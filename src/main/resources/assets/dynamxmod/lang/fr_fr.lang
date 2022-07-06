@@ -1,0 +1,53 @@
+itemGroup.dynamxmod_vehicle=Véhicules DynamX
+itemGroup.dynamxmod_object=Objets DynamX
+
+item.dynamxmod.slopes.name=Outil pentes
+item.dynamxmod.wrench.name=Clé à molette
+item.dynamxmod.ragdoll.name=Spawner de ragdoll
+item.dynamxmod.shockwave.name=Générateur d'onde de choc
+
+key.categories.dynamxmod=DynamX
+key.brake=Frein à main
+key.camin=Zoom camera avant
+key.camout=Zoom camera arrière
+key.cammode=Changement du mode de la caméra
+key.watchbehind=Regarder derrière
+key.debug=Menu de debug
+key.speedlimit=Limiteur de vitesse
+key.startEngine=Allumer/éteindre le moteur
+key.pickobject=Déplacer l'objet
+key.takeoject=Prendre l'objet
+key.toogleLockDoor=Ouvrir/fermer la portière
+
+slopes.config.title=Configuration des pentes automatiques :
+slopes.config.dalls=Ignorer les demi dalles
+slopes.config.diags=Inverser les diagonales
+slopes.config.orientation=Appliquer l'orientation : %s
+slopes.config.blocks=Blocs à ignorer :
+slopes.config.add=Ajouter
+slopes.config.blocknotfound=Ce block n'existe pas
+slopes.config.cancel=Annuler
+slopes.config.apply=Appliquer
+
+cmd.slopes.noitem=§cVous devez avoir l'item slopes dans la main principale !
+cmd.slopes.needcreate=§cVous devez être en mode [CREATE] pour créer une pente !
+cmd.slopes.create.points=§4Vous devez avoir sélectionné au moins 4 points pour créer une pente
+cmd.slopes.create.error=§4Aucune pente n'a pu être créée, vérifiez l'ordre des points !
+cmd.slopes.create.terrainerror=§4Echec de chargement du terrain, chargez-le avec un véhicule et réessayez !
+cmd.slopes.create.result=%s [CREATE] Calcul et ajout des pentes réalisés en %s ms
+cmd.slopes.create.resulterror=§4Une erreur de chargement du terrain est survenue, effacez les pentes de la zone et réessayez
+cmd.slopes.create.success=§a[CREATE] Les pentes ont bien été ajoutées !
+cmd.slopes.needdelete=§cVous devez être en mode [DELETE] pour supprimer des pentes !
+cmd.slopes.delete.points=§c[DELETE] Vous n'avez pas configuré les deux points de délimitation
+cmd.slopes.delete.terrainerror=§4Echec de chargement du terrain du chunk %s, chargez-le avec un véhicule et réessayez !
+cmd.slopes.delete.selerror=§4Au moins une pente a été trouvée dans la région, mais la région n'englobe pas toute la pente
+cmd.slopes.delete.selempty=§4Aucune pente n'a été trouvée dans la région
+cmd.slopes.delete.result=%s pente(s) dans la région de sélection ont été supprimées !
+cmd.slopes.needauto=§6Vous devez être en mode [AUTO] pour générer des pentes !
+cmd.slopes.auto.points=§6[AUTO] Vous n'avez pas configuré les deux points de délimitation
+cmd.slopes.auto.working=§6[AUTO] Génération en cours...
+cmd.slopes.auto.error=§4Aucune pente n'a pu être créée, vérifiez l'orientation et la config des blocs supportant des pentes !
+cmd.slopes.auto.result=§6[AUTO] Génération et ajout des pentes réalisés en %s ms
+cmd.slopes.auto.success=§a[AUTO] Les pentes ont bien été ajoutées !
+
+hud.car.speedlimit=Limite de vitesse : %s

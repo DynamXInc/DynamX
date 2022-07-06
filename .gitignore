@@ -1,0 +1,40 @@
+# Build and Bins
+.gradle/
+build/
+bin/
+out/
+/run/*
+
+# IDEs
+.classpath
+.project
+.settings/
+eclipse/
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# System
+Thumbs.db
+.DS_Store
+
+# DynamX Content Packs
+#!/run/DynamX
+
+# Wiki (for aym)
+/Wiki/
+
+# MPS Exporter
+/MpsIn/
+/MpsOut/
+MpsExporter.ini
+MpsExporter.jar
+
+#javadoc
+/javadoc/
+
+*.obj
+*.mtl
+*.png
+*.dc

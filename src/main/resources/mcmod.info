@@ -1,0 +1,16 @@
+[
+{
+  "modid": "dynamxmod",
+  "name": "DynamX",
+  "description": "Pack-based mod that adds realistic physics to Minecraft",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "https://dynamx.fr",
+  "updateUrl": "https://dynamx.fr",
+  "authorList": ["Yanis", "Aym'"],
+  "credits": "",
+  "logoFile": "/dynamx.png",
+  "screenshots": [],
+  "dependencies": []
+}
+]

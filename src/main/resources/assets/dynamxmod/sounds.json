@@ -1,0 +1,14 @@
+{
+  "skid_01": {
+    "category": "record",
+    "sounds": [
+      "dynamxmod:skid"
+    ]
+  },
+  "skid_dirt": {
+    "category": "record",
+    "sounds": [
+      "dynamxmod:dirt_skid"
+    ]
+  }
+}

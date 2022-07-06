@@ -1,0 +1,53 @@
+itemGroup.dynamxmod_vehicle=DynamX Vehicle Tab
+itemGroup.dynamxmod_object=DynamX Object Tab
+
+item.dynamxmod.slopes.name=Slopes tool
+item.dynamxmod.wrench.name=Wrench
+item.dynamxmod.ragdoll.name=Ragdoll spawner
+item.dynamxmod.shockwave.name=Shockwave generator
+
+key.categories.dynamxmod=DynamX
+key.brake=Handbrake
+key.camin=Camera zoom in
+key.camout=Camera zoom out
+key.cammode=Change camera mode
+key.watchbehind=Watch behind
+key.debug=Debug menu
+key.speedlimit=Speed limiter
+key.startEngine=Engine on/off
+key.pickobject=Pick object
+key.takeoject=Take object
+key.toogleLockDoor=Toogle lock door
+
+slopes.config.title=Config automatic slopes :
+slopes.config.dalls=Ignore slabs
+slopes.config.diags=Invert diagonals
+slopes.config.orientation=Apply facing : %s
+slopes.config.blocks=Blocks to ignore :
+slopes.config.add=Add
+slopes.config.blocknotfound=Block not found
+slopes.config.cancel=Cancel
+slopes.config.apply=Apply
+
+cmd.slopes.noitem=§cYou must have the slopes item in the main hand !
+cmd.slopes.needcreate=§cYou must be in [CREATE] mode to create a slope !
+cmd.slopes.create.points=§4You must select at least 4 points to create a slope
+cmd.slopes.create.error=§4No slope have been added, review the order of the points !
+cmd.slopes.create.terrainerror=§4Failed to load the terrain, load it with a vehicle then retry !
+cmd.slopes.create.result=%s [CREATE] Computed and added slopes in %s ms
+cmd.slopes.create.resulterror=§4An error occured while loading the terrain, delete the slopes of the zone then retry
+cmd.slopes.create.success=§a[CREATE] The slopes have been added !
+cmd.slopes.needdelete=§cYou must be in [DELETE] mode to delete slopes !
+cmd.slopes.delete.points=§c[DELETE] You didn't set the two points of delimitation
+cmd.slopes.delete.terrainerror=§4Failed to load the terrain of chunk %s, load it with a vehicle then retry !
+cmd.slopes.delete.selerror=§4At least one slope have been found in the zone, but the zone doesn't overlap all the slope
+cmd.slopes.delete.selempty=§4No slope have been found in the zone
+cmd.slopes.delete.result=%s slope(s) in the selected zone have been deleted !
+cmd.slopes.needauto=§6You must be in [AUTO] mode to generate slopes !
+cmd.slopes.auto.points=§6[AUTO] You didn't set the two points of delimitation
+cmd.slopes.auto.working=§6[AUTO] Generating slopes...
+cmd.slopes.auto.error=§4No slope have been create, check the facing and the configuration of the blocks supporting the slopes !
+cmd.slopes.auto.result=§6[AUTO] Generation of the slopes done in %s ms
+cmd.slopes.auto.success=§a[AUTO] The slopes have been added !
+
+hud.car.speedlimit=Speed limit : %s

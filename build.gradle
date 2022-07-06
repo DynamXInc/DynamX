@@ -1,0 +1,116 @@
+buildscript {
+    repositories {
+        maven { url = "https://files.minecraftforge.net/maven" }
+        maven { url = "https://repo.spongepowered.org/maven" }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.4'
+        classpath 'org.spongepowered:mixingradle:0.6-SNAPSHOT'
+    }
+}
+
+plugins {
+    id "com.jfrog.artifactory" version "4.9.8"
+}
+
+repositories {
+    maven {
+        url artifactory_contextUrl + '/ACsGuisRepo'
+    }
+    maven {
+        url artifactory_contextUrl + '/DynamXRepo'
+    }
+}
+
+apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.artifactory'
+apply plugin: 'org.spongepowered.mixin'
+
+version = version_major + "." + version_minor + "." + version_patch
+group = "fr.dynamx"
+archivesBaseName = "DynamX"
+
+compileJava.options.encoding = 'UTF-8'
+
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
+
+minecraft {
+    version = minecraft_version + "-" + forge_version
+    runDir = "run"
+
+    mappings = "stable_39"
+}
+
+repositories {
+    maven { url = 'https://repo.spongepowered.org/maven' }
+}
+
+dependencies {
+    compile 'com.github.stephengold:Libbulletjme:' + libbulletjme_version
+    compile "fr.aym.acsguis:ACsGuis:1.2.0-2"
+    compile('org.spongepowered:mixin:0.8.3-SNAPSHOT') {
+        exclude module: 'guava'
+        exclude module: 'commons-io'
+        exclude module: 'gson'
+    }
+
+    shadow('org.spongepowered:mixin:0.8.3-SNAPSHOT') {
+        exclude module: 'guava'
+        exclude module: 'commons-io'
+        exclude module: 'gson'
+    }
+    shadow 'com.github.stephengold:Libbulletjme:' + libbulletjme_version
+
+    shadow fileTree(dir: 'libs', include: '*.jar')
+
+    compileOnly 'org.projectlombok:lombok:1.18.22'
+    annotationProcessor 'org.projectlombok:lombok:1.18.22'
+}
+
+processResources {
+    // this will ensure that this task is redone when the versions change.
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
+
+    // replace stuff in mcmod.info, nothing else
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+
+        // replace version and mcversion
+        expand 'version': project.version, 'mcversion': project.minecraft.version
+    }
+
+    // copy everything else except the mcmod.info
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
+}
+
+mixin {
+    add sourceSets.main, "refmap.dynamxmod.json"
+}
+
+jar {
+    manifest {
+        attributes "FMLCorePlugin": "fr.dynamx.common.core.DynamXCoreMod"
+        attributes "FMLAT": "dynamx_at.cfg"
+        attributes "FMLCorePluginContainsFMLMod": "true"
+        attributes "ForceLoadAsMod": "true"
+        attributes "TweakClass": "org.spongepowered.asm.launch.MixinTweaker"
+        attributes "TweakOrder": "0"
+        attributes "MixinConfigs": "mixins.dynamxmod.json"
+    }
+}
+
+shadowJar {
+    configurations = [project.configurations.shadow]
+}
+
+reobf {
+    shadowJar {
+        mappingType = "SEARGE"
+    }
+}

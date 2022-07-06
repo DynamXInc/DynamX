@@ -1,0 +1,173 @@
+@font-face {
+    font-family: "dnx:test_font";
+    /*font-style: italic;*/
+    src: url("dynamxmod:css/font2.ttf");
+    font-size: 52px;
+}
+
+.home
+{
+    background-color: rgba(0,0,0,100);
+    width: 80%;
+    height: 80%;
+    top: 50%;
+    bottom: 50%;
+    left: 50%;
+    right: 50%;
+    border-radius: 18px;
+    border: 2px rgba(0, 0, 0, 0);
+}
+.home:hover
+{
+    border-color: rgba(0,0,0,200);
+}
+
+.title
+{
+    top: 10px;
+    left: 0px;
+    text-align: center;
+    border: 2px cyan;
+    padding: 0px;
+    text-align-vertical: center;
+    padding-left: 10px;
+}
+.title:hover
+{
+    text-shadow: disable;
+    border: 2px orange;
+    height: 25px;
+    font-size: 13px;
+}
+
+.switch-button-off
+{
+    width: 20px;
+    height: 20px;
+    left: 10px;
+    border: 1px gray;
+    border-radius: 10px;
+    background-color: rgb(180, 0, 0);
+    background-image: none;
+    top:auto;
+}
+.switch-button-off:hover
+{
+    background-color: red;
+}
+.switch-button-on
+{
+    width: 20px;
+    height: 20px;
+    left: 10px;
+    border: 1px gray;
+    border-radius: 10px;
+    background-color: rgb(40,200,40);
+    background-image: none;
+}
+.option-desc
+{
+    width: 100%;
+    top:auto;
+}
+.option-desc>label
+{
+    left: 40px;
+    text-shadow: disable;
+    width: 80%;
+    padding: 0px;
+}
+
+.switch-button-on:hover
+{
+    background-color: green;
+}
+.option-subcategory
+{
+    left: 10px;
+    font-family: "dnx:test_font";
+    text-shadow: disable;
+    font-size: 2px;
+    width: 80%;
+    padding: 0px;
+    top:auto;
+}
+
+tabbed_pane
+{
+    background-color: translucent;
+}
+tabbed_pane>button
+{
+    border: 1px rgba(100,100,100,100);
+    border-radius: 10px;
+    background-image: none;
+    border-position: internal;
+}
+tabbed_pane>button:hover,tabbed_pane>button:active
+{
+    border-color: rgba(200,200,200,100);
+    border-position: external;
+    font-size: 12px;
+}
+
+#credits
+{
+    width: auto;
+    font-size: 15px;
+    top: 90%;
+    height: 10%;
+    left: 50%;
+    right: 50%;
+    color: lightblue;
+    background-color: translucent;
+    font-style: italic;
+}
+#credits:hover
+{
+    color: cyan;
+    text-shadow: disable;
+    font-style: normal;
+}
+
+.reload_button
+{
+    width: 35%;
+    min-width: 160px;
+    left: 10px;
+    text-align: center;
+    border: 2px gray;
+    border-radius: 10px;
+    border-position: internal;
+}
+.reload_button:hover
+{
+    border-color: dimgray;
+}
+.reload_button:disabled
+{
+    border-color: darkgreen;
+}
+
+#reload_packs
+{
+    top: auto;
+}
+#reload_models
+{
+    top: auto;
+}
+#reload_css
+{
+    top: auto;
+}
+#reload_all
+{
+    top: auto;
+}
+
+#general>scroll_pane,#terrain>scroll_pane,#vehicles>scroll_pane
+{
+    top: 40px;
+    height: 62%;
+}

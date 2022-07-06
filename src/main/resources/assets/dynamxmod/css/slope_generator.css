@@ -1,0 +1,115 @@
+#root{
+    background-color: rgba(0,0,0,170);
+    width: 50%;
+    height: 60%;
+    top: 50%;
+    bottom: 50%;
+    left: 50%;
+    right: 50%;
+    border-radius: 10px;
+
+    min-width: 500px;
+    min-height: 260px;
+}
+
+#main_title
+{
+    top: 3px;
+    width: 100%;
+    text-align: center;
+    background-color: translucent;
+}
+
+checkbox {
+    padding: 2px;
+}
+
+#root>checkbox{
+    left: 50%;
+    right: 50%;
+    width: 60%;
+}
+
+#slopes{
+    top: 30px;
+}
+
+#diagDir{
+    top: 55px;
+}
+
+#setfacing{
+    top: 75px;
+    left: 50%;
+    right: 50%;
+    width: 50%;
+    text-align: center;
+    background-color: lightskyblue;
+}
+#setfacing:hover{
+    background-color: dodgerblue;
+}
+#setfacing:active{
+    background-color: royalblue;
+}
+
+#blacklist_title
+{
+    top: 100px;
+    left: 50%;
+    right: 50%;
+    width: 60%;
+    background-color: translucent;
+}
+
+#blacklist_bar
+{
+    top: 120px;
+    left: 50%;
+    right: 50%;
+    width: 80%;
+}
+
+#blacklist_add
+{
+    top: 145px;
+    left: 50%;
+    right: 50%;
+    width: 80%;
+}
+#blacklist_add:hover
+{
+    background-color: green;
+}
+
+#blacklist{
+    top: 170px;
+    left: 50%;
+    right: 50%;
+    width: 80%;
+    height: 100px;
+}
+
+.blacklist_block
+{
+    width: auto;
+    top: auto;
+    left: auto;
+    height: auto;
+    padding: 0;
+}
+.blacklist_block:hover
+{
+    background-color: red;
+}
+
+#refresh{
+    left: 50%;
+    bottom: 10px;
+    width: 30%;
+}
+#quit{
+    right: 50%;
+    bottom: 10px;
+    width: 30%;
+}

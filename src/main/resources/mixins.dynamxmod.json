@@ -1,0 +1,12 @@
+{
+  "compatibilityLevel": "JAVA_8",
+  "package": "fr.dynamx.common.core.mixin",
+  "mixins": [
+    "MixinWorld",
+    "MixinChunk",
+    "MixinNetHandlerPlayServer"
+  ],
+  "minVersion": "0.6",
+  "client": [],
+  "server": []
+}

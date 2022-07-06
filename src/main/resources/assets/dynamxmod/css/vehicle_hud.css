@@ -1,0 +1,131 @@
+@font-face {
+    font-family: "dnx:e_hud";
+    font-style: normal;
+    src: url("dynamxmod:css/e_hud.ttf");
+    font-size: 30px;
+}
+@font-face {
+    font-family: "dnx:rpms";
+    font-style: normal;
+    src: url("dynamxmod:css/e_hud_2.ttf");
+    font-size: 30px;
+}
+
+.root {
+    width: 100%;
+    height: 100%;
+}
+
+#network_warning {
+    top: 110px;
+    color: red;
+}
+
+.root > .hud_item {
+    left: 10px;
+    border-radius: 5px;
+
+    width: 140px;
+    background-color: rgba(0, 0, 140, 100);
+}
+
+#engine_hud {
+    /*top: 10px;
+    height: 75px;*/
+    width: 100%;
+    height: 100%;
+    background-color: translucent;
+}
+
+label {
+    padding: 0px;
+    left: 10px;
+    width: 100%;
+    background-color: translucent;
+}
+
+.speed_pane {
+    right: 0px;
+    bottom: 0px;
+    width: 90px;
+    height: 90px;
+    background-image: url("dynamxmod:textures/speedometer.png");
+}
+
+#engine_speed {
+    width: 100%;
+    padding: 0px;
+    height: 25px;
+    left: 0px;
+    top: 50%;
+    bottom: 50%;
+    font-family: "dnx:e_hud";
+    text-align: center;
+    background-color: translucent;
+}
+
+#engine_rpm {
+    width: 100%;
+    height: 20px;
+    top: 80%;
+    bottom: 20%;
+    left: 50%;
+    right: 50%;
+    text-align: center;
+}
+
+#speed_limit {
+    top: 5px;
+    left: 5px;
+    color: lightblue;
+}
+
+#engine_gear {
+    width: 100%;
+    height: 20px;
+    top: 92%;
+    bottom: 8%;
+    left: 50%;
+    right: 50%;
+    text-align: center;
+}
+
+#handbrake_state {
+    top: 25px;
+    left: 5px;
+}
+
+#engine_sounds {
+    top: 35px;
+    left: 5px;
+}
+
+.hud_label_debug {
+    visibility: show;
+}
+
+.hud_label_hidden {
+    visibility: hidden;
+}
+
+#engine_state {
+    top: 20px;
+}
+
+#hud_ea_warning {
+    top: 2px;
+    right: 2px;
+    color: rgba(150, 150, 150, 50);
+    width: auto;
+}
+
+.rpm_letter {
+    font-family: "dnx:rpms";
+    font-size: 2px;
+    left: auto;
+    top: auto;
+    padding: 0px;
+    text-align: left;
+    text-align-vertical: top;
+    color: auto;
+}

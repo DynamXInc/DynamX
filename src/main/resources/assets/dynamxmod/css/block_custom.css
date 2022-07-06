@@ -1,0 +1,105 @@
+.root{
+    background-color: rgba(0,0,0,170);
+    width: 60%;
+    height: 50%;
+    top: 50%;
+    bottom: 50%;
+    left: 50%;
+    right: 50%;
+    border-radius: 2px;
+
+}
+
+.preview {
+    width: 40%;
+    height: 80%;
+    top: 50%;
+    bottom: 50%;
+    left: 5%;
+    border-radius: 6px;
+    border: 1px rgba(255,255,255,120);
+}
+
+.translation{
+    left: 47%;
+    top: 25%;
+    font-size: 7;
+}
+.translationX{
+    left: 65%;
+    top: 25%;
+    width: 30px;
+}
+.translationY{
+    left: 75%;
+    top: 25%;
+    width: 30px;
+}
+.translationZ{
+    left: 85%;
+    top: 25%;
+    width: 30px;
+}
+.scaleX{
+    left: 65%;
+    top: 45%;
+    width: 30px;
+}
+.scaleY{
+    left: 75%;
+    top: 45%;
+    width: 30px;
+}
+.scaleZ{
+    left: 85%;
+    top: 45%;
+    width: 30px;
+}
+.rotationX{
+    left: 65%;
+    top: 65%;
+    width: 30px;
+}
+.rotationY{
+    left: 75%;
+    top: 65%;
+    width: 30px;
+}
+.rotationZ{
+    left: 85%;
+    top: 65%;
+    width: 30px;
+}
+.scale{
+    left: 47%;
+    top: 45%;
+    font-size: 7;
+}
+.rotation{
+    left: 47%;
+    top: 65%;
+    font-size: 7;
+}
+
+.confirm{
+    bottom: 1px;
+    right: 1px;
+    text-align: center;
+    width: 20%;
+    border-radius: 2px;
+    border: 1px rgba(255,255,255,120);
+}
+.confirm:hover{
+    border: 1px white;
+}
+.collision{
+    top: 1px;
+    right: 1px;
+    text-align: center;
+    width: 35%;
+    border-radius: 2px;
+    border: 1px rgba(255,255,255,120);
+}
+.collision:hover{
+    border: 1px white;
+}

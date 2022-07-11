@@ -1,5 +1,5 @@
 # [![](http://cf.way2muchnoise.eu/full_dynamx_downloads.svg)](https://www.curseforge.com/minecraft/mc-mods/dynamx) [![](https://cf.way2muchnoise.eu/versions/dynamx.svg)](https://www.curseforge.com/minecraft/mc-mods/dynamx)
-![](https://dynamx.fr/banner_dynamx.png)
+![](https://dynamx.fr/banner_dynamx_2.png)
 
 ## Official Repository of DynamX
 
@@ -23,7 +23,7 @@ repositories {
 
 dependencies {
     deobfCompile "fr.dynamx:DynamX:[VERSION]"
-    compile "fr.aym.acsguis:ACsGuis:1.2.0-4"
+    compile "fr.aym.acsguis:ACsGuis:1.2.3-2"
 }
 ```
 

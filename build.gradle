@@ -50,7 +50,7 @@ repositories {
 
 dependencies {
     compile 'com.github.stephengold:Libbulletjme:' + libbulletjme_version
-    compile "fr.aym.acsguis:ACsGuis:1.2.0-2"
+    compile "fr.aym.acsguis:ACsGuis:1.2.3-2"
     compile('org.spongepowered:mixin:0.8.3-SNAPSHOT') {
         exclude module: 'guava'
         exclude module: 'commons-io'

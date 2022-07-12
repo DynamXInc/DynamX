@@ -39,6 +39,7 @@ public class AABBCollisionHandler
         {
             entity.setEntityBoundingBox(entity.getEntityBoundingBox().offset(x, y, z));
             entity.resetPositionToBB();
+            //new NullPointerException("WTF").printStackTrace();
         }
         else
         {

@@ -5,6 +5,7 @@ import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.EnumBulletShapeType;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.PhysicsEntity;
+import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.common.entities.modules.MovableModule;
 import fr.dynamx.common.items.tools.ItemWrench;
 import fr.dynamx.common.network.packets.MessageSyncPlayerPicking;
@@ -78,17 +79,25 @@ public class PickingObjectHelper {
         PhysicsRaycastResult result = DynamXUtils.castRayFromEntity(player, distanceMax, predicateShape);
 
         if (result != null) {
-            BulletShapeType<PhysicsEntity<?>> shapeType = (BulletShapeType<PhysicsEntity<?>>) result.hitBody.getUserObject();
-            PhysicsEntity<?> e = shapeType.getObjectIn();//TODO PhysicsEntity<?>) ((SPPhysicsEntityNetHandler)shapeType.getObjectIn().getNetwork()).getOtherSideEntity();
-            MovableModule movableModule = e.getModuleByType(MovableModule.class);
+            BulletShapeType<?> shapeType = (BulletShapeType<?>) result.hitBody.getUserObject();
+            PhysicsEntity<?> physicsEntity = null;                //TODO PhysicsEntity<?>) ((SPPhysicsEntityNetHandler)shapeType.getObjectIn().getNetwork()).getOtherSideEntity();
+            if (shapeType.getObjectIn() instanceof PhysicsEntity) {
+                physicsEntity = (PhysicsEntity<?>) shapeType.getObjectIn();
+            } else if (shapeType.getObjectIn() instanceof DoorsModule.DoorVarContainer) {
+                physicsEntity = ((DoorsModule.DoorVarContainer) shapeType.getObjectIn()).getModule().vehicleEntity;
+            }
+            if(physicsEntity == null)
+                return;
+            MovableModule movableModule = physicsEntity.getModuleByType(MovableModule.class);
             //use entity id because instances depends on the side
             if (movableModule != null
                     && (!DynamXContext.getWalkingPlayers().containsKey(player)
-                    || e.getEntityId() != DynamXContext.getWalkingPlayers().get(player).getEntityId())) {
+                    || physicsEntity.getEntityId() != DynamXContext.getWalkingPlayers().get(player).getEntityId())) {
                 movableModule.usingAction = MovableModule.EnumAction.PICK;
-                movableModule.pickObjects.pickObject(player, e, result.hitBody, result.hitPos,
+                movableModule.pickObjects.pickObject(player, physicsEntity, result.hitBody, result.hitPos,
                         result.hitPos.subtract(result.fromVec).length());
             }
+
         }
     }
 

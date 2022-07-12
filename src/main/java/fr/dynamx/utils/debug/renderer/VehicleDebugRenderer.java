@@ -389,7 +389,7 @@ public class VehicleDebugRenderer {
 
                 SynchronizedVariable<?> variable = entity.getNetwork().getInputSyncVars().get(SynchronizedVariablesRegistry.getSyncVarRegistry().get(PosSynchronizedVariable.NAME));
                 if (!(variable instanceof DebugPosSynchronizedVariable))
-                    return;
+                    return; //wtf
                 Vector3f clientPos = ((DebugPosSynchronizedVariable) variable).clientPos;
                 if (clientPos != null) {
                     GlStateManager.pushMatrix();

@@ -66,6 +66,7 @@ public class PickObjects extends MovableModule {
 
     @Override
     public void preUpdatePhysics(boolean b) {
+        //System.out.println("Pd pos "+joint+" "+mover);
         if (joint != null && mover != null) {
             Vector3fPool.openPool();
             Vector3f playerPosition = Vector3fPool.get(

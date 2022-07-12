@@ -20,6 +20,7 @@ import fr.dynamx.common.contentpack.parts.PartDoor;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.handlers.TaskScheduler;
+import fr.dynamx.common.network.packets.MessageChangeDoorState;
 import fr.dynamx.common.network.sync.vars.AttachedBodySynchronizedVariable;
 import fr.dynamx.common.network.sync.vars.AttachedDoorsSynchronizedVariable;
 import fr.dynamx.common.network.sync.vars.VehicleSynchronizedVariables;
@@ -36,7 +37,6 @@ import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import fr.dynamx.utils.physics.DynamXPhysicsHelper;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.renderer.GlStateManager;
@@ -56,13 +56,15 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
         JointHandlerRegistry.register(new JointHandler(JOINT_NAME, BaseVehicleEntity.class, BaseVehicleEntity.class, DoorsModule.class));
     }
 
-    public final BaseVehicleEntity<?> entity;
-    private final Map<Byte, DoorPhysicsHandler> attachedDoors = new HashMap<>();
+    public final BaseVehicleEntity<?> vehicleEntity;
+    private final Map<Byte, DoorVarContainer> attachedDoors = new HashMap<>();
+    private final Map<Byte, DoorVarContainer> cachedAttachedDoors = new HashMap<>();
     private final HashMap<Byte, SynchronizedRigidBodyTransform> attachedBodiesTransform = new HashMap<>();
-    protected Map<Byte, Boolean> doorsState = new HashMap<>();
+    @Getter
+    protected Map<Byte, DoorState> doorsState = new HashMap<>();
 
-    public DoorsModule(BaseVehicleEntity<?> entity) {
-        this.entity = entity;
+    public DoorsModule(BaseVehicleEntity<?> vehicleEntity) {
+        this.vehicleEntity = vehicleEntity;
     }
 
     @Override
@@ -77,8 +79,8 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
         //System.out.println("RM DOOR " + joint);
         attachedBodiesTransform.remove(joint.getJointId());
         attachedDoors.remove(joint.getJointId());
-        if (entity.physicsHandler != null) {
-            entity.physicsHandler.getCollisionObject().removeFromIgnoreList(joint.getJoint().getBodyB());
+        if (vehicleEntity.physicsHandler != null) {
+            vehicleEntity.physicsHandler.getCollisionObject().removeFromIgnoreList(joint.getJoint().getBodyB());
         }
     }
 
@@ -88,28 +90,36 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
         Vector3f p1 = Vector3fPool.get(door1.getCarAttachPoint());
         Vector3f p2 = Vector3fPool.get(door1.getDoorAttachPoint());
 
-        Quaternion localQuat = QuaternionPool.get(entity.getPhysicsHandler().getRotation());
-        Vector3f doorPos = DynamXGeometry.rotateVectorByQuaternion(p1.subtract(p2).addLocal(entity.getPackInfo().getCenterOfMass()), localQuat).addLocal(entity.physicsPosition);
-        PhysicsRigidBody doorBody = DynamXPhysicsHelper.fastCreateRigidBody(entity, 40, new BoxCollisionShape(door1.getScale()), doorPos, entity.getPhysicsHandler().getSpawnRotationAngle());
-        DynamXContext.getPhysicsWorld().addCollisionObject(doorBody);
-        doorBody.setUserObject(new BulletShapeType<>(EnumBulletShapeType.BULLET_ENTITY, new DoorContainer(this, door1.getId())));
+        DoorVarContainer localVarContainer = new DoorVarContainer();
+        localVarContainer.setModule(this);
+        localVarContainer.setDoorID(jointId);
 
-        HingeJoint hingeJoint = new HingeJoint(entity.physicsHandler.getCollisionObject(), doorBody, p1.addLocal(entity.getPackInfo().getCenterOfMass()), p2, DynamXMath.Y_AXIS, DynamXMath.Y_AXIS);
+        Quaternion doorRotation = QuaternionPool.get(vehicleEntity.getPhysicsHandler().getRotation());
+        Vector3f doorPos = DynamXGeometry.rotateVectorByQuaternion(p1.subtract(p2).addLocal(vehicleEntity.getPackInfo().getCenterOfMass()), doorRotation).addLocal(vehicleEntity.physicsPosition);
+        PhysicsRigidBody doorBody = DynamXPhysicsHelper.fastCreateRigidBody(vehicleEntity, 40, new BoxCollisionShape(door1.getScale()), doorPos, vehicleEntity.getPhysicsHandler().getSpawnRotationAngle());
+        localVarContainer.setDoorBody(doorBody);
+        doorBody.setUserObject(new BulletShapeType<>(EnumBulletShapeType.BULLET_ENTITY, localVarContainer));
+        DynamXContext.getPhysicsWorld().addCollisionObject(doorBody);
+
+        HingeJoint hingeJoint = new HingeJoint(vehicleEntity.physicsHandler.getCollisionObject(), doorBody, p1.addLocal(vehicleEntity.getPackInfo().getCenterOfMass()), p2, DynamXMath.Y_AXIS, DynamXMath.Y_AXIS);
         hingeJoint.setLimit(0.0f, 0f);
         hingeJoint.setCollisionBetweenLinkedBodies(false);
-        //doorBody.addToIgnoreList(entity.physicsHandler.getRigidBody());
-        //hingeJoint.setBreakingImpulseThreshold(400);
+        attachedDoors.forEach((doorId, doorVarContainer) -> {
+            doorBody.addToIgnoreList(doorVarContainer.doorBody);
+            doorVarContainer.doorBody.addToIgnoreList(doorBody);
+        });
+        localVarContainer.setJoint(hingeJoint);
 
-        //System.out.println("ADD DOOR " + jointId + " " + entity);
         attachedBodiesTransform.put(jointId, new SynchronizedRigidBodyTransform(new RigidBodyTransform(doorBody)));
-        attachedDoors.put(jointId, new DoorPhysicsHandler(doorBody, hingeJoint));
+        attachedDoors.put(jointId, localVarContainer);
+        cachedAttachedDoors.put(jointId, localVarContainer);
         return hingeJoint;
     }
 
     @Override
     public void initEntityProperties() {
-        for (PartDoor s : entity.getPackInfo().getPartsByType(PartDoor.class)) {
-            doorsState.put(s.getId(), false);
+        for (PartDoor partDoor : vehicleEntity.getPackInfo().getPartsByType(PartDoor.class)) {
+            doorsState.put(partDoor.getId(), DoorState.CLOSE);
         }
     }
 
@@ -125,52 +135,42 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
 
     @Override
     public void initPhysicsEntity(AbstractEntityPhysicsHandler<?, ?> handler) {
-        if (!entity.world.isRemote) {
-            entity.getPackInfo().getPartsByType(PartDoor.class).forEach(this::spawnDoor);
+        if (!vehicleEntity.world.isRemote) {
+            vehicleEntity.getPackInfo().getPartsByType(PartDoor.class).forEach(this::spawnDoor);
         }
     }
 
-    public PartDoor getPartDoor(byte doorID) {
-        return entity.getPackInfo().getPartByTypeAndId(PartDoor.class, doorID);
-    }
 
     public boolean isDoorAttached(byte doorID) {
-        for (EntityJoint<?> j : entity.getJointsHandler().getJoints()) {
-            if (j.getType() == JOINT_NAME && j.getJointId() == doorID) {
+        for (EntityJoint<?> entityJoint : vehicleEntity.getJointsHandler().getJoints()) {
+            if (entityJoint.getType() == JOINT_NAME && entityJoint.getJointId() == doorID) {
                 return true;
             }
         }
         return false;//attachedDoors.containsKey(doorID);
     }
 
-    public DoorPhysicsHandler getDoorPhysics(byte doorId) {
-        return attachedDoors.get(doorId);
-    }
-
-    public Map<Byte, Boolean> getDoorsState() {
-        return doorsState;
-    }
 
     public void spawnDoor(PartDoor door) {
         if (door.isEnabled()) {
-            DynamXMain.proxy.scheduleTask(entity.world, () -> JointHandlerRegistry.createJointWithSelf(JOINT_NAME, entity, door.getId()));
+            DynamXMain.proxy.scheduleTask(vehicleEntity.world, () -> JointHandlerRegistry.createJointWithSelf(JOINT_NAME, vehicleEntity, door.getId()));
         }
     }
 
     @Override
     public void preUpdatePhysics(boolean simulatingPhysics) {
-        //TODO ALLOW THIS IN SOLO TOO
-        if (simulatingPhysics && !entity.world.isRemote) {
+        if (simulatingPhysics) {
             for (byte doorID : attachedDoors.keySet()) {
-                DoorPhysicsHandler physics = attachedDoors.get(doorID);
-                if (isDoorOpened(getPartDoor(doorID).getId()) && physics.joint.getHingeAngle() <= 0 && physics.timer == -1) {
-                    doorsState.put(doorID, false);
+                DoorVarContainer physics = attachedDoors.get(doorID);
+                if (isDoorOpened(doorID) && physics.joint.getHingeAngle() <= 0 && physics.timer == -1) {
+                    DynamXContext.getNetwork().sendToServer(new MessageChangeDoorState(vehicleEntity, DoorState.CLOSE, doorID));
                     PartDoor door = getPartDoor(doorID);
                     physics.joint.setLimit(door.getCloseLimit().x, door.getCloseLimit().y);
                 }
                 if (physics.timer >= 0) {
                     physics.timer--;
                 }
+                System.out.println(physics.joint.isEnabled());
             }
         }
     }
@@ -179,7 +179,7 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
     public void postUpdatePhysics(boolean simulatingPhysics) {
         if (simulatingPhysics) {
             for (byte door : attachedDoors.keySet()) {
-                PhysicsRigidBody body = attachedDoors.get(door).body;
+                PhysicsRigidBody body = attachedDoors.get(door).doorBody;
                 attachedBodiesTransform.get(door).getPhysicTransform().set(body);
                 //attachedBodiesTransform.get(door).updatePos();
             }
@@ -190,81 +190,89 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
         }
     }
 
+
     public boolean isDoorOpened(byte doorID) {
         if (doorsState == null)
             return true;
-        return !doorsState.containsKey(doorID) || doorsState.get(doorID);
+        return !doorsState.containsKey(doorID) || doorsState.get(doorID) == DoorState.OPEN;
     }
 
-    public void setDoorState(byte doorID, boolean opened) {
-        DoorPhysicsHandler physicsHandler = attachedDoors.get(doorID);
-        PartDoor door = getPartDoor(doorID);
+
+    public void switchDoorState(byte doorId) {
+        setDoorState(doorId, getInverseCurrentState(doorId));
+
+    }
+
+    public void setDoorState(byte doorId, DoorState doorState) {
+        DoorVarContainer physicsHandler = attachedDoors.get(doorId);
+        PartDoor door = getPartDoor(doorId);
         if (physicsHandler != null) {
-            if (opened) {
-                doorsState.put(doorID, true);
-                playDoorSound(false);
+            if (doorState == DoorState.OPEN) {
+                doorsState.put(doorId, DoorState.OPEN);
+                playDoorSound(DoorState.OPEN);
                 physicsHandler.joint.setLimit(door.getOpenLimit().x, door.getOpenLimit().y);
                 physicsHandler.joint.enableMotor(true, door.getOpenMotor().x, door.getOpenMotor().y);
-                entity.forcePhysicsActivation();
-                physicsHandler.timer = 20 * 3;
+                vehicleEntity.forcePhysicsActivation();
             } else {
                 physicsHandler.joint.enableMotor(true, door.getCloseMotor().x, door.getCloseMotor().y);
-                entity.forcePhysicsActivation();
-                if (entity.getNetwork().getSimulationHolder() != SimulationHolder.SERVER_SP) //TODO SERVER_SP SPLITTED IN SERVER_SP AND DRIVE_SP
-                    doorsState.put(doorID, false); //Closes the door (animation) and the plays the closing sound
+                vehicleEntity.forcePhysicsActivation();
+                if (vehicleEntity.getNetwork().getSimulationHolder() != SimulationHolder.SERVER_SP) //TODO SERVER_SP SPLITTED IN SERVER_SP AND DRIVE_SP
+                    doorsState.put(doorId, DoorState.CLOSE); //Closes the door (animation) and the plays the closing sound
                 TaskScheduler.schedule(new TaskScheduler.ScheduledTask(door.getDoorCloseTime()) {
                     @Override
                     public void run() {
-                        if (entity.getNetwork().getSimulationHolder() == SimulationHolder.SERVER_SP)
-                            doorsState.put(doorID, false); //Only plays the closing sound
-                        playDoorSound(true);
+                        if (vehicleEntity.getNetwork().getSimulationHolder() == SimulationHolder.SERVER_SP)
+                            doorsState.put(doorId, DoorState.CLOSE); //Only plays the closing sound
+                        playDoorSound(DoorState.CLOSE);
                         physicsHandler.joint.setLimit(door.getCloseLimit().x, door.getCloseLimit().y);
                     }
                 });
             }
+            physicsHandler.timer = 20 * 3;
         } else {
-            if (opened) {
-                doorsState.put(doorID, true);
-                playDoorSound(false);
+            if (doorState == DoorState.OPEN) {
+                doorsState.put(doorId, DoorState.OPEN);
+                playDoorSound(DoorState.OPEN);
             } else {
                 //if (entity.getNetwork().getSimulationHolder() != SimulationHolder.SERVER_SP)
-                doorsState.put(doorID, false); //Closes the door (animation) and the plays the closing sound
+                doorsState.put(doorId, DoorState.CLOSE); //Closes the door (animation) and the plays the closing sound
                 TaskScheduler.schedule(new TaskScheduler.ScheduledTask(door.getDoorCloseTime()) {
                     @Override
                     public void run() {
                         //if (entity.getNetwork().getSimulationHolder() == SimulationHolder.SERVER_SP)
-                        //  doorsStatus.put(doorID, false); //Only plays the closing sound
-                        playDoorSound(true);
+                        //  doorsStatus.put(doorId, false); //Only plays the closing sound
+                        playDoorSound(DoorState.CLOSE);
                     }
                 });
             }
         }
     }
 
-    public void playDoorSound(boolean close) {
-        if (entity.world.isRemote) {
-            ClientProxy.SOUND_HANDLER.playSingleSound(entity.physicsPosition, close ? "door_close" : "door_open", 1, 1);
+
+    private void isDoorAnimationFinished(boolean doorState) {
+
+    }
+
+    public void playDoorSound(DoorState doorState) {
+        if (vehicleEntity.world.isRemote) {
+            ClientProxy.SOUND_HANDLER.playSingleSound(vehicleEntity.physicsPosition, doorState == DoorState.CLOSE ? "door_close" : "door_open", 1, 1);
         }
     }
 
     @Override
     public void onRemovedFromWorld() {
-        if (DynamXMain.proxy.shouldUseBulletSimulation(entity.world)) {
-            for (DoorPhysicsHandler body : attachedDoors.values())
-                DynamXContext.getPhysicsWorld().removeCollisionObject(body.body);
+        if (DynamXMain.proxy.shouldUseBulletSimulation(vehicleEntity.world)) {
+            for (DoorVarContainer body : cachedAttachedDoors.values())
+                DynamXContext.getPhysicsWorld().removeCollisionObject(body.doorBody);
+            cachedAttachedDoors.clear();
         }
-    }
-
-    @Override
-    public HashMap<Byte, SynchronizedRigidBodyTransform> getTransforms() {
-        return attachedBodiesTransform;
     }
 
     @Override
     public void setPhysicsTransform(byte jointId, RigidBodyTransform transform) {
         if (attachedDoors.containsKey(jointId)) {
-            attachedDoors.get(jointId).body.setPhysicsLocation(transform.getPosition());
-            attachedDoors.get(jointId).body.setPhysicsRotation(transform.getRotation());
+            attachedDoors.get(jointId).doorBody.setPhysicsLocation(transform.getPosition());
+            attachedDoors.get(jointId).doorBody.setPhysicsRotation(transform.getRotation());
         }
     }
 
@@ -323,38 +331,38 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
         }
     }
 
-    @AllArgsConstructor
-    @Getter
-    @Setter
-    public static class DoorContainer {
-        private DoorsModule module;
-        private byte doorID;
+    public PartDoor getPartDoor(byte doorID) {
+        return vehicleEntity.getPackInfo().getPartByTypeAndId(PartDoor.class, doorID);
     }
 
-    public static class DoorPhysicsHandler {
-        private final PhysicsRigidBody body;
-        private final HingeJoint joint;
-        private int timer;
+    public DoorVarContainer getDoorVarContainer(byte doorId) {
+        return attachedDoors.get(doorId);
+    }
 
-        public DoorPhysicsHandler(PhysicsRigidBody body, HingeJoint joint) {
-            this.body = body;
-            this.joint = joint;
-        }
+    public DoorState getCurrentState(byte doorId) {
+        return doorsState.get(doorId);
+    }
 
-        public PhysicsRigidBody getBody() {
-            return body;
-        }
+    public DoorState getInverseCurrentState(byte doorId) {
+        return getCurrentState(doorId) == DoorState.OPEN ? DoorState.CLOSE : DoorState.OPEN;
+    }
 
-        public HingeJoint getJoint() {
-            return joint;
-        }
+    @Override
+    public Map<Byte, SynchronizedRigidBodyTransform> getTransforms() {
+        return attachedBodiesTransform;
+    }
 
-        public int getTimer() {
-            return timer;
-        }
+    public enum DoorState {
+        OPEN, CLOSE
+    }
 
-        public void setTimer(int timer) {
-            this.timer = timer;
-        }
+    @Getter
+    @Setter
+    public static class DoorVarContainer {
+        private DoorsModule module;
+        private byte doorID;
+        private PhysicsRigidBody doorBody;
+        private HingeJoint joint;
+        public int timer;
     }
 }

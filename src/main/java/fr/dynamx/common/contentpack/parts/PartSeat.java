@@ -10,6 +10,7 @@ import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.common.entities.vehicles.CarEntity;
+import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
 import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -55,13 +56,14 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
                 PartDoor door = getLinkedPartDoor(vehicleEntity);
                 if (door != null) {
                     if (!door.isPlayerMounting()) {
-                        if(((IModuleContainer.IDoorContainer) vehicleEntity).getDoors() == null)
+                        IModuleContainer.IDoorContainer doorContainer = (IModuleContainer.IDoorContainer) vehicleEntity;
+                        if(doorContainer.getDoors() == null)
                             return false;
-                        if (!door.isEnabled() || ((IModuleContainer.IDoorContainer) vehicleEntity).getDoors().isDoorAttached(door.getId())) {
-                            if (!door.isEnabled() || ((IModuleContainer.IDoorContainer) vehicleEntity).getDoors().isDoorOpened(door.getId())) {
+                        if (!door.isEnabled() || doorContainer.getDoors().isDoorAttached(door.getId())) {
+                            if (!door.isEnabled() || doorContainer.getDoors().isDoorOpened(door.getId())) {
                                 boolean didMount = mount(vehicleEntity, seats, player);
                                 if (didMount) {
-                                    vehicleEntity.getModuleByType(DoorsModule.class).setDoorState(door.getId(), false);
+                                    vehicleEntity.getModuleByType(DoorsModule.class).setDoorState(door.getId(), DoorsModule.DoorState.CLOSE);
                                 }
                                 return didMount;
                             } else {

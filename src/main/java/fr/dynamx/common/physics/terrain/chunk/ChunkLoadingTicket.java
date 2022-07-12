@@ -154,7 +154,7 @@ public class ChunkLoadingTicket implements VerticalChunkPos.VerticalChunkPosCont
             if(this.collisions != null) {
                 this.collisions.removeFromBulletWorld(DynamXContext.getPhysicsWorld());
                 if(this.collisions.getChunkState().areComputedElementsAdded()|| this.collisions.getChunkState().arePersistentElementsAdded()) {
-                    throw new IllegalStateException("Elements still added ! "+this.collisions+" "+this);
+                    throw new IllegalStateException("Elements still added ! "+this.collisions+" wtf "+this);
                 }
                 this.collisions.reset();
             }

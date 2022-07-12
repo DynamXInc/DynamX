@@ -170,6 +170,8 @@ public class SynchronizedVariablesRegistry {
                     e.printStackTrace();
                 }
             }
+            else
+                System.out.println("WTF NOT FOUND "+i);
         }*/
     }
 }

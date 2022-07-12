@@ -43,7 +43,7 @@ public abstract class BaseWheeledVehiclePhysicsHandler<T extends BaseVehicleEnti
     @Override
     public void addToWorld() {
         if(DynamXContext.getPhysicsWorld() == null)  {
-            throw new NullPointerException("Physics world is null, "+handledEntity.getEntityWorld()+" "+ getCollisionObject());
+            throw new NullPointerException("Physics world is null, wtf "+handledEntity.getEntityWorld()+" "+ getCollisionObject());
         }
         DynamXContext.getPhysicsWorld().addVehicle((PhysicsVehicle) getCollisionObject());
     }

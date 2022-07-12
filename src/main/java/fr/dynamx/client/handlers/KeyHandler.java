@@ -5,16 +5,12 @@ import fr.dynamx.api.physics.EnumBulletShapeType;
 import fr.dynamx.client.camera.CameraSystem;
 import fr.dynamx.client.handlers.hud.CarController;
 import fr.dynamx.common.DynamXContext;
-import fr.dynamx.common.contentpack.parts.PartDoor;
-import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.common.entities.modules.MovableModule;
 import fr.dynamx.common.entities.modules.movables.PickingObjectHelper;
-import fr.dynamx.common.handlers.TaskScheduler;
 import fr.dynamx.common.items.tools.ItemSlopes;
 import fr.dynamx.common.items.tools.ItemWrench;
-import fr.dynamx.common.network.DynamXNetwork;
 import fr.dynamx.common.network.packets.MessageDebugRequest;
 import fr.dynamx.common.network.packets.MessagePickObject;
 import fr.dynamx.common.network.packets.MessagePlayerMountVehicle;
@@ -191,13 +187,13 @@ public class KeyHandler {
                     if (!(userObject instanceof BulletShapeType)) {
                         return;
                     }
-                    if (!(((BulletShapeType<?>) userObject).getObjectIn() instanceof DoorsModule.DoorContainer)) {
+                    if (!(((BulletShapeType<?>) userObject).getObjectIn() instanceof DoorsModule.DoorVarContainer)) {
                         return;
                     }
-                    DoorsModule.DoorContainer doorContainer = (DoorsModule.DoorContainer) ((BulletShapeType<?>) userObject).getObjectIn();
+                    DoorsModule.DoorVarContainer doorContainer = (DoorsModule.DoorVarContainer) ((BulletShapeType<?>) userObject).getObjectIn();
                     byte doorID = doorContainer.getDoorID();
                     DoorsModule doorsModule = doorContainer.getModule();
-                    DynamXContext.getNetwork().sendToServer(new MessagePlayerMountVehicle(doorsModule.entity.getEntityId(), doorID));
+                    DynamXContext.getNetwork().sendToServer(new MessagePlayerMountVehicle(doorsModule.vehicleEntity.getEntityId(), doorID));
                 }
             } else {
                 justPressed = false;

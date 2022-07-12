@@ -77,7 +77,7 @@ public class VirtualTerrainFile {
             try {
                 if (dt == null) {
                     if (this instanceof TerrainFile) {
-                        DynamXMain.log.error("Java multithreading crazy things... Cannot load chunk at " + pos + " because contains null element in data cache ?!?!?");
+                        DynamXMain.log.error("Java multithreading crazy things... Cannot load chunk at " + pos + " because contains null element in data cache ?!?!? WTF");
                         terrainCache.invalidate(pos, true, false);
                     }
                     trimeshShape = null;

@@ -38,7 +38,7 @@ public class AutomaticGearboxHandler implements IGearBoxHandler {
                 {
                     gearChanged = gearBox.decreaseGear();
                     //gear = gearBox.getActiveGear();
-                }
+                }//sex
             }
             if (gearBox.getActiveGearNum() == 0 && currentAcceleration != 0) //Accération en étant au point mort : on passe la première
             {
@@ -52,7 +52,7 @@ public class AutomaticGearboxHandler implements IGearBoxHandler {
                 for (int i = 0; i < wheels.getNumWheels(); i++) {
                     WheelPhysicsHandler wheelPhysicsHandler = wheels.getWheel(i);
                     if (wheelPhysicsHandler.isDrivingWheel()) {
-                        wheelRotationSpeed += wheelPhysicsHandler.getRotationDelta() * wheelPhysicsHandler.getPhysicsWheel().getRadius();
+                        wheelRotationSpeed += wheelPhysicsHandler.getDeltaRotation() * wheelPhysicsHandler.getPhysicsWheel().getRadius();
                         j++;
                     }
                 }

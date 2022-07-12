@@ -18,6 +18,7 @@ import fr.dynamx.common.physics.entities.parts.wheel.SuspensionPhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.wheel.WheelPhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.wheel.WheelState;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import lombok.Getter;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.ArrayList;
@@ -39,6 +40,9 @@ public class WheelsPhysicsHandler implements IPropulsionHandler {
 
     private static final Vector3f direction = new Vector3f(0, -1, 0);
     private static final Vector3f axle = new Vector3f(-1, 0, 0);
+
+    @Getter
+    private boolean isAccelerating;
 
     public WheelsPhysicsHandler(WheelsModule module, BaseWheeledVehiclePhysicsHandler<? extends BaseVehicleEntity<?>> handler) {
         this.module = module;
@@ -69,20 +73,10 @@ public class WheelsPhysicsHandler implements IPropulsionHandler {
     }
 
     public void addWheel(PartWheel partWheel, PartWheelInfo wheelInfo) {
-        Vector3f co = Vector3fPool.get(partWheel.getPosition());
-        co.addLocal(handler.getPackInfo().getCenterOfMass());
-        co.y -= wheelInfo.getSuspensionRestLength();
-        VehicleWheel vehicleWheel = handler.getPhysicsVehicle().addWheel(co, direction, axle, wheelInfo.getSuspensionRestLength(), wheelInfo.getWheelRadius(), partWheel.isWheelIsSteerable());
-
+        Vector3f wheelPosition = Vector3fPool.get(partWheel.getPosition()).addLocal(handler.getPackInfo().getCenterOfMass()).addLocal(0, -wheelInfo.getSuspensionRestLength(), 0);
+        VehicleWheel vehicleWheel = handler.getPhysicsVehicle().addWheel(wheelPosition, direction, axle, wheelInfo.getSuspensionRestLength(), wheelInfo.getWheelRadius(), partWheel.isWheelIsSteerable());
         byte index = (byte) (handler.getPhysicsVehicle().getNumWheels() - 1);
-        SuspensionPhysicsHandler suspensionPhysicsHandler = new SuspensionPhysicsHandler(vehicleWheel, partWheel);
-        WheelPhysicsHandler wheelPhysicsHandler = new WheelPhysicsHandler(partWheel, handler.getPhysicsVehicle(), index, partWheel.isWheelIsSteerable(), suspensionPhysicsHandler, wheelInfo.getWheelBrakeForce(), wheelInfo.getHandBrakeForce());
-
-        if (partWheel.isDrivingWheel()) {
-            wheelPhysicsHandler.setDrivingWheel();
-            wheelPhysicsHandler.setAccelerationForce(1);
-        }
-        wheelPhysicsHandler.setHandBrakingWheel(partWheel.isHandBrakingWheel());
+        WheelPhysicsHandler wheelPhysicsHandler = new WheelPhysicsHandler(handler.getPhysicsVehicle(), vehicleWheel, index, partWheel);
         for (Map.Entry<Byte, Byte> entry : wheelIDByPartID.entrySet()) {
             byte newWheelID = entry.getValue();
             if (newWheelID >= index)
@@ -101,8 +95,8 @@ public class WheelsPhysicsHandler implements IPropulsionHandler {
             if (wheelIDByPartID.get(partID) != null) {
                 byte wheelID = wheelIDByPartID.get(partID);
                 for (WheelPhysicsHandler wheelPhysicsHandler : vehicleWheelPhysicsHandlers) {
-                    if (wheelPhysicsHandler.wheelIndex > wheelID)
-                        --wheelPhysicsHandler.wheelIndex;
+                    if (wheelPhysicsHandler.getWheelIndex() > wheelID)
+                        wheelPhysicsHandler.setWheelIndex((byte) (wheelPhysicsHandler.getWheelIndex() - 1));
                 }
                 for (PartWheel partWheel : handler.getPackInfo().getPartsByType(PartWheel.class)) {
                     if (partID == partWheel.getId()) {
@@ -145,6 +139,7 @@ public class WheelsPhysicsHandler implements IPropulsionHandler {
                         // System.out.println("Delta rot "+wheel.getRotationDelta()+" "+getSpeed(SpeedUnit.KMH));
 
                         wheelPhysicsHandler.accelerate(power * speedRatio * strength * 2);//(getGearBox().getActiveGearNum() < 0 ? -1 : 1));
+                        isAccelerating = true;
                     } else
                         wheelPhysicsHandler.accelerate(0);
                 } else {

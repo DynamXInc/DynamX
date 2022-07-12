@@ -265,8 +265,8 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
                         if (wheelsPhysics.pacejkaMagicFormula.lateral[b] != wheelProperties[getPropertyIndex(b, VehicleEntityProperties.EnumWheelProperties.PACEJKALATERAL)]) {
                             wheelProperties[getPropertyIndex(b, VehicleEntityProperties.EnumWheelProperties.PACEJKALATERAL)] = wheelsPhysics.pacejkaMagicFormula.lateral[b] / 10000;
                         }
-                        if (w.getRotationDelta() != wheelProperties[getPropertyIndex(b, VehicleEntityProperties.EnumWheelProperties.ROTATIONDELTA)]) {
-                            wheelProperties[getPropertyIndex(b, VehicleEntityProperties.EnumWheelProperties.ROTATIONDELTA)] = w.getRotationDelta();
+                        if (w.getDeltaRotation() != wheelProperties[getPropertyIndex(b, VehicleEntityProperties.EnumWheelProperties.ROTATIONDELTA)]) {
+                            wheelProperties[getPropertyIndex(b, VehicleEntityProperties.EnumWheelProperties.ROTATIONDELTA)] = w.getDeltaRotation();
                         }
                     }
                 }

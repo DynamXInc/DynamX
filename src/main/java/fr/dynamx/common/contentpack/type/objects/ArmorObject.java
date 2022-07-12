@@ -15,6 +15,8 @@ import fr.dynamx.common.contentpack.loader.ObjectLoader;
 import fr.dynamx.common.items.DynamXItemArmor;
 import fr.dynamx.common.obj.texture.TextureData;
 import fr.dynamx.utils.DynamXLoadingTasks;
+import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.inventory.EntityEquipmentSlot;
@@ -37,27 +39,27 @@ import java.util.Map;
  * Armor object, for "armor_" files
  */
 public class ArmorObject<T extends ArmorObject<T>> extends AbstractItemObject<T> implements IModelTextureSupplier, ISubInfoTypeOwner<ArmorObject<?>> {
-    @PackFileProperty(configNames = "ArmorHead", required = false)
-    private String armorHead;
-    @PackFileProperty(configNames = "ArmorBody", required = false)
-    private String armorBody;
-    @PackFileProperty(configNames = "ArmorArms", required = false)
-    private String[] armorArms;
-    @PackFileProperty(configNames = "ArmorLegs", required = false)
-    private String[] armorLegs;
-    @PackFileProperty(configNames = "ArmorFoot", required = false)
-    private String[] armorFoot;
-    @PackFileProperty(configNames = "Durability", required = false, defaultValue = "5")
+    @Getter @PackFileProperty(configNames = "ArmorHead", required = false)
+    protected String armorHead;
+    @Getter @PackFileProperty(configNames = "ArmorBody", required = false)
+    protected String armorBody;
+    @Getter @PackFileProperty(configNames = "ArmorArms", required = false)
+    protected String[] armorArms;
+    @Getter @PackFileProperty(configNames = "ArmorLegs", required = false)
+    protected String[] armorLegs;
+    @Getter @PackFileProperty(configNames = "ArmorFoot", required = false)
+    protected String[] armorFoot;
+    @Getter @PackFileProperty(configNames = "Durability", required = false, defaultValue = "5")
     protected int durability = 5; //Leather value
-    @PackFileProperty(configNames = "Enchantability", required = false, defaultValue = "15")
+    @Getter @PackFileProperty(configNames = "Enchantability", required = false, defaultValue = "15")
     protected int enchantibility = 15; //Leather value
-    @PackFileProperty(configNames = "EquipSound", required = false, defaultValue = "item.armor.equip_leather")
+    @Getter @PackFileProperty(configNames = "EquipSound", required = false, defaultValue = "item.armor.equip_leather")
     protected SoundEvent sound = SoundEvent.REGISTRY.getObject(new ResourceLocation("item.armor.equip_leather"));
-    @PackFileProperty(configNames = "Toughness", required = false, defaultValue = "0")
+    @Getter @PackFileProperty(configNames = "Toughness", required = false, defaultValue = "0")
     protected float toughness = 0; //Leather value
-    @PackFileProperty(configNames = "DamageReduction", required = false, defaultValue = "\"1 2 3 1\" (leather)")
+    @Getter @PackFileProperty(configNames = "DamageReduction", required = false, defaultValue = "\"1 2 3 1\" (leather)")
     protected int[] reductionAmount = new int[]{1, 2, 3, 1};
-    @PackFileProperty(configNames = "Textures", required = false, type = DefinitionType.DynamXDefinitionTypes.STRING_ARRAY_2D)
+    @Getter @PackFileProperty(configNames = "Textures", required = false, type = DefinitionType.DynamXDefinitionTypes.STRING_ARRAY_2D)
     protected String[][] texturesArray;
 
     @SideOnly(Side.CLIENT)
@@ -112,46 +114,6 @@ public class ArmorObject<T extends ArmorObject<T>> extends AbstractItemObject<T>
         }
         this.owners = owners.toArray(new IInfoOwner[0]);
         return this.owners;
-    }
-
-    public String getArmorHead() {
-        return armorHead;
-    }
-
-    public void setArmorHead(String armorHead) {
-        this.armorHead = armorHead;
-    }
-
-    public String getArmorBody() {
-        return armorBody;
-    }
-
-    public void setArmorBody(String armorBody) {
-        this.armorBody = armorBody;
-    }
-
-    public String[] getArmorArms() {
-        return armorArms;
-    }
-
-    public void setArmorArms(String[] armorArms) {
-        this.armorArms = armorArms;
-    }
-
-    public String[] getArmorLegs() {
-        return armorLegs;
-    }
-
-    public void setArmorLegs(String[] armorLegs) {
-        this.armorLegs = armorLegs;
-    }
-
-    public String[] getArmorFoot() {
-        return armorFoot;
-    }
-
-    public void setArmorFoot(String[] armorFoot) {
-        this.armorFoot = armorFoot;
     }
 
     @Override

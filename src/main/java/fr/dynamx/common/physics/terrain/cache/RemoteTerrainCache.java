@@ -46,7 +46,6 @@ public class RemoteTerrainCache implements ITerrainCache {
 
     @Override
     public void invalidate(VerticalChunkPos pos, boolean changed, boolean syncChanges) {
-        //System.out.println("INVAL "+pos);
         dataCache.remove(pos);
         erroredChunks.remove(pos);
         rawSlopeDataCache.removeChunk(pos);

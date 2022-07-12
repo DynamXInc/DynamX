@@ -71,19 +71,17 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
         dynamicsWorld = new PhysicsSoftSpace(min, max, bPhase){
             @Override
             public void onContactStarted(long manifoldId) {
-                super.onContactStarted(manifoldId);
+                // memory leak fix : don't call super method : bullets stores all collision events in a queue
             }
 
             @Override
             public void onContactProcessed(PhysicsCollisionObject pcoA, PhysicsCollisionObject pcoB, long contactPointId) {
-                super.onContactProcessed(pcoA, pcoB, contactPointId);
+                // memory leak fix : don't call super method : bullets stores all collision events in a queue
                 CollisionsHandler.handleCollision(new PhysicsCollisionEvent(pcoA, pcoB, contactPointId), (BulletShapeType<?>) pcoA.getUserObject(), (BulletShapeType<?>) pcoB.getUserObject());
             }
 
             @Override
-            public void onContactEnded(long manifoldId) {
-                super.onContactEnded(manifoldId);
-            }
+            public void onContactEnded(long manifoldId) {}
         };
         manager = new PhysicsWorldTerrain(this, mcWorld, isRemoteWorld);
     }

@@ -9,24 +9,26 @@ import net.minecraftforge.fml.common.eventhandler.Event;
 
 public class PhysicsEvent extends Event {
 
-    @Getter private final IPhysicsWorld physicsWorld;
+    @Getter
+    private final IPhysicsWorld physicsWorld;
 
-    public PhysicsEvent(IPhysicsWorld physicsWorld){
+    public PhysicsEvent(IPhysicsWorld physicsWorld) {
         this.physicsWorld = physicsWorld;
     }
 
     /**
      * Fired when an entity is added to the physics world
      */
-    public static class PhysicsEntityAddedEvent extends PhysicsEvent{
+    public static class PhysicsEntityAddedEvent extends PhysicsEvent {
 
-        @Getter private final PhysicsEntity<?> physicsEntity;
+        @Getter
+        private final PhysicsEntity<?> physicsEntity;
 
         /**
          * @param physicsEntity the physics entity which was added
-         * @param physicsWorld the physics world where the physics entity was added
+         * @param physicsWorld  the physics world where the physics entity was added
          */
-        public PhysicsEntityAddedEvent(PhysicsEntity<?> physicsEntity, IPhysicsWorld physicsWorld){
+        public PhysicsEntityAddedEvent(PhysicsEntity<?> physicsEntity, IPhysicsWorld physicsWorld) {
             super(physicsWorld);
             this.physicsEntity = physicsEntity;
         }
@@ -35,39 +37,43 @@ public class PhysicsEvent extends Event {
     /**
      * Fired when an entity is removed from the physics world
      */
-    public static class PhysicsEntityRemovedEvent extends PhysicsEvent{
+    public static class PhysicsEntityRemovedEvent extends PhysicsEvent {
 
-        @Getter private final PhysicsEntity<?> physicsEntity;
+        @Getter
+        private final PhysicsEntity<?> physicsEntity;
 
         /**
          * @param physicsEntity the physics entity which was removed
-         * @param physicsWorld the physics world where the physics entity was removed
+         * @param physicsWorld  the physics world where the physics entity was removed
          */
-        public PhysicsEntityRemovedEvent(PhysicsEntity<?> physicsEntity, IPhysicsWorld physicsWorld){
+        public PhysicsEntityRemovedEvent(PhysicsEntity<?> physicsEntity, IPhysicsWorld physicsWorld) {
             super(physicsWorld);
             this.physicsEntity = physicsEntity;
         }
     }
 
-    /** Called on physics world update */
-    public static class StepSimulationEvent extends PhysicsEvent{
-        @Getter private final float deltaTime;
+    /**
+     * Called on physics world update
+     */
+    public static class StepSimulationEvent extends PhysicsEvent {
+        @Getter
+        private final float deltaTime;
 
         /**
          * @param physicsWorld The physics world where the simulation took place
-         * @param deltaTime The time that was simulated
+         * @param deltaTime    The time that was simulated
          */
-        public StepSimulationEvent(IPhysicsWorld physicsWorld, float deltaTime){
+        public StepSimulationEvent(IPhysicsWorld physicsWorld, float deltaTime) {
             super(physicsWorld);
             this.deltaTime = deltaTime;
         }
     }
+
     /**
      * Called after bullet's world initialization
      */
-    public static class PhysicsWorldLoad extends PhysicsEvent
-    {
-        public PhysicsWorldLoad(IPhysicsWorld physicsWorld){
+    public static class PhysicsWorldLoad extends PhysicsEvent {
+        public PhysicsWorldLoad(IPhysicsWorld physicsWorld) {
             super(physicsWorld);
         }
     }
@@ -75,17 +81,18 @@ public class PhysicsEvent extends Event {
     /**
      * Called when the state of a ChunkCollision has changed, see {@link EnumChunkCollisionsState}
      */
-    public static class ChunkCollisionsStateEvent extends PhysicsEvent
-    {
-        @Getter private final ChunkCollisions collisions;
-        @Getter private final EnumChunkCollisionsState oldState;
+    public static class ChunkCollisionsStateEvent extends PhysicsEvent {
+        @Getter
+        private final ChunkCollisions collisions;
+        @Getter
+        private final EnumChunkCollisionsState oldState;
 
         /**
          * Called when the state of a ChunkCollision has changed, see {@link EnumChunkCollisionsState}
          *
          * @param physicsWorld The physics world owning this chunk
-         * @param collisions The chunk (16*16*16 area)
-         * @param oldState The old state of the chunk
+         * @param collisions   The chunk (16*16*16 area)
+         * @param oldState     The old state of the chunk
          */
         public ChunkCollisionsStateEvent(IPhysicsWorld physicsWorld, ChunkCollisions collisions, EnumChunkCollisionsState oldState) {
             super(physicsWorld);

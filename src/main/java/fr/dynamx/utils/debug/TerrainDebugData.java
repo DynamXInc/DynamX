@@ -4,19 +4,19 @@ import fr.aym.acslib.utils.packetserializer.ISerializablePacket;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class TerrainDebugData implements ISerializablePacket
-{
+public class TerrainDebugData implements ISerializablePacket {
     private static final AtomicInteger lastUuid = new AtomicInteger(Integer.MIN_VALUE);
 
     private int uuid;
     private TerrainDebugRenderer renderer;
     private float[] data;
 
-    public TerrainDebugData() {}
+    public TerrainDebugData() {
+    }
 
     public TerrainDebugData(TerrainDebugRenderer renderer, float[] data) {
         this.uuid = lastUuid.getAndIncrement();
-        if(lastUuid.get() == Integer.MAX_VALUE)
+        if (lastUuid.get() == Integer.MAX_VALUE)
             lastUuid.set(Integer.MIN_VALUE);
         this.renderer = renderer;
         this.data = data;
@@ -36,7 +36,7 @@ public class TerrainDebugData implements ISerializablePacket
 
     @Override
     public Object[] getObjectsToSave() {
-        return new Object[] {uuid, renderer.ordinal(), data};
+        return new Object[]{uuid, renderer.ordinal(), data};
     }
 
     @Override

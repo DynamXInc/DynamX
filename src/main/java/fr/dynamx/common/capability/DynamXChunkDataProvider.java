@@ -9,7 +9,7 @@ import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 public class DynamXChunkDataProvider implements ICapabilitySerializable<NBTBase> {
 
     @CapabilityInject(DynamXChunkData.class)
-    public static final Capability <DynamXChunkData> DYNAM_X_CHUNK_DATA_CAPABILITY = null;
+    public static final Capability<DynamXChunkData> DYNAM_X_CHUNK_DATA_CAPABILITY = null;
 
     private final DynamXChunkData chunkAABB = DYNAM_X_CHUNK_DATA_CAPABILITY.getDefaultInstance();
 

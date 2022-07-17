@@ -7,7 +7,6 @@ import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.StorageModule;
-import fr.dynamx.common.entities.modules.VehicleLightsModule;
 import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
@@ -23,7 +22,7 @@ public class PartStorage extends InteractivePart<BaseVehicleEntity<?>, ModularVe
 
     @Override
     public void appendTo(ModularVehicleInfoBuilder modulableVehicleInfo) {
-        if(storageSize%9 != 0)
+        if (storageSize % 9 != 0)
             throw new IllegalArgumentException("StorageSize must be a multiple of 9 !");
         super.appendTo(modulableVehicleInfo);
     }
@@ -40,7 +39,7 @@ public class PartStorage extends InteractivePart<BaseVehicleEntity<?>, ModularVe
 
     @Override
     public boolean interact(BaseVehicleEntity<?> vehicleEntity, EntityPlayer player) {
-        if(player.isSneaking()) {
+        if (player.isSneaking()) {
             player.openGui(DynamXMain.instance, 1, player.world, vehicleEntity.getEntityId(), storageSize, 0);
             return true;
         }
@@ -53,6 +52,6 @@ public class PartStorage extends InteractivePart<BaseVehicleEntity<?>, ModularVe
 
     @Override
     public String getName() {
-        return "PartStorage named "+getPartName()+" in "+getOwner().getName();
+        return "PartStorage named " + getPartName() + " in " + getOwner().getName();
     }
 }

@@ -69,8 +69,7 @@ public abstract class VehicleSound implements IDynamXSound {
         } else {
             if (vehicleEntity.isDead) {
                 handler.stopSound(this);
-            }
-            else if (getState() != EnumSoundState.STOPPED) {
+            } else if (getState() != EnumSoundState.STOPPED) {
                 setState(EnumSoundState.STOPPING);
             }
         }

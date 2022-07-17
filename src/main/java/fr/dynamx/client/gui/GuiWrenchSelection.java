@@ -8,7 +8,6 @@ import fr.dynamx.common.items.tools.ItemWrench;
 import fr.dynamx.common.items.tools.WrenchMode;
 import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -34,7 +33,7 @@ public class GuiWrenchSelection extends GuiFrame {
         });
 
         ItemStack itemStack = mc.player.getHeldItemMainhand();
-        if(itemStack.getItem() instanceof ItemWrench){
+        if (itemStack.getItem() instanceof ItemWrench) {
             currentMode = WrenchMode.getCurrentMode(itemStack);
         }
     }
@@ -92,6 +91,7 @@ public class GuiWrenchSelection extends GuiFrame {
     }
 
     List<String> infos = new ArrayList<>();
+
     @Override
     public void drawBackground(int mouseX, int mouseY, float partialTicks) {
         super.drawBackground(mouseX, mouseY, partialTicks);
@@ -103,14 +103,14 @@ public class GuiWrenchSelection extends GuiFrame {
         infos.add(wrenchMode.getMessage());
         GuiAPIClientHelper.drawHoveringText(infos, mouseX, mouseY);
 
-        if(currentMode != null) {
+        if (currentMode != null) {
             GlStateManager.scale(0.7f, 0.7f, 0);
-            mc.fontRenderer.drawString("Current Mode : " + currentMode.getLabel(), (int) (getWidth() / (2*0.7f) - (mc.fontRenderer.getStringWidth("Current Mode : " + currentMode.getLabel()) / 2)), (int) (getHeight() / (2*0.7f) - (mc.fontRenderer.FONT_HEIGHT / 2)), Color.WHITE.getRGB());
+            mc.fontRenderer.drawString("Current Mode : " + currentMode.getLabel(), (int) (getWidth() / (2 * 0.7f) - (mc.fontRenderer.getStringWidth("Current Mode : " + currentMode.getLabel()) / 2)), (int) (getHeight() / (2 * 0.7f) - (mc.fontRenderer.FONT_HEIGHT / 2)), Color.WHITE.getRGB());
         }
 
     }
 
-    private WrenchMode getModeWithMousePos(int mouseX, int mouseY){
+    private WrenchMode getModeWithMousePos(int mouseX, int mouseY) {
         //TODO GENERALIZE MODE FINDING
         int mx = mouseX - getWidth() / 2;
         int my = mouseY - getHeight() / 2;
@@ -118,11 +118,11 @@ public class GuiWrenchSelection extends GuiFrame {
         double theta = FastMath.atan2(my, mx);
         theta += FastMath.PI / maxModes;
         theta += FastMath.PI;
-        theta = theta % (FastMath.PI*2);
+        theta = theta % (FastMath.PI * 2);
 
         int mode = (int) (theta / (2 * FastMath.PI / maxModes));
 
-        return WrenchMode.getWrenchModes().get(mode == 5 ? 6 : maxModes-mode-1);
+        return WrenchMode.getWrenchModes().get(mode == 5 ? 6 : maxModes - mode - 1);
     }
 
     @Override

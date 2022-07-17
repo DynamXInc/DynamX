@@ -124,7 +124,7 @@ public class ObjModelServer {
         return indices;
     }
 
-    public IObjObject getObjObject(String objectName){
+    public IObjObject getObjObject(String objectName) {
         for (IObjObject objObject : objObjects) {
             if (objObject.getName().toLowerCase().contains(objectName.toLowerCase())) {
                 return objObject;

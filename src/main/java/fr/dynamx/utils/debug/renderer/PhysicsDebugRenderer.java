@@ -26,8 +26,7 @@ import org.lwjgl.util.glu.Sphere;
 
 import java.awt.*;
 
-public class PhysicsDebugRenderer
-{
+public class PhysicsDebugRenderer {
     public static void debugSoftBody(PhysicsSoftBody physicsSoftBody) {
         GlStateManager.pushMatrix();
         Vector3f physicsLocation = Vector3fPool.get();
@@ -97,7 +96,7 @@ public class PhysicsDebugRenderer
                 /*physicsRigidBody.getPhysicsLocation(physicsLocation);
                 physicsRigidBody.getPhysicsRotation(physicsRotation);*/
 
-                if(prevTransform != null) {
+                if (prevTransform != null) {
                     GlStateManager.translate(prevTransform.getPosition().x + (physicsLocation.x - prevTransform.getPosition().x) * partialTicks,
                             prevTransform.getPosition().y + (physicsLocation.y - prevTransform.getPosition().y) * partialTicks,
                             prevTransform.getPosition().z + (physicsLocation.z - prevTransform.getPosition().z) * partialTicks);

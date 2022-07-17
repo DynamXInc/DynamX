@@ -9,11 +9,10 @@ import java.util.Map;
  * @see fr.dynamx.utils.debug.renderer.DebugRenderer
  * @see DynamXDebugOptions
  */
-public class DynamXDebugOption
-{
+public class DynamXDebugOption {
     /**
      * @param category The category
-     * @param name The name of the debug option
+     * @param name     The name of the debug option
      * @return A new debug option in this category
      */
     public static DynamXDebugOption newOption(DynamXDebugOptions.DebugCategories category, String name) {
@@ -22,10 +21,10 @@ public class DynamXDebugOption
 
     /**
      * The returned option will notify the server when enabled on a client machine <br>
-     *     Note that the server handling of this is hardcoded todo improve handling of ServerDependantDebugOptions
+     * Note that the server handling of this is hardcoded todo improve handling of ServerDependantDebugOptions
      *
      * @param category The category
-     * @param name The name of the debug option
+     * @param name     The name of the debug option
      * @return A new debug option in this category
      */
     public static ServerDependantDebugOption newServerDependantOption(DynamXDebugOptions.DebugCategories category, String name) {
@@ -33,9 +32,9 @@ public class DynamXDebugOption
     }
 
     /**
-     * @param name The name of the debug option
-     * @param needsServerInfo if the option should notify the server when enabled on a client machine (see newServerDependantOption)
-     * @param mask The mask of the option (should be a power of two, and unique in this category)
+     * @param name              The name of the debug option
+     * @param needsServerInfo   if the option should notify the server when enabled on a client machine (see newServerDependantOption)
+     * @param mask              The mask of the option (should be a power of two, and unique in this category)
      * @param incompatibilities The incompatible masks
      * @return A new debug option in terrain category
      */
@@ -45,8 +44,8 @@ public class DynamXDebugOption
 
     /**
      * @param category The category
-     * @param name The name of the debug option
-     * @param mask The mask of the option (should be a power of two, and unique in this category)
+     * @param name     The name of the debug option
+     * @param mask     The mask of the option (should be a power of two, and unique in this category)
      * @return A new debug option in this category
      */
     public static DynamXDebugOption newOptionWithMask(DynamXDebugOptions.DebugCategories category, String name, int mask) {
@@ -97,16 +96,15 @@ public class DynamXDebugOption
     }
 
     public void enable() {
-        category.setState(category.getState()|mask);
+        category.setState(category.getState() | mask);
     }
 
     public void disable() {
-        category.setState((Integer.MAX_VALUE - mask)&category.getState());
+        category.setState((Integer.MAX_VALUE - mask) & category.getState());
     }
 
-    public boolean isActive()
-    {
-        return (category.getState()&mask) > 0;
+    public boolean isActive() {
+        return (category.getState() & mask) > 0;
     }
 
     public String getDisplayName() {
@@ -122,11 +120,10 @@ public class DynamXDebugOption
     }
 
     public boolean matchesNetMask(int request) {
-        return (request&serverRequestMask()) > 0;
+        return (request & serverRequestMask()) > 0;
     }
 
-    public static class ServerDependantDebugOption extends DynamXDebugOption
-    {
+    public static class ServerDependantDebugOption extends DynamXDebugOption {
         private static int serverRequestMaskIndex;
         private final int serverRequestMask;
 
@@ -142,8 +139,7 @@ public class DynamXDebugOption
         }
     }
 
-    public static class TerrainDebugOption extends ServerDependantDebugOption
-    {
+    public static class TerrainDebugOption extends ServerDependantDebugOption {
         private final boolean needServerRq;
         private final int[] incompatibilities;
         private Map<Integer, TerrainDebugData> dataIn = new HashMap<>();
@@ -157,8 +153,8 @@ public class DynamXDebugOption
         @Override
         public void enable() {
             super.enable();
-            for(int incompatibility : incompatibilities)
-                getCategory().setState((Integer.MAX_VALUE - incompatibility)&getCategory().getState());
+            for (int incompatibility : incompatibilities)
+                getCategory().setState((Integer.MAX_VALUE - incompatibility) & getCategory().getState());
         }
 
         @Override

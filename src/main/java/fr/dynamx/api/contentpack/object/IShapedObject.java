@@ -6,10 +6,9 @@ import fr.dynamx.common.contentpack.parts.PartShape;
 
 /**
  * Describes a IShapedObject <br>
- *     The function generateShape() is automatically called by the associed {@link fr.dynamx.common.contentpack.loader.InfoLoader}
+ * The function generateShape() is automatically called by the associed {@link fr.dynamx.common.contentpack.loader.InfoLoader}
  */
-public interface IShapedObject extends INamedObject
-{
+public interface IShapedObject extends INamedObject {
     /**
      * Generates the shape of the object <br>
      * If an exception is thrown then setShapeErrored() will be called

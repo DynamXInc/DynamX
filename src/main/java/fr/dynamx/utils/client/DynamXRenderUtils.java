@@ -27,8 +27,7 @@ import java.util.List;
  *
  * @see ClientDynamXUtils
  */
-public class DynamXRenderUtils
-{
+public class DynamXRenderUtils {
     private static final Sphere sphere = new Sphere();
 
     public static void drawBoundingBox(Vector3f halfExtent, float red, float green, float blue, float alpha) {
@@ -129,21 +128,21 @@ public class DynamXRenderUtils
         Vector3fPool.closePool();
     }
 
-    public static void drawSphere(Vector3f translation, float radius, int resolution, @Nullable Color sphereColor){
-        if(sphereColor != null)
+    public static void drawSphere(Vector3f translation, float radius, int resolution, @Nullable Color sphereColor) {
+        if (sphereColor != null)
             GlStateManager.color(sphereColor.getRed(), sphereColor.getGreen(), sphereColor.getBlue(), sphereColor.getAlpha());
         GlStateManager.translate(translation.x, translation.y, translation.z);
         sphere.draw(radius, resolution, resolution);
         GlStateManager.translate(-translation.x, -translation.y, -translation.z);
-        if(sphereColor != null)
-            GlStateManager.color(1,1,1,1);
+        if (sphereColor != null)
+            GlStateManager.color(1, 1, 1, 1);
     }
 
     public static void glTranslate(Vector3f translation) {
         GlStateManager.translate(translation.x, translation.y, translation.z);
     }
 
-    public static void drawConvexHull(List<Vector3f> vectorBuffer){
+    public static void drawConvexHull(List<Vector3f> vectorBuffer) {
         Vector3fPool.openPool();
         GlStateManager.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
         GlStateManager.glBegin(GL11.GL_TRIANGLES);

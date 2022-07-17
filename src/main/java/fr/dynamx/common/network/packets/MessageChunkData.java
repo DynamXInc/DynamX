@@ -20,15 +20,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.zip.GZIPOutputStream;
 
-public class MessageChunkData implements IDnxPacket
-{
+public class MessageChunkData implements IDnxPacket {
     private static final byte version = 3;
 
     private byte[] dataType;
     private VerticalChunkPos pos;
     private byte[] data;
 
-    public MessageChunkData() {}
+    public MessageChunkData() {
+    }
 
     public MessageChunkData(VerticalChunkPos pos, byte[] dataType, byte[] data) {
         this.pos = pos;
@@ -44,8 +44,7 @@ public class MessageChunkData implements IDnxPacket
         try {
             out = new ObjectOutputStream(new GZIPOutputStream(data));
             out.writeInt(terrainElements.size());
-            for(ITerrainElement e : terrainElements)
-            {
+            for (ITerrainElement e : terrainElements) {
                 out.writeByte(e.getFactory().ordinal());
                 e.save(ITerrainElement.TerrainSaveType.NETWORK, out);
             }
@@ -64,12 +63,11 @@ public class MessageChunkData implements IDnxPacket
     @Override
     public void fromBytes(ByteBuf buf) {
         byte ve = buf.readByte();
-        if(ve != version)
-        {
-            throw new UnsupportedOperationException("Wrong encoding version, found "+ve+" and should be "+version);
+        if (ve != version) {
+            throw new UnsupportedOperationException("Wrong encoding version, found " + ve + " and should be " + version);
         }
         pos = new VerticalChunkPos(buf.readInt(), buf.readInt(), buf.readInt());
-        dataType = new byte[] {buf.readByte(), buf.readByte()};
+        dataType = new byte[]{buf.readByte(), buf.readByte()};
         data = new byte[buf.readInt()];
         buf.readBytes(data);
     }
@@ -87,8 +85,7 @@ public class MessageChunkData implements IDnxPacket
         buf.writeBytes(data);
     }
 
-    public static class Handler implements IMessageHandler<MessageChunkData, IDnxPacket>
-    {
+    public static class Handler implements IMessageHandler<MessageChunkData, IDnxPacket> {
         private final ExecutorService POOL = Executors.newFixedThreadPool(2, new DynamXThreadedModLoader.DefaultThreadFactory("DnxCliCollsLoader"));
 
         @Override
@@ -99,10 +96,10 @@ public class MessageChunkData implements IDnxPacket
                 ((RemoteTerrainCache) DynamXContext.getPhysicsWorld().getTerrainManager().getCache()).receiveChunkData(message.pos, message.dataType[0], message.dataType[1], message.data);
                 profiler.end(Profiler.Profiles.TERRAIN_LOADER_TICK);
                 profiler.update();
-                if(profiler.isActive()) //Profiling
+                if (profiler.isActive()) //Profiling
                 {
                     List<String> st = profiler.getData();
-                    if(!st.isEmpty()) {
+                    if (!st.isEmpty()) {
                         profiler.printData("Network terrain thread");
                         profiler.reset();
                     }

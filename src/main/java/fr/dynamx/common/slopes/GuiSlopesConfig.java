@@ -24,8 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class GuiSlopesConfig extends GuiFrame
-{
+public class GuiSlopesConfig extends GuiFrame {
     private final IMouseClickListener exitButton;
     private boolean cancelled;
 
@@ -44,7 +43,7 @@ public class GuiSlopesConfig extends GuiFrame
         add((b2 = new GuiCheckBox(I18n.format("slopes.config.diags"))).setChecked(config.getDiagDir() == -1).setCssId("diagDir"));
 
         EnumFacing current = mc.player.getHorizontalFacing();
-        add(new GuiLabel(I18n.format("slopes.config.orientation", current.getName())).setCssId("setfacing").addClickListener((x,y,bu) -> {
+        add(new GuiLabel(I18n.format("slopes.config.orientation", current.getName())).setCssId("setfacing").addClickListener((x, y, bu) -> {
             config.setFacing(current);
         }));
 
@@ -57,20 +56,18 @@ public class GuiSlopesConfig extends GuiFrame
             @Override
             public List<String> generateAvailableNames() {
                 List<String> list = new ArrayList<>();
-                for(ResourceLocation l : Block.REGISTRY.getKeys())
+                for (ResourceLocation l : Block.REGISTRY.getKeys())
                     list.add(l.toString());
                 return list;
             }
         }).setCssId("blacklist_bar"));
-        add((lab = new GuiLabel(I18n.format("slopes.config.add"))).setCssId("blacklist_add").addClickListener((x,y,bt) ->  {
+        add((lab = new GuiLabel(I18n.format("slopes.config.add"))).setCssId("blacklist_add").addClickListener((x, y, bt) -> {
             ResourceLocation loc = new ResourceLocation(text.getText());
-            if(Block.REGISTRY.containsKey(loc))
-            {
+            if (Block.REGISTRY.containsKey(loc)) {
                 config.getBlackList().add(Block.REGISTRY.getObject(loc));
                 setupBlacklist(config, pane);
-            }
-            else
-                lab.setText(TextFormatting.RED+I18n.format("slopes.config.blocknotfound"));
+            } else
+                lab.setText(TextFormatting.RED + I18n.format("slopes.config.blocknotfound"));
         }));
 
         pane.setLayout(new GridLayout(-1, 10, 1, GridLayout.GridDirection.HORIZONTAL, 1));
@@ -80,7 +77,7 @@ public class GuiSlopesConfig extends GuiFrame
             cancelled = true;
             Minecraft.getMinecraft().displayGuiScreen(null);
         }));
-        add(new GuiButton(I18n.format("slopes.config.apply")).setCssId("refresh").addClickListener(exitButton = (x,y,bu) -> {
+        add(new GuiButton(I18n.format("slopes.config.apply")).setCssId("refresh").addClickListener(exitButton = (x, y, bu) -> {
             config.setEnableSlabs(!b.isChecked());
             config.setDiagDir(b2.isChecked() ? -1 : 1);
             DynamXContext.getNetwork().sendToServer(new MessageSlopesConfigGui(config.serialize()));
@@ -88,13 +85,11 @@ public class GuiSlopesConfig extends GuiFrame
         setPauseGame(false);
     }
 
-    private void setupBlacklist(SlopeBuildingConfig config, GuiScrollPane pane)
-    {
+    private void setupBlacklist(SlopeBuildingConfig config, GuiScrollPane pane) {
         pane.removeAllChilds();
-        for(Block bo : config.getBlackList())
-        {
+        for (Block bo : config.getBlackList()) {
             ResourceLocation bl = bo.getRegistryName();
-            pane.add(new GuiLabel(bl.toString()).setCssClass("blacklist_block").addClickListener((x,y,bt) ->  {
+            pane.add(new GuiLabel(bl.toString()).setCssClass("blacklist_block").addClickListener((x, y, bt) -> {
                 config.getBlackList().remove(bo);
                 setupBlacklist(config, pane);
             }));
@@ -103,8 +98,7 @@ public class GuiSlopesConfig extends GuiFrame
 
     @Override
     public void guiClose() {
-        if(!cancelled)
-        {
+        if (!cancelled) {
             exitButton.onMouseClicked(0, 0, 0);
         }
         super.guiClose();

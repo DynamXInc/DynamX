@@ -16,8 +16,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public abstract class ItemModularEntity<T extends ModularVehicleInfo<?>> extends DynamXItemSpawner<T> implements IInfoOwner<T>
-{
+public abstract class ItemModularEntity<T extends ModularVehicleInfo<?>> extends DynamXItemSpawner<T> implements IInfoOwner<T> {
     private final int textureNum;
 
     public ItemModularEntity(T modulableVehicleInfo) {
@@ -26,13 +25,13 @@ public abstract class ItemModularEntity<T extends ModularVehicleInfo<?>> extends
         setCreativeTab(modulableVehicleInfo.getCreativeTab(DynamXItemRegistry.vehicleTab));
 
         textureNum = modulableVehicleInfo.getMaxTextureMetadata();
-        if(textureNum> 1)
+        if (textureNum > 1)
             setHasSubtypes(true);
     }
 
     @Override
     public String getJsonName(int meta) {
-        return super.getJsonName(meta)+"_"+getInfo().getTextures().get((byte) meta).getName().toLowerCase();
+        return super.getJsonName(meta) + "_" + getInfo().getTextures().get((byte) meta).getName().toLowerCase();
     }
 
     @Override
@@ -42,32 +41,30 @@ public abstract class ItemModularEntity<T extends ModularVehicleInfo<?>> extends
 
     @Override
     public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items) {
-        if (this.isInCreativeTab(tab))
-        {
+        if (this.isInCreativeTab(tab)) {
             for (byte m = 0; m < textureNum; m++) {
-                items.add(new ItemStack(this,1, m));
+                items.add(new ItemStack(this, 1, m));
             }
         }
     }
 
     @Override
     public String getTranslationKey(ItemStack stack) {
-        if(stack.getMetadata() != 0 && textureNum > stack.getMetadata() && getInfo().getTextures().containsKey((byte) stack.getMetadata())) {
+        if (stack.getMetadata() != 0 && textureNum > stack.getMetadata() && getInfo().getTextures().containsKey((byte) stack.getMetadata())) {
             return super.getTranslationKey(stack) + "_" + getInfo().getTextures().get((byte) stack.getMetadata()).getName().toLowerCase();
         }
         return super.getTranslationKey(stack);
     }
 
     @SideOnly(Side.CLIENT)
-    public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn)
-    {
+    public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add("Description: " + getInfo().getDescription());
-        tooltip.add("Pack: "+ getInfo().getPackName());
-        if(stack.getMetadata() != 0) {
-            if(textureNum > stack.getMetadata() && getInfo().getTextures().containsKey((byte) stack.getMetadata()))
+        tooltip.add("Pack: " + getInfo().getPackName());
+        if (stack.getMetadata() != 0) {
+            if (textureNum > stack.getMetadata() && getInfo().getTextures().containsKey((byte) stack.getMetadata()))
                 tooltip.add("Texture: " + getInfo().getTextures().get((byte) stack.getMetadata()).getName());
             else
-                tooltip.add(TextFormatting.RED+"Texture not found, check your pack errors");
+                tooltip.add(TextFormatting.RED + "Texture not found, check your pack errors");
         }
         getInfo().getPartsByType(PartWheel.class).forEach(vehicleWheelInfo -> tooltip.add("Wheel: " + vehicleWheelInfo.getDefaultWheelName()));
         //vehicleInfo.getPartsByType(PartSeat.class).forEach(seatInfo -> tooltip.add("Seat: " + seatInfo.getPartName()));

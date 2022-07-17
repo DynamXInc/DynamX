@@ -7,10 +7,8 @@ import fr.dynamx.common.items.tools.ItemSlopes;
 import fr.dynamx.common.items.tools.ItemWrench;
 import fr.dynamx.common.items.tools.WrenchMode;
 import fr.dynamx.common.physics.PhysicsTickHandler;
-import fr.dynamx.server.command.CmdOpenDebugGui;
 import fr.dynamx.utils.DynamXConstants;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextComponentString;
@@ -18,7 +16,6 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import net.minecraftforge.fml.relauncher.Side;
 
 public class MessageDebugRequest implements IDnxPacket, IMessageHandler<MessageDebugRequest, IMessage> {
     public int debugMode;
@@ -73,7 +70,7 @@ public class MessageDebugRequest implements IDnxPacket, IMessageHandler<MessageD
                 WrenchMode.setMode(ctx.getServerHandler().player, s, mode);
             }
         } else {
-            if (ctx.getServerHandler().player.canUseCommand(2, DynamXConstants.ID+".command.debug_gui")) {
+            if (ctx.getServerHandler().player.canUseCommand(2, DynamXConstants.ID + ".command.debug_gui")) {
                 ctx.getServerHandler().player.getServer().addScheduledTask(() -> PhysicsTickHandler.requestedDebugInfo.put(ctx.getServerHandler().player, message.debugMode));
             } else {
                 DynamXMain.log.warn(ctx.getServerHandler().player + " tried to enable debug mode " + message.debugMode + " while not in the debug gui");

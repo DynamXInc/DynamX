@@ -1,7 +1,6 @@
 package fr.dynamx.api.physics;
 
 import com.jme3.bullet.PhysicsSoftSpace;
-import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.bullet.joints.PhysicsJoint;
 import com.jme3.bullet.objects.PhysicsVehicle;
@@ -15,32 +14,32 @@ import net.minecraftforge.common.MinecraftForge;
 /**
  * Where all physics happen
  */
-public interface IPhysicsWorld
-{
+public interface IPhysicsWorld {
     /**
      * Appends an operation on this PhysicsWorld <br>
-     *     See other add and remove methods <br>
-     *         Thread-safe method
-     *     
+     * See other add and remove methods <br>
+     * Thread-safe method
+     *
      * @param operation The {@link PhysicsWorldOperation} operation to execute
      */
     void addOperation(PhysicsWorldOperation<?> operation);
 
     /**
      * Adds a collision object to the physics world, used for non-vehicle objects <br>
-     *     The world terrain around will not be loaded, see addBulletEntity <br>
-     *         <strong>Note : </strong> The user object of the collision object must be a {@link BulletShapeType} <br>
+     * The world terrain around will not be loaded, see addBulletEntity <br>
+     * <strong>Note : </strong> The user object of the collision object must be a {@link BulletShapeType} <br>
      * Thread-safe method
      */
     default void addCollisionObject(PhysicsCollisionObject obj) {
-        if(obj.getUserObject() instanceof BulletShapeType)
+        if (obj.getUserObject() instanceof BulletShapeType)
             addOperation(new PhysicsWorldOperation<>(PhysicsWorldOperation.PhysicsWorldOperationType.ADD_OBJECT, obj));
         else
             throw new IllegalArgumentException("User object of a collision object must be a BulletShapeType !");
     }
+
     /**
      * Removes a collision object from the physics world, used for non-vehicle objects <br>
-     *     The world terrain around will not be unloaded, see removeBulletEntity <br>
+     * The world terrain around will not be unloaded, see removeBulletEntity <br>
      * Thread-safe method
      */
     default void removeCollisionObject(PhysicsCollisionObject obj) {
@@ -49,7 +48,7 @@ public interface IPhysicsWorld
 
     /**
      * Adds an entity to the physics world : the terrain around the entity will be loaded <br>
-     *     Does not add the collision box of the entity, see addCollisionObject <br>
+     * Does not add the collision box of the entity, see addCollisionObject <br>
      * Thread-safe method
      */
     default void addBulletEntity(PhysicsEntity<?> e) {
@@ -57,9 +56,10 @@ public interface IPhysicsWorld
         addOperation(new PhysicsWorldOperation<>(PhysicsWorldOperation.PhysicsWorldOperationType.ADD_ENTITY, e));
         MinecraftForge.EVENT_BUS.post(new PhysicsEvent.PhysicsEntityAddedEvent(e, this));
     }
+
     /**
      * Removes an entity from the world <br>
-     *      Does not remove the collision box of the entity, see removeCollisionObject <br>
+     * Does not remove the collision box of the entity, see removeCollisionObject <br>
      * Thread-safe method
      */
     default void removeBulletEntity(PhysicsEntity<?> e) {
@@ -70,19 +70,20 @@ public interface IPhysicsWorld
 
     /**
      * Adds a vehicle to the physics world <br>
-     *     The world terrain around will not be loaded (use addBulletEntity for this) <br>
-     *         <strong>Note : </strong> The user object of the collision object must be a {@link BulletShapeType} <br>
+     * The world terrain around will not be loaded (use addBulletEntity for this) <br>
+     * <strong>Note : </strong> The user object of the collision object must be a {@link BulletShapeType} <br>
      * Thread-safe method
      */
     default void addVehicle(PhysicsVehicle vehicle) {
-        if(vehicle.getUserObject() instanceof BulletShapeType)
+        if (vehicle.getUserObject() instanceof BulletShapeType)
             addOperation(new PhysicsWorldOperation<>(PhysicsWorldOperation.PhysicsWorldOperationType.ADD_VEHICLE, vehicle));
         else
             throw new IllegalArgumentException("User object of a vehicle must be a BulletShapeType !");
     }
+
     /**
      * Removes a vehicle from the physics world <br>
-     *     The world terrain around will not be unloaded (use removeBulletEntity for this) <br>
+     * The world terrain around will not be unloaded (use removeBulletEntity for this) <br>
      * Thread-safe method
      */
     default void removeVehicle(PhysicsVehicle vehicle) {
@@ -99,7 +100,7 @@ public interface IPhysicsWorld
 
     /**
      * Removes a joint from the physics world <br>
-     *     It should be called when one of the entities using the joint is killed <br>
+     * It should be called when one of the entities using the joint is killed <br>
      * Thread-safe method
      */
     default void removeJoint(PhysicsJoint joint) {
@@ -113,7 +114,7 @@ public interface IPhysicsWorld
 
     /**
      * @return The total number of physics entity inside the world <br>
-     *     If 0 then there is no terrain loaded
+     * If 0 then there is no terrain loaded
      */
     int getLoadedEntityCount();
 
@@ -124,6 +125,7 @@ public interface IPhysicsWorld
 
     /**
      * Processes all simulation things, called once per tick
+     *
      * @param deltaTime The time elapsed since the last call of the function, in seconds (typically one tick ie 0.05 secs) <br>
      *                  This time will be subdivided into smaller intervals of getTimeSubdivision() to call getDynamicsWorld().stepSimulation as many times as needed
      */

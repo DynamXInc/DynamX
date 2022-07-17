@@ -15,8 +15,7 @@ import fr.dynamx.utils.DynamXLoadingTasks;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 
-public class ItemCar<T extends ModularVehicleInfo<?>> extends ItemModularEntity<T>
-{
+public class ItemCar<T extends ModularVehicleInfo<?>> extends ItemModularEntity<T> {
     public ItemCar(T info) {
         super(info);
         if (info.getSubPropertyByType(EngineInfo.class) == null) {
@@ -31,8 +30,7 @@ public class ItemCar<T extends ModularVehicleInfo<?>> extends ItemModularEntity<
     }
 
     public static <A extends ModularVehicleInfo<?>> ItemCar<A> getItemForCar(A info) {
-        if(info.getPartsByType(PartWheel.class).isEmpty())
-        {
+        if (info.getPartsByType(PartWheel.class).isEmpty()) {
             DynamXMain.log.error("Cannot determine type of " + info.getFullName() + " ! It's a car with no wheels...");
             DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, info.getPackName(), info.getName(), "This car has no wheels !", ErrorTrackingService.TrackedErrorLevel.FATAL);
         }

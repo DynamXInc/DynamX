@@ -17,15 +17,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class PartLightSource implements ISubInfoType<ModularVehicleInfoBuilder>
-{
+public class PartLightSource implements ISubInfoType<ModularVehicleInfoBuilder> {
     private final ISubInfoTypeOwner<ModularVehicleInfoBuilder> owner;
     private final String name;
 
     @PackFileProperty(configNames = "Position", oldNames = "ShapePosition", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y, description = "common.position", required = false)
     private Vector3f position;
     @PackFileProperty(configNames = "Rotation", required = false, defaultValue = "1 0 0 0")
-    private Quaternion rotation = new Quaternion();
+    private final Quaternion rotation = new Quaternion();
     @PackFileProperty(configNames = "LightId")
     private int lightId;
     @PackFileProperty(configNames = "PartName")
@@ -52,7 +51,7 @@ public class PartLightSource implements ISubInfoType<ModularVehicleInfoBuilder>
 
     @Override
     public void addModules(BaseVehicleEntity<?> entity, ModuleListBuilder modules) {
-        if(!modules.hasModuleOfClass(VehicleLightsModule.class)) {
+        if (!modules.hasModuleOfClass(VehicleLightsModule.class)) {
             modules.add(new VehicleLightsModule(entity));
         }
     }
@@ -63,7 +62,7 @@ public class PartLightSource implements ISubInfoType<ModularVehicleInfoBuilder>
 
     @Override
     public String getName() {
-        return "LightSource_"+name+" in "+owner.getName();
+        return "LightSource_" + name + " in " + owner.getName();
     }
 
     @Override
@@ -113,8 +112,7 @@ public class PartLightSource implements ISubInfoType<ModularVehicleInfoBuilder>
         return colors;
     }
 
-    public static class CompoundLight
-    {
+    public static class CompoundLight {
         private final String partName;
         private final List<PartLightSource> sources = new ArrayList<>();
 

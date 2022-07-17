@@ -109,7 +109,7 @@ public class DynamXMath {
         c3 = 2 * T * p0 + (T - 3) * p1 + (3 - 2 * T) * p2 + -T * p3;
         c4 = -T * p0 + (2 - T) * p1 + (T - 2) * p2 + T * p3;
 
-        return (float) (((c4 * u + c3) * u + c2) * u + c1);
+        return ((c4 * u + c3) * u + c2) * u + c1;
     }
 
     /**
@@ -333,5 +333,9 @@ public class DynamXMath {
     public static int preciseRound(double of) {
         int c = (int) of;
         return of - c > 0.5 ? c + 1 : of - c < -0.5 ? c - 1 : c;
+    }
+
+    public static float roundFloat(float f, float precision) {
+        return (float) Math.round(f * precision) / precision;
     }
 }

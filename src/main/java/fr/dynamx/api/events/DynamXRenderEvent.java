@@ -4,11 +4,9 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.eventhandler.Cancelable;
 import net.minecraftforge.fml.common.eventhandler.Event;
 
-public class DynamXRenderEvent extends Event
-{
+public class DynamXRenderEvent extends Event {
     @Cancelable
-    public static class RenderModel extends Event
-    {
+    public static class RenderModel extends Event {
         private final EventStage stage;
         private final ResourceLocation location;
         private final String groupName;

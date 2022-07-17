@@ -101,7 +101,7 @@ public class TerrainBoxConstructor {
         List<MutableBoundingBox> vanillaBoxes = new ArrayList<>();
         //Sort them by y pos
         outListVanilla.sort(Comparator.comparingDouble(a -> {
-            if(a != null) {
+            if (a != null) {
                 return a.minY;
             }
             return 0;
@@ -111,14 +111,14 @@ public class TerrainBoxConstructor {
             if (box != null) {
                 vanillaBoxes.add(new MutableBoundingBox(box));
                 count++;
-                if(count >= MAX_BOXES_PER_MESH) {
+                if (count >= MAX_BOXES_PER_MESH) {
                     result.add(new CompoundBoxTerrainElement(-x, -y, -z, vanillaBoxes));
                     vanillaBoxes = new ArrayList<>();
                     count = 0;
                 }
             }
         }
-        if(!vanillaBoxes.isEmpty()) {
+        if (!vanillaBoxes.isEmpty()) {
             result.add(new CompoundBoxTerrainElement(-x, -y, -z, vanillaBoxes));
         }
         //And add all standard TerrainElements

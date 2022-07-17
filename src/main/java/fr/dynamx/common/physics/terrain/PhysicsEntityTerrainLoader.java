@@ -19,11 +19,11 @@ public class PhysicsEntityTerrainLoader implements IPhysicsTerrainLoader {
     private static final Map<VerticalChunkPos, ChunkLoadingTicket.TicketPriority> toUnLoad = new HashMap<>();
     protected int lastChunkX, lastChunkY = Integer.MAX_VALUE, lastChunkZ; //note that this precises coordinates are an edge case where the chunk won't be loaded on entity spawn :O
 
-    private static int radiusY = 3;//3
-    private static int radiusYHalf = 1;//1
-    private static int radiusH = 7;//7
-    private static int squareRadiusH = radiusH * radiusH;
-    private static int radiusHHalf = 3;//3
+    private static final int radiusY = 3;//3
+    private static final int radiusYHalf = 1;//1
+    private static final int radiusH = 7;//7
+    private static final int squareRadiusH = radiusH * radiusH;
+    private static final int radiusHHalf = 3;//3
     protected final byte[][] loadMatrice = new byte[3][49];
     //private final Map<VerticalChunkPos, ChunkLoadingTicket.TicketPriority> states = new HashMap<>(49 * 3);
     private final PhysicsEntity<?> entityIn;
@@ -56,7 +56,7 @@ public class PhysicsEntityTerrainLoader implements IPhysicsTerrainLoader {
                         ChunkLoadingTicket.TicketPriority oldPriority = ChunkLoadingTicket.TicketPriority.values()[loadMatrice[i][j]];
                         VerticalChunkPos prevPosImmutable = prevPos.toImmutable();
                         ChunkLoadingTicket.TicketPriority newPriority = toLoad.get(prevPosImmutable);
-                        if(newPriority != oldPriority)
+                        if (newPriority != oldPriority)
                             toUnLoad.put(prevPosImmutable, oldPriority);
                         else
                             toLoad.remove(prevPosImmutable);
@@ -70,22 +70,22 @@ public class PhysicsEntityTerrainLoader implements IPhysicsTerrainLoader {
                         loadMatrice[i][j] = (byte) priority.ordinal();
                         //border = isBorderChunkSub(entityIn.chunkCoordX - lastChunkX, entityIn.chunkCoordY - lastChunkY, entityIn.chunkCoordZ - lastChunkZ, dx, i - radiusYHalf, dz);
                         //if(border)
-                            //mais attention bordel priorités
-                            //terrain.subscribeToChunk(pos.toImmutable(), priority, profiler);
+                        //mais attention bordel priorités
+                        //terrain.subscribeToChunk(pos.toImmutable(), priority, profiler);
                         VerticalChunkPos posImmutable = pos.toImmutable();
                         ChunkLoadingTicket.TicketPriority oldPriority = toUnLoad.get(posImmutable);
-                        if(oldPriority != priority)
+                        if (oldPriority != priority)
                             toLoad.put(posImmutable, priority);
                         else
                             toUnLoad.remove(posImmutable);
                     }
                 }
             }
-            if(!toUnLoad.isEmpty()) {
+            if (!toUnLoad.isEmpty()) {
                 toUnLoad.keySet().forEach(terrain::unsubscribeFromChunk);
                 toUnLoad.clear();
             }
-            if(!toLoad.isEmpty()) {
+            if (!toLoad.isEmpty()) {
                 toLoad.forEach((load, priority) -> {
                     terrain.subscribeToChunk(load, priority, profiler);
                 });

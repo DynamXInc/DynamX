@@ -5,8 +5,7 @@ import com.jme3.bounding.BoundingBox;
 import javax.annotation.concurrent.ThreadSafe;
 
 @ThreadSafe
-public class BoundingBoxPool extends ClassPool<BoundingBox>
-{
+public class BoundingBoxPool extends ClassPool<BoundingBox> {
     private static final ThreadLocal<BoundingBoxPool> LOCAL_POOL = ThreadLocal.withInitial(BoundingBoxPool::new);
 
     /*@Override
@@ -18,23 +17,20 @@ public class BoundingBoxPool extends ClassPool<BoundingBox>
     @Override
     public void closeSubPool() {}*/
 
-    public static BoundingBox get()
-    {
+    public static BoundingBox get() {
         BoundingBox v = getPool().provideNewInstance();
         v.setMinMax(Vector3fPool.get(), Vector3fPool.get());
         return v;
     }
 
-    public BoundingBoxPool()
-    {
+    public BoundingBoxPool() {
         super(30);
     }
 
     @Override
-    public BoundingBox[] createNewPool(int newInstancesStart, int size)
-    {
+    public BoundingBox[] createNewPool(int newInstancesStart, int size) {
         BoundingBox[] pool = new BoundingBox[size];
-        for(int i=newInstancesStart;i<size;i++)
+        for (int i = newInstancesStart; i < size; i++)
             pool[i] = new BoundingBox();
         return pool;
     }
@@ -47,8 +43,7 @@ public class BoundingBoxPool extends ClassPool<BoundingBox>
     /**
      * @return The current threads's instance
      */
-    public static BoundingBoxPool getPool()
-    {
+    public static BoundingBoxPool getPool() {
         return LOCAL_POOL.get();
     }
 }

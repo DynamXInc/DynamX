@@ -59,7 +59,7 @@ public class WorldTerrainState //TODO INTERFACE
                     //TODO SOLVE THIS : SHOULD NOT BE CALLED FOR CHUNKS LOADING WITH ENTITIES NEAR
 
                     //ticket.incrStatusIndex("Unloaded_no entity"); //Invalidate loading
-                    //28/07/21 : WHY, KEEP LOADED WHILE LOADING, THEN CHECK IF IT SHOULD BE REMOVED
+                    //28/07/21 : WTF WHY, KEEP LOADED WHILE LOADING, THEN CHECK IF IT SHOULD BE REMOVED
                     return false; //But mark as used to avoid possible errors. It will be removed later.
                     //Will be removed when loading is finished
                 } else {
@@ -68,10 +68,10 @@ public class WorldTerrainState //TODO INTERFACE
                     }
                     ticket.getCollisions().removeFromBulletWorld(terrain.getPhysicsWorld());
                     if (ticket.getCollisions().getChunkState().areComputedElementsAdded() || ticket.getCollisions().getChunkState().arePersistentElementsAdded()) {
-                        throw new IllegalStateException("Elements still added ! " + ticket.getCollisions() + " " + ticket);
+                        throw new IllegalStateException("Elements still added ! " + ticket.getCollisions() + " wtf " + ticket);
                     }
                     loadedTerrain.remove(pos);
-                    if(pendingForInvalidation.contains(pos)) {
+                    if (pendingForInvalidation.contains(pos)) {
                         onChunkUnload(terrain, pos);
                         pendingForInvalidation.remove(pos);
                     }
@@ -82,7 +82,7 @@ public class WorldTerrainState //TODO INTERFACE
     }
 
     public void onChunkUnload(PhysicsWorldTerrain terrain, VerticalChunkPos pos) {
-        if(isLoadedAnywhere(pos)) {
+        if (isLoadedAnywhere(pos)) {
             pendingForInvalidation.add(pos);
         } else {
             ChunkLoadingTicket ticket = terrain.removeTicket(pos); //Will cancel current loading processes

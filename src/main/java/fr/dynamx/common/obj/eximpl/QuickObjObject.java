@@ -23,19 +23,20 @@ import java.util.Map;
 
 import static fr.dynamx.common.DynamXMain.log;
 
-public class QuickObjObject implements IObjObject
-{
+public class QuickObjObject implements IObjObject {
     // Use THIS instead of GlStateManager, it has weird issues due to last bind texture memory and display lists
     private static int bindTexture;
+
     /**
      * Binds the texture, if not already bound
      */
     private static void bindTexture(int id) {
-        if(id != bindTexture) {
+        if (id != bindTexture) {
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, id);
             bindTexture = id;
         }
     }
+
     /**
      * Resets memory of last bind texture
      */
@@ -86,10 +87,10 @@ public class QuickObjObject implements IObjObject
 
     @Override
     public void createList(TextureData useDefault, TextureData textureData, ObjModelClient model, boolean logIfNotFound) {
-        if(!isMaterialValid(model, mesh.materials[0]))
+        if (!isMaterialValid(model, mesh.materials[0]))
             return;
         boolean isCustom = textureData.getId() == 0; //0 is the default, base texture
-        if(!isCustom) {
+        if (!isCustom) {
             for (Material m : mesh.materials) {
                 if (m.diffuseTexture.containsKey(textureData.getName())) {
                     isCustom = true;
@@ -97,10 +98,9 @@ public class QuickObjObject implements IObjObject
                 }
             }
         }
-        if(isCustom)
-        {
+        if (isCustom) {
             // Create an empty display list
-            int id =  GlStateManager.glGenLists(1);
+            int id = GlStateManager.glGenLists(1);
             // Start the compilation of the list, this will fill the list with every vertex rendered onwards
             GlStateManager.glNewList(id, GL11.GL_COMPILE);
             //Do render
@@ -109,21 +109,19 @@ public class QuickObjObject implements IObjObject
             GlStateManager.glEndList();
             modelDisplayList.put(textureData.getId(), id);
             //log.info("Compile list for "+textureData+" (default is "+useDefault+") for part "+getName()+" of "+model.getLocation());
-        }
-        else
-        {
-            if(logIfNotFound)
-                log.error("Failed to find custom texture for skin "+textureData.getName()+" of "+model.getLocation()+" in part "+getName());
+        } else {
+            if (logIfNotFound)
+                log.error("Failed to find custom texture for skin " + textureData.getName() + " of " + model.getLocation() + " in part " + getName());
             modelDisplayList.put(textureData.getId(), modelDisplayList.get(useDefault.getId()));
         }
     }
 
     @Override
     public void createDefaultList(ObjModelClient model) {
-        if(!isMaterialValid(model, mesh.materials[0]))
+        if (!isMaterialValid(model, mesh.materials[0]))
             return;
         // Create an empty display list
-        int id =  GlStateManager.glGenLists(1);
+        int id = GlStateManager.glGenLists(1);
         // Start the compilation of the list, this will fill the list with every vertex rendered onwards
         GlStateManager.glNewList(id, GL11.GL_COMPILE);
         //Do render
@@ -136,14 +134,13 @@ public class QuickObjObject implements IObjObject
 
     @Override
     public void render(ObjModelClient model, byte textureDataId) {
-        if(mesh.materials.length == 0 || !isMaterialValid(model, mesh.materials[0]))
+        if (mesh.materials.length == 0 || !isMaterialValid(model, mesh.materials[0]))
             return;
-        if(!modelDisplayList.containsKey(textureDataId)) {
+        if (!modelDisplayList.containsKey(textureDataId)) {
             GlStateManager.color(1, 0, 0);
             GlStateManager.callList(modelDisplayList.get((byte) 0));
             GlStateManager.color(1, 1, 1);
-        }
-        else
+        } else
             GlStateManager.callList(modelDisplayList.get(textureDataId));
         //GL11.glBindTexture(GL11.GL_TEXTURE_2D, Minecraft.getMinecraft().getTextureMapBlocks().getGlTextureId());
         GlStateManager.bindTexture(Minecraft.getMinecraft().getTextureMapBlocks().getGlTextureId()); //Confirm to mc that used texture has changed
@@ -152,6 +149,7 @@ public class QuickObjObject implements IObjObject
     private String getExistingTexture(Material material, String first, String second) {
         return material.diffuseTexture.containsKey(first) ? first : material.diffuseTexture.containsKey(second) ? second : "Default";
     }
+
     /**
      * Model is assumed to be not empty
      */
@@ -168,10 +166,10 @@ public class QuickObjObject implements IObjObject
         bind = mesh.materials[0];
         String bindName = getExistingTexture(mesh.materials[0], textureName, useDefault);
         MaterialTexture materialMultipleTextures = mesh.materials[0].diffuseTexture.get(bindName);
-        if(materialMultipleTextures!=null) {
+        if (materialMultipleTextures != null) {
             bindTexture(mesh.materials[0].diffuseTexture.get(bindName).getGlTextureId());
-        }else{
-            log.error("Failed to load Default texture of " + getName()+" in "+model.getLocation()+" in material " + mesh.materials[0].getName());
+        } else {
+            log.error("Failed to load Default texture of " + getName() + " in " + model.getLocation() + " in material " + mesh.materials[0].getName());
         }
         int[] indices = mesh.indices;
         Vertex[] vertices = mesh.vertices;
@@ -185,17 +183,17 @@ public class QuickObjObject implements IObjObject
             Vertex v1 = vertices[i1];
             Vertex v2 = vertices[i2];
 
-            if (isMaterialValid(model, mesh.materials[i/3]) && mesh.materials[i / 3] != bind) {
+            if (isMaterialValid(model, mesh.materials[i / 3]) && mesh.materials[i / 3] != bind) {
                 bind = mesh.materials[i / 3];
                 //System.out.println("Bind material " + bind.getName() + " " + bind.diffuseTex + " " + bind.diffuseTexture + " in model " + this.filename);
                 if (drawing)
                     tess.draw();
-                bindName = getExistingTexture(mesh.materials[i/3], textureName, useDefault);
+                bindName = getExistingTexture(mesh.materials[i / 3], textureName, useDefault);
                 materialMultipleTextures = mesh.materials[i / 3].diffuseTexture.get(bindName);
-                if(materialMultipleTextures!=null) {
+                if (materialMultipleTextures != null) {
                     bindTexture(mesh.materials[i / 3].diffuseTexture.get(bindName).getGlTextureId());
-                }else{
-                    log.error("Failed to load Default texture of " + getName()+" in "+model.getLocation()+" in material " + mesh.materials[i / 3].getName());
+                } else {
+                    log.error("Failed to load Default texture of " + getName() + " in " + model.getLocation() + " in material " + mesh.materials[i / 3].getName());
                 }
                 begining = true;
             }
@@ -214,14 +212,14 @@ public class QuickObjObject implements IObjObject
     }
 
     private boolean isMaterialValid(ObjModelClient model, Material material) {
-        if(material == null)
+        if (material == null)
             return false;
-        if(material.getName().equals("none")) //BlockBench uses "none" materials, this is a bug
+        if (material.getName().equals("none")) //BlockBench uses "none" materials, this is a bug
         {
-            if(!model.hasNoneMaterials) {
+            if (!model.hasNoneMaterials) {
                 log.error("Invalid object " + getName() + " in model " + model.getLocation() + " : uses 'none' material of BlockBench");
                 DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.MODEL, model.getCustomTextures() != null ? model.getCustomTextures().getPackName() : "Non-pack model", model.getLocation().toString(),
-                        "Invalid object " + getName() +" : uses 'none' material of BlockBench", ErrorTrackingService.TrackedErrorLevel.LOW);
+                        "Invalid object " + getName() + " : uses 'none' material of BlockBench", ErrorTrackingService.TrackedErrorLevel.LOW);
             }
             model.hasNoneMaterials = true;
             return false;

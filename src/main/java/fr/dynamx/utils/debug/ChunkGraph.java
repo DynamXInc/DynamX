@@ -25,6 +25,7 @@ public class ChunkGraph {
     public static void addToGrah(VerticalChunkPos pos, ChunkActions action, ActionLocation location, ChunkLoadingTicket ticket) {
         addToGrah(pos, action, location, null, ticket.toString());
     }
+
     public static void addToGrah(VerticalChunkPos pos, ChunkActions action, ActionLocation location, ChunkCollisions chunk, String info) {
         try {
             if ((chunk == null || chunk instanceof DebugChunkCollisions) && ((LISTEN == 0 && DynamXConfig.enableDebugTerrainManager) || LISTEN == 2 || (LISTEN == 1 && DynamXConfig.chunkDebugPoses.contains(pos)))) {
@@ -36,7 +37,7 @@ public class ChunkGraph {
                 }
 
                 graphs.get(pos).actions.add(new HistoryEntry(action, location, System.currentTimeMillis(), chunk == null ? null : ((DebugChunkCollisions) chunk).getId(), info));
-                if(LISTEN == 0) {
+                if (LISTEN == 0) {
                     while (graphs.get(pos).actions.size() > 25) { //TODOOLD DISABLE THIS SO EXPENSIVE THING
                         graphs.get(pos).actions.remove(0);
                     }

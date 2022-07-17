@@ -18,23 +18,23 @@ import io.netty.buffer.Unpooled;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 
-public class UdpClientNetworkHandler implements IDnxNetworkHandler
-{
+public class UdpClientNetworkHandler implements IDnxNetworkHandler {
     private boolean authed;
     private final String hash;
 
     public final String getHash() {
         return this.hash;
     }
+
     public boolean isAuthed() {
         return this.authed;
     }
+
     void setAuthed(boolean authed) {
         this.authed = authed;
     }
@@ -55,7 +55,7 @@ public class UdpClientNetworkHandler implements IDnxNetworkHandler
     public void authenticate() {
         this.setAuthed(false);
         this.sendPacket(new UDPClientAuthenticationPacket(hash));
-        if(DynamXConfig.udpDebug)
+        if (DynamXConfig.udpDebug)
             DynamXMain.log.info("[UDP-DEBUG] Auth rq sent");
     }
 
@@ -63,7 +63,7 @@ public class UdpClientNetworkHandler implements IDnxNetworkHandler
         DynamXMain.log.info("Successfully authenticated with udp server.");
         this.setAuthed(true);
 
-        if(DynamXConfig.syncPacks) {
+        if (DynamXConfig.syncPacks) {
             DynamXMain.log.debug("Requesting pack sync...");
             DynamXContext.getNetwork().sendToServer(new MessagePacksHashs(PackSyncHandler.getObjects()));
         }
@@ -78,13 +78,13 @@ public class UdpClientNetworkHandler implements IDnxNetworkHandler
             packet.write(packetBuffer);
             byte[] data = packetBuffer.array();
 
-            if(DynamXConfig.udpDebug)
-                DynamXMain.log.info("Send packet with size "+data.length);
-            if(data.length > 512) { //512 is reasonable when sent from client
-                if(warningThreshold == 0)
+            if (DynamXConfig.udpDebug)
+                DynamXMain.log.info("Send packet with size " + data.length);
+            if (data.length > 512) { //512 is reasonable when sent from client
+                if (warningThreshold == 0)
                     DynamXMain.log.warn("[UDP] Packet with id " + packet.id() + " is too large, reduce the amount of data to 512 bytes at max !");
                 warningThreshold++;
-                if(warningThreshold > 40)
+                if (warningThreshold > 40)
                     warningThreshold = 0;
             }
             try {
@@ -92,8 +92,7 @@ public class UdpClientNetworkHandler implements IDnxNetworkHandler
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-        else
+        } else
             DynamXMain.log.error("Cannot send packet : socket closed");
     }
 
@@ -120,20 +119,20 @@ public class UdpClientNetworkHandler implements IDnxNetworkHandler
             DatagramPacket p = new DatagramPacket(packetBuffer, packetBuffer.length);
 
             try {
-                if(DynamXConfig.udpDebug)
+                if (DynamXConfig.udpDebug)
                     DynamXMain.log.info("Receiving...");
                 this.datagramSocket.receive(p);
-                if(DynamXConfig.udpDebug)
-                    DynamXMain.log.info("Received length "+p.getLength());
+                if (DynamXConfig.udpDebug)
+                    DynamXMain.log.info("Received length " + p.getLength());
                 this.handler.packetQueue.offer(p.getData());
 
                 synchronized (this.handler) {
                     this.handler.notify();
-                    if(DynamXConfig.udpDebug)
+                    if (DynamXConfig.udpDebug)
                         DynamXMain.log.info("Notified handler");
                 }
             } catch (SocketException e) {
-                if(e.getMessage().contains("socket closed"))
+                if (e.getMessage().contains("socket closed"))
                     DynamXMain.log.warn("UDP socket closed unexpectedly");
                 else
                     DynamXMain.log.fatal("UDP connection exception", e);
@@ -157,12 +156,10 @@ public class UdpClientNetworkHandler implements IDnxNetworkHandler
 
     @Override
     public <T> void sendPacket(IDnxPacket packet, EnumPacketTarget<T> targetType, @Nullable T target) {
-        if(targetType == EnumPacketTarget.SERVER)
-        {
+        if (targetType == EnumPacketTarget.SERVER) {
             //System.out.println("Sending packet "+packet);
             sendPacket(new EncapsulatedUDPPacket(packet));
-        }
-        else
+        } else
             throw new IllegalArgumentException("Cannot send a packet to another client, from a client !");
     }
 

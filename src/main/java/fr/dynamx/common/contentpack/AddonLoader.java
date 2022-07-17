@@ -26,19 +26,16 @@ import static fr.dynamx.common.DynamXMain.log;
  *
  * @see DynamXAddon
  */
-public class AddonLoader
-{
+public class AddonLoader {
     /**
      * Loaded addons
      */
     private static final Map<String, AddonInfo> addons = new HashMap<>();
 
-    protected static void discoverAddons(FMLConstructionEvent event)
-    {
+    protected static void discoverAddons(FMLConstructionEvent event) {
         Set<ASMDataTable.ASMData> modData = event.getASMHarvestedData().getAll(DynamXAddon.class.getName());
-        for(ASMDataTable.ASMData data : modData)
-        {
-            if(canRunOn(data.getAnnotationInfo().get("sides"), event.getSide())) {
+        for (ASMDataTable.ASMData data : modData) {
+            if (canRunOn(data.getAnnotationInfo().get("sides"), event.getSide())) {
                 String name = data.getClassName();
                 try {
                     Class<?> addon = Class.forName(data.getClassName());
@@ -61,7 +58,7 @@ public class AddonLoader
                         throw new IllegalArgumentException("Addon class " + name + " (" + data.getClassName() + ") with not @AddonEventSubscriber init method");
                 } catch (Exception e) {
                     log.error("Addon " + name + " cannot be loaded !", e);
-                    DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.INIT, "Addon "+name, "Cannot load addon " + name+" contained in class "+data.getClassName(), e, ErrorTrackingService.TrackedErrorLevel.FATAL);
+                    DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.INIT, "Addon " + name, "Cannot load addon " + name + " contained in class " + data.getClassName(), e, ErrorTrackingService.TrackedErrorLevel.FATAL);
                 }
             }
         }
@@ -73,10 +70,10 @@ public class AddonLoader
      * @param addonSides annotation data
      */
     private static boolean canRunOn(Object addonSides, Side current) {
-        if(addonSides == null)
+        if (addonSides == null)
             return true; //default behavior
         for (ModAnnotation.EnumHolder s : (Iterable<ModAnnotation.EnumHolder>) addonSides) {
-            if(s.getValue().equalsIgnoreCase(current.name()))
+            if (s.getValue().equalsIgnoreCase(current.name()))
                 return true;
         }
         return false;
@@ -85,11 +82,10 @@ public class AddonLoader
     /**
      * Initializes all addons (discovered in init method)
      */
-    public static void initAddons()
-    {
+    public static void initAddons() {
         ProgressManager.ProgressBar bar = ProgressManager.push("Loading DynamX addons", 1);
         bar.step("Initialize addons");
-        for(AddonInfo addon : getAddons().values()) {
+        for (AddonInfo addon : getAddons().values()) {
             try {
                 Optional<ModContainer> container = Loader.instance().getActiveModList().stream().filter(p -> p.getModId().equals(addon.getModId())).findFirst();
                 ModContainer current = Loader.instance().activeModContainer();
@@ -97,11 +93,11 @@ public class AddonLoader
                 addon.initAddon();
                 container.ifPresent(modContainer -> Loader.instance().setActiveModContainer(current));
             } catch (Exception e) {
-                log.error("Addon "+addon.toString()+" cannot be initialized !", e);
-                DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.INIT, "Addon "+addon.toString(), "Cannot initialize "+addon.toString(), e, ErrorTrackingService.TrackedErrorLevel.FATAL);
+                log.error("Addon " + addon.toString() + " cannot be initialized !", e);
+                DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.INIT, "Addon " + addon, "Cannot initialize " + addon, e, ErrorTrackingService.TrackedErrorLevel.FATAL);
             }
         }
-        log.info("Loaded addons are "+ getAddons().values().toString());
+        log.info("Loaded addons are " + getAddons().values());
         ProgressManager.pop(bar);
     }
 

@@ -58,12 +58,11 @@ public class DynamXItemArmor<T extends ArmorObject<?>> extends ItemArmor impleme
      */
     public DynamXItemArmor(String modid, String itemName, String model, ArmorMaterial material, EntityEquipmentSlot armorType) {
         super(material, 0, armorType);
-        if(modid.contains("builtin_mod_")) { //Backward-compatibility
+        if (modid.contains("builtin_mod_")) { //Backward-compatibility
             this.armorInfo = (T) DynamXObjectLoaders.ARMORS.addBuiltinObject(this, modid, itemName);
             modid = modid.replace("builtin_mod_", "");
-        }
-        else {
-            this.armorInfo = (T) DynamXObjectLoaders.ARMORS.addBuiltinObject(this, "dynx."+modid, itemName);
+        } else {
+            this.armorInfo = (T) DynamXObjectLoaders.ARMORS.addBuiltinObject(this, "dynx." + modid, itemName);
         }
         this.armorInfo.setModel(model);
         armorInfo.setDescription("Builtin " + modid + "'s armor");
@@ -104,7 +103,7 @@ public class DynamXItemArmor<T extends ArmorObject<?>> extends ItemArmor impleme
 
     @Override
     public String getTranslationKey(ItemStack stack) {
-        if(stack.getMetadata() != 0 && textureNum > 1) {
+        if (stack.getMetadata() != 0 && textureNum > 1) {
             return super.getTranslationKey(stack) + "_" + getInfo().getTexturesFor(null).get((byte) stack.getMetadata()).getName().toLowerCase();
         }
         return super.getTranslationKey(stack);

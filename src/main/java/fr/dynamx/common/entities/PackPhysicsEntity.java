@@ -25,12 +25,11 @@ import net.minecraft.world.World;
 /**
  * Base implementation for all pack-based entities
  *
+ * @param <T> The physics handler type
  * @see IPhysicsModule
  * @see PackEntityPhysicsHandler For the physics implementation
- * @param <T> The physics handler type
  */
-public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>, A extends IPhysicsPackInfo> extends ModularPhysicsEntity<T> implements IMovableModuleContainer
-{
+public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>, A extends IPhysicsPackInfo> extends ModularPhysicsEntity<T> implements IMovableModuleContainer {
     private static final DataParameter<String> INFO_NAME = EntityDataManager.createKey(PackPhysicsEntity.class, DataSerializers.STRING);
     private static final DataParameter<Integer> METADATA = EntityDataManager.createKey(PackPhysicsEntity.class, DataSerializers.VARINT);
     private int lastMetadata = -1;
@@ -63,10 +62,9 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
     @Override
     public boolean initEntityProperties() {
         packInfo = createInfo(getInfoName());
-        if(packInfo == null)
-            DynamXMain.log.warn("Failed to find info of "+this+". Should be "+getInfoName());
-        if(packInfo != null)
-        {
+        if (packInfo == null)
+            DynamXMain.log.warn("Failed to find info of " + this + ". Should be " + getInfoName());
+        if (packInfo != null) {
             return super.initEntityProperties();
         }
         return false;
@@ -76,7 +74,7 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
     protected void createModules(ModuleListBuilder modules) {
         moduleList.add(jointsHandler);
         moduleList.add(movableModule = new MovableModule(this));
-        movableModule.initSubModules(modules,this);
+        movableModule.initSubModules(modules, this);
     }
 
     @Override
@@ -102,7 +100,7 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
             return;
         }
         super.onUpdate();
-        if(world.isRemote && getMetadata() != lastMetadata) //Metadata has been sync, so update texture
+        if (world.isRemote && getMetadata() != lastMetadata) //Metadata has been sync, so update texture
         {
             lastMetadata = getMetadata();
             entityTextureID = (byte) getMetadata();
@@ -114,7 +112,7 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
      * Ray-traces to get hit part when interacting with the entity
      */
     public InteractivePart<?, ?> getHitPart(Entity entity) {
-        if(getPackInfo() != null) {
+        if (getPackInfo() != null) {
             Vec3d lookVec = entity.getLook(1.0F);
             Vec3d hitVec = entity.getPositionVector().add(0, entity.getEyeHeight(), 0);
             InteractivePart<?, ?> nearest = null;
@@ -152,7 +150,8 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
 
     /**
      * The texture id depends on the entity's metadata <br>
-     *     If -1 is returned, the entity will not be rendered
+     * If -1 is returned, the entity will not be rendered
+     *
      * @return The texture id to use for drawing chassis
      */
     public byte getEntityTextureID() {

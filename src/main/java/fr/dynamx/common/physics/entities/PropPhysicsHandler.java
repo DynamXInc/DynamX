@@ -9,7 +9,6 @@ import fr.dynamx.api.physics.EnumBulletShapeType;
 import fr.dynamx.common.contentpack.type.objects.PropObject;
 import fr.dynamx.common.entities.PropsEntity;
 import fr.dynamx.utils.optimization.QuaternionPool;
-import fr.dynamx.utils.physics.DynamXPhysicsHelper;
 
 public class PropPhysicsHandler<T extends PropsEntity<?>> extends PackEntityPhysicsHandler<PropObject<?>, T> {
 
@@ -32,7 +31,7 @@ public class PropPhysicsHandler<T extends PropsEntity<?>> extends PackEntityPhys
         rigidBody.setSleepingThresholds(0.2f, 1);
         rigidBody.setDamping(packInfo.getDampingFactor(), packInfo.getDampingFactor());
         rigidBody.setRestitution(packInfo.getRestitutionFactor());
-        if(packInfo.isCCDEnabled()){
+        if (packInfo.isCCDEnabled()) {
             rigidBody.setCcdMotionThreshold(0.1f);
             rigidBody.setCcdSweptSphereRadius(0.1f);
         }

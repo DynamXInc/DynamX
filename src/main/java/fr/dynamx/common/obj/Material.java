@@ -6,8 +6,7 @@ import org.lwjgl.util.vector.Vector3f;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Material
-{
+public class Material {
     private final String name;
     public Vector3f diffuseColor;
     public Vector3f ambientColor;

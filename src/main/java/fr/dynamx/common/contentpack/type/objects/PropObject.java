@@ -36,15 +36,15 @@ public class PropObject<T extends BlockObject<?>> extends AbstractProp<T> implem
     @PackFileProperty(configNames = "CenterOfGravityOffset", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F)
     private Vector3f centerOfMass;
     @PackFileProperty(configNames = "SpawnOffset", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false, defaultValue = "0 0.65 0")
-    private Vector3f spawnOffset = new Vector3f(0, 0.65f, 0);
+    private final Vector3f spawnOffset = new Vector3f(0, 0.65f, 0);
     @PackFileProperty(configNames = "ContinuousCollisionDetection", required = false, defaultValue = "false")
     private boolean isCCDEnabled;
     @PackFileProperty(configNames = "Friction", required = false, defaultValue = "0.5")
-    private float friction = 0.5f;
+    private final float friction = 0.5f;
     @PackFileProperty(configNames = "Margin", required = false, defaultValue = "0.04")
-    private float margin = 0.04f;
+    private final float margin = 0.04f;
     @PackFileProperty(configNames = "DespawnTime", required = false, defaultValue = "\"-1\" (disabled)")
-    private float despawnTime = -1;
+    private final float despawnTime = -1;
     @PackFileProperty(configNames = "Damping", required = false, defaultValue = "0")
     private float dampingFactor;
     @PackFileProperty(configNames = "Bounciness", required = false, defaultValue = "0")
@@ -102,7 +102,7 @@ public class PropObject<T extends BlockObject<?>> extends AbstractProp<T> implem
             super.generateShape();
         } else {
             compoundCollisionShape = owner.compoundCollisionShape;
-            for(MutableBoundingBox blockBox : owner.getCollisionBoxes()) {
+            for (MutableBoundingBox blockBox : owner.getCollisionBoxes()) {
                 MutableBoundingBox propBox = new MutableBoundingBox(blockBox);
                 propBox.offset(-0.5, -0.5f, -0.5);
                 getCollisionBoxes().add(propBox);
@@ -184,6 +184,6 @@ public class PropObject<T extends BlockObject<?>> extends AbstractProp<T> implem
 
     @Override
     public String toString() {
-        return "PropObject named "+getFullName();
+        return "PropObject named " + getFullName();
     }
 }

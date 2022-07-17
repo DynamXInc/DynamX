@@ -18,7 +18,6 @@ import fr.dynamx.common.entities.vehicles.TrailerEntity;
 import fr.dynamx.common.handlers.TaskScheduler;
 import fr.dynamx.common.items.ItemProps;
 import fr.dynamx.common.network.packets.MessageDebugRequest;
-import fr.dynamx.common.network.packets.MessagePlayerToRagdoll;
 import fr.dynamx.common.physics.joints.JointHandlerRegistry;
 import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.DynamXUtils;
@@ -45,8 +44,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class WrenchMode
-{
+public class WrenchMode {
     private static final List<WrenchMode> WRENCH_MODES = new ArrayList<>();
 
     public static final WrenchMode NONE = new WrenchMode("None", TextFormatting.RED + "Wrench disabled");
@@ -57,12 +55,12 @@ public class WrenchMode
     public static final WrenchMode LAUNCH_ENTITIES = new WrenchMode("Launch Entities", TextFormatting.GOLD + "Wrench mode set to launch entities") {
         @Override
         public void onWrenchRightClick(EntityPlayer playerIn, EnumHand handIn) {
-            if(!playerIn.world.isRemote) {
+            if (!playerIn.world.isRemote) {
                 ItemStack itemOffhand = playerIn.getHeldItemOffhand();
                 Item item = itemOffhand.getItem();
                 if (item instanceof ItemProps) {
                     PropsEntity<?> spawnEntity = ((ItemProps<?>) item).getSpawnEntity(playerIn.world, playerIn,
-                            Vector3fPool.get(playerIn.posX, playerIn.posY+1.25, playerIn.posZ), playerIn.rotationYaw % 360.0F, item.getMetadata(itemOffhand));
+                            Vector3fPool.get(playerIn.posX, playerIn.posY + 1.25, playerIn.posZ), playerIn.rotationYaw % 360.0F, item.getMetadata(itemOffhand));
                     playerIn.world.spawnEntity(spawnEntity);
                     spawnEntity.setPhysicsInitCallback((modularEntity, physicsHandler) -> {
                         physicsHandler.setLinearVelocity(DynamXUtils.toVector3f(playerIn.getLookVec()).multLocal(20));
@@ -100,13 +98,17 @@ public class WrenchMode
         return message;
     }
 
-    public void onWrenchLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {}
+    public void onWrenchLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
+    }
 
-    public void onWrenchRightClick(EntityPlayer playerIn, EnumHand handIn) {}
+    public void onWrenchRightClick(EntityPlayer playerIn, EnumHand handIn) {
+    }
 
-    public void onWrenchRightClickClient(EntityPlayer playerIn, EnumHand handIn) {}
+    public void onWrenchRightClickClient(EntityPlayer playerIn, EnumHand handIn) {
+    }
 
-    public void onInteractWithEntity(EntityPlayer player, PhysicsEntity<?> targetEntity, boolean isSneaking) {}
+    public void onInteractWithEntity(EntityPlayer player, PhysicsEntity<?> targetEntity, boolean isSneaking) {
+    }
 
     public static List<WrenchMode> getWrenchModes() {
         return WRENCH_MODES;
@@ -119,15 +121,15 @@ public class WrenchMode
             l = 0;
         }
         s.getTagCompound().setInteger("mode", l);
-        if(!player.capabilities.isCreativeMode) {
+        if (!player.capabilities.isCreativeMode) {
             boolean allowed = false;
             for (int i = 0; i < DynamXConfig.allowedWrenchModes.length; i++) {
-                if(DynamXConfig.allowedWrenchModes[i] == l) {
+                if (DynamXConfig.allowedWrenchModes[i] == l) {
                     allowed = true;
                     break;
                 }
             }
-            if(!allowed) {
+            if (!allowed) {
                 switchMode(player, s);
                 return;
             }
@@ -141,15 +143,15 @@ public class WrenchMode
             mode = 0;
         }
         s.getTagCompound().setInteger("mode", mode);
-        if(!player.capabilities.isCreativeMode) {
+        if (!player.capabilities.isCreativeMode) {
             boolean allowed = false;
             for (int i = 0; i < DynamXConfig.allowedWrenchModes.length; i++) {
-                if(DynamXConfig.allowedWrenchModes[i] == mode) {
+                if (DynamXConfig.allowedWrenchModes[i] == mode) {
                     allowed = true;
                     break;
                 }
             }
-            if(!allowed) {
+            if (!allowed) {
                 switchMode(player, s);
                 return;
             }
@@ -160,12 +162,12 @@ public class WrenchMode
     public static void sendWrenchMode(WrenchMode mode) {
         int index = 0;
         for (int i = 0; i < WRENCH_MODES.size(); i++) {
-            if(WRENCH_MODES.get(i) == mode) {
+            if (WRENCH_MODES.get(i) == mode) {
                 index = i;
                 break;
             }
         }
-        DynamXContext.getNetwork().sendToServer(new MessageDebugRequest(-15817-index));
+        DynamXContext.getNetwork().sendToServer(new MessageDebugRequest(-15817 - index));
     }
 
     public static WrenchMode getCurrentMode(ItemStack s) {
@@ -206,29 +208,27 @@ public class WrenchMode
                 BulletShapeType<?> shapeType = (BulletShapeType<?>) result.hitBody.getUserObject();
 
                 ItemStack itemStack = player.getHeldItemMainhand();
-                if(!ItemWrench.hasEntity(itemStack)){
-                    if(!shapeType.getType().isTerrain()) {
+                if (!ItemWrench.hasEntity(itemStack)) {
+                    if (!shapeType.getType().isTerrain()) {
                         MovableModule movableModule = ((PhysicsEntity<?>) shapeType.getObjectIn()).getModuleByType(MovableModule.class);
                         movableModule.attachObjects.initObject(result.hitBody, result.hitPos, JointEnd.A);
                         ItemWrench.writeEntity(itemStack, (PhysicsEntity<?>) shapeType.getObjectIn());
-                    }else{
+                    } else {
                         player.sendMessage(new TextComponentString("§cYou must first click on an entity"));
                     }
-                }else{
+                } else {
                     PhysicsEntity<?> containedEntity = ItemWrench.getEntity(itemStack, player.world);
-                    if(containedEntity != null) {
+                    if (containedEntity != null) {
                         AttachObjects attachObjects = containedEntity.getModuleByType(MovableModule.class).attachObjects;
                         if (!shapeType.getType().isTerrain()) {
                             attachObjects.initObject(result.hitBody, result.hitPos, JointEnd.B);
-                        }else if(!shouldWeldObjects){
+                        } else if (!shouldWeldObjects) {
                             // Single ended joint
                             attachObjects.initObject((PhysicsRigidBody) containedEntity.physicsHandler.getCollisionObject(), result.hitPos, JointEnd.A);
                         }
-                        if(shapeType.getType().isBulletEntity())
-                        {
+                        if (shapeType.getType().isBulletEntity()) {
                             DynamXContext.getPhysicsWorld().schedule(() -> JointHandlerRegistry.createJointWithOther(MovableModule.JOINT_NAME, containedEntity, (PhysicsEntity<?>) shapeType.getObjectIn(), (byte) (shouldWeldObjects ? 2 : 1)));
-                        }
-                        else {
+                        } else {
                             DynamXContext.getPhysicsWorld().schedule(() -> JointHandlerRegistry.createJointWithSelf(MovableModule.JOINT_NAME, containedEntity, (byte) (shouldWeldObjects ? 2 : 1)));
                         }
                         ItemWrench.removeEntity(itemStack);
@@ -291,12 +291,12 @@ public class WrenchMode
         @Override
         public void onWrenchRightClickClient(EntityPlayer playerIn, EnumHand handIn) {
             super.onWrenchRightClick(playerIn, handIn);
-            ClientDynamXUtils.playerToRagdoll(playerIn, new Vector3f(20,20,20));
+            ClientDynamXUtils.playerToRagdoll(playerIn, new Vector3f(20, 20, 20));
         }
 
         @Override
         public void onInteractWithEntity(EntityPlayer context, PhysicsEntity<?> physicsEntity, boolean isSneaking) {
-            if(isSneaking) {
+            if (isSneaking) {
                 NBTTagCompound tag = new NBTTagCompound();
                 context.sendMessage(new TextComponentString("Respawning !"));
                 physicsEntity.writeToNBT(tag);
@@ -312,7 +312,8 @@ public class WrenchMode
                             context.world.spawnEntity(e);
                         }
                     });
-                } catch (InstantiationException | IllegalAccessException | InvocationTargetException instantiationException) {
+                } catch (InstantiationException | IllegalAccessException |
+                         InvocationTargetException instantiationException) {
                     context.sendMessage(new TextComponentString(TextFormatting.RED + " An error occurred"));
                     DynamXMain.log.fatal("Cannot respawn entity " + physicsEntity, instantiationException);
                 }

@@ -11,8 +11,7 @@ import java.util.Map;
 /**
  * A simple home-made thread safe profiler
  */
-public class Profiler
-{
+public class Profiler {
     private static boolean isProfilingOn;
     private static final ThreadLocal<Profiler> LOCAL_PROFILER = ThreadLocal.withInitial(Profiler::new);
 
@@ -35,49 +34,48 @@ public class Profiler
         return isActive;
     }
 
-    public void start(Profiles profile)
-    {
-        if(isActive) {
+    public void start(Profiles profile) {
+        if (isActive) {
             if (!data.containsKey(profile))
                 data.put(profile, new ProfilingData(profile));
             data.get(profile).start();
         }
     }
-    public void end(Profiles profile)
-    {
-        if(isActive && data.containsKey(profile))
+
+    public void end(Profiles profile) {
+        if (isActive && data.containsKey(profile))
             data.get(profile).end();
     }
-    public void update()
-    {
-        if(isActive)
+
+    public void update() {
+        if (isActive)
             data.values().forEach(ProfilingData::update);
-        if(isActive && !isProfilingOn)
+        if (isActive && !isProfilingOn)
             reset();
         isActive = isProfilingOn;
     }
-    public List<String> getData()
-    {
+
+    public List<String> getData() {
         List<String> result = new ArrayList<>();
-        data.forEach((p,d) -> {
-            if(!d.isEmpty())
+        data.forEach((p, d) -> {
+            if (!d.isEmpty())
                 result.add(d.toString());
         });
         return result;
     }
-    public void printData(String displayName)
-    {
+
+    public void printData(String displayName) {
         List<String> st = getData();
-        if(!st.isEmpty()) {
-            DynamXMain.log.info("==== "+displayName+" profiling data ====");
+        if (!st.isEmpty()) {
+            DynamXMain.log.info("==== " + displayName + " profiling data ====");
             for (String s : st) {
                 DynamXMain.log.info(s);
             }
             DynamXMain.log.info("========================");
         }
     }
-    public void reset()
-    {
+
+    public void reset() {
         data.values().forEach(ProfilingData::reset);
     }
 
@@ -88,8 +86,7 @@ public class Profiler
         return data.get(profile);
     }
 
-    public enum Profiles
-    {
+    public enum Profiles {
         TICK(),
         STEP_SIMULATION(),
         LOAD_SHAPES(),
@@ -127,8 +124,8 @@ public class Profiler
         SLOPE_CALCULUS,
         ENTITY_COLLISION;
         public final int id;
-        Profiles()
-        {
+
+        Profiles() {
             this.id = lastId;
             lastId++;
         }

@@ -5,7 +5,6 @@ import fr.dynamx.api.obj.IObjObject;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
 import fr.dynamx.common.obj.eximpl.TessellatorModelClient;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.resources.IResource;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;

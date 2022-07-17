@@ -14,8 +14,7 @@ import java.util.List;
 
 import static net.minecraft.command.CommandBase.parseInt;
 
-public class CmdRefreshChunks implements ISubCommand
-{
+public class CmdRefreshChunks implements ISubCommand {
     @Override
     public String getName() {
         return "refresh_chunks";
@@ -23,7 +22,7 @@ public class CmdRefreshChunks implements ISubCommand
 
     @Override
     public String getUsage() {
-        return getName()+" <x1> <y1> <z1> <x2> <y2> <z2> - Updates collisions in the given zone";
+        return getName() + " <x1> <y1> <z1> <x2> <y2> <z2> - Updates collisions in the given zone";
     }
 
     @Override
@@ -54,18 +53,18 @@ public class CmdRefreshChunks implements ISubCommand
             }
             sender.sendMessage(new TextComponentString("Reloaded " + count + " collision chunks"));
         } else
-            throw new WrongUsageException("/dynamx "+getUsage());
+            throw new WrongUsageException("/dynamx " + getUsage());
     }
 
     @Override
     public void getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, BlockPos targetPos, List<String> r) {
-        if(args.length>1 && targetPos != null){
-            if(args.length == 2 || args.length == 5)
-                r.add(""+targetPos.getX());
-            else if(args.length == 3 || args.length == 6)
-                r.add(""+targetPos.getY());
-            else if(args.length == 4 || args.length == 7)
-                r.add(""+targetPos.getZ());
+        if (args.length > 1 && targetPos != null) {
+            if (args.length == 2 || args.length == 5)
+                r.add("" + targetPos.getX());
+            else if (args.length == 3 || args.length == 6)
+                r.add("" + targetPos.getY());
+            else if (args.length == 4 || args.length == 7)
+                r.add("" + targetPos.getZ());
         }
     }
 }

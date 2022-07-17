@@ -374,7 +374,7 @@ public class PhysicsWorldTerrain implements ITerrainManager {
                 }
             } else { //If it's loading, it's iznogood
                 if (TerrainFile.ULTIMATEDEBUG) {
-                    System.out.println("This chunk is still loading " + ticket);
+                    System.out.println("This chunk is still loading, wtf " + ticket);
                     ChunkGraph graph = ChunkGraph.getAt(pos);
                     if (graph != null) {
                         System.out.println("Printing graph " + pos);

@@ -1,6 +1,5 @@
 package fr.dynamx.api.contentpack.registry;
 
-import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
@@ -13,7 +12,6 @@ import net.minecraft.util.SoundEvent;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 import javax.vecmath.Vector2f;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -83,7 +81,7 @@ public class DefinitionType<T> {
     public T getValue(String value) {
         String newValue = value;
         for (PackConstants packConstants : PackConstants.values()) {
-            if(value.contains(packConstants.name())){
+            if (value.contains(packConstants.name())) {
                 newValue = value.replace(packConstants.name(), String.valueOf(packConstants.getValue()));
             }
         }

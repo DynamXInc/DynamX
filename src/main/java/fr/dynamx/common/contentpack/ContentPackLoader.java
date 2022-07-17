@@ -170,10 +170,11 @@ public class ContentPackLoader {
             ACsGuiApi.registerStyleSheetToPreload(new ResourceLocation(DynamXConstants.ID, "css/block_custom.css"));
             ACsGuiApi.registerStyleSheetToPreload(new ResourceLocation(DynamXConstants.ID, "css/dnx_debug.css"));
             ACsGuiApi.registerStyleSheetToPreload(CarController.STYLE);
+            //CssGuiManager.registerStyleSheetToPreload(new ResourceLocation(DynamXMain.ID, "css/main_menu.css"));
             ACsGuiApi.registerStyleSheetToPreload(new ResourceLocation(DynamXConstants.ID, "css/slope_generator.css"));
         } else {
             for (File file : myDir.listFiles()) {
-                if(file.isDirectory() || file.getName().endsWith(".zip") || file.getName().endsWith(PACK_FILE_EXTENSION)) {
+                if (file.isDirectory() || file.getName().endsWith(".zip") || file.getName().endsWith(PACK_FILE_EXTENSION)) {
                     //Add custom ModProtectionSystem repositories
                     protectedResources.put(file.getName(), modProtectionContainer.getParent().loadCustomRepository(modProtectionContainer, file));
                 }

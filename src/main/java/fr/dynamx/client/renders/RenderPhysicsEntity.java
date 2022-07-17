@@ -2,6 +2,7 @@ package fr.dynamx.client.renders;
 
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.events.PhysicsEntityEvent;
+import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.client.renders.model.ObjModelClient;
 import fr.dynamx.common.contentpack.parts.PartSeat;
@@ -9,7 +10,6 @@ import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.utils.client.ClientDynamXUtils;
-import fr.dynamx.utils.debug.ClientDebugSystem;
 import fr.dynamx.utils.debug.renderer.DebugRenderer;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.QuaternionPool;
@@ -103,9 +103,9 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
                 if (appliedRotation != null)
                     GlStateManager.rotate(appliedRotation);
                 //Apply seat rotation
-                if(entity instanceof IModuleContainer.ISeatsContainer) {
+                if (entity instanceof IModuleContainer.ISeatsContainer) {
                     PartSeat seat = ((IModuleContainer.ISeatsContainer) entity).getSeats().getRidingSeat(e);
-                    if(seat != null && seat.getRotation() != null) {
+                    if (seat != null && seat.getRotation() != null) {
                         GlStateManager.rotate(GlQuaternionPool.get(seat.getRotation()));
                     }
                 }

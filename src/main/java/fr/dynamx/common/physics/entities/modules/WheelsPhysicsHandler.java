@@ -14,7 +14,6 @@ import fr.dynamx.common.entities.modules.WheelsModule;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.BaseWheeledVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.wheel.PacejkaMagicFormula;
-import fr.dynamx.common.physics.entities.parts.wheel.SuspensionPhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.wheel.WheelPhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.wheel.WheelState;
 import fr.dynamx.utils.optimization.Vector3fPool;

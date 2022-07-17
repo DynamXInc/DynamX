@@ -14,11 +14,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class MessageMultiPhysicsEntitySync implements IDnxPacket, IMessageHandler<MessageMultiPhysicsEntitySync, IMessage>
-{
+public class MessageMultiPhysicsEntitySync implements IDnxPacket, IMessageHandler<MessageMultiPhysicsEntitySync, IMessage> {
     private Collection<MessagePhysicsEntitySync<?>> syncs;
 
-    public MessageMultiPhysicsEntitySync() {}
+    public MessageMultiPhysicsEntitySync() {
+    }
 
     public MessageMultiPhysicsEntitySync(Collection<MessagePhysicsEntitySync<?>> syncs) {
         this.syncs = syncs;

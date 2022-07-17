@@ -11,26 +11,36 @@ import net.minecraft.util.math.Vec3d;
 import javax.annotation.Nullable;
 import java.io.Serializable;
 
-public class MutableBoundingBox implements Serializable, IShapeInfo
-{
+public class MutableBoundingBox implements Serializable, IShapeInfo {
     //For terrain save, don't touch !
     private static final long serialVersionUID = -9207351705409830894L;
 
-    /** The minimum X coordinate of this bounding box. Guaranteed to always be less than or equal to {@link #maxX}. */
+    /**
+     * The minimum X coordinate of this bounding box. Guaranteed to always be less than or equal to {@link #maxX}.
+     */
     public double minX;
-    /** The minimum Y coordinate of this bounding box. Guaranteed to always be less than or equal to {@link #maxY}. */
+    /**
+     * The minimum Y coordinate of this bounding box. Guaranteed to always be less than or equal to {@link #maxY}.
+     */
     public double minY;
-    /** The minimum Y coordinate of this bounding box. Guaranteed to always be less than or equal to {@link #maxZ}. */
+    /**
+     * The minimum Y coordinate of this bounding box. Guaranteed to always be less than or equal to {@link #maxZ}.
+     */
     public double minZ;
-    /** The maximum X coordinate of this bounding box. Guaranteed to always be greater than or equal to {@link #minX}. */
+    /**
+     * The maximum X coordinate of this bounding box. Guaranteed to always be greater than or equal to {@link #minX}.
+     */
     public double maxX;
-    /** The maximum Y coordinate of this bounding box. Guaranteed to always be greater than or equal to {@link #minY}. */
+    /**
+     * The maximum Y coordinate of this bounding box. Guaranteed to always be greater than or equal to {@link #minY}.
+     */
     public double maxY;
-    /** The maximum Z coordinate of this bounding box. Guaranteed to always be greater than or equal to {@link #minZ}. */
+    /**
+     * The maximum Z coordinate of this bounding box. Guaranteed to always be greater than or equal to {@link #minZ}.
+     */
     public double maxZ;
 
-    public MutableBoundingBox(double x1, double y1, double z1, double x2, double y2, double z2)
-    {
+    public MutableBoundingBox(double x1, double y1, double z1, double x2, double y2, double z2) {
         this.minX = Math.min(x1, x2);
         this.minY = Math.min(y1, y2);
         this.minZ = Math.min(z1, z2);
@@ -38,118 +48,99 @@ public class MutableBoundingBox implements Serializable, IShapeInfo
         this.maxY = Math.max(y1, y2);
         this.maxZ = Math.max(z1, z2);
     }
-    public MutableBoundingBox(Vector3f vec){
+
+    public MutableBoundingBox(Vector3f vec) {
         this(vec.x, vec.y, vec.z, -vec.x, -vec.y, -vec.z);
     }
-    public MutableBoundingBox(BlockPos pos1, BlockPos pos2)
-    {
+
+    public MutableBoundingBox(BlockPos pos1, BlockPos pos2) {
         this(pos1.getX(), pos1.getY(), pos1.getZ(), pos2.getX(), pos2.getY(), pos2.getZ());
     }
-    public MutableBoundingBox(Vec3d min, Vec3d max)
-    {
+
+    public MutableBoundingBox(Vec3d min, Vec3d max) {
         this(min.x, min.y, min.z, max.x, max.y, max.z);
     }
-    public MutableBoundingBox(AxisAlignedBB from)
-    {
+
+    public MutableBoundingBox(AxisAlignedBB from) {
         this(from.minX, from.minY, from.minZ, from.maxX, from.maxY, from.maxZ);
     }
-    public MutableBoundingBox(MutableBoundingBox from)
-    {
+
+    public MutableBoundingBox(MutableBoundingBox from) {
         this(from.minX, from.minY, from.minZ, from.maxX, from.maxY, from.maxZ);
     }
-    public MutableBoundingBox()
-    {
+
+    public MutableBoundingBox() {
         this(0, 0, 0, 0, 0, 0);
     }
 
-    public void setTo(MutableBoundingBox from)
-    {
-        this.minX = from.minX; this.maxX = from.maxX; this.minY = from.minY; this.maxY = from.maxY; this.minZ = from.minZ; this.maxZ = from.maxZ;
-    }
-    public void setTo(AxisAlignedBB from)
-    {
-        this.minX = from.minX; this.maxX = from.maxX; this.minY = from.minY; this.maxY = from.maxY; this.minZ = from.minZ; this.maxZ = from.maxZ;
+    public void setTo(MutableBoundingBox from) {
+        this.minX = from.minX;
+        this.maxX = from.maxX;
+        this.minY = from.minY;
+        this.maxY = from.maxY;
+        this.minZ = from.minZ;
+        this.maxZ = from.maxZ;
     }
 
-    public boolean equals(Object p_equals_1_)
-    {
-        if (this == p_equals_1_)
-        {
+    public void setTo(AxisAlignedBB from) {
+        this.minX = from.minX;
+        this.maxX = from.maxX;
+        this.minY = from.minY;
+        this.maxY = from.maxY;
+        this.minZ = from.minZ;
+        this.maxZ = from.maxZ;
+    }
+
+    public boolean equals(Object p_equals_1_) {
+        if (this == p_equals_1_) {
             return true;
-        }
-        else if(p_equals_1_ instanceof AxisAlignedBB)
-        {
-            AxisAlignedBB axisalignedbb = (AxisAlignedBB)p_equals_1_;
-            if (Double.compare(axisalignedbb.minX, this.minX) != 0)
-            {
+        } else if (p_equals_1_ instanceof AxisAlignedBB) {
+            AxisAlignedBB axisalignedbb = (AxisAlignedBB) p_equals_1_;
+            if (Double.compare(axisalignedbb.minX, this.minX) != 0) {
                 return false;
-            }
-            else if (Double.compare(axisalignedbb.minY, this.minY) != 0)
-            {
+            } else if (Double.compare(axisalignedbb.minY, this.minY) != 0) {
                 return false;
-            }
-            else if (Double.compare(axisalignedbb.minZ, this.minZ) != 0)
-            {
+            } else if (Double.compare(axisalignedbb.minZ, this.minZ) != 0) {
                 return false;
-            }
-            else if (Double.compare(axisalignedbb.maxX, this.maxX) != 0)
-            {
+            } else if (Double.compare(axisalignedbb.maxX, this.maxX) != 0) {
                 return false;
-            }
-            else if (Double.compare(axisalignedbb.maxY, this.maxY) != 0)
-            {
+            } else if (Double.compare(axisalignedbb.maxY, this.maxY) != 0) {
                 return false;
-            }
-            else
-            {
+            } else {
                 return Double.compare(axisalignedbb.maxZ, this.maxZ) == 0;
             }
-        }
-        else if (p_equals_1_ instanceof MutableBoundingBox)
-        {
-            MutableBoundingBox axisalignedbb = (MutableBoundingBox)p_equals_1_;
-            if (Double.compare(axisalignedbb.minX, this.minX) != 0)
-            {
+        } else if (p_equals_1_ instanceof MutableBoundingBox) {
+            MutableBoundingBox axisalignedbb = (MutableBoundingBox) p_equals_1_;
+            if (Double.compare(axisalignedbb.minX, this.minX) != 0) {
                 return false;
-            }
-            else if (Double.compare(axisalignedbb.minY, this.minY) != 0)
-            {
+            } else if (Double.compare(axisalignedbb.minY, this.minY) != 0) {
                 return false;
-            }
-            else if (Double.compare(axisalignedbb.minZ, this.minZ) != 0)
-            {
+            } else if (Double.compare(axisalignedbb.minZ, this.minZ) != 0) {
                 return false;
-            }
-            else if (Double.compare(axisalignedbb.maxX, this.maxX) != 0)
-            {
+            } else if (Double.compare(axisalignedbb.maxX, this.maxX) != 0) {
                 return false;
-            }
-            else if (Double.compare(axisalignedbb.maxY, this.maxY) != 0)
-            {
+            } else if (Double.compare(axisalignedbb.maxY, this.maxY) != 0) {
                 return false;
-            }
-            else
-            {
+            } else {
                 return Double.compare(axisalignedbb.maxZ, this.maxZ) == 0;
             }
         }
         return false;
     }
 
-    public int hashCode()
-    {
+    public int hashCode() {
         long i = Double.doubleToLongBits(this.minX);
-        int j = (int)(i ^ i >>> 32);
+        int j = (int) (i ^ i >>> 32);
         i = Double.doubleToLongBits(this.minY);
-        j = 31 * j + (int)(i ^ i >>> 32);
+        j = 31 * j + (int) (i ^ i >>> 32);
         i = Double.doubleToLongBits(this.minZ);
-        j = 31 * j + (int)(i ^ i >>> 32);
+        j = 31 * j + (int) (i ^ i >>> 32);
         i = Double.doubleToLongBits(this.maxX);
-        j = 31 * j + (int)(i ^ i >>> 32);
+        j = 31 * j + (int) (i ^ i >>> 32);
         i = Double.doubleToLongBits(this.maxY);
-        j = 31 * j + (int)(i ^ i >>> 32);
+        j = 31 * j + (int) (i ^ i >>> 32);
         i = Double.doubleToLongBits(this.maxZ);
-        j = 31 * j + (int)(i ^ i >>> 32);
+        j = 31 * j + (int) (i ^ i >>> 32);
         return j;
     }
 
@@ -189,32 +180,22 @@ public class MutableBoundingBox implements Serializable, IShapeInfo
      * <li>{@link #shrink(double)} - contracts in all directions (like {@link #grow(double)})</li>
      * </ul>
      */
-    public void contract(double x, double y, double z)
-    {
-        if (x < 0.0D)
-        {
+    public void contract(double x, double y, double z) {
+        if (x < 0.0D) {
             minX -= x;
-        }
-        else if (x > 0.0D)
-        {
+        } else if (x > 0.0D) {
             maxX -= x;
         }
 
-        if (y < 0.0D)
-        {
+        if (y < 0.0D) {
             minY -= y;
-        }
-        else if (y > 0.0D)
-        {
+        } else if (y > 0.0D) {
             maxY -= y;
         }
 
-        if (z < 0.0D)
-        {
+        if (z < 0.0D) {
             minZ -= z;
-        }
-        else if (z > 0.0D)
-        {
+        } else if (z > 0.0D) {
             maxZ -= z;
         }
     }
@@ -243,32 +224,22 @@ public class MutableBoundingBox implements Serializable, IShapeInfo
      * <br>
      * This bounding box is modified and will always be equal or greater in volume to this bounding box.
      */
-    public void expand(double x, double y, double z)
-    {
-        if (x < 0.0D)
-        {
+    public void expand(double x, double y, double z) {
+        if (x < 0.0D) {
             minX += x;
-        }
-        else if (x > 0.0D)
-        {
+        } else if (x > 0.0D) {
             maxX += x;
         }
 
-        if (y < 0.0D)
-        {
+        if (y < 0.0D) {
             minY += y;
-        }
-        else if (y > 0.0D)
-        {
+        } else if (y > 0.0D) {
             maxY += y;
         }
 
-        if (z < 0.0D)
-        {
+        if (z < 0.0D) {
             minZ += z;
-        }
-        else if (z > 0.0D)
-        {
+        } else if (z > 0.0D) {
             maxZ += z;
         }
     }
@@ -303,8 +274,7 @@ public class MutableBoundingBox implements Serializable, IShapeInfo
      * <li>{@link #shrink(double)} - contracts in all directions</li>
      * </ul>
      */
-    public void grow(double x, double y, double z)
-    {
+    public void grow(double x, double y, double z) {
         this.minX -= x;
         this.minY -= y;
         this.minZ -= z;
@@ -322,42 +292,32 @@ public class MutableBoundingBox implements Serializable, IShapeInfo
      * If contracting and the amount to contract by is larger than the length of a side, then the side will wrap (still
      * creating a valid AABB - see samples on {@link #grow(double, double, double)}).
      */
-    public void grow(double value)
-    {
+    public void grow(double value) {
         this.grow(value, value, value);
     }
 
     /**
      * Checks if the bounding box intersects with another.
      */
-    public boolean intersects(MutableBoundingBox other)
-    {
+    public boolean intersects(MutableBoundingBox other) {
         return this.intersects(other.minX, other.minY, other.minZ, other.maxX, other.maxY, other.maxZ);
     }
 
-    public boolean intersects(double x1, double y1, double z1, double x2, double y2, double z2)
-    {
+    public boolean intersects(double x1, double y1, double z1, double x2, double y2, double z2) {
         return this.minX < x2 && this.maxX > x1 && this.minY < y2 && this.maxY > y1 && this.minZ < z2 && this.maxZ > z1;
     }
 
     /**
      * Returns if the supplied Vec3D is completely inside the bounding box
      */
-    public boolean contains(Vec3d vec)
-    {
-        if (vec.x > this.minX && vec.x < this.maxX)
-        {
-            if (vec.y > this.minY && vec.y < this.maxY)
-            {
+    public boolean contains(Vec3d vec) {
+        if (vec.x > this.minX && vec.x < this.maxX) {
+            if (vec.y > this.minY && vec.y < this.maxY) {
                 return vec.z > this.minZ && vec.z < this.maxZ;
-            }
-            else
-            {
+            } else {
                 return false;
             }
-        }
-        else
-        {
+        } else {
             return false;
         }
     }
@@ -372,52 +332,45 @@ public class MutableBoundingBox implements Serializable, IShapeInfo
      * If contracting and the amount to contract by is larger than the length of a side, then the side will wrap (still
      * creating a valid AABB - see samples on {@link #grow(double, double, double)}).
      */
-    public void shrink(double value)
-    {
+    public void shrink(double value) {
         this.grow(-value);
     }
 
     @Nullable
-    public RayTraceResult calculateIntercept(Vec3d vecA, Vec3d vecB)
-    {
+    public RayTraceResult calculateIntercept(Vec3d vecA, Vec3d vecB) {
         Vec3d vec3d = this.collideWithXPlane(this.minX, vecA, vecB);
         EnumFacing enumfacing = EnumFacing.WEST;
         Vec3d vec3d1 = this.collideWithXPlane(this.maxX, vecA, vecB);
 
-        if (vec3d1 != null && this.isClosest(vecA, vec3d, vec3d1))
-        {
+        if (vec3d1 != null && this.isClosest(vecA, vec3d, vec3d1)) {
             vec3d = vec3d1;
             enumfacing = EnumFacing.EAST;
         }
 
         vec3d1 = this.collideWithYPlane(this.minY, vecA, vecB);
 
-        if (vec3d1 != null && this.isClosest(vecA, vec3d, vec3d1))
-        {
+        if (vec3d1 != null && this.isClosest(vecA, vec3d, vec3d1)) {
             vec3d = vec3d1;
             enumfacing = EnumFacing.DOWN;
         }
 
         vec3d1 = this.collideWithYPlane(this.maxY, vecA, vecB);
 
-        if (vec3d1 != null && this.isClosest(vecA, vec3d, vec3d1))
-        {
+        if (vec3d1 != null && this.isClosest(vecA, vec3d, vec3d1)) {
             vec3d = vec3d1;
             enumfacing = EnumFacing.UP;
         }
 
         vec3d1 = this.collideWithZPlane(this.minZ, vecA, vecB);
 
-        if (vec3d1 != null && this.isClosest(vecA, vec3d, vec3d1))
-        {
+        if (vec3d1 != null && this.isClosest(vecA, vec3d, vec3d1)) {
             vec3d = vec3d1;
             enumfacing = EnumFacing.NORTH;
         }
 
         vec3d1 = this.collideWithZPlane(this.maxZ, vecA, vecB);
 
-        if (vec3d1 != null && this.isClosest(vecA, vec3d, vec3d1))
-        {
+        if (vec3d1 != null && this.isClosest(vecA, vec3d, vec3d1)) {
             vec3d = vec3d1;
             enumfacing = EnumFacing.SOUTH;
         }
@@ -425,60 +378,51 @@ public class MutableBoundingBox implements Serializable, IShapeInfo
         return vec3d == null ? null : new RayTraceResult(vec3d, enumfacing);
     }
 
-    boolean isClosest(Vec3d p_186661_1_, @Nullable Vec3d p_186661_2_, Vec3d p_186661_3_)
-    {
+    boolean isClosest(Vec3d p_186661_1_, @Nullable Vec3d p_186661_2_, Vec3d p_186661_3_) {
         return p_186661_2_ == null || p_186661_1_.squareDistanceTo(p_186661_3_) < p_186661_1_.squareDistanceTo(p_186661_2_);
     }
 
     @Nullable
-    Vec3d collideWithXPlane(double p_186671_1_, Vec3d p_186671_3_, Vec3d p_186671_4_)
-    {
+    Vec3d collideWithXPlane(double p_186671_1_, Vec3d p_186671_3_, Vec3d p_186671_4_) {
         Vec3d vec3d = p_186671_3_.getIntermediateWithXValue(p_186671_4_, p_186671_1_);
         return vec3d != null && this.intersectsWithYZ(vec3d) ? vec3d : null;
     }
 
     @Nullable
-    Vec3d collideWithYPlane(double p_186663_1_, Vec3d p_186663_3_, Vec3d p_186663_4_)
-    {
+    Vec3d collideWithYPlane(double p_186663_1_, Vec3d p_186663_3_, Vec3d p_186663_4_) {
         Vec3d vec3d = p_186663_3_.getIntermediateWithYValue(p_186663_4_, p_186663_1_);
         return vec3d != null && this.intersectsWithXZ(vec3d) ? vec3d : null;
     }
 
     @Nullable
-    Vec3d collideWithZPlane(double p_186665_1_, Vec3d p_186665_3_, Vec3d p_186665_4_)
-    {
+    Vec3d collideWithZPlane(double p_186665_1_, Vec3d p_186665_3_, Vec3d p_186665_4_) {
         Vec3d vec3d = p_186665_3_.getIntermediateWithZValue(p_186665_4_, p_186665_1_);
         return vec3d != null && this.intersectsWithXY(vec3d) ? vec3d : null;
     }
 
-    public boolean intersectsWithYZ(Vec3d vec)
-    {
+    public boolean intersectsWithYZ(Vec3d vec) {
         return vec.y >= this.minY && vec.y <= this.maxY && vec.z >= this.minZ && vec.z <= this.maxZ;
     }
 
-    public boolean intersectsWithXZ(Vec3d vec)
-    {
+    public boolean intersectsWithXZ(Vec3d vec) {
         return vec.x >= this.minX && vec.x <= this.maxX && vec.z >= this.minZ && vec.z <= this.maxZ;
     }
 
-    public boolean intersectsWithXY(Vec3d vec)
-    {
+    public boolean intersectsWithXY(Vec3d vec) {
         return vec.x >= this.minX && vec.x <= this.maxX && vec.y >= this.minY && vec.y <= this.maxY;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return "box[" + this.minX + ", " + this.minY + ", " + this.minZ + ". Size " + getSize() + "]";
     }
 
-    public MutableBoundingBox offset(Vector3f position)
-    {
-        minX+=position.x;
-        maxX+=position.x;
-        minY+=position.y;
-        maxY+=position.y;
-        minZ+=position.z;
-        maxZ+=position.z;
+    public MutableBoundingBox offset(Vector3f position) {
+        minX += position.x;
+        maxX += position.x;
+        minY += position.y;
+        maxY += position.y;
+        minZ += position.z;
+        maxZ += position.z;
         return this;
     }
 
@@ -502,22 +446,22 @@ public class MutableBoundingBox implements Serializable, IShapeInfo
     }
 
     public MutableBoundingBox offset(double x, double y, double z) {
-        minX+=x;
-        maxX+=x;
-        minY+=y;
-        maxY+=y;
-        minZ+=z;
-        maxZ+=z;
+        minX += x;
+        maxX += x;
+        minY += y;
+        maxY += y;
+        minZ += z;
+        maxZ += z;
         return this;
     }
 
     @Override
     public Vector3f getPosition() {
-        return Vector3fPool.get((float)(minX+maxX)/2, (float)(minY+maxY)/2, (float)(minZ+maxZ)/2);
+        return Vector3fPool.get((float) (minX + maxX) / 2, (float) (minY + maxY) / 2, (float) (minZ + maxZ) / 2);
     }
 
     @Override
     public Vector3f getSize() {
-        return Vector3fPool.get((float)(maxX-minX)/2, (float)(maxY-minY)/2, (float)(maxZ-minZ)/2);
+        return Vector3fPool.get((float) (maxX - minX) / 2, (float) (maxY - minY) / 2, (float) (maxZ - minZ) / 2);
     }
 }

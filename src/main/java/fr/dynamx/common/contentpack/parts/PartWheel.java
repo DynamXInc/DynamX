@@ -14,8 +14,7 @@ import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.AxisAlignedBB;
 
-public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfoBuilder>
-{
+public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfoBuilder> {
     @PackFileProperty(configNames = "IsRight", oldNames = "isRight")
     private boolean isRight;
     @PackFileProperty(configNames = "IsSteerable")
@@ -33,23 +32,23 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
     @PackFileProperty(configNames = "RotationPoint", required = false, type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y)
     private Vector3f rotationPoint;
     @PackFileProperty(configNames = "SuspensionAxis", required = false)
-    private Quaternion suspensionAxis = new Quaternion();
+    private final Quaternion suspensionAxis = new Quaternion();
 
     private PartWheelInfo defaultWheelInfo;
 
-    public PartWheel(ModularVehicleInfoBuilder owner, String partName){
-        super(owner, partName,0.75f,0.75f);
+    public PartWheel(ModularVehicleInfoBuilder owner, String partName) {
+        super(owner, partName, 0.75f, 0.75f);
     }
 
     @Override
     public void appendTo(ModularVehicleInfoBuilder owner) {
         super.appendTo(owner);
-        if(getRotationPoint() == null)
+        if (getRotationPoint() == null)
             rotationPoint = getPosition();
         else
             getRotationPoint().multLocal(getScaleModifier(owner));
         owner.arrangeWheelID(this);
-        if(getMudGuardPartName() != null)
+        if (getMudGuardPartName() != null)
             owner.addRenderedParts(getMudGuardPartName());
     }
 
@@ -60,14 +59,14 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
 
     @Override
     public void addPart(BaseVehicleEntity<?> vehicle) {
-        if(!(vehicle instanceof IModuleContainer.IPropulsionContainer) || !(((IModuleContainer.IPropulsionContainer) vehicle).getPropulsion() instanceof WheelsModule))
-            throw new IllegalStateException("The entity "+vehicle+" has PartWheels, but does not implement IHavePropulsion or the propulsion is not a WheelsModule !");
-        ((WheelsPhysicsHandler)((IModuleContainer.IPropulsionContainer) vehicle).getPropulsion().getPhysicsHandler()).addWheel(this, getDefaultWheelInfo());
+        if (!(vehicle instanceof IModuleContainer.IPropulsionContainer) || !(((IModuleContainer.IPropulsionContainer) vehicle).getPropulsion() instanceof WheelsModule))
+            throw new IllegalStateException("The entity " + vehicle + " has PartWheels, but does not implement IHavePropulsion or the propulsion is not a WheelsModule !");
+        ((WheelsPhysicsHandler) ((IModuleContainer.IPropulsionContainer) vehicle).getPropulsion().getPhysicsHandler()).addWheel(this, getDefaultWheelInfo());
     }
 
     @Override
     public void removePart(BaseVehicleEntity<?> vehicle) {
-        ((WheelsPhysicsHandler)((IModuleContainer.IPropulsionContainer) vehicle).getPropulsion().getPhysicsHandler()).removeWheel(getId());
+        ((WheelsPhysicsHandler) ((IModuleContainer.IPropulsionContainer) vehicle).getPropulsion().getPhysicsHandler()).removeWheel(getId());
     }
 
     @Override
@@ -76,11 +75,9 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
     }
 
     public void setDefaultWheelInfo(ModularVehicleInfoBuilder vehicleInfoBuilder, PartWheelInfo partWheelInfo) {
-        if(partWheelInfo == null)
-        {
-            throw new IllegalArgumentException("Attached wheel info "+ getDefaultWheelName() +" was not found !");
-        }
-        else {
+        if (partWheelInfo == null) {
+            throw new IllegalArgumentException("Attached wheel info " + getDefaultWheelName() + " was not found !");
+        } else {
             defaultWheelInfo = partWheelInfo;
             setBox(new AxisAlignedBB(-partWheelInfo.getWheelWidth(), -partWheelInfo.getWheelRadius(), -partWheelInfo.getWheelRadius(),
                     partWheelInfo.getWheelWidth(), partWheelInfo.getWheelRadius(), partWheelInfo.getWheelRadius()));
@@ -133,6 +130,6 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
 
     @Override
     public String getName() {
-        return "PartWheel named "+getPartName()+" in "+getOwner().getName();
+        return "PartWheel named " + getPartName() + " in " + getOwner().getName();
     }
 }

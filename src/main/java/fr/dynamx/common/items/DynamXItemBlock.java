@@ -88,7 +88,7 @@ public class DynamXItemBlock extends ItemBlock implements IResourcesOwner, IInfo
         if (state.getBlock() == this.block) {
             setTileEntityNBT(world, player, pos, stack);
 
-            if(dynamxMainBlock.isObj()) {
+            if (dynamxMainBlock.isObj()) {
                 TileEntity tileentity = world.getTileEntity(pos);
 
                 if (tileentity instanceof TEDynamXBlock) {

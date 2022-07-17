@@ -18,8 +18,7 @@ import org.lwjgl.util.vector.Quaternion;
  *
  * @see DynamXRenderUtils
  */
-public class ClientDynamXUtils
-{
+public class ClientDynamXUtils {
     /**
      * Interpolation (slerp) between prevRotation and rotation jme quaternions
      *
@@ -33,7 +32,7 @@ public class ClientDynamXUtils
     /**
      * Interpolation (slerp) between prevRotation and rotation jme quaternions <br>
      * The result is returned and stored into glQuatCache <br>
-     *     <strong>You should open a GlQuaternionPool before calling this, and the returned Quaternion belongs to this pool</strong>
+     * <strong>You should open a GlQuaternionPool before calling this, and the returned Quaternion belongs to this pool</strong>
      *
      * @param step    Step, between 0 and 1
      * @param inverse If true the returned quaternion will be inverted (opposite rotation)
@@ -67,7 +66,7 @@ public class ClientDynamXUtils
     }
 
 
-    public static void playerToRagdoll(EntityPlayer player, Vector3f velMult){
-        DynamXContext.getNetwork().sendToServer(new MessagePlayerToRagdoll(new Vector3f((float)player.motionX,(float) player.motionY, (float)player.motionZ).mult(velMult, null)));
+    public static void playerToRagdoll(EntityPlayer player, Vector3f velMult) {
+        DynamXContext.getNetwork().sendToServer(new MessagePlayerToRagdoll(new Vector3f((float) player.motionX, (float) player.motionY, (float) player.motionZ).mult(velMult, null)));
     }
 }

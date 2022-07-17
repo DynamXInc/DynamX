@@ -14,17 +14,14 @@ import fr.dynamx.utils.DynamXLoadingTasks;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 
-public class ItemTrailer<T extends ModularVehicleInfo<?>> extends ItemModularEntity<T>
-{
+public class ItemTrailer<T extends ModularVehicleInfo<?>> extends ItemModularEntity<T> {
     public ItemTrailer(T modularVehicleInfo) {
         super(modularVehicleInfo);
-        if(getInfo().getPartsByType(PartWheel.class).isEmpty())
-        {
+        if (getInfo().getPartsByType(PartWheel.class).isEmpty()) {
             DynamXMain.log.error("Cannot determine type of " + getInfo().getFullName() + " ! It's a trailer with no wheels...");
             DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, getInfo().getPackName(), getInfo().getName(), "This trailer has no wheels !", ErrorTrackingService.TrackedErrorLevel.FATAL);
         }
-        if(getInfo().getSubPropertyByType(TrailerAttachInfo.class) == null)
-        {
+        if (getInfo().getSubPropertyByType(TrailerAttachInfo.class) == null) {
             DynamXMain.log.error("Cannot determine type of " + getInfo().getFullName() + " ! It's a trailer with no trailer attach...");
             DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, getInfo().getPackName(), getInfo().getName(), "Missing Trailer config !", ErrorTrackingService.TrackedErrorLevel.FATAL);
         }

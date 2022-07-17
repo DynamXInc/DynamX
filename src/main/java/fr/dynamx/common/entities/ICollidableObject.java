@@ -14,8 +14,8 @@ import java.util.List;
 public interface ICollidableObject {
     /**
      * @return The collision boxes composing this entity, with no rotation applied, but at the objet position <br>
-     *     Used for collisions with players and other entities <br>
-     *     The list is not modified by callers of the function
+     * Used for collisions with players and other entities <br>
+     * The list is not modified by callers of the function
      */
     List<MutableBoundingBox> getCollisionBoxes();
 

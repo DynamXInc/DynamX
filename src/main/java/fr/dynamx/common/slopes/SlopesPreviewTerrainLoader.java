@@ -3,8 +3,8 @@ package fr.dynamx.common.slopes;
 import fr.dynamx.api.physics.terrain.ITerrainManager;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.items.tools.ItemSlopes;
-import fr.dynamx.common.physics.terrain.chunk.ChunkLoadingTicket;
 import fr.dynamx.common.physics.terrain.PhysicsEntityTerrainLoader;
+import fr.dynamx.common.physics.terrain.chunk.ChunkLoadingTicket;
 import fr.dynamx.utils.VerticalChunkPos;
 import fr.dynamx.utils.debug.Profiler;
 import fr.dynamx.utils.optimization.Vector3fPool;
@@ -16,8 +16,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 /**
  * Loads the slopes around you when you hold an {@link ItemSlopes}, so you can see them
  */
-public class SlopesPreviewTerrainLoader extends PhysicsEntityTerrainLoader
-{
+public class SlopesPreviewTerrainLoader extends PhysicsEntityTerrainLoader {
     private boolean added;
 
     public SlopesPreviewTerrainLoader() {
@@ -26,7 +25,7 @@ public class SlopesPreviewTerrainLoader extends PhysicsEntityTerrainLoader
 
     @Override
     public void update(ITerrainManager terrain, Profiler profiler) {
-        if(terrain.getWorld().isRemote || DynamXMain.proxy.getClientWorld() != null) {
+        if (terrain.getWorld().isRemote || DynamXMain.proxy.getClientWorld() != null) {
             Vector3fPool.openPool();
             refresh(terrain, profiler);
             Vector3fPool.closePool();
@@ -36,7 +35,7 @@ public class SlopesPreviewTerrainLoader extends PhysicsEntityTerrainLoader
     @SideOnly(Side.CLIENT)
     private void refresh(ITerrainManager terrain, Profiler profiler) {
         EntityPlayer player = Minecraft.getMinecraft().player;
-        if(player != null && player.getHeldItemMainhand().getItem() instanceof ItemSlopes) {
+        if (player != null && player.getHeldItemMainhand().getItem() instanceof ItemSlopes) {
             if (!added || lastChunkX != player.chunkCoordX || lastChunkY != player.chunkCoordY || lastChunkZ != player.chunkCoordZ) {
                 VerticalChunkPos.Mutable pos = new VerticalChunkPos.Mutable();
                 VerticalChunkPos.Mutable prevPos = new VerticalChunkPos.Mutable();
@@ -47,7 +46,7 @@ public class SlopesPreviewTerrainLoader extends PhysicsEntityTerrainLoader
                         pos.setPos(player.chunkCoordX + dx, player.chunkCoordY + i - 1, player.chunkCoordZ + dz);
 
                         prevPos.setPos(lastChunkX + dx, lastChunkY + i - 1, lastChunkZ + dz);
-                        if(loadMatrice[i][j] != -1) {
+                        if (loadMatrice[i][j] != -1) {
                             terrain.unsubscribeFromChunk(prevPos.toImmutable());
                             loadMatrice[i][j] = -1;
                         }
@@ -68,7 +67,7 @@ public class SlopesPreviewTerrainLoader extends PhysicsEntityTerrainLoader
                 lastChunkZ = player.chunkCoordZ;
                 added = true;
             }
-        } else if(added) {
+        } else if (added) {
             onRemoved(terrain);
             added = false;
         }
@@ -82,7 +81,7 @@ public class SlopesPreviewTerrainLoader extends PhysicsEntityTerrainLoader
                 int dx = (j % 5) - 2;
                 int dz = (j / 5) - 2;
                 pos.setPos(lastChunkX + dx, lastChunkY + i - 1, lastChunkZ + dz);
-                if(loadMatrice[i][j] != -1) {
+                if (loadMatrice[i][j] != -1) {
                     terrain.unsubscribeFromChunk(pos.toImmutable());
                     loadMatrice[i][j] = -1;
                 }

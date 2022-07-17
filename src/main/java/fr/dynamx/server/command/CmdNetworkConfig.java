@@ -21,8 +21,7 @@ import java.util.List;
 import static java.lang.Float.parseFloat;
 import static net.minecraft.command.CommandBase.parseInt;
 
-public class CmdNetworkConfig implements ISubCommand
-{
+public class CmdNetworkConfig implements ISubCommand {
     public static boolean sync_buff;
     public static boolean TRACK_SYNC;
     //public static boolean SERVER_INTERPOL;
@@ -36,7 +35,7 @@ public class CmdNetworkConfig implements ISubCommand
 
     @Override
     public String getUsage() {
-        return getName()+" <doTrackSync|syncCrit|sync_buff|syncDelay|SMOOTHY|epsilon|printNetDebug> - for Aym'";
+        return getName() + " <doTrackSync|syncCrit|sync_buff|syncDelay|SMOOTHY|epsilon|printNetDebug> - for Aym'";
     }
 
     @Override
@@ -58,18 +57,15 @@ public class CmdNetworkConfig implements ISubCommand
         if (args.length - 1 >= 0) System.arraycopy(args, 1, args, 0, args.length - 1);
         if (args[0].equalsIgnoreCase("doTrackSync")) {
             TRACK_SYNC = !TRACK_SYNC;
-            sender.sendMessage(new TextComponentString("TRACK_SYNC is "+TRACK_SYNC));
-        }
-        else if (args[0].equalsIgnoreCase("syncCrit")) {
-            if(args.length != 4)
+            sender.sendMessage(new TextComponentString("TRACK_SYNC is " + TRACK_SYNC));
+        } else if (args[0].equalsIgnoreCase("syncCrit")) {
+            if (args.length != 4)
                 throw new WrongUsageException("To be used by aym");
             PosSynchronizedVariable.CRITIC1 = parseInt(args[1]);
             PosSynchronizedVariable.CRITIC2 = parseInt(args[2]);
             PosSynchronizedVariable.CRITIC3 = parseInt(args[3]);
-            sender.sendMessage(new TextComponentString("SyncCrit are "+ PosSynchronizedVariable.CRITIC1+" "+PosSynchronizedVariable.CRITIC2+" "+PosSynchronizedVariable.CRITIC3));
-        }
-        else if (args[0].equalsIgnoreCase("sync_buff") && args.length == 7)
-        {
+            sender.sendMessage(new TextComponentString("SyncCrit are " + PosSynchronizedVariable.CRITIC1 + " " + PosSynchronizedVariable.CRITIC2 + " " + PosSynchronizedVariable.CRITIC3));
+        } else if (args[0].equalsIgnoreCase("sync_buff") && args.length == 7) {
             PlayerSyncBuffer.NEW_SENDS_LIMIT = parseInt(args[1]);
             PlayerSyncBuffer.DELAYED_SENDS_LIMIT = parseInt(args[2]);
             PlayerSyncBuffer.FIRST_RADIUS = parseInt(args[3]);
@@ -78,7 +74,7 @@ public class CmdNetworkConfig implements ISubCommand
             PlayerSyncBuffer.SECOND_RADIUS *= PlayerSyncBuffer.SECOND_RADIUS; //square it
             PlayerSyncBuffer.MAX_SKIP = parseInt(args[5]);
             PlayerSyncBuffer.ENTITIES_PER_PACKETS = parseInt(args[6]);
-            sender.sendMessage(new TextComponentString("sync_buff is " + PlayerSyncBuffer.NEW_SENDS_LIMIT + " " + PlayerSyncBuffer.DELAYED_SENDS_LIMIT + " " + PlayerSyncBuffer.FIRST_RADIUS + " " + PlayerSyncBuffer.SECOND_RADIUS + " " + PlayerSyncBuffer.MAX_SKIP+" "+PlayerSyncBuffer.ENTITIES_PER_PACKETS));
+            sender.sendMessage(new TextComponentString("sync_buff is " + PlayerSyncBuffer.NEW_SENDS_LIMIT + " " + PlayerSyncBuffer.DELAYED_SENDS_LIMIT + " " + PlayerSyncBuffer.FIRST_RADIUS + " " + PlayerSyncBuffer.SECOND_RADIUS + " " + PlayerSyncBuffer.MAX_SKIP + " " + PlayerSyncBuffer.ENTITIES_PER_PACKETS));
         } else if (args[0].equalsIgnoreCase("sync_buff")) {
             sync_buff = !sync_buff;
             sender.sendMessage(new TextComponentString("sync_buff is " + sync_buff + " [limit] [limit2] [safe_radius] [safe_radius2] [max_skip] [entity per packet]"));
@@ -99,8 +95,7 @@ public class CmdNetworkConfig implements ISubCommand
             if (CmdNetworkConfig.SERVER_NET_DEBUG > 2)
                 CmdNetworkConfig.SERVER_NET_DEBUG = 0;
             sender.sendMessage(new TextComponentString("SERVER_NET_DEBUG is " + CmdNetworkConfig.SERVER_NET_DEBUG + ", may be laggy"));
-        }
-        else
+        } else
             throw new WrongUsageException(getRootCommandUsage() + getUsage());
     }
 }

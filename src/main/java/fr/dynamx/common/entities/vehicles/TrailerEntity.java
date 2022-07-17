@@ -2,20 +2,24 @@ package fr.dynamx.common.entities.vehicles;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.IModuleContainer;
-import fr.dynamx.api.entities.modules.*;
+import fr.dynamx.api.entities.modules.IMovableModuleContainer;
+import fr.dynamx.api.entities.modules.IPropulsionModule;
+import fr.dynamx.api.entities.modules.ISeatsModule;
+import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.physics.entities.IPropulsionHandler;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.entities.modules.*;
+import fr.dynamx.common.entities.modules.DoorsModule;
+import fr.dynamx.common.entities.modules.SeatsModule;
+import fr.dynamx.common.entities.modules.WheelsModule;
 import fr.dynamx.common.physics.entities.BaseWheeledVehiclePhysicsHandler;
 import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
 
 public class TrailerEntity<T extends TrailerEntity.TrailerPhysicsHandler<?>> extends BaseVehicleEntity<T> implements
-        IModuleContainer.IPropulsionContainer<IPropulsionModule<BaseWheeledVehiclePhysicsHandler<?>>>, IModuleContainer.IDoorContainer, IMovableModuleContainer, IModuleContainer.ISeatsContainer
-{
+        IModuleContainer.IPropulsionContainer<IPropulsionModule<BaseWheeledVehiclePhysicsHandler<?>>>, IModuleContainer.IDoorContainer, IMovableModuleContainer, IModuleContainer.ISeatsContainer {
     private IPropulsionModule<BaseWheeledVehiclePhysicsHandler<?>> wheels;
     private DoorsModule doors;
     private ISeatsModule seats;
@@ -65,13 +69,12 @@ public class TrailerEntity<T extends TrailerEntity.TrailerPhysicsHandler<?>> ext
     @Nonnull
     @Override
     public ISeatsModule getSeats() {
-        if(seats == null) //We may need seats before modules are created, because of seats sync
+        if (seats == null) //We may need seats before modules are created, because of seats sync
             seats = new SeatsModule(this);
         return seats;
     }
 
-    public static class TrailerPhysicsHandler<A extends TrailerEntity<?>> extends BaseWheeledVehiclePhysicsHandler<A>
-    {
+    public static class TrailerPhysicsHandler<A extends TrailerEntity<?>> extends BaseWheeledVehiclePhysicsHandler<A> {
         public TrailerPhysicsHandler(A entity) {
             super(entity);
         }

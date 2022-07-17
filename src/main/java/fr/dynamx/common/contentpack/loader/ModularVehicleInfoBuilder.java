@@ -31,8 +31,7 @@ import java.util.stream.Collectors;
  * Builder of {@link ModularVehicleInfo} <br>
  * Responsible for loading all the configuration/properties of the vehicle and creating a final object
  */
-public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implements IShapedObject, INamedObject, ParticleEmitterInfo.IParticleEmitterContainer
-{
+public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implements IShapedObject, INamedObject, ParticleEmitterInfo.IParticleEmitterContainer {
     private final String packName, fileName;
 
     @PackFileProperty(configNames = "Name")
@@ -81,7 +80,7 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
     private Vector3f centerOfMass;
     @PackFileProperty(configNames = "ScaleModifier", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false,
             defaultValue = "1 1 1")
-    private final Vector3f scaleModifier = new Vector3f(1,1,1);
+    private final Vector3f scaleModifier = new Vector3f(1, 1, 1);
 
     @PackFileProperty(configNames = "DefaultEngine", required = false)
     private String defaultEngine;
@@ -120,13 +119,16 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
     }
 
     private byte seatID, wheelID, doorID;
-    public void arrangeSeatID(PartSeat seat){
+
+    public void arrangeSeatID(PartSeat seat) {
         seat.setId(seatID++);
     }
-    public void arrangeDoorID(PartDoor door){
+
+    public void arrangeDoorID(PartDoor door) {
         door.setId(doorID++);
     }
-    public void arrangeWheelID(PartWheel wheel){
+
+    public void arrangeWheelID(PartWheel wheel) {
         wheel.setId(wheelID++);
     }
 
@@ -135,7 +137,9 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
     }
 
     @Override
-    public void addPart(BasePart<?> partToAdd) { parts.add(partToAdd); }
+    public void addPart(BasePart<?> partToAdd) {
+        parts.add(partToAdd);
+    }
 
     /**
      * Prevents the added parts from being rendered with the main obj model of the vehicle <br>
@@ -149,10 +153,11 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
 
     /**
      * Adds a light source to this vehicle
+     *
      * @param source The light source to add
      */
     public void addLightSource(PartLightSource source) {
-        if(lightSources.containsKey(source.getPartName()))
+        if (lightSources.containsKey(source.getPartName()))
             lightSources.get(source.getPartName()).addSource(source);
         else
             lightSources.put(source.getPartName(), new PartLightSource.CompoundLight(source));
@@ -160,7 +165,7 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
 
     /**
      * @param clazz The class of the parts to return
-     * @param <T> The type of the parts to return
+     * @param <T>   The type of the parts to return
      * @return All the parts of the given type
      */
     public <T extends BasePart<?>> List<T> getPartsByType(Class<T> clazz) {
@@ -168,9 +173,9 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
     }
 
     @Override
-    public void generateShape(){
+    public void generateShape() {
         ObjModelPath modelPath = DynamXUtils.getModelPath(getPackName(), model);
-        if(useHullShape)
+        if (useHullShape)
             physicsCollisionShape = ShapeUtils.generateComplexModelCollisions(modelPath, "chassis", scaleModifier, centerOfMass, shapeYOffset);
         else {
             physicsCollisionShape = new CompoundCollisionShape();
@@ -196,13 +201,12 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
     /**
      * Creates a final {@link ModularVehicleInfo} from the properties of this builder
      *
-     * @param wheels The loaded wheels
+     * @param wheels  The loaded wheels
      * @param engines The loaded engines
-     * @param sounds The loaded sounds
+     * @param sounds  The loaded sounds
      * @return A new, fresh, vehicle
      */
-    public ModularVehicleInfo<?> build(Map<String, PartWheelInfo> wheels, Map<String, EngineInfo> engines, Map<String, SoundListInfo> sounds)
-    {
+    public ModularVehicleInfo<?> build(Map<String, PartWheelInfo> wheels, Map<String, EngineInfo> engines, Map<String, SoundListInfo> sounds) {
         //Attach wheels and verify handbrake (V. 2.13.5)
         boolean hasHandbrake = false;
         int directingWheel = -1;
@@ -215,33 +219,32 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
             if (directingWheel == -1 && partWheel.isWheelIsSteerable())
                 directingWheel = i;
         }
-        if(directingWheel == -1)
+        if (directingWheel == -1)
             directingWheel = 0;
-        if(!hasHandbrake)
-        {
+        if (!hasHandbrake) {
             for (PartWheel partWheel : getPartsByType(PartWheel.class)) {
                 if (!partWheel.isDrivingWheel())
                     partWheel.setHandBrakingWheel(true);
             }
         }
         //Attach engine
-        if(defaultEngine != null) {
+        if (defaultEngine != null) {
             EngineInfo engine = engines.get(defaultEngine);
-            if(engine == null)
-                throw new IllegalArgumentException("Engine "+defaultEngine+" of "+getFullName()+" was not found, check file names and previous loading errors !");
+            if (engine == null)
+                throw new IllegalArgumentException("Engine " + defaultEngine + " of " + getFullName() + " was not found, check file names and previous loading errors !");
             engine.appendTo(this);
             //And sounds
-            if(defaultSounds != null) {
+            if (defaultSounds != null) {
                 SoundListInfo engineSound = sounds.get(defaultSounds);
-                if(engineSound == null)
-                    throw new IllegalArgumentException("Engine sounds "+defaultSounds+" of "+getFullName()+" were not found, check file names and previous loading errors !");
+                if (engineSound == null)
+                    throw new IllegalArgumentException("Engine sounds " + defaultSounds + " of " + getFullName() + " were not found, check file names and previous loading errors !");
                 engine.setSounds(engineSound.getSoundsIn());
             }
         }
         //Map textures
         Map<Byte, TextureData> bakedTextures = new HashMap<>();
         bakedTextures.put((byte) 0, new TextureData("Default", (byte) 0, getName()));
-        if(texturesArray != null) {
+        if (texturesArray != null) {
             byte id = 1;
             for (String[] info : texturesArray) {
                 bakedTextures.put(id, new TextureData(info[0], id, info[1]));
@@ -249,12 +252,12 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
             }
         }
         //Map lights
-        for(PartLightSource.CompoundLight src : lightSources.values()) {
+        for (PartLightSource.CompoundLight src : lightSources.values()) {
             if (src != null) {
                 List<PartLightSource> sources = src.getSources();
                 for (int i = 0; i < sources.size(); i++) {
                     PartLightSource source = sources.get(i);
-                    if(source.getTextures() != null) {
+                    if (source.getTextures() != null) {
                         for (int j = 0; j < source.getTextures().length; j++) {
                             TextureData data = new TextureData(source.getTextures()[j], (byte) (1 + i + j));
                             source.mapTexture(j, data);
@@ -263,7 +266,7 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
                 }
             }
         }
-        return new ModularVehicleInfo(defaultName, getPackName(), getName(), description, emptyMass, dragFactor, model, centerOfMass, scaleModifier,bakedTextures, parts, partShapes, subProperties, lightSources,
+        return new ModularVehicleInfo(defaultName, getPackName(), getName(), description, emptyMass, dragFactor, model, centerOfMass, scaleModifier, bakedTextures, parts, partShapes, subProperties, lightSources,
                 frictionPoints, particleEmitters, vehicleMaxSpeed, directingWheel, itemScale, item3DRenderLocation, FMLCommonHandler.instance().getSide().isClient() ? renderedParts : null, physicsCollisionShape, collisionShapeDebugBuffer, creativeTabName, defaultZoomLevel);
     }
 
@@ -297,7 +300,7 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
 
     @Override
     public String getFullName() {
-        return packName+"."+fileName;
+        return packName + "." + fileName;
     }
 
     public void addFrictionPoint(FrictionPoint frictionPoint) {

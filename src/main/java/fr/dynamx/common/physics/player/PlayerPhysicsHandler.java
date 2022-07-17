@@ -13,7 +13,6 @@ import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.entities.RagdollEntity;
-import fr.dynamx.common.physics.CollisionsHandler;
 import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;

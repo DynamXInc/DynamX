@@ -1,7 +1,6 @@
 package fr.dynamx.api.audio;
 
-public enum EnumSoundState
-{
+public enum EnumSoundState {
     STARTING,
     PLAYING,
     STOPPING,

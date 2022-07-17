@@ -12,8 +12,7 @@ import java.util.List;
 /**
  * Describes an {@link ObjectInfo} which can be used in a {@link fr.dynamx.common.entities.PackPhysicsEntity}
  */
-public interface IPhysicsPackInfo
-{
+public interface IPhysicsPackInfo {
     /**
      * @return The center of mass of the object
      */

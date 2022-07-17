@@ -1,7 +1,6 @@
 package fr.dynamx.common.network.sync.vars;
 
 import fr.dynamx.api.network.sync.PhysicsEntityNetHandler;
-import fr.dynamx.api.network.sync.SimulationHolder;
 import fr.dynamx.api.network.sync.SyncTarget;
 import fr.dynamx.api.network.sync.SynchronizedVariable;
 import fr.dynamx.common.DynamXMain;
@@ -24,11 +23,11 @@ import java.util.Map;
 /**
  * The {@link SynchronizedVariable} responsible to sync the pos and the rotation of rigid bodies attached to the entity
  */
-public abstract class AttachedBodySynchronizedVariable<T extends PhysicsEntity<?>> implements SynchronizedVariable<T>
-{
+public abstract class AttachedBodySynchronizedVariable<T extends PhysicsEntity<?>> implements SynchronizedVariable<T> {
     private final Map<Byte, RigidBodyTransform> transforms = new HashMap<>();
-    
-    public AttachedBodySynchronizedVariable() {}
+
+    public AttachedBodySynchronizedVariable() {
+    }
 
     /**
      * @return The {@link AttachedBodySynchronizer} of the given entity
@@ -37,12 +36,12 @@ public abstract class AttachedBodySynchronizedVariable<T extends PhysicsEntity<?
 
     @Override
     public SyncTarget getValueFrom(T entity, PhysicsEntityNetHandler<T> network, Side side, int syncTick) {
-        boolean changed = !transforms.isEmpty() && syncTick%20==0; //Keep low-rate sync while not moving, if we have joints to sync
-        if(syncTick%20==0)
+        boolean changed = !transforms.isEmpty() && syncTick % 20 == 0; //Keep low-rate sync while not moving, if we have joints to sync
+        if (syncTick % 20 == 0)
             SyncTracker.addChange("r_pos", "keep_sync");
 
         AttachedBodySynchronizer synchronizer = getSynchronizer(entity);
-        if(synchronizer != null) {
+        if (synchronizer != null) {
             if (!changed) {
                 for (Map.Entry<Byte, SynchronizedRigidBodyTransform> transform : synchronizer.getTransforms().entrySet()) {
                     if (!transforms.containsKey(transform.getKey())) {
@@ -75,7 +74,9 @@ public abstract class AttachedBodySynchronizedVariable<T extends PhysicsEntity<?
             }
             if (changed) {
                 for (Map.Entry<Byte, SynchronizedRigidBodyTransform> transform : synchronizer.getTransforms().entrySet()) {
-                    transforms.get(transform.getKey()).set(transform.getValue().getPhysicTransform());
+                    if (transforms.get(transform.getKey()) != null) {
+                        transforms.get(transform.getKey()).set(transform.getValue().getPhysicTransform());
+                    }
                 }
             }
         }
@@ -83,16 +84,14 @@ public abstract class AttachedBodySynchronizedVariable<T extends PhysicsEntity<?
     }
 
     @Override
-    public void setValueTo(T entity, PhysicsEntityNetHandler<T> network, MessagePhysicsEntitySync msg, Side side)
-    {
-        if(network.getSimulationHolder().isSinglePlayer())
-        {
-            if(side.isServer()) //Solo mode
+    public void setValueTo(T entity, PhysicsEntityNetHandler<T> network, MessagePhysicsEntitySync msg, Side side) {
+        if (network.getSimulationHolder().isSinglePlayer()) {
+            if (side.isServer()) //Solo mode
             {
-                if(getSynchronizer(entity) != null) {
+                if (getSynchronizer(entity) != null) {
                     Map<Byte, SynchronizedRigidBodyTransform> tar = getSynchronizer(entity).getTransforms();//entity.getModuleByType(DoorsModule.class).getTransforms();
                     transforms.forEach((b, t) -> {
-                        if(!tar.containsKey(b))
+                        if (!tar.containsKey(b))
                             tar.put(b, new SynchronizedRigidBodyTransform(t));
                         else
                             tar.get(b).getPhysicTransform().set(t);
@@ -101,14 +100,11 @@ public abstract class AttachedBodySynchronizedVariable<T extends PhysicsEntity<?
                         tar.keySet().removeIf(b -> !transforms.containsKey(b));
                     }
                 }
-            }
-            else
-                DynamXMain.log.error("Incorrect simulation holder in client set pos value : "+network.getSimulationHolder());
-        }
-        else //Physics "receiver" side
+            } else
+                DynamXMain.log.error("Incorrect simulation holder in client set pos value : " + network.getSimulationHolder());
+        } else //Physics "receiver" side
         {
-            for(Map.Entry<Byte, RigidBodyTransform> transform : transforms.entrySet())
-            {
+            for (Map.Entry<Byte, RigidBodyTransform> transform : transforms.entrySet()) {
                 getSynchronizer(entity).setPhysicsTransform(transform.getKey(), transform.getValue());
             }
         }
@@ -116,8 +112,8 @@ public abstract class AttachedBodySynchronizedVariable<T extends PhysicsEntity<?
 
     @Override
     public void interpolate(T entity, PhysicsEntityNetHandler<T> network, Profiler profiler, MessagePhysicsEntitySync msg, int step) {
-       // if(ClientDebugSystem.MOVE_DEBUG > 0)
-            //System.out.println("Interpolate "+step+" "+msg+" "+DynamXMain.proxy.ownsSimulation(entity));
+        // if(ClientDebugSystem.MOVE_DEBUG > 0)
+        //System.out.println("Interpolate "+step+" "+msg+" "+DynamXMain.proxy.ownsSimulation(entity));
         /*if(DynamXMain.proxy.ownsSimulation(entity) && false) //If we are simulating this entity
         {
             if(!network.getSimulationHolder().isMe(Side.CLIENT)) {
@@ -146,15 +142,14 @@ public abstract class AttachedBodySynchronizedVariable<T extends PhysicsEntity<?
             //else ignore
         }
         else*/
-       // if(!(entity instanceof BaseVehicleEntity) || !DynamXMain.proxy.ownsSimulation(entity))
+        // if(!(entity instanceof BaseVehicleEntity) || !DynamXMain.proxy.ownsSimulation(entity))
         {
             //Else we just interpolate
             //Thanks to Flan's mod and Mojang for the idea of this code
 
             Map<Byte, SynchronizedRigidBodyTransform> tar = getSynchronizer(entity).getTransforms();//entity.getModuleByType(DoorsModule.class).getTransforms();
-            for(Map.Entry<Byte, RigidBodyTransform> transform : transforms.entrySet())
-            {
-                if(getSynchronizer(entity).getTransforms().containsKey(transform.getKey())) { //Joint has been added
+            for (Map.Entry<Byte, RigidBodyTransform> transform : transforms.entrySet()) {
+                if (getSynchronizer(entity).getTransforms().containsKey(transform.getKey())) { //Joint has been added
                     //tar.put(transform.getKey(), new RigidBodyTransform());
                     SynchronizedRigidBodyTransform var = tar.get(transform.getKey());
                     var.getPhysicTransform().setPosition(
@@ -177,13 +172,12 @@ public abstract class AttachedBodySynchronizedVariable<T extends PhysicsEntity<?
 
     @Override
     public void write(ByteBuf buf, boolean compress) {
-        if(compress) {
+        if (compress) {
             buf.writeByte(1);
             RigidBodyTransform transform = transforms.get((byte) EnumRagdollBodyPart.CHEST.ordinal());
             buf.writeByte(EnumRagdollBodyPart.CHEST.ordinal());
             writeTransform(buf, transform);
-        }
-        else {
+        } else {
             buf.writeByte(transforms.size());
             for (byte tr : transforms.keySet()) {
                 buf.writeByte(tr);
@@ -219,8 +213,7 @@ public abstract class AttachedBodySynchronizedVariable<T extends PhysicsEntity<?
     public void read(ByteBuf buf) {
         transforms.clear();
         byte size = buf.readByte();
-        for (byte i = 0; i < size; i++)
-        {
+        for (byte i = 0; i < size; i++) {
             byte tr = buf.readByte();
             RigidBodyTransform transform = new RigidBodyTransform();
 
@@ -234,17 +227,16 @@ public abstract class AttachedBodySynchronizedVariable<T extends PhysicsEntity<?
     /**
      * Handles sync of attached bodies, via the {@link AttachedBodySynchronizer}
      */
-    public interface AttachedBodySynchronizer
-    {
+    public interface AttachedBodySynchronizer {
         /**
          * @return A map giving one {@link SynchronizedRigidBodyTransform} for each joint (the key is the jointId) <br>
-         *     Keep this map in a field of this module
+         * Keep this map in a field of this module
          */
         Map<Byte, SynchronizedRigidBodyTransform> getTransforms();
 
         /**
          * Alters the physics state on the object attached to the given joint <br>
-         *     Fired when receiving a sync and physics are enabled on this side
+         * Fired when receiving a sync and physics are enabled on this side
          */
         void setPhysicsTransform(byte jointId, RigidBodyTransform transform);
     }

@@ -24,11 +24,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MessagePacksHashs implements IDnxPacket
-{
+public class MessagePacksHashs implements IDnxPacket {
     private Map<String, Map<String, byte[]>> objects;
 
-    public MessagePacksHashs() {}
+    public MessagePacksHashs() {
+    }
 
     public MessagePacksHashs(Map<String, Map<String, byte[]>> objects) {
         this.objects = objects;
@@ -71,11 +71,10 @@ public class MessagePacksHashs implements IDnxPacket
         });
     }
 
-    public static class HandlerServer implements IMessageHandler<MessagePacksHashs, IMessage>
-    {
+    public static class HandlerServer implements IMessageHandler<MessagePacksHashs, IMessage> {
         @Override
         public IMessage onMessage(MessagePacksHashs message, MessageContext ctx) {
-            if(DynamXConfig.syncPacks) {
+            if (DynamXConfig.syncPacks) {
                 try {
                     Map<String, List<String>> delta = PackSyncHandler.getFullDelta(message.objects);
                     //System.out.println("Full delta with "+ctx.getServerHandler().player+" is "+delta);
@@ -100,16 +99,15 @@ public class MessagePacksHashs implements IDnxPacket
                     }
                     //else
                     //  System.out.println("There is no delta");
-                } catch (Exception e){
-                    ctx.getServerHandler().getNetworkManager().closeChannel(new TextComponentString("Invalid DynamX pack "+e.getMessage()));
+                } catch (Exception e) {
+                    ctx.getServerHandler().getNetworkManager().closeChannel(new TextComponentString("Invalid DynamX pack " + e.getMessage()));
                 }
             }
             return null;
         }
     }
 
-    public static class HandlerClient implements IMessageHandler<MessagePacksHashs, IMessage>
-    {
+    public static class HandlerClient implements IMessageHandler<MessagePacksHashs, IMessage> {
         @Override
         @SideOnly(Side.CLIENT)
         public IMessage onMessage(MessagePacksHashs message, MessageContext ctx) {

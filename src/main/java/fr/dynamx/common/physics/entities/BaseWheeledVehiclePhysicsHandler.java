@@ -15,11 +15,11 @@ import fr.dynamx.utils.optimization.Vector3fPool;
 
 /**
  * Physics handler of {@link BaseVehicleEntity}, for vehicles that have wheels (using the bullet's {@link PhysicsVehicle}) <br>
- *     The physics handler is the bridge between the minecraft entity and the physics engine
+ * The physics handler is the bridge between the minecraft entity and the physics engine
+ *
  * @param <T> The entity type
  */
-public abstract class BaseWheeledVehiclePhysicsHandler<T extends BaseVehicleEntity<?>> extends BaseVehiclePhysicsHandler<T>
-{
+public abstract class BaseWheeledVehiclePhysicsHandler<T extends BaseVehicleEntity<?>> extends BaseVehiclePhysicsHandler<T> {
     private PhysicsVehicle physicsVehicle;
 
     public BaseWheeledVehiclePhysicsHandler(T entity) {
@@ -42,8 +42,8 @@ public abstract class BaseWheeledVehiclePhysicsHandler<T extends BaseVehicleEnti
 
     @Override
     public void addToWorld() {
-        if(DynamXContext.getPhysicsWorld() == null)  {
-            throw new NullPointerException("Physics world is null, "+handledEntity.getEntityWorld()+" "+ getCollisionObject());
+        if (DynamXContext.getPhysicsWorld() == null) {
+            throw new NullPointerException("Physics world is null, wtf " + handledEntity.getEntityWorld() + " " + getCollisionObject());
         }
         DynamXContext.getPhysicsWorld().addVehicle((PhysicsVehicle) getCollisionObject());
     }
@@ -51,10 +51,9 @@ public abstract class BaseWheeledVehiclePhysicsHandler<T extends BaseVehicleEnti
     @Override
     public void update() {
         super.update();
-        if(!handledEntity.getPackInfo().getFrictionPoints().isEmpty() && isBodyActive()) {
+        if (!handledEntity.getPackInfo().getFrictionPoints().isEmpty() && isBodyActive()) {
             float horizSpeed = Vector3fPool.get(getLinearVelocity().x, 0, getLinearVelocity().z).length();
-            for(FrictionPoint f : handledEntity.getPackInfo().getFrictionPoints())
-            {
+            for (FrictionPoint f : handledEntity.getPackInfo().getFrictionPoints()) {
                 Vector3f pushDown = new Vector3f(-getLinearVelocity().x, -horizSpeed, -getLinearVelocity().z);
                 pushDown.multLocal(f.getIntensity());
                 applyForce(f.getPosition(), pushDown);

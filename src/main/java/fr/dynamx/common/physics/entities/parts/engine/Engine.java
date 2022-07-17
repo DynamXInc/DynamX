@@ -8,12 +8,11 @@ import fr.dynamx.common.physics.entities.PackEntityPhysicsHandler;
 import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.maths.LinearSpline;
 
-public class Engine
-{
+public class Engine {
     private final String name;
     /**
      * The total power of the engine. This will be distributed to the propellant(s).
-      */
+     */
     private float power;
 
     /**
@@ -26,8 +25,8 @@ public class Engine
     private float maxRevs;
 
     /**
-    * the amount of engine braking when coasting.
-    * this can be manipulated to simulate damage.
+     * the amount of engine braking when coasting.
+     * this can be manipulated to simulate damage.
      */
     private float braking;
 
@@ -117,7 +116,6 @@ public class Engine
         float speedUnit = vehicle.getSpeed(ModulableVehiclePhysicsHandler.SpeedUnit.KMH) / engineMaxSpeed;
         return 1.0f - DynamXMath.interpolateLinear(speedUnit, 0, speedUnit);
     }*/
-
     public float getBraking() {
         return braking;
     }

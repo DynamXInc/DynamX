@@ -10,8 +10,7 @@ import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
 /**
  * Info of the trailer attach point of a vehicle
  */
-public class BoatEngineInfo extends SubInfoType<ModularVehicleInfoBuilder>
-{
+public class BoatEngineInfo extends SubInfoType<ModularVehicleInfoBuilder> {
     @PackFileProperty(configNames = "Position", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y)
     private Vector3f position;
 
@@ -21,8 +20,8 @@ public class BoatEngineInfo extends SubInfoType<ModularVehicleInfoBuilder>
 
     @Override
     public void appendTo(ModularVehicleInfoBuilder partInfo) {
-        if(getPosition() == null)
-            throw new IllegalArgumentException("AttachPoint not configured ! In trailer of "+partInfo.toString());
+        if (getPosition() == null)
+            throw new IllegalArgumentException("AttachPoint not configured ! In trailer of " + partInfo.toString());
         partInfo.addSubProperty(this);
     }
 
@@ -32,6 +31,6 @@ public class BoatEngineInfo extends SubInfoType<ModularVehicleInfoBuilder>
 
     @Override
     public String getName() {
-        return "BoatEngineInfo in "+getOwner().getName();
+        return "BoatEngineInfo in " + getOwner().getName();
     }
 }

@@ -12,16 +12,13 @@ import fr.dynamx.client.network.ClientPhysicsSyncManager;
 import fr.dynamx.client.network.UdpClientPhysicsEntityNetHandler;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.utils.DynamXConstants;
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
-import scala.actors.threadpool.Arrays;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class VehicleHud extends GuiFrame
-{
+public class VehicleHud extends GuiFrame {
     private final BaseVehicleEntity<?> riddenEntity;
     private GuiLabel netWarning;
     private final List<ResourceLocation> styleSheets = new ArrayList<>();
@@ -31,7 +28,7 @@ public class VehicleHud extends GuiFrame
         this.riddenEntity = riddenEntity.cast();
         setCssClass("root");
         List<IVehicleController> controllers = new ArrayList<>(((ClientEntityNetHandler) riddenEntity.cast().getNetwork()).getControllers());
-        if(!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.CreateVehicleHudEvent(this, styleSheets, riddenEntity.getSeats().isLocalPlayerDriving(), this.riddenEntity, controllers))) {
+        if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.CreateVehicleHudEvent(this, styleSheets, riddenEntity.getSeats().isLocalPlayerDriving(), this.riddenEntity, controllers))) {
             controllers.forEach(c ->
             {
                 List<ResourceLocation> hudStyle = c.getHudCssStyles();
@@ -56,7 +53,7 @@ public class VehicleHud extends GuiFrame
         super.tick();
         if (netWarning != null & ClientPhysicsSyncManager.hasBadConnection() && riddenEntity.ticksExisted % (20 * 3) < (20 * 2))
             netWarning.setText(ClientPhysicsSyncManager.getPingMessage());
-        else if(netWarning != null && !netWarning.getText().isEmpty())
+        else if (netWarning != null && !netWarning.getText().isEmpty())
             netWarning.setText("");
     }
 

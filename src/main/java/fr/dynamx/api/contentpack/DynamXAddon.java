@@ -1,6 +1,5 @@
 package fr.dynamx.api.contentpack;
 
-import net.minecraft.util.StringUtils;
 import net.minecraftforge.fml.relauncher.Side;
 
 import java.lang.annotation.ElementType;
@@ -10,11 +9,10 @@ import java.lang.annotation.Target;
 
 /**
  * Represents an addon for DynamX <br>
- *     You <strong>should</strong> use @AddonEventSubscriber on a static method to catch addon initialization (like @EventHandler for Forge, but with static method and no parameter)
+ * You <strong>should</strong> use @AddonEventSubscriber on a static method to catch addon initialization (like @EventHandler for Forge, but with static method and no parameter)
  */
 @Retention(RetentionPolicy.RUNTIME)
-public @interface DynamXAddon
-{
+public @interface DynamXAddon {
     /**
      * @return The id of the mod owning this addon
      */
@@ -45,5 +43,6 @@ public @interface DynamXAddon
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)
-    @interface AddonEventSubscriber {}
+    @interface AddonEventSubscriber {
+    }
 }

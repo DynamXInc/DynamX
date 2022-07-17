@@ -25,18 +25,16 @@ import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
 
 /**
  * Base implementation for all vehicles <br>
- *     It's fully modular and allows to create very different vehicles
+ * It's fully modular and allows to create very different vehicles
  *
+ * @param <T> The physics handler type
  * @see IPhysicsModule
  * @see BaseVehiclePhysicsHandler For the physics implementation
- * @param <T> The physics handler type
  */
-public abstract class BaseVehicleEntity<T extends BaseVehiclePhysicsHandler<?>> extends PackPhysicsEntity<T, ModularVehicleInfo<?>>
-{
+public abstract class BaseVehicleEntity<T extends BaseVehiclePhysicsHandler<?>> extends PackPhysicsEntity<T, ModularVehicleInfo<?>> {
     public BaseVehicleEntity(World worldIn) {
         super(worldIn);
     }
@@ -53,7 +51,7 @@ public abstract class BaseVehicleEntity<T extends BaseVehiclePhysicsHandler<?>> 
     @Override
     public List<ResourceLocation> getSynchronizedVariables(Side side, SimulationHolder simulationHolder) {
         List<ResourceLocation> vars = super.getSynchronizedVariables(side, simulationHolder);
-        if(this instanceof IModuleContainer.IEngineContainer && simulationHolder.isPhysicsAuthority(side)) {
+        if (this instanceof IModuleContainer.IEngineContainer && simulationHolder.isPhysicsAuthority(side)) {
             vars.add(VehicleSynchronizedVariables.Engine.NAME);
         }
         return vars;

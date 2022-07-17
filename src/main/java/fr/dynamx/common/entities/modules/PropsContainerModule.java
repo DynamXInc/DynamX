@@ -15,8 +15,7 @@ import fr.dynamx.utils.optimization.Vector3fPool;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PropsContainerModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, IPhysicsModule.IEntityUpdateListener
-{
+public class PropsContainerModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, IPhysicsModule.IEntityUpdateListener {
     private final BaseVehicleEntity<?> entity;
     private final List<PartPropsContainer> containers;
     private final List<PhysicsEntity<?>> modifiedEntitiesCache = new ArrayList<>();
@@ -28,9 +27,9 @@ public class PropsContainerModule implements IPhysicsModule<BaseVehiclePhysicsHa
 
     @Override
     public void updateEntity() {
-        if(entity.ticksExisted%20==0 && !modifiedEntitiesCache.isEmpty()) {
+        if (entity.ticksExisted % 20 == 0 && !modifiedEntitiesCache.isEmpty()) {
             modifiedEntitiesCache.removeIf(e -> {
-                if(e.getDistance(entity) > 10) {
+                if (e.getDistance(entity) > 10) {
                     System.out.println("[DEV] Remove " + e + " : far from " + entity);
                     e.getNetwork().setSimulationHolder(SimulationHolder.SERVER, SimulationHolder.UpdateContext.PROPS_CONTAINER_UPDATE);
                     return true;
@@ -43,7 +42,7 @@ public class PropsContainerModule implements IPhysicsModule<BaseVehiclePhysicsHa
     @Override
     public void onSetSimulationHolder(SimulationHolder simulationHolder, SimulationHolder.UpdateContext changeContext) {
         modifiedEntitiesCache.clear();
-        for(PartPropsContainer container : containers) {
+        for (PartPropsContainer container : containers) {
             Vector3f pos = DynamXGeometry.rotateVectorByQuaternion(container.getPosition(), entity.physicsRotation);
             MutableBoundingBox rotatedSize = DynamXContext.getCollisionHandler().rotateBB(Vector3fPool.get(0, 0, 0), container.getBox(), entity.physicsRotation);
             rotatedSize = rotatedSize.offset(pos);

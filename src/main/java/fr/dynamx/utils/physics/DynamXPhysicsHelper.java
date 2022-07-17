@@ -27,8 +27,7 @@ import java.util.function.Predicate;
  *
  * @see DynamXGeometry
  */
-public class DynamXPhysicsHelper
-{
+public class DynamXPhysicsHelper {
     public static final Vector3f GRAVITY = new Vector3f(0.0f, -9.81f, 0.0f);
     public static final int X_ROTATION_DOF = 3 + PhysicsSpace.AXIS_X;
     public static final int Y_ROTATION_DOF = 3 + PhysicsSpace.AXIS_Y;
@@ -61,7 +60,8 @@ public class DynamXPhysicsHelper
     /**
      * Method to fast create rigid body and translate it <br>
      * Does not adds the body to the physics world
-     *  @param physicsEntity  The entity owning this rigid body
+     *
+     * @param physicsEntity  The entity owning this rigid body
      * @param mass           Mass in kg
      * @param collisionShape Shape of the rigid body
      * @param position       Initial position
@@ -84,7 +84,7 @@ public class DynamXPhysicsHelper
 
             if (!(result.getCollisionObject() instanceof PhysicsRigidBody))
                 continue;
-            if(!ignoredBody.test(((BulletShapeType<?>) result.getCollisionObject().getUserObject()).getType()))
+            if (!ignoredBody.test(((BulletShapeType<?>) result.getCollisionObject().getUserObject()).getType()))
                 continue;
 
             Vector3f hitPosition = Vector3fPool.get();
@@ -104,7 +104,7 @@ public class DynamXPhysicsHelper
         return null;
     }
 
-    public static Vector3f getBodyLocalPoint(PhysicsCollisionObject rigidBody, Vector3f pointInWorld){
+    public static Vector3f getBodyLocalPoint(PhysicsCollisionObject rigidBody, Vector3f pointInWorld) {
         Vector3f bodyLocation = Vector3fPool.get();
         rigidBody.getPhysicsLocation(bodyLocation);
 
@@ -116,7 +116,7 @@ public class DynamXPhysicsHelper
         return bodyRotation.inverse().multLocal(pickPosition);
     }
 
-    public static void createExplosion(PhysicsEntity<?> physicsEntity, Vector3f explosionPosition, double explosionStrength){
+    public static void createExplosion(PhysicsEntity<?> physicsEntity, Vector3f explosionPosition, double explosionStrength) {
         if (physicsEntity.getPhysicsHandler() != null) {
             PhysicsRigidBody body = (PhysicsRigidBody) physicsEntity.getPhysicsHandler().getCollisionObject();
             Vector3f centerOfMass = physicsEntity.physicsPosition;

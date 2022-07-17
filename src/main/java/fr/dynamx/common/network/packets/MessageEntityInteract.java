@@ -5,6 +5,7 @@ import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.api.network.EnumNetworkType;
 import fr.dynamx.api.network.IDnxPacket;
+import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
@@ -21,7 +22,8 @@ import net.minecraftforge.fml.relauncher.Side;
 public class MessageEntityInteract implements IDnxPacket, IMessageHandler<MessageEntityInteract, IMessage> {
     private int vehicleID;
 
-    public MessageEntityInteract() {}
+    public MessageEntityInteract() {
+    }
 
     public MessageEntityInteract(int vehicleID) {
         this.vehicleID = vehicleID;
@@ -57,7 +59,7 @@ public class MessageEntityInteract implements IDnxPacket, IMessageHandler<Messag
             //Do nothing
             //((EntityPlayerMP) context).connection.disconnect(new TextComponentString("Invalid vehicle interact packet, too long distance"));
         } else if (context.getHeldItemMainhand().getItem() instanceof ItemWrench) {
-            ((ItemWrench)context.getHeldItemMainhand().getItem()).interact(context, physicsEntity);
+            ((ItemWrench) context.getHeldItemMainhand().getItem()).interact(context, physicsEntity);
         } else if (!(physicsEntity instanceof IModuleContainer.ISeatsContainer) || !((IModuleContainer.ISeatsContainer) physicsEntity).getSeats().isPlayerSitting(context)) {
             if (physicsEntity instanceof PackPhysicsEntity) {
                 PackPhysicsEntity<?, ?> vehicleEntity = (PackPhysicsEntity<?, ?>) physicsEntity;
@@ -65,9 +67,12 @@ public class MessageEntityInteract implements IDnxPacket, IMessageHandler<Messag
                 Vector3fPool.openPool();
                 InteractivePart hitPart = vehicleEntity.getHitPart(context);
                 if (hitPart != null) {
+                    if ((hitPart instanceof PartSeat && ((PartSeat) hitPart).hasDoor()) && context.isSneaking()) {
+                        return;
+                    }
                     if (!(vehicleEntity instanceof BaseVehicleEntity) || !MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.VehicleInteractEntityEvent(context, (BaseVehicleEntity<?>) vehicleEntity, hitPart)))
                         hitPart.interact(vehicleEntity, context);
-                } else if(vehicleEntity instanceof BaseVehicleEntity)
+                } else if (vehicleEntity instanceof BaseVehicleEntity)
                     MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.VehicleInteractEntityEvent(context, (BaseVehicleEntity<?>) vehicleEntity, null));
                 Vector3fPool.closePool();
             }

@@ -16,8 +16,7 @@ import java.util.UUID;
  * @param <T> The Constraint type
  * @see EntityJointsHandler
  */
-public class EntityJoint<T extends Constraint>
-{
+public class EntityJoint<T extends Constraint> {
     private final JointHandler<?, ?, ?> handler;
     private final PhysicsEntity<?> entity1, entity2;
     private final ResourceLocation type;
@@ -51,6 +50,7 @@ public class EntityJoint<T extends Constraint>
 
     /**
      * Can be null to simulate joints on server side in solo (and force sync to the client using physics)
+     *
      * @return The physics joint
      */
     @Nullable
@@ -93,14 +93,14 @@ public class EntityJoint<T extends Constraint>
     /**
      * A serialized {@link EntityJoint}, ready to be saved
      */
-    public static class CachedJoint implements ISerializable
-    {
+    public static class CachedJoint implements ISerializable {
         private UUID id;
         private byte jid;
         private ResourceLocation type;
         private boolean jointOwner;
 
-        public CachedJoint() {}
+        public CachedJoint() {
+        }
 
         public CachedJoint(UUID id, byte jid, ResourceLocation type, boolean jointOwner) {
             this.id = id;
@@ -142,7 +142,7 @@ public class EntityJoint<T extends Constraint>
 
         @Override
         public Object[] getObjectsToSave() {
-            return new Object[] {id, type.toString(), jid, jointOwner};
+            return new Object[]{id, type.toString(), jid, jointOwner};
         }
 
         @Override

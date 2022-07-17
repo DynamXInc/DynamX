@@ -13,12 +13,10 @@ import fr.dynamx.utils.DynamXLoadingTasks;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 
-public class ItemBoat<T extends ModularVehicleInfo<?>> extends ItemModularEntity<T>
-{
+public class ItemBoat<T extends ModularVehicleInfo<?>> extends ItemModularEntity<T> {
     public ItemBoat(T modularVehicleInfo) {
         super(modularVehicleInfo);
-        if(getInfo().getSubPropertyByType(BoatEngineInfo.class) == null)
-        {
+        if (getInfo().getSubPropertyByType(BoatEngineInfo.class) == null) {
             DynamXMain.log.error("Cannot determine type of " + getInfo().getFullName() + " ! It's a boat with no boat_engine...");
             DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, getInfo().getPackName(), getInfo().getName(), "Missing boat_engine config !", ErrorTrackingService.TrackedErrorLevel.FATAL);
         }

@@ -48,7 +48,9 @@ public class IndexedModel {
         return tangents;
     }
 
-    public ArrayList<Material> getMaterials() {return materials;}
+    public ArrayList<Material> getMaterials() {
+        return materials;
+    }
 
     public void toMesh(Mesh mesh) {
         ArrayList<Vertex> verticesList = new ArrayList<Vertex>();

@@ -109,8 +109,8 @@ public class PackFilePropertyData<T> {
                 return;
         }
         String docKey = description.isEmpty() ? field.getDeclaringClass().getSimpleName() + "." + configFieldName : description;
-        if(isDeprecated()) {
-            if(!locale.hasKey(docKey)) {
+        if (isDeprecated()) {
+            if (!locale.hasKey(docKey)) {
                 docKey = "common.error.deprecated";
             }
         }

@@ -6,7 +6,6 @@ import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.network.sync.MessagePhysicsEntitySync;
-import fr.dynamx.common.network.sync.MessageSeatsSync;
 import fr.dynamx.server.network.ServerPhysicsSyncManager;
 import net.minecraft.entity.player.EntityPlayerMP;
 
@@ -104,7 +103,7 @@ public class TaskScheduler {
                     entity.getJointsHandler().sync(target);
                 }
             } else {
-                DynamXMain.log.warn("Skipping resync item of "+entity+" for "+target+" : player not connected");
+                DynamXMain.log.warn("Skipping resync item of " + entity + " for " + target + " : player not connected");
             }
         }
     }

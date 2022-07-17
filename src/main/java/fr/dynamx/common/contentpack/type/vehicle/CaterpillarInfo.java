@@ -6,8 +6,7 @@ import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
 
-public class CaterpillarInfo implements ISubInfoType<ModularVehicleInfoBuilder>
-{
+public class CaterpillarInfo implements ISubInfoType<ModularVehicleInfoBuilder> {
     private final ISubInfoTypeOwner<ModularVehicleInfoBuilder> owner;
 
     //caterpillar things
@@ -31,7 +30,7 @@ public class CaterpillarInfo implements ISubInfoType<ModularVehicleInfoBuilder>
 
     @Override
     public String getName() {
-        return "CaterpillarInfo in "+owner.getName();
+        return "CaterpillarInfo in " + owner.getName();
     }
 
     @Override

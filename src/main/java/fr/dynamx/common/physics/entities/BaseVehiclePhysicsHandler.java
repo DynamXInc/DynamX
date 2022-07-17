@@ -15,13 +15,12 @@ import fr.dynamx.utils.optimization.Vector3fPool;
 
 /**
  * Physics handler of {@link BaseVehicleEntity} <br>
- *     The physics handler is the bridge between the minecraft entity and the physics engine
+ * The physics handler is the bridge between the minecraft entity and the physics engine
  *
- * @see BaseWheeledVehiclePhysicsHandler
  * @param <T> The entity type
+ * @see BaseWheeledVehiclePhysicsHandler
  */
-public abstract class BaseVehiclePhysicsHandler<T extends BaseVehicleEntity<?>> extends PackEntityPhysicsHandler<ModularVehicleInfo<?>, T>
-{
+public abstract class BaseVehiclePhysicsHandler<T extends BaseVehicleEntity<?>> extends PackEntityPhysicsHandler<ModularVehicleInfo<?>, T> {
     /**
      * @return The propulsion of the entity
      */
@@ -52,24 +51,24 @@ public abstract class BaseVehiclePhysicsHandler<T extends BaseVehicleEntity<?>> 
 
     @Override
     public void update() {
-      //  if (!getHandledEntity().isInWater()) {
-            //Vector3f dragForce = PhysicsHelper.getAirDrag(getLinearVelocity(), getPackInfo().getDragFactor());
-            //forces.add(new Force(dragForce, Vector3fPool.get()));
+        //  if (!getHandledEntity().isInWater()) {
+        //Vector3f dragForce = PhysicsHelper.getAirDrag(getLinearVelocity(), getPackInfo().getDragFactor());
+        //forces.add(new Force(dragForce, Vector3fPool.get()));
         //}
         super.update();
-        if(!EnginePhysicsHandler.inTestFullGo && getCollisionObject().getActivationState() == 4 && getHandledEntity().getControllingPassenger() == null) {
+        if (!EnginePhysicsHandler.inTestFullGo && getCollisionObject().getActivationState() == 4 && getHandledEntity().getControllingPassenger() == null) {
             getCollisionObject().setEnableSleep(true);
         }
-        if(EnginePhysicsHandler.inTestFullGo)
+        if (EnginePhysicsHandler.inTestFullGo)
             getCollisionObject().activate();
         //System.out.println("BEF "+physicsVehicle.getActivationState());
-       // physicsVehicle.setEnableSleep(false);Pos
-       //System.out.println("AFT "+physicsVehicle.getActivationState());
+        // physicsVehicle.setEnableSleep(false);Pos
+        //System.out.println("AFT "+physicsVehicle.getActivationState());
     }
 
     @Override
     public void setForceActivation(boolean force) {
-        if(EnginePhysicsHandler.inTestFullGo)
+        if (EnginePhysicsHandler.inTestFullGo)
             force = true;
         super.setForceActivation(force);
         forceActivation = force;

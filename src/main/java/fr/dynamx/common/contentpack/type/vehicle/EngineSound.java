@@ -8,8 +8,7 @@ import fr.dynamx.api.contentpack.registry.PackFileProperty;
  *
  * @see SoundListInfo
  */
-public class EngineSound implements INamedObject
-{
+public class EngineSound implements INamedObject {
     private static int lastId;
 
     private final String packName;
@@ -17,19 +16,18 @@ public class EngineSound implements INamedObject
 
     /**
      * RPM range of this sound (array containing the min and the max) <br>
-     *     OR if it's the starting sound, equals to {-1}
+     * OR if it's the starting sound, equals to {-1}
      */
     @PackFileProperty(configNames = "RPMRange")
-    private int[] rpmRange;
+    private final int[] rpmRange;
     @PackFileProperty(configNames = "Sound")
     private String soundName;
     @PackFileProperty(configNames = "PitchRange", required = false)
-    private float[] pitchRange = new float[] {0.5f, 2.0f};
+    private final float[] pitchRange = new float[]{0.5f, 2.0f};
 
     private boolean isInterior;
 
-    public EngineSound(String packName, int[] rpmRange)
-    {
+    public EngineSound(String packName, int[] rpmRange) {
         id = lastId;
         lastId++;
         this.packName = packName;
@@ -39,8 +37,7 @@ public class EngineSound implements INamedObject
     /**
      * @return True if it's not a normal EngineSound with min and max rpm
      */
-    public boolean isSpecialSound()
-    {
+    public boolean isSpecialSound() {
         return rpmRange.length == 1;
     }
 
@@ -66,7 +63,7 @@ public class EngineSound implements INamedObject
 
     @Override
     public String getName() {
-        return "EngineSound_"+soundName;
+        return "EngineSound_" + soundName;
     }
 
     @Override

@@ -8,8 +8,7 @@ import fr.dynamx.api.obj.IObjObject;
 /**
  * Structure of an {@link IObjObject}
  */
-public class Mesh
-{
+public class Mesh {
     public int[] indices;
     public Vertex[] vertices;
     public Material[] materials;
@@ -62,12 +61,12 @@ public class Mesh
     public Vector3f getDimension() {
         Vector3f max = max();
         Vector3f min = min();
-        return new Vector3f((max.x - min.x)/2, (max.y - min.y)/2, (max.z - min.z)/2);
+        return new Vector3f((max.x - min.x) / 2, (max.y - min.y) / 2, (max.z - min.z) / 2);
     }
 
     public void addCollisionShape(CompoundCollisionShape to, Vector3f objectScale) {
         Vector3f half = getDimension().multLocal(objectScale);
-        if(half.x != 0 || half.y != 0 || half.z != 0) {
+        if (half.x != 0 || half.y != 0 || half.z != 0) {
             to.addChildShape(new BoxCollisionShape(half), getCenter());
         }
     }

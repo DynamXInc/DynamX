@@ -7,8 +7,7 @@ import fr.dynamx.common.entities.vehicles.CaterpillarEntity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 
-public class ItemCaterpillar<T extends ModularVehicleInfo<?>> extends ItemCar<T>
-{
+public class ItemCaterpillar<T extends ModularVehicleInfo<?>> extends ItemCar<T> {
     public ItemCaterpillar(T modularVehicleInfo) {
         super(modularVehicleInfo);
     }

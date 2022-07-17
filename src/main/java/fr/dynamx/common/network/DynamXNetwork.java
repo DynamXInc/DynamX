@@ -77,7 +77,7 @@ public class DynamXNetwork {
         registerMessage(channel, MessagePacksHashs.HandlerServer.class, MessagePacksHashs.class, Side.SERVER);
         registerMessage(channel, MessageEntityInteract.class, MessageEntityInteract.class, Side.SERVER);
         registerMessage(channel, MessagePickObject.class, MessagePickObject.class, Side.SERVER);
-        registerMessage(channel, MessageOpenDoor.class, MessageOpenDoor.class, Side.SERVER);
+        registerMessage(channel, MessageChangeDoorState.class, MessageChangeDoorState.class, Side.SERVER);
         registerMessage(channel, MessageSyncBlockCustomization.class, MessageSyncBlockCustomization.class, Side.SERVER);
         registerMessage(channel, MessageSlopesConfigGui.class, MessageSlopesConfigGui.class, Side.SERVER);
         registerMessage(channel, MessageDebugRequest.class, MessageDebugRequest.class, Side.SERVER);

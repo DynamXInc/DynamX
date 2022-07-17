@@ -2,12 +2,17 @@ package fr.dynamx.common.entities.vehicles;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.IModuleContainer;
-import fr.dynamx.api.entities.modules.*;
+import fr.dynamx.api.entities.modules.IEngineModule;
+import fr.dynamx.api.entities.modules.ISeatsModule;
+import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.physics.entities.IPropulsionHandler;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.entities.modules.*;
+import fr.dynamx.common.entities.modules.DoorsModule;
+import fr.dynamx.common.entities.modules.EngineModule;
+import fr.dynamx.common.entities.modules.SeatsModule;
+import fr.dynamx.common.entities.modules.WheelsModule;
 import fr.dynamx.common.physics.entities.BaseWheeledVehiclePhysicsHandler;
 import net.minecraft.world.World;
 
@@ -15,8 +20,7 @@ import javax.annotation.Nonnull;
 
 public class CarEntity<T extends CarEntity.CarPhysicsHandler<?>> extends BaseVehicleEntity<T> implements
         IModuleContainer.IEngineContainer, IModuleContainer.IPropulsionContainer<WheelsModule>,
-        IModuleContainer.ISeatsContainer, IModuleContainer.IDoorContainer
-{
+        IModuleContainer.ISeatsContainer, IModuleContainer.IDoorContainer {
     private IEngineModule<?> engine;
     private ISeatsModule seats;
     private WheelsModule propulsion;
@@ -73,7 +77,7 @@ public class CarEntity<T extends CarEntity.CarPhysicsHandler<?>> extends BaseVeh
     @Nonnull
     @Override
     public ISeatsModule getSeats() {
-        if(seats == null) //We may need seats before modules are created, because of seats sync
+        if (seats == null) //We may need seats before modules are created, because of seats sync
             seats = new SeatsModule(this);
         return seats;
     }
@@ -83,8 +87,7 @@ public class CarEntity<T extends CarEntity.CarPhysicsHandler<?>> extends BaseVeh
         return this;
     }
 
-    public static class CarPhysicsHandler<A extends CarEntity<?>> extends BaseWheeledVehiclePhysicsHandler<A>
-    {
+    public static class CarPhysicsHandler<A extends CarEntity<?>> extends BaseWheeledVehiclePhysicsHandler<A> {
         public CarPhysicsHandler(A entity) {
             super(entity);
         }

@@ -6,8 +6,7 @@ import com.jme3.bullet.PhysicsSoftSpace;
  * The physics simulation mode <br>
  * It changes the precision of the physics in favor (or not) of the game performance (to reduce the lag)
  */
-public interface IPhysicsSimulationMode
-{
+public interface IPhysicsSimulationMode {
     /**
      * Updates the bullet's physics world
      *

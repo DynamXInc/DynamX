@@ -3,8 +3,7 @@ package fr.dynamx.api.physics.entities;
 /**
  * The physics state of the entity
  */
-public enum EntityPhysicsState
-{
+public enum EntityPhysicsState {
     /**
      * Enable physics
      */

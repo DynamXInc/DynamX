@@ -2,14 +2,18 @@ package fr.dynamx.common.entities.vehicles;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.IModuleContainer;
-import fr.dynamx.api.entities.modules.*;
+import fr.dynamx.api.entities.modules.IEngineModule;
+import fr.dynamx.api.entities.modules.IPropulsionModule;
+import fr.dynamx.api.entities.modules.ISeatsModule;
+import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.physics.entities.IPropulsionHandler;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.ModularVehicleInfo;
 import fr.dynamx.common.contentpack.parts.PartFloat;
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.entities.modules.*;
+import fr.dynamx.common.entities.modules.BoatEngineModule;
+import fr.dynamx.common.entities.modules.SeatsModule;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.Vector3fPool;
@@ -18,8 +22,7 @@ import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
 
-public class BoatEntity<T extends BoatEntity.BoatPhysicsHandler<?>> extends BaseVehicleEntity<T> implements IModuleContainer.IEngineContainer, IModuleContainer.IPropulsionContainer, IModuleContainer.ISeatsContainer
-{
+public class BoatEntity<T extends BoatEntity.BoatPhysicsHandler<?>> extends BaseVehicleEntity<T> implements IModuleContainer.IEngineContainer, IModuleContainer.IPropulsionContainer, IModuleContainer.ISeatsContainer {
     private IEngineModule engine;
     private ISeatsModule seats;
     private IPropulsionModule propulsion;
@@ -63,7 +66,7 @@ public class BoatEntity<T extends BoatEntity.BoatPhysicsHandler<?>> extends Base
     @Nonnull
     @Override
     public ISeatsModule getSeats() {
-        if(seats == null) //We may need seats before modules are created, because of seats sync
+        if (seats == null) //We may need seats before modules are created, because of seats sync
             seats = new SeatsModule(this);
         return seats;
     }
@@ -81,8 +84,7 @@ public class BoatEntity<T extends BoatEntity.BoatPhysicsHandler<?>> extends Base
     public static Vector3f[] ntm = new Vector3f[10];
     public static Vector3f[] ntmdrag = new Vector3f[10];
 
-    public static class BoatPhysicsHandler<A extends BoatEntity<?>> extends BaseVehiclePhysicsHandler<A>
-    {
+    public static class BoatPhysicsHandler<A extends BoatEntity<?>> extends BaseVehiclePhysicsHandler<A> {
         public BoatPhysicsHandler(A entity) {
             super(entity);
             //getPhysicsVehicle().setAngularFactor(0);
@@ -103,23 +105,21 @@ public class BoatEntity<T extends BoatEntity.BoatPhysicsHandler<?>> extends Base
             {
                 //forces.add(new Force(dragForce, Vector3fPool.get()));
                 int i = 0;
-                System.out.println("=== === Linear vel "+getLinearVelocity()+" === === Angular vel "+getAngularVelocity()+" === ===");
-                for(PartFloat f : packInfo.getPartsByType(PartFloat.class))
-                {
+                System.out.println("=== === Linear vel " + getLinearVelocity() + " === === Angular vel " + getAngularVelocity() + " === ===");
+                for (PartFloat f : packInfo.getPartsByType(PartFloat.class)) {
                     MutableBoundingBox bb = new MutableBoundingBox(f.box);
                     bb = DynamXContext.getCollisionHandler().rotateBB(Vector3fPool.get(), bb, getRotation());
-                    double dy = (float) (40-(getPosition().y+bb.minY));
+                    double dy = (float) (40 - (getPosition().y + bb.minY));
                     Vector3f p = f.getPosition();
                     Vector3f forcer = new Vector3f();
 
                     Vector3f drag = DynamXPhysicsHelper.getVelocityAtPoint(getLinearVelocity(), getAngularVelocity(), p);
                     ntm[i] = drag;
-                    System.out.println("["+i+"] Speed is "+drag);
-                    if(dy > 0)
-                    {
-                        dy = Math.min(dy, Math.sqrt((bb.maxY-bb.minY)*(bb.maxY-bb.minY)));
+                    System.out.println("[" + i + "] Speed is " + drag);
+                    if (dy > 0) {
+                        dy = Math.min(dy, Math.sqrt((bb.maxY - bb.minY) * (bb.maxY - bb.minY)));
                         p.y = (float) bb.minY;
-                        double vol = dy * Math.sqrt((bb.maxX-bb.minX)*(bb.maxX-bb.minX)) * Math.sqrt((bb.maxZ-bb.minZ)*(bb.maxZ-bb.minZ));
+                        double vol = dy * Math.sqrt((bb.maxX - bb.minX) * (bb.maxX - bb.minX)) * Math.sqrt((bb.maxZ - bb.minZ) * (bb.maxZ - bb.minZ));
                         //System.out.println(bb+" "+vol+" "+DynamXMain.physicsWorld.getDynamicsWorld().getGravity(new Vector3f()).multLocal((float) (-1000*vol)));
                   /*      Force fr = new Force(DynamXMain.physicsWorld.getDynamicsWorld().getGravity(new Vector3f()).multLocal((float) (-vol*1000)), p);
                         //fr = new Force(DynamXMain.physicsWorld.getDynamicsWorld().getGravity(new Vector3f()).multLocal(-(packInfo.getEmptyMass()+10)), new Vector3f());
@@ -129,13 +129,13 @@ public class BoatEntity<T extends BoatEntity.BoatPhysicsHandler<?>> extends Base
                         //SHOULD NOT BE COMMENTED drag = DynamXPhysicsHelper.getWaterDrag(drag, getPackInfo().getDragFactor());
                     }
                     //else
-                        //SHOULD NOT BE COMMENTED drag = DynamXPhysicsHelper.getAirDrag(drag, getPackInfo().getDragFactor());
+                    //SHOULD NOT BE COMMENTED drag = DynamXPhysicsHelper.getAirDrag(drag, getPackInfo().getDragFactor());
                     drag.multLocal(0.025f);
                     getCollisionObject().applyImpulse(drag, p);
                     ntmdrag[i] = drag;
-                    ntmdrag[i+5] = new Vector3f();
-                    ntmdrag[i+5].set(forcer);
-                    ntmdrag[i+5].multLocal(0.01f);
+                    ntmdrag[i + 5] = new Vector3f();
+                    ntmdrag[i + 5].set(forcer);
+                    ntmdrag[i + 5].multLocal(0.01f);
 
                     //Vector3f dragVect = new Vector3f();
                     //Vector3f surfVelVec = new Vector3f();
@@ -188,7 +188,7 @@ public class BoatEntity<T extends BoatEntity.BoatPhysicsHandler<?>> extends Base
                         ntmdrag[i+5] = new Vector3f();
                         ntmdrag[i+5].set(forcer);*/
                     }
-                    System.out.println("["+i+"] Apply force = "+forcer+" // drag = "+drag+" // at = "+p);
+                    System.out.println("[" + i + "] Apply force = " + forcer + " // drag = " + drag + " // at = " + p);
                     i++;
                 }
                 //System.out.println(DynamXMain.physicsWorld.getDynamicsWorld().getGravity(Vector3fPool.get())+" "+packInfo.getEmptyMass());

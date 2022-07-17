@@ -3,8 +3,7 @@ package fr.dynamx.api.contentpack.object;
 /**
  * An object coming from a pack : has a name and a pack name
  */
-public interface INamedObject
-{
+public interface INamedObject {
     /**
      * @return The name of the object
      */
@@ -19,7 +18,7 @@ public interface INamedObject
      * @return A name composed with the packName and name, should be unique
      */
     default String getFullName() {
-        return getPackName()+"."+getName();
+        return getPackName() + "." + getName();
     }
 
     /**
@@ -27,5 +26,6 @@ public interface INamedObject
      *
      * @param hotReload If it's an hot reload
      */
-    default void onComplete(boolean hotReload){}
+    default void onComplete(boolean hotReload) {
+    }
 }

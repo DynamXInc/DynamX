@@ -17,8 +17,7 @@ import java.util.Map;
 /**
  * Wheel contained in a wheel file
  */
-public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements ISubInfoType<PartWheelInfo>, IObjPackObject, INamedObject
-{
+public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements ISubInfoType<PartWheelInfo>, IObjPackObject, INamedObject {
     private final String packName;
     private final String partName;
 
@@ -49,10 +48,10 @@ public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IS
     @PackFileProperty(configNames = "WheelsDampingCompression")
     private float wheelsDampingCompression;
     @PackFileProperty(configNames = "SkidParticle", required = false)
-    private EnumParticleTypes skidParticle = EnumParticleTypes.SMOKE_NORMAL;
+    private final EnumParticleTypes skidParticle = EnumParticleTypes.SMOKE_NORMAL;
 
     @PackFileProperty(configNames = "ScaleModifier", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false)
-    private Vector3f scaleModifier = new Vector3f(1,1,1);
+    private final Vector3f scaleModifier = new Vector3f(1, 1, 1);
 
     @PackFileProperty(configNames = "Textures", required = false, type = DefinitionType.DynamXDefinitionTypes.STRING_ARRAY_2D, defaultValue = "\"Textures: DynamX\"")
     private String[][] texturesArray;
@@ -75,25 +74,26 @@ public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IS
 
     @Override
     public String getFullName() {
-        return getPackName() +"."+ getPartName();
+        return getPackName() + "." + getPartName();
     }
 
     @Override //A sub info types owner is an info type himself (it is THE root owning all properties)
-    public void appendTo(PartWheelInfo owner) {}
+    public void appendTo(PartWheelInfo owner) {
+    }
 
     @Override
     public void onComplete(boolean hotReload) {
-        if(handBrakeForce == -1)
+        if (handBrakeForce == -1)
             handBrakeForce = wheelBrakeForce * 2;
         wheelRadius = getWheelRadius() * getScaleModifier().z;
         wheelWidth = getWheelWidth() * getScaleModifier().x;
     }
 
     private void computeTextures() {
-        if(bakedTextures == null) {
+        if (bakedTextures == null) {
             bakedTextures = new HashMap<>();
             bakedTextures.put((byte) 0, new TextureData("Default", (byte) 0, ""));
-            if(texturesArray != null) {
+            if (texturesArray != null) {
                 byte id = 1;
                 for (String[] s : texturesArray) {
                     bakedTextures.put(id, new TextureData(s[0], id));
@@ -112,7 +112,7 @@ public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IS
     public byte getIdForTexture(String textureName) {
         computeTextures();
         for (byte i = 0; i < bakedTextures.size(); i++) {
-            if(bakedTextures.get(i).getName().equalsIgnoreCase(textureName))
+            if (bakedTextures.get(i).getName().equalsIgnoreCase(textureName))
                 return i;
         }
         return 0;
@@ -201,6 +201,6 @@ public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IS
 
     @Override
     public String toString() {
-        return "PartWheelInfo named "+getFullName();
+        return "PartWheelInfo named " + getFullName();
     }
 }

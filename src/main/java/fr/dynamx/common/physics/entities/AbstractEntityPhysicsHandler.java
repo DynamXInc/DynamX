@@ -59,7 +59,7 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
         this.spawnRotationAngle = entity.rotationYaw;
         this.physicsPosition = new Vector3f((float) entity.posX, (float) entity.posY, (float) entity.posZ);
         if (CONSTRUYE_DEBUG)
-            System.out.println("Init with spqr "+spawnRotationAngle+" "+Math.toRadians(-spawnRotationAngle));
+            System.out.println("Init with spqr " + spawnRotationAngle + " " + Math.toRadians(-spawnRotationAngle));
         this.physicsRotation = new Quaternion(DynamXGeometry.rotationYawToQuaternion(spawnRotationAngle));
 
         collisionObject = createShape(physicsPosition, physicsRotation, spawnRotationAngle);

@@ -4,9 +4,7 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.network.EnumNetworkType;
 import fr.dynamx.api.network.IDnxPacket;
 import fr.dynamx.common.blocks.TEDynamXBlock;
-import fr.dynamx.common.obj.ObjModelServer;
 import fr.dynamx.utils.DynamXUtils;
-import fr.dynamx.utils.physics.ShapeUtils;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -18,7 +16,8 @@ public class MessageSyncBlockCustomization implements IDnxPacket, IMessageHandle
     private BlockPos blockPos;
     private Vector3f relativeTranslation, relativeScale, relativeRotation;
 
-    public MessageSyncBlockCustomization() {}
+    public MessageSyncBlockCustomization() {
+    }
 
     public MessageSyncBlockCustomization(BlockPos blockPos, Vector3f relativeTranslation, Vector3f relativeScale, Vector3f relativeRotation) {
         this.blockPos = blockPos;
@@ -48,8 +47,7 @@ public class MessageSyncBlockCustomization implements IDnxPacket, IMessageHandle
         World world = ctx.getServerHandler().player.world;
         TEDynamXBlock te = (TEDynamXBlock) ctx.getServerHandler().player.world.getTileEntity(message.blockPos);
         if (te != null) {
-            if(ctx.getServerHandler().player.canUseCommand(4, "dynamx block_customization"))
-            {
+            if (ctx.getServerHandler().player.canUseCommand(4, "dynamx block_customization")) {
                 te.setRelativeTranslation(message.relativeTranslation);
                 te.setRelativeScale(message.relativeScale);
                 te.setRelativeRotation(message.relativeRotation);

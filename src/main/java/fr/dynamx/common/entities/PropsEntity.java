@@ -16,8 +16,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PropsEntity<T extends PackEntityPhysicsHandler<PropObject<?>, ?>> extends PackPhysicsEntity<T, PropObject<?>> implements IMovableModuleContainer
-{
+public class PropsEntity<T extends PackEntityPhysicsHandler<PropObject<?>, ?>> extends PackPhysicsEntity<T, PropObject<?>> implements IMovableModuleContainer {
     private final List<MutableBoundingBox> unrotatedBoxes = new ArrayList<>();
 
     public PropsEntity(World worldIn) {
@@ -36,7 +35,7 @@ public class PropsEntity<T extends PackEntityPhysicsHandler<PropObject<?>, ?>> e
     @Override
     public void onUpdate() {
         super.onUpdate();
-        if(getPackInfo() != null) {
+        if (getPackInfo() != null) {
             if (getPackInfo().getDespawnTime() != -1) {
                 if ((ticksExisted % getPackInfo().getDespawnTime()) == 0) {
                     setDead();

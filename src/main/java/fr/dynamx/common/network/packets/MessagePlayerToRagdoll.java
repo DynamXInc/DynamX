@@ -18,7 +18,8 @@ public class MessagePlayerToRagdoll implements IDnxPacket, IMessageHandler<Messa
 
     private Vector3f velocity;
 
-    public MessagePlayerToRagdoll() {}
+    public MessagePlayerToRagdoll() {
+    }
 
     public MessagePlayerToRagdoll(Vector3f velocity) {
         this.velocity = velocity;
@@ -39,9 +40,9 @@ public class MessagePlayerToRagdoll implements IDnxPacket, IMessageHandler<Messa
         Vector3fPool.openPool();
         EntityPlayerMP player = ctx.getServerHandler().player;
         RagdollEntity ragdollEntity = new RagdollEntity(player.world, DynamXUtils.toVector3f(player.getPositionVector().add(0, player.getDefaultEyeHeight(), 0)),
-                player.rotationYaw + 180, player.getName(), (short)-1, player);
-        ragdollEntity.setPhysicsInitCallback((a,b) -> {
-            if(b != null && b.getCollisionObject() != null) {
+                player.rotationYaw + 180, player.getName(), (short) -1, player);
+        ragdollEntity.setPhysicsInitCallback((a, b) -> {
+            if (b != null && b.getCollisionObject() != null) {
                 ((PhysicsRigidBody) b.getCollisionObject()).setLinearVelocity(message.velocity);
             }
         });

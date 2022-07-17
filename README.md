@@ -29,7 +29,7 @@ dependencies {
 
 ## Contribution
 
-In order to setup DynamX workspace you just need to run 
+In order to setup DynamX workspace you just need to run
 ```gradle
 gradlew setupDecompWorkspace
 ```

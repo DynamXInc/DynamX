@@ -74,7 +74,7 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
 
     @Override
     public String toString() {
-        return "BlockObject named "+getFullName();
+        return "BlockObject named " + getFullName();
     }
 
     public boolean isObj() {

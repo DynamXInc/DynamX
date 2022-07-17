@@ -224,7 +224,7 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
 
     /**
      * @param clazz The class of the parts to return
-     * @param <T> The type of the parts to return
+     * @param <T>   The type of the parts to return
      * @return All the parts of the given type
      */
     public <T extends BasePart<ModularVehicleInfoBuilder>> List<T> getPartsByType(Class<T> clazz) {
@@ -233,7 +233,7 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
 
     /**
      * @param clazz The class of the part to return
-     * @param <T> The type of the part to return
+     * @param <T>   The type of the part to return
      * @return The part with the given type and the given id (wheel index for example), or null
      */
     public <T extends BasePart<ModularVehicleInfoBuilder>> T getPartByTypeAndId(Class<T> clazz, byte id) {
@@ -242,7 +242,7 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
 
     /**
      * @param clazz The class of the ISubInfoTypes to returns
-     * @param <T> The type of the ISubInfoTypes to return
+     * @param <T>   The type of the ISubInfoTypes to return
      * @return All the ISubInfoTypes of the given type
      */
     public <T extends ISubInfoType<ModularVehicleInfoBuilder>> T getSubPropertyByType(Class<T> clazz) {
@@ -273,7 +273,7 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
     @Override
     public Map<Byte, TextureData> getTexturesFor(IObjObject object) {
         PartLightSource.CompoundLight src = getLightSource(object.getName());
-        if(src != null) {
+        if (src != null) {
             Map<Byte, TextureData> ret = new HashMap<>();
             ret.put((byte) 0, new TextureData("Default", (byte) 0));
             List<PartLightSource> sources = src.getSources();
@@ -344,6 +344,6 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
 
     @Override
     public String toString() {
-        return "ModularVehicleInfo named "+getFullName();
+        return "ModularVehicleInfo named " + getFullName();
     }
 }

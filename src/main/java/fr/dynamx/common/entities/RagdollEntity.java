@@ -49,11 +49,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> implements AttachedBodySynchronizedVariable.AttachedBodySynchronizer
-{
+public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> implements AttachedBodySynchronizedVariable.AttachedBodySynchronizer {
     private static final DataParameter<String> SKIN = EntityDataManager.createKey(RagdollEntity.class, DataSerializers.STRING);
 
-    public static final Vector3f HEAD_BOX_SIZE = new Vector3f(0.25f,0.25f ,0.25f);
+    public static final Vector3f HEAD_BOX_SIZE = new Vector3f(0.25f, 0.25f, 0.25f);
     public static final Vector3f CHEST_BOX_SIZE = new Vector3f(0.24f, 0.375f, 0.129f);
     public static final Vector3f LIMB_BOX_SIZE = new Vector3f(0.129f, 0.375f, 0.129f);
 
@@ -78,11 +77,11 @@ public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> imple
     private final MovableModule movableModule = new MovableModule(this);
 
     //private final NonNullList<ItemStack> inventoryHands = NonNullList.<ItemStack>withSize(2, ItemStack.EMPTY);
-    private final NonNullList<ItemStack> inventoryArmor = NonNullList.<ItemStack>withSize(4, ItemStack.EMPTY);
+    private final NonNullList<ItemStack> inventoryArmor = NonNullList.withSize(4, ItemStack.EMPTY);
     //private final NonNullList<ItemStack> handInventory = NonNullList.withSize(2, ItemStack.EMPTY);
     private final NonNullList<ItemStack> armorArray = NonNullList.withSize(4, ItemStack.EMPTY);
 
-    public RagdollEntity(World world){
+    public RagdollEntity(World world) {
         super(world);
         this.handlingTime = -1;
         this.handledPlayer = null;
@@ -97,7 +96,7 @@ public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> imple
         this.handlingTime = handlingTime;
         this.handledPlayer = handledPlayer;
         setSkin(skin);
-        if(handledPlayer != null) {
+        if (handledPlayer != null) {
             setHandledPlayer(handledPlayer.getEntityId());
             NonNullList<ItemStack> armorInventory = handledPlayer.inventory.armorInventory;
             for (int i = 0; i < armorInventory.size(); i++) {
@@ -142,10 +141,9 @@ public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> imple
     @Override
     public boolean initEntityProperties() {
         super.initEntityProperties();
-        for(EnumRagdollBodyPart part : EnumRagdollBodyPart.values())
-        {
+        for (EnumRagdollBodyPart part : EnumRagdollBodyPart.values()) {
             RigidBodyTransform t = new RigidBodyTransform();
-            Quaternion localQuat = new Quaternion().fromAngleNormalAxis((float) Math.toRadians(-rotationYaw), new Vector3f(0,1,0));
+            Quaternion localQuat = new Quaternion().fromAngleNormalAxis((float) Math.toRadians(-rotationYaw), new Vector3f(0, 1, 0));
             Vector3f pos = DynamXGeometry.rotateVectorByQuaternion(part.getChestAttachPoint(), localQuat);
             t.setPosition(physicsPosition.add(pos));
             t.setRotation(localQuat);
@@ -201,7 +199,7 @@ public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> imple
     public <D extends IPhysicsModule<?>> D getModuleByType(Class<D> attachModuleClass) {
         if (attachModuleClass.hashCode() == RagdollJointsHandler.class.hashCode()) {
             return (D) attachModule;
-        }else if(attachModuleClass == MovableModule.class)
+        } else if (attachModuleClass == MovableModule.class)
             return (D) movableModule;
         return null;
     }
@@ -220,10 +218,10 @@ public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> imple
 
     @Override
     public void onRemovedFromWorld() {
-        if(handledPlayer != null) {
+        if (handledPlayer != null) {
             handledPlayer.eyeHeight = handledPlayer.getDefaultEyeHeight();
             handledPlayer.setInvisible(false);
-            if(handledPlayer.getRidingEntity() == null && !DynamXContext.getWalkingPlayers().containsKey(handledPlayer))
+            if (handledPlayer.getRidingEntity() == null && !DynamXContext.getWalkingPlayers().containsKey(handledPlayer))
                 DynamXContext.getPlayerToCollision().get(handledPlayer).addToWorld();
         }
         handler.onRemovedFromWorld();
@@ -233,7 +231,7 @@ public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> imple
     @Override
     public List<ResourceLocation> getSynchronizedVariables(Side side, SimulationHolder simulationHolder) {
         List<ResourceLocation> r = super.getSynchronizedVariables(side, simulationHolder);
-        if(simulationHolder.isPhysicsAuthority(side)) {
+        if (simulationHolder.isPhysicsAuthority(side)) {
             r.add(RagdollPartsSynchronizedVariable.NAME);
         }
         return r;
@@ -253,20 +251,18 @@ public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> imple
     public void onUpdate() {
         super.onUpdate();
         handler.updateEntity();
-        if(handledPlayer != null && handlingTime > 0) {
+        if (handledPlayer != null && handlingTime > 0) {
             handlingTime--;
-            if(handlingTime == 0) {
+            if (handlingTime == 0) {
                 handlingTime = -1;
                 setDead();
             }
         }
-        if(!world.isRemote) {
-            for (EntityEquipmentSlot entityequipmentslot : EntityEquipmentSlot.values())
-            {
+        if (!world.isRemote) {
+            for (EntityEquipmentSlot entityequipmentslot : EntityEquipmentSlot.values()) {
                 ItemStack itemstack;
 
-                switch (entityequipmentslot.getSlotType())
-                {
+                switch (entityequipmentslot.getSlotType()) {
                     case HAND:
                         //itemstack = this.handInventory.get(entityequipmentslot.getIndex());
                         itemstack = ItemStack.EMPTY;
@@ -280,14 +276,12 @@ public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> imple
 
                 ItemStack itemstack1 = this.getItemStackFromSlot(entityequipmentslot);
 
-                if (!ItemStack.areItemStacksEqual(itemstack1, itemstack))
-                {
+                if (!ItemStack.areItemStacksEqual(itemstack1, itemstack)) {
                     if (!ItemStack.areItemStacksEqualUsingNBTShareTag(itemstack1, itemstack)) {
                         ((WorldServer) this.world).getEntityTracker().sendToTracking(this, new SPacketEntityEquipment(this.getEntityId(), entityequipmentslot, itemstack1));
                     }
 
-                    switch (entityequipmentslot.getSlotType())
-                    {
+                    switch (entityequipmentslot.getSlotType()) {
                         case HAND:
                             //this.handInventory.set(entityequipmentslot.getIndex(), itemstack1.isEmpty() ? ItemStack.EMPTY : itemstack1.copy());
                             break;
@@ -298,16 +292,16 @@ public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> imple
             }
         }
 
-        if(world.isRemote){
-            if(handledPlayer == null){
+        if (world.isRemote) {
+            if (handledPlayer == null) {
                 Entity entityByID = world.getEntityByID(getHandledPlayer());
-                if(entityByID instanceof EntityPlayer)
+                if (entityByID instanceof EntityPlayer)
                     handledPlayer = (EntityPlayer) entityByID;
             }
         }
 
 
-        if(handledPlayer != null){
+        if (handledPlayer != null) {
             handledPlayer.motionX = 0;
             handledPlayer.motionY = 0;
             handledPlayer.motionZ = 0;
@@ -319,8 +313,7 @@ public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> imple
     @Override
     public void updateMinecraftPos() {
         super.updateMinecraftPos();
-        for(EnumRagdollBodyPart part : EnumRagdollBodyPart.values())
-        {
+        for (EnumRagdollBodyPart part : EnumRagdollBodyPart.values()) {
             transforms.get((byte) part.ordinal()).updatePos();
         }
     }
@@ -329,9 +322,8 @@ public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> imple
     public void preUpdatePhysics(boolean simulatingPhysics) {
         super.preUpdatePhysics(simulatingPhysics);
         movableModule.preUpdatePhysics(simulatingPhysics);
-        if(simulatingPhysics) {
-            for(EnumRagdollBodyPart part : EnumRagdollBodyPart.values())
-            {
+        if (simulatingPhysics) {
+            for (EnumRagdollBodyPart part : EnumRagdollBodyPart.values()) {
                 PhysicsRigidBody body = physicsHandler.getBodyParts().get(part);
                 transforms.get((byte) part.ordinal()).getPhysicTransform().set(body);
             }
@@ -365,17 +357,14 @@ public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> imple
         return this.inventoryHands;
     }*/
 
-    public Iterable<ItemStack> getArmorInventoryList()
-    {
+    public Iterable<ItemStack> getArmorInventoryList() {
         return this.inventoryArmor;
     }
 
-    public ItemStack getItemStackFromSlot(EntityEquipmentSlot slotIn)
-    {
-        switch (slotIn.getSlotType())
-        {
+    public ItemStack getItemStackFromSlot(EntityEquipmentSlot slotIn) {
+        switch (slotIn.getSlotType()) {
             //case HAND:
-              //  return this.inventoryHands.get(slotIn.getIndex());
+            //  return this.inventoryHands.get(slotIn.getIndex());
             case ARMOR:
                 return this.inventoryArmor.get(slotIn.getIndex());
             default:
@@ -384,10 +373,8 @@ public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> imple
     }
 
     @Override
-    public void setItemStackToSlot(EntityEquipmentSlot slotIn, ItemStack stack)
-    {
-        switch (slotIn.getSlotType())
-        {
+    public void setItemStackToSlot(EntityEquipmentSlot slotIn, ItemStack stack) {
+        switch (slotIn.getSlotType()) {
             case HAND:
                 //this.inventoryHands.set(slotIn.getIndex(), stack);
                 break;
@@ -396,8 +383,7 @@ public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> imple
         }
     }
 
-    public static class RagdollJointsHandler implements AttachModule.AttachToSelfModule, IPhysicsModule<EntityPhysicsHandler<?>>
-    {
+    public static class RagdollJointsHandler implements AttachModule.AttachToSelfModule, IPhysicsModule<EntityPhysicsHandler<?>> {
         public static final ResourceLocation JOINT_HANDLER_NAME = new ResourceLocation(DynamXConstants.ID, "ragdoll_parts");
         protected final RagdollEntity entity;
 
@@ -415,7 +401,8 @@ public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> imple
         }
 
         @Override
-        public void onJointDestroyed(EntityJoint<?> joint) {}
+        public void onJointDestroyed(EntityJoint<?> joint) {
+        }
 
         @Override
         public Constraint createJoint(byte jointId) {

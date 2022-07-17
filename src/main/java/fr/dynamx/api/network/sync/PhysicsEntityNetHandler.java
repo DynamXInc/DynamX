@@ -25,11 +25,11 @@ public abstract class PhysicsEntityNetHandler<T extends PhysicsEntity<?>> {
     /**
      * All {@link SynchronizedVariable} received from the network, and that need to be synced with the entity
      */
-    private ConcurrentHashMap<Integer, SynchronizedVariable<T>> inputSyncVars = new ConcurrentHashMap<>(3, 0.75f, 2);
+    private final ConcurrentHashMap<Integer, SynchronizedVariable<T>> inputSyncVars = new ConcurrentHashMap<>(3, 0.75f, 2);
     /**
      * All {@link SynchronizedVariable} to sync with the clients (or with the server if we are the driver)
      */
-    private ConcurrentHashMap<Integer, SynchronizedVariable<T>> outputSyncVars = new ConcurrentHashMap<>(3, 0.75f, 2);
+    private final ConcurrentHashMap<Integer, SynchronizedVariable<T>> outputSyncVars = new ConcurrentHashMap<>(3, 0.75f, 2);
     /**
      * The {@link SimulationHolder} of this entity
      */

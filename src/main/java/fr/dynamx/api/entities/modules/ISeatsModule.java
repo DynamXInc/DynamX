@@ -2,7 +2,6 @@ package fr.dynamx.api.entities.modules;
 
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.network.sync.PhysicsEntityNetHandler;
-import fr.dynamx.client.renders.RenderPhysicsEntity;
 import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.network.sync.MessagePhysicsEntitySync;
@@ -18,8 +17,7 @@ import java.util.Map;
 /**
  * Base of a seat module, all of these methods are called by the {@link BaseVehicleEntity}, if {@link IModuleContainer.ISeatsContainer} is implemented
  */
-public interface ISeatsModule extends IPhysicsModule
-{
+public interface ISeatsModule extends IPhysicsModule {
     @Nullable
     /**
      * The entity controlling this
@@ -38,6 +36,7 @@ public interface ISeatsModule extends IPhysicsModule
 
     /**
      * Client only
+     *
      * @return True if Minecraft.getMinecraft().player is controlling this
      */
     @SideOnly(Side.CLIENT)

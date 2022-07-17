@@ -14,6 +14,7 @@ import fr.dynamx.common.contentpack.type.PartWheelInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
+import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.common.entities.modules.EngineModule;
 import fr.dynamx.common.entities.modules.WheelsModule;
 import fr.dynamx.common.network.sync.MessagePhysicsEntitySync;
@@ -46,8 +47,8 @@ public class VehicleSynchronizedVariables {
         private float[] engineProperties;
         private boolean isEngineStarted;
 
-        private int creationTick;
-        private long creationTime;
+        private final int creationTick;
+        private final long creationTime;
 
         private int lastGetValTick;
         private long lastGetValTime;
@@ -329,8 +330,8 @@ public class VehicleSynchronizedVariables {
         public static final ResourceLocation NAME = new ResourceLocation(DynamXConstants.ID, "visuals");
         private float[] visualProperties;
 
-        private int creationTick;
-        private long creationTime;
+        private final int creationTick;
+        private final long creationTime;
 
         private int lastGetValTick;
         private long lastGetValTime;
@@ -515,7 +516,7 @@ public class VehicleSynchronizedVariables {
     public static class DoorsStatus<A extends PackPhysicsEntity<?, ?>> implements SynchronizedVariable<A> {
         public static final ResourceLocation NAME = new ResourceLocation(DynamXConstants.ID, "doorsstatus");
         //private Map<Byte, Integer> attachedDoors = new HashMap<>();
-        private Map<Byte, Boolean> doorsStatus = new HashMap<>();
+        private final Map<Byte, DoorsModule.DoorState> doorsState = new HashMap<>();
 
         @Override
         public SyncTarget getValueFrom(A entity, PhysicsEntityNetHandler<A> network, Side side, int syncTick) {
@@ -523,11 +524,11 @@ public class VehicleSynchronizedVariables {
             if (entity instanceof BaseVehicleEntity<?>) {
                 if (entity instanceof IModuleContainer.IDoorContainer) {
                     //Detect changes and update values
-                    for (Map.Entry<Byte, Boolean> entry : ((IModuleContainer.IDoorContainer) entity).getDoors().getDoorsState().entrySet()) {
+                    for (Map.Entry<Byte, DoorsModule.DoorState> entry : ((IModuleContainer.IDoorContainer) entity).getDoors().getDoorsState().entrySet()) {
                         Byte i = entry.getKey();
-                        Boolean s = entry.getValue();
-                        if (doorsStatus.get(i) != s) {
-                            doorsStatus.put(i, s);
+                        DoorsModule.DoorState s = entry.getValue();
+                        if (doorsState.get(i) != s) {
+                            doorsState.put(i, s);
                             changed = true;
                         }
                     }
@@ -547,20 +548,21 @@ public class VehicleSynchronizedVariables {
 
         @Override
         public void setValueTo(A vehicleEntity, PhysicsEntityNetHandler<A> network, MessagePhysicsEntitySync msg, Side side) {
-            Map<Byte, Boolean> target = ((IModuleContainer.IDoorContainer) vehicleEntity).getDoors().getDoorsState();
+            Map<Byte, DoorsModule.DoorState> target = ((IModuleContainer.IDoorContainer) vehicleEntity).getDoors().getDoorsState();
             if (true || network.getSimulationHolder() != SimulationHolder.SERVER_SP) {
-                doorsStatus.forEach((i, b) -> {
-                    if (b && (!target.containsKey(i) || !target.get(i))) {
-                        ((IModuleContainer.IDoorContainer) vehicleEntity).getDoors().setDoorState(i, true);
-                    } else if (!b && (target.containsKey(i) && target.get(i))) {
-                        ((IModuleContainer.IDoorContainer) vehicleEntity).getDoors().setDoorState(i, false);
+                doorsState.forEach((i, b) -> {
+                    if (b == DoorsModule.DoorState.OPEN && (!target.containsKey(i) || target.get(i) == DoorsModule.DoorState.CLOSE)) {
+                        ((IModuleContainer.IDoorContainer) vehicleEntity).getDoors().setDoorState(i, DoorsModule.DoorState.OPEN);
+                    } else if (b == DoorsModule.DoorState.CLOSE && (target.containsKey(i) && target.get(i) == DoorsModule.DoorState.OPEN)) {
+                        ((IModuleContainer.IDoorContainer) vehicleEntity).getDoors().setDoorState(i, DoorsModule.DoorState.CLOSE);
                     }
                 });
             } else {
-                doorsStatus.forEach((i, b) -> {
+                doorsState.forEach((i, b) -> {
                     if (b != target.get(i)) {
                         target.put(i, b);
-                        ((IModuleContainer.IDoorContainer) vehicleEntity).getDoors().playDoorSound(!b);
+                        DoorsModule doors = ((IModuleContainer.IDoorContainer) vehicleEntity).getDoors();
+                        doors.playDoorSound(b == DoorsModule.DoorState.OPEN ? DoorsModule.DoorState.CLOSE : DoorsModule.DoorState.OPEN);
                     }
                 });
             }
@@ -570,10 +572,10 @@ public class VehicleSynchronizedVariables {
 
         @Override
         public void write(ByteBuf buf, boolean compress) {
-            buf.writeByte(doorsStatus.size());
-            doorsStatus.forEach((i, s) -> {
+            buf.writeByte(doorsState.size());
+            doorsState.forEach((i, s) -> {
                 buf.writeByte(i);
-                buf.writeBoolean(s);
+                buf.writeInt(s.ordinal());
             });
 
             /*buf.writeByte(attachedDoors.size());
@@ -585,11 +587,11 @@ public class VehicleSynchronizedVariables {
 
         @Override
         public void writeEntityValues(A entity, ByteBuf buf) {
-            Map<Byte, Boolean> target = ((IModuleContainer.IDoorContainer) entity).getDoors().getDoorsState();
+            Map<Byte, DoorsModule.DoorState> target = ((IModuleContainer.IDoorContainer) entity).getDoors().getDoorsState();
             buf.writeByte(target.size());
             target.forEach((i, s) -> {
                 buf.writeByte(i);
-                buf.writeBoolean(s);
+                buf.writeInt(s.ordinal());
             });
         }
 
@@ -597,7 +599,7 @@ public class VehicleSynchronizedVariables {
         public void read(ByteBuf buf) {
             int size = buf.readByte();
             for (int i = 0; i < size; i++) {
-                doorsStatus.put(buf.readByte(), buf.readBoolean());
+                doorsState.put(buf.readByte(), DoorsModule.DoorState.values()[buf.readInt()]);
             }
 
             /*size = buf.readByte();

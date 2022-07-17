@@ -5,13 +5,12 @@ import javax.annotation.Nullable;
 /**
  * Dispatch packets over a specific network type
  */
-public interface IDnxNetworkHandler
-{
+public interface IDnxNetworkHandler {
     /**
      * Sends a packet
      *
      * @param targetType The target type
-     * @param target The target, nullable
+     * @param target     The target, nullable
      */
     <T> void sendPacket(IDnxPacket packet, EnumPacketTarget<T> targetType, @Nullable T target);
 

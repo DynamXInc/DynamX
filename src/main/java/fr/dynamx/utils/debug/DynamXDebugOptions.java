@@ -7,8 +7,7 @@ import java.util.List;
  * All {@link DynamXDebugOption} <br>
  * Feel free to create yours
  */
-public class DynamXDebugOptions
-{
+public class DynamXDebugOptions {
     public static final DynamXDebugOption DEBUG_RENDER = DynamXDebugOption.newServerDependantOption(DebugCategories.GENERAL, "Debug renderer").withSubCategory("DynamX"),
             PROFILING = DynamXDebugOption.newServerDependantOption(DebugCategories.GENERAL, "Profiling").withDescription("Find why DynamX is lagging - prints timings in the logs. May produce lag").withSubCategory("DynamX"),
             PHYSICS_DEBUG = DynamXDebugOption.newOption(DebugCategories.GENERAL, "Bullet physics debug").withDescription("Shows complete rigid bodies and joints debug, may produce lag").withSubCategory("Physics"),
@@ -38,8 +37,7 @@ public class DynamXDebugOptions
     /**
      * DynamX debug categories
      */
-    public enum DebugCategories
-    {
+    public enum DebugCategories {
         GENERAL, TERRAIN, VEHICLES;
 
         private int state;
@@ -67,8 +65,7 @@ public class DynamXDebugOptions
         }
     }
 
-    public enum VehicleDebugTypes
-    {
+    public enum VehicleDebugTypes {
         GENERAL("Main"), COLLISIONS("Collisions"), ATTACH_POINTS("Attach points"), OTHER("Other");
 
         public final String title;

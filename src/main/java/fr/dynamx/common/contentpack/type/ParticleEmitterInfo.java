@@ -10,8 +10,7 @@ import net.minecraft.util.EnumParticleTypes;
 import java.util.Collections;
 import java.util.List;
 
-public class ParticleEmitterInfo<T extends ISubInfoTypeOwner<T> & ParticleEmitterInfo.IParticleEmitterContainer> extends SubInfoType<T>
-{
+public class ParticleEmitterInfo<T extends ISubInfoTypeOwner<T> & ParticleEmitterInfo.IParticleEmitterContainer> extends SubInfoType<T> {
     private final String emitterName;
 
     @PackFileProperty(configNames = "Type", type = DefinitionType.DynamXDefinitionTypes.PARTICLE_TYPE)
@@ -45,9 +44,10 @@ public class ParticleEmitterInfo<T extends ISubInfoTypeOwner<T> & ParticleEmitte
     }
 
     public interface IParticleEmitterContainer {
-        default void addParticleEmitter(ParticleEmitterInfo<?> emitterInfo){}
+        default void addParticleEmitter(ParticleEmitterInfo<?> emitterInfo) {
+        }
 
-        default List<ParticleEmitterInfo<?>> getParticleEmitters(){
+        default List<ParticleEmitterInfo<?>> getParticleEmitters() {
             return Collections.emptyList();
         }
     }

@@ -8,8 +8,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraftforge.common.MinecraftForge;
 
-public class RenderProp<T extends PropsEntity<?>> extends RenderPhysicsEntity<T>
-{
+public class RenderProp<T extends PropsEntity<?>> extends RenderPhysicsEntity<T> {
     public RenderProp(RenderManager manager) {
         super(manager);
         addDebugRenderers(new DebugRenderer.HullDebug());
@@ -29,8 +28,10 @@ public class RenderProp<T extends PropsEntity<?>> extends RenderPhysicsEntity<T>
     }
 
     @Override
-    public void renderParts(T entity, float partialTicks) {}
+    public void renderParts(T entity, float partialTicks) {
+    }
 
     @Override
-    public void spawnParticles(T entity, float partialTicks) {}
+    public void spawnParticles(T entity, float partialTicks) {
+    }
 }

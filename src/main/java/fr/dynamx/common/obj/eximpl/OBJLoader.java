@@ -25,7 +25,7 @@ public class OBJLoader {
     private static final String NEW_GROUP = "g";
     private static final String USE_MATERIAL = "usemtl";
     private static final String NEW_MATERIAL = "mtllib";
-    
+
     private static final List<MtlMaterialLib> materialLibs = new ArrayList<>();
 
     private boolean hasNormals = false;
@@ -39,7 +39,7 @@ public class OBJLoader {
     public static List<MtlMaterialLib> getMaterialLibs() {
         return materialLibs;
     }
-    
+
     public static String[] trim(String[] split) {
         ArrayList<String> strings = new ArrayList<String>();
         for (String s : split)
@@ -50,26 +50,26 @@ public class OBJLoader {
 
     /**
      * Reads an obj models, ignoring mtl files
-     * 
+     *
      * @param objContent Content of the obj file
      */
     public void loadModelServer(IObjObject.ObjObjectProvider objectProvider, String objContent) {
         loadModelClient(objectProvider, null, objContent);
     }
+
     /**
      * Reads an obj models, including mtl files
      *
-     * @param startPath Path of the obj model directory
+     * @param startPath  Path of the obj model directory
      * @param objContent Content of the obj file
      */
-    public void loadModelClient(IObjObject.ObjObjectProvider objectProvider, String startPath, String objContent)
-    {
+    public void loadModelClient(IObjObject.ObjObjectProvider objectProvider, String startPath, String objContent) {
         try {
             hasNormals = true;
             hasTexCoords = true;
             IndexedModel result = new IndexedModel();
             IndexedModel normalModel = new IndexedModel();
-            String lines[] = objContent.split("\n|\r");
+            String[] lines = objContent.split("\n|\r");
 
             int posOffset = 0;
             int indicesOffset = 0;
@@ -137,7 +137,7 @@ public class OBJLoader {
                         }
                     }
                 } catch (Exception e) {
-                    throw new RuntimeException("Error at line "+j, e);
+                    throw new RuntimeException("Error at line " + j, e);
                 }
             }
             result.getObjIndices().addAll(indices);

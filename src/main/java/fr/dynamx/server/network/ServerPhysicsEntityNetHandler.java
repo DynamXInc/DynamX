@@ -39,7 +39,7 @@ public class ServerPhysicsEntityNetHandler<T extends PhysicsEntity<?>> extends P
      */
     private final Queue<MessagePhysicsEntitySync<T>> queuedPackets = Queues.newArrayDeque();
 
-    private Map<Integer, SyncTarget> varsToSync = new HashMap<>();
+    private final Map<Integer, SyncTarget> varsToSync = new HashMap<>();
     private int updateCount = 0;
 
     public ServerPhysicsEntityNetHandler(T entityIn) {

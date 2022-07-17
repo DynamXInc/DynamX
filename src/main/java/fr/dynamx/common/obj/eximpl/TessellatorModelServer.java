@@ -29,7 +29,7 @@ public class TessellatorModelServer extends ObjModelServer {
             new OBJLoader(objObjects).loadModelServer(SimpleObjObject::new, content);
         } catch (Exception e) {
             //Don't remove the throw - Aym
-            throw new RuntimeException("Model " + path + " cannot be loaded ! Has secure loader: "+(mpsClassLoader != null), e);
+            throw new RuntimeException("Model " + path + " cannot be loaded ! Has secure loader: " + (mpsClassLoader != null), e);
         }
     }
 

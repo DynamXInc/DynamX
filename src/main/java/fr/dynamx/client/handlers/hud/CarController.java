@@ -14,15 +14,15 @@ import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.entities.modules.IVehicleController;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.client.camera.CameraSystem;
+import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.contentpack.type.vehicle.EngineInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.common.entities.modules.EngineModule;
-import fr.dynamx.common.network.packets.MessageOpenDoor;
+import fr.dynamx.common.network.packets.MessageChangeDoorState;
 import fr.dynamx.utils.DynamXConstants;
-import fr.dynamx.utils.debug.ClientDebugSystem;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.Minecraft;
@@ -79,10 +79,18 @@ public class CarController implements IVehicleController {
     protected final BaseVehicleEntity<?> entity;
     protected final EngineModule engine;
 
-    @Getter @Setter private boolean accelerating, handbraking, reversing;
-    @Getter @Setter private boolean turningLeft, turningRight, isEngineStarted;
-    @Getter @Setter private float speedLimit;
-    @Getter @Setter private byte onCooldown;
+    @Getter
+    @Setter
+    private boolean accelerating, handbraking, reversing;
+    @Getter
+    @Setter
+    private boolean turningLeft, turningRight, isEngineStarted;
+    @Getter
+    @Setter
+    private float speedLimit;
+    @Getter
+    @Setter
+    private byte onCooldown;
 
     /**
      * @param entity is assumed to implement {@link IModuleContainer.ISeatsContainer}
@@ -144,9 +152,9 @@ public class CarController implements IVehicleController {
                     if (entity instanceof IModuleContainer.IDoorContainer && ((IModuleContainer.IDoorContainer) entity).getDoors() != null) {
                         PartSeat seat = ((IModuleContainer.ISeatsContainer) entity).getSeats().getRidingSeat(MC.player);
                         DoorsModule doors = ((IModuleContainer.IDoorContainer) entity).getDoors();
-                        if(seat.getLinkedPartDoor(entity) == null)
+                        if (seat.getLinkedPartDoor(entity) == null)
                             return;
-                        DynamXContext.getNetwork().sendToServer(new MessageOpenDoor(entity, !doors.isDoorOpened(seat.getLinkedPartDoor(entity).getId())));
+                        DynamXContext.getNetwork().sendToServer(new MessageChangeDoorState(entity, doors.getInverseCurrentState(seat.getLinkedPartDoor(entity).getId()), (byte) -1));
                     }
                     onCooldown = 30;
                 }

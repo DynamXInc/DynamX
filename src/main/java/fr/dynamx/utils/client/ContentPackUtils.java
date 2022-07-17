@@ -149,13 +149,11 @@ public class ContentPackUtils {
     }
 
     public static void registerDynamXBlockStateMapper(IInfoOwner<BlockObject<?>> block) {
-        registerBlockWithStateMapper((Block) block, new StateMapperBase()
-        {
-            protected ModelResourceLocation getModelResourceLocation(IBlockState state)
-            {
-                Map<IProperty<?>, Comparable<? >> map = Maps. < IProperty<?>, Comparable<? >> newLinkedHashMap(state.getProperties());
-                map.put(DynamXBlock.METADATA, ((state.getValue(DynamXBlock.METADATA)+1)/4)%4);
-                return new ModelResourceLocation(DynamXConstants.ID + ":" + ((DynamXBlock<?>)block).getJsonName(state.getValue(DynamXBlock.METADATA)), this.getPropertyString(map));
+        registerBlockWithStateMapper((Block) block, new StateMapperBase() {
+            protected ModelResourceLocation getModelResourceLocation(IBlockState state) {
+                Map<IProperty<?>, Comparable<?>> map = Maps.newLinkedHashMap(state.getProperties());
+                map.put(DynamXBlock.METADATA, ((state.getValue(DynamXBlock.METADATA) + 1) / 4) % 4);
+                return new ModelResourceLocation(DynamXConstants.ID + ":" + ((DynamXBlock<?>) block).getJsonName(state.getValue(DynamXBlock.METADATA)), this.getPropertyString(map));
             }
         });
     }

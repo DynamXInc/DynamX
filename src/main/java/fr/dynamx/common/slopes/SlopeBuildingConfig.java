@@ -12,18 +12,18 @@ import net.minecraft.util.ResourceLocation;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SlopeBuildingConfig implements ISerializable
-{
+public class SlopeBuildingConfig implements ISerializable {
     private int version;
     private EnumFacing facing = EnumFacing.DOWN;
     private int diagDir;
     private boolean enableSlabs;
-    private List<Block> blackList = new ArrayList<>();
+    private final List<Block> blackList = new ArrayList<>();
 
-    public SlopeBuildingConfig() {}
+    public SlopeBuildingConfig() {
+    }
 
     public SlopeBuildingConfig(NBTTagCompound from) {
-        if(!from.isEmpty())
+        if (!from.isEmpty())
             NBTSerializer.unserialize(from, this);
     }
 
@@ -36,8 +36,7 @@ public class SlopeBuildingConfig implements ISerializable
         return enableSlabs;
     }
 
-    public void refresh()
-    {
+    public void refresh() {
         version++;
     }
 
@@ -46,7 +45,7 @@ public class SlopeBuildingConfig implements ISerializable
     }
 
     public int getDiagDir() {
-        if(diagDir != -1 && diagDir != 1)
+        if (diagDir != -1 && diagDir != 1)
             diagDir = 1;
         return diagDir;
     }
@@ -77,19 +76,17 @@ public class SlopeBuildingConfig implements ISerializable
     @Override
     public Object[] getObjectsToSave() {
         List<String> auBlack = new ArrayList<>();
-        for(Block black : blackList)
-        {
+        for (Block black : blackList) {
             auBlack.add(black.getRegistryName().toString());
         }
-        return new Object[] {version, facing.ordinal(), diagDir, enableSlabs, auBlack};
+        return new Object[]{version, facing.ordinal(), diagDir, enableSlabs, auBlack};
     }
 
     @Override
     public void populateWithSavedObjects(Object[] objects) {
         blackList.clear();
         List<String> auBlack = (List<String>) objects[4];
-        for(String loc : auBlack)
-        {
+        for (String loc : auBlack) {
             blackList.add(Block.REGISTRY.getObject(new ResourceLocation(loc)));
         }
         version = (int) objects[0];
@@ -99,9 +96,9 @@ public class SlopeBuildingConfig implements ISerializable
     }
 
     public boolean isValidBlock(IBlockState block) {
-        if(blackList.contains(block.getBlock()))
+        if (blackList.contains(block.getBlock()))
             return false;
-        return enableSlabs || !(block.getBlock() instanceof BlockSlab && !(((BlockSlab)block.getBlock()).isDouble()/* || enableFullSlabs*/));
+        return enableSlabs || !(block.getBlock() instanceof BlockSlab && !(((BlockSlab) block.getBlock()).isDouble()/* || enableFullSlabs*/));
     }
 
     public NBTTagCompound serialize() {

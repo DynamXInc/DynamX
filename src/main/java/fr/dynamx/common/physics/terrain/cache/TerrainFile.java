@@ -14,8 +14,7 @@ import java.util.zip.GZIPOutputStream;
 /**
  * Terrain data cache
  */
-public class TerrainFile extends VirtualTerrainFile
-{
+public class TerrainFile extends VirtualTerrainFile {
     public static boolean ULTIMATEDEBUG;
 
     private static final int VERSION = 6;
@@ -31,23 +30,24 @@ public class TerrainFile extends VirtualTerrainFile
     public TerrainFile(File container) {
         this(container, false);
     }
+
     public TerrainFile(File container, boolean isSlopes) {
-        if(DynamXConfig.enableDebugTerrainManager)
-            DynamXMain.log.info("Chunk debug pos are "+DynamXConfig.chunkDebugPoses);
+        if (DynamXConfig.enableDebugTerrainManager)
+            DynamXMain.log.info("Chunk debug pos are " + DynamXConfig.chunkDebugPoses);
         this.container = container;
         this.version = isSlopes ? SLOPES_VERSION : VERSION;
     }
 
     @Override
     public void lock(VerticalChunkPos pos) {
-        if(ioLoading) {
-            if(ULTIMATEDEBUG) {
-                System.out.println("Got locked on "+this+" "+container.getName()+" at "+pos);
+        if (ioLoading) {
+            if (ULTIMATEDEBUG) {
+                System.out.println("Got locked on " + this + " " + container.getName() + " at " + pos);
             }
             ioLock.lock(); //simply wait until io load end
             ioLock.unlock(); //yes this is ugly
-            if(ULTIMATEDEBUG) {
-                System.out.println("Finished get locked on "+this+" "+container.getName()+" at "+pos);
+            if (ULTIMATEDEBUG) {
+                System.out.println("Finished get locked on " + this + " " + container.getName() + " at " + pos);
             }
         }
         super.lock(pos);
@@ -58,13 +58,13 @@ public class TerrainFile extends VirtualTerrainFile
     }
 
     public void load() throws IOException, ClassNotFoundException {
-        if(ULTIMATEDEBUG) {
-            System.out.println("Locking ! "+this+" "+container.getName());
+        if (ULTIMATEDEBUG) {
+            System.out.println("Locking ! " + this + " " + container.getName());
         }
         ioLock.lock();
         ioLoading = true;
         try {
-            if(container.exists()) {
+            if (container.exists()) {
                 ObjectInputStream in = new ObjectInputStream(new GZIPInputStream(new FileInputStream(container)));
                 short version = in.readShort();
                 if (version >= this.getVersion()) {
@@ -74,13 +74,11 @@ public class TerrainFile extends VirtualTerrainFile
                         putData(pos, (byte[]) in.readObject());
                     }
                     in.close();
-                }
-                else if(version >= 1 && this.version != SLOPES_VERSION) { //Take care if SLOPES_VERSION == VERSION
+                } else if (version >= 1 && this.version != SLOPES_VERSION) { //Take care if SLOPES_VERSION == VERSION
                     in.close();
-                    DynamXMain.log.warn("Outdated chunks collisions file : version "+version+", everything will be erased !");
-                    DynamXMain.log.info("Deleted with success : "+container.delete());
-                }
-                else {
+                    DynamXMain.log.warn("Outdated chunks collisions file : version " + version + ", everything will be erased !");
+                    DynamXMain.log.info("Deleted with success : " + container.delete());
+                } else {
                     in.close();
                     throw new UnsupportedOperationException("Dnx chunk version " + version);
                 }
@@ -90,15 +88,15 @@ public class TerrainFile extends VirtualTerrainFile
         } finally {
             ioLoading = false;
             ioLock.unlock();
-            if(ULTIMATEDEBUG) {
-                System.out.println("Unlocking ! "+this+" "+container.getName());
+            if (ULTIMATEDEBUG) {
+                System.out.println("Unlocking ! " + this + " " + container.getName());
             }
         }
     }
 
     public void save() throws IOException {
-        if(ULTIMATEDEBUG) {
-            System.out.println("SAV Locking ! "+this+" "+container.getName());
+        if (ULTIMATEDEBUG) {
+            System.out.println("SAV Locking ! " + this + " " + container.getName());
         }
         ioLock.lock();
         ioLoading = true;
@@ -107,7 +105,7 @@ public class TerrainFile extends VirtualTerrainFile
             ObjectOutputStream out = new ObjectOutputStream(new GZIPOutputStream(new FileOutputStream(container)));
             out.writeShort(version);
             out.writeInt(dataCache.size());
-            for(Map.Entry<VerticalChunkPos, byte[]> entry : dataCache.entrySet()) {
+            for (Map.Entry<VerticalChunkPos, byte[]> entry : dataCache.entrySet()) {
                 out.writeInt(entry.getKey().x);
                 out.writeInt(entry.getKey().y);
                 out.writeInt(entry.getKey().z);
@@ -119,8 +117,8 @@ public class TerrainFile extends VirtualTerrainFile
         } finally {
             ioLoading = false;
             ioLock.unlock();
-            if(ULTIMATEDEBUG) {
-                System.out.println("SAV Unlocking ! "+this+" "+container.getName());
+            if (ULTIMATEDEBUG) {
+                System.out.println("SAV Unlocking ! " + this + " " + container.getName());
             }
         }
     }

@@ -11,8 +11,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 
-public interface IObjPackObject extends IModelTextureSupplier
-{
+public interface IObjPackObject extends IModelTextureSupplier {
     @SideOnly(Side.CLIENT)
     String getModel();
 

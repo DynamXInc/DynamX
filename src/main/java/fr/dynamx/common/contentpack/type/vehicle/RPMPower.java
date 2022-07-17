@@ -9,8 +9,7 @@ import fr.dynamx.api.contentpack.registry.PackFileProperty;
 /**
  * Power point of the rpm graph of an {@link EngineInfo}
  */
-public class RPMPower extends SubInfoType<EngineInfo>
-{
+public class RPMPower extends SubInfoType<EngineInfo> {
     @PackFileProperty(configNames = "RPMPower", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_0Z)
     private Vector3f rpmPower; //It's a Vector3f because of the Spline
 
@@ -29,6 +28,6 @@ public class RPMPower extends SubInfoType<EngineInfo>
 
     @Override
     public String getName() {
-        return "Point in "+getOwner().getName();
+        return "Point in " + getOwner().getName();
     }
 }

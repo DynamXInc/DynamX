@@ -15,8 +15,7 @@ import net.minecraft.world.World;
  * @deprecated Not used. WIP.
  */
 @Deprecated
-public class SlopesCalculatron
-{
+public class SlopesCalculatron {
     /*
 
 

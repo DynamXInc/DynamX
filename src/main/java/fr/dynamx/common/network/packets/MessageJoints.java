@@ -10,8 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class MessageJoints extends PhysicsEntityMessage<MessageJoints>
-{
+public class MessageJoints extends PhysicsEntityMessage<MessageJoints> {
     private List<EntityJoint.CachedJoint> jointList;
 
     public MessageJoints() {
@@ -27,8 +26,7 @@ public class MessageJoints extends PhysicsEntityMessage<MessageJoints>
     public void toBytes(ByteBuf buf) {
         super.toBytes(buf);
         buf.writeInt(jointList.size());
-        for(EntityJoint.CachedJoint g : jointList)
-        {
+        for (EntityJoint.CachedJoint g : jointList) {
             ByteBufUtils.writeUTF8String(buf, g.getId().toString());
             buf.writeByte(g.getJid());
             ByteBufUtils.writeUTF8String(buf, g.getType().toString());
@@ -41,8 +39,7 @@ public class MessageJoints extends PhysicsEntityMessage<MessageJoints>
         super.fromBytes(buf);
         jointList = new ArrayList<>();
         int size = buf.readInt();
-        for (int i = 0; i < size; i++)
-        {
+        for (int i = 0; i < size; i++) {
             EntityJoint.CachedJoint g = new EntityJoint.CachedJoint(UUID.fromString(ByteBufUtils.readUTF8String(buf)), buf.readByte(),
                     new ResourceLocation(ByteBufUtils.readUTF8String(buf)), buf.readBoolean());
             jointList.add(g);

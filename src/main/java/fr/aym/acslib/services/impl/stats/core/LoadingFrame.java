@@ -4,39 +4,43 @@ import javax.swing.*;
 import java.awt.*;
 
 @SuppressWarnings("serial")
-public class LoadingFrame extends JFrame
-{
-	/** Displayed text */
-	private JLabel mark;
-	/** Displayed progress bar */
-	private JProgressBar indet = new JProgressBar(0, 100);
-	/** Displayed status */
-	public JLabel status = new JLabel("Préparation...");
+public class LoadingFrame extends JFrame {
+    /**
+     * Displayed text
+     */
+    private final JLabel mark;
+    /**
+     * Displayed progress bar
+     */
+    private final JProgressBar indet = new JProgressBar(0, 100);
+    /**
+     * Displayed status
+     */
+    public JLabel status = new JLabel("Préparation...");
 
-	public LoadingFrame(String name, Component parent)
-	{
-	    this.setTitle(name);
-	    this.setSize(300, 100);
-	    this.setResizable(false);
-	    this.setLocationRelativeTo(parent);
-	    //this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    public LoadingFrame(String name, Component parent) {
+        this.setTitle(name);
+        this.setSize(300, 100);
+        this.setResizable(false);
+        this.setLocationRelativeTo(parent);
+        //this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-	    //if(DBootstrap.getFrameType()==1)
-	    {
-	    	mark = new JLabel("Le jeu a crashé, envoi du crash au support");
-		    mark.setFont(new Font("Courrier", Font.TYPE1_FONT, 12));
-		    mark.setForeground(Color.BLACK);
-		    
-		    indet.setIndeterminate(true);
-		    
-		    Box box = Box.createVerticalBox();
-		    
-		    box.add(mark);
-		    box.add(indet);
-		    box.add(status);
-		    
-		    this.getContentPane().add(box);
-	    }
+        //if(DBootstrap.getFrameType()==1)
+        {
+            mark = new JLabel("Le jeu a crashé, envoi du crash au support");
+            mark.setFont(new Font("Courrier", Font.TYPE1_FONT, 12));
+            mark.setForeground(Color.BLACK);
+
+            indet.setIndeterminate(true);
+
+            Box box = Box.createVerticalBox();
+
+            box.add(mark);
+            box.add(indet);
+            box.add(status);
+
+            this.getContentPane().add(box);
+        }
 	    /*else if(DBootstrap.getFrameType()==2)
 	    {
 		    Container content;
@@ -86,8 +90,8 @@ public class LoadingFrame extends JFrame
 				} catch (IOException e) {
 			    	System.out.println("Error during loading icon");
 				}*/
-				//if(DBootstrap.getFrameType()==1)
-				{
+        //if(DBootstrap.getFrameType()==1)
+        {
 				   /* try
 				    {
 						UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -98,8 +102,8 @@ public class LoadingFrame extends JFrame
 				    	e.printStackTrace();
 					}
 				    SwingUtilities.updateComponentTreeUI(LoadingFrame.this);*/
-				}
-			    LoadingFrame.this.setVisible(true);
+        }
+        LoadingFrame.this.setVisible(true);
 			/*}
 		}.start();*/
 	    
@@ -122,13 +126,13 @@ public class LoadingFrame extends JFrame
 					System.exit(0);
 			}
 		});*/
-	}
-	public void setProgressIndeterminated(boolean d)
-	{
-		this.indet.setIndeterminate(d);
-	}
-	public void setProgressValue(int value)
-	{
-		this.indet.setValue(value);
-	}
+    }
+
+    public void setProgressIndeterminated(boolean d) {
+        this.indet.setIndeterminate(d);
+    }
+
+    public void setProgressValue(int value) {
+        this.indet.setValue(value);
+    }
 }

@@ -14,32 +14,27 @@ import java.util.Map;
 
 /**
  * Holds previous states of an entity, to smoothly fix it's position when we receive a sync packet, corresponding to a previous date <br>
- *     Works with {@link PosSynchronizedVariable}
+ * Works with {@link PosSynchronizedVariable}
  */
-public class AttachBodyPhysicsState extends EntityPhysicsState
-{
+public class AttachBodyPhysicsState extends EntityPhysicsState {
     public final Map<Byte, RigidBodyTransform> transforms = new HashMap<>();
 
-    public AttachBodyPhysicsState(PhysicsEntity<?> entityIn)
-    {
+    public AttachBodyPhysicsState(PhysicsEntity<?> entityIn) {
         super(entityIn);
     }
 
-    protected void addToOlders(byte part, Vector3f offsetn, Quaternion offsetQuat, float step)
-    {
+    protected void addToOlders(byte part, Vector3f offsetn, Quaternion offsetQuat, float step) {
         Vector3f finalOffsetn = Vector3fPool.get(offsetn);
         PhysicsEntityNetHandler<? extends PhysicsEntity<?>> h = entityIn.getNetwork();
         h.getOldStates().forEach((i, s) -> {
-            if(i < ClientPhysicsSyncManager.simulationTime)
-            {
-                ((AttachBodyPhysicsState)s).transforms.get(part).getPosition().addLocal(finalOffsetn);
-                DynamXGeometry.slerp(((AttachBodyPhysicsState)s).transforms.get(part).getRotation(), offsetQuat, ((AttachBodyPhysicsState)s).transforms.get(part).getRotation(), step);
+            if (i < ClientPhysicsSyncManager.simulationTime) {
+                ((AttachBodyPhysicsState) s).transforms.get(part).getPosition().addLocal(finalOffsetn);
+                DynamXGeometry.slerp(((AttachBodyPhysicsState) s).transforms.get(part).getRotation(), offsetQuat, ((AttachBodyPhysicsState) s).transforms.get(part).getRotation(), step);
             }
         });
     }
 
-    public void interpolateDeltas(byte part, RigidBodyTransform transform, int step, int pass)
-    {
+    public void interpolateDeltas(byte part, RigidBodyTransform transform, int step, int pass) {
         /*Optional<EntityJoint<?>> joint = entityIn.getJointsHandler().getJoints().stream().filter(e -> e.getJointId() == part).findFirst();
         if(joint.isPresent())
         {

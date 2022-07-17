@@ -4,8 +4,7 @@ import fr.dynamx.api.obj.IObjObject;
 
 import javax.vecmath.Vector3f;
 
-public class SimpleObjObject implements IObjObject
-{
+public class SimpleObjObject implements IObjObject {
     private final Mesh mesh = new Mesh();
     private Vector3f center;
     private final String name;

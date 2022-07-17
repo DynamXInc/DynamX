@@ -27,165 +27,156 @@ import java.util.List;
  * NOT USED. WIP.
  */
 @Deprecated
-public class SlopeTerrainElement implements ITerrainElement
-{
-	protected final List<SlopeFace> slopes = new ArrayList<>();
-	protected MeshCollisionShape shape;
-	private long poolId;
-	protected TerrainDebugData debugData;
+public class SlopeTerrainElement implements ITerrainElement {
+    protected final List<SlopeFace> slopes = new ArrayList<>();
+    protected MeshCollisionShape shape;
+    private long poolId;
+    protected TerrainDebugData debugData;
 
-	public PhysicsRigidBody body;
+    public PhysicsRigidBody body;
 
-	public SlopeTerrainElement() {}
+    public SlopeTerrainElement() {
+    }
 
-	public SlopeTerrainElement(long poolId, Vector3f pos)
-	{
-		this.poolId = poolId;
-		try {
-			Vector3fPool.getPool(poolId, ""+pos).openSubPool();
-		} catch (Exception e) {
-			DynamXMain.log.fatal("Debug info "+poolId+" "+Vector3fPool.get(poolId, ""+pos)+" "+Vector3fPool.getInstances());
-			throw new RuntimeException("Cannot continue, send this to aym", e);
-		}
-	}
+    public SlopeTerrainElement(long poolId, Vector3f pos) {
+        this.poolId = poolId;
+        try {
+            Vector3fPool.getPool(poolId, "" + pos).openSubPool();
+        } catch (Exception e) {
+            DynamXMain.log.fatal("Debug info " + poolId + " " + Vector3fPool.get(poolId, "" + pos) + " " + Vector3fPool.getInstances());
+            throw new RuntimeException("Cannot continue, send this to aym", e);
+        }
+    }
 
-	public List<SlopeFace> getSlopes() {
-		return slopes;
-	}
+    public List<SlopeFace> getSlopes() {
+        return slopes;
+    }
 
-	public long getPoolId() {
-		return poolId;
-	}
+    public long getPoolId() {
+        return poolId;
+    }
 
-	public void addSlope(SlopeFace slope)
-	{
-		slopes.add(slope);
-	}
+    public void addSlope(SlopeFace slope) {
+        slopes.add(slope);
+    }
 
-	public boolean empty()
-	{
-		return slopes.isEmpty();
-	}
+    public boolean empty() {
+        return slopes.isEmpty();
+    }
 
-	@Override
-	public void save(TerrainSaveType type, ObjectOutputStream out) throws IOException {
-		out.writeInt(slopes.size());
-		for(SlopeFace box : slopes)
-		{
-			//Write all collisions boxes as computed by fr.dynamx.impl.TerrainCollisionManager.loadBlockCollisions
-			out.writeObject(box);
-		}
-		if(type.usesPlatformDependantOptimizations()) {
-			//Write bullet's bvh data
-			out.writeObject(shape.serializeBvh());
-		}
-	}
+    @Override
+    public void save(TerrainSaveType type, ObjectOutputStream out) throws IOException {
+        out.writeInt(slopes.size());
+        for (SlopeFace box : slopes) {
+            //Write all collisions boxes as computed by fr.dynamx.impl.TerrainCollisionManager.loadBlockCollisions
+            out.writeObject(box);
+        }
+        if (type.usesPlatformDependantOptimizations()) {
+            //Write bullet's bvh data
+            out.writeObject(shape.serializeBvh());
+        }
+    }
 
-	@Override
-	public boolean load(TerrainSaveType type, ObjectInputStream in, VerticalChunkPos pos) throws IOException, ClassNotFoundException {
-		slopes.clear();
-		int size = in.readInt();
-		for(int i=0;i<size;i++)
-		{
-			//Read all boxes as computed by fr.dynamx.impl.TerrainCollisionManager.loadBlockCollisions
-			Object o =  in.readObject();
-			if(o instanceof SlopeFace)
-				slopes.add((SlopeFace)o);
-		}
-		//Generate corresponding IndexedMeshes
-		List<Vector3f> triangles = new ArrayList<>();
-		int[] indices = new int[6 * 2 * slopes.size()];
+    @Override
+    public boolean load(TerrainSaveType type, ObjectInputStream in, VerticalChunkPos pos) throws IOException, ClassNotFoundException {
+        slopes.clear();
+        int size = in.readInt();
+        for (int i = 0; i < size; i++) {
+            //Read all boxes as computed by fr.dynamx.impl.TerrainCollisionManager.loadBlockCollisions
+            Object o = in.readObject();
+            if (o instanceof SlopeFace)
+                slopes.add((SlopeFace) o);
+        }
+        //Generate corresponding IndexedMeshes
+        List<Vector3f> triangles = new ArrayList<>();
+        int[] indices = new int[6 * 2 * slopes.size()];
 
-		for (int i = 0; i < slopes.size(); i++) {
-			//System.out.println("Setting slope at "+slopes.get(i).getOffset()+" "+triangles.size()+" "+slopes.get(i));
-			IndexedMeshBuilder.appendSlopePointsToMesh(slopes.get(i).getPoints(), triangles, indices, i);
-		}
-		Vector3f debugPos = Vector3fPool.get(pos.x*16, pos.y*16, pos.z*16);
-		debugData = new TerrainDebugData(TerrainDebugRenderer.SLOPES, IndexedMeshBuilder.computeDebug(debugPos, triangles, indices));
+        for (int i = 0; i < slopes.size(); i++) {
+            //System.out.println("Setting slope at "+slopes.get(i).getOffset()+" "+triangles.size()+" "+slopes.get(i));
+            IndexedMeshBuilder.appendSlopePointsToMesh(slopes.get(i).getPoints(), triangles, indices, i);
+        }
+        Vector3f debugPos = Vector3fPool.get(pos.x * 16, pos.y * 16, pos.z * 16);
+        debugData = new TerrainDebugData(TerrainDebugRenderer.SLOPES, IndexedMeshBuilder.computeDebug(debugPos, triangles, indices));
 
-		if(type.usesPlatformDependantOptimizations()) {
-			//Read bullet's bvh data
-			byte[] data = (byte[]) in.readObject();
-			//Then create the shape
-			shape = new MeshCollisionShape(data, new IndexedMesh(triangles.toArray(new Vector3f[0]), indices));
-		}
-		else
-			//Then create the shape
-			shape = new MeshCollisionShape(true, new IndexedMesh(triangles.toArray(new Vector3f[0]), indices));
-		return true;
-	}
+        if (type.usesPlatformDependantOptimizations()) {
+            //Read bullet's bvh data
+            byte[] data = (byte[]) in.readObject();
+            //Then create the shape
+            shape = new MeshCollisionShape(data, new IndexedMesh(triangles.toArray(new Vector3f[0]), indices));
+        } else
+            //Then create the shape
+            shape = new MeshCollisionShape(true, new IndexedMesh(triangles.toArray(new Vector3f[0]), indices));
+        return true;
+    }
 
-	@Override
-	public PhysicsRigidBody build(Vector3f pos)
-	{
-		applyOffset(pos.multLocal(-1));
-		pos.multLocal(-1);
-		if(shape == null) { //Not generated
-			List<Vector3f> triangles = new ArrayList<>();
-			int[] indices = new int[6 * 2 * slopes.size()];
+    @Override
+    public PhysicsRigidBody build(Vector3f pos) {
+        applyOffset(pos.multLocal(-1));
+        pos.multLocal(-1);
+        if (shape == null) { //Not generated
+            List<Vector3f> triangles = new ArrayList<>();
+            int[] indices = new int[6 * 2 * slopes.size()];
 
-			for (int i = 0; i < slopes.size(); i++) {
-				//System.out.println("Setting slope at "+slopes.get(i).getOffset()+" "+triangles.size()+" "+slopes.get(i));
-				IndexedMeshBuilder.appendSlopePointsToMesh(slopes.get(i).getPoints(), triangles, indices, i);
-			}
-			shape = new MeshCollisionShape(true, new IndexedMesh(triangles.toArray(new Vector3f[0]), indices));
-			debugData = new TerrainDebugData(TerrainDebugRenderer.SLOPES, IndexedMeshBuilder.computeDebug(pos, triangles, indices));
-		}
+            for (int i = 0; i < slopes.size(); i++) {
+                //System.out.println("Setting slope at "+slopes.get(i).getOffset()+" "+triangles.size()+" "+slopes.get(i));
+                IndexedMeshBuilder.appendSlopePointsToMesh(slopes.get(i).getPoints(), triangles, indices, i);
+            }
+            shape = new MeshCollisionShape(true, new IndexedMesh(triangles.toArray(new Vector3f[0]), indices));
+            debugData = new TerrainDebugData(TerrainDebugRenderer.SLOPES, IndexedMeshBuilder.computeDebug(pos, triangles, indices));
+        }
 
-		PhysicsRigidBody pr = new PhysicsRigidBody(shape, 0);
-		pr.setPhysicsLocation(pos);
-		pr.setFriction(1);
-		pr.setUserObject(new BulletShapeType<>(EnumBulletShapeType.SLOPE, this));
+        PhysicsRigidBody pr = new PhysicsRigidBody(shape, 0);
+        pr.setPhysicsLocation(pos);
+        pr.setFriction(1);
+        pr.setUserObject(new BulletShapeType<>(EnumBulletShapeType.SLOPE, this));
 
-		if(poolId != 0) {
-			Vector3fPool.getPool(poolId, "ste").closeSubPool();
-			Vector3fPool.disposePool(poolId);
-			poolId = 0;
-		}
-		body=pr;
-		return pr;
-	}
+        if (poolId != 0) {
+            Vector3fPool.getPool(poolId, "ste").closeSubPool();
+            Vector3fPool.disposePool(poolId);
+            poolId = 0;
+        }
+        body = pr;
+        return pr;
+    }
 
-	@Nonnull
-	@Override
-	public PhysicsRigidBody getBody() {
-		return body;
-	}
+    @Nonnull
+    @Override
+    public PhysicsRigidBody getBody() {
+        return body;
+    }
 
-	@Override
-	public void addDebugToWorld(World mcWorld, Vector3f pos) {
-		//System.out.println("Add debug of "+poolId+" at "+pos);
-		(mcWorld.isRemote ? DynamXDebugOptions.CLIENT_SLOPE_BOXES : DynamXDebugOptions.SLOPE_BOXES).getDataIn().put(debugData.getUuid(), debugData);
-	}
+    @Override
+    public void addDebugToWorld(World mcWorld, Vector3f pos) {
+        //System.out.println("Add debug of "+poolId+" at "+pos);
+        (mcWorld.isRemote ? DynamXDebugOptions.CLIENT_SLOPE_BOXES : DynamXDebugOptions.SLOPE_BOXES).getDataIn().put(debugData.getUuid(), debugData);
+    }
 
-	@Override
-	public void removeDebugFromWorld(World mcWorld) {
-		//System.out.println("Remove debug of "+poolId);
-		(mcWorld.isRemote ? DynamXDebugOptions.CLIENT_SLOPE_BOXES : DynamXDebugOptions.SLOPE_BOXES).getDataIn().remove(debugData.getUuid());
-	}
+    @Override
+    public void removeDebugFromWorld(World mcWorld) {
+        //System.out.println("Remove debug of "+poolId);
+        (mcWorld.isRemote ? DynamXDebugOptions.CLIENT_SLOPE_BOXES : DynamXDebugOptions.SLOPE_BOXES).getDataIn().remove(debugData.getUuid());
+    }
 
-	@Override
-	public void clear() {
-		debugData = null;
-		shape = null;
-		body = null;
-		slopes.clear();
-		if(poolId != 0)
-			Vector3fPool.disposePool(poolId);
-	}
+    @Override
+    public void clear() {
+        debugData = null;
+        shape = null;
+        body = null;
+        slopes.clear();
+        if (poolId != 0)
+            Vector3fPool.disposePool(poolId);
+    }
 
-	@Override
-	public TerrainElementsFactory getFactory() {
-		return TerrainElementsFactory.AUTO_SLOPES;
-	}
+    @Override
+    public TerrainElementsFactory getFactory() {
+        return TerrainElementsFactory.AUTO_SLOPES;
+    }
 
-	private void applyOffset(Vector3f offset) {
-		for(SlopeFace b : slopes)
-		{
-			for(Vector3f point : b.getPoints())
-			{
-				point.addLocal(offset);
-			}
-		}
-	}
+    private void applyOffset(Vector3f offset) {
+        for (SlopeFace b : slopes) {
+            for (Vector3f point : b.getPoints()) {
+                point.addLocal(offset);
+            }
+        }
+    }
 }

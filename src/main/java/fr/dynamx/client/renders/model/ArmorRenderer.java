@@ -10,8 +10,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class ArmorRenderer extends ModelRenderer
-{
+public class ArmorRenderer extends ModelRenderer {
     private final ModelObjArmor model;
     private final ObjModelClient objModel;
     private IObjObject objObject;
@@ -20,7 +19,7 @@ public class ArmorRenderer extends ModelRenderer
         super(model, partName);
         this.model = model;
         this.objModel = objModel;
-        if(objModel != DynamXModelRegistry.MISSING_MODEL) {
+        if (objModel != DynamXModelRegistry.MISSING_MODEL) {
             for (IObjObject objObject1 : objModel.objObjects) {
                 if (objObject1.getName().equalsIgnoreCase(partName)) {
                     objObject = objObject1;
@@ -28,7 +27,7 @@ public class ArmorRenderer extends ModelRenderer
                 }
             }
         }
-        if(objObject == null) {
+        if (objObject == null) {
             objObject = MissingObjModel.getEmptyPart();
         }
     }
@@ -38,25 +37,25 @@ public class ArmorRenderer extends ModelRenderer
     public void render(float scale) {
         if (!this.isHidden) {
             if (this.showModel) {
-                if(MinecraftForge.EVENT_BUS.post(new ArmorEvent.RenderArmorEvent(model, objModel, objObject, PhysicsEntityEvent.Phase.PRE, ArmorEvent.RenderArmorEvent.Type.NORMAL)))
+                if (MinecraftForge.EVENT_BUS.post(new ArmorEvent.RenderArmorEvent(model, objModel, objObject, PhysicsEntityEvent.Phase.PRE, ArmorEvent.RenderArmorEvent.Type.NORMAL)))
                     return;
                 GlStateManager.pushMatrix();
                 GlStateManager.translate(this.rotationPointX, this.rotationPointY, this.rotationPointZ);
-                GlStateManager.rotate(180,1,0,0);
+                GlStateManager.rotate(180, 1, 0, 0);
 
-                    if (this.rotateAngleZ != 0.0F) {
-                        GlStateManager.rotate(this.rotateAngleZ * (180F / (float) Math.PI), 0.0F, 0.0F, 1.0F);
-                    }
+                if (this.rotateAngleZ != 0.0F) {
+                    GlStateManager.rotate(this.rotateAngleZ * (180F / (float) Math.PI), 0.0F, 0.0F, 1.0F);
+                }
 
-                    if (this.rotateAngleY != 0.0F) {
-                        GlStateManager.rotate(this.rotateAngleY * (180F / (float) Math.PI), 0.0F, 1.0F, 0.0F);
-                    }
+                if (this.rotateAngleY != 0.0F) {
+                    GlStateManager.rotate(this.rotateAngleY * (180F / (float) Math.PI), 0.0F, 1.0F, 0.0F);
+                }
 
-                    if (this.rotateAngleX != 0.0F) {
-                        GlStateManager.rotate(this.rotateAngleX * (180F / (float) Math.PI), 1.0F, 0.0F, 0.0F);
-                    }
-                    GlStateManager.translate(-this.offsetX, this.offsetY, -this.offsetZ);
-                    objModel.renderGroup(objObject, model.getActiveTextureId());
+                if (this.rotateAngleX != 0.0F) {
+                    GlStateManager.rotate(this.rotateAngleX * (180F / (float) Math.PI), 1.0F, 0.0F, 0.0F);
+                }
+                GlStateManager.translate(-this.offsetX, this.offsetY, -this.offsetZ);
+                objModel.renderGroup(objObject, model.getActiveTextureId());
 
                 GlStateManager.popMatrix();
             }
@@ -68,7 +67,7 @@ public class ArmorRenderer extends ModelRenderer
     public void renderWithRotation(float scale) {
         if (!this.isHidden) {
             if (this.showModel) {
-                if(MinecraftForge.EVENT_BUS.post(new ArmorEvent.RenderArmorEvent(model, objModel, objObject, PhysicsEntityEvent.Phase.PRE, ArmorEvent.RenderArmorEvent.Type.WITH_ROTATION)))
+                if (MinecraftForge.EVENT_BUS.post(new ArmorEvent.RenderArmorEvent(model, objModel, objObject, PhysicsEntityEvent.Phase.PRE, ArmorEvent.RenderArmorEvent.Type.WITH_ROTATION)))
                     return;
                 GlStateManager.pushMatrix();
                 GlStateManager.translate(this.rotationPointX * scale, this.rotationPointY * scale, this.rotationPointZ * scale);
@@ -99,7 +98,7 @@ public class ArmorRenderer extends ModelRenderer
     public void postRender(float scale) {
         if (!this.isHidden) {
             if (this.showModel) {
-                if(MinecraftForge.EVENT_BUS.post(new ArmorEvent.RenderArmorEvent(model, objModel, objObject, PhysicsEntityEvent.Phase.POST, ArmorEvent.RenderArmorEvent.Type.NORMAL)))
+                if (MinecraftForge.EVENT_BUS.post(new ArmorEvent.RenderArmorEvent(model, objModel, objObject, PhysicsEntityEvent.Phase.POST, ArmorEvent.RenderArmorEvent.Type.NORMAL)))
                     return;
                 if (this.rotateAngleX == 0.0F && this.rotateAngleY == 0.0F && this.rotateAngleZ == 0.0F) {
                     if (this.rotationPointX != 0.0F || this.rotationPointY != 0.0F || this.rotationPointZ != 0.0F) {

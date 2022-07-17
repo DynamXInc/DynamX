@@ -6,11 +6,10 @@ import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 
 /**
  * Base interface for engine modules, responsible to handle player controls, and give acceleration/brake to the {@link IPropulsionModule} <br>
- *     Requires a propulsion module in order to work <br>
- *         Needs an {@link IEnginePhysicsHandler}
+ * Requires a propulsion module in order to work <br>
+ * Needs an {@link IEnginePhysicsHandler}
  */
-public interface IEngineModule<P extends AbstractEntityPhysicsHandler<?, ?>> extends IPhysicsModule<P>
-{
+public interface IEngineModule<P extends AbstractEntityPhysicsHandler<?, ?>> extends IPhysicsModule<P> {
     /**
      * @return engine properties such as speed or rpm <br>
      * {@link fr.dynamx.common.entities.modules.EngineModule} implementation uses {@link fr.dynamx.api.entities.VehicleEntityProperties.EnumEngineProperties}

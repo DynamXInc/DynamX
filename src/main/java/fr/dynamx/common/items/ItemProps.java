@@ -33,20 +33,20 @@ public class ItemProps<T extends PropObject<?>> extends DynamXItemSpawner<PropOb
     }
 
     @Override
-    public boolean spawnEntity(ItemStack itemStackIn, World worldIn, EntityPlayer playerIn, Vec3d blockpos) {
+    public boolean spawnEntity(ItemStack itemStackIn, World worldIn, EntityPlayer playerIn, Vec3d blockPos) {
         Vector3f pos;
         if (!worldIn.isRemote) {
             if (playerIn.isSneaking()) {
                 for (float i = 0; i < 5; i += 1) {
                     for (float j = 0; j < 5; j += 1) {
                         for (float k = 0; k < 5; k += 1) {
-                            pos = new Vector3f((float) blockpos.x + i, (float) blockpos.y + 4f + (j), (float) blockpos.z + k);
+                            pos = new Vector3f((float) blockPos.x + i, (float) blockPos.y + 4f + (j), (float) blockPos.z + k);
                             worldIn.spawnEntity(getSpawnEntity(worldIn, playerIn, pos, playerIn.rotationYaw % 360.0F, itemStackIn.getMetadata()));
                         }
                     }
                 }
             } else {
-                pos = new Vector3f((float) blockpos.x + getInfo().getSpawnOffset().x, (float) blockpos.y + getInfo().getSpawnOffset().y, (float) blockpos.z + getInfo().getSpawnOffset().z);
+                pos = new Vector3f((float) blockPos.x + getInfo().getSpawnOffset().x, (float) blockPos.y + getInfo().getSpawnOffset().y, (float) blockPos.z + getInfo().getSpawnOffset().z);
                 worldIn.spawnEntity(getSpawnEntity(worldIn, playerIn, pos, playerIn.rotationYaw % 360.0F, itemStackIn.getMetadata()));
             }
         }
@@ -83,10 +83,10 @@ public class ItemProps<T extends PropObject<?>> extends DynamXItemSpawner<PropOb
         tooltip.add("Description: " + getInfo().getDescription());
         tooltip.add("Pack: " + getInfo().getPackName());
         if (stack.getMetadata() != 0) {
-            if(textureNum > stack.getMetadata())
+            if (textureNum > stack.getMetadata())
                 tooltip.add("Texture: " + getInfo().getTexturesFor(null).get((byte) stack.getMetadata()).getName());
             else
-                tooltip.add(TextFormatting.RED+"Texture not found, check your pack errors");
+                tooltip.add(TextFormatting.RED + "Texture not found, check your pack errors");
         }
     }
 }

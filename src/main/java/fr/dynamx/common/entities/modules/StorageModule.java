@@ -3,7 +3,6 @@ package fr.dynamx.common.entities.modules;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.common.contentpack.parts.PartStorage;
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.physics.entities.PackEntityPhysicsHandler;
 import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.item.ItemStack;
@@ -11,8 +10,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraftforge.common.util.Constants;
 
-public class StorageModule implements IPhysicsModule<PackEntityPhysicsHandler<?, ?>>
-{
+public class StorageModule implements IPhysicsModule<PackEntityPhysicsHandler<?, ?>> {
     private final InventoryBasic inventory;
 
     public StorageModule(BaseVehicleEntity<?> entity, PartStorage partStorage) {

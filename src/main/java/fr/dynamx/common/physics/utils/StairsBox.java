@@ -4,8 +4,7 @@ import net.minecraft.util.EnumFacing;
 
 import java.io.Serializable;
 
-public class StairsBox implements Serializable
-{
+public class StairsBox implements Serializable {
     private final float min, max;
     private final float minY, minOtherCoord;
     private final boolean inverted;

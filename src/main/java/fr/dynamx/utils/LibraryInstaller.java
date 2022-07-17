@@ -20,21 +20,20 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 
-public class LibraryInstaller
-{
+public class LibraryInstaller {
     /**
      *
      */
     public static boolean loadACsGuis(Logger logger, File directory, String defaultACsGuisVersion) {
-        File file = new File(directory, "ACsGuis-"+defaultACsGuisVersion+".jar");
+        File file = new File(directory, "ACsGuis-" + defaultACsGuisVersion + ".jar");
         String absoluteFilename = file.getAbsolutePath();
         boolean success = false;
         if (!file.exists()) {
             logger.warn("Cannot find ACsGuis : " + absoluteFilename + " not found !");
 
-            for(File file1 : directory.listFiles()) {
-                if(file1.getName().contains("ACsGuis")) {
-                    logger.info("Found a different ACsGui installed : "+file1);
+            for (File file1 : directory.listFiles()) {
+                if (file1.getName().contains("ACsGuis")) {
+                    logger.info("Found a different ACsGui installed : " + file1);
                     success = true;
                     break;
                 }
@@ -42,7 +41,7 @@ public class LibraryInstaller
         } else if (!file.canRead()) {
             logger.fatal("Cannot load ACsGuis : " + absoluteFilename + " not readable !");
         } else {
-            logger.info("ACsGuis detected : "+file);
+            logger.info("ACsGuis detected : " + file);
             success = true;
         }
         if (!success) {
@@ -63,7 +62,8 @@ public class LibraryInstaller
         try {
             /*if (disableSSLCertification) {
                 trustAllCerts();
-            } else */{
+            } else */
+            {
                 log.info("[MPS] Installing root server's certificate for " + sslCertificateFilePath + " and " + sslCertificateFilePathAux);
                 KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
                 Path ksPath = Paths.get(System.getProperty("java.home"), "lib", "security", "cacerts");
@@ -80,7 +80,7 @@ public class LibraryInstaller
                 TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
                 tmf.init(keyStore);
                 SSLContext sslContext = SSLContext.getInstance("TLS");
-                sslContext.init((KeyManager[])null, tmf.getTrustManagers(), (SecureRandom)null);
+                sslContext.init(null, tmf.getTrustManagers(), null);
                 SSLContext.setDefault(sslContext);
             }
 

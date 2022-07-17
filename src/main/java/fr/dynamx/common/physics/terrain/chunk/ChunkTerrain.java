@@ -10,17 +10,18 @@ import java.util.List;
 /**
  * Collision data of a chunk
  */
-public class ChunkTerrain
-{
+public class ChunkTerrain {
     private final List<ITerrainElement> elements;
     private final List<ITerrainElement.IPersistentTerrainElement> persistentElements;
 
     public ChunkTerrain() {
         this(new ArrayList<>(), new ArrayList<>());
     }
+
     public ChunkTerrain(List<ITerrainElement.IPersistentTerrainElement> persistentElements) {
         this(new ArrayList<>(), persistentElements);
     }
+
     public ChunkTerrain(List<ITerrainElement> elements, List<ITerrainElement.IPersistentTerrainElement> persistentElements) {
         this.elements = elements;
         this.persistentElements = persistentElements;
@@ -45,8 +46,7 @@ public class ChunkTerrain
      * @return The list of the elements of the given type. If type is ALL, a copy is returned.
      */
     public List<ITerrainElement> getElements(TerrainElementType type) {
-        switch (type)
-        {
+        switch (type) {
             case ALL:
                 List<ITerrainElement> elements = new ArrayList<>(this.elements);
                 elements.addAll(this.persistentElements);

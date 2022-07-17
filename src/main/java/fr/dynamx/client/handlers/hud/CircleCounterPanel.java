@@ -1,7 +1,6 @@
 package fr.dynamx.client.handlers.hud;
 
 import fr.aym.acsguis.component.panel.GuiPanel;
-import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
@@ -52,16 +51,15 @@ public class CircleCounterPanel extends GuiPanel {
             y = height;
         }
 
-        float f1 = 0.00390625F;
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder bufferbuilder = tessellator.getBuffer();
         bufferbuilder.begin(GL11.GL_TRIANGLE_FAN, DefaultVertexFormats.POSITION_TEX);
-        if(rightToLeft) {
+        if (rightToLeft) {
             bufferbuilder.pos(width, height, 0).tex(1, 1).endVertex();
             bufferbuilder.pos(width, height - y, 0).tex(1, (height - y) / height).endVertex();
-            bufferbuilder.pos(width/2, height/2, 0).tex(0.5, 0.5).endVertex();
+            bufferbuilder.pos(width / 2.0, height / 2.0, 0).tex(0.5, 0.5).endVertex();
         } else {
-            bufferbuilder.pos(width/2, height/2, 0).tex(0.5, 0.5).endVertex();
+            bufferbuilder.pos(width / 2.0, height / 2.0, 0).tex(0.5, 0.5).endVertex();
             bufferbuilder.pos(0, height - y, 0).tex(0, (height - y) / height).endVertex();
             bufferbuilder.pos(0, height, 0).tex(0, 1).endVertex();
         }
@@ -74,12 +72,12 @@ public class CircleCounterPanel extends GuiPanel {
             }
 
             bufferbuilder.begin(GL11.GL_TRIANGLE_FAN, DefaultVertexFormats.POSITION_TEX);
-            if(rightToLeft) {
+            if (rightToLeft) {
                 bufferbuilder.pos(width, 0, 0).tex(1, 0).endVertex();
                 bufferbuilder.pos(width - x, 0, 0).tex((width - x) / width, 0).endVertex();
-                bufferbuilder.pos(width/2, height/2, 0).tex(0.5, 0.5).endVertex();
+                bufferbuilder.pos(width / 2.0, height / 2.0, 0).tex(0.5, 0.5).endVertex();
             } else {
-                bufferbuilder.pos(width/2, height/2, 0).tex(0.5, 0.5).endVertex();
+                bufferbuilder.pos(width / 2.0, height / 2.0, 0).tex(0.5, 0.5).endVertex();
                 bufferbuilder.pos(x, 0, 0).tex(x / width, 0).endVertex();
                 bufferbuilder.pos(0, 0, 0).tex(0, 0).endVertex();
             }
@@ -93,12 +91,12 @@ public class CircleCounterPanel extends GuiPanel {
             }
 
             bufferbuilder.begin(GL11.GL_TRIANGLE_FAN, DefaultVertexFormats.POSITION_TEX);
-            if(rightToLeft) {
+            if (rightToLeft) {
                 bufferbuilder.pos(0, 0, 0).tex(0, 0).endVertex();
                 bufferbuilder.pos(0, y, 0).tex(0, y / height).endVertex();
-                bufferbuilder.pos(width/2, height/2, 0).tex(0.5, 0.5).endVertex();
+                bufferbuilder.pos(width / 2.0, height / 2.0, 0).tex(0.5, 0.5).endVertex();
             } else {
-                bufferbuilder.pos(width/2, height/2, 0).tex(0.5, 0.5).endVertex();
+                bufferbuilder.pos(width / 2.0, height / 2.0, 0).tex(0.5, 0.5).endVertex();
                 bufferbuilder.pos(width, y, 0).tex(1, y / height).endVertex();
                 bufferbuilder.pos(width, 0, 0).tex(1, 0).endVertex();
             }

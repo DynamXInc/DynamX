@@ -5,8 +5,7 @@ import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
 import net.minecraft.util.math.AxisAlignedBB;
 
-public class PartFloat extends BasePart<ModularVehicleInfoBuilder>
-{
+public class PartFloat extends BasePart<ModularVehicleInfoBuilder> {
     public AxisAlignedBB box;
 
     public PartFloat(ModularVehicleInfoBuilder owner, String partName) {
@@ -25,6 +24,6 @@ public class PartFloat extends BasePart<ModularVehicleInfoBuilder>
 
     @Override
     public String getName() {
-        return "PartFloat named "+getPartName()+" in "+getOwner().getName();
+        return "PartFloat named " + getPartName() + " in " + getOwner().getName();
     }
 }

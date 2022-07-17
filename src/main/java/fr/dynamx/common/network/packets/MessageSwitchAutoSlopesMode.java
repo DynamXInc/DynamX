@@ -9,15 +9,15 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class MessageSwitchAutoSlopesMode implements IDnxPacket
-{
+public class MessageSwitchAutoSlopesMode implements IDnxPacket {
     public int mode;
 
     public MessageSwitchAutoSlopesMode(int mode) {
         this.mode = mode;
     }
 
-    public MessageSwitchAutoSlopesMode() {}
+    public MessageSwitchAutoSlopesMode() {
+    }
 
     @Override
     public EnumNetworkType getPreferredNetwork() {
@@ -26,7 +26,7 @@ public class MessageSwitchAutoSlopesMode implements IDnxPacket
 
     @Override
     public void fromBytes(ByteBuf buf) {
-        mode= buf.readInt();
+        mode = buf.readInt();
     }
 
     @Override
@@ -34,11 +34,10 @@ public class MessageSwitchAutoSlopesMode implements IDnxPacket
         buf.writeInt(mode);
     }
 
-    public static class Handler implements IMessageHandler<MessageSwitchAutoSlopesMode, IDnxPacket>
-    {
+    public static class Handler implements IMessageHandler<MessageSwitchAutoSlopesMode, IDnxPacket> {
         @Override
         public IDnxPacket onMessage(MessageSwitchAutoSlopesMode message, MessageContext ctx) {
-            handleClient(message,ctx);
+            handleClient(message, ctx);
             return null;
         }
 

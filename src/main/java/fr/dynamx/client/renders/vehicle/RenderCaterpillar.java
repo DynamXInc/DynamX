@@ -100,7 +100,7 @@ public class RenderCaterpillar<T extends CaterpillarEntity<?>> extends RenderBas
         float length = 0;
         int i = 1;
         for (; i <= points.length; i++) {
-            if(i == points.length) {
+            if (i == points.length) {
                 p2 = points[0];
             } else {
                 p2 = points[i];
@@ -125,7 +125,7 @@ public class RenderCaterpillar<T extends CaterpillarEntity<?>> extends RenderBas
         Vector3f p1 = points[0];
         for (int i = 1; i <= points.length; i++) {
             Vector3f p2 = null;
-            if(i == points.length) {
+            if (i == points.length) {
                 p2 = points[0];
             } else {
                 p2 = points[i];

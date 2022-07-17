@@ -16,8 +16,7 @@ import static fr.dynamx.common.DynamXMain.log;
 /**
  * Sounds files loader
  */
-public class SoundInfoLoader extends InfoLoader<SoundListInfo, ISubInfoTypeOwner.Empty>
-{
+public class SoundInfoLoader extends InfoLoader<SoundListInfo, ISubInfoTypeOwner.Empty> {
     public SoundInfoLoader(String prefix, BiFunction<String, String, SoundListInfo> assetCreator) {
         super(prefix, assetCreator, null);
     }
@@ -58,7 +57,7 @@ public class SoundInfoLoader extends InfoLoader<SoundListInfo, ISubInfoTypeOwner
                                 readingCategory[0] = new EngineSound(info.getPackName(), new int[]{Integer.parseInt(sp[0]), Integer.parseInt(sp[1])});
                                 readingCategory[0].setInterior(interior[0]);
                             } else {
-                                log.error("Invalid sound config entry : " + s + " in "+info.getFullName());
+                                log.error("Invalid sound config entry : " + s + " in " + info.getFullName());
                                 DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, info.getPackName(), info.getFullName(), "Invalid sound config entry : " + s, ErrorTrackingService.TrackedErrorLevel.LOW);
                             }
                     }
@@ -70,13 +69,13 @@ public class SoundInfoLoader extends InfoLoader<SoundListInfo, ISubInfoTypeOwner
                     }
                 } else if (s.contains("}")) { //End of a property, if it was a sound, add it to the sound list
                     if (readingCategory[0] != null)
-                        ((SoundListInfo)info).addSound(readingCategory[0]);
+                        ((SoundListInfo) info).addSound(readingCategory[0]);
                     readingCategory[0] = null;
                 } else if (s.contains("Engine")) {
                     //We don't care
                 } else {
-                    log.error("Unknown sound config key " + s+ " in "+info.getFullName());
-                    DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, info.getPackName(), "Error in "+info.getFullName(), "Unknown sound config key " + s, ErrorTrackingService.TrackedErrorLevel.LOW);
+                    log.error("Unknown sound config key " + s + " in " + info.getFullName());
+                    DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, info.getPackName(), "Error in " + info.getFullName(), "Unknown sound config key " + s, ErrorTrackingService.TrackedErrorLevel.LOW);
                 }
             }
         });

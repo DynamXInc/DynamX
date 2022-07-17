@@ -15,15 +15,14 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class MessagePing implements IDnxPacket, net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler<MessagePing, IMessage>
-{
+public class MessagePing implements IDnxPacket, net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler<MessagePing, IMessage> {
     private long sentTime;
     private boolean manual;
 
-    public MessagePing() {}
+    public MessagePing() {
+    }
 
-    public MessagePing(long creationTime, boolean manual)
-    {
+    public MessagePing(long creationTime, boolean manual) {
         this.sentTime = creationTime;
         this.manual = manual;
     }
@@ -42,22 +41,20 @@ public class MessagePing implements IDnxPacket, net.minecraftforge.fml.common.ne
 
     @Override
     public IMessage onMessage(MessagePing message, MessageContext ctx) {
-        if(ctx.side.isServer())
+        if (ctx.side.isServer())
             return new MessagePing(message.sentTime, message.manual);
-        else
-        {
+        else {
             clientHandle(message);
         }
         return null;
     }
 
     @SideOnly(Side.CLIENT)
-    private static void clientHandle(MessagePing message)
-    {
-        ClientPhysicsSyncManager.pingMs = ((int) (System.currentTimeMillis()-message.sentTime))/2;
+    private static void clientHandle(MessagePing message) {
+        ClientPhysicsSyncManager.pingMs = ((int) (System.currentTimeMillis() - message.sentTime)) / 2;
         ClientPhysicsSyncManager.lastPing = message.sentTime;
-        if(message.manual)
-            Minecraft.getMinecraft().player.sendMessage(new TextComponentString("[DynamX] Your ping is "+ ClientPhysicsSyncManager.pingMs+" ms"));
+        if (message.manual)
+            Minecraft.getMinecraft().player.sendMessage(new TextComponentString("[DynamX] Your ping is " + ClientPhysicsSyncManager.pingMs + " ms"));
     }
 
     @Override
@@ -67,10 +64,9 @@ public class MessagePing implements IDnxPacket, net.minecraftforge.fml.common.ne
 
     @Override
     public void handleUDPReceive(EntityPlayer context, Side side) {
-        if(side.isServer())
+        if (side.isServer())
             DynamXContext.getNetwork().sendToClient(new MessagePing(sentTime, manual), EnumPacketTarget.PLAYER, ((EntityPlayerMP) context));
-        else
-        {
+        else {
             clientHandle(this);
         }
     }

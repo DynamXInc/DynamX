@@ -38,7 +38,6 @@ import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
@@ -389,7 +388,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
                 /* Render mudguard */
                 if (partWheel.getMudGuardPartName() != null) {
                     GlStateManager.scale(entity.getPackInfo().getScaleModifier().x, entity.getPackInfo().getScaleModifier().y, entity.getPackInfo().getScaleModifier().z);
-                    DynamXContext.getObjModelRegistry().getModel(this.entity.getPackInfo().getModel()).renderGroups(partWheel.getMudGuardPartName(), wheelsTextureId[partWheel.getId()]);
+                    DynamXContext.getObjModelRegistry().getModel(this.entity.getPackInfo().getModel()).renderGroups(partWheel.getMudGuardPartName(), entity.getEntityTextureID());
                 }
             }
             GlStateManager.popMatrix();

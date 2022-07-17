@@ -7,7 +7,6 @@ import java.util.List;
 /**
  * Client {@link PhysicsEntityNetHandler}, handles controls and hud via the {@link IVehicleController}s
  */
-public interface ClientEntityNetHandler
-{
+public interface ClientEntityNetHandler {
     List<IVehicleController> getControllers();
 }

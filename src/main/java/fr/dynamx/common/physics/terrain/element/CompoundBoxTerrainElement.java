@@ -48,7 +48,7 @@ public class CompoundBoxTerrainElement implements ITerrainElement {
         System.out.println("Box data " + this.hashCode());
         System.out.println("Collisions " + collisions);
         System.out.println("--------- Collisions stats: ---------");
-        if(collisions != null) {
+        if (collisions != null) {
             System.out.println("Count: " + collisions.size());
             Map<Double, Integer> perHeightMin = new HashMap<>();
             Map<Double, Integer> perHeightMax = new HashMap<>();

@@ -6,8 +6,7 @@ import fr.dynamx.api.network.EnumNetworkType;
 import fr.dynamx.common.entities.PhysicsEntity;
 import io.netty.buffer.ByteBuf;
 
-public class MessageForcePlayerPos extends PhysicsEntityMessage<MessageForcePlayerPos>
-{
+public class MessageForcePlayerPos extends PhysicsEntityMessage<MessageForcePlayerPos> {
     public Vector3f rightPos;
     public Quaternion rotation = new Quaternion();
     public Vector3f linearVel = new Vector3f();

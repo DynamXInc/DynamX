@@ -6,8 +6,7 @@ import fr.dynamx.api.physics.IPhysicsSimulationMode;
 /**
  * DynamX {@link IPhysicsSimulationMode}s
  */
-public class PhysicsSimulationModes
-{
+public class PhysicsSimulationModes {
     /**
      * Full physics : 2 calls of bullet physics update per dynamx physics world update, with 0.025 time step
      */

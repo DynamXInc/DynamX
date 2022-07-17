@@ -186,7 +186,7 @@ public class DynamXUtils {
                 double d2 = d1;
 
                 for (Entity entity1 : list) {
-                    AxisAlignedBB axisalignedbb = entity1.getEntityBoundingBox().grow((double) entity1.getCollisionBorderSize());
+                    AxisAlignedBB axisalignedbb = entity1.getEntityBoundingBox().grow(entity1.getCollisionBorderSize());
                     RayTraceResult raytraceresult = axisalignedbb.calculateIntercept(vec3d, vec3d2);
 
                     if (axisalignedbb.contains(vec3d)) {

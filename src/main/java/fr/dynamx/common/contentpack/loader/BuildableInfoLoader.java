@@ -100,7 +100,7 @@ public class BuildableInfoLoader<A extends SubInfoTypeOwner.BuildableSubInfoType
                     T vehicleInfo = info.build();
                     super.loadItems(vehicleInfo, hot);
                 } catch (Exception e) {
-                    log.error("Cannot complete vehicle " + info.toString() + " !", e);
+                    log.error("Cannot complete vehicle " + info + " !", e);
                     DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, info.getPackName(), info.getFullName(), "Cannot complete vehicle : " + e.getMessage(), ErrorTrackingService.TrackedErrorLevel.FATAL);
                 }
             } else {

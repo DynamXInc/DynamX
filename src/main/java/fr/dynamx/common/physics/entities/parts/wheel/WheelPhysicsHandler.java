@@ -31,7 +31,9 @@ public class WheelPhysicsHandler {
     //Wheel state
     private boolean flattened;
     private float steeringAngle = 0;
-    /** simulates degradation. 1.0 = full grip the tyre allows, 0.0 = the tyre is dead. */
+    /**
+     * simulates degradation. 1.0 = full grip the tyre allows, 0.0 = the tyre is dead.
+     */
     private float grip = 1.0f;
 
     public WheelPhysicsHandler(PhysicsVehicle physicsVehicle, VehicleWheel vehicleWheel, byte wheelIndex, PartWheel partWheel) {
@@ -127,7 +129,7 @@ public class WheelPhysicsHandler {
         return physicsWheel.getRollInfluence();
     }
 
-    public void setRollInfluence(float rollInfluence){
+    public void setRollInfluence(float rollInfluence) {
         physicsWheel.setRollInfluence(rollInfluence);
     }
 
@@ -165,7 +167,7 @@ public class WheelPhysicsHandler {
     public void setFlattened(boolean flattened) {
         this.flattened = flattened;
         float radius = flattened ? wheelInfo.getRimRadius() : wheelInfo.getWheelRadius();
-        if(radius != physicsWheel.getRadius())
+        if (radius != physicsWheel.getRadius())
             physicsWheel.setRadius(radius);
     }
 

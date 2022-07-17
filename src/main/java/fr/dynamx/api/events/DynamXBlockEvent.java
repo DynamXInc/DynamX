@@ -37,7 +37,7 @@ public class DynamXBlockEvent extends Event {
 
     public static class TickTileEntity extends DynamXBlockEvent {
         @Getter
-        private TEDynamXBlock tileEntity;
+        private final TEDynamXBlock tileEntity;
 
         public TickTileEntity(Side side, DynamXBlock<?> dynamXBlock, World world, TEDynamXBlock tileEntity) {
             super(side, dynamXBlock, world);

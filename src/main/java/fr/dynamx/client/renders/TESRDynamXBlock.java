@@ -1,14 +1,13 @@
-
 package fr.dynamx.client.renders;
 
 import com.jme3.math.Quaternion;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.events.DynamXBlockEvent;
 import fr.dynamx.api.events.EventStage;
+import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.blocks.TEDynamXBlock;
-import fr.dynamx.utils.debug.ClientDebugSystem;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.debug.renderer.VehicleDebugRenderer;
 import fr.dynamx.utils.optimization.GlQuaternionPool;

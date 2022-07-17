@@ -6,8 +6,7 @@ import fr.dynamx.common.physics.terrain.computing.TerrainCollisionsCalculator;
 /**
  * {@link ChunkTerrain} element types
  */
-public enum TerrainElementType
-{
+public enum TerrainElementType {
     /**
      * Both types
      */

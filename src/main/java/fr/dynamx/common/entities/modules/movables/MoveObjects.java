@@ -26,7 +26,7 @@ public class MoveObjects extends MovableModule {
     }
 
     public void pickObject(EntityPlayer picker, PhysicsEntity<?> pickedEntity) {
-        if(pickedEntity.getPhysicsHandler() != null) {
+        if (pickedEntity.getPhysicsHandler() != null) {
             PhysicsCollisionObject rigidBody = pickedEntity.getPhysicsHandler().getCollisionObject();
             if (rigidBody instanceof PhysicsRigidBody) {
                 if (((PhysicsRigidBody) rigidBody).getMass() < 100) {
@@ -88,15 +88,15 @@ public class MoveObjects extends MovableModule {
                     }
                 }
             }
-        }else{
+        } else {
             //updateClient();
         }
     }
 
     @SideOnly(Side.CLIENT)
-    private void updateClient(){
+    private void updateClient() {
         picker = Minecraft.getMinecraft().player;
-        if(picker != null) {
+        if (picker != null) {
             if (picker.world.isRemote) {
                 if (pickedEntity != null) {
                     if (isPicked) {

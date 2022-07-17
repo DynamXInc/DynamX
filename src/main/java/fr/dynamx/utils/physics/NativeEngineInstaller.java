@@ -5,7 +5,6 @@ import com.jme3.system.Platform;
 import fr.aym.mps.utils.SSLHelper;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.utils.DynamXConstants;
-import fr.dynamx.utils.LibraryInstaller;
 import net.minecraftforge.fml.common.ProgressManager;
 
 import java.io.*;

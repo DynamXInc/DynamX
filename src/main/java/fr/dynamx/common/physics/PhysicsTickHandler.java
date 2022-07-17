@@ -41,8 +41,7 @@ public class PhysicsTickHandler {
             QuaternionPool.openPool();
             Vector3fPool.openPool();
             DynamXLoadingTasks.tick();
-        }
-        else {
+        } else {
             if (Minecraft.getMinecraft().world != null) {
                 boolean profiling = DynamXDebugOptions.PROFILING.isActive();
                 if (profiling) {

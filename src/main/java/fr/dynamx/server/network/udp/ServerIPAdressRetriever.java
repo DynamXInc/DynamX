@@ -1,7 +1,6 @@
 package fr.dynamx.server.network.udp;
 
 import fr.dynamx.common.DynamXMain;
-import fr.dynamx.server.network.DynamXServerNetworkSystem;
 import fr.dynamx.utils.DynamXConfig;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -15,8 +14,7 @@ import java.util.List;
 public class ServerIPAdressRetriever {
     private String externalAddress;
 
-    public String getAddress()
-    {
+    public String getAddress() {
         return this.externalAddress;
     }
 
@@ -25,7 +23,7 @@ public class ServerIPAdressRetriever {
         String[] ips = new String[players.size()];
 
         for (int i = 0; i < players.size(); ++i) {
-            EntityPlayerMP p = (EntityPlayerMP)players.get(i);
+            EntityPlayerMP p = (EntityPlayerMP) players.get(i);
             ips[i] = p.getPlayerIP();
         }
         return ips;

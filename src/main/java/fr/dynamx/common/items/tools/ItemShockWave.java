@@ -16,8 +16,7 @@ import net.minecraft.world.World;
 
 import java.util.List;
 
-public class ItemShockWave extends Item
-{
+public class ItemShockWave extends Item {
     public ItemShockWave() {
         super();
         setRegistryName(DynamXConstants.ID, "shockwave");

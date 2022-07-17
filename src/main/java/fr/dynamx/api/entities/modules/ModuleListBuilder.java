@@ -1,18 +1,17 @@
 package fr.dynamx.api.entities.modules;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Helper class to build a {@link IPhysicsModule} list
  */
-public class ModuleListBuilder
-{
+public class ModuleListBuilder {
     private final List<IPhysicsModule<?>> list;
 
     /**
      * The modules will be added to the given list <br>
      * It may already contain modules
+     *
      * @param moduleList The module list
      */
     public ModuleListBuilder(List<IPhysicsModule<?>> moduleList) {
@@ -21,6 +20,7 @@ public class ModuleListBuilder
 
     /**
      * Adds a module to the list
+     *
      * @param module The module
      */
     public void add(IPhysicsModule<?> module) {
@@ -37,7 +37,7 @@ public class ModuleListBuilder
 
     /**
      * @param clazz The module class
-     * @param <Y> The module type
+     * @param <Y>   The module type
      * @return The module of the given type, or null
      */
     public <Y extends IPhysicsModule<?>> Y getByClass(Class<Y> clazz) {

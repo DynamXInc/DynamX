@@ -5,9 +5,7 @@ import fr.dynamx.client.camera.CameraSystem;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.network.packets.MessageDebugRequest;
 import fr.dynamx.common.physics.utils.RigidBodyTransform;
-import fr.dynamx.common.physics.world.BasePhysicsWorld;
 import fr.dynamx.utils.DynamXConstants;
-import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.debug.renderer.PhysicsDebugRenderer;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.QuaternionPool;
@@ -29,10 +27,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
 
-import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
-import java.awt.*;
-import java.util.List;
 import java.util.*;
 
 @Mod.EventBusSubscriber(modid = DynamXConstants.ID, value = Side.CLIENT)

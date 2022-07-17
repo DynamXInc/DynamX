@@ -32,18 +32,17 @@ import java.util.List;
 import java.util.Optional;
 
 @Mod.EventBusSubscriber(value = Side.CLIENT, modid = DynamXConstants.ID)
-public class DynamXItemRegistry
-{
+public class DynamXItemRegistry {
     private static final List<IResourcesOwner> ITEMS = new ArrayList<>();
 
-    public static CreativeTabs vehicleTab = new CreativeTabs(DynamXConstants.ID+"_vehicle") {
+    public static CreativeTabs vehicleTab = new CreativeTabs(DynamXConstants.ID + "_vehicle") {
         @Override
         public ItemStack createIcon() {
             Optional<IInfoOwner<ModularVehicleInfo<?>>> item = DynamXObjectLoaders.WHEELED_VEHICLES.owners.stream().filter(blockObjectIInfoOwner -> blockObjectIInfoOwner.getInfo().getCreativeTab(null) == null).findFirst();
             return item.map(blockObjectIInfoOwner -> new ItemStack((Item) blockObjectIInfoOwner)).orElseGet(() -> new ItemStack(Items.CARROT));
         }
     };
-    public static CreativeTabs objectTab = new CreativeTabs(DynamXConstants.ID+"_object") {
+    public static CreativeTabs objectTab = new CreativeTabs(DynamXConstants.ID + "_object") {
         @Override
         public ItemStack createIcon() {
             Optional<IInfoOwner<BlockObject<?>>> item = DynamXObjectLoaders.BLOCKS.owners.stream().filter(blockObjectIInfoOwner -> blockObjectIInfoOwner.getInfo().getCreativeTab(null) == null).findFirst();
@@ -63,14 +62,13 @@ public class DynamXItemRegistry
         ITEMS.stream().map(IResourcesOwner::getItem).forEach(items::register);
     }
 
-    public static void registerItemBlock(DynamXBlock<?> block){
+    public static void registerItemBlock(DynamXBlock<?> block) {
         add(new DynamXItemBlock(block));
     }
 
     @SideOnly(Side.CLIENT)
     @SubscribeEvent
-    public static void registerItemModels(ModelRegistryEvent event)
-    {
+    public static void registerItemModels(ModelRegistryEvent event) {
         ITEMS.forEach(items -> {
             for (byte i = 0; i < items.getMaxMeta(); i++) {
                 registerModel(items, i);
@@ -79,13 +77,12 @@ public class DynamXItemRegistry
     }
 
     @SideOnly(Side.CLIENT)
-    public static void registerModel(IResourcesOwner item, byte metadata)
-    {
-        if(item instanceof IInfoOwner && item.createJson()) {
+    public static void registerModel(IResourcesOwner item, byte metadata) {
+        if (item instanceof IInfoOwner && item.createJson()) {
             ContentPackUtils.addMissingJSONs(item, ((IInfoOwner<?>) item).getInfo(), DynamXMain.resDir, metadata);
         }
-        String resourceName = DynamXConstants.ID+":"+item.getJsonName(metadata);
-        if(item.getObjModel() != null && item.getObjModel().isModelValid())
+        String resourceName = DynamXConstants.ID + ":" + item.getJsonName(metadata);
+        if (item.getObjModel() != null && item.getObjModel().isModelValid())
             DynamXContext.getObjModelRegistry().getItemRenderer().registerItemModel(item, metadata, new ResourceLocation(resourceName));
         else
             ModelLoader.setCustomModelResourceLocation(item.getItem(), metadata, new ModelResourceLocation(resourceName, "inventory"));

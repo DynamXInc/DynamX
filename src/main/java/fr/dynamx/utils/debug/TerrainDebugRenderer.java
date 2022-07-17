@@ -1,7 +1,6 @@
 package fr.dynamx.utils.debug;
 
-public enum TerrainDebugRenderer
-{
+public enum TerrainDebugRenderer {
     BLOCKS(0, 0, 1),
     STAIRS(0.5f, 0, 1),
     DYNAMXBLOCKS(0, 1, 0),

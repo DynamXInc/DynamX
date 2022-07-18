@@ -50,7 +50,6 @@ public class SlopesPreviewTerrainLoader extends PhysicsEntityTerrainLoader {
                             terrain.unsubscribeFromChunk(prevPos.toImmutable());
                             loadMatrice[i][j] = -1;
                         }
-//todo local sub/unsub game ?
                         int deltaX = pos.x * 16 + 8 - (int) player.posX;
                         int deltaY = pos.y * 16 + 8 - (int) player.posY;
                         int deltaZ = pos.z * 16 + 8 - (int) player.posZ;

@@ -1,11 +1,18 @@
 package fr.dynamx.client.handlers;
 
 import com.jme3.bullet.objects.PhysicsRigidBody;
+import fr.dynamx.api.contentpack.object.IShapeProvider;
+import fr.dynamx.api.contentpack.object.part.BasePart;
+import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.client.camera.CameraSystem;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.contentpack.parts.PartSeat;
+import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.network.packets.MessageDebugRequest;
 import fr.dynamx.common.physics.utils.RigidBodyTransform;
 import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.debug.*;
 import fr.dynamx.utils.debug.renderer.PhysicsDebugRenderer;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
@@ -14,10 +21,12 @@ import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -29,6 +38,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 @Mod.EventBusSubscriber(modid = DynamXConstants.ID, value = Side.CLIENT)
 public class ClientDebugSystem {
@@ -38,6 +48,8 @@ public class ClientDebugSystem {
 
     private static final Map<Long, RigidBodyTransform>[] prevRigidBodyStates = new Map[]{new HashMap(), new HashMap()};
     private static byte curRigidBodyStatesIndex;
+
+    private static final Minecraft MC = Minecraft.getMinecraft();
 
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
@@ -112,6 +124,8 @@ public class ClientDebugSystem {
         }
     }
 
+    static BasePart<?> lastPart = null;
+
     @SideOnly(Side.CLIENT)
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void worldRender(RenderWorldLastEvent event) {
@@ -164,13 +178,68 @@ public class ClientDebugSystem {
 
             }
 
+
             GlStateManager.enableTexture2D();
             GlStateManager.popMatrix();
 
             if (DynamXDebugOptions.CAMERA_RAYCAST.isActive()) {
                 CameraSystem.drawDebug();
             }
+
+            Vector3fPool.openPool();
+            if (MC.objectMouseOver != null) {
+                if (!(MC.objectMouseOver.entityHit instanceof PackPhysicsEntity)) {
+                    disableShapeDebug(lastPart);
+                    Vector3fPool.closePool();
+                    return;
+                }
+                PackPhysicsEntity<?, ?> entityHit = (PackPhysicsEntity<?, ?>) MC.objectMouseOver.entityHit;
+                if (!(entityHit.getPackInfo() instanceof IShapeProvider)) {
+                    disableShapeDebug(lastPart);
+                    Vector3fPool.closePool();
+                    return;
+                }
+                Predicate<BasePart<?>> wantedShape = null;
+                Optional<DynamXDebugOption> dynamXDebugOptional = DynamXDebugOptions.DebugCategories.VEHICLES
+                        .getOptions()
+                        .stream()
+                        .filter(DynamXDebugOption::isActive).findFirst();
+                if (dynamXDebugOptional.isPresent()) {
+                    wantedShape = basePart -> basePart.getDebugOption().equals(dynamXDebugOptional.get());
+                }
+                BasePart<?> basePart = DynamXUtils.rayTestPart(rootPlayer, entityHit, (IShapeProvider<?>) entityHit.getPackInfo(), wantedShape);
+                if (basePart == null) {
+                    disableShapeDebug(lastPart);
+                    Vector3fPool.closePool();
+                    return;
+                }
+                GlStateManager.pushMatrix();
+                GlStateManager.translate(-x, -y, -z);
+                float yOffset = 0;
+                if (basePart instanceof PartSeat)
+                    yOffset = 0.9f;
+                EntityRenderer.drawNameplate(MC.fontRenderer, basePart.getPartName(),
+                        (float) entityHit.posX + basePart.getPosition().x,
+                        (float) entityHit.posY + basePart.getPosition().y + yOffset + 1,
+                        (float) entityHit.posZ + basePart.getPosition().z, 0, rootPlayer.rotationYaw, rootPlayer.rotationPitch, false, false);
+                if (lastPart != null)
+                    lastPart.getDebugOption().disable();
+                basePart.getDebugOption().enable();
+                if(wantedShape == null)
+                    lastPart = basePart;
+                GlStateManager.popMatrix();
+            } else {
+                disableShapeDebug(lastPart);
+            }
+            Vector3fPool.closePool();
+
         }
+    }
+
+    private static void disableShapeDebug(BasePart<?> basePart) {
+        if (basePart == null)
+            return;
+        basePart.getDebugOption().disable();
     }
 
     @SideOnly(Side.CLIENT)

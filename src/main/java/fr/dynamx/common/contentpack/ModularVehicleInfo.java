@@ -4,6 +4,7 @@ import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
+import fr.dynamx.api.contentpack.object.IShapeProvider;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
@@ -25,6 +26,8 @@ import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.items.ItemModularEntity;
 import fr.dynamx.common.obj.texture.TextureData;
 import fr.dynamx.utils.client.DynamXRenderUtils;
+import fr.dynamx.utils.debug.DynamXDebugOption;
+import fr.dynamx.utils.debug.DynamXDebugOptions;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
@@ -43,7 +46,7 @@ import java.util.stream.Collectors;
  * @see BaseVehicleEntity
  */
 public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends AbstractItemObject<U> implements IPhysicsPackInfo, IModelTextureSupplier,
-        ParticleEmitterInfo.IParticleEmitterContainer {
+        ParticleEmitterInfo.IParticleEmitterContainer, IShapeProvider<ModularVehicleInfoBuilder> {
     private final int emptyMass;
     private final float dragFactor;
     private final Vector3f centerOfMass;
@@ -346,4 +349,10 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
     public String toString() {
         return "ModularVehicleInfo named " + getFullName();
     }
+
+    @Override
+    public List<BasePart<ModularVehicleInfoBuilder>> getAllParts() {
+        return parts;
+    }
+
 }

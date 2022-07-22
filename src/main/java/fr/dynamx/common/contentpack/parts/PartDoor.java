@@ -13,6 +13,8 @@ import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.debug.DynamXDebugOption;
+import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import lombok.Getter;
@@ -68,6 +70,11 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
         super(owner, partName, 0, 0);
     }
 
+
+    @Override
+    public DynamXDebugOption getDebugOption() {
+        return DynamXDebugOptions.DOOR_ATTACH_POINTS;
+    }
     public void setPlayerMounting(boolean playerMounting) {
         isPlayerMounting = playerMounting;
     }

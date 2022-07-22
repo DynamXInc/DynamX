@@ -22,7 +22,7 @@ public class DynamXDebugOptions {
             CLIENT_SLOPE_BOXES = (DynamXDebugOption.TerrainDebugOption) DynamXDebugOption.newTerrainOption("Client slopes", true, 32, 16).withDescription("Not available in solo").withSubCategory("Client");
 
     public static final DynamXDebugOption CENTER_OF_MASS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Center of mass").withSubCategory(VehicleDebugTypes.GENERAL.title),
-            SEATS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Seats").withSubCategory(VehicleDebugTypes.GENERAL.title),
+            SEATS_AND_STORAGE = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Seats and storage").withSubCategory(VehicleDebugTypes.GENERAL.title),
             WHEELS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Wheels").withSubCategory(VehicleDebugTypes.GENERAL.title),
             FRICTION_POINTS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Force points").withSubCategory(VehicleDebugTypes.GENERAL.title),
             PLAYER_COLLISIONS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Player collisions").withDescription("Debug for collisions between players and vehicles").withSubCategory(VehicleDebugTypes.COLLISIONS.title),

@@ -7,6 +7,8 @@ import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.PropsContainerModule;
+import fr.dynamx.utils.debug.DynamXDebugOption;
+import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 
 public class PartPropsContainer extends BasePart<ModularVehicleInfoBuilder> implements IShapeInfo {
@@ -45,5 +47,10 @@ public class PartPropsContainer extends BasePart<ModularVehicleInfoBuilder> impl
 
     public MutableBoundingBox getBox() {
         return box;
+    }
+
+    @Override
+    public DynamXDebugOption getDebugOption() {
+        return DynamXDebugOptions.PROPS_CONTAINERS;
     }
 }

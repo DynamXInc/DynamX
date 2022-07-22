@@ -8,6 +8,8 @@ import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.StorageModule;
 import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.debug.DynamXDebugOption;
+import fr.dynamx.utils.debug.DynamXDebugOptions;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 
@@ -20,7 +22,6 @@ public class PartStorage extends InteractivePart<BaseVehicleEntity<?>, ModularVe
         super(owner, partName, 0.5f, 0.5f);
     }
 
-    @Override
     public void appendTo(ModularVehicleInfoBuilder modulableVehicleInfo) {
         if (storageSize % 9 != 0)
             throw new IllegalArgumentException("StorageSize must be a multiple of 9 !");
@@ -48,6 +49,10 @@ public class PartStorage extends InteractivePart<BaseVehicleEntity<?>, ModularVe
 
     public int getStorageSize() {
         return storageSize;
+    }
+    @Override
+    public DynamXDebugOption getDebugOption() {
+        return DynamXDebugOptions.SEATS_AND_STORAGE;
     }
 
     @Override

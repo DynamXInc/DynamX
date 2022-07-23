@@ -247,7 +247,9 @@ public class DynamXUtils {
                     continue;
                 }
                 Vector3f partPos = DynamXGeometry.rotateVectorByQuaternion(part.getPosition(), entityPart.physicsRotation);
+                Vector3fPool.openPool();
                 partPos.addLocal(toVector3f(entityPart.getPositionVector()));
+                Vector3fPool.closePool();
                 if ((nearestPos == null || DynamXGeometry.distanceBetween(partPos, playerPos) < DynamXGeometry.distanceBetween(nearestPos, playerPos))
                         && vecInsideBox(hitVec, part, partPos)) {
                     nearest = part;

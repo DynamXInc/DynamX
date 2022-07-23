@@ -76,7 +76,9 @@ public abstract class BasePart<T extends ISubInfoTypeOwner<T>> extends SubInfoTy
         return ((IShapeContainer) vehicleInfo).getScaleModifier();
     }
 
-    public abstract DynamXDebugOption getDebugOption();
+    public DynamXDebugOption getDebugOption() {
+        return null;
+    }
 
     @Override
     public void appendTo(T vehicleInfo) {

@@ -12,11 +12,16 @@ import fr.dynamx.common.contentpack.type.PartWheelInfo;
 import fr.dynamx.common.contentpack.type.vehicle.SteeringWheelInfo;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.math.AxisAlignedBB;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.Sphere;
+import org.lwjgl.util.vector.Quaternion;
 
 import javax.annotation.Nullable;
 import java.awt.*;
@@ -170,5 +175,37 @@ public class DynamXRenderUtils {
         GlStateManager.glEnd();
         GlStateManager.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
         Vector3fPool.closePool();
+    }
+
+    public static void drawNameplate(FontRenderer fontRendererIn, String str, float x, float y, float z, Quaternion rotation, int verticalShift, float viewerYaw, float viewerPitch, boolean isThirdPersonFrontal) {
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(x, y, z);
+        GlStateManager.rotate(rotation);
+        GlStateManager.rotate(-viewerYaw, 0.0F, 1.0F, 0.0F);
+        GlStateManager.rotate((float) (isThirdPersonFrontal ? -1 : 1) * viewerPitch, 1.0F, 0.0F, 0.0F);
+        GlStateManager.scale(-0.025F, -0.025F, 0.025F);
+        GlStateManager.disableLighting();
+        GlStateManager.depthMask(false);
+
+        GlStateManager.enableBlend();
+        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        int i = fontRendererIn.getStringWidth(str) / 2;
+        GlStateManager.disableTexture2D();
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_COLOR);
+        bufferbuilder.pos(-i - 1, -1 + verticalShift, 0.0D).color(0.0F, 0.0F, 0.0F, 0.25F).endVertex();
+        bufferbuilder.pos(-i - 1, 8 + verticalShift, 0.0D).color(0.0F, 0.0F, 0.0F, 0.25F).endVertex();
+        bufferbuilder.pos(i + 1, 8 + verticalShift, 0.0D).color(0.0F, 0.0F, 0.0F, 0.25F).endVertex();
+        bufferbuilder.pos(i + 1, -1 + verticalShift, 0.0D).color(0.0F, 0.0F, 0.0F, 0.25F).endVertex();
+        tessellator.draw();
+        GlStateManager.enableTexture2D();
+
+        GlStateManager.depthMask(true);
+        fontRendererIn.drawString(str, -fontRendererIn.getStringWidth(str) / 2, verticalShift, -1);
+        GlStateManager.enableLighting();
+        GlStateManager.disableBlend();
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager.popMatrix();
     }
 }

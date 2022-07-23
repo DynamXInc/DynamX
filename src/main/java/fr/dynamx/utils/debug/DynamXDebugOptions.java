@@ -1,5 +1,7 @@
 package fr.dynamx.utils.debug;
 
+import lombok.Getter;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,6 +10,7 @@ import java.util.List;
  * Feel free to create yours
  */
 public class DynamXDebugOptions {
+    private static final List<DynamXDebugOption> ALL_OPTIONS = new ArrayList<>();
     public static final DynamXDebugOption DEBUG_RENDER = DynamXDebugOption.newServerDependantOption(DebugCategories.GENERAL, "Debug renderer").withSubCategory("DynamX"),
             PROFILING = DynamXDebugOption.newServerDependantOption(DebugCategories.GENERAL, "Profiling").withDescription("Find why DynamX is lagging - prints timings in the logs. May produce lag").withSubCategory("DynamX"),
             PHYSICS_DEBUG = DynamXDebugOption.newOption(DebugCategories.GENERAL, "Bullet physics debug").withDescription("Shows complete rigid bodies and joints debug, may produce lag").withSubCategory("Physics"),
@@ -34,6 +37,11 @@ public class DynamXDebugOptions {
             FULL_NETWORK_DEBUG = DynamXDebugOption.newServerDependantOption(DebugCategories.VEHICLES, "Full network debug").withDescription("Enables network debug functions, may produce lag").withSubCategory(VehicleDebugTypes.OTHER.title),
             WHEEL_ADVANCED_DATA = DynamXDebugOption.newServerDependantOption(DebugCategories.VEHICLES, "Sync wheel advanced data").withDescription("WIP - Has no effects except more network usage").withSubCategory(VehicleDebugTypes.OTHER.title);
 
+
+    public static List<DynamXDebugOption> getAllOptions() {
+        return ALL_OPTIONS;
+    }
+
     /**
      * DynamX debug categories
      */
@@ -52,6 +60,7 @@ public class DynamXDebugOptions {
         }
 
         public DynamXDebugOption addOption(DynamXDebugOption option) {
+            ALL_OPTIONS.add(option);
             options.add(option);
             return option;
         }

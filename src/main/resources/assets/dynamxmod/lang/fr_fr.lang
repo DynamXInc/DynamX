@@ -29,6 +29,14 @@ slopes.config.blocknotfound=Ce block n'existe pas
 slopes.config.cancel=Annuler
 slopes.config.apply=Appliquer
 
+slopes.clear.create=§a[CREATE] La pente de sélection a été réinitialisée
+slopes.clear.delete=§d[DELETE] La région de sélection a été réinitialisée
+slopes.clear.auto=§6[AUTO] La région de sélection a été réinitialisée
+
+slopes.changemode.create=§aMode mis à [CREATE]
+slopes.changemode.delete=§dMode mis à [DELETE]
+slopes.changemode.auto=§6Mode mis à [AUTO]
+
 cmd.slopes.noitem=§cVous devez avoir l'item slopes dans la main principale !
 cmd.slopes.needcreate=§cVous devez être en mode [CREATE] pour créer une pente !
 cmd.slopes.create.points=§4Vous devez avoir sélectionné au moins 4 points pour créer une pente

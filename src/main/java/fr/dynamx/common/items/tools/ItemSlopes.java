@@ -18,6 +18,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
+import net.minecraft.util.text.TextComponentTranslation;
 
 import javax.annotation.Nullable;
 
@@ -37,19 +38,19 @@ public class ItemSlopes extends Item {
         if (nbt.getInteger("mode") == 1) {//Create
             nbt.removeTag("plist");
             if (worldIn.isRemote)
-                playerIn.sendMessage(new TextComponentString(TextFormatting.GREEN + "[CREATE] La pente de sélection a été réinitialisée"));
+                playerIn.sendMessage(new TextComponentTranslation("slopes.clear.create"));
         } else if (nbt.getInteger("mode") == 0) { //Delete
             nbt.removeTag("p1");
             nbt.removeTag("p2");
             if (worldIn.isRemote)
-                playerIn.sendMessage(new TextComponentString(TextFormatting.LIGHT_PURPLE + "[DELETE] La région de sélection a été réinitialisée"));
+                playerIn.sendMessage(new TextComponentTranslation("slopes.clear.delete"));
         } else if (nbt.getInteger("mode") == 2) { //Auto
             nbt.removeTag("pt1");
             nbt.removeTag("pt2");
             nbt.removeTag("ptface");
             nbt.removeTag("ptround");
             if (worldIn.isRemote)
-                playerIn.sendMessage(new TextComponentString(TextFormatting.GOLD + "[AUTO] La région de sélection a été réinitialisée"));
+                playerIn.sendMessage(new TextComponentTranslation("slopes.clear.auto"));
         }
     }
 

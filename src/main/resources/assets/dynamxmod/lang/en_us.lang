@@ -33,6 +33,10 @@ slopes.clear.create=§a[CREATE] The selection slope has been reset
 slopes.clear.delete=§d[DELETE] The selection region has been reset
 slopes.clear.auto=§6[AUTO] The selection region has been reset
 
+slopes.changemode.create=§aMode set to [CREATE]
+slopes.changemode.delete=§dMode set to [DELETE]
+slopes.changemode.auto=§6Mode set to [AUTO]
+
 cmd.slopes.noitem=§cYou must have the slopes item in the main hand !
 cmd.slopes.needcreate=§cYou must be in [CREATE] mode to create a slope !
 cmd.slopes.create.points=§4You must select at least 4 points to create a slope

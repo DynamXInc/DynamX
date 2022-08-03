@@ -29,6 +29,10 @@ slopes.config.blocknotfound=Block not found
 slopes.config.cancel=Cancel
 slopes.config.apply=Apply
 
+slopes.clear.create=§a[CREATE] The selection slope has been reset
+slopes.clear.delete=§d[DELETE] The selection region has been reset
+slopes.clear.auto=§6[AUTO] The selection region has been reset
+
 cmd.slopes.noitem=§cYou must have the slopes item in the main hand !
 cmd.slopes.needcreate=§cYou must be in [CREATE] mode to create a slope !
 cmd.slopes.create.points=§4You must select at least 4 points to create a slope
@@ -49,8 +53,5 @@ cmd.slopes.auto.working=§6[AUTO] Generating slopes...
 cmd.slopes.auto.error=§4No slope have been create, check the facing and the configuration of the blocks supporting the slopes !
 cmd.slopes.auto.result=§6[AUTO] Generation of the slopes done in %s ms
 cmd.slopes.auto.success=§a[AUTO] The slopes have been added !
-cmd.slopes.mode.create=§a[CREATE] The selection slope has been reset
-cmd.slopes.mode.delete=§d[DELETE] The selection region has been reset
-cmd.slopes.mode.auto=§6[AUTO] The selection region has been reset
 
 hud.car.speedlimit=Speed limit : %s

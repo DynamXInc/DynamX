@@ -29,6 +29,10 @@ slopes.config.blocknotfound=Ce block n'existe pas
 slopes.config.cancel=Annuler
 slopes.config.apply=Appliquer
 
+slopes.clear.create=§a[CREATE] La pente de sélection a été réinitialisée
+slopes.clear.delete=§d[DELETE] La région de sélection a été réinitialisée
+slopes.clear.auto=§6[AUTO] La région de sélection a été réinitialisée
+
 cmd.slopes.noitem=§cVous devez avoir l'item slopes dans la main principale !
 cmd.slopes.needcreate=§cVous devez être en mode [CREATE] pour créer une pente !
 cmd.slopes.create.points=§4Vous devez avoir sélectionné au moins 4 points pour créer une pente
@@ -49,8 +53,5 @@ cmd.slopes.auto.working=§6[AUTO] Génération en cours...
 cmd.slopes.auto.error=§4Aucune pente n'a pu être créée, vérifiez l'orientation et la config des blocs supportant des pentes !
 cmd.slopes.auto.result=§6[AUTO] Génération et ajout des pentes réalisés en %s ms
 cmd.slopes.auto.success=§a[AUTO] Les pentes ont bien été ajoutées !
-cmd.slopes.mode.create=§a[CREATE] La pente de sélection a été réinitialisée
-cmd.slopes.mode.delete=§d[DELETE] La région de sélection a été réinitialisée
-cmd.slopes.mode.auto=§6[AUTO] La région de sélection a été réinitialisée
 
 hud.car.speedlimit=Limite de vitesse : %s

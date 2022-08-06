@@ -62,14 +62,8 @@ public class DynamXRenderUtils {
                 GlStateManager.translate(center.x, center.y, center.z);
 
                 //Apply steering wheel base rotation
-                if (info.getSteeringWheelBaseRotation() != null) {
+                if (info.getSteeringWheelBaseRotation() != null)
                     GlStateManager.rotate(GlQuaternionPool.get(info.getSteeringWheelBaseRotation()));
-                } else if (info.getDeprecatedBaseRotation() != null) {
-                    float[] baseRotation = info.getDeprecatedBaseRotation();
-                    if (baseRotation[0] != 0)
-                        GlStateManager.rotate(baseRotation[0], baseRotation[1], baseRotation[2], baseRotation[3]);
-                }
-
                 //Scale it
                 GlStateManager.scale(car.getScaleModifier().x, car.getScaleModifier().y, car.getScaleModifier().z);
                 //Render it

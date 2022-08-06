@@ -9,7 +9,9 @@ import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
+import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
+import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.ModularVehicleInfo;
@@ -32,6 +34,13 @@ import java.util.stream.Collectors;
  * Responsible for loading all the configuration/properties of the vehicle and creating a final object
  */
 public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implements IShapedObject, INamedObject, ParticleEmitterInfo.IParticleEmitterContainer {
+    @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
+    public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
+        if ("UseHullShape".equals(key))
+            return new IPackFilePropertyFixer.FixResult("UseComplexCollisions", true);
+        return null;
+    };
+
     private final String packName, fileName;
 
     @PackFileProperty(configNames = "Name")
@@ -93,7 +102,7 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
     private final Enum3DRenderLocation item3DRenderLocation = Enum3DRenderLocation.ALL;
     @PackFileProperty(configNames = "MaxVehicleSpeed", required = false, defaultValue = "infinite")
     private final float vehicleMaxSpeed = Integer.MAX_VALUE;
-    @PackFileProperty(configNames = "UseComplexCollisions", oldNames = {"UseHullShape"}, required = false, defaultValue = "true", description = "common.UseComplexCollisions")
+    @PackFileProperty(configNames = "UseComplexCollisions", required = false, defaultValue = "true", description = "common.UseComplexCollisions")
     private final boolean useHullShape = true;
     @PackFileProperty(configNames = "Textures", required = false, type = DefinitionType.DynamXDefinitionTypes.STRING_ARRAY_2D)
     private String[][] texturesArray;
@@ -213,6 +222,7 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
         List<PartWheel> partsByType = getPartsByType(PartWheel.class);
         for (int i = 0; i < partsByType.size(); i++) {
             PartWheel partWheel = partsByType.get(i);
+            System.out.println("Want wheel "+ partWheel.getDefaultWheelName()+" in "+ wheels);
             partWheel.setDefaultWheelInfo(this, wheels.get(partWheel.getDefaultWheelName()));
             if (partWheel.isHandBrakingWheel())
                 hasHandbrake = true;

@@ -3,6 +3,8 @@ package fr.dynamx.common.contentpack.parts;
 import com.jme3.math.Quaternion;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
+import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
+import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.modules.ISeatsModule;
 import fr.dynamx.common.DynamXMain;
@@ -18,6 +20,7 @@ import net.minecraft.util.text.TextComponentString;
 
 import javax.annotation.Nullable;
 
+@RegisteredSubInfoType(name = "seat", registries = SubInfoTypeRegistries.WHEELED_VEHICLES, strictName = false)
 public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfoBuilder> {
     @PackFileProperty(configNames = "Driver")
     private boolean isDriver;

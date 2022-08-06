@@ -2,6 +2,8 @@ package fr.dynamx.common.contentpack.parts;
 
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
+import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
+import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
@@ -11,6 +13,7 @@ import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 
+@RegisteredSubInfoType(name = "storage", registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
 public class PartStorage extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfoBuilder> //TODO FIX MULTI-STORAGE ON ONE ENTITY
 {
     @PackFileProperty(configNames = "StorageSize")

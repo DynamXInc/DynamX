@@ -6,9 +6,8 @@ import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.contentpack.object.IShapedObject;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
-import fr.dynamx.api.contentpack.registry.FileDefinitionsRegistry;
+import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeEntry;
-import fr.dynamx.api.contentpack.registry.SubInfoTypesRegistry;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.sync.PackSyncHandler;
@@ -19,7 +18,6 @@ import javax.annotation.Nullable;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -217,19 +215,21 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
      */
     protected void readLineProperty(List<PackFilePropertyData<?>> foundProperties, INamedObject obj, String line) {
         if (line.contains(":")) {
-            //String[] keyValue = line.split(":");
             int index = line.indexOf(':');
-            String key = line.substring(0, index);
-            String value = line.substring(index + 1);
-            //if (keyValue.length == 2) {
-            PackFilePropertyData<?> d = setFieldValue(obj, key.trim(), value.trim());
-            if (d != null) {
-                foundProperties.add(d);
+            String key = line.substring(0, index).trim();
+            String value = line.substring(index + 1).trim();
+            IPackFilePropertyFixer propertyFixer = infoTypesRegistry.getSubInfoTypePropertiesFixer(obj.getClass());
+            if(propertyFixer != null) {
+                IPackFilePropertyFixer.FixResult fixResult = propertyFixer.fixInputField(obj, key, value);
+                if(fixResult != null) {
+                    if(fixResult.isDeprecation())
+                        DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, obj.getPackName(), obj.getName(), "Deprecated config key found " + key + ". You should now use " + fixResult.newKey(), ErrorTrackingService.TrackedErrorLevel.LOW);
+                    key = fixResult.newKey();
+                    value = fixResult.newValue(value);
+                }
             }
-          /*  } else {
-                DynamXMain.log.warn("Illegal line content (not a comment, not a property) in " + obj.getFullName() + " : " + line);
-                DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, obj.getPackName(), obj.getName(), "Bad syntax : " + keyValue.length + " values found in line " + line + ". Should be 2.", ErrorTrackingService.TrackedErrorLevel.HIGH);
-            } */
+            PackFilePropertyData<?> d = setFieldValue(obj, key, value);
+            if (d != null)  foundProperties.add(d);
         } else if (!line.isEmpty()) {
             DynamXMain.log.warn("Illegal line content (not a comment, not a property) in " + obj.getFullName() + " : " + line);
             DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, obj.getPackName(), obj.getName(), "Bad syntax : missing ':' on line " + line + ", and not a comment", ErrorTrackingService.TrackedErrorLevel.LOW);
@@ -241,36 +241,17 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
      *
      * @param obj   The object
      * @param key   The name of the java field, should correspond to one {@link fr.dynamx.api.contentpack.registry.PackFileProperty}
-     * @param value The string value of the field, automatically parsed via the FileDefinitions
+     * @param value The string value of the field, automatically parsed via the {@link fr.dynamx.api.contentpack.registry.DefinitionType}
      */
     protected PackFilePropertyData<?> setFieldValue(INamedObject obj, String key, String value) {
         try {
             PackFilePropertyData<?> data = SubInfoTypeAnnotationCache.getFieldFor(obj, key);
-            if (data != null) {
-                return data.apply(obj, value);
-            }
-
-            //Backward compatibility with < 2.12.0 versions
-            FileDefinitionsRegistry.FileDefinition<?> def = FileDefinitionsRegistry.getFileDefinition(key);
-            if (def == null) {
+            if (data == null) {
                 DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, obj.getPackName(), "Bad property in " + obj.getName(), "PackFileProperty with name " + key + " for " + obj.getClass() +
-                        " has no corresponding java field (make sure to add the @PackFileProperty on the field)", ErrorTrackingService.TrackedErrorLevel.HIGH);
+                        " does not exists", ErrorTrackingService.TrackedErrorLevel.HIGH);
                 return null;
             }
-            Field[] fields = obj.getClass().getFields();
-            for (Field field : fields) {
-                if (field.getName().equals(def.getFieldName())) {
-                    field.set(obj, def.parse(value));
-                    DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, obj.getPackName(), "Warning in " + obj.getName(), "The config key " + key + " is using the old FileDefinition " +
-                                    "system in " + obj.getClass().getName() + ", consider moving to @PackFileProperty !",
-                            ErrorTrackingService.TrackedErrorLevel.LOW);
-                    return null;
-                }
-            }
-            //log.error("Invalid key " + key + " for " + obj.getClass()+" (not found in target class "+obj.getClass().getName()+", may be private ?) In file : "+ obj.getFullName());
-            DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, obj.getPackName(), "Error in " + obj.getName(), "Invalid FileDefinition " + key + " for " + obj.getClass().getSimpleName() +
-                    " : no corresponding java field found, make sure it's public", ErrorTrackingService.TrackedErrorLevel.HIGH);
-            return null;
+            return data.apply(obj, value);
         } catch (IllegalAccessException e) {
             throw new IllegalArgumentException("Invalid key " + key + " for " + obj.getFullName(), e);
         }
@@ -480,11 +461,10 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
     }
 
     /**
-     * Registers a sub info type, its key should be unique or an IllegalArgumentException is thrown <br>
-     * Should be called before any content pack is loaded (in addons initialization for example)
-     *
+     * @deprecated Use {@link fr.dynamx.api.contentpack.registry.RegisteredSubInfoType} annotation
      * @throws IllegalArgumentException If this object does not support sub info types or if this {@link SubInfoTypeEntry} is duplicated
      */
+    @Deprecated
     public void addSubInfoType(SubInfoTypeEntry<A> entry) {
         if (infoTypesRegistry == null)
             throw new IllegalArgumentException("This object does not support sub info types !");

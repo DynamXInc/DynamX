@@ -6,7 +6,9 @@ import fr.dynamx.api.contentpack.object.IShapedObject;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoType;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
+import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
+import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.utils.DynamXLoadingTasks;
@@ -15,12 +17,25 @@ import fr.dynamx.utils.DynamXLoadingTasks;
  * @param <T> Should implement ISubInfoTypeOwner<T> and IShapedObject
  */
 public abstract class BasePart<T extends ISubInfoTypeOwner<T>> extends SubInfoType<T> {
+    @IPackFilePropertyFixer.PackFilePropertyFixer(registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.BLOCKS_AND_PROPS})
+    public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
+        switch (key) {
+            case "ShapePosition":
+                return new IPackFilePropertyFixer.FixResult("Position", true);
+            case "Size":
+            case "ShapeScale":
+            case "BoxDim":
+                return new IPackFilePropertyFixer.FixResult("Scale", true);
+        }
+        return null;
+    };
+
     private byte id;
     private final String partName;
 
-    @PackFileProperty(configNames = "Position", oldNames = "ShapePosition", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y, description = "common.position")
+    @PackFileProperty(configNames = "Position", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y, description = "common.position")
     private Vector3f position;
-    @PackFileProperty(configNames = "Scale", oldNames = {"Size", "ShapeScale", "BoxDim"}, type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED, required = false, description = "common.scale")
+    @PackFileProperty(configNames = "Scale", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED, required = false, description = "common.scale")
     private Vector3f scale;
 
     public BasePart(T owner, String partName) {

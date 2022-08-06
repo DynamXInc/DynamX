@@ -11,6 +11,8 @@ import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
+import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
+import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
@@ -28,8 +30,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@RegisteredSubInfoType(name = "prop", registries = SubInfoTypeRegistries.BLOCKS_AND_PROPS, strictName = false)
 public class PropObject<T extends BlockObject<?>> extends AbstractProp<T> implements IPhysicsPackInfo, ISubInfoType<BlockObject<?>>, ISubInfoTypeOwner<BlockObject<?>> {
-
     private final BlockObject<?> owner;
     @PackFileProperty(configNames = "EmptyMass")
     private int emptyMass;

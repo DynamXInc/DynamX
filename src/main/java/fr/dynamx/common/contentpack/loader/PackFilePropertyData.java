@@ -21,26 +21,20 @@ public class PackFilePropertyData<T> {
     private final String configFieldName;
     private final DefinitionType<T> type;
     private final boolean required;
-    private final String usage;
     private final String description;
     private final String defaultValue;
 
-    public PackFilePropertyData(Field field, String configFieldName, DefinitionType<T> type, boolean required, String usage, String description, String defaultValue) {
+    public PackFilePropertyData(Field field, String configFieldName, DefinitionType<T> type, boolean required, String description, String defaultValue) {
         this.field = field;
         this.configFieldName = configFieldName;
         this.type = type;
         this.required = required;
-        this.usage = usage;
         this.description = description;
         this.defaultValue = defaultValue;
     }
 
-    public boolean isDeprecated() {
-        return usage != null;
-    }
-
     public boolean isRequired() {
-        return required && !isDeprecated();
+        return required;
     }
 
     /**
@@ -73,7 +67,7 @@ public class PackFilePropertyData<T> {
      *
      * @param on    The loading object
      * @param value The string value of this property
-     * @return The corresponding, not deprecated, property data, or null if parse failed
+     * @return The corresponding property data, or null if parse failed
      * @throws IllegalAccessException If reflection fails
      */
     @SuppressWarnings("unchecked")
@@ -88,20 +82,11 @@ public class PackFilePropertyData<T> {
         field.setAccessible(true);
         field.set(on, val);
         field.setAccessible(false);
-        if (isDeprecated()) {
-            DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, on.getPackName(), on.getName(), "Deprecated config key found " + configFieldName + ". You should now use " + usage, ErrorTrackingService.TrackedErrorLevel.LOW);
-            PackFilePropertyData<T> data = (PackFilePropertyData<T>) SubInfoTypeAnnotationCache.getFieldFor(on, usage);
-            if (data != null)
-                return data;
-        }
         return this;
     }
 
     public void writeDocLine(StringBuilder builder, DocLocale locale, ContentPackDocGenerator.DocType type) {
-        if (isDeprecated()) {
-            if (type != ContentPackDocGenerator.DocType.DEPRECATED)
-                return;
-        } else if (isRequired()) {
+        if (isRequired()) {
             if (type != ContentPackDocGenerator.DocType.REQUIRED)
                 return;
         } else {
@@ -109,11 +94,6 @@ public class PackFilePropertyData<T> {
                 return;
         }
         String docKey = description.isEmpty() ? field.getDeclaringClass().getSimpleName() + "." + configFieldName : description;
-        if (isDeprecated()) {
-            if (!locale.hasKey(docKey)) {
-                docKey = "common.error.deprecated";
-            }
-        }
         String sep = "|";
         String typeName = locale.format(this.type.getTypeName());
         builder.append(sep).append(type).append(sep).append(configFieldName).append(sep).append(typeName).append(sep)

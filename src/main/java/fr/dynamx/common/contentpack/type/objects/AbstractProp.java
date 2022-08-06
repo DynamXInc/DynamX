@@ -8,8 +8,12 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IShapedObject;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
+import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
+import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.obj.IObjObject;
+import fr.dynamx.common.contentpack.DynamXObjectLoaders;
+import fr.dynamx.common.contentpack.PackInfo;
 import fr.dynamx.common.contentpack.parts.PartShape;
 import fr.dynamx.common.obj.ObjModelServer;
 import fr.dynamx.common.obj.texture.TextureData;
@@ -25,13 +29,20 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractItemObject<T> implements IShapedObject {
+    @IPackFilePropertyFixer.PackFilePropertyFixer(registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.PROPS})
+    public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
+        if ("UseHullShape".equals(key))
+            return new IPackFilePropertyFixer.FixResult("UseComplexCollisions", true);
+        return null;
+    };
+
     @PackFileProperty(configNames = "Translate", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false, defaultValue = "0 0 0")
     protected Vector3f translation = new Vector3f(0, 0, 0);
     @PackFileProperty(configNames = "Scale", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false, defaultValue = "1 1 1")
     protected Vector3f scaleModifier = new Vector3f(1, 1, 1);
     @PackFileProperty(configNames = "RenderDistanceSquared", required = false, defaultValue = "4096")
     protected float renderDistance = 4096;
-    @PackFileProperty(configNames = "UseComplexCollisions", oldNames = {"UseHullShape"}, required = false, defaultValue = "false", description = "common.UseComplexCollisions")
+    @PackFileProperty(configNames = "UseComplexCollisions", required = false, defaultValue = "false", description = "common.UseComplexCollisions")
     protected boolean useHullShape = false;
     /*@PackFileProperty(configNames = "CollisionType", required = false, defaultValue = "Simple", type = DefinitionType.DynamXDefinitionTypes.COLLISION_TYPE)
     protected EnumCollisionType collisionType = EnumCollisionType.SIMPLE;*/

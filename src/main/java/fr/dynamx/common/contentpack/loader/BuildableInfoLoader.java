@@ -4,7 +4,6 @@ import fr.aym.acslib.api.services.ErrorTrackingService;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.IShapedObject;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoTypeOwner;
-import fr.dynamx.api.contentpack.registry.SubInfoTypesRegistry;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.sync.PackSyncHandler;

@@ -173,8 +173,6 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IInf
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
         super.breakBlock(worldIn, pos, state);
         DynamXChunkData data = worldIn.getChunk(pos).getCapability(DynamXChunkDataProvider.DYNAM_X_CHUNK_DATA_CAPABILITY, null);
-        System.out.println("Collisions are " + data.getBlocksAABB());
-        System.out.println("Remove" + data.getBlocksAABB().get(pos) + " at " + pos);
         data.getBlocksAABB().remove(pos);
     }
 

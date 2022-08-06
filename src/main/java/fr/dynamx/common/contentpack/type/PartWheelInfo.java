@@ -6,7 +6,9 @@ import fr.dynamx.api.contentpack.object.render.IObjPackObject;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
+import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
+import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.obj.IObjObject;
 import fr.dynamx.common.obj.texture.TextureData;
 import net.minecraft.util.EnumParticleTypes;
@@ -18,6 +20,13 @@ import java.util.Map;
  * Wheel contained in a wheel file
  */
 public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements ISubInfoType<PartWheelInfo>, IObjPackObject, INamedObject {
+    @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.WHEELS)
+    public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
+        if ("WheelRadius".equals(key))
+            return new IPackFilePropertyFixer.FixResult("Radius", true);
+        return null;
+    };
+
     private final String packName;
     private final String partName;
 
@@ -25,7 +34,7 @@ public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IS
     private String model;
     @PackFileProperty(configNames = "Width")
     private float wheelWidth;
-    @PackFileProperty(configNames = "Radius", oldNames = "WheelRadius")
+    @PackFileProperty(configNames = "Radius")
     private float wheelRadius;
     @PackFileProperty(configNames = "RimRadius")
     private float rimRadius;

@@ -4,8 +4,11 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
+import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
+import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
 
+@RegisteredSubInfoType(name = "caterpillar", registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
 public class CaterpillarInfo implements ISubInfoType<ModularVehicleInfoBuilder> {
     private final ISubInfoTypeOwner<ModularVehicleInfoBuilder> owner;
 

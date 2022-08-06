@@ -2,6 +2,7 @@ package fr.dynamx.api.contentpack.registry;
 
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
+import fr.dynamx.common.contentpack.loader.SubInfoTypesRegistry;
 
 import java.lang.reflect.InvocationTargetException;
 

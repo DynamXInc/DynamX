@@ -3,10 +3,13 @@ package fr.dynamx.common.contentpack.type.vehicle;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
+import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
+import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 
 /**
  * Automatic gear of an {@link EngineInfo}
  */
+@RegisteredSubInfoType(name = "gear", registries = SubInfoTypeRegistries.ENGINES, strictName = false)
 public class GearInfo extends SubInfoType<EngineInfo> {
     private byte id;
     private final String gearName;

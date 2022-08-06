@@ -1,7 +1,7 @@
 package fr.dynamx.api.contentpack.object.subinfo;
 
 import fr.dynamx.api.contentpack.object.INamedObject;
-import fr.dynamx.api.contentpack.registry.SubInfoTypesRegistry;
+import fr.dynamx.common.contentpack.loader.SubInfoTypesRegistry;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;

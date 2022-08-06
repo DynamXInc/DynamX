@@ -2,14 +2,15 @@ package fr.dynamx.common.contentpack.loader;
 
 import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
+import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
+import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -45,40 +46,46 @@ public class SubInfoTypeAnnotationCache {
         return cache.get(from);
     }
 
-    private static void load(Class<?> toCache) {
-        Map<String, PackFilePropertyData<?>> data = new HashMap<>();
-        List<PackFilePropertyData<?>> fields = new ArrayList<>();
-        for (Field f : toCache.getDeclaredFields()) {
+    private static void load(Class<?> classToParse) {
+        Map<String, PackFilePropertyData<?>> packFileProperties = new HashMap<>();
+        for (Field f : classToParse.getDeclaredFields()) {
             if (f.isAnnotationPresent(PackFileProperty.class)) {
-                DefinitionType<?> type = f.getAnnotation(PackFileProperty.class).type().type;
+                PackFileProperty property = f.getAnnotation(PackFileProperty.class);
+                DefinitionType<?> type = property.type().type;
                 if (type == null)
                     type = DefinitionType.getParserOf(f.getType());
                 if (type != null) {
-                    PackFileProperty property = f.getAnnotation(PackFileProperty.class);
-                    for (String configName : f.getAnnotation(PackFileProperty.class).configNames()) {
-                        PackFilePropertyData<?> d = new PackFilePropertyData<>(f, configName, type, property.required(),
-                                property.newConfigName().isEmpty() ? null : property.newConfigName(), property.description(), property.defaultValue());
-                        data.put(d.getConfigFieldName(), d);
-                        fields.add(d);
+                    for (String configName : property.configNames()) {
+                        PackFilePropertyData<?> d = new PackFilePropertyData<>(f, configName, type, property.required(), property.description(), property.defaultValue());
+                        packFileProperties.put(d.getConfigFieldName(), d);
                     }
-                    for (String oldName : f.getAnnotation(PackFileProperty.class).oldNames()) {
-                        PackFilePropertyData<?> d = new PackFilePropertyData<>(f, oldName, type, f.getAnnotation(PackFileProperty.class).required(),
-                                f.getAnnotation(PackFileProperty.class).configNames()[0], "", "");
-                        data.put(oldName, d);
-                        fields.add(d);
+                } else
+                    throw new IllegalArgumentException("No parser for field " + f.getName() + " of " + classToParse.getName());
+            }
+            if (f.isAnnotationPresent(IPackFilePropertyFixer.PackFilePropertyFixer.class)) {
+                if (!INamedObject.class.isAssignableFrom(classToParse))
+                    throw new IllegalArgumentException("Only INamedObject objects can have the @PackFilePropertyFixer annotation. Errored class: " + classToParse);
+                try {
+                    Object value = f.get(null);
+                    if (!(value instanceof IPackFilePropertyFixer))
+                        throw new IllegalArgumentException("@PackFilePropertyFixer should annotate a static IPackFilePropertyFixer field. Errored class: " + classToParse);
+                    System.out.println("Detect in " + classToParse + " " + Arrays.toString(f.getAnnotation(IPackFilePropertyFixer.PackFilePropertyFixer.class).registries()));
+                    for (SubInfoTypeRegistries registry : f.getAnnotation(IPackFilePropertyFixer.PackFilePropertyFixer.class).registries()) {
+                        if (!registry.getInfoLoader().hasSubInfoTypesRegistry())
+                            throw new IllegalArgumentException("No sub info type registry on registry " + registry);
+                        registry.getInfoLoader().getSubInfoTypesRegistry().addSubInfoTypePropertiesFixer((Class<? extends INamedObject>) classToParse, (IPackFilePropertyFixer) value);
                     }
-                } else {
-                    throw new IllegalArgumentException("No parser for field " + f.getName() + " of " + toCache.getName());
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
                 }
             }
         }
-        if (toCache.getSuperclass() != null) {
-            Map<String, PackFilePropertyData<?>> dataMap = getOrLoadData(toCache.getSuperclass());
-            data.putAll(dataMap);
-            fields.addAll(dataMap.values());
+        if (classToParse.getSuperclass() != null) {
+            Map<String, PackFilePropertyData<?>> dataMap = getOrLoadData(classToParse.getSuperclass());
+            packFileProperties.putAll(dataMap);
         }
-        //ContentPackDocGenerator.generateDoc(toCache.getSimpleName(), "fr_fr", fields);
+        //ContentPackDocGenerator.generateDoc(toCache.getSimpleName(), "fr_fr", data.values());
         //System.out.println("Found "+data.size()+" fields in "+toCache.getName());
-        cache.put(toCache, data);
+        cache.put(classToParse, packFileProperties);
     }
 }

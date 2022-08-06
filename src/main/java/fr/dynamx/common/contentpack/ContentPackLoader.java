@@ -3,6 +3,7 @@ package fr.dynamx.common.contentpack;
 import fr.aym.acsguis.api.ACsGuiApi;
 import fr.aym.acslib.api.services.ErrorTrackingService;
 import fr.aym.acslib.api.services.mps.ModProtectionContainer;
+import fr.dynamx.common.contentpack.loader.SubInfoTypesRegistry;
 import fr.dynamx.api.events.ContentPackSystemEvent;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.client.handlers.hud.CarController;
@@ -102,6 +103,7 @@ public class ContentPackLoader {
         }
         //Discover addons
         AddonLoader.discoverAddons(event);
+        SubInfoTypesRegistry.discoverSubInfoTypes(event);
         //Discover resources
         if (side.isClient()) {
             int packCount = 0;
@@ -263,7 +265,7 @@ public class ContentPackLoader {
                             loadingPack = DynamXObjectLoaders.PACKS.findInfo(loadingPack + ".pack_info").getFixedPackName();
                         } else {
                             log.warn("Content pack " + loadingPack + " is missing a pack_info.dynx file !");
-                            DynamXObjectLoaders.PACKS.addInfo(loadingPack + ".pack_info.dynx", new PackInfo(loadingPack).setPathName(contentPack.getName()).setPackVersion("dummy info"));
+                            DynamXObjectLoaders.PACKS.addInfo(loadingPack + ".pack_info.dynx", new PackInfo(loadingPack, false).setPathName(contentPack.getName()).setPackVersion("dummy info"));
                             //DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, loadingPack, "Content Pack " + loadingPack + " is missing a pack_info.dynx file !", "Please add a pack_info.dynx file to this pack", ErrorTrackingService.TrackedErrorLevel.FATAL);
                         }
                         DynamXMain.log.info("Loading " + loadingPack + "(in " + contentPack.getName() + ")");
@@ -312,7 +314,7 @@ public class ContentPackLoader {
                             ifo.setPathName(contentPack.getName());
                         } else {
                             log.warn("Zip content pack " + loadingPack + " is missing a pack_info.dynx file !");
-                            DynamXObjectLoaders.PACKS.addInfo(loadingPack + ".pack_info", new PackInfo(loadingPack).setPathName(contentPack.getName()).setPackVersion("dummy info"));
+                            DynamXObjectLoaders.PACKS.addInfo(loadingPack + ".pack_info", new PackInfo(loadingPack, false).setPathName(contentPack.getName()).setPackVersion("dummy info"));
                             //DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, loadingPack, "Zip content Pack " + loadingPack + " is missing a pack_info.dynx file !", "Please add a pack_info.dynx file to this pack", ErrorTrackingService.TrackedErrorLevel.FATAL);
                         }
                         DynamXMain.log.info("Loading " + loadingPack + "(in " + contentPack.getName() + ")");

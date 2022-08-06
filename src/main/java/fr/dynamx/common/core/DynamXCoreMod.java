@@ -2,8 +2,6 @@ package fr.dynamx.common.core;
 
 import fr.aym.acslib.services.impl.stats.core.StatsBotCorePlugin;
 import fr.aym.loadingscreen.client.SplashScreenTransformer;
-import fr.dynamx.common.core.asm.EntityLivingBasePatcher;
-import fr.dynamx.common.core.asm.EntityPatcher;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.LibraryInstaller;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
@@ -26,7 +24,7 @@ public class DynamXCoreMod implements IFMLLoadingPlugin {
 
     @Override
     public String[] getASMTransformerClass() {
-        return new String[]{SplashScreenTransformer.class.getName(), EntityPatcher.class.getName(), EntityLivingBasePatcher.class.getName(), StatsBotCorePlugin.class.getName()};
+        return new String[]{SplashScreenTransformer.class.getName(), StatsBotCorePlugin.class.getName()};
     }
 
     @Override
@@ -41,8 +39,8 @@ public class DynamXCoreMod implements IFMLLoadingPlugin {
 
     @Override
     public void injectData(Map<String, Object> data) {
-        EntityPatcher.runtimeDeobfuscationEnabled = (Boolean) data.get("runtimeDeobfuscationEnabled");
-        if (EntityPatcher.runtimeDeobfuscationEnabled) { //Production
+        StatsBotCorePlugin.runtimeDeobfuscationEnabled = (Boolean) data.get("runtimeDeobfuscationEnabled");
+        if (StatsBotCorePlugin.runtimeDeobfuscationEnabled) { //Production
             LOG.info("Checking ACsGuis installation...");
             if (!LibraryInstaller.loadACsGuis(LOG, new File("mods"), DynamXConstants.DEFAULT_ACSGUIS_VERSION)) {
                 LOG.fatal("ACsGuis library cannot be found or installed !");

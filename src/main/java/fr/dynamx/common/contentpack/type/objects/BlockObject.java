@@ -45,7 +45,7 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
         if (event.isOverridden()) {
             return (IInfoOwner<T>) event.getSpawnItem();
         } else {
-            return new DynamXBlock(this, DynamXUtils.getMat(material));
+            return new DynamXBlock(this, material != null ? DynamXUtils.getMat(material) : DynamXUtils.getMat("ROCK"));
         }
     }
 

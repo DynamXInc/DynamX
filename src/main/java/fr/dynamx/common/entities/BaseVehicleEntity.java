@@ -13,6 +13,7 @@ import fr.dynamx.common.contentpack.parts.PartShape;
 import fr.dynamx.common.network.sync.vars.VehicleSynchronizedVariables;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.utils.DynamXConfig;
+import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.debug.Profiler;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.Vector3fPool;
@@ -162,6 +163,9 @@ public abstract class BaseVehicleEntity<T extends BaseVehiclePhysicsHandler<?>> 
 
     @Override
     public boolean canPlayerStandOnTop() {
-        return true;
+        String playerStandOnTop = this.getPackInfo().getPlayerStandOnTop();
+        if(playerStandOnTop.equalsIgnoreCase("progressive")) {
+            return DynamXUtils.getSpeed(this) <= 30;
+        } else return !playerStandOnTop.equalsIgnoreCase("never");
     }
 }

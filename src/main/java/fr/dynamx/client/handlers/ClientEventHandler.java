@@ -22,6 +22,7 @@ import fr.dynamx.common.entities.PropsEntity;
 import fr.dynamx.common.items.DynamXItemSpawner;
 import fr.dynamx.common.items.tools.ItemSlopes;
 import fr.dynamx.common.network.packets.MessageEntityInteract;
+import fr.dynamx.common.physics.player.WalkingOnPlayerController;
 import fr.dynamx.common.slopes.GuiSlopesConfig;
 import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.DynamXConstants;
@@ -67,6 +68,7 @@ import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 public class ClientEventHandler {
     public static final Minecraft MC = Minecraft.getMinecraft();
     public static boolean rendering;
+    public static boolean sit;
     public static RenderPlayer renderPlayer;
 
     /* Placing block */
@@ -232,6 +234,17 @@ public class ClientEventHandler {
                     connectionTime = -1;
             }
         }
+
+        if((MC.player != null))
+            if(DynamXContext.getWalkingPlayers().containsKey(MC.player)){
+                PhysicsEntity<?> car = DynamXContext.getWalkingPlayers().get(MC.player);
+                if(!car.canPlayerStandOnTop()){
+                    if(WalkingOnPlayerController.controller != null) {
+                        WalkingOnPlayerController.controller.disable();
+                        MC.player.motionY += 0.2D;
+                    }
+                }
+            }
 
         model = null;
         EntityPlayer entityPlayer = Minecraft.getMinecraft().player;

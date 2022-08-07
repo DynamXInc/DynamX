@@ -45,6 +45,7 @@ import java.util.stream.Collectors;
 public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends AbstractItemObject<U> implements IPhysicsPackInfo, IModelTextureSupplier,
         ParticleEmitterInfo.IParticleEmitterContainer {
     private final int emptyMass;
+    private final String playerStandOnTop;
     private final float dragFactor;
     private final Vector3f centerOfMass;
     private final Vector3f scaleModifier;
@@ -109,7 +110,7 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
      */
     private final List<Vector3f> collisionShapeDebugBuffer;
 
-    public ModularVehicleInfo(String defaultName, String packName, String fileName, String description, int emptyMass, float dragFactor, String model, Vector3f centerOfMass,
+    public ModularVehicleInfo(String defaultName, String packName, String fileName, String description, int emptyMass, String playerStandOnTop, float dragFactor, String model, Vector3f centerOfMass,
                               Vector3f scaleModifier, Map<Byte, TextureData> textures, List<BasePart<ModularVehicleInfoBuilder>> parts, List<PartShape<?>> partShapes,
                               List<ISubInfoType<ModularVehicleInfoBuilder>> subProperties, Map<String, PartLightSource.CompoundLight> lightSources, List<FrictionPoint> frictionPoints,
                               List<ParticleEmitterInfo<?>> particleEmitters, float vehicleMaxSpeed, int directingWheel, float itemScale, Enum3DRenderLocation item3DRenderLocation,
@@ -130,6 +131,7 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
         this.scaleModifier = scaleModifier;
 
         this.emptyMass = emptyMass;
+        this.playerStandOnTop = playerStandOnTop;
         this.dragFactor = dragFactor;
         this.model = model;
         this.centerOfMass = centerOfMass;
@@ -206,6 +208,10 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
 
     public int getEmptyMass() {
         return emptyMass;
+    }
+
+    public String getPlayerStandOnTop() {
+        return playerStandOnTop;
     }
 
     public float getDragFactor() {

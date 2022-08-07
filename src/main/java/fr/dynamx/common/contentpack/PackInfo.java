@@ -6,6 +6,8 @@ import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
+import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
+import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.utils.DynamXLoadingTasks;
@@ -29,10 +31,12 @@ public class PackInfo extends SubInfoTypeOwner<PackInfo> implements INamedObject
     private String packVersion = "nc";
     @PackFileProperty(configNames = "CompatibleWithLoaderVersions", required = false)
     private String compatibleLoaderVersions;
+    private final boolean isBuiltinPack;
 
-    public PackInfo(String packName) {
+    public PackInfo(String packName, boolean isBuiltinPack) {
         this.originalPackName = this.packName = packName;
         this.pathName = packName;
+        this.isBuiltinPack = isBuiltinPack;
     }
 
     public PackInfo setPathName(String pathName) {
@@ -127,7 +131,16 @@ public class PackInfo extends SubInfoTypeOwner<PackInfo> implements INamedObject
         return packName;
     }
 
-    public static class RequiredAddonInfo extends SubInfoType<PackInfo> {
+    /**
+     * @return True if the pack comes from an addon (with builtin blocks or items)
+     */
+    public boolean isBuiltinPack() {
+        return isBuiltinPack;
+    }
+
+    @RegisteredSubInfoType(name = "RequiredAddon", registries = SubInfoTypeRegistries.PACKS, strictName = false)
+    public static class RequiredAddonInfo extends SubInfoType<PackInfo>
+    {
         private final String name;
 
         @PackFileProperty(configNames = "Id")

@@ -75,6 +75,9 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
             if (useHullShape) {
                 compoundCollisionShape = ShapeUtils.generateComplexModelCollisions(DynamXUtils.getModelPath(getPackName(), model), "", scaleModifier, new Vector3f(), 0);
             } else {
+                PackInfo info = DynamXObjectLoaders.PACKS.findPackInfoByPackName(getPackName());
+                //System.out.println("Info for "+getPackName()+" "+info);
+                //System.out.println("All are " + DynamXObjectLoaders.PACKS.getInfos());
                 ShapeUtils.generateModelCollisions(this, ObjModelServer.createServerObjModel(DynamXUtils.getModelPath(getPackName(), getModel())), compoundCollisionShape);
             }
         } else {

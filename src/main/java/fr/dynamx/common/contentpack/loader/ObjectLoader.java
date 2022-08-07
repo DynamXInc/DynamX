@@ -3,9 +3,10 @@ package fr.dynamx.common.contentpack.loader;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
-import fr.dynamx.api.contentpack.registry.SubInfoTypesRegistry;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.ContentPackLoader;
+import fr.dynamx.common.contentpack.DynamXObjectLoaders;
+import fr.dynamx.common.contentpack.PackInfo;
 import fr.dynamx.common.contentpack.type.ObjectInfo;
 import fr.dynamx.common.contentpack.type.objects.AbstractItemObject;
 import fr.dynamx.common.items.DynamXItemRegistry;
@@ -83,6 +84,10 @@ public class ObjectLoader<T extends ObjectInfo<?>, C extends IInfoOwner<?>, U ex
         T info = assetCreator.apply(modName, objectName);
         owners.add((IInfoOwner<T>) owner);
         builtinObjects.add(info);
+        if(DynamXObjectLoaders.PACKS.findPackInfoByPackName(modName) == null)
+            DynamXObjectLoaders.PACKS.addInfo(modName, new PackInfo(modName, true));
+        //System.out.println("Builtin pack info added is " + DynamXObjectLoaders.PACKS.findPackInfoByPackName(modName)+" with name " + modName);
+        //System.out.println("All info " + DynamXObjectLoaders.PACKS.getInfos());
         return info;
     }
 

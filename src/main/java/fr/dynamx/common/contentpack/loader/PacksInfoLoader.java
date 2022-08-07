@@ -1,6 +1,5 @@
 package fr.dynamx.common.contentpack.loader;
 
-import fr.dynamx.api.contentpack.registry.SubInfoTypesRegistry;
 import fr.dynamx.common.contentpack.PackInfo;
 
 import javax.annotation.Nullable;
@@ -9,6 +8,11 @@ import java.util.function.BiFunction;
 public class PacksInfoLoader extends InfoLoader<PackInfo, PackInfo> {
     public PacksInfoLoader(String prefix, BiFunction<String, String, PackInfo> assetCreator, @Nullable SubInfoTypesRegistry<PackInfo> infoTypesRegistry) {
         super(prefix, assetCreator, infoTypesRegistry);
+    }
+
+    @Override
+    public void clear(boolean hot) {
+        infos.values().removeIf(packInfo -> !packInfo.isBuiltinPack());
     }
 
     @Override

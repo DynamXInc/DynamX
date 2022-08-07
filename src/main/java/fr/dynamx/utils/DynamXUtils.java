@@ -79,7 +79,8 @@ public class DynamXUtils {
      */
     public static ObjModelPath getModelPath(String packName, String model) {
         PackInfo info = DynamXObjectLoaders.PACKS.findPackInfoByPackName(packName);
-        return new ObjModelPath(info == null ? packName : info.getPathName(), RegistryNameSetter.getDynamXModelResourceLocation(model));
+        if(info == null) return new ObjModelPath(packName , RegistryNameSetter.getDynamXModelResourceLocation(model), false);
+        return new ObjModelPath(info.getPathName(), RegistryNameSetter.getDynamXModelResourceLocation(model), info.isBuiltinPack());
     }
 
     public static byte[] readInputStream(InputStream resource) throws IOException {

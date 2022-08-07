@@ -10,10 +10,12 @@ import net.minecraft.util.ResourceLocation;
 public class ObjModelPath implements INamedObject {
     private final String packName;
     private final ResourceLocation modelPath;
+    private final boolean isBuiltinModel;
 
-    public ObjModelPath(String packName, ResourceLocation modelPath) {
+    public ObjModelPath(String packName, ResourceLocation modelPath, boolean isBuiltinModel) {
         this.packName = packName;
         this.modelPath = modelPath;
+        this.isBuiltinModel = isBuiltinModel;
     }
 
     /**
@@ -34,6 +36,13 @@ public class ObjModelPath implements INamedObject {
      */
     public ResourceLocation getModelPath() {
         return modelPath;
+    }
+
+    /**
+     * @return True if the model comes from an addon (builtin block or item)
+     */
+    public boolean isBuiltinModel() {
+        return isBuiltinModel;
     }
 
     @Override

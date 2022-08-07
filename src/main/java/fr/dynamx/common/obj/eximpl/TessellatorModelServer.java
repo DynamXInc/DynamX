@@ -47,6 +47,12 @@ public class TessellatorModelServer extends ObjModelServer {
                 return protectedd;
             }
         }
+        if(path.isBuiltinModel()) {
+            System.out.println("Builtin model " + path);
+            String entry = "/assets/" + path.getModelPath().getNamespace() + "/" + path.getModelPath().getPath();
+            System.out.println("entry "+entry+" "+getClass().getResourceAsStream(entry));
+            return getClass().getResourceAsStream(entry);
+        }
         if (path.getPackName().contains(".zip") || path.getPackName().contains(ContentPackLoader.PACK_FILE_EXTENSION)) {
             ZipFile root = new ZipFile(DynamXMain.resDir + File.separator + path.getPackName());
             //System.out.println("Root is "+root);

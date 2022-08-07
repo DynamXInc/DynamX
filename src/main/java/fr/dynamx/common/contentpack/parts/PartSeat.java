@@ -25,6 +25,10 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     private String linkedDoor;
     @PackFileProperty(configNames = "Rotation", required = false, defaultValue = "1 0 0 0")
     private Quaternion rotation;
+
+    @PackFileProperty(configNames = "PlayerPosition", required = false, defaultValue = "sit")
+    private String playerPosition;
+
     @PackFileProperty(configNames = "CameraRotation", required = false, defaultValue = "0")
     private float rotationYaw;
 
@@ -102,6 +106,10 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
 
     public Quaternion getRotation() {
         return rotation;
+    }
+
+    public String getPlayerPosition() {
+        return playerPosition;
     }
 
     public float getRotationYaw() {

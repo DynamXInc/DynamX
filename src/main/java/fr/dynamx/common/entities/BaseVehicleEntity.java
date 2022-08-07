@@ -7,6 +7,7 @@ import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.api.network.sync.SimulationHolder;
+import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.common.contentpack.ModularVehicleInfo;
 import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.contentpack.parts.PartShape;
@@ -131,7 +132,7 @@ public abstract class BaseVehicleEntity<T extends BaseVehiclePhysicsHandler<?>> 
 
     @Override
     public boolean shouldRiderSit() {
-        return true; //Passagers debouts
+        return ClientEventHandler.sit;
     }
 
     @Override

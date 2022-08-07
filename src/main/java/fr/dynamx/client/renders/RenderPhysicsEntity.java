@@ -105,8 +105,17 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
                 //Apply seat rotation
                 if(entity instanceof IModuleContainer.ISeatsContainer) {
                     PartSeat seat = ((IModuleContainer.ISeatsContainer) entity).getSeats().getRidingSeat(e);
-                    if(seat != null && seat.getRotation() != null) {
-                        GlStateManager.rotate(GlQuaternionPool.get(seat.getRotation()));
+                    if(seat != null) {
+                        if (seat.getRotation() != null)
+                            GlStateManager.rotate(GlQuaternionPool.get(seat.getRotation()));
+
+                        if (seat.getPlayerPosition() != null) {
+                            ClientEventHandler.sit = seat.getPlayerPosition().equalsIgnoreCase("sit");
+
+                            if (seat.getPlayerPosition().equalsIgnoreCase("sleeping")) {
+                                GlStateManager.rotate(90, -1, 0, 0);
+                            }
+                        }
                     }
                 }
 

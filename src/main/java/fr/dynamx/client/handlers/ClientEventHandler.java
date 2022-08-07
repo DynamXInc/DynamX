@@ -235,20 +235,19 @@ public class ClientEventHandler {
             }
         }
 
-        if((MC.player != null))
-            if(DynamXContext.getWalkingPlayers().containsKey(MC.player)){
-                PhysicsEntity<?> car = DynamXContext.getWalkingPlayers().get(MC.player);
-                if(!car.canPlayerStandOnTop()){
+        model = null;
+        EntityPlayer entityPlayer = Minecraft.getMinecraft().player;
+        if (entityPlayer != null) {
+            if(DynamXContext.getWalkingPlayers().containsKey(entityPlayer)){
+                PhysicsEntity<?> physicsEntity = DynamXContext.getWalkingPlayers().get(entityPlayer);
+                if(!physicsEntity.canPlayerStandOnTop()){
                     if(WalkingOnPlayerController.controller != null) {
                         WalkingOnPlayerController.controller.disable();
-                        MC.player.motionY += 0.2D;
+                        entityPlayer.motionY += 0.2D;
                     }
                 }
             }
 
-        model = null;
-        EntityPlayer entityPlayer = Minecraft.getMinecraft().player;
-        if (entityPlayer != null) {
             ItemStack currentItem = entityPlayer.inventory.getCurrentItem();
             if (currentItem.getItem() instanceof ItemBlock && ((ItemBlock) currentItem.getItem()).getBlock() instanceof DynamXBlock) {
                 ItemBlock itemBlock = (ItemBlock) currentItem.getItem();

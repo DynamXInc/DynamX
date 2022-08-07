@@ -1,11 +1,18 @@
 package fr.dynamx.client.handlers;
 
 import com.jme3.bullet.objects.PhysicsRigidBody;
+import fr.dynamx.api.contentpack.object.IShapeProvider;
+import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.client.camera.CameraSystem;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.contentpack.parts.PartSeat;
+import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.network.packets.MessageDebugRequest;
 import fr.dynamx.common.physics.utils.RigidBodyTransform;
 import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.DynamXUtils;
+import fr.dynamx.utils.client.ClientDynamXUtils;
+import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.debug.*;
 import fr.dynamx.utils.debug.renderer.PhysicsDebugRenderer;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
@@ -27,8 +34,10 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.vector.Quaternion;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 @Mod.EventBusSubscriber(modid = DynamXConstants.ID, value = Side.CLIENT)
 public class ClientDebugSystem {
@@ -38,6 +47,8 @@ public class ClientDebugSystem {
 
     private static final Map<Long, RigidBodyTransform>[] prevRigidBodyStates = new Map[]{new HashMap(), new HashMap()};
     private static byte curRigidBodyStatesIndex;
+
+    private static final Minecraft MC = Minecraft.getMinecraft();
 
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
@@ -112,6 +123,8 @@ public class ClientDebugSystem {
         }
     }
 
+    static BasePart<?> lastPart = null;
+
     @SideOnly(Side.CLIENT)
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void worldRender(RenderWorldLastEvent event) {
@@ -164,13 +177,97 @@ public class ClientDebugSystem {
 
             }
 
+
             GlStateManager.enableTexture2D();
             GlStateManager.popMatrix();
 
             if (DynamXDebugOptions.CAMERA_RAYCAST.isActive()) {
                 CameraSystem.drawDebug();
             }
+
+            Vector3fPool.openPool();
+            if (MC.objectMouseOver != null) {
+                if (!rootPlayer.isSneaking()) {
+                    disableShapeDebug(lastPart);
+                    Vector3fPool.closePool();
+                    return;
+                }
+                if (!(MC.objectMouseOver.entityHit instanceof PackPhysicsEntity)) {
+                    disableShapeDebug(lastPart);
+                    Vector3fPool.closePool();
+                    return;
+                }
+                PackPhysicsEntity<?, ?> entityHit = (PackPhysicsEntity<?, ?>) MC.objectMouseOver.entityHit;
+                if (!(entityHit.getPackInfo() instanceof IShapeProvider)) {
+                    disableShapeDebug(lastPart);
+                    Vector3fPool.closePool();
+                    return;
+                }
+                Predicate<BasePart<?>> wantedShape = null;
+                Optional<DynamXDebugOption> dynamXDebugOptions = DynamXDebugOptions.getAllOptions()
+                        .stream()
+                        .filter(dynamXDebugOption -> !dynamXDebugOption.equals(DynamXDebugOptions.DEBUG_RENDER)
+                                && dynamXDebugOption.isActive()).findFirst();
+                if (dynamXDebugOptions.isPresent()) {
+                    wantedShape = basePart -> {
+                        if(basePart.getDebugOption() != null) {
+                            return basePart.getDebugOption().equals(dynamXDebugOptions.get());
+                        }
+                        return false;
+                    };
+                }
+                BasePart<?> basePart = DynamXUtils.rayTestPart(rootPlayer, entityHit, (IShapeProvider<?>) entityHit.getPackInfo(), wantedShape);
+                if (basePart == null) {
+                    disableShapeDebug(lastPart);
+                    Vector3fPool.closePool();
+                    return;
+                }
+                GlStateManager.pushMatrix();
+                GlQuaternionPool.openPool();
+                QuaternionPool.openPool();
+                Quaternion rot = ClientDynamXUtils.computeInterpolatedGlQuaternion(
+                        entityHit.prevRenderRotation,
+                        entityHit.renderRotation,
+                        event.getPartialTicks(), false);
+                double entityX = entityHit.lastTickPosX + (entityHit.posX - entityHit.lastTickPosX) * event.getPartialTicks();
+                double entityY = entityHit.lastTickPosY + (entityHit.posY - entityHit.lastTickPosY) * event.getPartialTicks();
+                double entityZ = entityHit.lastTickPosZ + (entityHit.posZ - entityHit.lastTickPosZ) * event.getPartialTicks();
+                GlStateManager.translate(-x, -y, -z);
+                GlStateManager.translate(entityX, entityY, entityZ);
+                GlStateManager.rotate(rot);
+                float yOffset = 0;
+                if (basePart instanceof PartSeat)
+                    yOffset = 0.9f;
+                DynamXRenderUtils.drawNameplate(MC.fontRenderer, basePart.getPartName(),
+                        basePart.getPosition().x,
+                        basePart.getPosition().y + yOffset + 1,
+                        basePart.getPosition().z,
+                        ClientDynamXUtils.computeInterpolatedGlQuaternion(
+                                entityHit.prevRenderRotation,
+                                entityHit.renderRotation,
+                                event.getPartialTicks(), true),
+                        0, rootPlayer.rotationYaw, rootPlayer.rotationPitch, false);
+                if (lastPart != null && lastPart.getDebugOption() != null)
+                    lastPart.getDebugOption().disable();
+                if (basePart.getDebugOption() != null)
+                    basePart.getDebugOption().enable();
+                if (wantedShape == null)
+                    lastPart = basePart;
+                GlQuaternionPool.closePool();
+                QuaternionPool.closePool();
+                GlStateManager.popMatrix();
+            } else {
+                //disableShapeDebug(lastPart);
+            }
+            Vector3fPool.closePool();
+
         }
+    }
+
+    private static void disableShapeDebug(BasePart<?> basePart) {
+        if (basePart == null || basePart.getDebugOption() == null)
+            return;
+        basePart.getDebugOption().disable();
     }
 
     @SideOnly(Side.CLIENT)

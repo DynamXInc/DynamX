@@ -11,6 +11,8 @@ import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.common.entities.vehicles.CarEntity;
 import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.debug.DynamXDebugOption;
+import fr.dynamx.utils.debug.DynamXDebugOptions;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
@@ -30,6 +32,11 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
 
     public PartSeat(ModularVehicleInfoBuilder owner, String partName) {
         super(owner, partName, 0.4f, 1.8f);
+    }
+
+    @Override
+    public DynamXDebugOption getDebugOption() {
+        return DynamXDebugOptions.SEATS_AND_STORAGE;
     }
 
     @Override

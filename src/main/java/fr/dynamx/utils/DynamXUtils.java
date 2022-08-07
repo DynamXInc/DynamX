@@ -3,10 +3,14 @@ package fr.dynamx.utils;
 import com.google.common.base.Predicates;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import fr.dynamx.api.contentpack.object.IShapeProvider;
+import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.api.physics.EnumBulletShapeType;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.PackInfo;
+import fr.dynamx.common.entities.PackPhysicsEntity;
+import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import fr.dynamx.utils.physics.DynamXPhysicsHelper;
 import fr.dynamx.utils.physics.PhysicsRaycastResult;
@@ -228,6 +232,44 @@ public class DynamXUtils {
             }
         }
         return objectMouseOver;
+    }
+
+    public static BasePart<?> rayTestPart(EntityPlayer player, PackPhysicsEntity<?, ?> entityPart, IShapeProvider<?> packInfo, Predicate<BasePart<?>> wantedPart) {
+        Vector3fPool.openPool();
+        Vec3d lookVec = player.getLook(1.0F);
+        Vec3d hitVec = player.getPositionVector().add(0, player.getEyeHeight(), 0);
+        BasePart<?> nearest = null;
+        Vector3f nearestPos = null;
+        Vector3f playerPos = Vector3fPool.get((float) player.posX, (float) player.posY, (float) player.posZ);
+        for (float f = 1.0F; f < 4.0F; f += 0.1F) {
+            for (BasePart<?> part : packInfo.getAllParts()) {
+                if(wantedPart != null && !wantedPart.test(part)){
+                    continue;
+                }
+                Vector3f partPos = DynamXGeometry.rotateVectorByQuaternion(part.getPosition(), entityPart.physicsRotation);
+                Vector3fPool.openPool();
+                partPos.addLocal(toVector3f(entityPart.getPositionVector()));
+                Vector3fPool.closePool();
+                if ((nearestPos == null || DynamXGeometry.distanceBetween(partPos, playerPos) < DynamXGeometry.distanceBetween(nearestPos, playerPos))
+                        && vecInsideBox(hitVec, part, partPos)) {
+                    nearest = part;
+                    nearestPos = partPos;
+                }
+            }
+            hitVec = hitVec.add(lookVec.x * 0.1F, lookVec.y * 0.1F, lookVec.z * 0.1F);
+        }
+        Vector3fPool.closePool();
+        return nearest;
+    }
+
+    public static boolean vecInsideBox(Vec3d vec1, BasePart<?> part, Vector3f pos) {
+        float minX = -part.getScale().x + pos.x;
+        float minY = pos.y;
+        float minZ = -part.getScale().z + pos.z;
+        float maxX = part.getScale().x + pos.x;
+        float maxY = part.getScale().y + pos.y;
+        float maxZ = part.getScale().z + pos.z;
+        return vec1.x > minX && vec1.x < maxX && vec1.y > minY && vec1.y < maxY && vec1.z > minZ && vec1.z < maxZ;
     }
 
     public static List<Vector3f> floatBufferToVec3f(FloatBuffer buffer, Vector3f offset) {

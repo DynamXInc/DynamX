@@ -4,7 +4,7 @@ import com.jme3.bullet.collision.shapes.BoxCollisionShape;
 import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.INamedObject;
-import fr.dynamx.api.contentpack.object.IShapedObject;
+import fr.dynamx.api.contentpack.object.IShapeContainer;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoTypeOwner;
@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
  * Builder of {@link ModularVehicleInfo} <br>
  * Responsible for loading all the configuration/properties of the vehicle and creating a final object
  */
-public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implements IShapedObject, INamedObject, ParticleEmitterInfo.IParticleEmitterContainer {
+public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implements IShapeContainer, INamedObject, ParticleEmitterInfo.IParticleEmitterContainer {
     private final String packName, fileName;
 
     @PackFileProperty(configNames = "Name")
@@ -189,7 +189,7 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
     }
 
     @Override
-    public void setShapeErrored() {
+    public void markFailedShape() {
         errored = true;
     }
 

@@ -3,14 +3,18 @@ package fr.dynamx.utils;
 import com.google.common.base.Predicates;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.api.physics.EnumBulletShapeType;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.PackInfo;
+import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.modules.EngineModule;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import fr.dynamx.utils.physics.DynamXPhysicsHelper;
 import fr.dynamx.utils.physics.PhysicsRaycastResult;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -239,5 +243,95 @@ public class DynamXUtils {
             vector3fList.add(new Vector3f(xF + offset.x, yF + offset.y, zF + offset.z));
         }
         return vector3fList;
+    }
+
+    //DUPLICATE (function is already in the BasicsAddon)
+    public static int getSpeed(BaseVehicleEntity<?> entity) {
+        EngineModule engine = entity.getModuleByType(EngineModule.class);
+        if(engine != null){
+            float[] ab = engine.getEngineProperties();
+            if(ab == null) return 0;
+            return (int) Math.abs(ab[VehicleEntityProperties.EnumEngineProperties.SPEED.ordinal()]);
+        }
+        return -1;
+    }
+
+    public static Material getMat(String s)
+    {
+        s = s.toUpperCase();
+        if(s.equals("AIR"))
+            return Material.AIR;
+        else if(s.equals("ANVIL"))
+            return Material.ANVIL;
+        else if(s.equals("BARRIER"))
+            return Material.BARRIER;
+        else if(s.equals("CACTUS"))
+            return Material.CACTUS;
+        else if(s.equals("CAKE"))
+            return Material.CAKE;
+        else if(s.equals("CIRCUITS"))
+            return Material.CIRCUITS;
+        else if(s.equals("CARPET"))
+            return Material.CARPET;
+        else if(s.equals("CLAY"))
+            return Material.CLAY;
+        else if(s.equals("CLOTH"))
+            return Material.CLOTH;
+        else if(s.equals("CORAL"))
+            return Material.CORAL;
+        else if(s.equals("CRAFTED_SNOW"))
+            return Material.CRAFTED_SNOW;
+        else if(s.equals("DRAGON_EGG"))
+            return Material.DRAGON_EGG;
+        else if(s.equals("FIRE"))
+            return Material.FIRE;
+        else if(s.equals("GLASS"))
+            return Material.GLASS;
+        else if(s.equals("GOURD"))
+            return Material.GOURD;
+        else if(s.equals("GRASS"))
+            return Material.GRASS;
+        else if(s.equals("GROUND"))
+            return Material.GROUND;
+        else if(s.equals("ICE"))
+            return Material.ICE;
+        else if(s.equals("IRON"))
+            return Material.IRON;
+        else if(s.equals("LAVA"))
+            return Material.LAVA;
+        else if(s.equals("LEAVES"))
+            return Material.LEAVES;
+        else if(s.equals("PACKED_ICE"))
+            return Material.PACKED_ICE;
+        else if(s.equals("PISTON"))
+            return Material.PISTON;
+        else if(s.equals("PLANTS"))
+            return Material.PLANTS;
+        else if(s.equals("PORTAL"))
+            return Material.PORTAL;
+        else if(s.equals("REDSTONE_LIGHT"))
+            return Material.REDSTONE_LIGHT;
+        else if(s.equals("ROCK"))
+            return Material.ROCK;
+        else if(s.equals("SAND"))
+            return Material.SAND;
+        else if(s.equals("SNOW"))
+            return Material.SNOW;
+        else if(s.equals("SPONGE"))
+            return Material.SPONGE;
+        else if(s.equals("STRUCTURE_VOID"))
+            return Material.STRUCTURE_VOID;
+        else if(s.equals("TNT"))
+            return Material.TNT;
+        else if(s.equals("VINE"))
+            return Material.VINE;
+        else if(s.equals("WATER"))
+            return Material.WATER;
+        else if(s.equals("WEB"))
+            return Material.WEB;
+        else if(s.equals("WOOD"))
+            return Material.WOOD;
+
+        return null;
     }
 }

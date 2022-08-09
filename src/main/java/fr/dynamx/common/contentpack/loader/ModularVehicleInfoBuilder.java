@@ -21,6 +21,7 @@ import fr.dynamx.common.contentpack.type.vehicle.FrictionPoint;
 import fr.dynamx.common.contentpack.type.vehicle.SoundListInfo;
 import fr.dynamx.common.obj.texture.TextureData;
 import fr.dynamx.utils.DynamXUtils;
+import fr.dynamx.utils.EnumPlayerStandOnTop;
 import fr.dynamx.utils.physics.ShapeUtils;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 
@@ -43,8 +44,8 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
     private int emptyMass;
     @PackFileProperty(configNames = "DragCoefficient")
     private float dragFactor;
-    @PackFileProperty(configNames = "PlayerStandOnTop", required = false, defaultValue = "always")
-    private String playerStandOnTop;
+    @PackFileProperty(configNames = "PlayerStandOnTop", required = false, defaultValue = "ALWAYS", type = DefinitionType.DynamXDefinitionTypes.PLAYER_STAND_ON_TOP)
+    public EnumPlayerStandOnTop playerStandOnTop;
     @PackFileProperty(configNames = "Model", description = "common.model", defaultValue = "obj/name_of_vehicle/name_of_model.obj")
     private String model;
     @PackFileProperty(configNames = "ShapeYOffset", required = false)

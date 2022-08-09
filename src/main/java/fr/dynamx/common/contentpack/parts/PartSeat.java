@@ -2,6 +2,7 @@ package fr.dynamx.common.contentpack.parts;
 
 import com.jme3.math.Quaternion;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
+import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.modules.ISeatsModule;
@@ -11,6 +12,7 @@ import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.common.entities.vehicles.CarEntity;
 import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.EnumSeatPlayerPosition;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
@@ -26,8 +28,8 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     @PackFileProperty(configNames = "Rotation", required = false, defaultValue = "1 0 0 0")
     private Quaternion rotation;
 
-    @PackFileProperty(configNames = "PlayerPosition", required = false, defaultValue = "sit")
-    private String playerPosition;
+    @PackFileProperty(configNames = "PlayerPosition", required = false, defaultValue = "SIT", type = DefinitionType.DynamXDefinitionTypes.PLAYER_SEAT_POSITION)
+    private EnumSeatPlayerPosition playerPosition;
 
     @PackFileProperty(configNames = "CameraRotation", required = false, defaultValue = "0")
     private float rotationYaw;
@@ -108,7 +110,7 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
         return rotation;
     }
 
-    public String getPlayerPosition() {
+    public EnumSeatPlayerPosition getPlayerPosition() {
         return playerPosition;
     }
 

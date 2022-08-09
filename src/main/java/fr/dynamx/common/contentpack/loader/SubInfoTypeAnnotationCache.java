@@ -69,7 +69,7 @@ public class SubInfoTypeAnnotationCache {
                     Object value = f.get(null);
                     if (!(value instanceof IPackFilePropertyFixer))
                         throw new IllegalArgumentException("@PackFilePropertyFixer should annotate a static IPackFilePropertyFixer field. Errored class: " + classToParse);
-                    System.out.println("Detect in " + classToParse + " " + Arrays.toString(f.getAnnotation(IPackFilePropertyFixer.PackFilePropertyFixer.class).registries()));
+                    //System.out.println("Detect in " + classToParse + " " + Arrays.toString(f.getAnnotation(IPackFilePropertyFixer.PackFilePropertyFixer.class).registries()));
                     for (SubInfoTypeRegistries registry : f.getAnnotation(IPackFilePropertyFixer.PackFilePropertyFixer.class).registries()) {
                         if (!registry.getInfoLoader().hasSubInfoTypesRegistry())
                             throw new IllegalArgumentException("No sub info type registry on registry " + registry);

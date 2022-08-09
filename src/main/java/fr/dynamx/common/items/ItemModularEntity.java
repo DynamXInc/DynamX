@@ -2,7 +2,7 @@ package fr.dynamx.common.items;
 
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
-import fr.dynamx.common.contentpack.ModularVehicleInfo;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.contentpack.parts.PartWheel;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;

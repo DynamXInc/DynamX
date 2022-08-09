@@ -22,7 +22,7 @@ import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.parts.PartWheel;
-import fr.dynamx.common.contentpack.type.PartWheelInfo;
+import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.contentpack.type.vehicle.SteeringWheelInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.network.sync.vars.VehicleSynchronizedVariables;

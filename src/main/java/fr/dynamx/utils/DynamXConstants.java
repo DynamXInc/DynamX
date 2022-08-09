@@ -1,5 +1,8 @@
 package fr.dynamx.utils;
 
+import net.minecraftforge.fml.common.versioning.ArtifactVersion;
+import net.minecraftforge.fml.common.versioning.DefaultArtifactVersion;
+
 public class DynamXConstants
 {
     public static final String NAME = "DynamX";
@@ -14,6 +17,10 @@ public class DynamXConstants
     public static final String LIBBULLET_VERSION = "14.3.0";
     /** .dc file version, only change when an update of libbullet breaks the .dc files, to regenerate them */
     public static final String DC_FILE_VERSION = "12.5.0";
+    /**
+     * Version of the {@link fr.dynamx.common.contentpack.ContentPackLoader}
+     */
+    public static final ArtifactVersion PACK_LOADER_VERSION = new DefaultArtifactVersion("1.0.1");
 
     public static final String DYNAMX_CERT = "certs/lets-encrypt-r3.der", DYNAMX_AUX_CERT = null;
     public static final String MPS_URL = "https://dynamx.fr/mps/", MPS_AUX_URL = "https://mps2.dynamx.fr/", MPS_KEY = "0", MPS_STARTER = null;

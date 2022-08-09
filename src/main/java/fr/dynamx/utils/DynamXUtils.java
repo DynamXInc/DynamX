@@ -3,6 +3,7 @@ package fr.dynamx.utils;
 import com.google.common.base.Predicates;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import fr.dynamx.api.contentpack.ContentPackType;
 import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.api.physics.EnumBulletShapeType;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
@@ -79,8 +80,11 @@ public class DynamXUtils {
      */
     public static ObjModelPath getModelPath(String packName, String model) {
         PackInfo info = DynamXObjectLoaders.PACKS.findPackInfoByPackName(packName);
-        if(info == null) return new ObjModelPath(packName , RegistryNameSetter.getDynamXModelResourceLocation(model), false);
-        return new ObjModelPath(info.getPathName(), RegistryNameSetter.getDynamXModelResourceLocation(model), info.isBuiltinPack());
+        if (info == null) {
+            System.err.println("WTF PACK INFO " + packName + " NOT FOUND");
+            return new ObjModelPath(new PackInfo(packName, ContentPackType.FOLDER), RegistryNameSetter.getDynamXModelResourceLocation(model));
+        }
+        return new ObjModelPath(info, RegistryNameSetter.getDynamXModelResourceLocation(model));
     }
 
     public static byte[] readInputStream(InputStream resource) throws IOException {

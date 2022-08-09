@@ -59,7 +59,7 @@ public class DynamXMain {
 
     @EventHandler
     public void construction(FMLConstructionEvent event) {
-        log.info(NAME + " version " + VERSION + " (pack loader version " + ContentPackLoader.LOADER_VERSION.getVersionString() + ") is running, by Yanis and Aym'");
+        log.info(NAME + " version " + VERSION + " (pack loader version " + PACK_LOADER_VERSION.getVersionString() + ") is running, by Yanis and Aym'");
 
         ProgressManager.ProgressBar bar = ProgressManager.push("Constructing DynamX", 5);
         bar.step("Init");

@@ -1,5 +1,6 @@
 package fr.dynamx.common.contentpack.loader;
 
+import fr.dynamx.api.contentpack.ContentPackType;
 import fr.dynamx.common.contentpack.PackInfo;
 
 import javax.annotation.Nullable;
@@ -12,7 +13,7 @@ public class PacksInfoLoader extends InfoLoader<PackInfo, PackInfo> {
 
     @Override
     public void clear(boolean hot) {
-        infos.values().removeIf(packInfo -> !packInfo.isBuiltinPack());
+        infos.values().removeIf(packInfo -> packInfo.getPackType() != ContentPackType.BUILTIN);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package fr.dynamx.common.contentpack.loader;
 
+import fr.dynamx.api.contentpack.ContentPackType;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
@@ -85,7 +86,7 @@ public class ObjectLoader<T extends ObjectInfo<?>, C extends IInfoOwner<?>, U ex
         owners.add((IInfoOwner<T>) owner);
         builtinObjects.add(info);
         if(DynamXObjectLoaders.PACKS.findPackInfoByPackName(modName) == null)
-            DynamXObjectLoaders.PACKS.addInfo(modName, new PackInfo(modName, true));
+            DynamXObjectLoaders.PACKS.addInfo(modName, new PackInfo(modName, ContentPackType.BUILTIN));
         //System.out.println("Builtin pack info added is " + DynamXObjectLoaders.PACKS.findPackInfoByPackName(modName)+" with name " + modName);
         //System.out.println("All info " + DynamXObjectLoaders.PACKS.getInfos());
         return info;

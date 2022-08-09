@@ -2,7 +2,7 @@ package fr.dynamx.common.physics.entities.parts.engine;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.common.contentpack.ContentPackLoader;
-import fr.dynamx.common.contentpack.ModularVehicleInfo;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.contentpack.type.vehicle.EngineInfo;
 import fr.dynamx.common.physics.entities.PackEntityPhysicsHandler;
 import fr.dynamx.utils.maths.DynamXMath;

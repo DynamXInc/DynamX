@@ -14,9 +14,9 @@ import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
-import fr.dynamx.common.contentpack.ModularVehicleInfo;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.contentpack.parts.*;
-import fr.dynamx.common.contentpack.type.PartWheelInfo;
+import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.contentpack.type.vehicle.EngineInfo;
 import fr.dynamx.common.contentpack.type.vehicle.FrictionPoint;
@@ -222,7 +222,6 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
         List<PartWheel> partsByType = getPartsByType(PartWheel.class);
         for (int i = 0; i < partsByType.size(); i++) {
             PartWheel partWheel = partsByType.get(i);
-            System.out.println("Want wheel "+ partWheel.getDefaultWheelName()+" in "+ wheels);
             partWheel.setDefaultWheelInfo(this, wheels.get(partWheel.getDefaultWheelName()));
             if (partWheel.isHandBrakingWheel())
                 hasHandbrake = true;

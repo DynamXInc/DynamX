@@ -8,7 +8,7 @@ import fr.dynamx.api.entities.modules.IEngineModule;
 import fr.dynamx.api.physics.entities.IEnginePhysicsHandler;
 import fr.dynamx.api.physics.entities.IPropulsionHandler;
 import fr.dynamx.common.contentpack.parts.PartWheel;
-import fr.dynamx.common.contentpack.type.PartWheelInfo;
+import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.WheelsModule;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;

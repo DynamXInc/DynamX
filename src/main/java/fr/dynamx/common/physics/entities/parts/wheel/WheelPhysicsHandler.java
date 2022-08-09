@@ -3,7 +3,7 @@ package fr.dynamx.common.physics.entities.parts.wheel;
 import com.jme3.bullet.objects.PhysicsVehicle;
 import com.jme3.bullet.objects.VehicleWheel;
 import fr.dynamx.common.contentpack.parts.PartWheel;
-import fr.dynamx.common.contentpack.type.PartWheelInfo;
+import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.physics.entities.parts.wheel.tyre.PajeckaTireModel;
 import fr.dynamx.common.physics.entities.parts.wheel.tyre.TyreSettings;
 

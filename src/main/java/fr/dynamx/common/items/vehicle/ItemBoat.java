@@ -4,7 +4,7 @@ import com.jme3.math.Vector3f;
 import fr.aym.acslib.api.services.ErrorTrackingService;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
-import fr.dynamx.common.contentpack.ModularVehicleInfo;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.contentpack.type.vehicle.BoatEngineInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.vehicles.BoatEntity;

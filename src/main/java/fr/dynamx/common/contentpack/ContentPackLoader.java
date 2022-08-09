@@ -3,13 +3,14 @@ package fr.dynamx.common.contentpack;
 import fr.aym.acsguis.api.ACsGuiApi;
 import fr.aym.acslib.api.services.ErrorTrackingService;
 import fr.aym.acslib.api.services.mps.ModProtectionContainer;
-import fr.dynamx.common.contentpack.loader.SubInfoTypesRegistry;
+import fr.dynamx.api.contentpack.ContentPackType;
 import fr.dynamx.api.events.ContentPackSystemEvent;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.client.handlers.hud.CarController;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.loader.InfoLoader;
+import fr.dynamx.common.contentpack.loader.SubInfoTypesRegistry;
 import fr.dynamx.common.contentpack.sync.PackSyncHandler;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXLoadingTasks;
@@ -26,8 +27,6 @@ import net.minecraftforge.fml.common.ProgressManager;
 import net.minecraftforge.fml.common.discovery.ContainerType;
 import net.minecraftforge.fml.common.discovery.ModCandidate;
 import net.minecraftforge.fml.common.event.FMLConstructionEvent;
-import net.minecraftforge.fml.common.versioning.ArtifactVersion;
-import net.minecraftforge.fml.common.versioning.DefaultArtifactVersion;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -36,6 +35,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -60,11 +60,6 @@ public class ContentPackLoader {
      */
     private static final Map<Block, float[]> BLOCKS_GRIP = new HashMap<>();
     private static final float[] DEFAULT_GRIP = new float[]{1, 0.9f};
-
-    /**
-     * Version of this loader
-     */
-    public static final ArtifactVersion LOADER_VERSION = new DefaultArtifactVersion("1.0.1");
 
     /**
      * Blocks where slopes can be placed
@@ -108,7 +103,7 @@ public class ContentPackLoader {
         if (side.isClient()) {
             int packCount = 0;
             for (File file : myDir.listFiles()) {
-                if (file.isDirectory()) {
+                if (file.isDirectory()) { //TODO FACTORIZE
                     if (new File(file, "assets").exists()) {
                         try {
                             //not needed, only for java classes ((LaunchClassLoader)Thread.currentThread().getContextClassLoader()).addURL(file.toURI().toURL());
@@ -144,7 +139,7 @@ public class ContentPackLoader {
                             DynamXMain.log.info("Loaded mps pack : " + file.getName());
                         }
                     }
-                    DynamXMain.log.info("Loaded content pack : " + file.getName());
+                    DynamXMain.log.info("Injected resource pack : " + file.getName());
                 } else if (file.isFile() && (file.getName().endsWith(".zip") || file.getName().endsWith(PACK_FILE_EXTENSION))) {
                     try {
                         HashMap<String, Object> map = new HashMap<>();
@@ -163,7 +158,7 @@ public class ContentPackLoader {
                     //Custom ModProtectionSystem repositories
                     protectedResources.put(file.getName(), modProtectionContainer.getParent().loadCustomRepository(modProtectionContainer, file));
                     //And load protected files -> Now directly handled by mps
-                    DynamXMain.log.info("Loaded content pack : " + file.getName());
+                    DynamXMain.log.info("Injected resource pack : " + file.getName());
                 }
             }
             DynamXMain.log.info("Loaded " + packCount + " DynamX resource packs");
@@ -244,42 +239,33 @@ public class ContentPackLoader {
             int errorCount = 0;
             String suffix = ".dynx";
             for (File contentPack : resDir.listFiles()) {
-                if (contentPack.getName().equals("slopes.dynx") && loadBlocksConfigs) {
-                    registerSlopes(new BufferedReader(new InputStreamReader(new FileInputStream(contentPack))));
-                } else if (contentPack.getName().equals("blocks.dynx") && loadBlocksConfigs) {
-                    registerBlockGrip(new BufferedReader(new InputStreamReader(new FileInputStream(contentPack))));
+                if (contentPack.getName().equals("slopes.dynx")) {
+                    if (loadBlocksConfigs)
+                        registerSlopes(new BufferedReader(new InputStreamReader(new FileInputStream(contentPack))));
+                } else if (contentPack.getName().equals("blocks.dynx")) {
+                    if (loadBlocksConfigs)
+                        registerBlockGrip(new BufferedReader(new InputStreamReader(new FileInputStream(contentPack))));
                 } else if (contentPack.isDirectory()) {
                     // Loading pack, useful for debugging errors
                     String loadingPack = contentPack.getName();
                     try {
+                        AtomicReference<PackFile> packInfo = new AtomicReference<>();
+                        List<PackFile> packFiles = new ArrayList<>();
                         Stream<Path> configs = Files.walk(Paths.get(contentPack.getPath()));
-
-                        //Seach for real pack name in the pack info
-                        Optional<Path> info = configs.filter(path -> path.getFileName().toString().equals("pack_info.dynx")).findFirst();
-                        if (info.isPresent()) {
-                            try {
-                                loadFile(isHotReloading, loadingPack, suffix, new FileInputStream(info.get().toFile()), info.get().getFileName().toString());
-                            } catch (FileNotFoundException e) {
-                                throw new RuntimeException("Failed to find file " + info.get(), e);
-                            }
-                            loadingPack = DynamXObjectLoaders.PACKS.findInfo(loadingPack + ".pack_info").getFixedPackName();
-                        } else {
-                            log.warn("Content pack " + loadingPack + " is missing a pack_info.dynx file !");
-                            DynamXObjectLoaders.PACKS.addInfo(loadingPack + ".pack_info.dynx", new PackInfo(loadingPack, false).setPathName(contentPack.getName()).setPackVersion("dummy info"));
-                            //DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, loadingPack, "Content Pack " + loadingPack + " is missing a pack_info.dynx file !", "Please add a pack_info.dynx file to this pack", ErrorTrackingService.TrackedErrorLevel.FATAL);
-                        }
-                        DynamXMain.log.info("Loading " + loadingPack + "(in " + contentPack.getName() + ")");
-                        String finalLoadingPack = loadingPack;
-                        configs = Files.walk(Paths.get(contentPack.getPath())); //FIXME THIS IS BAD
                         configs.forEach(path -> {
-                            if (path.toString().endsWith(suffix) && !path.toString().endsWith("pack_info.dynx")) {
+                            if (path.toString().endsWith(suffix)) {
                                 try {
-                                    loadFile(isHotReloading, finalLoadingPack, suffix, new FileInputStream(path.toFile()), path.getFileName().toString());
+                                    PackFile packFile = new PackFile(path.getFileName().toString(), new FileInputStream(path.toFile()));
+                                    if (packFile.getName().endsWith("pack_info.dynx"))
+                                        packInfo.set(packFile);
+                                    else
+                                        packFiles.add(packFile);
                                 } catch (FileNotFoundException e) {
                                     throw new RuntimeException("Failed to find file " + path, e);
                                 }
                             }
                         });
+                        loadPack(loadingPack, contentPack, ContentPackType.FOLDER, suffix, packInfo.get(), packFiles);
                         packCount++;
                     } catch (Exception e) {
                         log.error("Content Pack " + loadingPack + " cannot be loaded : ", e);
@@ -287,50 +273,32 @@ public class ContentPackLoader {
                         errorCount++;
                     }
                 } else if (contentPack.isFile() && (contentPack.getName().endsWith(".zip") || contentPack.getName().endsWith(PACK_FILE_EXTENSION))) {
-                    DynamXMain.log.info("Loading " + contentPack.getName());
                     // Loading pack, useful for debugging errors
                     String loadingPack = contentPack.getName().replace(".zip", "").replace(PACK_FILE_EXTENSION, "");
                     try {
                         ZipFile zip = new ZipFile(contentPack);
-
-                        //Seach for real pack name in the pack info
+                        PackFile packInfo = null;
+                        List<PackFile> packFiles = new ArrayList<>();
                         Enumeration<? extends ZipEntry> configs = zip.entries();
-                        Optional<ZipEntry> info = Optional.empty();
                         while (configs.hasMoreElements()) {
                             ZipEntry config = configs.nextElement();
-                            if (config.getName().equals("pack_info.dynx")) {
-                                info = Optional.of(config);
-                                break;
+                            if (config.getName().endsWith(suffix)) {
+                                PackFile packFile = new PackFile(config.getName().substring(config.getName().lastIndexOf("/") + 1), zip.getInputStream(config));
+                                if (config.getName().endsWith("pack_info.dynx"))
+                                    packInfo = packFile;
+                                else
+                                    packFiles.add(packFile);
                             }
                         }
-                        if (info.isPresent()) {
-                            try {
-                                loadFile(isHotReloading, loadingPack, suffix, zip.getInputStream(info.get()), info.get().getName().substring(info.get().getName().lastIndexOf("/") + 1));
-                            } catch (FileNotFoundException e) {
-                                throw new RuntimeException("Failed to find file " + info.get(), e);
-                            }
-                            PackInfo ifo = DynamXObjectLoaders.PACKS.findInfo(loadingPack + ".pack_info");
-                            loadingPack = ifo.getFixedPackName();
-                            ifo.setPathName(contentPack.getName());
-                        } else {
-                            log.warn("Zip content pack " + loadingPack + " is missing a pack_info.dynx file !");
-                            DynamXObjectLoaders.PACKS.addInfo(loadingPack + ".pack_info", new PackInfo(loadingPack, false).setPathName(contentPack.getName()).setPackVersion("dummy info"));
-                            //DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, loadingPack, "Zip content Pack " + loadingPack + " is missing a pack_info.dynx file !", "Please add a pack_info.dynx file to this pack", ErrorTrackingService.TrackedErrorLevel.FATAL);
-                        }
-                        DynamXMain.log.info("Loading " + loadingPack + "(in " + contentPack.getName() + ")");
-                        configs = zip.entries(); //FIXME THIS IS BAD
-                        while (configs.hasMoreElements()) {
-                            ZipEntry config = configs.nextElement();
-                            if (config.getName().endsWith(suffix) && !config.getName().endsWith("pack_info.dynx")) {
-                                loadFile(isHotReloading, loadingPack, suffix, zip.getInputStream(config), config.getName().substring(config.getName().lastIndexOf("/") + 1));
-                            }
-                        }
+                        loadPack(loadingPack, contentPack, contentPack.getName().endsWith(".zip") ? ContentPackType.ZIP : ContentPackType.DNXPACK, suffix, packInfo, packFiles);
                         packCount++;
                     } catch (Exception e) {
-                        log.error("Zip content Pack " + loadingPack + " cannot be loaded : ", e);
-                        DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, loadingPack, "Zip content Pack " + loadingPack + " cannot be loaded", e, ErrorTrackingService.TrackedErrorLevel.FATAL);
+                        log.error("Compressed content Pack " + loadingPack + " cannot be loaded : ", e);
+                        DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, loadingPack, "Compressed content Pack " + loadingPack + " cannot be loaded", e, ErrorTrackingService.TrackedErrorLevel.FATAL);
                         errorCount++;
                     }
+                } else if (!contentPack.getName().endsWith(".dll") && !contentPack.getName().endsWith(".so")) { //Bullet library files
+                    log.warn("File " + contentPack.getName() + " isn't a valid DynamX content pack file");
                 }
             }
             //Load shapes
@@ -356,25 +324,43 @@ public class ContentPackLoader {
         System.out.println("LOAD END");
     }
 
-    private static void loadFile(boolean hot, String loadingPack, String suffix, InputStream inputFile, String configFileName) {
+    private static void loadPack(String loadingPack, File contentPack, ContentPackType packType, String suffix, PackFile packInfo, List<PackFile> packFiles) {
+        //Search for real pack name in the pack info
+        if (packInfo != null) {
+            loadFile(loadingPack, suffix, packInfo);
+            PackInfo loadedInfo = DynamXObjectLoaders.PACKS.findInfo(loadingPack + ".pack_info");
+            loadedInfo.setPathName(contentPack.getName()).setPackType(packType);
+            loadingPack = loadedInfo.getFixedPackName();
+        } else {
+            log.warn("Content pack " + loadingPack + " is missing a pack_info.dynx file !");
+            DynamXObjectLoaders.PACKS.addInfo(loadingPack + ".pack_info.dynx", new PackInfo(loadingPack, packType).setPathName(contentPack.getName()).setPackVersion("dummy info"));
+            DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, loadingPack, "Content Pack " + contentPack.getName() + " is missing a pack_info.dynx file !", "Please add a pack_info.dynx file to this pack", ErrorTrackingService.TrackedErrorLevel.FATAL);
+        }
+        DynamXMain.log.info("Loading " + loadingPack + "(in " + contentPack.getName() + ")");
+        for (PackFile packFile : packFiles) {
+            loadFile(loadingPack, suffix, packFile);
+        }
+    }
+
+    private static void loadFile(String loadingPack, String suffix, PackFile file) {
         BufferedReader inputStream = null;
         try {
-            inputStream = new BufferedReader(new InputStreamReader(inputFile));
-            String configName = configFileName.substring(0, configFileName.length() - suffix.length()).toLowerCase();
+            inputStream = new BufferedReader(new InputStreamReader(file.getInputStream()));
+            String configName = file.getName().substring(0, file.getName().length() - suffix.length()).toLowerCase();
             boolean loaded = false;
             for (InfoLoader<?, ?> loader : DynamXObjectLoaders.LOADERS) {
-                if (loader.load(loadingPack, configName, inputStream, hot)) {
+                if (loader.load(loadingPack, configName, inputStream, isHotReloading)) {
                     loaded = true;
                     break;
                 }
             }
             if (!loaded)
-                throw new IllegalArgumentException("Invalid " + suffix + " file name : " + configFileName);
+                throw new IllegalArgumentException("Invalid " + suffix + " file name : " + file.getName());
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         } catch (Exception e) {
-            log.error("Content pack file " + configFileName + " of " + loadingPack + " cannot be loaded : ", e);
-            DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, loadingPack, "Content pack file " + configFileName + " cannot be loaded", e, ErrorTrackingService.TrackedErrorLevel.FATAL);
+            log.error("Content pack file " + file.getName() + " of " + loadingPack + " cannot be loaded : ", e);
+            DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, loadingPack, "Content pack file " + file.getName() + " cannot be loaded", e, ErrorTrackingService.TrackedErrorLevel.FATAL);
         } finally {
             if (inputStream != null) {
                 try {
@@ -447,5 +433,23 @@ public class ContentPackLoader {
 
     public static Map<Block, float[]> getBlocksGrip() {
         return BLOCKS_GRIP;
+    }
+
+    private static class PackFile {
+        private final String name;
+        private final InputStream inputStream;
+
+        private PackFile(String name, InputStream inputStream) {
+            this.name = name;
+            this.inputStream = inputStream;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public InputStream getInputStream() {
+            return inputStream;
+        }
     }
 }

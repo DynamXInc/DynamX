@@ -1,4 +1,4 @@
-package fr.dynamx.common.contentpack.type;
+package fr.dynamx.common.contentpack.type.vehicle;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.INamedObject;

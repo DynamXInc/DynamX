@@ -1,6 +1,7 @@
 package fr.dynamx.api.obj;
 
 import fr.dynamx.api.contentpack.object.INamedObject;
+import fr.dynamx.common.contentpack.PackInfo;
 import net.minecraft.util.ResourceLocation;
 
 /**
@@ -8,18 +9,20 @@ import net.minecraft.util.ResourceLocation;
  * Can be used to search it as a mc packs resource, or generate a File to find it on server
  */
 public class ObjModelPath implements INamedObject {
-    private final String packName;
+    private final PackInfo packInfo;
     private final ResourceLocation modelPath;
-    private final boolean isBuiltinModel;
 
-    public ObjModelPath(String packName, ResourceLocation modelPath, boolean isBuiltinModel) {
-        this.packName = packName;
+    public ObjModelPath(PackInfo packInfo, ResourceLocation modelPath) {
+        this.packInfo = packInfo;
         this.modelPath = modelPath;
-        this.isBuiltinModel = isBuiltinModel;
+    }
+
+    public PackInfo getPackInfo() {
+        return packInfo;
     }
 
     /**
-     * @return The path of the model inside of the pack, excluding the modid (typically models/mymodels/myfirstmodel.obj)
+     * @return The path of the model inside the pack, excluding the modid (typically models/mymodels/myfirstmodel.obj)
      */
     @Override
     public String getName() {
@@ -28,7 +31,7 @@ public class ObjModelPath implements INamedObject {
 
     @Override
     public String getPackName() {
-        return packName;
+        return packInfo.getPathName();
     }
 
     /**
@@ -38,17 +41,10 @@ public class ObjModelPath implements INamedObject {
         return modelPath;
     }
 
-    /**
-     * @return True if the model comes from an addon (builtin block or item)
-     */
-    public boolean isBuiltinModel() {
-        return isBuiltinModel;
-    }
-
     @Override
     public String toString() {
         return "ObjModelPath{" +
-                "packName='" + packName + '\'' +
+                "packInfo=" + packInfo +
                 ", modelPath=" + modelPath +
                 '}';
     }

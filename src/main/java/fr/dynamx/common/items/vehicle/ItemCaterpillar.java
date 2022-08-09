@@ -1,7 +1,7 @@
 package fr.dynamx.common.items.vehicle;
 
 import com.jme3.math.Vector3f;
-import fr.dynamx.common.contentpack.ModularVehicleInfo;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.vehicles.CaterpillarEntity;
 import net.minecraft.entity.player.EntityPlayer;

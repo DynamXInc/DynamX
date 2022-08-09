@@ -1,4 +1,4 @@
-package fr.dynamx.common.contentpack;
+package fr.dynamx.common.contentpack.type.vehicle;
 
 import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.math.Vector3f;
@@ -20,7 +20,6 @@ import fr.dynamx.common.contentpack.parts.PartLightSource;
 import fr.dynamx.common.contentpack.parts.PartShape;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.contentpack.type.objects.AbstractItemObject;
-import fr.dynamx.common.contentpack.type.vehicle.FrictionPoint;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.items.ItemModularEntity;
 import fr.dynamx.common.obj.texture.TextureData;

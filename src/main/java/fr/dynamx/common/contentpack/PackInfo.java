@@ -1,6 +1,7 @@
 package fr.dynamx.common.contentpack;
 
 import fr.aym.acslib.api.services.ErrorTrackingService;
+import fr.dynamx.api.contentpack.ContentPackType;
 import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoType;
@@ -10,7 +11,9 @@ import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
+import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXLoadingTasks;
+import lombok.Getter;
 import net.minecraft.util.StringUtils;
 import net.minecraftforge.fml.common.versioning.DefaultArtifactVersion;
 import net.minecraftforge.fml.common.versioning.InvalidVersionSpecificationException;
@@ -23,38 +26,27 @@ public class PackInfo extends SubInfoTypeOwner<PackInfo> implements INamedObject
     private final String originalPackName;
     @PackFileProperty(configNames = "PackName")
     private final String packName;
+    @Getter
+    private ContentPackType packType;
 
     private final List<RequiredAddonInfo> required = new ArrayList<>();
+    @Getter
     private String pathName;
 
+    @Getter
     @PackFileProperty(configNames = "PackVersion", required = false)
     private String packVersion = "nc";
     @PackFileProperty(configNames = "CompatibleWithLoaderVersions", required = false)
+    @Getter
     private String compatibleLoaderVersions;
-    private final boolean isBuiltinPack;
+    @Getter
+    @PackFileProperty(configNames = "DcFileVersion", defaultValue = DynamXConstants.DC_FILE_VERSION)
+    private String dcFileVersion = DynamXConstants.DC_FILE_VERSION;
 
-    public PackInfo(String packName, boolean isBuiltinPack) {
+    public PackInfo(String packName, ContentPackType packType) {
         this.originalPackName = this.packName = packName;
         this.pathName = packName;
-        this.isBuiltinPack = isBuiltinPack;
-    }
-
-    public PackInfo setPathName(String pathName) {
-        this.pathName = pathName;
-        return this;
-    }
-
-    public PackInfo setPackVersion(String packVersion) {
-        this.packVersion = packVersion;
-        return this;
-    }
-
-    public String getPackVersion() {
-        return packVersion;
-    }
-
-    public String getPathName() {
-        return pathName;
+        this.packType = packType;
     }
 
     public void validateVersions() {
@@ -63,12 +55,18 @@ public class PackInfo extends SubInfoTypeOwner<PackInfo> implements INamedObject
             if (!StringUtils.isNullOrEmpty(compatibleLoaderVersions)) {
                 try {
                     VersionRange range = VersionRange.createFromVersionSpec(compatibleLoaderVersions);
-                    if (!range.containsVersion(ContentPackLoader.LOADER_VERSION)) {
+                    if (!range.containsVersion(DynamXConstants.PACK_LOADER_VERSION)) {
                         DynamXMain.log.warn("Outdated content pack " + getFixedPackName() + " found, compatible with loader versions " + compatibleLoaderVersions);
-                        DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, getFixedPackName(), "Unsupported content pack version", "This pack is made for versions " + compatibleLoaderVersions + " of the DynamX's pack loader (currently in version " + ContentPackLoader.LOADER_VERSION.getVersionString() + ")", ErrorTrackingService.TrackedErrorLevel.LOW);
+                        DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, getFixedPackName(), "Outdated content pack", "This pack is made for versions " + compatibleLoaderVersions + " of the DynamX's pack loader (currently in version " + DynamXConstants.PACK_LOADER_VERSION.getVersionString() + ")", ErrorTrackingService.TrackedErrorLevel.LOW);
                     }
                 } catch (InvalidVersionSpecificationException ignored) {
                 } //Already caught in onComplete
+            }
+            if (!StringUtils.isNullOrEmpty(dcFileVersion) && packType.isCompressed()) {
+                if (!dcFileVersion.equalsIgnoreCase(DynamXConstants.DC_FILE_VERSION)) {
+                    DynamXMain.log.warn("Outdated content pack " + getFixedPackName() + " found. Compatible with dc files version " + dcFileVersion);
+                    DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, getFixedPackName(), "Outdated content pack", "The model files are compiled for version " + dcFileVersion + " of the DynamX's .dc file loader (currently in version " + DynamXConstants.DC_FILE_VERSION + "). The pack will take more time to load.", ErrorTrackingService.TrackedErrorLevel.HIGH);
+                }
             }
             for (RequiredAddonInfo addonInfo : required) {
                 if (!StringUtils.isNullOrEmpty(addonInfo.versions) && AddonLoader.isAddonLoaded(addonInfo.addonId)) {
@@ -114,6 +112,21 @@ public class PackInfo extends SubInfoTypeOwner<PackInfo> implements INamedObject
         }
     }
 
+    public PackInfo setPathName(String pathName) {
+        this.pathName = pathName;
+        return this;
+    }
+
+    public PackInfo setPackVersion(String packVersion) {
+        this.packVersion = packVersion;
+        return this;
+    }
+
+    public PackInfo setPackType(ContentPackType packType) {
+        this.packType = packType;
+        return this;
+    }
+
     @Override
     public String getName() {
         return "pack_info";
@@ -131,16 +144,8 @@ public class PackInfo extends SubInfoTypeOwner<PackInfo> implements INamedObject
         return packName;
     }
 
-    /**
-     * @return True if the pack comes from an addon (with builtin blocks or items)
-     */
-    public boolean isBuiltinPack() {
-        return isBuiltinPack;
-    }
-
     @RegisteredSubInfoType(name = "RequiredAddon", registries = SubInfoTypeRegistries.PACKS, strictName = false)
-    public static class RequiredAddonInfo extends SubInfoType<PackInfo>
-    {
+    public static class RequiredAddonInfo extends SubInfoType<PackInfo> {
         private final String name;
 
         @PackFileProperty(configNames = "Id")
@@ -162,5 +167,28 @@ public class PackInfo extends SubInfoTypeOwner<PackInfo> implements INamedObject
         public String getName() {
             return "Required addon " + name + " in " + getOwner().getName();
         }
+
+        @Override
+        public String toString() {
+            return "RequiredAddonInfo{" +
+                    "name='" + name + '\'' +
+                    ", addonId='" + addonId + '\'' +
+                    ", versions='" + versions + '\'' +
+                    '}';
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "PackInfo{" +
+                "originalPackName='" + originalPackName + '\'' +
+                ", packName='" + packName + '\'' +
+                ", packType=" + packType +
+                ", required=" + required +
+                ", pathName='" + pathName + '\'' +
+                ", packVersion='" + packVersion + '\'' +
+                ", compatibleLoaderVersions='" + compatibleLoaderVersions + '\'' +
+                ", dcFileVersion='" + dcFileVersion + '\'' +
+                '}';
     }
 }

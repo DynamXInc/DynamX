@@ -1,6 +1,7 @@
 package fr.dynamx.common.obj.eximpl;
 
 import fr.aym.mps.IMpsClassLoader;
+import fr.dynamx.api.contentpack.ContentPackType;
 import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.ContentPackLoader;
@@ -15,6 +16,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -41,32 +44,32 @@ public class TessellatorModelServer extends ObjModelServer {
 
     private InputStream server(ObjModelPath path) throws IOException {
         if (mpsClassLoader != null) {
-            InputStream protectedd = mpsClassLoader.getResourceAsStream("assets/" + path.getModelPath().getNamespace() + "/" + path.getModelPath().getPath());
-            //System.out.println("Search " + "assets/" + path.getModelPath().getNamespace() + "/" + path.getModelPath().getPath() + " " + path + " : " + protectedd);
-            if (protectedd != null) {
-                return protectedd;
-            }
+            InputStream protectedIs = mpsClassLoader.getResourceAsStream("assets/" + path.getModelPath().getNamespace() + "/" + path.getModelPath().getPath());
+            if (protectedIs != null)
+                return protectedIs;
         }
-        if(path.isBuiltinModel()) {
-            System.out.println("Builtin model " + path);
-            String entry = "/assets/" + path.getModelPath().getNamespace() + "/" + path.getModelPath().getPath();
-            System.out.println("entry "+entry+" "+getClass().getResourceAsStream(entry));
-            return getClass().getResourceAsStream(entry);
+        InputStream result = null;
+        switch (path.getPackInfo().getPackType()) {
+            case FOLDER:
+                String fullPath = DynamXMain.resDir + File.separator + path.getPackName() + File.separator + "assets" +
+                    File.separator + path.getModelPath().getNamespace() + File.separator + path.getModelPath().getPath().replace("/", File.separator);
+                result = Files.newInputStream(Paths.get(fullPath));
+                break;
+            case DNXPACK:
+            case ZIP:
+                ZipFile root = new ZipFile(DynamXMain.resDir + File.separator + path.getPackName());
+                String entry = "assets/" + path.getModelPath().getNamespace() + "/" + path.getModelPath().getPath();
+                result = root.getInputStream(root.getEntry(entry));
+                break;
+            case BUILTIN:
+                System.out.println("Builtin model " + path);
+                entry = "/assets/" + path.getModelPath().getNamespace() + "/" + path.getModelPath().getPath();
+                System.out.println("entry " + entry + " " + ContentPackType.class.getResourceAsStream(entry));
+                result = ContentPackType.class.getResourceAsStream(entry);
+                break;
         }
-        if (path.getPackName().contains(".zip") || path.getPackName().contains(ContentPackLoader.PACK_FILE_EXTENSION)) {
-            ZipFile root = new ZipFile(DynamXMain.resDir + File.separator + path.getPackName());
-            //System.out.println("Root is "+root);
-            String entry = "assets/" + path.getModelPath().getNamespace() + "/" + path.getModelPath().getPath();
-            //System.out.println("Entry path is "+entry+" "+path);
-            ZipEntry t = root.getEntry(entry);
-            if (t == null) {
-                throw new FileNotFoundException("Not found in zip : " + path + ". Has mps class loader : " + (mpsClassLoader != null));
-            }
-            return root.getInputStream(t);
-        }
-        String fullPath = DynamXMain.resDir + File.separator + path.getPackName() + File.separator + "assets" +
-                File.separator + path.getModelPath().getNamespace() + File.separator + path.getModelPath().getPath().replace("/", File.separator);
-        //System.out.println("Full path is "+fullPath+" "+path);
-        return new FileInputStream(fullPath);
+        if (result == null)
+            throw new FileNotFoundException("Model not found : " + path + ". Pack : " + path.getPackInfo() + ". Has mps class loader : " + (mpsClassLoader != null));
+        return result;
     }
 }

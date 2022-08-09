@@ -7,7 +7,7 @@ import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.api.network.sync.SimulationHolder;
-import fr.dynamx.client.handlers.ClientEventHandler;
+import fr.dynamx.client.renders.RenderPhysicsEntity;
 import fr.dynamx.common.contentpack.ModularVehicleInfo;
 import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.contentpack.parts.PartShape;
@@ -15,6 +15,7 @@ import fr.dynamx.common.network.sync.vars.VehicleSynchronizedVariables;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.DynamXUtils;
+import fr.dynamx.utils.EnumPlayerStandOnTop;
 import fr.dynamx.utils.debug.Profiler;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.Vector3fPool;
@@ -132,7 +133,7 @@ public abstract class BaseVehicleEntity<T extends BaseVehiclePhysicsHandler<?>> 
 
     @Override
     public boolean shouldRiderSit() {
-        return ClientEventHandler.sit;
+        return RenderPhysicsEntity.shouldRenderPlayerSitting;
     }
 
     @Override

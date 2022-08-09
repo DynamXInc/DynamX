@@ -68,7 +68,6 @@ import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 public class ClientEventHandler {
     public static final Minecraft MC = Minecraft.getMinecraft();
     public static boolean rendering;
-    public static boolean sit;
     public static RenderPlayer renderPlayer;
 
     /* Placing block */

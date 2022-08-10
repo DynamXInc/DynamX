@@ -324,7 +324,6 @@ public class CommonEventHandler {
         @SubscribeEvent
         public static void registerBlocks(RegistryEvent.Register<Block> event) {
             IForgeRegistry<Block> blocks = event.getRegistry();
-            System.out.println("FOR");
             for (IInfoOwner<BlockObject<?>> block : DynamXObjectLoaders.BLOCKS.owners) {
                 blocks.register((Block) block);
 

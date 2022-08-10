@@ -1,6 +1,7 @@
 package fr.dynamx.common.blocks;
 
 import fr.dynamx.api.contentpack.object.IInfoOwner;
+import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
 import fr.dynamx.api.contentpack.object.render.IObjPackObject;
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.api.events.DynamXBlockEvent;
@@ -212,6 +213,11 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IInf
     @Override
     public void setInfo(T info) {
         blockObjectInfo = info;
+    }
+
+    @Override
+    public boolean createJson() {
+        return IResourcesOwner.super.createJson() || blockObjectInfo.get3DItemRenderLocation() != Enum3DRenderLocation.ALL;
     }
 
     @Override

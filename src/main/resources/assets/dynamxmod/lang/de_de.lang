@@ -1,0 +1,61 @@
+itemGroup.dynamxmod_vehicle=DynamX Fahrzeug
+itemGroup.dynamxmod_object=DynamX Objekte
+
+item.dynamxmod.slopes.name=Slopes Werkzeug
+item.dynamxmod.wrench.name=Schraubenschlüssel
+item.dynamxmod.ragdoll.name=Ragdoll Spawner
+item.dynamxmod.shockwave.name=Shockwave Generator
+
+key.categories.dynamxmod=DynamX
+key.brake=Handbremse
+key.camin=Kamera einzoomen
+key.camout=Kamera auszoomen
+key.cammode=Kameramodus wechseln
+key.watchbehind=Nach hinten schauen
+key.debug=Debug Menü
+key.speedlimit=Tempomat
+key.startEngine=Motor an/aus
+key.pickobject=Objekt wählen
+key.takeoject=Objekt nehmen
+key.toogleLockDoor=Türe auf-/abschliessen
+
+slopes.config.title=Config automatische slopes :
+slopes.config.dalls=Stufen ignorieren
+slopes.config.diags=Diagonalen invertieren
+slopes.config.orientation=Richtung : %s
+slopes.config.blocks=Blöcke zum ignorieren :
+slopes.config.add=Hinzufügen
+slopes.config.blocknotfound=Block nicht gefunden
+slopes.config.cancel=Abbrechen
+slopes.config.apply=Anwenden
+
+slopes.clear.create=§a[CREATE] Die Auswahl für die Slopes wurde zurückgesetzt
+slopes.clear.delete=§d[DELETE] Der Auswahlbereich wurde zurückgesetzt
+slopes.clear.auto=§6[AUTO] Der Auswahlbereich wurde zurückgesetzt
+
+slopes.changemode.create=§aModus geändert zu [CREATE]
+slopes.changemode.delete=§dModus geändert zu [DELETE]
+slopes.changemode.auto=§6Modus geändert zu [AUTO]
+
+cmd.slopes.noitem=§cDu musst das Slope-Tool in der Haupthand halten !
+cmd.slopes.needcreate=§cDu musst im [CREATE] um Slopes zu erstellen !
+cmd.slopes.create.points=§4Du musst mindestens 4 Punkte auswählen um Slopes zu erstellen
+cmd.slopes.create.error=§4Keine Slopes wurden hinzugefügt, prüfe die Reihenfolge deiner Punkte !
+cmd.slopes.create.terrainerror=§4Fehler beim laden der Umgebung, lade sie mit einem Fahrzeug und versuche es dann erneut !
+cmd.slopes.create.result=%s [CREATE] Slopes berechnet und addiert in %s ms
+cmd.slopes.create.resulterror=§4Beim Laden der Umgebung ist ein Fehler aufgetreten, lösche die Slopes in dieser Zone und versuche es erneut
+cmd.slopes.create.success=§a[CREATE] Die Slopes wurden hinzugefügt !
+cmd.slopes.needdelete=§cDu musst im [DELETE] Modus sein um Slopes zu löschen !
+cmd.slopes.delete.points=§c[DELETE] Du hast die beiden Punkte der Abgrenzung nicht festgelegt
+cmd.slopes.delete.terrainerror=§4Das Terrain von Chunk %s konnte nicht geladen werden, lade es mit einem Fahrzeug und versuche es erneut !
+cmd.slopes.delete.selerror=§Es wurde ein Slope in der Zone gefunden, aber die Zone überschneidet sich nicht mit allen Slopes
+cmd.slopes.delete.selempty=§4Keine Slopes gefunden in der Zone
+cmd.slopes.delete.result=%s Slope(s) wurden in der ausgewählten Zone gelöscht !
+cmd.slopes.needauto=§6Du musst im [AUTO] Modus sein um Slopes zu generieren !
+cmd.slopes.auto.points=§6[AUTO] Du hast die beiden Punkte der Abgrenzung nicht festgelegt
+cmd.slopes.auto.working=§6[AUTO] Slopes werden generiert..
+cmd.slopes.auto.error=§4Keine Slopes wurden erstellt, überprüfen Sie die Richtungen und die Anordnung der Blöcke, die die Slopes unterstützen!
+cmd.slopes.auto.result=§6[AUTO] Slopes wurden generiert in %s ms
+cmd.slopes.auto.success=§a[AUTO] Die Slopes wurden hinzugefügt !
+
+hud.car.speedlimit=Geschwindigkeitsbegrenzung : %s

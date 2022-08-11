@@ -149,7 +149,7 @@ public class OBJLoader {
                 for (IndexedModel.OBJIndex current : indices) {
                     Vector3f pos = positions.get(current.positionIndex);
                     Vector2f texCoord = hasTexCoords && startPath != null ? texCoords.get(current.texCoordsIndex) : new Vector2f();
-                    Vector3f normal = hasNormals ? normals.get(current.normalIndex) : new Vector3f();
+                    Vector3f normal = hasNormals && current.normalIndex < normals.size() ? normals.get(current.normalIndex) : new Vector3f();
 
                     int modelVertexIndex = resultIndexMap.getOrDefault(current, -1);
                     if (modelVertexIndex == -1) {

@@ -41,25 +41,14 @@ public class ArmorRenderer extends ModelRenderer {
                 GlStateManager.pushMatrix();
                 GlStateManager.translate(this.rotationPointX, this.rotationPointY, this.rotationPointZ);
                 GlStateManager.rotate(180, 1, 0, 0);
-
-                if (this.rotateAngleZ != 0.0F) {
-                    GlStateManager.rotate(this.rotateAngleZ * (180F / (float) Math.PI), 0.0F, 0.0F, 1.0F);
-                }
-
-                if (this.rotateAngleY != 0.0F) {
-                    GlStateManager.rotate(this.rotateAngleY * (180F / (float) Math.PI), 0.0F, 1.0F, 0.0F);
-                }
-
-                if (this.rotateAngleX != 0.0F) {
-                    GlStateManager.rotate(this.rotateAngleX * (180F / (float) Math.PI), 1.0F, 0.0F, 0.0F);
-                }
+                rotateXYZ(false);
                 GlStateManager.translate(-this.offsetX, this.offsetY, -this.offsetZ);
                 objModel.renderGroup(objObjectRenderer, model.getActiveTextureId());
-
                 GlStateManager.popMatrix();
             }
         }
     }
+
 
     @Override
     @SideOnly(Side.CLIENT)
@@ -70,19 +59,7 @@ public class ArmorRenderer extends ModelRenderer {
                     return;
                 GlStateManager.pushMatrix();
                 GlStateManager.translate(this.rotationPointX * scale, this.rotationPointY * scale, this.rotationPointZ * scale);
-
-                if (this.rotateAngleY != 0.0F) {
-                    GlStateManager.rotate(this.rotateAngleY * (180F / (float) Math.PI), 0.0F, 1.0F, 0.0F);
-                }
-
-                if (this.rotateAngleX != 0.0F) {
-                    GlStateManager.rotate(this.rotateAngleX * (180F / (float) Math.PI), 1.0F, 0.0F, 0.0F);
-                }
-
-                if (this.rotateAngleZ != 0.0F) {
-                    GlStateManager.rotate(this.rotateAngleZ * (180F / (float) Math.PI), 0.0F, 0.0F, 1.0F);
-                }
-
+                rotateXYZ(true);
                 objModel.renderGroup(objObjectRenderer, model.getActiveTextureId());
                 GlStateManager.popMatrix();
             }
@@ -105,19 +82,29 @@ public class ArmorRenderer extends ModelRenderer {
                     }
                 } else {
                     GlStateManager.translate(this.rotationPointX * scale, this.rotationPointY * scale, this.rotationPointZ * scale);
-
-                    if (this.rotateAngleZ != 0.0F) {
-                        GlStateManager.rotate(this.rotateAngleZ * (180F / (float) Math.PI), 0.0F, 0.0F, 1.0F);
-                    }
-
-                    if (this.rotateAngleY != 0.0F) {
-                        GlStateManager.rotate(this.rotateAngleY * (180F / (float) Math.PI), 0.0F, 1.0F, 0.0F);
-                    }
-
-                    if (this.rotateAngleX != 0.0F) {
-                        GlStateManager.rotate(this.rotateAngleX * (180F / (float) Math.PI), 1.0F, 0.0F, 0.0F);
-                    }
+                    rotateXYZ(false);
                 }
+            }
+        }
+    }
+
+    private void rotateXYZ(boolean yFirst) {
+        if (!yFirst) {
+            if (this.rotateAngleZ != 0.0F) {
+                GlStateManager.rotate(this.rotateAngleZ * (180F / (float) Math.PI), 0.0F, 0.0F, 1.0F);
+            }
+        }
+
+        if (this.rotateAngleY != 0.0F) {
+            GlStateManager.rotate(this.rotateAngleY * (180F / (float) Math.PI), 0.0F, 1.0F, 0.0F);
+        }
+
+        if (this.rotateAngleX != 0.0F) {
+            GlStateManager.rotate(this.rotateAngleX * (180F / (float) Math.PI), 1.0F, 0.0F, 0.0F);
+        }
+        if (yFirst) {
+            if (this.rotateAngleZ != 0.0F) {
+                GlStateManager.rotate(this.rotateAngleZ * (180F / (float) Math.PI), 0.0F, 0.0F, 1.0F);
             }
         }
     }

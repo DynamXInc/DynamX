@@ -41,10 +41,8 @@ public class ItemObjModel implements IModel {
 
         DynamXMain.log.debug("Registered item model " + location + " for " + owner.getModel() + " of " + owner.getPackName() + " with render locations " + owner.get3DItemRenderLocation());
         if (owner.get3DItemRenderLocation() != Enum3DRenderLocation.ALL) {
-            //System.out.println("Path is "+location+" "+location.getPath());
             gui = ModelLoaderRegistry.getModel(new ResourceLocation(location.getNamespace(), "item/" + location.getPath().replace(".obj", "")));
         }
-        //objObjects.addAll(DynamXModelRegistry.getModel(location.getPath()).objObjects);
     }
 
     public void setOwner(IObjPackObject owner) {

@@ -1,7 +1,7 @@
 package fr.dynamx.api.events;
 
 import fr.dynamx.client.renders.model.ModelObjArmor;
-import fr.dynamx.client.renders.model.ObjModelClient;
+import fr.dynamx.client.renders.model.ObjModelRenderer;
 import fr.dynamx.client.renders.model.ObjObjectRenderer;
 import lombok.Getter;
 import net.minecraftforge.fml.common.eventhandler.Cancelable;
@@ -13,7 +13,7 @@ public class ArmorEvent extends Event {
         @Getter
         private final ModelObjArmor armorModel;
         @Getter
-        private final ObjModelClient objModel;
+        private final ObjModelRenderer objModel;
         @Getter
         private final ObjObjectRenderer objObjectRenderer;
         @Getter
@@ -21,7 +21,7 @@ public class ArmorEvent extends Event {
         @Getter
         private final Type renderType;
 
-        public RenderArmorEvent(ModelObjArmor armorModel, ObjModelClient objModel, ObjObjectRenderer objObjectRenderer, PhysicsEntityEvent.Phase phase, Type renderType) {
+        public RenderArmorEvent(ModelObjArmor armorModel, ObjModelRenderer objModel, ObjObjectRenderer objObjectRenderer, PhysicsEntityEvent.Phase phase, Type renderType) {
             this.armorModel = armorModel;
             this.objModel = objModel;
             this.objObjectRenderer = objObjectRenderer;

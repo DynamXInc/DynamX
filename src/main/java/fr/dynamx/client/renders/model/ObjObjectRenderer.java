@@ -63,7 +63,7 @@ public class ObjObjectRenderer {
         }
     }
 
-    public void createList(TextureData useDefault, TextureData textureData, ObjModelClient model, boolean logIfNotFound) {
+    public void createList(TextureData useDefault, TextureData textureData, ObjModelRenderer model, boolean logIfNotFound) {
         if (!isMaterialValid(model, objObjectData.getMesh().materialForEachVertex[0]))
             return;
         boolean isCustom = textureData.getId() == 0; //0 is the default, base texture
@@ -93,7 +93,7 @@ public class ObjObjectRenderer {
         }
     }
 
-    public void createDefaultList(ObjModelClient model) {
+    public void createDefaultList(ObjModelRenderer model) {
         if (!isMaterialValid(model, objObjectData.getMesh().materialForEachVertex[0]))
             return;
         // Create an empty display list
@@ -108,7 +108,7 @@ public class ObjObjectRenderer {
         modelDisplayList.put((byte) 0, id);
     }
 
-    public void render(ObjModelClient model, byte textureDataId) {
+    public void render(ObjModelRenderer model, byte textureDataId) {
         if (objObjectData.getMesh().materialForEachVertex.length == 0 || !isMaterialValid(model, objObjectData.getMesh().materialForEachVertex[0]))
             return;
         if (!modelDisplayList.containsKey(textureDataId)) {
@@ -128,7 +128,7 @@ public class ObjObjectRenderer {
     /**
      * Model is assumed to be not empty
      */
-    private void renderCPU(ObjModelClient model, String useDefault, String textureName) {
+    private void renderCPU(ObjModelRenderer model, String useDefault, String textureName) {
         //Reset bind texture
         startDrawing();
         // The model is not compiled, this shouldn't happen if the setup is correct
@@ -186,7 +186,7 @@ public class ObjObjectRenderer {
         bindTexture(Minecraft.getMinecraft().getTextureMapBlocks().getGlTextureId());
     }
 
-    private boolean isMaterialValid(ObjModelClient model, Material material) {
+    private boolean isMaterialValid(ObjModelRenderer model, Material material) {
         if (material == null)
             return false;
         if (material.getName().equals("none")) //BlockBench uses "none" materials, this is a bug

@@ -11,10 +11,10 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ArmorRenderer extends ModelRenderer {
     private final ModelObjArmor model;
-    private final ObjModelClient objModel;
+    private final ObjModelRenderer objModel;
     private ObjObjectRenderer objObjectRenderer;
 
-    public ArmorRenderer(ObjModelClient objModel, ModelObjArmor model, String partName) {
+    public ArmorRenderer(ObjModelRenderer objModel, ModelObjArmor model, String partName) {
         super(model, partName);
         this.model = model;
         this.objModel = objModel;

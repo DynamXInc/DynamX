@@ -17,7 +17,7 @@ import java.util.ArrayList;
 /**
  * Missing obj model indicating errors
  */
-public class MissingObjModel extends ObjModelClient {
+public class MissingObjModel extends ObjModelRenderer {
     private static final AxisAlignedBB BOX = new AxisAlignedBB(-1, -1, -1, 1, 1, 1);
     private static final Vector3f zero = new Vector3f();
     private static final ObjObjectData emptyPart = new ObjObjectData("empty") {

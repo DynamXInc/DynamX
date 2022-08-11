@@ -32,7 +32,7 @@ public class ModelObjArmor extends ModelBiped {
         this.armorObject = armorObject;
     }
 
-    public void init(ObjModelClient model) {
+    public void init(ObjModelRenderer model) {
         if (armorObject.getArmorHead() != null) {
             head = new ArmorRenderer(model, this, armorObject.getArmorHead());
             setBodyPart(head, bipedHead);

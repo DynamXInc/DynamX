@@ -6,7 +6,7 @@ import fr.aym.acsguis.component.panel.GuiFrame;
 import fr.aym.acsguis.component.panel.GuiPanel;
 import fr.aym.acsguis.component.textarea.GuiFloatField;
 import fr.aym.acsguis.component.textarea.GuiLabel;
-import fr.dynamx.client.renders.model.ObjModelClient;
+import fr.dynamx.client.renders.model.ObjModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.blocks.TEDynamXBlock;
 import fr.dynamx.common.network.packets.MessageSyncBlockCustomization;
@@ -24,7 +24,7 @@ import java.util.List;
 
 public class GuiBlockCustomization extends GuiFrame {
 
-    private static ObjModelClient model;
+    private static ObjModelRenderer model;
     private static TEDynamXBlock teBlock;
     GuiPanel preview = new GuiPanel();
 
@@ -122,7 +122,7 @@ public class GuiBlockCustomization extends GuiFrame {
         drawModelOnScreen(x / 1.2f - 30, y / 1.2f - 30, 20, mouseX, mouseY, model);
     }
 
-    public void drawModelOnScreen(float posX, float posY, float scale, float mouseX, float mouseY, ObjModelClient model) {
+    public void drawModelOnScreen(float posX, float posY, float scale, float mouseX, float mouseY, ObjModelRenderer model) {
         unbindLayerBounds();
 
         BlockRendererDispatcher blockRenderer = Minecraft.getMinecraft().getBlockRendererDispatcher();

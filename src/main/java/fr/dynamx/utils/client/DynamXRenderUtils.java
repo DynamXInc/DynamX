@@ -1,7 +1,7 @@
 package fr.dynamx.utils.client;
 
 import com.jme3.math.Vector3f;
-import fr.dynamx.client.renders.model.ObjModelClient;
+import fr.dynamx.client.renders.model.ObjModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.ModularVehicleInfo;
 import fr.dynamx.common.contentpack.parts.PartDoor;
@@ -51,7 +51,7 @@ public class DynamXRenderUtils {
         Vector3fPool.openPool();
         GlQuaternionPool.openPool();
         /* Rendering the chassis */
-        ObjModelClient vehicleModel = DynamXContext.getObjModelRegistry().getModel(car.getModel());
+        ObjModelRenderer vehicleModel = DynamXContext.getObjModelRegistry().getModel(car.getModel());
         GlStateManager.scale(car.getScaleModifier().x, car.getScaleModifier().y, car.getScaleModifier().z);
         vehicleModel.renderDefaultParts(textureId);//.renderGroups("Chassis", textureId);
         GlStateManager.scale(1 / car.getScaleModifier().x, 1 / car.getScaleModifier().y, 1 / car.getScaleModifier().z);
@@ -105,7 +105,7 @@ public class DynamXRenderUtils {
                     }
                     /*Rendering the wheels */
                     PartWheelInfo info1 = partWheel.getDefaultWheelInfo();
-                    ObjModelClient model = DynamXContext.getObjModelRegistry().getModel(info1.getModel());
+                    ObjModelRenderer model = DynamXContext.getObjModelRegistry().getModel(info1.getModel());
                     //System.out.println("Model is "+model+" "+info1.getTextures()+ " "+car.getTextures().get(textureId));
                     GlStateManager.scale(car.getScaleModifier().x, car.getScaleModifier().y, car.getScaleModifier().z);
                     if (car.getTextures().containsKey(textureId))

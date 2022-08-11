@@ -32,7 +32,7 @@ import static fr.dynamx.common.DynamXMain.log;
  *
  * @see ObjModelData
  */
-public class ObjModelClient {
+public class ObjModelRenderer {
     @Getter
     private final ResourceLocation location;
     @Getter
@@ -44,13 +44,13 @@ public class ObjModelClient {
     @Getter
     private final IModelTextureSupplier customTextures;
 
-    public ObjModelClient(ResourceLocation location, List<ObjObjectRenderer> objObjects, @Nullable IModelTextureSupplier customTextures) {
+    public ObjModelRenderer(ResourceLocation location, List<ObjObjectRenderer> objObjects, @Nullable IModelTextureSupplier customTextures) {
         this.location = location;
         this.objObjects = objObjects;
         this.customTextures = customTextures;
     }
 
-    public static ObjModelClient loadObjModel(ObjModelPath objModelPath, @Nullable IModelTextureSupplier customTextures) {
+    public static ObjModelRenderer loadObjModel(ObjModelPath objModelPath, @Nullable IModelTextureSupplier customTextures) {
         try {
             List<ObjObjectRenderer> objObjects = new ArrayList<>();
 
@@ -58,7 +58,7 @@ public class ObjModelClient {
             objModelData.getObjObjects().forEach(ObjObjectData -> {
                 objObjects.add(new ObjObjectRenderer(ObjObjectData));
             });
-            return new ObjModelClient(objModelPath.getModelPath(), objObjects, customTextures);
+            return new ObjModelRenderer(objModelPath.getModelPath(), objObjects, customTextures);
         } catch (Exception e) {
             log.error(" Model " + objModelPath.getModelPath() + " cannot be loaded !", e);
             DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.MODEL,

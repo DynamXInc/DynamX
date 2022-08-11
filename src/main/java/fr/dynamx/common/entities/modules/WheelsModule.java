@@ -13,7 +13,7 @@ import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.api.network.sync.SimulationHolder;
 import fr.dynamx.api.physics.entities.IPropulsionHandler;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
-import fr.dynamx.client.renders.model.ObjModelClient;
+import fr.dynamx.client.renders.model.ObjModelRenderer;
 import fr.dynamx.client.renders.vehicle.RenderBaseVehicle;
 import fr.dynamx.client.sound.SkiddingSound;
 import fr.dynamx.client.sound.VehicleSound;
@@ -296,7 +296,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
     @Override
     @SideOnly(Side.CLIENT)
     public void drawParts(RenderPhysicsEntity<?> render, float partialTicks, BaseVehicleEntity<?> carEntity) {
-        ObjModelClient vehicleModel = DynamXContext.getObjModelRegistry().getModel(carEntity.getPackInfo().getModel());
+        ObjModelRenderer vehicleModel = DynamXContext.getObjModelRegistry().getModel(carEntity.getPackInfo().getModel());
         /* Rendering the steering wheel */
         SteeringWheelInfo info = carEntity.getPackInfo().getSubPropertyByType(SteeringWheelInfo.class);
         if (info != null && !carEntity.getModuleByType(WheelsModule.class).getWheelInfos().isEmpty()) { //If has steering and wheels AND at least one wheel (think to loading errors)
@@ -436,7 +436,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
                     GlStateManager.rotate(-(prev + (visualProperties[index] - prev) * partialTicks), -1.0F, 0.0F, 0.0F);
                 }
                 /*Rendering the wheels */
-                ObjModelClient model = DynamXContext.getObjModelRegistry().getModel(info.getModel());
+                ObjModelRenderer model = DynamXContext.getObjModelRegistry().getModel(info.getModel());
                 //Scale
                 GlStateManager.scale(info.getScaleModifier().x, info.getScaleModifier().y, info.getScaleModifier().z);
                 //If the wheel is not flattened, or the model does not supports flattening

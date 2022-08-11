@@ -2,7 +2,7 @@ package fr.dynamx.api.obj;
 
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.client.renders.model.ItemObjModel;
-import fr.dynamx.client.renders.model.ObjModelClient;
+import fr.dynamx.client.renders.model.ObjModelRenderer;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.ICustomModelLoader;
@@ -35,7 +35,7 @@ public interface IObjModelRegistry {
      * @return The model corresponding to the given name (the name used in registerModel)
      * @throws IllegalArgumentException If the model wasn't registered (should be done before DynamX pre initialization)
      */
-    ObjModelClient getModel(ResourceLocation name);
+    ObjModelRenderer getModel(ResourceLocation name);
 
     /**
      * Reloads all models, may take some time

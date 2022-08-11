@@ -8,7 +8,7 @@ import fr.dynamx.api.obj.IObjModelRegistry;
 import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.client.renders.model.MissingObjModel;
 import fr.dynamx.client.renders.model.ObjItemModelLoader;
-import fr.dynamx.client.renders.model.ObjModelClient;
+import fr.dynamx.client.renders.model.ObjModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
@@ -30,13 +30,13 @@ import static fr.dynamx.common.DynamXMain.log;
 public class DynamXModelRegistry implements IObjModelRegistry {
     private static final ObjItemModelLoader OBJ_ITEM_MODEL_LOADER = new ObjItemModelLoader();
     private static final Map<ObjModelPath, IModelTextureSupplier> MODELS_REGISTRY = new HashMap<>();
-    private static final Map<ResourceLocation, ObjModelClient> MODELS = new HashMap<>();
+    private static final Map<ResourceLocation, ObjModelRenderer> MODELS = new HashMap<>();
     private static final List<ResourceLocation> ERRORED_MODELS = new ArrayList<>();
 
     /**
      * A missing model rendered when the right model isn't found
      */
-    public static final ObjModelClient MISSING_MODEL = new MissingObjModel();
+    public static final ObjModelRenderer MISSING_MODEL = new MissingObjModel();
 
     private static boolean REGISTRY_CLOSED;
 
@@ -65,7 +65,7 @@ public class DynamXModelRegistry implements IObjModelRegistry {
     }
 
     @Override
-    public ObjModelClient getModel(ResourceLocation name) {
+    public ObjModelRenderer getModel(ResourceLocation name) {
         if (!MODELS.containsKey(name)) {
             if (!ERRORED_MODELS.contains(name)) {
                 log.error("Obj model " + name + " isn't registered !");
@@ -93,7 +93,7 @@ public class DynamXModelRegistry implements IObjModelRegistry {
             for (Map.Entry<ObjModelPath, IModelTextureSupplier> name : MODELS_REGISTRY.entrySet()) {
                 log.debug("Loading tessellator model " + name.getKey());
 
-                ObjModelClient model = ObjModelClient.loadObjModel(name.getKey(), name.getValue());
+                ObjModelRenderer model = ObjModelRenderer.loadObjModel(name.getKey(), name.getValue());
                 if (model != null) {
                     MODELS.put(name.getKey().getModelPath(), model);
                 } else {
@@ -122,7 +122,7 @@ public class DynamXModelRegistry implements IObjModelRegistry {
             MODELS.forEach((s, t) -> t.setupModel());
             bar.step("Compiling armors");
             for (ArmorObject<?> info : DynamXObjectLoaders.ARMORS.getInfos().values()) {
-                ObjModelClient model = getModel(info.getModel());
+                ObjModelRenderer model = getModel(info.getModel());
                 info.getObjArmor().init(model);
             }
             ProgressManager.pop(bar);

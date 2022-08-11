@@ -1,8 +1,10 @@
-package fr.dynamx.client.renders.model;
+package fr.dynamx.client.renders.model.renderer;
 
 import fr.dynamx.api.events.ArmorEvent;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.client.DynamXModelRegistry;
+import fr.dynamx.client.renders.model.MissingObjModel;
+import fr.dynamx.client.renders.model.ModelObjArmor;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraftforge.common.MinecraftForge;

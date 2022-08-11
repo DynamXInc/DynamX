@@ -1,8 +1,10 @@
 package fr.dynamx.client.renders.model;
 
 import fr.dynamx.api.obj.IModelTextureSupplier;
+import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
+import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.common.objloader.Mesh;
-import fr.dynamx.common.objloader.ObjObjectData;
+import fr.dynamx.common.objloader.data.ObjObjectData;
 import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;

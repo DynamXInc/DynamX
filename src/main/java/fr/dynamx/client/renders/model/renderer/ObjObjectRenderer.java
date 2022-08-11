@@ -1,9 +1,9 @@
-package fr.dynamx.client.renders.model;
+package fr.dynamx.client.renders.model.renderer;
 
 import fr.aym.acslib.api.services.ErrorTrackingService;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.objloader.Material;
-import fr.dynamx.common.objloader.ObjObjectData;
+import fr.dynamx.common.objloader.data.ObjObjectData;
 import fr.dynamx.common.objloader.Vertex;
 import fr.dynamx.client.renders.model.texture.MaterialTexture;
 import fr.dynamx.client.renders.model.texture.TextureData;

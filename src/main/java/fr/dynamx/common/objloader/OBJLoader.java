@@ -1,5 +1,6 @@
 package fr.dynamx.common.objloader;
 
+import fr.dynamx.common.objloader.data.ObjObjectData;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.RegistryNameSetter;
 import net.minecraft.client.Minecraft;

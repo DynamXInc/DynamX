@@ -1,6 +1,8 @@
 package fr.dynamx.client.renders.model;
 
 import fr.aym.acslib.api.services.ErrorTrackingService;
+import fr.dynamx.client.renders.model.renderer.ArmorRenderer;
+import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.type.objects.ArmorObject;

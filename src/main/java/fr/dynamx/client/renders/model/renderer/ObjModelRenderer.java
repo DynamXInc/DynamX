@@ -1,4 +1,4 @@
-package fr.dynamx.client.renders.model;
+package fr.dynamx.client.renders.model.renderer;
 
 import fr.aym.acslib.api.services.ErrorTrackingService;
 import fr.dynamx.api.events.DynamXModelRenderEvent;
@@ -7,8 +7,8 @@ import fr.dynamx.api.obj.IModelTextureSupplier;
 import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
-import fr.dynamx.common.objloader.ObjModelData;
-import fr.dynamx.common.objloader.ObjObjectData;
+import fr.dynamx.common.objloader.data.ObjModelData;
+import fr.dynamx.common.objloader.data.ObjObjectData;
 import fr.dynamx.client.renders.model.texture.TextureData;
 import fr.dynamx.utils.DynamXLoadingTasks;
 import lombok.Getter;

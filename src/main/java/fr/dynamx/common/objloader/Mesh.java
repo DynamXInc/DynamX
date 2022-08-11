@@ -3,6 +3,7 @@ package fr.dynamx.common.objloader;
 import com.jme3.bullet.collision.shapes.BoxCollisionShape;
 import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.math.Vector3f;
+import fr.dynamx.common.objloader.data.ObjObjectData;
 
 /**
  * Structure of an {@link ObjObjectData}

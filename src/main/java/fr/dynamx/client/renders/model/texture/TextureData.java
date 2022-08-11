@@ -2,7 +2,7 @@ package fr.dynamx.client.renders.model.texture;
 
 import fr.dynamx.api.obj.IModelTextureSupplier;
 import fr.dynamx.common.contentpack.type.PartWheelInfo;
-import fr.dynamx.client.renders.model.ObjObjectRenderer;
+import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 
 import javax.annotation.Nullable;
 

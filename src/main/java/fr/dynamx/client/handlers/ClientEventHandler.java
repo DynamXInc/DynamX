@@ -10,7 +10,7 @@ import fr.dynamx.client.camera.CameraSystem;
 import fr.dynamx.client.gui.GuiLoadingErrors;
 import fr.dynamx.client.gui.VehicleHud;
 import fr.dynamx.client.renders.RenderMovableLine;
-import fr.dynamx.client.renders.model.ObjModelRenderer;
+import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.blocks.DynamXBlock;

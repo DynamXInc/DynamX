@@ -12,7 +12,7 @@ import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.contentpack.type.objects.AbstractProp;
 import fr.dynamx.common.contentpack.type.objects.PropObject;
-import fr.dynamx.common.objloader.ObjModelData;
+import fr.dynamx.common.objloader.data.ObjModelData;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.optimization.MutableBoundingBox;

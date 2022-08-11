@@ -20,7 +20,7 @@ import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.contentpack.type.vehicle.EngineInfo;
 import fr.dynamx.common.contentpack.type.vehicle.FrictionPoint;
 import fr.dynamx.common.contentpack.type.vehicle.SoundListInfo;
-import fr.dynamx.common.objloader.ObjModelData;
+import fr.dynamx.common.objloader.data.ObjModelData;
 import fr.dynamx.client.renders.model.texture.TextureData;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.physics.ShapeUtils;

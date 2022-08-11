@@ -3,6 +3,7 @@ package fr.dynamx.client.renders.model;
 import com.google.common.collect.ImmutableList;
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
 import fr.dynamx.api.contentpack.object.render.IObjPackObject;
+import fr.dynamx.client.renders.model.renderer.ObjItemModelLoader;
 import fr.dynamx.common.DynamXMain;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;

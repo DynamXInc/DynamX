@@ -2,7 +2,7 @@ package fr.dynamx.api.obj;
 
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.client.renders.model.ItemObjModel;
-import fr.dynamx.client.renders.model.ObjModelRenderer;
+import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.ICustomModelLoader;

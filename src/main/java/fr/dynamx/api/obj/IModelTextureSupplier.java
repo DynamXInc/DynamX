@@ -1,7 +1,7 @@
 package fr.dynamx.api.obj;
 
-import fr.dynamx.common.objloader.ObjObjectData;
-import fr.dynamx.client.renders.model.ObjObjectRenderer;
+import fr.dynamx.common.objloader.data.ObjObjectData;
+import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.client.renders.model.texture.TextureData;
 
 import javax.annotation.Nullable;

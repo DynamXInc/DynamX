@@ -10,7 +10,7 @@ import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.VehicleLightsModule;
-import fr.dynamx.common.obj.texture.TextureData;
+import fr.dynamx.client.renders.model.texture.TextureData;
 
 import java.util.ArrayList;
 import java.util.HashMap;

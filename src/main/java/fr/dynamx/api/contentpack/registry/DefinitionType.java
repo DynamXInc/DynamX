@@ -5,6 +5,7 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
 import fr.dynamx.common.contentpack.loader.PackConstants;
 import fr.dynamx.common.contentpack.parts.PartShape;
+import fr.dynamx.utils.RegistryNameSetter;
 import fr.dynamx.utils.physics.EnumCollisionType;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ResourceLocation;
@@ -219,7 +220,8 @@ public class DefinitionType<T> {
         }, p -> p == null ? "none" : p.getParticleName(), "type.particle")),
         COLLISION_TYPE(new DefinitionType<>(EnumCollisionType.class, EnumCollisionType::valueOf,
                 p -> p == null ? EnumCollisionType.SIMPLE.name() : p.name(), "type.collision")),
-        SHAPE_TYPE(new DefinitionType<>(PartShape.EnumPartType.class, PartShape.EnumPartType::fromString, "type.shapetype"));
+        SHAPE_TYPE(new DefinitionType<>(PartShape.EnumPartType.class, PartShape.EnumPartType::fromString, "type.shapetype")),
+        DYNX_RESOURCE_LOCATION(new DefinitionType<>(ResourceLocation.class, RegistryNameSetter::getDynamXModelResourceLocation, "type.resourcelocation"));
 
         public final DefinitionType<?> type;
 

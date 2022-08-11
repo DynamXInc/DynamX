@@ -1,7 +1,6 @@
-package fr.dynamx.common.obj.eximpl;
+package fr.dynamx.common.objloader;
 
-import fr.dynamx.common.obj.Material;
-import fr.dynamx.common.obj.texture.MaterialTexture;
+import fr.dynamx.client.renders.model.texture.MaterialTexture;
 import fr.dynamx.utils.RegistryNameSetter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureManager;

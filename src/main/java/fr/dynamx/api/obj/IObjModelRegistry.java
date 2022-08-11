@@ -20,7 +20,7 @@ public interface IObjModelRegistry {
      *
      * @param name The model in format modid:path
      */
-    void registerModel(String name);
+    void registerModel(ObjModelPath name);
 
     /**
      * Registers a model <br>
@@ -29,42 +29,13 @@ public interface IObjModelRegistry {
      * @param name           The model in format modid:path
      * @param customTextures A texture supplier for this model (allows multi-texturing)
      */
-    void registerModel(String name, IModelTextureSupplier customTextures);
-
-    /**
-     * Registers a model <br>
-     * The model should be in modid:models/path
-     *
-     * @param location The model resource location
-     */
-    default void registerModel(ResourceLocation location) {
-        registerModel(location.toString());
-    }
-
-    /**
-     * Registers a model <br>
-     * The model should be in modid:models/path
-     *
-     * @param location       The model resource location
-     * @param customTextures A texture supplier for this model (allows multi-texturing)
-     */
-    default void registerModel(ResourceLocation location, IModelTextureSupplier customTextures) {
-        registerModel(location.toString(), customTextures);
-    }
-
-    /**
-     * @return The model corresponding to the given resource location (the location used in registerModel)
-     * @throws IllegalArgumentException If the model wasn't registered (should be done before DynamX pre initialization)
-     */
-    default ObjModelClient getModel(ResourceLocation location) {
-        return getModel(location.toString());
-    }
+    void registerModel(ObjModelPath name, IModelTextureSupplier customTextures);
 
     /**
      * @return The model corresponding to the given name (the name used in registerModel)
      * @throws IllegalArgumentException If the model wasn't registered (should be done before DynamX pre initialization)
      */
-    ObjModelClient getModel(String name);
+    ObjModelClient getModel(ResourceLocation name);
 
     /**
      * Reloads all models, may take some time

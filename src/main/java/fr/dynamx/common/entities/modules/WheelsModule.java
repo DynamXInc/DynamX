@@ -11,7 +11,6 @@ import fr.dynamx.api.entities.modules.IPropulsionModule;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.api.network.sync.SimulationHolder;
-import fr.dynamx.api.obj.IObjObject;
 import fr.dynamx.api.physics.entities.IPropulsionHandler;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
 import fr.dynamx.client.renders.model.ObjModelClient;
@@ -26,7 +25,8 @@ import fr.dynamx.common.contentpack.type.PartWheelInfo;
 import fr.dynamx.common.contentpack.type.vehicle.SteeringWheelInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.network.sync.vars.VehicleSynchronizedVariables;
-import fr.dynamx.common.obj.texture.TextureData;
+import fr.dynamx.client.renders.model.ObjObjectRenderer;
+import fr.dynamx.client.renders.model.texture.TextureData;
 import fr.dynamx.common.physics.entities.BaseWheeledVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.wheel.WheelPhysicsHandler;
@@ -300,7 +300,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
         /* Rendering the steering wheel */
         SteeringWheelInfo info = carEntity.getPackInfo().getSubPropertyByType(SteeringWheelInfo.class);
         if (info != null && !carEntity.getModuleByType(WheelsModule.class).getWheelInfos().isEmpty()) { //If has steering and wheels AND at least one wheel (think to loading errors)
-            IObjObject steeringWheel = vehicleModel.getObjObject(info.getPartName());
+            ObjObjectRenderer steeringWheel = vehicleModel.getObjObjectRenderer(info.getPartName());
             if (steeringWheel != null) {
                 if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.RenderVehicleEntityEvent(VehicleEntityEvent.RenderVehicleEntityEvent.Type.STEERING_WHEEL, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks))) {
                     GlStateManager.pushMatrix();

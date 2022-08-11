@@ -1,15 +1,14 @@
-package fr.dynamx.common.obj.eximpl;
+package fr.dynamx.client.renders.model;
 
 import fr.aym.acslib.api.services.ErrorTrackingService;
-import fr.dynamx.api.obj.IObjObject;
-import fr.dynamx.client.renders.model.ObjModelClient;
 import fr.dynamx.common.DynamXContext;
-import fr.dynamx.common.obj.Material;
-import fr.dynamx.common.obj.Mesh;
-import fr.dynamx.common.obj.Vertex;
-import fr.dynamx.common.obj.texture.MaterialTexture;
-import fr.dynamx.common.obj.texture.TextureData;
+import fr.dynamx.common.objloader.Material;
+import fr.dynamx.common.objloader.ObjObjectData;
+import fr.dynamx.common.objloader.Vertex;
+import fr.dynamx.client.renders.model.texture.MaterialTexture;
+import fr.dynamx.client.renders.model.texture.TextureData;
 import fr.dynamx.utils.DynamXLoadingTasks;
+import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
@@ -23,7 +22,7 @@ import java.util.Map;
 
 import static fr.dynamx.common.DynamXMain.log;
 
-public class QuickObjObject implements IObjObject {
+public class ObjObjectRenderer {
     // Use THIS instead of GlStateManager, it has weird issues due to last bind texture memory and display lists
     private static int bindTexture;
 
@@ -44,37 +43,16 @@ public class QuickObjObject implements IObjObject {
         bindTexture = -1;
     }
 
-    private final Mesh mesh = new Mesh();
-    private Vector3f center;
-    private final String name;
 
     private final Map<Byte, Integer> modelDisplayList = new HashMap<>();
 
-    public QuickObjObject(String name) {
-        this.name = name;
+    @Getter
+    private final ObjObjectData objObjectData;
+
+    public ObjObjectRenderer(ObjObjectData objObjectData) {
+        this.objObjectData = objObjectData;
     }
 
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public Vector3f getCenter() {
-        return center;
-    }
-
-    @Override
-    public void setCenter(Vector3f center) {
-        this.center = center;
-    }
-
-    @Override
-    public Mesh getMesh() {
-        return mesh;
-    }
-
-    @Override
     public void clearDisplayLists() {
         if (!modelDisplayList.isEmpty()) {
             modelDisplayList.forEach((textureID, displayList) -> {
@@ -85,13 +63,12 @@ public class QuickObjObject implements IObjObject {
         }
     }
 
-    @Override
     public void createList(TextureData useDefault, TextureData textureData, ObjModelClient model, boolean logIfNotFound) {
-        if (!isMaterialValid(model, mesh.materials[0]))
+        if (!isMaterialValid(model, objObjectData.getMesh().materials[0]))
             return;
         boolean isCustom = textureData.getId() == 0; //0 is the default, base texture
         if (!isCustom) {
-            for (Material m : mesh.materials) {
+            for (Material m : objObjectData.getMesh().materials) {
                 if (m.diffuseTexture.containsKey(textureData.getName())) {
                     isCustom = true;
                     break;
@@ -111,14 +88,13 @@ public class QuickObjObject implements IObjObject {
             //log.info("Compile list for "+textureData+" (default is "+useDefault+") for part "+getName()+" of "+model.getLocation());
         } else {
             if (logIfNotFound)
-                log.error("Failed to find custom texture for skin " + textureData.getName() + " of " + model.getLocation() + " in part " + getName());
+                log.error("Failed to find custom texture for skin " + textureData.getName() + " of " + model.getLocation() + " in part " + objObjectData.getName());
             modelDisplayList.put(textureData.getId(), modelDisplayList.get(useDefault.getId()));
         }
     }
 
-    @Override
     public void createDefaultList(ObjModelClient model) {
-        if (!isMaterialValid(model, mesh.materials[0]))
+        if (!isMaterialValid(model, objObjectData.getMesh().materials[0]))
             return;
         // Create an empty display list
         int id = GlStateManager.glGenLists(1);
@@ -132,9 +108,8 @@ public class QuickObjObject implements IObjObject {
         modelDisplayList.put((byte) 0, id);
     }
 
-    @Override
     public void render(ObjModelClient model, byte textureDataId) {
-        if (mesh.materials.length == 0 || !isMaterialValid(model, mesh.materials[0]))
+        if (objObjectData.getMesh().materials.length == 0 || !isMaterialValid(model, objObjectData.getMesh().materials[0]))
             return;
         if (!modelDisplayList.containsKey(textureDataId)) {
             GlStateManager.color(1, 0, 0);
@@ -163,16 +138,16 @@ public class QuickObjObject implements IObjObject {
         Vector3f color = new Vector3f(1, 1, 1);
         float alpha = 1f;
         Material bind = null;
-        bind = mesh.materials[0];
-        String bindName = getExistingTexture(mesh.materials[0], textureName, useDefault);
-        MaterialTexture materialMultipleTextures = mesh.materials[0].diffuseTexture.get(bindName);
+        bind = objObjectData.getMesh().materials[0];
+        String bindName = getExistingTexture(objObjectData.getMesh().materials[0], textureName, useDefault);
+        MaterialTexture materialMultipleTextures = objObjectData.getMesh().materials[0].diffuseTexture.get(bindName);
         if (materialMultipleTextures != null) {
-            bindTexture(mesh.materials[0].diffuseTexture.get(bindName).getGlTextureId());
+            bindTexture(objObjectData.getMesh().materials[0].diffuseTexture.get(bindName).getGlTextureId());
         } else {
-            log.error("Failed to load Default texture of " + getName() + " in " + model.getLocation() + " in material " + mesh.materials[0].getName());
+            log.error("Failed to load Default texture of " + objObjectData.getName() + " in " + model.getLocation() + " in material " + objObjectData.getMesh().materials[0].getName());
         }
-        int[] indices = mesh.indices;
-        Vertex[] vertices = mesh.vertices;
+        int[] indices = objObjectData.getMesh().indices;
+        Vertex[] vertices = objObjectData.getMesh().vertices;
 
         boolean begining = true, drawing = false;
         for (int i = 0; i < indices.length; i += 3) {
@@ -183,17 +158,17 @@ public class QuickObjObject implements IObjObject {
             Vertex v1 = vertices[i1];
             Vertex v2 = vertices[i2];
 
-            if (isMaterialValid(model, mesh.materials[i / 3]) && mesh.materials[i / 3] != bind) {
-                bind = mesh.materials[i / 3];
+            if (isMaterialValid(model, objObjectData.getMesh().materials[i / 3]) && objObjectData.getMesh().materials[i / 3] != bind) {
+                bind = objObjectData.getMesh().materials[i / 3];
                 //System.out.println("Bind material " + bind.getName() + " " + bind.diffuseTex + " " + bind.diffuseTexture + " in model " + this.filename);
                 if (drawing)
                     tess.draw();
-                bindName = getExistingTexture(mesh.materials[i / 3], textureName, useDefault);
-                materialMultipleTextures = mesh.materials[i / 3].diffuseTexture.get(bindName);
+                bindName = getExistingTexture(objObjectData.getMesh().materials[i / 3], textureName, useDefault);
+                materialMultipleTextures = objObjectData.getMesh().materials[i / 3].diffuseTexture.get(bindName);
                 if (materialMultipleTextures != null) {
-                    bindTexture(mesh.materials[i / 3].diffuseTexture.get(bindName).getGlTextureId());
+                    bindTexture(objObjectData.getMesh().materials[i / 3].diffuseTexture.get(bindName).getGlTextureId());
                 } else {
-                    log.error("Failed to load Default texture of " + getName() + " in " + model.getLocation() + " in material " + mesh.materials[i / 3].getName());
+                    log.error("Failed to load Default texture of " + objObjectData.getName() + " in " + model.getLocation() + " in material " + objObjectData.getMesh().materials[i / 3].getName());
                 }
                 begining = true;
             }
@@ -217,9 +192,9 @@ public class QuickObjObject implements IObjObject {
         if (material.getName().equals("none")) //BlockBench uses "none" materials, this is a bug
         {
             if (!model.hasNoneMaterials) {
-                log.error("Invalid object " + getName() + " in model " + model.getLocation() + " : uses 'none' material of BlockBench");
+                log.error("Invalid object " + objObjectData.getName() + " in model " + model.getLocation() + " : uses 'none' material of BlockBench");
                 DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.MODEL, model.getCustomTextures() != null ? model.getCustomTextures().getPackName() : "Non-pack model", model.getLocation().toString(),
-                        "Invalid object " + getName() + " : uses 'none' material of BlockBench", ErrorTrackingService.TrackedErrorLevel.LOW);
+                        "Invalid object " + objObjectData.getName() + " : uses 'none' material of BlockBench", ErrorTrackingService.TrackedErrorLevel.LOW);
             }
             model.hasNoneMaterials = true;
             return false;

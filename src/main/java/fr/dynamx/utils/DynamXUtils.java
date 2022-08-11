@@ -23,6 +23,7 @@ import net.minecraft.nbt.NBTTagFloat;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
@@ -81,9 +82,9 @@ public class DynamXUtils {
     /**
      * @return A new {@link ObjModelPath} for this model
      */
-    public static ObjModelPath getModelPath(String packName, String model) {
+    public static ObjModelPath getModelPath(String packName, ResourceLocation model) {
         PackInfo info = DynamXObjectLoaders.PACKS.findPackInfoByPackName(packName);
-        return new ObjModelPath(info == null ? packName : info.getPathName(), RegistryNameSetter.getDynamXModelResourceLocation(model));
+        return new ObjModelPath(info == null ? packName : info.getPathName(), model);
     }
 
     public static byte[] readInputStream(InputStream resource) throws IOException {

@@ -1,9 +1,5 @@
-package fr.dynamx.common.obj.eximpl;
+package fr.dynamx.common.objloader;
 
-import fr.dynamx.api.obj.IObjObject;
-import fr.dynamx.common.obj.HashMapWithDefault;
-import fr.dynamx.common.obj.IndexedModel;
-import fr.dynamx.common.obj.Material;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.RegistryNameSetter;
 import net.minecraft.client.Minecraft;
@@ -30,9 +26,9 @@ public class OBJLoader {
 
     private boolean hasNormals = false;
     private boolean hasTexCoords = false;
-    private final List<IObjObject> objObjects;
+    private final List<ObjObjectData> objObjects;
 
-    public OBJLoader(List<IObjObject> objects) {
+    public OBJLoader(List<ObjObjectData> objects) {
         this.objObjects = objects;
     }
 
@@ -41,7 +37,7 @@ public class OBJLoader {
     }
 
     public static String[] trim(String[] split) {
-        ArrayList<String> strings = new ArrayList<String>();
+        ArrayList<String> strings = new ArrayList<>();
         for (String s : split)
             if (s != null && !s.trim().equals(""))
                 strings.add(s);
@@ -49,51 +45,42 @@ public class OBJLoader {
     }
 
     /**
-     * Reads an obj models, ignoring mtl files
-     *
-     * @param objContent Content of the obj file
-     */
-    public void loadModelServer(IObjObject.ObjObjectProvider objectProvider, String objContent) {
-        loadModelClient(objectProvider, null, objContent);
-    }
-
-    /**
      * Reads an obj models, including mtl files
      *
-     * @param startPath  Path of the obj model directory
+     * @param startPath  Path of the obj model directory. Null if it needs to ignore mtl files
      * @param objContent Content of the obj file
      */
-    public void loadModelClient(IObjObject.ObjObjectProvider objectProvider, String startPath, String objContent) {
+    public void readAndLoadModel(String startPath, String objContent) {
         try {
             hasNormals = true;
             hasTexCoords = true;
             IndexedModel result = new IndexedModel();
             IndexedModel normalModel = new IndexedModel();
-            String[] lines = objContent.split("\n|\r");
+            String[] lines = objContent.split("[\n\r]");
 
             int posOffset = 0;
             int indicesOffset = 0;
             int texOffset = 0;
             int normOffset = 0;
-            ArrayList<Vector3f> positions = new ArrayList<>();
-            ArrayList<Vector2f> texCoords = new ArrayList<>();
-            ArrayList<Vector3f> normals = new ArrayList<>();
-            ArrayList<IndexedModel.OBJIndex> indices = new ArrayList<>();
-            ArrayList<Material> indicedMaterials = new ArrayList<>();
+            List<Vector3f> positions = new ArrayList<>();
+            List<Vector2f> texCoords = new ArrayList<>();
+            List<Vector3f> normals = new ArrayList<>();
+            List<IndexedModel.OBJIndex> indices = new ArrayList<>();
+            List<Material> indicedMaterials = new ArrayList<>();
 
-            ArrayList<Material> materials = new ArrayList<>();
-            HashMapWithDefault<IndexedModel.OBJIndex, Integer> resultIndexMap = new HashMapWithDefault<IndexedModel.OBJIndex, Integer>();
-            HashMapWithDefault<Integer, Integer> normalIndexMap = new HashMapWithDefault<Integer, Integer>();
-            HashMapWithDefault<Integer, Integer> indexMap = new HashMapWithDefault<Integer, Integer>();
+            List<Material> materials = new ArrayList<>();
+            HashMapWithDefault<IndexedModel.OBJIndex, Integer> resultIndexMap = new HashMapWithDefault<>();
+            HashMapWithDefault<Integer, Integer> normalIndexMap = new HashMapWithDefault<>();
+            HashMapWithDefault<Integer, Integer> indexMap = new HashMapWithDefault<>();
             resultIndexMap.setDefault(-1);
             normalIndexMap.setDefault(-1);
             indexMap.setDefault(-1);
 
-            HashMap<IObjObject, IndexedModel> map = new HashMap<IObjObject, IndexedModel>();
+            Map<ObjObjectData, IndexedModel> map = new HashMap<>();
 
             Material currentMaterial = null;
-            HashMap<IObjObject, IndexedModel[]> objects = new HashMap<IObjObject, IndexedModel[]>();
-            objects.put(objectProvider.createObject("main"), new IndexedModel[]{result, normalModel});
+            HashMap<ObjObjectData, IndexedModel[]> objects = new HashMap<>();
+            objects.put(new ObjObjectData("main"), new IndexedModel[]{result, normalModel});
             for (int j = 0, linesLength = lines.length; j < linesLength; j++) {
                 try {
                     String line = lines[j];
@@ -133,7 +120,7 @@ public class OBJLoader {
                             normalModel = new IndexedModel();
                             indices.clear();
                             indicedMaterials.clear();
-                            objects.put(objectProvider.createObject(parts[1]), new IndexedModel[]{result, normalModel});
+                            objects.put(new ObjObjectData(parts[1]), new IndexedModel[]{result, normalModel});
                         }
                     }
                 } catch (Exception e) {
@@ -144,16 +131,13 @@ public class OBJLoader {
             result.getMaterials().addAll(indicedMaterials);
             normalModel.getObjIndices().addAll(indices);
 
-            Iterator<IObjObject> it = objects.keySet().iterator();
-            while (it.hasNext()) {
-                IObjObject object = it.next();
+            for (ObjObjectData object : objects.keySet()) {
                 result = objects.get(object)[0];
                 normalModel = objects.get(object)[1];
                 indices = result.getObjIndices();
                 map.put(object, result);
                 object.setCenter(result.computeCenter());
-                for (int i = 0; i < indices.size(); i++) {
-                    IndexedModel.OBJIndex current = indices.get(i);
+                for (IndexedModel.OBJIndex current : indices) {
                     Vector3f pos = positions.get(current.positionIndex);
                     Vector2f texCoord;
                     if (hasTexCoords && startPath != null) {
@@ -174,10 +158,10 @@ public class OBJLoader {
 
                     int modelVertexIndex = resultIndexMap.get(current);
                     if (modelVertexIndex == -1) {
-                        resultIndexMap.put(current, result.getPositions().size());
-                        modelVertexIndex = result.getPositions().size();
+                        resultIndexMap.put(current, result.getVertices().size());
+                        modelVertexIndex = result.getVertices().size();
 
-                        result.getPositions().add(pos);
+                        result.getVertices().add(pos);
                         result.getTexCoords().add(texCoord);
                         if (hasNormals)
                             result.getNormals().add(normal);
@@ -187,10 +171,10 @@ public class OBJLoader {
                     int normalModelIndex = normalIndexMap.get(current.positionIndex);
 
                     if (normalModelIndex == -1) {
-                        normalModelIndex = normalModel.getPositions().size();
+                        normalModelIndex = normalModel.getVertices().size();
                         normalIndexMap.put(current.positionIndex, normalModelIndex);
 
-                        normalModel.getPositions().add(pos);
+                        normalModel.getVertices().add(pos);
                         normalModel.getTexCoords().add(texCoord);
                         normalModel.getNormals().add(normal);
                         normalModel.getTangents().add(new Vector3f());
@@ -215,8 +199,8 @@ public class OBJLoader {
             }
 
             objObjects.clear();
-            Set<IObjObject> keys = map.keySet();
-            for (IObjObject object : keys) {
+            Set<ObjObjectData> keys = map.keySet();
+            for (ObjObjectData object : keys) {
                 objObjects.add(object);
                 map.get(object).toMesh(object.getMesh());
             }
@@ -225,7 +209,7 @@ public class OBJLoader {
         }
     }
 
-    private Material getMaterial(ArrayList<Material> materials, String id) {
+    private Material getMaterial(List<Material> materials, String id) {
         for (Material mat : materials) {
             if (mat.getName().equals(id))
                 return mat;

@@ -1,8 +1,8 @@
-package fr.dynamx.common.obj.texture;
+package fr.dynamx.client.renders.model.texture;
 
 import fr.dynamx.api.obj.IModelTextureSupplier;
 import fr.dynamx.common.contentpack.type.PartWheelInfo;
-import fr.dynamx.common.obj.eximpl.QuickObjObject;
+import fr.dynamx.client.renders.model.ObjObjectRenderer;
 
 import javax.annotation.Nullable;
 
@@ -12,7 +12,7 @@ import javax.annotation.Nullable;
  * @see IModelTextureSupplier
  * @see fr.dynamx.common.contentpack.ModularVehicleInfo
  * @see PartWheelInfo
- * @see QuickObjObject
+ * @see ObjObjectRenderer
  */
 public class TextureData {
     private final String name;

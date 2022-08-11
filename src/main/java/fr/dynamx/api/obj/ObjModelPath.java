@@ -7,6 +7,7 @@ import net.minecraft.util.ResourceLocation;
  * Defines an obj model location <br>
  * Can be used to search it as a mc packs resource, or generate a File to find it on server
  */
+//TODO RENAME OBJMODELPATH
 public class ObjModelPath implements INamedObject {
     private final String packName;
     private final ResourceLocation modelPath;

@@ -1,7 +1,6 @@
 package fr.dynamx.utils.client;
 
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.obj.IObjObject;
 import fr.dynamx.client.renders.model.ObjModelClient;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.ModularVehicleInfo;
@@ -10,6 +9,7 @@ import fr.dynamx.common.contentpack.parts.PartLightSource;
 import fr.dynamx.common.contentpack.parts.PartWheel;
 import fr.dynamx.common.contentpack.type.PartWheelInfo;
 import fr.dynamx.common.contentpack.type.vehicle.SteeringWheelInfo;
+import fr.dynamx.client.renders.model.ObjObjectRenderer;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.gui.FontRenderer;
@@ -53,13 +53,13 @@ public class DynamXRenderUtils {
         /* Rendering the chassis */
         ObjModelClient vehicleModel = DynamXContext.getObjModelRegistry().getModel(car.getModel());
         GlStateManager.scale(car.getScaleModifier().x, car.getScaleModifier().y, car.getScaleModifier().z);
-        vehicleModel.renderMainParts(textureId);//.renderGroups("Chassis", textureId);
+        vehicleModel.renderDefaultParts(textureId);//.renderGroups("Chassis", textureId);
         GlStateManager.scale(1 / car.getScaleModifier().x, 1 / car.getScaleModifier().y, 1 / car.getScaleModifier().z);
 
         /* Rendering the steering wheel */
         SteeringWheelInfo info = car.getSubPropertyByType(SteeringWheelInfo.class);
         if (info != null) {
-            IObjObject steeringWheel = vehicleModel.getObjObject(info.getPartName());
+            ObjObjectRenderer steeringWheel = vehicleModel.getObjObjectRenderer(info.getPartName());
             if (steeringWheel != null) {
                 GlStateManager.pushMatrix();
                 Vector3f center = info.getSteeringWheelPosition();

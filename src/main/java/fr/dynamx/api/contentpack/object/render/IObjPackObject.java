@@ -6,6 +6,7 @@ import fr.dynamx.common.DynamXContext;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -13,10 +14,10 @@ import javax.annotation.Nullable;
 
 public interface IObjPackObject extends IModelTextureSupplier {
     @SideOnly(Side.CLIENT)
-    String getModel();
+    ResourceLocation getModel();
 
     default boolean isModelValid() {
-        return getModel() != null && !getModel().equalsIgnoreCase("disable_rendering");
+        return getModel() != null && !getModel().getPath().toLowerCase().contains("disable_rendering");
     }
 
     default boolean shouldRegisterModel() {

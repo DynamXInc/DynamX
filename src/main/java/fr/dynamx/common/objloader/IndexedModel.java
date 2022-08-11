@@ -1,20 +1,29 @@
-package fr.dynamx.common.obj;
+package fr.dynamx.common.objloader;
 
+
+import lombok.Getter;
 
 import javax.vecmath.Vector2f;
 import javax.vecmath.Vector3f;
 import java.util.ArrayList;
+import java.util.List;
 
 public class IndexedModel {
 
-    private final ArrayList<Vector3f> vertices;
-    private final ArrayList<Vector2f> texCoords;
-    private final ArrayList<Vector3f> normals;
-    private final ArrayList<Vector3f> tangents;
-    private final ArrayList<Integer> indices;
-    private final ArrayList<OBJIndex> objindices;
-
-    private final ArrayList<Material> materials;
+    @Getter
+    private final List<Vector3f> vertices;
+    @Getter
+    private final List<Vector2f> texCoords;
+    @Getter
+    private final List<Vector3f> normals;
+    @Getter
+    private final List<Vector3f> tangents;
+    @Getter
+    private final List<Integer> indices;
+    @Getter
+    private final List<OBJIndex> objIndices;
+    @Getter
+    private final List<Material> materials;
 
     public IndexedModel() {
         vertices = new ArrayList<>();
@@ -22,38 +31,13 @@ public class IndexedModel {
         normals = new ArrayList<>();
         tangents = new ArrayList<>();
         indices = new ArrayList<>();
-        objindices = new ArrayList<>();
+        objIndices = new ArrayList<>();
 
         materials = new ArrayList<>();
     }
 
-    public ArrayList<Vector3f> getPositions() {
-        //System.out.println(vertices);
-        return vertices;
-    }
-
-    public ArrayList<Vector2f> getTexCoords() {
-        return texCoords;
-    }
-
-    public ArrayList<Vector3f> getNormals() {
-        return normals;
-    }
-
-    public ArrayList<Integer> getIndices() {
-        return indices;
-    }
-
-    public ArrayList<Vector3f> getTangents() {
-        return tangents;
-    }
-
-    public ArrayList<Material> getMaterials() {
-        return materials;
-    }
-
     public void toMesh(Mesh mesh) {
-        ArrayList<Vertex> verticesList = new ArrayList<Vertex>();
+        ArrayList<Vertex> verticesList = new ArrayList<>();
         int n = Math.min(vertices.size(), Math.min(texCoords.size(), normals.size()));
         for (int i = 0; i < n; i++) {
             Vertex vertex = new Vertex(vertices.get(i),
@@ -98,9 +82,8 @@ public class IndexedModel {
             normals.set(i2, v);
         }
 
-        for (int i = 0; i < normals.size(); i++) {
-            normals.get(i).normalize();
-        }
+        for (Vector3f normal : normals) normal.normalize();
+
     }
 
     public void computeTangents() {
@@ -141,12 +124,7 @@ public class IndexedModel {
             tangents.set(i2, v);
         }
 
-        for (int i = 0; i < tangents.size(); i++)
-            tangents.get(i).normalize();
-    }
-
-    public ArrayList<OBJIndex> getObjIndices() {
-        return objindices;
+        for (Vector3f tangent : tangents) tangent.normalize();
     }
 
     public Vector3f computeCenter() {

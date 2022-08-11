@@ -1,8 +1,8 @@
 package fr.dynamx.api.events;
 
 import fr.dynamx.api.obj.IModelTextureSupplier;
-import fr.dynamx.api.obj.IObjObject;
 import fr.dynamx.client.renders.model.ObjModelClient;
+import fr.dynamx.client.renders.model.ObjObjectRenderer;
 import lombok.Getter;
 import net.minecraftforge.fml.common.eventhandler.Cancelable;
 import net.minecraftforge.fml.common.eventhandler.Event;
@@ -41,11 +41,11 @@ public class DynamXModelRenderEvent extends Event {
     @Cancelable
     public static class RenderPart extends DynamXModelRenderEvent {
         @Getter
-        private final IObjObject part;
+        private final ObjObjectRenderer objObjectRenderer;
 
-        public RenderPart(EventStage stage, ObjModelClient model, IModelTextureSupplier textureSupplier, byte textureId, IObjObject part) {
+        public RenderPart(EventStage stage, ObjModelClient model, IModelTextureSupplier textureSupplier, byte textureId, ObjObjectRenderer objObjectRenderer) {
             super(stage, model, textureSupplier, textureId);
-            this.part = part;
+            this.objObjectRenderer = objObjectRenderer;
         }
     }
 }

@@ -2,7 +2,6 @@ package fr.dynamx.client.renders.model;
 
 import fr.dynamx.api.events.ArmorEvent;
 import fr.dynamx.api.events.PhysicsEntityEvent;
-import fr.dynamx.api.obj.IObjObject;
 import fr.dynamx.client.DynamXModelRegistry;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.renderer.GlStateManager;
@@ -13,22 +12,22 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class ArmorRenderer extends ModelRenderer {
     private final ModelObjArmor model;
     private final ObjModelClient objModel;
-    private IObjObject objObject;
+    private ObjObjectRenderer objObjectRenderer;
 
     public ArmorRenderer(ObjModelClient objModel, ModelObjArmor model, String partName) {
         super(model, partName);
         this.model = model;
         this.objModel = objModel;
         if (objModel != DynamXModelRegistry.MISSING_MODEL) {
-            for (IObjObject objObject1 : objModel.objObjects) {
-                if (objObject1.getName().equalsIgnoreCase(partName)) {
-                    objObject = objObject1;
+            for (ObjObjectRenderer objObjectRenderer1 : objModel.getObjObjects()) {
+                if (objObjectRenderer1.getObjObjectData().getName().equalsIgnoreCase(partName)) {
+                    objObjectRenderer = objObjectRenderer1;
                     break;
                 }
             }
         }
-        if (objObject == null) {
-            objObject = MissingObjModel.getEmptyPart();
+        if (objObjectRenderer == null) {
+            objObjectRenderer = MissingObjModel.getEmptyPart();
         }
     }
 
@@ -37,7 +36,7 @@ public class ArmorRenderer extends ModelRenderer {
     public void render(float scale) {
         if (!this.isHidden) {
             if (this.showModel) {
-                if (MinecraftForge.EVENT_BUS.post(new ArmorEvent.RenderArmorEvent(model, objModel, objObject, PhysicsEntityEvent.Phase.PRE, ArmorEvent.RenderArmorEvent.Type.NORMAL)))
+                if (MinecraftForge.EVENT_BUS.post(new ArmorEvent.RenderArmorEvent(model, objModel, objObjectRenderer, PhysicsEntityEvent.Phase.PRE, ArmorEvent.RenderArmorEvent.Type.NORMAL)))
                     return;
                 GlStateManager.pushMatrix();
                 GlStateManager.translate(this.rotationPointX, this.rotationPointY, this.rotationPointZ);
@@ -55,7 +54,7 @@ public class ArmorRenderer extends ModelRenderer {
                     GlStateManager.rotate(this.rotateAngleX * (180F / (float) Math.PI), 1.0F, 0.0F, 0.0F);
                 }
                 GlStateManager.translate(-this.offsetX, this.offsetY, -this.offsetZ);
-                objModel.renderGroup(objObject, model.getActiveTextureId());
+                objModel.renderGroup(objObjectRenderer, model.getActiveTextureId());
 
                 GlStateManager.popMatrix();
             }
@@ -67,7 +66,7 @@ public class ArmorRenderer extends ModelRenderer {
     public void renderWithRotation(float scale) {
         if (!this.isHidden) {
             if (this.showModel) {
-                if (MinecraftForge.EVENT_BUS.post(new ArmorEvent.RenderArmorEvent(model, objModel, objObject, PhysicsEntityEvent.Phase.PRE, ArmorEvent.RenderArmorEvent.Type.WITH_ROTATION)))
+                if (MinecraftForge.EVENT_BUS.post(new ArmorEvent.RenderArmorEvent(model, objModel, objObjectRenderer, PhysicsEntityEvent.Phase.PRE, ArmorEvent.RenderArmorEvent.Type.WITH_ROTATION)))
                     return;
                 GlStateManager.pushMatrix();
                 GlStateManager.translate(this.rotationPointX * scale, this.rotationPointY * scale, this.rotationPointZ * scale);
@@ -84,7 +83,7 @@ public class ArmorRenderer extends ModelRenderer {
                     GlStateManager.rotate(this.rotateAngleZ * (180F / (float) Math.PI), 0.0F, 0.0F, 1.0F);
                 }
 
-                objModel.renderGroup(objObject, model.getActiveTextureId());
+                objModel.renderGroup(objObjectRenderer, model.getActiveTextureId());
                 GlStateManager.popMatrix();
             }
         }
@@ -98,7 +97,7 @@ public class ArmorRenderer extends ModelRenderer {
     public void postRender(float scale) {
         if (!this.isHidden) {
             if (this.showModel) {
-                if (MinecraftForge.EVENT_BUS.post(new ArmorEvent.RenderArmorEvent(model, objModel, objObject, PhysicsEntityEvent.Phase.POST, ArmorEvent.RenderArmorEvent.Type.NORMAL)))
+                if (MinecraftForge.EVENT_BUS.post(new ArmorEvent.RenderArmorEvent(model, objModel, objObjectRenderer, PhysicsEntityEvent.Phase.POST, ArmorEvent.RenderArmorEvent.Type.NORMAL)))
                     return;
                 if (this.rotateAngleX == 0.0F && this.rotateAngleY == 0.0F && this.rotateAngleZ == 0.0F) {
                     if (this.rotationPointX != 0.0F || this.rotationPointY != 0.0F || this.rotationPointZ != 0.0F) {

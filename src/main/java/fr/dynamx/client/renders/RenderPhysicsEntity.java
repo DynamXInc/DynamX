@@ -232,7 +232,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
      * Will draw a white box over the all entity if model wasn't loaded (not found for example)
      */
     public void renderModel(ObjModelClient model, Entity entity, byte textureDataId) {
-        if (model.objObjects.isEmpty()) //Error while loading the model
+        if (model.getObjObjects().isEmpty()) //Error while loading the model
         {
             renderOffsetAABB(entity.getEntityBoundingBox(), -entity.lastTickPosX, -entity.lastTickPosY, -entity.lastTickPosZ);
         } else {
@@ -245,7 +245,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
      * Will draw a white box over the all entity if model wasn't loaded (not found for example)
      */
     public void renderMainModel(ObjModelClient model, Entity entity, byte textureDataId) {
-        boolean drawn = model.renderMainParts(textureDataId);
+        boolean drawn = model.renderDefaultParts(textureDataId);
         if (!drawn) {
             renderOffsetAABB(entity.getEntityBoundingBox(), -entity.lastTickPosX, -entity.lastTickPosY, -entity.lastTickPosZ);
         }

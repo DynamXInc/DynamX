@@ -1,8 +1,8 @@
 package fr.dynamx.client.renders.model;
 
 import fr.dynamx.api.obj.IModelTextureSupplier;
-import fr.dynamx.api.obj.IObjObject;
-import fr.dynamx.common.obj.Mesh;
+import fr.dynamx.common.objloader.Mesh;
+import fr.dynamx.common.objloader.ObjObjectData;
 import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
@@ -20,7 +20,7 @@ import java.util.ArrayList;
 public class MissingObjModel extends ObjModelClient {
     private static final AxisAlignedBB BOX = new AxisAlignedBB(-1, -1, -1, 1, 1, 1);
     private static final Vector3f zero = new Vector3f();
-    private static final IObjObject emptyPart = new IObjObject() {
+    private static final ObjObjectData emptyPart = new ObjObjectData("empty") {
         @Override
         public String getName() {
             return "empty";
@@ -41,13 +41,17 @@ public class MissingObjModel extends ObjModelClient {
         }
     };
 
+    private static ObjObjectRenderer emptyPartRenderer;
+
     public MissingObjModel() {
-        super(new ResourceLocation(DynamXConstants.ID, "obj/missing.obj"), new ArrayList<>());
-        objObjects.add(emptyPart);
+        super(new ResourceLocation(DynamXConstants.ID, "obj/missing.obj"), new ArrayList<>(), null);
+        ObjObjectRenderer objObjectRenderer = new ObjObjectRenderer(emptyPart);
+        getObjObjects().add(objObjectRenderer);
+        emptyPartRenderer = objObjectRenderer;
     }
 
-    public static IObjObject getEmptyPart() {
-        return emptyPart;
+    public static ObjObjectRenderer getEmptyPart() {
+        return emptyPartRenderer;
     }
 
     @Nullable
@@ -61,13 +65,13 @@ public class MissingObjModel extends ObjModelClient {
     }
 
     @Override
-    public void renderGroup(IObjObject group, byte textureDataId) {
+    public void renderGroup(ObjObjectRenderer group, byte textureDataId) {
         renderModel(textureDataId);
     }
 
     @Override
-    public IObjObject getObjObject(String groupName) {
-        return emptyPart;
+    public ObjObjectRenderer getObjObjectRenderer(String groupName) {
+        return emptyPartRenderer;
     }
 
     @Override
@@ -77,7 +81,7 @@ public class MissingObjModel extends ObjModelClient {
     }
 
     @Override
-    public boolean renderMainParts(byte textureDataId) {
+    public boolean renderDefaultParts(byte textureDataId) {
         renderModel(textureDataId);
         return true;
     }

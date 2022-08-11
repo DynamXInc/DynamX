@@ -11,6 +11,7 @@ import fr.dynamx.api.contentpack.object.subinfo.SubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.obj.ObjModelPath;
+import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.ModularVehicleInfo;
 import fr.dynamx.common.contentpack.parts.*;
@@ -19,9 +20,11 @@ import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.contentpack.type.vehicle.EngineInfo;
 import fr.dynamx.common.contentpack.type.vehicle.FrictionPoint;
 import fr.dynamx.common.contentpack.type.vehicle.SoundListInfo;
-import fr.dynamx.common.obj.texture.TextureData;
+import fr.dynamx.common.objloader.ObjModelData;
+import fr.dynamx.client.renders.model.texture.TextureData;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.physics.ShapeUtils;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 
 import java.util.*;
@@ -42,8 +45,8 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
     private int emptyMass;
     @PackFileProperty(configNames = "DragCoefficient")
     private float dragFactor;
-    @PackFileProperty(configNames = "Model", description = "common.model", defaultValue = "obj/name_of_vehicle/name_of_model.obj")
-    private String model;
+    @PackFileProperty(configNames = "Model", type = DefinitionType.DynamXDefinitionTypes.DYNX_RESOURCE_LOCATION, description = "common.model", defaultValue = "obj/name_of_vehicle/name_of_model.obj")
+    private ResourceLocation model;
     @PackFileProperty(configNames = "ShapeYOffset", required = false)
     private float shapeYOffset;
     @PackFileProperty(configNames = {"CreativeTabName", "CreativeTab", "TabName"}, required = false, defaultValue = "CreativeTab of DynamX", description = "common.creativetabname")
@@ -175,6 +178,8 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
     @Override
     public void generateShape() {
         ObjModelPath modelPath = DynamXUtils.getModelPath(getPackName(), model);
+        ObjModelData model = DynamXContext.getObjModelDataFromCache(modelPath);
+        model.getObjObjects().forEach(ObjObjectData -> System.out.println(ObjObjectData.getName() +" " + ObjObjectData.getCenter()));
         if (useHullShape)
             physicsCollisionShape = ShapeUtils.generateComplexModelCollisions(modelPath, "chassis", scaleModifier, centerOfMass, shapeYOffset);
         else {

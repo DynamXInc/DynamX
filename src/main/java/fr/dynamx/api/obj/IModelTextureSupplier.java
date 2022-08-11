@@ -1,23 +1,24 @@
 package fr.dynamx.api.obj;
 
-import fr.dynamx.common.obj.eximpl.TessellatorModelClient;
-import fr.dynamx.common.obj.texture.TextureData;
+import fr.dynamx.common.objloader.ObjObjectData;
+import fr.dynamx.client.renders.model.ObjObjectRenderer;
+import fr.dynamx.client.renders.model.texture.TextureData;
 
 import javax.annotation.Nullable;
 import java.util.Map;
 
 /**
- * Matches an {@link IObjObject} with its available textures
+ * Matches an {@link ObjObjectData} with its available textures
  *
  * @see TessellatorModelClient
  */
 public interface IModelTextureSupplier {
     /**
-     * @return A id to {@link TextureData} map that can be applied to the given {@link IObjObject} <br>
+     * @return A id to {@link TextureData} map that can be applied to the given {@link ObjObjectData} <br>
      * Return null to always apply default texture
      */
     @Nullable
-    default Map<Byte, TextureData> getTexturesFor(IObjObject object) {
+    default Map<Byte, TextureData> getTexturesFor(ObjObjectRenderer objObjectRenderer) {
         return null;
     }
 

@@ -1,4 +1,4 @@
-package fr.dynamx.common.obj.texture;
+package fr.dynamx.client.renders.model.texture;
 
 import fr.aym.acslib.impl.services.thrload.ThreadedTexture;
 import net.minecraft.client.renderer.texture.ITextureObject;

@@ -1,6 +1,6 @@
-package fr.dynamx.common.obj;
+package fr.dynamx.common.objloader;
 
-import fr.dynamx.common.obj.texture.MaterialTexture;
+import fr.dynamx.client.renders.model.texture.MaterialTexture;
 import org.lwjgl.util.vector.Vector3f;
 
 import java.util.HashMap;

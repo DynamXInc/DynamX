@@ -10,10 +10,11 @@ import fr.dynamx.api.contentpack.object.IShapeProvider;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
-import fr.dynamx.api.obj.IObjObject;
+import fr.dynamx.api.obj.ObjModelPath;
+import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.parts.PartShape;
-import fr.dynamx.common.obj.ObjModelServer;
-import fr.dynamx.common.obj.texture.TextureData;
+import fr.dynamx.client.renders.model.ObjObjectRenderer;
+import fr.dynamx.client.renders.model.texture.TextureData;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.physics.ShapeUtils;
@@ -62,10 +63,11 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
     public void generateShape() {
         compoundCollisionShape = new CompoundCollisionShape();
         if (getPartShapes().isEmpty()) {
+            ObjModelPath modelPath = DynamXUtils.getModelPath(getPackName(), model);
             if (useHullShape) {
-                compoundCollisionShape = ShapeUtils.generateComplexModelCollisions(DynamXUtils.getModelPath(getPackName(), model), "", scaleModifier, new Vector3f(), 0);
+                compoundCollisionShape = ShapeUtils.generateComplexModelCollisions(modelPath, "", scaleModifier, new Vector3f(), 0);
             } else {
-                ShapeUtils.generateModelCollisions(this, ObjModelServer.createServerObjModel(DynamXUtils.getModelPath(getPackName(), getModel())), compoundCollisionShape);
+                ShapeUtils.generateModelCollisions(this, DynamXContext.getObjModelDataFromCache(modelPath), compoundCollisionShape);
             }
         } else {
             getPartShapes().forEach(shape -> {
@@ -106,7 +108,7 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
 
     @Nullable
     @Override
-    public Map<Byte, TextureData> getTexturesFor(IObjObject object) {
+    public Map<Byte, TextureData> getTexturesFor(ObjObjectRenderer objObjectRenderer) {
         return textures;
     }
 

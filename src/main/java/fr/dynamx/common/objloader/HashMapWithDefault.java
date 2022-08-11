@@ -1,4 +1,4 @@
-package fr.dynamx.common.obj;
+package fr.dynamx.common.objloader;
 
 import java.util.HashMap;
 

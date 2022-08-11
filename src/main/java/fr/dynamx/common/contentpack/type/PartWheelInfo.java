@@ -7,9 +7,10 @@ import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
-import fr.dynamx.api.obj.IObjObject;
-import fr.dynamx.common.obj.texture.TextureData;
+import fr.dynamx.client.renders.model.ObjObjectRenderer;
+import fr.dynamx.client.renders.model.texture.TextureData;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.ResourceLocation;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,8 +22,8 @@ public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IS
     private final String packName;
     private final String partName;
 
-    @PackFileProperty(configNames = "Model", description = "common.model", defaultValue = "obj/nom_du_vehicule/nom_du_modele.obj")
-    private String model;
+    @PackFileProperty(configNames = "Model", description = "common.model", type = DefinitionType.DynamXDefinitionTypes.DYNX_RESOURCE_LOCATION, defaultValue = "obj/nom_du_vehicule/nom_du_modele.obj")
+    private ResourceLocation model;
     @PackFileProperty(configNames = "Width")
     private float wheelWidth;
     @PackFileProperty(configNames = "Radius", oldNames = "WheelRadius")
@@ -119,7 +120,7 @@ public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IS
     }
 
     @Override
-    public Map<Byte, TextureData> getTexturesFor(IObjObject object) {
+    public Map<Byte, TextureData> getTexturesFor(ObjObjectRenderer objObjectRenderer) {
         //Here we can make difference between tyre and rim textures
         return getTextures();
     }
@@ -139,7 +140,7 @@ public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IS
     }
 
     @Override
-    public String getModel() {
+    public ResourceLocation getModel() {
         return model;
     }
 

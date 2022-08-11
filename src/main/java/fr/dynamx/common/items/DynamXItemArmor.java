@@ -17,6 +17,7 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -56,7 +57,7 @@ public class DynamXItemArmor<T extends ArmorObject<?>> extends ItemArmor impleme
      * @param material  The armor material
      * @param armorType The armor type
      */
-    public DynamXItemArmor(String modid, String itemName, String model, ArmorMaterial material, EntityEquipmentSlot armorType) {
+    public DynamXItemArmor(String modid, String itemName, ResourceLocation model, ArmorMaterial material, EntityEquipmentSlot armorType) {
         super(material, 0, armorType);
         if (modid.contains("builtin_mod_")) { //Backward-compatibility
             this.armorInfo = (T) DynamXObjectLoaders.ARMORS.addBuiltinObject(this, modid, itemName);

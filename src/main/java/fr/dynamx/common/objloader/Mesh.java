@@ -1,12 +1,11 @@
-package fr.dynamx.common.obj;
+package fr.dynamx.common.objloader;
 
 import com.jme3.bullet.collision.shapes.BoxCollisionShape;
 import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.obj.IObjObject;
 
 /**
- * Structure of an {@link IObjObject}
+ * Structure of an {@link ObjObjectData}
  */
 public class Mesh {
     public int[] indices;

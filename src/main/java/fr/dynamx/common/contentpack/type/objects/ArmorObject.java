@@ -7,13 +7,13 @@ import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.obj.IModelTextureSupplier;
-import fr.dynamx.api.obj.IObjObject;
 import fr.dynamx.client.renders.model.ModelObjArmor;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.loader.ObjectLoader;
 import fr.dynamx.common.items.DynamXItemArmor;
-import fr.dynamx.common.obj.texture.TextureData;
+import fr.dynamx.client.renders.model.ObjObjectRenderer;
+import fr.dynamx.client.renders.model.texture.TextureData;
 import fr.dynamx.utils.DynamXLoadingTasks;
 import lombok.Getter;
 import net.minecraft.client.renderer.GlStateManager;
@@ -92,7 +92,7 @@ public class ArmorObject<T extends ArmorObject<T>> extends AbstractItemObject<T>
 
     @Nullable
     @Override
-    public Map<Byte, TextureData> getTexturesFor(IObjObject object) {
+    public Map<Byte, TextureData> getTexturesFor(ObjObjectRenderer objObjectRenderer) {
         return textures;
     }
 

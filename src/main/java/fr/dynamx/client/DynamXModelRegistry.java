@@ -5,6 +5,7 @@ import fr.aym.acslib.api.services.ErrorTrackingService;
 import fr.aym.acslib.api.services.ThreadedLoadingService;
 import fr.dynamx.api.obj.IModelTextureSupplier;
 import fr.dynamx.api.obj.IObjModelRegistry;
+import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.client.renders.model.MissingObjModel;
 import fr.dynamx.client.renders.model.ObjItemModelLoader;
 import fr.dynamx.client.renders.model.ObjModelClient;
@@ -12,11 +13,11 @@ import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.objects.ArmorObject;
-import fr.dynamx.common.obj.eximpl.MtlMaterialLib;
-import fr.dynamx.common.obj.eximpl.OBJLoader;
+import fr.dynamx.common.objloader.MtlMaterialLib;
+import fr.dynamx.common.objloader.OBJLoader;
 import fr.dynamx.utils.DynamXLoadingTasks;
-import fr.dynamx.utils.RegistryNameSetter;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.ProgressManager;
 
 import java.util.ArrayList;
@@ -28,9 +29,9 @@ import static fr.dynamx.common.DynamXMain.log;
 
 public class DynamXModelRegistry implements IObjModelRegistry {
     private static final ObjItemModelLoader OBJ_ITEM_MODEL_LOADER = new ObjItemModelLoader();
-    private static final Map<String, IModelTextureSupplier> MODELS_REGISTRY = new HashMap<>();
-    private static final Map<String, ObjModelClient> MODELS = new HashMap<>();
-    private static final List<String> ERRORED_MODELS = new ArrayList<>();
+    private static final Map<ObjModelPath, IModelTextureSupplier> MODELS_REGISTRY = new HashMap<>();
+    private static final Map<ResourceLocation, ObjModelClient> MODELS = new HashMap<>();
+    private static final List<ResourceLocation> ERRORED_MODELS = new ArrayList<>();
 
     /**
      * A missing model rendered when the right model isn't found
@@ -40,12 +41,12 @@ public class DynamXModelRegistry implements IObjModelRegistry {
     private static boolean REGISTRY_CLOSED;
 
     @Override
-    public void registerModel(String location) {
+    public void registerModel(ObjModelPath location) {
         registerModel(location, null);
     }
 
     @Override
-    public void registerModel(String location, IModelTextureSupplier customTextures) {
+    public void registerModel(ObjModelPath location, IModelTextureSupplier customTextures) {
         if (REGISTRY_CLOSED)
             throw new IllegalStateException("Model registry closed, you should register your model before DynamX pre-initialization");
         if (!MODELS_REGISTRY.containsKey(location)) {
@@ -64,7 +65,7 @@ public class DynamXModelRegistry implements IObjModelRegistry {
     }
 
     @Override
-    public ObjModelClient getModel(String name) {
+    public ObjModelClient getModel(ResourceLocation name) {
         if (!MODELS.containsKey(name)) {
             if (!ERRORED_MODELS.contains(name)) {
                 log.error("Obj model " + name + " isn't registered !");
@@ -89,14 +90,14 @@ public class DynamXModelRegistry implements IObjModelRegistry {
 
         ACsLib.getPlatform().provideService(ThreadedLoadingService.class).addTask(ThreadedLoadingService.ModLoadingSteps.FINISH_LOAD, "model_load", () -> {
             //bar.step("Loading model files");
-            for (Map.Entry<String, IModelTextureSupplier> name : MODELS_REGISTRY.entrySet()) {
+            for (Map.Entry<ObjModelPath, IModelTextureSupplier> name : MODELS_REGISTRY.entrySet()) {
                 log.debug("Loading tessellator model " + name.getKey());
 
-                ObjModelClient model = ObjModelClient.createObjModel(RegistryNameSetter.getDynamXModelResourceLocation(name.getKey()), name.getValue());
+                ObjModelClient model = ObjModelClient.loadObjModel(name.getKey(), name.getValue());
                 if (model != null) {
-                    MODELS.put(name.getKey(), model);
+                    MODELS.put(name.getKey().getModelPath(), model);
                 } else {
-                    MODELS.put(name.getKey(), MISSING_MODEL);
+                    MODELS.put(name.getKey().getModelPath(), MISSING_MODEL);
                 }
             }
 

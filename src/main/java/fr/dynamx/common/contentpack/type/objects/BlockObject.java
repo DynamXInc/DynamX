@@ -78,7 +78,7 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
     }
 
     public boolean isObj() {
-        return getModel().endsWith(".obj");
+        return getModel().getPath().endsWith(".obj");
     }
 
     public float getLightLevel() {

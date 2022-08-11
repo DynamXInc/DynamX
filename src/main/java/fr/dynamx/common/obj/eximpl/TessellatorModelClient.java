@@ -1,14 +1,13 @@
 package fr.dynamx.common.obj.eximpl;
 
-import fr.aym.acslib.api.services.ErrorTrackingService;
+import fr.aym.acslib.api.services.ErrorManagerService;
 import fr.dynamx.api.events.DynamXModelRenderEvent;
 import fr.dynamx.api.events.EventStage;
 import fr.dynamx.api.obj.IModelTextureSupplier;
 import fr.dynamx.api.obj.IObjObject;
 import fr.dynamx.client.renders.model.ObjModelClient;
-import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.obj.texture.TextureData;
-import fr.dynamx.utils.DynamXLoadingTasks;
+import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.DynamXUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IResource;
@@ -21,8 +20,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import static fr.dynamx.common.DynamXMain.log;
 
 /**
  * @author jglrxavpok, modified by Yanis and Aym for DynamX
@@ -44,10 +41,8 @@ public class TessellatorModelClient extends ObjModelClient {
             new OBJLoader(objObjects).loadModelClient(QuickObjObject::new, startPath, content);
             return new TessellatorModelClient(location, objObjects, customTextures);
         } catch (Exception e) {
-            log.error(" Model " + location + " cannot be loaded !", e);
-            DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.MODEL,
-                    customTextures != null ? customTextures.getPackName() : "Non-pack model",
-                    "Model " + location + " cannot be loaded !", e, ErrorTrackingService.TrackedErrorLevel.HIGH);
+            //log.error(" Model " + location + " cannot be loaded !", e);
+            DynamXErrorManager.addError(customTextures != null ? customTextures.getPackName() : "Non-pack model", "obj_error", ErrorManagerService.ErrorLevel.HIGH, location.toString(), "", e);
         }
         return null;
     }
@@ -83,8 +78,8 @@ public class TessellatorModelClient extends ObjModelClient {
                 object.createDefaultList(this);
             }
         } catch (Exception e) {
-            log.error("Cannot setup model " + getLocation() + " ! Step: " + (step == null ? null : step.getName()), e);
-            DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.MODEL, customTextures != null ? customTextures.getPackName() : "Non-pack model", "Cannot setup model " + getLocation() + " ! Step: " + (step == null ? null : step.getName()), e, ErrorTrackingService.TrackedErrorLevel.HIGH);
+            //log.error("Cannot setup model " + getLocation() + " ! Step: " + (step == null ? null : step.getName()), e);
+            DynamXErrorManager.addError(customTextures != null ? customTextures.getPackName() : "Non-pack model", "obj_error", ErrorManagerService.ErrorLevel.HIGH, getLocation().toString(), (step == null ? null : step.getName()), e);
         }
     }
 

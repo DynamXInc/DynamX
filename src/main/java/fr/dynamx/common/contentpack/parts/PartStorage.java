@@ -24,10 +24,10 @@ public class PartStorage extends InteractivePart<BaseVehicleEntity<?>, ModularVe
     }
 
     @Override
-    public void appendTo(ModularVehicleInfoBuilder modulableVehicleInfo) {
+    public void appendTo(ModularVehicleInfoBuilder owner) {
         if (storageSize % 9 != 0)
             throw new IllegalArgumentException("StorageSize must be a multiple of 9 !");
-        super.appendTo(modulableVehicleInfo);
+        super.appendTo(owner);
     }
 
     @Override
@@ -55,6 +55,6 @@ public class PartStorage extends InteractivePart<BaseVehicleEntity<?>, ModularVe
 
     @Override
     public String getName() {
-        return "PartStorage named " + getPartName() + " in " + getOwner().getName();
+        return "PartStorage named " + getPartName();
     }
 }

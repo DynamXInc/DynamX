@@ -25,12 +25,12 @@ public class RPMPower extends SubInfoType<EngineInfo> {
     }
 
     @Override
-    public void appendTo(EngineInfo engineInfo) {
-        engineInfo.addPoint(this);
+    public void appendTo(EngineInfo owner) {
+        owner.addPoint(this);
     }
 
     @Override
     public String getName() {
-        return "Point in " + getOwner().getName();
+        return "RPM point";
     }
 }

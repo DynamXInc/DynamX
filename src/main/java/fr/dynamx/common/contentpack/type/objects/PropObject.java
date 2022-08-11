@@ -2,7 +2,7 @@ package fr.dynamx.common.contentpack.type.objects;
 
 import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.math.Vector3f;
-import fr.aym.acslib.api.services.ErrorTrackingService;
+import fr.aym.acslib.api.services.ErrorManagerService;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
@@ -13,7 +13,6 @@ import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
-import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
@@ -21,10 +20,11 @@ import fr.dynamx.common.contentpack.loader.ObjectLoader;
 import fr.dynamx.common.contentpack.loader.PackFilePropertyData;
 import fr.dynamx.common.contentpack.loader.SubInfoTypeAnnotationCache;
 import fr.dynamx.common.items.ItemProps;
-import fr.dynamx.utils.DynamXLoadingTasks;
+import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.physics.ShapeUtils;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -55,7 +55,7 @@ public class PropObject<T extends BlockObject<?>> extends AbstractProp<T> implem
 
     public PropObject(String packName, String fileName) {
         super(packName, fileName);
-        DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, getPackName(), "Deprecated prop utilisation in " + fileName, "Props should now be declared in the corresponding block_" + getName() + ".dynx file", ErrorTrackingService.TrackedErrorLevel.LOW);
+        DynamXErrorManager.addError(getPackName(), "deprecated_prop", ErrorManagerService.ErrorLevel.LOW, fileName, "Props should now be declared in the corresponding block_" + getName() + ".dynx file");
         owner = null;
         this.itemIcon = "Prop";
     }
@@ -88,9 +88,15 @@ public class PropObject<T extends BlockObject<?>> extends AbstractProp<T> implem
     }
 
     @Override
-    public void appendTo(BlockObject<?> partInfo) {
-        partInfo.propObject = this;
+    public void appendTo(BlockObject<?> owner) {
+        owner.propObject = this;
         DynamXObjectLoaders.PROPS.loadItems(this, ContentPackLoader.isHotReloading);
+    }
+
+    @Nullable
+    @Override
+    public BlockObject<?> getOwner() {
+        return owner;
     }
 
     @Override

@@ -27,6 +27,6 @@ public class PartFloat extends BasePart<ModularVehicleInfoBuilder> {
 
     @Override
     public String getName() {
-        return "PartFloat named " + getPartName() + " in " + getOwner().getName();
+        return "PartFloat named " + getPartName();
     }
 }

@@ -21,9 +21,9 @@ public class PartShape<T extends ISubInfoTypeOwner<T>> extends BasePart<T> imple
     }
 
     @Override
-    public void appendTo(T vehicleInfo) {
-        super.appendTo(vehicleInfo);
-        ((IShapedObject) vehicleInfo).addCollisionShape(this);
+    public void appendTo(T owner) {
+        super.appendTo(owner);
+        ((IShapedObject) owner).addCollisionShape(this);
         Vector3f min = getPosition().subtract(getScale());
         Vector3f max = getPosition().add(getScale());
         this.boundingBox = new MutableBoundingBox(
@@ -33,7 +33,7 @@ public class PartShape<T extends ISubInfoTypeOwner<T>> extends BasePart<T> imple
 
     @Override
     public String getName() {
-        return "PartShape named " + getPartName() + " of type " + getShapeType() + " in " + getOwner().getName();
+        return "PartShape named " + getPartName() + " of type " + getShapeType();
     }
 
     @Override

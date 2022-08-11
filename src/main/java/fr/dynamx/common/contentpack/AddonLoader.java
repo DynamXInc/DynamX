@@ -1,9 +1,8 @@
 package fr.dynamx.common.contentpack;
 
-import fr.aym.acslib.api.services.ErrorTrackingService;
+import fr.aym.acslib.api.services.ErrorManagerService;
 import fr.dynamx.api.contentpack.DynamXAddon;
-import fr.dynamx.common.DynamXContext;
-import fr.dynamx.utils.DynamXLoadingTasks;
+import fr.dynamx.utils.errors.DynamXErrorManager;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.common.ProgressManager;
@@ -57,8 +56,8 @@ public class AddonLoader {
                     if (!found)
                         throw new IllegalArgumentException("Addon class " + name + " (" + data.getClassName() + ") with not @AddonEventSubscriber init method");
                 } catch (Exception e) {
-                    log.error("Addon " + name + " cannot be loaded !", e);
-                    DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.INIT, "Addon " + name, "Cannot load addon " + name + " contained in class " + data.getClassName(), e, ErrorTrackingService.TrackedErrorLevel.FATAL);
+                    //log.error("Addon " + name + " cannot be loaded !", e);
+                    DynamXErrorManager.addError("DynamX initialization", "addon_load_error", ErrorManagerService.ErrorLevel.FATAL, name, "Addon class: " + data.getClassName(), e, 900);
                 }
             }
         }
@@ -94,7 +93,7 @@ public class AddonLoader {
                 container.ifPresent(modContainer -> Loader.instance().setActiveModContainer(current));
             } catch (Exception e) {
                 log.error("Addon " + addon.toString() + " cannot be initialized !", e);
-                DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.INIT, "Addon " + addon, "Cannot initialize " + addon, e, ErrorTrackingService.TrackedErrorLevel.FATAL);
+                DynamXErrorManager.addError("DynamX initialization", "addon_init_error", ErrorManagerService.ErrorLevel.FATAL, addon.getAddonName(), null, e);
             }
         }
         log.info("Loaded addons are " + getAddons().values());

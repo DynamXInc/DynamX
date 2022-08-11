@@ -57,6 +57,6 @@ public class SteeringWheelInfo extends SubInfoType<ModularVehicleInfoBuilder> {
 
     @Override
     public String getName() {
-        return "SteeringWheel in " + getOwner().getName();
+        return "SteeringWheel";
     }
 }

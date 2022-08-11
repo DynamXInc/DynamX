@@ -8,6 +8,7 @@ import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.client.ClientProxy;
 import fr.dynamx.client.camera.CameraSystem;
 import fr.dynamx.client.gui.GuiLoadingErrors;
+import fr.dynamx.client.gui.GuiTexturedButton;
 import fr.dynamx.client.gui.VehicleHud;
 import fr.dynamx.client.renders.RenderMovableLine;
 import fr.dynamx.client.renders.model.ObjModelClient;
@@ -26,6 +27,7 @@ import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXLoadingTasks;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
+import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
@@ -129,28 +131,26 @@ public class ClientEventHandler {
 
     /* Gui events */
 
-    private static final ResourceLocation CRAFTING_TABLE_GUI_TEXTURES = new ResourceLocation("textures/gui/container/crafting_table.png");
+    //private static final ResourceLocation CRAFTING_TABLE_GUI_TEXTURES = new ResourceLocation("textures/gui/container/crafting_table.png");
 
     @SubscribeEvent
     public void initMainMenu(GuiScreenEvent.InitGuiEvent event) {
-        if (event.getGui() instanceof GuiMainMenu && DynamXContext.getErrorTracker().hasErrors(ACsLibErrorType.ACSLIBERROR, DynamXLoadingTasks.INIT, DynamXLoadingTasks.PACK, DynamXLoadingTasks.MODEL, ACsGuiApi.CSS_ERROR_TYPE)) {
-            event.getButtonList().add(new GuiButton(-54391, event.getGui().width / 2 - 110, event.getGui().height - 30, 220, 20, TextFormatting.DARK_RED + "Erreur(s) de chargement de DynamX ™ !" + TextFormatting.RESET));
-        } else if (event.getGui() instanceof GuiMainMenu && DynamXContext.getErrorTracker().hasErrors(DynamXLoadingTasks.MAJS)) {
+        if (event.getGui() instanceof GuiMainMenu && DynamXErrorManager.getErrorManager().hasErrors(ACsLibErrorType.ACSLIBERROR, DynamXErrorManager.DYNAMX_ERRORS, ACsGuiApi.getCssErrorType()))
+            event.getButtonList().add(new GuiTexturedButton(-54391, event.getGui().width - 25, 5, 20, 20, TextFormatting.GOLD + "DynamX loading errors" + TextFormatting.RESET, new ResourceLocation(DynamXConstants.ID, "textures/mark.png")));
+        else if (event.getGui() instanceof GuiMainMenu && DynamXErrorManager.getErrorManager().hasErrors(DynamXLoadingTasks.MAJS)) //TODO MAJ INFO BUTTON
             event.getButtonList().add(new GuiButton(-54391, event.getGui().width / 2 - 110, event.getGui().height - 30, 220, 20, TextFormatting.AQUA + "Mise à jour DynamX disponible !" + TextFormatting.RESET));
-        } else if (event.getGui() instanceof GuiWorldSelection || event.getGui() instanceof GuiMultiplayer) {
-
-            event.getButtonList().add(new GuiButtonImage(-54392, event.getGui().width - 25, 5, 20, 18, 0, 168, 19, CRAFTING_TABLE_GUI_TEXTURES));
-        }
+        //else if (event.getGui() instanceof GuiWorldSelection || event.getGui() instanceof GuiMultiplayer)
+        //    event.getButtonList().add(new GuiButtonImage(-54392, event.getGui().width - 25, 5, 20, 18, 0, 168, 19, CRAFTING_TABLE_GUI_TEXTURES));
     }
 
     @SubscribeEvent
     public void performMainMenuAction(GuiScreenEvent.ActionPerformedEvent event) {
         if (event.getGui() instanceof GuiMainMenu && event.getButton().id == -54391) {
             Minecraft.getMinecraft().displayGuiScreen(new GuiLoadingErrors().getGuiScreen());
-        } else if ((event.getGui() instanceof GuiWorldSelection || event.getGui() instanceof GuiMultiplayer) && event.getButton().id == -54392) {
+        }/* else if ((event.getGui() instanceof GuiWorldSelection || event.getGui() instanceof GuiMultiplayer) && event.getButton().id == -54392) {
             Minecraft.getMinecraft().displayGuiScreen(new GuiDisconnected(event.getGui(), "Improving DynamX", new TextComponentString("DynamX is collecting data about your computer (GPU, memory, OS) and crash-reports to improve the mod. \n" +
                     "You can disable this in the configuration file of DynamX (under 'config' directory)")));
-        }
+        }*/
     }
 
     @SubscribeEvent

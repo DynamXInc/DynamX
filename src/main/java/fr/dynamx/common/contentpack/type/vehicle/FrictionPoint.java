@@ -22,7 +22,7 @@ public class FrictionPoint extends SubInfoType<ModularVehicleInfoBuilder> {
 
     @Override
     public String getName() {
-        return "FrictionPoint in " + getOwner().getName();
+        return "FrictionPoint";
     }
 
     @Override

@@ -13,6 +13,7 @@ import fr.dynamx.api.obj.IObjObject;
 import fr.dynamx.common.obj.texture.TextureData;
 import net.minecraft.util.EnumParticleTypes;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -88,6 +89,12 @@ public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IS
 
     @Override //A sub info types owner is an info type himself (it is THE root owning all properties)
     public void appendTo(PartWheelInfo owner) {
+    }
+
+    @Nullable
+    @Override
+    public PartWheelInfo getOwner() {
+        return null;
     }
 
     @Override

@@ -36,9 +36,9 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     }
 
     @Override
-    public void appendTo(ModularVehicleInfoBuilder modulableVehicleInfo) {
-        super.appendTo(modulableVehicleInfo);
-        modulableVehicleInfo.arrangeSeatID(this);
+    public void appendTo(ModularVehicleInfoBuilder owner) {
+        super.appendTo(owner);
+        owner.arrangeSeatID(this);
     }
 
     @Override
@@ -119,7 +119,7 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
 
     @Override
     public String getName() {
-        return "PartSeat named " + getPartName() + " in " + getOwner().getName();
+        return "PartSeat_" + getPartName();
     }
 
     @Nullable

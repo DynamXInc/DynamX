@@ -33,13 +33,13 @@ public class GearInfo extends SubInfoType<EngineInfo> {
     }
 
     @Override
-    public void appendTo(EngineInfo engineInfo) {
-        engineInfo.addGear(this);
+    public void appendTo(EngineInfo owner) {
+        owner.addGear(this);
     }
 
     @Override
     public String getName() {
-        return "Gear_" + getGearName() + " in " + getOwner().getName();
+        return "Gear_" + getGearName();
     }
 
     public byte getId() {

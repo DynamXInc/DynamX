@@ -38,7 +38,7 @@ public class ParticleEmitterInfo<T extends ISubInfoTypeOwner<T> & ParticleEmitte
 
     @Override
     public String getName() {
-        return "ParticleEmitterInfo in " + getOwner().getName();
+        return "ParticleEmitterInfo_" + emitterName;
     }
 
     @Override

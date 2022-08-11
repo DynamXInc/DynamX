@@ -26,6 +26,7 @@ import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.physics.ShapeUtils;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -324,5 +325,11 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
     @Override
     public List<ParticleEmitterInfo<?>> getParticleEmitters() {
         return particleEmitters;
+    }
+
+    @Nullable
+    @Override
+    public ModularVehicleInfoBuilder getOwner() {
+        return null;
     }
 }

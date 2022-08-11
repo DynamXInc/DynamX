@@ -22,10 +22,10 @@ public class BoatEngineInfo extends SubInfoType<ModularVehicleInfoBuilder> {
     }
 
     @Override
-    public void appendTo(ModularVehicleInfoBuilder partInfo) {
+    public void appendTo(ModularVehicleInfoBuilder owner) {
         if (getPosition() == null)
-            throw new IllegalArgumentException("AttachPoint not configured ! In trailer of " + partInfo.toString());
-        partInfo.addSubProperty(this);
+            throw new IllegalArgumentException("AttachPoint not configured ! In trailer of " + owner.toString());
+        owner.addSubProperty(this);
     }
 
     public Vector3f getPosition() {
@@ -34,6 +34,6 @@ public class BoatEngineInfo extends SubInfoType<ModularVehicleInfoBuilder> {
 
     @Override
     public String getName() {
-        return "BoatEngineInfo in " + getOwner().getName();
+        return "BoatEngineInfo";
     }
 }

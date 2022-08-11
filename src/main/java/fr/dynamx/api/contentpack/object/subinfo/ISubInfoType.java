@@ -7,6 +7,8 @@ import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 
+import javax.annotation.Nullable;
+
 /**
  * A sub info type is an object containing specific properties in an info file <br>
  * Example : <br>
@@ -22,14 +24,20 @@ import fr.dynamx.common.entities.BaseVehicleEntity;
  * @see SubInfoTypesRegistry
  * @see SubInfoType
  */
-public interface ISubInfoType<T extends ISubInfoTypeOwner> extends INamedObject {
+public interface ISubInfoType<T extends ISubInfoTypeOwner<?>> extends INamedObject {
     /**
      * Called when this sub info has been read and should be added to the corresponding {@link ISubInfoTypeOwner} <br>
      * See {@link ModularVehicleInfoBuilder} for the most common {@link ISubInfoTypeOwner}
      *
-     * @param owner The owner of this property
+     * todo update doc
      */
     void appendTo(T owner);
+
+    /**
+     * @return The owner of this property
+     */
+    @Nullable
+    T getOwner();
 
     /**
      * Adds the {@link IPhysicsModule}s associated with this sub info type to the given entity
@@ -37,6 +45,17 @@ public interface ISubInfoType<T extends ISubInfoTypeOwner> extends INamedObject 
      * @param entity  The entity being initialized
      * @param modules The modules list where you should add your module(s)
      */
-    default void addModules(BaseVehicleEntity<?> entity, ModuleListBuilder modules) {
+    default void addModules(BaseVehicleEntity<?> entity, ModuleListBuilder modules) {}
+
+    /**
+     * todo doc
+     * @return
+     */
+    default INamedObject getRootOwner() {
+        INamedObject parent = this;
+        while(parent instanceof ISubInfoType && ((ISubInfoType<?>) parent).getOwner() != null) {
+            parent = ((ISubInfoType<?>)parent).getOwner();
+        }
+        return parent;
     }
 }

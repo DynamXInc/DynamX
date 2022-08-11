@@ -61,7 +61,7 @@ public abstract class SubInfoTypeOwner<T extends SubInfoTypeOwner<T>> implements
      */
     public abstract static class Vehicle extends BuildableSubInfoTypeOwner<ModularVehicleInfoBuilder, ModularVehicleInfo<?>> implements ISubInfoType<ModularVehicleInfoBuilder> {
         @Override //A sub info types owner is an info type himself (it is THE root owning all properties)
-        public void appendTo(ModularVehicleInfoBuilder partInfo) {
+        public void appendTo(ModularVehicleInfoBuilder owner) {
         }
     }
 }

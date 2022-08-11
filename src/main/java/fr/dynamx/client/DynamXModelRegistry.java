@@ -1,19 +1,19 @@
 package fr.dynamx.client;
 
 import fr.aym.acslib.ACsLib;
-import fr.aym.acslib.api.services.ErrorTrackingService;
+import fr.aym.acslib.api.services.ErrorManagerService;
 import fr.aym.acslib.api.services.ThreadedLoadingService;
 import fr.dynamx.api.obj.IModelTextureSupplier;
 import fr.dynamx.api.obj.IObjModelRegistry;
 import fr.dynamx.client.renders.model.MissingObjModel;
 import fr.dynamx.client.renders.model.ObjItemModelLoader;
 import fr.dynamx.client.renders.model.ObjModelClient;
-import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.objects.ArmorObject;
 import fr.dynamx.common.obj.eximpl.MtlMaterialLib;
 import fr.dynamx.common.obj.eximpl.OBJLoader;
+import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.DynamXLoadingTasks;
 import fr.dynamx.utils.RegistryNameSetter;
 import net.minecraft.client.Minecraft;
@@ -56,9 +56,8 @@ public class DynamXModelRegistry implements IObjModelRegistry {
                 log.debug("Replacing model texture supplier of '" + location + "' from '" + previousSupplier + "' to '" + customTextures + "' : the previous doesn't have custom textures");
                 MODELS_REGISTRY.put(location, customTextures);
             } else {
-                log.error("Tried to register the model '" + location + "' two times with custom textures '" + previousSupplier + "' and '" + customTextures + "' ! Ignoring " + customTextures);
-                DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, customTextures.getPackName(), "Model " + location,
-                        "Tried to register the model '" + location + "' two times with custom textures '" + previousSupplier + "' and '" + customTextures + "' ! Ignoring " + customTextures, ErrorTrackingService.TrackedErrorLevel.HIGH);
+                //log.error("Tried to register the model '" + location + "' two times with custom textures '" + previousSupplier + "' and '" + customTextures + "' ! Ignoring " + customTextures);
+                DynamXErrorManager.addError(customTextures.getPackName(), "obj_duplicated_custom_textures", ErrorManagerService.ErrorLevel.HIGH, location, "Tried to register the model '" + location + "' two times with custom textures '" + previousSupplier + "' and '" + customTextures + "' ! Ignoring " + customTextures);
             }
         }
     }
@@ -85,7 +84,7 @@ public class DynamXModelRegistry implements IObjModelRegistry {
         REGISTRY_CLOSED = true;
         MODELS.clear();
         ERRORED_MODELS.clear();
-        DynamXContext.getErrorTracker().clear(DynamXLoadingTasks.MODEL);
+        DynamXErrorManager.getErrorManager().clear(DynamXLoadingTasks.MODEL);
 
         ACsLib.getPlatform().provideService(ThreadedLoadingService.class).addTask(ThreadedLoadingService.ModLoadingSteps.FINISH_LOAD, "model_load", () -> {
             //bar.step("Loading model files");

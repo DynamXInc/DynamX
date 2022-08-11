@@ -31,6 +31,7 @@ import fr.dynamx.common.network.SPPhysicsEntityNetHandler;
 import fr.dynamx.common.network.udp.CommandUdp;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.world.BuiltinThreadedPhysicsWorld;
+import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.DynamXLoadingTasks;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
@@ -160,7 +161,7 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
         if (resourcePredicate.test(VanillaResourceType.MODELS)) {
             DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.CLIENT, () -> {
                 if (Minecraft.getMinecraft().player != null) {
-                    if (DynamXContext.getErrorTracker().hasErrors(DynamXLoadingTasks.MODEL)) {
+                    if (DynamXErrorManager.getErrorManager().hasErrors(DynamXLoadingTasks.MODEL)) {
                         Minecraft.getMinecraft().player.sendMessage(new TextComponentString(TextFormatting.RED + "[DynamX] Certains modèles ont des problèmes, utilisez le menu de debug pour les voir"));
                     }
                 }

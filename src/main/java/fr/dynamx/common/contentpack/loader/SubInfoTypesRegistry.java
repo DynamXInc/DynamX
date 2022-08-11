@@ -1,6 +1,6 @@
 package fr.dynamx.common.contentpack.loader;
 
-import fr.aym.acslib.api.services.ErrorTrackingService;
+import fr.aym.acslib.api.services.ErrorManagerService;
 import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
@@ -8,8 +8,7 @@ import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeEntry;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
-import fr.dynamx.common.DynamXContext;
-import fr.dynamx.utils.DynamXLoadingTasks;
+import fr.dynamx.utils.errors.DynamXErrorManager;
 import net.minecraftforge.fml.common.discovery.ASMDataTable;
 import net.minecraftforge.fml.common.event.FMLConstructionEvent;
 
@@ -17,8 +16,6 @@ import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
-
-import static fr.dynamx.common.DynamXMain.log;
 
 /**
  * Registry for ModularVehicles sub info categories, such as shapes, wheels, seats, trailer attach or steering wheel <br>
@@ -72,7 +69,6 @@ public class SubInfoTypesRegistry<T extends ISubInfoTypeOwner<?>> {
                 if (!ISubInfoType.class.isAssignableFrom(object))
                     throw new IllegalArgumentException("Only ISubInfoType objects can have the RegisteredSubInfoType annotation. Errored class: " + object);
 
-                log.info("Found sub info type candidate " + object);
                 RegisteredSubInfoType an = object.getAnnotation(RegisteredSubInfoType.class);
                 Class<? extends ISubInfoTypeOwner<?>> subInfoTypeClass = null;
                 if (an.registries().length == 1)
@@ -111,8 +107,8 @@ public class SubInfoTypesRegistry<T extends ISubInfoTypeOwner<?>> {
                     }, an.strictName()));
                 }
             } catch (Exception e) {
-                log.error("Cannot load @RegisteredSubInfoType annotation in class " + name + " !", e);
-                DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.INIT, "Addons initialization", "Cannot load @RegisteredSubInfoType annotation in class " + name + " (" + data.getClassName() + ")", e, ErrorTrackingService.TrackedErrorLevel.FATAL);
+                //log.error("Cannot load @RegisteredSubInfoType annotation in class " + name + " !", e);
+                DynamXErrorManager.addError("DynamX initialization", "addon_error", ErrorManagerService.ErrorLevel.FATAL, name, "Cannot load @RegisteredSubInfoType annotation in class " + data.getClassName(), e, 900);
             }
         }
     }

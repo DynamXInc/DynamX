@@ -11,6 +11,7 @@ import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.VehicleLightsModule;
 import fr.dynamx.common.obj.texture.TextureData;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +26,7 @@ public class PartLightSource implements ISubInfoType<ModularVehicleInfoBuilder> 
         return null;
     };
 
-    private final ISubInfoTypeOwner<ModularVehicleInfoBuilder> owner;
+    private final ModularVehicleInfoBuilder owner;
     private final String name;
 
     @PackFileProperty(configNames = "Position", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y, description = "common.position", required = false)
@@ -46,7 +47,7 @@ public class PartLightSource implements ISubInfoType<ModularVehicleInfoBuilder> 
     private int rotateDuration;
 
     public PartLightSource(ISubInfoTypeOwner<ModularVehicleInfoBuilder> owner, String name) {
-        this.owner = owner;
+        this.owner = (ModularVehicleInfoBuilder) owner;
         this.name = name;
     }
 
@@ -54,6 +55,12 @@ public class PartLightSource implements ISubInfoType<ModularVehicleInfoBuilder> 
     public void appendTo(ModularVehicleInfoBuilder owner) {
         owner.addLightSource(this);
         owner.addRenderedParts(getPartName());
+    }
+
+    @Nullable
+    @Override
+    public ModularVehicleInfoBuilder getOwner() {
+        return owner;
     }
 
     @Override
@@ -69,7 +76,7 @@ public class PartLightSource implements ISubInfoType<ModularVehicleInfoBuilder> 
 
     @Override
     public String getName() {
-        return "LightSource_" + name + " in " + owner.getName();
+        return "LightSource_" + name;
     }
 
     @Override

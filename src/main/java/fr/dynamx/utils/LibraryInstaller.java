@@ -33,6 +33,8 @@ public class LibraryInstaller {
 
             for (File file1 : directory.listFiles()) {
                 if (file1.getName().contains("ACsGuis")) {
+                    //TODO CHECK INCOMPATIBLE VERSIONS !!!!
+
                     logger.info("Found a different ACsGui installed : " + file1);
                     success = true;
                     break;

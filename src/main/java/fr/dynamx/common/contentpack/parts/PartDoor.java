@@ -164,7 +164,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
      */
     @Override
     public String getName() {
-        return "PartDoor named " + getPartName() + " in " + getOwner().getName();
+        return "PartDoor named " + getPartName();
     }
 
     @Override

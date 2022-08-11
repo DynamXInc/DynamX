@@ -12,6 +12,7 @@ import fr.aym.acsguis.component.textarea.GuiLabel;
 import fr.aym.acsguis.utils.GuiCssError;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.DynamXLoadingTasks;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
@@ -51,7 +52,7 @@ public class GuiDnxDebug extends GuiFrame {
                 DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.CLIENT, () -> {
                     DynamXContext.getObjModelRegistry().getItemRenderer().refreshItemInfos();
                     box.setEnabled(true);
-                    if (DynamXContext.getErrorTracker().hasErrors(DynamXLoadingTasks.INIT, DynamXLoadingTasks.PACK))
+                    if (DynamXErrorManager.getErrorManager().hasErrors(DynamXErrorManager.DYNAMX_ERRORS))
                         box.setText(TextFormatting.RED + "Some packs have errors");
                     else
                         box.setText("Packs reloaded");
@@ -67,9 +68,9 @@ public class GuiDnxDebug extends GuiFrame {
                 DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.CLIENT, () -> {
                     DynamXContext.getObjModelRegistry().getItemRenderer().refreshItemInfos();
                     box2.setEnabled(true);
-                    if (DynamXContext.getErrorTracker().hasErrors(DynamXLoadingTasks.MODEL))
+                    /*if (DynamXErrorManager.getErrorManager().hasErrors(DynamXLoadingTasks.MODEL))
                         box2.setText(TextFormatting.RED + "Some models have problems");
-                    else
+                    else*/
                         box2.setText("Models reloaded");
                 }, DynamXLoadingTasks.MODEL);
             });
@@ -81,11 +82,11 @@ public class GuiDnxDebug extends GuiFrame {
                 box3.setText("Reloading...");
                 DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.CLIENT, () -> {
                     box3.setEnabled(true);
-                    if (DynamXContext.getErrorTracker().hasErrors(ACsGuiApi.CSS_ERROR_TYPE))
+                    if (DynamXErrorManager.getErrorManager().hasErrors(ACsGuiApi.getCssErrorType()))
                         box3.setText(TextFormatting.RED + "Some css styles have errors");
                     else
                         box3.setText("Css styles reloaded");
-                }, (ACsGuiApi.CSS_ERROR_TYPE));
+                }, (ACsGuiApi.getCssErrorType()));
             });
             pane1.add(box3);
             GuiLabel box4 = new GuiLabel("Reload all");
@@ -95,11 +96,11 @@ public class GuiDnxDebug extends GuiFrame {
                 box4.setText("Reloading...");
                 DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.CLIENT, () -> {
                     box4.setEnabled(true);
-                    if (DynamXContext.getErrorTracker().hasErrors(DynamXLoadingTasks.INIT, DynamXLoadingTasks.PACK, ACsGuiApi.CSS_ERROR_TYPE, DynamXLoadingTasks.MODEL))
+                    if (DynamXErrorManager.getErrorManager().hasErrors(DynamXErrorManager.DYNAMX_ERRORS, ACsGuiApi.getCssErrorType(), DynamXLoadingTasks.MODEL))
                         box4.setText(TextFormatting.RED + "Check the errors menu");
                     else
                         box4.setText("Reloading finished");
-                }, DynamXLoadingTasks.PACK, DynamXLoadingTasks.MODEL, ACsGuiApi.CSS_ERROR_TYPE);
+                }, DynamXLoadingTasks.PACK, DynamXLoadingTasks.MODEL, ACsGuiApi.getCssErrorType());
             });
             pane1.add(box4);
 

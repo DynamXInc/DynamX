@@ -1,6 +1,6 @@
 package fr.dynamx.server.command;
 
-import fr.dynamx.common.DynamXContext;
+import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.DynamXLoadingTasks;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -27,7 +27,7 @@ public class CmdReloadConfig implements ISubCommand {
         server.getPlayerList().sendMessage(msg);
         DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.SERVER_RUNNING, () -> {
             sender.sendMessage(new TextComponentString("Packs reloaded"));
-            if (DynamXContext.getErrorTracker().hasErrors(DynamXLoadingTasks.INIT, DynamXLoadingTasks.PACK)) {
+            if (DynamXErrorManager.getErrorManager().hasErrors(DynamXErrorManager.DYNAMX_ERRORS)) {
                 sender.sendMessage(new TextComponentString(TextFormatting.RED + " Certains packs ont des erreurs, utilisez le menu de debug pour les voir"));
             }
         }, DynamXLoadingTasks.PACK);

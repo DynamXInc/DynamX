@@ -8,9 +8,11 @@ import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
 
+import javax.annotation.Nullable;
+
 @RegisteredSubInfoType(name = "caterpillar", registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
 public class CaterpillarInfo implements ISubInfoType<ModularVehicleInfoBuilder> {
-    private final ISubInfoTypeOwner<ModularVehicleInfoBuilder> owner;
+    private final ModularVehicleInfoBuilder owner;
 
     //caterpillar things
     public boolean caterpillar;
@@ -23,12 +25,18 @@ public class CaterpillarInfo implements ISubInfoType<ModularVehicleInfoBuilder> 
     public float caterpillarWidth;
 
     public CaterpillarInfo(ISubInfoTypeOwner<ModularVehicleInfoBuilder> owner) {
-        this.owner = owner;
+        this.owner = (ModularVehicleInfoBuilder) owner;
     }
 
     @Override
-    public void appendTo(ModularVehicleInfoBuilder partInfo) {
-        partInfo.addSubProperty(this);
+    public void appendTo(ModularVehicleInfoBuilder owner) {
+        owner.addSubProperty(this);
+    }
+
+    @Nullable
+    @Override
+    public ModularVehicleInfoBuilder getOwner() {
+        return owner;
     }
 
     @Override

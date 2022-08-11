@@ -1,6 +1,6 @@
 package fr.dynamx.common.contentpack;
 
-import fr.aym.acslib.api.services.ErrorTrackingService;
+import fr.aym.acslib.api.services.ErrorManagerService;
 import fr.dynamx.api.contentpack.ContentPackType;
 import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
@@ -9,10 +9,9 @@ import fr.dynamx.api.contentpack.object.subinfo.SubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
-import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.utils.DynamXConstants;
-import fr.dynamx.utils.DynamXLoadingTasks;
+import fr.dynamx.utils.errors.DynamXErrorManager;
 import lombok.Getter;
 import net.minecraft.util.StringUtils;
 import net.minecraftforge.fml.common.versioning.DefaultArtifactVersion;
@@ -51,21 +50,21 @@ public class PackInfo extends SubInfoTypeOwner<PackInfo> implements INamedObject
 
     public void validateVersions() {
         DynamXMain.log.debug("Validating from " + compatibleLoaderVersions + " for " + getFixedPackName());
-        if (DynamXContext.getErrorTracker().getAllErrors().containsKey(getFixedPackName()) && !DynamXContext.getErrorTracker().getAllErrors().get(getFixedPackName()).getErrors().isEmpty()) {
+        if (DynamXErrorManager.getErrorManager().getAllErrors().containsKey(getFixedPackName()) && !DynamXErrorManager.getErrorManager().getAllErrors().get(getFixedPackName()).getErrors().isEmpty()) {
             if (!StringUtils.isNullOrEmpty(compatibleLoaderVersions)) {
                 try {
                     VersionRange range = VersionRange.createFromVersionSpec(compatibleLoaderVersions);
                     if (!range.containsVersion(DynamXConstants.PACK_LOADER_VERSION)) {
-                        DynamXMain.log.warn("Outdated content pack " + getFixedPackName() + " found, compatible with loader versions " + compatibleLoaderVersions);
-                        DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, getFixedPackName(), "Outdated content pack", "This pack is made for versions " + compatibleLoaderVersions + " of the DynamX's pack loader (currently in version " + DynamXConstants.PACK_LOADER_VERSION.getVersionString() + ")", ErrorTrackingService.TrackedErrorLevel.LOW);
+                        //DynamXMain.log.warn("Outdated content pack " + getFixedPackName() + " found, compatible with loader versions " + compatibleLoaderVersions);
+                        DynamXErrorManager.addError(getFixedPackName(), "pack_requirements", ErrorManagerService.ErrorLevel.LOW, "pack_version", "This pack is made for versions " + compatibleLoaderVersions + " of the DynamX's pack loader (currently in version " + DynamXConstants.PACK_LOADER_VERSION.getVersionString() + ")", null, 600);
                     }
                 } catch (InvalidVersionSpecificationException ignored) {
                 } //Already caught in onComplete
             }
             if (!StringUtils.isNullOrEmpty(dcFileVersion) && packType.isCompressed()) {
                 if (!dcFileVersion.equalsIgnoreCase(DynamXConstants.DC_FILE_VERSION)) {
-                    DynamXMain.log.warn("Outdated content pack " + getFixedPackName() + " found. Compatible with dc files version " + dcFileVersion);
-                    DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, getFixedPackName(), "Outdated content pack", "The model files are compiled for version " + dcFileVersion + " of the DynamX's .dc file loader (currently in version " + DynamXConstants.DC_FILE_VERSION + "). The pack will take more time to load.", ErrorTrackingService.TrackedErrorLevel.HIGH);
+                    //DynamXMain.log.warn("Outdated content pack " + getFixedPackName() + " found. Compatible with dc files version " + dcFileVersion);
+                    DynamXErrorManager.addError(getFixedPackName(), "pack_requirements", ErrorManagerService.ErrorLevel.HIGH, "pack_dc_version", "The model files are compiled for version " + dcFileVersion + " of the DynamX's .dc file loader (currently in version " + DynamXConstants.DC_FILE_VERSION + "). The pack will take more time to load.", null, 600);
                 }
             }
             for (RequiredAddonInfo addonInfo : required) {
@@ -73,8 +72,8 @@ public class PackInfo extends SubInfoTypeOwner<PackInfo> implements INamedObject
                     try {
                         VersionRange range = VersionRange.createFromVersionSpec(addonInfo.versions);
                         if (!range.containsVersion(new DefaultArtifactVersion(AddonLoader.getAddons().get(addonInfo.addonId).getVersion()))) {
-                            DynamXMain.log.warn("Outdated content pack " + getFixedPackName() + " found, compatible with versions of addon " + addonInfo.addonId + " : " + compatibleLoaderVersions);
-                            DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, getFixedPackName(), "Unsupported addon version", "This pack is made for versions " + addonInfo.versions + " of the addon " + addonInfo.addonId + " (currently in version " + AddonLoader.getAddons().get(addonInfo.addonId).getVersion() + ")", ErrorTrackingService.TrackedErrorLevel.LOW);
+                            //DynamXMain.log.warn("Outdated content pack " + getFixedPackName() + " found, compatible with versions of addon " + addonInfo.addonId + " : " + compatibleLoaderVersions);
+                            DynamXErrorManager.addError(getFixedPackName(), "pack_requirements", ErrorManagerService.ErrorLevel.LOW, "pack_addon_dependencies", "This pack is made for versions " + addonInfo.versions + " of the addon " + addonInfo.addonId + " (currently in version " + AddonLoader.getAddons().get(addonInfo.addonId).getVersion() + ")", null, 600);
                         }
                     } catch (InvalidVersionSpecificationException ignored) {
                     } //Already caught in onComplete
@@ -90,22 +89,22 @@ public class PackInfo extends SubInfoTypeOwner<PackInfo> implements INamedObject
             try { //Check format of the version specs
                 VersionRange.createFromVersionSpec(compatibleLoaderVersions);
             } catch (InvalidVersionSpecificationException e) {
-                DynamXMain.log.fatal("Invalid CompatibleWithLoaderVersions in " + getFullName(), e);
-                DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, getFixedPackName(), "Bad CompatibleWithLoaderVersions property in pack_info", e, ErrorTrackingService.TrackedErrorLevel.FATAL);
+                //DynamXMain.log.fatal("Invalid CompatibleWithLoaderVersions in " + getFullName(), e);
+                DynamXErrorManager.addError(getFixedPackName(), "pack_requirements", ErrorManagerService.ErrorLevel.FATAL, "pack_version", "Bad CompatibleWithLoaderVersions property", e);
                 compatibleLoaderVersions = "";
             }
         }
         for (RequiredAddonInfo addonInfo : required) {
             if (!AddonLoader.isAddonLoaded(addonInfo.addonId)) {
                 DynamXMain.log.error("Addon " + addonInfo.addonId + " is missing for content pack " + getFixedPackName());
-                DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, getFixedPackName(), "Missing addon", "This pack requires the addon " + addonInfo.addonId + " in order to be loaded", ErrorTrackingService.TrackedErrorLevel.FATAL);
+                DynamXErrorManager.addError(getFixedPackName(), "pack_requirements", ErrorManagerService.ErrorLevel.FATAL, "pack_addon_dependencies", "This pack requires the addon " + addonInfo.addonId + " in order to be loaded", null, 700);
             }
             if (!StringUtils.isNullOrEmpty(addonInfo.versions) && AddonLoader.isAddonLoaded(addonInfo.addonId)) {
                 try { //Check format of the version specs
                     VersionRange.createFromVersionSpec(addonInfo.versions);
                 } catch (InvalidVersionSpecificationException e) {
-                    DynamXMain.log.fatal("Invalid Versions in declaration of required addon " + addonInfo.getFullName(), e);
-                    DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, getFixedPackName(), "Bad required addon " + addonInfo.getFullName() + " Versions in pack_info", e, ErrorTrackingService.TrackedErrorLevel.FATAL);
+                    //DynamXMain.log.fatal("Invalid Versions in declaration of required addon " + addonInfo.getFullName(), e);
+                    DynamXErrorManager.addError(getFixedPackName(), "pack_requirements", ErrorManagerService.ErrorLevel.FATAL, "pack_addon_dependencies", "Bad required addon " + addonInfo.getFullName() + " Versions syntax in pack_info", e);
                     addonInfo.versions = "";
                 }
             }
@@ -165,7 +164,7 @@ public class PackInfo extends SubInfoTypeOwner<PackInfo> implements INamedObject
 
         @Override
         public String getName() {
-            return "Required addon " + name + " in " + getOwner().getName();
+            return "Required addon " + name;
         }
 
         @Override

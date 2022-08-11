@@ -20,8 +20,8 @@ public class PartPropsContainer extends BasePart<ModularVehicleInfoBuilder> impl
     }
 
     @Override
-    public void appendTo(ModularVehicleInfoBuilder vehicleInfo) {
-        super.appendTo(vehicleInfo);
+    public void appendTo(ModularVehicleInfoBuilder owner) {
+        super.appendTo(owner);
         Vector3f min = getPosition().subtract(getScale());
         Vector3f max = getPosition().add(getScale());
         this.box = new MutableBoundingBox(
@@ -38,7 +38,7 @@ public class PartPropsContainer extends BasePart<ModularVehicleInfoBuilder> impl
 
     @Override
     public String getName() {
-        return "PartPropsContainer named " + getPartName() + " in " + getOwner().getName();
+        return "PartPropsContainer named " + getPartName();
     }
 
     @Override

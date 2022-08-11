@@ -27,10 +27,10 @@ public class TrailerAttachInfo extends SubInfoType<ModularVehicleInfoBuilder> {
     }
 
     @Override
-    public void appendTo(ModularVehicleInfoBuilder partInfo) {
+    public void appendTo(ModularVehicleInfoBuilder owner) {
         if (trailerAttachPoint == null)
-            throw new IllegalArgumentException("AttachPoint not configured ! In trailer of " + partInfo.toString());
-        partInfo.addSubProperty(this);
+            throw new IllegalArgumentException("AttachPoint not configured ! In trailer of " + owner.toString());
+        owner.addSubProperty(this);
     }
 
     @Override
@@ -48,6 +48,6 @@ public class TrailerAttachInfo extends SubInfoType<ModularVehicleInfoBuilder> {
 
     @Override
     public String getName() {
-        return "TrailerAttachInfo in " + getOwner().getName();
+        return "TrailerAttachInfo";
     }
 }

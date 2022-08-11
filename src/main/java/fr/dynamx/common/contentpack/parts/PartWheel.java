@@ -137,6 +137,6 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
 
     @Override
     public String getName() {
-        return "PartWheel named " + getPartName() + " in " + getOwner().getName();
+        return "PartWheel named " + getPartName();
     }
 }

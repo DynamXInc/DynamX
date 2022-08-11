@@ -1,6 +1,5 @@
 package fr.dynamx.client.gui;
 
-import fr.aym.acsguis.api.ACsGuiApi;
 import fr.aym.acsguis.component.GuiComponent;
 import fr.aym.acsguis.component.layout.GuiScaler;
 import fr.aym.acsguis.component.panel.GuiFrame;
@@ -8,10 +7,11 @@ import fr.aym.acsguis.component.panel.GuiPanel;
 import fr.aym.acsguis.component.panel.GuiScrollPane;
 import fr.aym.acsguis.component.textarea.GuiLabel;
 import fr.aym.acsguis.component.textarea.GuiTextArea;
+import fr.aym.acslib.ACsLib;
+import fr.aym.acslib.api.services.ErrorManagerService;
 import fr.aym.acslib.api.services.ErrorTrackingService;
 import fr.aym.acslib.impl.services.error_tracking.ACsLibErrorType;
-import fr.dynamx.common.DynamXContext;
-import fr.dynamx.utils.DynamXLoadingTasks;
+import fr.dynamx.utils.errors.DynamXErrorManager;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
@@ -22,6 +22,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+
+//TODO UPDATE THIS GUI
 public class GuiLoadingErrors extends GuiFrame {
     private final GuiPanel summary;
     private GuiComponent<?> displayed;
@@ -38,7 +40,7 @@ public class GuiLoadingErrors extends GuiFrame {
         summary.add(new GuiLabel(0, 0, w, 20, "Errors while loading DynamX and the content packs").getStyle().setPaddingLeft(2).setPaddingTop(2).getOwner());
         summary.add(new GuiLabel(0, 22, w, 20, "Click on any category to view it, then press escape to go back").getStyle().setPaddingLeft(2).setPaddingTop(2).getOwner());
         int i = 2;
-        for (Map.Entry<String, ErrorTrackingService.LocatedErrorList> d : DynamXContext.getErrorTracker().getAllErrors().entrySet()) {
+        for (Map.Entry<String, ErrorTrackingService.LocatedErrorList> d : ACsLib.getPlatform().provideService(ErrorTrackingService.class).getAllErrors().entrySet()) {
             StringBuilder title = new StringBuilder(d.getValue().getColor() + d.getKey() + " : ");
             Collection<ErrorTrackingService.TrackedError> e = d.getValue().getErrors(ErrorTrackingService.TrackedErrorLevel.FATAL);
             if (!e.isEmpty())
@@ -66,11 +68,11 @@ public class GuiLoadingErrors extends GuiFrame {
                 final StringBuilder text = new StringBuilder(TextFormatting.BLUE + "Errors in " + d.getKey() + " :" + "\n" + " \n");
 
                 addErrors(d.getValue(), ACsLibErrorType.ACSLIBERROR, text);
-                addErrors(d.getValue(), DynamXLoadingTasks.MAJS, text);
+                /*addErrors(d.getValue(), DynamXLoadingTasks.MAJS, text);
                 addErrors(d.getValue(), DynamXLoadingTasks.INIT, text);
                 addErrors(d.getValue(), DynamXLoadingTasks.PACK, text);
                 addErrors(d.getValue(), DynamXLoadingTasks.MODEL, text);
-                addErrors(d.getValue(), DynamXContext.getErrorTracker().findErrorType(new ResourceLocation(ACsGuiApi.RES_LOC_ID, "css")), text);
+                addErrors(d.getValue(), DynamXErrorManager.getErrorManager().findErrorType(new ResourceLocation(ACsGuiApi.RES_LOC_ID, "css")), text);*/
 
                 text.append("\n \n" + TextFormatting.WHITE + "Press escape to go back");
 
@@ -91,6 +93,8 @@ public class GuiLoadingErrors extends GuiFrame {
             getStyle().getWidth().setAbsolute(w1 - 20);
             getStyle().getHeight().setAbsolute(h - 20);
         });
+
+        DynamXErrorManager.printErrors(ErrorManagerService.ErrorLevel.ADVICE);
     }
 
     private void addErrors(ErrorTrackingService.LocatedErrorList d, ErrorTrackingService.ErrorType t, StringBuilder text) {

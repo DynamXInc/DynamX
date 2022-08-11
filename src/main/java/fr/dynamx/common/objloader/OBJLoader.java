@@ -69,12 +69,9 @@ public class OBJLoader {
             List<Material> indicedMaterials = new ArrayList<>();
 
             List<Material> materials = new ArrayList<>();
-            HashMapWithDefault<IndexedModel.OBJIndex, Integer> resultIndexMap = new HashMapWithDefault<>();
-            HashMapWithDefault<Integer, Integer> normalIndexMap = new HashMapWithDefault<>();
-            HashMapWithDefault<Integer, Integer> indexMap = new HashMapWithDefault<>();
-            resultIndexMap.setDefault(-1);
-            normalIndexMap.setDefault(-1);
-            indexMap.setDefault(-1);
+            Map<IndexedModel.OBJIndex, Integer> resultIndexMap = new HashMap<>();
+            Map<Integer, Integer> normalIndexMap = new HashMap<>();
+            Map<Integer, Integer> indexMap = new HashMap<>();
 
             Map<ObjObjectData, IndexedModel> map = new HashMap<>();
 
@@ -88,39 +85,51 @@ public class OBJLoader {
                         String[] parts = trim(line.split(" "));
                         if (parts.length == 0)
                             continue;
-                        if (parts[0].equals(COMMENT)) {
-                            continue;
-                        } else if (parts[0].equals(POSITION)) {
-                            positions.add(new Vector3f(Float.parseFloat(parts[1]), Float.parseFloat(parts[2]), Float.parseFloat(parts[3])));
-                        } else if (parts[0].equals(FACE)) {
-                            for (int i = 0; i < parts.length - 3; i++) {
-                                indicedMaterials.add(currentMaterial);
-                                indices.add(parseOBJIndex(parts[1], posOffset, texOffset, normOffset));
-                                indices.add(parseOBJIndex(parts[2 + i], posOffset, texOffset, normOffset));
-                                indices.add(parseOBJIndex(parts[3 + i], posOffset, texOffset, normOffset));
-                            }
-                        } else if (parts[0].equals(NORMAL)) {
-                            normals.add(new Vector3f(Float.parseFloat(parts[1]), Float.parseFloat(parts[2]), Float.parseFloat(parts[3])));
-                        } else if (parts[0].equals(TEX_COORDS) && startPath != null) {
-                            texCoords.add(new Vector2f(Float.parseFloat(parts[1]), Float.parseFloat(parts[2])));
-                        } else if (parts[0].equals(NEW_MATERIAL) && startPath != null) {
-                            String path = startPath + parts[1];
-                            IResource resp = Minecraft.getMinecraft().getResourceManager().getResource(RegistryNameSetter.getResourceLocationWithDynamXDefault(path));
-                            MtlMaterialLib material = new MtlMaterialLib();
-                            material.parse(startPath, new String(DynamXUtils.readInputStream(resp.getInputStream()), StandardCharsets.UTF_8));
-                            materials.addAll(material.getMaterials());
-                            materialLibs.add(material);
-                        } else if (parts[0].equals(USE_MATERIAL) && startPath != null) {
-                            currentMaterial = getMaterial(materials, parts[1]);
-                        } else if (parts[0].equals(NEW_OBJECT) || parts[0].equals(NEW_GROUP)) {
-                            result.getObjIndices().addAll(indices);
-                            result.getMaterials().addAll(indicedMaterials);
-                            normalModel.getObjIndices().addAll(indices);
-                            result = new IndexedModel();
-                            normalModel = new IndexedModel();
-                            indices.clear();
-                            indicedMaterials.clear();
-                            objects.put(new ObjObjectData(parts[1]), new IndexedModel[]{result, normalModel});
+                        switch (parts[0]){
+                            case COMMENT:
+                                continue;
+                            case POSITION:
+                                positions.add(new Vector3f(Float.parseFloat(parts[1]), Float.parseFloat(parts[2]), Float.parseFloat(parts[3])));
+                                break;
+                            case FACE:
+                                for (int i = 0; i < parts.length - 3; i++) {
+                                    indicedMaterials.add(currentMaterial);
+                                    indices.add(parseOBJIndex(parts[1], posOffset, texOffset, normOffset));
+                                    indices.add(parseOBJIndex(parts[2 + i], posOffset, texOffset, normOffset));
+                                    indices.add(parseOBJIndex(parts[3 + i], posOffset, texOffset, normOffset));
+                                }
+                                break;
+                            case NORMAL:
+                                normals.add(new Vector3f(Float.parseFloat(parts[1]), Float.parseFloat(parts[2]), Float.parseFloat(parts[3])));
+                                break;
+                            case TEX_COORDS:
+                                if(startPath != null)
+                                    texCoords.add(new Vector2f(Float.parseFloat(parts[1]), Float.parseFloat(parts[2])));
+                                break;
+                            case NEW_MATERIAL:
+                                if(startPath != null) {
+                                    String path = startPath + parts[1];
+                                    IResource resp = Minecraft.getMinecraft().getResourceManager().getResource(RegistryNameSetter.getResourceLocationWithDynamXDefault(path));
+                                    MtlMaterialLib material = new MtlMaterialLib();
+                                    material.parse(startPath, new String(DynamXUtils.readInputStream(resp.getInputStream()), StandardCharsets.UTF_8));
+                                    materials.addAll(material.getMaterials());
+                                    materialLibs.add(material);
+                                }
+                                break;
+                            case USE_MATERIAL:
+                                currentMaterial = getMaterial(materials, parts[1]);
+                                break;
+                            case NEW_OBJECT:
+                            case NEW_GROUP:
+                                result.getObjIndices().addAll(indices);
+                                result.getMaterials().addAll(indicedMaterials);
+                                normalModel.getObjIndices().addAll(indices);
+                                result = new IndexedModel();
+                                normalModel = new IndexedModel();
+                                indices.clear();
+                                indicedMaterials.clear();
+                                objects.put(new ObjObjectData(parts[1]), new IndexedModel[]{result, normalModel});
+                                break;
                         }
                     }
                 } catch (Exception e) {
@@ -139,24 +148,10 @@ public class OBJLoader {
                 object.setCenter(result.computeCenter());
                 for (IndexedModel.OBJIndex current : indices) {
                     Vector3f pos = positions.get(current.positionIndex);
-                    Vector2f texCoord;
-                    if (hasTexCoords && startPath != null) {
-                        texCoord = texCoords.get(current.texCoordsIndex);
-                    } else {
-                        texCoord = new Vector2f();
-                    }
-                    Vector3f normal;
-                    if (hasNormals) {
-                        try {
-                            normal = normals.get(current.normalIndex);
-                        } catch (Exception e) {
-                            normal = new Vector3f();
-                        }
-                    } else {
-                        normal = new Vector3f();
-                    }
+                    Vector2f texCoord = hasTexCoords && startPath != null ? texCoords.get(current.texCoordsIndex) : new Vector2f();
+                    Vector3f normal = hasNormals ? normals.get(current.normalIndex) : new Vector3f();
 
-                    int modelVertexIndex = resultIndexMap.get(current);
+                    int modelVertexIndex = resultIndexMap.getOrDefault(current, -1);
                     if (modelVertexIndex == -1) {
                         resultIndexMap.put(current, result.getVertices().size());
                         modelVertexIndex = result.getVertices().size();
@@ -168,7 +163,7 @@ public class OBJLoader {
                         result.getTangents().add(new Vector3f());
                     }
 
-                    int normalModelIndex = normalIndexMap.get(current.positionIndex);
+                    int normalModelIndex = normalIndexMap.getOrDefault(current.positionIndex,-1);
 
                     if (normalModelIndex == -1) {
                         normalModelIndex = normalModel.getVertices().size();
@@ -180,8 +175,6 @@ public class OBJLoader {
                         normalModel.getTangents().add(new Vector3f());
                     }
 
-                    //result.getMaterials().add(current.material);
-
                     result.getIndices().add(modelVertexIndex);
                     normalModel.getIndices().add(normalModelIndex);
                     indexMap.put(modelVertexIndex, normalModelIndex);
@@ -191,10 +184,9 @@ public class OBJLoader {
                     normalModel.computeNormals();
 
                     for (int i = 0; i < result.getNormals().size(); i++) {
-                        result.getNormals().add(normalModel.getNormals().get(indexMap.get(i)));
+                        result.getNormals().add(normalModel.getNormals().get(indexMap.getOrDefault(i,-1)));
                     }
                 }
-
                 object.setCenter(result.computeCenter());
             }
 

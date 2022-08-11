@@ -10,7 +10,7 @@ import com.jme3.math.Vector3f;
 public class Mesh {
     public int[] indices;
     public Vertex[] vertices;
-    public Material[] materials;
+    public Material[] materialForEachVertex;
 
     /**
      * Return maximum point in the mesh.

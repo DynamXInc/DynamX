@@ -79,7 +79,7 @@ public class ObjModelClient {
             for (ObjObjectRenderer object : objObjects) {
                 step = object;
                 object.clearDisplayLists();
-                if (object.getObjObjectData().getMesh().materials.length == 0) continue;
+                if (object.getObjObjectData().getMesh().materialForEachVertex.length == 0) continue;
                 if (getCustomTextures() != null) {
                     Map<Byte, TextureData> customTextures = this.getCustomTextures().getTexturesFor(object);
                     if (customTextures != null) {

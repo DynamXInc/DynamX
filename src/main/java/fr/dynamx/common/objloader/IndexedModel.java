@@ -6,53 +6,37 @@ import lombok.Getter;
 import javax.vecmath.Vector2f;
 import javax.vecmath.Vector3f;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
 
 public class IndexedModel {
 
     @Getter
-    private final List<Vector3f> vertices;
+    private final List<Vector3f> vertices = new ArrayList<>();
     @Getter
-    private final List<Vector2f> texCoords;
+    private final List<Vector2f> texCoords = new ArrayList<>();
     @Getter
-    private final List<Vector3f> normals;
+    private final List<Vector3f> normals = new ArrayList<>();
     @Getter
-    private final List<Vector3f> tangents;
+    private final List<Vector3f> tangents = new ArrayList<>();
     @Getter
-    private final List<Integer> indices;
+    private final List<Integer> indices = new ArrayList<>();
     @Getter
-    private final List<OBJIndex> objIndices;
+    private final List<OBJIndex> objIndices = new ArrayList<>();
     @Getter
-    private final List<Material> materials;
-
-    public IndexedModel() {
-        vertices = new ArrayList<>();
-        texCoords = new ArrayList<>();
-        normals = new ArrayList<>();
-        tangents = new ArrayList<>();
-        indices = new ArrayList<>();
-        objIndices = new ArrayList<>();
-
-        materials = new ArrayList<>();
-    }
+    private final List<Material> materials = new ArrayList<>();
 
     public void toMesh(Mesh mesh) {
-        ArrayList<Vertex> verticesList = new ArrayList<>();
         int n = Math.min(vertices.size(), Math.min(texCoords.size(), normals.size()));
-        for (int i = 0; i < n; i++) {
-            Vertex vertex = new Vertex(vertices.get(i),
-                    texCoords.get(i),
-                    normals.get(i), new Vector3f());
-            verticesList.add(vertex);
-        }
         Integer[] indicesArray = indices.toArray(new Integer[0]);
-        Vertex[] verticesArray = verticesList.toArray(new Vertex[0]);
-        int[] indicesArrayInt = new int[indicesArray.length];
-        for (int i = 0; i < indicesArray.length; i++)
-            indicesArrayInt[i] = indicesArray[i];
+        Vertex[] verticesArray = IntStream.range(0, n).mapToObj(i -> new Vertex(vertices.get(i),
+                texCoords.get(i),
+                normals.get(i), new Vector3f())).toArray(Vertex[]::new);
+        int[] indicesArrayInt = Arrays.stream(indicesArray).mapToInt(integer -> integer).toArray();
         mesh.vertices = verticesArray;
         mesh.indices = indicesArrayInt;
-        mesh.materials = materials.toArray(new Material[0]);
+        mesh.materialForEachVertex = materials.toArray(new Material[0]);
     }
 
     public void computeNormals() {

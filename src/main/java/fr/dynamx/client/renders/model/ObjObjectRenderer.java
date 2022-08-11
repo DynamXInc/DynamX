@@ -64,11 +64,11 @@ public class ObjObjectRenderer {
     }
 
     public void createList(TextureData useDefault, TextureData textureData, ObjModelClient model, boolean logIfNotFound) {
-        if (!isMaterialValid(model, objObjectData.getMesh().materials[0]))
+        if (!isMaterialValid(model, objObjectData.getMesh().materialForEachVertex[0]))
             return;
         boolean isCustom = textureData.getId() == 0; //0 is the default, base texture
         if (!isCustom) {
-            for (Material m : objObjectData.getMesh().materials) {
+            for (Material m : objObjectData.getMesh().materialForEachVertex) {
                 if (m.diffuseTexture.containsKey(textureData.getName())) {
                     isCustom = true;
                     break;
@@ -94,7 +94,7 @@ public class ObjObjectRenderer {
     }
 
     public void createDefaultList(ObjModelClient model) {
-        if (!isMaterialValid(model, objObjectData.getMesh().materials[0]))
+        if (!isMaterialValid(model, objObjectData.getMesh().materialForEachVertex[0]))
             return;
         // Create an empty display list
         int id = GlStateManager.glGenLists(1);
@@ -109,7 +109,7 @@ public class ObjObjectRenderer {
     }
 
     public void render(ObjModelClient model, byte textureDataId) {
-        if (objObjectData.getMesh().materials.length == 0 || !isMaterialValid(model, objObjectData.getMesh().materials[0]))
+        if (objObjectData.getMesh().materialForEachVertex.length == 0 || !isMaterialValid(model, objObjectData.getMesh().materialForEachVertex[0]))
             return;
         if (!modelDisplayList.containsKey(textureDataId)) {
             GlStateManager.color(1, 0, 0);
@@ -138,13 +138,13 @@ public class ObjObjectRenderer {
         Vector3f color = new Vector3f(1, 1, 1);
         float alpha = 1f;
         Material bind = null;
-        bind = objObjectData.getMesh().materials[0];
-        String bindName = getExistingTexture(objObjectData.getMesh().materials[0], textureName, useDefault);
-        MaterialTexture materialMultipleTextures = objObjectData.getMesh().materials[0].diffuseTexture.get(bindName);
+        bind = objObjectData.getMesh().materialForEachVertex[0];
+        String bindName = getExistingTexture(objObjectData.getMesh().materialForEachVertex[0], textureName, useDefault);
+        MaterialTexture materialMultipleTextures = objObjectData.getMesh().materialForEachVertex[0].diffuseTexture.get(bindName);
         if (materialMultipleTextures != null) {
-            bindTexture(objObjectData.getMesh().materials[0].diffuseTexture.get(bindName).getGlTextureId());
+            bindTexture(objObjectData.getMesh().materialForEachVertex[0].diffuseTexture.get(bindName).getGlTextureId());
         } else {
-            log.error("Failed to load Default texture of " + objObjectData.getName() + " in " + model.getLocation() + " in material " + objObjectData.getMesh().materials[0].getName());
+            log.error("Failed to load Default texture of " + objObjectData.getName() + " in " + model.getLocation() + " in material " + objObjectData.getMesh().materialForEachVertex[0].getName());
         }
         int[] indices = objObjectData.getMesh().indices;
         Vertex[] vertices = objObjectData.getMesh().vertices;
@@ -158,17 +158,17 @@ public class ObjObjectRenderer {
             Vertex v1 = vertices[i1];
             Vertex v2 = vertices[i2];
 
-            if (isMaterialValid(model, objObjectData.getMesh().materials[i / 3]) && objObjectData.getMesh().materials[i / 3] != bind) {
-                bind = objObjectData.getMesh().materials[i / 3];
+            if (isMaterialValid(model, objObjectData.getMesh().materialForEachVertex[i / 3]) && objObjectData.getMesh().materialForEachVertex[i / 3] != bind) {
+                bind = objObjectData.getMesh().materialForEachVertex[i / 3];
                 //System.out.println("Bind material " + bind.getName() + " " + bind.diffuseTex + " " + bind.diffuseTexture + " in model " + this.filename);
                 if (drawing)
                     tess.draw();
-                bindName = getExistingTexture(objObjectData.getMesh().materials[i / 3], textureName, useDefault);
-                materialMultipleTextures = objObjectData.getMesh().materials[i / 3].diffuseTexture.get(bindName);
+                bindName = getExistingTexture(objObjectData.getMesh().materialForEachVertex[i / 3], textureName, useDefault);
+                materialMultipleTextures = objObjectData.getMesh().materialForEachVertex[i / 3].diffuseTexture.get(bindName);
                 if (materialMultipleTextures != null) {
-                    bindTexture(objObjectData.getMesh().materials[i / 3].diffuseTexture.get(bindName).getGlTextureId());
+                    bindTexture(objObjectData.getMesh().materialForEachVertex[i / 3].diffuseTexture.get(bindName).getGlTextureId());
                 } else {
-                    log.error("Failed to load Default texture of " + objObjectData.getName() + " in " + model.getLocation() + " in material " + objObjectData.getMesh().materials[i / 3].getName());
+                    log.error("Failed to load Default texture of " + objObjectData.getName() + " in " + model.getLocation() + " in material " + objObjectData.getMesh().materialForEachVertex[i / 3].getName());
                 }
                 begining = true;
             }

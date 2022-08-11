@@ -24,7 +24,7 @@ public class MtlMaterialLib {
     public static final String TEXTURE_SPECULAR = "map_Ks";
     public static final String TEXTURE_TRANSPARENCY = "map_d";
 
-    private final ArrayList<Material> materials = new ArrayList<>();
+    private final List<Material> materials = new ArrayList<>();
 
     public void parse(String startPath, String content) {
         String[] lines = content.split("\n");
@@ -47,8 +47,6 @@ public class MtlMaterialLib {
                     current.diffuseColor = new Vector3f(Float.parseFloat(parts[1]), Float.parseFloat(parts[2]), Float.parseFloat(parts[3]));
                     break;
                 case TEXTURE_DIFFUSE: {
-                    //current.diffuseTex = parts[1].contains(File.separator+File.separator) ? startPath + parts[1].replace(File.separator+File.separator,
-                    // File.separator) : startPath + parts[1];
                     String name = parts.length >= 3 ? parts[2] : "Default";
                     current.diffuseTexture.put(name,
                             new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault(startPath + parts[1]), name, -1));
@@ -77,15 +75,10 @@ public class MtlMaterialLib {
      * It only read images files, so it can be called in any thread
      */
     public void loadTextures() {
-        TextureManager man = Minecraft.getMinecraft().getTextureManager();
-        //System.out.println("LOAD man is "+man);
-        for (Material mat : materials) {
-            if (mat.ambientTexture != null) {
-                mat.ambientTexture.forEach((textureName, textures) -> textures.loadTexture(man));
-            }
-            if (mat.diffuseTexture != null) {
-                mat.diffuseTexture.forEach((textureName, textures) -> textures.loadTexture(man));
-            }
+        TextureManager textureManager = Minecraft.getMinecraft().getTextureManager();
+        for (Material material : materials) {
+            material.ambientTexture.forEach((textureName, textures) -> textures.loadTexture(textureManager));
+            material.diffuseTexture.forEach((textureName, textures) -> textures.loadTexture(textureManager));
         }
     }
 
@@ -94,17 +87,10 @@ public class MtlMaterialLib {
      * It creates all gl texture ids, so it should be called in gl thread
      */
     public void uploadTextures() {
-        TextureManager man = Minecraft.getMinecraft().getTextureManager();
-        /*System.out.printf("UPLOAD man is "+man);
-        if(man == null)
-            throw new NullPointerException("Mc Texture Manager not loaded !");*/
-        for (Material mat : materials) {
-            if (mat.ambientTexture != null) {
-                mat.ambientTexture.forEach((textureName, textures) -> textures.uploadTexture(man));
-            }
-            if (mat.diffuseTexture != null) {
-                mat.diffuseTexture.forEach((textureName, textures) -> textures.uploadTexture(man));
-            }
+        TextureManager textureManager = Minecraft.getMinecraft().getTextureManager();
+        for (Material material : materials) {
+            material.ambientTexture.forEach((textureName, textures) -> textures.uploadTexture(textureManager));
+            material.diffuseTexture.forEach((textureName, textures) -> textures.uploadTexture(textureManager));
         }
     }
 }

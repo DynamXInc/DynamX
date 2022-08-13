@@ -292,10 +292,9 @@ public class CommonEventHandler {
     }
 
     @SubscribeEvent
-    public void onPlayerDied(LivingDeathEvent e) {
-        if (e.getEntity() instanceof EntityPlayer && DynamXContext.getPlayerToCollision().containsKey(e.getEntity())) {
-            DynamXContext.getPlayerToCollision().remove(e.getEntity()).removeFromWorld(true);
-        }
+    public void onPlayerLoggedOut(net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedOutEvent event) {
+        if (DynamXContext.getPlayerToCollision().containsKey(event.player))
+            DynamXContext.getPlayerToCollision().get(event.player).removeFromWorld(true);
     }
 
     @SubscribeEvent

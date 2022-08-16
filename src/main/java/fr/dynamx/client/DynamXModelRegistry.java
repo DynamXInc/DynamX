@@ -1,7 +1,7 @@
 package fr.dynamx.client;
 
 import fr.aym.acslib.ACsLib;
-import fr.aym.acslib.api.services.ErrorManagerService;
+import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.aym.acslib.api.services.ThreadedLoadingService;
 import fr.dynamx.api.obj.IModelTextureSupplier;
 import fr.dynamx.api.obj.IObjModelRegistry;
@@ -57,7 +57,7 @@ public class DynamXModelRegistry implements IObjModelRegistry {
                 MODELS_REGISTRY.put(location, customTextures);
             } else {
                 //log.error("Tried to register the model '" + location + "' two times with custom textures '" + previousSupplier + "' and '" + customTextures + "' ! Ignoring " + customTextures);
-                DynamXErrorManager.addError(customTextures.getPackName(), "obj_duplicated_custom_textures", ErrorManagerService.ErrorLevel.HIGH, location, "Tried to register the model '" + location + "' two times with custom textures '" + previousSupplier + "' and '" + customTextures + "' ! Ignoring " + customTextures);
+                DynamXErrorManager.addError(customTextures.getPackName(), "obj_duplicated_custom_textures", ErrorLevel.HIGH, location, "Tried to register the model '" + location + "' two times with custom textures '" + previousSupplier + "' and '" + customTextures + "' ! Ignoring " + customTextures);
             }
         }
     }

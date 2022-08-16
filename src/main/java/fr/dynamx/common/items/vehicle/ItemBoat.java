@@ -1,7 +1,7 @@
 package fr.dynamx.common.items.vehicle;
 
 import com.jme3.math.Vector3f;
-import fr.aym.acslib.api.services.ErrorManagerService;
+import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.common.contentpack.type.vehicle.BoatEngineInfo;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
@@ -16,7 +16,7 @@ public class ItemBoat<T extends ModularVehicleInfo<?>> extends ItemModularEntity
         super(modularVehicleInfo);
         if (getInfo().getSubPropertyByType(BoatEngineInfo.class) == null) {
             //DynamXMain.log.error("Cannot determine type of " + getInfo().getFullName() + " ! It's a boat with no boat_engine...");
-            DynamXErrorManager.addError(getInfo().getPackName(), "config_error", ErrorManagerService.ErrorLevel.FATAL, getInfo().getName(), "Missing boat_engine config !");
+            DynamXErrorManager.addError(getInfo().getPackName(), "config_error", ErrorLevel.FATAL, getInfo().getName(), "Missing boat_engine config !");
         }
     }
 

@@ -27,12 +27,13 @@ import java.util.List;
 import java.util.Map;
 
 public class GuiDnxDebug extends GuiFrame {
+    public static final ResourceLocation STYLE = new ResourceLocation(DynamXConstants.ID, "css/dnx_debug.css");
+
     public GuiDnxDebug() {
         super(new GuiScaler.Identity());
 
         style.setBackgroundColor(Color.TRANSLUCENT);
         setCssClass("home");
-        //DnxCssParser.loadGui(this);
         GuiTabbedPane pane = new GuiTabbedPane();
 
         GuiPanel general = new GuiPanel();
@@ -40,10 +41,7 @@ public class GuiDnxDebug extends GuiFrame {
         general.add(new GuiLabel(50, 50, 0, 0, "DynamX debug - general").setCssClass("title"));
         //Options :
         {
-            //GuiScrollPane pane1 = new GuiScrollPane();
             GuiPanel pane1 = generateDebugCategory(DynamXDebugOptions.DebugCategories.GENERAL);
-            // pane1.add(t);
-
             GuiLabel box = new GuiLabel("Reload packs");
             box.setCssId("reload_packs").setCssClass("reload_button");
             box.addClickListener((x, y, bu) -> {
@@ -115,7 +113,6 @@ public class GuiDnxDebug extends GuiFrame {
         pane.addTab("Terrain debug", general);
 
         general = new GuiPanel();
-        //general.setLayout(new GridLayout(-1, 20, 0, GridLayout.GridDirection.HORIZONTAL, 1));
         general.add(new GuiLabel("DynamX debug - vehicles").setCssClass("title"));
         general.setCssId("vehicles");
         general.add(generateDebugCategory(DynamXDebugOptions.DebugCategories.VEHICLES));
@@ -126,7 +123,7 @@ public class GuiDnxDebug extends GuiFrame {
         pane.addTab(TextFormatting.GOLD + "Erreurs", general);
         pane.getTabButton(3).addClickListener((mx, my, button) -> {
             if (button == 0)
-                Minecraft.getMinecraft().addScheduledTask(() -> Minecraft.getMinecraft().displayGuiScreen(new GuiLoadingErrors().getGuiScreen()));
+                ACsGuiApi.asyncLoadThenShowGui("LoadingErrors", GuiLoadingErrors::new);
         });
 
         general = new GuiPanel();
@@ -145,7 +142,7 @@ public class GuiDnxDebug extends GuiFrame {
 
     @Override
     public List<ResourceLocation> getCssStyles() {
-        return Collections.singletonList(new ResourceLocation(DynamXConstants.ID, "css/dnx_debug.css"));
+        return Collections.singletonList(STYLE);
     }
 
     @Override
@@ -159,7 +156,6 @@ public class GuiDnxDebug extends GuiFrame {
     }
 
     protected GuiPanel generateDebugCategory(DynamXDebugOptions.DebugCategories category) {
-        int y = 0;
         String subCategory = null;
         {
             Map<DynamXDebugOption, GuiButton> terrainButtons = new HashMap<>();
@@ -171,9 +167,6 @@ public class GuiDnxDebug extends GuiFrame {
                     subCategory = option.getSubCategory();
                     GuiLabel label1 = new GuiLabel(subCategory + " :");
                     pane1.add(label1.setCssClass("option-subcategory"));
-                    y += 5;
-                    //label1.getStyle().getYPos().setAbsolute(y);
-                    y += 25;
                 }
 
                 GuiPanel line = new GuiPanel();
@@ -199,20 +192,8 @@ public class GuiDnxDebug extends GuiFrame {
                     }
                 }));
                 pane1.add(line);
-
-                /*b1.getStyle().getYPos().setAbsolute(y);
-                label1.getStyle().getYPos().setAbsolute(y);
-                y += 25;*/
             }
             return pane1;
         }
-    }
-
-    @Override
-    public void guiClose() {
-        super.guiClose();
-        /*if(!ClientDebugSystem.enableDebugDrawing) {
-            DynamXContext.getNetwork().sendToServer(new MessageOpenDebugGui((byte) -20));
-        }*/
     }
 }

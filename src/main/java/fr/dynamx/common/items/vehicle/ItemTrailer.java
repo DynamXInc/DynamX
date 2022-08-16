@@ -1,7 +1,7 @@
 package fr.dynamx.common.items.vehicle;
 
 import com.jme3.math.Vector3f;
-import fr.aym.acslib.api.services.ErrorManagerService;
+import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.contentpack.parts.PartWheel;
 import fr.dynamx.common.contentpack.type.vehicle.TrailerAttachInfo;
@@ -17,11 +17,11 @@ public class ItemTrailer<T extends ModularVehicleInfo<?>> extends ItemModularEnt
         super(modularVehicleInfo);
         if (getInfo().getPartsByType(PartWheel.class).isEmpty()) {
             //DynamXMain.log.error("Cannot determine type of " + getInfo().getFullName() + " ! It's a trailer with no wheels...");
-            DynamXErrorManager.addError(getInfo().getPackName(), "config_error", ErrorManagerService.ErrorLevel.FATAL, getInfo().getName(),  "This trailer has no wheels !");
+            DynamXErrorManager.addError(getInfo().getPackName(), "config_error", ErrorLevel.FATAL, getInfo().getName(),  "This trailer has no wheels !");
         }
         if (getInfo().getSubPropertyByType(TrailerAttachInfo.class) == null) {
             //DynamXMain.log.error("Cannot determine type of " + getInfo().getFullName() + " ! It's a trailer with no trailer attach...");
-            DynamXErrorManager.addError(getInfo().getPackName(), "config_error", ErrorManagerService.ErrorLevel.FATAL, getInfo().getName(),  "Missing trailer config !");
+            DynamXErrorManager.addError(getInfo().getPackName(), "config_error", ErrorLevel.FATAL, getInfo().getName(),  "Missing trailer config !");
         }
     }
 

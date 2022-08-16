@@ -1,7 +1,9 @@
 package fr.dynamx.client.handlers;
 
 import fr.aym.acsguis.api.ACsGuiApi;
-import fr.aym.acslib.impl.services.error_tracking.ACsLibErrorType;
+import fr.aym.acslib.ACsLib;
+import fr.aym.acslib.impl.ACsPlatform;
+import fr.aym.acslib.impl.services.error_tracking.ACsLibErrorCategory;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.events.VehicleEntityEvent;
@@ -135,7 +137,7 @@ public class ClientEventHandler {
 
     @SubscribeEvent
     public void initMainMenu(GuiScreenEvent.InitGuiEvent event) {
-        if (event.getGui() instanceof GuiMainMenu && DynamXErrorManager.getErrorManager().hasErrors(ACsLibErrorType.ACSLIBERROR, DynamXErrorManager.DYNAMX_ERRORS, ACsGuiApi.getCssErrorType()))
+        if (event.getGui() instanceof GuiMainMenu && DynamXErrorManager.getErrorManager().hasErrors(ACsLib.getPlatform().getACsLibErrorCategory(), DynamXErrorManager.DYNAMX_ERRORS, ACsGuiApi.getCssErrorType()))
             event.getButtonList().add(new GuiTexturedButton(-54391, event.getGui().width - 25, 5, 20, 20, TextFormatting.GOLD + "DynamX loading errors" + TextFormatting.RESET, new ResourceLocation(DynamXConstants.ID, "textures/mark.png")));
         else if (event.getGui() instanceof GuiMainMenu && DynamXErrorManager.getErrorManager().hasErrors(DynamXLoadingTasks.MAJS)) //TODO MAJ INFO BUTTON
             event.getButtonList().add(new GuiButton(-54391, event.getGui().width / 2 - 110, event.getGui().height - 30, 220, 20, TextFormatting.AQUA + "Mise à jour DynamX disponible !" + TextFormatting.RESET));
@@ -146,7 +148,7 @@ public class ClientEventHandler {
     @SubscribeEvent
     public void performMainMenuAction(GuiScreenEvent.ActionPerformedEvent event) {
         if (event.getGui() instanceof GuiMainMenu && event.getButton().id == -54391) {
-            Minecraft.getMinecraft().displayGuiScreen(new GuiLoadingErrors().getGuiScreen());
+            ACsGuiApi.asyncLoadThenShowGui("LoadingErrors", GuiLoadingErrors::new);
         }/* else if ((event.getGui() instanceof GuiWorldSelection || event.getGui() instanceof GuiMultiplayer) && event.getButton().id == -54392) {
             Minecraft.getMinecraft().displayGuiScreen(new GuiDisconnected(event.getGui(), "Improving DynamX", new TextComponentString("DynamX is collecting data about your computer (GPU, memory, OS) and crash-reports to improve the mod. \n" +
                     "You can disable this in the configuration file of DynamX (under 'config' directory)")));

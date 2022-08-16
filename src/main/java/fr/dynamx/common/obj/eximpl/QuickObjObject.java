@@ -1,6 +1,6 @@
 package fr.dynamx.common.obj.eximpl;
 
-import fr.aym.acslib.api.services.ErrorManagerService;
+import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.obj.IObjObject;
 import fr.dynamx.client.renders.model.ObjModelClient;
 import fr.dynamx.common.obj.Material;
@@ -220,7 +220,7 @@ public class QuickObjObject implements IObjObject {
         {
             if (!model.hasNoneMaterials) {
                 //log.error("Invalid object " + getName() + " in model " + model.getLocation() + " : uses 'none' material of BlockBench");
-                DynamXErrorManager.addError(model.getCustomTextures() != null ? model.getCustomTextures().getPackName() : "Non-pack model", "obj_none_material", ErrorManagerService.ErrorLevel.LOW, model.getLocation().toString(), getName());
+                DynamXErrorManager.addError(model.getCustomTextures() != null ? model.getCustomTextures().getPackName() : "Non-pack model", "obj_none_material", ErrorLevel.LOW, model.getLocation().toString(), getName());
             }
             model.hasNoneMaterials = true;
             return false;

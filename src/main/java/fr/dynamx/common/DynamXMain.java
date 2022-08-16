@@ -1,9 +1,9 @@
 package fr.dynamx.common;
 
 import fr.aym.acslib.ACsLib;
-import fr.aym.acslib.api.services.ErrorManagerService;
 import fr.aym.acslib.api.services.StatsReportingService;
 import fr.aym.acslib.api.services.ThreadedLoadingService;
+import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.aym.acslib.api.services.mps.ModProtectionContainer;
 import fr.aym.acslib.api.services.mps.ModProtectionService;
 import fr.dynamx.api.network.sync.SynchronizedVariablesRegistry;
@@ -20,7 +20,10 @@ import fr.dynamx.common.items.tools.ItemRagdoll;
 import fr.dynamx.common.items.tools.ItemShockWave;
 import fr.dynamx.common.items.tools.ItemSlopes;
 import fr.dynamx.server.command.DynamXCommands;
-import fr.dynamx.utils.*;
+import fr.dynamx.utils.DynamXConfig;
+import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.DynamXMpsConfig;
+import fr.dynamx.utils.DynamXReflection;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.physics.NativeEngineInstaller;
 import net.minecraft.util.ResourceLocation;
@@ -90,7 +93,7 @@ public class DynamXMain {
             try {
                 container.setup("DynamXEA");
             } catch (Exception e) {
-                DynamXErrorManager.addError("DynamX initialization", "mps_error", ErrorManagerService.ErrorLevel.FATAL, "MPS", "Cannot connect to DynamX server", e);
+                DynamXErrorManager.addError("DynamX initialization", "mps_error", ErrorLevel.FATAL, "MPS", "Cannot connect to DynamX server", e);
                 e.printStackTrace();
             }
         });
@@ -145,11 +148,11 @@ public class DynamXMain {
         ForgeVersion.CheckResult result = ForgeVersion.getResult(Loader.instance().activeModContainer());
         if (result.status == ForgeVersion.Status.OUTDATED) {
             //DynamXMain.log.warn("Outdated version found, you should update to " + result.target);
-            DynamXErrorManager.addError("DynamX updates", "updates", ErrorManagerService.ErrorLevel.ADVICE, "Mise à jour de DynamX", "Version " + result.target + " disponible");
+            DynamXErrorManager.addError("DynamX updates", "updates", ErrorLevel.ADVICE, "Mise à jour de DynamX", "Version " + result.target + " disponible");
         } else if (result.status == ForgeVersion.Status.FAILED) {
             DynamXMain.log.warn("Forge failed to check majs for DynamX !");
         }
-        DynamXErrorManager.printErrors(ErrorManagerService.ErrorLevel.HIGH);
+        DynamXErrorManager.printErrors(ErrorLevel.HIGH);
     }
 
     @EventHandler

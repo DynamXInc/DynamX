@@ -2,9 +2,11 @@ package fr.dynamx.utils;
 
 import fr.aym.acsguis.api.ACsGuiApi;
 import fr.aym.acslib.ACsLib;
-import fr.aym.acslib.api.services.ErrorManagerService;
+import fr.aym.acslib.api.services.error.ErrorCategory;
+import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.aym.acslib.api.services.ErrorTrackingService;
 import fr.aym.acslib.api.services.ThreadedLoadingService;
+import fr.aym.acslib.api.services.error.ErrorManagerService;
 import fr.dynamx.api.network.EnumPacketTarget;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
@@ -34,23 +36,23 @@ public class DynamXLoadingTasks {
     /**
      * MAJS error type : notifies of DynamX updates
      */
-    public static ErrorManagerService.ErrorCategory MAJS = DynamXErrorManager.getErrorManager().createErrorCategory(new ResourceLocation(DynamXConstants.ID, "majs"), "Updates");
+    public static ErrorCategory MAJS = DynamXErrorManager.getErrorManager().createErrorCategory(new ResourceLocation(DynamXConstants.ID, "majs"), "Updates");
     /**
      * INIT error type : notifies of DynamX init errors
      */
-    public static ErrorManagerService.ErrorCategory INIT = DynamXErrorManager.getErrorManager().createErrorCategory(new ResourceLocation(DynamXConstants.ID, "init"), "Initialization");
+    public static ErrorCategory INIT = DynamXErrorManager.getErrorManager().createErrorCategory(new ResourceLocation(DynamXConstants.ID, "init"), "Initialization");
     /**
      * PACK error type : notifies of pack loading errors <br>
      * Reload flag for packs
      */
-    public static ErrorManagerService.ErrorCategory PACK = DynamXErrorManager.getErrorManager().createErrorCategory(new ResourceLocation(DynamXConstants.ID, "pack"), "Packs");
+    public static ErrorCategory PACK = DynamXErrorManager.getErrorManager().createErrorCategory(new ResourceLocation(DynamXConstants.ID, "pack"), "Packs");
     /**
      * MODEL error type : notifies of model loading errors <br>
      * Reload flag for models
      */
-    public static ErrorManagerService.ErrorCategory MODEL = DynamXErrorManager.getErrorManager().createErrorCategory(new ResourceLocation(DynamXConstants.ID, "model"), "Models");
+    public static ErrorCategory MODEL = DynamXErrorManager.getErrorManager().createErrorCategory(new ResourceLocation(DynamXConstants.ID, "model"), "Models");
 
-    private static final BiFunction<ErrorManagerService.ErrorCategory, TaskContext, Runnable> executors = (errorType, taskContext) -> {
+    private static final BiFunction<ErrorCategory, TaskContext, Runnable> executors = (errorType, taskContext) -> {
         if (PACK.equals(errorType)) {
             return () ->
             {
@@ -76,7 +78,7 @@ public class DynamXLoadingTasks {
         throw new UnsupportedOperationException("Cannot reload " + errorType.getLabel());
     };
 
-    private static final List<ErrorManagerService.ErrorCategory> currentTasks = new ArrayList<>();
+    private static final List<ErrorCategory> currentTasks = new ArrayList<>();
     private static final Queue<Runnable> tasks = new ArrayDeque<>();
     private static final List<Runnable> reloadCallback = new ArrayList<>();
 
@@ -88,7 +90,7 @@ public class DynamXLoadingTasks {
      * @param context The reload context
      * @param items   The resources to reload
      */
-    public static void reload(TaskContext context, ErrorManagerService.ErrorCategory... items) {
+    public static void reload(TaskContext context, ErrorCategory... items) {
         reload(context, null, items);
     }
 
@@ -101,10 +103,10 @@ public class DynamXLoadingTasks {
      * @param reloadCallback A callback to execute after all the given tasks have finished
      * @param items          The resources to reload
      */
-    public static void reload(TaskContext context, Runnable reloadCallback, ErrorManagerService.ErrorCategory... items) {
+    public static void reload(TaskContext context, Runnable reloadCallback, ErrorCategory... items) {
         if (reloadCallback != null)
             DynamXLoadingTasks.reloadCallback.add(reloadCallback);
-        for (ErrorManagerService.ErrorCategory t : items) {
+        for (ErrorCategory t : items) {
             if (!currentTasks.contains(t)) {
                 Runnable r = executors.apply(t, context);
                 DynamXMain.log.info("Reloading " + t.getLabel());
@@ -134,7 +136,7 @@ public class DynamXLoadingTasks {
     /**
      * @return True if the given task is running
      */
-    public static boolean isTaskRunning(ErrorManagerService.ErrorCategory type) {
+    public static boolean isTaskRunning(ErrorCategory type) {
         return currentTasks.contains(type);
     }
 
@@ -142,7 +144,7 @@ public class DynamXLoadingTasks {
      * Notifies that task has ended, useful for async tasks <br>
      * Should be fired for each resource type, on reload end
      */
-    public static void endTask(ErrorManagerService.ErrorCategory type) {
+    public static void endTask(ErrorCategory type) {
         if (!currentTasks.contains(type))
             throw new IllegalStateException("Task " + type.getLabel() + " not started !");
         DynamXMain.log.info("Finished " + type.getLabel() + " reloading");

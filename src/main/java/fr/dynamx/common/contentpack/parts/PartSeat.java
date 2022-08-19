@@ -28,7 +28,7 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     @PackFileProperty(configNames = "Rotation", required = false, defaultValue = "1 0 0 0")
     private Quaternion rotation;
 
-    @PackFileProperty(configNames = "PlayerPosition", required = false, defaultValue = "SIT", type = DefinitionType.DynamXDefinitionTypes.PLAYER_SEAT_POSITION)
+    @PackFileProperty(configNames = "PlayerPosition", required = false, defaultValue = "SIT")
     private EnumSeatPlayerPosition playerPosition;
 
     @PackFileProperty(configNames = "CameraRotation", required = false, defaultValue = "0")

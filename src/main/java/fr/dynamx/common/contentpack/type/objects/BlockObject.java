@@ -29,7 +29,7 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
     @PackFileProperty(configNames = "LightLevel", defaultValue = "0", required = false)
     protected float lightLevel;
 
-    @PackFileProperty(configNames = "Material", required = false, defaultValue = "ROCK", type = DefinitionType.DynamXDefinitionTypes.MATERIAL)
+    @PackFileProperty(configNames = "Material", required = false, defaultValue = "ROCK")
     protected Material material;
 
     public BlockObject(String packName, String fileName) {

@@ -44,7 +44,7 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
     private int emptyMass;
     @PackFileProperty(configNames = "DragCoefficient")
     private float dragFactor;
-    @PackFileProperty(configNames = "PlayerStandOnTop", required = false, defaultValue = "ALWAYS", type = DefinitionType.DynamXDefinitionTypes.PLAYER_STAND_ON_TOP)
+    @PackFileProperty(configNames = "PlayerStandOnTop", required = false, defaultValue = "ALWAYS")
     public EnumPlayerStandOnTop playerStandOnTop;
     @PackFileProperty(configNames = "Model", description = "common.model", defaultValue = "obj/name_of_vehicle/name_of_model.obj")
     private String model;

@@ -6,6 +6,7 @@ import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.api.network.EnumPacketTarget;
+import fr.dynamx.api.physics.player.DynamXPhysicsWorldBlacklistApi;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.blocks.DynamXBlock;
@@ -275,9 +276,12 @@ public class CommonEventHandler {
 
     //Walking players :
 
+
+
     @SubscribeEvent
     public void onPlayerUpdate(TickEvent.PlayerTickEvent e) {
         if (!(e.player.getRidingEntity() instanceof BaseVehicleEntity) && DynamXContext.getPhysicsWorld() != null && !e.player.isDead) {
+            if(!DynamXContext.getPlayerToCollision().containsKey(e.player) && DynamXPhysicsWorldBlacklistApi.isBlacklisted(e.player)) return;
             Vector3fPool.openPool();
             QuaternionPool.openPool();
             if (!DynamXContext.getPlayerToCollision().containsKey(e.player)) {

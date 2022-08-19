@@ -96,6 +96,13 @@ public class ContentPackUtils {
         }
     }
 
+    private static boolean existsCaseSensitive(File dir, String filename){
+        String[] files = dir.list();
+        for(String file : files)
+            if(file.equals(filename))
+                return true;
+        return false;
+    }
 
     /**
      * Writes the translation of this object in the pack lang file, if not already present in the translation file
@@ -110,11 +117,34 @@ public class ContentPackUtils {
                 langPath.mkdirs();
             }
             try {
-                File langFile = new File(langPath, "en_us.lang");
-                if (!langFile.exists()) {
-                    langFile.createNewFile();
+                File mcmetaFile = new File(dynxDir, objectInfo.getPackName() + "/pack.mcmeta");
+                File langUsFile = new File(langPath, "en_us.lang");
+                File langUSFile = new File(langPath, "en_US.lang");
+                File currentFile = null;
+
+                if(existsCaseSensitive(langPath, "en_us.lang") || existsCaseSensitive(langPath, "en_US.lang")){
+                    currentFile = existsCaseSensitive(langPath, "en_us.lang") ? langUsFile : langUSFile;
                 }
-                writeInLangFile(objectInfo, langFile, item, metadata);
+                if(currentFile != null){
+                    if(mcmetaFile.exists()){
+                        if(currentFile.getName().equals("en_US.lang")){
+                            currentFile.renameTo(langUsFile);
+                        }
+                    }else{
+                        if(currentFile.getName().equals("en_us.lang")){
+                            currentFile.renameTo(langUSFile);
+                        }
+                    }
+                }else{
+                    if(mcmetaFile.exists()){
+                        currentFile = langUsFile;
+                    }else{
+                        currentFile = langUSFile;
+                    }
+                    currentFile.createNewFile();
+                }
+
+                writeInLangFile(objectInfo, currentFile, item, metadata);
             } catch (IOException e) {
                 e.printStackTrace();
             }

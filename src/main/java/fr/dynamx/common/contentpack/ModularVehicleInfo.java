@@ -12,7 +12,7 @@ import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.CreatePackItemEvent;
-import fr.dynamx.api.obj.IModelTextureSupplier;
+import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
 import fr.dynamx.common.contentpack.loader.BuildableInfoLoader;
 import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
 import fr.dynamx.common.contentpack.loader.ObjectLoader;
@@ -24,7 +24,7 @@ import fr.dynamx.common.contentpack.type.vehicle.FrictionPoint;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.items.ItemModularEntity;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
-import fr.dynamx.client.renders.model.texture.TextureData;
+import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.item.ItemStack;
@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
  * @see ModularVehicleInfoBuilder
  * @see BaseVehicleEntity
  */
-public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends AbstractItemObject<U> implements IPhysicsPackInfo, IModelTextureSupplier,
+public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends AbstractItemObject<U> implements IPhysicsPackInfo, IModelTextureVariantsSupplier,
         ParticleEmitterInfo.IParticleEmitterContainer, IShapeProvider<ModularVehicleInfoBuilder> {
     private final int emptyMass;
     private final float dragFactor;
@@ -54,7 +54,7 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
     /**
      * Maps the metadata to the texture data
      */
-    private final Map<Byte, TextureData> textures;
+    private final Map<Byte, TextureVariantData> textures;
     /**
      * The number of textures available for the vehicle
      */
@@ -112,7 +112,7 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
     private final List<Vector3f> collisionShapeDebugBuffer;
 
     public ModularVehicleInfo(String defaultName, String packName, String fileName, String description, int emptyMass, float dragFactor, ResourceLocation model, Vector3f centerOfMass,
-                              Vector3f scaleModifier, Map<Byte, TextureData> textures, List<BasePart<ModularVehicleInfoBuilder>> parts, List<PartShape<?>> partShapes,
+                              Vector3f scaleModifier, Map<Byte, TextureVariantData> textures, List<BasePart<ModularVehicleInfoBuilder>> parts, List<PartShape<?>> partShapes,
                               List<ISubInfoType<ModularVehicleInfoBuilder>> subProperties, Map<String, PartLightSource.CompoundLight> lightSources, List<FrictionPoint> frictionPoints,
                               List<ParticleEmitterInfo<?>> particleEmitters, float vehicleMaxSpeed, int directingWheel, float itemScale, Enum3DRenderLocation item3DRenderLocation,
                               List<String> renderedParts, CompoundCollisionShape collisionShape, List<Vector3f> debugBuffer, String creativeTabName, int defaultZoomLevel) {
@@ -145,7 +145,7 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
         this.item3DRenderLocation = item3DRenderLocation;
 
         int texCount = 0;
-        for (TextureData data : textures.values()) {
+        for (TextureVariantData data : textures.values()) {
             if (data.isItem())
                 texCount++;
         }
@@ -263,7 +263,7 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
         return collisionShapeDebugBuffer;
     }
 
-    public Map<Byte, TextureData> getTextures() {
+    public Map<Byte, TextureVariantData> getTextures() {
         return textures;
     }
 
@@ -273,15 +273,15 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
     }
 
     @Override
-    public Map<Byte, TextureData> getTexturesFor(ObjObjectRenderer objObjectRenderer) {
+    public Map<Byte, TextureVariantData> getTextureVariantsFor(ObjObjectRenderer objObjectRenderer) {
         PartLightSource.CompoundLight src = getLightSource(objObjectRenderer.getObjObjectData().getName());
         if (src != null) {
-            Map<Byte, TextureData> ret = new HashMap<>();
-            ret.put((byte) 0, new TextureData("Default", (byte) 0));
+            Map<Byte, TextureVariantData> ret = new HashMap<>();
+            ret.put((byte) 0, new TextureVariantData("Default", (byte) 0));
             List<PartLightSource> sources = src.getSources();
             for (PartLightSource source : sources) {
-                for (TextureData textureData : source.getTextureMap().values()) {
-                    ret.put(textureData.getId(), textureData);
+                for (TextureVariantData textureVariantData : source.getTextureMap().values()) {
+                    ret.put(textureVariantData.getId(), textureVariantData);
                 }
             }
             return ret;
@@ -290,7 +290,7 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
     }
 
     @Override
-    public boolean hasCustomTextures() {
+    public boolean hasVaryingTextures() {
         return getTextures().size() > 1;
     }
 
@@ -323,7 +323,7 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
     public String getTranslationKey(IInfoOwner<U> item, int itemMeta) {
         if (itemMeta == 0)
             return super.getTranslationKey(item, itemMeta);
-        TextureData textureInfo = getTextures().get((byte) itemMeta);
+        TextureVariantData textureInfo = getTextures().get((byte) itemMeta);
         return super.getTranslationKey(item, itemMeta) + "_" + textureInfo.getName().toLowerCase();
     }
 
@@ -331,7 +331,7 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
     public String getTranslatedName(IInfoOwner<U> item, int itemMeta) {
         if (itemMeta == 0)
             return super.getTranslatedName(item, itemMeta);
-        TextureData textureInfo = getTextures().get((byte) itemMeta);
+        TextureVariantData textureInfo = getTextures().get((byte) itemMeta);
         return super.getTranslatedName(item, itemMeta) + " " + textureInfo.getName();
     }
 

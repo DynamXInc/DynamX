@@ -14,7 +14,7 @@ import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.parts.PartShape;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
-import fr.dynamx.client.renders.model.texture.TextureData;
+import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.physics.ShapeUtils;
@@ -43,7 +43,7 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
     private final List<BasePart<?>> parts = new ArrayList<>();
     private final List<MutableBoundingBox> collisionBoxes = new ArrayList<>();
     private final List<PartShape<?>> partShapes = new ArrayList<>();
-    private final Map<Byte, TextureData> textures = new HashMap<>();
+    private final Map<Byte, TextureVariantData> textures = new HashMap<>();
 
     protected CompoundCollisionShape compoundCollisionShape;
 
@@ -90,16 +90,16 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
     @Override
     public void onComplete(boolean hotReload) {
         textures.clear();
-        textures.put((byte) 0, new TextureData("Default", (byte) 0, getName()));
+        textures.put((byte) 0, new TextureVariantData("Default", (byte) 0, getName()));
         if (texturesArray != null) {
             byte id = 1;
             for (String[] info : texturesArray) {
-                textures.put(id, new TextureData(info[0], id, info[1] == null ? "dummy" : info[1]));
+                textures.put(id, new TextureVariantData(info[0], id, info[1] == null ? "dummy" : info[1]));
                 id++;
             }
         }
         int texCount = 0;
-        for (TextureData data : textures.values()) {
+        for (TextureVariantData data : textures.values()) {
             if (data.isItem())
                 texCount++;
         }
@@ -108,7 +108,7 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
 
     @Nullable
     @Override
-    public Map<Byte, TextureData> getTexturesFor(ObjObjectRenderer objObjectRenderer) {
+    public Map<Byte, TextureVariantData> getTextureVariantsFor(ObjObjectRenderer objObjectRenderer) {
         return textures;
     }
 
@@ -117,7 +117,7 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
     }
 
     @Override
-    public boolean hasCustomTextures() {
+    public boolean hasVaryingTextures() {
         return textures.size() > 1;
     }
 

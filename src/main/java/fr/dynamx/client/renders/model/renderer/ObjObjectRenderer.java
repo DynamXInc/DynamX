@@ -1,9 +1,8 @@
 package fr.dynamx.client.renders.model.renderer;
 
-import com.jme3.math.Vector3f;
 import fr.aym.acslib.api.services.ErrorTrackingService;
 import fr.dynamx.client.renders.model.texture.MaterialTexture;
-import fr.dynamx.client.renders.model.texture.TextureData;
+import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.objloader.Material;
 import fr.dynamx.common.objloader.Vertex;
@@ -46,37 +45,41 @@ public class ObjObjectRenderer {
         }
     }
 
-    private void compileModel(ObjModelRenderer model, @Nullable TextureData useDefault, @Nullable TextureData variantTextureData) {
+    private void compileModel(ObjModelRenderer model, @Nullable TextureVariantData useDefault, @Nullable TextureVariantData variantTextureVariantData) {
         // Create an empty display list
         int id = GlStateManager.glGenLists(1);
         // Start the compilation of the list, this will fill the list with every vertex rendered onwards
         GlStateManager.glNewList(id, GL11.GL_COMPILE);
         //Do immediate render
-        renderCPU(model, useDefault != null ? useDefault.getName() : "Default", variantTextureData != null ? variantTextureData.getName() : "Default");
+        renderCPU(model, useDefault != null ? useDefault.getName() : "Default", variantTextureVariantData != null ? variantTextureVariantData.getName() : "Default");
         // Finish the compilation process
         GlStateManager.glEndList();
-        modelDisplayList.put(variantTextureData != null ? variantTextureData.getId() : 0, id);
+        modelDisplayList.put(variantTextureVariantData != null ? variantTextureVariantData.getId() : 0, id);
 
     }
 
-    public void createList(TextureData useDefault, TextureData textureData, ObjModelRenderer model, boolean logIfNotFound) {
+    public void createList(TextureVariantData useDefault, TextureVariantData textureVariantData, ObjModelRenderer model, boolean logIfNotFound) {
         if (!isMaterialValid(model, objObjectData.getMesh().materialForEachVertex[0]))
             return;
-        boolean isCustom = textureData.getId() == 0; //0 is the default, base texture
-        if (!isCustom) {
-            for (Material m : objObjectData.getMesh().materialForEachVertex) {
-                if (m.diffuseTexture.containsKey(textureData.getName())) {
-                    isCustom = true;
+        if (useDefault == null || textureVariantData == null) {
+            compileModel(model, null, null);
+            return;
+        }
+        boolean hasVaryingTextures = textureVariantData.getId() == 0; //0 is the default, base texture
+        if (!hasVaryingTextures) {
+            for (Material material : objObjectData.getMesh().materialForEachVertex) {
+                if (material.diffuseTexture.containsKey(textureVariantData.getName())) {
+                    hasVaryingTextures = true;
                     break;
                 }
             }
         }
-        if (isCustom) {
-            compileModel(model, useDefault, textureData);
+        if (hasVaryingTextures) {
+            compileModel(model, useDefault, textureVariantData);
         } else {
             if (logIfNotFound)
-                log.error("Failed to find custom texture for skin " + textureData.getName() + " of " + model.getLocation() + " in part " + objObjectData.getName());
-            modelDisplayList.put(textureData.getId(), modelDisplayList.get(useDefault.getId()));
+                log.error("Failed to find custom texture for skin " + textureVariantData.getName() + " of " + model.getLocation() + " in part " + objObjectData.getName());
+            modelDisplayList.put(textureVariantData.getId(), modelDisplayList.get(useDefault.getId()));
         }
     }
 

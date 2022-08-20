@@ -3,7 +3,7 @@ package fr.dynamx.client;
 import fr.aym.acslib.ACsLib;
 import fr.aym.acslib.api.services.ErrorTrackingService;
 import fr.aym.acslib.api.services.ThreadedLoadingService;
-import fr.dynamx.api.obj.IModelTextureSupplier;
+import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
 import fr.dynamx.api.obj.IObjModelRegistry;
 import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.client.renders.model.MissingObjModel;
@@ -29,7 +29,7 @@ import static fr.dynamx.common.DynamXMain.log;
 
 public class DynamXModelRegistry implements IObjModelRegistry {
     private static final ObjItemModelLoader OBJ_ITEM_MODEL_LOADER = new ObjItemModelLoader();
-    private static final Map<ObjModelPath, IModelTextureSupplier> MODELS_REGISTRY = new HashMap<>();
+    private static final Map<ObjModelPath, IModelTextureVariantsSupplier> MODELS_REGISTRY = new HashMap<>();
     private static final Map<ResourceLocation, ObjModelRenderer> MODELS = new HashMap<>();
     private static final List<ResourceLocation> ERRORED_MODELS = new ArrayList<>();
 
@@ -46,14 +46,14 @@ public class DynamXModelRegistry implements IObjModelRegistry {
     }
 
     @Override
-    public void registerModel(ObjModelPath location, IModelTextureSupplier customTextures) {
+    public void registerModel(ObjModelPath location, IModelTextureVariantsSupplier customTextures) {
         if (REGISTRY_CLOSED)
             throw new IllegalStateException("Model registry closed, you should register your model before DynamX pre-initialization");
         if (!MODELS_REGISTRY.containsKey(location)) {
             MODELS_REGISTRY.put(location, customTextures);
-        } else if (customTextures != null && customTextures.hasCustomTextures()) {
-            IModelTextureSupplier previousSupplier = MODELS_REGISTRY.get(location);
-            if (previousSupplier == null || !previousSupplier.hasCustomTextures()) {
+        } else if (customTextures != null && customTextures.hasVaryingTextures()) {
+            IModelTextureVariantsSupplier previousSupplier = MODELS_REGISTRY.get(location);
+            if (previousSupplier == null || !previousSupplier.hasVaryingTextures()) {
                 log.debug("Replacing model texture supplier of '" + location + "' from '" + previousSupplier + "' to '" + customTextures + "' : the previous doesn't have custom textures");
                 MODELS_REGISTRY.put(location, customTextures);
             } else {
@@ -90,7 +90,7 @@ public class DynamXModelRegistry implements IObjModelRegistry {
 
         ACsLib.getPlatform().provideService(ThreadedLoadingService.class).addTask(ThreadedLoadingService.ModLoadingSteps.FINISH_LOAD, "model_load", () -> {
             //bar.step("Loading model files");
-            for (Map.Entry<ObjModelPath, IModelTextureSupplier> name : MODELS_REGISTRY.entrySet()) {
+            for (Map.Entry<ObjModelPath, IModelTextureVariantsSupplier> name : MODELS_REGISTRY.entrySet()) {
                 log.debug("Loading tessellator model " + name.getKey());
 
                 ObjModelRenderer model = ObjModelRenderer.loadObjModel(name.getKey(), name.getValue());

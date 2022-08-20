@@ -10,7 +10,7 @@ import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.VehicleLightsModule;
-import fr.dynamx.client.renders.model.texture.TextureData;
+import fr.dynamx.client.renders.model.texture.TextureVariantData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -98,13 +98,13 @@ public class PartLightSource implements ISubInfoType<ModularVehicleInfoBuilder> 
         return rotateDuration;
     }
 
-    private final Map<Integer, TextureData> textureMap = new HashMap<>();
+    private final Map<Integer, TextureVariantData> textureMap = new HashMap<>();
 
-    public void mapTexture(int blinkStep, TextureData textureData) {
-        textureMap.put(blinkStep, textureData);
+    public void mapTexture(int blinkStep, TextureVariantData textureVariantData) {
+        textureMap.put(blinkStep, textureVariantData);
     }
 
-    public Map<Integer, TextureData> getTextureMap() {
+    public Map<Integer, TextureVariantData> getTextureMap() {
         return textureMap;
     }
 

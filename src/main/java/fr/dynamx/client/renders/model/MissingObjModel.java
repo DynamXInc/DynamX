@@ -1,6 +1,6 @@
 package fr.dynamx.client.renders.model;
 
-import fr.dynamx.api.obj.IModelTextureSupplier;
+import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.common.objloader.Mesh;
@@ -58,7 +58,7 @@ public class MissingObjModel extends ObjModelRenderer {
 
     @Nullable
     @Override
-    public IModelTextureSupplier getCustomTextures() {
+    public IModelTextureVariantsSupplier getCustomTextures() {
         return null;
     }
 

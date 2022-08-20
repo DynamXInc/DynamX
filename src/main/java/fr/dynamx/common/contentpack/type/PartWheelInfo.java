@@ -8,7 +8,7 @@ import fr.dynamx.api.contentpack.object.subinfo.SubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
-import fr.dynamx.client.renders.model.texture.TextureData;
+import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ResourceLocation;
 
@@ -56,7 +56,7 @@ public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IS
 
     @PackFileProperty(configNames = "Textures", required = false, type = DefinitionType.DynamXDefinitionTypes.STRING_ARRAY_2D, defaultValue = "\"Textures: DynamX\"")
     private String[][] texturesArray;
-    private Map<Byte, TextureData> bakedTextures;
+    private Map<Byte, TextureVariantData> bakedTextures;
 
     public PartWheelInfo(String packName, String partName) {
         this.packName = packName;
@@ -93,11 +93,11 @@ public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IS
     private void computeTextures() {
         if (bakedTextures == null) {
             bakedTextures = new HashMap<>();
-            bakedTextures.put((byte) 0, new TextureData("Default", (byte) 0, ""));
+            bakedTextures.put((byte) 0, new TextureVariantData("Default", (byte) 0, ""));
             if (texturesArray != null) {
                 byte id = 1;
                 for (String[] s : texturesArray) {
-                    bakedTextures.put(id, new TextureData(s[0], id));
+                    bakedTextures.put(id, new TextureVariantData(s[0], id));
                     id++;
                 }
             }
@@ -105,7 +105,7 @@ public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IS
         }
     }
 
-    public Map<Byte, TextureData> getTextures() {
+    public Map<Byte, TextureVariantData> getTextures() {
         computeTextures();
         return bakedTextures;
     }
@@ -120,13 +120,13 @@ public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IS
     }
 
     @Override
-    public Map<Byte, TextureData> getTexturesFor(ObjObjectRenderer objObjectRenderer) {
+    public Map<Byte, TextureVariantData> getTextureVariantsFor(ObjObjectRenderer objObjectRenderer) {
         //Here we can make difference between tyre and rim textures
         return getTextures();
     }
 
     @Override
-    public boolean hasCustomTextures() {
+    public boolean hasVaryingTextures() {
         computeTextures();
         return bakedTextures.size() > 1;
     }

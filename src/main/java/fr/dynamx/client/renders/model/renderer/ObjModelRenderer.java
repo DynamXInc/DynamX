@@ -3,13 +3,13 @@ package fr.dynamx.client.renders.model.renderer;
 import fr.aym.acslib.api.services.ErrorTrackingService;
 import fr.dynamx.api.events.DynamXModelRenderEvent;
 import fr.dynamx.api.events.EventStage;
-import fr.dynamx.api.obj.IModelTextureSupplier;
+import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
 import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
 import fr.dynamx.common.objloader.data.ObjModelData;
 import fr.dynamx.common.objloader.data.ObjObjectData;
-import fr.dynamx.client.renders.model.texture.TextureData;
+import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import fr.dynamx.utils.DynamXLoadingTasks;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
@@ -42,15 +42,15 @@ public class ObjModelRenderer {
      */
     public boolean hasNoneMaterials;
     @Getter
-    private final IModelTextureSupplier customTextures;
+    private final IModelTextureVariantsSupplier customTextures;
 
-    public ObjModelRenderer(ResourceLocation location, List<ObjObjectRenderer> objObjects, @Nullable IModelTextureSupplier customTextures) {
+    public ObjModelRenderer(ResourceLocation location, List<ObjObjectRenderer> objObjects, @Nullable IModelTextureVariantsSupplier customTextures) {
         this.location = location;
         this.objObjects = objObjects;
         this.customTextures = customTextures;
     }
 
-    public static ObjModelRenderer loadObjModel(ObjModelPath objModelPath, @Nullable IModelTextureSupplier customTextures) {
+    public static ObjModelRenderer loadObjModel(ObjModelPath objModelPath, @Nullable IModelTextureVariantsSupplier customTextures) {
         try {
             List<ObjObjectRenderer> objObjects = new ArrayList<>();
 
@@ -81,9 +81,9 @@ public class ObjModelRenderer {
                 object.clearDisplayLists();
                 if (object.getObjObjectData().getMesh().materialForEachVertex.length == 0) continue;
                 if (getCustomTextures() != null) {
-                    Map<Byte, TextureData> customTextures = this.getCustomTextures().getTexturesFor(object);
+                    Map<Byte, TextureVariantData> customTextures = this.getCustomTextures().getTextureVariantsFor(object);
                     if (customTextures != null) {
-                        TextureData defaultTexture = customTextures.get((byte) 0);
+                        TextureVariantData defaultTexture = customTextures.get((byte) 0);
                         boolean log = object.getObjObjectData().getName().equalsIgnoreCase("chassis");
                         customTextures.values().forEach(data -> object.createList(defaultTexture, data, this, log));
                         continue;

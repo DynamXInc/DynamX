@@ -21,7 +21,7 @@ import fr.dynamx.common.contentpack.type.vehicle.EngineInfo;
 import fr.dynamx.common.contentpack.type.vehicle.FrictionPoint;
 import fr.dynamx.common.contentpack.type.vehicle.SoundListInfo;
 import fr.dynamx.common.objloader.data.ObjModelData;
-import fr.dynamx.client.renders.model.texture.TextureData;
+import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.physics.ShapeUtils;
 import net.minecraft.util.ResourceLocation;
@@ -247,12 +247,12 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
             }
         }
         //Map textures
-        Map<Byte, TextureData> bakedTextures = new HashMap<>();
-        bakedTextures.put((byte) 0, new TextureData("Default", (byte) 0, getName()));
+        Map<Byte, TextureVariantData> bakedTextures = new HashMap<>();
+        bakedTextures.put((byte) 0, new TextureVariantData("Default", (byte) 0, getName()));
         if (texturesArray != null) {
             byte id = 1;
             for (String[] info : texturesArray) {
-                bakedTextures.put(id, new TextureData(info[0], id, info[1]));
+                bakedTextures.put(id, new TextureVariantData(info[0], id, info[1]));
                 id++;
             }
         }
@@ -264,7 +264,7 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
                     PartLightSource source = sources.get(i);
                     if (source.getTextures() != null) {
                         for (int j = 0; j < source.getTextures().length; j++) {
-                            TextureData data = new TextureData(source.getTextures()[j], (byte) (1 + i + j));
+                            TextureVariantData data = new TextureVariantData(source.getTextures()[j], (byte) (1 + i + j));
                             source.mapTexture(j, data);
                         }
                     }

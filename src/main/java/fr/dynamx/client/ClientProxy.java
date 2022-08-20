@@ -6,7 +6,7 @@ import fr.dynamx.api.audio.IDynamXSoundHandler;
 import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.contentpack.object.render.IObjPackObject;
 import fr.dynamx.api.network.sync.PhysicsEntityNetHandler;
-import fr.dynamx.api.obj.IModelTextureSupplier;
+import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
 import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.client.handlers.ClientEventHandler;
@@ -82,7 +82,7 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
             for (INamedObject namedObject : infoLoader.getInfos().values()) {
                 if (namedObject instanceof IObjPackObject && ((IObjPackObject) namedObject).shouldRegisterModel()) {
                     ObjModelPath modelPath = DynamXUtils.getModelPath(namedObject.getPackName(), ((IObjPackObject) namedObject).getModel());
-                    DynamXContext.getObjModelRegistry().registerModel(modelPath, (IModelTextureSupplier) namedObject);
+                    DynamXContext.getObjModelRegistry().registerModel(modelPath, (IModelTextureVariantsSupplier) namedObject);
                 }
             }
         }

@@ -85,7 +85,7 @@ public class DynamXItemArmor<T extends ArmorObject<?>> extends ItemArmor impleme
 
     @Override
     public String getJsonName(int meta) {
-        return getInfo().getFullName().toLowerCase() + "_" + armorType.getName() + "_" + getInfo().getTexturesFor(null).get((byte) meta).getName().toLowerCase();
+        return getInfo().getFullName().toLowerCase() + "_" + armorType.getName() + "_" + getInfo().getTextureVariantsFor(null).get((byte) meta).getName().toLowerCase();
     }
 
     @Override
@@ -105,7 +105,7 @@ public class DynamXItemArmor<T extends ArmorObject<?>> extends ItemArmor impleme
     @Override
     public String getTranslationKey(ItemStack stack) {
         if (stack.getMetadata() != 0 && textureNum > 1) {
-            return super.getTranslationKey(stack) + "_" + getInfo().getTexturesFor(null).get((byte) stack.getMetadata()).getName().toLowerCase();
+            return super.getTranslationKey(stack) + "_" + getInfo().getTextureVariantsFor(null).get((byte) stack.getMetadata()).getName().toLowerCase();
         }
         return super.getTranslationKey(stack);
     }
@@ -120,7 +120,7 @@ public class DynamXItemArmor<T extends ArmorObject<?>> extends ItemArmor impleme
         tooltip.add("Description: " + getInfo().getDescription());
         tooltip.add("Pack: " + getInfo().getPackName());
         if (stack.getMetadata() > 0 && textureNum > 1)
-            tooltip.add("Texture: " + getInfo().getTexturesFor(null).get((byte) stack.getMetadata()).getName());
+            tooltip.add("Texture: " + getInfo().getTextureVariantsFor(null).get((byte) stack.getMetadata()).getName());
         super.addInformation(stack, worldIn, tooltip, flagIn);
         //tooltip.add("Armor slot : "+armorType.getName());
     }

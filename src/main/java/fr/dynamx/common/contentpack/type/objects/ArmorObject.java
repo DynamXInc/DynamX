@@ -6,14 +6,14 @@ import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
-import fr.dynamx.api.obj.IModelTextureSupplier;
+import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
 import fr.dynamx.client.renders.model.ModelObjArmor;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.loader.ObjectLoader;
 import fr.dynamx.common.items.DynamXItemArmor;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
-import fr.dynamx.client.renders.model.texture.TextureData;
+import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import fr.dynamx.utils.DynamXLoadingTasks;
 import lombok.Getter;
 import net.minecraft.client.renderer.GlStateManager;
@@ -37,7 +37,7 @@ import java.util.Map;
 /**
  * Armor object, for "armor_" files
  */
-public class ArmorObject<T extends ArmorObject<T>> extends AbstractItemObject<T> implements IModelTextureSupplier, ISubInfoTypeOwner<ArmorObject<?>> {
+public class ArmorObject<T extends ArmorObject<T>> extends AbstractItemObject<T> implements IModelTextureVariantsSupplier, ISubInfoTypeOwner<ArmorObject<?>> {
     @Getter
     @PackFileProperty(configNames = "ArmorHead", required = false)
     protected String armorHead;
@@ -87,17 +87,17 @@ public class ArmorObject<T extends ArmorObject<T>> extends AbstractItemObject<T>
         return objArmor;
     }
 
-    private final Map<Byte, TextureData> textures = new HashMap<>();
+    private final Map<Byte, TextureVariantData> textures = new HashMap<>();
     private int maxTextureMetadata;
 
     @Nullable
     @Override
-    public Map<Byte, TextureData> getTexturesFor(ObjObjectRenderer objObjectRenderer) {
+    public Map<Byte, TextureVariantData> getTextureVariantsFor(ObjObjectRenderer objObjectRenderer) {
         return textures;
     }
 
     @Override
-    public boolean hasCustomTextures() {
+    public boolean hasVaryingTextures() {
         return textures.size() > 1;
     }
 
@@ -132,16 +132,16 @@ public class ArmorObject<T extends ArmorObject<T>> extends AbstractItemObject<T>
             getObjArmor().init(DynamXContext.getObjModelRegistry().getModel(getModel()));
 
         textures.clear();
-        textures.put((byte) 0, new TextureData("Default", (byte) 0, getName()));
+        textures.put((byte) 0, new TextureVariantData("Default", (byte) 0, getName()));
         if (texturesArray != null) {
             byte id = 1;
             for (String[] info : texturesArray) {
-                textures.put(id, new TextureData(info[0], id, info[1] == null ? "dummy" : info[1]));
+                textures.put(id, new TextureVariantData(info[0], id, info[1] == null ? "dummy" : info[1]));
                 id++;
             }
         }
         int texCount = 0;
-        for (TextureData data : textures.values()) {
+        for (TextureVariantData data : textures.values()) {
             if (data.isItem())
                 texCount++;
         }
@@ -180,7 +180,7 @@ public class ArmorObject<T extends ArmorObject<T>> extends AbstractItemObject<T>
         EntityEquipmentSlot slot = ((DynamXItemArmor<T>) item).armorType;
         if (itemMeta == 0)
             return super.getTranslationKey(item, itemMeta) + "_" + slot.getName();
-        TextureData textureInfo = textures.get((byte) itemMeta);
+        TextureVariantData textureInfo = textures.get((byte) itemMeta);
         return super.getTranslationKey(item, itemMeta) + "_" + slot.getName() + "_" + textureInfo.getName().toLowerCase();
     }
 
@@ -204,7 +204,7 @@ public class ArmorObject<T extends ArmorObject<T>> extends AbstractItemObject<T>
         }
         if (itemMeta == 0)
             return prefix + " " + super.getTranslatedName(item, itemMeta);
-        TextureData textureInfo = textures.get((byte) itemMeta);
+        TextureVariantData textureInfo = textures.get((byte) itemMeta);
         return prefix + " " + super.getTranslatedName(item, itemMeta) + " " + textureInfo.getName();
     }
 

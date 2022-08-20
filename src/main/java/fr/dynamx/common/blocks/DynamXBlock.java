@@ -124,7 +124,7 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IInf
         tooltip.add("Description: " + getInfo().getDescription());
         tooltip.add("Pack: " + getInfo().getPackName());
         if (stack.getMetadata() > 0 && textureNum > 1) {
-            tooltip.add("Texture: " + getInfo().getTexturesFor(null).get((byte) stack.getMetadata()).getName());
+            tooltip.add("Texture: " + getInfo().getTextureVariantsFor(null).get((byte) stack.getMetadata()).getName());
         }
     }
 

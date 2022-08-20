@@ -1,7 +1,7 @@
 package fr.dynamx.api.contentpack.object.render;
 
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.obj.IModelTextureSupplier;
+import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
@@ -12,7 +12,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 
-public interface IObjPackObject extends IModelTextureSupplier {
+public interface IObjPackObject extends IModelTextureVariantsSupplier {
     @SideOnly(Side.CLIENT)
     ResourceLocation getModel();
 

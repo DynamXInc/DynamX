@@ -29,7 +29,7 @@ public interface IObjModelRegistry {
      * @param name           The model in format modid:path
      * @param customTextures A texture supplier for this model (allows multi-texturing)
      */
-    void registerModel(ObjModelPath name, IModelTextureSupplier customTextures);
+    void registerModel(ObjModelPath name, IModelTextureVariantsSupplier customTextures);
 
     /**
      * @return The model corresponding to the given name (the name used in registerModel)

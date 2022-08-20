@@ -26,7 +26,7 @@ import fr.dynamx.common.contentpack.type.vehicle.SteeringWheelInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.network.sync.vars.VehicleSynchronizedVariables;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
-import fr.dynamx.client.renders.model.texture.TextureData;
+import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import fr.dynamx.common.physics.entities.BaseWheeledVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.wheel.WheelPhysicsHandler;
@@ -103,7 +103,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
     @Override
     @SideOnly(Side.CLIENT)
     public void handleTextureID(byte metadata, BaseVehicleEntity<?> packInfo) {
-        TextureData chassis = packInfo.getPackInfo().getTextures().get(metadata);
+        TextureVariantData chassis = packInfo.getPackInfo().getTextures().get(metadata);
         if (chassis == null)
             chassis = packInfo.getPackInfo().getTextures().get((byte) 0);
         for (byte i = 0; i < wheelsTextureId.length; i++) {

@@ -44,13 +44,13 @@ public class ObjModelRenderer {
     @Getter
     private final IModelTextureVariantsSupplier customTextures;
 
-    public ObjModelRenderer(ResourceLocation location, List<ObjObjectRenderer> objObjects, @Nullable IModelTextureVariantsSupplier customTextures) {
+    public ObjModelRenderer(ResourceLocation location, List<ObjObjectRenderer> objObjects, @Nullable IModelTextureVariantsSupplier textureVariants) {
         this.location = location;
         this.objObjects = objObjects;
-        this.customTextures = customTextures;
+        this.textureVariants = textureVariants;
     }
 
-    public static ObjModelRenderer loadObjModel(ObjModelPath objModelPath, @Nullable IModelTextureVariantsSupplier customTextures) {
+    public static ObjModelRenderer loadObjModel(ObjModelPath objModelPath, @Nullable IModelTextureVariantsSupplier textureVariants) {
         try {
             List<ObjObjectRenderer> objObjects = new ArrayList<>();
 
@@ -58,11 +58,11 @@ public class ObjModelRenderer {
             objModelData.getObjObjects().forEach(ObjObjectData -> {
                 objObjects.add(new ObjObjectRenderer(ObjObjectData));
             });
-            return new ObjModelRenderer(objModelPath.getModelPath(), objObjects, customTextures);
+            return new ObjModelRenderer(objModelPath.getModelPath(), objObjects, textureVariants);
         } catch (Exception e) {
             log.error(" Model " + objModelPath.getModelPath() + " cannot be loaded !", e);
             DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.MODEL,
-                    customTextures != null ? customTextures.getPackName() : "Non-pack model",
+                    textureVariants != null ? textureVariants.getPackName() : "Non-pack model",
                     "Model " + objModelPath.getModelPath() + " cannot be loaded !", e, ErrorTrackingService.TrackedErrorLevel.HIGH);
         }
         return null;
@@ -80,12 +80,12 @@ public class ObjModelRenderer {
                 step = object;
                 object.clearDisplayLists();
                 if (object.getObjObjectData().getMesh().materialForEachVertex.length == 0) continue;
-                if (getCustomTextures() != null) {
-                    Map<Byte, TextureVariantData> customTextures = this.getCustomTextures().getTextureVariantsFor(object);
-                    if (customTextures != null) {
-                        TextureVariantData defaultTexture = customTextures.get((byte) 0);
+                if (getTextureVariants() != null) {
+                    Map<Byte, TextureVariantData> textureVariants = this.getTextureVariants().getTextureVariantsFor(object);
+                    if (textureVariants != null) {
+                        TextureVariantData defaultTexture = textureVariants.get((byte) 0);
                         boolean log = object.getObjObjectData().getName().equalsIgnoreCase("chassis");
-                        customTextures.values().forEach(data -> object.createList(defaultTexture, data, this, log));
+                        textureVariants.values().forEach(data -> object.createList(defaultTexture, data, this, log));
                         continue;
                     }
                 }
@@ -93,7 +93,7 @@ public class ObjModelRenderer {
             }
         } catch (Exception e) {
             log.error("Cannot setup model " + getLocation() + " ! Step: " + (step == null ? null : step.getObjObjectData().getName()), e);
-            DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.MODEL, customTextures != null ? customTextures.getPackName() : "Non-pack model", "Cannot setup model " + getLocation() + " ! Step: " + (step == null ? null : step.getObjObjectData().getName()), e, ErrorTrackingService.TrackedErrorLevel.HIGH);
+            DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.MODEL, textureVariants != null ? textureVariants.getPackName() : "Non-pack model", "Cannot setup model " + getLocation() + " ! Step: " + (step == null ? null : step.getObjObjectData().getName()), e, ErrorTrackingService.TrackedErrorLevel.HIGH);
         }
     }
 
@@ -102,9 +102,9 @@ public class ObjModelRenderer {
      * Will draw nothing if the model is not correctly loaded
      */
     public void renderGroup(ObjObjectRenderer obj, byte textureDataId) {
-        if (!MinecraftForge.EVENT_BUS.post(new DynamXModelRenderEvent.RenderPart(EventStage.PRE, this, getCustomTextures(), textureDataId, obj)) && !obj.getObjObjectData().getName().equals("main")) {
+        if (!MinecraftForge.EVENT_BUS.post(new DynamXModelRenderEvent.RenderPart(EventStage.PRE, this, getTextureVariants(), textureDataId, obj)) && !obj.getObjObjectData().getName().equals("main")) {
             obj.render(this, textureDataId);
-            MinecraftForge.EVENT_BUS.post(new DynamXModelRenderEvent.RenderPart(EventStage.POST, this, getCustomTextures(), textureDataId, obj));
+            MinecraftForge.EVENT_BUS.post(new DynamXModelRenderEvent.RenderPart(EventStage.POST, this, getTextureVariants(), textureDataId, obj));
         }
     }
 
@@ -130,17 +130,17 @@ public class ObjModelRenderer {
     }
 
     public boolean renderDefaultParts(byte textureDataId) {
-        if (getCustomTextures() == null)
+        if (getTextureVariants() == null)
             throw new IllegalStateException("Cannot determine the parts to render !");
-        if (!MinecraftForge.EVENT_BUS.post(new DynamXModelRenderEvent.RenderMainParts(EventStage.PRE, this, getCustomTextures(), textureDataId))) {
+        if (!MinecraftForge.EVENT_BUS.post(new DynamXModelRenderEvent.RenderMainParts(EventStage.PRE, this, getTextureVariants(), textureDataId))) {
             boolean drawn = false;
             for (ObjObjectRenderer object : objObjects) {
-                if (getCustomTextures().canRenderPart(object.getObjObjectData().getName())) {
+                if (getTextureVariants().canRenderPart(object.getObjObjectData().getName())) {
                     renderGroup(object, textureDataId);
                     drawn = true;
                 }
             }
-            MinecraftForge.EVENT_BUS.post(new DynamXModelRenderEvent.RenderMainParts(EventStage.POST, this, getCustomTextures(), textureDataId));
+            MinecraftForge.EVENT_BUS.post(new DynamXModelRenderEvent.RenderMainParts(EventStage.POST, this, getTextureVariants(), textureDataId));
             return drawn;
         }
         return true;
@@ -165,9 +165,9 @@ public class ObjModelRenderer {
             double bDist = v.distanceTo(new Vec3d(b.getObjObjectData().getCenter().x, b.getObjObjectData().getCenter().y, b.getObjObjectData().getCenter().z));
             return Double.compare(aDist, bDist);
         });
-        if (!MinecraftForge.EVENT_BUS.post(new DynamXModelRenderEvent.RenderFullModel(EventStage.PRE, this, getCustomTextures(), textureDataId))) {
+        if (!MinecraftForge.EVENT_BUS.post(new DynamXModelRenderEvent.RenderFullModel(EventStage.PRE, this, getTextureVariants(), textureDataId))) {
             objObjects.forEach(object -> renderGroup(object, textureDataId));
-            MinecraftForge.EVENT_BUS.post(new DynamXModelRenderEvent.RenderFullModel(EventStage.POST, this, getCustomTextures(), textureDataId));
+            MinecraftForge.EVENT_BUS.post(new DynamXModelRenderEvent.RenderFullModel(EventStage.POST, this, getTextureVariants(), textureDataId));
         }
     }
 

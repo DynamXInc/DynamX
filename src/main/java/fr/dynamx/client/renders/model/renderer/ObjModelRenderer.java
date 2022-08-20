@@ -42,7 +42,7 @@ public class ObjModelRenderer {
      */
     public boolean hasNoneMaterials;
     @Getter
-    private final IModelTextureVariantsSupplier customTextures;
+    private final IModelTextureVariantsSupplier textureVariants;
 
     public ObjModelRenderer(ResourceLocation location, List<ObjObjectRenderer> objObjects, @Nullable IModelTextureVariantsSupplier textureVariants) {
         this.location = location;

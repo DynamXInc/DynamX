@@ -90,12 +90,17 @@ public class ObjObjectRenderer {
     public void render(ObjModelRenderer model, byte textureDataId) {
         if (objObjectData.getMesh().materialForEachVertex.length == 0 || !isMaterialValid(model, objObjectData.getMesh().materialForEachVertex[0]))
             return;
+        GlStateManager.alphaFunc(516, 0.1F);
+        GlStateManager.enableBlend();
+        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         if (!modelDisplayList.containsKey(textureDataId)) {
             GlStateManager.color(1, 0, 0);
             GlStateManager.callList(modelDisplayList.get((byte) 0));
             GlStateManager.color(1, 1, 1);
-        } else
+        } else {
             GlStateManager.callList(modelDisplayList.get(textureDataId));
+        }
+        GlStateManager.disableBlend();
         GlStateManager.bindTexture(Minecraft.getMinecraft().getTextureMapBlocks().getGlTextureId());
     }
 
@@ -152,7 +157,7 @@ public class ObjObjectRenderer {
         String bindName = getExistingTexture(material, textureName, useDefault);
         MaterialTexture materialMultipleTextures = material.diffuseTexture.get(bindName);
         if (materialMultipleTextures != null) {
-            if(areVbosEnabled) {
+            if (areVbosEnabled) {
                 Minecraft.getMinecraft().getTextureManager().bindTexture(materialMultipleTextures.getPath());
             } else {
                 bindTexture(materialMultipleTextures.getGlTextureId());

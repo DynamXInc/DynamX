@@ -78,6 +78,7 @@ public class OBJLoader {
 
             Material currentMaterial = null;
             HashMap<ObjObjectData, IndexedModel[]> objects = new HashMap<>();
+            String currentObject = "";
             objects.put(new ObjObjectData("main"), new IndexedModel[]{result, normalModel});
             for (int j = 0, linesLength = lines.length; j < linesLength; j++) {
                 try {
@@ -118,7 +119,10 @@ public class OBJLoader {
                                 }
                                 break;
                             case USE_MATERIAL:
+                                setMaterialFinalIndex(indices, currentMaterial, currentObject);
                                 currentMaterial = getMaterial(materials, parts[1]);
+                                if (currentMaterial != null)
+                                    currentMaterial.indexPairPerObject.put(currentObject, new Material.IndexPair(indices.size(), -1));
                                 break;
                             case NEW_OBJECT:
                             case NEW_GROUP:
@@ -127,9 +131,11 @@ public class OBJLoader {
                                 normalModel.getObjIndices().addAll(indices);
                                 result = new IndexedModel();
                                 normalModel = new IndexedModel();
+                                setMaterialFinalIndex(indices, currentMaterial, currentObject);
                                 indices.clear();
                                 indicedMaterials.clear();
                                 objects.put(new ObjObjectData(parts[1]), new IndexedModel[]{result, normalModel});
+                                currentObject = parts[1];
                                 break;
                         }
                     }
@@ -140,6 +146,7 @@ public class OBJLoader {
             result.getObjIndices().addAll(indices);
             result.getMaterials().addAll(indicedMaterials);
             normalModel.getObjIndices().addAll(indices);
+            setMaterialFinalIndex(indices, currentMaterial, currentObject);
 
             for (ObjObjectData object : objects.keySet()) {
                 result = objects.get(object)[0];
@@ -199,6 +206,17 @@ public class OBJLoader {
             }
         } catch (Exception e) {
             throw new RuntimeException("Error while loading obj model", e);
+        }
+    }
+
+    private void setMaterialFinalIndex(List<IndexedModel.OBJIndex> indices, Material currentMaterial, String currentObject) {
+        if (currentMaterial == null) {
+            return;
+        }
+        if (currentMaterial.indexPairPerObject.containsKey(currentObject)) {
+            Material.IndexPair indexPair = currentMaterial.indexPairPerObject.get(currentObject);
+            indexPair.setFinalIndex(indices.size());
+            currentMaterial.indexPairPerObject.put(currentObject, indexPair);
         }
     }
 

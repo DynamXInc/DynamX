@@ -37,6 +37,19 @@ public class IndexedModel {
         mesh.vertices = verticesArray;
         mesh.indices = indicesArrayInt;
         mesh.materialForEachVertex = materials.toArray(new Material[0]);
+
+        List<Material> materialArrayList = new ArrayList<>();
+        if (mesh.materialForEachVertex.length > 0) {
+            materialArrayList.add(mesh.materialForEachVertex[0]);
+            Material firstMaterial = mesh.materialForEachVertex[0];
+            for (int i = 0; i < mesh.materialForEachVertex.length; i++) {
+                if (mesh.materialForEachVertex[i] != firstMaterial) {
+                    firstMaterial = mesh.materialForEachVertex[i];
+                    materialArrayList.add(firstMaterial);
+                }
+            }
+        }
+        mesh.materialsList = materialArrayList;
     }
 
     public void computeNormals() {

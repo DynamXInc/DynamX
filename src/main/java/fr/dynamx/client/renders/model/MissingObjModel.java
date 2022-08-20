@@ -56,9 +56,8 @@ public class MissingObjModel extends ObjModelRenderer {
         return emptyPartRenderer;
     }
 
-    @Nullable
     @Override
-    public IModelTextureVariantsSupplier getCustomTextures() {
+    public IModelTextureVariantsSupplier getTextureVariants() {
         return null;
     }
 

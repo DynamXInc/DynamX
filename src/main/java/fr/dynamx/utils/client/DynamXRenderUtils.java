@@ -12,6 +12,7 @@ import fr.dynamx.common.contentpack.type.vehicle.SteeringWheelInfo;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
@@ -19,7 +20,9 @@ import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.math.AxisAlignedBB;
+import org.lwjgl.opengl.APPLEVertexArrayObject;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL30;
 import org.lwjgl.util.glu.Sphere;
 import org.lwjgl.util.vector.Quaternion;
 
@@ -207,5 +210,17 @@ public class DynamXRenderUtils {
         GlStateManager.disableBlend();
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         GlStateManager.popMatrix();
+    }
+
+    public static int genVertexArrays() {
+        return Minecraft.IS_RUNNING_ON_MAC ? APPLEVertexArrayObject.glGenVertexArraysAPPLE() : GL30.glGenVertexArrays();
+    }
+
+    public static void bindVertexArray(int vaoID) {
+        if (Minecraft.IS_RUNNING_ON_MAC) {
+            APPLEVertexArrayObject.glBindVertexArrayAPPLE(vaoID);
+        } else {
+            GL30.glBindVertexArray(vaoID);
+        }
     }
 }

@@ -12,6 +12,7 @@ import fr.dynamx.common.objloader.data.ObjObjectData;
 import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import fr.dynamx.utils.DynamXLoadingTasks;
 import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
@@ -21,6 +22,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nullable;
+import javax.vecmath.Vector4f;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +45,9 @@ public class ObjModelRenderer {
     public boolean hasNoneMaterials;
     @Getter
     private final IModelTextureVariantsSupplier textureVariants;
+    @Getter
+    @Setter
+    private Vector4f modelColor = new Vector4f(1,1,1,1);
 
     public ObjModelRenderer(ResourceLocation location, List<ObjObjectRenderer> objObjects, @Nullable IModelTextureVariantsSupplier textureVariants) {
         this.location = location;
@@ -166,7 +171,10 @@ public class ObjModelRenderer {
             return Double.compare(aDist, bDist);
         });
         if (!MinecraftForge.EVENT_BUS.post(new DynamXModelRenderEvent.RenderFullModel(EventStage.PRE, this, getTextureVariants(), textureDataId))) {
-            objObjects.forEach(object -> renderGroup(object, textureDataId));
+            objObjects.forEach(object -> {
+                object.setObjectColor(modelColor);
+                renderGroup(object, textureDataId);
+            });
             MinecraftForge.EVENT_BUS.post(new DynamXModelRenderEvent.RenderFullModel(EventStage.POST, this, getTextureVariants(), textureDataId));
         }
     }
@@ -192,7 +200,8 @@ public class ObjModelRenderer {
             GlStateManager.rotate(blockObjectInfo.getRotation().z, 0, 0, 1);
 
         GlStateManager.disableBlend();
-        GlStateManager.color(canPlace ? 0 : 1, canPlace ? 1 : 0, 0, 1);
+
+        setModelColor(new Vector4f(canPlace ? 0 : 1, canPlace ? 1 : 0, 0, 0.7f));
         renderModel();
         GlStateManager.enableBlend();
         GlStateManager.popMatrix();

@@ -4,8 +4,8 @@ import fr.dynamx.client.renders.model.texture.MaterialTexture;
 import fr.dynamx.utils.RegistryNameSetter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureManager;
-import org.lwjgl.util.vector.Vector3f;
 
+import javax.vecmath.Vector3f;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,8 +48,9 @@ public class MtlMaterialLib {
                     break;
                 case TEXTURE_DIFFUSE: {
                     String name = parts.length >= 3 ? parts[2] : "Default";
+                    String textureName = parts[1].equalsIgnoreCase("white") ? "textures/white.png" : startPath + parts[1];
                     current.diffuseTexture.put(name,
-                            new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault(startPath + parts[1]), name, -1));
+                            new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault(textureName), name, -1));
                     break;
                 }
                 case TEXTURE_AMBIENT: {

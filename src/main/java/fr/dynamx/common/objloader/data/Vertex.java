@@ -1,4 +1,4 @@
-package fr.dynamx.common.objloader;
+package fr.dynamx.common.objloader.data;
 
 
 import lombok.AllArgsConstructor;

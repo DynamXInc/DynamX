@@ -1,6 +1,9 @@
 package fr.dynamx.common.objloader;
 
 
+import fr.dynamx.common.objloader.data.Material;
+import fr.dynamx.common.objloader.data.Mesh;
+import fr.dynamx.common.objloader.data.Vertex;
 import lombok.Getter;
 
 import javax.vecmath.Vector2f;

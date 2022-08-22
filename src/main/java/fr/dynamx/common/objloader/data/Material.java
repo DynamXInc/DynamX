@@ -1,4 +1,4 @@
-package fr.dynamx.common.objloader;
+package fr.dynamx.common.objloader.data;
 
 
 import fr.dynamx.client.renders.model.texture.MaterialTexture;

@@ -1,9 +1,8 @@
-package fr.dynamx.common.objloader;
+package fr.dynamx.common.objloader.data;
 
 import com.jme3.bullet.collision.shapes.BoxCollisionShape;
 import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.math.Vector3f;
-import fr.dynamx.common.objloader.data.ObjObjectData;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -3,7 +3,7 @@ package fr.dynamx.client.renders.model;
 import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
-import fr.dynamx.common.objloader.Mesh;
+import fr.dynamx.common.objloader.data.Mesh;
 import fr.dynamx.common.objloader.data.ObjObjectData;
 import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.client.Minecraft;
@@ -12,7 +12,6 @@ import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 
-import javax.annotation.Nullable;
 import javax.vecmath.Vector3f;
 import java.util.ArrayList;
 

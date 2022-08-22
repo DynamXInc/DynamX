@@ -1,5 +1,6 @@
 package fr.dynamx.common.objloader;
 
+import fr.dynamx.common.objloader.data.Material;
 import fr.dynamx.common.objloader.data.ObjObjectData;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.RegistryNameSetter;
@@ -23,7 +24,7 @@ public class OBJLoader {
     private static final String USE_MATERIAL = "usemtl";
     private static final String NEW_MATERIAL = "mtllib";
 
-    private static final List<MtlMaterialLib> materialLibs = new ArrayList<>();
+    private static final List<MTLLoader> materialLibs = new ArrayList<>();
 
     private boolean hasNormals = false;
     private boolean hasTexCoords = false;
@@ -33,7 +34,7 @@ public class OBJLoader {
         this.objObjects = objects;
     }
 
-    public static List<MtlMaterialLib> getMaterialLibs() {
+    public static List<MTLLoader> getMaterialLibs() {
         return materialLibs;
     }
 
@@ -112,7 +113,7 @@ public class OBJLoader {
                                 if(startPath != null) {
                                     String path = startPath + parts[1];
                                     IResource resp = Minecraft.getMinecraft().getResourceManager().getResource(RegistryNameSetter.getResourceLocationWithDynamXDefault(path));
-                                    MtlMaterialLib material = new MtlMaterialLib();
+                                    MTLLoader material = new MTLLoader();
                                     material.parse(startPath, new String(DynamXUtils.readInputStream(resp.getInputStream()), StandardCharsets.UTF_8));
                                     materials.addAll(material.getMaterials());
                                     materialLibs.add(material);

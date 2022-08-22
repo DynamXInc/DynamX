@@ -1,6 +1,5 @@
 package fr.dynamx.common.objloader.data;
 
-import fr.dynamx.common.objloader.Mesh;
 import lombok.Getter;
 import lombok.Setter;
 

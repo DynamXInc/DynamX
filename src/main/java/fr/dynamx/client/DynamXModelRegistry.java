@@ -13,7 +13,7 @@ import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.objects.ArmorObject;
-import fr.dynamx.common.objloader.MtlMaterialLib;
+import fr.dynamx.common.objloader.MTLLoader;
 import fr.dynamx.common.objloader.OBJLoader;
 import fr.dynamx.utils.DynamXLoadingTasks;
 import net.minecraft.client.Minecraft;
@@ -111,13 +111,13 @@ public class DynamXModelRegistry implements IObjModelRegistry {
             }
             DynamXMain.log.debug("Tex manager wait took " + (System.currentTimeMillis() - time) + " ms");
 
-            OBJLoader.getMaterialLibs().forEach(MtlMaterialLib::loadTextures);
+            OBJLoader.getMaterialLibs().forEach(MTLLoader::loadTextures);
         }, () -> {
             ProgressManager.ProgressBar bar = ProgressManager.push("Loading obj models", 3);
             log.info("Loading model textures and compiling display lists...");
             //Loads all textures of models, cannot be done before because the TextureManager is not initialized
             bar.step("Uploading textures");
-            OBJLoader.getMaterialLibs().forEach(MtlMaterialLib::uploadTextures);
+            OBJLoader.getMaterialLibs().forEach(MTLLoader::uploadTextures);
             bar.step("Compiling models");
             MODELS.forEach((s, t) -> t.setupModel());
             bar.step("Compiling armors");

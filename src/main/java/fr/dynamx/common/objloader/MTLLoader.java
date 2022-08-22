@@ -1,6 +1,7 @@
 package fr.dynamx.common.objloader;
 
 import fr.dynamx.client.renders.model.texture.MaterialTexture;
+import fr.dynamx.common.objloader.data.Material;
 import fr.dynamx.utils.RegistryNameSetter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -9,7 +10,7 @@ import javax.vecmath.Vector3f;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MtlMaterialLib {
+public class MTLLoader {
     public static final String COMMENT = "#";
     public static final String NEW_MATERIAL = "newmtl";
     public static final String AMBIENT_COLOR = "Ka";

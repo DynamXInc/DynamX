@@ -1,20 +1,22 @@
 package fr.dynamx.client.renders.model.texture;
 
 import fr.aym.acslib.impl.services.thrload.ThreadedTexture;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.ToString;
 import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.ResourceLocation;
 
+@AllArgsConstructor
+@ToString
 public class MaterialTexture {
+    @Getter
     private final ResourceLocation path;
+    @Getter
     private final String name;
-    private int id;
-
-    public MaterialTexture(ResourceLocation path, String name, int id) {
-        this.path = path;
-        this.name = name;
-        this.id = id;
-    }
+    @Getter
+    private int glTextureId;
 
     public void loadTexture(TextureManager man) {
         ITextureObject obj = man.getTexture(path);
@@ -28,27 +30,6 @@ public class MaterialTexture {
         ITextureObject obj = man.getTexture(path);
         if (obj instanceof ThreadedTexture)
             ((ThreadedTexture) obj).uploadTexture(man);
-        id = obj.getGlTextureId();
-    }
-
-    public ResourceLocation getPath() {
-        return path;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public int getGlTextureId() {
-        return id;
-    }
-
-    @Override
-    public String toString() {
-        return "MaterialTexture{" +
-                "path=" + path +
-                ", name='" + name + '\'' +
-                ", id=" + id +
-                '}';
+        glTextureId = obj.getGlTextureId();
     }
 }

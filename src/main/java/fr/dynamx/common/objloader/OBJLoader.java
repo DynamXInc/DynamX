@@ -4,6 +4,7 @@ import fr.dynamx.common.objloader.data.Material;
 import fr.dynamx.common.objloader.data.ObjObjectData;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.RegistryNameSetter;
+import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IResource;
 
@@ -23,7 +24,7 @@ public class OBJLoader {
     private static final String NEW_GROUP = "g";
     private static final String USE_MATERIAL = "usemtl";
     private static final String NEW_MATERIAL = "mtllib";
-
+    @Getter
     private static final List<MTLLoader> materialLibs = new ArrayList<>();
 
     private boolean hasNormals = false;
@@ -32,10 +33,6 @@ public class OBJLoader {
 
     public OBJLoader(List<ObjObjectData> objects) {
         this.objObjects = objects;
-    }
-
-    public static List<MTLLoader> getMaterialLibs() {
-        return materialLibs;
     }
 
     public static String[] trim(String[] split) {

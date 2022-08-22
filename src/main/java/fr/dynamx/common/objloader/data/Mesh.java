@@ -14,7 +14,6 @@ public class Mesh {
     public int[] indices;
     public Vertex[] vertices;
     public Material[] materialForEachVertex;
-
     public List<Material> materialsList = new ArrayList<>();
 
     public float[] getVerticesPos() {

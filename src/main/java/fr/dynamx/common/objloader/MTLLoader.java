@@ -3,9 +3,9 @@ package fr.dynamx.common.objloader;
 import fr.dynamx.client.renders.model.texture.MaterialTexture;
 import fr.dynamx.common.objloader.data.Material;
 import fr.dynamx.utils.RegistryNameSetter;
+import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureManager;
-
 import javax.vecmath.Vector3f;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +24,7 @@ public class MTLLoader {
     public static final String TEXTURE_DIFFUSE = "map_Kd";
     public static final String TEXTURE_SPECULAR = "map_Ks";
     public static final String TEXTURE_TRANSPARENCY = "map_d";
-
+    @Getter
     private final List<Material> materials = new ArrayList<>();
 
     public void parse(String startPath, String content) {
@@ -33,6 +33,7 @@ public class MTLLoader {
         for (String s : lines) {
             String line = s.trim();
             String[] parts = line.split(" ");
+            String name = parts.length >= 3 ? parts[2] : "Default";
             switch (parts[0]) {
                 case COMMENT:
                     break;
@@ -47,29 +48,25 @@ public class MTLLoader {
                 case DIFFUSE_COLOR:
                     current.diffuseColor = new Vector3f(Float.parseFloat(parts[1]), Float.parseFloat(parts[2]), Float.parseFloat(parts[3]));
                     break;
-                case TEXTURE_DIFFUSE: {
-                    String name = parts.length >= 3 ? parts[2] : "Default";
+                case TEXTURE_DIFFUSE:
                     String textureName = parts[1].equalsIgnoreCase("white") ? "textures/white.png" : startPath + parts[1];
                     current.diffuseTexture.put(name,
                             new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault(textureName), name, -1));
                     break;
-                }
-                case TEXTURE_AMBIENT: {
-                    String name = parts.length >= 3 ? parts[2] : "Default";
+                case TEXTURE_AMBIENT:
                     current.ambientTexture.put(name,
                             new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault(startPath + parts[1]), name, -1));
                     break;
-                }
                 case TRANSPARENCY_D:
                 case TRANSPARENCY_TR:
                     current.transparency = (float) Double.parseDouble(parts[1]);
                     break;
             }
+            if (current != null && current.diffuseTexture.isEmpty()){
+                current.diffuseTexture.put(name,
+                        new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault("missing_texture_for_" + startPath), name, -1));
+            }
         }
-    }
-
-    public List<Material> getMaterials() {
-        return materials;
     }
 
     /**

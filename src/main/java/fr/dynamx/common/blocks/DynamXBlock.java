@@ -58,11 +58,8 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IInf
      * Use the other constructor to create custom blocks and easily set BlockObject's properties
      */
     public DynamXBlock(T blockObjectInfo) {
-        this(blockObjectInfo, Material.ROCK);
-    }
+        super(Material.ROCK);
 
-    public DynamXBlock(T blockObjectInfo, Material material) {
-        super(material);
         this.blockObjectInfo = blockObjectInfo;
         setDefaultState(this.blockState.getBaseState().withProperty(METADATA, 0));
         RegistryNameSetter.setRegistryName(this, DynamXConstants.ID, blockObjectInfo.getFullName().toLowerCase());

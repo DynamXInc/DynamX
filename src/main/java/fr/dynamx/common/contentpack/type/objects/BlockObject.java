@@ -10,7 +10,6 @@ import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.events.CreatePackItemEvent;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.contentpack.loader.ObjectLoader;
-import net.minecraft.block.material.Material;
 import net.minecraftforge.common.MinecraftForge;
 
 import java.util.ArrayList;
@@ -29,9 +28,6 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
     @PackFileProperty(configNames = "LightLevel", defaultValue = "0", required = false)
     protected float lightLevel;
 
-    @PackFileProperty(configNames = "Material", required = false, defaultValue = "ROCK")
-    protected Material material;
-
     public BlockObject(String packName, String fileName) {
         super(packName, fileName);
         this.itemIcon = "Block";
@@ -45,7 +41,7 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
         if (event.isOverridden()) {
             return (IInfoOwner<T>) event.getSpawnItem();
         } else {
-            return new DynamXBlock(this, material != null ? material : Material.ROCK);
+            return new DynamXBlock(this);
         }
     }
 

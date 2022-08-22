@@ -8,7 +8,6 @@ import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
-import fr.dynamx.utils.EnumSeatPlayerPosition;
 import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.debug.ClientDebugSystem;
 import fr.dynamx.utils.debug.renderer.DebugRenderer;
@@ -31,7 +30,7 @@ import java.util.stream.Collectors;
 
 public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Render<T> {
     private final List<DebugRenderer<T>> debugRenderers = new ArrayList<>();
-    public static boolean shouldRenderPlayerSitting;
+
     public RenderPhysicsEntity(RenderManager manager) {
         super(manager);
         addDebugRenderers(new DebugRenderer.ShapesDebug(), new DebugRenderer.CenterOfMassDebug());
@@ -106,14 +105,8 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
                 //Apply seat rotation
                 if(entity instanceof IModuleContainer.ISeatsContainer) {
                     PartSeat seat = ((IModuleContainer.ISeatsContainer) entity).getSeats().getRidingSeat(e);
-                    if(seat != null) {
-                        EnumSeatPlayerPosition position = seat.getPlayerPosition();
-                        shouldRenderPlayerSitting = position == EnumSeatPlayerPosition.SIT || position == null;
-
-                        if (seat.getRotation() != null)
-                            GlStateManager.rotate(GlQuaternionPool.get(seat.getRotation()));
-                        if (position == EnumSeatPlayerPosition.LYING)
-                            GlStateManager.rotate(90, -1, 0, 0);
+                    if(seat != null && seat.getRotation() != null) {
+                        GlStateManager.rotate(GlQuaternionPool.get(seat.getRotation()));
                     }
                 }
 

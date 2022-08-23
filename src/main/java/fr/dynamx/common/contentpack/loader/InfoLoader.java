@@ -1,6 +1,6 @@
 package fr.dynamx.common.contentpack.loader;
 
-import fr.aym.acslib.api.services.ErrorManagerService;
+import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.contentpack.object.IShapeContainer;
@@ -125,11 +125,11 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
                         inComment = false;
                     else {
                         //DynamXMain.log.error("Illegal multi-line comment end in " + info.getFullName() + " : " + s);
-                        DynamXErrorManager.addError(info.getPackName(), "syntax_error", ErrorManagerService.ErrorLevel.HIGH, info.getName(), "Illegal multi-line comment end in line " + s + ", property skipped");
+                        DynamXErrorManager.addError(info.getPackName(), "syntax_error", ErrorLevel.HIGH, info.getName(), "Illegal multi-line comment end in line " + s + ", property skipped");
                     }
                 } else if (inComment && s.contains("}")) {
                     //DynamXMain.log.error("Found a never ending multi-line comment in " + info.getFullName());
-                    DynamXErrorManager.addError(info.getPackName(), "syntax_error", ErrorManagerService.ErrorLevel.FATAL, info.getName(), "Found a never ending multi-line comment, some properties may be missing in-game");
+                    DynamXErrorManager.addError(info.getPackName(), "syntax_error", ErrorLevel.FATAL, info.getName(), "Found a never ending multi-line comment, some properties may be missing in-game");
                 } else if (!inComment && !s.startsWith("//")) {
                     if (s.startsWith("/*")) {
                         inComment = true;
@@ -141,11 +141,11 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
             }
             if (inComment) {
                 //DynamXMain.log.error("Found a never ending multi-line comment in " + info.getFullName());
-                DynamXErrorManager.addError(info.getPackName(), "syntax_error", ErrorManagerService.ErrorLevel.FATAL, info.getName(), "Found a never ending multi-line comment, some properties may be missing in-game");
+                DynamXErrorManager.addError(info.getPackName(), "syntax_error", ErrorLevel.FATAL, info.getName(), "Found a never ending multi-line comment, some properties may be missing in-game");
             }
             SubInfoTypeAnnotationCache.getOrLoadData(info.getClass()).values().forEach(p -> {
                 if (p.isRequired() && !foundProperties.contains(p)) {
-                    DynamXErrorManager.addError(info.getPackName(), "required_property", ErrorManagerService.ErrorLevel.HIGH, info.getName(), p.getConfigFieldName());
+                    DynamXErrorManager.addError(info.getPackName(), "required_property", ErrorLevel.HIGH, info.getName(), p.getConfigFieldName());
                 }
             });
         }
@@ -171,7 +171,7 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
                     inComment = false;
                 else {
                     //DynamXMain.log.error("Illegal multi-line comment end in " + obj.getFullName() + " : " + s);
-                    DynamXErrorManager.addError(obj.getPackName(), "syntax_error", ErrorManagerService.ErrorLevel.HIGH, obj.getName(), "Illegal multi-line comment end in line " + s + ", property skipped");
+                    DynamXErrorManager.addError(obj.getPackName(), "syntax_error", ErrorLevel.HIGH, obj.getName(), "Illegal multi-line comment end in line " + s + ", property skipped");
                 }
             } else if (!inComment && !s.startsWith("//")) {
                 if (s.startsWith("/*")) {
@@ -193,12 +193,12 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
         }
         if (inComment) {
             //DynamXMain.log.error("Found a never ending multi-line comment in " + obj.getFullName());
-            DynamXErrorManager.addError(obj.getPackName(), "syntax_error", ErrorManagerService.ErrorLevel.FATAL, obj.getName(), "Found a never ending multi-line comment, some properties may be missing in-game");
+            DynamXErrorManager.addError(obj.getPackName(), "syntax_error", ErrorLevel.FATAL, obj.getName(), "Found a never ending multi-line comment, some properties may be missing in-game");
         }
 
         SubInfoTypeAnnotationCache.getOrLoadData(obj.getClass()).values().forEach(p -> {
             if (p.isRequired() && !foundProperties.contains(p)) {
-                DynamXErrorManager.addError(obj.getPackName(), "required_property", ErrorManagerService.ErrorLevel.HIGH, obj.getName(), p.getConfigFieldName());
+                DynamXErrorManager.addError(obj.getPackName(), "required_property", ErrorLevel.HIGH, obj.getName(), p.getConfigFieldName());
             }
         });
     }
@@ -225,7 +225,7 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
                         INamedObject parent = obj;
                         if(parent instanceof ISubInfoType)
                             parent = ((ISubInfoType<?>) parent).getRootOwner();
-                        DynamXErrorManager.addError(obj.getPackName(), "deprecated_prop", ErrorManagerService.ErrorLevel.LOW, parent.getName(), "Deprecated config key found " + key + " in " + obj.getName()+". You should now use " + fixResult.newKey());
+                        DynamXErrorManager.addError(obj.getPackName(), "deprecated_prop", ErrorLevel.LOW, parent.getName(), "Deprecated config key found " + key + " in " + obj.getName()+". You should now use " + fixResult.newKey());
                     }
                     key = fixResult.newKey();
                     value = fixResult.newValue(value);
@@ -235,7 +235,7 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
             if (d != null) foundProperties.add(d);
         } else if (!line.isEmpty()) {
             //DynamXMain.log.warn("Illegal line content (not a comment, not a property) in " + obj.getFullName() + " : " + line);
-            DynamXErrorManager.addError(obj.getPackName(), "syntax_error", ErrorManagerService.ErrorLevel.LOW, obj.getName(), "Missing ':' on line " + line + ", and not a comment");
+            DynamXErrorManager.addError(obj.getPackName(), "syntax_error", ErrorLevel.LOW, obj.getName(), "Missing ':' on line " + line + ", and not a comment");
         }
     }
 
@@ -253,7 +253,7 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
                 INamedObject parent = obj;
                 if(parent instanceof ISubInfoType)
                     parent = ((ISubInfoType<?>) parent).getRootOwner();
-                DynamXErrorManager.addError(obj.getPackName(), "missing_prop", ErrorManagerService.ErrorLevel.HIGH, parent.getName(), "PackFileProperty with name " + key + " does not exists in part " + obj.getName());
+                DynamXErrorManager.addError(obj.getPackName(), "missing_prop", ErrorLevel.HIGH, parent.getName(), "PackFileProperty with name " + key + " does not exists in part " + obj.getName());
                 return null;
             }
             return data.apply(obj, value);
@@ -279,7 +279,7 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
             DynamXMain.log.debug("Ignoring optional block " + name + " in " + obj);
         } else {
             //DynamXMain.log.error("Unknown sub property " + tags[0] + " in " + obj.getFullName());
-            DynamXErrorManager.addError(obj.getPackName(), "unknown_sub_info", ErrorManagerService.ErrorLevel.HIGH, obj.getName(), name);
+            DynamXErrorManager.addError(obj.getPackName(), "unknown_sub_info", ErrorLevel.HIGH, obj.getName(), name);
         }
         return null;
     }
@@ -314,7 +314,7 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
                 } catch (Exception e) {
                     ((IShapeContainer) info).markFailedShape();
                     //DynamXMain.log.fatal("Cannot load physics collision shape of " + info.getFullName() + " !", e);
-                    DynamXErrorManager.addError(info.getPackName(), "collision_shape_error", ErrorManagerService.ErrorLevel.FATAL, info.getName(), null, e);
+                    DynamXErrorManager.addError(info.getPackName(), "collision_shape_error", ErrorLevel.FATAL, info.getName(), null, e);
                 }
             }
             ProgressManager.pop(bar1);

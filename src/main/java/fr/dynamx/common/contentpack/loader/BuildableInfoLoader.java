@@ -1,6 +1,6 @@
 package fr.dynamx.common.contentpack.loader;
 
-import fr.aym.acslib.api.services.ErrorManagerService;
+import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.IShapeContainer;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoTypeOwner;
@@ -91,7 +91,7 @@ public class BuildableInfoLoader<A extends SubInfoTypeOwner.BuildableSubInfoType
             } catch (Exception e) {
                 ((IShapeContainer) info).markFailedShape();
                 //DynamXMain.log.fatal("Cannot load physics collision shape of " + info.getFullName() + " !", e);
-                DynamXErrorManager.addError(info.getPackName(), "collision_shape_error", ErrorManagerService.ErrorLevel.FATAL, info.getName(), null, e);
+                DynamXErrorManager.addError(info.getPackName(), "collision_shape_error", ErrorLevel.FATAL, info.getName(), null, e);
             }
             if (!info.isErrored()) {
                 try {
@@ -99,7 +99,7 @@ public class BuildableInfoLoader<A extends SubInfoTypeOwner.BuildableSubInfoType
                     super.loadItems(vehicleInfo, hot);
                 } catch (Exception e) {
                     //log.error("Cannot complete vehicle " + info + " !", e);
-                    DynamXErrorManager.addError(info.getPackName(), "complete_vehicle_error", ErrorManagerService.ErrorLevel.FATAL, info.getName(), null, e);
+                    DynamXErrorManager.addError(info.getPackName(), "complete_vehicle_error", ErrorLevel.FATAL, info.getName(), null, e);
                 }
             } else {
                 log.info("Ignoring errored vehicle " + info.getFullName() + ". See previous errors.");

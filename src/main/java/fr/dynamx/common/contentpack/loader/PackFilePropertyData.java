@@ -1,6 +1,6 @@
 package fr.dynamx.common.contentpack.loader;
 
-import fr.aym.acslib.api.services.ErrorManagerService;
+import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.utils.errors.DynamXErrorManager;
@@ -75,7 +75,7 @@ public class PackFilePropertyData<T> {
         try {
             val = parse(value);
         } catch (Exception e) {
-            DynamXErrorManager.addError(on.getPackName(), "property_parse_error", ErrorManagerService.ErrorLevel.HIGH, on.getName(), "Cannot parse property " + getConfigFieldName() + ". Make sure to respect the syntax given in the documentation.", e);
+            DynamXErrorManager.addError(on.getPackName(), "property_parse_error", ErrorLevel.HIGH, on.getName(), "Cannot parse property " + getConfigFieldName() + ". Make sure to respect the syntax given in the documentation.", e);
             return null; //Error while parsing
         }
         field.setAccessible(true);

@@ -1,6 +1,6 @@
 package fr.dynamx.common.contentpack;
 
-import fr.aym.acslib.api.services.ErrorManagerService;
+import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.DynamXAddon;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import net.minecraftforge.fml.common.Loader;
@@ -57,7 +57,7 @@ public class AddonLoader {
                         throw new IllegalArgumentException("Addon class " + name + " (" + data.getClassName() + ") with not @AddonEventSubscriber init method");
                 } catch (Exception e) {
                     //log.error("Addon " + name + " cannot be loaded !", e);
-                    DynamXErrorManager.addError("DynamX initialization", "addon_load_error", ErrorManagerService.ErrorLevel.FATAL, name, "Addon class: " + data.getClassName(), e, 900);
+                    DynamXErrorManager.addError("DynamX initialization", "addon_load_error", ErrorLevel.FATAL, name, "Addon class: " + data.getClassName(), e, 900);
                 }
             }
         }
@@ -93,7 +93,7 @@ public class AddonLoader {
                 container.ifPresent(modContainer -> Loader.instance().setActiveModContainer(current));
             } catch (Exception e) {
                 log.error("Addon " + addon.toString() + " cannot be initialized !", e);
-                DynamXErrorManager.addError("DynamX initialization", "addon_init_error", ErrorManagerService.ErrorLevel.FATAL, addon.getAddonName(), null, e);
+                DynamXErrorManager.addError("DynamX initialization", "addon_init_error", ErrorLevel.FATAL, addon.getAddonName(), null, e);
             }
         }
         log.info("Loaded addons are " + getAddons().values());

@@ -1,6 +1,6 @@
 package fr.dynamx.common.contentpack.loader;
 
-import fr.aym.acslib.api.services.ErrorManagerService;
+import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
@@ -108,7 +108,7 @@ public class SubInfoTypesRegistry<T extends ISubInfoTypeOwner<?>> {
                 }
             } catch (Exception e) {
                 //log.error("Cannot load @RegisteredSubInfoType annotation in class " + name + " !", e);
-                DynamXErrorManager.addError("DynamX initialization", "addon_error", ErrorManagerService.ErrorLevel.FATAL, name, "Cannot load @RegisteredSubInfoType annotation in class " + data.getClassName(), e, 900);
+                DynamXErrorManager.addError("DynamX initialization", "addon_error", ErrorLevel.FATAL, name, "Cannot load @RegisteredSubInfoType annotation in class " + data.getClassName(), e, 900);
             }
         }
     }

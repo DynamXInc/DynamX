@@ -1,6 +1,6 @@
 package fr.dynamx.common.obj.eximpl;
 
-import fr.aym.acslib.api.services.ErrorManagerService;
+import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.events.DynamXModelRenderEvent;
 import fr.dynamx.api.events.EventStage;
 import fr.dynamx.api.obj.IModelTextureSupplier;
@@ -42,7 +42,7 @@ public class TessellatorModelClient extends ObjModelClient {
             return new TessellatorModelClient(location, objObjects, customTextures);
         } catch (Exception e) {
             //log.error(" Model " + location + " cannot be loaded !", e);
-            DynamXErrorManager.addError(customTextures != null ? customTextures.getPackName() : "Non-pack model", "obj_error", ErrorManagerService.ErrorLevel.HIGH, location.toString(), "", e);
+            DynamXErrorManager.addError(customTextures != null ? customTextures.getPackName() : "Non-pack model", "obj_error", ErrorLevel.HIGH, location.toString(), "", e);
         }
         return null;
     }
@@ -79,7 +79,7 @@ public class TessellatorModelClient extends ObjModelClient {
             }
         } catch (Exception e) {
             //log.error("Cannot setup model " + getLocation() + " ! Step: " + (step == null ? null : step.getName()), e);
-            DynamXErrorManager.addError(customTextures != null ? customTextures.getPackName() : "Non-pack model", "obj_error", ErrorManagerService.ErrorLevel.HIGH, getLocation().toString(), (step == null ? null : step.getName()), e);
+            DynamXErrorManager.addError(customTextures != null ? customTextures.getPackName() : "Non-pack model", "obj_error", ErrorLevel.HIGH, getLocation().toString(), (step == null ? null : step.getName()), e);
         }
     }
 

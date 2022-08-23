@@ -1,13 +1,13 @@
 @font-face {
     font-family: "dnx:e_hud";
     font-style: normal;
-    src: url("dynamxmod:css/e_hud.ttf");
+    src: url("dynamxmod:css/font_hud_1.ttf");
     font-size: 30px;
 }
 @font-face {
     font-family: "dnx:rpms";
     font-style: normal;
-    src: url("dynamxmod:css/e_hud_2.ttf");
+    src: url("dynamxmod:css/font_hud_2.ttf");
     font-size: 30px;
 }
 

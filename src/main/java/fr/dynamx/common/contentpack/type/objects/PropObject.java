@@ -2,7 +2,7 @@ package fr.dynamx.common.contentpack.type.objects;
 
 import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.math.Vector3f;
-import fr.aym.acslib.api.services.ErrorManagerService;
+import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
@@ -55,7 +55,7 @@ public class PropObject<T extends BlockObject<?>> extends AbstractProp<T> implem
 
     public PropObject(String packName, String fileName) {
         super(packName, fileName);
-        DynamXErrorManager.addError(getPackName(), "deprecated_prop", ErrorManagerService.ErrorLevel.LOW, fileName, "Props should now be declared in the corresponding block_" + getName() + ".dynx file");
+        DynamXErrorManager.addError(getPackName(), "deprecated_prop", ErrorLevel.LOW, fileName, "Props should now be declared in the corresponding block_" + getName() + ".dynx file");
         owner = null;
         this.itemIcon = "Prop";
     }

@@ -1,16 +1,20 @@
 package fr.dynamx.common.contentpack;
 
 import fr.aym.acsguis.api.ACsGuiApi;
-import fr.aym.acslib.api.services.ErrorManagerService;
+import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.aym.acslib.api.services.mps.ModProtectionContainer;
 import fr.dynamx.api.contentpack.ContentPackType;
 import fr.dynamx.api.events.ContentPackSystemEvent;
 import fr.dynamx.api.events.PhysicsEntityEvent;
+import fr.dynamx.client.gui.GuiBlockCustomization;
+import fr.dynamx.client.gui.GuiDnxDebug;
+import fr.dynamx.client.gui.GuiLoadingErrors;
 import fr.dynamx.client.handlers.hud.CarController;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.loader.InfoLoader;
 import fr.dynamx.common.contentpack.loader.SubInfoTypesRegistry;
 import fr.dynamx.common.contentpack.sync.PackSyncHandler;
+import fr.dynamx.common.slopes.GuiSlopesConfig;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.DynamXLoadingTasks;
@@ -118,7 +122,7 @@ public class ContentPackLoader {
                         } catch (Exception e) {
                             DynamXMain.log.error("Failed to load textures and models of DynamX pack : " + file.getName());
                             DynamXMain.log.throwing(e);
-                            DynamXErrorManager.addError(file.getName(), "res_pack_load_fail", ErrorManagerService.ErrorLevel.FATAL, "assets", "Failed to register as resource pack", e, 700);
+                            DynamXErrorManager.addError(file.getName(), "res_pack_load_fail", ErrorLevel.FATAL, "assets", "Failed to register as resource pack", e, 700);
                         }
                     }
                     //Custom ModProtectionSystem repositories
@@ -134,7 +138,7 @@ public class ContentPackLoader {
                             } catch (Exception e) {
                                 DynamXMain.log.error("Failed to load mps resources jar : " + f.getName());
                                 DynamXMain.log.throwing(e);
-                                DynamXErrorManager.addError(file.getName(), "res_pack_load_fail", ErrorManagerService.ErrorLevel.FATAL, "assets", "Failed to add to classpath", e, 700);
+                                DynamXErrorManager.addError(file.getName(), "res_pack_load_fail", ErrorLevel.FATAL, "assets", "Failed to add to classpath", e, 700);
                             }
                             DynamXMain.log.info("Loaded mps pack : " + file.getName());
                         }
@@ -153,7 +157,7 @@ public class ContentPackLoader {
                     } catch (Exception e) {
                         DynamXMain.log.error("Failed to load textures and models of DynamX pack : " + file.getName());
                         DynamXMain.log.throwing(e);
-                        DynamXErrorManager.addError(file.getName(), "res_pack_load_fail", ErrorManagerService.ErrorLevel.FATAL, "assets", "Failed to register as resource pack", e, 700);
+                        DynamXErrorManager.addError(file.getName(), "res_pack_load_fail", ErrorLevel.FATAL, "assets", "Failed to register as resource pack", e, 700);
                     }
                     //Custom ModProtectionSystem repositories
                     protectedResources.put(file.getName(), modProtectionContainer.getParent().loadCustomRepository(modProtectionContainer, file));
@@ -164,11 +168,11 @@ public class ContentPackLoader {
             DynamXMain.log.info("Loaded " + packCount + " DynamX resource packs");
 
             //Add built-in style, before customs by addons
-            ACsGuiApi.registerStyleSheetToPreload(new ResourceLocation(DynamXConstants.ID, "css/block_custom.css"));
-            ACsGuiApi.registerStyleSheetToPreload(new ResourceLocation(DynamXConstants.ID, "css/dnx_debug.css"));
+            ACsGuiApi.registerStyleSheetToPreload(GuiDnxDebug.STYLE);
+            ACsGuiApi.registerStyleSheetToPreload(GuiLoadingErrors.STYLE);
             ACsGuiApi.registerStyleSheetToPreload(CarController.STYLE);
-            //CssGuiManager.registerStyleSheetToPreload(new ResourceLocation(DynamXMain.ID, "css/main_menu.css"));
-            ACsGuiApi.registerStyleSheetToPreload(new ResourceLocation(DynamXConstants.ID, "css/slope_generator.css"));
+            ACsGuiApi.registerStyleSheetToPreload(GuiBlockCustomization.STYLE);
+            ACsGuiApi.registerStyleSheetToPreload(GuiSlopesConfig.STYLE);
         } else {
             for (File file : myDir.listFiles()) {
                 if (file.isDirectory() || file.getName().endsWith(".zip") || file.getName().endsWith(PACK_FILE_EXTENSION)) {
@@ -185,7 +189,7 @@ public class ContentPackLoader {
                             } catch (Exception e) {
                                 DynamXMain.log.error("Failed to load mps resources jar : " + f.getName());
                                 DynamXMain.log.throwing(e);
-                                DynamXErrorManager.addError(file.getName(), "res_pack_load_fail", ErrorManagerService.ErrorLevel.FATAL, "assets", "Failed to add to classpath", e, 700);
+                                DynamXErrorManager.addError(file.getName(), "res_pack_load_fail", ErrorLevel.FATAL, "assets", "Failed to add to classpath", e, 700);
                             }
                             DynamXMain.log.info("Loaded mps pack : " + file.getName());
                         }
@@ -228,7 +232,7 @@ public class ContentPackLoader {
             initialized = true;
         for (InfoLoader<?, ?> loader : DynamXObjectLoaders.LOADERS)
             loader.clear(isHotReloading);
-        DynamXErrorManager.getErrorManager().clear(DynamXLoadingTasks.PACK);
+        DynamXErrorManager.getErrorManager().clear(DynamXErrorManager.DYNAMX_ERRORS);
         try {
             ProgressManager.ProgressBar bar = ProgressManager.push("Loading content pack system", 1 + DynamXObjectLoaders.LOADERS.size());
             bar.step("Discover assets");
@@ -269,7 +273,7 @@ public class ContentPackLoader {
                         packCount++;
                     } catch (Exception e) {
                         //log.error("Content Pack " + loadingPack + " cannot be loaded : ", e);
-                        DynamXErrorManager.addError(loadingPack, "pack_load_fail", ErrorManagerService.ErrorLevel.FATAL, "loading folder pack", loadingPack, e, 800);
+                        DynamXErrorManager.addError(loadingPack, "pack_load_fail", ErrorLevel.FATAL, "loading folder pack", loadingPack, e, 800);
                         errorCount++;
                     }
                 } else if (contentPack.isFile() && (contentPack.getName().endsWith(".zip") || contentPack.getName().endsWith(PACK_FILE_EXTENSION))) {
@@ -294,7 +298,7 @@ public class ContentPackLoader {
                         packCount++;
                     } catch (Exception e) {
                         //log.error("Compressed content Pack " + loadingPack + " cannot be loaded : ", e);
-                        DynamXErrorManager.addError(loadingPack, "pack_load_fail", ErrorManagerService.ErrorLevel.FATAL, "loading compressed pack", loadingPack, e, 800);
+                        DynamXErrorManager.addError(loadingPack, "pack_load_fail", ErrorLevel.FATAL, "loading compressed pack", loadingPack, e, 800);
                         errorCount++;
                     }
                 } else if (!contentPack.getName().endsWith(".dll") && !contentPack.getName().endsWith(".so")) { //Bullet library files
@@ -333,7 +337,7 @@ public class ContentPackLoader {
             loadingPack = loadedInfo.getFixedPackName();
         } else {
             //log.warn("Content pack " + loadingPack + " is missing a pack_info.dynx file !");
-            DynamXErrorManager.addError(loadingPack, "missing_pack_info", ErrorManagerService.ErrorLevel.HIGH, "pack_info", "Pack info is missing", null, 600);
+            DynamXErrorManager.addError(loadingPack, "missing_pack_info", ErrorLevel.HIGH, "pack_info", "Pack info is missing", null, 600);
             DynamXObjectLoaders.PACKS.addInfo(loadingPack + ".pack_info.dynx", new PackInfo(loadingPack, packType).setPathName(contentPack.getName()).setPackVersion("dummy info"));
         }
         DynamXMain.log.info("Loading " + loadingPack + "(in " + contentPack.getName() + ")");
@@ -360,7 +364,7 @@ public class ContentPackLoader {
             throw new RuntimeException(e);
         } catch (Exception e) {
             //log.error("Content pack file " + file.getName() + " of " + loadingPack + " cannot be loaded : ", e);
-            DynamXErrorManager.addError(loadingPack, "pack_file_load_error", ErrorManagerService.ErrorLevel.FATAL, "pack_files", file.getName(), e, 100);
+            DynamXErrorManager.addError(loadingPack, "pack_file_load_error", ErrorLevel.FATAL, file.getName().replace(suffix, ""), null, e, 100);
         } finally {
             if (inputStream != null) {
                 try {

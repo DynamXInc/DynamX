@@ -1,6 +1,6 @@
 package fr.dynamx.common.contentpack.type.objects;
 
-import fr.aym.acslib.api.services.ErrorManagerService;
+import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
@@ -119,7 +119,7 @@ public class ArmorObject<T extends ArmorObject<T>> extends AbstractItemObject<T>
             owners.add(new DynamXItemArmor(this, material, EntityEquipmentSlot.FEET));
         if (owners.isEmpty()) {
             //DynamXMain.log.error("Armor " + getFullName() + " has no configured items !");
-            DynamXErrorManager.addError(getPackName(), "armor_error", ErrorManagerService.ErrorLevel.FATAL, getName(), "No configured items for this armor");
+            DynamXErrorManager.addError(getPackName(), "armor_error", ErrorLevel.FATAL, getName(), "No configured items for this armor");
         }
         this.owners = owners.toArray(new IInfoOwner[0]);
         return this.owners;

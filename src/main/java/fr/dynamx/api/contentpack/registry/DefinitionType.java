@@ -5,8 +5,8 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
 import fr.dynamx.common.contentpack.loader.PackConstants;
 import fr.dynamx.common.contentpack.parts.PartShape;
-import fr.dynamx.utils.EnumSeatPlayerPosition;
 import fr.dynamx.utils.EnumPlayerStandOnTop;
+import fr.dynamx.utils.EnumSeatPlayerPosition;
 import fr.dynamx.utils.physics.EnumCollisionType;
 import net.minecraft.block.material.Material;
 import net.minecraft.util.EnumParticleTypes;
@@ -15,6 +15,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 import javax.vecmath.Vector2f;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

@@ -28,7 +28,7 @@ public class PartShape<T extends ISubInfoTypeOwner<T>> extends BasePart<T> imple
     @Override
     public void appendTo(T owner) {
         super.appendTo(owner);
-        ((IShapeContainer) vehicleInfo).addCollisionShape(this);
+        ((IShapeContainer) owner).addCollisionShape(this);
         Vector3f min = getPosition().subtract(getScale());
         Vector3f max = getPosition().add(getScale());
         this.boundingBox = new MutableBoundingBox(

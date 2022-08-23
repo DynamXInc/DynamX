@@ -2,8 +2,6 @@ package fr.dynamx.api.contentpack.object.part;
 
 import com.jme3.math.Vector3f;
 import fr.aym.acslib.api.services.ErrorManagerService;
-import fr.dynamx.api.contentpack.object.IShapedObject;
-import fr.aym.acslib.api.services.ErrorTrackingService;
 import fr.dynamx.api.contentpack.object.IShapeContainer;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoType;
@@ -12,7 +10,6 @@ import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.utils.DynamXLoadingTasks;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 

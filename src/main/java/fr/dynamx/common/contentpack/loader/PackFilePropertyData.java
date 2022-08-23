@@ -75,7 +75,7 @@ public class PackFilePropertyData<T> {
         try {
             val = parse(value);
         } catch (Exception e) {
-            DynamXErrorManager.addError(on.getPackName(), "property_parse_error", ErrorLevel.HIGH, on.getName(), "Cannot parse property " + getConfigFieldName() + ". Make sure to respect the syntax given in the documentation.", e);
+            DynamXErrorManager.addError(on.getPackName(), "property_parse_error", ErrorLevel.HIGH, on.getName(), getConfigFieldName(), e);
             return null; //Error while parsing
         }
         field.setAccessible(true);

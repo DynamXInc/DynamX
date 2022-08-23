@@ -6,13 +6,9 @@ import fr.aym.acslib.api.services.error.*;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.translation.I18n;
 
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static fr.aym.acslib.api.services.error.ErrorFormatter.*;
 
 public class DynamXErrorManager {
     private static final ErrorManagerService errorManager = ACsLib.getPlatform().provideService(ErrorManagerService.class);
@@ -46,30 +42,67 @@ public class DynamXErrorManager {
         DYNAMX_ERRORS.registerErrorFormatter(genericType, errorFormatter);
     }
 
+    private static String getErrorName(ErrorData errorData, boolean addStackTrace) {
+       String translated = I18n.translateToLocal("dynamx.error."+errorData.getGenericType());
+       return addStackTrace ? (translated + " (" + errorData.getGenericType() +")") : translated;
+    }
+
+    public static final ErrorFormatter FORMATTER_SINGLE_ERROR = (errorBuilder, addStackTrace, errors) -> {
+        for(ErrorData error : errors) {
+            if(error.getMessage() != null)
+                errorBuilder.append("- ").append(getErrorName(error, addStackTrace)).append(" : ").append("\n").append(error.getMessage()).append("\n");
+            else
+                errorBuilder.append("- ").append(getErrorName(error, addStackTrace)).append(" : ").append("\n");
+            if(error.getException() != null) {
+                errorBuilder.append(error.getException().toString()).append("\n");
+                if(addStackTrace) {
+                    for(StackTraceElement stackTraceElement : error.getException().getStackTrace()) {
+                        errorBuilder.append(stackTraceElement.toString()).append("\n");
+                    }
+                }
+            }
+        }
+    };
+    public static final ErrorFormatter FORMATTER_MULTIPLE_ERROR_ONE_LI = (errorBuilder, addStackTrace, errors) -> {
+        errorBuilder.append("- ").append(getErrorName(errors.get(0), addStackTrace)).append(" : ").append("\n");
+        errorBuilder.append(errors.stream().map(ErrorData::getMessage).reduce((a, b) -> a + ", " + b).orElse("reduce error"));
+        errorBuilder.append("\n");
+    };
+    public static final ErrorFormatter FORMATTER_MULTIPLE_ERROR = (errorBuilder, addStackTrace, errors) -> {
+        errorBuilder.append("- ").append(getErrorName(errors.get(0), addStackTrace)).append(" : ").append("\n");
+        if(errors.size() > 1) {
+            for (ErrorData error : errors) {
+                if (error.getMessage() != null)
+                    errorBuilder.append("-> ").append(error.getMessage()).append("\n");
+            }
+        } else if(errors.get(0).getMessage() != null)
+            errorBuilder.append(errors.get(0).getMessage()).append("\n");
+    };
+
     static {
-        registerErrorFormatter("required_property", MULTIPLE_ERROR_ONE_LI);
-        registerErrorFormatter("obj_duplicated_custom_textures", MULTIPLE_ERROR);
-        registerErrorFormatter("armor_error", MULTIPLE_ERROR);
-        registerErrorFormatter("updates", SINGLE_ERROR);
-        registerErrorFormatter("syntax_error", MULTIPLE_ERROR);
-        registerErrorFormatter("deprecated_prop", MULTIPLE_ERROR);
-        registerErrorFormatter("missing_prop", MULTIPLE_ERROR);
-        registerErrorFormatter("unknown_sub_info", MULTIPLE_ERROR_ONE_LI);
-        registerErrorFormatter("sound_error", MULTIPLE_ERROR);
-        registerErrorFormatter("config_error", MULTIPLE_ERROR);
-        registerErrorFormatter("obj_none_material", MULTIPLE_ERROR_ONE_LI);
-        registerErrorFormatter("mps_error", SINGLE_ERROR);
-        registerErrorFormatter("addon_init_error", SINGLE_ERROR);
-        registerErrorFormatter("pack_requirements", MULTIPLE_ERROR); //FORMAT
-        registerErrorFormatter("collision_shape_error", SINGLE_ERROR);
-        registerErrorFormatter("complete_vehicle_error", SINGLE_ERROR);
-        registerErrorFormatter("property_parse_error", SINGLE_ERROR); //FORMAT
-        registerErrorFormatter("loading_tasks", SINGLE_ERROR);
-        registerErrorFormatter("addon_load_error", SINGLE_ERROR); //FORMAT
-        registerErrorFormatter("res_pack_load_fail", SINGLE_ERROR);
-        registerErrorFormatter("pack_load_fail", SINGLE_ERROR);
-        registerErrorFormatter("missing_pack_info", MULTIPLE_ERROR);  //FORMAT
-        registerErrorFormatter("pack_file_load_error", SINGLE_ERROR);
-        registerErrorFormatter("addon_error", SINGLE_ERROR); //FORMAT
+        registerErrorFormatter("required_property", FORMATTER_MULTIPLE_ERROR_ONE_LI);
+        registerErrorFormatter("obj_duplicated_custom_textures", FORMATTER_MULTIPLE_ERROR);
+        registerErrorFormatter("armor_error", FORMATTER_MULTIPLE_ERROR);
+        registerErrorFormatter("updates", FORMATTER_SINGLE_ERROR);
+        registerErrorFormatter("syntax_error", FORMATTER_MULTIPLE_ERROR);
+        registerErrorFormatter("deprecated_prop", FORMATTER_MULTIPLE_ERROR);
+        registerErrorFormatter("missing_prop", FORMATTER_MULTIPLE_ERROR);
+        registerErrorFormatter("unknown_sub_info", FORMATTER_MULTIPLE_ERROR_ONE_LI);
+        registerErrorFormatter("sound_error", FORMATTER_MULTIPLE_ERROR);
+        registerErrorFormatter("config_error", FORMATTER_MULTIPLE_ERROR);
+        registerErrorFormatter("obj_none_material", FORMATTER_MULTIPLE_ERROR_ONE_LI);
+        registerErrorFormatter("mps_error", FORMATTER_SINGLE_ERROR);
+        registerErrorFormatter("addon_init_error", FORMATTER_SINGLE_ERROR);
+        registerErrorFormatter("pack_requirements", FORMATTER_MULTIPLE_ERROR); //FORMAT
+        registerErrorFormatter("collision_shape_error", FORMATTER_SINGLE_ERROR);
+        registerErrorFormatter("complete_vehicle_error", FORMATTER_SINGLE_ERROR);
+        registerErrorFormatter("property_parse_error", FORMATTER_MULTIPLE_ERROR); //FORMAT
+        registerErrorFormatter("loading_tasks", FORMATTER_SINGLE_ERROR);
+        registerErrorFormatter("addon_load_error", FORMATTER_SINGLE_ERROR); //FORMAT
+        registerErrorFormatter("res_pack_load_fail", FORMATTER_SINGLE_ERROR);
+        registerErrorFormatter("pack_load_fail", FORMATTER_SINGLE_ERROR);
+        registerErrorFormatter("missing_pack_info", FORMATTER_MULTIPLE_ERROR);  //FORMAT
+        registerErrorFormatter("pack_file_load_error", FORMATTER_SINGLE_ERROR);
+        registerErrorFormatter("addon_error", FORMATTER_SINGLE_ERROR); //FORMAT
     }
 }

@@ -57,6 +57,7 @@ public class DynamXModelRegistry implements IObjModelRegistry {
                 MODELS_REGISTRY.put(location, customTextures);
             } else {
                 //log.error("Tried to register the model '" + location + "' two times with custom textures '" + previousSupplier + "' and '" + customTextures + "' ! Ignoring " + customTextures);
+                //TODO FORMAT ERROR
                 DynamXErrorManager.addError(customTextures.getPackName(), "obj_duplicated_custom_textures", ErrorLevel.HIGH, location, "Tried to register the model '" + location + "' two times with custom textures '" + previousSupplier + "' and '" + customTextures + "' ! Ignoring " + customTextures);
             }
         }

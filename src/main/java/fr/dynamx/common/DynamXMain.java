@@ -93,7 +93,7 @@ public class DynamXMain {
             try {
                 container.setup("DynamXEA");
             } catch (Exception e) {
-                DynamXErrorManager.addError("DynamX initialization", "mps_error", ErrorLevel.FATAL, "MPS", "Cannot connect to DynamX server", e);
+                DynamXErrorManager.addError("DynamX initialization", "mps_error", ErrorLevel.FATAL, "MPS", null, e);
                 e.printStackTrace();
             }
         });
@@ -148,7 +148,7 @@ public class DynamXMain {
         ForgeVersion.CheckResult result = ForgeVersion.getResult(Loader.instance().activeModContainer());
         if (result.status == ForgeVersion.Status.OUTDATED) {
             //DynamXMain.log.warn("Outdated version found, you should update to " + result.target);
-            DynamXErrorManager.addError("DynamX updates", "updates", ErrorLevel.ADVICE, "Mise à jour de DynamX", "Version " + result.target + " disponible");
+            DynamXErrorManager.addError("DynamX updates", "updates", ErrorLevel.ADVICE, "DynamX", "Version " + result.target + " disponible");
         } else if (result.status == ForgeVersion.Status.FAILED) {
             DynamXMain.log.warn("Forge failed to check majs for DynamX !");
         }

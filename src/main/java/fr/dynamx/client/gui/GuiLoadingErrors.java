@@ -114,7 +114,7 @@ public class GuiLoadingErrors extends GuiFrame {
                 errorListPerType.sort(ErrorManagerService.ERROR_COMPARATOR);
                 ErrorData errorType = errorListPerType.get(0);
                 text.append("\n");
-                text.append(errorType.getLevel().color).append("==> Level: ").append(errorType.getLevel()).append("\n").append(errorType.getLevel().color);
+                text.append(errorType.getLevel().color).append("==> Level: ").append(errorType.getLevel()).append("\n").append(TextFormatting.LIGHT_PURPLE);
                 ErrorFormatter formatter = errorType.getCategory().getErrorFormatter(s2);
                 formatter.formatError(text, false, errorListPerType);
             }));
@@ -175,36 +175,33 @@ public class GuiLoadingErrors extends GuiFrame {
         });
         errorsPanel.add(new GuiLabel(TextFormatting.DARK_AQUA + "Errors while loading " + location).getStyle().setPaddingLeft(2).setPaddingTop(2).getOwner());
         errorsPanel.add(new GuiLabel(TextFormatting.GRAY + "Click on any category to view it, press escape to go back").getStyle().setPaddingLeft(2).setPaddingTop(2).getOwner());
+        errorsPanel.add(new GuiLabel(TextFormatting.GRAY + "  -> Show all").addClickListener((x, y, b) ->
+            showErrors(!deployAll, new ArrayList<>(), location, locatedErrorList)
+        ));
 
         AtomicInteger i = new AtomicInteger();
         Collection<ErrorData> errorList = locatedErrorList.getErrors();
         Map<String, List<ErrorData>> errorsPerObject = ErrorManagerService.groupBy(errorList, ErrorData::getObject);
         errorsPerObject.forEach((s1, errorListPerObject) -> {
-            boolean deployed = deployAll != deployObjs.contains(i.get());
             int id = i.get();
             GuiTextArea label = new GuiTextArea();
             label.setEditable(false);
-            heightMap.put(label, setDeployed(label, location, s1, errorListPerObject, deployed));
+            heightMap.put(label, setDeployed(label, location, s1, errorListPerObject, deployAll != deployObjs.contains(id)));
             errorsPanel.add(label.getStyle().setPaddingLeft(2).setPaddingTop(2).getOwner().addClickListener((x, y, b) -> {
                 if (deployObjs.contains(id))
                     deployObjs.remove((Integer) id);
                 else
                     deployObjs.add(id);
-                //heightMap.put(label, setDeployed(label, location, s1, errorListPerObject, deployed));
-                //errorsPanel.getLayout().clear();
-                //errorsPanel.getStyle().update();
-                showErrors(deployAll, deployObjs, location, locatedErrorList);
+                heightMap.put(label, setDeployed(label, location, s1, errorListPerObject, deployAll != deployObjs.contains(id)));
+                errorsPanel.getLayout().clear();
+                errorsPanel.getStyle().refreshCss(false, "layout change");
+                //showErrors(deployAll, deployObjs, location, locatedErrorList);
             }));
             i.getAndIncrement();
         });
-
-        errorsPanel.add(new GuiLabel(TextFormatting.GRAY + "  -> Show all").addClickListener((x, y, b) ->
-            showErrors(!deployAll, new ArrayList<>(), location, locatedErrorList)
-        ));
         errorsPanel.add(new GuiLabel(TextFormatting.DARK_AQUA + "  <- Go back").addClickListener((x, y, b) ->
             goBack()
         ));
-
         displayed = errorsPanel;
         errorsPanel.setFocused(true);
         add(errorsPanel.getStyle().setForegroundColor(0x88FF88).setBackgroundColor(0xDD222222).getOwner());

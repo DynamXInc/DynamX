@@ -2,6 +2,7 @@ package fr.dynamx.api.contentpack.object.part;
 
 import com.jme3.math.Vector3f;
 import fr.aym.acslib.api.services.error.ErrorLevel;
+import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.contentpack.object.IShapeContainer;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoType;
@@ -96,8 +97,10 @@ public abstract class BasePart<T extends ISubInfoTypeOwner<T>> extends SubInfoTy
 
     @Override
     public void appendTo(T owner) {
-        if (scale == null)
-            DynamXErrorManager.addError(getPackName(), "required_property", ErrorLevel.HIGH, getName(), "Scale");
+        if (scale == null) {
+            INamedObject parent = getRootOwner();
+            DynamXErrorManager.addError(getPackName(), "required_property", ErrorLevel.HIGH, parent.getName(), "Scale in " + getName());
+        }
         ((IShapeContainer) owner).addPart(this);
         getPosition().multLocal(getScaleModifier(owner));
         getScale().multLocal(getScaleModifier(owner));

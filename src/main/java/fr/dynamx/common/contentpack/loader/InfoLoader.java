@@ -18,12 +18,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * Automatic loader of specific named objects
@@ -115,38 +113,38 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
         if (info instanceof ISubInfoTypeOwner<?>)
             readInfoWithSubInfos((A) info, reader);
         else {
+            //TODO FACTORIZE WITH THE NEXT FUNCTION
             List<PackFilePropertyData<?>> foundProperties = new ArrayList<>();
             String s;
             boolean inComment = false;
+            INamedObject parent = info;
+            if (parent instanceof ISubInfoType)
+                parent = ((ISubInfoType<?>) parent).getRootOwner();
             while ((s = reader.readLine()) != null) {
                 s = s.trim();
                 if (s.endsWith("*/")) {
                     if (inComment)
                         inComment = false;
-                    else {
-                        //DynamXMain.log.error("Illegal multi-line comment end in " + info.getFullName() + " : " + s);
-                        DynamXErrorManager.addError(info.getPackName(), "syntax_error", ErrorLevel.HIGH, info.getName(), "Illegal multi-line comment end in line " + s + ", property skipped");
-                    }
-                } else if (inComment && s.contains("}")) {
-                    //DynamXMain.log.error("Found a never ending multi-line comment in " + info.getFullName());
-                    DynamXErrorManager.addError(info.getPackName(), "syntax_error", ErrorLevel.FATAL, info.getName(), "Found a never ending multi-line comment, some properties may be missing in-game");
-                } else if (!inComment && !s.startsWith("//")) {
-                    if (s.startsWith("/*")) {
+                    else
+                        //TODO FORMAT ERRORS
+                        DynamXErrorManager.addError(info.getPackName(), "syntax_error", ErrorLevel.HIGH, parent.getName(), "Illegal multi-line comment end in line " + s + ", property skipped in " + info.getName());
+                } else if (inComment && s.contains("}"))
+                    DynamXErrorManager.addError(info.getPackName(), "syntax_error", ErrorLevel.FATAL, parent.getName(), "Found a never ending multi-line comment in " + info.getName() + ", some properties may be missing in-game");
+                else if (!inComment && !s.startsWith("//")) {
+                    if (s.startsWith("/*"))
                         inComment = true;
-                    } else if (s.contains("}")) //End of sub property
+                    else if (s.contains("}")) //End of sub property
                         break;
                     else
                         readLineProperty(foundProperties, info, s);
                 }
             }
-            if (inComment) {
-                //DynamXMain.log.error("Found a never ending multi-line comment in " + info.getFullName());
-                DynamXErrorManager.addError(info.getPackName(), "syntax_error", ErrorLevel.FATAL, info.getName(), "Found a never ending multi-line comment, some properties may be missing in-game");
-            }
+            if (inComment)
+                DynamXErrorManager.addError(info.getPackName(), "syntax_error", ErrorLevel.FATAL, parent.getName(), "Found a never ending multi-line comment in " + info.getName() + ", some properties may be missing in-game");
+            INamedObject finalParent = parent;
             SubInfoTypeAnnotationCache.getOrLoadData(info.getClass()).values().forEach(p -> {
-                if (p.isRequired() && !foundProperties.contains(p)) {
-                    DynamXErrorManager.addError(info.getPackName(), "required_property", ErrorLevel.HIGH, info.getName(), p.getConfigFieldName());
-                }
+                if (p.isRequired() && !foundProperties.contains(p))
+                    DynamXErrorManager.addError(info.getPackName(), "required_property", ErrorLevel.HIGH, finalParent.getName(), "'" + p.getConfigFieldName() + "' in " + info.getName());
             });
         }
     }
@@ -164,15 +162,16 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
         //Read the category
         String s;
         boolean inComment = false;
+        INamedObject parent = obj;
+        if (parent instanceof ISubInfoType)
+            parent = ((ISubInfoType<?>) parent).getRootOwner();
         while ((s = reader.readLine()) != null) {
             s = s.trim();
             if (s.endsWith("*/")) {
                 if (inComment)
                     inComment = false;
-                else {
-                    //DynamXMain.log.error("Illegal multi-line comment end in " + obj.getFullName() + " : " + s);
-                    DynamXErrorManager.addError(obj.getPackName(), "syntax_error", ErrorLevel.HIGH, obj.getName(), "Illegal multi-line comment end in line " + s + ", property skipped");
-                }
+                else  //TODO FORMAT ERROR
+                    DynamXErrorManager.addError(obj.getPackName(), "syntax_error", ErrorLevel.HIGH, parent.getName(), "Illegal multi-line comment end in line " + s + ", property skipped in " + obj.getName());
             } else if (!inComment && !s.startsWith("//")) {
                 if (s.startsWith("/*")) {
                     inComment = true;
@@ -191,15 +190,12 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
                 }
             }
         }
-        if (inComment) {
-            //DynamXMain.log.error("Found a never ending multi-line comment in " + obj.getFullName());
-            DynamXErrorManager.addError(obj.getPackName(), "syntax_error", ErrorLevel.FATAL, obj.getName(), "Found a never ending multi-line comment, some properties may be missing in-game");
-        }
-
+        if (inComment)
+            DynamXErrorManager.addError(obj.getPackName(), "syntax_error", ErrorLevel.FATAL, parent.getName(), "Found a never ending multi-line comment in " + obj.getName() + ", some properties may be missing in-game");
+        INamedObject finalParent = parent;
         SubInfoTypeAnnotationCache.getOrLoadData(obj.getClass()).values().forEach(p -> {
-            if (p.isRequired() && !foundProperties.contains(p)) {
-                DynamXErrorManager.addError(obj.getPackName(), "required_property", ErrorLevel.HIGH, obj.getName(), p.getConfigFieldName());
-            }
+            if (p.isRequired() && !foundProperties.contains(p))
+                DynamXErrorManager.addError(obj.getPackName(), "required_property", ErrorLevel.HIGH, finalParent.getName(), "'" + p.getConfigFieldName() + "' in " + obj.getName());
         });
     }
 
@@ -223,9 +219,9 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
                 if (fixResult != null) {
                     if (fixResult.isDeprecation()) {
                         INamedObject parent = obj;
-                        if(parent instanceof ISubInfoType)
+                        if (parent instanceof ISubInfoType)
                             parent = ((ISubInfoType<?>) parent).getRootOwner();
-                        DynamXErrorManager.addError(obj.getPackName(), "deprecated_prop", ErrorLevel.LOW, parent.getName(), "Deprecated config key found " + key + " in " + obj.getName()+". You should now use " + fixResult.newKey());
+                        DynamXErrorManager.addError(obj.getPackName(), "deprecated_prop", ErrorLevel.LOW, parent.getName(), "Deprecated config key found " + key + " in " + obj.getName() + ". You should now use " + fixResult.newKey());
                     }
                     key = fixResult.newKey();
                     value = fixResult.newValue(value);
@@ -234,8 +230,10 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
             PackFilePropertyData<?> d = setFieldValue(obj, key, value);
             if (d != null) foundProperties.add(d);
         } else if (!line.isEmpty()) {
-            //DynamXMain.log.warn("Illegal line content (not a comment, not a property) in " + obj.getFullName() + " : " + line);
-            DynamXErrorManager.addError(obj.getPackName(), "syntax_error", ErrorLevel.LOW, obj.getName(), "Missing ':' on line " + line + ", and not a comment");
+            INamedObject parent = obj;
+            if (parent instanceof ISubInfoType)
+                parent = ((ISubInfoType<?>) parent).getRootOwner();
+            DynamXErrorManager.addError(obj.getPackName(), "syntax_error", ErrorLevel.LOW, parent.getName(), "Missing ':' on line " + line + ", and not a comment");
         }
     }
 
@@ -251,9 +249,10 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
             PackFilePropertyData<?> data = SubInfoTypeAnnotationCache.getFieldFor(obj, key);
             if (data == null) {
                 INamedObject parent = obj;
-                if(parent instanceof ISubInfoType)
+                if (parent instanceof ISubInfoType)
                     parent = ((ISubInfoType<?>) parent).getRootOwner();
-                DynamXErrorManager.addError(obj.getPackName(), "missing_prop", ErrorLevel.HIGH, parent.getName(), "PackFileProperty with name " + key + " does not exists in part " + obj.getName());
+                //TODO FORMAT ERROR
+                DynamXErrorManager.addError(obj.getPackName(), "missing_prop", ErrorLevel.HIGH, parent.getName(), "Property '" + key + "' in " + obj.getName());
                 return null;
             }
             return data.apply(obj, value);
@@ -270,8 +269,10 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
      */
     @Nullable
     protected ISubInfoType<A> getClassForPropertyOwner(A obj, String name) {
+        if(infoTypesRegistry == null) return null;
         String[] tags = name.split("#");
-        for (SubInfoTypeEntry<A> type : infoTypesRegistry.getRegisteredEntries()) {
+        Collection<SubInfoTypeEntry<A>> types = infoTypesRegistry.getRegisteredEntries().stream().sorted((t1, t2) -> t1.isStrict() != t2.isStrict() ? (t1.isStrict() ? -1 : 1) : 0).collect(Collectors.toList());
+        for (SubInfoTypeEntry<A> type : types) {
             if (type.matches(tags[0]))
                 return type.create(obj, tags[0]);
         }

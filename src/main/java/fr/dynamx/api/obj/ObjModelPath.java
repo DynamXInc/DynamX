@@ -43,9 +43,6 @@ public class ObjModelPath implements INamedObject {
 
     @Override
     public String toString() {
-        return "ObjModelPath{" +
-                "packInfo=" + packInfo +
-                ", modelPath=" + modelPath +
-                '}';
+        return "Model " + modelPath + " in pack " + packInfo;
     }
 }

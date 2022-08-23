@@ -55,7 +55,7 @@ public class SoundInfoLoader extends InfoLoader<SoundListInfo, ISubInfoTypeOwner
                                 readingCategory[0].setInterior(interior[0]);
                             } else {
                                 //log.error("Invalid sound config entry : " + s + " in " + info.getFullName());
-                                DynamXErrorManager.addError(info.getPackName(), "sound_error", ErrorLevel.LOW, info.getName(), "Invalid sound config entry " + s);
+                                DynamXErrorManager.addError(info.getPackName(), "sound_error", ErrorLevel.LOW, info.getName(), "value: " + s);
                             }
                     }
                 } else if (s.contains(":")) {
@@ -72,7 +72,7 @@ public class SoundInfoLoader extends InfoLoader<SoundListInfo, ISubInfoTypeOwner
                     //We don't care
                 } else {
                     //log.error("Unknown sound config key " + s + " in " + info.getFullName());
-                    DynamXErrorManager.addError(info.getPackName(), "sound_error", ErrorLevel.LOW, info.getName(), "Invalid sound config key " + s);
+                    DynamXErrorManager.addError(info.getPackName(), "sound_error", ErrorLevel.LOW, info.getName(), "key: " + s);
                 }
             }
         });

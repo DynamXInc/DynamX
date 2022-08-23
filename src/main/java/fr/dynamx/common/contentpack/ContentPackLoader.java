@@ -110,7 +110,6 @@ public class ContentPackLoader {
                 if (file.isDirectory()) { //TODO FACTORIZE
                     if (new File(file, "assets").exists()) {
                         try {
-                            //not needed, only for java classes ((LaunchClassLoader)Thread.currentThread().getContextClassLoader()).addURL(file.toURI().toURL());
                             HashMap<String, Object> map = new HashMap<>();
                             map.put("modid", DynamXConstants.ID);
                             map.put("name", "DynamX pack : " + file.getName());
@@ -133,7 +132,6 @@ public class ContentPackLoader {
                         if (f.isFile() && f.getName().endsWith(".jar")) {
                             try {
                                 //Protected resources (.part files), only add to classpath
-                                //System.out.println("Adding "+f.toURI().toURL());
                                 ((LaunchClassLoader) Thread.currentThread().getContextClassLoader()).addURL(f.toURI().toURL());
                             } catch (Exception e) {
                                 DynamXMain.log.error("Failed to load mps resources jar : " + f.getName());
@@ -336,8 +334,8 @@ public class ContentPackLoader {
             loadedInfo.setPathName(contentPack.getName()).setPackType(packType);
             loadingPack = loadedInfo.getFixedPackName();
         } else {
-            //log.warn("Content pack " + loadingPack + " is missing a pack_info.dynx file !");
-            DynamXErrorManager.addError(loadingPack, "missing_pack_info", ErrorLevel.HIGH, "pack_info", "Pack info is missing", null, 600);
+            //TODO FORMAT ERROR
+            DynamXErrorManager.addError(loadingPack, "missing_pack_info", ErrorLevel.HIGH, "pack_info", "Add a pack_info.dynx file in the pack !", null, 600);
             DynamXObjectLoaders.PACKS.addInfo(loadingPack + ".pack_info.dynx", new PackInfo(loadingPack, packType).setPathName(contentPack.getName()).setPackVersion("dummy info"));
         }
         DynamXMain.log.info("Loading " + loadingPack + "(in " + contentPack.getName() + ")");
@@ -363,7 +361,6 @@ public class ContentPackLoader {
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         } catch (Exception e) {
-            //log.error("Content pack file " + file.getName() + " of " + loadingPack + " cannot be loaded : ", e);
             DynamXErrorManager.addError(loadingPack, "pack_file_load_error", ErrorLevel.FATAL, file.getName().replace(suffix, ""), null, e, 100);
         } finally {
             if (inputStream != null) {

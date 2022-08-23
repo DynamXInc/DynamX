@@ -5,7 +5,8 @@ import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.bullet.collision.shapes.CylinderCollisionShape;
 import com.jme3.bullet.collision.shapes.SphereCollisionShape;
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.contentpack.object.IShapedObject;
+import fr.dynamx.api.contentpack.object.IShapeContainer;
+import fr.dynamx.api.contentpack.object.IShapeProvider;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
@@ -28,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractItemObject<T> implements IShapedObject {
+public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractItemObject<T> implements IShapeContainer, IShapeProvider {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.PROPS})
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("UseHullShape".equals(key))
@@ -64,7 +65,7 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
     }
 
     @Override
-    public void setShapeErrored() {
+    public void markFailedShape() {
         //DO STH ?
     }
 
@@ -189,5 +190,10 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
 
     public List<PartShape<?>> getPartShapes() {
         return partShapes;
+    }
+
+    @Override
+    public List<BasePart<?>> getAllParts() {
+        return parts;
     }
 }

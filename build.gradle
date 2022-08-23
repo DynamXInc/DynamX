@@ -1,12 +1,12 @@
 buildscript {
     repositories {
-        maven { url = "https://files.minecraftforge.net/maven" }
-        maven { url = "https://repo.spongepowered.org/maven" }
+        maven { url = 'https://maven.minecraftforge.net/' }
+        mavenCentral()
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
         classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.4'
-        classpath 'org.spongepowered:mixingradle:0.6-SNAPSHOT'
+        classpath 'org.spongepowered:mixingradle:0.7.+'
     }
 }
 
@@ -21,13 +21,19 @@ repositories {
     maven {
         url artifactory_contextUrl + '/DynamXRepo'
     }
+    maven { url = 'https://repo.spongepowered.org/maven' }
+
+    flatDir {
+        dir 'libs'
+    }
 }
 
-apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'org.spongepowered.mixin'
+apply plugin: 'idea'
 
 version = version_major + "." + version_minor + "." + version_patch
 group = "fr.dynamx"
@@ -38,56 +44,49 @@ compileJava.options.encoding = 'UTF-8'
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
 
 minecraft {
-    version = minecraft_version + "-" + forge_version
-    runDir = "run"
+    mappings channel: 'stable', version: '39-1.12'
 
-    mappings = "stable_39"
-}
+    accessTransformer = file('src/main/resources/META-INF/dynamx_at.cfg')
 
-repositories {
-    maven { url = 'https://repo.spongepowered.org/maven' }
+    runs {
+        client {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            property 'forge.logging.console.level', 'info'
+        }
+        server {
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            property 'forge.logging.console.level', 'info'
+        }
+    }
 }
 
 dependencies {
-    compile 'com.github.stephengold:Libbulletjme:' + libbulletjme_version
+    minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2860'
+
+    implementation 'com.github.stephengold:Libbulletjme:' + libbulletjme_version
     compile "fr.aym.acsguis:ACsGuis:1.2.4-1c"
-    compile('org.spongepowered:mixin:0.8.3-SNAPSHOT') {
+    implementation ":ModProtectionLib:1.2.4"
+    implementation('org.spongepowered:mixin:0.8.5') {
         exclude module: 'guava'
         exclude module: 'commons-io'
         exclude module: 'gson'
     }
+    compileOnly 'org.projectlombok:lombok:1.18.24'
 
-    shadow('org.spongepowered:mixin:0.8.3-SNAPSHOT') {
+    shadow('org.spongepowered:mixin:0.8.5') {
         exclude module: 'guava'
         exclude module: 'commons-io'
         exclude module: 'gson'
     }
     shadow 'com.github.stephengold:Libbulletjme:' + libbulletjme_version
 
+
     shadow fileTree(dir: 'libs', include: '*.jar')
 
-    compileOnly 'org.projectlombok:lombok:1.18.22'
-    annotationProcessor 'org.projectlombok:lombok:1.18.22'
-    annotationProcessor 'org.spongepowered:mixin:0.8.3-SNAPSHOT:processor'
-}
-
-processResources {
-    // this will ensure that this task is redone when the versions change.
-    inputs.property "version", project.version
-    inputs.property "mcversion", project.minecraft.version
-
-    // replace stuff in mcmod.info, nothing else
-    from(sourceSets.main.resources.srcDirs) {
-        include 'mcmod.info'
-
-        // replace version and mcversion
-        expand 'version': project.version, 'mcversion': project.minecraft.version
-    }
-
-    // copy everything else except the mcmod.info
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'mcmod.info'
-    }
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    testAnnotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }
 
 mixin {
@@ -108,10 +107,30 @@ jar {
 
 shadowJar {
     configurations = [project.configurations.shadow]
+    classifier = 'all'
 }
 
 reobf {
     shadowJar {
-        mappingType = "SEARGE"
     }
 }
+
+jar.finalizedBy('reobfJar')
+
+/** Shit that idea needs to process resources ? **/
+idea {
+    module {
+        inheritOutputDirs = true
+    }
+}
+subprojects {
+    apply plugin: 'idea'
+}
+task prepareAssets(type: Copy) {
+    group = 'build'
+    from project.file('src/main/resources')
+    into project.file('build/classes/java/main')
+}
+
+classes.dependsOn(prepareAssets)
+/** end of shit **/

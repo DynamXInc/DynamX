@@ -22,6 +22,7 @@ import fr.dynamx.common.entities.PropsEntity;
 import fr.dynamx.common.items.DynamXItemSpawner;
 import fr.dynamx.common.items.tools.ItemSlopes;
 import fr.dynamx.common.network.packets.MessageEntityInteract;
+import fr.dynamx.common.physics.player.WalkingOnPlayerController;
 import fr.dynamx.common.slopes.GuiSlopesConfig;
 import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.DynamXConstants;
@@ -234,6 +235,16 @@ public class ClientEventHandler {
         model = null;
         EntityPlayer entityPlayer = Minecraft.getMinecraft().player;
         if (entityPlayer != null) {
+            if(DynamXContext.getWalkingPlayers().containsKey(entityPlayer)){
+                PhysicsEntity<?> physicsEntity = DynamXContext.getWalkingPlayers().get(entityPlayer);
+                if(!physicsEntity.canPlayerStandOnTop()){
+                    if(WalkingOnPlayerController.controller != null) {
+                        WalkingOnPlayerController.controller.disable();
+                        entityPlayer.motionY += 0.2D;
+                    }
+                }
+            }
+
             ItemStack currentItem = entityPlayer.inventory.getCurrentItem();
             if (currentItem.getItem() instanceof ItemBlock && ((ItemBlock) currentItem.getItem()).getBlock() instanceof DynamXBlock) {
                 ItemBlock itemBlock = (ItemBlock) currentItem.getItem();

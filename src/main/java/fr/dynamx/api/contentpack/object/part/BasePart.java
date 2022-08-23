@@ -3,6 +3,8 @@ package fr.dynamx.api.contentpack.object.part;
 import com.jme3.math.Vector3f;
 import fr.aym.acslib.api.services.ErrorManagerService;
 import fr.dynamx.api.contentpack.object.IShapedObject;
+import fr.aym.acslib.api.services.ErrorTrackingService;
+import fr.dynamx.api.contentpack.object.IShapeContainer;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoType;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
@@ -10,6 +12,8 @@ import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.utils.DynamXLoadingTasks;
+import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 
 /**
@@ -86,14 +90,18 @@ public abstract class BasePart<T extends ISubInfoTypeOwner<T>> extends SubInfoTy
     }
 
     public Vector3f getScaleModifier(T vehicleInfo) {
-        return ((IShapedObject) vehicleInfo).getScaleModifier();
+        return ((IShapeContainer) vehicleInfo).getScaleModifier();
+    }
+
+    public DynamXDebugOption getDebugOption() {
+        return null;
     }
 
     @Override
     public void appendTo(T owner) {
         if (scale == null)
             DynamXErrorManager.addError(getPackName(), "required_property", ErrorManagerService.ErrorLevel.HIGH, getName(), "Scale");
-        ((IShapedObject) owner).addPart(this);
+        ((IShapeContainer) owner).addPart(this);
         getPosition().multLocal(getScaleModifier(owner));
         getScale().multLocal(getScaleModifier(owner));
     }

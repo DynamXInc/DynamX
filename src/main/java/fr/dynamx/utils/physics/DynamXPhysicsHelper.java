@@ -10,6 +10,7 @@ import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.EnumBulletShapeType;
+import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.utils.maths.DynamXGeometry;
@@ -77,8 +78,10 @@ public class DynamXPhysicsHelper {
     public static PhysicsRaycastResult castRay(Vector3f from, Vector3f dir, Predicate<EnumBulletShapeType> ignoredBody) {
         Vector3fPool.openPool();
         List<PhysicsRayTestResult> results = new LinkedList<>();
-        DynamXContext.getPhysicsWorld().getDynamicsWorld().rayTest(from, dir, results);
-
+        IPhysicsWorld iPhysicsWorld = DynamXContext.getPhysicsWorld();
+        if(iPhysicsWorld != null) {
+            iPhysicsWorld.getDynamicsWorld().rayTest(from, dir, results);
+        }
 
         for (PhysicsRayTestResult result : results) {
 

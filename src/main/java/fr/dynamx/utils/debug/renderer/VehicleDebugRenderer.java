@@ -433,7 +433,7 @@ public class VehicleDebugRenderer {
     public static class SeatDebug implements DebugRenderer<BaseVehicleEntity<?>> {
         @Override
         public boolean shouldRender(BaseVehicleEntity<?> entity) {
-            return DynamXDebugOptions.SEATS.isActive();
+            return DynamXDebugOptions.SEATS_AND_STORAGE.isActive();
         }
 
         @Override

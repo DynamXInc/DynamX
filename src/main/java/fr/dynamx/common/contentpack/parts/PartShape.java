@@ -1,11 +1,15 @@
 package fr.dynamx.common.contentpack.parts;
 
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.contentpack.object.IShapedObject;
+import fr.dynamx.api.contentpack.object.IShapeContainer;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.*;
+import fr.dynamx.api.contentpack.registry.DefinitionType;
+import fr.dynamx.api.contentpack.registry.PackFileProperty;
+import fr.dynamx.utils.debug.DynamXDebugOption;
+import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 
 @RegisteredSubInfoType(name = "shape", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.BLOCKS_AND_PROPS}, strictName = false)
@@ -20,10 +24,11 @@ public class PartShape<T extends ISubInfoTypeOwner<T>> extends BasePart<T> imple
         super(owner, partName);
     }
 
+
     @Override
     public void appendTo(T owner) {
         super.appendTo(owner);
-        ((IShapedObject) owner).addCollisionShape(this);
+        ((IShapeContainer) vehicleInfo).addCollisionShape(this);
         Vector3f min = getPosition().subtract(getScale());
         Vector3f max = getPosition().add(getScale());
         this.boundingBox = new MutableBoundingBox(
@@ -47,6 +52,10 @@ public class PartShape<T extends ISubInfoTypeOwner<T>> extends BasePart<T> imple
 
     public EnumPartType getShapeType() {
         return shapeType;
+    }
+    @Override
+    public DynamXDebugOption getDebugOption() {
+        return DynamXDebugOptions.PLAYER_TO_OBJECT_COLLISION_DEBUG;
     }
 
     public enum EnumPartType {

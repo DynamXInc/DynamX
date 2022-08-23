@@ -10,6 +10,8 @@ import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.WheelsModule;
 import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
+import fr.dynamx.utils.debug.DynamXDebugOption;
+import fr.dynamx.utils.debug.DynamXDebugOptions;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.AxisAlignedBB;
 
@@ -74,6 +76,11 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
     @Override
     public void removePart(BaseVehicleEntity<?> vehicle) {
         ((WheelsPhysicsHandler) ((IModuleContainer.IPropulsionContainer) vehicle).getPropulsion().getPhysicsHandler()).removeWheel(getId());
+    }
+
+    @Override
+    public DynamXDebugOption getDebugOption() {
+        return DynamXDebugOptions.WHEELS;
     }
 
     @Override

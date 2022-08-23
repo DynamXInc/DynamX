@@ -4,7 +4,7 @@ import com.jme3.bullet.collision.shapes.BoxCollisionShape;
 import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.INamedObject;
-import fr.dynamx.api.contentpack.object.IShapedObject;
+import fr.dynamx.api.contentpack.object.IShapeContainer;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoTypeOwner;
@@ -23,6 +23,7 @@ import fr.dynamx.common.contentpack.type.vehicle.FrictionPoint;
 import fr.dynamx.common.contentpack.type.vehicle.SoundListInfo;
 import fr.dynamx.common.obj.texture.TextureData;
 import fr.dynamx.utils.DynamXUtils;
+import fr.dynamx.utils.EnumPlayerStandOnTop;
 import fr.dynamx.utils.physics.ShapeUtils;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 
@@ -34,7 +35,7 @@ import java.util.stream.Collectors;
  * Builder of {@link ModularVehicleInfo} <br>
  * Responsible for loading all the configuration/properties of the vehicle and creating a final object
  */
-public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implements IShapedObject, INamedObject, ParticleEmitterInfo.IParticleEmitterContainer {
+public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implements IShapeContainer, INamedObject, ParticleEmitterInfo.IParticleEmitterContainer {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("UseHullShape".equals(key))
@@ -52,6 +53,8 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
     private int emptyMass;
     @PackFileProperty(configNames = "DragCoefficient")
     private float dragFactor;
+    @PackFileProperty(configNames = "PlayerStandOnTop", required = false, defaultValue = "ALWAYS")
+    public EnumPlayerStandOnTop playerStandOnTop;
     @PackFileProperty(configNames = "Model", description = "common.model", defaultValue = "obj/name_of_vehicle/name_of_model.obj")
     private String model;
     @PackFileProperty(configNames = "ShapeYOffset", required = false)
@@ -199,7 +202,7 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
     }
 
     @Override
-    public void setShapeErrored() {
+    public void markFailedShape() {
         errored = true;
     }
 
@@ -276,7 +279,7 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
                 }
             }
         }
-        return new ModularVehicleInfo(defaultName, getPackName(), getName(), description, emptyMass, dragFactor, model, centerOfMass, scaleModifier, bakedTextures, parts, partShapes, subProperties, lightSources,
+        return new ModularVehicleInfo(defaultName, getPackName(), getName(), description, emptyMass, playerStandOnTop, dragFactor, model, centerOfMass, scaleModifier, bakedTextures, parts, partShapes, subProperties, lightSources,
                 frictionPoints, particleEmitters, vehicleMaxSpeed, directingWheel, itemScale, item3DRenderLocation, FMLCommonHandler.instance().getSide().isClient() ? renderedParts : null, physicsCollisionShape, collisionShapeDebugBuffer, creativeTabName, defaultZoomLevel);
     }
 

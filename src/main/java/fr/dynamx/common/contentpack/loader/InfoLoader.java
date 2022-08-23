@@ -3,7 +3,7 @@ package fr.dynamx.common.contentpack.loader;
 import fr.aym.acslib.api.services.ErrorManagerService;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.INamedObject;
-import fr.dynamx.api.contentpack.object.IShapedObject;
+import fr.dynamx.api.contentpack.object.IShapeContainer;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
@@ -296,11 +296,11 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
      * @return True if postLoad() should be called
      */
     public boolean hasPostLoad() {
-        return !infos.isEmpty() && infos.values().iterator().next() instanceof IShapedObject;
+        return !infos.isEmpty() && infos.values().iterator().next() instanceof IShapeContainer;
     }
 
     /**
-     * Used to compute shapes of {@link IShapedObject}s
+     * Used to compute shapes of {@link IShapeContainer}s
      *
      * @param hot True if it's an hot reload
      */
@@ -310,9 +310,9 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
             for (T info : infos.values()) {
                 bar1.step(info.getFullName());
                 try {
-                    ((IShapedObject) info).generateShape();
+                    ((IShapeContainer) info).generateShape();
                 } catch (Exception e) {
-                    ((IShapedObject) info).setShapeErrored();
+                    ((IShapeContainer) info).markFailedShape();
                     //DynamXMain.log.fatal("Cannot load physics collision shape of " + info.getFullName() + " !", e);
                     DynamXErrorManager.addError(info.getPackName(), "collision_shape_error", ErrorManagerService.ErrorLevel.FATAL, info.getName(), null, e);
                 }

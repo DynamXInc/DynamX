@@ -2,7 +2,7 @@ package fr.dynamx.common.contentpack.loader;
 
 import fr.aym.acslib.api.services.ErrorManagerService;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
-import fr.dynamx.api.contentpack.object.IShapedObject;
+import fr.dynamx.api.contentpack.object.IShapeContainer;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoTypeOwner;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.sync.PackSyncHandler;
@@ -87,9 +87,9 @@ public class BuildableInfoLoader<A extends SubInfoTypeOwner.BuildableSubInfoType
         for (A info : vehiclesToLoad) {
             bar1.step(info.getFullName());
             try {
-                ((IShapedObject) info).generateShape();
+                ((IShapeContainer) info).generateShape();
             } catch (Exception e) {
-                ((IShapedObject) info).setShapeErrored();
+                ((IShapeContainer) info).markFailedShape();
                 //DynamXMain.log.fatal("Cannot load physics collision shape of " + info.getFullName() + " !", e);
                 DynamXErrorManager.addError(info.getPackName(), "collision_shape_error", ErrorManagerService.ErrorLevel.FATAL, info.getName(), null, e);
             }

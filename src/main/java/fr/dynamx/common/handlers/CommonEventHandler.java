@@ -6,6 +6,7 @@ import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.api.network.EnumPacketTarget;
+import fr.dynamx.api.physics.player.DynamXPhysicsWorldBlacklistApi;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.blocks.DynamXBlock;
@@ -275,9 +276,11 @@ public class CommonEventHandler {
 
     //Walking players :
 
+
     @SubscribeEvent
     public void onPlayerUpdate(TickEvent.PlayerTickEvent e) {
         if (!(e.player.getRidingEntity() instanceof BaseVehicleEntity) && DynamXContext.getPhysicsWorld() != null && !e.player.isDead) {
+            if(!DynamXContext.getPlayerToCollision().containsKey(e.player) && DynamXPhysicsWorldBlacklistApi.isBlacklisted(e.player)) return;
             Vector3fPool.openPool();
             QuaternionPool.openPool();
             if (!DynamXContext.getPlayerToCollision().containsKey(e.player)) {
@@ -292,10 +295,9 @@ public class CommonEventHandler {
     }
 
     @SubscribeEvent
-    public void onPlayerDied(LivingDeathEvent e) {
-        if (e.getEntity() instanceof EntityPlayer && DynamXContext.getPlayerToCollision().containsKey(e.getEntity())) {
-            DynamXContext.getPlayerToCollision().remove(e.getEntity()).removeFromWorld(true);
-        }
+    public void onPlayerLoggedOut(net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedOutEvent event) {
+        if (DynamXContext.getPlayerToCollision().containsKey(event.player))
+            DynamXContext.getPlayerToCollision().get(event.player).removeFromWorld(true);
     }
 
     @SubscribeEvent
@@ -324,7 +326,6 @@ public class CommonEventHandler {
         @SubscribeEvent
         public static void registerBlocks(RegistryEvent.Register<Block> event) {
             IForgeRegistry<Block> blocks = event.getRegistry();
-            System.out.println("FOR");
             for (IInfoOwner<BlockObject<?>> block : DynamXObjectLoaders.BLOCKS.owners) {
                 blocks.register((Block) block);
 

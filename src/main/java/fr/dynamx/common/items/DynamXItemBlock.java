@@ -124,12 +124,12 @@ public class DynamXItemBlock extends ItemBlock implements IResourcesOwner, IInfo
 
     @Override
     public boolean createJson() {
-        return ((IResourcesOwner) block).createJson();
+        return dynamxMainBlock.createJson();
     }
 
     @Override
     public boolean createTranslation() {
-        return ((IResourcesOwner) block).createTranslation();
+        return dynamxMainBlock.createTranslation();
     }
 
     @Override
@@ -140,5 +140,12 @@ public class DynamXItemBlock extends ItemBlock implements IResourcesOwner, IInfo
     @Override
     public void setInfo(BlockObject<?> info) {
         dynamxMainBlock.setInfo(info);
+    }
+
+    @Override
+    public String toString() {
+        return "DynamXItemBlock{" +
+                "dynamxMainBlock=" + dynamxMainBlock +
+                '}';
     }
 }

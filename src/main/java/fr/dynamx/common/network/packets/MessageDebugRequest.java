@@ -16,6 +16,7 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraft.util.text.TextComponentTranslation;
 
 public class MessageDebugRequest implements IDnxPacket, IMessageHandler<MessageDebugRequest, IMessage> {
     public int debugMode;
@@ -48,13 +49,13 @@ public class MessageDebugRequest implements IDnxPacket, IMessageHandler<MessageD
                 if (!s.hasTagCompound()) s.setTagCompound(new NBTTagCompound());
                 if (s.getTagCompound().getInteger("mode") == 0) {
                     s.getTagCompound().setInteger("mode", 1);
-                    ctx.getServerHandler().player.sendMessage(new TextComponentString(TextFormatting.GREEN + "Mode mis à [CREATE]"));
+                    ctx.getServerHandler().player.sendMessage(new TextComponentTranslation("slopes.changemode.create"));
                 } else if (s.getTagCompound().getInteger("mode") == 1) {
                     s.getTagCompound().setInteger("mode", 2);
-                    ctx.getServerHandler().player.sendMessage(new TextComponentString(TextFormatting.GOLD + "Mode mis à [AUTO]"));
+                    ctx.getServerHandler().player.sendMessage(new TextComponentTranslation("slopes.changemode.auto"));
                 } else {
                     s.getTagCompound().setInteger("mode", 0);
-                    ctx.getServerHandler().player.sendMessage(new TextComponentString(TextFormatting.LIGHT_PURPLE + "Mode mis à [DELETE]"));
+                    ctx.getServerHandler().player.sendMessage(new TextComponentTranslation("slopes.changemode.delete"));
                 }
             }
         }

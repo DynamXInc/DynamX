@@ -10,6 +10,8 @@ import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.StorageModule;
 import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.debug.DynamXDebugOption;
+import fr.dynamx.utils.debug.DynamXDebugOptions;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 
@@ -51,6 +53,10 @@ public class PartStorage extends InteractivePart<BaseVehicleEntity<?>, ModularVe
 
     public int getStorageSize() {
         return storageSize;
+    }
+    @Override
+    public DynamXDebugOption getDebugOption() {
+        return DynamXDebugOptions.SEATS_AND_STORAGE;
     }
 
     @Override

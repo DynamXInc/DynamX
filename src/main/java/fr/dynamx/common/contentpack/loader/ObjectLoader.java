@@ -108,7 +108,6 @@ public class ObjectLoader<T extends ObjectInfo<?>, C extends IInfoOwner<?>, U ex
                 String creativeTabName = ((AbstractItemObject<?>) info).getCreativeTabName();
                 if (creativeTabName != null && !creativeTabName.equalsIgnoreCase("None")) {
                     if (DynamXItemRegistry.creativeTabs.stream().noneMatch(p -> DynamXReflection.getCreativeTabName(p).equals(creativeTabName))) {
-                        DynamXMain.log.info("Creative Tab : " + creativeTabName + " not found. Creating a new one");
                         DynamXItemRegistry.creativeTabs.add(new CreativeTabs(creativeTabName) {
                             @Override
                             public ItemStack createIcon() {

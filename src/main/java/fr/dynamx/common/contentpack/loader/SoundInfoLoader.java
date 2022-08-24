@@ -53,10 +53,8 @@ public class SoundInfoLoader extends InfoLoader<SoundListInfo, ISubInfoTypeOwner
                                 //Parse min and max rpm
                                 readingCategory[0] = new EngineSound(info.getPackName(), new int[]{Integer.parseInt(sp[0]), Integer.parseInt(sp[1])});
                                 readingCategory[0].setInterior(interior[0]);
-                            } else {
-                                //log.error("Invalid sound config entry : " + s + " in " + info.getFullName());
-                                DynamXErrorManager.addError(info.getPackName(), "sound_error", ErrorLevel.LOW, info.getName(), "value: " + s);
-                            }
+                            } else
+                                DynamXErrorManager.addPackError(info.getPackName(), "sound_error", ErrorLevel.LOW, info.getName(), "value: " + s);
                     }
                 } else if (s.contains(":")) {
                     //Property of a reading sound
@@ -68,12 +66,9 @@ public class SoundInfoLoader extends InfoLoader<SoundListInfo, ISubInfoTypeOwner
                     if (readingCategory[0] != null)
                         ((SoundListInfo) info).addSound(readingCategory[0]);
                     readingCategory[0] = null;
-                } else if (s.contains("Engine")) {
-                    //We don't care
-                } else {
-                    //log.error("Unknown sound config key " + s + " in " + info.getFullName());
-                    DynamXErrorManager.addError(info.getPackName(), "sound_error", ErrorLevel.LOW, info.getName(), "key: " + s);
-                }
+                } else if (!s.contains("Engine")) {
+                    DynamXErrorManager.addPackError(info.getPackName(), "sound_error", ErrorLevel.LOW, info.getName(), "key: " + s);
+                } // else we don't care
             }
         });
     }

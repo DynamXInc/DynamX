@@ -99,7 +99,7 @@ public abstract class BasePart<T extends ISubInfoTypeOwner<T>> extends SubInfoTy
     public void appendTo(T owner) {
         if (scale == null) {
             INamedObject parent = getRootOwner();
-            DynamXErrorManager.addError(getPackName(), "required_property", ErrorLevel.HIGH, parent.getName(), "Scale in " + getName());
+            DynamXErrorManager.addPackError(getPackName(), "required_property", ErrorLevel.HIGH, parent.getName(), "Scale in " + getName());
         }
         ((IShapeContainer) owner).addPart(this);
         getPosition().multLocal(getScaleModifier(owner));

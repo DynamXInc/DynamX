@@ -21,7 +21,6 @@ import fr.dynamx.utils.DynamXLoadingTasks;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.launchwrapper.LaunchClassLoader;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -104,100 +103,63 @@ public class ContentPackLoader {
         AddonLoader.discoverAddons(event);
         SubInfoTypesRegistry.discoverSubInfoTypes(event);
         //Discover resources
-        if (side.isClient()) {
-            int packCount = 0;
-            for (File file : myDir.listFiles()) {
-                if (file.isDirectory()) { //TODO FACTORIZE
-                    if (new File(file, "assets").exists()) {
+        int packCount = 0;
+        for (File file : myDir.listFiles()) {
+            if (file.isDirectory() || file.getName().endsWith(".zip") || file.getName().endsWith(PACK_FILE_EXTENSION)) {
+                DynamXMain.log.debug("Loading resource pack: " + file.getName());
+                //Add assets
+                if(side.isClient() && loadPackResources(file, file.isDirectory() ? ContainerType.DIR : ContainerType.JAR))
+                    packCount++;
+                else if(side.isServer())
+                    packCount++;
+                //Add custom ModProtectionSystem repositories
+                protectedResources.put(file.getName(), modProtectionContainer.getParent().loadCustomRepository(modProtectionContainer, file));
+            }
+            if (file.isDirectory()) {
+                //And load protected files -> Now directly handled by mps
+                for (File f : file.listFiles()){  //Keep handle the PackFiles.jar, but deprecated
+                    if (f.isFile() && f.getName().endsWith(".jar")) {
                         try {
-                            HashMap<String, Object> map = new HashMap<>();
-                            map.put("modid", DynamXConstants.ID);
-                            map.put("name", "DynamX pack : " + file.getName());
-                            map.put("version", "1.0");
-                            FMLModContainer container = new FMLModContainer("fr.dynamx.common.DynamXMain", new ModCandidate(file, file, ContainerType.DIR), map);
-                            container.bindMetadata(MetadataCollection.from(null, ""));
-                            FMLClientHandler.instance().addModAsResource(container);
-                            packCount++;
+                            //Protected resources (.part files), only add to classpath
+                            ((LaunchClassLoader) Thread.currentThread().getContextClassLoader()).addURL(f.toURI().toURL());
                         } catch (Exception e) {
-                            DynamXMain.log.error("Failed to load textures and models of DynamX pack : " + file.getName());
+                            DynamXMain.log.error("Failed to load mps resources jar : " + f.getName());
                             DynamXMain.log.throwing(e);
-                            DynamXErrorManager.addError(file.getName(), "res_pack_load_fail", ErrorLevel.FATAL, "assets", "Failed to register as resource pack", e, 700);
+                            DynamXErrorManager.addError(file.getName(), DynamXErrorManager.INIT_ERRORS, "res_pack_load_fail", ErrorLevel.FATAL, "assets", "Failed to add to classpath", e, 700);
                         }
+                        DynamXMain.log.info("Loaded mps pack file : " + f.getName());
                     }
-                    //Custom ModProtectionSystem repositories
-                    protectedResources.put(file.getName(), modProtectionContainer.getParent().loadCustomRepository(modProtectionContainer, file));
-                    //And load protected files -> Now directly handled by mps
-                    for (File f : file.listFiles()) //Keep handle the PackFiles.jar, but deprecated
-                    {
-                        if (f.isFile() && f.getName().endsWith(".jar")) {
-                            try {
-                                //Protected resources (.part files), only add to classpath
-                                ((LaunchClassLoader) Thread.currentThread().getContextClassLoader()).addURL(f.toURI().toURL());
-                            } catch (Exception e) {
-                                DynamXMain.log.error("Failed to load mps resources jar : " + f.getName());
-                                DynamXMain.log.throwing(e);
-                                DynamXErrorManager.addError(file.getName(), "res_pack_load_fail", ErrorLevel.FATAL, "assets", "Failed to add to classpath", e, 700);
-                            }
-                            DynamXMain.log.info("Loaded mps pack : " + file.getName());
-                        }
-                    }
-                    DynamXMain.log.info("Injected resource pack : " + file.getName());
-                } else if (file.isFile() && (file.getName().endsWith(".zip") || file.getName().endsWith(PACK_FILE_EXTENSION))) {
-                    try {
-                        HashMap<String, Object> map = new HashMap<>();
-                        map.put("modid", DynamXConstants.ID);
-                        map.put("name", "DynamX assets : " + file.getName());
-                        map.put("version", "1.0");
-                        FMLModContainer container = new FMLModContainer("fr.dynamx.common.DynamXMain", new ModCandidate(file, file, ContainerType.JAR), map);
-                        container.bindMetadata(MetadataCollection.from(null, ""));
-                        FMLClientHandler.instance().addModAsResource(container);
-                        packCount++;
-                    } catch (Exception e) {
-                        DynamXMain.log.error("Failed to load textures and models of DynamX pack : " + file.getName());
-                        DynamXMain.log.throwing(e);
-                        DynamXErrorManager.addError(file.getName(), "res_pack_load_fail", ErrorLevel.FATAL, "assets", "Failed to register as resource pack", e, 700);
-                    }
-                    //Custom ModProtectionSystem repositories
-                    protectedResources.put(file.getName(), modProtectionContainer.getParent().loadCustomRepository(modProtectionContainer, file));
-                    //And load protected files -> Now directly handled by mps
-                    DynamXMain.log.info("Injected resource pack : " + file.getName());
                 }
             }
-            DynamXMain.log.info("Loaded " + packCount + " DynamX resource packs");
-
+        }
+        DynamXMain.log.info("Loaded " + packCount + " DynamX resource packs");
+        if (side.isClient()) {
             //Add built-in style, before customs by addons
             ACsGuiApi.registerStyleSheetToPreload(GuiDnxDebug.STYLE);
             ACsGuiApi.registerStyleSheetToPreload(GuiLoadingErrors.STYLE);
             ACsGuiApi.registerStyleSheetToPreload(CarController.STYLE);
             ACsGuiApi.registerStyleSheetToPreload(GuiBlockCustomization.STYLE);
             ACsGuiApi.registerStyleSheetToPreload(GuiSlopesConfig.STYLE);
-        } else {
-            for (File file : myDir.listFiles()) {
-                if (file.isDirectory() || file.getName().endsWith(".zip") || file.getName().endsWith(PACK_FILE_EXTENSION)) {
-                    //Add custom ModProtectionSystem repositories
-                    protectedResources.put(file.getName(), modProtectionContainer.getParent().loadCustomRepository(modProtectionContainer, file));
-                }
-                if (file.isDirectory()) {
-                    //And load protected files
-                    for (File f : file.listFiles()) {
-                        if (f.isFile() && f.getName().endsWith(".jar")) {
-                            try {
-                                //Protected resources (.part files), only add to classpath
-                                ((LaunchClassLoader) Thread.currentThread().getContextClassLoader()).addURL(f.toURI().toURL());
-                            } catch (Exception e) {
-                                DynamXMain.log.error("Failed to load mps resources jar : " + f.getName());
-                                DynamXMain.log.throwing(e);
-                                DynamXErrorManager.addError(file.getName(), "res_pack_load_fail", ErrorLevel.FATAL, "assets", "Failed to add to classpath", e, 700);
-                            }
-                            DynamXMain.log.info("Loaded mps pack : " + file.getName());
-                        }
-                    }
-                }
-            }
-            DynamXMain.log.info("Loaded server-side DynamX protected resource packs");
         }
-        //FMLCommonHandler.instance().handleExit(0);
-        return myDir; //the used path, used when reloading config
+        return myDir; //return the used path, used when reloading config
+    }
+
+    private static boolean loadPackResources(File file, ContainerType type) {
+        try {
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("modid", DynamXConstants.ID);
+            map.put("name", "DynamX assets : " + file.getName());
+            map.put("version", "1.0");
+            FMLModContainer container = new FMLModContainer("fr.dynamx.common.DynamXMain", new ModCandidate(file, file, type), map);
+            container.bindMetadata(MetadataCollection.from(null, ""));
+            FMLClientHandler.instance().addModAsResource(container);
+            return true;
+        } catch (Exception e) {
+            DynamXMain.log.error("Failed to load textures and models of DynamX pack : " + file.getName());
+            DynamXMain.log.throwing(e);
+            DynamXErrorManager.addError(file.getName(), DynamXErrorManager.INIT_ERRORS, "res_pack_load_fail", ErrorLevel.FATAL, "assets", "Failed to register as resource pack", e, 700);
+            return false;
+        }
     }
 
     /**
@@ -230,7 +192,7 @@ public class ContentPackLoader {
             initialized = true;
         for (InfoLoader<?, ?> loader : DynamXObjectLoaders.LOADERS)
             loader.clear(isHotReloading);
-        DynamXErrorManager.getErrorManager().clear(DynamXErrorManager.DYNAMX_ERRORS);
+        DynamXErrorManager.getErrorManager().clear(DynamXErrorManager.PACKS__ERRORS);
         try {
             ProgressManager.ProgressBar bar = ProgressManager.push("Loading content pack system", 1 + DynamXObjectLoaders.LOADERS.size());
             bar.step("Discover assets");
@@ -271,7 +233,7 @@ public class ContentPackLoader {
                         packCount++;
                     } catch (Exception e) {
                         //log.error("Content Pack " + loadingPack + " cannot be loaded : ", e);
-                        DynamXErrorManager.addError(loadingPack, "pack_load_fail", ErrorLevel.FATAL, "loading folder pack", loadingPack, e, 800);
+                        DynamXErrorManager.addError(loadingPack, DynamXErrorManager.PACKS__ERRORS, "pack_load_fail", ErrorLevel.FATAL, "loading folder pack", loadingPack, e, 800);
                         errorCount++;
                     }
                 } else if (contentPack.isFile() && (contentPack.getName().endsWith(".zip") || contentPack.getName().endsWith(PACK_FILE_EXTENSION))) {
@@ -296,7 +258,7 @@ public class ContentPackLoader {
                         packCount++;
                     } catch (Exception e) {
                         //log.error("Compressed content Pack " + loadingPack + " cannot be loaded : ", e);
-                        DynamXErrorManager.addError(loadingPack, "pack_load_fail", ErrorLevel.FATAL, "loading compressed pack", loadingPack, e, 800);
+                        DynamXErrorManager.addError(loadingPack, DynamXErrorManager.PACKS__ERRORS, "pack_load_fail", ErrorLevel.FATAL, "loading compressed pack", loadingPack, e, 800);
                         errorCount++;
                     }
                 } else if (!contentPack.getName().endsWith(".dll") && !contentPack.getName().endsWith(".so")) { //Bullet library files
@@ -323,22 +285,23 @@ public class ContentPackLoader {
         }
         PackSyncHandler.computeAll();
         DynamXLoadingTasks.endTask(DynamXLoadingTasks.PACK);
-        System.out.println("LOAD END");
     }
 
     private static void loadPack(String loadingPack, File contentPack, ContentPackType packType, String suffix, PackFile packInfo, List<PackFile> packFiles) {
         //Search for real pack name in the pack info
+        String packVersion = "<missing pack info>";
         if (packInfo != null) {
             loadFile(loadingPack, suffix, packInfo);
             PackInfo loadedInfo = DynamXObjectLoaders.PACKS.findInfo(loadingPack + ".pack_info");
             loadedInfo.setPathName(contentPack.getName()).setPackType(packType);
             loadingPack = loadedInfo.getFixedPackName();
+            packVersion = loadedInfo.getPackVersion();
         } else {
             //TODO FORMAT ERROR
-            DynamXErrorManager.addError(loadingPack, "missing_pack_info", ErrorLevel.HIGH, "pack_info", "Add a pack_info.dynx file in the pack !", null, 600);
+            DynamXErrorManager.addError(loadingPack, DynamXErrorManager.PACKS__ERRORS, "missing_pack_info", ErrorLevel.HIGH, "pack_info", "Add a pack_info.dynx file in the pack !", null, 600);
             DynamXObjectLoaders.PACKS.addInfo(loadingPack + ".pack_info.dynx", new PackInfo(loadingPack, packType).setPathName(contentPack.getName()).setPackVersion("dummy info"));
         }
-        DynamXMain.log.info("Loading " + loadingPack + "(in " + contentPack.getName() + ")");
+        DynamXMain.log.info("Loading " + loadingPack + " version " + packVersion + " (in " + contentPack.getName() + ")");
         for (PackFile packFile : packFiles) {
             loadFile(loadingPack, suffix, packFile);
         }
@@ -361,7 +324,7 @@ public class ContentPackLoader {
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         } catch (Exception e) {
-            DynamXErrorManager.addError(loadingPack, "pack_file_load_error", ErrorLevel.FATAL, file.getName().replace(suffix, ""), null, e, 100);
+            DynamXErrorManager.addError(loadingPack, DynamXErrorManager.PACKS__ERRORS, "pack_file_load_error", ErrorLevel.FATAL, file.getName().replace(suffix, ""), null, e, 100);
         } finally {
             if (inputStream != null) {
                 try {
@@ -422,7 +385,7 @@ public class ContentPackLoader {
                                 Float.parseFloat(values[0]), Float.parseFloat(values[0])});
                     }
                 } else {
-                    log.error("Block " + blockString[0] + " doesn't exist");
+                    log.error("Bad block grip config: block " + blockString[0] + " doesn't exist");
                 }
             }
         });

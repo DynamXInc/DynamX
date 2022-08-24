@@ -15,14 +15,10 @@ import net.minecraft.world.World;
 public class ItemTrailer<T extends ModularVehicleInfo<?>> extends ItemModularEntity<T> {
     public ItemTrailer(T modularVehicleInfo) {
         super(modularVehicleInfo);
-        if (getInfo().getPartsByType(PartWheel.class).isEmpty()) {
-            //DynamXMain.log.error("Cannot determine type of " + getInfo().getFullName() + " ! It's a trailer with no wheels...");
-            DynamXErrorManager.addError(getInfo().getPackName(), "config_error", ErrorLevel.FATAL, getInfo().getName(),  "This trailer has no wheels !");
-        }
-        if (getInfo().getSubPropertyByType(TrailerAttachInfo.class) == null) {
-            //DynamXMain.log.error("Cannot determine type of " + getInfo().getFullName() + " ! It's a trailer with no trailer attach...");
-            DynamXErrorManager.addError(getInfo().getPackName(), "config_error", ErrorLevel.FATAL, getInfo().getName(),  "Missing trailer config !");
-        }
+        if (getInfo().getPartsByType(PartWheel.class).isEmpty())
+            DynamXErrorManager.addPackError(getInfo().getPackName(), "config_error", ErrorLevel.FATAL, getInfo().getName(),  "This trailer has no wheels !");
+        if (getInfo().getSubPropertyByType(TrailerAttachInfo.class) == null)
+            DynamXErrorManager.addPackError(getInfo().getPackName(), "config_error", ErrorLevel.FATAL, getInfo().getName(),  "Missing trailer config !");
     }
 
     @Override

@@ -117,10 +117,8 @@ public class ArmorObject<T extends ArmorObject<T>> extends AbstractItemObject<T>
             owners.add(new DynamXItemArmor(this, material, EntityEquipmentSlot.LEGS));
         if (getArmorFoot() != null)
             owners.add(new DynamXItemArmor(this, material, EntityEquipmentSlot.FEET));
-        if (owners.isEmpty()) {
-            //DynamXMain.log.error("Armor " + getFullName() + " has no configured items !");
-            DynamXErrorManager.addError(getPackName(), "armor_error", ErrorLevel.FATAL, getName(), "No configured items for this armor");
-        }
+        if (owners.isEmpty())
+            DynamXErrorManager.addPackError(getPackName(), "armor_error", ErrorLevel.FATAL, getName(), "No configured items for this armor");
         this.owners = owners.toArray(new IInfoOwner[0]);
         return this.owners;
     }

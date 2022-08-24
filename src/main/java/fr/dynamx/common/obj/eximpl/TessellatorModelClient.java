@@ -41,8 +41,7 @@ public class TessellatorModelClient extends ObjModelClient {
             new OBJLoader(objObjects).loadModelClient(QuickObjObject::new, startPath, content);
             return new TessellatorModelClient(location, objObjects, customTextures);
         } catch (Exception e) {
-            //log.error(" Model " + location + " cannot be loaded !", e);
-            DynamXErrorManager.addError(customTextures != null ? customTextures.getPackName() : "Non-pack model", "obj_error", ErrorLevel.HIGH, location.toString(), "", e);
+            DynamXErrorManager.addError(customTextures != null ? customTextures.getPackName() : "Non-pack model", DynamXErrorManager.MODEL_ERRORS, "obj_error", ErrorLevel.HIGH, location.toString(), "", e);
         }
         return null;
     }
@@ -78,8 +77,7 @@ public class TessellatorModelClient extends ObjModelClient {
                 object.createDefaultList(this);
             }
         } catch (Exception e) {
-            //log.error("Cannot setup model " + getLocation() + " ! Step: " + (step == null ? null : step.getName()), e);
-            DynamXErrorManager.addError(customTextures != null ? customTextures.getPackName() : "Non-pack model", "obj_error", ErrorLevel.HIGH, getLocation().toString(), (step == null ? null : step.getName()), e);
+            DynamXErrorManager.addError(customTextures != null ? customTextures.getPackName() : "Non-pack model", DynamXErrorManager.MODEL_ERRORS, "obj_error", ErrorLevel.HIGH, getLocation().toString(), (step == null ? null : step.getName()), e);
         }
     }
 

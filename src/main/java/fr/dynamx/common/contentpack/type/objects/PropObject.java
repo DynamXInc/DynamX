@@ -55,7 +55,7 @@ public class PropObject<T extends BlockObject<?>> extends AbstractProp<T> implem
 
     public PropObject(String packName, String fileName) {
         super(packName, fileName);
-        DynamXErrorManager.addError(getPackName(), "deprecated_prop", ErrorLevel.LOW, fileName, "Props should now be declared in the corresponding block_" + getName() + ".dynx file");
+        DynamXErrorManager.addPackError(getPackName(), "deprecated_prop", ErrorLevel.LOW, fileName, "Props should now be declared in the corresponding block_" + getName() + ".dynx file");
         owner = null;
         this.itemIcon = "Prop";
     }

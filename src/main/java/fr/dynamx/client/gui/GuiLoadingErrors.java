@@ -239,6 +239,6 @@ public class GuiLoadingErrors extends GuiFrame {
 
     @Override
     public boolean needsCssReload() {
-        return true;
+        return false;
     }
 }

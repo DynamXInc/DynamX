@@ -220,7 +220,7 @@ public class QuickObjObject implements IObjObject {
         {
             if (!model.hasNoneMaterials) {
                 //log.error("Invalid object " + getName() + " in model " + model.getLocation() + " : uses 'none' material of BlockBench");
-                DynamXErrorManager.addError(model.getCustomTextures() != null ? model.getCustomTextures().getPackName() : "Non-pack model", "obj_none_material", ErrorLevel.LOW, model.getLocation().toString(), getName());
+                DynamXErrorManager.addError(model.getCustomTextures() != null ? model.getCustomTextures().getPackName() : "Non-pack model", DynamXErrorManager.MODEL_ERRORS, "obj_none_material", ErrorLevel.LOW, model.getLocation().toString(), getName());
             }
             model.hasNoneMaterials = true;
             return false;

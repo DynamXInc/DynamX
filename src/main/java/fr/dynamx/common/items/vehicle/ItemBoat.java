@@ -14,10 +14,8 @@ import net.minecraft.world.World;
 public class ItemBoat<T extends ModularVehicleInfo<?>> extends ItemModularEntity<T> {
     public ItemBoat(T modularVehicleInfo) {
         super(modularVehicleInfo);
-        if (getInfo().getSubPropertyByType(BoatEngineInfo.class) == null) {
-            //DynamXMain.log.error("Cannot determine type of " + getInfo().getFullName() + " ! It's a boat with no boat_engine...");
-            DynamXErrorManager.addError(getInfo().getPackName(), "config_error", ErrorLevel.FATAL, getInfo().getName(), "Missing boat_engine config !");
-        }
+        if (getInfo().getSubPropertyByType(BoatEngineInfo.class) == null)
+            DynamXErrorManager.addPackError(getInfo().getPackName(), "config_error", ErrorLevel.FATAL, getInfo().getName(), "Missing boat_engine config !");
     }
 
     @Override

@@ -90,14 +90,14 @@ public class BuildableInfoLoader<A extends SubInfoTypeOwner.BuildableSubInfoType
                 ((IShapeContainer) info).generateShape();
             } catch (Exception e) {
                 ((IShapeContainer) info).markFailedShape();
-                DynamXErrorManager.addError(info.getPackName(), "collision_shape_error", ErrorLevel.FATAL, info.getName(), null, e);
+                DynamXErrorManager.addError(info.getPackName(), DynamXErrorManager.PACKS__ERRORS, "collision_shape_error", ErrorLevel.FATAL, info.getName(), null, e);
             }
             if (!info.isErrored()) {
                 try {
                     T vehicleInfo = info.build();
                     super.loadItems(vehicleInfo, hot);
                 } catch (Exception e) {
-                    DynamXErrorManager.addError(info.getPackName(), "complete_vehicle_error", ErrorLevel.FATAL, info.getName(), null, e);
+                    DynamXErrorManager.addError(info.getPackName(), DynamXErrorManager.PACKS__ERRORS, "complete_vehicle_error", ErrorLevel.FATAL, info.getName(), null, e);
                 }
             } else {
                 log.info("Ignoring errored vehicle " + info.getFullName() + ". See previous errors.");

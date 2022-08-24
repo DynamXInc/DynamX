@@ -13,7 +13,19 @@ import java.util.*;
 public class DynamXErrorManager {
     private static final ErrorManagerService errorManager = ACsLib.getPlatform().provideService(ErrorManagerService.class);
 
-    public static final ErrorCategory DYNAMX_ERRORS = errorManager.createErrorCategory(new ResourceLocation(DynamXConstants.ID, "general_errors"), "DynamX errors");
+    public static final ErrorCategory INIT_ERRORS = errorManager.createErrorCategory(new ResourceLocation(DynamXConstants.ID, "general_errors"), "DynamX errors");
+    /**
+     * PACK error type : notifies of pack loading errors
+     */
+    public static final ErrorCategory PACKS__ERRORS = errorManager.createErrorCategory(new ResourceLocation(DynamXConstants.ID, "general_errors"), "DynamX errors");
+    /**
+     * MODEL error type : notifies of model loading errors
+     */
+    public static final ErrorCategory MODEL_ERRORS = errorManager.createErrorCategory(new ResourceLocation(DynamXConstants.ID, "general_errors"), "DynamX errors");
+    /**
+     * UPDATES error type : notifies of DynamX updates
+     */
+    public static ErrorCategory UPDATES = getErrorManager().createErrorCategory(new ResourceLocation(DynamXConstants.ID, "majs"), "Updates");
 
     /**
      * The current {@link ErrorManagerService} instance
@@ -22,24 +34,32 @@ public class DynamXErrorManager {
         return errorManager;
     }
 
-    public static void addError(String pack, String genericType, ErrorLevel errorLevel, String object, String message) {
-        errorManager.addError(pack, DYNAMX_ERRORS, genericType, errorLevel, object, message);
+
+    public static void addPackError(String pack, String genericType, ErrorLevel errorLevel, String object, String message) {
+        addError(pack, PACKS__ERRORS, genericType, errorLevel, object, message);
     }
 
-    public static void addError(String pack, String genericType, ErrorLevel errorLevel, String object, String message, Exception exception) {
-        errorManager.addError(pack, DYNAMX_ERRORS, genericType, errorLevel, object, message, exception);
+    public static void addError(String pack, ErrorCategory errorCategory, String genericType, ErrorLevel errorLevel, String object, String message) {
+        errorManager.addError(pack, errorCategory, genericType, errorLevel, object, message);
     }
 
-    public static void addError(String pack, String genericType, ErrorLevel errorLevel, String object, String message, Exception exception, int priority) {
-        errorManager.addError(pack, DYNAMX_ERRORS, genericType, errorLevel, object, message, exception, priority);
+    public static void addError(String pack, ErrorCategory errorCategory, String genericType, ErrorLevel errorLevel, String object, String message, Exception exception) {
+        errorManager.addError(pack, errorCategory, genericType, errorLevel, object, message, exception);
+    }
+
+    public static void addError(String pack, ErrorCategory errorCategory, String genericType, ErrorLevel errorLevel, String object, String message, Exception exception, int priority) {
+        errorManager.addError(pack, errorCategory, genericType, errorLevel, object, message, exception, priority);
     }
 
     public static void printErrors(ErrorLevel minLevel) {
-        errorManager.printErrors(DynamXMain.log, Arrays.asList(DYNAMX_ERRORS, ACsLib.getPlatform().getACsLibErrorCategory(), ACsGuiApi.getCssErrorType()), minLevel);
+        if(errorManager.getAllErrors().values().stream().anyMatch(e -> e.getHighestErrorLevel().ordinal() >= minLevel.ordinal())) {
+            DynamXMain.log.error("==== DynamX loading errors ====");
+            errorManager.printErrors(DynamXMain.log, Arrays.asList(INIT_ERRORS, PACKS__ERRORS, MODEL_ERRORS, ACsLib.getPlatform().getACsLibErrorCategory(), ACsGuiApi.getCssErrorType()), minLevel);
+        }
     }
 
-    public static void registerErrorFormatter(String genericType, ErrorFormatter errorFormatter) {
-        DYNAMX_ERRORS.registerErrorFormatter(genericType, errorFormatter);
+    public static void registerErrorFormatter(ErrorCategory category, String genericType, ErrorFormatter errorFormatter) {
+        category.registerErrorFormatter(genericType, errorFormatter);
     }
 
     private static String getErrorName(ErrorData errorData, boolean addStackTrace) {
@@ -56,8 +76,15 @@ public class DynamXErrorManager {
             if(error.getException() != null) {
                 errorBuilder.append(error.getException().toString()).append("\n");
                 if(addStackTrace) {
-                    for(StackTraceElement stackTraceElement : error.getException().getStackTrace()) {
-                        errorBuilder.append(stackTraceElement.toString()).append("\n");
+                    Throwable parent = error.getException();
+                    while (parent != null) {
+                        StackTraceElement[] stackTrace = parent.getStackTrace();
+                        for (int i = 0; i < Math.min(stackTrace.length, 10); i++) {
+                            errorBuilder.append(stackTrace[i].toString()).append("\n");
+                        }
+                        parent = parent.getCause();
+                        if(parent != null)
+                            errorBuilder.append("Caused by: ").append(parent).append("\n");
                     }
                 }
             }
@@ -80,29 +107,30 @@ public class DynamXErrorManager {
     };
 
     static {
-        registerErrorFormatter("required_property", FORMATTER_MULTIPLE_ERROR_ONE_LI);
-        registerErrorFormatter("obj_duplicated_custom_textures", FORMATTER_MULTIPLE_ERROR);
-        registerErrorFormatter("armor_error", FORMATTER_MULTIPLE_ERROR);
-        registerErrorFormatter("updates", FORMATTER_SINGLE_ERROR);
-        registerErrorFormatter("syntax_error", FORMATTER_MULTIPLE_ERROR);
-        registerErrorFormatter("deprecated_prop", FORMATTER_MULTIPLE_ERROR);
-        registerErrorFormatter("missing_prop", FORMATTER_MULTIPLE_ERROR);
-        registerErrorFormatter("unknown_sub_info", FORMATTER_MULTIPLE_ERROR_ONE_LI);
-        registerErrorFormatter("sound_error", FORMATTER_MULTIPLE_ERROR);
-        registerErrorFormatter("config_error", FORMATTER_MULTIPLE_ERROR);
-        registerErrorFormatter("obj_none_material", FORMATTER_MULTIPLE_ERROR_ONE_LI);
-        registerErrorFormatter("mps_error", FORMATTER_SINGLE_ERROR);
-        registerErrorFormatter("addon_init_error", FORMATTER_SINGLE_ERROR);
-        registerErrorFormatter("pack_requirements", FORMATTER_MULTIPLE_ERROR); //FORMAT
-        registerErrorFormatter("collision_shape_error", FORMATTER_SINGLE_ERROR);
-        registerErrorFormatter("complete_vehicle_error", FORMATTER_SINGLE_ERROR);
-        registerErrorFormatter("property_parse_error", FORMATTER_MULTIPLE_ERROR); //FORMAT
-        registerErrorFormatter("loading_tasks", FORMATTER_SINGLE_ERROR);
-        registerErrorFormatter("addon_load_error", FORMATTER_SINGLE_ERROR); //FORMAT
-        registerErrorFormatter("res_pack_load_fail", FORMATTER_SINGLE_ERROR);
-        registerErrorFormatter("pack_load_fail", FORMATTER_SINGLE_ERROR);
-        registerErrorFormatter("missing_pack_info", FORMATTER_MULTIPLE_ERROR);  //FORMAT
-        registerErrorFormatter("pack_file_load_error", FORMATTER_SINGLE_ERROR);
-        registerErrorFormatter("addon_error", FORMATTER_SINGLE_ERROR); //FORMAT
+        registerErrorFormatter(INIT_ERRORS, "mps_error", FORMATTER_SINGLE_ERROR);
+        registerErrorFormatter(INIT_ERRORS, "loading_tasks", FORMATTER_SINGLE_ERROR);
+        registerErrorFormatter(INIT_ERRORS, "addon_init_error", FORMATTER_SINGLE_ERROR);
+        registerErrorFormatter(INIT_ERRORS, "addon_load_error", FORMATTER_SINGLE_ERROR); //FORMAT
+        registerErrorFormatter(INIT_ERRORS, "addon_error", FORMATTER_SINGLE_ERROR); //FORMAT
+        registerErrorFormatter(INIT_ERRORS, "res_pack_load_fail", FORMATTER_SINGLE_ERROR);
+        registerErrorFormatter(UPDATES, "updates", FORMATTER_SINGLE_ERROR);
+        registerErrorFormatter(PACKS__ERRORS, "required_property", FORMATTER_MULTIPLE_ERROR_ONE_LI);
+        registerErrorFormatter(PACKS__ERRORS, "obj_duplicated_custom_textures", FORMATTER_MULTIPLE_ERROR);
+        registerErrorFormatter(PACKS__ERRORS, "armor_error", FORMATTER_MULTIPLE_ERROR);
+        registerErrorFormatter(PACKS__ERRORS, "syntax_error", FORMATTER_MULTIPLE_ERROR);
+        registerErrorFormatter(PACKS__ERRORS, "deprecated_prop", FORMATTER_MULTIPLE_ERROR);
+        registerErrorFormatter(PACKS__ERRORS, "missing_prop", FORMATTER_MULTIPLE_ERROR);
+        registerErrorFormatter(PACKS__ERRORS, "unknown_sub_info", FORMATTER_MULTIPLE_ERROR_ONE_LI);
+        registerErrorFormatter(PACKS__ERRORS, "sound_error", FORMATTER_MULTIPLE_ERROR);
+        registerErrorFormatter(PACKS__ERRORS, "config_error", FORMATTER_MULTIPLE_ERROR);
+        registerErrorFormatter(PACKS__ERRORS, "pack_requirements", FORMATTER_MULTIPLE_ERROR); //FORMAT
+        registerErrorFormatter(PACKS__ERRORS, "collision_shape_error", FORMATTER_SINGLE_ERROR);
+        registerErrorFormatter(PACKS__ERRORS, "complete_vehicle_error", FORMATTER_SINGLE_ERROR);
+        registerErrorFormatter(PACKS__ERRORS, "property_parse_error", FORMATTER_MULTIPLE_ERROR); //FORMAT
+        registerErrorFormatter(PACKS__ERRORS, "pack_load_fail", FORMATTER_SINGLE_ERROR);
+        registerErrorFormatter(PACKS__ERRORS, "missing_pack_info", FORMATTER_MULTIPLE_ERROR);  //FORMAT
+        registerErrorFormatter(PACKS__ERRORS, "pack_file_load_error", FORMATTER_SINGLE_ERROR);
+        registerErrorFormatter(MODEL_ERRORS, "obj_error", FORMATTER_SINGLE_ERROR);
+        registerErrorFormatter(MODEL_ERRORS, "obj_none_material", FORMATTER_MULTIPLE_ERROR_ONE_LI);
     }
 }

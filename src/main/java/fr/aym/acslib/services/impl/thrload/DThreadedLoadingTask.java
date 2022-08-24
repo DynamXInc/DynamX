@@ -40,7 +40,7 @@ public class DThreadedLoadingTask implements Runnable {
             executor.onEnd(this, followingInThreadTask, (System.currentTimeMillis() - time));
         } catch (Exception e) {
             ACsLogger.serviceFatal(ACsLib.getPlatform().provideService(ThreadedLoadingService.class), "Error in task " + name, e);
-            DynamXErrorManager.addError("DynamX initialization", "loading_tasks", ErrorLevel.FATAL, "ThreadTask " + name, null, e, 1000);
+            DynamXErrorManager.addError("DynamX initialization", DynamXErrorManager.INIT_ERRORS, "loading_tasks", ErrorLevel.FATAL, "ThreadTask " + name, null, e, 1000);
             if (FMLCommonHandler.instance().getSide().isClient()) {
                 executor.onEnd(this, () -> {
                     if (e instanceof CustomModLoadingErrorDisplayException)

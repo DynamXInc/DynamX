@@ -58,7 +58,7 @@ public class DynamXModelRegistry implements IObjModelRegistry {
             } else {
                 //log.error("Tried to register the model '" + location + "' two times with custom textures '" + previousSupplier + "' and '" + customTextures + "' ! Ignoring " + customTextures);
                 //TODO FORMAT ERROR
-                DynamXErrorManager.addError(customTextures.getPackName(), "obj_duplicated_custom_textures", ErrorLevel.HIGH, location, "Tried to register the model '" + location + "' two times with custom textures '" + previousSupplier + "' and '" + customTextures + "' ! Ignoring " + customTextures);
+                DynamXErrorManager.addPackError(customTextures.getPackName(), "obj_duplicated_custom_textures", ErrorLevel.HIGH, location, "Tried to register the model '" + location + "' two times with custom textures '" + previousSupplier + "' and '" + customTextures + "' ! Ignoring " + customTextures);
             }
         }
     }
@@ -85,7 +85,7 @@ public class DynamXModelRegistry implements IObjModelRegistry {
         REGISTRY_CLOSED = true;
         MODELS.clear();
         ERRORED_MODELS.clear();
-        DynamXErrorManager.getErrorManager().clear(DynamXLoadingTasks.MODEL);
+        DynamXErrorManager.getErrorManager().clear(DynamXErrorManager.MODEL_ERRORS);
 
         ACsLib.getPlatform().provideService(ThreadedLoadingService.class).addTask(ThreadedLoadingService.ModLoadingSteps.FINISH_LOAD, "model_load", () -> {
             //bar.step("Loading model files");
@@ -125,7 +125,6 @@ public class DynamXModelRegistry implements IObjModelRegistry {
                 info.getObjArmor().init(model);
             }
             ProgressManager.pop(bar);
-
             DynamXLoadingTasks.endTask(DynamXLoadingTasks.MODEL);
         });
     }

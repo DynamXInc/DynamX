@@ -10,7 +10,6 @@ import fr.aym.acsguis.component.panel.GuiScrollPane;
 import fr.aym.acsguis.component.panel.GuiTabbedPane;
 import fr.aym.acsguis.component.textarea.GuiLabel;
 import fr.aym.acsguis.utils.GuiCssError;
-import fr.dynamx.common.DynamXContext;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.DynamXLoadingTasks;
@@ -47,14 +46,13 @@ public class GuiDnxDebug extends GuiFrame {
             box.addClickListener((x, y, bu) -> {
                 box.setEnabled(false);
                 box.setText("Reloading...");
-                DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.CLIENT, () -> {
-                    DynamXContext.getObjModelRegistry().getItemRenderer().refreshItemInfos();
+                DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.CLIENT, DynamXLoadingTasks.PACK).thenAccept(empty -> {
                     box.setEnabled(true);
-                    if (DynamXErrorManager.getErrorManager().hasErrors(DynamXErrorManager.DYNAMX_ERRORS))
+                    if (DynamXErrorManager.getErrorManager().hasErrors(DynamXErrorManager.INIT_ERRORS, DynamXErrorManager.PACKS__ERRORS))
                         box.setText(TextFormatting.RED + "Some packs have errors");
                     else
                         box.setText("Packs reloaded");
-                }, DynamXLoadingTasks.PACK);
+                });
             });
             pane1.add(box);
             GuiLabel box2 = new GuiLabel("Reload models");
@@ -63,14 +61,13 @@ public class GuiDnxDebug extends GuiFrame {
                 //mc.debugFeedbackTranslated("debug.reload_resourcepacks.message");
                 box2.setEnabled(false);
                 box2.setText("Reloading...");
-                DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.CLIENT, () -> {
-                    DynamXContext.getObjModelRegistry().getItemRenderer().refreshItemInfos();
+                DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.CLIENT, DynamXLoadingTasks.MODEL).thenAccept(empty -> {
                     box2.setEnabled(true);
-                    /*if (DynamXErrorManager.getErrorManager().hasErrors(DynamXLoadingTasks.MODEL))
+                    if (DynamXErrorManager.getErrorManager().hasErrors(DynamXErrorManager.MODEL_ERRORS))
                         box2.setText(TextFormatting.RED + "Some models have problems");
-                    else*/
+                    else
                         box2.setText("Models reloaded");
-                }, DynamXLoadingTasks.MODEL);
+                });
             });
             pane1.add(box2);
             GuiLabel box3 = new GuiLabel("Reload css styles");
@@ -78,13 +75,13 @@ public class GuiDnxDebug extends GuiFrame {
             box3.addClickListener((x, y, bu) -> {
                 box3.setEnabled(false);
                 box3.setText("Reloading...");
-                DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.CLIENT, () -> {
+                DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.CLIENT, DynamXLoadingTasks.CSS).thenAccept(empty -> {
                     box3.setEnabled(true);
                     if (DynamXErrorManager.getErrorManager().hasErrors(ACsGuiApi.getCssErrorType()))
                         box3.setText(TextFormatting.RED + "Some css styles have errors");
                     else
                         box3.setText("Css styles reloaded");
-                }, (ACsGuiApi.getCssErrorType()));
+                });
             });
             pane1.add(box3);
             GuiLabel box4 = new GuiLabel("Reload all");
@@ -92,13 +89,13 @@ public class GuiDnxDebug extends GuiFrame {
             box4.addClickListener((x, y, bu) -> {
                 box4.setEnabled(false);
                 box4.setText("Reloading...");
-                DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.CLIENT, () -> {
+                DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.CLIENT, DynamXLoadingTasks.PACK, DynamXLoadingTasks.MODEL, DynamXLoadingTasks.CSS).thenAccept(empty -> {
                     box4.setEnabled(true);
-                    if (DynamXErrorManager.getErrorManager().hasErrors(DynamXErrorManager.DYNAMX_ERRORS, ACsGuiApi.getCssErrorType(), DynamXLoadingTasks.MODEL))
+                    if (DynamXErrorManager.getErrorManager().hasErrors(DynamXErrorManager.INIT_ERRORS, DynamXErrorManager.PACKS__ERRORS, DynamXErrorManager.MODEL_ERRORS, ACsGuiApi.getCssErrorType()))
                         box4.setText(TextFormatting.RED + "Check the errors menu");
                     else
                         box4.setText("Reloading finished");
-                }, DynamXLoadingTasks.PACK, DynamXLoadingTasks.MODEL, ACsGuiApi.getCssErrorType());
+                });
             });
             pane1.add(box4);
 
@@ -120,7 +117,7 @@ public class GuiDnxDebug extends GuiFrame {
 
         general = new GuiPanel();
         general.setCssId("loadinglog");
-        pane.addTab(TextFormatting.GOLD + "Erreurs", general);
+        pane.addTab(TextFormatting.GOLD + "Errors", general);
         pane.getTabButton(3).addClickListener((mx, my, button) -> {
             if (button == 0)
                 ACsGuiApi.asyncLoadThenShowGui("LoadingErrors", GuiLoadingErrors::new);

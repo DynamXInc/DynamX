@@ -5,14 +5,19 @@
     bottom: 50%;
     width: 90%;
     height: 90%;
+    border-radius: 2%;
+    background-color: rgba(34, 34, 34, 189);
 }
 
 #root>scroll_pane {
-    width: 100%;
-    height: 100%;
+    left: 50%;
+    right: 50%;
+    top: 50%;
+    bottom: 50%;
+    width: 97%;
+    height: 96%;
     color: white;
-/*#88FF88;*/
-    background-color: rgba(34, 34, 34, 189);
+    background-color: translucent;
 }
 
 #search_field {

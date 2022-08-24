@@ -22,6 +22,7 @@ import fr.dynamx.common.network.packets.MessageSyncConfig;
 import fr.dynamx.common.network.sync.MessageSeatsSync;
 import fr.dynamx.common.physics.player.PlayerPhysicsHandler;
 import fr.dynamx.common.physics.terrain.cache.TerrainFile;
+import fr.dynamx.common.world.DynamXWorldListener;
 import fr.dynamx.server.network.ServerPhysicsSyncManager;
 import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.DynamXConstants;
@@ -199,6 +200,15 @@ public class CommonEventHandler {
         }
     }
 
+    // World Listener
+    private static final DynamXWorldListener LISTENER = new DynamXWorldListener();
+    
+    @SubscribeEvent
+    public void onWorldLoad(WorldEvent.Load event) {
+        World world = event.getWorld();
+        world.addEventListener(LISTENER);
+    }
+
     /*@SubscribeEvent
     public void onChunkLoad(ChunkEvent.Load event) {
         ChunkAABB capability = event.getChunk().getCapability(CapaProvider.CHUNK_AABB_CAPABILITY, null);
@@ -221,6 +231,9 @@ public class CommonEventHandler {
     @SubscribeEvent
     public void onWorldUnload(WorldEvent.Unload e) {
         try {
+
+            e.getWorld().removeEventListener(LISTENER); // remove world listener
+
             if (DynamXContext.getPhysicsWorld() != null && DynamXContext.getPhysicsWorld().ownsWorld(e.getWorld())) {
                 DynamXContext.getPhysicsWorld().clearAll();
                 DynamXContext.getPlayerToCollision().clear();
@@ -292,12 +305,6 @@ public class CommonEventHandler {
             Vector3fPool.closePool();
             QuaternionPool.closePool();
         }
-    }
-
-    @SubscribeEvent
-    public void onPlayerLoggedOut(net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedOutEvent event) {
-        if (DynamXContext.getPlayerToCollision().containsKey(event.player))
-            DynamXContext.getPlayerToCollision().get(event.player).removeFromWorld(true);
     }
 
     @SubscribeEvent

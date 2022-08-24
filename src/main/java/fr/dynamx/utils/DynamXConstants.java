@@ -13,6 +13,7 @@ public class DynamXConstants
 
     public static final String ACS_GUIS_BASE_URL = "https://dynamx.fr/download/libs/ACsGuis-";
     public static final String DEFAULT_ACSGUIS_VERSION = "1.2.4-1-all";
+    public static final String ACSLIBS_REQUIRED_VERSION = "[1.1.0,)";
 
     public static final String LIBBULLET_VERSION = "14.3.0";
     /** .dc file version, only change when an update of libbullet breaks the .dc files, to regenerate them */

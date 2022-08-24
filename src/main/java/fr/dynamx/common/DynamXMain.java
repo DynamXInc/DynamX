@@ -48,7 +48,7 @@ import static fr.dynamx.utils.DynamXConstants.*;
 import static net.minecraftforge.fml.common.Mod.EventHandler;
 import static net.minecraftforge.fml.common.Mod.Instance;
 
-@Mod(modid = ID, name = NAME, version = VERSION, updateJSON = "https://dynamx.fr/mps/updates.json", dependencies = "required-after:acslib")
+@Mod(modid = ID, name = NAME, version = VERSION, updateJSON = "https://dynamx.fr/mps/updates.json", dependencies = "required-after:acslib@" + ACSLIBS_REQUIRED_VERSION)
 public class DynamXMain {
     @Instance(value = ID)
     public static DynamXMain instance;

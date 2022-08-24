@@ -12,22 +12,9 @@ import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
  */
 @RegisteredSubInfoType(name = "steeringwheel", registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
 public class SteeringWheelInfo extends SubInfoType<ModularVehicleInfoBuilder> {
-    @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
-    public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
-        if ("BaseRotation".equals(key))
-            return new IPackFilePropertyFixer.FixResult("BaseRotationQuat", true) {
-                @Override
-                public String newValue(String oldValue) {
-                    String[] t = oldValue.split(" ");
-                    return "0 0 0 0";//todo fix t[1] + " " + t[2] + " " + t[3] + " " + (Float.parseFloat(t[0]) * 180f / Math.PI); //Convert to degrees
-                }
-            };
-        return null;
-    };
-
     @PackFileProperty(configNames = "PartName", required = false, defaultValue = "SteeringWheel")
     private final String partName = "SteeringWheel";
-    @PackFileProperty(configNames = "BaseRotationQuat", required = false, defaultValue = "0 0 0 1")
+    @PackFileProperty(configNames = {"BaseRotation", "BaseRotationQuat"}, required = false, defaultValue = "0 0 0 1")
     private final Quaternion steeringWheelBaseRotation = null;
     @PackFileProperty(configNames = "Position", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y)
     private final Vector3f position = new Vector3f(0.5f, 1.1f, 1);

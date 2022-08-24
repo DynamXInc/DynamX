@@ -169,7 +169,8 @@ public class DefinitionType<T> {
         }, v -> v.x + " " + v.y + " " + v.z, "type.vector3f")),
         QUATERNION(new DefinitionType<>(Quaternion.class, (s) -> {
             String[] t = s.split(" ");
-            return new Quaternion(Float.parseFloat(t[1]), Float.parseFloat(t[2]), Float.parseFloat(t[3]), Float.parseFloat(t[0]));
+            Quaternion q = new Quaternion(Float.parseFloat(t[1]), Float.parseFloat(t[2]), Float.parseFloat(t[3]), Float.parseFloat(t[0]));
+            return q.normalizeLocal();
         }, v -> v.getX() + " " + v.getY() + " " + v.getZ() + " " + v.getW(), "type.quaternion")),
         /**
          * Vector3f def, but only with x and y arguments, z=0

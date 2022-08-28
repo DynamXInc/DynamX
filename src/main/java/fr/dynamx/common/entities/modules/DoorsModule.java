@@ -44,6 +44,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.HashMap;
@@ -166,6 +167,7 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
 
     @Override
     public void preUpdatePhysics(boolean simulatingPhysics) {
+        if(FMLCommonHandler.instance().getSide().equals(Side.SERVER)) return;
         if (simulatingPhysics) {
             for (byte doorID : attachedDoors.keySet()) {
                 DoorVarContainer varContainer = attachedDoors.get(doorID);

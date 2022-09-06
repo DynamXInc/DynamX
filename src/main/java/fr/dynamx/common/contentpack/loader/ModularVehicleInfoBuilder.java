@@ -14,13 +14,9 @@ import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
-import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.contentpack.parts.*;
-import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
-import fr.dynamx.common.contentpack.type.vehicle.EngineInfo;
-import fr.dynamx.common.contentpack.type.vehicle.FrictionPoint;
-import fr.dynamx.common.contentpack.type.vehicle.SoundListInfo;
+import fr.dynamx.common.contentpack.type.vehicle.*;
 import fr.dynamx.common.obj.texture.TextureData;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.EnumPlayerStandOnTop;
@@ -101,17 +97,17 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
     private String defaultSounds;
 
     @PackFileProperty(configNames = "ItemScale", required = false, description = "common.itemscale", defaultValue = "0.2")
-    private final float itemScale = 0.2f;
+    private float itemScale = 0.2f;
     @PackFileProperty(configNames = "Item3DRenderLocation", required = false, description = "common.item3D", defaultValue = "all")
-    private final Enum3DRenderLocation item3DRenderLocation = Enum3DRenderLocation.ALL;
+    private Enum3DRenderLocation item3DRenderLocation = Enum3DRenderLocation.ALL;
     @PackFileProperty(configNames = "MaxVehicleSpeed", required = false, defaultValue = "infinite")
-    private final float vehicleMaxSpeed = Integer.MAX_VALUE;
+    private float vehicleMaxSpeed = Integer.MAX_VALUE;
     @PackFileProperty(configNames = "UseComplexCollisions", required = false, defaultValue = "true", description = "common.UseComplexCollisions")
-    private final boolean useHullShape = true;
+    private boolean useHullShape = true;
     @PackFileProperty(configNames = "Textures", required = false, type = DefinitionType.DynamXDefinitionTypes.STRING_ARRAY_2D)
     private String[][] texturesArray;
     @PackFileProperty(configNames = "DefaultZoomLevel", required = false, defaultValue = "4")
-    private final int defaultZoomLevel = 4;
+    private int defaultZoomLevel = 4;
 
     /**
      * The collision shape of this vehicle, generated either form the partShapes list, or the obj model of the vehicle (hull shape)

@@ -15,7 +15,7 @@ import fr.dynamx.utils.optimization.MutableBoundingBox;
 @RegisteredSubInfoType(name = "shape", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.BLOCKS_AND_PROPS}, strictName = false)
 public class PartShape<T extends ISubInfoTypeOwner<T>> extends BasePart<T> implements IShapeInfo {
     @PackFileProperty(configNames = "Type", type = DefinitionType.DynamXDefinitionTypes.SHAPE_TYPE, description = "common.shape.type", required = false)
-    private final EnumPartType shapeType = EnumPartType.BOX;
+    private EnumPartType shapeType = EnumPartType.BOX;
     //@PackFileProperty(configNames = "CanPlayersWalkOnTop", required = false)
     //TODO SUPPORT THIS protected boolean canPlayersWalkOnTop;
     protected MutableBoundingBox boundingBox;

@@ -20,7 +20,7 @@ public class TrailerAttachInfo extends SubInfoType<ModularVehicleInfoBuilder> {
     @PackFileProperty(configNames = "AttachPoint", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y)
     private Vector3f trailerAttachPoint;
     @PackFileProperty(configNames = "AttachStrength", required = false)
-    private final int trailerAttachStrength = 1000;
+    private int trailerAttachStrength = 1000;
 
     public TrailerAttachInfo(ISubInfoTypeOwner<ModularVehicleInfoBuilder> owner) {
         super(owner);

@@ -15,9 +15,9 @@ public class GearInfo extends SubInfoType<EngineInfo> {
     private final String gearName;
 
     @PackFileProperty(configNames = "SpeedRange")
-    private final int[] speedRange = new int[2];
+    private int[] speedRange = new int[2];
     @PackFileProperty(configNames = "RPMRange")
-    private final int[] rpmRange = new int[2];
+    private int[] rpmRange = new int[2];
 
     public GearInfo(ISubInfoTypeOwner<EngineInfo> owner, String name) {
         super(owner);

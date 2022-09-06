@@ -32,7 +32,7 @@ public class PartLightSource implements ISubInfoType<ModularVehicleInfoBuilder> 
     @PackFileProperty(configNames = "Position", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y, description = "common.position", required = false)
     private Vector3f position;
     @PackFileProperty(configNames = "Rotation", required = false, defaultValue = "1 0 0 0")
-    private final Quaternion rotation = new Quaternion();
+    private Quaternion rotation = new Quaternion();
     @PackFileProperty(configNames = "LightId")
     private int lightId;
     @PackFileProperty(configNames = "PartName")

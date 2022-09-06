@@ -8,6 +8,7 @@ import fr.dynamx.utils.doc.ContentPackDocGenerator;
 import fr.dynamx.utils.doc.DocLocale;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 
 /**
  * Represents a configuration field, contains the corresponding field, and the "parser" ({@link DefinitionType}) able to translate the string value of this property into the correct type
@@ -78,6 +79,8 @@ public class PackFilePropertyData<T> {
             DynamXErrorManager.addError(on.getPackName(), DynamXErrorManager.PACKS__ERRORS, "property_parse_error", ErrorLevel.HIGH, on.getName(), getConfigFieldName(), e);
             return null; //Error while parsing
         }
+        if(Modifier.isFinal(field.getModifiers()))
+            throw new IllegalArgumentException("Field " + field + " is final : cannot use it as a PackFileProperty !");
         field.setAccessible(true);
         field.set(on, val);
         field.setAccessible(false);

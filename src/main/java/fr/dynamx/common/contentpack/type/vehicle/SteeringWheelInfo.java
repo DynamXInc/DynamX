@@ -13,11 +13,11 @@ import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
 @RegisteredSubInfoType(name = "steeringwheel", registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
 public class SteeringWheelInfo extends SubInfoType<ModularVehicleInfoBuilder> {
     @PackFileProperty(configNames = "PartName", required = false, defaultValue = "SteeringWheel")
-    private final String partName = "SteeringWheel";
+    private String partName = "SteeringWheel";
     @PackFileProperty(configNames = {"BaseRotation", "BaseRotationQuat"}, required = false, defaultValue = "0 0 0 1")
-    private final Quaternion steeringWheelBaseRotation = null;
+    private Quaternion steeringWheelBaseRotation = null;
     @PackFileProperty(configNames = "Position", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y)
-    private final Vector3f position = new Vector3f(0.5f, 1.1f, 1);
+    private Vector3f position = new Vector3f(0.5f, 1.1f, 1);
 
     public SteeringWheelInfo(ISubInfoTypeOwner<ModularVehicleInfoBuilder> owner) {
         super(owner);

@@ -94,6 +94,7 @@ mixin {
 }
 
 jar {
+    duplicatesStrategy 'exclude'
     manifest {
         attributes "FMLCorePlugin": "fr.dynamx.common.core.DynamXCoreMod"
         attributes "FMLAT": "dynamx_at.cfg"
@@ -106,6 +107,7 @@ jar {
 }
 
 shadowJar {
+    duplicatesStrategy 'exclude'
     configurations = [project.configurations.shadow]
     classifier = 'all'
 }

@@ -1,4 +1,4 @@
-package fr.dynamx.common.world;
+package fr.dynamx.common.handlers;
 
 import fr.dynamx.common.DynamXContext;
 import net.minecraft.block.state.IBlockState;

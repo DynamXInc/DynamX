@@ -22,7 +22,6 @@ import fr.dynamx.common.network.packets.MessageSyncConfig;
 import fr.dynamx.common.network.sync.MessageSeatsSync;
 import fr.dynamx.common.physics.player.PlayerPhysicsHandler;
 import fr.dynamx.common.physics.terrain.cache.TerrainFile;
-import fr.dynamx.common.world.DynamXWorldListener;
 import fr.dynamx.server.network.ServerPhysicsSyncManager;
 import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.DynamXConstants;
@@ -42,7 +41,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.ChunkEvent;
@@ -200,13 +198,10 @@ public class CommonEventHandler {
         }
     }
 
-    // World Listener
-    private static final DynamXWorldListener LISTENER = new DynamXWorldListener();
-    
     @SubscribeEvent
     public void onWorldLoad(WorldEvent.Load event) {
         World world = event.getWorld();
-        world.addEventListener(LISTENER);
+        world.addEventListener(new DynamXWorldListener());
     }
 
     /*@SubscribeEvent
@@ -231,9 +226,6 @@ public class CommonEventHandler {
     @SubscribeEvent
     public void onWorldUnload(WorldEvent.Unload e) {
         try {
-
-            e.getWorld().removeEventListener(LISTENER); // remove world listener
-
             if (DynamXContext.getPhysicsWorld() != null && DynamXContext.getPhysicsWorld().ownsWorld(e.getWorld())) {
                 DynamXContext.getPhysicsWorld().clearAll();
                 DynamXContext.getPlayerToCollision().clear();

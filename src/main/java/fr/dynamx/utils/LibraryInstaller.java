@@ -118,9 +118,9 @@ public class LibraryInstaller {
         }
     }
 
-    private static boolean downloadACsGuis(Logger logger, File to, String jmeVersion) throws IOException {
+    private static boolean downloadACsGuis(Logger logger, File to, String acsGuisVersion) throws IOException {
         logger.info("Installing ACsGuis library...");
-        URL url = new URL(DynamXConstants.ACS_GUIS_BASE_URL + jmeVersion + ".jar");
+        URL url = new URL(String.format(DynamXConstants.ACS_GUIS_BASE_URL, acsGuisVersion));
         LibraryInstaller.download(url, to);
         logger.info("Downloaded ACsGuis lib from " + url + " to " + to);
         return true;

@@ -9,7 +9,6 @@ import fr.aym.acsguis.component.panel.GuiPanel;
 import fr.aym.acsguis.component.panel.GuiScrollPane;
 import fr.aym.acsguis.component.style.ComponentStyleManager;
 import fr.aym.acsguis.component.textarea.GuiLabel;
-import fr.aym.acsguis.component.textarea.GuiSearchField;
 import fr.aym.acsguis.component.textarea.GuiTextArea;
 import fr.aym.acslib.api.services.error.*;
 import fr.dynamx.utils.DynamXConstants;
@@ -55,7 +54,7 @@ public class GuiLoadingErrors extends GuiFrame {
         summary.add(new GuiLabel(TextFormatting.GRAY + "Click on any category to view it, press escape to go back").getStyle().setPaddingLeft(2).setPaddingTop(2).getOwner());
 
         Map<ResourceLocation, LocatedErrorList> allErrors = DynamXErrorManager.getErrorManager().getAllErrors();
-        if(filter != null)
+        if (filter != null)
             allErrors = allErrors.entrySet().stream().filter(entry ->
                     entry.getValue().getErrors().stream().anyMatch(error -> (entry.getKey() + "/" + error.getObject()).equals(filter))
             ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -89,7 +88,7 @@ public class GuiLoadingErrors extends GuiFrame {
                 fatals = locatedErrorList.getErrors().stream().filter(er -> er.getLevel() == ErrorLevel.ADVICE).count();
                 if (fatals > 0)
                     title.append(ErrorLevel.ADVICE.color.toString()).append(fatals).append(" advice(s)");
-                summary.add(new GuiLabel("+ " + title).getStyle().setPaddingLeft(2).setPaddingTop(2).getOwner().addClickListener((x, y, b) ->
+                summary.add(new GuiLabel("+ " + title).setCssId("label-closed").getStyle().setPaddingLeft(2).setPaddingTop(2).getOwner().addClickListener((x, y, b) ->
                         showErrors(false, new ArrayList<>(), entry.getKey(), locatedErrorList)
                 ));
             });
@@ -98,7 +97,7 @@ public class GuiLoadingErrors extends GuiFrame {
         }
     }
 
-    private int setDeployed(GuiTextArea label, ResourceLocation location, String object, List<ErrorData> errorListPerObject, boolean deploy) {
+    private int setDeployed(GuiTextArea label, String object, List<ErrorData> errorListPerObject, boolean deploy) {
         label.setMaxTextLength(50000);
         StringBuilder title = new StringBuilder(object + " : ");
         int height = 20;
@@ -119,6 +118,7 @@ public class GuiLoadingErrors extends GuiFrame {
                 formatter.formatError(text, false, errorListPerType);
             }));
             label.setText(text.toString());
+            label.setCssId("label-deployed");
             height = mc.fontRenderer.FONT_HEIGHT * GuiAPIClientHelper.trimTextToWidth(text.toString(), getWidth()).size() + 10;
         } else {
             long fatals = errorListPerObject.stream().filter(er -> er.getLevel() == ErrorLevel.FATAL).count();
@@ -134,6 +134,7 @@ public class GuiLoadingErrors extends GuiFrame {
             if (fatals > 0)
                 title.append(ErrorLevel.ADVICE.color.toString()).append(fatals).append(" advice(s)");
             label.setText("+ " + TextFormatting.GREEN + title);
+            label.setCssId("label-closed");
         }
         return height;
     }
@@ -151,8 +152,8 @@ public class GuiLoadingErrors extends GuiFrame {
 
             @Override
             public int getY(ComponentStyleManager target) {
-                if(!seenElements.containsKey(target)) {
-                    if(lastElement != null)
+                if (!seenElements.containsKey(target)) {
+                    if (lastElement != null)
                         seenElements.put(target, (int) (lastElement.getYPos().getRawValue() + lastElement.getHeight().getRawValue() + 2));
                     else
                         seenElements.put(target, 0);
@@ -175,8 +176,8 @@ public class GuiLoadingErrors extends GuiFrame {
         });
         errorsPanel.add(new GuiLabel(TextFormatting.DARK_AQUA + "Errors while loading " + location).getStyle().setPaddingLeft(2).setPaddingTop(2).getOwner());
         errorsPanel.add(new GuiLabel(TextFormatting.GRAY + "Click on any category to view it, press escape to go back").getStyle().setPaddingLeft(2).setPaddingTop(2).getOwner());
-        errorsPanel.add(new GuiLabel(TextFormatting.GRAY + "  -> Show all").addClickListener((x, y, b) ->
-            showErrors(!deployAll, new ArrayList<>(), location, locatedErrorList)
+        errorsPanel.add(new GuiLabel(TextFormatting.GRAY + "  -> Show all").setCssId("label-closed").addClickListener((x, y, b) ->
+                showErrors(!deployAll, new ArrayList<>(), location, locatedErrorList)
         ));
 
         AtomicInteger i = new AtomicInteger();
@@ -186,21 +187,20 @@ public class GuiLoadingErrors extends GuiFrame {
             int id = i.get();
             GuiTextArea label = new GuiTextArea();
             label.setEditable(false);
-            heightMap.put(label, setDeployed(label, location, s1, errorListPerObject, deployAll != deployObjs.contains(id)));
+            heightMap.put(label, setDeployed(label, s1, errorListPerObject, deployAll != deployObjs.contains(id)));
             errorsPanel.add(label.getStyle().setPaddingLeft(2).setPaddingTop(2).getOwner().addClickListener((x, y, b) -> {
                 if (deployObjs.contains(id))
                     deployObjs.remove((Integer) id);
                 else
                     deployObjs.add(id);
-                heightMap.put(label, setDeployed(label, location, s1, errorListPerObject, deployAll != deployObjs.contains(id)));
+                heightMap.put(label, setDeployed(label, s1, errorListPerObject, deployAll != deployObjs.contains(id)));
                 errorsPanel.getLayout().clear();
                 errorsPanel.getStyle().refreshCss(false, "layout change");
-                //showErrors(deployAll, deployObjs, location, locatedErrorList);
             }));
             i.getAndIncrement();
         });
-        errorsPanel.add(new GuiLabel(TextFormatting.DARK_AQUA + "  <- Go back").addClickListener((x, y, b) ->
-            goBack()
+        errorsPanel.add(new GuiLabel(TextFormatting.DARK_AQUA + "  <- Go back").setCssId("label-closed").addClickListener((x, y, b) ->
+                goBack()
         ));
         displayed = errorsPanel;
         errorsPanel.setFocused(true);

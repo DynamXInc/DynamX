@@ -41,7 +41,7 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
     @PackFileProperty(configNames = "RotationPoint", required = false, type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y)
     private Vector3f rotationPoint;
     @PackFileProperty(configNames = "SuspensionAxis", required = false)
-    private final Quaternion suspensionAxis = new Quaternion();
+    private Quaternion suspensionAxis = new Quaternion();
 
     private PartWheelInfo defaultWheelInfo;
 

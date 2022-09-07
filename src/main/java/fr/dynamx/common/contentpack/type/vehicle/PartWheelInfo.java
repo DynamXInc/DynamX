@@ -58,10 +58,10 @@ public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IS
     @PackFileProperty(configNames = "WheelsDampingCompression")
     private float wheelsDampingCompression;
     @PackFileProperty(configNames = "SkidParticle", required = false)
-    private final EnumParticleTypes skidParticle = EnumParticleTypes.SMOKE_NORMAL;
+    private EnumParticleTypes skidParticle = EnumParticleTypes.SMOKE_NORMAL;
 
     @PackFileProperty(configNames = "ScaleModifier", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false)
-    private final Vector3f scaleModifier = new Vector3f(1, 1, 1);
+    private Vector3f scaleModifier = new Vector3f(1, 1, 1);
 
     @PackFileProperty(configNames = "Textures", required = false, type = DefinitionType.DynamXDefinitionTypes.STRING_ARRAY_2D, defaultValue = "\"Textures: DynamX\"")
     private String[][] texturesArray;

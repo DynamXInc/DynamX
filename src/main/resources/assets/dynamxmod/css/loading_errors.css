@@ -6,7 +6,7 @@
     width: 90%;
     height: 90%;
     border-radius: 2%;
-    background-color: rgba(34, 34, 34, 189);
+    background-color: rgba(0,0,0,200);
 }
 
 #root>scroll_pane {
@@ -38,6 +38,10 @@ label, text_area {
     padding-top: 5px;
 }
 
-label:hover, text_area:hover {
+#label-closed:hover {
+    background-color: rgba(50, 50, 50, 189);
+}
+
+#label-deployed {
     background-color: rgba(50, 50, 50, 189);
 }

@@ -31,7 +31,7 @@ public class EngineInfo extends SubInfoTypeOwner<EngineInfo> implements ISubInfo
     @PackFileProperty(configNames = "Braking")
     private float braking;
     @PackFileProperty(configNames = "TurnSpeed", required = false, defaultValue = "0.09")
-    private final float turnSpeed = 0.09f;
+    private float turnSpeed = 0.09f;
 
     public List<Vector3f> points = new ArrayList<>();
     public List<GearInfo> gears = new ArrayList<>();

@@ -24,7 +24,7 @@ import java.util.List;
 public class PackInfo extends SubInfoTypeOwner<PackInfo> implements INamedObject {
     private final String originalPackName;
     @PackFileProperty(configNames = "PackName")
-    private final String packName;
+    private String packName;
     @Getter
     private ContentPackType packType;
 

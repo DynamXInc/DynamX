@@ -6,39 +6,37 @@ import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import lombok.RequiredArgsConstructor;
 
 import static fr.dynamx.utils.maths.DynamXMath.clamp;
 
+@RequiredArgsConstructor
 public class PacejkaMagicFormula {
     private final WheelsPhysicsHandler wheelsPhysics;
     public final float[] lateral = new float[10];
     public final float[] longitudinal = new float[10];
 
-    public PacejkaMagicFormula(WheelsPhysicsHandler wheelsPhysics) {
-        this.wheelsPhysics = wheelsPhysics;
-    }
-
     public void update() {
         for (int i = 0; i < wheelsPhysics.getNumWheels(); i++) {
-            WheelPhysicsHandler wheelPhysicsHandler = wheelsPhysics.getWheel(i);
+            WheelPhysics wheelPhysics = wheelsPhysics.getWheel(i);
 
             // the angle between the dir of the wheel and the dir the vehicle is travelling.
-            float lateralSlip = calculateLateralSlipAngle(wheelPhysicsHandler);
+            float lateralSlip = calculateLateralSlipAngle(wheelPhysics);
             float load = 10000;
-            wheelPhysicsHandler.getTireModel().setLoad(load);
+            wheelPhysics.getTireModel().setLoad(load);
 
             // returns the amount of force in N on the tyre.
             // this model allows max 10,000 (this is determined by the tyre).
-            lateral[i] = wheelPhysicsHandler.getTireModel().calcLateralTireForce(lateralSlip);
+            lateral[i] = wheelPhysics.getTireModel().calcLateralTireForce(lateralSlip);
 
             // the slip angle for this is how much force is being applied to the tyre (acceleration force).
-            float longSlip = calculateLongitudinalSlipAngle(wheelPhysicsHandler);
-            longitudinal[i] = wheelPhysicsHandler.getTireModel().calcLongtitudeTireForce(longSlip);
+            float longSlip = calculateLongitudinalSlipAngle(wheelPhysics);
+            longitudinal[i] = wheelPhysics.getTireModel().calcLongtitudeTireForce(longSlip);
 
             float friction = 1.0f - ((lateral[i] / 10000) - (longitudinal[i] / 10000));
             friction *= 2.0;
-            friction *= wheelPhysicsHandler.getGrip();
-            wheelPhysicsHandler.setFriction(friction);
+            friction *= wheelPhysics.getGrip();
+            wheelPhysics.setFriction(friction);
         }
     }
 
@@ -46,7 +44,7 @@ public class PacejkaMagicFormula {
     // LATERAL
     // the slip angle is the angle between the direction in which a wheel is pointing
     // and the direction in which the vehicle is traveling.
-    protected float calculateLateralSlipAngle(WheelPhysicsHandler wheelPhysics) {
+    protected float calculateLateralSlipAngle(WheelPhysics wheelPhysics) {
         Quaternion wheelRot = wheelPhysics.getPhysicsVehicle().getPhysicsRotation(QuaternionPool.get()).mult(
                 QuaternionPool.get().fromAngleNormalAxis(wheelPhysics.getSteeringAngle(), Vector3fPool.get(0, 1, 0)), QuaternionPool.get());
 
@@ -74,7 +72,7 @@ public class PacejkaMagicFormula {
 
     // the slip angle for this is how much force is being applied to the tyre (acceleration force).
     // how much rotation has been applied as a result of acceleration.
-    protected float calculateLongitudinalSlipAngle(WheelPhysicsHandler wheelPhysics) {
+    protected float calculateLongitudinalSlipAngle(WheelPhysics wheelPhysics) {
         // the rotation of the wheel as if it were just following a moving vehicle.
         // that is to say a wheel that is rolling without slip.
         float normalRot = wheelPhysics.getPhysicsWheel().getDeltaRotation();// * 0.5f;

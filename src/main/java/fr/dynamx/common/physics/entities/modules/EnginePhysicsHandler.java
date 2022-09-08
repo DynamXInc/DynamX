@@ -13,6 +13,10 @@ import fr.dynamx.common.physics.entities.parts.engine.GearBox;
 import fr.dynamx.common.physics.terrain.cache.TerrainFile;
 import fr.dynamx.utils.VerticalChunkPos;
 import fr.dynamx.utils.debug.ChunkGraph;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.List;
 
 /**
  * @see IEnginePhysicsHandler
@@ -22,23 +26,28 @@ public class EnginePhysicsHandler implements IEnginePhysicsHandler {
     private final EngineModule module;
     private final BaseVehiclePhysicsHandler<?> handler;
     private final IPropulsionHandler propulsionHandler;
+    @Getter
+    @Setter
     private Engine engine;
+    @Getter
+    @Setter
     private GearBox gearBox;
     private IGearBoxHandler gearBoxHandler;
-
+    @Getter
     private float accelerationForce;
     private float steeringForce = 0;
 
     public EnginePhysicsHandler(EngineModule module, BaseVehiclePhysicsHandler<?> handler, IPropulsionHandler propulsionHandler) {
         this.module = module;
         this.handler = handler;
-        byte i = 0;
-        setEngine(new Engine(handler, module.getEngineInfo()));
-        setGearBox(new GearBox(module.getEngineInfo().gears.size()));
-        for (GearInfo gear : module.getEngineInfo().gears) {
-            getGearBox().setGear(i++, gear.getSpeedRange()[0], gear.getSpeedRange()[1], gear.getRpmRange()[0], gear.getRpmRange()[1]);
-        }
         this.propulsionHandler = propulsionHandler;
+        engine = new Engine(handler, module.getEngineInfo());
+        List<GearInfo> gears = module.getEngineInfo().gears;
+        gearBox = new GearBox(gears.size());
+        for (int i = 0; i < gears.size(); i++) {
+            GearInfo gear = gears.get(i);
+            gearBox.setGear(i++, gear.getSpeedRange()[0], gear.getSpeedRange()[1], gear.getRpmRange()[0], gear.getRpmRange()[1]);
+        }
         if (propulsionHandler instanceof WheelsPhysicsHandler)
             gearBoxHandler = new AutomaticGearboxHandler(this, gearBox, (WheelsPhysicsHandler) propulsionHandler);// propulsionHandler.createGearBox(module, this);
     }
@@ -221,19 +230,9 @@ public class EnginePhysicsHandler implements IEnginePhysicsHandler {
             accelerate(0);
         }
     }
-
-    @Override
-    public Engine getEngine() {
-        return engine;
-    }
-
     @Override
     public boolean isEngaged() {
         return getGearBox().getActiveGearNum() != 0;
-    }
-
-    public void setEngine(Engine engine) {
-        this.engine = engine;
     }
 
     public void setEngineStarted(boolean started) {
@@ -258,17 +257,9 @@ public class EnginePhysicsHandler implements IEnginePhysicsHandler {
         }
     }
 
-    public GearBox getGearBox() {
-        return gearBox;
-    }
-
     @Override
     public void syncActiveGear(int activeGearNum) {
         gearBox.syncActiveGearNum(activeGearNum);
-    }
-
-    public void setGearBox(GearBox gearBox) {
-        this.gearBox = gearBox;
     }
 
     public void accelerate(float strength) {
@@ -278,10 +269,6 @@ public class EnginePhysicsHandler implements IEnginePhysicsHandler {
 
     public void disengageEngine() {
         propulsionHandler.disengageEngine();
-    }
-
-    public float getAccelerationForce() {
-        return this.accelerationForce;
     }
 
     public void brake(float strength) {

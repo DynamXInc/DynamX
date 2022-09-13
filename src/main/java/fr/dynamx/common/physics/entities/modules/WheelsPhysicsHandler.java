@@ -123,21 +123,7 @@ public class WheelsPhysicsHandler implements IPropulsionHandler {
                     if (strength != 0 && module.isEngaged() && Math.abs(handler.getSpeed(BaseVehiclePhysicsHandler.SpeedUnit.KMH)) < speedLimit) //pas au point mort
                     {
                         float power = (module.getEngine().getPowerOutputAtRevs());
-
-                        // so the faster we go, the less force the vehicle can apply.
-                        // this simulates making it harder to accelerate at higher speeds
-                        // realistically this makes it difficult to achieve the max speed.
-                        float speedRatio = 1.0f;// - (getSpeed(SpeedUnit.KMH) / (strength != 0 ? getGearBox().getMaxSpeed(SpeedUnit.KMH) : (getGearBox().getActiveGear().getStart() + getGearBox().getActiveGear().getEnd() / 4)));
-                        //permet d'avancer à vitesse constante si on touche aucune "pédale"
-                        //System.out.println(power+" "+getEngine().getRevs());
-                        speedRatio = MathHelper.clamp(speedRatio, 0, 1);
-
-                        // how much this wheel is "skidding".
-                        //float skid = 1-wheel.getVehicleWheel().skidInfo;
-
-                        // System.out.println("Delta rot "+wheel.getRotationDelta()+" "+getSpeed(SpeedUnit.KMH));
-
-                        wheelPhysicsHandler.accelerate(power * speedRatio * strength * 2);//(getGearBox().getActiveGearNum() < 0 ? -1 : 1));
+                        wheelPhysicsHandler.accelerate(power * strength * 2);
                         isAccelerating = true;
                     } else
                         wheelPhysicsHandler.accelerate(0);

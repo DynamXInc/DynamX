@@ -207,11 +207,7 @@ public class EnginePhysicsHandler implements IEnginePhysicsHandler {
                 disengageEngine();
                 brake(1f);
             } else if (module.isEngineStarted()) {
-                if (handler.getSpeed(BaseVehiclePhysicsHandler.SpeedUnit.KMH) > -40) {
-                    accelerate(-0.5f);
-                } else {
-                    disengageEngine();
-                }
+                accelerate(-1);
             } else {
                 applyEngineBraking();
                 accelerate(0);

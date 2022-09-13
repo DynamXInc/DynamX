@@ -88,17 +88,6 @@ public class GearBox {
         return this.gears.length;
     }
 
-    public float getMaxSpeed(BaseVehiclePhysicsHandler.SpeedUnit speedUnit) {
-        switch (speedUnit) {
-            case KMH:
-                return gears[getGearCount() - 1].getEnd();
-            case MPH:
-                return gears[getGearCount() - 1].getEnd() * BaseVehiclePhysicsHandler.KMH_TO_MPH;
-            default:
-                return -1;
-        }
-    }
-
     public int updateGearChangeCounter() {
         if (gearChangeCounter > 0)
             gearChangeCounter--;

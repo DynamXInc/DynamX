@@ -33,6 +33,8 @@ package fr.dynamx.utils.maths;
 
 
 import com.jme3.math.Vector3f;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +44,7 @@ import java.util.List;
  */
 public class LinearSpline {
 
-
+    @Getter
     private final List<Vector3f> controlPoints = new ArrayList<>();
 
     /**
@@ -78,14 +80,6 @@ public class LinearSpline {
         DynamXMath.interpolateLinear(value, controlPoints.get(currentControlPoint), controlPoints.get(currentControlPoint + 1), store);
 
         return store;
-    }
-
-
-    /**
-     * returns this spline control points
-     */
-    public List<Vector3f> getControlPoints() {
-        return controlPoints;
     }
 
 

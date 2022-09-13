@@ -3,6 +3,9 @@ package fr.dynamx.common.physics.entities.parts.engine;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.maths.DynamXMath;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 public class GearBox {
     /**
@@ -11,20 +14,20 @@ public class GearBox {
      * 1,2,3,4,5,6 : other speeds
      */
     private int activeGear;
-    private final Gear[] gears;
+    private final GearData[] gears;
     private int gearChangeCounter;
 
     public GearBox(int gearCount) {
-        this.gears = new Gear[gearCount];
+        this.gears = new GearData[gearCount];
 
         for (int i = 0; i < gearCount; i++) {
-            this.gears[i] = new Gear(0, 0, 0, 0);
+            this.gears[i] = new GearData(0, 0, 0, 0);
         }
     }
 
     public void setGear(int gearNum, float start, float end, float rpmStart, float rpmEnd) {
 
-        Gear gear = this.gears[gearNum];
+        GearData gear = this.gears[gearNum];
 
         gear.setStart(start);
         gear.setEnd(end);
@@ -32,7 +35,7 @@ public class GearBox {
         gear.setRpmEnd(rpmEnd);
     }
 
-    public Gear getActiveGear() {
+    public GearData getActiveGear() {
         return this.gears[activeGear + 1];
     }
 
@@ -99,10 +102,20 @@ public class GearBox {
     }
 
     public float getRPM(Engine engine, float speed) {
-        Gear gear = getActiveGear();
+        GearData gear = getActiveGear();
         float revs = DynamXMath.unInterpolateLinear(speed, gear.getStart(), gear.getEnd());
         revs *= (gear.getRpmEnd() - gear.getRpmStart()) / engine.getMaxRevs();
         revs += gear.getRpmStart() / engine.getMaxRevs(); //on ajoute les tours moteurs minimaux (irl si on tombe dessous on cale donc avec une boite auto pas possible)
         return revs;
+    }
+
+    @AllArgsConstructor
+    public static class GearData{
+        @Getter
+        @Setter
+        private float start, end;
+        @Getter
+        @Setter
+        private float rpmStart, rpmEnd;
     }
 }

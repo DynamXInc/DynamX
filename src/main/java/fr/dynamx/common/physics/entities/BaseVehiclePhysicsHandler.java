@@ -38,32 +38,26 @@ public abstract class BaseVehiclePhysicsHandler<T extends BaseVehicleEntity<?>> 
 
     @Override
     public PhysicsRigidBody createShape(Vector3f position, Quaternion rotation, float spawnRotation) {
-        Vector3f trans = Vector3fPool.get(position);
-        Transform localTransform = new Transform(trans, QuaternionPool.get(rotation));
+        Vector3f tmp = Vector3fPool.get(position);
+        Transform transform = new Transform(tmp, QuaternionPool.get(rotation));
+        ModularVehicleInfo<?> modularVehicleInfo = getHandledEntity().getPackInfo();
 
         //Don't use this.getPackInfo() : it isn't initialized yet
-        PhysicsRigidBody prop = new PhysicsRigidBody(getHandledEntity().getPackInfo().getPhysicsCollisionShape(), getHandledEntity().getPackInfo().getEmptyMass());
-        prop.setPhysicsTransform(localTransform);
-        prop.setUserObject(new BulletShapeType<>(EnumBulletShapeType.VEHICLE, getHandledEntity()));
-        prop.setSleepingThresholds(0.9f, 1.2f);
-        return prop;
+        PhysicsRigidBody vehicleBody = new PhysicsRigidBody(modularVehicleInfo.getPhysicsCollisionShape(), modularVehicleInfo.getEmptyMass());
+        vehicleBody.setPhysicsTransform(transform);
+        vehicleBody.setUserObject(new BulletShapeType<>(EnumBulletShapeType.VEHICLE, getHandledEntity()));
+        vehicleBody.setSleepingThresholds(0.9f, 1.2f);
+        return vehicleBody;
     }
 
     @Override
     public void update() {
-        //  if (!getHandledEntity().isInWater()) {
-        //Vector3f dragForce = PhysicsHelper.getAirDrag(getLinearVelocity(), getPackInfo().getDragFactor());
-        //forces.add(new Force(dragForce, Vector3fPool.get()));
-        //}
         super.update();
         if (!EnginePhysicsHandler.inTestFullGo && getCollisionObject().getActivationState() == 4 && getHandledEntity().getControllingPassenger() == null) {
             getCollisionObject().setEnableSleep(true);
         }
         if (EnginePhysicsHandler.inTestFullGo)
             getCollisionObject().activate();
-        //System.out.println("BEF "+physicsVehicle.getActivationState());
-        // physicsVehicle.setEnableSleep(false);Pos
-        //System.out.println("AFT "+physicsVehicle.getActivationState());
     }
 
     @Override

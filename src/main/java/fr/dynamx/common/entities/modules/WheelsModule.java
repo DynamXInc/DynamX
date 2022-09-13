@@ -29,7 +29,7 @@ import fr.dynamx.common.network.sync.vars.VehicleSynchronizedVariables;
 import fr.dynamx.common.obj.texture.TextureData;
 import fr.dynamx.common.physics.entities.BaseWheeledVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
-import fr.dynamx.common.physics.entities.parts.wheel.WheelPhysicsHandler;
+import fr.dynamx.common.physics.entities.parts.wheel.WheelPhysics;
 import fr.dynamx.common.physics.entities.parts.wheel.WheelState;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.maths.DynamXGeometry;
@@ -172,8 +172,8 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
     public void preUpdatePhysics(boolean simulatePhysics) {
         if (simulatePhysics) {
             if (entity.ticksExisted > 10) {
-                for (int i = 0; i < wheelsPhysics.vehicleWheelPhysicsHandlers.size(); i++) {
-                    WheelPhysicsHandler w = wheelsPhysics.vehicleWheelPhysicsHandlers.get(i);
+                for (int i = 0; i < wheelsPhysics.vehicleWheelData.size(); i++) {
+                    WheelPhysics w = wheelsPhysics.vehicleWheelData.get(i);
                     if (w != null) {
                         Vector3f pos = Vector3fPool.get();
                         w.getPhysicsWheel().getCollisionLocation(pos);
@@ -249,7 +249,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
                 visualProperties[VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.COLLISIONZ)] = pos.z;
             }
             for (byte b = 0; b < n; b++) {
-                WheelPhysicsHandler w = wheelsPhysics.getWheel(b);
+                WheelPhysics w = wheelsPhysics.getWheel(b);
                 if (w != null) {
                     if (w.getSkidInfo() != wheelProperties[getPropertyIndex(b, VehicleEntityProperties.EnumWheelProperties.SKIDINFO)]) {
                         wheelProperties[getPropertyIndex(b, VehicleEntityProperties.EnumWheelProperties.SKIDINFO)] = w.getSkidInfo();

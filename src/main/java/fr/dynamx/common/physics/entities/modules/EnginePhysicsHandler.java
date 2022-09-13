@@ -46,7 +46,7 @@ public class EnginePhysicsHandler implements IEnginePhysicsHandler {
         gearBox = new GearBox(gears.size());
         for (int i = 0; i < gears.size(); i++) {
             GearInfo gear = gears.get(i);
-            gearBox.setGear(i++, gear.getSpeedRange()[0], gear.getSpeedRange()[1], gear.getRpmRange()[0], gear.getRpmRange()[1]);
+            gearBox.setGear(i, gear.getSpeedRange()[0], gear.getSpeedRange()[1], gear.getRpmRange()[0], gear.getRpmRange()[1]);
         }
         if (propulsionHandler instanceof WheelsPhysicsHandler)
             gearBoxHandler = new AutomaticGearboxHandler(this, gearBox, (WheelsPhysicsHandler) propulsionHandler);// propulsionHandler.createGearBox(module, this);

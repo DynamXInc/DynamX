@@ -5,7 +5,6 @@ import fr.dynamx.common.contentpack.parts.PartWheel;
 import lombok.Getter;
 
 public class SuspensionPhysics {
-
     @Getter
     private float stiffness;
     @Getter
@@ -22,11 +21,11 @@ public class SuspensionPhysics {
     public SuspensionPhysics(VehicleWheel vehicleWheel, PartWheel partWheel) {
         this.vehicleWheel = vehicleWheel;
 
-        stiffness = partWheel.getDefaultWheelInfo().getSuspensionStiffness();
-        compression = partWheel.getDefaultWheelInfo().getWheelsDampingCompression();
-        dampness = partWheel.getDefaultWheelInfo().getWheelsDampingRelaxation();
-        maxForce = partWheel.getDefaultWheelInfo().getSuspensionMaxForce();
-        restLength = partWheel.getDefaultWheelInfo().getSuspensionRestLength();
+        setStiffness(partWheel.getDefaultWheelInfo().getSuspensionStiffness());
+        setCompression(partWheel.getDefaultWheelInfo().getWheelsDampingCompression());
+        setDampness(partWheel.getDefaultWheelInfo().getWheelsDampingRelaxation());
+        setMaxForce(partWheel.getDefaultWheelInfo().getSuspensionMaxForce());
+        setRestLength(partWheel.getDefaultWheelInfo().getSuspensionRestLength());
     }
 
     public void setStiffness(float stiffness) {

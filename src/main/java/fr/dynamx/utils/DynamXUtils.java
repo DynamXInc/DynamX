@@ -27,17 +27,20 @@ import net.minecraft.nbt.NBTTagFloat;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.lwjgl.BufferUtils;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -89,9 +92,9 @@ public class DynamXUtils {
         PackInfo info = DynamXObjectLoaders.PACKS.findPackInfoByPackName(packName);
         if (info == null) {
             System.err.println("WTF PACK INFO " + packName + " NOT FOUND");
-            return new ObjModelPath(new PackInfo(packName, ContentPackType.FOLDER), RegistryNameSetter.getDynamXModelResourceLocation(model));
+            return new ObjModelPath(new PackInfo(packName, ContentPackType.FOLDER), model);
         }
-        return new ObjModelPath(info == null ? packName : info.getPathName(), RegistryNameSetter.getDynamXModelResourceLocation(model));
+        return new ObjModelPath(info, model);
     }
 
     public static byte[] readInputStream(InputStream resource) throws IOException {

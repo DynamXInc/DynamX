@@ -1,18 +1,13 @@
-package fr.dynamx.common.obj.texture;
+package fr.dynamx.client.renders.model.texture;
 
-import fr.dynamx.api.obj.IModelTextureSupplier;
-import fr.dynamx.common.contentpack.type.PartWheelInfo;
-import fr.dynamx.common.obj.eximpl.QuickObjObject;
+import lombok.Getter;
+import lombok.ToString;
 
 import javax.annotation.Nullable;
 
 /**
  * Properties of a texture used in obj models
  *
- * @see IModelTextureVariantsSupplier
- * @see fr.dynamx.common.contentpack.ModularVehicleInfo
- * @see PartWheelInfo
- * @see ObjObjectRenderer
  */
 @ToString
 public class TextureVariantData {

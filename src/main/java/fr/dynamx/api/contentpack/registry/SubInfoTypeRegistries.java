@@ -5,9 +5,9 @@ import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.PackInfo;
 import fr.dynamx.common.contentpack.loader.InfoLoader;
 import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
-import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.contentpack.type.objects.*;
 import fr.dynamx.common.contentpack.type.vehicle.EngineInfo;
+import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 
 public enum SubInfoTypeRegistries
 {

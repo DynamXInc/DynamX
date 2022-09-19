@@ -1,4 +1,4 @@
-package fr.dynamx.common.contentpack.type;
+package fr.dynamx.common.contentpack.type.vehicle;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.INamedObject;
@@ -6,11 +6,15 @@ import fr.dynamx.api.contentpack.object.render.IObjPackObject;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
+import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
-import fr.dynamx.api.obj.IObjObject;
-import fr.dynamx.common.obj.texture.TextureData;
+import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
+import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
+import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.ResourceLocation;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 

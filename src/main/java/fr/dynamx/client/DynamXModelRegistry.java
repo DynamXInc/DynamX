@@ -3,20 +3,24 @@ package fr.dynamx.client;
 import fr.aym.acslib.ACsLib;
 import fr.aym.acslib.api.services.ErrorTrackingService;
 import fr.aym.acslib.api.services.ThreadedLoadingService;
-import fr.dynamx.api.obj.IModelTextureSupplier;
+import fr.aym.acslib.api.services.error.ErrorLevel;
+import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
 import fr.dynamx.api.obj.IObjModelRegistry;
+import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.client.renders.model.MissingObjModel;
-import fr.dynamx.client.renders.model.ObjItemModelLoader;
-import fr.dynamx.client.renders.model.ObjModelClient;
+import fr.dynamx.client.renders.model.renderer.ObjItemModelLoader;
+import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.objects.ArmorObject;
-import fr.dynamx.common.obj.eximpl.MtlMaterialLib;
-import fr.dynamx.common.obj.eximpl.OBJLoader;
+import fr.dynamx.common.objloader.MTLLoader;
+import fr.dynamx.common.objloader.OBJLoader;
 import fr.dynamx.utils.DynamXLoadingTasks;
 import fr.dynamx.utils.RegistryNameSetter;
+import fr.dynamx.utils.errors.DynamXErrorManager;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.ProgressManager;
 
 import java.util.ArrayList;
@@ -58,7 +62,7 @@ public class DynamXModelRegistry implements IObjModelRegistry {
             } else {
                 //log.error("Tried to register the model '" + location + "' two times with custom textures '" + previousSupplier + "' and '" + customTextures + "' ! Ignoring " + customTextures);
                 //TODO FORMAT ERROR
-                DynamXErrorManager.addPackError(customTextures.getPackName(), "obj_duplicated_custom_textures", ErrorLevel.HIGH, location, "Tried to register the model '" + location + "' two times with custom textures '" + previousSupplier + "' and '" + customTextures + "' ! Ignoring " + customTextures);
+                DynamXErrorManager.addPackError(customTextures.getPackName(), "obj_duplicated_custom_textures", ErrorLevel.HIGH, location.getName(), "Tried to register the model '" + location + "' two times with custom textures '" + previousSupplier + "' and '" + customTextures + "' ! Ignoring " + customTextures);
             }
         }
     }

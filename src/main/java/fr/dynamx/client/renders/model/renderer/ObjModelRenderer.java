@@ -1,6 +1,7 @@
 package fr.dynamx.client.renders.model.renderer;
 
 import fr.aym.acslib.api.services.ErrorTrackingService;
+import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.events.DynamXModelRenderEvent;
 import fr.dynamx.api.events.EventStage;
 import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
@@ -11,6 +12,7 @@ import fr.dynamx.common.objloader.data.ObjModelData;
 import fr.dynamx.common.objloader.data.ObjObjectData;
 import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import fr.dynamx.utils.DynamXLoadingTasks;
+import fr.dynamx.utils.errors.DynamXErrorManager;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.Minecraft;
@@ -65,10 +67,7 @@ public class ObjModelRenderer {
             });
             return new ObjModelRenderer(objModelPath.getModelPath(), objObjects, textureVariants);
         } catch (Exception e) {
-            log.error(" Model " + objModelPath.getModelPath() + " cannot be loaded !", e);
-            DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.MODEL,
-                    textureVariants != null ? textureVariants.getPackName() : "Non-pack model",
-                    "Model " + objModelPath.getModelPath() + " cannot be loaded !", e, ErrorTrackingService.TrackedErrorLevel.HIGH);
+            DynamXErrorManager.addError(textureVariants != null ? textureVariants.getPackName() : "Non-pack model", DynamXErrorManager.MODEL_ERRORS, "obj_error", ErrorLevel.HIGH, objModelPath.toString(), "", e);
         }
         return null;
     }
@@ -97,8 +96,7 @@ public class ObjModelRenderer {
                 object.createDefaultList(this);
             }
         } catch (Exception e) {
-            log.error("Cannot setup model " + getLocation() + " ! Step: " + (step == null ? null : step.getObjObjectData().getName()), e);
-            DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.MODEL, textureVariants != null ? textureVariants.getPackName() : "Non-pack model", "Cannot setup model " + getLocation() + " ! Step: " + (step == null ? null : step.getObjObjectData().getName()), e, ErrorTrackingService.TrackedErrorLevel.HIGH);
+            DynamXErrorManager.addError(textureVariants != null ? textureVariants.getPackName() : "Non-pack model", DynamXErrorManager.MODEL_ERRORS, "obj_error", ErrorLevel.HIGH, getLocation().toString(), (step == null ? null : step.getObjObjectData().getName()), e);
         }
     }
 

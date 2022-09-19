@@ -1,6 +1,7 @@
 package fr.dynamx.client.renders.model.renderer;
 
 import fr.aym.acslib.api.services.ErrorTrackingService;
+import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.client.renders.model.texture.MaterialTexture;
 import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import fr.dynamx.common.DynamXContext;
@@ -10,6 +11,7 @@ import fr.dynamx.common.objloader.data.ObjObjectData;
 import fr.dynamx.utils.DynamXLoadingTasks;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.client.DynamXRenderUtils;
+import fr.dynamx.utils.errors.DynamXErrorManager;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.Minecraft;
@@ -293,9 +295,7 @@ public class ObjObjectRenderer {
         if (material.getName().equals("none")) //BlockBench uses "none" materials, this is a bug
         {
             if (!model.hasNoneMaterials) {
-                log.error("Invalid object " + objObjectData.getName() + " in model " + model.getLocation() + " : uses 'none' material of BlockBench");
-                DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.MODEL, model.getTextureVariants() != null ? model.getTextureVariants().getPackName() : "Non-pack model", model.getLocation().toString(),
-                        "Invalid object " + objObjectData.getName() + " : uses 'none' material of BlockBench", ErrorTrackingService.TrackedErrorLevel.LOW);
+                DynamXErrorManager.addError(model.getTextureVariants() != null ? model.getTextureVariants().getPackName() : "Non-pack model", DynamXErrorManager.MODEL_ERRORS, "obj_none_material", ErrorLevel.LOW, model.getLocation().toString(), objObjectData.getName());
             }
             model.hasNoneMaterials = true;
             return false;

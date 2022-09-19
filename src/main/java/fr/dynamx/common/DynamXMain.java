@@ -152,7 +152,7 @@ public class DynamXMain {
         } else if (result.status == ForgeVersion.Status.FAILED) {
             DynamXMain.log.warn("Forge failed to check majs for DynamX !");
         }
-        DynamXErrorManager.printErrors(ErrorLevel.HIGH);
+        DynamXErrorManager.printErrors(event.getSide(), ErrorLevel.HIGH);
     }
 
     @EventHandler

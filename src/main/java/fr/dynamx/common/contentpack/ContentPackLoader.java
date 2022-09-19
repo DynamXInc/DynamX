@@ -261,7 +261,7 @@ public class ContentPackLoader {
                         DynamXErrorManager.addError(loadingPack, DynamXErrorManager.PACKS__ERRORS, "pack_load_fail", ErrorLevel.FATAL, "loading compressed pack", loadingPack, e, 800);
                         errorCount++;
                     }
-                } else if (!contentPack.getName().endsWith(".dll") && !contentPack.getName().endsWith(".so")) { //Bullet library files
+                } else if (!contentPack.getName().endsWith(".dll") && !contentPack.getName().endsWith(".so") && !contentPack.getName().endsWith(".dylib")) { //Bullet library files
                     log.warn("File " + contentPack.getName() + " isn't a valid DynamX content pack file");
                 }
             }

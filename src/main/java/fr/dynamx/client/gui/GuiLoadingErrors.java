@@ -15,6 +15,7 @@ import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -45,7 +46,7 @@ public class GuiLoadingErrors extends GuiFrame {
         fillSummary(null);
         summary.setFocused(true);
         add(summary);
-        DynamXErrorManager.printErrors(ErrorLevel.ADVICE);
+        DynamXErrorManager.printErrors(Side.CLIENT, ErrorLevel.ADVICE);
     }
 
     private void fillSummary(String filter) {

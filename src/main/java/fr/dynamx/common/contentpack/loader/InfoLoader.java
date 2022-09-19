@@ -1,32 +1,27 @@
 package fr.dynamx.common.contentpack.loader;
 
-import fr.aym.acslib.api.services.ErrorTrackingService;
+import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.contentpack.object.IShapeContainer;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
-import fr.dynamx.api.contentpack.registry.FileDefinitionsRegistry;
+import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeEntry;
-import fr.dynamx.api.contentpack.registry.SubInfoTypesRegistry;
-import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.sync.PackSyncHandler;
-import fr.dynamx.utils.DynamXLoadingTasks;
+import fr.dynamx.utils.errors.DynamXErrorManager;
 import net.minecraftforge.fml.common.ProgressManager;
 
 import javax.annotation.Nullable;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * Automatic loader of specific named objects
@@ -118,38 +113,38 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
         if (info instanceof ISubInfoTypeOwner<?>)
             readInfoWithSubInfos((A) info, reader);
         else {
+            //TODO FACTORIZE WITH THE NEXT FUNCTION
             List<PackFilePropertyData<?>> foundProperties = new ArrayList<>();
             String s;
             boolean inComment = false;
+            INamedObject parent = info;
+            if (parent instanceof ISubInfoType)
+                parent = ((ISubInfoType<?>) parent).getRootOwner();
             while ((s = reader.readLine()) != null) {
                 s = s.trim();
                 if (s.endsWith("*/")) {
                     if (inComment)
                         inComment = false;
-                    else {
-                        DynamXMain.log.error("Illegal multi-line comment end in " + info.getFullName() + " : " + s);
-                        DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, info.getPackName(), info.getName(), "Illegal multi-line comment end in line " + s + ", property skipped", ErrorTrackingService.TrackedErrorLevel.HIGH);
-                    }
-                } else if (inComment && s.contains("}")) {
-                    DynamXMain.log.error("Found a never ending multi-line comment in " + info.getFullName());
-                    DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, info.getPackName(), info.getName(), "Found a never ending multi-line comment, some properties may be missing in-game", ErrorTrackingService.TrackedErrorLevel.FATAL);
-                } else if (!inComment && !s.startsWith("//")) {
-                    if (s.startsWith("/*")) {
+                    else
+                        //TODO FORMAT ERRORS
+                        DynamXErrorManager.addPackError(info.getPackName(), "syntax_error", ErrorLevel.HIGH, parent.getName(), "Illegal multi-line comment end in line " + s + ", property skipped in " + info.getName());
+                } else if (inComment && s.contains("}"))
+                    DynamXErrorManager.addPackError(info.getPackName(), "syntax_error", ErrorLevel.FATAL, parent.getName(), "Found a never ending multi-line comment in " + info.getName() + ", some properties may be missing in-game");
+                else if (!inComment && !s.startsWith("//")) {
+                    if (s.startsWith("/*"))
                         inComment = true;
-                    } else if (s.contains("}")) //End of sub property
+                    else if (s.contains("}")) //End of sub property
                         break;
                     else
                         readLineProperty(foundProperties, info, s);
                 }
             }
-            if (inComment) {
-                DynamXMain.log.error("Found a never ending multi-line comment in " + info.getFullName());
-                DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, info.getPackName(), info.getName(), "Found a never ending multi-line comment, some properties may be missing in-game", ErrorTrackingService.TrackedErrorLevel.FATAL);
-            }
+            if (inComment)
+                DynamXErrorManager.addPackError(info.getPackName(), "syntax_error", ErrorLevel.FATAL, parent.getName(), "Found a never ending multi-line comment in " + info.getName() + ", some properties may be missing in-game");
+            INamedObject finalParent = parent;
             SubInfoTypeAnnotationCache.getOrLoadData(info.getClass()).values().forEach(p -> {
-                if (p.isRequired() && !foundProperties.contains(p)) {
-                    DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, info.getPackName(), info.getName(), "The property '" + p.getConfigFieldName() + "' is required in " + info.getName() + " !", ErrorTrackingService.TrackedErrorLevel.HIGH);
-                }
+                if (p.isRequired() && !foundProperties.contains(p))
+                    DynamXErrorManager.addPackError(info.getPackName(), "required_property", ErrorLevel.HIGH, finalParent.getName(), "'" + p.getConfigFieldName() + "' in " + info.getName());
             });
         }
     }
@@ -167,15 +162,16 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
         //Read the category
         String s;
         boolean inComment = false;
+        INamedObject parent = obj;
+        if (parent instanceof ISubInfoType)
+            parent = ((ISubInfoType<?>) parent).getRootOwner();
         while ((s = reader.readLine()) != null) {
             s = s.trim();
             if (s.endsWith("*/")) {
                 if (inComment)
                     inComment = false;
-                else {
-                    DynamXMain.log.error("Illegal multi-line comment end in " + obj.getFullName() + " : " + s);
-                    DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, obj.getPackName(), obj.getName(), "Illegal multi-line comment end in line " + s + ", property skipped", ErrorTrackingService.TrackedErrorLevel.HIGH);
-                }
+                else  //TODO FORMAT ERROR
+                    DynamXErrorManager.addPackError(obj.getPackName(), "syntax_error", ErrorLevel.HIGH, parent.getName(), "Illegal multi-line comment end in line " + s + ", property skipped in " + obj.getName());
             } else if (!inComment && !s.startsWith("//")) {
                 if (s.startsWith("/*")) {
                     inComment = true;
@@ -194,15 +190,12 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
                 }
             }
         }
-        if (inComment) {
-            DynamXMain.log.error("Found a never ending multi-line comment in " + obj.getFullName());
-            DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, obj.getPackName(), obj.getName(), "Found a never ending multi-line comment, some properties may be missing in-game", ErrorTrackingService.TrackedErrorLevel.FATAL);
-        }
-
+        if (inComment)
+            DynamXErrorManager.addPackError(obj.getPackName(), "syntax_error", ErrorLevel.FATAL, parent.getName(), "Found a never ending multi-line comment in " + obj.getName() + ", some properties may be missing in-game");
+        INamedObject finalParent = parent;
         SubInfoTypeAnnotationCache.getOrLoadData(obj.getClass()).values().forEach(p -> {
-            if (p.isRequired() && !foundProperties.contains(p)) {
-                DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, obj.getPackName(), obj.getName(), "The property '" + p.getConfigFieldName() + "' is required in " + obj.getName() + " !", ErrorTrackingService.TrackedErrorLevel.HIGH);
-            }
+            if (p.isRequired() && !foundProperties.contains(p))
+                DynamXErrorManager.addPackError(obj.getPackName(), "required_property", ErrorLevel.HIGH, finalParent.getName(), "'" + p.getConfigFieldName() + "' in " + obj.getName());
         });
     }
 
@@ -217,22 +210,30 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
      */
     protected void readLineProperty(List<PackFilePropertyData<?>> foundProperties, INamedObject obj, String line) {
         if (line.contains(":")) {
-            //String[] keyValue = line.split(":");
             int index = line.indexOf(':');
-            String key = line.substring(0, index);
-            String value = line.substring(index + 1);
-            //if (keyValue.length == 2) {
-            PackFilePropertyData<?> d = setFieldValue(obj, key.trim(), value.trim());
-            if (d != null) {
-                foundProperties.add(d);
+            String key = line.substring(0, index).trim();
+            String value = line.substring(index + 1).trim();
+            IPackFilePropertyFixer propertyFixer = infoTypesRegistry.getSubInfoTypePropertiesFixer(obj.getClass());
+            if (propertyFixer != null) {
+                IPackFilePropertyFixer.FixResult fixResult = propertyFixer.fixInputField(obj, key, value);
+                if (fixResult != null) {
+                    if (fixResult.isDeprecation()) {
+                        INamedObject parent = obj;
+                        if (parent instanceof ISubInfoType)
+                            parent = ((ISubInfoType<?>) parent).getRootOwner();
+                        DynamXErrorManager.addPackError(obj.getPackName(), "deprecated_prop", ErrorLevel.LOW, parent.getName(), "Deprecated config key found " + key + " in " + obj.getName() + ". You should now use " + fixResult.newKey());
+                    }
+                    key = fixResult.newKey();
+                    value = fixResult.newValue(value);
+                }
             }
-          /*  } else {
-                DynamXMain.log.warn("Illegal line content (not a comment, not a property) in " + obj.getFullName() + " : " + line);
-                DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, obj.getPackName(), obj.getName(), "Bad syntax : " + keyValue.length + " values found in line " + line + ". Should be 2.", ErrorTrackingService.TrackedErrorLevel.HIGH);
-            } */
+            PackFilePropertyData<?> d = setFieldValue(obj, key, value);
+            if (d != null) foundProperties.add(d);
         } else if (!line.isEmpty()) {
-            DynamXMain.log.warn("Illegal line content (not a comment, not a property) in " + obj.getFullName() + " : " + line);
-            DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, obj.getPackName(), obj.getName(), "Bad syntax : missing ':' on line " + line + ", and not a comment", ErrorTrackingService.TrackedErrorLevel.LOW);
+            INamedObject parent = obj;
+            if (parent instanceof ISubInfoType)
+                parent = ((ISubInfoType<?>) parent).getRootOwner();
+            DynamXErrorManager.addPackError(obj.getPackName(), "syntax_error", ErrorLevel.LOW, parent.getName(), "Missing ':' on line " + line + ", and not a comment");
         }
     }
 
@@ -241,36 +242,20 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
      *
      * @param obj   The object
      * @param key   The name of the java field, should correspond to one {@link fr.dynamx.api.contentpack.registry.PackFileProperty}
-     * @param value The string value of the field, automatically parsed via the FileDefinitions
+     * @param value The string value of the field, automatically parsed via the {@link fr.dynamx.api.contentpack.registry.DefinitionType}
      */
     protected PackFilePropertyData<?> setFieldValue(INamedObject obj, String key, String value) {
         try {
             PackFilePropertyData<?> data = SubInfoTypeAnnotationCache.getFieldFor(obj, key);
-            if (data != null) {
-                return data.apply(obj, value);
-            }
-
-            //Backward compatibility with < 2.12.0 versions
-            FileDefinitionsRegistry.FileDefinition<?> def = FileDefinitionsRegistry.getFileDefinition(key);
-            if (def == null) {
-                DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, obj.getPackName(), "Bad property in " + obj.getName(), "PackFileProperty with name " + key + " for " + obj.getClass() +
-                        " has no corresponding java field (make sure to add the @PackFileProperty on the field)", ErrorTrackingService.TrackedErrorLevel.HIGH);
+            if (data == null) {
+                INamedObject parent = obj;
+                if (parent instanceof ISubInfoType)
+                    parent = ((ISubInfoType<?>) parent).getRootOwner();
+                //TODO FORMAT ERROR
+                DynamXErrorManager.addPackError(obj.getPackName(), "missing_prop", ErrorLevel.HIGH, parent.getName(), "Property '" + key + "' in " + obj.getName());
                 return null;
             }
-            Field[] fields = obj.getClass().getFields();
-            for (Field field : fields) {
-                if (field.getName().equals(def.getFieldName())) {
-                    field.set(obj, def.parse(value));
-                    DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, obj.getPackName(), "Warning in " + obj.getName(), "The config key " + key + " is using the old FileDefinition " +
-                                    "system in " + obj.getClass().getName() + ", consider moving to @PackFileProperty !",
-                            ErrorTrackingService.TrackedErrorLevel.LOW);
-                    return null;
-                }
-            }
-            //log.error("Invalid key " + key + " for " + obj.getClass()+" (not found in target class "+obj.getClass().getName()+", may be private ?) In file : "+ obj.getFullName());
-            DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, obj.getPackName(), "Error in " + obj.getName(), "Invalid FileDefinition " + key + " for " + obj.getClass().getSimpleName() +
-                    " : no corresponding java field found, make sure it's public", ErrorTrackingService.TrackedErrorLevel.HIGH);
-            return null;
+            return data.apply(obj, value);
         } catch (IllegalAccessException e) {
             throw new IllegalArgumentException("Invalid key " + key + " for " + obj.getFullName(), e);
         }
@@ -284,17 +269,17 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
      */
     @Nullable
     protected ISubInfoType<A> getClassForPropertyOwner(A obj, String name) {
+        if(infoTypesRegistry == null) return null;
         String[] tags = name.split("#");
-        for (SubInfoTypeEntry<A> type : infoTypesRegistry.getRegisteredEntries()) {
+        Collection<SubInfoTypeEntry<A>> types = infoTypesRegistry.getRegisteredEntries().stream().sorted((t1, t2) -> t1.isStrict() != t2.isStrict() ? (t1.isStrict() ? -1 : 1) : 0).collect(Collectors.toList());
+        for (SubInfoTypeEntry<A> type : types) {
             if (type.matches(tags[0]))
                 return type.create(obj, tags[0]);
         }
-        if (tags.length > 1 && optionalDependencyMatcher.test(tags[1])) {
+        if (tags.length > 1 && optionalDependencyMatcher.test(tags[1]))
             DynamXMain.log.debug("Ignoring optional block " + name + " in " + obj);
-        } else {
-            DynamXMain.log.error("Unknown sub property " + tags[0] + " in " + obj.getFullName());
-            DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, obj.getPackName(), obj.getName(), "Unknown sub property " + name + ", maybe you need an addon ?", ErrorTrackingService.TrackedErrorLevel.HIGH);
-        }
+        else
+            DynamXErrorManager.addPackError(obj.getPackName(), "unknown_sub_info", ErrorLevel.HIGH, obj.getName(), name);
         return null;
     }
 
@@ -327,8 +312,7 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
                     ((IShapeContainer) info).generateShape();
                 } catch (Exception e) {
                     ((IShapeContainer) info).markFailedShape();
-                    DynamXMain.log.fatal("Cannot load physics collision shape of " + info.getFullName() + " !", e);
-                    DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, info.getPackName(), info.getFullName(), "Cannot load physics collision shape !", ErrorTrackingService.TrackedErrorLevel.HIGH);
+                    DynamXErrorManager.addError(info.getPackName(), DynamXErrorManager.PACKS__ERRORS, "collision_shape_error", ErrorLevel.FATAL, info.getName(), null, e);
                 }
             }
             ProgressManager.pop(bar1);
@@ -480,11 +464,10 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
     }
 
     /**
-     * Registers a sub info type, its key should be unique or an IllegalArgumentException is thrown <br>
-     * Should be called before any content pack is loaded (in addons initialization for example)
-     *
      * @throws IllegalArgumentException If this object does not support sub info types or if this {@link SubInfoTypeEntry} is duplicated
+     * @deprecated Use {@link fr.dynamx.api.contentpack.registry.RegisteredSubInfoType} annotation
      */
+    @Deprecated
     public void addSubInfoType(SubInfoTypeEntry<A> entry) {
         if (infoTypesRegistry == null)
             throw new IllegalArgumentException("This object does not support sub info types !");

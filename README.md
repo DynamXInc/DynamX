@@ -38,6 +38,8 @@ and add to the VM options of the run configuration in your IDE
 -Dfml.coreMods.load=fr.dynamx.common.core.DynamXCoreMod
 ```
 
+DynamX is distributed under Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 license.
+
 ## Acknowledgments
 
 The whole team of DynamX is grateful to :

@@ -2,7 +2,7 @@ package fr.dynamx.common.contentpack.type.objects;
 
 import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.math.Vector3f;
-import fr.aym.acslib.api.services.ErrorTrackingService;
+import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
@@ -11,7 +11,8 @@ import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
-import fr.dynamx.common.DynamXContext;
+import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
+import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
@@ -19,32 +20,33 @@ import fr.dynamx.common.contentpack.loader.ObjectLoader;
 import fr.dynamx.common.contentpack.loader.PackFilePropertyData;
 import fr.dynamx.common.contentpack.loader.SubInfoTypeAnnotationCache;
 import fr.dynamx.common.items.ItemProps;
-import fr.dynamx.utils.DynamXLoadingTasks;
+import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.physics.ShapeUtils;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@RegisteredSubInfoType(name = "prop", registries = SubInfoTypeRegistries.BLOCKS_AND_PROPS, strictName = false)
 public class PropObject<T extends BlockObject<?>> extends AbstractProp<T> implements IPhysicsPackInfo, ISubInfoType<BlockObject<?>>, ISubInfoTypeOwner<BlockObject<?>> {
-
     private final BlockObject<?> owner;
     @PackFileProperty(configNames = "EmptyMass")
     private int emptyMass;
     @PackFileProperty(configNames = "CenterOfGravityOffset", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F)
     private Vector3f centerOfMass;
     @PackFileProperty(configNames = "SpawnOffset", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false, defaultValue = "0 0.65 0")
-    private final Vector3f spawnOffset = new Vector3f(0, 0.65f, 0);
+    private Vector3f spawnOffset = new Vector3f(0, 0.65f, 0);
     @PackFileProperty(configNames = "ContinuousCollisionDetection", required = false, defaultValue = "false")
     private boolean isCCDEnabled;
     @PackFileProperty(configNames = "Friction", required = false, defaultValue = "0.5")
-    private final float friction = 0.5f;
+    private float friction = 0.5f;
     @PackFileProperty(configNames = "Margin", required = false, defaultValue = "0.04")
-    private final float margin = 0.04f;
+    private float margin = 0.04f;
     @PackFileProperty(configNames = "DespawnTime", required = false, defaultValue = "\"-1\" (disabled)")
-    private final float despawnTime = -1;
+    private float despawnTime = -1;
     @PackFileProperty(configNames = "Damping", required = false, defaultValue = "0")
     private float dampingFactor;
     @PackFileProperty(configNames = "Bounciness", required = false, defaultValue = "0")
@@ -53,7 +55,7 @@ public class PropObject<T extends BlockObject<?>> extends AbstractProp<T> implem
 
     public PropObject(String packName, String fileName) {
         super(packName, fileName);
-        DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, getPackName(), "Deprecated prop utilisation in " + fileName, "Props should now be declared in the corresponding block_" + getName() + ".dynx file", ErrorTrackingService.TrackedErrorLevel.LOW);
+        DynamXErrorManager.addPackError(getPackName(), "deprecated_prop", ErrorLevel.LOW, fileName, "Props should now be declared in the corresponding block_" + getName() + ".dynx file");
         owner = null;
         this.itemIcon = "Prop";
     }
@@ -86,9 +88,15 @@ public class PropObject<T extends BlockObject<?>> extends AbstractProp<T> implem
     }
 
     @Override
-    public void appendTo(BlockObject<?> partInfo) {
-        partInfo.propObject = this;
+    public void appendTo(BlockObject<?> owner) {
+        owner.propObject = this;
         DynamXObjectLoaders.PROPS.loadItems(this, ContentPackLoader.isHotReloading);
+    }
+
+    @Nullable
+    @Override
+    public BlockObject<?> getOwner() {
+        return owner;
     }
 
     @Override

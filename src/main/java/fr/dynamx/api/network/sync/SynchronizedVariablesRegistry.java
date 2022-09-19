@@ -55,7 +55,7 @@ public class SynchronizedVariablesRegistry {
      * Sorts variable ids in alphabetical order
      */
     public static void sortRegistry(Predicate<String> useMod) {
-        DynamXMain.log.info("Sorting SynchronizedVariables registry ids...");
+        DynamXMain.log.debug("Sorting SynchronizedVariables registry ids...");
         Map<ResourceLocation, Integer> nw = new HashMap<>();
         List<String> buff = new ArrayList<>();
         for (ResourceLocation res : baseSyncVarRegistry.keySet()) {

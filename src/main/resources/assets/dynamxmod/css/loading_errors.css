@@ -1,0 +1,47 @@
+#root {
+    left: 50%;
+    right: 50%;
+    top: 50%;
+    bottom: 50%;
+    width: 90%;
+    height: 90%;
+    border-radius: 2%;
+    background-color: rgba(0,0,0,200);
+}
+
+#root>scroll_pane {
+    left: 50%;
+    right: 50%;
+    top: 50%;
+    bottom: 50%;
+    width: 97%;
+    height: 96%;
+    color: white;
+    background-color: translucent;
+}
+
+#search_field {
+    left: auto;
+    top: auto;
+    width: auto;
+ }
+
+label, text_area {
+    left: auto;
+    top: auto;
+    width: auto;
+    height: auto;
+
+    background-color: translucent;
+    border: none;
+
+    padding-top: 5px;
+}
+
+#label-closed:hover {
+    background-color: rgba(50, 50, 50, 189);
+}
+
+#label-deployed {
+    background-color: rgba(50, 50, 50, 189);
+}

@@ -10,11 +10,10 @@ import fr.dynamx.api.contentpack.object.IShapeProvider;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
-import fr.dynamx.api.obj.ObjModelPath;
-import fr.dynamx.common.DynamXContext;
+import fr.dynamx.api.obj.IObjObject;
 import fr.dynamx.common.contentpack.parts.PartShape;
-import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
-import fr.dynamx.client.renders.model.texture.TextureVariantData;
+import fr.dynamx.common.obj.ObjModelServer;
+import fr.dynamx.common.obj.texture.TextureData;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.physics.ShapeUtils;
@@ -27,13 +26,20 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractItemObject<T> implements IShapeContainer, IShapeProvider {
+    @IPackFilePropertyFixer.PackFilePropertyFixer(registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.PROPS})
+    public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
+        if ("UseHullShape".equals(key))
+            return new IPackFilePropertyFixer.FixResult("UseComplexCollisions", true);
+        return null;
+    };
+
     @PackFileProperty(configNames = "Translate", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false, defaultValue = "0 0 0")
     protected Vector3f translation = new Vector3f(0, 0, 0);
     @PackFileProperty(configNames = "Scale", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false, defaultValue = "1 1 1")
     protected Vector3f scaleModifier = new Vector3f(1, 1, 1);
     @PackFileProperty(configNames = "RenderDistanceSquared", required = false, defaultValue = "4096")
     protected float renderDistance = 4096;
-    @PackFileProperty(configNames = "UseComplexCollisions", oldNames = {"UseHullShape"}, required = false, defaultValue = "false", description = "common.UseComplexCollisions")
+    @PackFileProperty(configNames = "UseComplexCollisions", required = false, defaultValue = "false", description = "common.UseComplexCollisions")
     protected boolean useHullShape = false;
     /*@PackFileProperty(configNames = "CollisionType", required = false, defaultValue = "Simple", type = DefinitionType.DynamXDefinitionTypes.COLLISION_TYPE)
     protected EnumCollisionType collisionType = EnumCollisionType.SIMPLE;*/
@@ -65,8 +71,9 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
         if (getPartShapes().isEmpty()) {
             ObjModelPath modelPath = DynamXUtils.getModelPath(getPackName(), model);
             if (useHullShape) {
-                compoundCollisionShape = ShapeUtils.generateComplexModelCollisions(modelPath, "", scaleModifier, new Vector3f(), 0);
+                compoundCollisionShape = ShapeUtils.generateComplexModelCollisions(DynamXUtils.getModelPath(getPackName(), model), "", scaleModifier, new Vector3f(), 0);
             } else {
+                PackInfo info = DynamXObjectLoaders.PACKS.findPackInfoByPackName(getPackName());
                 ShapeUtils.generateModelCollisions(this, DynamXContext.getObjModelDataFromCache(modelPath), compoundCollisionShape);
             }
         } else {

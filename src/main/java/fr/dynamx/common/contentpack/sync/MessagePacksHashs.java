@@ -131,6 +131,7 @@ public class MessagePacksHashs implements IDnxPacket {
                     });
                 }
                 PackSyncHandler.computeAll();
+                DynamXContext.getObjModelRegistry().getItemRenderer().refreshItemInfos();
                 Minecraft.getMinecraft().ingameGUI.setOverlayMessage("", false);
             });
             return null;

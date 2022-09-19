@@ -2,6 +2,8 @@ package fr.dynamx.common.contentpack.parts;
 
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
+import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
+import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
@@ -13,6 +15,7 @@ import fr.dynamx.utils.debug.DynamXDebugOptions;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 
+@RegisteredSubInfoType(name = "storage", registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
 public class PartStorage extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfoBuilder> //TODO FIX MULTI-STORAGE ON ONE ENTITY
 {
     @PackFileProperty(configNames = "StorageSize")
@@ -22,10 +25,11 @@ public class PartStorage extends InteractivePart<BaseVehicleEntity<?>, ModularVe
         super(owner, partName, 0.5f, 0.5f);
     }
 
-    public void appendTo(ModularVehicleInfoBuilder modulableVehicleInfo) {
+    @Override
+    public void appendTo(ModularVehicleInfoBuilder owner) {
         if (storageSize % 9 != 0)
             throw new IllegalArgumentException("StorageSize must be a multiple of 9 !");
-        super.appendTo(modulableVehicleInfo);
+        super.appendTo(owner);
     }
 
     @Override
@@ -57,6 +61,6 @@ public class PartStorage extends InteractivePart<BaseVehicleEntity<?>, ModularVe
 
     @Override
     public String getName() {
-        return "PartStorage named " + getPartName() + " in " + getOwner().getName();
+        return "PartStorage named " + getPartName();
     }
 }

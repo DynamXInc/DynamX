@@ -5,11 +5,15 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IShapeProvider;
 import fr.dynamx.api.contentpack.object.part.BasePart;
+import fr.dynamx.api.entities.VehicleEntityProperties;
+import fr.dynamx.api.contentpack.ContentPackType;
 import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.api.physics.EnumBulletShapeType;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.PackInfo;
+import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
+import fr.dynamx.common.entities.modules.EngineModule;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import fr.dynamx.utils.physics.DynamXPhysicsHelper;
@@ -23,20 +27,17 @@ import net.minecraft.nbt.NBTTagFloat;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.lwjgl.BufferUtils;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -86,7 +87,11 @@ public class DynamXUtils {
      */
     public static ObjModelPath getModelPath(String packName, ResourceLocation model) {
         PackInfo info = DynamXObjectLoaders.PACKS.findPackInfoByPackName(packName);
-        return new ObjModelPath(info == null ? packName : info.getPathName(), model);
+        if (info == null) {
+            System.err.println("WTF PACK INFO " + packName + " NOT FOUND");
+            return new ObjModelPath(new PackInfo(packName, ContentPackType.FOLDER), RegistryNameSetter.getDynamXModelResourceLocation(model));
+        }
+        return new ObjModelPath(info == null ? packName : info.getPathName(), RegistryNameSetter.getDynamXModelResourceLocation(model));
     }
 
     public static byte[] readInputStream(InputStream resource) throws IOException {
@@ -299,4 +304,16 @@ public class DynamXUtils {
         buffer.flip();
         return buffer;
     }
+
+    //DUPLICATE (function is already in the BasicsAddon)
+    public static int getSpeed(BaseVehicleEntity<?> entity) {
+        EngineModule engine = entity.getModuleByType(EngineModule.class);
+        if(engine != null){
+            float[] ab = engine.getEngineProperties();
+            if(ab == null) return 0;
+            return (int) Math.abs(ab[VehicleEntityProperties.EnumEngineProperties.SPEED.ordinal()]);
+        }
+        return -1;
+    }
+
 }

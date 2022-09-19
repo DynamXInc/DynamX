@@ -90,8 +90,10 @@ public interface DebugRenderer<T extends PhysicsEntity<?>> {
         public void render(PackPhysicsEntity<?, ?> entity, double x, double y, double z, float partialTicks) {
             List<Vector3f> debugBuffer = entity.getPackInfo().getCollisionShapeDebugBuffer();
             if (debugBuffer != null) {
+                GlStateManager.pushMatrix();
                 GlStateManager.translate(-entity.getPackInfo().getCenterOfMass().x, -entity.getPackInfo().getCenterOfMass().y, -entity.getPackInfo().getCenterOfMass().z);
                 DynamXRenderUtils.drawConvexHull(debugBuffer);
+                GlStateManager.popMatrix();
             }
         }
     }

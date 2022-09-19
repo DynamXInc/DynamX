@@ -22,7 +22,9 @@ import org.lwjgl.input.Mouse;
 import java.util.Collections;
 import java.util.List;
 
-public class GuiBlockCustomization extends GuiFrame {
+public class GuiBlockCustomization extends GuiFrame
+{
+    public static final ResourceLocation STYLE = new ResourceLocation(DynamXConstants.ID, "css/block_custom.css");
 
     private static ObjModelRenderer model;
     private static TEDynamXBlock teBlock;
@@ -170,7 +172,7 @@ public class GuiBlockCustomization extends GuiFrame {
 
     @Override
     public List<ResourceLocation> getCssStyles() {
-        return Collections.singletonList(new ResourceLocation(DynamXConstants.ID, "css/block_custom.css"));
+        return Collections.singletonList(STYLE);
     }
 
     @Override

@@ -28,7 +28,7 @@ public class PlayerPhysicsHandler {
     private PhysicsRigidBody bodyIn;
 
     private PlayerBodyState state = PlayerBodyState.DISABLED;
-    private byte removedCooldown;
+    private byte removedCountdown;
 
     public RagdollEntity ragdollEntity;
 
@@ -38,37 +38,50 @@ public class PlayerPhysicsHandler {
         Transform localTransform = new Transform(new Vector3f((float) playerIn.posX, (float) playerIn.posY + 0.8f, (float) playerIn.posZ), localQuat);
         bodyIn = DynamXPhysicsHelper.createRigidBody(60f, localTransform, new BoxCollisionShape(0.35f, 0.8f, 0.35f),
                 new BulletShapeType<>(EnumBulletShapeType.PLAYER, this));
-        bodyIn.setGravity(new Vector3f());
         bodyIn.setKinematic(true);
         bodyIn.setEnableSleep(false);
     }
 
     public void update(IPhysicsWorld world) {
-        if (removedCooldown > 0) {
-            removedCooldown--;
-            if (removedCooldown == 0 && state == PlayerBodyState.DISABLED) {
-                state = PlayerBodyState.ACTIONABLE;
-            }
-        }
-        if (removedCooldown == 0 && state == PlayerBodyState.ACTIONABLE && !playerIn.isSpectator()) {
-            if (bodyIn == null) {
-                throw new IllegalStateException("Body is null :thinking: " + removedCooldown + " " + state + " " + playerIn);
-            }
-            DynamXContext.getPhysicsWorld().addCollisionObject(bodyIn);
-            state = PlayerBodyState.ACTIVATED;
-        } else if (state == PlayerBodyState.ACTIVATED && playerIn.isSpectator()) {
-            removeFromWorld(false);
-        }
-        if (state == PlayerBodyState.ACTIVATED && bodyIn != null) {
-            Vector3f position = Vector3fPool.get();
-            position.set((float) playerIn.posX, (float) playerIn.posY + 0.8f, (float) playerIn.posZ);
-            if (Vector3f.isValidVector(position) && playerIn.fallDistance < 10) { //fixes a crash with elytra
-                bodyIn.setPhysicsLocation(position);
-                bodyIn.setPhysicsRotation(QuaternionPool.get().fromAngleNormalAxis((float) Math.toRadians(-playerIn.rotationYaw), Vector3f.UNIT_Y));
-                bodyIn.setContactResponse(true);
-            } else {
-                bodyIn.setContactResponse(false);
-            }
+        if(playerIn.isDead)
+            removeFromWorld(true);
+        if (removedCountdown > 0)
+            removedCountdown--;
+        switch (state) {
+            case DISABLED:
+                if (removedCountdown == 0)
+                    state = PlayerBodyState.ACTIONABLE;
+                break;
+            case ACTIONABLE:
+                if (removedCountdown == 0 && !playerIn.isSpectator()) {
+                    if (bodyIn == null)
+                        throw new IllegalStateException("Body is null while adding " + removedCountdown + " " + state + " " + playerIn);
+                    DynamXContext.getPhysicsWorld().addCollisionObject(bodyIn);
+                    state = PlayerBodyState.ACTIVATING;
+                }
+                break;
+            case ACTIVATING:
+                if(playerIn.isSpectator())
+                    removeFromWorld(false);
+                else if(bodyIn.isInWorld()) {
+                    DynamXContext.getPhysicsWorld().schedule(() -> bodyIn.setGravity(Vector3fPool.get()));
+                    state = PlayerBodyState.ACTIVATED;
+                }
+                break;
+            case ACTIVATED:
+                if(playerIn.isSpectator())
+                    removeFromWorld(false);
+                else if(bodyIn != null) {
+                    Vector3f position = Vector3fPool.get();
+                    position.set((float) playerIn.posX, (float) playerIn.posY + 0.8f, (float) playerIn.posZ);
+                    if (Vector3f.isValidVector(position) && playerIn.fallDistance < 10) { //fixes a crash with elytra
+                        bodyIn.setPhysicsLocation(position);
+                        bodyIn.setPhysicsRotation(QuaternionPool.get().fromAngleNormalAxis((float) Math.toRadians(-playerIn.rotationYaw), Vector3f.UNIT_Y));
+                        bodyIn.setContactResponse(true);
+                    } else
+                        bodyIn.setContactResponse(false);
+                }
+                break;
         }
     }
 
@@ -96,22 +109,21 @@ public class PlayerPhysicsHandler {
         }
     }
 
-    //TODO AUTOMATE A ETATS, PAS DE COLLISIONS EN GM3
     public void addToWorld() {
-        if (state != PlayerBodyState.ACTIVATED) {
+        if (state == PlayerBodyState.DISABLED)
             state = PlayerBodyState.ACTIONABLE;
-        }
     }
 
     public void removeFromWorld(boolean delete) {
-        removedCooldown = 30;
-        if (bodyIn != null && state == PlayerBodyState.ACTIVATED) {
+        removedCountdown = 30;
+        if (bodyIn != null && state == PlayerBodyState.ACTIVATED)
             DynamXContext.getPhysicsWorld().removeCollisionObject(bodyIn);
-            state = PlayerBodyState.DISABLED;
-        }
         if (delete) {
             bodyIn = null;
-        }
+            DynamXContext.getPlayerToCollision().remove(playerIn);
+            state = PlayerBodyState.DELETED;
+        } else
+            state = PlayerBodyState.DISABLED;
     }
 
     public PhysicsRigidBody getBodyIn() {
@@ -121,6 +133,8 @@ public class PlayerPhysicsHandler {
     public enum PlayerBodyState {
         DISABLED,
         ACTIONABLE,
-        ACTIVATED
+        ACTIVATING,
+        ACTIVATED,
+        DELETED
     }
 }

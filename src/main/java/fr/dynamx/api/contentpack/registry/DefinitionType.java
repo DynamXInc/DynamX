@@ -5,7 +5,6 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
 import fr.dynamx.common.contentpack.loader.PackConstants;
 import fr.dynamx.common.contentpack.parts.PartShape;
-import fr.dynamx.utils.RegistryNameSetter;
 import fr.dynamx.utils.physics.EnumCollisionType;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ResourceLocation;
@@ -165,7 +164,8 @@ public class DefinitionType<T> {
         }, v -> v.x + " " + v.y + " " + v.z, "type.vector3f")),
         QUATERNION(new DefinitionType<>(Quaternion.class, (s) -> {
             String[] t = s.split(" ");
-            return new Quaternion(Float.parseFloat(t[1]), Float.parseFloat(t[2]), Float.parseFloat(t[3]), Float.parseFloat(t[0]));
+            Quaternion q = new Quaternion(Float.parseFloat(t[1]), Float.parseFloat(t[2]), Float.parseFloat(t[3]), Float.parseFloat(t[0]));
+            return q.normalizeLocal();
         }, v -> v.getX() + " " + v.getY() + " " + v.getZ() + " " + v.getW(), "type.quaternion")),
         /**
          * Vector3f def, but only with x and y arguments, z=0
@@ -222,6 +222,14 @@ public class DefinitionType<T> {
                 p -> p == null ? EnumCollisionType.SIMPLE.name() : p.name(), "type.collision")),
         SHAPE_TYPE(new DefinitionType<>(PartShape.EnumPartType.class, PartShape.EnumPartType::fromString, "type.shapetype")),
         DYNX_RESOURCE_LOCATION(new DefinitionType<>(ResourceLocation.class, RegistryNameSetter::getDynamXModelResourceLocation, "type.resourcelocation"));
+        SHAPE_TYPE(new DefinitionType<>(PartShape.EnumPartType.class, PartShape.EnumPartType::fromString, "type.shapetype")),
+        PLAYER_STAND_ON_TOP(new DefinitionType<>(EnumPlayerStandOnTop.class, EnumPlayerStandOnTop::fromString, "type.player_stand_on_top")),
+        PLAYER_SEAT_POSITION(new DefinitionType<>(EnumSeatPlayerPosition.class, EnumSeatPlayerPosition::fromString, "type.player_seat_position")),
+        MATERIAL(new DefinitionType<>(Material.class, (s) -> {
+            List<String> names = Arrays.asList("AIR", "GRASS", "GROUND", "WOOD", "ROCK", "IRON", "ANVIL", "WATER", "LAVA", "LEAVES", "PLANTS", "VINE", "SPONGE", "CLOTH", "FIRE", "SAND", "CIRCUITS", "CARPET", "GLASS", "REDSTONE_LIGHT", "TNT", "CORAL", "ICE", "PACKED_ICE", "SNOW", "CRAFTED_SNOW", "CACTUS", "CLAY", "GOURD", "DRAGON_EGG", "PORTAL", "CAKE", "WEB", "PISTON", "BARRIER", "STRUCTURE_VOID");
+            Material[] materials = new Material[] {Material.AIR, Material.GRASS, Material.GROUND, Material.WOOD, Material.ROCK, Material.IRON, Material.ANVIL, Material.WATER, Material.LAVA, Material.LEAVES, Material.PLANTS, Material.VINE, Material.SPONGE, Material.CLOTH, Material.FIRE, Material.SAND, Material.CIRCUITS, Material.CARPET, Material.GLASS, Material.REDSTONE_LIGHT, Material.TNT, Material.CORAL, Material.ICE, Material.PACKED_ICE, Material.SNOW, Material.CRAFTED_SNOW, Material.CACTUS, Material.CLAY, Material.GOURD, Material.DRAGON_EGG, Material.PORTAL, Material.CAKE, Material.WEB, Material.PISTON, Material.BARRIER, Material.STRUCTURE_VOID};
+            return materials[names.indexOf(s.toUpperCase())];
+        }, "type.material"));
 
         public final DefinitionType<?> type;
 

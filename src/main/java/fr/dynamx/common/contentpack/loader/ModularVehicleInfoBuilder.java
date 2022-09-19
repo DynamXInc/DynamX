@@ -11,7 +11,6 @@ import fr.dynamx.api.contentpack.object.subinfo.SubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.obj.ObjModelPath;
-import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.ModularVehicleInfo;
 import fr.dynamx.common.contentpack.parts.*;
@@ -20,11 +19,9 @@ import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.contentpack.type.vehicle.EngineInfo;
 import fr.dynamx.common.contentpack.type.vehicle.FrictionPoint;
 import fr.dynamx.common.contentpack.type.vehicle.SoundListInfo;
-import fr.dynamx.common.objloader.data.ObjModelData;
-import fr.dynamx.client.renders.model.texture.TextureVariantData;
+import fr.dynamx.common.obj.texture.TextureData;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.physics.ShapeUtils;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 
 import java.util.*;
@@ -35,6 +32,13 @@ import java.util.stream.Collectors;
  * Responsible for loading all the configuration/properties of the vehicle and creating a final object
  */
 public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implements IShapeContainer, INamedObject, ParticleEmitterInfo.IParticleEmitterContainer {
+    @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
+    public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
+        if ("UseHullShape".equals(key))
+            return new IPackFilePropertyFixer.FixResult("UseComplexCollisions", true);
+        return null;
+    };
+
     private final String packName, fileName;
 
     @PackFileProperty(configNames = "Name")
@@ -47,6 +51,8 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
     private float dragFactor;
     @PackFileProperty(configNames = "Model", type = DefinitionType.DynamXDefinitionTypes.DYNX_RESOURCE_LOCATION, description = "common.model", defaultValue = "obj/name_of_vehicle/name_of_model.obj")
     private ResourceLocation model;
+    @PackFileProperty(configNames = "PlayerStandOnTop", required = false, defaultValue = "ALWAYS")
+    public EnumPlayerStandOnTop playerStandOnTop;
     @PackFileProperty(configNames = "ShapeYOffset", required = false)
     private float shapeYOffset;
     @PackFileProperty(configNames = {"CreativeTabName", "CreativeTab", "TabName"}, required = false, defaultValue = "CreativeTab of DynamX", description = "common.creativetabname")
@@ -91,17 +97,17 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
     private String defaultSounds;
 
     @PackFileProperty(configNames = "ItemScale", required = false, description = "common.itemscale", defaultValue = "0.2")
-    private final float itemScale = 0.2f;
+    private float itemScale = 0.2f;
     @PackFileProperty(configNames = "Item3DRenderLocation", required = false, description = "common.item3D", defaultValue = "all")
-    private final Enum3DRenderLocation item3DRenderLocation = Enum3DRenderLocation.ALL;
+    private Enum3DRenderLocation item3DRenderLocation = Enum3DRenderLocation.ALL;
     @PackFileProperty(configNames = "MaxVehicleSpeed", required = false, defaultValue = "infinite")
-    private final float vehicleMaxSpeed = Integer.MAX_VALUE;
-    @PackFileProperty(configNames = "UseComplexCollisions", oldNames = {"UseHullShape"}, required = false, defaultValue = "true", description = "common.UseComplexCollisions")
-    private final boolean useHullShape = true;
+    private float vehicleMaxSpeed = Integer.MAX_VALUE;
+    @PackFileProperty(configNames = "UseComplexCollisions", required = false, defaultValue = "true", description = "common.UseComplexCollisions")
+    private boolean useHullShape = true;
     @PackFileProperty(configNames = "Textures", required = false, type = DefinitionType.DynamXDefinitionTypes.STRING_ARRAY_2D)
     private String[][] texturesArray;
     @PackFileProperty(configNames = "DefaultZoomLevel", required = false, defaultValue = "4")
-    private final int defaultZoomLevel = 4;
+    private int defaultZoomLevel = 4;
 
     /**
      * The collision shape of this vehicle, generated either form the partShapes list, or the obj model of the vehicle (hull shape)
@@ -271,7 +277,7 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
                 }
             }
         }
-        return new ModularVehicleInfo(defaultName, getPackName(), getName(), description, emptyMass, dragFactor, model, centerOfMass, scaleModifier, bakedTextures, parts, partShapes, subProperties, lightSources,
+        return new ModularVehicleInfo(defaultName, getPackName(), getName(), description, emptyMass, playerStandOnTop, dragFactor, model, centerOfMass, scaleModifier, bakedTextures, parts, partShapes, subProperties, lightSources,
                 frictionPoints, particleEmitters, vehicleMaxSpeed, directingWheel, itemScale, item3DRenderLocation, FMLCommonHandler.instance().getSide().isClient() ? renderedParts : null, physicsCollisionShape, collisionShapeDebugBuffer, creativeTabName, defaultZoomLevel);
     }
 
@@ -320,5 +326,11 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
     @Override
     public List<ParticleEmitterInfo<?>> getParticleEmitters() {
         return particleEmitters;
+    }
+
+    @Nullable
+    @Override
+    public ModularVehicleInfoBuilder getOwner() {
+        return null;
     }
 }

@@ -1,8 +1,6 @@
 package fr.dynamx.client.renders.model;
 
 import fr.aym.acslib.api.services.ErrorTrackingService;
-import fr.dynamx.client.renders.model.renderer.ArmorRenderer;
-import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.type.objects.ArmorObject;
@@ -44,37 +42,31 @@ public class ModelObjArmor extends ModelBiped {
             setBodyPart(body, bipedBody);
         }
         if (armorObject.getArmorArms() != null) {
-            if (armorObject.getArmorArms().length != 2) {
-                DynamXMain.log.warn("Armor " + armorObject.getFullName() + " has one arm in the config, but there should be 2 arms !");
-                DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, armorObject.getFullName(), "Missing arm", "The armor has only one arm part, it should be two !", ErrorTrackingService.TrackedErrorLevel.HIGH);
-            } else {
+            if (armorObject.getArmorArms().length == 2) {
                 arms = new ArmorRenderer[]{new ArmorRenderer(model, this, armorObject.getArmorArms()[0]), new ArmorRenderer(model, this, armorObject.getArmorArms()[1])};
                 arms[0].mirror = true;
                 setBodyPart(arms[0], bipedLeftArm);
                 setBodyPart(arms[1], bipedRightArm);
-            }
+            } else
+                DynamXErrorManager.addError(armorObject.getPackName(), DynamXErrorManager.MODEL_ERRORS, "armor_error", ErrorLevel.HIGH, armorObject.getName(), "The armor has only one arm part, it should be two !");
         }
         if (armorObject.getArmorLegs() != null) {
-            if (armorObject.getArmorLegs().length != 2) {
-                DynamXMain.log.warn("Armor " + armorObject.getFullName() + " has one leg in the config, but there should be 2 legs !");
-                DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, armorObject.getFullName(), "Missing leg", "The armor has only one leg part, it should be two !", ErrorTrackingService.TrackedErrorLevel.HIGH);
-            } else {
+            if (armorObject.getArmorLegs().length == 2) {
                 legs = new ArmorRenderer[]{new ArmorRenderer(model, this, armorObject.getArmorLegs()[0]), new ArmorRenderer(model, this, armorObject.getArmorLegs()[1])};
                 legs[0].mirror = true;
                 setBodyPart(legs[0], bipedLeftLeg);
                 setBodyPart(legs[1], bipedRightLeg);
-            }
+            } else
+                DynamXErrorManager.addError(armorObject.getPackName(), DynamXErrorManager.MODEL_ERRORS, "armor_error", ErrorLevel.HIGH, armorObject.getName(), "The armor has only one leg part, it should be two !");
         }
         if (armorObject.getArmorFoot() != null) {
-            if (armorObject.getArmorFoot().length != 2) {
-                DynamXMain.log.warn("Armor " + armorObject.getFullName() + " has one feet in the config, but there should be 2 foot !");
-                DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, armorObject.getFullName(), "Missing feet", "The armor has only one feet part, it should be two !", ErrorTrackingService.TrackedErrorLevel.HIGH);
-            } else {
+            if (armorObject.getArmorFoot().length == 2) {
                 foot = new ArmorRenderer[]{new ArmorRenderer(model, this, armorObject.getArmorFoot()[0]), new ArmorRenderer(model, this, armorObject.getArmorFoot()[1])};
                 foot[0].mirror = true;
                 setBodyPart(foot[0], bipedLeftLeg);
                 setBodyPart(foot[1], bipedRightLeg);
-            }
+            } else
+                DynamXErrorManager.addError(armorObject.getPackName(), DynamXErrorManager.MODEL_ERRORS, "armor_error", ErrorLevel.HIGH, armorObject.getName(), "The armor has only one feet part, it should be two !");
         }
     }
 

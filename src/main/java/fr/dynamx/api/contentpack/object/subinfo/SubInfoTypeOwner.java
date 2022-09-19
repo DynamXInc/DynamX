@@ -1,8 +1,8 @@
 package fr.dynamx.api.contentpack.object.subinfo;
 
 import fr.dynamx.api.contentpack.object.INamedObject;
-import fr.dynamx.api.contentpack.registry.SubInfoTypesRegistry;
-import fr.dynamx.common.contentpack.ModularVehicleInfo;
+import fr.dynamx.common.contentpack.loader.SubInfoTypesRegistry;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
 import fr.dynamx.common.contentpack.type.ObjectInfo;
 
@@ -61,7 +61,7 @@ public abstract class SubInfoTypeOwner<T extends SubInfoTypeOwner<T>> implements
      */
     public abstract static class Vehicle extends BuildableSubInfoTypeOwner<ModularVehicleInfoBuilder, ModularVehicleInfo<?>> implements ISubInfoType<ModularVehicleInfoBuilder> {
         @Override //A sub info types owner is an info type himself (it is THE root owning all properties)
-        public void appendTo(ModularVehicleInfoBuilder partInfo) {
+        public void appendTo(ModularVehicleInfoBuilder owner) {
         }
     }
 }

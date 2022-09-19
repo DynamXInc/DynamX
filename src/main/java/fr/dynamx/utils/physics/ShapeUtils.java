@@ -25,10 +25,7 @@ import java.io.*;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import java.util.zip.*;
 
 import static fr.dynamx.common.DynamXMain.log;
 
@@ -124,10 +121,21 @@ public class ShapeUtils {
             if (!file.getPath().contains(".zip") && !file.getPath().contains(ContentPackLoader.PACK_FILE_EXTENSION)) { //not a zip pack
                 saveFile(file, shapeGenerator);
             } else {
-                file = new File(file.getPath().replace(".zip", "").replace(ContentPackLoader.PACK_FILE_EXTENSION, ""));
-                new File(file.getParent()).mkdirs();
                 log.warn("Saving .dc file of " + tessellatorModel + " of a zipped pack in " + file + ". Consider putting it in the zip file of the pack.");
-                saveFile(file, shapeGenerator);
+                try {
+                    boolean zipped = file.getPath().contains(".zip");
+                    File zipFile;
+                    if (zipped) {
+                        zipFile = new File(file.getPath().substring(0, file.getPath().lastIndexOf(".zip") + 4));
+                    } else {
+                        zipFile = new File(file.getPath().substring(0, file.getPath().lastIndexOf(ContentPackLoader.PACK_FILE_EXTENSION) + ContentPackLoader.PACK_FILE_EXTENSION.length()));
+                    }
+                    addFilesToExistingZip(zipFile, file, shapeGenerator);
+
+                    log.info("Saved the shape " + file.getName());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
             end = System.currentTimeMillis();
             time = end - start;
@@ -143,6 +151,47 @@ public class ShapeUtils {
         long time = end - start;
         log.info("Loaded " + modelName + " in " + time + " ms");
         return collisionShape;
+    }
+
+    public static void addFilesToExistingZip(File zipFile, File modelFile, ShapeGenerator shapeGenerator) throws IOException {
+        byte[] buf = new byte[1024];
+        File outputZipFile = new File(zipFile.getParentFile(), zipFile.getName()+".temp");
+        ZipInputStream zin = new ZipInputStream(new FileInputStream(zipFile));
+        ZipOutputStream out = new ZipOutputStream(new FileOutputStream(outputZipFile));
+
+        ZipEntry entry = zin.getNextEntry();
+        while (entry != null) {
+            String name = entry.getName();
+            boolean notInFiles = !modelFile.getName().equals(name);
+            if (notInFiles) {
+                // Add ZIP entry to output stream.
+                out.putNextEntry(new ZipEntry(name));
+                // Transfer bytes from the ZIP file to the output file
+                int len;
+                while ((len = zin.read(buf)) > 0) {
+                    out.write(buf, 0, len);
+                }
+            }
+            entry = zin.getNextEntry();
+        }
+        // Close the streams
+        zin.close();
+        // Compress the files
+
+        // Add ZIP entry to output stream.
+        out.putNextEntry(new ZipEntry(modelFile.getName()));
+        // Transfer bytes from the file to the ZIP file
+        ObjectOutputStream shapeBytes = new ObjectOutputStream(new GZIPOutputStream(out));
+        shapeBytes.writeObject(shapeGenerator);
+
+        // Complete the entry
+        out.closeEntry();
+        // Complete the ZIP file
+        out.close();
+
+        System.out.println(zipFile.delete());
+        System.out.println("Deleted old");
+        System.out.println(outputZipFile.renameTo(zipFile));
     }
 
     private static void saveFile(File file, ShapeGenerator shapeGenerator) {

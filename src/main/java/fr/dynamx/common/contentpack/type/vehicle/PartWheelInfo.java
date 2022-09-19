@@ -7,10 +7,9 @@ import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
-import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
-import fr.dynamx.client.renders.model.texture.TextureVariantData;
+import fr.dynamx.api.obj.IObjObject;
+import fr.dynamx.common.obj.texture.TextureData;
 import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.ResourceLocation;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +18,13 @@ import java.util.Map;
  * Wheel contained in a wheel file
  */
 public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements ISubInfoType<PartWheelInfo>, IObjPackObject, INamedObject {
+    @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.WHEELS)
+    public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
+        if ("WheelRadius".equals(key))
+            return new IPackFilePropertyFixer.FixResult("Radius", true);
+        return null;
+    };
+
     private final String packName;
     private final String partName;
 
@@ -26,7 +32,7 @@ public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IS
     private ResourceLocation model;
     @PackFileProperty(configNames = "Width")
     private float wheelWidth;
-    @PackFileProperty(configNames = "Radius", oldNames = "WheelRadius")
+    @PackFileProperty(configNames = "Radius")
     private float wheelRadius;
     @PackFileProperty(configNames = "RimRadius")
     private float rimRadius;
@@ -49,10 +55,10 @@ public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IS
     @PackFileProperty(configNames = "WheelsDampingCompression")
     private float wheelsDampingCompression;
     @PackFileProperty(configNames = "SkidParticle", required = false)
-    private final EnumParticleTypes skidParticle = EnumParticleTypes.SMOKE_NORMAL;
+    private EnumParticleTypes skidParticle = EnumParticleTypes.SMOKE_NORMAL;
 
     @PackFileProperty(configNames = "ScaleModifier", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false)
-    private final Vector3f scaleModifier = new Vector3f(1, 1, 1);
+    private Vector3f scaleModifier = new Vector3f(1, 1, 1);
 
     @PackFileProperty(configNames = "Textures", required = false, type = DefinitionType.DynamXDefinitionTypes.STRING_ARRAY_2D, defaultValue = "\"Textures: DynamX\"")
     private String[][] texturesArray;
@@ -80,6 +86,12 @@ public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IS
 
     @Override //A sub info types owner is an info type himself (it is THE root owning all properties)
     public void appendTo(PartWheelInfo owner) {
+    }
+
+    @Nullable
+    @Override
+    public PartWheelInfo getOwner() {
+        return null;
     }
 
     @Override

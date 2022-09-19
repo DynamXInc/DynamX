@@ -10,6 +10,7 @@ import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.EngineModule;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +31,7 @@ public class EngineInfo extends SubInfoTypeOwner<EngineInfo> implements ISubInfo
     @PackFileProperty(configNames = "Braking")
     private float braking;
     @PackFileProperty(configNames = "TurnSpeed", required = false, defaultValue = "0.09")
-    private final float turnSpeed = 0.09f;
+    private float turnSpeed = 0.09f;
 
     public List<Vector3f> points = new ArrayList<>();
     public List<GearInfo> gears = new ArrayList<>();
@@ -119,10 +120,16 @@ public class EngineInfo extends SubInfoTypeOwner<EngineInfo> implements ISubInfo
     }
 
     @Override
-    public void appendTo(ModularVehicleInfoBuilder partInfo) {
+    public void appendTo(ModularVehicleInfoBuilder owner) {
         //Fix bug : engine duplicated when using pack sync option
-        partInfo.getSubProperties().removeIf(p -> p.getFullName().equals(getFullName()));
-        partInfo.addSubProperty(this);
+        owner.getSubProperties().removeIf(p -> p.getFullName().equals(getFullName()));
+        owner.addSubProperty(this);
+    }
+
+    @Nullable
+    @Override
+    public ModularVehicleInfoBuilder getOwner() {
+        return null;
     }
 
     @Override

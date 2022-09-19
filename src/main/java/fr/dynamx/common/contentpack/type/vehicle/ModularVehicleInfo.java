@@ -12,7 +12,8 @@ import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.CreatePackItemEvent;
-import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
+import fr.dynamx.api.obj.IModelTextureSupplier;
+import fr.dynamx.api.obj.IObjObject;
 import fr.dynamx.common.contentpack.loader.BuildableInfoLoader;
 import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
 import fr.dynamx.common.contentpack.loader.ObjectLoader;
@@ -23,12 +24,12 @@ import fr.dynamx.common.contentpack.type.objects.AbstractItemObject;
 import fr.dynamx.common.contentpack.type.vehicle.FrictionPoint;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.items.ItemModularEntity;
-import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
-import fr.dynamx.client.renders.model.texture.TextureVariantData;
+import fr.dynamx.common.obj.texture.TextureData;
 import fr.dynamx.utils.client.DynamXRenderUtils;
+import fr.dynamx.utils.debug.DynamXDebugOption;
+import fr.dynamx.utils.debug.DynamXDebugOptions;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 
 import java.util.Collection;
@@ -47,6 +48,7 @@ import java.util.stream.Collectors;
 public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends AbstractItemObject<U> implements IPhysicsPackInfo, IModelTextureVariantsSupplier,
         ParticleEmitterInfo.IParticleEmitterContainer, IShapeProvider<ModularVehicleInfoBuilder> {
     private final int emptyMass;
+    private final EnumPlayerStandOnTop playerStandOnTop;
     private final float dragFactor;
     private final Vector3f centerOfMass;
     private final Vector3f scaleModifier;
@@ -111,7 +113,7 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
      */
     private final List<Vector3f> collisionShapeDebugBuffer;
 
-    public ModularVehicleInfo(String defaultName, String packName, String fileName, String description, int emptyMass, float dragFactor, ResourceLocation model, Vector3f centerOfMass,
+    public ModularVehicleInfo(String defaultName, String packName, String fileName, String description, int emptyMass, EnumPlayerStandOnTop playerStandOnTop, float dragFactor, String model, Vector3f centerOfMass,
                               Vector3f scaleModifier, Map<Byte, TextureVariantData> textures, List<BasePart<ModularVehicleInfoBuilder>> parts, List<PartShape<?>> partShapes,
                               List<ISubInfoType<ModularVehicleInfoBuilder>> subProperties, Map<String, PartLightSource.CompoundLight> lightSources, List<FrictionPoint> frictionPoints,
                               List<ParticleEmitterInfo<?>> particleEmitters, float vehicleMaxSpeed, int directingWheel, float itemScale, Enum3DRenderLocation item3DRenderLocation,
@@ -132,6 +134,7 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
         this.scaleModifier = scaleModifier;
 
         this.emptyMass = emptyMass;
+        this.playerStandOnTop = playerStandOnTop;
         this.dragFactor = dragFactor;
         this.model = model;
         this.centerOfMass = centerOfMass;
@@ -208,6 +211,10 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
 
     public int getEmptyMass() {
         return emptyMass;
+    }
+
+    public EnumPlayerStandOnTop getPlayerStandOnTop() {
+        return playerStandOnTop;
     }
 
     public float getDragFactor() {

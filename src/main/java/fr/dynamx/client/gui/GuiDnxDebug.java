@@ -10,8 +10,8 @@ import fr.aym.acsguis.component.panel.GuiScrollPane;
 import fr.aym.acsguis.component.panel.GuiTabbedPane;
 import fr.aym.acsguis.component.textarea.GuiLabel;
 import fr.aym.acsguis.utils.GuiCssError;
-import fr.dynamx.common.DynamXContext;
 import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.DynamXLoadingTasks;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
@@ -26,12 +26,13 @@ import java.util.List;
 import java.util.Map;
 
 public class GuiDnxDebug extends GuiFrame {
+    public static final ResourceLocation STYLE = new ResourceLocation(DynamXConstants.ID, "css/dnx_debug.css");
+
     public GuiDnxDebug() {
         super(new GuiScaler.Identity());
 
         style.setBackgroundColor(Color.TRANSLUCENT);
         setCssClass("home");
-        //DnxCssParser.loadGui(this);
         GuiTabbedPane pane = new GuiTabbedPane();
 
         GuiPanel general = new GuiPanel();
@@ -39,23 +40,19 @@ public class GuiDnxDebug extends GuiFrame {
         general.add(new GuiLabel(50, 50, 0, 0, "DynamX debug - general").setCssClass("title"));
         //Options :
         {
-            //GuiScrollPane pane1 = new GuiScrollPane();
             GuiPanel pane1 = generateDebugCategory(DynamXDebugOptions.DebugCategories.GENERAL);
-            // pane1.add(t);
-
             GuiLabel box = new GuiLabel("Reload packs");
             box.setCssId("reload_packs").setCssClass("reload_button");
             box.addClickListener((x, y, bu) -> {
                 box.setEnabled(false);
                 box.setText("Reloading...");
-                DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.CLIENT, () -> {
-                    DynamXContext.getObjModelRegistry().getItemRenderer().refreshItemInfos();
+                DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.CLIENT, DynamXLoadingTasks.PACK).thenAccept(empty -> {
                     box.setEnabled(true);
-                    if (DynamXContext.getErrorTracker().hasErrors(DynamXLoadingTasks.INIT, DynamXLoadingTasks.PACK))
+                    if (DynamXErrorManager.getErrorManager().hasErrors(DynamXErrorManager.INIT_ERRORS, DynamXErrorManager.PACKS__ERRORS))
                         box.setText(TextFormatting.RED + "Some packs have errors");
                     else
                         box.setText("Packs reloaded");
-                }, DynamXLoadingTasks.PACK);
+                });
             });
             pane1.add(box);
             GuiLabel box2 = new GuiLabel("Reload models");
@@ -64,14 +61,13 @@ public class GuiDnxDebug extends GuiFrame {
                 //mc.debugFeedbackTranslated("debug.reload_resourcepacks.message");
                 box2.setEnabled(false);
                 box2.setText("Reloading...");
-                DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.CLIENT, () -> {
-                    DynamXContext.getObjModelRegistry().getItemRenderer().refreshItemInfos();
+                DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.CLIENT, DynamXLoadingTasks.MODEL).thenAccept(empty -> {
                     box2.setEnabled(true);
-                    if (DynamXContext.getErrorTracker().hasErrors(DynamXLoadingTasks.MODEL))
+                    if (DynamXErrorManager.getErrorManager().hasErrors(DynamXErrorManager.MODEL_ERRORS))
                         box2.setText(TextFormatting.RED + "Some models have problems");
                     else
                         box2.setText("Models reloaded");
-                }, DynamXLoadingTasks.MODEL);
+                });
             });
             pane1.add(box2);
             GuiLabel box3 = new GuiLabel("Reload css styles");
@@ -79,13 +75,13 @@ public class GuiDnxDebug extends GuiFrame {
             box3.addClickListener((x, y, bu) -> {
                 box3.setEnabled(false);
                 box3.setText("Reloading...");
-                DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.CLIENT, () -> {
+                DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.CLIENT, DynamXLoadingTasks.CSS).thenAccept(empty -> {
                     box3.setEnabled(true);
-                    if (DynamXContext.getErrorTracker().hasErrors(ACsGuiApi.CSS_ERROR_TYPE))
+                    if (DynamXErrorManager.getErrorManager().hasErrors(ACsGuiApi.getCssErrorType()))
                         box3.setText(TextFormatting.RED + "Some css styles have errors");
                     else
                         box3.setText("Css styles reloaded");
-                }, (ACsGuiApi.CSS_ERROR_TYPE));
+                });
             });
             pane1.add(box3);
             GuiLabel box4 = new GuiLabel("Reload all");
@@ -93,13 +89,13 @@ public class GuiDnxDebug extends GuiFrame {
             box4.addClickListener((x, y, bu) -> {
                 box4.setEnabled(false);
                 box4.setText("Reloading...");
-                DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.CLIENT, () -> {
+                DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.CLIENT, DynamXLoadingTasks.PACK, DynamXLoadingTasks.MODEL, DynamXLoadingTasks.CSS).thenAccept(empty -> {
                     box4.setEnabled(true);
-                    if (DynamXContext.getErrorTracker().hasErrors(DynamXLoadingTasks.INIT, DynamXLoadingTasks.PACK, ACsGuiApi.CSS_ERROR_TYPE, DynamXLoadingTasks.MODEL))
+                    if (DynamXErrorManager.getErrorManager().hasErrors(DynamXErrorManager.INIT_ERRORS, DynamXErrorManager.PACKS__ERRORS, DynamXErrorManager.MODEL_ERRORS, ACsGuiApi.getCssErrorType()))
                         box4.setText(TextFormatting.RED + "Check the errors menu");
                     else
                         box4.setText("Reloading finished");
-                }, DynamXLoadingTasks.PACK, DynamXLoadingTasks.MODEL, ACsGuiApi.CSS_ERROR_TYPE);
+                });
             });
             pane1.add(box4);
 
@@ -114,7 +110,6 @@ public class GuiDnxDebug extends GuiFrame {
         pane.addTab("Terrain debug", general);
 
         general = new GuiPanel();
-        //general.setLayout(new GridLayout(-1, 20, 0, GridLayout.GridDirection.HORIZONTAL, 1));
         general.add(new GuiLabel("DynamX debug - vehicles").setCssClass("title"));
         general.setCssId("vehicles");
         general.add(generateDebugCategory(DynamXDebugOptions.DebugCategories.VEHICLES));
@@ -122,10 +117,10 @@ public class GuiDnxDebug extends GuiFrame {
 
         general = new GuiPanel();
         general.setCssId("loadinglog");
-        pane.addTab(TextFormatting.GOLD + "Erreurs", general);
+        pane.addTab(TextFormatting.GOLD + "Errors", general);
         pane.getTabButton(3).addClickListener((mx, my, button) -> {
             if (button == 0)
-                Minecraft.getMinecraft().addScheduledTask(() -> Minecraft.getMinecraft().displayGuiScreen(new GuiLoadingErrors().getGuiScreen()));
+                ACsGuiApi.asyncLoadThenShowGui("LoadingErrors", GuiLoadingErrors::new);
         });
 
         general = new GuiPanel();
@@ -144,7 +139,7 @@ public class GuiDnxDebug extends GuiFrame {
 
     @Override
     public List<ResourceLocation> getCssStyles() {
-        return Collections.singletonList(new ResourceLocation(DynamXConstants.ID, "css/dnx_debug.css"));
+        return Collections.singletonList(STYLE);
     }
 
     @Override
@@ -158,7 +153,6 @@ public class GuiDnxDebug extends GuiFrame {
     }
 
     protected GuiPanel generateDebugCategory(DynamXDebugOptions.DebugCategories category) {
-        int y = 0;
         String subCategory = null;
         {
             Map<DynamXDebugOption, GuiButton> terrainButtons = new HashMap<>();
@@ -170,9 +164,6 @@ public class GuiDnxDebug extends GuiFrame {
                     subCategory = option.getSubCategory();
                     GuiLabel label1 = new GuiLabel(subCategory + " :");
                     pane1.add(label1.setCssClass("option-subcategory"));
-                    y += 5;
-                    //label1.getStyle().getYPos().setAbsolute(y);
-                    y += 25;
                 }
 
                 GuiPanel line = new GuiPanel();
@@ -198,20 +189,8 @@ public class GuiDnxDebug extends GuiFrame {
                     }
                 }));
                 pane1.add(line);
-
-                /*b1.getStyle().getYPos().setAbsolute(y);
-                label1.getStyle().getYPos().setAbsolute(y);
-                y += 25;*/
             }
             return pane1;
         }
-    }
-
-    @Override
-    public void guiClose() {
-        super.guiClose();
-        /*if(!ClientDebugSystem.enableDebugDrawing) {
-            DynamXContext.getNetwork().sendToServer(new MessageOpenDebugGui((byte) -20));
-        }*/
     }
 }

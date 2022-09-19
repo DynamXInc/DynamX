@@ -6,14 +6,14 @@ import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
-import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
+import fr.dynamx.api.obj.IModelTextureSupplier;
+import fr.dynamx.api.obj.IObjObject;
 import fr.dynamx.client.renders.model.ModelObjArmor;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.loader.ObjectLoader;
 import fr.dynamx.common.items.DynamXItemArmor;
-import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
-import fr.dynamx.client.renders.model.texture.TextureVariantData;
+import fr.dynamx.common.obj.texture.TextureData;
 import fr.dynamx.utils.DynamXLoadingTasks;
 import lombok.Getter;
 import net.minecraft.client.renderer.GlStateManager;
@@ -118,10 +118,8 @@ public class ArmorObject<T extends ArmorObject<T>> extends AbstractItemObject<T>
             owners.add(new DynamXItemArmor(this, material, EntityEquipmentSlot.LEGS));
         if (getArmorFoot() != null)
             owners.add(new DynamXItemArmor(this, material, EntityEquipmentSlot.FEET));
-        if (owners.isEmpty()) {
-            DynamXMain.log.error("Armor " + getFullName() + " has no configured items !");
-            DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, getPackName(), getFullName(), "No configured items for this armor", ErrorTrackingService.TrackedErrorLevel.FATAL);
-        }
+        if (owners.isEmpty())
+            DynamXErrorManager.addPackError(getPackName(), "armor_error", ErrorLevel.FATAL, getName(), "No configured items for this armor");
         this.owners = owners.toArray(new IInfoOwner[0]);
         return this.owners;
     }

@@ -4,27 +4,35 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
-import fr.dynamx.api.contentpack.registry.DefinitionType;
-import fr.dynamx.api.contentpack.registry.PackFileProperty;
+import fr.dynamx.api.contentpack.registry.*;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.VehicleLightsModule;
 import fr.dynamx.client.renders.model.texture.TextureVariantData;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@RegisteredSubInfoType(name = "light", registries = SubInfoTypeRegistries.WHEELED_VEHICLES, strictName = false)
 public class PartLightSource implements ISubInfoType<ModularVehicleInfoBuilder> {
-    private final ISubInfoTypeOwner<ModularVehicleInfoBuilder> owner;
+    @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
+    public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
+        if ("ShapePosition".equals(key))
+            return new IPackFilePropertyFixer.FixResult("Position", true);
+        return null;
+    };
+
+    private final ModularVehicleInfoBuilder owner;
     private final String name;
 
-    @PackFileProperty(configNames = "Position", oldNames = "ShapePosition", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y, description = "common.position", required = false)
+    @PackFileProperty(configNames = "Position", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y, description = "common.position", required = false)
     private Vector3f position;
     @PackFileProperty(configNames = "Rotation", required = false, defaultValue = "1 0 0 0")
-    private final Quaternion rotation = new Quaternion();
+    private Quaternion rotation = new Quaternion();
     @PackFileProperty(configNames = "LightId")
     private int lightId;
     @PackFileProperty(configNames = "PartName")
@@ -39,7 +47,7 @@ public class PartLightSource implements ISubInfoType<ModularVehicleInfoBuilder> 
     private int rotateDuration;
 
     public PartLightSource(ISubInfoTypeOwner<ModularVehicleInfoBuilder> owner, String name) {
-        this.owner = owner;
+        this.owner = (ModularVehicleInfoBuilder) owner;
         this.name = name;
     }
 
@@ -47,6 +55,12 @@ public class PartLightSource implements ISubInfoType<ModularVehicleInfoBuilder> 
     public void appendTo(ModularVehicleInfoBuilder owner) {
         owner.addLightSource(this);
         owner.addRenderedParts(getPartName());
+    }
+
+    @Nullable
+    @Override
+    public ModularVehicleInfoBuilder getOwner() {
+        return owner;
     }
 
     @Override
@@ -62,7 +76,7 @@ public class PartLightSource implements ISubInfoType<ModularVehicleInfoBuilder> 
 
     @Override
     public String getName() {
-        return "LightSource_" + name + " in " + owner.getName();
+        return "LightSource_" + name;
     }
 
     @Override

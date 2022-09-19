@@ -1,6 +1,7 @@
 package fr.dynamx.api.obj;
 
 import fr.dynamx.api.contentpack.object.INamedObject;
+import fr.dynamx.common.contentpack.PackInfo;
 import net.minecraft.util.ResourceLocation;
 
 /**
@@ -9,16 +10,20 @@ import net.minecraft.util.ResourceLocation;
  */
 //TODO RENAME OBJMODELPATH
 public class ObjModelPath implements INamedObject {
-    private final String packName;
+    private final PackInfo packInfo;
     private final ResourceLocation modelPath;
 
-    public ObjModelPath(String packName, ResourceLocation modelPath) {
-        this.packName = packName;
+    public ObjModelPath(PackInfo packInfo, ResourceLocation modelPath) {
+        this.packInfo = packInfo;
         this.modelPath = modelPath;
     }
 
+    public PackInfo getPackInfo() {
+        return packInfo;
+    }
+
     /**
-     * @return The path of the model inside of the pack, excluding the modid (typically models/mymodels/myfirstmodel.obj)
+     * @return The path of the model inside the pack, excluding the modid (typically models/mymodels/myfirstmodel.obj)
      */
     @Override
     public String getName() {
@@ -27,7 +32,7 @@ public class ObjModelPath implements INamedObject {
 
     @Override
     public String getPackName() {
-        return packName;
+        return packInfo.getPathName();
     }
 
     /**
@@ -39,9 +44,6 @@ public class ObjModelPath implements INamedObject {
 
     @Override
     public String toString() {
-        return "ObjModelPath{" +
-                "packName='" + packName + '\'' +
-                ", modelPath=" + modelPath +
-                '}';
+        return "Model " + modelPath + " in pack " + packInfo;
     }
 }

@@ -1,7 +1,5 @@
 package fr.dynamx.common;
 
-import fr.aym.acslib.ACsLib;
-import fr.aym.acslib.api.services.ErrorTrackingService;
 import fr.dynamx.api.network.IDnxNetworkSystem;
 import fr.dynamx.api.obj.IObjModelRegistry;
 import fr.dynamx.api.obj.ObjModelPath;
@@ -34,8 +32,6 @@ public class DynamXContext {
     private static IPhysicsWorld physicsWorld;
     private static final IRotatedCollisionHandler collisionHandler = new RotatedCollisionHandlerImpl();
     private static final IDnxNetworkSystem network;
-
-    private static final ErrorTrackingService errorTrackingService = ACsLib.getPlatform().provideService(ErrorTrackingService.class);
     @SideOnly(Side.CLIENT)
     private static IObjModelRegistry objModelRegistry;
 
@@ -100,13 +96,6 @@ public class DynamXContext {
      */
     public static Map<Integer, Integer> getPlayerPickingObjects() {
         return playerPickingObjects;
-    }
-
-    /**
-     * The current {@link ErrorTrackingService} instance
-     */
-    public static ErrorTrackingService getErrorTracker() {
-        return errorTrackingService;
     }
 
     /**

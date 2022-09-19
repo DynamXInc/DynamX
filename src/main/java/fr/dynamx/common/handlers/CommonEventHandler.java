@@ -6,6 +6,7 @@ import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.api.network.EnumPacketTarget;
+import fr.dynamx.api.physics.player.DynamXPhysicsWorldBlacklistApi;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.blocks.DynamXBlock;
@@ -40,7 +41,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.ChunkEvent;
@@ -198,6 +198,12 @@ public class CommonEventHandler {
         }
     }
 
+    @SubscribeEvent
+    public void onWorldLoad(WorldEvent.Load event) {
+        World world = event.getWorld();
+        world.addEventListener(new DynamXWorldListener());
+    }
+
     /*@SubscribeEvent
     public void onChunkLoad(ChunkEvent.Load event) {
         ChunkAABB capability = event.getChunk().getCapability(CapaProvider.CHUNK_AABB_CAPABILITY, null);
@@ -275,9 +281,11 @@ public class CommonEventHandler {
 
     //Walking players :
 
+
     @SubscribeEvent
     public void onPlayerUpdate(TickEvent.PlayerTickEvent e) {
         if (!(e.player.getRidingEntity() instanceof BaseVehicleEntity) && DynamXContext.getPhysicsWorld() != null && !e.player.isDead) {
+            if(!DynamXContext.getPlayerToCollision().containsKey(e.player) && DynamXPhysicsWorldBlacklistApi.isBlacklisted(e.player)) return;
             Vector3fPool.openPool();
             QuaternionPool.openPool();
             if (!DynamXContext.getPlayerToCollision().containsKey(e.player)) {
@@ -288,13 +296,6 @@ public class CommonEventHandler {
             DynamXContext.getPlayerToCollision().get(e.player).update(DynamXContext.getPhysicsWorld());
             Vector3fPool.closePool();
             QuaternionPool.closePool();
-        }
-    }
-
-    @SubscribeEvent
-    public void onPlayerDied(LivingDeathEvent e) {
-        if (e.getEntity() instanceof EntityPlayer && DynamXContext.getPlayerToCollision().containsKey(e.getEntity())) {
-            DynamXContext.getPlayerToCollision().remove(e.getEntity()).removeFromWorld(true);
         }
     }
 

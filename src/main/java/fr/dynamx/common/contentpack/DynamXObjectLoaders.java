@@ -1,10 +1,12 @@
 package fr.dynamx.common.contentpack;
 
+import fr.dynamx.api.contentpack.ContentPackType;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
-import fr.dynamx.api.contentpack.registry.SubInfoTypesRegistry;
+import fr.dynamx.common.contentpack.loader.SubInfoTypesRegistry;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.contentpack.loader.*;
-import fr.dynamx.common.contentpack.type.PartWheelInfo;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
+import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.contentpack.type.objects.ArmorObject;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
 import fr.dynamx.common.contentpack.type.objects.ItemObject;
@@ -27,7 +29,7 @@ import java.util.List;
 public class DynamXObjectLoaders {
     static final List<InfoLoader<?, ?>> LOADERS = new ArrayList<>();
 
-    public static PacksInfoLoader PACKS = new PacksInfoLoader("pack_info", (p, n) -> new PackInfo(p), new SubInfoTypesRegistry<>());
+    public static PacksInfoLoader PACKS = new PacksInfoLoader("pack_info", (p, n) -> new PackInfo(p, ContentPackType.FOLDER), new SubInfoTypesRegistry<>());
 
     public static BuildableInfoLoader<ModularVehicleInfoBuilder, ModularVehicleInfo<?>, ItemCar<?>> WHEELED_VEHICLES = new BuildableInfoLoader<>("vehicle_", ModularVehicleInfoBuilder::new, ItemCar::getItemForCar, new SubInfoTypesRegistry<>());
     public static BuildableInfoLoader<ModularVehicleInfoBuilder, ModularVehicleInfo<?>, ItemTrailer<?>> TRAILERS = new BuildableInfoLoader<>("trailer_", ModularVehicleInfoBuilder::new, ItemTrailer::new, WHEELED_VEHICLES.getSubInfoTypesRegistry());
@@ -41,18 +43,7 @@ public class DynamXObjectLoaders {
     public static SoundInfoLoader SOUNDS = new SoundInfoLoader("sounds", SoundListInfo::new);
 
     static {
-        SubInfoTypesRegistry.initBuiltinSubInfoTypes();
-        DynamXObjectLoaders.LOADERS.add(DynamXObjectLoaders.WHEELED_VEHICLES);
-        DynamXObjectLoaders.LOADERS.add(DynamXObjectLoaders.TRAILERS);
-        DynamXObjectLoaders.LOADERS.add(DynamXObjectLoaders.BOATS);
-        DynamXObjectLoaders.LOADERS.add(DynamXObjectLoaders.BLOCKS);
-        DynamXObjectLoaders.LOADERS.add(DynamXObjectLoaders.ITEMS);
-        DynamXObjectLoaders.LOADERS.add(DynamXObjectLoaders.ARMORS);
-        DynamXObjectLoaders.LOADERS.add(DynamXObjectLoaders.PROPS);
-        DynamXObjectLoaders.LOADERS.add(DynamXObjectLoaders.WHEELS);
-        DynamXObjectLoaders.LOADERS.add(DynamXObjectLoaders.ENGINES);
-        DynamXObjectLoaders.LOADERS.add(DynamXObjectLoaders.SOUNDS);
-        DynamXObjectLoaders.LOADERS.add(DynamXObjectLoaders.PACKS);
+        DynamXObjectLoaders.getLoaders().add(DynamXObjectLoaders.SOUNDS);
     }
 
     public static List<InfoLoader<?, ?>> getLoaders() {

@@ -3,11 +3,11 @@ package fr.dynamx.utils.client;
 import com.jme3.math.Vector3f;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.DynamXContext;
-import fr.dynamx.common.contentpack.ModularVehicleInfo;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.contentpack.parts.PartDoor;
 import fr.dynamx.common.contentpack.parts.PartLightSource;
 import fr.dynamx.common.contentpack.parts.PartWheel;
-import fr.dynamx.common.contentpack.type.PartWheelInfo;
+import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.contentpack.type.vehicle.SteeringWheelInfo;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
@@ -70,14 +70,8 @@ public class DynamXRenderUtils {
                 GlStateManager.translate(center.x, center.y, center.z);
 
                 //Apply steering wheel base rotation
-                if (info.getSteeringWheelBaseRotation() != null) {
+                if (info.getSteeringWheelBaseRotation() != null)
                     GlStateManager.rotate(GlQuaternionPool.get(info.getSteeringWheelBaseRotation()));
-                } else if (info.getDeprecatedBaseRotation() != null) {
-                    float[] baseRotation = info.getDeprecatedBaseRotation();
-                    if (baseRotation[0] != 0)
-                        GlStateManager.rotate(baseRotation[0], baseRotation[1], baseRotation[2], baseRotation[3]);
-                }
-
                 //Scale it
                 GlStateManager.scale(car.getScaleModifier().x, car.getScaleModifier().y, car.getScaleModifier().z);
                 //Render it

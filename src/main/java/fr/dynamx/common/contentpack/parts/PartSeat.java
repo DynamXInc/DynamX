@@ -3,6 +3,8 @@ package fr.dynamx.common.contentpack.parts;
 import com.jme3.math.Quaternion;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
+import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
+import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.modules.ISeatsModule;
 import fr.dynamx.common.DynamXMain;
@@ -11,6 +13,7 @@ import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.common.entities.vehicles.CarEntity;
 import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.EnumSeatPlayerPosition;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import net.minecraft.entity.Entity;
@@ -20,6 +23,7 @@ import net.minecraft.util.text.TextComponentString;
 
 import javax.annotation.Nullable;
 
+@RegisteredSubInfoType(name = "seat", registries = SubInfoTypeRegistries.WHEELED_VEHICLES, strictName = false)
 public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfoBuilder> {
     @PackFileProperty(configNames = "Driver")
     private boolean isDriver;
@@ -27,6 +31,10 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     private String linkedDoor;
     @PackFileProperty(configNames = "Rotation", required = false, defaultValue = "1 0 0 0")
     private Quaternion rotation;
+
+    @PackFileProperty(configNames = "PlayerPosition", required = false, defaultValue = "SIT")
+    private EnumSeatPlayerPosition playerPosition;
+
     @PackFileProperty(configNames = "CameraRotation", required = false, defaultValue = "0")
     private float rotationYaw;
 
@@ -40,9 +48,9 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     }
 
     @Override
-    public void appendTo(ModularVehicleInfoBuilder modulableVehicleInfo) {
-        super.appendTo(modulableVehicleInfo);
-        modulableVehicleInfo.arrangeSeatID(this);
+    public void appendTo(ModularVehicleInfoBuilder owner) {
+        super.appendTo(owner);
+        owner.arrangeSeatID(this);
     }
 
     @Override
@@ -112,6 +120,10 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
         return rotation;
     }
 
+    public EnumSeatPlayerPosition getPlayerPosition() {
+        return playerPosition;
+    }
+
     public float getRotationYaw() {
         return rotationYaw;
     }
@@ -123,7 +135,7 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
 
     @Override
     public String getName() {
-        return "PartSeat named " + getPartName() + " in " + getOwner().getName();
+        return "PartSeat_" + getPartName();
     }
 
     @Nullable

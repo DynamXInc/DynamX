@@ -1,10 +1,8 @@
-package fr.dynamx.client.renders.model.texture;
+package fr.dynamx.common.obj.texture;
 
-import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
+import fr.dynamx.api.obj.IModelTextureSupplier;
 import fr.dynamx.common.contentpack.type.PartWheelInfo;
-import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
-import lombok.Getter;
-import lombok.ToString;
+import fr.dynamx.common.obj.eximpl.QuickObjObject;
 
 import javax.annotation.Nullable;
 

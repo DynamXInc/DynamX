@@ -32,6 +32,7 @@ import fr.dynamx.common.network.SPPhysicsEntityNetHandler;
 import fr.dynamx.common.network.udp.CommandUdp;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.world.BuiltinThreadedPhysicsWorld;
+import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.DynamXLoadingTasks;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.optimization.Vector3fPool;
@@ -161,13 +162,14 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
     @Override
     public void onResourceManagerReload(IResourceManager resourceManager, Predicate<IResourceType> resourcePredicate) {
         if (resourcePredicate.test(VanillaResourceType.MODELS)) {
-            DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.CLIENT, () -> {
+            DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.CLIENT, DynamXLoadingTasks.MODEL).thenAccept(empty -> {
                 if (Minecraft.getMinecraft().player != null) {
-                    if (DynamXContext.getErrorTracker().hasErrors(DynamXLoadingTasks.MODEL)) {
+                    if (DynamXErrorManager.getErrorManager().hasErrors(DynamXErrorManager.MODEL_ERRORS)) {
+                        //TODO TRANSLATE
                         Minecraft.getMinecraft().player.sendMessage(new TextComponentString(TextFormatting.RED + "[DynamX] Certains modèles ont des problèmes, utilisez le menu de debug pour les voir"));
                     }
                 }
-            }, DynamXLoadingTasks.MODEL);
+            });
         }
     }
 

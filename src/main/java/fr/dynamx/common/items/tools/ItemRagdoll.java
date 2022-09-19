@@ -5,6 +5,7 @@ import fr.dynamx.common.entities.RagdollEntity;
 import fr.dynamx.common.items.DynamXItemRegistry;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXUtils;
+import fr.dynamx.utils.RegistryNameSetter;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -20,7 +21,7 @@ import net.minecraft.world.World;
 public class ItemRagdoll extends Item {
     public ItemRagdoll() {
         super();
-        setRegistryName(DynamXConstants.ID, "ragdoll");
+        RegistryNameSetter.setRegistryName(this, DynamXConstants.ID, "ragdoll");
         setTranslationKey(DynamXConstants.ID + "." + "ragdoll");
         setCreativeTab(DynamXItemRegistry.objectTab);
         DynamXItemRegistry.add(this);

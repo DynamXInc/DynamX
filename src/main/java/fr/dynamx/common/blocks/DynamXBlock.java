@@ -57,8 +57,11 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IInf
      * Use the other constructor to create custom blocks and easily set BlockObject's properties
      */
     public DynamXBlock(T blockObjectInfo) {
-        super(Material.ROCK);
+        this(blockObjectInfo, Material.ROCK);
+    }
 
+    public DynamXBlock(T blockObjectInfo, Material material) {
+        super(material);
         this.blockObjectInfo = blockObjectInfo;
         setDefaultState(this.blockState.getBaseState().withProperty(METADATA, 0));
         RegistryNameSetter.setRegistryName(this, DynamXConstants.ID, blockObjectInfo.getFullName().toLowerCase());
@@ -175,8 +178,6 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IInf
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
         super.breakBlock(worldIn, pos, state);
         DynamXChunkData data = worldIn.getChunk(pos).getCapability(DynamXChunkDataProvider.DYNAM_X_CHUNK_DATA_CAPABILITY, null);
-        System.out.println("Collisions are " + data.getBlocksAABB());
-        System.out.println("Remove" + data.getBlocksAABB().get(pos) + " at " + pos);
         data.getBlocksAABB().remove(pos);
     }
 

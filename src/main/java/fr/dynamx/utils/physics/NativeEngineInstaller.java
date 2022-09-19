@@ -43,6 +43,7 @@ public class NativeEngineInstaller {
                 break;
             case MacOSX32:
             case MacOSX64:
+            case MacOSX_ARM64:
                 name = "libbulletjme.dylib";
                 break;
             default:

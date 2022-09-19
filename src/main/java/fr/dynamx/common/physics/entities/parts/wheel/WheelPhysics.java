@@ -3,44 +3,70 @@ package fr.dynamx.common.physics.entities.parts.wheel;
 import com.jme3.bullet.objects.PhysicsVehicle;
 import com.jme3.bullet.objects.VehicleWheel;
 import fr.dynamx.common.contentpack.parts.PartWheel;
-import fr.dynamx.common.contentpack.type.PartWheelInfo;
+import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.physics.entities.parts.wheel.tyre.PajeckaTireModel;
-import fr.dynamx.common.physics.entities.parts.wheel.tyre.TyreSettings;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
-public class WheelPhysicsHandler {
+public class WheelPhysics {
     //TODO DOC
+    @Getter
     private final PhysicsVehicle physicsVehicle;
+    @Getter
     private final VehicleWheel physicsWheel;
+    @Getter
+    @Setter
     private byte wheelIndex;
-    private final SuspensionPhysicsHandler suspension;
+    @Getter
+    private final SuspensionPhysics suspension;
+    @Getter
+    @Setter
     private PajeckaTireModel tireModel;
 
     //PartWheel depending variables
+    @Getter
     private PartWheelInfo wheelInfo;
+    @Getter
+    @Setter
     private boolean steering;
+    @Getter
+    @Setter
     private float maxSteerAngle;
     // determines whether this wheel provides acceleration in a 0..1 range.
     // this can be used for settings FWD, RWD, 60/40 distribution, etc...
+    @Getter
+    @Setter
     private float accelerationForce = 0;
+    @Getter
+    @Setter
     private boolean handBrakingWheel;
 
     //PartWheelInfo depending variables
+    @Getter
+    @Setter
     private float brakeStrength;
+    @Getter
+    @Setter
     private float handbrakeStrength;
 
     //Wheel state
     private boolean flattened;
+    @Getter
+    @Setter
     private float steeringAngle = 0;
     /**
      * simulates degradation. 1.0 = full grip the tyre allows, 0.0 = the tyre is dead.
      */
+    @Getter
+    @Setter
     private float grip = 1.0f;
 
-    public WheelPhysicsHandler(PhysicsVehicle physicsVehicle, VehicleWheel vehicleWheel, byte wheelIndex, PartWheel partWheel) {
+    public WheelPhysics(PhysicsVehicle physicsVehicle, VehicleWheel vehicleWheel, byte wheelIndex, PartWheel partWheel) {
         this.physicsVehicle = physicsVehicle;
         this.physicsWheel = vehicleWheel;
         this.wheelIndex = wheelIndex;
-        this.suspension = new SuspensionPhysicsHandler(vehicleWheel, partWheel);
+        this.suspension = new SuspensionPhysics(vehicleWheel, partWheel);
 
         this.wheelInfo = partWheel.getDefaultWheelInfo();
         this.steering = partWheel.isWheelIsSteerable();
@@ -54,7 +80,7 @@ public class WheelPhysicsHandler {
         setFriction(partWheel.getDefaultWheelInfo().getWheelFriction());
         setRollInfluence(partWheel.getDefaultWheelInfo().getWheelRollInInfluence());
 
-        this.tireModel = new PajeckaTireModel("Default Tyre",
+        this.tireModel = new PajeckaTireModel(
                 new TyreSettings(
                         1.54f,
                         18.86f,
@@ -75,8 +101,7 @@ public class WheelPhysicsHandler {
                         -2.0f,
                         2.65f,
                         0.000110f
-                ),
-                10000);
+                ));
     }
 
     public void setWheelInfo(PartWheelInfo wheelInfo) {
@@ -171,106 +196,33 @@ public class WheelPhysicsHandler {
             physicsWheel.setRadius(radius);
     }
 
-    public PhysicsVehicle getPhysicsVehicle() {
-        return physicsVehicle;
-    }
-
-    public VehicleWheel getPhysicsWheel() {
-        return physicsWheel;
-    }
-
-    public byte getWheelIndex() {
-        return wheelIndex;
-    }
-
-    public void setWheelIndex(byte wheelIndex) {
-        this.wheelIndex = wheelIndex;
-    }
-
-    public SuspensionPhysicsHandler getSuspension() {
-        return suspension;
-    }
-
-    public PajeckaTireModel getTireModel() {
-        return tireModel;
-    }
-
-    public void setTireModel(PajeckaTireModel tireModel) {
-        this.tireModel = tireModel;
-    }
-
-    public PartWheelInfo getWheelInfo() {
-        return wheelInfo;
-    }
-
-    public boolean isSteering() {
-        return steering;
-    }
-
-    public void setSteering(boolean steering) {
-        this.steering = steering;
-    }
-
-    public float getMaxSteerAngle() {
-        return maxSteerAngle;
-    }
-
-    public void setMaxSteerAngle(float maxSteerAngle) {
-        this.maxSteerAngle = maxSteerAngle;
-    }
-
-    public float getAccelerationForce() {
-        return accelerationForce;
-    }
-
     /**
-     * The amount of force applied to this wheel when the vehicle is accelerating
-     * Value is in the 0 to 1 range. 0 = no force, 1 = full force.
-     * This acts as a multiplier for the engine power to this wheel.
-     *
-     * @param accelerationForce the amount of force to apply to this wheel when accelerating.
+     * Creates a Race Car Tire Model Object with the given curve coefficients.
+     * Use these example coefficient values for basic tire to start with:<br>
+     * C = 1.3<br>
+     * B = 15.2<br>
+     * E = -1.6<br>
+     * KA = 2.0<br>
+     * KB = 0.000055
      */
-    public void setAccelerationForce(float accelerationForce) {
-        this.accelerationForce = accelerationForce;
-    }
+    @AllArgsConstructor
+    public static class TyreSettings {
 
-    public boolean isHandBrakingWheel() {
-        return handBrakingWheel;
-    }
+        @Getter
+        @Setter
+        private float slipAngleCoefficientC; // coefficient C for the normalised slip-angle curve.
+        @Getter
+        @Setter
+        private float slipAngleCoefficientB; // coefficient B for the normalised slip-angle curve.
+        @Getter
+        @Setter
+        private float slipAngleCoefficientE; // coefficient E for the normalised slip-angle curve.
+        @Getter
+        @Setter
+        private float loadCoefficientKA; // coefficient KA for the load function.
+        @Getter
+        @Setter
+        private float loadCoefficientKB; // coefficient KB for the load function.
 
-    public void setHandBrakingWheel(boolean handBrakingWheel) {
-        this.handBrakingWheel = handBrakingWheel;
-    }
-
-    public float getBrakeStrength() {
-        return brakeStrength;
-    }
-
-    public void setBrakeStrength(float brakeStrength) {
-        this.brakeStrength = brakeStrength;
-    }
-
-    public float getHandbrakeStrength() {
-        return handbrakeStrength;
-    }
-
-    public void setHandbrakeStrength(float handbrakeStrength) {
-        this.handbrakeStrength = handbrakeStrength;
-    }
-
-    public float getSteeringAngle() {
-        return steeringAngle;
-    }
-
-    public void setSteeringAngle(float steeringAngle) {
-        this.steeringAngle = steeringAngle;
-    }
-
-    public float getGrip() {
-        return grip;
-    }
-
-    public void setGrip(float grip) {
-        this.grip = grip;
     }
 }

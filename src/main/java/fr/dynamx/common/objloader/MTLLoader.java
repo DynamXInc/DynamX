@@ -50,12 +50,12 @@ public class MTLLoader {
                     break;
                 case TEXTURE_DIFFUSE:
                     String textureName = parts[1].equalsIgnoreCase("white") ? "textures/white.png" : startPath + parts[1];
-                    current.diffuseTexture.put(name,
-                            new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault(textureName), name, -1));
+                    current.diffuseTexture.put(name.toLowerCase(),
+                            new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault(textureName.toLowerCase()), name.toLowerCase(), -1));
                     break;
                 case TEXTURE_AMBIENT:
-                    current.ambientTexture.put(name,
-                            new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault(startPath + parts[1]), name, -1));
+                    current.ambientTexture.put(name.toLowerCase(),
+                            new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault((startPath + parts[1]).toLowerCase()), name.toLowerCase(), -1));
                     break;
                 case TRANSPARENCY_D:
                 case TRANSPARENCY_TR:
@@ -63,8 +63,8 @@ public class MTLLoader {
                     break;
             }
             if (current != null && current.diffuseTexture.isEmpty()){
-                current.diffuseTexture.put(name,
-                        new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault("missing_texture_for_" + startPath), name, -1));
+                current.diffuseTexture.put(name.toLowerCase(),
+                        new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault("missing_texture_for_" + startPath), name.toLowerCase(), -1));
             }
         }
     }

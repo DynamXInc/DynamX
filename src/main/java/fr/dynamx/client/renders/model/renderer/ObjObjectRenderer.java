@@ -244,7 +244,7 @@ public class ObjObjectRenderer {
     }
 
     private String getExistingTexture(Material material, String textureName) {
-        return material.diffuseTexture.containsKey(textureName) ? textureName : "Default";
+        return material.diffuseTexture.containsKey(textureName) ? textureName : "default";
     }
 
     /**

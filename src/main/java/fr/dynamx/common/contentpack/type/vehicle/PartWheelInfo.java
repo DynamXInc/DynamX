@@ -109,11 +109,11 @@ public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IS
     private void computeTextures() {
         if (bakedTextures == null) {
             bakedTextures = new HashMap<>();
-            bakedTextures.put((byte) 0, new TextureVariantData("Default", (byte) 0, ""));
+            bakedTextures.put((byte) 0, new TextureVariantData("default", (byte) 0, ""));
             if (texturesArray != null) {
                 byte id = 1;
                 for (String[] s : texturesArray) {
-                    bakedTextures.put(id, new TextureVariantData(s[0], id));
+                    bakedTextures.put(id, new TextureVariantData(s[0].toLowerCase(), id));
                     id++;
                 }
             }

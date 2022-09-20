@@ -286,7 +286,7 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
         PartLightSource.CompoundLight src = getLightSource(objObjectRenderer.getObjObjectData().getName());
         if (src != null) {
             Map<Byte, TextureVariantData> ret = new HashMap<>();
-            ret.put((byte) 0, new TextureVariantData("Default", (byte) 0));
+            ret.put((byte) 0, new TextureVariantData("default", (byte) 0));
             List<PartLightSource> sources = src.getSources();
             for (PartLightSource source : sources) {
                 for (TextureVariantData textureVariantData : source.getTextureMap().values()) {

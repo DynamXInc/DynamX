@@ -147,10 +147,6 @@ public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IS
         return bakedTextures.size() > 1;
     }
 
-    public boolean enableRendering() {
-        return !getModel().equals("disable_rendering");
-    }
-
     public String getPartName() {
         return partName;
     }

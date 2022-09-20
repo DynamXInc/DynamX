@@ -58,7 +58,7 @@ public class RenderCaterpillar<T extends CaterpillarEntity<?>> extends RenderBas
             carEntity.trackProgress += Math.toRadians(dif) * minfo.getPartsByType(PartWheel.class).get(0).getDefaultWheelInfo().getWheelRadius();
             /* Rendering the wheels */
             CaterpillarInfo info = minfo.getSubPropertyByType(CaterpillarInfo.class);
-            if (info.caterpillarLeftBuffer != null && info.caterpillarRightBuffer != null && carEntity.getPackInfo().getPartsByType(PartWheel.class).get(0).getDefaultWheelInfo().enableRendering()) {
+            if (info.caterpillarLeftBuffer != null && info.caterpillarRightBuffer != null && carEntity.getPackInfo().getPartsByType(PartWheel.class).get(0).getDefaultWheelInfo().isModelValid()) {
                 if (carEntity.trackProgress > info.caterpillarWidth) carEntity.trackProgress = 0;
                 if (carEntity.trackProgress < -info.caterpillarWidth) carEntity.trackProgress = 0;
 

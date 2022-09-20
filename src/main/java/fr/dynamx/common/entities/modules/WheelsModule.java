@@ -344,7 +344,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
         //Dust particles when the vehicle friction is very low
         entity.getPackInfo().getPartsByType(PartWheel.class).forEach(partWheel -> {
             PartWheelInfo info = getWheelInfo(partWheel.getId());
-            if (info.enableRendering() && info.getSkidParticle() != null) {
+            if (info.isModelValid() && info.getSkidParticle() != null) {
                 if (((IModuleContainer.IPropulsionContainer<?>) entity).getPropulsion().getPropulsionProperties()[VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumWheelProperties.SKIDINFO)] < 0.1f) {
                     entity.world.spawnParticle(info.getSkidParticle(), visualProperties[VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.COLLISIONX)],
                             visualProperties[VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.COLLISIONY)],
@@ -360,7 +360,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
         int index;
         Quaternion baseRotation = partWheel.getSuspensionAxis();
         PartWheelInfo info = getWheelInfo(partWheel.getId());
-        if (info.enableRendering()) {
+        if (info.isModelValid()) {
             GlStateManager.pushMatrix();
             {
                 /* Translation to the wheel rotation point */

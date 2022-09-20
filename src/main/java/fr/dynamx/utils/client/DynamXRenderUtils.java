@@ -91,7 +91,7 @@ public class DynamXRenderUtils {
 
         /* Rendering the wheels */
         car.getPartsByType(PartWheel.class).forEach(partWheel -> {
-            if (partWheel.getDefaultWheelInfo().enableRendering()) {
+            if (partWheel.getDefaultWheelInfo().isModelValid()) {
                 GlStateManager.pushMatrix();
                 {
                     /* Translation to the wheel position */

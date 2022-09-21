@@ -7,6 +7,7 @@ import fr.dynamx.api.contentpack.object.subinfo.SubInfoTypeOwner;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.sync.PackSyncHandler;
 import fr.dynamx.common.contentpack.type.ObjectInfo;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfoBuilder;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import net.minecraftforge.fml.common.ProgressManager;
 

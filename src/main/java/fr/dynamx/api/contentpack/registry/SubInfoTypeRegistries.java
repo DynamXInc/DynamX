@@ -4,13 +4,12 @@ import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.PackInfo;
 import fr.dynamx.common.contentpack.loader.InfoLoader;
-import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
-import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfoBuilder;
 import fr.dynamx.common.contentpack.type.objects.*;
 import fr.dynamx.common.contentpack.type.vehicle.EngineInfo;
+import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 
-public enum SubInfoTypeRegistries
-{
+public enum SubInfoTypeRegistries {
     PACKS(DynamXObjectLoaders.PACKS, PackInfo.class),
     WHEELED_VEHICLES(DynamXObjectLoaders.WHEELED_VEHICLES, ModularVehicleInfoBuilder.class),
     TRAILERS(DynamXObjectLoaders.TRAILERS, ModularVehicleInfoBuilder.class),
@@ -26,7 +25,7 @@ public enum SubInfoTypeRegistries
     private final Class<? extends ISubInfoTypeOwner<?>> infoOwnerType;
 
     SubInfoTypeRegistries(InfoLoader<?, ?> infoLoader, Class<?> infoOwnerType) {
-        if(!ISubInfoTypeOwner.class.isAssignableFrom(infoOwnerType))
+        if (!ISubInfoTypeOwner.class.isAssignableFrom(infoOwnerType))
             throw new IllegalArgumentException(infoOwnerType + " does not implements ISubInfoTypeOwner !");
         this.infoLoader = infoLoader;
         this.infoOwnerType = (Class<ISubInfoTypeOwner<?>>) infoOwnerType;
@@ -41,7 +40,7 @@ public enum SubInfoTypeRegistries
     }
 
     static {
-        for(SubInfoTypeRegistries value : values()) {
+        for (SubInfoTypeRegistries value : values()) {
             DynamXObjectLoaders.getLoaders().add(value.getInfoLoader());
         }
     }

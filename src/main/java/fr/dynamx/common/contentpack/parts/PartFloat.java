@@ -4,7 +4,7 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
-import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfoBuilder;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import net.minecraft.util.math.AxisAlignedBB;
 

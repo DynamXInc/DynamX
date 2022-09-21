@@ -4,7 +4,7 @@ import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.common.contentpack.loader.SubInfoTypesRegistry;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
-import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfoBuilder;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 
 import javax.annotation.Nullable;

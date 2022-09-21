@@ -8,14 +8,12 @@ import fr.dynamx.api.contentpack.object.IShapeProvider;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
-import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.CreatePackItemEvent;
 import fr.dynamx.api.obj.IModelTextureSupplier;
 import fr.dynamx.api.obj.IObjObject;
 import fr.dynamx.common.contentpack.loader.BuildableInfoLoader;
-import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
 import fr.dynamx.common.contentpack.loader.ObjectLoader;
 import fr.dynamx.common.contentpack.parts.PartLightSource;
 import fr.dynamx.common.contentpack.parts.PartShape;
@@ -26,8 +24,6 @@ import fr.dynamx.common.items.ItemModularEntity;
 import fr.dynamx.common.obj.texture.TextureData;
 import fr.dynamx.utils.EnumPlayerStandOnTop;
 import fr.dynamx.utils.client.DynamXRenderUtils;
-import fr.dynamx.utils.debug.DynamXDebugOption;
-import fr.dynamx.utils.debug.DynamXDebugOptions;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
@@ -48,7 +44,6 @@ import java.util.stream.Collectors;
 public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends AbstractItemObject<U> implements IPhysicsPackInfo, IModelTextureSupplier,
         ParticleEmitterInfo.IParticleEmitterContainer, IShapeProvider<ModularVehicleInfoBuilder> {
     private final int emptyMass;
-    private final EnumPlayerStandOnTop playerStandOnTop;
     private final float dragFactor;
     private final Vector3f centerOfMass;
     private final Vector3f scaleModifier;
@@ -112,50 +107,41 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
      * The debug buffer for the hull shape of the vehicle (generated from the obj model)
      */
     private final List<Vector3f> collisionShapeDebugBuffer;
+    private final EnumPlayerStandOnTop playerStandOnTop;
 
-    public ModularVehicleInfo(String defaultName, String packName, String fileName, String description, int emptyMass, EnumPlayerStandOnTop playerStandOnTop, float dragFactor, String model, Vector3f centerOfMass,
-                              Vector3f scaleModifier, Map<Byte, TextureData> textures, List<BasePart<ModularVehicleInfoBuilder>> parts, List<PartShape<?>> partShapes,
-                              List<ISubInfoType<ModularVehicleInfoBuilder>> subProperties, Map<String, PartLightSource.CompoundLight> lightSources, List<FrictionPoint> frictionPoints,
-                              List<ParticleEmitterInfo<?>> particleEmitters, float vehicleMaxSpeed, int directingWheel, float itemScale, Enum3DRenderLocation item3DRenderLocation,
-                              List<String> renderedParts, CompoundCollisionShape collisionShape, List<Vector3f> debugBuffer, String creativeTabName, int defaultZoomLevel) {
-        super(packName, fileName);
-        this.frictionPoints = frictionPoints;
-        this.particleEmitters = particleEmitters;
-        this.vehicleMaxSpeed = vehicleMaxSpeed;
-        this.directingWheel = directingWheel;
-        this.renderedParts = renderedParts;
-        this.setDefaultName(defaultName);
-        this.lightSources = lightSources;
-        this.physicsCollisionShape = collisionShape;
-        this.collisionShapeDebugBuffer = debugBuffer;
+    public ModularVehicleInfo(ModularVehicleInfoBuilder builder, int directingWheel, Map<Byte, TextureData> textures, int textureCount, List<String> renderedParts) {
+        super(builder.getPackName(), builder.getName());
+        this.setDefaultName(builder.defaultName);
+        this.setDescription(builder.description);
 
-        this.setDescription(description);
+        this.model = builder.model;
+        this.itemScale = builder.itemScale;
+        this.item3DRenderLocation = builder.item3DRenderLocation;
+        this.creativeTabName = builder.creativeTabName;
 
-        this.scaleModifier = scaleModifier;
-
-        this.emptyMass = emptyMass;
-        this.playerStandOnTop = playerStandOnTop;
-        this.dragFactor = dragFactor;
-        this.model = model;
-        this.centerOfMass = centerOfMass;
+        this.emptyMass = builder.emptyMass;
+        this.dragFactor = builder.dragFactor;
+        this.centerOfMass = builder.centerOfMass;
+        this.scaleModifier = builder.scaleModifier;
 
         this.textures = textures;
-        this.parts = parts;
-        this.partShapes = partShapes;
-        this.subProperties = subProperties;
+        this.maxTextureMetadata = textureCount;
 
-        this.itemScale = itemScale;
-        this.item3DRenderLocation = item3DRenderLocation;
+        this.parts = (List) builder.parts;
+        this.partShapes = builder.partShapes;
+        this.subProperties = builder.getSubProperties();
+        this.renderedParts = renderedParts;
+        this.lightSources = builder.lightSources;
+        this.frictionPoints = builder.frictionPoints;
+        this.particleEmitters = builder.particleEmitters;
 
-        int texCount = 0;
-        for (TextureData data : textures.values()) {
-            if (data.isItem())
-                texCount++;
-        }
-        this.maxTextureMetadata = texCount;
+        this.vehicleMaxSpeed = builder.vehicleMaxSpeed;
+        this.directingWheel = directingWheel;
+        this.defaultZoomLevel = builder.defaultZoomLevel;
 
-        this.creativeTabName = creativeTabName;
-        this.defaultZoomLevel = defaultZoomLevel;
+        this.physicsCollisionShape = builder.physicsCollisionShape;
+        this.collisionShapeDebugBuffer = builder.collisionShapeDebugBuffer;
+        this.playerStandOnTop = builder.playerStandOnTop;
     }
 
     public void addModules(BaseVehicleEntity<?> entity, ModuleListBuilder modules) {

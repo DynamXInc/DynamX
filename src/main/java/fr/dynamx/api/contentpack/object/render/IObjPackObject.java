@@ -17,7 +17,6 @@ public interface IObjPackObject extends IModelTextureVariantsSupplier {
     ResourceLocation getModel();
 
     default boolean isModelValid() {
-        System.out.println("Is valid : " + getModel()+" "+getModel().getPath().toLowerCase()+" "+getModel().getPath().toLowerCase().contains("disable_rendering"));
         return getModel() != null && !getModel().getPath().toLowerCase().contains("disable_rendering");
     }
 

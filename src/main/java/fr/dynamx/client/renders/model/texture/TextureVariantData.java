@@ -46,9 +46,9 @@ public class TextureVariantData {
      * @param iconName The name if the texture of the item
      */
     public TextureVariantData(String name, byte id, String iconName) {
-        this.name = name;
+        this.name = name.toLowerCase();
         this.id = id;
-        this.iconName = iconName;
+        this.iconName = iconName != null ? iconName.toLowerCase() : null;
     }
 
     /**

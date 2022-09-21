@@ -113,7 +113,7 @@ public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IS
             if (texturesArray != null) {
                 byte id = 1;
                 for (String[] s : texturesArray) {
-                    bakedTextures.put(id, new TextureVariantData(s[0].toLowerCase(), id));
+                    bakedTextures.put(id, new TextureVariantData(s[0], id));
                     id++;
                 }
             }

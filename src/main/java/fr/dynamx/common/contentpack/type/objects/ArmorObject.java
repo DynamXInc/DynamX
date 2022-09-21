@@ -132,11 +132,11 @@ public class ArmorObject<T extends ArmorObject<T>> extends AbstractItemObject<T>
             getObjArmor().init(DynamXContext.getObjModelRegistry().getModel(getModel()));
 
         textures.clear();
-        textures.put((byte) 0, new TextureVariantData("default", (byte) 0, getName().toLowerCase()));
+        textures.put((byte) 0, new TextureVariantData("default", (byte) 0, getName()));
         if (texturesArray != null) {
             byte id = 1;
             for (String[] info : texturesArray) {
-                textures.put(id, new TextureVariantData(info[0].toLowerCase(), id, info[1] == null ? "dummy" : info[1].toLowerCase()));
+                textures.put(id, new TextureVariantData(info[0], id, info[1] == null ? "dummy" : info[1]));
                 id++;
             }
         }

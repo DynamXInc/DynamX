@@ -257,7 +257,7 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
         }
         //Map textures
         Map<Byte, TextureVariantData> bakedTextures = new HashMap<>();
-        bakedTextures.put((byte) 0, new TextureVariantData("Default", (byte) 0, getName()));
+        bakedTextures.put((byte) 0, new TextureVariantData("default", (byte) 0, getName()));
         if (texturesArray != null) {
             byte id = 1;
             for (String[] info : texturesArray) {

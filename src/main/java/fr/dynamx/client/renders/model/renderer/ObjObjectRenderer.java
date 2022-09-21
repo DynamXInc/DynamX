@@ -1,14 +1,11 @@
 package fr.dynamx.client.renders.model.renderer;
 
-import fr.aym.acslib.api.services.ErrorTrackingService;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.client.renders.model.texture.MaterialTexture;
 import fr.dynamx.client.renders.model.texture.TextureVariantData;
-import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.objloader.data.Material;
-import fr.dynamx.common.objloader.data.Vertex;
 import fr.dynamx.common.objloader.data.ObjObjectData;
-import fr.dynamx.utils.DynamXLoadingTasks;
+import fr.dynamx.common.objloader.data.Vertex;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.errors.DynamXErrorManager;
@@ -45,7 +42,7 @@ public class ObjObjectRenderer {
     private boolean isVAOSetup;
     @Getter
     @Setter
-    private Vector4f objectColor = new Vector4f(1,1,1,1);
+    private Vector4f objectColor = new Vector4f(1, 1, 1, 1);
 
     public ObjObjectRenderer(ObjObjectData objObjectData) {
         this.objObjectData = objObjectData;
@@ -135,25 +132,20 @@ public class ObjObjectRenderer {
         GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         if (OpenGlHelper.useVbo()) {
             setupVAO();
-            if (model.getTextureVariants() == null) {
-                return;
-            }
-            Map<Byte, TextureVariantData> textureVariant = model.getTextureVariants().getTextureVariantsFor(this);
-            if (textureVariant == null) {
-                return;
-            }
-            if (vaos.containsKey(textureVariantID)) {
+            Map<Byte, TextureVariantData> textureVariant = model.getTextureVariants() != null ? model.getTextureVariants().getTextureVariantsFor(this) : null;
+            if(!vaos.containsKey(textureVariantID) || textureVariant == null || !textureVariant.containsKey(textureVariantID)) {
+                if(!vaos.containsKey((byte) 0))
+                    return;
+                renderVAO(model, vaos.get((byte) 0), "default");
+            } else
                 renderVAO(model, vaos.get(textureVariantID), textureVariant.get(textureVariantID).getName());
-            }
-
         } else {
             if (!modelDisplayList.containsKey(textureVariantID)) {
                 GlStateManager.color(1, 0, 0);
                 GlStateManager.callList(modelDisplayList.get((byte) 0));
                 GlStateManager.color(1, 1, 1);
-            } else {
+            } else
                 GlStateManager.callList(modelDisplayList.get(textureVariantID));
-            }
             GlStateManager.disableBlend();
             GlStateManager.bindTexture(Minecraft.getMinecraft().getTextureMapBlocks().getGlTextureId());
         }
@@ -168,14 +160,12 @@ public class ObjObjectRenderer {
         for (int i = 0, materialsListSize = materialsList.size(); i < materialsListSize; i++) {
             Material material = materialsList.get(i);
             bindTexture(model, material, variantTextureName, true);
-            Vector4f finalColor = new Vector4f();
-            finalColor.set(material.diffuseColor.x * objectColor.x,material.diffuseColor.y * objectColor.y,material.diffuseColor.z * objectColor.z,
+            GlStateManager.color(material.diffuseColor.x * objectColor.x, material.diffuseColor.y * objectColor.y, material.diffuseColor.z * objectColor.z,
                     material.transparency * objectColor.w);
-            GlStateManager.color(finalColor.x, finalColor.y, finalColor.z, finalColor.w);
             Material.IndexPair indexPair = material.indexPairPerObject.get(getObjObjectData().getName());
             GL11.glDrawElements(GL11.GL_TRIANGLES, (indexPair.getFinalIndex() - indexPair.getStartIndex()), GL11.GL_UNSIGNED_INT,
                     4L * indexPair.getStartIndex());
-            objectColor.set(1,1,1,1);
+            objectColor.set(1, 1, 1, 1);
         }
         GlStateManager.glDisableClientState(GL11.GL_VERTEX_ARRAY);
         GlStateManager.glDisableClientState(GL11.GL_TEXTURE_COORD_ARRAY);

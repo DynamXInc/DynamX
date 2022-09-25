@@ -119,7 +119,11 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
                 }
 
                 //Remove player's yaw offset rotation, to avoid stiff neck
-                ((AbstractClientPlayer) e).renderYawOffset = ((AbstractClientPlayer) e).prevRenderYawOffset = 0;
+                PartSeat seat = ((IModuleContainer.ISeatsContainer) entity).getSeats().getRidingSeat(e);
+                if (seat != null) {
+                    if(seat.limitFieldOfView()) ((AbstractClientPlayer) e).renderYawOffset = ((AbstractClientPlayer) e).prevRenderYawOffset = 0;
+                }
+
                 //The render the player, e.rotationYaw is the name plate rotation
                 ClientEventHandler.renderPlayer.doRender((AbstractClientPlayer) e, 0, 0, 0, e.rotationYaw, partialTicks);
                 GlStateManager.popMatrix();

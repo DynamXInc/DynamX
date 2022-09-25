@@ -24,6 +24,21 @@ import javax.annotation.Nullable;
 public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfoBuilder> {
     @PackFileProperty(configNames = "Driver")
     private boolean isDriver;
+    @PackFileProperty(configNames = "LimitFieldOfView", required = false, defaultValue = "true")
+    private boolean limitFieldOfView;
+
+    @PackFileProperty(configNames = "MaxYaw", required = false, defaultValue = "-105")
+    private float maxYaw = -105.0f;
+
+    @PackFileProperty(configNames = "MinYaw", required = false, defaultValue = "105")
+    private float minYaw = 105.0f;
+
+    @PackFileProperty(configNames = "MaxPitch", required = false, defaultValue = "-105")
+    private float maxPitch = -105.0f;
+
+    @PackFileProperty(configNames = "MinPitch", required = false, defaultValue = "105")
+    private float minPitch = 105.0f;
+
     @PackFileProperty(configNames = "LinkedDoorPart", required = false)
     private String linkedDoor;
     @PackFileProperty(configNames = "Rotation", required = false, defaultValue = "1 0 0 0")
@@ -111,6 +126,23 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
 
     public boolean isDriver() {
         return isDriver;
+    }
+
+    public boolean limitFieldOfView() {
+        return limitFieldOfView;
+    }
+
+    public float getMaxYaw() {
+        return maxYaw;
+    }
+    public float getMinYaw() {
+        return minYaw;
+    }
+    public float getMaxPitch() {
+        return maxPitch;
+    }
+    public float getMinPitch() {
+        return minPitch;
     }
 
     public Quaternion getRotation() {

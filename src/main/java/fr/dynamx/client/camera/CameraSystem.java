@@ -32,6 +32,7 @@ public class CameraSystem {
     private static CameraMode rotationMode = CameraMode.AUTO;
 
     private static int zoomLevel = 4;
+    private static float cameraPositionY;
     private static boolean watchingBehind = false;
     private static final Quaternion glQuatCache = new Quaternion();
     private static final com.jme3.math.Quaternion jmeQuatCache = new com.jme3.math.Quaternion();
@@ -80,6 +81,18 @@ public class CameraSystem {
         GlStateManager.rotate(event.getPitch(), 1.0F, 0.0F, 0.0F);
         if (vehicle instanceof IModuleContainer.ISeatsContainer) {
             PartSeat seat = ((IModuleContainer.ISeatsContainer) vehicle).getSeats().getRidingSeat(renderEntity);
+
+            if(seat != null){
+                if(Minecraft.getMinecraft().gameSettings.thirdPersonView > 0){
+                    if (cameraPositionY != seat.getCameraPositionY()){
+                        cameraPositionY = seat.getCameraPositionY();
+                    }
+                }else{
+                    cameraPositionY = 0;
+                }
+                GlStateManager.translate(0, -cameraPositionY, 0);
+            }
+
             if (seat != null && seat.getRotation() != null) {
                 GlStateManager.rotate(event.getYaw() + (watchingBehind ? 180 : 0) + seat.getRotationYaw(), 0.0F, 1.0F, 0.0F);
             } else {
@@ -175,7 +188,7 @@ public class CameraSystem {
         double d2 = (entity.prevPosZ + (entity.posZ - entity.prevPosZ) * partialTicks);
         if (debug)
             pt0.set((float) d0, (float) d1, (float) d2);
-        Vector3f eye = Vector3fPool.get(0, f, 0);
+        Vector3f eye = Vector3fPool.get(0, f + (Minecraft.getMinecraft().gameSettings.thirdPersonView > 0 ? cameraPositionY : 0), 0);
         eye = DynamXGeometry.rotateVectorByQuaternion(eye, vRotation.inverse());
         d0 += eye.x;
         d1 += eye.y;

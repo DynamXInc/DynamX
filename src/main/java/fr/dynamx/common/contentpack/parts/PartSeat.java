@@ -50,6 +50,9 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     @PackFileProperty(configNames = "CameraRotation", required = false, defaultValue = "0")
     private float rotationYaw;
 
+    @PackFileProperty(configNames = "CameraPositionY", required = false, defaultValue = "0")
+    private float cameraPositionY;
+
     public PartSeat(ModularVehicleInfoBuilder owner, String partName) {
         super(owner, partName, 0.4f, 1.8f);
     }
@@ -143,6 +146,9 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     }
     public float getMinPitch() {
         return minPitch;
+    }
+    public float getCameraPositionY() {
+        return cameraPositionY;
     }
 
     public Quaternion getRotation() {

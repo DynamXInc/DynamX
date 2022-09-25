@@ -14,6 +14,8 @@ import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.EnumSeatPlayerPosition;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
@@ -24,8 +26,11 @@ import javax.annotation.Nullable;
 public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfoBuilder> {
     @PackFileProperty(configNames = "Driver")
     private boolean isDriver;
-    @PackFileProperty(configNames = "LimitFieldOfView", required = false, defaultValue = "true")
-    private boolean limitFieldOfView = true;
+    @PackFileProperty(configNames = "ShouldLimitFieldOfView", required = false, defaultValue = "true")
+
+    @Accessors(fluent = true)
+    @Getter
+    private boolean shouldLimitFieldOfView = true;
 
     @PackFileProperty(configNames = "MaxYaw", required = false, defaultValue = "-105")
     @Getter
@@ -134,26 +139,6 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
 
     public boolean isDriver() {
         return isDriver;
-    }
-
-    public boolean limitFieldOfView() {
-        return limitFieldOfView;
-    }
-
-    public float getMaxYaw() {
-        return maxYaw;
-    }
-    public float getMinYaw() {
-        return minYaw;
-    }
-    public float getMaxPitch() {
-        return maxPitch;
-    }
-    public float getMinPitch() {
-        return minPitch;
-    }
-    public float getCameraPositionY() {
-        return cameraPositionY;
     }
 
     public Quaternion getRotation() {

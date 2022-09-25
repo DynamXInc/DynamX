@@ -28,15 +28,19 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     private boolean limitFieldOfView = true;
 
     @PackFileProperty(configNames = "MaxYaw", required = false, defaultValue = "-105")
+    @Getter
     private float maxYaw = -105.0f;
 
     @PackFileProperty(configNames = "MinYaw", required = false, defaultValue = "105")
+    @Getter
     private float minYaw = 105.0f;
 
     @PackFileProperty(configNames = "MaxPitch", required = false, defaultValue = "-105")
+    @Getter
     private float maxPitch = -105.0f;
 
     @PackFileProperty(configNames = "MinPitch", required = false, defaultValue = "105")
+    @Getter
     private float minPitch = 105.0f;
 
     @PackFileProperty(configNames = "LinkedDoorPart", required = false)
@@ -51,6 +55,7 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     private float rotationYaw;
 
     @PackFileProperty(configNames = "CameraPositionY", required = false, defaultValue = "0")
+    @Getter
     private float cameraPositionY;
 
     public PartSeat(ModularVehicleInfoBuilder owner, String partName) {

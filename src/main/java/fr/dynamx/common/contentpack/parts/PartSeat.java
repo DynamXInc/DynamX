@@ -25,7 +25,7 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     @PackFileProperty(configNames = "Driver")
     private boolean isDriver;
     @PackFileProperty(configNames = "LimitFieldOfView", required = false, defaultValue = "true")
-    private boolean limitFieldOfView;
+    private boolean limitFieldOfView = true;
 
     @PackFileProperty(configNames = "MaxYaw", required = false, defaultValue = "-105")
     private float maxYaw = -105.0f;

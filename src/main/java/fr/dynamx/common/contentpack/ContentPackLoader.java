@@ -16,8 +16,8 @@ import fr.dynamx.common.contentpack.loader.SubInfoTypesRegistry;
 import fr.dynamx.common.contentpack.sync.PackSyncHandler;
 import fr.dynamx.common.slopes.GuiSlopesConfig;
 import fr.dynamx.utils.DynamXConstants;
-import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.DynamXLoadingTasks;
+import fr.dynamx.utils.errors.DynamXErrorManager;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.launchwrapper.LaunchClassLoader;
@@ -108,24 +108,26 @@ public class ContentPackLoader {
             if (file.isDirectory() || file.getName().endsWith(".zip") || file.getName().endsWith(PACK_FILE_EXTENSION)) {
                 DynamXMain.log.debug("Loading resource pack: " + file.getName());
                 //Add assets
-                if(side.isClient() && loadPackResources(file, file.isDirectory() ? ContainerType.DIR : ContainerType.JAR))
+                if (side.isClient() && loadPackResources(file, file.isDirectory() ? ContainerType.DIR : ContainerType.JAR))
                     packCount++;
-                else if(side.isServer())
+                else if (side.isServer())
                     packCount++;
                 //Add custom ModProtectionSystem repositories
                 protectedResources.put(file.getName(), modProtectionContainer.getParent().loadCustomRepository(modProtectionContainer, file));
             }
             if (file.isDirectory()) {
                 //And load protected files -> Now directly handled by mps
-                for (File f : file.listFiles()){  //Keep handle the PackFiles.jar, but deprecated
+                for (File f : file.listFiles()) {  //Keep handle the PackFiles.jar, but deprecated
                     if (f.isFile() && f.getName().endsWith(".jar")) {
                         try {
                             //Protected resources (.part files), only add to classpath
                             ((LaunchClassLoader) Thread.currentThread().getContextClassLoader()).addURL(f.toURI().toURL());
-                        } catch (Exception e) {
+                        } catch (Throwable e) {
                             DynamXMain.log.error("Failed to load mps resources jar : " + f.getName());
                             DynamXMain.log.throwing(e);
-                            DynamXErrorManager.addError(file.getName(), DynamXErrorManager.INIT_ERRORS, "res_pack_load_fail", ErrorLevel.FATAL, "assets", "Failed to add to classpath", e, 700);
+                            if (!(e instanceof Exception)) //todo clean
+                                e = new RuntimeException("encapsulated error", e);
+                            DynamXErrorManager.addError(file.getName(), DynamXErrorManager.INIT_ERRORS, "res_pack_load_fail", ErrorLevel.FATAL, "assets", "Failed to add to classpath", (Exception) e, 700);
                         }
                         DynamXMain.log.info("Loaded mps pack file : " + f.getName());
                     }
@@ -154,10 +156,12 @@ public class ContentPackLoader {
             container.bindMetadata(MetadataCollection.from(null, ""));
             FMLClientHandler.instance().addModAsResource(container);
             return true;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             DynamXMain.log.error("Failed to load textures and models of DynamX pack : " + file.getName());
             DynamXMain.log.throwing(e);
-            DynamXErrorManager.addError(file.getName(), DynamXErrorManager.INIT_ERRORS, "res_pack_load_fail", ErrorLevel.FATAL, "assets", "Failed to register as resource pack", e, 700);
+            if (!(e instanceof Exception)) //todo clean
+                e = new RuntimeException("encapsulated error", e);
+            DynamXErrorManager.addError(file.getName(), DynamXErrorManager.INIT_ERRORS, "res_pack_load_fail", ErrorLevel.FATAL, "assets", "Failed to register as resource pack", (Exception) e, 700);
             return false;
         }
     }
@@ -231,9 +235,11 @@ public class ContentPackLoader {
                         });
                         loadPack(loadingPack, contentPack, ContentPackType.FOLDER, suffix, packInfo.get(), packFiles);
                         packCount++;
-                    } catch (Exception e) {
+                    } catch (Throwable e) {
                         //log.error("Content Pack " + loadingPack + " cannot be loaded : ", e);
-                        DynamXErrorManager.addError(loadingPack, DynamXErrorManager.PACKS__ERRORS, "pack_load_fail", ErrorLevel.FATAL, "loading folder pack", loadingPack, e, 800);
+                        if (!(e instanceof Exception)) //todo clean
+                            e = new RuntimeException("encapsulated error", e);
+                        DynamXErrorManager.addError(loadingPack, DynamXErrorManager.PACKS__ERRORS, "pack_load_fail", ErrorLevel.FATAL, "loading folder pack", loadingPack, (Exception) e, 800);
                         errorCount++;
                     }
                 } else if (contentPack.isFile() && (contentPack.getName().endsWith(".zip") || contentPack.getName().endsWith(PACK_FILE_EXTENSION))) {
@@ -256,9 +262,11 @@ public class ContentPackLoader {
                         }
                         loadPack(loadingPack, contentPack, contentPack.getName().endsWith(".zip") ? ContentPackType.ZIP : ContentPackType.DNXPACK, suffix, packInfo, packFiles);
                         packCount++;
-                    } catch (Exception e) {
+                    } catch (Throwable e) {
                         //log.error("Compressed content Pack " + loadingPack + " cannot be loaded : ", e);
-                        DynamXErrorManager.addError(loadingPack, DynamXErrorManager.PACKS__ERRORS, "pack_load_fail", ErrorLevel.FATAL, "loading compressed pack", loadingPack, e, 800);
+                        if (!(e instanceof Exception)) //todo clean
+                            e = new RuntimeException("encapsulated error", e);
+                        DynamXErrorManager.addError(loadingPack, DynamXErrorManager.PACKS__ERRORS, "pack_load_fail", ErrorLevel.FATAL, "loading compressed pack", loadingPack, (Exception) e, 800);
                         errorCount++;
                     }
                 } else if (!contentPack.getName().endsWith(".dll") && !contentPack.getName().endsWith(".so") && !contentPack.getName().endsWith(".dylib")) { //Bullet library files
@@ -275,7 +283,7 @@ public class ContentPackLoader {
             log.info("Loaded " + packCount + " content packs");
             if (errorCount > 0)
                 log.warn("Ignored " + errorCount + " errored packs");
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error("Fatal error while loading DynamX packs, we can't continue !", e);
             throw new RuntimeException(e);
         }
@@ -323,8 +331,10 @@ public class ContentPackLoader {
                 throw new IllegalArgumentException("Invalid " + suffix + " file name : " + file.getName());
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
-        } catch (Exception e) {
-            DynamXErrorManager.addError(loadingPack, DynamXErrorManager.PACKS__ERRORS, "pack_file_load_error", ErrorLevel.FATAL, file.getName().replace(suffix, ""), null, e, 100);
+        } catch (Throwable e) {
+            if (!(e instanceof Exception)) //todo clean
+                e = new RuntimeException("encapsulated error", e);
+            DynamXErrorManager.addError(loadingPack, DynamXErrorManager.PACKS__ERRORS, "pack_file_load_error", ErrorLevel.FATAL, file.getName().replace(suffix, ""), null, (Exception) e, 100);
         } finally {
             if (inputStream != null) {
                 try {
@@ -414,6 +424,11 @@ public class ContentPackLoader {
 
         public InputStream getInputStream() {
             return inputStream;
+        }
+
+        @Override
+        public String toString() {
+            return "PackFile{" + name + '}';
         }
     }
 }

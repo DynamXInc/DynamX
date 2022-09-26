@@ -186,6 +186,23 @@ public class ClientEventHandler {
                 }
             }
             Vector3fPool.closePool();
+        } else if(event.getType() == RenderGameOverlayEvent.ElementType.ALL && !Minecraft.getMinecraft().isSingleplayer() && DynamXConfig.useUdp && (!DynamXContext.getNetwork().isConnected() || !DynamXContext.getNetwork().getQuickNetwork().isAuthenticated())) {
+            String text = "DynamX: connecting to the server " + (DynamXContext.getNetwork().isConnected() ? "2/2" : "1/2");
+            switch ((int)(Minecraft.getSystemTime() / 600L % 3L))
+            {
+                case 0:
+                default:
+                    text += ".  ";
+                    break;
+                case 1:
+                    text += " . ";
+                    break;
+                case 2:
+                    text += "  .";
+                    break;
+            }
+            MC.fontRenderer.drawString(text, event.getResolution().getScaledWidth() - MC.fontRenderer.getStringWidth(text) - 4, 4, 0xFFFFFFFF);
+            GlStateManager.color(1, 1, 1, 1);
         }
     }
 
@@ -223,7 +240,7 @@ public class ClientEventHandler {
         ClientProxy.SOUND_HANDLER.tick();
 
         if (connectionTime != -1 && !Minecraft.getMinecraft().isSingleplayer() && DynamXConfig.useUdp) {
-            if ((System.currentTimeMillis() - connectionTime) > 40000) {
+            if ((System.currentTimeMillis() - connectionTime) > 30000) {
                 if (!DynamXContext.getNetwork().isConnected()) {
                     DynamXMain.log.warn("Failed to establish an UDP connection : timed out (0x1)");
                     if (Minecraft.getMinecraft().getConnection() != null)

@@ -27,18 +27,6 @@ public class UdpClientNetworkHandler implements IDnxNetworkHandler {
     private boolean authed;
     private final String hash;
 
-    public final String getHash() {
-        return this.hash;
-    }
-
-    public boolean isAuthed() {
-        return this.authed;
-    }
-
-    void setAuthed(boolean authed) {
-        this.authed = authed;
-    }
-
     public static volatile boolean running;
     private final int port;
     private final String host;
@@ -53,7 +41,7 @@ public class UdpClientNetworkHandler implements IDnxNetworkHandler {
     }
 
     public void authenticate() {
-        this.setAuthed(false);
+        this.setAuthenticated(false);
         this.sendPacket(new UDPClientAuthenticationPacket(hash));
         if (DynamXConfig.udpDebug)
             DynamXMain.log.info("[UDP-DEBUG] Auth rq sent");
@@ -61,7 +49,7 @@ public class UdpClientNetworkHandler implements IDnxNetworkHandler {
 
     void handleAuth() {
         DynamXMain.log.info("Successfully authenticated with udp server.");
-        this.setAuthed(true);
+        this.setAuthenticated(true);
 
         if (DynamXConfig.syncPacks) {
             DynamXMain.log.debug("Requesting pack sync...");
@@ -167,4 +155,18 @@ public class UdpClientNetworkHandler implements IDnxNetworkHandler {
     public EnumNetworkType getType() {
         return EnumNetworkType.DYNAMX_UDP;
     }
+
+    @Override
+    public boolean isAuthenticated() {
+        return this.authed;
+    }
+
+    protected void setAuthenticated(boolean authed) {
+        this.authed = authed;
+    }
+
+    public final String getHash() {
+        return this.hash;
+    }
+
 }

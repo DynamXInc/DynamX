@@ -82,14 +82,10 @@ public class CameraSystem {
         if (vehicle instanceof IModuleContainer.ISeatsContainer) {
             PartSeat seat = ((IModuleContainer.ISeatsContainer) vehicle).getSeats().getRidingSeat(renderEntity);
 
-            if(seat != null){
-                if(Minecraft.getMinecraft().gameSettings.thirdPersonView > 0){
-                    if (cameraPositionY != seat.getCameraPositionY()){
-                        cameraPositionY = seat.getCameraPositionY();
-                    }
-                }else{
-                    cameraPositionY = 0;
-                }
+            if(seat == null) {
+                return;
+            }else{
+                cameraPositionY = ClientEventHandler.MC.gameSettings.thirdPersonView > 0 ? seat.getCameraPositionY() : 0;
                 GlStateManager.translate(0, -cameraPositionY, 0);
             }
 
@@ -188,7 +184,7 @@ public class CameraSystem {
         double d2 = (entity.prevPosZ + (entity.posZ - entity.prevPosZ) * partialTicks);
         if (debug)
             pt0.set((float) d0, (float) d1, (float) d2);
-        Vector3f eye = Vector3fPool.get(0, f + (Minecraft.getMinecraft().gameSettings.thirdPersonView > 0 ? cameraPositionY : 0), 0);
+        Vector3f eye = Vector3fPool.get(0, f + (ClientEventHandler.MC.gameSettings.thirdPersonView > 0 ? cameraPositionY : 0), 0);
         eye = DynamXGeometry.rotateVectorByQuaternion(eye, vRotation.inverse());
         d0 += eye.x;
         d1 += eye.y;

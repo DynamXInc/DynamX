@@ -7,6 +7,7 @@ import fr.dynamx.common.DynamXMain;
 import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.translation.I18n;
+import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.*;
 
@@ -51,10 +52,13 @@ public class DynamXErrorManager {
         errorManager.addError(pack, errorCategory, genericType, errorLevel, object, message, exception, priority);
     }
 
-    public static void printErrors(ErrorLevel minLevel) {
+    public static void printErrors(Side side, ErrorLevel minLevel) {
         if(errorManager.getAllErrors().values().stream().anyMatch(e -> e.getHighestErrorLevel().ordinal() >= minLevel.ordinal())) {
             DynamXMain.log.error("==== DynamX loading errors ====");
-            errorManager.printErrors(DynamXMain.log, Arrays.asList(INIT_ERRORS, PACKS__ERRORS, MODEL_ERRORS, ACsLib.getPlatform().getACsLibErrorCategory(), ACsGuiApi.getCssErrorType()), minLevel);
+            if(side.isClient())
+                errorManager.printErrors(DynamXMain.log, Arrays.asList(INIT_ERRORS, PACKS__ERRORS, MODEL_ERRORS, ACsLib.getPlatform().getACsLibErrorCategory(), ACsGuiApi.getCssErrorType()), minLevel);
+            else
+                errorManager.printErrors(DynamXMain.log, Arrays.asList(INIT_ERRORS, PACKS__ERRORS, MODEL_ERRORS, ACsLib.getPlatform().getACsLibErrorCategory()), minLevel);
         }
     }
 

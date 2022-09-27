@@ -11,6 +11,10 @@ import fr.dynamx.api.entities.modules.IPropulsionModule;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.api.network.sync.SimulationHolder;
+import fr.dynamx.api.network.sync.v3.SynchronizationRules;
+import fr.dynamx.api.network.sync.v3.SynchronizedEntityVariable;
+import fr.dynamx.api.network.sync.v3.SynchronizedEntityVariableFactory;
+import fr.dynamx.api.network.sync.v3.SynchronizedVariableSerializer;
 import fr.dynamx.api.obj.IObjObject;
 import fr.dynamx.api.physics.entities.IPropulsionHandler;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
@@ -19,12 +23,14 @@ import fr.dynamx.client.renders.vehicle.RenderBaseVehicle;
 import fr.dynamx.client.sound.SkiddingSound;
 import fr.dynamx.client.sound.VehicleSound;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.parts.PartWheel;
 import fr.dynamx.common.contentpack.type.PartWheelInfo;
 import fr.dynamx.common.contentpack.type.vehicle.SteeringWheelInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.network.sync.v3.DynamXSynchronizedVariables;
 import fr.dynamx.common.network.sync.vars.VehicleSynchronizedVariables;
 import fr.dynamx.common.obj.texture.TextureData;
 import fr.dynamx.common.physics.entities.BaseWheeledVehiclePhysicsHandler;
@@ -36,6 +42,7 @@ import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.init.Blocks;
@@ -44,6 +51,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -62,20 +70,40 @@ import static fr.dynamx.client.ClientProxy.SOUND_HANDLER;
  * @see WheelsPhysicsHandler
  */
 public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysicsHandler<?>>, IPhysicsModule.IEntityUpdateListener, IPhysicsModule.IPhysicsUpdateListener, IPhysicsModule.IDrawableModule<BaseVehicleEntity<?>> {
-    protected final Map<Byte, PartWheelInfo> wheelInfos = new HashMap<>();
+    protected final SynchronizedEntityVariable<Map<Byte, PartWheelInfo>> wheelInfos = new SynchronizedEntityVariable<>((variable, value) -> {
+        value.forEach(this::setWheelInfo);
+    }, SynchronizationRules.CONTROLS_TO_SPECTATORS, new SynchronizedVariableSerializer<Map<Byte, PartWheelInfo>>() {
+        @Override
+        public void writeObject(ByteBuf buf, Map<Byte, PartWheelInfo> object) {
+            buf.writeInt(object.size());
+            object.forEach((id, info) -> {
+                buf.writeByte(id);
+                ByteBufUtils.writeUTF8String(buf, info.getFullName());
+            });
+        }
+
+        @Override
+        public Map<Byte, PartWheelInfo> readObject(ByteBuf buf, Map<Byte, PartWheelInfo> currentValue) {
+            int size = buf.readInt();
+            for (byte i = 0; i < size; i++)
+                currentValue.put(buf.readByte(), DynamXObjectLoaders.WHEELS.findInfo(ByteBufUtils.readUTF8String(buf)));
+            return currentValue;
+        }
+    }, new HashMap<>());
     /**
      * Wheels visual states, based on the physical states
      */
-    protected WheelState[] wheelsStates;
+    protected SynchronizedEntityVariable<WheelState[]> wheelsStates;
     // [0;4] SkidInfo [4;8] Friction [8;12] longitudinal [12;16] lateral [16;20] getRotationDelta
     // todo clean wheelProperties system
-    public float[] wheelProperties;
+    public SynchronizedEntityVariable<float[]> wheelProperties = new SynchronizedEntityVariable<>(SynchronizationRules.PHYSICS_TO_SPECTATORS, SynchronizedEntityVariableFactory.floatArraySerializer);
+
     protected byte[] wheelsTextureId;
 
     /**
      * Entity visual properties, accessible via the {@link IPhysicsModule}s
      */
-    public float[] visualProperties;
+    public SynchronizedEntityVariable<float[]> visualProperties = new SynchronizedEntityVariable<>(SynchronizationRules.PHYSICS_TO_SPECTATORS, SynchronizedEntityVariableFactory.floatArraySerializer);
     /**
      * Entity prev visual properties
      */
@@ -86,13 +114,45 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
 
     public WheelsModule(BaseVehicleEntity<? extends BaseWheeledVehiclePhysicsHandler<?>> entity) {
         this.entity = entity;
+        this.wheelsStates = new SynchronizedEntityVariable<>((variable, value) -> {
+            if (!entity.getNetwork().getSimulationHolder().ownsControls(FMLCommonHandler.instance().getEffectiveSide())) {
+                if (DynamXMain.proxy.shouldUseBulletSimulation(entity.world)) {
+                    for (int i = 0; i < value.length; i++) {
+                        if (variable.get()[i] != value[i]) {
+                            if (value[i] == WheelState.REMOVED)
+                                ((WheelsPhysicsHandler) getPhysicsHandler()).removeWheel((byte) i);
+                            else
+                                ((WheelsPhysicsHandler) getPhysicsHandler()).getWheel(i).setFlattened(value[i] == WheelState.ADDED_FLATTENED);
+                        }
+                    }
+                }
+            }
+        }, SynchronizationRules.CONTROLS_TO_SPECTATORS, new SynchronizedVariableSerializer<WheelState[]>() {
+            @Override
+            public void writeObject(ByteBuf buf, WheelState[] object) {
+                buf.writeInt(object.length);
+                for (WheelState f : object) {
+                    buf.writeByte(f.ordinal());
+                }
+            }
+
+            @Override
+            public WheelState[] readObject(ByteBuf buf, WheelState[] currentValue) {
+                currentValue = new WheelState[buf.readInt()];
+                for (byte i = 0; i < currentValue.length; i++) {
+                    currentValue[i] = WheelState.values()[buf.readByte()];
+                }
+                return currentValue;
+            }
+        });
     }
 
     public void setWheelInfo(byte partIndex, PartWheelInfo info) {
-        if (wheelInfos.get(partIndex) != info) {
-            VehicleEntityEvent.ChangeVehicleWheelEvent event = new VehicleEntityEvent.ChangeVehicleWheelEvent(FMLCommonHandler.instance().getEffectiveSide(), entity, this, wheelInfos.get(partIndex), info, partIndex);
+        if (wheelInfos.get().get(partIndex) != info) {
+            VehicleEntityEvent.ChangeVehicleWheelEvent event = new VehicleEntityEvent.ChangeVehicleWheelEvent(FMLCommonHandler.instance().getEffectiveSide(), entity, this, wheelInfos.get().get(partIndex), info, partIndex);
             if (!MinecraftForge.EVENT_BUS.post(event)) {
-                wheelInfos.put(partIndex, event.getNewWheel());
+                wheelInfos.get().put(partIndex, event.getNewWheel());
+                wheelInfos.setChanged(true);
                 if (wheelsPhysics != null)
                     wheelsPhysics.getWheelByPartIndex(partIndex).setWheelInfo(event.getNewWheel());
                 if (entity.getEntityTextureID() != -1)
@@ -118,39 +178,36 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
     }
 
     public PartWheelInfo getWheelInfo(byte partIndex) {
-        return wheelInfos.get(partIndex);
+        return wheelInfos.get().get(partIndex);
     }
 
     public Map<Byte, PartWheelInfo> getWheelInfos() {
-        return wheelInfos;
+        return wheelInfos.get();
     }
 
     /**
      * @return The wheels visual states, based on the physical states
      */
     public WheelState[] getWheelsStates() {
-        return wheelsStates;
-    }
-
-    public void setWheelsStates(WheelState[] wheelsStates) {
-        this.wheelsStates = wheelsStates;
+        return wheelsStates.get();
     }
 
     @Override
     public void initEntityProperties() {
         int wheelCount = entity.getPackInfo().getPartsByType(PartWheel.class).size();
-        wheelProperties = new float[wheelCount * VehicleEntityProperties.EnumWheelProperties.values().length];
+        wheelProperties.set(new float[wheelCount * VehicleEntityProperties.EnumWheelProperties.values().length]);
         for (PartWheel part : entity.getPackInfo().getPartsByType(PartWheel.class)) {
-            wheelInfos.put(part.getId(), part.getDefaultWheelInfo());
+            wheelInfos.get().put(part.getId(), part.getDefaultWheelInfo());
         }
-        wheelsStates = new WheelState[wheelCount];
+        wheelInfos.setChanged(true);
+        wheelsStates.set(new WheelState[wheelCount]);
         this.wheelsTextureId = new byte[wheelCount];
         for (int i = 0; i < wheelCount; i++) {
-            wheelsStates[i] = WheelState.ADDED;
+            wheelsStates.get()[i] = WheelState.ADDED;
             wheelsTextureId[i] = -1;
         }
-        visualProperties = new float[wheelCount * VehicleEntityProperties.EnumVisualProperties.values().length];
-        prevVisualProperties = new float[visualProperties.length];
+        visualProperties.set(new float[wheelCount * VehicleEntityProperties.EnumVisualProperties.values().length]);
+        prevVisualProperties = new float[visualProperties.get().length];
     }
 
     @Override
@@ -160,11 +217,11 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
             //Call init after setting "wheels =", because init uses it
             wheelsPhysics.init();
             //Restore previous wheels state
-            for (byte i = 0; i < wheelsStates.length; i++) {
-                if (wheelsStates[i] == WheelState.REMOVED)
+            for (byte i = 0; i < wheelsStates.get().length; i++) {
+                if (wheelsStates.get()[i] == WheelState.REMOVED)
                     wheelsPhysics.removeWheel(i);
                 else
-                    wheelsPhysics.getWheel(i).setFlattened(wheelsStates[i] == WheelState.ADDED_FLATTENED);
+                    wheelsPhysics.getWheel(i).setFlattened(wheelsStates.get()[i] == WheelState.ADDED_FLATTENED);
             }
         }
     }
@@ -185,10 +242,17 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
                             w.setGrip((w.isFlattened() ? 0.16f : 1) * floats[1]);
                         else
                             w.setGrip((w.isFlattened() ? 0.16f : 1) * floats[0]);
-                        if (wheelsStates[i] == WheelState.ADDED && w.isFlattened())
-                            wheelsStates[i] = WheelState.ADDED_FLATTENED;
-                        else if (wheelsStates[i] == WheelState.ADDED_FLATTENED && !w.isFlattened())
-                            wheelsStates[i] = WheelState.ADDED;
+                        if(blockState.getBlock() == Blocks.GLASS) {
+                            w.setFlattened(true);
+                        }
+                        if (wheelsStates.get()[i] == WheelState.ADDED && w.isFlattened()) {
+                            wheelsStates.get()[i] = WheelState.ADDED_FLATTENED;
+                            wheelsStates.setChanged(true);
+                        }
+                        else if (wheelsStates.get()[i] == WheelState.ADDED_FLATTENED && !w.isFlattened()) {
+                            wheelsStates.get()[i] = WheelState.ADDED;
+                            wheelsStates.setChanged(true);
+                        }
                     }
                 }
             }
@@ -198,31 +262,28 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
 
     @Override
     public void postUpdatePhysics(boolean simulatingPhysics) {
-        if (simulatingPhysics) {
-            System.arraycopy(visualProperties, 0, prevVisualProperties, 0, prevVisualProperties.length);
-            updateVisualProperties(visualProperties, prevVisualProperties);
-        } else {
-            System.arraycopy(visualProperties, 0, prevVisualProperties, 0, prevVisualProperties.length);
-        }
+        System.arraycopy(visualProperties.get(), 0, prevVisualProperties, 0, prevVisualProperties.length);
+        if (simulatingPhysics)
+            updateVisualProperties(visualProperties.get(), prevVisualProperties);
     }
 
     @Override
     public void readFromNBT(NBTTagCompound tag) {
-        int wheelCount = Math.min(tag.getByte("WheelCount"), wheelInfos.size());
+        int wheelCount = Math.min(tag.getByte("WheelCount"), wheelInfos.get().size());
         for (byte i = 0; i < wheelCount; i++) {
             PartWheelInfo info = DynamXObjectLoaders.WHEELS.findInfo(tag.getString("WheelInfo" + i));
             if (info != null)
                 setWheelInfo(i, info);
-            wheelsStates[i] = WheelState.values()[tag.getByte("WheelState" + i)];
+            wheelsStates.get()[i] = WheelState.values()[tag.getByte("WheelState" + i)];
         }
     }
 
     @Override
     public void writeToNBT(NBTTagCompound tag) {
-        tag.setByte("WheelCount", (byte) wheelsStates.length);
-        for (byte i = 0; i < wheelsStates.length; i++) {
-            tag.setByte("WheelState" + i, (byte) wheelsStates[i].ordinal());
-            tag.setString("WheelInfo" + i, wheelInfos.get(i).getFullName());
+        tag.setByte("WheelCount", (byte) wheelsStates.get().length);
+        for (byte i = 0; i < wheelsStates.get().length; i++) {
+            tag.setByte("WheelState" + i, (byte) wheelsStates.get()[i].ordinal());
+            tag.setString("WheelInfo" + i, wheelInfos.get().get(i).getFullName());
         }
     }
 
@@ -249,25 +310,20 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
                 visualProperties[VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.COLLISIONY)] = pos.y;
                 visualProperties[VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.COLLISIONZ)] = pos.z;
             }
+            this.visualProperties.setChanged(true);
             for (byte b = 0; b < n; b++) {
                 WheelPhysicsHandler w = wheelsPhysics.getWheel(b);
                 if (w != null) {
-                    if (w.getSkidInfo() != wheelProperties[getPropertyIndex(b, VehicleEntityProperties.EnumWheelProperties.SKIDINFO)]) {
-                        wheelProperties[getPropertyIndex(b, VehicleEntityProperties.EnumWheelProperties.SKIDINFO)] = w.getSkidInfo();
+                    if (w.getSkidInfo() != wheelProperties.get()[getPropertyIndex(b, VehicleEntityProperties.EnumWheelProperties.SKIDINFO)]) {
+                        wheelProperties.get()[getPropertyIndex(b, VehicleEntityProperties.EnumWheelProperties.SKIDINFO)] = w.getSkidInfo();
+                        wheelProperties.setChanged(true);
                     }
                     if (DynamXDebugOptions.WHEEL_ADVANCED_DATA.isActive()) {
-                        if (w.getFriction() != wheelProperties[getPropertyIndex(b, VehicleEntityProperties.EnumWheelProperties.FRICTION)]) {
-                            wheelProperties[getPropertyIndex(b, VehicleEntityProperties.EnumWheelProperties.FRICTION)] = w.getFriction();
-                        }
-                        if (wheelsPhysics.pacejkaMagicFormula.longitudinal[b] != wheelProperties[getPropertyIndex(b, VehicleEntityProperties.EnumWheelProperties.PACEJKALONGITUDINAL)]) {
-                            wheelProperties[getPropertyIndex(b, VehicleEntityProperties.EnumWheelProperties.PACEJKALONGITUDINAL)] = wheelsPhysics.pacejkaMagicFormula.longitudinal[b] / 10000;
-                        }
-                        if (wheelsPhysics.pacejkaMagicFormula.lateral[b] != wheelProperties[getPropertyIndex(b, VehicleEntityProperties.EnumWheelProperties.PACEJKALATERAL)]) {
-                            wheelProperties[getPropertyIndex(b, VehicleEntityProperties.EnumWheelProperties.PACEJKALATERAL)] = wheelsPhysics.pacejkaMagicFormula.lateral[b] / 10000;
-                        }
-                        if (w.getDeltaRotation() != wheelProperties[getPropertyIndex(b, VehicleEntityProperties.EnumWheelProperties.ROTATIONDELTA)]) {
-                            wheelProperties[getPropertyIndex(b, VehicleEntityProperties.EnumWheelProperties.ROTATIONDELTA)] = w.getDeltaRotation();
-                        }
+                        wheelProperties.get()[getPropertyIndex(b, VehicleEntityProperties.EnumWheelProperties.FRICTION)] = w.getFriction();
+                        wheelProperties.get()[getPropertyIndex(b, VehicleEntityProperties.EnumWheelProperties.PACEJKALONGITUDINAL)] = wheelsPhysics.pacejkaMagicFormula.longitudinal[b] / 10000;
+                        wheelProperties.get()[getPropertyIndex(b, VehicleEntityProperties.EnumWheelProperties.PACEJKALATERAL)] = wheelsPhysics.pacejkaMagicFormula.lateral[b] / 10000;
+                        wheelProperties.get()[getPropertyIndex(b, VehicleEntityProperties.EnumWheelProperties.ROTATIONDELTA)] = w.getDeltaRotation();
+                        wheelProperties.setChanged(true);
                     }
                 }
             }
@@ -281,17 +337,15 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
 
     @Override
     public float[] getPropulsionProperties() {
-        return wheelProperties;
+        return wheelProperties.get();
     }
 
     @Override
     public void addSynchronizedVariables(Side side, SimulationHolder simulationHolder, List<ResourceLocation> variables) {
-        if (simulationHolder.isPhysicsAuthority(side)) {
-            variables.add(VehicleSynchronizedVariables.WheelVisuals.NAME);
-            variables.add(VehicleSynchronizedVariables.Visuals.NAME);
-        }
-        if (simulationHolder.isPhysicsAuthority(side) || simulationHolder.ownsControls(side))
-            variables.add(VehicleSynchronizedVariables.WheelPhysics.NAME);
+        entity.getSynchronizer().registerVariable(DynamXSynchronizedVariables.WHEEL_INFOS, wheelInfos);
+        entity.getSynchronizer().registerVariable(DynamXSynchronizedVariables.WHEEL_STATES, wheelsStates);
+        entity.getSynchronizer().registerVariable(DynamXSynchronizedVariables.WHEEL_PROPERTIES, wheelProperties);
+        entity.getSynchronizer().registerVariable(DynamXSynchronizedVariables.WHEEL_VISUALS, visualProperties);
     }
 
     @Override
@@ -320,7 +374,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
                     //Rotate the steering wheel
                     int directingWheel = VehicleEntityProperties.getPropertyIndex(carEntity.getPackInfo().getDirectingWheel(), VehicleEntityProperties.EnumVisualProperties.STEERANGLE);
                     WheelsModule m = carEntity.getModuleByType(WheelsModule.class);
-                    GlStateManager.rotate(-(m.prevVisualProperties[directingWheel] + (m.visualProperties[directingWheel] - m.prevVisualProperties[directingWheel]) * partialTicks), 0F, 0F, 1F);
+                    GlStateManager.rotate(-(m.prevVisualProperties[directingWheel] + (m.visualProperties.get()[directingWheel] - m.prevVisualProperties[directingWheel]) * partialTicks), 0F, 0F, 1F);
 
                     //Scale it
                     GlStateManager.scale(carEntity.getPackInfo().getScaleModifier().x, carEntity.getPackInfo().getScaleModifier().y, carEntity.getPackInfo().getScaleModifier().z);
@@ -335,7 +389,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
         if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.RenderVehicleEntityEvent(VehicleEntityEvent.RenderVehicleEntityEvent.Type.PROPULSION, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks))) {
             if (getPropulsionProperties() != null) {
                 this.entity.getPackInfo().getPartsByType(PartWheel.class).forEach(partWheel -> {
-                    if (wheelsStates[partWheel.getId()] != WheelState.REMOVED) {
+                    if (wheelsStates.get()[partWheel.getId()] != WheelState.REMOVED) {
                         renderWheel(render, partWheel, partialTicks);
                     }
                 });
@@ -352,9 +406,9 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
             PartWheelInfo info = getWheelInfo(partWheel.getId());
             if (info.enableRendering() && info.getSkidParticle() != null) {
                 if (((IModuleContainer.IPropulsionContainer<?>) entity).getPropulsion().getPropulsionProperties()[VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumWheelProperties.SKIDINFO)] < 0.1f) {
-                    entity.world.spawnParticle(info.getSkidParticle(), visualProperties[VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.COLLISIONX)],
-                            visualProperties[VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.COLLISIONY)],
-                            visualProperties[VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.COLLISIONZ)],
+                    entity.world.spawnParticle(info.getSkidParticle(), visualProperties.get()[VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.COLLISIONX)],
+                            visualProperties.get()[VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.COLLISIONY)],
+                            visualProperties.get()[VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.COLLISIONZ)],
                             0, 0, 0);
                 }
             }
@@ -378,12 +432,12 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
 
                 /* Suspension translation */
                 index = VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.SUSPENSIONLENGTH);
-                GlStateManager.translate(0, -(prevVisualProperties[index] + (visualProperties[index] - prevVisualProperties[index]) * partialTicks) + 0.2, 0);
+                GlStateManager.translate(0, -(prevVisualProperties[index] + (visualProperties.get()[index] - prevVisualProperties[index]) * partialTicks) + 0.2, 0);
 
                 /* Steering rotation*/
                 if (partWheel.isWheelIsSteerable()) {
                     index = VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.STEERANGLE);
-                    GlStateManager.rotate((prevVisualProperties[index] + (visualProperties[index] - prevVisualProperties[index]) * partialTicks), 0.0F, 1.0F, 0.0F);
+                    GlStateManager.rotate((prevVisualProperties[index] + (visualProperties.get()[index] - prevVisualProperties[index]) * partialTicks), 0.0F, 1.0F, 0.0F);
                 }
 
                 /* Render mudguard */
@@ -405,12 +459,12 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
 
                 /* Suspension translation */
                 index = VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.SUSPENSIONLENGTH);
-                GlStateManager.translate(0, -(prevVisualProperties[index] + (visualProperties[index] - prevVisualProperties[index]) * partialTicks), 0);
+                GlStateManager.translate(0, -(prevVisualProperties[index] + (visualProperties.get()[index] - prevVisualProperties[index]) * partialTicks), 0);
 
                 /* Steering rotation*/
                 if (partWheel.isWheelIsSteerable()) {
                     index = VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.STEERANGLE);
-                    GlStateManager.rotate((prevVisualProperties[index] + (visualProperties[index] - prevVisualProperties[index]) * partialTicks), 0.0F, 1.0F, 0.0F);
+                    GlStateManager.rotate((prevVisualProperties[index] + (visualProperties.get()[index] - prevVisualProperties[index]) * partialTicks), 0.0F, 1.0F, 0.0F);
                 }
 
                 //Remove wheel base rotation
@@ -423,25 +477,25 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
                 index = VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.ROTATIONANGLE);
                 //Fix sign problems for wheel rotation
                 float prev = prevVisualProperties[index];
-                if (prev - visualProperties[index] > 180)
+                if (prev - visualProperties.get()[index] > 180)
                     prev -= 360;
-                if (prev - visualProperties[index] < -180)
+                if (prev - visualProperties.get()[index] < -180)
                     prev += 360;
                 //Then render
                 if (partWheel.isRight()) {
                     /* Wheel rotation (Right-Side)*/
                     GlStateManager.rotate(180, 0, 1, 0);
-                    GlStateManager.rotate((prev + (visualProperties[index] - prev) * partialTicks), -1.0F, 0.0F, 0.0F);
+                    GlStateManager.rotate((prev + (visualProperties.get()[index] - prev) * partialTicks), -1.0F, 0.0F, 0.0F);
                 } else {
                     /* Wheel rotation (Left-Side)*/
-                    GlStateManager.rotate(-(prev + (visualProperties[index] - prev) * partialTicks), -1.0F, 0.0F, 0.0F);
+                    GlStateManager.rotate(-(prev + (visualProperties.get()[index] - prev) * partialTicks), -1.0F, 0.0F, 0.0F);
                 }
                 /*Rendering the wheels */
                 ObjModelClient model = DynamXContext.getObjModelRegistry().getModel(info.getModel());
                 //Scale
                 GlStateManager.scale(info.getScaleModifier().x, info.getScaleModifier().y, info.getScaleModifier().z);
                 //If the wheel is not flattened, or the model does not supports flattening
-                if (wheelsStates[partWheel.getId()] != WheelState.ADDED_FLATTENED || !model.renderGroups("rim", wheelsTextureId[partWheel.getId()])) {
+                if (wheelsStates.get()[partWheel.getId()] != WheelState.ADDED_FLATTENED || !model.renderGroups("rim", wheelsTextureId[partWheel.getId()])) {
                     render.renderModel(model, entity, wheelsTextureId[partWheel.getId()]);
                 }
             }
@@ -487,7 +541,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
                         }*/
                 int numSkdding = 0;
                 for (int i = 0; i < entity.getPackInfo().getPartsByType(PartWheel.class).size(); i++) {
-                    if (wheelProperties[getPropertyIndex(i, VehicleEntityProperties.EnumWheelProperties.SKIDINFO)] < 0.1f)
+                    if (wheelProperties.get()[getPropertyIndex(i, VehicleEntityProperties.EnumWheelProperties.SKIDINFO)] < 0.1f)
                         numSkdding++;
                 }
                 if (numSkdding > 0) {

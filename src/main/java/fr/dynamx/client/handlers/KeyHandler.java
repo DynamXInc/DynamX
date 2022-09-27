@@ -66,12 +66,6 @@ public class KeyHandler {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void tick(TickEvent.ClientTickEvent event) {
         if ((mc.player != null) && (event.phase == TickEvent.Phase.START)) {
-            //FIXME SOLO : SIMPLIFY CONDITION
-            if (mc.player.getRidingEntity() instanceof BaseVehicleEntity && mc.isSingleplayer() && !DynamXConfig.clientOwnsPhysicsInSolo) {
-                //INEFFICIENT BUT NOT USED ANYMORE
-                ((BaseVehicleEntity<?>) mc.player.getRidingEntity()).getNetwork().onPrePhysicsTick(Profiler.get());
-                ((BaseVehicleEntity<?>) mc.player.getRidingEntity()).getNetwork().onPostPhysicsTick(Profiler.get());
-            }
             if (WalkingOnPlayerController.controller != null && (MC.player.isRiding() || MC.gameSettings.keyBindForward.isKeyDown() || MC.gameSettings.keyBindBack.isKeyDown() || MC.gameSettings.keyBindLeft.isKeyDown() || MC.gameSettings.keyBindRight.isKeyDown() || MC.gameSettings.keyBindJump.isKeyDown())) {
                 WalkingOnPlayerController.controller.disable();
             }
@@ -83,7 +77,7 @@ public class KeyHandler {
 
             if (KEY_PICK_OBJECT.isKeyDown() && MC.player.getRidingEntity() == null && MC.player.getHeldItemMainhand().isEmpty()) {
                 if (!DynamXContext.getPlayerPickingObjects().containsKey(MC.player.getEntityId())) {
-                    if (DynamXConfig.clientOwnsPhysicsInSolo && MC.isSingleplayer()) {
+                    if (MC.isSingleplayer()) {
                         PickingObjectHelper.handlePickingControl(new MovableModule.Action(MovableModule.EnumAction.PICK, 3), MC.player);
                     } else {
                         DynamXContext.getNetwork().sendToServer(new MessagePickObject(new MovableModule.Action(MovableModule.EnumAction.PICK, 3)));
@@ -91,7 +85,7 @@ public class KeyHandler {
                 }
             } else {
                 if (DynamXContext.getPlayerPickingObjects().containsKey(MC.player.getEntityId())) {
-                    if (DynamXConfig.clientOwnsPhysicsInSolo && MC.isSingleplayer()) {
+                    if (MC.isSingleplayer()) {
                         PickingObjectHelper.handlePickingControl(new MovableModule.Action(MovableModule.EnumAction.UNPICK), MC.player);
                     } else {
                         DynamXContext.getNetwork().sendToServer(new MessagePickObject(new MovableModule.Action(MovableModule.EnumAction.UNPICK)));
@@ -106,7 +100,7 @@ public class KeyHandler {
                         if (MC.player.getRidingEntity() == null && MC.player.getHeldItemMainhand().isEmpty() && !DynamXContext.getPlayerPickingObjects().containsKey(MC.player.getEntityId())) {
                             if (entityHit != null) {
                                 justPressed = true;
-                                if (DynamXConfig.clientOwnsPhysicsInSolo && MC.isSingleplayer()) {
+                                if (MC.isSingleplayer()) {
                                     PickingObjectHelper.handlePickingControl(new MovableModule.Action(MovableModule.EnumAction.TAKE, entityHit.getEntityId()), MC.player);
                                 } else {
                                     DynamXContext.getNetwork().sendToServer(new MessagePickObject(new MovableModule.Action(MovableModule.EnumAction.TAKE, entityHit.getEntityId())));
@@ -118,7 +112,7 @@ public class KeyHandler {
                 } else {
                     if (holdingDown > 10) {
                         if (DynamXContext.getPlayerPickingObjects().containsKey(MC.player.getEntityId())) {
-                            if (DynamXConfig.clientOwnsPhysicsInSolo && MC.isSingleplayer()) {
+                            if (MC.isSingleplayer()) {
                                 PickingObjectHelper.handlePickingControl(new MovableModule.Action(MovableModule.EnumAction.THROW, holdingDown), MC.player);
                             } else {
                                 DynamXContext.getNetwork().sendToServer(new MessagePickObject(new MovableModule.Action(MovableModule.EnumAction.THROW, holdingDown)));
@@ -128,7 +122,7 @@ public class KeyHandler {
                     } else if (holdingDown > 0) {
                         if (!justPressed) {
                             if (DynamXContext.getPlayerPickingObjects().containsKey(MC.player.getEntityId())) {
-                                if (DynamXConfig.clientOwnsPhysicsInSolo && MC.isSingleplayer()) {
+                                if (MC.isSingleplayer()) {
                                     PickingObjectHelper.handlePickingControl(new MovableModule.Action(MovableModule.EnumAction.UNTAKE), MC.player);
                                 } else {
                                     DynamXContext.getNetwork().sendToServer(new MessagePickObject(new MovableModule.Action(MovableModule.EnumAction.UNTAKE)));

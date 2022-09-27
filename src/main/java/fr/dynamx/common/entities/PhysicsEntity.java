@@ -9,11 +9,14 @@ import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.network.sync.PhysicsEntityNetHandler;
 import fr.dynamx.api.network.sync.SimulationHolder;
+import fr.dynamx.api.network.sync.SynchronizedVariablesRegistry;
+import fr.dynamx.api.network.sync.v3.PhysicsEntitySynchronizer;
 import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.entities.EntityPhysicsState;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.items.DynamXItemRegistry;
+import fr.dynamx.common.network.sync.SPPhysicsEntitySynchronizer;
 import fr.dynamx.common.network.sync.vars.PosSynchronizedVariable;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.player.WalkingOnPlayerController;
@@ -55,6 +58,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
      * Entity network
      */
     private final PhysicsEntityNetHandler<? extends PhysicsEntity<T>> network;
+    private final PhysicsEntitySynchronizer<? extends PhysicsEntity<T>> synchronizer;
     /**
      * The entity physics handler
      */
@@ -124,6 +128,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
 
         // Network Init
         network = DynamXMain.proxy.getNetHandlerForEntity(this);
+        synchronizer = new SPPhysicsEntitySynchronizer<>(this, world.isRemote ? Side.CLIENT : Side.SERVER); //TODO
         usesPhysicsWorld = DynamXContext.usesPhysicsWorld(world);
     }
 
@@ -192,6 +197,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
                 }
             }
             getNetwork().setSimulationHolder(getNetwork().getDefaultSimulationHolder());
+            getSynchronizer().setSimulationHolder(getSynchronizer().getDefaultSimulationHolder());
             if (CONSTRUYE_DEBUG)
                 System.out.println("When init physics : " + rotationYaw + " " + physicsRotation);
             initPhysicsEntity(usesPhysicsWorld);
@@ -242,7 +248,9 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
         //Tick physics if we don't use a physics world
         if (!usesPhysicsWorld) {
             getNetwork().onPrePhysicsTick(Profiler.get());
+            getSynchronizer().onPrePhysicsTick(Profiler.get());
             getNetwork().onPostPhysicsTick(Profiler.get());
+            getSynchronizer().onPostPhysicsTick(Profiler.get());
         }
 
         //Update visual pos
@@ -398,6 +406,10 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
      */
     public PhysicsEntityNetHandler<? extends PhysicsEntity<T>> getNetwork() {
         return network;
+    }
+
+    public PhysicsEntitySynchronizer<? extends PhysicsEntity<T>> getSynchronizer() {
+        return synchronizer;
     }
 
     /**

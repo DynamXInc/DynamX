@@ -140,7 +140,7 @@ public class CommonEventHandler {
      * @param pos   The modified position. The corresponding chunk will be reloaded
      */
     public static void onBlockChange(World world, BlockPos pos) {
-        if (world.provider.getDimension() == 0 && (!world.isRemote || (DynamXConfig.clientOwnsPhysicsInSolo && FMLCommonHandler.instance().getMinecraftServerInstance() != null))) {
+        if (world.provider.getDimension() == 0 && (!world.isRemote || FMLCommonHandler.instance().getMinecraftServerInstance() != null)) {
             VerticalChunkPos p = new VerticalChunkPos(pos.getX() >> 4, pos.getY() >> 4, pos.getZ() >> 4);
             if (TerrainFile.ULTIMATEDEBUG)
                 System.out.println("Notify " + p + " " + pos + " " + scheduledChunkReload);

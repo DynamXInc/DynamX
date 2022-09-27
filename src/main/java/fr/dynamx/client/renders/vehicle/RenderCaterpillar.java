@@ -39,7 +39,7 @@ public class RenderCaterpillar<T extends CaterpillarEntity<?>> extends RenderBas
                 /* Translation to the origin */
                 GlStateManager.translate(0.5, 1.1, 1);
                 /* Rotation of the steering wheel */
-                GlStateManager.rotate(-(module.prevVisualProperties[1] + (module.visualProperties[1] - module.prevVisualProperties[1]) * partialTicks), 0.0F, 0.0F, 1.0F);
+                GlStateManager.rotate(-(module.prevVisualProperties[1] + (module.visualProperties.get()[1] - module.prevVisualProperties[1]) * partialTicks), 0.0F, 0.0F, 1.0F);
                 /* Translate with the same values but negative to move it to it normal position*/
                 GlStateManager.translate(-0.5, -1.1, -1);
                 /* Rendering the steering wheel */
@@ -53,7 +53,7 @@ public class RenderCaterpillar<T extends CaterpillarEntity<?>> extends RenderBas
             ModularVehicleInfo<?> minfo = carEntity.getPackInfo();
 
             int index = VehicleEntityProperties.getPropertyIndex(0, VehicleEntityProperties.EnumVisualProperties.ROTATIONANGLE);
-            float an = ((module.prevVisualProperties[index] + (module.visualProperties[index] - module.prevVisualProperties[index]) * partialTicks)) % 360;
+            float an = ((module.prevVisualProperties[index] + (module.visualProperties.get()[index] - module.prevVisualProperties[index]) * partialTicks)) % 360;
             float dif = an - carEntity.prevAngle;
             carEntity.trackProgress += Math.toRadians(dif) * minfo.getPartsByType(PartWheel.class).get(0).getDefaultWheelInfo().getWheelRadius();
             /* Rendering the wheels */

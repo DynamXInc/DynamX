@@ -41,7 +41,11 @@ public class VehicleSynchronizedVariables {
     /**
      * Wheel data, used by {@link BaseVehicleEntity} that implement {@link IModuleContainer.IEngineContainer}
      */
-    public static class Engine<A extends BaseVehicleEntity<?>> implements SynchronizedVariable<A> {
+    /* FIXME sync v3 notes :
+     * - add ListeningSynchronizedEntityVariable for isEngineStarted
+     * - clean IEngineModule
+     */
+    /*public static class Engine<A extends BaseVehicleEntity<?>> implements SynchronizedVariable<A> {
         public static final ResourceLocation NAME = new ResourceLocation(DynamXConstants.ID, "engine");
 
         private float[] engineProperties;
@@ -156,12 +160,12 @@ public class VehicleSynchronizedVariables {
                 engineProperties[i] = buf.readFloat();
             }
         }
-    }
+    }*/
 
     /**
      * Wheel visual data, used by {@link BaseVehicleEntity} that have {@link fr.dynamx.common.entities.modules.WheelsModule}
      */
-    public static class WheelVisuals<A extends BaseVehicleEntity<?>> implements SynchronizedVariable<A> {
+    /*public static class WheelVisuals<A extends BaseVehicleEntity<?>> implements SynchronizedVariable<A> {
         public static final ResourceLocation NAME = new ResourceLocation(DynamXConstants.ID, "wvisuals");
 
         private float[] wheelProperties;
@@ -218,12 +222,12 @@ public class VehicleSynchronizedVariables {
                 wheelProperties[i] = buf.readFloat();
             }
         }
-    }
+    }*/
 
     /**
      * Wheel physics data, used by {@link BaseVehicleEntity} that have {@link WheelsModule}
      */
-    public static class WheelPhysics<A extends BaseVehicleEntity<?>> implements SynchronizedVariable<A> {
+    /*public static class WheelPhysics<A extends BaseVehicleEntity<?>> implements SynchronizedVariable<A> {
         public static final ResourceLocation NAME = new ResourceLocation(DynamXConstants.ID, "wphysics");
 
         private WheelState[] wheelsStates;
@@ -326,7 +330,7 @@ public class VehicleSynchronizedVariables {
     /**
      * Visual effects : wheel rotations and contacts
      */
-    public static class Visuals<A extends PhysicsEntity<?>> implements SynchronizedVariable<A> {
+    /*public static class Visuals<A extends PhysicsEntity<?>> implements SynchronizedVariable<A> {
         public static final ResourceLocation NAME = new ResourceLocation(DynamXConstants.ID, "visuals");
         private float[] visualProperties;
 
@@ -457,12 +461,12 @@ public class VehicleSynchronizedVariables {
                 visualProperties[i] = buf.readFloat();
             }
         }
-    }
+    }*/
 
     /**
      * All player inputs for a {@link BaseVehicleEntity} that have an {@link fr.dynamx.common.entities.modules.EngineModule}
      */
-    public static class Controls<A extends BaseVehicleEntity<?>> implements SynchronizedVariable<A> {
+    /*public static class Controls<A extends BaseVehicleEntity<?>> implements SynchronizedVariable<A> {
         public static final ResourceLocation NAME = new ResourceLocation(DynamXConstants.ID, "controls");
 
         private int controls;
@@ -511,7 +515,7 @@ public class VehicleSynchronizedVariables {
             controls = buf.readInt();
             speedLimit = buf.readFloat();
         }
-    }
+    }*/
 
     public static class DoorsStatus<A extends PackPhysicsEntity<?, ?>> implements SynchronizedVariable<A> {
         public static final ResourceLocation NAME = new ResourceLocation(DynamXConstants.ID, "doorsstatus");

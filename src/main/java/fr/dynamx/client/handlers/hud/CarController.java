@@ -141,10 +141,10 @@ public class CarController implements IVehicleController {
                 }
             }
             if (speedLimiter.isPressed()) {
-                if (speedLimit == Integer.MAX_VALUE)
+                if (speedLimit == Float.MAX_VALUE)
                     speedLimit = Math.abs(engine.getEngineProperties()[0]);
                 else
-                    speedLimit = Integer.MAX_VALUE;
+                    speedLimit = Float.MAX_VALUE;
             }
 
             if (toggleLockDoor.isPressed()) {
@@ -176,7 +176,6 @@ public class CarController implements IVehicleController {
                 controls = controls | 32;
             engine.setControls(controls);
             engine.setSpeedLimit(speedLimit);
-
         }
     }
 
@@ -217,7 +216,7 @@ public class CarController implements IVehicleController {
         panel.add(speed);
 
         panel.add(new UpdatableGuiLabel("hud.car.speedlimit", s -> {
-            if (speedLimit != Integer.MAX_VALUE) {
+            if (speedLimit != Float.MAX_VALUE) {
                 return I18n.format(s, (int) speedLimit);
             } else {
                 return "";

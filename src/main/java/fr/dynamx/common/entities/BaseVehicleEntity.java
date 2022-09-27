@@ -52,11 +52,7 @@ public abstract class BaseVehicleEntity<T extends BaseVehiclePhysicsHandler<?>> 
 
     @Override
     public List<ResourceLocation> getSynchronizedVariables(Side side, SimulationHolder simulationHolder) {
-        List<ResourceLocation> vars = super.getSynchronizedVariables(side, simulationHolder);
-        if(this instanceof IModuleContainer.IEngineContainer && simulationHolder.isPhysicsAuthority(side)) {
-            vars.add(VehicleSynchronizedVariables.Engine.NAME);
-        }
-        return vars;
+        return super.getSynchronizedVariables(side, simulationHolder);
     }
 
     @Override

@@ -79,7 +79,7 @@ public abstract class AttachedBodySynchronizedVariable<T extends PhysicsEntity<?
                 }
             }
         }
-        return changed ? SyncTarget.SPECTATORS_PEDESTRIANS : SyncTarget.NONE;
+        return changed ? SyncTarget.SPECTATORS : SyncTarget.NONE;
     }
 
     @Override

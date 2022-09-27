@@ -5,6 +5,7 @@ import fr.dynamx.api.network.EnumNetworkType;
 import fr.dynamx.api.network.IDnxPacket;
 import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.modules.DoorsModule;
 import io.netty.buffer.ByteBuf;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -40,7 +41,7 @@ public class MessageOpenDoor implements IDnxPacket, IMessageHandler<MessageOpenD
         //System.out.println(vehicleEntity);
         if (vehicleEntity != null) {
             PartSeat seat = ((IModuleContainer.ISeatsContainer)vehicleEntity).getSeats().getRidingSeat(ctx.getServerHandler().player);
-            ((IModuleContainer.IDoorContainer) vehicleEntity).getDoors().setDoorState(seat.getLinkedPartDoor(vehicleEntity).getId(), message.isDoorOpened);
+            ((IModuleContainer.IDoorContainer) vehicleEntity).getDoors().setDoorState(seat.getLinkedPartDoor(vehicleEntity).getId(), message.isDoorOpened ? DoorsModule.DoorState.OPEN : DoorsModule.DoorState.CLOSE);
         }
         return null;
     }

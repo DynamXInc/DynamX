@@ -89,7 +89,7 @@ public class ServerPhysicsEntityNetHandler<T extends PhysicsEntity<?>> extends P
 
             profiler.start(Profiler.Profiles.PKTSEND2);
             Set<? extends EntityPlayer> l = ((WorldServer) entity.world).getEntityTracker().getTrackingPlayers(entity);
-            l.forEach(p -> sendSyncTo(p, retainSyncVars(getOutputSyncVars(), varsToSync, p == entity.getControllingPassenger() ? SyncTarget.DRIVER : p.getRidingEntity() instanceof BaseVehicleEntity && p.getRidingEntity().getControllingPassenger() == p ? SyncTarget.SPECTATORS : SyncTarget.SPECTATORS_PEDESTRIANS)));
+            l.forEach(p -> sendSyncTo(p, retainSyncVars(getOutputSyncVars(), varsToSync, p == entity.getControllingPassenger() ? SyncTarget.DRIVER : SyncTarget.SPECTATORS)));
             profiler.end(Profiler.Profiles.PKTSEND2);
             updateCount++;
         }

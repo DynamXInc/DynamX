@@ -7,6 +7,7 @@ import fr.dynamx.api.entities.callbacks.ModularEntityPhysicsInitCallback;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.network.sync.SimulationHolder;
+import fr.dynamx.api.network.sync.SynchronizedVariablesRegistry;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.entities.PackEntityPhysicsHandler;
 import net.minecraft.entity.Entity;
@@ -17,6 +18,7 @@ import net.minecraftforge.fml.relauncher.Side;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -124,6 +126,7 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
         }
         //Init them before sorting because listened functions may change
         sortModules();
+        SynchronizedVariablesRegistry.setSyncVarsForContext(world.isRemote ? Side.CLIENT : Side.SERVER, new HashMap<>(), getNetwork()); //todo TEMPORARY
         return true;
     }
 

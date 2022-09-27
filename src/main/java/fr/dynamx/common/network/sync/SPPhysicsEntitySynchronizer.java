@@ -1,21 +1,23 @@
-package fr.dynamx.common.network;
+package fr.dynamx.common.network.sync;
 
-import com.google.common.collect.Queues;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.IVehicleController;
-import fr.dynamx.api.network.sync.*;
+import fr.dynamx.api.network.sync.ClientEntityNetHandler;
+import fr.dynamx.api.network.sync.SimulationHolder;
+import fr.dynamx.api.network.sync.SyncTarget;
+import fr.dynamx.api.network.sync.v3.PhysicsEntitySynchronizer;
+import fr.dynamx.api.network.sync.v3.SynchronizedEntityVariable;
+import fr.dynamx.api.network.sync.v3.SynchronizedEntityVariableRegistry;
+import fr.dynamx.api.network.sync.v3.SynchronizedEntityVariableSnapshot;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.network.packets.MessageJoints;
 import fr.dynamx.common.network.packets.PhysicsEntityMessage;
-import fr.dynamx.common.network.sync.MessageSeatsSync;
-import fr.dynamx.common.network.sync.vars.EntityPhysicsState;
 import fr.dynamx.common.physics.joints.EntityJoint;
 import fr.dynamx.common.physics.joints.EntityJointsHandler;
 import fr.dynamx.utils.debug.Profiler;
-import fr.dynamx.utils.optimization.HashMapPool;
 import fr.dynamx.utils.optimization.PooledHashMap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -32,15 +34,13 @@ import static fr.dynamx.common.DynamXMain.log;
 /**
  * Simplified networks handler (there are no packets sent) for singleplayer games
  */
-public class SPPhysicsEntityNetHandler<T extends PhysicsEntity<?>> extends PhysicsEntityNetHandler<T> implements ClientEntityNetHandler {
+public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends PhysicsEntitySynchronizer<T> implements ClientEntityNetHandler {
     private final Side mySide;
     private final List<IVehicleController> controllers = new ArrayList<>();
     private Map<Integer, SyncTarget> varsToSync = new HashMap<>();
     private int updateCount = 0;
 
-    private Queue<PooledHashMap<Integer, SynchronizedVariable<T>>> updateQueue = Queues.newConcurrentLinkedQueue();
-
-    public SPPhysicsEntityNetHandler(T entityIn, Side side) {
+    public SPPhysicsEntitySynchronizer(T entityIn, Side side) {
         super(entityIn);
         this.mySide = side;
     }
@@ -52,20 +52,23 @@ public class SPPhysicsEntityNetHandler<T extends PhysicsEntity<?>> extends Physi
         return DynamXMain.proxy.getServerWorld().getEntityByID(entity.getEntityId());
     }
 
-    private void sendMyVars(SPPhysicsEntityNetHandler<T> other, SyncTarget to) {
-        PooledHashMap<Integer, SynchronizedVariable<T>> varsToSync = SynchronizedVariablesRegistry.retainSyncVars(getOutputSyncVars(), this.varsToSync, to);
-        PooledHashMap<Integer, SynchronizedVariable<T>> varsToRead = HashMapPool.get();
+    private <A> void sendMyVars(SPPhysicsEntitySynchronizer<T> other, SyncTarget to) {
+        //TODO CLEAN METHOD
+        PooledHashMap<Integer, SynchronizedEntityVariable<?>> varsToSync = SynchronizedEntityVariableRegistry.retainSyncVars(getSynchronizedVariables(), this.varsToSync, to);
         ByteBuf buf = Unpooled.buffer();
-        for (Map.Entry<Integer, SynchronizedVariable<T>> entry : varsToSync.entrySet()) {
+        for (Map.Entry<Integer, SynchronizedEntityVariable<?>> entry : varsToSync.entrySet()) {
             Integer i = entry.getKey();
-            SynchronizedVariable<T> v = entry.getValue();
-            v.write(buf, false);
-            SynchronizedVariable<T> v2 = (SynchronizedVariable<T>) SynchronizedVariablesRegistry.instantiate(i);
-            v2.read(buf);
+            SynchronizedEntityVariable<A> v = (SynchronizedEntityVariable<A>) entry.getValue();
+            v.getSerializer().writeObject(buf, v.get());
+            v.setChanged(false);
+            SynchronizedEntityVariableSnapshot<A> v2 = (SynchronizedEntityVariableSnapshot<A>) other.getReceivedVariables().get(i);
+            if(v2 != null) {
+                v2.read(buf);
+            } else {
+                System.out.println("Var not found " + i + " " + v + " " + other.getReceivedVariables());
+            }
             buf.clear();
-            varsToRead.put(i, v2);
         }
-        other.updateQueue.add(varsToRead);
         varsToSync.release();
     }
 
@@ -75,7 +78,7 @@ public class SPPhysicsEntityNetHandler<T extends PhysicsEntity<?>> extends Physi
             entity.physicsHandler.setForceActivation(true);
         }
         setSimulationHolder(SimulationHolder.DRIVER_SP);
-        if (player.world.isRemote && player.isUser()) {
+        if (player.world.isRemote && player.isUser() && false) {
             if (entity instanceof BaseVehicleEntity) {
                 for (Object module : ((BaseVehicleEntity) entity).getModules()) {
                     IVehicleController c = ((IPhysicsModule) module).createNewController();
@@ -84,8 +87,6 @@ public class SPPhysicsEntityNetHandler<T extends PhysicsEntity<?>> extends Physi
                 }
             }
         }
-
-        entity.getSynchronizer().onPlayerStartControlling(player, addControllers);
     }
 
     @Override
@@ -97,8 +98,6 @@ public class SPPhysicsEntityNetHandler<T extends PhysicsEntity<?>> extends Physi
         if (player.world.isRemote && player.isUser()) {
             controllers.clear();
         }
-
-        entity.getSynchronizer().onPlayerStopControlling(player, removeControllers);
     }
 
     @Override
@@ -106,30 +105,23 @@ public class SPPhysicsEntityNetHandler<T extends PhysicsEntity<?>> extends Physi
         if (entity.world.isRemote && entity.initialized == 2 && isLocalPlayerDriving() && entity instanceof IModuleContainer.IEngineContainer) {
             controllers.forEach(IVehicleController::update);
         }
-
         Entity other = getOtherSideEntity();
         if (other instanceof PhysicsEntity) {
-            getInputSyncVars().clear();
-            if (!updateQueue.isEmpty()) {
-                while (updateQueue.size() > 1)
-                    putInputSyncVars(updateQueue.poll());
-            }
-            getInputSyncVars().forEach((i, v) -> v.setValueTo(entity, this, null, mySide));
+            getReceivedVariables().forEach((key, value) -> ((SynchronizedEntityVariableSnapshot<Object>) value).updateVariable((SynchronizedEntityVariable<Object>) getSynchronizedVariables().get(key)));
         }
-        //entity.prePhysicsUpdateWrapper(profiler, entity.usesPhysicsWorld());
+        entity.prePhysicsUpdateWrapper(profiler, entity.usesPhysicsWorld());
     }
 
     @Override
     public void onPostPhysicsTick(Profiler profiler) {
-        entity.postUpdatePhysicsWrapper(profiler, entity.usesPhysicsWorld());
+        //entity.postUpdatePhysicsWrapper(profiler, entity.usesPhysicsWorld());
 
         Entity other = getOtherSideEntity();
-        if (other instanceof PhysicsEntity) {
+        if (other instanceof PhysicsEntity && ((PhysicsEntity<?>) other).initialized != 0) {
             if (!mySide.isServer()) {
                 varsToSync.clear();
                 getDirtyVars(varsToSync, Side.SERVER, updateCount);
-                getOutputSyncVars().forEach((i, s) -> s.getValueFrom(entity, this, Side.SERVER, entity.ticksExisted));
-                sendMyVars((SPPhysicsEntityNetHandler<T>) ((T) other).getNetwork(), SyncTarget.SERVER);
+                sendMyVars((SPPhysicsEntitySynchronizer<T>) ((T) other).getSynchronizer(), SyncTarget.SERVER);
             } else {
                 varsToSync.clear();
                 profiler.start(Profiler.Profiles.PKTSEND1);
@@ -137,7 +129,7 @@ public class SPPhysicsEntityNetHandler<T extends PhysicsEntity<?>> extends Physi
                 profiler.end(Profiler.Profiles.PKTSEND1);
 
                 profiler.start(Profiler.Profiles.PKTSEND2);
-                sendMyVars((SPPhysicsEntityNetHandler<T>) ((T) other).getNetwork(), SyncTarget.SPECTATORS);
+                sendMyVars((SPPhysicsEntitySynchronizer<T>) ((T) other).getSynchronizer(), SyncTarget.SPECTATORS);
                 profiler.end(Profiler.Profiles.PKTSEND2);
             }
             updateCount++;
@@ -165,10 +157,10 @@ public class SPPhysicsEntityNetHandler<T extends PhysicsEntity<?>> extends Physi
     @Override
     public void processPacket(PhysicsEntityMessage<?> message) {
         if (message.getMessageId() == 3) {//Seats
-            if (entity instanceof IModuleContainer.ISeatsContainer)
+            /* todo if (entity instanceof IModuleContainer.ISeatsContainer)
                 ((IModuleContainer.ISeatsContainer) entity).getSeats().updateSeats((MessageSeatsSync) message, this);
             else
-                log.fatal("Received seats packet for an entity that have no seats !");
+                log.fatal("Received seats packet for an entity that have no seats !"); */
         } else if (message.getMessageId() == 6) {//Joints
             if (entity.getJointsHandler() != null) {
                 List<EntityJoint.CachedJoint> joints = ((MessageJoints) message).getJointList();
@@ -199,11 +191,6 @@ public class SPPhysicsEntityNetHandler<T extends PhysicsEntity<?>> extends Physi
         } else {
             throw new UnsupportedOperationException("Packets unavailable in single player");
         }
-    }
-
-    @Override
-    public Map<Integer, EntityPhysicsState> getOldStates() {
-        throw new IllegalStateException("Solo network");
     }
 
     @Override

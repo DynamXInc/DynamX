@@ -3,11 +3,10 @@ package fr.dynamx.common.contentpack.parts;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
-import fr.dynamx.api.contentpack.registry.DefinitionType;
-import fr.dynamx.api.contentpack.registry.PackFileProperty;
+import fr.dynamx.api.contentpack.registry.*;
 import fr.dynamx.api.entities.IModuleContainer;
-import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
-import fr.dynamx.common.contentpack.type.PartWheelInfo;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfoBuilder;
+import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.WheelsModule;
 import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
@@ -16,8 +15,16 @@ import fr.dynamx.utils.debug.DynamXDebugOptions;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.AxisAlignedBB;
 
+@RegisteredSubInfoType(name = "wheel", registries = SubInfoTypeRegistries.WHEELED_VEHICLES, strictName = false)
 public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfoBuilder> {
-    @PackFileProperty(configNames = "IsRight", oldNames = "isRight")
+    @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
+    public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
+        if ("isRight".equals(key))
+            return new IPackFilePropertyFixer.FixResult("IsRight", true);
+        return null;
+    };
+
+    @PackFileProperty(configNames = "IsRight")
     private boolean isRight;
     @PackFileProperty(configNames = "IsSteerable")
     private boolean wheelIsSteerable;
@@ -34,7 +41,7 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
     @PackFileProperty(configNames = "RotationPoint", required = false, type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y)
     private Vector3f rotationPoint;
     @PackFileProperty(configNames = "SuspensionAxis", required = false)
-    private final Quaternion suspensionAxis = new Quaternion();
+    private Quaternion suspensionAxis = new Quaternion();
 
     private PartWheelInfo defaultWheelInfo;
 
@@ -137,6 +144,6 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
 
     @Override
     public String getName() {
-        return "PartWheel named " + getPartName() + " in " + getOwner().getName();
+        return "PartWheel named " + getPartName();
     }
 }

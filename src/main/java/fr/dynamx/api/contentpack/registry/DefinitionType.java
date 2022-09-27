@@ -5,8 +5,8 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
 import fr.dynamx.common.contentpack.loader.PackConstants;
 import fr.dynamx.common.contentpack.parts.PartShape;
-import fr.dynamx.utils.EnumSeatPlayerPosition;
 import fr.dynamx.utils.EnumPlayerStandOnTop;
+import fr.dynamx.utils.EnumSeatPlayerPosition;
 import fr.dynamx.utils.physics.EnumCollisionType;
 import net.minecraft.block.material.Material;
 import net.minecraft.util.EnumParticleTypes;
@@ -15,6 +15,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 import javax.vecmath.Vector2f;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -168,7 +169,8 @@ public class DefinitionType<T> {
         }, v -> v.x + " " + v.y + " " + v.z, "type.vector3f")),
         QUATERNION(new DefinitionType<>(Quaternion.class, (s) -> {
             String[] t = s.split(" ");
-            return new Quaternion(Float.parseFloat(t[1]), Float.parseFloat(t[2]), Float.parseFloat(t[3]), Float.parseFloat(t[0]));
+            Quaternion q = new Quaternion(Float.parseFloat(t[1]), Float.parseFloat(t[2]), Float.parseFloat(t[3]), Float.parseFloat(t[0]));
+            return q.normalizeLocal();
         }, v -> v.getX() + " " + v.getY() + " " + v.getZ() + " " + v.getW(), "type.quaternion")),
         /**
          * Vector3f def, but only with x and y arguments, z=0

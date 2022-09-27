@@ -2,10 +2,13 @@ package fr.dynamx.common.contentpack.parts;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.part.BasePart;
-import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
+import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
+import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfoBuilder;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import net.minecraft.util.math.AxisAlignedBB;
 
+@RegisteredSubInfoType(name = "float", registries = SubInfoTypeRegistries.WHEELED_VEHICLES, strictName = false)
 public class PartFloat extends BasePart<ModularVehicleInfoBuilder> {
     public AxisAlignedBB box;
 
@@ -30,6 +33,6 @@ public class PartFloat extends BasePart<ModularVehicleInfoBuilder> {
 
     @Override
     public String getName() {
-        return "PartFloat named " + getPartName() + " in " + getOwner().getName();
+        return "PartFloat named " + getPartName();
     }
 }

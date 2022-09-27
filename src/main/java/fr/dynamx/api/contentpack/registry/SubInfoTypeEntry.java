@@ -2,6 +2,8 @@ package fr.dynamx.api.contentpack.registry;
 
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
+import fr.dynamx.common.contentpack.loader.SubInfoTypesRegistry;
+import lombok.Getter;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -13,11 +15,16 @@ import java.lang.reflect.InvocationTargetException;
  * @see ISubInfoType
  */
 public class SubInfoTypeEntry<T extends ISubInfoTypeOwner<?>> {
+    /**
+     * The key of this entry
+     */
+    @Getter
     private final String key;
     private final ISubInfoTypeCreator<T> creator;
     /**
      * If strict, then the name must equals to the name in info file, else it can be contained in it
      */
+    @Getter
     private final boolean strict;
 
     /**
@@ -85,12 +92,5 @@ public class SubInfoTypeEntry<T extends ISubInfoTypeOwner<?>> {
      */
     public ISubInfoType<T> create(T owner, String name) {
         return creator.apply(owner, name);
-    }
-
-    /**
-     * @return The key of this entry
-     */
-    public String getKey() {
-        return key;
     }
 }

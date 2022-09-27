@@ -98,9 +98,8 @@ public class MessageSyncConfig implements IDnxPacket, IMessageHandler<MessageSyn
     public void handleUDPReceive(EntityPlayer context, Side side) {
         Minecraft.getMinecraft().addScheduledTask(() -> {
             DynamXConfig.mountedVehiclesSyncTickRate = syncDelay;
-            if (reloadResources) {
-                DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.CLIENT, () -> DynamXContext.getObjModelRegistry().getItemRenderer().refreshItemInfos(), DynamXLoadingTasks.PACK);
-            }
+            if (reloadResources)
+                DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.CLIENT, DynamXLoadingTasks.PACK);
             ContentPackLoader.getBlocksGrip().clear();
             ContentPackLoader.getBlocksGrip().putAll(blockInfos);
             ContentPackLoader.slopes.clear();

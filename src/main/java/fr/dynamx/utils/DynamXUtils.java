@@ -6,6 +6,7 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IShapeProvider;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.entities.VehicleEntityProperties;
+import fr.dynamx.api.contentpack.ContentPackType;
 import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.api.physics.EnumBulletShapeType;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
@@ -86,7 +87,11 @@ public class DynamXUtils {
      */
     public static ObjModelPath getModelPath(String packName, String model) {
         PackInfo info = DynamXObjectLoaders.PACKS.findPackInfoByPackName(packName);
-        return new ObjModelPath(info == null ? packName : info.getPathName(), RegistryNameSetter.getDynamXModelResourceLocation(model));
+        if (info == null) {
+            System.err.println("WTF PACK INFO " + packName + " NOT FOUND");
+            return new ObjModelPath(new PackInfo(packName, ContentPackType.FOLDER), RegistryNameSetter.getDynamXModelResourceLocation(model));
+        }
+        return new ObjModelPath(info, RegistryNameSetter.getDynamXModelResourceLocation(model));
     }
 
     public static byte[] readInputStream(InputStream resource) throws IOException {
@@ -103,6 +108,10 @@ public class DynamXUtils {
 
     public static Vector3f toVector3f(Vec3d pos) {
         return Vector3fPool.get((float) pos.x, (float) pos.y, (float) pos.z);
+    }
+
+    public static Vector3f toVector3f(BlockPos pos) {
+        return Vector3fPool.get((float) pos.getX(), (float) pos.getY(), (float) pos.getZ());
     }
 
     public static Vector3f getPositionEyes(Entity entity) {

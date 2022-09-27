@@ -25,6 +25,8 @@ import java.util.Collections;
 import java.util.List;
 
 public class GuiSlopesConfig extends GuiFrame {
+    public static final ResourceLocation STYLE = new ResourceLocation(DynamXConstants.ID, "css/slope_generator.css");
+
     private final IMouseClickListener exitButton;
     private boolean cancelled;
 
@@ -106,6 +108,6 @@ public class GuiSlopesConfig extends GuiFrame {
 
     @Override
     public List<ResourceLocation> getCssStyles() {
-        return Collections.singletonList(new ResourceLocation(DynamXConstants.ID, "css/slope_generator.css"));
+        return Collections.singletonList(STYLE);
     }
 }

@@ -5,8 +5,10 @@ import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoType;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
-import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
+import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
+import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 
+@RegisteredSubInfoType(name = "boat_engine", registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
 /**
  * Info of the trailer attach point of a vehicle
  */
@@ -19,10 +21,10 @@ public class BoatEngineInfo extends SubInfoType<ModularVehicleInfoBuilder> {
     }
 
     @Override
-    public void appendTo(ModularVehicleInfoBuilder partInfo) {
+    public void appendTo(ModularVehicleInfoBuilder owner) {
         if (getPosition() == null)
-            throw new IllegalArgumentException("AttachPoint not configured ! In trailer of " + partInfo.toString());
-        partInfo.addSubProperty(this);
+            throw new IllegalArgumentException("AttachPoint not configured ! In trailer of " + owner.toString());
+        owner.addSubProperty(this);
     }
 
     public Vector3f getPosition() {
@@ -31,6 +33,6 @@ public class BoatEngineInfo extends SubInfoType<ModularVehicleInfoBuilder> {
 
     @Override
     public String getName() {
-        return "BoatEngineInfo in " + getOwner().getName();
+        return "BoatEngineInfo";
     }
 }

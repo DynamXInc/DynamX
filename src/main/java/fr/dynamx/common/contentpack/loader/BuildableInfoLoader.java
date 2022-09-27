@@ -1,15 +1,14 @@
 package fr.dynamx.common.contentpack.loader;
 
-import fr.aym.acslib.api.services.ErrorTrackingService;
+import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.IShapeContainer;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoTypeOwner;
-import fr.dynamx.api.contentpack.registry.SubInfoTypesRegistry;
-import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.sync.PackSyncHandler;
 import fr.dynamx.common.contentpack.type.ObjectInfo;
-import fr.dynamx.utils.DynamXLoadingTasks;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfoBuilder;
+import fr.dynamx.utils.errors.DynamXErrorManager;
 import net.minecraftforge.fml.common.ProgressManager;
 
 import javax.annotation.Nonnull;
@@ -92,16 +91,14 @@ public class BuildableInfoLoader<A extends SubInfoTypeOwner.BuildableSubInfoType
                 ((IShapeContainer) info).generateShape();
             } catch (Exception e) {
                 ((IShapeContainer) info).markFailedShape();
-                DynamXMain.log.fatal("Cannot load physics collision shape of " + info.getFullName() + " !", e);
-                DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, info.getPackName(), info.getFullName(), "Cannot load physics collision shape : " + e.getMessage(), ErrorTrackingService.TrackedErrorLevel.FATAL);
+                DynamXErrorManager.addError(info.getPackName(), DynamXErrorManager.PACKS__ERRORS, "collision_shape_error", ErrorLevel.FATAL, info.getName(), null, e);
             }
             if (!info.isErrored()) {
                 try {
                     T vehicleInfo = info.build();
                     super.loadItems(vehicleInfo, hot);
                 } catch (Exception e) {
-                    log.error("Cannot complete vehicle " + info + " !", e);
-                    DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, info.getPackName(), info.getFullName(), "Cannot complete vehicle : " + e.getMessage(), ErrorTrackingService.TrackedErrorLevel.FATAL);
+                    DynamXErrorManager.addError(info.getPackName(), DynamXErrorManager.PACKS__ERRORS, "complete_vehicle_error", ErrorLevel.FATAL, info.getName(), null, e);
                 }
             } else {
                 log.info("Ignoring errored vehicle " + info.getFullName() + ". See previous errors.");

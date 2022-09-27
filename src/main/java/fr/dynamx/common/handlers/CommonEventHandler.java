@@ -41,7 +41,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.ChunkEvent;
@@ -199,6 +198,12 @@ public class CommonEventHandler {
         }
     }
 
+    @SubscribeEvent
+    public void onWorldLoad(WorldEvent.Load event) {
+        World world = event.getWorld();
+        world.addEventListener(new DynamXWorldListener());
+    }
+
     /*@SubscribeEvent
     public void onChunkLoad(ChunkEvent.Load event) {
         ChunkAABB capability = event.getChunk().getCapability(CapaProvider.CHUNK_AABB_CAPABILITY, null);
@@ -292,12 +297,6 @@ public class CommonEventHandler {
             Vector3fPool.closePool();
             QuaternionPool.closePool();
         }
-    }
-
-    @SubscribeEvent
-    public void onPlayerLoggedOut(net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedOutEvent event) {
-        if (DynamXContext.getPlayerToCollision().containsKey(event.player))
-            DynamXContext.getPlayerToCollision().get(event.player).removeFromWorld(true);
     }
 
     @SubscribeEvent

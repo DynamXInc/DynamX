@@ -5,29 +5,31 @@ import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoType;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
+import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
+import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
-import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.TrailerAttachModule;
 
 /**
  * Info of the trailer attach point of a vehicle
  */
+@RegisteredSubInfoType(name = "trailer", registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
 public class TrailerAttachInfo extends SubInfoType<ModularVehicleInfoBuilder> {
     @PackFileProperty(configNames = "AttachPoint", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y)
     private Vector3f trailerAttachPoint;
     @PackFileProperty(configNames = "AttachStrength", required = false)
-    private final int trailerAttachStrength = 1000;
+    private int trailerAttachStrength = 1000;
 
     public TrailerAttachInfo(ISubInfoTypeOwner<ModularVehicleInfoBuilder> owner) {
         super(owner);
     }
 
     @Override
-    public void appendTo(ModularVehicleInfoBuilder partInfo) {
+    public void appendTo(ModularVehicleInfoBuilder owner) {
         if (trailerAttachPoint == null)
-            throw new IllegalArgumentException("AttachPoint not configured ! In trailer of " + partInfo.toString());
-        partInfo.addSubProperty(this);
+            throw new IllegalArgumentException("AttachPoint not configured ! In trailer of " + owner.toString());
+        owner.addSubProperty(this);
     }
 
     @Override
@@ -45,6 +47,6 @@ public class TrailerAttachInfo extends SubInfoType<ModularVehicleInfoBuilder> {
 
     @Override
     public String getName() {
-        return "TrailerAttachInfo in " + getOwner().getName();
+        return "TrailerAttachInfo";
     }
 }

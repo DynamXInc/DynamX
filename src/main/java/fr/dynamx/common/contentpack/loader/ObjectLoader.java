@@ -1,11 +1,13 @@
 package fr.dynamx.common.contentpack.loader;
 
+import fr.dynamx.api.contentpack.ContentPackType;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
-import fr.dynamx.api.contentpack.registry.SubInfoTypesRegistry;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.ContentPackLoader;
+import fr.dynamx.common.contentpack.DynamXObjectLoaders;
+import fr.dynamx.common.contentpack.PackInfo;
 import fr.dynamx.common.contentpack.type.ObjectInfo;
 import fr.dynamx.common.contentpack.type.objects.AbstractItemObject;
 import fr.dynamx.common.items.DynamXItemRegistry;
@@ -83,6 +85,10 @@ public class ObjectLoader<T extends ObjectInfo<?>, C extends IInfoOwner<?>, U ex
         T info = assetCreator.apply(modName, objectName);
         owners.add((IInfoOwner<T>) owner);
         builtinObjects.add(info);
+        if(DynamXObjectLoaders.PACKS.findPackInfoByPackName(modName) == null)
+            DynamXObjectLoaders.PACKS.addInfo(modName, new PackInfo(modName, ContentPackType.BUILTIN));
+        //System.out.println("Builtin pack info added is " + DynamXObjectLoaders.PACKS.findPackInfoByPackName(modName)+" with name " + modName);
+        //System.out.println("All info " + DynamXObjectLoaders.PACKS.getInfos());
         return info;
     }
 
@@ -102,7 +108,6 @@ public class ObjectLoader<T extends ObjectInfo<?>, C extends IInfoOwner<?>, U ex
                 String creativeTabName = ((AbstractItemObject<?>) info).getCreativeTabName();
                 if (creativeTabName != null && !creativeTabName.equalsIgnoreCase("None")) {
                     if (DynamXItemRegistry.creativeTabs.stream().noneMatch(p -> DynamXReflection.getCreativeTabName(p).equals(creativeTabName))) {
-                        DynamXMain.log.info("Creative Tab : " + creativeTabName + " not found. Creating a new one");
                         DynamXItemRegistry.creativeTabs.add(new CreativeTabs(creativeTabName) {
                             @Override
                             public ItemStack createIcon() {

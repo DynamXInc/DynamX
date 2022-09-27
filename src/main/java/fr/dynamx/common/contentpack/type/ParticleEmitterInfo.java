@@ -5,12 +5,17 @@ import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoType;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
+import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
+import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
+import lombok.Getter;
 import net.minecraft.util.EnumParticleTypes;
 
 import java.util.Collections;
 import java.util.List;
 
+@RegisteredSubInfoType(name = "emitter", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.BLOCKS_AND_PROPS}, strictName = false)
 public class ParticleEmitterInfo<T extends ISubInfoTypeOwner<T> & ParticleEmitterInfo.IParticleEmitterContainer> extends SubInfoType<T> {
+    @Getter
     private final String emitterName;
 
     @PackFileProperty(configNames = "Type", type = DefinitionType.DynamXDefinitionTypes.PARTICLE_TYPE)
@@ -29,13 +34,9 @@ public class ParticleEmitterInfo<T extends ISubInfoTypeOwner<T> & ParticleEmitte
         }
     }
 
-    public String getEmitterName() {
-        return emitterName;
-    }
-
     @Override
     public String getName() {
-        return "ParticleEmitterInfo in " + getOwner().getName();
+        return "ParticleEmitterInfo_" + emitterName;
     }
 
     @Override

@@ -176,7 +176,4 @@ public class RenderRagdoll<T extends RagdollEntity> extends RenderPhysicsEntity<
     public void renderParts(T entity, float partialTicks) {
     }
 
-    @Override
-    public void spawnParticles(T entity, float partialTicks) {
-    }
 }

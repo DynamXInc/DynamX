@@ -30,7 +30,7 @@ public class ContentPackDocGenerator {
         builder.append("| -------- | ------------- | ------------------ | ---------------------------- | ---------------- |\n");
         data.forEach(d -> d.writeDocLine(builder, locale, DocType.REQUIRED));
         data.forEach(d -> d.writeDocLine(builder, locale, DocType.OPTIONAL));
-        data.forEach(d -> d.writeDocLine(builder, locale, DocType.DEPRECATED));
+        //data.forEach(d -> d.writeDocLine(builder, locale, DocType.DEPRECATED));
         File docDir = new File("Doc");
         docDir.mkdirs();
         try {
@@ -89,6 +89,6 @@ public class ContentPackDocGenerator {
     }
 
     public enum DocType {
-        REQUIRED, OPTIONAL, DEPRECATED
+        REQUIRED, OPTIONAL
     }
 }

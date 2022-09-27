@@ -6,7 +6,7 @@ import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.common.DynamXContext;
-import fr.dynamx.common.contentpack.ModularVehicleInfo;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.contentpack.parts.PartWheel;
 import fr.dynamx.common.contentpack.type.vehicle.CaterpillarInfo;
 import fr.dynamx.common.entities.modules.WheelsModule;
@@ -159,7 +159,4 @@ public class RenderCaterpillar<T extends CaterpillarEntity<?>> extends RenderBas
 
     }
 
-    @Override
-    public void spawnParticles(T carEntity, float partialTicks) {
-    }
 }

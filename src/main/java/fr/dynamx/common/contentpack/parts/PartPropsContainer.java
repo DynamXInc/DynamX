@@ -3,14 +3,17 @@ package fr.dynamx.common.contentpack.parts;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
+import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
+import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
-import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfoBuilder;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.PropsContainerModule;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 
+@RegisteredSubInfoType(name = "propscontainer", registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
 public class PartPropsContainer extends BasePart<ModularVehicleInfoBuilder> implements IShapeInfo {
     protected MutableBoundingBox box;
 
@@ -19,8 +22,8 @@ public class PartPropsContainer extends BasePart<ModularVehicleInfoBuilder> impl
     }
 
     @Override
-    public void appendTo(ModularVehicleInfoBuilder vehicleInfo) {
-        super.appendTo(vehicleInfo);
+    public void appendTo(ModularVehicleInfoBuilder owner) {
+        super.appendTo(owner);
         Vector3f min = getPosition().subtract(getScale());
         Vector3f max = getPosition().add(getScale());
         this.box = new MutableBoundingBox(
@@ -37,7 +40,7 @@ public class PartPropsContainer extends BasePart<ModularVehicleInfoBuilder> impl
 
     @Override
     public String getName() {
-        return "PartPropsContainer named " + getPartName() + " in " + getOwner().getName();
+        return "PartPropsContainer named " + getPartName();
     }
 
     @Override

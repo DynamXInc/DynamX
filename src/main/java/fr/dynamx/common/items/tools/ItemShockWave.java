@@ -4,6 +4,7 @@ import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.items.DynamXItemRegistry;
 import fr.dynamx.server.command.DynamXCommands;
 import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.RegistryNameSetter;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import fr.dynamx.utils.physics.DynamXPhysicsHelper;
 import net.minecraft.entity.player.EntityPlayer;
@@ -19,7 +20,7 @@ import java.util.List;
 public class ItemShockWave extends Item {
     public ItemShockWave() {
         super();
-        setRegistryName(DynamXConstants.ID, "shockwave");
+        RegistryNameSetter.setRegistryName(this, DynamXConstants.ID, "shockwave");
         setTranslationKey(DynamXConstants.ID + "." + "shockwave");
         setCreativeTab(DynamXItemRegistry.vehicleTab);
         DynamXItemRegistry.add(this);

@@ -1,7 +1,8 @@
 package fr.dynamx.common.obj.texture;
 
 import fr.dynamx.api.obj.IModelTextureSupplier;
-import fr.dynamx.common.contentpack.type.PartWheelInfo;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
+import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.obj.eximpl.QuickObjObject;
 
 import javax.annotation.Nullable;
@@ -10,7 +11,7 @@ import javax.annotation.Nullable;
  * Properties of a texture used in obj models
  *
  * @see IModelTextureSupplier
- * @see fr.dynamx.common.contentpack.ModularVehicleInfo
+ * @see ModularVehicleInfo
  * @see PartWheelInfo
  * @see QuickObjObject
  */

@@ -10,13 +10,17 @@ import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.events.CreatePackItemEvent;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.contentpack.loader.ObjectLoader;
+import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
+import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.block.material.Material;
 import net.minecraftforge.common.MinecraftForge;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> implements ISubInfoTypeOwner<BlockObject<?>> {
+public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> implements ISubInfoTypeOwner<BlockObject<?>>,
+        ParticleEmitterInfo.IParticleEmitterContainer {
     /**
      * List of owned {@link ISubInfoType}s
      */
@@ -24,13 +28,19 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
     protected PropObject<?> propObject;
 
     @PackFileProperty(configNames = "Rotate", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false, defaultValue = "0 0 0")
+    @Getter
+    @Setter
     protected Vector3f rotation = new Vector3f(0, 0, 0); //Not supported by props
 
     @PackFileProperty(configNames = "LightLevel", defaultValue = "0", required = false)
+    @Getter
     protected float lightLevel;
 
     @PackFileProperty(configNames = "Material", required = false, defaultValue = "ROCK")
+    @Getter
     protected Material material;
+
+    private final List<ParticleEmitterInfo<?>> particleEmitters = new ArrayList<>();
 
     public BlockObject(String packName, String fileName) {
         super(packName, fileName);
@@ -45,7 +55,7 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
         if (event.isOverridden()) {
             return (IInfoOwner<T>) event.getSpawnItem();
         } else {
-            return new DynamXBlock(this, material != null ? material : Material.ROCK);
+            return new DynamXBlock<>((T) this, material != null ? material : Material.ROCK);
         }
     }
 
@@ -68,12 +78,14 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
         return compoundCollisionShape;
     }
 
-    public Vector3f getRotation() {
-        return rotation;
+    @Override
+    public void addParticleEmitter(ParticleEmitterInfo<?> emitterInfo) {
+        particleEmitters.add(emitterInfo);
     }
 
-    public void setRotation(Vector3f rotation) {
-        this.rotation = rotation;
+    @Override
+    public List<ParticleEmitterInfo<?>> getParticleEmitters() {
+        return particleEmitters;
     }
 
     @Override
@@ -85,7 +97,4 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
         return getModel().endsWith(".obj");
     }
 
-    public float getLightLevel() {
-        return lightLevel;
-    }
 }

@@ -14,14 +14,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface PackFileProperty {
     /**
-     * @return The name of this property in the config file/sub category
+     * @return The recognized names of this property in the config file/sub category
      */
     String[] configNames();
-
-    /**
-     * @return An array of old, deprecated, names matching this property
-     */
-    String[] oldNames() default {};
 
     /**
      * All parsers are in {@link fr.dynamx.api.contentpack.registry.DefinitionType.DynamXDefinitionTypes}
@@ -36,11 +31,6 @@ public @interface PackFileProperty {
      * @return If the property if required in the config file, true by default
      */
     boolean required() default true;
-
-    /**
-     * @return A new name for this property if the type has changed and this is deprecated and will be removed
-     */
-    String newConfigName() default "";
 
     /**
      * For documentation generator

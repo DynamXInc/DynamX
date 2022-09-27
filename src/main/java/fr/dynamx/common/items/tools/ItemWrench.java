@@ -6,6 +6,7 @@ import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.items.DynamXItemRegistry;
 import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.RegistryNameSetter;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -23,7 +24,7 @@ import java.util.List;
 public class ItemWrench extends Item {
 
     public ItemWrench() {
-        setRegistryName(DynamXConstants.ID, "wrench");
+        RegistryNameSetter.setRegistryName(this, DynamXConstants.ID, "wrench");
         setTranslationKey("dynamxmod.wrench");
         setCreativeTab(DynamXItemRegistry.vehicleTab);
         this.maxStackSize = 1;

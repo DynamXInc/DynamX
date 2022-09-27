@@ -4,10 +4,10 @@ package fr.dynamx.api.contentpack.object.subinfo;
  * Basic implementation of {@link ISubInfoType}, keeping the owner in a field
  */
 public abstract class SubInfoType<T extends ISubInfoTypeOwner<T>> implements ISubInfoType<T> {
-    private final ISubInfoTypeOwner<T> owner;
+    private final T owner;
 
     protected SubInfoType(ISubInfoTypeOwner<T> owner) {
-        this.owner = owner;
+        this.owner = (T) owner;
     }
 
     @Override
@@ -15,7 +15,8 @@ public abstract class SubInfoType<T extends ISubInfoTypeOwner<T>> implements ISu
         return owner.getPackName();
     }
 
-    public ISubInfoTypeOwner<T> getOwner() {
+    @Override
+    public T getOwner() {
         return owner;
     }
 }

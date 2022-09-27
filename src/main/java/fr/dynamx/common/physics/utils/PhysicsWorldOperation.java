@@ -46,43 +46,37 @@ public class PhysicsWorldOperation<A> {
      * Modifies the PhysicsWorld, executing this operation
      *
      * @param dynamicsWorld The bullet PhysicsSpace
-     * @param rigidbodies   The cache of added PhysicsCollisionObjects
-     * @param vehicles      The cache of added vehicles
-     * @param joints
+     * @param joints        The cache of added joints
      * @param entities      The cache of added entities
      */
-    public void execute(PhysicsSpace dynamicsWorld, Collection<PhysicsCollisionObject> rigidbodies, Collection<PhysicsVehicle> vehicles, Set<PhysicsJoint> joints, Collection<PhysicsEntity<?>> entities) {
+    public void execute(PhysicsSpace dynamicsWorld,  Set<PhysicsJoint> joints, Collection<PhysicsEntity<?>> entities) {
         switch (operation) {
             case ADD_VEHICLE:
-                if (!vehicles.contains(object))
-                    vehicles.add((PhysicsVehicle) object);
-                else
-                    DynamXMain.log.fatal("PhysicsVehicle " + object + " is already registered, please report this !");
+                if (dynamicsWorld.getVehicleList().contains(object))
+                    DynamXMain.log.fatal("PhysicsVehicle " + object + " is already in the physics world, please report this !");
             case ADD_OBJECT:
-                if (!rigidbodies.contains(object)) {
+                if (!dynamicsWorld.getRigidBodyList().contains(object))
                     dynamicsWorld.addCollisionObject((PhysicsCollisionObject) object);
-                    rigidbodies.add((PhysicsCollisionObject) object);
-                } else
+                else
                     DynamXMain.log.fatal("PhysicsCollisionObject " + object + " is already registered, please report this !");
                 break;
             case REMOVE_VEHICLE:
-                vehicles.remove(object);
+                if (!dynamicsWorld.getVehicleList().contains(object))
+                    DynamXMain.log.fatal("PhysicsVehicle " + object + " is not is the physics world, please report this !");
             case REMOVE_OBJECT:
-                if (rigidbodies.contains(object)) {
+                if (dynamicsWorld.getRigidBodyList().contains(object))
                     dynamicsWorld.removeCollisionObject((PhysicsCollisionObject) object);
-                    rigidbodies.remove(object);
-                }
                 break;
             case ADD_ENTITY:
                 if (entities.contains(object))
                     DynamXMain.log.fatal("Entity " + object + " is already registered, please report this !");
-                entities.add((PhysicsEntity<?>) object);
+                else
+                    entities.add((PhysicsEntity<?>) object);
                 ((PhysicsEntity<?>) object).isRegistered = 2;
                 break;
             case REMOVE_ENTITY:
                 PhysicsEntity<?> et = (PhysicsEntity<?>) object;
                 entities.remove(et);
-
                 DynamXMain.proxy.scheduleTask(et.world, () -> {
                     List<PhysicsEntity> physicsEntities = et.world.getEntitiesWithinAABB(PhysicsEntity.class, et.getEntityBoundingBox().expand(10, 10, 10));
                     physicsEntities.forEach(entity -> {
@@ -111,7 +105,7 @@ public class PhysicsWorldOperation<A> {
             try {
                 operation = callback.call();
                 if (operation != null)
-                    operation.execute(dynamicsWorld, rigidbodies, vehicles, joints, entities);
+                    operation.execute(dynamicsWorld, joints, entities);
             } catch (Exception e) {
                 DynamXMain.log.fatal("Exception while executing callback of " + this + ". Callback: " + callback, e);
             }

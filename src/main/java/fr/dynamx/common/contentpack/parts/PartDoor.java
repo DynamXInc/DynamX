@@ -6,10 +6,12 @@ import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
+import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
+import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.VehicleEntityEvent;
-import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfoBuilder;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.utils.DynamXConstants;
@@ -29,40 +31,41 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+@RegisteredSubInfoType(name = "door", registries = SubInfoTypeRegistries.WHEELED_VEHICLES, strictName = false)
 public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfoBuilder> implements IPhysicsPackInfo {
     @Getter
     @PackFileProperty(configNames = "LocalCarAttachPoint", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y, required = false)
-    private final Vector3f carAttachPoint = new Vector3f();
+    private Vector3f carAttachPoint = new Vector3f();
     @Getter
     @PackFileProperty(configNames = "LocalDoorAttachPoint", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y, required = false)
-    private final Vector3f doorAttachPoint = new Vector3f();
+    private Vector3f doorAttachPoint = new Vector3f();
     @Getter
     @PackFileProperty(configNames = "AttachStrength", required = false)
-    private final int attachStrength = 400;
+    private int attachStrength = 400;
 
     @Getter
     @PackFileProperty(configNames = "OpenedDoorAngleLimit", required = false)
-    private final Vector2f openLimit = new Vector2f();
+    private Vector2f openLimit = new Vector2f();
     @Getter
     @PackFileProperty(configNames = "ClosedDoorAngleLimit", required = false)
-    private final Vector2f closeLimit = new Vector2f();
+    private Vector2f closeLimit = new Vector2f();
     @Getter
     @PackFileProperty(configNames = "DoorOpenForce", required = false)
-    private final Vector2f openMotor = new Vector2f(1, 200);
+    private Vector2f openMotor = new Vector2f(1, 200);
     @Getter
     @PackFileProperty(configNames = "DoorCloseForce", required = false)
-    private final Vector2f closeMotor = new Vector2f(-1.5f, 300);
+    private Vector2f closeMotor = new Vector2f(-1.5f, 300);
 
     @Getter
     @PackFileProperty(configNames = "AutoMountDelay", required = false)
-    private final byte mountDelay = (byte) 40;
+    private byte mountDelay = (byte) 40;
     @Getter
     @PackFileProperty(configNames = "DoorCloseTime", required = false)
-    private final byte doorCloseTime = (byte) 25;
+    private byte doorCloseTime = (byte) 25;
 
     @Getter
     @PackFileProperty(configNames = "Enabled", required = false, defaultValue = "true")
-    private final boolean enabled = true;
+    private boolean enabled = true;
 
     public boolean isPlayerMounting;
 
@@ -168,7 +171,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
      */
     @Override
     public String getName() {
-        return "PartDoor named " + getPartName() + " in " + getOwner().getName();
+        return "PartDoor named " + getPartName();
     }
 
     @Override

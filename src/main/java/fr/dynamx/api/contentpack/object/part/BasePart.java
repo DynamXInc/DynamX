@@ -1,27 +1,42 @@
 package fr.dynamx.api.contentpack.object.part;
 
 import com.jme3.math.Vector3f;
-import fr.aym.acslib.api.services.ErrorTrackingService;
+import fr.aym.acslib.api.services.error.ErrorLevel;
+import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.contentpack.object.IShapeContainer;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoType;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
+import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
-import fr.dynamx.common.DynamXContext;
+import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.utils.DynamXLoadingTasks;
 import fr.dynamx.utils.debug.DynamXDebugOption;
+import fr.dynamx.utils.errors.DynamXErrorManager;
 
 /**
  * @param <T> Should implement ISubInfoTypeOwner<T> and IShapedObject
  */
 public abstract class BasePart<T extends ISubInfoTypeOwner<T>> extends SubInfoType<T> {
+    @IPackFilePropertyFixer.PackFilePropertyFixer(registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.BLOCKS_AND_PROPS})
+    public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
+        switch (key) {
+            case "ShapePosition":
+                return new IPackFilePropertyFixer.FixResult("Position", true);
+            case "Size":
+            case "ShapeScale":
+            case "BoxDim":
+                return new IPackFilePropertyFixer.FixResult("Scale", true);
+        }
+        return null;
+    };
+
     private byte id;
     private final String partName;
 
-    @PackFileProperty(configNames = "Position", oldNames = "ShapePosition", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y, description = "common.position")
+    @PackFileProperty(configNames = "Position", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y, description = "common.position")
     private Vector3f position;
-    @PackFileProperty(configNames = "Scale", oldNames = {"Size", "ShapeScale", "BoxDim"}, type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED, required = false, description = "common.scale")
+    @PackFileProperty(configNames = "Scale", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED, required = false, description = "common.scale")
     private Vector3f scale;
 
     public BasePart(T owner, String partName) {
@@ -81,12 +96,13 @@ public abstract class BasePart<T extends ISubInfoTypeOwner<T>> extends SubInfoTy
     }
 
     @Override
-    public void appendTo(T vehicleInfo) {
+    public void appendTo(T owner) {
         if (scale == null) {
-            DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, getPackName(), getName(), "The property 'Scale' is required in " + getName() + " !", ErrorTrackingService.TrackedErrorLevel.HIGH);
+            INamedObject parent = getRootOwner();
+            DynamXErrorManager.addPackError(getPackName(), "required_property", ErrorLevel.HIGH, parent.getName(), "Scale in " + getName());
         }
-        ((IShapeContainer) vehicleInfo).addPart(this);
-        getPosition().multLocal(getScaleModifier(vehicleInfo));
-        getScale().multLocal(getScaleModifier(vehicleInfo));
+        ((IShapeContainer) owner).addPart(this);
+        getPosition().multLocal(getScaleModifier(owner));
+        getScale().multLocal(getScaleModifier(owner));
     }
 }

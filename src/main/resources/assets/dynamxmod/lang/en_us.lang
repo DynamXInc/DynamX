@@ -59,3 +59,29 @@ cmd.slopes.auto.result=§6[AUTO] Generation of the slopes done in %s ms
 cmd.slopes.auto.success=§a[AUTO] The slopes have been added !
 
 hud.car.speedlimit=Speed limit : %s
+
+
+dynamx.error.required_property=Required properties
+dynamx.error.obj_duplicated_custom_textures=Duplicated custom textures
+dynamx.error.armor_error=Bad armor parts
+dynamx.error.updates=DynamX update available
+dynamx.error.syntax_error=Syntax error
+dynamx.error.deprecated_prop=props_ files are deprecated
+dynamx.error.missing_prop=Unknown pack file properties
+dynamx.error.unknown_sub_info=Unknown sub properties
+dynamx.error.sound_error=Invalid sound config
+dynamx.error.config_error=Config error
+dynamx.error.obj_none_material=Object(s) using the 'none' material of BlockBench
+dynamx.error.mps_error=Cannot connect to DynamX server
+dynamx.error.addon_init_error=Addon initialization error
+dynamx.error.pack_requirements=Pack requirements not met
+dynamx.error.collision_shape_error=Cannot load the physics collision shape
+dynamx.error.complete_vehicle_error=Cannot complete the vehicle
+dynamx.error.property_parse_error=Cannot parse the following properties. Check the documentation for the correct syntax.
+dynamx.error.loading_tasks=Loading task error
+dynamx.error.addon_load_error=Addon cannot be loaded !
+dynamx.error.res_pack_load_fail=Resources (models and textures) detection failed
+dynamx.error.pack_load_fail=Cannot load content pack
+dynamx.error.missing_pack_info=Pack info is missing
+dynamx.error.pack_file_load_error=Cannot load pack file
+dynamx.error.addon_error=Addon loading error

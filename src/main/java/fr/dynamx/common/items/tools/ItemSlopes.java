@@ -3,6 +3,7 @@ package fr.dynamx.common.items.tools;
 import com.jme3.math.Vector3f;
 import fr.dynamx.common.items.DynamXItemRegistry;
 import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.RegistryNameSetter;
 import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.block.state.IBlockState;
@@ -25,7 +26,7 @@ import javax.annotation.Nullable;
 public class ItemSlopes extends Item {
     public ItemSlopes() {
         super();
-        setRegistryName(DynamXConstants.ID, "slopes");
+        RegistryNameSetter.setRegistryName(this, DynamXConstants.ID, "slopes");
         setTranslationKey(DynamXConstants.ID + "." + "slopes");
         setCreativeTab(DynamXItemRegistry.vehicleTab);
         DynamXItemRegistry.add(this);

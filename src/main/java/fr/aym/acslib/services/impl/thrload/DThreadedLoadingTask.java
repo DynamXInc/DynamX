@@ -1,11 +1,10 @@
 package fr.aym.acslib.services.impl.thrload;
 
 import fr.aym.acslib.ACsLib;
-import fr.aym.acslib.api.services.ErrorTrackingService;
 import fr.aym.acslib.api.services.ThreadedLoadingService;
+import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.aym.acslib.utils.ACsLogger;
-import fr.dynamx.common.DynamXContext;
-import fr.dynamx.utils.DynamXLoadingTasks;
+import fr.dynamx.utils.errors.DynamXErrorManager;
 import net.minecraftforge.fml.client.CustomModLoadingErrorDisplayException;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.LoaderException;
@@ -41,7 +40,7 @@ public class DThreadedLoadingTask implements Runnable {
             executor.onEnd(this, followingInThreadTask, (System.currentTimeMillis() - time));
         } catch (Exception e) {
             ACsLogger.serviceFatal(ACsLib.getPlatform().provideService(ThreadedLoadingService.class), "Error in task " + name, e);
-            DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.INIT, "LoadingTasks", "ThreadTask " + name, e.toString(), ErrorTrackingService.TrackedErrorLevel.FATAL);
+            DynamXErrorManager.addError("DynamX initialization", DynamXErrorManager.INIT_ERRORS, "loading_tasks", ErrorLevel.FATAL, "ThreadTask " + name, null, e, 1000);
             if (FMLCommonHandler.instance().getSide().isClient()) {
                 executor.onEnd(this, () -> {
                     if (e instanceof CustomModLoadingErrorDisplayException)

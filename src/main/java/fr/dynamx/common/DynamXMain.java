@@ -1,9 +1,9 @@
 package fr.dynamx.common;
 
 import fr.aym.acslib.ACsLib;
-import fr.aym.acslib.api.services.ErrorTrackingService;
 import fr.aym.acslib.api.services.StatsReportingService;
 import fr.aym.acslib.api.services.ThreadedLoadingService;
+import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.aym.acslib.api.services.mps.ModProtectionContainer;
 import fr.aym.acslib.api.services.mps.ModProtectionService;
 import fr.dynamx.api.network.sync.SynchronizedVariablesRegistry;
@@ -21,7 +21,11 @@ import fr.dynamx.common.items.tools.ItemRagdoll;
 import fr.dynamx.common.items.tools.ItemShockWave;
 import fr.dynamx.common.items.tools.ItemSlopes;
 import fr.dynamx.server.command.DynamXCommands;
-import fr.dynamx.utils.*;
+import fr.dynamx.utils.DynamXConfig;
+import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.DynamXMpsConfig;
+import fr.dynamx.utils.DynamXReflection;
+import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.physics.NativeEngineInstaller;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeVersion;
@@ -45,7 +49,7 @@ import static fr.dynamx.utils.DynamXConstants.*;
 import static net.minecraftforge.fml.common.Mod.EventHandler;
 import static net.minecraftforge.fml.common.Mod.Instance;
 
-@Mod(modid = ID, name = NAME, version = VERSION, updateJSON = "https://dynamx.fr/mps/updates.json", dependencies = "required-after:acslib")
+@Mod(modid = ID, name = NAME, version = VERSION, updateJSON = "https://dynamx.fr/mps/updates.json", dependencies = "required-after:acslib@" + ACSLIBS_REQUIRED_VERSION)
 public class DynamXMain {
     @Instance(value = ID)
     public static DynamXMain instance;
@@ -60,12 +64,11 @@ public class DynamXMain {
 
     @EventHandler
     public void construction(FMLConstructionEvent event) {
-        log.info(NAME + " version " + VERSION + " (pack loader version " + ContentPackLoader.LOADER_VERSION.getVersionString() + ") is running, by Yanis and Aym'");
+        log.info(NAME + " version " + VERSION + " (pack loader version " + PACK_LOADER_VERSION.getVersionString() + ") is running, by Yanis and Aym'");
 
         ProgressManager.ProgressBar bar = ProgressManager.push("Constructing DynamX", 5);
         bar.step("Init");
         ThreadedLoadingService loadingService = ACsLib.getPlatform().provideService(ThreadedLoadingService.class);
-        System.out.println("Loading is " + loadingService);
         ModProtectionService mps = ACsLib.getPlatform().provideService(ModProtectionService.class);
 
         container = mps.createNewMpsContainer("DynamX models", new DynamXMpsConfig(), false);
@@ -91,7 +94,7 @@ public class DynamXMain {
             try {
                 container.setup("DynamXEA");
             } catch (Exception e) {
-                DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.INIT, "ModProtectionSystem", "Cannot connect to DynamX server", e, ErrorTrackingService.TrackedErrorLevel.FATAL);
+                DynamXErrorManager.addError("DynamX initialization", DynamXErrorManager.INIT_ERRORS, "mps_error", ErrorLevel.FATAL, "MPS", null, e);
                 e.printStackTrace();
             }
         });
@@ -146,11 +149,12 @@ public class DynamXMain {
     public void completeLoad(FMLLoadCompleteEvent event) {
         ForgeVersion.CheckResult result = ForgeVersion.getResult(Loader.instance().activeModContainer());
         if (result.status == ForgeVersion.Status.OUTDATED) {
-            DynamXMain.log.warn("Outdated version found, you should update to " + result.target);
-            DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.MAJS, "Updates", "Mise à jour de DynamX", "Version " + result.target + " disponible", ErrorTrackingService.TrackedErrorLevel.ADVICE);
+            //DynamXMain.log.warn("Outdated version found, you should update to " + result.target);
+            DynamXErrorManager.addError("DynamX updates", DynamXErrorManager.UPDATES, "updates", ErrorLevel.ADVICE, "DynamX", "Version " + result.target + " disponible");
         } else if (result.status == ForgeVersion.Status.FAILED) {
             DynamXMain.log.warn("Forge failed to check majs for DynamX !");
         }
+        DynamXErrorManager.printErrors(event.getSide(), event.getSide().isServer() ? ErrorLevel.ADVICE : ErrorLevel.HIGH);
     }
 
     @EventHandler

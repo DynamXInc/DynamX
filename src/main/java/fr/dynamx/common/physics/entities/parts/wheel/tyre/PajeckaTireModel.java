@@ -1,90 +1,46 @@
 package fr.dynamx.common.physics.entities.parts.wheel.tyre;
 
+import fr.dynamx.common.physics.entities.parts.wheel.WheelPhysics;
+import lombok.Getter;
+import lombok.Setter;
+
 public class PajeckaTireModel {
 
-    private String name;
-
-    private TyreSettings lateral;
-    private TyreSettings longitudinal;
-    private TyreSettings alignMoment;
-
-    // the maximun load the tire can handle.
-    private float maxLoad;
+    @Getter
+    @Setter
+    private WheelPhysics.TyreSettings lateral, longitudinal, alignMoment;
     // the amount of load on the tire.
+    @Getter
+    @Setter
     private float load;
 
+    @Getter
     private float lateralValue;
+    @Getter
     private float longitudinalValue;
+    @Getter
     private float momentValue;
 
     // friction circle result.
     // a method of combining Fx and Fy together.
+    @Getter
     private float frictionCircle;
 
 
-    public PajeckaTireModel(String name,
-                            TyreSettings lateral, TyreSettings longitudinal, TyreSettings alignMoment,
-                            float maxLoad) {
-
-        this.name = name;
+    public PajeckaTireModel(WheelPhysics.TyreSettings lateral, WheelPhysics.TyreSettings longitudinal, WheelPhysics.TyreSettings alignMoment) {
         this.lateral = lateral;
         this.longitudinal = longitudinal;
         this.alignMoment = alignMoment;
-        this.maxLoad = maxLoad;
-
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public TyreSettings getLateral() {
-        return lateral;
-    }
-
-    public void setLateral(TyreSettings lateral) {
-        this.lateral = lateral;
-    }
-
-    public TyreSettings getLongitudinal() {
-        return longitudinal;
-    }
-
-    public void setLongitudinal(TyreSettings longitudinal) {
-        this.longitudinal = longitudinal;
-    }
-
-    public TyreSettings getAlignMoment() {
-        return alignMoment;
-    }
-
-    public void setAlignMoment(TyreSettings alignMoment) {
-        this.alignMoment = alignMoment;
-    }
-
-    public float getMaxLoad() {
-        return maxLoad;
-    }
-
-    public void setMaxLoad(float maxLoad) {
-        this.maxLoad = maxLoad;
     }
 
     // slipAngle is in RADIANS
-    private float calcSlipAngleFactor(float slipAngle, TyreSettings settings) {
-        // float x = slipAngle * FastMath.DEG_TO_RAD;
-        // float x = slipAngle;
-
+    private float calcSlipAngleFactor(float slipAngle, WheelPhysics.TyreSettings settings) {
         return (float) Math.sin(settings.getSlipAngleCoefficientC()
                 * Math.atan(settings.getSlipAngleCoefficientB() * slipAngle - settings.getSlipAngleCoefficientE()
                 * (settings.getSlipAngleCoefficientB() * slipAngle - Math.atan(settings.getSlipAngleCoefficientB() * slipAngle))));
     }
 
-    private float calcLoadForce(float load, TyreSettings settings) {
+    private float calcLoadForce(float load, WheelPhysics.TyreSettings settings) {
         return settings.getLoadCoefficientKA() * (1 - settings.getLoadCoefficientKB() * load) * load;
     }
 
@@ -111,52 +67,27 @@ public class PajeckaTireModel {
         return momentValue;
     }
 
-    public float getLateralValue() {
-        return this.lateralValue;
-    }
-
-    public float getLongitudinalValue() {
-        return longitudinalValue;
-    }
-
-    public float getMomentValue() {
-        return momentValue;
-    }
-
-    public float getFrictionCircle() {
-        return frictionCircle;
-    }
-
     @Override
     public String toString() {
 
         String format = "%s: \"%s\" : %s (C=%.2f, B=%.2f, E=%.2f, KA=%.2f, KB=%.6f)";
 
         String lat = String.format(format, this.getClass().toString(),
-                name, "Lateral",
+                "Lateral",
                 lateral.getSlipAngleCoefficientC(), lateral.getSlipAngleCoefficientB(), lateral.getSlipAngleCoefficientE(),
                 lateral.getLoadCoefficientKA(), lateral.getLoadCoefficientKB());
 
         String lng = String.format(format, this.getClass(),
-                name, "Longitudinal",
+                "Longitudinal",
                 longitudinal.getSlipAngleCoefficientC(), longitudinal.getSlipAngleCoefficientB(), longitudinal.getSlipAngleCoefficientE(),
                 longitudinal.getLoadCoefficientKA(), longitudinal.getLoadCoefficientKB());
 
         String mnt = String.format(format, this.getClass(),
-                name, "Align Moment",
+                "Align Moment",
                 alignMoment.getSlipAngleCoefficientC(), alignMoment.getSlipAngleCoefficientB(), alignMoment.getSlipAngleCoefficientE(),
                 alignMoment.getLoadCoefficientKA(), alignMoment.getLoadCoefficientKB());
 
         return lat + System.lineSeparator() + lng + System.lineSeparator() + mnt;
-    }
-
-
-    public float getLoad() {
-        return load;
-    }
-
-    public void setLoad(float load) {
-        this.load = load;
     }
 
 }

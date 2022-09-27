@@ -9,14 +9,16 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
  */
 public class RegistryNameSetter {
     /**
-     * Sets the registry name of the given object without sending the shitty warnings of Forge
+     * Sets the registry name of the given object without sending the shitty warnings of Forge <br>
+     * The warnings are there because our items are added in another thread, while other mods (with different modids) are loading
      */
     public static <T extends IForgeRegistryEntry.Impl<T>> void setRegistryName(T object, String name) {
         ObfuscationReflectionHelper.setPrivateValue(IForgeRegistryEntry.Impl.class, object, new ResourceLocation(name), "registryName");
     }
 
     /**
-     * Sets the registry name of the given object without sending the shitty warnings of Forge
+     * Sets the registry name of the given object without sending the shitty warnings of Forge <br>
+     * The warnings are there because our items are added in another thread, while other mods (with different modids) are loading
      */
     public static <T extends IForgeRegistryEntry.Impl<T>> void setRegistryName(T object, String modID, String name) {
         setRegistryName(object, modID + ":" + name);

@@ -8,7 +8,7 @@ import fr.dynamx.client.gui.VehicleHud;
 import fr.dynamx.client.handlers.hud.CarController;
 import fr.dynamx.client.renders.vehicle.RenderBaseVehicle;
 import fr.dynamx.common.contentpack.parts.PartSeat;
-import fr.dynamx.common.contentpack.type.PartWheelInfo;
+import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.WheelsModule;
 import lombok.Getter;

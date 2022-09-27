@@ -28,4 +28,12 @@ public interface IDnxNetworkHandler {
      * Stops this network
      */
     void stop();
+
+    /**
+     * @return True is the connection is established between the two hosts <br>
+     * Only used on client side of udp network
+     */
+    default boolean isAuthenticated() {
+        return true;
+    }
 }

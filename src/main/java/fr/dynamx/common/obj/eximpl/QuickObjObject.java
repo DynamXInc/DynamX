@@ -1,15 +1,14 @@
 package fr.dynamx.common.obj.eximpl;
 
-import fr.aym.acslib.api.services.ErrorTrackingService;
+import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.obj.IObjObject;
 import fr.dynamx.client.renders.model.ObjModelClient;
-import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.obj.Material;
 import fr.dynamx.common.obj.Mesh;
 import fr.dynamx.common.obj.Vertex;
 import fr.dynamx.common.obj.texture.MaterialTexture;
 import fr.dynamx.common.obj.texture.TextureData;
-import fr.dynamx.utils.DynamXLoadingTasks;
+import fr.dynamx.utils.errors.DynamXErrorManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
@@ -110,6 +109,7 @@ public class QuickObjObject implements IObjObject {
             modelDisplayList.put(textureData.getId(), id);
             //log.info("Compile list for "+textureData+" (default is "+useDefault+") for part "+getName()+" of "+model.getLocation());
         } else {
+            //TODO ERROR MANAGER
             if (logIfNotFound)
                 log.error("Failed to find custom texture for skin " + textureData.getName() + " of " + model.getLocation() + " in part " + getName());
             modelDisplayList.put(textureData.getId(), modelDisplayList.get(useDefault.getId()));
@@ -169,6 +169,7 @@ public class QuickObjObject implements IObjObject {
         if (materialMultipleTextures != null) {
             bindTexture(mesh.materials[0].diffuseTexture.get(bindName).getGlTextureId());
         } else {
+            //TODO ERROR MANAGER
             log.error("Failed to load Default texture of " + getName() + " in " + model.getLocation() + " in material " + mesh.materials[0].getName());
         }
         int[] indices = mesh.indices;
@@ -193,6 +194,7 @@ public class QuickObjObject implements IObjObject {
                 if (materialMultipleTextures != null) {
                     bindTexture(mesh.materials[i / 3].diffuseTexture.get(bindName).getGlTextureId());
                 } else {
+                    //TODO ERROR MANAGER
                     log.error("Failed to load Default texture of " + getName() + " in " + model.getLocation() + " in material " + mesh.materials[i / 3].getName());
                 }
                 begining = true;
@@ -217,9 +219,8 @@ public class QuickObjObject implements IObjObject {
         if (material.getName().equals("none")) //BlockBench uses "none" materials, this is a bug
         {
             if (!model.hasNoneMaterials) {
-                log.error("Invalid object " + getName() + " in model " + model.getLocation() + " : uses 'none' material of BlockBench");
-                DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.MODEL, model.getCustomTextures() != null ? model.getCustomTextures().getPackName() : "Non-pack model", model.getLocation().toString(),
-                        "Invalid object " + getName() + " : uses 'none' material of BlockBench", ErrorTrackingService.TrackedErrorLevel.LOW);
+                //log.error("Invalid object " + getName() + " in model " + model.getLocation() + " : uses 'none' material of BlockBench");
+                DynamXErrorManager.addError(model.getCustomTextures() != null ? model.getCustomTextures().getPackName() : "Non-pack model", DynamXErrorManager.MODEL_ERRORS, "obj_none_material", ErrorLevel.LOW, model.getLocation().toString(), getName());
             }
             model.hasNoneMaterials = true;
             return false;

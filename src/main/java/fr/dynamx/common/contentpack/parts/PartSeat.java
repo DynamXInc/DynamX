@@ -16,6 +16,8 @@ import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.EnumSeatPlayerPosition;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
@@ -27,6 +29,28 @@ import javax.annotation.Nullable;
 public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfoBuilder> {
     @PackFileProperty(configNames = "Driver")
     private boolean isDriver;
+
+    @PackFileProperty(configNames = "ShouldLimitFieldOfView", required = false, defaultValue = "true")
+    @Accessors(fluent = true)
+    @Getter
+    private boolean shouldLimitFieldOfView = true;
+
+    @PackFileProperty(configNames = "MaxYaw", required = false, defaultValue = "-105")
+    @Getter
+    private float maxYaw = -105.0f;
+
+    @PackFileProperty(configNames = "MinYaw", required = false, defaultValue = "105")
+    @Getter
+    private float minYaw = 105.0f;
+
+    @PackFileProperty(configNames = "MaxPitch", required = false, defaultValue = "-105")
+    @Getter
+    private float maxPitch = -105.0f;
+
+    @PackFileProperty(configNames = "MinPitch", required = false, defaultValue = "105")
+    @Getter
+    private float minPitch = 105.0f;
+
     @PackFileProperty(configNames = "LinkedDoorPart", required = false)
     private String linkedDoor;
     @PackFileProperty(configNames = "Rotation", required = false, defaultValue = "1 0 0 0")
@@ -37,6 +61,10 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
 
     @PackFileProperty(configNames = "CameraRotation", required = false, defaultValue = "0")
     private float rotationYaw;
+
+    @PackFileProperty(configNames = "CameraPositionY", required = false, defaultValue = "0")
+    @Getter
+    private float cameraPositionY;
 
     public PartSeat(ModularVehicleInfoBuilder owner, String partName) {
         super(owner, partName, 0.4f, 1.8f);

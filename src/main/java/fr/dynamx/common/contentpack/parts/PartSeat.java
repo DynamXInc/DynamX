@@ -26,8 +26,8 @@ import javax.annotation.Nullable;
 public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfoBuilder> {
     @PackFileProperty(configNames = "Driver")
     private boolean isDriver;
-    @PackFileProperty(configNames = "ShouldLimitFieldOfView", required = false, defaultValue = "true")
 
+    @PackFileProperty(configNames = "ShouldLimitFieldOfView", required = false, defaultValue = "true")
     @Accessors(fluent = true)
     @Getter
     private boolean shouldLimitFieldOfView = true;

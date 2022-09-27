@@ -86,8 +86,10 @@ public class CameraSystem {
                 return;
             }
 
-            cameraPositionY = ClientEventHandler.MC.gameSettings.thirdPersonView > 0 ? seat.getCameraPositionY() : 0;
-            GlStateManager.translate(0, -cameraPositionY, 0);
+            if(ClientEventHandler.MC.gameSettings.thirdPersonView > 0 && seat.getCameraPositionY() != 0) {
+                cameraPositionY = seat.getCameraPositionY();
+                GlStateManager.translate(0, -cameraPositionY, 0);
+            }
 
             if (seat.getRotation() != null) {
                 GlStateManager.rotate(event.getYaw() + (watchingBehind ? 180 : 0) + seat.getRotationYaw(), 0.0F, 1.0F, 0.0F);

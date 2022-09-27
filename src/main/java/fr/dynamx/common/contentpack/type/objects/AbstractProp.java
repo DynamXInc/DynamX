@@ -16,11 +16,15 @@ import fr.dynamx.api.obj.IObjObject;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.PackInfo;
 import fr.dynamx.common.contentpack.parts.PartShape;
+import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.obj.ObjModelServer;
 import fr.dynamx.common.obj.texture.TextureData;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.physics.ShapeUtils;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -29,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractItemObject<T> implements IShapeContainer, IShapeProvider {
+public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractItemObject<T> implements IShapeContainer, IShapeProvider, ParticleEmitterInfo.IParticleEmitterContainer {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.PROPS})
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("UseHullShape".equals(key))
@@ -38,25 +42,38 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
     };
 
     @PackFileProperty(configNames = "Translate", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false, defaultValue = "0 0 0")
+    @Getter
+    @Setter
     protected Vector3f translation = new Vector3f(0, 0, 0);
     @PackFileProperty(configNames = "Scale", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false, defaultValue = "1 1 1")
+    @Getter
+    @Setter
     protected Vector3f scaleModifier = new Vector3f(1, 1, 1);
     @PackFileProperty(configNames = "RenderDistanceSquared", required = false, defaultValue = "4096")
+    @Getter
+    @Setter
     protected float renderDistance = 4096;
     @PackFileProperty(configNames = "UseComplexCollisions", required = false, defaultValue = "false", description = "common.UseComplexCollisions")
+    @Accessors(fluent = true)
+    @Getter
     protected boolean useHullShape = false;
-    /*@PackFileProperty(configNames = "CollisionType", required = false, defaultValue = "Simple", type = DefinitionType.DynamXDefinitionTypes.COLLISION_TYPE)
-    protected EnumCollisionType collisionType = EnumCollisionType.SIMPLE;*/
     @PackFileProperty(configNames = "Textures", required = false, type = DefinitionType.DynamXDefinitionTypes.STRING_ARRAY_2D)
     protected String[][] texturesArray;
 
+    @Getter
     private final List<BasePart<?>> parts = new ArrayList<>();
+    @Getter
     private final List<MutableBoundingBox> collisionBoxes = new ArrayList<>();
+    @Getter
     private final List<PartShape<?>> partShapes = new ArrayList<>();
     private final Map<Byte, TextureData> textures = new HashMap<>();
 
+    private final List<ParticleEmitterInfo<?>> particleEmitters = new ArrayList<>();
+
+    @Getter
     protected CompoundCollisionShape compoundCollisionShape;
 
+    @Getter
     private int maxTextureMetadata;
 
     public AbstractProp(String packName, String fileName) {
@@ -124,22 +141,9 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
         return textures;
     }
 
-    public int getMaxTextureMetadata() {
-        return maxTextureMetadata;
-    }
-
     @Override
     public boolean hasCustomTextures() {
         return textures.size() > 1;
-    }
-
-    @Override
-    public Vector3f getScaleModifier() {
-        return scaleModifier;
-    }
-
-    public void setScaleModifier(Vector3f scale) {
-        this.scaleModifier = scale;
     }
 
     @Override
@@ -152,44 +156,18 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
         partShapes.add(partShape);
     }
 
+    @Override
+    public void addParticleEmitter(ParticleEmitterInfo<?> emitterInfo) {
+        particleEmitters.add(emitterInfo);
+    }
+
+    @Override
+    public List<ParticleEmitterInfo<?>> getParticleEmitters() {
+        return particleEmitters;
+    }
+
     public <A extends BasePart<?>> List<A> getPartsByType(Class<A> clazz) {
         return (List<A>) this.parts.stream().filter(p -> clazz.equals(p.getClass())).collect(Collectors.toList());
-    }
-
-    public List<BasePart<?>> getParts() {
-        return parts;
-    }
-
-    public Vector3f getTranslation() {
-        return translation;
-    }
-
-    public void setTranslation(Vector3f translation) {
-        this.translation = translation;
-    }
-
-    public float getRenderDistance() {
-        return renderDistance;
-    }
-
-    public void setRenderDistance(float renderDistance) {
-        this.renderDistance = renderDistance;
-    }
-
-    public boolean doesUseHullShape() {
-        return useHullShape;
-    }
-
-    public CompoundCollisionShape getCompoundCollisionShape() {
-        return compoundCollisionShape;
-    }
-
-    public List<MutableBoundingBox> getCollisionBoxes() {
-        return collisionBoxes;
-    }
-
-    public List<PartShape<?>> getPartShapes() {
-        return partShapes;
     }
 
     @Override

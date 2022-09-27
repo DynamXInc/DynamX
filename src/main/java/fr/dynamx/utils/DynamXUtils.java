@@ -110,6 +110,10 @@ public class DynamXUtils {
         return Vector3fPool.get((float) pos.x, (float) pos.y, (float) pos.z);
     }
 
+    public static Vector3f toVector3f(BlockPos pos) {
+        return Vector3fPool.get((float) pos.getX(), (float) pos.getY(), (float) pos.getZ());
+    }
+
     public static Vector3f getPositionEyes(Entity entity) {
         return Vector3fPool.get((float) entity.posX, (float) entity.posY + entity.getEyeHeight(), (float) entity.posZ);
     }

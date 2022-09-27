@@ -25,22 +25,22 @@ public class DismountHelper {
         if (entityIn instanceof IModuleContainer.ISeatsContainer) {
             IModuleContainer.ISeatsContainer vehicleEntity = (IModuleContainer.ISeatsContainer) entityIn;
             PartSeat seat = vehicleEntity.getSeats().getLastRiddenSeat();
-            if(seat!=null) {
+            if (seat != null) {
                 Vector3fPool.openPool();
                 Vector3f dismountPosition = //PhysicsHelper.getRotatedPoint(seat.position.add(new Vector3f(seat.position.x > 0 ? 1 : -1, 0, 0)),
                         //vehicleEntity.rotationPitch, vehicleEntity.rotationYaw, vehicleEntity.rotationRoll)
-                DynamXGeometry.rotateVectorByQuaternion(seat.getPosition().add(Vector3fPool.get(seat.getPosition().x > 0 ? 1 : -1, 0, 0)), ((BaseVehicleEntity) entityIn).physicsRotation)
-                        .addLocal(vehicleEntity.cast().physicsPosition);
+                        DynamXGeometry.rotateVectorByQuaternion(seat.getPosition().add(Vector3fPool.get(seat.getPosition().x > 0 ? 1 : -1, 0, 0)), ((BaseVehicleEntity) entityIn).physicsRotation)
+                                .addLocal(vehicleEntity.cast().physicsPosition);
 
-                AxisAlignedBB collisionDetectionBox = new AxisAlignedBB(dismountPosition.x, dismountPosition.y + 1, dismountPosition.z, dismountPosition.x+1, dismountPosition.y + 2, dismountPosition.z+1);
+                AxisAlignedBB collisionDetectionBox = new AxisAlignedBB(dismountPosition.x, dismountPosition.y + 1, dismountPosition.z, dismountPosition.x + 1, dismountPosition.y + 2, dismountPosition.z + 1);
                 if (!dismounter.world.collidesWithAnyBlock(collisionDetectionBox)) {
                     dismounter.setPositionAndUpdate(dismountPosition.x, collisionDetectionBox.minY, dismountPosition.z);
                 } else {
                     dismountPosition = //PhysicsHelper.getRotatedPoint(seat.position.add(new Vector3f(seat.position.x > 0 ? -2 : 2, 0, 0))
                             //, vehicleEntity.rotationPitch, vehicleEntity.rotationYaw, vehicleEntity.rotationRoll)
-                    DynamXGeometry.rotateVectorByQuaternion(seat.getPosition().add(Vector3fPool.get(seat.getPosition().x > 0 ? -2 : 2, 0, 0)), ((BaseVehicleEntity) entityIn).physicsRotation)
-                            .addLocal(vehicleEntity.cast().physicsPosition);
-                    collisionDetectionBox = new AxisAlignedBB(dismountPosition.x, dismountPosition.y + 1, dismountPosition.z, dismountPosition.x+1, dismountPosition.y + 2, dismountPosition.z+1);
+                            DynamXGeometry.rotateVectorByQuaternion(seat.getPosition().add(Vector3fPool.get(seat.getPosition().x > 0 ? -2 : 2, 0, 0)), ((BaseVehicleEntity) entityIn).physicsRotation)
+                                    .addLocal(vehicleEntity.cast().physicsPosition);
+                    collisionDetectionBox = new AxisAlignedBB(dismountPosition.x, dismountPosition.y + 1, dismountPosition.z, dismountPosition.x + 1, dismountPosition.y + 2, dismountPosition.z + 1);
                     dismounter.setPositionAndUpdate(dismountPosition.x, collisionDetectionBox.minY, dismountPosition.z);
                 }
                 Vector3fPool.closePool();
@@ -61,7 +61,7 @@ public class DismountHelper {
                 AxisAlignedBB axisalignedbb = new AxisAlignedBB(d5 - d7 / 2.0D, entityIn.getEntityBoundingBox().minY, d6 - d8 / 2.0D, d5 + d7 / 2.0D, Math.floor(entityIn.getEntityBoundingBox().minY) + (double) dismounter.height, d6 + d8 / 2.0D);
 
                 for (int[] aint : aint1) {
-                    double d9 =  enumfacing1.getXOffset() * aint[0] + enumfacing.getXOffset() * aint[1];
+                    double d9 = enumfacing1.getXOffset() * aint[0] + enumfacing.getXOffset() * aint[1];
                     double d10 = enumfacing1.getZOffset() * aint[0] + enumfacing.getZOffset() * aint[1];
                     double d11 = d5 + d9;
                     double d12 = d6 + d10;

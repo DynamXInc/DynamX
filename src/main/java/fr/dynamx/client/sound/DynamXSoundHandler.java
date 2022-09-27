@@ -33,10 +33,11 @@ import static fr.dynamx.common.DynamXMain.log;
 
 /**
  * Default DynamX implementation of {@link IDynamXSoundHandler}
+ * <p>
+ * author DonBruce and modified by the DynamX team
  */
 @SideOnly(Side.CLIENT)
-public class DynamXSoundHandler implements IDynamXSoundHandler
-{
+public class DynamXSoundHandler implements IDynamXSoundHandler {
     //Reflection variables.
     private static final String[] soundSystemNames = {"sndSystem", "field_148620_e"};
     private SoundManager mcSoundManager;
@@ -87,9 +88,8 @@ public class DynamXSoundHandler implements IDynamXSoundHandler
     private final List<String> erroredSounds = new ArrayList<>();
 
     @Override
-    public void tick()
-    {
-        if(ready()) {
+    public void tick() {
+        if (ready()) {
             //Update all sounds
             Vector3fPool.openPool();
             for (IDynamXSound sound : playingSounds) {
@@ -97,7 +97,7 @@ public class DynamXSoundHandler implements IDynamXSoundHandler
             }
             Vector3fPool.closePool();
             //Remove sounds that were stopped
-            if(!stoppingSounds.isEmpty()) {
+            if (!stoppingSounds.isEmpty()) {
                 for (IDynamXSound sound : stoppingSounds) {
                     playingSounds.remove(sound);
                 }
@@ -117,15 +117,13 @@ public class DynamXSoundHandler implements IDynamXSoundHandler
     }
 
     @Override
-    public void playSingleSound(Vector3f soundPosition, String soundName, float volume, float pitch, int attenuationType, float distOrRoll)
-    {
-        if (ready())
-        {
+    public void playSingleSound(Vector3f soundPosition, String soundName, float volume, float pitch, int attenuationType, float distOrRoll) {
+        if (ready()) {
             try {
                 //Need to add the DynamX_Main.MODID: prefix as the URL will trim off the first section, leading to a bad parse.
                 URL soundURL = new URL(null, DynamXConstants.ID + ":" + soundName + ".ogg", resourceStreamHandler);
                 if (trustedSounds.contains(soundName) || soundURL.openStream() != null) {
-                    if(!trustedSounds.contains(soundName))
+                    if (!trustedSounds.contains(soundName))
                         trustedSounds.add(soundName);
                     Vec3d soundNormalizedPosition = new Vec3d(soundPosition.x, soundPosition.y, soundPosition.z);
                     String soundTempName = mcSoundSystem.quickPlay(false, soundURL, soundURL.getFile(), false, (float) soundNormalizedPosition.x, (float) soundNormalizedPosition.y, (float) soundNormalizedPosition.z, attenuationType, distOrRoll);
@@ -133,12 +131,12 @@ public class DynamXSoundHandler implements IDynamXSoundHandler
                     mcSoundSystem.setPitch(soundTempName, pitch);
                 }
             } catch (FileNotFoundException e) {
-                if(!erroredSounds.contains(soundName)) {
+                if (!erroredSounds.contains(soundName)) {
                     log.error("Sound " + soundName + " not found", e);
                     erroredSounds.add(soundName);
                 }
             } catch (Exception e) {
-                if(!erroredSounds.contains(soundName)) {
+                if (!erroredSounds.contains(soundName)) {
                     log.error("COULD NOT PLAY SOUND:" + soundName, e);
                     erroredSounds.add(soundName);
                 }
@@ -153,12 +151,11 @@ public class DynamXSoundHandler implements IDynamXSoundHandler
 
     @Override
     public void playStreamingSound(Vector3f soundPosition, IDynamXSound sound, int attenuationType, float distOrRoll) {
-        if (ready())
-        {
-            if(playingSounds.contains(sound))
-                throw new IllegalStateException("Sound "+sound+" is already playing !");
+        if (ready()) {
+            if (playingSounds.contains(sound))
+                throw new IllegalStateException("Sound " + sound + " is already playing !");
             String soundID = sound.getSoundUniqueName();
-            String soundName = soundID.substring(soundID.indexOf('_')+1);
+            String soundName = soundID.substring(soundID.indexOf('_') + 1);
             if (!playingSounds.contains(sound) && !Minecraft.getMinecraft().isGamePaused()) {
                 try {
                     URL soundURL = new URL(null, DynamXConstants.ID + ":" + soundName + ".ogg", resourceStreamHandler);
@@ -171,12 +168,12 @@ public class DynamXSoundHandler implements IDynamXSoundHandler
                         playingSounds.add(sound);
                     }
                 } catch (FileNotFoundException e) {
-                    if(!erroredSounds.contains(soundName)) {
-                        log.error("Looping sound "+soundName+" not found", e);
+                    if (!erroredSounds.contains(soundName)) {
+                        log.error("Looping sound " + soundName + " not found", e);
                         erroredSounds.add(soundName);
                     }
                 } catch (Exception e) {
-                    if(!erroredSounds.contains(soundName)) {
+                    if (!erroredSounds.contains(soundName)) {
                         log.error("(0x1) COULD NOT PLAY LOOPING SOUND:" + soundName, e);
                         erroredSounds.add(soundName);
                     }
@@ -186,10 +183,9 @@ public class DynamXSoundHandler implements IDynamXSoundHandler
     }
 
     @Override
-    public void stopSound(IDynamXSound sound)
-    {
-        if(playingSounds.contains(sound)) {
-            if(sound.tryStop()) {
+    public void stopSound(IDynamXSound sound) {
+        if (playingSounds.contains(sound)) {
+            if (sound.tryStop()) {
                 try {
                     if (mcSoundSystem != null) {
                         mcSoundSystem.stop(sound.getSoundUniqueName());
@@ -212,51 +208,50 @@ public class DynamXSoundHandler implements IDynamXSoundHandler
 
     @Override
     public void setVolume(IDynamXSound sound, float volume) {
-        if(playingSounds.contains(sound))
+        if (playingSounds.contains(sound))
             mcSoundSystem.setVolume(sound.getSoundUniqueName(), volume);
     }
 
     @Override
     public void setPitch(IDynamXSound sound, float pitch) {
-        if(playingSounds.contains(sound))
+        if (playingSounds.contains(sound))
             mcSoundSystem.setPitch(sound.getSoundUniqueName(), pitch);
     }
 
     @Override
     public void setAttenuationType(IDynamXSound sound, int attenuationType) {
-        if(playingSounds.contains(sound))
+        if (playingSounds.contains(sound))
             mcSoundSystem.setAttenuation(sound.getSoundUniqueName(), attenuationType);
     }
 
     @Override
     public void setSoundDistance(IDynamXSound sound, float radius) {
-        if(playingSounds.contains(sound))
+        if (playingSounds.contains(sound))
             mcSoundSystem.setDistOrRoll(sound.getSoundUniqueName(), radius);
     }
 
     @Override
     public void setPosition(IDynamXSound sound, float x, float y, float z) {
-        if(playingSounds.contains(sound))
+        if (playingSounds.contains(sound))
             mcSoundSystem.setPosition(sound.getSoundUniqueName(), x, y, z);
     }
 
     @Override
     public void pause(IDynamXSound sound) {
-        if(playingSounds.contains(sound))
+        if (playingSounds.contains(sound))
             mcSoundSystem.pause(sound.getSoundUniqueName());
     }
 
     @Override
     public void resume(IDynamXSound sound) {
-        if(playingSounds.contains(sound))
+        if (playingSounds.contains(sound))
             mcSoundSystem.play(sound.getSoundUniqueName());
     }
 
     /**
      * @return False if mcSoundSystem is null, because we wait for it to be ready, or if no world is loaded, or calling the function from the server side
      */
-    private boolean ready()
-    {
+    private boolean ready() {
         if (Minecraft.getMinecraft().player != null && Minecraft.getMinecraft().world.isRemote) {
             //If we don't have the running instance of the SoundSystem, get it now.
             if (mcSoundSystem == null) {
@@ -278,15 +273,14 @@ public class DynamXSoundHandler implements IDynamXSoundHandler
     private void initSoundSystemHooks() {
         Exception lastException = null;
 
-        if(mcSoundManager == null) {
+        if (mcSoundManager == null) {
             mcSoundManager = ObfuscationReflectionHelper.getPrivateValue(SoundHandler.class, Minecraft.getMinecraft().getSoundHandler(), 5);
-            if(secondStartupTry)
+            if (secondStartupTry)
                 throw new IllegalStateException("McSoundManager is null !");
             soundSystemStartupDelay = 1500;
             secondStartupTry = true;
             return;
-        }
-        else {
+        } else {
             mcSoundManager = ObfuscationReflectionHelper.getPrivateValue(SoundHandler.class, Minecraft.getMinecraft().getSoundHandler(), 5);
         }
 
@@ -309,12 +303,14 @@ public class DynamXSoundHandler implements IDynamXSoundHandler
      * Custom stream handler for our sounds, to bypass sounds.json
      */
     private static class ResourceStreamHandler extends URLStreamHandler {
-        public ResourceStreamHandler() {}
+        public ResourceStreamHandler() {
+        }
 
         protected URLConnection openConnection(URL connection) {
             return new URLConnection(connection) {
                 @Override
-                public void connect() {}
+                public void connect() {
+                }
 
                 @Override
                 public InputStream getInputStream() throws IOException {
@@ -323,7 +319,7 @@ public class DynamXSoundHandler implements IDynamXSoundHandler
                     soundName = soundName.substring(packID.length() + 1);
                     IResource res;
                     try {
-                        res = Minecraft.getMinecraft().getResourceManager().getResource(new ResourceLocation(DynamXConstants.ID, "sounds/"+soundName));
+                        res = Minecraft.getMinecraft().getResourceManager().getResource(new ResourceLocation(DynamXConstants.ID, "sounds/" + soundName));
                     } catch (IOException e) {
                         //Handled at upper level log.error("Sound "+connection.toString()+" cannot be loaded !", e);
                         throw e;

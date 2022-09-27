@@ -12,14 +12,21 @@ import java.util.List;
 /**
  * /dynamx sub commands helper
  */
-public interface ISubCommand
-{
+public interface ISubCommand {
     String getName();
+
     String getUsage();
+
     void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException;
-    default void getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos, List<String> r) {}
-    default String getPermission() {
-        return DynamXConstants.ID+".command."+getName();
+
+    default void getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos, List<String> r) {
     }
-    default String getRootCommandUsage() { return "/dynamx "; }
+
+    default String getPermission() {
+        return DynamXConstants.ID + ".command." + getName();
+    }
+
+    default String getRootCommandUsage() {
+        return "/dynamx ";
+    }
 }

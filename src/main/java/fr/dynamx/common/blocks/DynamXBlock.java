@@ -1,6 +1,7 @@
 package fr.dynamx.common.blocks;
 
 import fr.dynamx.api.contentpack.object.IInfoOwner;
+import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
 import fr.dynamx.api.contentpack.object.render.IObjPackObject;
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.api.events.DynamXBlockEvent;
@@ -11,7 +12,6 @@ import fr.dynamx.common.contentpack.type.objects.BlockObject;
 import fr.dynamx.common.items.DynamXItemRegistry;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.RegistryNameSetter;
-import fr.dynamx.utils.client.ContentPackUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyInteger;
@@ -19,7 +19,6 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -33,7 +32,6 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -58,8 +56,11 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IInf
      * Use the other constructor to create custom blocks and easily set BlockObject's properties
      */
     public DynamXBlock(T blockObjectInfo) {
-        super(Material.ROCK);
+        this(blockObjectInfo, Material.ROCK);
+    }
 
+    public DynamXBlock(T blockObjectInfo, Material material) {
+        super(material);
         this.blockObjectInfo = blockObjectInfo;
         setDefaultState(this.blockState.getBaseState().withProperty(METADATA, 0));
         RegistryNameSetter.setRegistryName(this, DynamXConstants.ID, blockObjectInfo.getFullName().toLowerCase());
@@ -87,12 +88,11 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IInf
      */
     public DynamXBlock(Material material, String modid, String blockName, String model) {
         super(material);
-        if(modid.contains("builtin_mod_")) { //Backward-compatibility
+        if (modid.contains("builtin_mod_")) { //Backward-compatibility
             blockObjectInfo = (T) DynamXObjectLoaders.BLOCKS.addBuiltinObject(this, modid, blockName);
             modid = modid.replace("builtin_mod_", "");
-        }
-        else {
-            blockObjectInfo = (T) DynamXObjectLoaders.BLOCKS.addBuiltinObject(this, "dynx."+modid, blockName);
+        } else {
+            blockObjectInfo = (T) DynamXObjectLoaders.BLOCKS.addBuiltinObject(this, "dynx." + modid, blockName);
         }
         blockObjectInfo.setModel(model);
         blockObjectInfo.setDescription("Builtin " + modid + "'s block");
@@ -124,7 +124,7 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IInf
     @SideOnly(Side.CLIENT)
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add("Description: " + getInfo().getDescription());
-        tooltip.add("Pack: "+ getInfo().getPackName());
+        tooltip.add("Pack: " + getInfo().getPackName());
         if (stack.getMetadata() > 0 && textureNum > 1) {
             tooltip.add("Texture: " + getInfo().getTexturesFor(null).get((byte) stack.getMetadata()).getName());
         }
@@ -151,7 +151,7 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IInf
     @Nullable
     @Override
     public TileEntity createTileEntity(World world, IBlockState state) {
-        if(isObj) {
+        if (isObj) {
             DynamXBlockEvent.CreateTileEntity event = new DynamXBlockEvent.CreateTileEntity(world.isRemote ? Side.CLIENT : Side.SERVER, this, world, new TEDynamXBlock(blockObjectInfo));
             MinecraftForge.EVENT_BUS.post(event);
             return event.getTileEntity();
@@ -160,7 +160,8 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IInf
     }
 
     @Override //Handled by the RotatedCollisionHandler
-    public void addCollisionBoxToList(IBlockState state, World world, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes, @Nullable Entity entityIn, boolean isActualState) {}
+    public void addCollisionBoxToList(IBlockState state, World world, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes, @Nullable Entity entityIn, boolean isActualState) {
+    }
 
     @Override
     public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
@@ -176,8 +177,8 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IInf
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
         super.breakBlock(worldIn, pos, state);
         DynamXChunkData data = worldIn.getChunk(pos).getCapability(DynamXChunkDataProvider.DYNAM_X_CHUNK_DATA_CAPABILITY, null);
-        System.out.println("Collisions are "+data.getBlocksAABB());
-        System.out.println("Remove" +data.getBlocksAABB().get(pos)+" at "+pos);
+        System.out.println("Collisions are " + data.getBlocksAABB());
+        System.out.println("Remove" + data.getBlocksAABB().get(pos) + " at " + pos);
         data.getBlocksAABB().remove(pos);
     }
 
@@ -191,18 +192,17 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IInf
     protected RayTraceResult rayTrace(BlockPos pos, Vec3d start, Vec3d end, AxisAlignedBB boundingBox) {
         Vec3d vec3d = start.subtract(pos.getX(), pos.getY(), pos.getZ());
         Vec3d vec3d1 = end.subtract(pos.getX(), pos.getY(), pos.getZ());
-        return !intersects(boundingBox, vec3d, vec3d1) ? null : new RayTraceResult(new Vec3d(0,0,0), EnumFacing.DOWN, pos);
+        return !intersects(boundingBox, vec3d, vec3d1) ? null : new RayTraceResult(new Vec3d(0, 0, 0), EnumFacing.DOWN, pos);
     }
 
-    public static boolean intersects(AxisAlignedBB boundingBox, Vec3d min, Vec3d max)
-    {
+    public static boolean intersects(AxisAlignedBB boundingBox, Vec3d min, Vec3d max) {
         //Because vanilla method is side only client...
         return boundingBox.intersects(Math.min(min.x, max.x), Math.min(min.y, max.y), Math.min(min.z, max.z), Math.max(min.x, max.x), Math.max(min.y, max.y), Math.max(min.z, max.z));
     }
 
-    public AxisAlignedBB getComputedBB(IBlockAccess world, BlockPos pos){
+    public AxisAlignedBB getComputedBB(IBlockAccess world, BlockPos pos) {
         TileEntity tileEntity = world.getTileEntity(pos);
-        if(tileEntity instanceof TEDynamXBlock) {
+        if (tileEntity instanceof TEDynamXBlock) {
             return ((TEDynamXBlock) tileEntity).computeBoundingBox();
         } //FIXME DO FOR NO-OBJ BLOCKS
         return FULL_BLOCK_AABB;
@@ -216,6 +216,11 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IInf
     @Override
     public void setInfo(T info) {
         blockObjectInfo = info;
+    }
+
+    @Override
+    public boolean createJson() {
+        return IResourcesOwner.super.createJson() || blockObjectInfo.get3DItemRenderLocation() != Enum3DRenderLocation.ALL;
     }
 
     @Override

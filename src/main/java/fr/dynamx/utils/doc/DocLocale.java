@@ -4,17 +4,16 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import fr.dynamx.common.DynamXMain;
-import net.minecraft.client.resources.IResource;
-import net.minecraft.client.resources.IResourceManager;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.io.IOUtils;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.IllegalFormatException;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -74,7 +73,7 @@ public class DocLocale {
         if (inputStreamIn == null) return;
         for (String s : IOUtils.readLines(inputStreamIn, StandardCharsets.UTF_8)) {
             if (!s.isEmpty() && s.charAt(0) != '#') {
-                String[] astring = (String[]) Iterables.toArray(SPLITTER.split(s), String.class);
+                String[] astring = Iterables.toArray(SPLITTER.split(s), String.class);
 
                 if (astring != null && astring.length == 2) {
                     String s1 = astring[0];
@@ -90,8 +89,8 @@ public class DocLocale {
      */
     private String translateKeyPrivate(String translateKey) {
         String s = this.properties.get(translateKey);
-        if(s == null) {
-            DynamXMain.log.error("[DOC] Translation for "+translateKey+" not found !");
+        if (s == null) {
+            DynamXMain.log.error("[DOC] Translation for " + translateKey + " not found !");
             return translateKey;
         }
         return s;

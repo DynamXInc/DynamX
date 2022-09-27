@@ -2,7 +2,7 @@ package fr.dynamx.common.contentpack.loader;
 
 import fr.aym.acslib.api.services.ErrorTrackingService;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
-import fr.dynamx.api.contentpack.object.IShapedObject;
+import fr.dynamx.api.contentpack.object.IShapeContainer;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.SubInfoTypesRegistry;
 import fr.dynamx.common.DynamXContext;
@@ -89,9 +89,9 @@ public class BuildableInfoLoader<A extends SubInfoTypeOwner.BuildableSubInfoType
         for (A info : vehiclesToLoad) {
             bar1.step(info.getFullName());
             try {
-                ((IShapedObject) info).generateShape();
+                ((IShapeContainer) info).generateShape();
             } catch (Exception e) {
-                ((IShapedObject) info).setShapeErrored();
+                ((IShapeContainer) info).markFailedShape();
                 DynamXMain.log.fatal("Cannot load physics collision shape of " + info.getFullName() + " !", e);
                 DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, info.getPackName(), info.getFullName(), "Cannot load physics collision shape : " + e.getMessage(), ErrorTrackingService.TrackedErrorLevel.FATAL);
             }
@@ -100,7 +100,7 @@ public class BuildableInfoLoader<A extends SubInfoTypeOwner.BuildableSubInfoType
                     T vehicleInfo = info.build();
                     super.loadItems(vehicleInfo, hot);
                 } catch (Exception e) {
-                    log.error("Cannot complete vehicle " + info.toString() + " !", e);
+                    log.error("Cannot complete vehicle " + info + " !", e);
                     DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, info.getPackName(), info.getFullName(), "Cannot complete vehicle : " + e.getMessage(), ErrorTrackingService.TrackedErrorLevel.FATAL);
                 }
             } else {

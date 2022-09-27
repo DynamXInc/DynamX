@@ -14,16 +14,11 @@ import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.objects.ArmorObject;
 import fr.dynamx.common.obj.eximpl.MtlMaterialLib;
 import fr.dynamx.common.obj.eximpl.OBJLoader;
-import fr.dynamx.common.obj.eximpl.QuickObjObject;
 import fr.dynamx.utils.DynamXLoadingTasks;
-import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.RegistryNameSetter;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.IResource;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.ProgressManager;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -62,7 +57,7 @@ public class DynamXModelRegistry implements IObjModelRegistry {
                 MODELS_REGISTRY.put(location, customTextures);
             } else {
                 log.error("Tried to register the model '" + location + "' two times with custom textures '" + previousSupplier + "' and '" + customTextures + "' ! Ignoring " + customTextures);
-                DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, customTextures.getPackName(), "Model "+location,
+                DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, customTextures.getPackName(), "Model " + location,
                         "Tried to register the model '" + location + "' two times with custom textures '" + previousSupplier + "' and '" + customTextures + "' ! Ignoring " + customTextures, ErrorTrackingService.TrackedErrorLevel.HIGH);
             }
         }
@@ -98,7 +93,7 @@ public class DynamXModelRegistry implements IObjModelRegistry {
                 log.debug("Loading tessellator model " + name.getKey());
 
                 ObjModelClient model = ObjModelClient.createObjModel(RegistryNameSetter.getDynamXModelResourceLocation(name.getKey()), name.getValue());
-                if(model != null) {
+                if (model != null) {
                     MODELS.put(name.getKey(), model);
                 } else {
                     MODELS.put(name.getKey(), MISSING_MODEL);

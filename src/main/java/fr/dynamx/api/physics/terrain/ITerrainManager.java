@@ -2,8 +2,8 @@ package fr.dynamx.api.physics.terrain;
 
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.common.physics.terrain.WorldTerrainState;
-import fr.dynamx.common.physics.terrain.chunk.ChunkLoadingTicket;
 import fr.dynamx.common.physics.terrain.chunk.ChunkCollisions;
+import fr.dynamx.common.physics.terrain.chunk.ChunkLoadingTicket;
 import fr.dynamx.utils.VerticalChunkPos;
 import fr.dynamx.utils.debug.Profiler;
 import net.minecraft.world.World;
@@ -13,10 +13,9 @@ import javax.annotation.Nullable;
 
 /**
  * A TerrainManager is responsible for loading the world collisions (blocs and non-physic, non-player) entities <br>
- *     Interface used for protection system
+ * Interface used for protection system
  */
-public interface ITerrainManager
-{
+public interface ITerrainManager {
     /**
      * Injects chunks loaded in other threads and unloads unused chunks from bullet's world (chunks not used the last tick)
      */
@@ -24,13 +23,15 @@ public interface ITerrainManager
 
     /**
      * Loads the collisions of this chunk in the current thread, so it may provoke a little freeze
-     * @param ticket The chunk's ticket
+     *
+     * @param ticket   The chunk's ticket
      * @param profiler The current profiler
      */
     ChunkCollisions loadChunkCollisionsNow(ChunkLoadingTicket ticket, Profiler profiler);
 
     /**
      * Asks for the threaded terrain loader to load this chunk (in another thread) and then hotswap it
+     *
      * @param ticket The chunk's ticket
      */
     void asyncLoadChunkCollisions(ChunkLoadingTicket ticket);
@@ -48,6 +49,7 @@ public interface ITerrainManager
 
     /**
      * Called on chunk modification (block change), invalidates the collision saved on disk (if exists) and loads the new collision in the {@link ITerrainManager} (while it's loading, the old collision stays active)
+     *
      * @param pos The collision chunk's pos
      */
     void onChunkChanged(VerticalChunkPos pos);
@@ -78,7 +80,8 @@ public interface ITerrainManager
     /**
      * Sets the {@link ChunkCollisions} of this ticket and refreshes the physic terrain <br>
      * Fired by the async chunk loader
-     * @param ticket The chunk's ticket
+     *
+     * @param ticket     The chunk's ticket
      * @param collisions The new chunk's collisions
      */
     void offerLoadedChunk(ChunkLoadingTicket.AsyncLoadedChunk chunk);
@@ -86,7 +89,7 @@ public interface ITerrainManager
     /**
      * Will load the chunk at the given position, depending on the requested priority
      *
-     * @param pos The position of the chunk
+     * @param pos      The position of the chunk
      * @param priority The priority of loading
      * @param pro
      * @see IPhysicsTerrainLoader

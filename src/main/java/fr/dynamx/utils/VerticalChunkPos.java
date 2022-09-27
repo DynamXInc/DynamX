@@ -5,27 +5,25 @@ import java.util.Objects;
 /**
  * Like {@link net.minecraft.util.math.ChunkPos}, but with an y coordinate
  */
-public class VerticalChunkPos
-{
+public class VerticalChunkPos {
     /**
      * Mutable {@link VerticalChunkPos} used to find VerticalChunkPos into maps or lists
      */
-    public static class Mutable
-    {
+    public static class Mutable {
         public int x;
         public int z;
         public int y;
-        public void setPos(int x, int y, int z)
-        {
+
+        public void setPos(int x, int y, int z) {
             this.x = x;
             this.y = y;
             this.z = z;
         }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if(o instanceof VerticalChunkPos)
-            {
+            if (o instanceof VerticalChunkPos) {
                 VerticalChunkPos that = (VerticalChunkPos) o;
                 return x == that.x &&
                         z == that.z &&
@@ -37,14 +35,15 @@ public class VerticalChunkPos
                     z == that.z &&
                     y == that.y;
         }
+
         @Override
         public int hashCode() {
             return Objects.hash(x, y, z);
         }
+
         @Override
-        public String toString()
-        {
-            return "MutableVCP[" + this.x + ", "+ y + ", " + this.z + "]";
+        public String toString() {
+            return "MutableVCP[" + this.x + ", " + y + ", " + this.z + "]";
         }
 
         public VerticalChunkPos toImmutable() {
@@ -52,17 +51,24 @@ public class VerticalChunkPos
         }
     }
 
-    /** The X position of this Chunk Coordinate Pair */
+    /**
+     * The X position of this Chunk Coordinate Pair
+     */
     public final int x;
-    /** The Z position of this Chunk Coordinate Pair */
+    /**
+     * The Z position of this Chunk Coordinate Pair
+     */
     public final int z;
-    /** The y position (world y position divided by 16) */
+    /**
+     * The y position (world y position divided by 16)
+     */
     public final int y;
-    /** The hash code, to save cpu time */
+    /**
+     * The hash code, to save cpu time
+     */
     private final int hashCode;
 
-    public VerticalChunkPos(int x, int y, int z)
-    {
+    public VerticalChunkPos(int x, int y, int z) {
         this.x = x;
         this.y = y;
         this.z = z;
@@ -72,26 +78,22 @@ public class VerticalChunkPos
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if(o instanceof VerticalChunkPosContainer) {
+        if (o instanceof VerticalChunkPosContainer) {
             VerticalChunkPos that = ((VerticalChunkPosContainer) o).getPos();
             return x == that.x &&
                     z == that.z &&
                     y == that.y;
-        }
-        else if(o.getClass() == Mutable.class)
-        {
+        } else if (o.getClass() == Mutable.class) {
             Mutable that = (Mutable) o;
             return x == that.x &&
                     z == that.z &&
                     y == that.y;
-        }
-        else if(o.getClass() == VerticalChunkPos.class) {
+        } else if (o.getClass() == VerticalChunkPos.class) {
             VerticalChunkPos that = (VerticalChunkPos) o;
             return x == that.x &&
                     z == that.z &&
                     y == that.y;
-        }
-        else
+        } else
             return false;
     }
 
@@ -101,23 +103,21 @@ public class VerticalChunkPos
     }
 
     @Override
-    public String toString()
-    {
-        return "VCP[" + this.x + ", "+ y + ", " + this.z + "]";
+    public String toString() {
+        return "VCP[" + this.x + ", " + y + ", " + this.z + "]";
     }
 
     /**
      * The {@link VerticalChunkPos} container, used for easy comparison and usage in lists/hash maps.
      */
-    public interface VerticalChunkPosContainer
-    {
+    public interface VerticalChunkPosContainer {
         VerticalChunkPos getPos();
 
         default boolean posEquals(Object o) {
             if (this == o) return true;
-            if(o.getClass() == VerticalChunkPos.class)
+            if (o.getClass() == VerticalChunkPos.class)
                 return VerticalChunkPos.equals(getPos(), (VerticalChunkPos) o);
-            else if(o instanceof VerticalChunkPos.VerticalChunkPosContainer)
+            else if (o instanceof VerticalChunkPos.VerticalChunkPosContainer)
                 return VerticalChunkPos.equals(getPos(), ((VerticalChunkPos.VerticalChunkPosContainer) o).getPos());
             return false;
         }

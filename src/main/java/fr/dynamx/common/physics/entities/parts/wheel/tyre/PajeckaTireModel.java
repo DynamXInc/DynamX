@@ -93,9 +93,7 @@ public class PajeckaTireModel {
      * <br>
      * <b>CAUTION:</b> this function returns a value in Newton N!
      *
-     * @param slipAngle
-     *            - the slip angle in degrees (°).
-     *
+     * @param slipAngle - the slip angle in degrees (°).
      * @return - lateral tire force in N.
      */
     public float calcLateralTireForce(float slipAngle) {
@@ -139,12 +137,12 @@ public class PajeckaTireModel {
                 lateral.getSlipAngleCoefficientC(), lateral.getSlipAngleCoefficientB(), lateral.getSlipAngleCoefficientE(),
                 lateral.getLoadCoefficientKA(), lateral.getLoadCoefficientKB());
 
-        String lng = String.format(format, this.getClass().toString(),
+        String lng = String.format(format, this.getClass(),
                 name, "Longitudinal",
                 longitudinal.getSlipAngleCoefficientC(), longitudinal.getSlipAngleCoefficientB(), longitudinal.getSlipAngleCoefficientE(),
                 longitudinal.getLoadCoefficientKA(), longitudinal.getLoadCoefficientKB());
 
-        String mnt = String.format(format, this.getClass().toString(),
+        String mnt = String.format(format, this.getClass(),
                 name, "Align Moment",
                 alignMoment.getSlipAngleCoefficientC(), alignMoment.getSlipAngleCoefficientB(), alignMoment.getSlipAngleCoefficientE(),
                 alignMoment.getLoadCoefficientKA(), alignMoment.getLoadCoefficientKB());

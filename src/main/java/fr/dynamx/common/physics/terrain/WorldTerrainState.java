@@ -71,7 +71,7 @@ public class WorldTerrainState //TODO INTERFACE
                         throw new IllegalStateException("Elements still added ! " + ticket.getCollisions() + " wtf " + ticket);
                     }
                     loadedTerrain.remove(pos);
-                    if(pendingForInvalidation.contains(pos)) {
+                    if (pendingForInvalidation.contains(pos)) {
                         onChunkUnload(terrain, pos);
                         pendingForInvalidation.remove(pos);
                     }
@@ -82,7 +82,7 @@ public class WorldTerrainState //TODO INTERFACE
     }
 
     public void onChunkUnload(PhysicsWorldTerrain terrain, VerticalChunkPos pos) {
-        if(isLoadedAnywhere(pos)) {
+        if (isLoadedAnywhere(pos)) {
             pendingForInvalidation.add(pos);
         } else {
             ChunkLoadingTicket ticket = terrain.removeTicket(pos); //Will cancel current loading processes

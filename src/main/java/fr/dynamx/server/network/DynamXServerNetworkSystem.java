@@ -10,16 +10,14 @@ import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nullable;
 
-public class DynamXServerNetworkSystem implements IDnxNetworkSystem
-{
+public class DynamXServerNetworkSystem implements IDnxNetworkSystem {
     private final VanillaNetworkHandler VANILLA_NETWORK;
     private final IDnxNetworkHandler QUICK_NETWORK;
     private ServerIPAdressRetriever serverIPAdressRetriever;
 
     public DynamXServerNetworkSystem(EnumNetworkType networkType) {
         VANILLA_NETWORK = new VanillaNetworkHandler();
-        switch (networkType)
-        {
+        switch (networkType) {
             case VANILLA_TCP:
                 QUICK_NETWORK = VANILLA_NETWORK;
                 break;
@@ -27,15 +25,13 @@ public class DynamXServerNetworkSystem implements IDnxNetworkSystem
                 QUICK_NETWORK = new UdpServerNetworkHandler();
                 break;
             default:
-                throw new UnsupportedOperationException("Network type "+networkType+" isn't supported for the moment !");
+                throw new UnsupportedOperationException("Network type " + networkType + " isn't supported for the moment !");
         }
     }
 
     @Override
-    public <T> void sendToClient(IDnxPacket packet, EnumPacketTarget<T> targetType, @Nullable T target)
-    {
-        switch (packet.getPreferredNetwork())
-        {
+    public <T> void sendToClient(IDnxPacket packet, EnumPacketTarget<T> targetType, @Nullable T target) {
+        switch (packet.getPreferredNetwork()) {
             case VANILLA_TCP:
                 VANILLA_NETWORK.sendPacket(packet, targetType, target);
                 break;
@@ -50,27 +46,24 @@ public class DynamXServerNetworkSystem implements IDnxNetworkSystem
     }
 
     @Override
-    public void startNetwork()
-    {
+    public void startNetwork() {
         this.serverIPAdressRetriever = new ServerIPAdressRetriever();
         this.serverIPAdressRetriever.init();
 
-        DynamXMain.log.info(VANILLA_NETWORK.start()?"Started [" + VANILLA_NETWORK.getType() + "] Server.":"Failed to start [" + VANILLA_NETWORK.getType() + "] Server.");
-        if(VANILLA_NETWORK != QUICK_NETWORK)
-            DynamXMain.log.info(QUICK_NETWORK.start()?"Started [" + QUICK_NETWORK.getType() + "] Server.":"Failed to start [" + QUICK_NETWORK.getType() + "] Server.");
+        DynamXMain.log.info(VANILLA_NETWORK.start() ? "Started [" + VANILLA_NETWORK.getType() + "] Server." : "Failed to start [" + VANILLA_NETWORK.getType() + "] Server.");
+        if (VANILLA_NETWORK != QUICK_NETWORK)
+            DynamXMain.log.info(QUICK_NETWORK.start() ? "Started [" + QUICK_NETWORK.getType() + "] Server." : "Failed to start [" + QUICK_NETWORK.getType() + "] Server.");
         MinecraftForge.EVENT_BUS.register(new UdpServerConnectionHandler(QUICK_NETWORK));
     }
 
     @Override
-    public void stopNetwork()
-    {
-        if (this.QUICK_NETWORK instanceof UdpServerNetworkHandler)
-        {
-            ((UdpServerNetworkHandler)this.QUICK_NETWORK).waitingAuth.clear();
+    public void stopNetwork() {
+        if (this.QUICK_NETWORK instanceof UdpServerNetworkHandler) {
+            ((UdpServerNetworkHandler) this.QUICK_NETWORK).waitingAuth.clear();
         }
 
         VANILLA_NETWORK.stop();
-        if(VANILLA_NETWORK != QUICK_NETWORK)
+        if (VANILLA_NETWORK != QUICK_NETWORK)
             QUICK_NETWORK.stop();
     }
 
@@ -84,8 +77,7 @@ public class DynamXServerNetworkSystem implements IDnxNetworkSystem
         return QUICK_NETWORK;
     }
 
-    public ServerIPAdressRetriever getServerIPAdressRetriever()
-    {
+    public ServerIPAdressRetriever getServerIPAdressRetriever() {
         return this.serverIPAdressRetriever;
     }
 }

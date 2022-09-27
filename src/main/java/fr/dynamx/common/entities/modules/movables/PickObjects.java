@@ -101,7 +101,7 @@ public class PickObjects extends MovableModule {
 
     @Override
     public void onJointDestroyed(EntityJoint<?> joint) {
-        if(mover != null) {
+        if (mover != null) {
             entity.getNetwork().onPlayerStopControlling(mover, false);
         }
         this.joint = null;

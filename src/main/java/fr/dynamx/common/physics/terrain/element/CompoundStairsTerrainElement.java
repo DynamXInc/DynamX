@@ -22,8 +22,7 @@ import java.util.*;
 /**
  * A terrain element containing multiple boxes
  */
-public class CompoundStairsTerrainElement implements ITerrainElement
-{
+public class CompoundStairsTerrainElement implements ITerrainElement {
     private MeshCollisionShape shape;
     private List<StairsBox> collisions;
     private final Map<Integer, TerrainDebugData> debugData = new HashMap<>();
@@ -31,7 +30,8 @@ public class CompoundStairsTerrainElement implements ITerrainElement
     private List<IndexedMesh> meshes;
     private PhysicsRigidBody body;
 
-    public CompoundStairsTerrainElement() {}
+    public CompoundStairsTerrainElement() {
+    }
 
     public CompoundStairsTerrainElement(int x, int y, int z, List<StairsBox> boxes) {
         IndexedMeshBuilder builder = new IndexedMeshBuilder(x, y, z, debugData);
@@ -42,17 +42,16 @@ public class CompoundStairsTerrainElement implements ITerrainElement
 
     @Override
     public void save(TerrainSaveType type, ObjectOutputStream out) throws IOException {
-        if(meshes != null && meshes.isEmpty()) //No boxes (empty element)
+        if (meshes != null && meshes.isEmpty()) //No boxes (empty element)
         {
             out.writeInt(-1);
-        }
-        else {
+        } else {
             out.writeInt(collisions.size());
             for (StairsBox box : collisions) {
                 //Write all collisions boxes as computed by the TerrainCollisionManager
                 out.writeObject(box);
             }
-            if(type.usesPlatformDependantOptimizations()) {
+            if (type.usesPlatformDependantOptimizations()) {
                 //Write bullet's bvh data
                 out.writeObject(shape.serializeBvh());
             }
@@ -63,48 +62,46 @@ public class CompoundStairsTerrainElement implements ITerrainElement
     public boolean load(TerrainSaveType type, ObjectInputStream in, VerticalChunkPos pos) throws IOException, ClassNotFoundException {
         List<StairsBox> boxes = new ArrayList<>();
         int size = in.readInt();
-        if(size == -1) //No boxes (empty element)
+        if (size == -1) //No boxes (empty element)
         {
             meshes = Collections.EMPTY_LIST;
             shape = null;
-        }
-        else {
+        } else {
             //if(!type.usesPlatformDependantOptimizations())
-              //  System.out.println("Size "+pos+" "+size);
-          //  long start = System.currentTimeMillis();
+            //  System.out.println("Size "+pos+" "+size);
+            //  long start = System.currentTimeMillis();
             for (int i = 0; i < size; i++) {
                 //Read all boxes as computed by the TerrainCollisionManager
                 boxes.add((StairsBox) in.readObject());
             }
             collisions = boxes; //05/07/20 we now need it to serialise and send chunk over network
 
-           // start = System.currentTimeMillis()-start;
-           // long start2 = System.currentTimeMillis();
+            // start = System.currentTimeMillis()-start;
+            // long start2 = System.currentTimeMillis();
             //Generate corresponding IndexedMeshes
-            IndexedMeshBuilder builder = new IndexedMeshBuilder(- pos.x * 16, -pos.y * 16, - pos.z * 16, debugData);
+            IndexedMeshBuilder builder = new IndexedMeshBuilder(-pos.x * 16, -pos.y * 16, -pos.z * 16, debugData);
             builder.addStairBoxes(boxes);
-          //  start2 = System.currentTimeMillis()-start2;
+            //  start2 = System.currentTimeMillis()-start2;
 
-           // long start3 = System.currentTimeMillis();
-            if(type.usesPlatformDependantOptimizations()) {
+            // long start3 = System.currentTimeMillis();
+            if (type.usesPlatformDependantOptimizations()) {
                 //Read bullet's bvh data
                 byte[] data = (byte[]) in.readObject();
                 //Then create the shape
                 shape = new MeshCollisionShape(data, builder.getMeshes().toArray(new IndexedMesh[0]));
-            }
-            else
+            } else
                 //Then create the shape
                 shape = new MeshCollisionShape(true, builder.getMeshes().toArray(new IndexedMesh[0]));
-           //start3 = System.currentTimeMillis()-start3;
+            //start3 = System.currentTimeMillis()-start3;
 
-           // System.out.println("Timings are "+start+" "+start2+" "+start3);
+            // System.out.println("Timings are "+start+" "+start2+" "+start3);
         }
         return true;
     }
 
     @Override
     public PhysicsRigidBody build(Vector3f pos) {
-        if(shape == null) { //Not generated
+        if (shape == null) { //Not generated
             if (meshes.isEmpty()) //No boxes (empty element)
                 return null;
             shape = new MeshCollisionShape(true, meshes.toArray(new IndexedMesh[0]));
@@ -124,15 +121,14 @@ public class CompoundStairsTerrainElement implements ITerrainElement
 
     @Override
     public void addDebugToWorld(World mcWorld, Vector3f pos) {
-        if(!debugData.isEmpty()) {
+        if (!debugData.isEmpty()) {
             (mcWorld.isRemote ? DynamXDebugOptions.CLIENT_BLOCK_BOXES : DynamXDebugOptions.BLOCK_BOXES).getDataIn().putAll(debugData);
         }
     }
 
     @Override
     public void removeDebugFromWorld(World mcWorld) {
-        for(Integer pos : debugData.keySet())
-        {
+        for (Integer pos : debugData.keySet()) {
             (mcWorld.isRemote ? DynamXDebugOptions.CLIENT_BLOCK_BOXES : DynamXDebugOptions.BLOCK_BOXES).getDataIn().remove(pos);
         }
     }

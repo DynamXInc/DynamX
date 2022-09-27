@@ -11,11 +11,11 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class MessageSlopesConfigGui implements IDnxPacket, IMessageHandler<MessageSlopesConfigGui, IMessage>
-{
+public class MessageSlopesConfigGui implements IDnxPacket, IMessageHandler<MessageSlopesConfigGui, IMessage> {
     private NBTTagCompound serializedConfig;
 
-    public MessageSlopesConfigGui() {}
+    public MessageSlopesConfigGui() {
+    }
 
     public MessageSlopesConfigGui(NBTTagCompound serializedConfig) {
         this.serializedConfig = serializedConfig;
@@ -39,9 +39,8 @@ public class MessageSlopesConfigGui implements IDnxPacket, IMessageHandler<Messa
     @Override
     public IMessage onMessage(MessageSlopesConfigGui messageSlopesConfigGui, MessageContext messageContext) {
         ItemStack stack = messageContext.getServerHandler().player.getHeldItemMainhand();
-        if(stack.getItem() instanceof ItemSlopes)
-        {
-            if(!stack.hasTagCompound())
+        if (stack.getItem() instanceof ItemSlopes) {
+            if (!stack.hasTagCompound())
                 stack.setTagCompound(new NBTTagCompound());
             stack.getTagCompound().setTag("ptconfig", messageSlopesConfigGui.serializedConfig);
         }

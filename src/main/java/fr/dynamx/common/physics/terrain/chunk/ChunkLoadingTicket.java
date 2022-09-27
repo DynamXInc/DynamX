@@ -14,8 +14,7 @@ import java.util.concurrent.CompletableFuture;
  * The status can be one of {@link ChunkState}. <br>
  * The {@link fr.dynamx.api.physics.terrain.ITerrainManager} will handle the loading of this chunk, checking for the {@link TicketPriority} of this ticket and its current state.
  */
-public class ChunkLoadingTicket implements VerticalChunkPos.VerticalChunkPosContainer
-{
+public class ChunkLoadingTicket implements VerticalChunkPos.VerticalChunkPosContainer {
     private final VerticalChunkPos pos;
 
     private ChunkCollisions collisions;
@@ -63,10 +62,11 @@ public class ChunkLoadingTicket implements VerticalChunkPos.VerticalChunkPosCont
 
     /**
      * Increments the status index of this ticket, stopping all running loading operations based on snapshots.
+     *
      * @see Snap
      */
     public void incrStatusIndex(String from) {
-       //indexChangers.add(from);
+        //indexChangers.add(from);
         statusIndex++;
     }
 
@@ -104,8 +104,8 @@ public class ChunkLoadingTicket implements VerticalChunkPos.VerticalChunkPosCont
         incrStatusIndex("Set loading");
         this.loadedCallback = new CompletableFuture<>();
         this.status = ChunkState.LOADING;
-        if(DynamXConfig.enableDebugTerrainManager)
-            ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.SET_LOADING, ChunkGraph.ActionLocation.UNKNOWN, null, ""+this);
+        if (DynamXConfig.enableDebugTerrainManager)
+            ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.SET_LOADING, ChunkGraph.ActionLocation.UNKNOWN, null, "" + this);
     }
 
     /**
@@ -122,8 +122,8 @@ public class ChunkLoadingTicket implements VerticalChunkPos.VerticalChunkPosCont
     public void setLoaded(WorldTerrainState terrainState, ChunkCollisions collisions) {
         setCollisions(terrainState, collisions);
         this.status = ChunkState.LOADED;
-        if(DynamXConfig.enableDebugTerrainManager)
-            ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.SET_LOADED, ChunkGraph.ActionLocation.UNKNOWN, null, this+" "+(collisions != null ? collisions.getElements().getElements().size()+" / "+collisions.getElements().getPersistentElements().size() : "null coll"));
+        if (DynamXConfig.enableDebugTerrainManager)
+            ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.SET_LOADED, ChunkGraph.ActionLocation.UNKNOWN, null, this + " " + (collisions != null ? collisions.getElements().getElements().size() + " / " + collisions.getElements().getPersistentElements().size() : "null coll"));
     }
 
     /**
@@ -131,7 +131,7 @@ public class ChunkLoadingTicket implements VerticalChunkPos.VerticalChunkPosCont
      * It should be called separately from the setLoaded method, as it may be followed by a new loading operation on this chunk (async loading for clients)
      */
     public void fireLoadedCallback() {
-        if(loadedCallback != null)
+        if (loadedCallback != null)
             loadedCallback.complete(collisions);
     }
 
@@ -139,10 +139,10 @@ public class ChunkLoadingTicket implements VerticalChunkPos.VerticalChunkPosCont
      * Marks this chunks as unloaded, and clears the contained data
      */
     public void setUnloaded(WorldTerrainState terrainState) {
-        if(DynamXConfig.enableDebugTerrainManager)
+        if (DynamXConfig.enableDebugTerrainManager)
             ChunkGraph.addToGrah(getPos(), ChunkGraph.ChunkActions.DESTROY, ChunkGraph.ActionLocation.MAIN, getCollisions());
         incrStatusIndex("Set unloaded");
-        if(loadedCallback != null) //complete with old collisions
+        if (loadedCallback != null) //complete with old collisions
             loadedCallback.complete(collisions);
         setCollisions(terrainState, null);
         status = ChunkState.NONE;
@@ -150,11 +150,11 @@ public class ChunkLoadingTicket implements VerticalChunkPos.VerticalChunkPosCont
     }
 
     private void setCollisions(WorldTerrainState terrainState, ChunkCollisions collisions) {
-        if(collisions != this.collisions) {
-            if(this.collisions != null) {
+        if (collisions != this.collisions) {
+            if (this.collisions != null) {
                 this.collisions.removeFromBulletWorld(DynamXContext.getPhysicsWorld());
-                if(this.collisions.getChunkState().areComputedElementsAdded()|| this.collisions.getChunkState().arePersistentElementsAdded()) {
-                    throw new IllegalStateException("Elements still added ! "+this.collisions+" wtf "+this);
+                if (this.collisions.getChunkState().areComputedElementsAdded() || this.collisions.getChunkState().arePersistentElementsAdded()) {
+                    throw new IllegalStateException("Elements still added ! " + this.collisions + " wtf " + this);
                 }
                 this.collisions.reset();
             }
@@ -186,8 +186,7 @@ public class ChunkLoadingTicket implements VerticalChunkPos.VerticalChunkPosCont
     /**
      * Chunk loading priorities
      */
-    public enum TicketPriority
-    {
+    public enum TicketPriority {
         /**
          * No loading
          */
@@ -210,8 +209,7 @@ public class ChunkLoadingTicket implements VerticalChunkPos.VerticalChunkPosCont
      * A snapshot of this ticket, typically taken when beginning a loading of this chunk <br>
      * If the status index of the chunk is different, then another loading was started so this snapshot, and the associated loading operation, can be discarded
      */
-    public class Snap implements VerticalChunkPos.VerticalChunkPosContainer
-    {
+    public class Snap implements VerticalChunkPos.VerticalChunkPosContainer {
         private final int snapIndex;
 
         public Snap(int snapIndex) {
@@ -261,8 +259,7 @@ public class ChunkLoadingTicket implements VerticalChunkPos.VerticalChunkPosCont
     /**
      * Wrapper class for data of an async loaded chunk
      */
-    public static class AsyncLoadedChunk
-    {
+    public static class AsyncLoadedChunk {
         private final Snap snap;
         private final ChunkCollisions collisionsIn;
 

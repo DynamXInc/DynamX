@@ -5,8 +5,7 @@ import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 
-public class PosRotator
-{
+public class PosRotator {
     private final EnumFacing direction;
 
     public PosRotator(EnumFacing direction) {
@@ -14,55 +13,53 @@ public class PosRotator
     }
 
     public BlockPos.MutableBlockPos mute(int i, BlockPos.MutableBlockPos from) {
-        switch (direction)
-        {
+        switch (direction) {
             case NORTH:
-                from.setPos(from.getX(), from.getY(), from.getZ()-i);
+                from.setPos(from.getX(), from.getY(), from.getZ() - i);
                 break;
             case SOUTH:
-                from.setPos(from.getX(), from.getY(), from.getZ()+i);
+                from.setPos(from.getX(), from.getY(), from.getZ() + i);
                 break;
             case EAST:
-                from.setPos(from.getX()+i, from.getY(), from.getZ());
+                from.setPos(from.getX() + i, from.getY(), from.getZ());
                 break;
             case WEST:
-                from.setPos(from.getX()-i, from.getY(), from.getZ());
+                from.setPos(from.getX() - i, from.getY(), from.getZ());
                 break;
         }
         return from;
     }
 
     public BlockPos mute(int i, int x, int y, int z) {
-        switch (direction)
-        {
+        switch (direction) {
             case NORTH:
-                return new BlockPos(x, y, z-i);
+                return new BlockPos(x, y, z - i);
             case SOUTH:
-                return new BlockPos(x, y, z+i);
+                return new BlockPos(x, y, z + i);
             case EAST:
-                return new BlockPos(x+i, y, z);
+                return new BlockPos(x + i, y, z);
             case WEST:
-                return new BlockPos(x-i, y, z);
+                return new BlockPos(x - i, y, z);
         }
         return new BlockPos(x, y, z);
     }
+
     public Vector3f mute(int i, int x, float y, int z) {
-        switch (direction)
-        {
+        switch (direction) {
             case NORTH:
-                return Vector3fPool.get(x, y, z-i);
+                return Vector3fPool.get(x, y, z - i);
             case SOUTH:
-                return Vector3fPool.get(x, y, z+i);
+                return Vector3fPool.get(x, y, z + i);
             case EAST:
-                return Vector3fPool.get(x+i, y, z);
+                return Vector3fPool.get(x + i, y, z);
             case WEST:
-                return Vector3fPool.get(x-i, y, z);
+                return Vector3fPool.get(x - i, y, z);
         }
         return Vector3fPool.get(x, y, z);
     }
 
     public int getLittleX(int xstart, int xend) {
-        return direction.getAxis() == EnumFacing.Axis.X ? (direction.getAxisDirection() == EnumFacing.AxisDirection.NEGATIVE ? Math.max(xstart, xend) : Math.min(xstart, xend)) :  Math.min(xstart, xend);
+        return direction.getAxis() == EnumFacing.Axis.X ? (direction.getAxisDirection() == EnumFacing.AxisDirection.NEGATIVE ? Math.max(xstart, xend) : Math.min(xstart, xend)) : Math.min(xstart, xend);
     }
 
     public int getLittleZ(int zstart, int zend) {
@@ -97,17 +94,16 @@ public class PosRotator
     }*/
 
     public int getTheDir(BlockPos from) {
-        switch (direction)
-        {
+        switch (direction) {
             case NORTH:
             case SOUTH:
                 return from.getZ();
         }
         return from.getX();
     }
+
     public int getTheDir(Vector3f from) {
-        switch (direction)
-        {
+        switch (direction) {
             case NORTH:
             case SOUTH:
                 return (int) from.z;
@@ -116,26 +112,25 @@ public class PosRotator
     }
 
     public int getTheOtherDir(BlockPos from) {
-        switch (direction)
-        {
+        switch (direction) {
             case NORTH:
             case SOUTH:
                 return from.getX();
         }
         return from.getZ();
     }
+
     public float getTheOtherDir(Vector3f from) {
-        switch (direction)
-        {
+        switch (direction) {
             case NORTH:
             case SOUTH:
                 return from.x;
         }
         return from.z;
     }
+
     public BlockPos setTheOtherDir(BlockPos in, int value) {
-        switch (direction)
-        {
+        switch (direction) {
             case NORTH:
             case SOUTH:
                 return new BlockPos(value, in.getY(), in.getZ());
@@ -160,16 +155,18 @@ public class PosRotator
     }*/
 
     public int fixBorderX(int x) {
-        return direction == EnumFacing.WEST ? x+1 : x;
+        return direction == EnumFacing.WEST ? x + 1 : x;
     }
+
     public int fixBorderZ(int z) {
-        return direction == EnumFacing.NORTH ? z+1 : z;
+        return direction == EnumFacing.NORTH ? z + 1 : z;
     }
 
     public int counterFixBorderX(int x) {
-        return direction == EnumFacing.WEST ? x-1 : x;
+        return direction == EnumFacing.WEST ? x - 1 : x;
     }
+
     public int counterFixBorderZ(int z) {
-        return direction == EnumFacing.NORTH ? z-1 : z;
+        return direction == EnumFacing.NORTH ? z - 1 : z;
     }
 }

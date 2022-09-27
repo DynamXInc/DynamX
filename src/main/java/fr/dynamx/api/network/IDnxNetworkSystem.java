@@ -6,15 +6,13 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 import javax.annotation.Nullable;
 
 /**
- *  Responsible to dispatch vanilla and udp packets and manages udp network
+ * Responsible to dispatch vanilla and udp packets and manages udp network
  */
-public interface IDnxNetworkSystem
-{
+public interface IDnxNetworkSystem {
     /**
      * Sends the packet to the server, using preferred network of the packet
      */
-    default void sendToServer(IDnxPacket packet)
-    {
+    default void sendToServer(IDnxPacket packet) {
         throw new UnsupportedOperationException("Unsupported on this side !");
     }
 
@@ -23,8 +21,7 @@ public interface IDnxNetworkSystem
      *
      * @param targetType The client(s) type
      */
-    default void sendToClient(IDnxPacket packet, EnumPacketTarget<Void> targetType)
-    {
+    default void sendToClient(IDnxPacket packet, EnumPacketTarget<Void> targetType) {
         sendToClient(packet, targetType, null);
     }
 
@@ -33,10 +30,9 @@ public interface IDnxNetworkSystem
      * <strong>Only use this from the server thread because fml packets code isn't multi-threaded. Use 'sendToClientFromOtherThread' instead.</strong>
      *
      * @param targetType The client(s) type
-     * @param target The client(s)
+     * @param target     The client(s)
      */
-    default <T> void sendToClient(IDnxPacket packet, EnumPacketTarget<T> targetType, @Nullable T target)
-    {
+    default <T> void sendToClient(IDnxPacket packet, EnumPacketTarget<T> targetType, @Nullable T target) {
         throw new UnsupportedOperationException("Unsupported on this side !");
     }
 
@@ -45,10 +41,9 @@ public interface IDnxNetworkSystem
      * <strong>Unlike 'sendToClient', this will send the send task to the server thread, so use this if you are sending the packet from another thread.</strong>
      *
      * @param targetType The client(s) type
-     * @param target The client(s)
+     * @param target     The client(s)
      */
-    default <T> void sendToClientFromOtherThread(IDnxPacket packet, EnumPacketTarget<T> targetType, @Nullable T target)
-    {
+    default <T> void sendToClientFromOtherThread(IDnxPacket packet, EnumPacketTarget<T> targetType, @Nullable T target) {
         FMLCommonHandler.instance().getMinecraftServerInstance().addScheduledTask(() -> {
             sendToClient(packet, targetType, target);
         });

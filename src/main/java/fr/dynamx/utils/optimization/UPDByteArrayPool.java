@@ -5,9 +5,8 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 @NotThreadSafe
-public class UPDByteArrayPool
-{
-    private static UPDByteArrayPool INSTANCE = new UPDByteArrayPool(4096);
+public class UPDByteArrayPool {
+    private static final UPDByteArrayPool INSTANCE = new UPDByteArrayPool(4096);
     private final int arraysSize;
     private final Queue<byte[]> frees = new ConcurrentLinkedQueue<>();
 
@@ -16,16 +15,16 @@ public class UPDByteArrayPool
     }
 
     public byte[] get() {
-        if(!frees.isEmpty())
+        if (!frees.isEmpty())
             return frees.poll();
         return new byte[arraysSize];
     }
 
     public void free(byte[] array) {
-        if(array.length == arraysSize)
+        if (array.length == arraysSize)
             frees.add(array);
         else
-            throw new IllegalArgumentException("Wrong array length : "+array.length+" instead of "+arraysSize);
+            throw new IllegalArgumentException("Wrong array length : " + array.length + " instead of " + arraysSize);
     }
 
     public static UPDByteArrayPool getINSTANCE() {

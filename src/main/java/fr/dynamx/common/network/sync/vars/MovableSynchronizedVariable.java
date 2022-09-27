@@ -16,8 +16,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 
-public class MovableSynchronizedVariable <A extends PhysicsEntity<?>>  implements SynchronizedVariable<A>
-{
+public class MovableSynchronizedVariable<A extends PhysicsEntity<?>> implements SynchronizedVariable<A> {
     public static final ResourceLocation NAME = new ResourceLocation(DynamXConstants.ID, "movable");
 
     private Vector3f point = new Vector3f();
@@ -34,20 +33,20 @@ public class MovableSynchronizedVariable <A extends PhysicsEntity<?>>  implement
         boolean changed = false;
         MovableModule movableModule = entity.getModuleByType(MovableModule.class);
 
-        if(point != movableModule.pickObjects.getLocalPickPosition()) {
+        if (point != movableModule.pickObjects.getLocalPickPosition()) {
             point = movableModule.pickObjects.getLocalPickPosition();
             changed = true;
         }
-        if(pickDistance != movableModule.pickObjects.pickDistance) {
+        if (pickDistance != movableModule.pickObjects.pickDistance) {
             pickDistance = movableModule.pickObjects.pickDistance;
             changed = true;
         }
-        if(movableModule.pickObjects.mover != null && pickerId != movableModule.pickObjects.mover.getEntityId()) {
+        if (movableModule.pickObjects.mover != null && pickerId != movableModule.pickObjects.mover.getEntityId()) {
             pickerId = movableModule.pickObjects.mover.getEntityId();
             changed = true;
         }
 
-        if(movableModule.moveObjects.pickedEntity != null) {
+        if (movableModule.moveObjects.pickedEntity != null) {
             if (pickedEntityID != movableModule.moveObjects.pickedEntity.getEntityId()) {
                 pickedEntityID = movableModule.moveObjects.pickedEntity.getEntityId();
                 changed = true;
@@ -57,7 +56,7 @@ public class MovableSynchronizedVariable <A extends PhysicsEntity<?>>  implement
             isPicked = movableModule.moveObjects.isPicked;
             changed = true;
         }
-        if(movableModule.moveObjects.picker != null && moverId != movableModule.moveObjects.picker.getEntityId()) {
+        if (movableModule.moveObjects.picker != null && moverId != movableModule.moveObjects.picker.getEntityId()) {
             moverId = movableModule.moveObjects.picker.getEntityId();
             changed = true;
         }
@@ -70,24 +69,24 @@ public class MovableSynchronizedVariable <A extends PhysicsEntity<?>>  implement
         MovableModule movableModule = entity.getModuleByType(MovableModule.class);
         movableModule.pickObjects.setLocalPickPosition(point);
         movableModule.pickObjects.pickDistance = pickDistance;
-        if(movableModule.moveObjects.isPicked && !isPicked) {
+        if (movableModule.moveObjects.isPicked && !isPicked) {
             entity.getNetwork().onPlayerStopControlling(movableModule.moveObjects.picker, false);
         }
         movableModule.moveObjects.isPicked = isPicked;
         Entity entity1 = entity.world.getEntityByID(pickedEntityID);
-        if(entity1 instanceof PhysicsEntity<?>){
+        if (entity1 instanceof PhysicsEntity<?>) {
             movableModule.moveObjects.pickedEntity = (PhysicsEntity<?>) entity1;
         }
         entity1 = entity.world.getEntityByID(pickerId);
-        if(entity1 instanceof EntityPlayer){
-            if(DynamXContext.getPlayerPickingObjects().containsKey(entity1.getEntityId())) {
+        if (entity1 instanceof EntityPlayer) {
+            if (DynamXContext.getPlayerPickingObjects().containsKey(entity1.getEntityId())) {
                 movableModule.pickObjects.mover = (EntityPlayer) entity1;
                 entity.getNetwork().onPlayerStartControlling((EntityPlayer) entity1, false);
             }
         }
         entity1 = entity.world.getEntityByID(moverId);
-        if(entity1 instanceof EntityPlayer && isPicked){
-            if(DynamXContext.getPlayerPickingObjects().containsKey(entity1.getEntityId())) {
+        if (entity1 instanceof EntityPlayer && isPicked) {
+            if (DynamXContext.getPlayerPickingObjects().containsKey(entity1.getEntityId())) {
                 movableModule.moveObjects.picker = (EntityPlayer) entity1;
                 entity.getNetwork().onPlayerStartControlling((EntityPlayer) entity1, false);
             }

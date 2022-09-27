@@ -5,8 +5,7 @@ import fr.aym.acslib.api.ACsService;
 /**
  * Required here in DynamX because of the coremod loading system :c
  */
-public interface StatsReportingService extends ACsService
-{
+public interface StatsReportingService extends ACsService {
     /**
      * SHOULD BE CALLED BEFORE ANY REPORT
      * Sets the report url and product name
@@ -15,8 +14,7 @@ public interface StatsReportingService extends ACsService
 
     void disable();
 
-    enum ReportLevel
-    {
+    enum ReportLevel {
         ALL, ALL_ERRORS, ONLY_CRASHES, NONE
     }
 }

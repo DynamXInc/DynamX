@@ -29,8 +29,7 @@ import java.util.concurrent.ThreadFactory;
 /**
  * A {@link ITerrainCache} stored in a file
  */
-public class FileTerrainCache implements ITerrainCache
-{
+public class FileTerrainCache implements ITerrainCache {
     private static final ThreadFactory factory = new DynamXThreadedModLoader.DefaultThreadFactory("DnxTerrainCache");
     private final ExecutorService POOL = Executors.newFixedThreadPool(1, factory);
 
@@ -42,21 +41,18 @@ public class FileTerrainCache implements ITerrainCache
     //The Set avoids duplicates
     protected Set<VerticalChunkPos> dirtyChunks = ConcurrentHashMap.newKeySet();
 
-    public FileTerrainCache()
-    {
+    public FileTerrainCache() {
         storageDir = new File(FMLCommonHandler.instance().getMinecraftServerInstance().getEntityWorld().getSaveHandler().getWorldDirectory(), "DnxChunks");
         storageDir.mkdirs();
 
         File f = new File(storageDir, "dnxregion_main.dnx");
-        if(f.exists()) {
+        if (f.exists()) {
             throw new UnsupportedOperationException("V2 terrain formats are no longer supported, please delete file DnxChunks/dnxregion_main.dnx of your map (note : your custom slopes will be deleted)");
-        }
-        else {
+        } else {
             f = new File(storageDir, "custom_slopes.dnx");
-            if(f.exists() || storageDir.listFiles().length == 0) {
+            if (f.exists() || storageDir.listFiles().length == 0) {
                 initV4(f);
-            }
-            else {
+            } else {
                 initV3(f);
             }
         }
@@ -65,7 +61,7 @@ public class FileTerrainCache implements ITerrainCache
     private void initV4(File slopes) {
         DynamXMain.log.info("V4 terrain format detected !");
         try {
-            if(!slopes.exists()) //when the world is created
+            if (!slopes.exists()) //when the world is created
                 isSlopesToSave = true; //ensure to write a new file, and don't detect V3 the next time
             slopesFile = new TerrainFile(slopes, true);
             slopesFile.load();
@@ -89,38 +85,36 @@ public class FileTerrainCache implements ITerrainCache
      * @param collisions The chunk to save
      */
     @Override
-    public void addChunkToSave(ChunkLoadingTicket loadingTicket, ChunkCollisions collisions)
-    {
-        if(DynamXConfig.enableDebugTerrainManager)
+    public void addChunkToSave(ChunkLoadingTicket loadingTicket, ChunkCollisions collisions) {
+        if (DynamXConfig.enableDebugTerrainManager)
             ChunkGraph.addToGrah(collisions.getPos(), ChunkGraph.ChunkActions.SEND_SAVE, ChunkGraph.ActionLocation.UNKNOWN, collisions);
         //don't incr index here, but todoold take care if it's not incr just after chunk has been loaded
         //System.out.println("Adding dirty "+loadingTicket.getPos());
         dirtyChunks.add(loadingTicket.getPos());
         ChunkLoadingTicket.Snap snap = loadingTicket.snapshot();
-        POOL.submit(() ->  {
-            if(snap.isValid())
+        POOL.submit(() -> {
+            if (snap.isValid())
                 saveFile(collisions.getPos(), collisions.getElements());
             //else if(DynamXConfig.enableDebugTerrainManager)
-              //  System.out.println("Skipped save of "+snap+" : not valid anymore");
+            //  System.out.println("Skipped save of "+snap+" : not valid anymore");
         });
     }
 
     @Override
     public void invalidate(VerticalChunkPos pos, boolean changed, boolean syncChanges) {
-        if(DynamXConfig.enableDebugTerrainManager)
-            ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.SEND_INVALIDATE, ChunkGraph.ActionLocation.UNKNOWN, null, "Changed: "+changed);
-        if(changed) {
+        if (DynamXConfig.enableDebugTerrainManager)
+            ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.SEND_INVALIDATE, ChunkGraph.ActionLocation.UNKNOWN, null, "Changed: " + changed);
+        if (changed) {
             invalidate(pos, syncChanges);
         }
     }
 
     @Override
-    public void invalidate(ChunkLoadingTicket ticket, boolean changed, boolean syncChanges)
-    {
+    public void invalidate(ChunkLoadingTicket ticket, boolean changed, boolean syncChanges) {
         VerticalChunkPos pos = ticket.getPos();
-        if(DynamXConfig.enableDebugTerrainManager)
-            ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.SEND_INVALIDATE, ChunkGraph.ActionLocation.UNKNOWN, null, "Changed: "+changed+" Status "+ticket.getStatusIndex());
-        if(changed) {
+        if (DynamXConfig.enableDebugTerrainManager)
+            ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.SEND_INVALIDATE, ChunkGraph.ActionLocation.UNKNOWN, null, "Changed: " + changed + " Status " + ticket.getStatusIndex());
+        if (changed) {
             ticket.incrStatusIndex("invalidated_changed"); //will prevent any other tasks like loading
             invalidate(pos, syncChanges);
         }
@@ -128,13 +122,13 @@ public class FileTerrainCache implements ITerrainCache
 
     private void invalidate(VerticalChunkPos pos, boolean syncChanges) {
         //invalidatingChunks.add(pos);
-        if(syncChanges)
+        if (syncChanges)
             dirtyChunks.add(pos);
         ChunkPos cpos = new ChunkPos(pos.x >> 5, pos.z >> 5); //16x16 chunks
         POOL.submit(() -> {
             TerrainFile FILE = getFileAt(cpos);
             FILE.removeChunk(pos);
-            if(DynamXConfig.enableDebugTerrainManager)
+            if (DynamXConfig.enableDebugTerrainManager)
                 ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.INVALIDATED, ChunkGraph.ActionLocation.SAVER, null, "Done");
         });
     }
@@ -148,23 +142,22 @@ public class FileTerrainCache implements ITerrainCache
 
             //System.out.println("Send dirty "+ Arrays.toString(array));
             //TODO CLEAN CONDITION AND CODE
-            if(FMLCommonHandler.instance().getMinecraftServerInstance() != null && FMLCommonHandler.instance().getMinecraftServerInstance().isDedicatedServer()) {
+            if (FMLCommonHandler.instance().getMinecraftServerInstance() != null && FMLCommonHandler.instance().getMinecraftServerInstance().isDedicatedServer()) {
                 DynamXContext.getNetwork().sendToClient(new MessageUpdateChunk(array), EnumPacketTarget.ALL);
             }
         }
         timeCounter++;
-        if(needsTerrainSave && timeCounter%200==0) {
+        if (needsTerrainSave && timeCounter % 200 == 0) {
             POOL.submit(this::writeModifiedFiles);
         }
     }
 
     @Override
-    public ChunkTerrain load(ChunkLoadingTicket ticket, Profiler profiler)
-    {
+    public ChunkTerrain load(ChunkLoadingTicket ticket, Profiler profiler) {
         //We assume it's not called while the chunk is saving : it already is in an upper cache
         VerticalChunkPos pos = ticket.getPos();
-        if(DynamXConfig.enableDebugTerrainManager)
-            ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.LOAD_FROM_SAVE, ChunkGraph.ActionLocation.UNKNOWN, null, "Status: "+ticket.getStatusIndex());
+        if (DynamXConfig.enableDebugTerrainManager)
+            ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.LOAD_FROM_SAVE, ChunkGraph.ActionLocation.UNKNOWN, null, "Status: " + ticket.getStatusIndex());
 
         profiler.start(Profiler.Profiles.CHUNK_COLLS_LOAD_FROM_FILE);
         Vector3fPool.openPool();
@@ -172,8 +165,8 @@ public class FileTerrainCache implements ITerrainCache
 
         List<ITerrainElement> elements = getFileAt(cpos).loadChunk(pos, this);
         List<?> persistentElements = getSlopesFile().loadChunk(pos, this);
-        if(persistentElements != null && searchForDuplicatesAndRemove(pos, (List<ITerrainElement.IPersistentTerrainElement>) persistentElements)) {
-            DynamXMain.log.info("Saving modified chunk "+ticket+" due to duplicated slopes");
+        if (persistentElements != null && searchForDuplicatesAndRemove(pos, (List<ITerrainElement.IPersistentTerrainElement>) persistentElements)) {
+            DynamXMain.log.info("Saving modified chunk " + ticket + " due to duplicated slopes");
             saveFile(pos, new ChunkTerrain(elements == null ? new ArrayList<>() : elements, persistentElements == null ? new ArrayList<>() : (List<ITerrainElement.IPersistentTerrainElement>) persistentElements));
         }
 
@@ -185,26 +178,25 @@ public class FileTerrainCache implements ITerrainCache
 
     private boolean searchForDuplicatesAndRemove(VerticalChunkPos pos, List<ITerrainElement.IPersistentTerrainElement> elements) {
         List<ITerrainElement.IPersistentTerrainElement> duplicates = new ArrayList<>();
-        for (int i = 0; i < elements.size()-1; i++) {
-            for (int j = i+1; j < elements.size(); j++) {
+        for (int i = 0; i < elements.size() - 1; i++) {
+            for (int j = i + 1; j < elements.size(); j++) {
                 ITerrainElement.IPersistentTerrainElement element = elements.get(i);
                 ITerrainElement.IPersistentTerrainElement comp = elements.get(j);
-                if(!duplicates.contains(element) && !duplicates.contains(comp) && element.toString().equals(comp.toString())) {
+                if (!duplicates.contains(element) && !duplicates.contains(comp) && element.toString().equals(comp.toString())) {
                     duplicates.add(comp);
                 }
             }
         }
-        if(!duplicates.isEmpty()) {
+        if (!duplicates.isEmpty()) {
             DynamXMain.log.warn("Found " + duplicates.size() + " duplicates at " + pos + " ! Removing them...");
             elements.removeAll(duplicates);
             return true;
-        }
-        else
+        } else
             return false;
     }
 
     private TerrainFile getFileAt(ChunkPos pos) {
-        if(terrainFiles.containsKey(pos))
+        if (terrainFiles.containsKey(pos))
             return terrainFiles.get(pos);
         else {
             File f = new File(storageDir, "region_" + pos.x + "_" + pos.z + ".dnx");
@@ -235,13 +227,12 @@ public class FileTerrainCache implements ITerrainCache
     /**
      * Saves a chunk collisions
      *
-     * @param pos The pos of the chunk
+     * @param pos      The pos of the chunk
      * @param elements The elements of the chunk to save
      */
-    protected void saveFile(VerticalChunkPos pos, ChunkTerrain elements)
-    {
-        if(DynamXConfig.enableDebugTerrainManager)
-            ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.SAVE_TO_FILE, ChunkGraph.ActionLocation.SAVER, null, "elements: "+elements);
+    protected void saveFile(VerticalChunkPos pos, ChunkTerrain elements) {
+        if (DynamXConfig.enableDebugTerrainManager)
+            ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.SAVE_TO_FILE, ChunkGraph.ActionLocation.SAVER, null, "elements: " + elements);
         try {
             ChunkPos cpos = new ChunkPos(pos.x >> 5, pos.z >> 5); //16x16 chunks
             //System.out.println("Saving "+pos+" "+cpos);
@@ -249,14 +240,14 @@ public class FileTerrainCache implements ITerrainCache
             try {
                 FILE.setChunk(pos, elements.getElements());
                 boolean saveSlopes = !elements.getPersistentElements().isEmpty() || getSlopesFile().getAllKeys().contains(pos);
-                if(saveSlopes)
+                if (saveSlopes)
                     getSlopesFile().setChunk(pos, (List<ITerrainElement>) (List<?>) elements.getPersistentElements());
-                if(DynamXConfig.enableDebugTerrainManager)
-                    ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.SAVE_TO_FILE, ChunkGraph.ActionLocation.SAVER, null, "removed invalidating at "+pos);
+                if (DynamXConfig.enableDebugTerrainManager)
+                    ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.SAVE_TO_FILE, ChunkGraph.ActionLocation.SAVER, null, "removed invalidating at " + pos);
 
-                if(!terrainFileSaveQueue.contains(cpos))
+                if (!terrainFileSaveQueue.contains(cpos))
                     terrainFileSaveQueue.offer(cpos);
-                if(saveSlopes)
+                if (saveSlopes)
                     isSlopesToSave = true;
                 needsTerrainSave = true;
             } catch (IOException e) {
@@ -278,7 +269,7 @@ public class FileTerrainCache implements ITerrainCache
                 throw new RuntimeException("Chunk save failed", e);
             }
         }
-        if(isSlopesToSave) {
+        if (isSlopesToSave) {
             try {
                 getSlopesFile().save();
             } catch (IOException e) {
@@ -302,8 +293,7 @@ public class FileTerrainCache implements ITerrainCache
     }
 
     @Override
-    public void clear()
-    {
+    public void clear() {
         POOL.shutdown();
         terrainFiles.clear();
     }

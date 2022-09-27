@@ -10,8 +10,7 @@ import java.util.Map;
 /**
  * Registry of {@link JointHandler}, required to sync joints and load them from world saves
  */
-public class JointHandlerRegistry
-{
+public class JointHandlerRegistry {
     private static final Map<ResourceLocation, JointHandler<?, ?, ?>> HANDLERS = new HashMap<>();
 
     /**
@@ -20,8 +19,8 @@ public class JointHandlerRegistry
      * @param handler the handler of a joint, responsible for creating and destroying the joint
      */
     public static void register(JointHandler<?, ?, ?> handler) {
-        if(HANDLERS.containsKey(handler.getType()))
-            throw new IllegalArgumentException("JointHandler "+handler.getType()+" already registered !");
+        if (HANDLERS.containsKey(handler.getType()))
+            throw new IllegalArgumentException("JointHandler " + handler.getType() + " already registered !");
         HANDLERS.put(handler.getType(), handler);
     }
 
@@ -30,8 +29,8 @@ public class JointHandlerRegistry
      * @throws IllegalArgumentException If no handler was found
      */
     public static JointHandler<?, ?, ?> getHandler(ResourceLocation name) {
-        if(!HANDLERS.containsKey(name))
-            throw new IllegalArgumentException("JointHandler "+name+" does not exists");
+        if (!HANDLERS.containsKey(name))
+            throw new IllegalArgumentException("JointHandler " + name + " does not exists");
         return HANDLERS.get(name);
     }
 
@@ -46,8 +45,8 @@ public class JointHandlerRegistry
     /**
      * Creates a joint in the given entity
      *
-     * @param name The {@link JointHandler} registry name
-     * @param entity The affected entity
+     * @param name    The {@link JointHandler} registry name
+     * @param entity  The affected entity
      * @param jointID The local id of the joint, useful if you have multiple joints on this JointHandler <br> Should be unique for each joint
      */
     public static void createJointWithSelf(ResourceLocation name, PhysicsEntity<?> entity, byte jointID) {
@@ -57,7 +56,7 @@ public class JointHandlerRegistry
     /**
      * Creates a joint between the two given entities
      *
-     * @param name The {@link JointHandler} registry name
+     * @param name    The {@link JointHandler} registry name
      * @param entity1 The main entity
      * @param entity2 The other entity
      * @param jointID The local id of the joint, useful if you have multiple joints on this JointHandler <br> Should be unique for each joint

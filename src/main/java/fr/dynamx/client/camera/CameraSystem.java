@@ -2,11 +2,11 @@ package fr.dynamx.client.camera;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.IModuleContainer;
+import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.utils.DynamXConfig;
-import fr.dynamx.utils.debug.ClientDebugSystem;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.Vector3fPool;
@@ -51,7 +51,7 @@ public class CameraSystem {
             lastCameraQuat = new com.jme3.math.Quaternion(jmeQuatCache.getX(), jmeQuatCache.getY(), jmeQuatCache.getZ(), jmeQuatCache.getW());
         //else //FIXME FIX THIS :c
         //This causes camera stuttering since the input lag fix
-          //  DynamXGeometry.slerp(lastCameraQuat, jmeQuatCache, lastCameraQuat, animLength);
+        //  DynamXGeometry.slerp(lastCameraQuat, jmeQuatCache, lastCameraQuat, animLength);
         lastCameraQuat.set(jmeQuatCache);
         //jmeQuatCache.set(lastCameraQuat);
         lastCameraQuat.normalizeLocal();

@@ -7,12 +7,15 @@ import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.api.network.sync.SimulationHolder;
+import fr.dynamx.client.renders.RenderPhysicsEntity;
 import fr.dynamx.common.contentpack.ModularVehicleInfo;
 import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.contentpack.parts.PartShape;
 import fr.dynamx.common.network.sync.vars.VehicleSynchronizedVariables;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.utils.DynamXConfig;
+import fr.dynamx.utils.DynamXUtils;
+import fr.dynamx.utils.EnumPlayerStandOnTop;
 import fr.dynamx.utils.debug.Profiler;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.Vector3fPool;
@@ -25,18 +28,16 @@ import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
 
 /**
  * Base implementation for all vehicles <br>
- *     It's fully modular and allows to create very different vehicles
+ * It's fully modular and allows to create very different vehicles
  *
+ * @param <T> The physics handler type
  * @see IPhysicsModule
  * @see BaseVehiclePhysicsHandler For the physics implementation
- * @param <T> The physics handler type
  */
-public abstract class BaseVehicleEntity<T extends BaseVehiclePhysicsHandler<?>> extends PackPhysicsEntity<T, ModularVehicleInfo<?>>
-{
+public abstract class BaseVehicleEntity<T extends BaseVehiclePhysicsHandler<?>> extends PackPhysicsEntity<T, ModularVehicleInfo<?>> {
     public BaseVehicleEntity(World worldIn) {
         super(worldIn);
     }
@@ -52,7 +53,11 @@ public abstract class BaseVehicleEntity<T extends BaseVehiclePhysicsHandler<?>> 
 
     @Override
     public List<ResourceLocation> getSynchronizedVariables(Side side, SimulationHolder simulationHolder) {
-        return super.getSynchronizedVariables(side, simulationHolder);
+        List<ResourceLocation> vars = super.getSynchronizedVariables(side, simulationHolder);
+        if (this instanceof IModuleContainer.IEngineContainer && simulationHolder.isPhysicsAuthority(side)) {
+            vars.add(VehicleSynchronizedVariables.Engine.NAME);
+        }
+        return vars;
     }
 
     @Override
@@ -126,7 +131,7 @@ public abstract class BaseVehicleEntity<T extends BaseVehiclePhysicsHandler<?>> 
 
     @Override
     public boolean shouldRiderSit() {
-        return true; //Passagers debouts
+        return RenderPhysicsEntity.shouldRenderPlayerSitting;
     }
 
     @Override
@@ -158,6 +163,18 @@ public abstract class BaseVehicleEntity<T extends BaseVehiclePhysicsHandler<?>> 
 
     @Override
     public boolean canPlayerStandOnTop() {
-        return true;
+        EnumPlayerStandOnTop playerStandOnTop = this.getPackInfo().getPlayerStandOnTop();
+        if(playerStandOnTop == null)
+            return true;
+        else {
+            switch (playerStandOnTop) {
+                case NEVER:
+                    return false;
+                case PROGRESSIVE:
+                    return DynamXUtils.getSpeed(this) <= 30;
+                default:
+                    return true;
+            }
+        }
     }
 }

@@ -22,8 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 @ACsRegisteredService(name = "ThrLoad", version = "2.0.0", interfaceClass = ThreadedLoadingService.class)
-public class DynamXThreadedModLoader implements ThreadedLoadingService
-{
+public class DynamXThreadedModLoader implements ThreadedLoadingService {
     private final ExecutorService POOL;
     private final Map<DThreadedLoadingTask, Future<?>> tasks;
     private final Queue<Runnable> inThreadTasks;
@@ -44,13 +43,13 @@ public class DynamXThreadedModLoader implements ThreadedLoadingService
 
     @Override
     public void onFMLStateEvent(FMLStateEvent event) {
-        if(event instanceof FMLPreInitializationEvent)
+        if (event instanceof FMLPreInitializationEvent)
             step(ModLoadingSteps.PRE_INIT);
-        else if(event instanceof FMLInitializationEvent)
+        else if (event instanceof FMLInitializationEvent)
             step(ModLoadingSteps.INIT);
-        else if(event instanceof FMLPostInitializationEvent)
+        else if (event instanceof FMLPostInitializationEvent)
             step(ModLoadingSteps.POST_INIT);
-        else if(event instanceof FMLLoadCompleteEvent)
+        else if (event instanceof FMLLoadCompleteEvent)
             step(ModLoadingSteps.FINISH_LOAD);
     }
 
@@ -66,23 +65,19 @@ public class DynamXThreadedModLoader implements ThreadedLoadingService
 
     @Override
     public void addTask(ModLoadingSteps finishFor, String taskName, Runnable task, @Nullable Runnable followingInThreadTask) {
-        if(POOL.isShutdown())
-        {
-            ACsLogger.serviceInfo(this, "Pool is shutdown, running task now "+taskName);
+        if (POOL.isShutdown()) {
+            ACsLogger.serviceInfo(this, "Pool is shutdown, running task now " + taskName);
             task.run();
             if (followingInThreadTask != null) {
                 followingInThreadTask.run();
             }
-        }
-        else if(finishFor.getIndex() <= step.getIndex())
-        {
-            ACsLogger.serviceWarn(this, "Got a past task, running it now "+taskName);
+        } else if (finishFor.getIndex() <= step.getIndex()) {
+            ACsLogger.serviceWarn(this, "Got a past task, running it now " + taskName);
             task.run();
             if (followingInThreadTask != null) {
                 followingInThreadTask.run();
             }
-        }
-        else {
+        } else {
             DThreadedLoadingTask taskt = new DThreadedLoadingTask(task, finishFor, followingInThreadTask, taskName, this);
             tasks.put(taskt, POOL.submit(taskt));
         }
@@ -90,7 +85,7 @@ public class DynamXThreadedModLoader implements ThreadedLoadingService
 
     @Override
     public void step(ModLoadingSteps step) {
-        if(step.getIndex() > this.step.getIndex()) {
+        if (step.getIndex() > this.step.getIndex()) {
             ACsLogger.serviceDebug(this, "Transition: " + step);
             for (Map.Entry<DThreadedLoadingTask, Future<?>> task : tasks.entrySet()) {
                 if (task.getKey().shouldEndNow(step) && !task.getValue().isDone()) {
@@ -132,9 +127,8 @@ public class DynamXThreadedModLoader implements ThreadedLoadingService
 
     protected void onEnd(DThreadedLoadingTask task, Runnable followingInThreadTask, long tookTime) {
         economised.addAndGet(tookTime);
-        if(followingInThreadTask != null) {
-            if(POOL.isShutdown())
-            {
+        if (followingInThreadTask != null) {
+            if (POOL.isShutdown()) {
                 ACsLogger.serviceWarn(this, "Received following task too late, do it now !");
                 followingInThreadTask.run();
             }
@@ -148,7 +142,7 @@ public class DynamXThreadedModLoader implements ThreadedLoadingService
             }
         }
         tasks.remove(task);
-        ACsLogger.serviceDebug(this, "Finished "+task.toString()+" in "+tookTime+" ms during "+step);
+        ACsLogger.serviceDebug(this, "Finished " + task.toString() + " in " + tookTime + " ms during " + step);
     }
 
     /**
@@ -168,7 +162,7 @@ public class DynamXThreadedModLoader implements ThreadedLoadingService
             SecurityManager s = System.getSecurityManager();
             group = (s != null) ? s.getThreadGroup() :
                     Thread.currentThread().getThreadGroup();
-            namePrefix = prefix+"-";
+            namePrefix = prefix + "-";
         }
 
         public Thread newThread(Runnable r) {

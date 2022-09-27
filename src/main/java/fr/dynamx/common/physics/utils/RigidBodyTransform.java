@@ -9,12 +9,12 @@ import fr.dynamx.utils.optimization.Vector3fPool;
 /**
  * Container for position and rotation of a physics object
  */
-public class RigidBodyTransform
-{
+public class RigidBodyTransform {
     private final Vector3f position = new Vector3f();
     private final Quaternion rotation = new Quaternion();
 
-    public RigidBodyTransform() {}
+    public RigidBodyTransform() {
+    }
 
     public RigidBodyTransform(RigidBodyTransform transform) {
         set(transform);

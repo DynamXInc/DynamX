@@ -7,13 +7,12 @@ import java.lang.reflect.InvocationTargetException;
 
 /**
  * A sub info category registry entry <br>
- *     Should be registered in the corresponding {@link SubInfoTypesRegistry}
+ * Should be registered in the corresponding {@link SubInfoTypesRegistry}
  *
  * @param <T> The class owning the {@link ISubInfoType} of this sub info category
  * @see ISubInfoType
  */
-public class SubInfoTypeEntry<T extends ISubInfoTypeOwner<?>>
-{
+public class SubInfoTypeEntry<T extends ISubInfoTypeOwner<?>> {
     private final String key;
     private final ISubInfoTypeCreator<T> creator;
     /**
@@ -24,28 +23,27 @@ public class SubInfoTypeEntry<T extends ISubInfoTypeOwner<?>>
     /**
      * Creates a new sub info type registry entry
      *
-     * @param key should be the name of this sub info in the info file (or contain if not strict as wheels, shapes and seats)
+     * @param key   should be the name of this sub info in the info file (or contain if not strict as wheels, shapes and seats)
      * @param clazz the class corresponding to this property, with a constructor having <strong>one parameter of the type of T</strong>
      */
-    public SubInfoTypeEntry(String key, Class<? extends ISubInfoType<T>> clazz)
-    {
+    public SubInfoTypeEntry(String key, Class<? extends ISubInfoType<T>> clazz) {
         this(key, clazz, true);
     }
 
     /**
      * Creates a new sub info type registry entry
      *
-     * @param key should be the name of this sub info in the info file (or contain if not strict as wheels, shapes and seats)
-     * @param clazz the class corresponding to this property, with a constructor having <strong>one parameter of the type of T</strong>
+     * @param key    should be the name of this sub info in the info file (or contain if not strict as wheels, shapes and seats)
+     * @param clazz  the class corresponding to this property, with a constructor having <strong>one parameter of the type of T</strong>
      * @param strict if strict (default value), it will check if key is equals, else if key is contained in vehicle info field
      */
-    public SubInfoTypeEntry(String key, Class<? extends ISubInfoType<T>> clazz, boolean strict)
-    {
+    public SubInfoTypeEntry(String key, Class<? extends ISubInfoType<T>> clazz, boolean strict) {
         this(key, (owner, infoTypeName) -> {
             try {
                 return clazz.getConstructor(ISubInfoTypeOwner.class).newInstance(owner);
-            } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-                throw new RuntimeException("Inaccessible ISubProperty "+clazz+". The constructor must have one parameter of type ISubInfoTypeOwner.", e);
+            } catch (InstantiationException | IllegalAccessException | NoSuchMethodException |
+                     InvocationTargetException e) {
+                throw new RuntimeException("Inaccessible ISubProperty " + clazz + ". The constructor must have one parameter of type ISubInfoTypeOwner.", e);
             }
         }, strict);
     }
@@ -53,23 +51,21 @@ public class SubInfoTypeEntry<T extends ISubInfoTypeOwner<?>>
     /**
      * Creates a new sub info type registry entry
      *
-     * @param key should be the name of this sub info in the info file (or contain if not strict as wheels, shapes and seats)
+     * @param key     should be the name of this sub info in the info file (or contain if not strict as wheels, shapes and seats)
      * @param creator a {@link ISubInfoTypeCreator} creating an instance of the sub info type
      */
-    public SubInfoTypeEntry(String key, ISubInfoTypeCreator<T> creator)
-    {
+    public SubInfoTypeEntry(String key, ISubInfoTypeCreator<T> creator) {
         this(key, creator, true);
     }
 
     /**
      * Creates a new sub info type registry entry
      *
-     * @param key should be the name of this sub info in the info file (or contain if not strict as wheels, shapes and seats)
+     * @param key     should be the name of this sub info in the info file (or contain if not strict as wheels, shapes and seats)
      * @param creator a {@link ISubInfoTypeCreator} creating an instance of the sub info type
-     * @param strict if strict (default value), it will check if key is equals, else if key is contained in vehicle info field
+     * @param strict  if strict (default value), it will check if key is equals, else if key is contained in vehicle info field
      */
-    public SubInfoTypeEntry(String key, ISubInfoTypeCreator<T> creator, boolean strict)
-    {
+    public SubInfoTypeEntry(String key, ISubInfoTypeCreator<T> creator, boolean strict) {
         this.key = key.toLowerCase();
         this.creator = creator;
         this.strict = strict;

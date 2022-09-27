@@ -23,14 +23,13 @@ import java.util.List;
 
 /**
  * Base implementation for all modular entities <br>
- *      The modularity is made for addons, and allows to create very different objects and vehicles
+ * The modularity is made for addons, and allows to create very different objects and vehicles
  *
+ * @param <T> The physics handler type
  * @see IPhysicsModule
  * @see PackEntityPhysicsHandler For the physics implementation
- * @param <T> The physics handler type
  */
-public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>> extends PhysicsEntity<T>
-{
+public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>> extends PhysicsEntity<T> {
     protected final List<IPhysicsModule<?>> moduleList = new ArrayList<>();
     protected final List<IPhysicsModule.IEntityUpdateListener> updateEntityListeners = new ArrayList<>();
     protected final List<IPhysicsModule.IEntityPosUpdateListener> updateEntityPosListeners = new ArrayList<>();
@@ -94,13 +93,13 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
         updateEntityListeners.clear();
         updatePhysicsListeners.clear();
         moduleList.forEach(m -> {
-            if(m instanceof IPhysicsModule.IEntityUpdateListener && ((IPhysicsModule.IEntityUpdateListener) m).listenEntityUpdates(world.isRemote ? Side.CLIENT : Side.SERVER))
+            if (m instanceof IPhysicsModule.IEntityUpdateListener && ((IPhysicsModule.IEntityUpdateListener) m).listenEntityUpdates(world.isRemote ? Side.CLIENT : Side.SERVER))
                 updateEntityListeners.add((IPhysicsModule.IEntityUpdateListener) m);
-            if(m instanceof IPhysicsModule.IEntityPosUpdateListener && ((IPhysicsModule.IEntityPosUpdateListener) m).listenEntityPosUpdates(world.isRemote ? Side.CLIENT : Side.SERVER))
+            if (m instanceof IPhysicsModule.IEntityPosUpdateListener && ((IPhysicsModule.IEntityPosUpdateListener) m).listenEntityPosUpdates(world.isRemote ? Side.CLIENT : Side.SERVER))
                 updateEntityPosListeners.add((IPhysicsModule.IEntityPosUpdateListener) m);
-            if(m instanceof IPhysicsModule.IPhysicsUpdateListener)
+            if (m instanceof IPhysicsModule.IPhysicsUpdateListener)
                 updatePhysicsListeners.add((IPhysicsModule.IPhysicsUpdateListener) m);
-            if(m instanceof IPhysicsModule.IDrawableModule)
+            if (m instanceof IPhysicsModule.IDrawableModule)
                 drawableModules.add((IPhysicsModule.IDrawableModule) m);
         });
     }
@@ -120,7 +119,7 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
         createModules(new ModuleListBuilder(moduleList));
         fireCreateModulesEvent(world.isRemote ? Side.CLIENT : Side.SERVER);
         moduleList.forEach(IPhysicsModule::initEntityProperties);
-        if(initCallback != null) {
+        if (initCallback != null) {
             initCallback.onEntityInit(this, moduleList);
             initCallback = null; //Free memory
         }
@@ -132,9 +131,10 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
 
     @Override
     public void initPhysicsEntity(boolean usePhysics) {
-        if(usePhysics) physicsHandler = createPhysicsHandler();
+        if (usePhysics) physicsHandler = createPhysicsHandler();
         moduleList.forEach(m -> ((IPhysicsModule<T>) m).initPhysicsEntity(physicsHandler));
-        if(usePhysics) physicsHandler.addToWorld(); //Add the physics handler to the physics world AFTER modules initialisation
+        if (usePhysics)
+            physicsHandler.addToWorld(); //Add the physics handler to the physics world AFTER modules initialisation
         if (physicsInitCallback != null) {
             physicsInitCallback.onPhysicsInit(this, physicsHandler);
             physicsInitCallback = null; //Free memory
@@ -148,21 +148,22 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
 
     /**
      * Called to create and add modules to the module list <br>
-     *     Take care of their order : a propulsion module should be added before an engine module
+     * Take care of their order : a propulsion module should be added before an engine module
+     *
      * @param modules
      */
     protected abstract void createModules(ModuleListBuilder modules);
 
     /**
      * Fires the create modules event, with the right generic type <br>
-     *     If you override this function, you should make it final
+     * If you override this function, you should make it final
      */
     protected abstract void fireCreateModulesEvent(Side side);
 
     @Override
     public List<ResourceLocation> getSynchronizedVariables(Side side, SimulationHolder simulationHolder) {
         List<ResourceLocation> vars = super.getSynchronizedVariables(side, simulationHolder);
-        for(IPhysicsModule<?> module : moduleList)
+        for (IPhysicsModule<?> module : moduleList)
             module.addSynchronizedVariables(side, simulationHolder, vars);
         return vars;
     }
@@ -217,18 +218,17 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
 
     @Override
     public void applyOrientationToEntity(Entity passenger) {
-        if(this instanceof IModuleContainer.ISeatsContainer) {
-            ((IModuleContainer.ISeatsContainer)this).getSeats().applyOrientationToEntity(passenger);
-        }
-        else {
+        if (this instanceof IModuleContainer.ISeatsContainer) {
+            ((IModuleContainer.ISeatsContainer) this).getSeats().applyOrientationToEntity(passenger);
+        } else {
             super.applyOrientationToEntity(passenger);
         }
     }
 
     @Override
     public void updatePassenger(Entity passenger) {
-        if(this instanceof IModuleContainer.ISeatsContainer) {
-            ((IModuleContainer.ISeatsContainer)this).getSeats().updatePassenger(passenger);
+        if (this instanceof IModuleContainer.ISeatsContainer) {
+            ((IModuleContainer.ISeatsContainer) this).getSeats().updatePassenger(passenger);
         } else {
             super.updatePassenger(passenger);
         }
@@ -237,8 +237,8 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
     @Nullable
     @Override
     public Entity getControllingPassenger() {
-        if(this instanceof IModuleContainer.ISeatsContainer && ((IModuleContainer.ISeatsContainer)this).getSeats() != null){ //May be called before init of modules
-            return ((IModuleContainer.ISeatsContainer)this).getSeats().getControllingPassenger();
+        if (this instanceof IModuleContainer.ISeatsContainer && ((IModuleContainer.ISeatsContainer) this).getSeats() != null) { //May be called before init of modules
+            return ((IModuleContainer.ISeatsContainer) this).getSeats().getControllingPassenger();
         } else {
             return super.getControllingPassenger();
         }

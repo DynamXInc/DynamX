@@ -30,13 +30,11 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 
 import java.util.*;
 
-public class CmdSlopes implements ISubCommand
-{
+public class CmdSlopes implements ISubCommand {
     @Override
     public String getName() {
         return "slopes";
@@ -44,7 +42,7 @@ public class CmdSlopes implements ISubCommand
 
     @Override
     public String getUsage() {
-        return getName()+" <create|delete|automatic|enableAutoSlopes>";
+        return getName() + " <create|delete|automatic|enableAutoSlopes>";
     }
 
     @Override
@@ -58,39 +56,35 @@ public class CmdSlopes implements ISubCommand
         if (args.length >= 2) {
             exec(server, (EntityPlayer) sender, stack, args);
         } else {
-            throw new WrongUsageException("/dynamx "+getUsage());
+            throw new WrongUsageException("/dynamx " + getUsage());
         }
     }
 
     @Override
     public void getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, BlockPos targetPos, List<String> r) {
-        if(args.length>=2){
-            if(args.length == 2) {
+        if (args.length >= 2) {
+            if (args.length == 2) {
                 r.add("create");
                 r.add("delete");
                 r.add("automatic");
                 //r.add("switch");
                 //r.add("clear");
                 r.add("enableAutoSlopes");
-            }
-            else if(args[1].equalsIgnoreCase("automatic")) {
-                if(args.length == 3) {
+            } else if (args[1].equalsIgnoreCase("automatic")) {
+                if (args.length == 3) {
                     r.add("generate");
                     r.add("facing");
                     r.add("round");
                     r.add("diagDir");
                     r.add("refresh");
-                }
-                else if(args.length == 4) {
-                    if(args[2].equalsIgnoreCase("facing")) {
-                        for(EnumFacing f : EnumFacing.HORIZONTALS)
+                } else if (args.length == 4) {
+                    if (args[2].equalsIgnoreCase("facing")) {
+                        for (EnumFacing f : EnumFacing.HORIZONTALS)
                             r.add(f.name());
-                    }
-                    else if(args[2].equalsIgnoreCase("diagDir")) {
+                    } else if (args[2].equalsIgnoreCase("diagDir")) {
                         r.add("+");
                         r.add("-");
-                    }
-                    else if(args[2].equalsIgnoreCase("round")) {
+                    } else if (args[2].equalsIgnoreCase("round")) {
                         r.add("false");
                         r.add("true");
                     }
@@ -109,14 +103,14 @@ public class CmdSlopes implements ISubCommand
             for (NBTBase c : stack.getTagCompound().getTagList("plist", 10)) {
                 pos.add(ItemSlopes.getPosFromTag((NBTTagCompound) c));
             }
-            if(pos.size()<4){
+            if (pos.size() < 4) {
                 sender.sendMessage(new TextComponentTranslation("cmd.slopes.create.points"));
                 return;
             }
 
             long start = System.currentTimeMillis();
             Map<VerticalChunkPos, List<ITerrainElement.IPersistentTerrainElement>> l3 = SlopeGenerator.generateSlopesFromControlPoints(pos);
-            if(l3.isEmpty()) {
+            if (l3.isEmpty()) {
                 sender.sendMessage(new TextComponentTranslation("cmd.slopes.create.error"));
                 return;
             }
@@ -124,49 +118,45 @@ public class CmdSlopes implements ISubCommand
             ChunkCollisions c;
             //VerticalChunkPos cp = new VerticalChunkPos((int) p1.x / 16, (int) p1.y / 16, (int) p1.z / 16);
             boolean error = false;
-            for(Map.Entry<VerticalChunkPos, List<ITerrainElement.IPersistentTerrainElement>> cst : l3.entrySet())
-            {
+            for (Map.Entry<VerticalChunkPos, List<ITerrainElement.IPersistentTerrainElement>> cst : l3.entrySet()) {
                 c = DynamXContext.getPhysicsWorld().getTerrainManager().getChunkAt(cst.getKey());
-                if(c == null) {
-                    sender.sendMessage(new TextComponentString(TextFormatting.GRAY+"[SLOPES] Force-load chunk "+cst.getKey()));
+                if (c == null) {
+                    sender.sendMessage(new TextComponentString(TextFormatting.GRAY + "[SLOPES] Force-load chunk " + cst.getKey()));
                     c = DynamXContext.getPhysicsWorld().getTerrainManager().loadChunkCollisionsNow(DynamXContext.getPhysicsWorld().getTerrainManager().getTicket(cst.getKey()), Profiler.get());
                 }
-                if(c == null) {
+                if (c == null) {
                     error = true;
                     break;
                 }
             }
-            if(error) {
+            if (error) {
                 sender.sendMessage(new TextComponentTranslation("cmd.slopes.create.terrainerror"));
                 return;
             }
             //Very important : will set newest computed chunks
             DynamXContext.getPhysicsWorld().getTerrainManager().notifyWillChange();
-            for(Map.Entry<VerticalChunkPos, List<ITerrainElement.IPersistentTerrainElement>> cst : l3.entrySet())
-            {
-                if((c = DynamXContext.getPhysicsWorld().getTerrainManager().getChunkAt(cst.getKey())) != null) {
+            for (Map.Entry<VerticalChunkPos, List<ITerrainElement.IPersistentTerrainElement>> cst : l3.entrySet()) {
+                if ((c = DynamXContext.getPhysicsWorld().getTerrainManager().getChunkAt(cst.getKey())) != null) {
                     c.addPersistentElements(DynamXContext.getPhysicsWorld().getTerrainManager(), cst.getValue());
-                    if(server.isDedicatedServer()) {
+                    if (server.isDedicatedServer()) {
                         //Send updates to client
                         //Set<VerticalChunkPos> set = new HashSet<>();
                         //set.add(cst.getKey());
                         //MessageHandler.NETWORK.getVanillaNetwork().getChannel().sendToAll(new MessageSwitchAutoSlopesMode(1, stack.getTagCompound()));
                         DynamXContext.getNetwork().sendToClient(new MessageUpdateChunk(new VerticalChunkPos[]{cst.getKey()}), EnumPacketTarget.ALL);
                     }
-                }
-                else {
+                } else {
                     error = true;
                 }
             }
-            sender.sendMessage(new TextComponentTranslation("cmd.slopes.create.result", TextFormatting.GOLD, ""+(System.currentTimeMillis()-start)));
+            sender.sendMessage(new TextComponentTranslation("cmd.slopes.create.result", TextFormatting.GOLD, "" + (System.currentTimeMillis() - start)));
 
-            if(error)
+            if (error)
                 sender.sendMessage(new TextComponentTranslation("cmd.slopes.create.resulterror"));
             else
                 sender.sendMessage(new TextComponentTranslation("cmd.slopes.create.success"));
             //slopes.clearMemory(sender.world, sender, stack);
-        }
-        else if (args[1].equalsIgnoreCase("delete")) {
+        } else if (args[1].equalsIgnoreCase("delete")) {
             if (stack.getTagCompound().getInteger("mode") != 0) {
                 sender.sendMessage(new TextComponentTranslation("cmd.slopes.needdelete"));
                 return;
@@ -192,19 +182,19 @@ public class CmdSlopes implements ISubCommand
             int count = 0;
             //Very important : will set newest computed chunks
             DynamXContext.getPhysicsWorld().getTerrainManager().notifyWillChange();
-            for (float i = minX; i <= maxX+16; i += 16) {
-                for (float j = minZ; j <= maxZ+16; j += 16) {
-                    for (float k = minY; k <= maxY+16; k += 16) {
+            for (float i = minX; i <= maxX + 16; i += 16) {
+                for (float j = minZ; j <= maxZ + 16; j += 16) {
+                    for (float k = minY; k <= maxY + 16; k += 16) {
                         float ir = i;
                         float jr = j;
-                        if(ir< 0)
+                        if (ir < 0)
                             ir -= 16;
-                        if(jr < 0)
+                        if (jr < 0)
                             jr -= 16;
                         VerticalChunkPos chunkPos = new VerticalChunkPos((int) ir / 16, (int) k / 16, (int) jr / 16);
                         ChunkCollisions chunkData = DynamXContext.getPhysicsWorld().getTerrainManager().getChunkAt(chunkPos);
-                        if(chunkData == null) {
-                            sender.sendMessage(new TextComponentString(TextFormatting.GRAY+"[SLOPES] Force-load chunk "+chunkPos));
+                        if (chunkData == null) {
+                            sender.sendMessage(new TextComponentString(TextFormatting.GRAY + "[SLOPES] Force-load chunk " + chunkPos));
                             chunkData = DynamXContext.getPhysicsWorld().getTerrainManager().loadChunkCollisionsNow(DynamXContext.getPhysicsWorld().getTerrainManager().getTicket(chunkPos), Profiler.get());
                         }
                         if (chunkData != null) {
@@ -216,100 +206,88 @@ public class CmdSlopes implements ISubCommand
                                 Vector3f max = Vector3fPool.get();
                                 box.getMin(min);
                                 box.getMax(max);
-                                if (min.x >= minX-1 && max.x <= maxX+1 && min.y >= minY-1 && max.y <= maxY+1 && max.z <= maxZ+1 && min.z >= minZ-1) {
+                                if (min.x >= minX - 1 && max.x <= maxX + 1 && min.y >= minY - 1 && max.y <= maxY + 1 && max.z <= maxZ + 1 && min.z >= minZ - 1) {
                                     set.add(chunkPos);
                                     toRemove.add(element);
                                     count++;
-                                }
-                                else
+                                } else
                                     out = true;
                             }
                             chunkData.removePersistentElements(DynamXContext.getPhysicsWorld().getTerrainManager(), toRemove);
-                        }
-                        else {
+                        } else {
                             sender.sendMessage(new TextComponentTranslation("cmd.slopes.delete.terrainerror", chunkPos.toString()));
                         }
                     }
                 }
             }
-            if(server.isDedicatedServer()) {
+            if (server.isDedicatedServer()) {
                 //MessageHandler.NETWORK.getVanillaNetwork().getChannel().sendToAll(new MessageSwitchAutoSlopesMode(0, stack.getTagCompound()));
                 DynamXContext.getNetwork().sendToClient(new MessageUpdateChunk(set.toArray(new VerticalChunkPos[0])), EnumPacketTarget.ALL);
             }
-            if(set.isEmpty())
-            {
-                if(out)
+            if (set.isEmpty()) {
+                if (out)
                     sender.sendMessage(new TextComponentTranslation("cmd.slopes.delete.selerror"));
                 else
                     sender.sendMessage(new TextComponentTranslation("cmd.slopes.delete.selempty"));
-            }
-            else
-                sender.sendMessage(new TextComponentTranslation("cmd.slopes.delete.result", ""+TextFormatting.LIGHT_PURPLE.toString()+count));
+            } else
+                sender.sendMessage(new TextComponentTranslation("cmd.slopes.delete.result", "" + TextFormatting.LIGHT_PURPLE + count));
 
             //slopes.clearMemory(sender.world, sender, stack);
-        }
-        else if (args[1].equalsIgnoreCase("automatic")) {
-            if(args.length < 3)
+        } else if (args[1].equalsIgnoreCase("automatic")) {
+            if (args.length < 3)
                 throw new WrongUsageException("/dynamx slopes automatic <generate|facing|diagDir|round>");
             if (stack.getTagCompound().getInteger("mode") != 2) {
                 sender.sendMessage(new TextComponentTranslation("cmd.slopes.needauto"));
                 return;
             }
 
-            switch (args[2])
-            {
-                case "facing":
-                {
-                    if(args.length != 4)
+            switch (args[2]) {
+                case "facing": {
+                    if (args.length != 4)
                         throw new WrongUsageException("/dynamx slopes automatic facing <NORTH|EAST|SOUTH|WEST>");
                     EnumFacing f = null;
-                    for(EnumFacing facing : EnumFacing.values()) {
-                        if(facing.name().equalsIgnoreCase(args[3]))
-                        {
+                    for (EnumFacing facing : EnumFacing.values()) {
+                        if (facing.name().equalsIgnoreCase(args[3])) {
                             f = facing;
                             break;
                         }
                     }
-                    if(f == null)
-                        throw new CommandException("Facing "+args[2]+" not found");
+                    if (f == null)
+                        throw new CommandException("Facing " + args[2] + " not found");
                     SlopeBuildingConfig config = new SlopeBuildingConfig(stack.getTagCompound().getCompoundTag("ptconfig"));
                     config.setFacing(f);
                     stack.getTagCompound().setTag("ptconfig", config.serialize());
-                    sender.sendMessage(new TextComponentString(TextFormatting.GOLD+"[AUTO] Facing set to "+f.name()));
+                    sender.sendMessage(new TextComponentString(TextFormatting.GOLD + "[AUTO] Facing set to " + f.name()));
                     break;
                 }
-                case "diagDir":
-                {
-                    if(args.length != 4)
+                case "diagDir": {
+                    if (args.length != 4)
                         throw new WrongUsageException("/dynamx slopes automatic diagDir <+|->");
-                    if(!args[3].equals("+") && !args[3].equals("-"))
+                    if (!args[3].equals("+") && !args[3].equals("-"))
                         throw new WrongUsageException("'+' or '-' expected !");
                     SlopeBuildingConfig config = new SlopeBuildingConfig(stack.getTagCompound().getCompoundTag("ptconfig"));
                     config.setDiagDir(args[3].equals("-") ? -1 : 1);
                     stack.getTagCompound().setTag("ptconfig", config.serialize());
-                    sender.sendMessage(new TextComponentString(TextFormatting.GOLD+"[AUTO] Diagonal direction set to "+args[3]));
+                    sender.sendMessage(new TextComponentString(TextFormatting.GOLD + "[AUTO] Diagonal direction set to " + args[3]));
                     break;
                 }
-                case "round":
-                {
-                    if(args.length != 4)
+                case "round": {
+                    if (args.length != 4)
                         throw new WrongUsageException("/dynamx slopes automatic round <false|true>");
                     boolean round = CommandBase.parseBoolean(args[3]);
                     SlopeBuildingConfig config = new SlopeBuildingConfig(stack.getTagCompound().getCompoundTag("ptconfig"));
                     config.setEnableSlabs(!round);
                     stack.getTagCompound().setTag("ptconfig", config.serialize());
-                    sender.sendMessage(new TextComponentString(TextFormatting.GOLD+"[AUTO] Round set to "+round));
+                    sender.sendMessage(new TextComponentString(TextFormatting.GOLD + "[AUTO] Round set to " + round));
                     break;
                 }
-                case "refresh":
-                {
+                case "refresh": {
                     SlopeBuildingConfig config = new SlopeBuildingConfig(stack.getTagCompound().getCompoundTag("ptconfig"));
                     config.refresh();
                     stack.getTagCompound().setTag("ptconfig", config.serialize());
                     break;
                 }
-                case "generate":
-                {
+                case "generate": {
                     if (!stack.getTagCompound().hasKey("pt1") || !stack.getTagCompound().hasKey("pt2")) {
                         sender.sendMessage(new TextComponentTranslation("cmd.slopes.auto.points"));
                         return;
@@ -337,7 +315,7 @@ public class CmdSlopes implements ISubCommand
                         diagDir = 1;*/
                     long start = System.currentTimeMillis();
                     Map<VerticalChunkPos, List<ITerrainElement.IPersistentTerrainElement>> l3 = SlopeGenerator.generateSlopesInBox(sender.getEntityWorld(), config, new BlockPos(minX, minY, minZ), new BlockPos(maxX, maxY, maxZ));
-                    if(l3.isEmpty()) {
+                    if (l3.isEmpty()) {
                         sender.sendMessage(new TextComponentTranslation("cmd.slopes.auto.error"));
                         return;
                     }
@@ -345,42 +323,39 @@ public class CmdSlopes implements ISubCommand
                     ChunkCollisions c;
                     //VerticalChunkPos cp = new VerticalChunkPos((int) p1.x / 16, (int) p1.y / 16, (int) p1.z / 16);
                     boolean error = false;
-                    for(Map.Entry<VerticalChunkPos, List<ITerrainElement.IPersistentTerrainElement>> cst : l3.entrySet())
-                    {
-                        c= DynamXContext.getPhysicsWorld().getTerrainManager().getChunkAt(cst.getKey());
-                        if(c == null) {
-                            sender.sendMessage(new TextComponentTranslation(TextFormatting.GRAY+"[SLOPES] Force-load chunk "+cst.getKey()));
+                    for (Map.Entry<VerticalChunkPos, List<ITerrainElement.IPersistentTerrainElement>> cst : l3.entrySet()) {
+                        c = DynamXContext.getPhysicsWorld().getTerrainManager().getChunkAt(cst.getKey());
+                        if (c == null) {
+                            sender.sendMessage(new TextComponentTranslation(TextFormatting.GRAY + "[SLOPES] Force-load chunk " + cst.getKey()));
                             c = DynamXContext.getPhysicsWorld().getTerrainManager().loadChunkCollisionsNow(DynamXContext.getPhysicsWorld().getTerrainManager().getTicket(cst.getKey()), Profiler.get());
                         }
-                        if(c == null) {
+                        if (c == null) {
                             error = true;
                             break;
                         }
                     }
-                    if(error) {
+                    if (error) {
                         sender.sendMessage(new TextComponentTranslation("cmd.slopes.create.terrainerror"));
                         return;
                     }
                     //Very important : will set newest computed chunks
                     DynamXContext.getPhysicsWorld().getTerrainManager().notifyWillChange();
-                    for(Map.Entry<VerticalChunkPos, List<ITerrainElement.IPersistentTerrainElement>> cst : l3.entrySet())
-                    {
-                        if((c= DynamXContext.getPhysicsWorld().getTerrainManager().getChunkAt(cst.getKey())) != null) {
+                    for (Map.Entry<VerticalChunkPos, List<ITerrainElement.IPersistentTerrainElement>> cst : l3.entrySet()) {
+                        if ((c = DynamXContext.getPhysicsWorld().getTerrainManager().getChunkAt(cst.getKey())) != null) {
                             c.addPersistentElements(DynamXContext.getPhysicsWorld().getTerrainManager(), cst.getValue());
-                            if(server.isDedicatedServer()) {
+                            if (server.isDedicatedServer()) {
                                 //Send updates to client
                                 //Set<VerticalChunkPos> set = new HashSet<>();
                                 //set.add(cst.getKey());
                                 //MessageHandler.NETWORK.getVanillaNetwork().getChannel().sendToAll(new MessageSwitchAutoSlopesMode(1, stack.getTagCompound()));
                                 DynamXContext.getNetwork().sendToClient(new MessageUpdateChunk(new VerticalChunkPos[]{cst.getKey()}), EnumPacketTarget.ALL);
                             }
-                        }
-                        else
+                        } else
                             error = true;
                     }
-                    sender.sendMessage(new TextComponentTranslation("cmd.slopes.auto.result", ""+(System.currentTimeMillis()-start)));
+                    sender.sendMessage(new TextComponentTranslation("cmd.slopes.auto.result", "" + (System.currentTimeMillis() - start)));
 
-                    if(error)
+                    if (error)
                         sender.sendMessage(new TextComponentTranslation("cmd.slopes.create.resulterror"));
                     else
                         sender.sendMessage(new TextComponentTranslation("cmd.slopes.auto.success"));
@@ -408,10 +383,9 @@ public class CmdSlopes implements ISubCommand
             //tag.setBoolean("enable", ContentPackLoader.PLACE_SLOPES);
             DynamXContext.getNetwork().getVanillaNetwork().getChannel().sendToAll(new MessageSwitchAutoSlopesMode(ContentPackLoader.PLACE_SLOPES ? 1 : 0));
             sender.sendMessage(new TextComponentString("[EXPERIMENTAL] Placement des pentes automatiques " + (ContentPackLoader.PLACE_SLOPES ? "activé" : "désactivé")));
-            sender.sendMessage(new TextComponentString("Cette valeur n'est pas sauvegardée par défaut, ajoutez \"auto slopes:"+ContentPackLoader.PLACE_SLOPES+"\" dans le fichier slopes.dynx !"));
-        }
-        else {
-            throw new WrongUsageException("/dynamx "+getUsage());
+            sender.sendMessage(new TextComponentString("Cette valeur n'est pas sauvegardée par défaut, ajoutez \"auto slopes:" + ContentPackLoader.PLACE_SLOPES + "\" dans le fichier slopes.dynx !"));
+        } else {
+            throw new WrongUsageException("/dynamx " + getUsage());
         }
     }
 }

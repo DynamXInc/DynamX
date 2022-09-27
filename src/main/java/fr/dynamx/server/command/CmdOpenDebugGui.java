@@ -9,9 +9,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class CmdOpenDebugGui implements ISubCommand {
     @Override
     public String getName() {

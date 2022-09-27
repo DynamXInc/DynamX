@@ -9,7 +9,6 @@ import fr.dynamx.common.network.SPPhysicsEntityNetHandler;
 import fr.dynamx.common.physics.PhysicsTickHandler;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.world.BuiltinPhysicsWorld;
-import fr.dynamx.common.physics.world.BuiltinThreadedPhysicsWorld;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
@@ -20,8 +19,7 @@ import net.minecraftforge.fml.server.FMLServerHandler;
 
 import static fr.dynamx.utils.DynamXConstants.ID;
 
-public abstract class CommonProxy
-{
+public abstract class CommonProxy {
     public void preInit() {
         GameRegistry.registerTileEntity(TEDynamXBlock.class, new ResourceLocation(ID + ":dynamxblock"));
     }
@@ -48,8 +46,7 @@ public abstract class CommonProxy
     /**
      * @return True if the bullet physics engine should be used for the world. Always true except for client single player worlds
      */
-    public boolean shouldUseBulletSimulation(World world)
-    {
+    public boolean shouldUseBulletSimulation(World world) {
         return world.provider.getDimension() == 0;
     }
 

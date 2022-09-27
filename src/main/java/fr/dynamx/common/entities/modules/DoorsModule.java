@@ -1,9 +1,12 @@
 package fr.dynamx.common.entities.modules;
 
+import com.jme3.bullet.RotationOrder;
 import com.jme3.bullet.collision.shapes.BoxCollisionShape;
 import com.jme3.bullet.joints.Constraint;
-import com.jme3.bullet.joints.HingeJoint;
+import com.jme3.bullet.joints.New6Dof;
+import com.jme3.bullet.joints.motors.MotorParam;
 import com.jme3.bullet.objects.PhysicsRigidBody;
+import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.modules.AttachModule;
@@ -100,20 +103,24 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
         localVarContainer.setDoorBody(doorBody);
         doorBody.setUserObject(new BulletShapeType<>(EnumBulletShapeType.BULLET_ENTITY, localVarContainer));
         DynamXContext.getPhysicsWorld().addCollisionObject(doorBody);
-
-        HingeJoint hingeJoint = new HingeJoint(vehicleEntity.physicsHandler.getCollisionObject(), doorBody, p1.addLocal(vehicleEntity.getPackInfo().getCenterOfMass()), p2, DynamXMath.Y_AXIS, DynamXMath.Y_AXIS);
-        hingeJoint.setLimit(0.0f, 0f);
-        hingeJoint.setCollisionBetweenLinkedBodies(false);
         attachedDoors.forEach((doorId, doorVarContainer) -> {
             doorBody.addToIgnoreList(doorVarContainer.doorBody);
             doorVarContainer.doorBody.addToIgnoreList(doorBody);
         });
-        localVarContainer.setJoint(hingeJoint);
+
+        New6Dof new6Dof = new New6Dof(vehicleEntity.physicsHandler.getCollisionObject()
+                , doorBody, p1.addLocal(vehicleEntity.getPackInfo().getCenterOfMass()), p2, Quaternion.IDENTITY.toRotationMatrix(), Quaternion.IDENTITY.toRotationMatrix(),
+                RotationOrder.XYZ);
+        localVarContainer.setJoint(new6Dof);
+        localVarContainer.setJointLimit(DynamXPhysicsHelper.X_ROTATION_DOF, 0, 0);
+        localVarContainer.setJointLimit(DynamXPhysicsHelper.Y_ROTATION_DOF, 0, 0);
+        localVarContainer.setJointLimit(DynamXPhysicsHelper.Z_ROTATION_DOF, 0, 0);
+        new6Dof.setCollisionBetweenLinkedBodies(false);
 
         attachedBodiesTransform.put(jointId, new SynchronizedRigidBodyTransform(new RigidBodyTransform(doorBody)));
         attachedDoors.put(jointId, localVarContainer);
         cachedAttachedDoors.put(jointId, localVarContainer);
-        return hingeJoint;
+        return new6Dof;
     }
 
     @Override
@@ -161,16 +168,21 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
     public void preUpdatePhysics(boolean simulatingPhysics) {
         if (simulatingPhysics) {
             for (byte doorID : attachedDoors.keySet()) {
-                DoorVarContainer physics = attachedDoors.get(doorID);
-                if (isDoorOpened(doorID) && physics.joint.getHingeAngle() <= 0 && physics.timer == -1) {
+                DoorVarContainer varContainer = attachedDoors.get(doorID);
+                PartDoor door = getPartDoor(doorID);
+                if (getCurrentState(doorID) == DoorState.OPENING && isDoorJointOpened(door, varContainer)) {
+                    DynamXContext.getNetwork().sendToServer(new MessageChangeDoorState(vehicleEntity, DoorState.OPEN, doorID));
+                    doorsState.put(doorID, DoorState.OPEN);
+                    varContainer.setJointMotorState(DynamXPhysicsHelper.Y_ROTATION_DOF, false);
+                }
+                if ((isDoorOpened(doorID) || getCurrentState(doorID) == DoorState.CLOSING) && isDoorJointClosed(varContainer)) {
                     DynamXContext.getNetwork().sendToServer(new MessageChangeDoorState(vehicleEntity, DoorState.CLOSE, doorID));
-                    PartDoor door = getPartDoor(doorID);
-                    physics.joint.setLimit(door.getCloseLimit().x, door.getCloseLimit().y);
+                    doorsState.put(doorID, DoorState.CLOSE);
+                    playDoorSound(DoorState.CLOSE);
+                    varContainer.setJointMotorState(DynamXPhysicsHelper.Y_ROTATION_DOF, false);
+                    varContainer.setJointLimit(DynamXPhysicsHelper.Y_ROTATION_DOF, door.getCloseLimit().x, door.getCloseLimit().y);
                 }
-                if (physics.timer >= 0) {
-                    physics.timer--;
-                }
-                System.out.println(physics.joint.isEnabled());
+                //System.out.println(doorID +" " +getCurrentState(doorID) + " " + varContainer.getJointAngle().y);
             }
         }
     }
@@ -198,35 +210,29 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
     }
 
 
+
     public void switchDoorState(byte doorId) {
         setDoorState(doorId, getInverseCurrentState(doorId));
-
     }
 
     public void setDoorState(byte doorId, DoorState doorState) {
-        DoorVarContainer physicsHandler = attachedDoors.get(doorId);
+        DoorVarContainer doorVarContainer = attachedDoors.get(doorId);
         PartDoor door = getPartDoor(doorId);
-        if (physicsHandler != null) {
+        if (doorVarContainer != null) {
+            vehicleEntity.forcePhysicsActivation();
             if (doorState == DoorState.OPEN) {
-                doorsState.put(doorId, DoorState.OPEN);
+                doorsState.put(doorId, DoorState.OPENING);
                 playDoorSound(DoorState.OPEN);
-                physicsHandler.joint.setLimit(door.getOpenLimit().x, door.getOpenLimit().y);
-                physicsHandler.joint.enableMotor(true, door.getOpenMotor().x, door.getOpenMotor().y);
-                vehicleEntity.forcePhysicsActivation();
+                doorVarContainer.setJointLimit(DynamXPhysicsHelper.Y_ROTATION_DOF,
+                        door.getOpenLimit().x, door.getOpenLimit().y);
+                doorVarContainer.setJointRotationMotorVelocity(DynamXPhysicsHelper.Y_ROTATION_DOF,
+                        door.getOpenMotor().x, door.getOpenMotor().y);
             } else {
-                physicsHandler.joint.enableMotor(true, door.getCloseMotor().x, door.getCloseMotor().y);
-                vehicleEntity.forcePhysicsActivation();
-                if (vehicleEntity.getNetwork().getSimulationHolder() != SimulationHolder.SERVER_SP) //TODO SERVER_SP SPLITTED IN SERVER_SP AND DRIVE_SP
-                    doorsState.put(doorId, DoorState.CLOSE); //Closes the door (animation) and the plays the closing sound
-                TaskScheduler.schedule(new TaskScheduler.ScheduledTask(door.getDoorCloseTime()) {
-                    @Override
-                    public void run() {
-                        if (vehicleEntity.getNetwork().getSimulationHolder() == SimulationHolder.SERVER_SP)
-                            doorsState.put(doorId, DoorState.CLOSE); //Only plays the closing sound
-                        playDoorSound(DoorState.CLOSE);
-                        physicsHandler.joint.setLimit(door.getCloseLimit().x, door.getCloseLimit().y);
-                    }
-                });
+                doorVarContainer.setJointRotationMotorVelocity(DynamXPhysicsHelper.Y_ROTATION_DOF,
+                        door.getCloseMotor().x, door.getCloseMotor().y);
+                // if (vehicleEntity.getNetwork().getSimulationHolder() != SimulationHolder.SERVER_SP) //TODO SERVER_SP SPLITTED IN SERVER_SP AND DRIVE_SP
+                doorsState.put(doorId, DoorState.CLOSING); //Closes the door (animation) and the plays the closing sound
+
             }
             physicsHandler.timer = 20 * 3;
         } else {
@@ -249,9 +255,18 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
     }
 
 
-    private void isDoorAnimationFinished(boolean doorState) {
-
+    private boolean isDoorJointClosed(DoorVarContainer doorVarContainer) {
+        float roundedCurrentAngle = DynamXMath.roundFloat(doorVarContainer.getJointAngle().y, 100f);
+        return FastMath.approximateEquals(roundedCurrentAngle, 0.0f);
     }
+
+    private boolean isDoorJointOpened(PartDoor door, DoorVarContainer doorVarContainer) {
+        float extreme = doorVarContainer.getJointExtremeLimit(door.getOpenLimit().x, door.getOpenLimit().y);
+        float roundedExtreme = DynamXMath.roundFloat(extreme, 100f);
+        float roundedCurrentAngle = DynamXMath.roundFloat(doorVarContainer.getJointAngle().y, 100f);
+        return roundedExtreme >= 0 ? roundedCurrentAngle >= roundedExtreme : roundedCurrentAngle <= roundedExtreme;
+    }
+
 
     public void playDoorSound(DoorState doorState) {
         if (vehicleEntity.world.isRemote) {
@@ -353,7 +368,7 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
     }
 
     public enum DoorState {
-        OPEN, CLOSE
+        OPEN, CLOSE, OPENING, CLOSING
     }
 
     @Getter
@@ -362,7 +377,37 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
         private DoorsModule module;
         private byte doorID;
         private PhysicsRigidBody doorBody;
-        private HingeJoint joint;
-        public int timer;
+        private New6Dof joint;
+
+        public Vector3f getJointAngle() {
+            return joint.getAngles(null);
+        }
+
+        public void setJointRotationMotorVelocity(int axis, float targetVelocity, float maxForce) {
+            setJointMotorState(axis, true);
+            joint.set(MotorParam.TargetVelocity, axis, targetVelocity);
+            joint.set(MotorParam.MaxMotorForce, axis, maxForce);
+        }
+
+        public void setJointLimit(int axis, float lowerLimit, float upperLimit) {
+            joint.set(MotorParam.LowerLimit, axis, lowerLimit);
+            joint.set(MotorParam.UpperLimit, axis, upperLimit);
+        }
+
+        private float getJointExtremeLimit(float lowerLimit, float upperLimit) {
+            if (lowerLimit >= 0 && upperLimit >= 0) {
+                return Math.max(lowerLimit, upperLimit);
+            } else {
+                return Math.min(lowerLimit, upperLimit);
+            }
+        }
+
+        public void setJointMotorState(int axis, boolean state) {
+            if (axis <= 3) {
+                joint.getTranslationMotor().setMotorEnabled(axis, state);
+            } else {
+                joint.getRotationMotor(axis - 3).setMotorEnabled(state);
+            }
+        }
     }
 }

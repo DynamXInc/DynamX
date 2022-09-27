@@ -31,12 +31,10 @@ import static fr.dynamx.common.DynamXMain.log;
  * @param <T> The objects class
  * @param <C> The owners class
  * @param <U> The object type if it's an {@link ISubInfoTypeOwner} and you use a {@link SubInfoTypesRegistry}, or {@link fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner.Empty}
- *
  * @see ObjectInfo
  * @see BuildableInfoLoader
  */
-public class ObjectLoader<T extends ObjectInfo<?>, C extends IInfoOwner<?>, U extends ISubInfoTypeOwner<?>> extends InfoLoader<T, U>
-{
+public class ObjectLoader<T extends ObjectInfo<?>, C extends IInfoOwner<?>, U extends ISubInfoTypeOwner<?>> extends InfoLoader<T, U> {
     /**
      * All {@link IInfoOwner}s associated with our objects
      */
@@ -47,7 +45,7 @@ public class ObjectLoader<T extends ObjectInfo<?>, C extends IInfoOwner<?>, U ex
     protected final List<T> builtinObjects = new ArrayList<>();
 
     /**
-     * @param prefix The prefix used to detect associated .dnx files
+     * @param prefix       The prefix used to detect associated .dnx files
      * @param assetCreator A function matching an object packName and name with its object class
      */
     public ObjectLoader(String prefix, BiFunction<String, String, T> assetCreator, @Nullable SubInfoTypesRegistry<U> infoTypesRegistry) {
@@ -59,7 +57,7 @@ public class ObjectLoader<T extends ObjectInfo<?>, C extends IInfoOwner<?>, U ex
         super.clear(hot);
         //DO NOT CLEAR OWNERS, ITEMS ARE REUSED !
         for (T b : builtinObjects) {
-            if(hot) //If it's an hot reload, reload builtin items
+            if (hot) //If it's an hot reload, reload builtin items
                 loadItems(b, true);
             else //Else add the info in the map, but DO NOT create an object owner, it already exists !
                 super.loadItems(b, false);
@@ -68,11 +66,11 @@ public class ObjectLoader<T extends ObjectInfo<?>, C extends IInfoOwner<?>, U ex
 
     /**
      * Registers a builtin object, ie added from mods <br>
-     *         The object will have the same properties as if it was added in a pack,
-     *         and it is automatically reused when packs are reloaded <br> <br>
-     *     NOTE : Should be called during addons initialization
+     * The object will have the same properties as if it was added in a pack,
+     * and it is automatically reused when packs are reloaded <br> <br>
+     * NOTE : Should be called during addons initialization
      *
-     * @param modName The name of the mod adding this object
+     * @param modName    The name of the mod adding this object
      * @param objectName The name of the object
      * @return The object, to use in classes extending DynamX ones (example : {@link fr.dynamx.common.blocks.DynamXBlock})
      * @throws IllegalStateException If you call this after the start of packs loading (see ContentPackLoader.isPackLoadingStarted)
@@ -80,7 +78,7 @@ public class ObjectLoader<T extends ObjectInfo<?>, C extends IInfoOwner<?>, U ex
      */
     @SuppressWarnings("unchecked")
     public T addBuiltinObject(C owner, String modName, String objectName) {
-        if(ContentPackLoader.isPackLoadingStarted())
+        if (ContentPackLoader.isPackLoadingStarted())
             throw new IllegalStateException("You should register your builtin objects before packs loading. Use the addon init callback.");
         T info = assetCreator.apply(modName, objectName);
         owners.add((IInfoOwner<T>) owner);
@@ -89,10 +87,9 @@ public class ObjectLoader<T extends ObjectInfo<?>, C extends IInfoOwner<?>, U ex
     }
 
     /**
-     *
      * Puts the info into infos map, and updates other references to this objects (in {@link IInfoOwner}s for example)
      * <br>
-     *     Also generates owner of the info
+     * Also generates owner of the info
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -101,7 +98,7 @@ public class ObjectLoader<T extends ObjectInfo<?>, C extends IInfoOwner<?>, U ex
         if (!hot) {
             boolean client = FMLCommonHandler.instance().getSide().isClient();
             Object[] tabItem = new Object[1];
-            if(info instanceof AbstractItemObject) {
+            if (info instanceof AbstractItemObject) {
                 String creativeTabName = ((AbstractItemObject<?>) info).getCreativeTabName();
                 if (creativeTabName != null && !creativeTabName.equalsIgnoreCase("None")) {
                     if (DynamXItemRegistry.creativeTabs.stream().noneMatch(p -> DynamXReflection.getCreativeTabName(p).equals(creativeTabName))) {
@@ -118,14 +115,13 @@ public class ObjectLoader<T extends ObjectInfo<?>, C extends IInfoOwner<?>, U ex
                     }
                 }
             }
-            C[] obj = (C[]) ((ObjectInfo<T>)info).createOwners(this);
-            if(obj.length > 0){
+            C[] obj = (C[]) ((ObjectInfo<T>) info).createOwners(this);
+            if (obj.length > 0) {
                 tabItem[0] = obj[0];
             }
-            for(C ob : obj)
-            {
+            for (C ob : obj) {
                 owners.add((IInfoOwner<T>) ob);
-                if(client) {
+                if (client) {
                     if (ob instanceof IResourcesOwner && ((IResourcesOwner) ob).createTranslation()) {
                         for (int metadata = 0; metadata < ((IResourcesOwner) ob).getMaxMeta(); metadata++) {
                             ContentPackUtils.addMissingLangFile(DynamXMain.resDir, (IInfoOwner<T>) ob, metadata);
@@ -142,9 +138,8 @@ public class ObjectLoader<T extends ObjectInfo<?>, C extends IInfoOwner<?>, U ex
                     //Don't break, multiple items can have the same infos
                 }
             }
-            if(!found)
-            {
-                log.error("Cannot hotswap "+info.getFullName()+" in "+owners);
+            if (!found) {
+                log.error("Cannot hotswap " + info.getFullName() + " in " + owners);
             }
         }
     }

@@ -5,8 +5,7 @@ import com.jme3.math.Vector3f;
 /**
  * A simple cuboid collision shape
  */
-public interface IShapeInfo
-{
+public interface IShapeInfo {
     /**
      * @return Center of the shape
      */

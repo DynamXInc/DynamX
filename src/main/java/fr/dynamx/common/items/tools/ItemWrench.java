@@ -32,7 +32,7 @@ public class ItemWrench extends Item {
 
     @Override
     public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
-        if(!player.world.isRemote){
+        if (!player.world.isRemote) {
             WrenchMode.getCurrentMode(stack).onWrenchLeftClickEntity(stack, player, entity);
         }
         return true;
@@ -40,14 +40,14 @@ public class ItemWrench extends Item {
 
     @Override
     public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
-        if(worldIn.isRemote){
-            if(playerIn.isSneaking()){
+        if (worldIn.isRemote) {
+            if (playerIn.isSneaking()) {
                 ACsGuiApi.asyncLoadThenShowGui("wrench_gui", GuiWrenchSelection::new);
             }
         }
-        if(!worldIn.isRemote){
+        if (!worldIn.isRemote) {
             WrenchMode.getCurrentMode(playerIn.getHeldItem(handIn)).onWrenchRightClick(playerIn, handIn);
-        }else
+        } else
             WrenchMode.getCurrentMode(playerIn.getHeldItem(handIn)).onWrenchRightClickClient(playerIn, handIn);
         return super.onItemRightClick(worldIn, playerIn, handIn);
     }
@@ -82,12 +82,12 @@ public class ItemWrench extends Item {
     @Override
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
-        tooltip.add("Mode: "+WrenchMode.getCurrentMode(stack).getLabel());
+        tooltip.add("Mode: " + WrenchMode.getCurrentMode(stack).getLabel());
         if (hasEntity(stack)) {
             PhysicsEntity<?> e = getEntity(stack, worldIn);
             if (e instanceof PackPhysicsEntity)
                 tooltip.add("Linked entity " + ((PackPhysicsEntity<?, ?>) e).getInfoName());
-            else if(e != null)
+            else if (e != null)
                 tooltip.add("Linked entity " + e.getName());
         }
     }

@@ -16,8 +16,7 @@ import java.util.List;
 /**
  * Engine contained in an engine file
  */
-public class EngineInfo extends SubInfoTypeOwner<EngineInfo> implements ISubInfoType<ModularVehicleInfoBuilder>, INamedObject
-{
+public class EngineInfo extends SubInfoTypeOwner<EngineInfo> implements ISubInfoType<ModularVehicleInfoBuilder>, INamedObject {
     private final String packName;
     private final String engineName;
 
@@ -31,7 +30,7 @@ public class EngineInfo extends SubInfoTypeOwner<EngineInfo> implements ISubInfo
     @PackFileProperty(configNames = "Braking")
     private float braking;
     @PackFileProperty(configNames = "TurnSpeed", required = false, defaultValue = "0.09")
-    private float turnSpeed = 0.09f;
+    private final float turnSpeed = 0.09f;
 
     public List<Vector3f> points = new ArrayList<>();
     public List<GearInfo> gears = new ArrayList<>();
@@ -46,32 +45,29 @@ public class EngineInfo extends SubInfoTypeOwner<EngineInfo> implements ISubInfo
     }
 
     byte i = 0;
+
     void addGear(GearInfo gear) {
         gear.setId(i);
-        gears.add(i,gear);
+        gears.add(i, gear);
         i++;
     }
 
-    void addPoint(RPMPower rpmPower){
+    void addPoint(RPMPower rpmPower) {
         points.add(rpmPower.getRpmPower());
     }
 
-    public void setSounds(List<EngineSound> sounds)
-    {
+    public void setSounds(List<EngineSound> sounds) {
         soundsEngine = new ArrayList<>();
-        for(EngineSound sound : sounds)
-        {
-            if(sound.isSpecialSound())
-            {
-                if(sound.getRpmRange()[0] == -1) //A starting sound
+        for (EngineSound sound : sounds) {
+            if (sound.isSpecialSound()) {
+                if (sound.getRpmRange()[0] == -1) //A starting sound
                 {
-                    if(sound.isInterior())
+                    if (sound.isInterior())
                         startingSoundInterior = sound.getSoundName();
                     else
                         startingSoundExterior = sound.getSoundName();
                 }
-            }
-            else
+            } else
                 soundsEngine.add(sound);
         }
     }
@@ -107,20 +103,18 @@ public class EngineInfo extends SubInfoTypeOwner<EngineInfo> implements ISubInfo
     }
 
     @Override
-    public String getFullName()
-    {
-        return packName+"."+engineName;
+    public String getFullName() {
+        return packName + "." + engineName;
     }
 
     @Override
     public void onComplete(boolean hotReload) {
         float max = 0;
-        for(Vector3f power : points)
-        {
-            if(power.x > max)
+        for (Vector3f power : points) {
+            if (power.x > max)
                 max = power.x;
         }
-        if(max < maxRevs)
+        if (max < maxRevs)
             throw new IllegalArgumentException("Engine's MaxRPM must be lower or equal to the bigger point's RPM");
     }
 

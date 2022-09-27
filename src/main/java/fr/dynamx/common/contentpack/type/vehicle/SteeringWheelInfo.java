@@ -14,16 +14,15 @@ import fr.dynamx.utils.DynamXLoadingTasks;
 /**
  * Info of the steering wheel of a {@link ModularVehicleInfoBuilder}
  */
-public class SteeringWheelInfo extends SubInfoType<ModularVehicleInfoBuilder>
-{
+public class SteeringWheelInfo extends SubInfoType<ModularVehicleInfoBuilder> {
     @PackFileProperty(configNames = "PartName", required = false, defaultValue = "SteeringWheel")
-    private String partName = "SteeringWheel";
+    private final String partName = "SteeringWheel";
     @PackFileProperty(configNames = "BaseRotation", required = false, newConfigName = "BaseRotationQuat")
     private float[] deprecatedBaseRotation;
     @PackFileProperty(configNames = "BaseRotationQuat", required = false, defaultValue = "0 0 0 1")
-    private Quaternion steeringWheelBaseRotation = null;
+    private final Quaternion steeringWheelBaseRotation = null;
     @PackFileProperty(configNames = "Position", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y)
-    private Vector3f position = new Vector3f(0.5f, 1.1f, 1);
+    private final Vector3f position = new Vector3f(0.5f, 1.1f, 1);
 
     public SteeringWheelInfo(ISubInfoTypeOwner<ModularVehicleInfoBuilder> owner) {
         super(owner);
@@ -38,9 +37,9 @@ public class SteeringWheelInfo extends SubInfoType<ModularVehicleInfoBuilder>
 
     @Override
     public void onComplete(boolean hotReload) {
-        if(deprecatedBaseRotation != null)
-            deprecatedBaseRotation[0] *= 180f/Math.PI; //Convert to degrees
-        if(steeringWheelBaseRotation != null && deprecatedBaseRotation != null) {
+        if (deprecatedBaseRotation != null)
+            deprecatedBaseRotation[0] *= 180f / Math.PI; //Convert to degrees
+        if (steeringWheelBaseRotation != null && deprecatedBaseRotation != null) {
             DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.PACK, getPackName(), "Bad steering wheel BaseRotation property", "You should use BaseRotationQuat property and remove BaseRotation usage !", ErrorTrackingService.TrackedErrorLevel.HIGH);
         }
     }
@@ -63,6 +62,6 @@ public class SteeringWheelInfo extends SubInfoType<ModularVehicleInfoBuilder>
 
     @Override
     public String getName() {
-        return "SteeringWheel in "+getOwner().getName();
+        return "SteeringWheel in " + getOwner().getName();
     }
 }

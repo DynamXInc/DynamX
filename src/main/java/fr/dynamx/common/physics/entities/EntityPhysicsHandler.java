@@ -17,8 +17,7 @@ import net.minecraft.util.math.Vec3d;
  *
  * @param <T> The entity type
  */
-public abstract class EntityPhysicsHandler<T extends PhysicsEntity<?>> extends AbstractEntityPhysicsHandler<T, PhysicsRigidBody>
-{
+public abstract class EntityPhysicsHandler<T extends PhysicsEntity<?>> extends AbstractEntityPhysicsHandler<T, PhysicsRigidBody> {
     private final Vector3f linearVel;
     private final Vector3f rotationalVel;
     private boolean appliedBuoy;
@@ -36,7 +35,7 @@ public abstract class EntityPhysicsHandler<T extends PhysicsEntity<?>> extends A
         getCollisionObject().getAngularVelocity(rotationalVel);
 
         //Buoyancy effect W.I.P
-        if(getCollisionObject().isInWorld()) {
+        if (getCollisionObject().isInWorld()) {
             Vector3f bodyPos = getPosition();
             BlockPos pos = new BlockPos(bodyPos.x, bodyPos.y, bodyPos.z);
             IBlockState blockState = handledEntity.world.getBlockState(pos);
@@ -106,13 +105,13 @@ public abstract class EntityPhysicsHandler<T extends PhysicsEntity<?>> extends A
 
     @Override
     public void applyForce(Vector3f at, Vector3f force) {
-        if(getLinearVelocity().length() > 0.12f)
+        if (getLinearVelocity().length() > 0.12f)
             getCollisionObject().applyImpulse(force, at);
     }
 
     @Override
     public void applyTorque(Vector3f force) {
-        if(getLinearVelocity().length() > 0.12f)
+        if (getLinearVelocity().length() > 0.12f)
             getCollisionObject().applyTorque(force);
     }
 

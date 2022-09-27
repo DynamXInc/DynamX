@@ -45,7 +45,7 @@ public class BlockCollisionBehaviors {
             if (ofBlock.getMaterial().blocksMovement()) //Si le block a une collision spéciale, on l'ajoute
             {
                 ofBlock.addCollisionBoxToList(world, at, terrainBoxConstructor.getSearchZone(), boxes, null, false);
-                if(boxes.size() <= DynamXConfig.maxComplexBlockBoxes) {
+                if (boxes.size() <= DynamXConfig.maxComplexBlockBoxes) {
                     terrainBoxConstructor.injectBlockCollisions(at, ofBlock, boxes);
                     boxes.clear();
                 } else {
@@ -91,7 +91,7 @@ public class BlockCollisionBehaviors {
 
         @Override
         public boolean stacks(IBlockAccess world, BlockPos pos, EnumFacing.Axis axis, IBlockState onBlock, IBlockState stackingBlock, IBlockState lastStacked) {
-            if(axis == EnumFacing.Axis.Y && lastStacked != null && !lastStacked.isFullCube()) {
+            if (axis == EnumFacing.Axis.Y && lastStacked != null && !lastStacked.isFullCube()) {
                 return false;
             }
             return onBlock.isFullCube() || (axis == EnumFacing.Axis.Y && onBlock.getBlock() instanceof BlockSlab && onBlock.getValue(BlockSlab.HALF) == BlockSlab.EnumBlockHalf.TOP);
@@ -347,13 +347,13 @@ public class BlockCollisionBehaviors {
     static class PathBlock implements IBlockCollisionBehavior {
         @Override
         public boolean applies(IBlockAccess world, BlockPos pos, IBlockState toBlock) {
-         //   System.out.println("Test "+toBlock+" "+pos);
+            //   System.out.println("Test "+toBlock+" "+pos);
             return toBlock.getBlock() == Blocks.GRASS_PATH || toBlock.getBlock() == Blocks.FARMLAND;
         }
 
         @Override
         public boolean stacks(IBlockAccess world, BlockPos pos, EnumFacing.Axis axis, IBlockState onBlock, IBlockState stackingBlock, IBlockState lastStacked) {
-           //System.out.println("Stacks ? "+onBlock+" "+stackingBlock+" "+lastStacked);
+            //System.out.println("Stacks ? "+onBlock+" "+stackingBlock+" "+lastStacked);
             //System.out.println("RESULT "+(axis != EnumFacing.Axis.Y && applies(world, pos, onBlock)));
             return axis != EnumFacing.Axis.Y && applies(world, pos, onBlock);
         }

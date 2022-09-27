@@ -1,5 +1,7 @@
 package fr.dynamx.utils.debug;
 
+import lombok.Getter;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,8 +9,8 @@ import java.util.List;
  * All {@link DynamXDebugOption} <br>
  * Feel free to create yours
  */
-public class DynamXDebugOptions
-{
+public class DynamXDebugOptions {
+    private static final List<DynamXDebugOption> ALL_OPTIONS = new ArrayList<>();
     public static final DynamXDebugOption DEBUG_RENDER = DynamXDebugOption.newServerDependantOption(DebugCategories.GENERAL, "Debug renderer").withSubCategory("DynamX"),
             PROFILING = DynamXDebugOption.newServerDependantOption(DebugCategories.GENERAL, "Profiling").withDescription("Find why DynamX is lagging - prints timings in the logs. May produce lag").withSubCategory("DynamX"),
             PHYSICS_DEBUG = DynamXDebugOption.newOption(DebugCategories.GENERAL, "Bullet physics debug").withDescription("Shows complete rigid bodies and joints debug, may produce lag").withSubCategory("Physics"),
@@ -23,7 +25,7 @@ public class DynamXDebugOptions
             CLIENT_SLOPE_BOXES = (DynamXDebugOption.TerrainDebugOption) DynamXDebugOption.newTerrainOption("Client slopes", true, 32, 16).withDescription("Not available in solo").withSubCategory("Client");
 
     public static final DynamXDebugOption CENTER_OF_MASS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Center of mass").withSubCategory(VehicleDebugTypes.GENERAL.title),
-            SEATS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Seats").withSubCategory(VehicleDebugTypes.GENERAL.title),
+            SEATS_AND_STORAGE = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Seats and storage").withSubCategory(VehicleDebugTypes.GENERAL.title),
             WHEELS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Wheels").withSubCategory(VehicleDebugTypes.GENERAL.title),
             FRICTION_POINTS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Force points").withSubCategory(VehicleDebugTypes.GENERAL.title),
             PLAYER_COLLISIONS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Player collisions").withDescription("Debug for collisions between players and vehicles").withSubCategory(VehicleDebugTypes.COLLISIONS.title),
@@ -35,11 +37,15 @@ public class DynamXDebugOptions
             FULL_NETWORK_DEBUG = DynamXDebugOption.newServerDependantOption(DebugCategories.VEHICLES, "Full network debug").withDescription("Enables network debug functions, may produce lag").withSubCategory(VehicleDebugTypes.OTHER.title),
             WHEEL_ADVANCED_DATA = DynamXDebugOption.newServerDependantOption(DebugCategories.VEHICLES, "Sync wheel advanced data").withDescription("WIP - Has no effects except more network usage").withSubCategory(VehicleDebugTypes.OTHER.title);
 
+
+    public static List<DynamXDebugOption> getAllOptions() {
+        return ALL_OPTIONS;
+    }
+
     /**
      * DynamX debug categories
      */
-    public enum DebugCategories
-    {
+    public enum DebugCategories {
         GENERAL, TERRAIN, VEHICLES;
 
         private int state;
@@ -54,6 +60,7 @@ public class DynamXDebugOptions
         }
 
         public DynamXDebugOption addOption(DynamXDebugOption option) {
+            ALL_OPTIONS.add(option);
             options.add(option);
             return option;
         }
@@ -67,8 +74,7 @@ public class DynamXDebugOptions
         }
     }
 
-    public enum VehicleDebugTypes
-    {
+    public enum VehicleDebugTypes {
         GENERAL("Main"), COLLISIONS("Collisions"), ATTACH_POINTS("Attach points"), OTHER("Other");
 
         public final String title;

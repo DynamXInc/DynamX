@@ -8,10 +8,9 @@ import javax.vecmath.Vector3f;
 
 /**
  * An object object is a part of an obj model <br>
- *      Interface used for protection system
+ * Interface used for protection system
  */
-public interface IObjObject
-{
+public interface IObjObject {
     /**
      * @return Name of the part
      */
@@ -35,39 +34,42 @@ public interface IObjObject
     /**
      * Clears any computed render info
      */
-    default void clearDisplayLists() {}
+    default void clearDisplayLists() {
+    }
 
     /**
      * Pre-computes render info
      *
-     * @param useDefault The texture to use if textureData is not available for this part
-     * @param textureData The texture to use
-     * @param model The model owning this object
+     * @param useDefault    The texture to use if textureData is not available for this part
+     * @param textureData   The texture to use
+     * @param model         The model owning this object
      * @param logIfNotFound True to log texture errors
      */
-    default void createList(TextureData useDefault, TextureData textureData, ObjModelClient model, boolean logIfNotFound) {}
+    default void createList(TextureData useDefault, TextureData textureData, ObjModelClient model, boolean logIfNotFound) {
+    }
 
     /**
      * Pre-computes default (texture 0) render info
      *
      * @param model The model owning this object
      */
-    default void createDefaultList(ObjModelClient model) {}
+    default void createDefaultList(ObjModelClient model) {
+    }
 
     /**
      * Renders this part
      *
-     * @param model The model owning this object
+     * @param model         The model owning this object
      * @param textureDataId The texture to use
      */
-    default void render(ObjModelClient model, byte textureDataId) {}
+    default void render(ObjModelClient model, byte textureDataId) {
+    }
 
     /**
      * Provides obj objects <br>
-     *      Interface used for protection system
+     * Interface used for protection system
      */
-    interface ObjObjectProvider
-    {
+    interface ObjObjectProvider {
         IObjObject createObject(String name);
     }
 }

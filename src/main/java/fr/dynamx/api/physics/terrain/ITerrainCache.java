@@ -1,8 +1,8 @@
 package fr.dynamx.api.physics.terrain;
 
-import fr.dynamx.common.physics.terrain.chunk.ChunkLoadingTicket;
 import fr.dynamx.common.physics.terrain.cache.FileTerrainCache;
 import fr.dynamx.common.physics.terrain.chunk.ChunkCollisions;
+import fr.dynamx.common.physics.terrain.chunk.ChunkLoadingTicket;
 import fr.dynamx.common.physics.terrain.chunk.ChunkTerrain;
 import fr.dynamx.common.physics.terrain.element.TerrainElementType;
 import fr.dynamx.utils.VerticalChunkPos;
@@ -16,12 +16,11 @@ import java.util.concurrent.CompletableFuture;
  *
  * @see ITerrainManager
  */
-public interface ITerrainCache
-{
+public interface ITerrainCache {
     /**
      * Marks the chunk's data to be removed from this cache
      *
-     * @param changed True if the data has changed and should be deleted, false if we just don't need the data to be loaded in the cache anymore
+     * @param changed     True if the data has changed and should be deleted, false if we just don't need the data to be loaded in the cache anymore
      * @param syncChanges If chunk should be invalidated for clients
      */
     void invalidate(VerticalChunkPos pos, boolean changed, boolean syncChanges);
@@ -29,7 +28,7 @@ public interface ITerrainCache
     /**
      * Marks the chunk's data to be removed from this cache
      *
-     * @param changed True if the data has changed and should be deleted, false if we just don't need the data to be loaded in the cache anymore
+     * @param changed     True if the data has changed and should be deleted, false if we just don't need the data to be loaded in the cache anymore
      * @param syncChanges If chunk should be invalidated for clients
      */
     void invalidate(ChunkLoadingTicket pos, boolean changed, boolean syncChanges);
@@ -41,9 +40,9 @@ public interface ITerrainCache
 
     /**
      * Loads some chunk's data from the cache, on client implementations, it is an function call that retrieves the chunk data from the server <br>
-     *     It is not async on server side
+     * It is not async on server side
      *
-     * @param ticket The chunk to load
+     * @param ticket      The chunk to load
      * @param terrainType The terrain type to load
      */
     default CompletableFuture<ChunkTerrain> asyncLoad(ChunkLoadingTicket ticket, TerrainElementType terrainType) {
@@ -65,7 +64,7 @@ public interface ITerrainCache
     /**
      * Loads some chunk's data from the cache, it is a synchronous function that can load files from the disk
      *
-     * @param ticket The chunk to load
+     * @param ticket   The chunk to load
      * @param profiler The profiler, to time things
      * @return The chunk data, or null if not present in the cache
      */

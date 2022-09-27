@@ -7,8 +7,7 @@ import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
 
-public class FrictionPoint extends SubInfoType<ModularVehicleInfoBuilder>
-{
+public class FrictionPoint extends SubInfoType<ModularVehicleInfoBuilder> {
     @PackFileProperty(configNames = "Position", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y)
     private Vector3f position;
     @PackFileProperty(configNames = "Intensity", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F)
@@ -20,7 +19,7 @@ public class FrictionPoint extends SubInfoType<ModularVehicleInfoBuilder>
 
     @Override
     public String getName() {
-        return "FrictionPoint in "+getOwner().getName();
+        return "FrictionPoint in " + getOwner().getName();
     }
 
     @Override

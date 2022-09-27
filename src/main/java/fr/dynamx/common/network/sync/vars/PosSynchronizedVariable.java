@@ -36,9 +36,9 @@ public class PosSynchronizedVariable implements SynchronizedVariable<PhysicsEnti
     private boolean bodyActive;
     private float posX, posY, posZ;
     private Quaternion rotation = new Quaternion();
-    private Vector3f linearVel = new Vector3f();
-    private Vector3f rotationalVel = new Vector3f();
-    private Vector3f gravity = new Vector3f();
+    private final Vector3f linearVel = new Vector3f();
+    private final Vector3f rotationalVel = new Vector3f();
+    private final Vector3f gravity = new Vector3f();
 
     private EntityPhysicsState interpolatingState;
 

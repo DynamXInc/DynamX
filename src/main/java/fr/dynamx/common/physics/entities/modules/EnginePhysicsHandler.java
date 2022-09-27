@@ -18,8 +18,7 @@ import fr.dynamx.utils.debug.ChunkGraph;
  * @see IEnginePhysicsHandler
  * @see EngineModule
  */
-public class EnginePhysicsHandler implements IEnginePhysicsHandler
-{
+public class EnginePhysicsHandler implements IEnginePhysicsHandler {
     private final EngineModule module;
     private final BaseVehiclePhysicsHandler<?> handler;
     private final IPropulsionHandler propulsionHandler;
@@ -30,8 +29,7 @@ public class EnginePhysicsHandler implements IEnginePhysicsHandler
     private float accelerationForce;
     private float steeringForce = 0;
 
-    public EnginePhysicsHandler(EngineModule module, BaseVehiclePhysicsHandler<?> handler, IPropulsionHandler propulsionHandler)
-    {
+    public EnginePhysicsHandler(EngineModule module, BaseVehiclePhysicsHandler<?> handler, IPropulsionHandler propulsionHandler) {
         this.module = module;
         this.handler = handler;
         byte i = 0;
@@ -41,8 +39,8 @@ public class EnginePhysicsHandler implements IEnginePhysicsHandler
             getGearBox().setGear(i++, gear.getSpeedRange()[0], gear.getSpeedRange()[1], gear.getRpmRange()[0], gear.getRpmRange()[1]);
         }
         this.propulsionHandler = propulsionHandler;
-        if(propulsionHandler instanceof WheelsPhysicsHandler)
-        gearBoxHandler = new AutomaticGearboxHandler(this, gearBox, (WheelsPhysicsHandler) propulsionHandler);// propulsionHandler.createGearBox(module, this);
+        if (propulsionHandler instanceof WheelsPhysicsHandler)
+            gearBoxHandler = new AutomaticGearboxHandler(this, gearBox, (WheelsPhysicsHandler) propulsionHandler);// propulsionHandler.createGearBox(module, this);
     }
 
     public void update() {
@@ -74,13 +72,13 @@ public class EnginePhysicsHandler implements IEnginePhysicsHandler
             steer(steeringForce);
         } else {
             turnSpeed *= 4;
-            if(steeringForce > 0){
+            if (steeringForce > 0) {
                 steeringForce -= turnSpeed;
             }
-            if(steeringForce < 0){
+            if (steeringForce < 0) {
                 steeringForce += turnSpeed;
             }
-            if(Math.abs(steeringForce) < turnSpeed)
+            if (Math.abs(steeringForce) < turnSpeed)
                 steeringForce = 0;
         }
         steer(steeringForce);
@@ -96,17 +94,17 @@ public class EnginePhysicsHandler implements IEnginePhysicsHandler
         float turnSpeed = 1;//module.getEngineInfo().getTurnSpeed();
         if (module.isTurningLeft()) {
             steeringTimeD = steeringBase;
-            if(steeringTimeG < maxSteering)
+            if (steeringTimeG < maxSteering)
                 steeringTimeG += steeringInc;
             //System.out.println("G "+steeringTimeG+" "+steeringForce);
-            steeringForce = Math.min(turnSpeed*steeringTimeG, maxSteerForce);
+            steeringForce = Math.min(turnSpeed * steeringTimeG, maxSteerForce);
             // vehicle.getVehicleControl().steer(steeringValue);
             steer(steeringForce);
         } else if (module.isTurningRight()) {
             steeringTimeG = steeringBase;
-            if(steeringTimeD < maxSteering)
+            if (steeringTimeD < maxSteering)
                 steeringTimeD += steeringInc;
-            steeringForce = Math.max(-turnSpeed*steeringTimeD, -maxSteerForce);
+            steeringForce = Math.max(-turnSpeed * steeringTimeD, -maxSteerForce);
             steer(steeringForce);
         } else {
             steeringTimeG = steeringBase;
@@ -114,13 +112,13 @@ public class EnginePhysicsHandler implements IEnginePhysicsHandler
             deSteeringFactor = 0.3f;
             turnSpeed *= deSteeringFactor;
             //turnSpeed *= (1.4-steeringTime);
-            if(steeringForce > 0){
+            if (steeringForce > 0) {
                 steeringForce -= turnSpeed;
             }
-            if(steeringForce < 0){
+            if (steeringForce < 0) {
                 steeringForce += turnSpeed;
             }
-            if(Math.abs(steeringForce) < turnSpeed)
+            if (Math.abs(steeringForce) < turnSpeed)
                 steeringForce = 0;
         }
         steer(steeringForce);
@@ -133,17 +131,17 @@ public class EnginePhysicsHandler implements IEnginePhysicsHandler
         float turnSpeed = 1;//module.getEngineInfo().getTurnSpeed();
         if (module.isTurningLeft()) {
             steeringTimeD = steeringBase;
-            if(steeringTimeG < maxSteering)
+            if (steeringTimeG < maxSteering)
                 steeringTimeG += steeringInc;
             //System.out.println("G "+steeringTimeG+" "+steeringForce);
-            steeringForce = Math.min(turnSpeed*steeringTimeG, maxSteerForce);
+            steeringForce = Math.min(turnSpeed * steeringTimeG, maxSteerForce);
             // vehicle.getVehicleControl().steer(steeringValue);
             steer(steeringForce);
         } else if (module.isTurningRight()) {
             steeringTimeG = steeringBase;
-            if(steeringTimeD < maxSteering)
+            if (steeringTimeD < maxSteering)
                 steeringTimeD += steeringInc;
-            steeringForce = Math.max(-turnSpeed*steeringTimeD, -maxSteerForce);
+            steeringForce = Math.max(-turnSpeed * steeringTimeD, -maxSteerForce);
             steer(steeringForce);
         } else {
             steeringTimeG = steeringBase;
@@ -151,13 +149,13 @@ public class EnginePhysicsHandler implements IEnginePhysicsHandler
             deSteeringFactor = 0.3f;
             turnSpeed *= deSteeringFactor;
             //turnSpeed *= (1.4-steeringTime);
-            if(steeringForce > 0){
+            if (steeringForce > 0) {
                 steeringForce -= turnSpeed;
             }
-            if(steeringForce < 0){
+            if (steeringForce < 0) {
                 steeringForce += turnSpeed;
             }
-            if(Math.abs(steeringForce) < turnSpeed)
+            if (Math.abs(steeringForce) < turnSpeed)
                 steeringForce = 0;
         }
         steer(steeringForce);
@@ -171,69 +169,54 @@ public class EnginePhysicsHandler implements IEnginePhysicsHandler
         // do braking first so it doesn't override engineBraking.
         if (module.isHandBraking() && !inTestFullGo) {
             handbrake(1);
-        }
-        else {
+        } else {
             brake(0);
         }
 
-        if(TerrainFile.ULTIMATEDEBUG && handler.getHandledEntity().posY <= 3.5) {
+        if (TerrainFile.ULTIMATEDEBUG && handler.getHandledEntity().posY <= 3.5) {
             System.out.println("========== EMERGENCY MESSAGE =============");
-            System.err.println("UN VEHICULE EST TOMBE !!!! "+handler.getHandledEntity()+" AT "+System.currentTimeMillis());
-            System.out.println("Will print chunk data at "+handler.getHandledEntity().chunkCoordX+" "+handler.getHandledEntity().chunkCoordY+" "+handler.getHandledEntity().chunkCoordZ);
+            System.err.println("UN VEHICULE EST TOMBE !!!! " + handler.getHandledEntity() + " AT " + System.currentTimeMillis());
+            System.out.println("Will print chunk data at " + handler.getHandledEntity().chunkCoordX + " " + handler.getHandledEntity().chunkCoordY + " " + handler.getHandledEntity().chunkCoordZ);
             ChunkGraph c = ChunkGraph.getAt(new VerticalChunkPos(handler.getHandledEntity().chunkCoordX, handler.getHandledEntity().chunkCoordY, handler.getHandledEntity().chunkCoordZ));
-            if(c != null) {
-                System.out.println("Other info : current status : "+ DynamXContext.getPhysicsWorld().getTerrainManager().getTicket(c.listenedPos));
+            if (c != null) {
+                System.out.println("Other info : current status : " + DynamXContext.getPhysicsWorld().getTerrainManager().getTicket(c.listenedPos));
                 c.prettyPrint();
-            }
-            else
+            } else
                 System.err.println("Graph pas trouvé :c :O !! :mamamia:");
             inTestFullGo = false;
             handler.getHandledEntity().setDead();
             System.out.println("========== END OF THE MESSAGE ==============");
         }
-        if (module.isAccelerating())
-        {
-            if(inTestFullGo) {
+        if (module.isAccelerating()) {
+            if (inTestFullGo) {
                 module.setSpeedLimit(80);
             }
-            if(handler.getSpeed(BaseVehiclePhysicsHandler.SpeedUnit.KMH) < -1f) //reversing
+            if (handler.getSpeed(BaseVehiclePhysicsHandler.SpeedUnit.KMH) < -1f) //reversing
             {
                 disengageEngine();
                 brake(1f);
-            }
-            else if(module.isEngineStarted())
-            {
+            } else if (module.isEngineStarted()) {
                 accelerate(1);
-            }
-            else
-            {
+            } else {
                 applyEngineBraking();
                 accelerate(0);
             }
-        }
-        else if (module.isReversing())
-        {
-            if(handler.getSpeed(BaseVehiclePhysicsHandler.SpeedUnit.KMH) > 1) //going forward
+        } else if (module.isReversing()) {
+            if (handler.getSpeed(BaseVehiclePhysicsHandler.SpeedUnit.KMH) > 1) //going forward
             {
                 disengageEngine();
                 brake(1f);
-            }
-            else if(module.isEngineStarted())
-            {
+            } else if (module.isEngineStarted()) {
                 if (handler.getSpeed(BaseVehiclePhysicsHandler.SpeedUnit.KMH) > -40) {
                     accelerate(-0.5f);
                 } else {
                     disengageEngine();
                 }
-            }
-            else
-            {
+            } else {
                 applyEngineBraking();
                 accelerate(0);
             }
-        }
-        else
-        {
+        } else {
             applyEngineBraking();
             accelerate(0);
         }
@@ -254,7 +237,7 @@ public class EnginePhysicsHandler implements IEnginePhysicsHandler
     }
 
     public void setEngineStarted(boolean started) {
-        if(engine!=null) {
+        if (engine != null) {
             if (started) {
                 startEngine();
             } else {

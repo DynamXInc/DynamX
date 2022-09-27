@@ -1,8 +1,6 @@
 package fr.dynamx.common.physics;
 
-import com.jme3.bullet.collision.ManifoldPoints;
 import com.jme3.bullet.collision.PhysicsCollisionEvent;
-import com.jme3.math.Vector3f;
 import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.physics.player.PlayerPhysicsHandler;
@@ -72,14 +70,14 @@ public class CollisionsHandler {
 
         public void handleCollision() {
             //if (getAppliedImpulse() != 0) {
-            if(entityB.getObjectIn() instanceof PhysicsEntity) {
+            if (entityB.getObjectIn() instanceof PhysicsEntity) {
                 if (entityA.getType().isBulletEntity()) {
                     ((PhysicsEntity<?>) entityA.getObjectIn()).onCollisionEnter(collisionEvent, entityA, entityB);
                 } else if (entityB.getType().isBulletEntity()) {
                     ((PhysicsEntity<?>) entityB.getObjectIn()).onCollisionEnter(collisionEvent, entityA, entityB);
                 }
             }
-           // }
+            // }
             if (entityA.getType().isPlayer() && entityB.getType().isBulletEntity()) {
                 //((PlayerPhysicsHandler) entity1.getObjectIn()).handleCollision(event, entity2);
             } else if (entityB.getType().isPlayer() && entityA.getType().isBulletEntity())

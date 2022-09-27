@@ -140,10 +140,10 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
 
     @Override
     public boolean ownsSimulation(PhysicsEntity<?> entity) {
-        if(entity.getNetwork().getSimulationHolder().ownsPhysics(entity.world.isRemote ? Side.CLIENT : Side.SERVER)) {
+        if (entity.getNetwork().getSimulationHolder().ownsPhysics(entity.world.isRemote ? Side.CLIENT : Side.SERVER)) {
             return true;
         }
-        if(entity.world.isRemote && ClientEventHandler.MC.player.getRidingEntity() instanceof PhysicsEntity
+        if (entity.world.isRemote && ClientEventHandler.MC.player.getRidingEntity() instanceof PhysicsEntity
                 && ((PhysicsEntity<?>) ClientEventHandler.MC.player.getRidingEntity()).getNetwork().getSimulationHolder().ownsPhysics(Side.CLIENT)) {
             return true;
         }
@@ -170,7 +170,7 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
 
     @Override
     public IPhysicsWorld provideClientPhysicsWorld(World world) {
-        System.out.println("Create phy world for "+world);
+        System.out.println("Create phy world for " + world);
         return new BuiltinThreadedPhysicsWorld(world, !ClientEventHandler.MC.isSingleplayer());
     }
 

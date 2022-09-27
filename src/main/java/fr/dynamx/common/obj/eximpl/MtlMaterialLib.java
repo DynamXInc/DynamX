@@ -10,8 +10,7 @@ import org.lwjgl.util.vector.Vector3f;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MtlMaterialLib
-{
+public class MtlMaterialLib {
     public static final String COMMENT = "#";
     public static final String NEW_MATERIAL = "newmtl";
     public static final String AMBIENT_COLOR = "Ka";
@@ -76,18 +75,16 @@ public class MtlMaterialLib
 
     /**
      * Loads all textures used by this material, avoiding any duplicated textures shared between different materials <br>
-     *     It only read images files, so it can be called in any thread
+     * It only read images files, so it can be called in any thread
      */
-    public void loadTextures()
-    {
+    public void loadTextures() {
         TextureManager man = Minecraft.getMinecraft().getTextureManager();
         //System.out.println("LOAD man is "+man);
-        for(Material mat : materials)
-        {
-            if(mat.ambientTexture != null) {
+        for (Material mat : materials) {
+            if (mat.ambientTexture != null) {
                 mat.ambientTexture.forEach((textureName, textures) -> textures.loadTexture(man));
             }
-            if(mat.diffuseTexture != null) {
+            if (mat.diffuseTexture != null) {
                 mat.diffuseTexture.forEach((textureName, textures) -> textures.loadTexture(man));
             }
         }
@@ -95,20 +92,18 @@ public class MtlMaterialLib
 
     /**
      * Uploads all textures used by this material, avoiding any duplicated textures shared between different materials <br>
-     *     It creates all gl texture ids, so it should be called in gl thread
+     * It creates all gl texture ids, so it should be called in gl thread
      */
-    public void uploadTextures()
-    {
+    public void uploadTextures() {
         TextureManager man = Minecraft.getMinecraft().getTextureManager();
         /*System.out.printf("UPLOAD man is "+man);
         if(man == null)
             throw new NullPointerException("Mc Texture Manager not loaded !");*/
-        for(Material mat : materials)
-        {
-            if(mat.ambientTexture != null) {
+        for (Material mat : materials) {
+            if (mat.ambientTexture != null) {
                 mat.ambientTexture.forEach((textureName, textures) -> textures.uploadTexture(man));
             }
-            if(mat.diffuseTexture != null) {
+            if (mat.diffuseTexture != null) {
                 mat.diffuseTexture.forEach((textureName, textures) -> textures.uploadTexture(man));
             }
         }

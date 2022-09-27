@@ -4,7 +4,6 @@ import fr.aym.acsguis.api.ACsGuiApi;
 import fr.dynamx.api.network.EnumNetworkType;
 import fr.dynamx.api.network.IDnxPacket;
 import fr.dynamx.client.gui.GuiDnxDebug;
-import fr.dynamx.server.command.CmdOpenDebugGui;
 import io.netty.buffer.ByteBuf;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -41,7 +40,8 @@ public class MessageOpenDebugGui implements IDnxPacket {
             /*if (message.action == -20) {
                 //CmdOpenDebugGui.openedGuis.remove(ctx.getServerHandler().player);
             }
-            else*/ if (message.action == 125) {
+            else*/
+            if (message.action == 125) {
                 ACsGuiApi.asyncLoadThenShowGui("Dnx Debug", GuiDnxDebug::new);
             }
             return null;

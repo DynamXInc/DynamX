@@ -23,12 +23,11 @@ import net.minecraftforge.common.util.Constants;
 import java.util.HashMap;
 import java.util.Map;
 
-public class VehicleLightsModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, IPhysicsModule.IDrawableModule<BaseVehicleEntity<?>>
-{
+public class VehicleLightsModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, IPhysicsModule.IDrawableModule<BaseVehicleEntity<?>> {
     private final Map<Integer, Boolean> lightStates = new HashMap<>();
 
     public VehicleLightsModule(BaseVehicleEntity<?> entity) {
-        for(PartLightSource.CompoundLight compound : entity.getPackInfo().getLightSources()) {
+        for (PartLightSource.CompoundLight compound : entity.getPackInfo().getLightSources()) {
             for (PartLightSource s : compound.getSources()) {
                 lightStates.put(s.getLightId(), false);
             }
@@ -36,7 +35,7 @@ public class VehicleLightsModule implements IPhysicsModule<BaseVehiclePhysicsHan
     }
 
     public void setLightOn(int id, boolean state) {
-        if(lightStates.containsKey(id)) {
+        if (lightStates.containsKey(id)) {
             lightStates.put(id, state);
         }
     }
@@ -67,41 +66,40 @@ public class VehicleLightsModule implements IPhysicsModule<BaseVehiclePhysicsHan
 
     @Override
     public void drawParts(RenderPhysicsEntity<?> render, float partialTicks, BaseVehicleEntity<?> carEntity) {
-    //    setLightOn(9, true);
-    //    setLightOn(1, false);
+        //    setLightOn(9, true);
+        //    setLightOn(1, false);
         /* Rendering light sources */
         if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.RenderVehicleEntityEvent(VehicleEntityEvent.RenderVehicleEntityEvent.Type.LIGHTS, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks))) {
-            if(carEntity.hasModuleOfType(VehicleLightsModule.class)) {
+            if (carEntity.hasModuleOfType(VehicleLightsModule.class)) {
                 ObjModelClient vehicleModel = DynamXContext.getObjModelRegistry().getModel(carEntity.getPackInfo().getModel());
-                for(PartLightSource.CompoundLight sources : carEntity.getPackInfo().getLightSources())
-                {
+                for (PartLightSource.CompoundLight sources : carEntity.getPackInfo().getLightSources()) {
                     PartLightSource onSource = null;
-                    for(PartLightSource source : sources.getSources()) {
-                        if(isLightOn(source.getLightId())) {
+                    for (PartLightSource source : sources.getSources()) {
+                        if (isLightOn(source.getLightId())) {
                             onSource = source;
                         }
                     }
                     boolean isOn = true;
-                    if(onSource == null) {
+                    if (onSource == null) {
                         isOn = false;
                         onSource = sources.getSources().get(0);
                     }
                     int activeStep = 0;
-                    if(isOn && onSource.getBlinkSequence() != null) {
+                    if (isOn && onSource.getBlinkSequence() != null) {
                         int[] seq = onSource.getBlinkSequence();
-                        int mod = carEntity.ticksExisted%seq[seq.length-1];
+                        int mod = carEntity.ticksExisted % seq[seq.length - 1];
                         isOn = false; //Default state
-                        for (int i = seq.length-1 ; i >= 0; i--) {
-                            if(mod>seq[i]) {
-                                isOn = i%2 == 0;
-                                activeStep = (byte) (i+1);
+                        for (int i = seq.length - 1; i >= 0; i--) {
+                            if (mod > seq[i]) {
+                                isOn = i % 2 == 0;
+                                activeStep = (byte) (i + 1);
                                 break;
                             }
                         }
                     }
 
                     //Set luminescent
-                    if(isOn) {
+                    if (isOn) {
                         int i = 15728880;
                         int j = i % 65536;
                         int k = i / 65536;
@@ -113,21 +111,21 @@ public class VehicleLightsModule implements IPhysicsModule<BaseVehiclePhysicsHan
                     GlStateManager.pushMatrix();
                     GlStateManager.scale(carEntity.getPackInfo().getScaleModifier().x, carEntity.getPackInfo().getScaleModifier().y, carEntity.getPackInfo().getScaleModifier().z);
 
-                    if(onSource.getPosition() != null) {
+                    if (onSource.getPosition() != null) {
                         DynamXRenderUtils.glTranslate(onSource.getPosition());
                     }
                     GlStateManager.rotate(GlQuaternionPool.get(onSource.getRotation()));
 
-                    if(isLightOn(onSource.getLightId()) && onSource.getRotateDuration() > 0) {
-                        float step = ((float)(carEntity.ticksExisted%onSource.getRotateDuration()))/onSource.getRotateDuration();
+                    if (isLightOn(onSource.getLightId()) && onSource.getRotateDuration() > 0) {
+                        float step = ((float) (carEntity.ticksExisted % onSource.getRotateDuration())) / onSource.getRotateDuration();
                         step = step * 360;
                         GlStateManager.rotate(step, 0, 1, 0);
                     }
                     byte texId = 0;
-                    if(onSource.getTextures() != null) {
+                    if (onSource.getTextures() != null) {
                         if (isOn && !onSource.getTextureMap().containsKey(activeStep)) {
-                            activeStep = activeStep%onSource.getTextureMap().size();
-                            if(!onSource.getTextureMap().containsKey(activeStep)) {
+                            activeStep = activeStep % onSource.getTextureMap().size();
+                            if (!onSource.getTextureMap().containsKey(activeStep)) {
                                 isOn = false;
                                 //TODO CLEAN
                                 System.out.println("WARN TEXT NOT FOUND " + activeStep + " :" + onSource + " " + onSource.getTextureMap());
@@ -137,9 +135,9 @@ public class VehicleLightsModule implements IPhysicsModule<BaseVehiclePhysicsHan
                         } else {
                             texId = isOn ? onSource.getTextureMap().get(activeStep).getId() : (byte) 0;
                         }
-                    } else if(onSource.getColors() != null && activeStep < onSource.getColors().length) {
+                    } else if (onSource.getColors() != null && activeStep < onSource.getColors().length) {
                         Vector3f color = onSource.getColors()[activeStep];
-                        GlStateManager.color(color.x/255, color.y/255, color.z/255, 1);
+                        GlStateManager.color(color.x / 255, color.y / 255, color.z / 255, 1);
                     }
                     render.renderModelGroup(vehicleModel, onSource.getPartName(), carEntity, texId);
                     GlStateManager.popMatrix();

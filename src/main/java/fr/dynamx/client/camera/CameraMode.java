@@ -7,13 +7,12 @@ import java.util.function.BiFunction;
 /**
  * Vehicle camera modes for {@link CameraSystem}
  */
-public enum CameraMode
-{
+public enum CameraMode {
     /**
      * Automatically between FIXED and FREE according to thirdPersonView value
      */
     AUTO((i, q) -> {
-        if(i != 0)
+        if (i != 0)
             q.set(0, q.getY(), 0, q.getW());
         return null;
     }),
@@ -25,7 +24,7 @@ public enum CameraMode
      * Keeps vehicle rotation on Y axis
      */
     FREE((i, q) -> {
-        if(i != 0)
+        if (i != 0)
             q.set(0, q.getY(), 0, q.getW());
         else
             q.set(q.getX(), q.getY(), 0, q.getW());

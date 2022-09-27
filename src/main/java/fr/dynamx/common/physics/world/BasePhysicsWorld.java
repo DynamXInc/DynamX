@@ -2,9 +2,7 @@ package fr.dynamx.common.physics.world;
 
 import com.jme3.bullet.PhysicsSoftSpace;
 import com.jme3.bullet.PhysicsSpace;
-import com.jme3.bullet.collision.ManifoldPoints;
 import com.jme3.bullet.collision.PhysicsCollisionEvent;
-import com.jme3.bullet.collision.PhysicsCollisionListener;
 import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.bullet.joints.PhysicsJoint;
 import com.jme3.bullet.objects.PhysicsVehicle;
@@ -68,7 +66,7 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
         Vector3f max = new Vector3f(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
 
         PhysicsSpace.BroadphaseType bPhase = PhysicsSpace.BroadphaseType.DBVT;
-        dynamicsWorld = new PhysicsSoftSpace(min, max, bPhase){
+        dynamicsWorld = new PhysicsSoftSpace(min, max, bPhase) {
             @Override
             public void onContactStarted(long manifoldId) {
                 // memory leak fix : don't call super method : bullets stores all collision events in a queue
@@ -81,7 +79,8 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
             }
 
             @Override
-            public void onContactEnded(long manifoldId) {}
+            public void onContactEnded(long manifoldId) {
+            }
         };
         manager = new PhysicsWorldTerrain(this, mcWorld, isRemoteWorld);
     }

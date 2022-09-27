@@ -13,12 +13,11 @@ import java.lang.reflect.Method;
 
 import static fr.dynamx.common.DynamXMain.log;
 
-public class DynamXReflection
-{
+public class DynamXReflection {
     public static Method updateFallState, dealFireDamage, canTriggerWalking, doBlockCollisions, playStepSound, makeFlySound, playFlySound;
     public static Method worldIsChunkLoaded;
 
-    public static void initReflection(){
+    public static void initReflection() {
         log.debug("---- Start Reflection ----");
 
         updateFallState = findMethod(Entity.class, "func_184231_a", void.class,
@@ -39,7 +38,7 @@ public class DynamXReflection
         log.info("Successfully applied reflection");
     }
 
-    public static Method findMethod(Class<?> clazz, String srgName, Class<?> returnType, Class<?>... parameterTypes){
+    public static Method findMethod(Class<?> clazz, String srgName, Class<?> returnType, Class<?>... parameterTypes) {
         log.debug(srgName);
         return ObfuscationReflectionHelper.findMethod(clazz, srgName, returnType, parameterTypes);
     }

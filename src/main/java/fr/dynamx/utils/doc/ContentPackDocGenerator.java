@@ -9,18 +9,17 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Scanner;
 
-public class ContentPackDocGenerator
-{
+public class ContentPackDocGenerator {
     private static final DocLocale locale = new DocLocale();
     private static boolean hasInit;
 
     public static void generateDoc(String name, String lang, List<PackFilePropertyData<?>> data) {
-        if(data.isEmpty()) {
-            System.out.println("Ignoring "+name);
+        if (data.isEmpty()) {
+            System.out.println("Ignoring " + name);
             return;
         }
-        if(!hasInit) {
-            System.out.println("Doc locale "+lang);
+        if (!hasInit) {
+            System.out.println("Doc locale " + lang);
             locale.loadLocaleDataFiles("doc_" + lang + ".lang");
         }
 
@@ -36,11 +35,11 @@ public class ContentPackDocGenerator
         docDir.mkdirs();
         try {
             File file = new File(docDir, "ALL_DOC.md");
-            if(!hasInit) {
+            if (!hasInit) {
                 file.delete();
             }
             FileWriter writer = new FileWriter(file, true);
-            writer.write("\nDoc of "+name+" : \n");
+            writer.write("\nDoc of " + name + " : \n");
             writer.write(builder.toString());
             writer.close();
             //System.out.println("Generated " + file);
@@ -51,23 +50,22 @@ public class ContentPackDocGenerator
         docDir.mkdirs();
         File generated = new File(docDir, "generated");
         generated.mkdirs();
-        if(hasInit) {
+        if (hasInit) {
             docDir = generated;
-        }
-        else {
+        } else {
             hasInit = true;
         }
         boolean found = false;
-        String pattern = "${"+name+".md}";
-        for(File source : docDir.listFiles()) {
-            if(source.isFile()) {
+        String pattern = "${" + name + ".md}";
+        for (File source : docDir.listFiles()) {
+            if (source.isFile()) {
                 try {
                     Scanner sc = new Scanner(source);
                     StringBuilder nbuilder = new StringBuilder();
                     String line;
-                    while(sc.hasNextLine()) {
+                    while (sc.hasNextLine()) {
                         line = sc.nextLine();
-                        if(line.contains(pattern)) {
+                        if (line.contains(pattern)) {
                             found = true;
                             line = line.replace(pattern, builder.toString());
                         }
@@ -83,16 +81,14 @@ public class ContentPackDocGenerator
                 }
             }
         }
-        if(!found) {
-            DynamXMain.log.warn("[DOC] Doc of "+name+" not replaced : pattern "+pattern+" not found in doc_files !");
-        }
-        else {
-            DynamXMain.log.info("[DOC] Generated "+name+" doc");
+        if (!found) {
+            DynamXMain.log.warn("[DOC] Doc of " + name + " not replaced : pattern " + pattern + " not found in doc_files !");
+        } else {
+            DynamXMain.log.info("[DOC] Generated " + name + " doc");
         }
     }
 
-    public enum DocType
-    {
+    public enum DocType {
         REQUIRED, OPTIONAL, DEPRECATED
     }
 }

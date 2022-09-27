@@ -7,10 +7,11 @@ import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.PropsContainerModule;
+import fr.dynamx.utils.debug.DynamXDebugOption;
+import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 
-public class PartPropsContainer extends BasePart<ModularVehicleInfoBuilder> implements IShapeInfo
-{
+public class PartPropsContainer extends BasePart<ModularVehicleInfoBuilder> implements IShapeInfo {
     protected MutableBoundingBox box;
 
     public PartPropsContainer(ModularVehicleInfoBuilder owner, String partName) {
@@ -29,14 +30,14 @@ public class PartPropsContainer extends BasePart<ModularVehicleInfoBuilder> impl
 
     @Override
     public void addModules(BaseVehicleEntity<?> entity, ModuleListBuilder modules) {
-        if(!modules.hasModuleOfClass(PropsContainerModule.class)) {
+        if (!modules.hasModuleOfClass(PropsContainerModule.class)) {
             modules.add(new PropsContainerModule(entity));
         }
     }
 
     @Override
     public String getName() {
-        return "PartPropsContainer named "+getPartName()+" in "+getOwner().getName();
+        return "PartPropsContainer named " + getPartName() + " in " + getOwner().getName();
     }
 
     @Override
@@ -46,5 +47,10 @@ public class PartPropsContainer extends BasePart<ModularVehicleInfoBuilder> impl
 
     public MutableBoundingBox getBox() {
         return box;
+    }
+
+    @Override
+    public DynamXDebugOption getDebugOption() {
+        return DynamXDebugOptions.PROPS_CONTAINERS;
     }
 }

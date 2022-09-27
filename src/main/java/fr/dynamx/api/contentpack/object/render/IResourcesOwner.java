@@ -4,27 +4,33 @@ import net.minecraft.item.Item;
 
 import javax.annotation.Nullable;
 
-public interface IResourcesOwner
-{
+public interface IResourcesOwner {
     String getJsonName(int meta);
 
-    default int getMaxMeta() {return 1;}
+    default int getMaxMeta() {
+        return 1;
+    }
 
-    default boolean createTranslation() {return true;}
+    default boolean createTranslation() {
+        return true;
+    }
 
-    default boolean createJson() {return getObjModel() == null;}
+    default boolean createJson() {
+        return getObjModel() == null;
+    }
 
     @Nullable
     IObjPackObject getObjModel();
 
-    default Item getItem() { return this instanceof Item ? (Item) this : null;}
+    default Item getItem() {
+        return this instanceof Item ? (Item) this : null;
+    }
 
     static IResourcesOwner of(Item item) {
         return item instanceof IResourcesOwner ? (IResourcesOwner) item : new DummyResourceOwner(item);
     }
 
-    class DummyResourceOwner implements IResourcesOwner
-    {
+    class DummyResourceOwner implements IResourcesOwner {
         private final Item item;
 
         private DummyResourceOwner(Item item) {

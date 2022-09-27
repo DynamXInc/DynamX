@@ -9,8 +9,7 @@ import java.util.Map;
 /**
  * A kindly optimzed map for {@link ChunkLoadingTicket}s, identified by their position
  */
-public class ChunkLoadingTicketMap
-{
+public class ChunkLoadingTicketMap {
     private final Map<Integer, Map<Integer, Map<VerticalChunkPos, ChunkLoadingTicket>>> ticketsMap = new HashMap<>();
 
     public ChunkLoadingTicket get(VerticalChunkPos pos) {
@@ -27,9 +26,9 @@ public class ChunkLoadingTicketMap
 
     public ChunkLoadingTicket remove(VerticalChunkPos pos) {
         Map<Integer, Map<VerticalChunkPos, ChunkLoadingTicket>> m1 = ticketsMap.get(pos.x >> 4);
-        if(m1 != null) {
+        if (m1 != null) {
             Map<VerticalChunkPos, ChunkLoadingTicket> m2 = m1.get(pos.z >> 4);
-            if(m2 != null) {
+            if (m2 != null) {
                 return m2.remove(pos);
             }
         }
@@ -38,9 +37,9 @@ public class ChunkLoadingTicketMap
 
     public boolean containsKey(VerticalChunkPos pos) {
         Map<Integer, Map<VerticalChunkPos, ChunkLoadingTicket>> m1 = ticketsMap.get(pos.x >> 4);
-        if(m1 != null) {
+        if (m1 != null) {
             Map<VerticalChunkPos, ChunkLoadingTicket> m2 = m1.get(pos.z >> 4);
-            if(m2 != null) {
+            if (m2 != null) {
                 return m2.containsKey(pos);
             }
         }

@@ -5,8 +5,7 @@ import fr.dynamx.common.entities.RagdollEntity;
 import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.util.ResourceLocation;
 
-public enum EnumRagdollBodyPart
-{
+public enum EnumRagdollBodyPart {
     HEAD("head_joint", 10, RagdollEntity.HEAD_BOX_SIZE, RagdollEntity.HEAD_BODY_ATTACH_POINT, RagdollEntity.HEAD_ATTACH_POINT),
     CHEST("chest_joint", 30, RagdollEntity.CHEST_BOX_SIZE, new Vector3f(), new Vector3f()),
     RIGHT_ARM("right_arm_joint", 4, RagdollEntity.LIMB_BOX_SIZE, RagdollEntity.RIGHT_ARM_ATTACH_POINT, RagdollEntity.LIMB_ATTACH_POINT),

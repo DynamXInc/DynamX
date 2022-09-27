@@ -4,8 +4,7 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.common.entities.PhysicsEntity;
 import io.netty.buffer.ByteBuf;
 
-public class MessageWalkingPlayer extends PhysicsEntityMessage<MessageWalkingPlayer>
-{
+public class MessageWalkingPlayer extends PhysicsEntityMessage<MessageWalkingPlayer> {
     public int playerId;
     public Vector3f offset;
     public byte face;

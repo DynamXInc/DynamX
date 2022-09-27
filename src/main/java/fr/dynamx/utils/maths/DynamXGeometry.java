@@ -232,7 +232,7 @@ public class DynamXGeometry {
      * @return A new quaternion from the given euler angles
      */
     public static Quaternion eulerToQuaternion(float roll, float yaw, float pitch) {
-        return QuaternionPool.get().fromAngles((float)Math.toRadians(-pitch), (float)Math.toRadians(-yaw), (float)Math.toRadians(-roll));
+        return QuaternionPool.get().fromAngles((float) Math.toRadians(-pitch), (float) Math.toRadians(-yaw), (float) Math.toRadians(-roll));
     }
 
     /**

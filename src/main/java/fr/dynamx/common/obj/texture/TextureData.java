@@ -14,8 +14,7 @@ import javax.annotation.Nullable;
  * @see PartWheelInfo
  * @see QuickObjObject
  */
-public class TextureData
-{
+public class TextureData {
     private final String name;
     private final byte id;
     @Nullable
@@ -25,7 +24,7 @@ public class TextureData
      * This texture will not have an associated item
      *
      * @param name The name of the texture, matching with the name in mtl files
-     * @param id The id of this texture, should be unique in one vehicle
+     * @param id   The id of this texture, should be unique in one vehicle
      */
     public TextureData(String name, byte id) {
         this(name, id, null);
@@ -34,8 +33,8 @@ public class TextureData
     /**
      * This texture will have an associated item
      *
-     * @param name The name of the texture, matching with the name in mtl files
-     * @param id The id of this texture, should be unique in one vehicle
+     * @param name     The name of the texture, matching with the name in mtl files
+     * @param id       The id of this texture, should be unique in one vehicle
      * @param iconName The name if the texture of the item
      */
     public TextureData(String name, byte id, String iconName) {

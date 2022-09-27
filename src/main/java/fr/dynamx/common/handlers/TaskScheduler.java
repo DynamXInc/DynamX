@@ -92,19 +92,15 @@ public class TaskScheduler {
 
         @Override
         public void run() {
-            //Force tcp for first sync
-            //System.out.println("Forcing sync !");
             if (target.connection != null && target.connection.getNetworkManager().isChannelOpen()) {
+                //Force tcp for first sync
                 DynamXContext.getNetwork().getVanillaNetwork().sendPacket(new MessagePhysicsEntitySync(entity, ServerPhysicsSyncManager.getTime(target), entity.getNetwork().getOutputSyncVars(), MessagePhysicsEntitySync.SyncType.TCP_RESYNC), EnumPacketTarget.PLAYER, target);
-                if (entity instanceof IModuleContainer.ISeatsContainer) {
-                    //System.out.println("Forcing seats sync !");
-                    //TODO TESTS DynamXContext.getNetwork().sendToClient(new MessageSeatsSync((IModuleContainer.ISeatsContainer) entity), EnumPacketTarget.PLAYER, target);
-                }
-                if (entity.getJointsHandler() != null) {
+                if (entity instanceof IModuleContainer.ISeatsContainer)
+                    DynamXContext.getNetwork().sendToClient(new MessageSeatsSync((IModuleContainer.ISeatsContainer) entity), EnumPacketTarget.PLAYER, target);
+                if (entity.getJointsHandler() != null)
                     entity.getJointsHandler().sync(target);
-                }
             } else {
-                DynamXMain.log.warn("Skipping resync item of "+entity+" for "+target+" : player not connected");
+                DynamXMain.log.warn("Skipping resync item of " + entity + " for " + target + " : player not connected");
             }
         }
     }

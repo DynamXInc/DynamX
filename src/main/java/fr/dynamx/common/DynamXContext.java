@@ -26,8 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Common DynamX variables
  */
-public class DynamXContext
-{
+public class DynamXContext {
     private static IPhysicsWorld physicsWorld;
     private static final IRotatedCollisionHandler collisionHandler = new RotatedCollisionHandlerImpl();
     private static final IDnxNetworkSystem network;
@@ -40,10 +39,11 @@ public class DynamXContext
     private static final ConcurrentHashMap<EntityPlayer, PhysicsEntity<?>> walkingPlayers = new ConcurrentHashMap<>(0, 0.75f, 2);
     private static Map<Integer, Integer> playerPickingObjects = new HashMap<>();
 
-    private static final IPhysicsSimulationMode[] physicsSimulationModes = new IPhysicsSimulationMode[] {new PhysicsSimulationModes.FullPhysics(), new PhysicsSimulationModes.FullPhysics()};
+    private static final IPhysicsSimulationMode[] physicsSimulationModes = new IPhysicsSimulationMode[]{new PhysicsSimulationModes.FullPhysics(), new PhysicsSimulationModes.FullPhysics()};
 
     /**
      * Use this to avoid manipulating physics on invalid sides
+     *
      * @param world The World to test
      * @return True is a {@link IPhysicsWorld} exists for this {@link World} (depends on the side of the world) <br>
      * Always true except for client single player worlds
@@ -127,8 +127,8 @@ public class DynamXContext
     }
 
     /**
-     * @param side The side, server for the local physics simulation, client for the remote simulation world <br>
-     *             Side.CLIENT is <strong>only</strong> used on dedicated server for the client physics worlds
+     * @param side                  The side, server for the local physics simulation, client for the remote simulation world <br>
+     *                              Side.CLIENT is <strong>only</strong> used on dedicated server for the client physics worlds
      * @param physicsSimulationMode The {@link IPhysicsSimulationMode} to set on the given side
      */
     public static void setPhysicsSimulationMode(Side side, IPhysicsSimulationMode physicsSimulationMode) {
@@ -137,7 +137,7 @@ public class DynamXContext
 
     static {
         network = DynamXNetwork.init(FMLCommonHandler.instance().getSide());
-        if(FMLCommonHandler.instance().getSide().isClient())
+        if (FMLCommonHandler.instance().getSide().isClient())
             objModelRegistry = new DynamXModelRegistry();
     }
 }

@@ -21,8 +21,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import java.util.Arrays;
 import java.util.List;
 
-public class MovableModule implements IPhysicsModule<AbstractEntityPhysicsHandler<?, ?>>, AttachModule.AttachToSelfModule, IPhysicsModule.IEntityUpdateListener, IPhysicsModule.IPhysicsUpdateListener
-{
+public class MovableModule implements IPhysicsModule<AbstractEntityPhysicsHandler<?, ?>>, AttachModule.AttachToSelfModule, IPhysicsModule.IEntityUpdateListener, IPhysicsModule.IPhysicsUpdateListener {
     public static final ResourceLocation JOINT_NAME = new ResourceLocation(DynamXConstants.ID, "movable_module");
 
     static {
@@ -87,8 +86,7 @@ public class MovableModule implements IPhysicsModule<AbstractEntityPhysicsHandle
         TAKE, UNTAKE, PICK, UNPICK, LENGTH_CHANGE, FREEZE_OBJECT, ATTACH_OBJECTS, THROW
     }
 
-    public static class Action
-    {
+    public static class Action {
         private Object[] info;
         private EnumAction enumAction;
 

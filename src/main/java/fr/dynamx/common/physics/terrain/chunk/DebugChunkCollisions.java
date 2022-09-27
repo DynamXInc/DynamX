@@ -6,8 +6,7 @@ import net.minecraft.world.World;
 
 import java.util.UUID;
 
-public class DebugChunkCollisions extends ChunkCollisions
-{
+public class DebugChunkCollisions extends ChunkCollisions {
     private final UUID id;
 
     public DebugChunkCollisions(World mcWorld, VerticalChunkPos pos, IPhysicsWorld world) {
@@ -21,6 +20,6 @@ public class DebugChunkCollisions extends ChunkCollisions
 
     @Override
     public String toString() {
-        return "DebugChunkCollisions[x="+ getPos().x+";y="+ getPos().y+";z="+ getPos().z+"] with id "+id;
+        return "DebugChunkCollisions[x=" + getPos().x + ";y=" + getPos().y + ";z=" + getPos().z + "] with id " + id;
     }
 }

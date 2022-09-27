@@ -5,7 +5,10 @@ import fr.dynamx.api.contentpack.registry.SubInfoTypesRegistry;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.contentpack.loader.*;
 import fr.dynamx.common.contentpack.type.PartWheelInfo;
-import fr.dynamx.common.contentpack.type.objects.*;
+import fr.dynamx.common.contentpack.type.objects.ArmorObject;
+import fr.dynamx.common.contentpack.type.objects.BlockObject;
+import fr.dynamx.common.contentpack.type.objects.ItemObject;
+import fr.dynamx.common.contentpack.type.objects.PropObject;
 import fr.dynamx.common.contentpack.type.vehicle.EngineInfo;
 import fr.dynamx.common.contentpack.type.vehicle.SoundListInfo;
 import fr.dynamx.common.items.DynamXItem;
@@ -21,8 +24,7 @@ import java.util.List;
 /**
  * All DynamX {@link InfoLoader}s
  */
-public class DynamXObjectLoaders
-{
+public class DynamXObjectLoaders {
     static final List<InfoLoader<?, ?>> LOADERS = new ArrayList<>();
 
     public static PacksInfoLoader PACKS = new PacksInfoLoader("pack_info", (p, n) -> new PackInfo(p), new SubInfoTypesRegistry<>());
@@ -38,8 +40,7 @@ public class DynamXObjectLoaders
     public static InfoLoader<EngineInfo, EngineInfo> ENGINES = new InfoLoader<>("engine", EngineInfo::new, new SubInfoTypesRegistry<>());
     public static SoundInfoLoader SOUNDS = new SoundInfoLoader("sounds", SoundListInfo::new);
 
-    static
-    {
+    static {
         SubInfoTypesRegistry.initBuiltinSubInfoTypes();
         DynamXObjectLoaders.LOADERS.add(DynamXObjectLoaders.WHEELED_VEHICLES);
         DynamXObjectLoaders.LOADERS.add(DynamXObjectLoaders.TRAILERS);

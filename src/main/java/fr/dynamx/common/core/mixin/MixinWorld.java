@@ -24,87 +24,12 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 @Mixin(World.class)
 public abstract class MixinWorld {
-    @Shadow public abstract void removeEventListener(IWorldEventListener listener);
-
-    @Shadow public abstract World init();
-
-    /**
-     * Updates the terrain when the world is modified
-     *
-     * @author Aym'
-     */
-    /*@Overwrite
-    public boolean setBlockState(BlockPos pos, IBlockState newState, int flags)
-    {
-        World world = (World) (Object) this;
-        if (world.isOutsideBuildHeight(pos))
-        {
-            return false;
-        }
-        else if (!world.isRemote && world.getWorldInfo().getTerrainType() == WorldType.DEBUG_ALL_BLOCK_STATES)
-        {
-            return false;
-        }
-        else
-        {
-            Chunk chunk = this.getChunk(pos);
-
-            pos = pos.toImmutable(); // Forge - prevent mutable BlockPos leaks
-            net.minecraftforge.common.util.BlockSnapshot blockSnapshot = null;
-            if (world.captureBlockSnapshots && !world.isRemote)
-            {
-                blockSnapshot = net.minecraftforge.common.util.BlockSnapshot.getBlockSnapshot(world, pos, flags);
-                world.capturedBlockSnapshots.add(blockSnapshot);
-            }
-            IBlockState oldState = getBlockState(pos);
-            int oldLight = oldState.getLightValue(world, pos);
-            int oldOpacity = oldState.getLightOpacity(world, pos);
-
-            IBlockState iblockstate = chunk.setBlockState(pos, newState);
-
-            if (iblockstate == null)
-            {
-                if (blockSnapshot != null) world.capturedBlockSnapshots.remove(blockSnapshot);
-                return false;
-            }
-            else
-            {
-                if (newState.getLightOpacity(world, pos) != oldOpacity || newState.getLightValue(world, pos) != oldLight)
-                {
-                    world.profiler.startSection("checkLight");
-                    world.checkLight(pos);
-                    world.profiler.endSection();
-                }
-
-                if (blockSnapshot == null) // Don't notify clients or update physics while capturing blockstates
-                {
-                    world.markAndNotifyBlock(pos, chunk, iblockstate, newState, flags);
-                }
-
-
-                return true;
-            }
-        }
-    }
-   /* @Inject(at = @At("RETURN"), target = @Desc(value = "setBlockState", ret = boolean.class, args = {BlockPos.class, IBlockState.class, int.class}))
-    public void setBlockState(BlockPos pos, IBlockState newState, int flags, CallbackInfoReturnable<Boolean> info) {
-        if(flags != 4) {
-            System.out.println(info.getReturnValue() + " tut " + info.getReturnValueZ());
-            if (info.getReturnValueZ()) {
-                System.out.println("SET BLOCK CALLBACK " + pos + " " + flags + " " + (newState.getBlock().getTickRandomly()));
-                if (flags != 4 && DynamXContext.usesPhysicsWorld((World) (Object) this)) { // 4 is random leaves update
-                    System.out.println("Processing "+newState);
-                    CommonEventHandler.onBlockChange((World) (Object) this, pos);
-                }
-            } else {
-                DynamXMain.log.error("MixinWorld failed to inject at the right return !");
-                //System.out.println("Got but returning false :c");
-            }
-        }
-    }*/
+    @Shadow
+    public abstract World init();
 
     /**
      * @author Yanis
+     * @reason
      */
     @Nullable
     @Overwrite
@@ -228,9 +153,9 @@ public abstract class MixinWorld {
                     DynamXChunkData capability = chunk.getCapability(DynamXChunkDataProvider.DYNAM_X_CHUNK_DATA_CAPABILITY, null);
 
                     rayResult.set(null); //Ray-trace DynamX blocks
-                    for(Map.Entry<BlockPos, AxisAlignedBB> e : capability.getBlocksAABB().entrySet()) {
+                    for (Map.Entry<BlockPos, AxisAlignedBB> e : capability.getBlocksAABB().entrySet()) {
                         RayTraceResult res = e.getValue().calculateIntercept(vec31, vec32);
-                        if(res != null) {
+                        if (res != null) {
                             rayResult.set(res);
                             blockpos.set(e.getKey());
                             break;
@@ -239,12 +164,12 @@ public abstract class MixinWorld {
 
                     IBlockState iblockstate1 = this.getBlockState(blockpos.get());
                     Block block1 = iblockstate1.getBlock();
-                    if(rayResult.get() != null && !(block1 instanceof DynamXBlock)) {
+                    if (rayResult.get() != null && !(block1 instanceof DynamXBlock)) {
                         capability.getBlocksAABB().remove(blockpos.get());
                     }
                     if (!ignoreBlockWithoutBoundingBox || iblockstate1.getMaterial() == Material.PORTAL || iblockstate1.getCollisionBoundingBox((World) (Object) this, blockpos.get()) != Block.NULL_AABB) {
                         if (block1.canCollideCheck(iblockstate1, stopOnLiquid)) {
-                            if(rayResult.get() == null) { //Don't re-raytrace DynamX blocks
+                            if (rayResult.get() == null) { //Don't re-raytrace DynamX blocks
                                 rayResult.set(iblockstate1.collisionRayTrace((World) (Object) this, blockpos.get(), vec31, vec32));
                                 if (rayResult.get() != null) {
                                     return rayResult.get();

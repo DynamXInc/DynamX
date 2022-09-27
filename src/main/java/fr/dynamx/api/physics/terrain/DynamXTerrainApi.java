@@ -11,8 +11,7 @@ import java.util.List;
  * @see IPhysicsTerrainLoader
  * @see IBlockCollisionBehavior
  */
-public class DynamXTerrainApi
-{
+public class DynamXTerrainApi {
     /**
      * Custom terrain loaders
      */

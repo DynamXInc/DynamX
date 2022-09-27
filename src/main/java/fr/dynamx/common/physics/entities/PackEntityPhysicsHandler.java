@@ -1,11 +1,8 @@
 package fr.dynamx.common.physics.entities;
 
-import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
 import fr.dynamx.common.entities.PackPhysicsEntity;
-import fr.dynamx.utils.maths.DynamXGeometry;
-import fr.dynamx.utils.optimization.Vector3fPool;
 
 import javax.annotation.Nullable;
 

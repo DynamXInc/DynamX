@@ -4,6 +4,7 @@ import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
+import fr.dynamx.api.contentpack.object.IShapeProvider;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
@@ -24,7 +25,10 @@ import fr.dynamx.common.contentpack.type.vehicle.FrictionPoint;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.items.ItemModularEntity;
 import fr.dynamx.common.obj.texture.TextureData;
+import fr.dynamx.utils.EnumPlayerStandOnTop;
 import fr.dynamx.utils.client.DynamXRenderUtils;
+import fr.dynamx.utils.debug.DynamXDebugOption;
+import fr.dynamx.utils.debug.DynamXDebugOptions;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
@@ -43,8 +47,9 @@ import java.util.stream.Collectors;
  * @see BaseVehicleEntity
  */
 public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends AbstractItemObject<U> implements IPhysicsPackInfo, IModelTextureSupplier,
-        ParticleEmitterInfo.IParticleEmitterContainer {
+        ParticleEmitterInfo.IParticleEmitterContainer, IShapeProvider<ModularVehicleInfoBuilder> {
     private final int emptyMass;
+    private final EnumPlayerStandOnTop playerStandOnTop;
     private final float dragFactor;
     private final Vector3f centerOfMass;
     private final Vector3f scaleModifier;
@@ -109,7 +114,7 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
      */
     private final List<Vector3f> collisionShapeDebugBuffer;
 
-    public ModularVehicleInfo(String defaultName, String packName, String fileName, String description, int emptyMass, float dragFactor, String model, Vector3f centerOfMass,
+    public ModularVehicleInfo(String defaultName, String packName, String fileName, String description, int emptyMass, EnumPlayerStandOnTop playerStandOnTop, float dragFactor, String model, Vector3f centerOfMass,
                               Vector3f scaleModifier, Map<Byte, TextureData> textures, List<BasePart<ModularVehicleInfoBuilder>> parts, List<PartShape<?>> partShapes,
                               List<ISubInfoType<ModularVehicleInfoBuilder>> subProperties, Map<String, PartLightSource.CompoundLight> lightSources, List<FrictionPoint> frictionPoints,
                               List<ParticleEmitterInfo<?>> particleEmitters, float vehicleMaxSpeed, int directingWheel, float itemScale, Enum3DRenderLocation item3DRenderLocation,
@@ -130,6 +135,7 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
         this.scaleModifier = scaleModifier;
 
         this.emptyMass = emptyMass;
+        this.playerStandOnTop = playerStandOnTop;
         this.dragFactor = dragFactor;
         this.model = model;
         this.centerOfMass = centerOfMass;
@@ -208,6 +214,10 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
         return emptyMass;
     }
 
+    public EnumPlayerStandOnTop getPlayerStandOnTop() {
+        return playerStandOnTop;
+    }
+
     public float getDragFactor() {
         return dragFactor;
     }
@@ -224,7 +234,7 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
 
     /**
      * @param clazz The class of the parts to return
-     * @param <T> The type of the parts to return
+     * @param <T>   The type of the parts to return
      * @return All the parts of the given type
      */
     public <T extends BasePart<ModularVehicleInfoBuilder>> List<T> getPartsByType(Class<T> clazz) {
@@ -233,7 +243,7 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
 
     /**
      * @param clazz The class of the part to return
-     * @param <T> The type of the part to return
+     * @param <T>   The type of the part to return
      * @return The part with the given type and the given id (wheel index for example), or null
      */
     public <T extends BasePart<ModularVehicleInfoBuilder>> T getPartByTypeAndId(Class<T> clazz, byte id) {
@@ -242,7 +252,7 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
 
     /**
      * @param clazz The class of the ISubInfoTypes to returns
-     * @param <T> The type of the ISubInfoTypes to return
+     * @param <T>   The type of the ISubInfoTypes to return
      * @return All the ISubInfoTypes of the given type
      */
     public <T extends ISubInfoType<ModularVehicleInfoBuilder>> T getSubPropertyByType(Class<T> clazz) {
@@ -273,7 +283,7 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
     @Override
     public Map<Byte, TextureData> getTexturesFor(IObjObject object) {
         PartLightSource.CompoundLight src = getLightSource(object.getName());
-        if(src != null) {
+        if (src != null) {
             Map<Byte, TextureData> ret = new HashMap<>();
             ret.put((byte) 0, new TextureData("Default", (byte) 0));
             List<PartLightSource> sources = src.getSources();
@@ -344,6 +354,12 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
 
     @Override
     public String toString() {
-        return "ModularVehicleInfo named "+getFullName();
+        return "ModularVehicleInfo named " + getFullName();
     }
+
+    @Override
+    public List<BasePart<ModularVehicleInfoBuilder>> getAllParts() {
+        return parts;
+    }
+
 }

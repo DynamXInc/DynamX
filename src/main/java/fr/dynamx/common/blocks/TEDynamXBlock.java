@@ -1,12 +1,10 @@
 package fr.dynamx.common.blocks;
 
 import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
-import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.aym.acsguis.api.ACsGuiApi;
 import fr.dynamx.api.events.DynamXBlockEvent;
-import fr.dynamx.api.events.EventStage;
 import fr.dynamx.client.gui.GuiBlockCustomization;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.capability.DynamXChunkData;

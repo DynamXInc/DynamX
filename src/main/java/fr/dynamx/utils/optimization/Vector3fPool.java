@@ -2,7 +2,6 @@ package fr.dynamx.utils.optimization;
 
 import com.jme3.math.Vector3f;
 import net.minecraft.util.math.Vec3d;
-import scala.Int;
 
 import javax.annotation.concurrent.ThreadSafe;
 import java.util.HashMap;
@@ -21,7 +20,7 @@ public class Vector3fPool extends ClassPool<Vector3f> {
 
     private static final ThreadLocal<Vector3fPool> LOCAL_POOL = ThreadLocal.withInitial(Vector3fPool::new);
 
-  //  private final Map<StackTraceElement, Integer> callers = new HashMap<>();
+    //  private final Map<StackTraceElement, Integer> callers = new HashMap<>();
 
     public static Vector3fPool getPool() {
         return LOCAL_POOL.get();

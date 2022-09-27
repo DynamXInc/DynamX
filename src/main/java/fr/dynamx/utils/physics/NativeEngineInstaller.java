@@ -5,7 +5,6 @@ import com.jme3.system.Platform;
 import fr.aym.mps.utils.SSLHelper;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.utils.DynamXConstants;
-import fr.dynamx.utils.LibraryInstaller;
 import net.minecraftforge.fml.common.ProgressManager;
 
 import java.io.*;
@@ -44,6 +43,7 @@ public class NativeEngineInstaller {
                 break;
             case MacOSX32:
             case MacOSX64:
+            case MacOSX_ARM64:
                 name = "libbulletjme.dylib";
                 break;
             default:

@@ -3,6 +3,7 @@ package fr.dynamx.common.entities.modules;
 import com.jme3.bullet.joints.Constraint;
 import com.jme3.bullet.joints.Point2PointJoint;
 import com.jme3.math.Vector3f;
+import fr.dynamx.api.entities.modules.AttachModule;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.common.contentpack.type.vehicle.TrailerAttachInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
@@ -10,7 +11,6 @@ import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.entities.vehicles.CarEntity;
 import fr.dynamx.common.entities.vehicles.TrailerEntity;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
-import fr.dynamx.api.entities.modules.AttachModule;
 import fr.dynamx.common.physics.joints.EntityJoint;
 import fr.dynamx.common.physics.joints.JointHandler;
 import fr.dynamx.common.physics.joints.JointHandlerRegistry;
@@ -18,13 +18,11 @@ import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.util.ResourceLocation;
 
-public class TrailerAttachModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, AttachModule.AttachToOtherModule<TrailerEntity<?>>
-{
+public class TrailerAttachModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, AttachModule.AttachToOtherModule<TrailerEntity<?>> {
     public static final ResourceLocation JOINT_NAME = new ResourceLocation(DynamXConstants.ID, "trailer_module");
     public static final JointHandler<CarEntity<?>, TrailerEntity<?>, TrailerAttachModule> HANDLER;
 
-    static
-    {
+    static {
         JointHandlerRegistry.register(HANDLER = new JointHandler(JOINT_NAME, CarEntity.class, TrailerEntity.class, TrailerAttachModule.class));
     }
 

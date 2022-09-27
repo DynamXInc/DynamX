@@ -14,8 +14,7 @@ import java.util.List;
  *
  * @param <T> The type of the implementing class
  */
-public interface ISubInfoTypeOwner<T extends ISubInfoTypeOwner<T>> extends INamedObject
-{
+public interface ISubInfoTypeOwner<T extends ISubInfoTypeOwner<T>> extends INamedObject {
     /**
      * Adds an {@link ISubInfoType}
      */
@@ -38,12 +37,13 @@ public interface ISubInfoTypeOwner<T extends ISubInfoTypeOwner<T>> extends IName
      * @return The ISubInfoType matching to the given clazz, or null
      */
     @Nullable
-    default  <A extends ISubInfoType<T>> A getSubPropertyByType(Class<A> clazz) {
+    default <A extends ISubInfoType<T>> A getSubPropertyByType(Class<A> clazz) {
         return (A) this.getSubProperties().stream().filter(p -> clazz.equals(p.getClass())).findFirst().orElseGet(() -> null); //Don't remove the () -> : idea doesn't understand it
     }
 
     /**
      * Use this when you don't want a {@link SubInfoTypesRegistry} on your object
      */
-    interface Empty extends ISubInfoTypeOwner<Empty> {}
+    interface Empty extends ISubInfoTypeOwner<Empty> {
+    }
 }

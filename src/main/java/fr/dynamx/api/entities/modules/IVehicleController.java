@@ -15,8 +15,7 @@ import java.util.List;
  * @see IPhysicsModule
  * @see IEngineModule
  */
-public interface IVehicleController
-{
+public interface IVehicleController {
     /**
      * Called each tick to read controls
      */
@@ -24,7 +23,7 @@ public interface IVehicleController
 
     /**
      * Called to create the vehicle HUD when the driver mounts, on client side <br>
-     *     Nullable : display nothing for this controller
+     * Nullable : display nothing for this controller
      */
     @Nullable
     @SideOnly(Side.CLIENT)
@@ -32,7 +31,7 @@ public interface IVehicleController
 
     /**
      * Called to get the vehicle HUD style when the driver mounts, on client side <br>
-     *     Nullable : display nothing for this controller
+     * Nullable : display nothing for this controller
      */
     @Nullable
     @SideOnly(Side.CLIENT)

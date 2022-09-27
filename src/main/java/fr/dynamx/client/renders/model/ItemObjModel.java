@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
 import fr.dynamx.api.contentpack.object.render.IObjPackObject;
 import fr.dynamx.common.DynamXMain;
-import fr.dynamx.utils.optimization.GlQuaternionPool;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.IBakedModel;
@@ -29,24 +28,21 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
-public class ItemObjModel implements IModel
-{
+public class ItemObjModel implements IModel {
     private final ResourceLocation location;
     private IObjPackObject owner;
 
     private IModel gui;
     private IBakedModel guiBaked;
 
-    public ItemObjModel(ResourceLocation location, IObjPackObject owner) throws Exception
-    {
+    public ItemObjModel(ResourceLocation location, IObjPackObject owner) throws Exception {
         this.location = location;
         this.owner = owner;
 
-        DynamXMain.log.debug("Registered item model "+location+" for "+owner.getModel()+" of "+owner.getPackName()+" with render locations "+owner.get3DItemRenderLocation());
-        if(owner.get3DItemRenderLocation() != Enum3DRenderLocation.ALL)
-        {
+        DynamXMain.log.debug("Registered item model " + location + " for " + owner.getModel() + " of " + owner.getPackName() + " with render locations " + owner.get3DItemRenderLocation());
+        if (owner.get3DItemRenderLocation() != Enum3DRenderLocation.ALL) {
             //System.out.println("Path is "+location+" "+location.getPath());
-            gui = ModelLoaderRegistry.getModel(new ResourceLocation(location.getNamespace(), "item/"+location.getPath().replace(".obj", "")));
+            gui = ModelLoaderRegistry.getModel(new ResourceLocation(location.getNamespace(), "item/" + location.getPath().replace(".obj", "")));
         }
         //objObjects.addAll(DynamXModelRegistry.getModel(location.getPath()).objObjects);
     }
@@ -82,9 +78,8 @@ public class ItemObjModel implements IModel
     }
 
     @Override
-    public IBakedModel bake(IModelState state, VertexFormat format, Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter)
-    {
-        if(gui != null) {
+    public IBakedModel bake(IModelState state, VertexFormat format, Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter) {
+        if (gui != null) {
             ProgressManager.ProgressBar bar = ProgressManager.push("Loading item model " + location, 1);
             bar.step("Baking gui model");
             guiBaked = gui.bake(state, format, bakedTextureGetter);

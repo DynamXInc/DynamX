@@ -28,8 +28,7 @@ import java.io.ObjectOutputStream;
 /**
  * A terrain element containing multiple boxes
  */
-public class DynamXBlockTerrainElement implements ITerrainElement
-{
+public class DynamXBlockTerrainElement implements ITerrainElement {
     private int x, y, z;
     private BlockPos pos;
     private PhysicsRigidBody body;
@@ -37,7 +36,8 @@ public class DynamXBlockTerrainElement implements ITerrainElement
     private Vector3f position; //TODO OPTI : THIS IS IN THE TE
     private Quaternion rotation;
 
-    public DynamXBlockTerrainElement() {}
+    public DynamXBlockTerrainElement() {
+    }
 
     public DynamXBlockTerrainElement(int x, int y, int z, BlockPos pos, Vector3f position, Quaternion rotation) {
         this.x = x;
@@ -79,11 +79,11 @@ public class DynamXBlockTerrainElement implements ITerrainElement
     @Override
     public PhysicsRigidBody build(Vector3f pos) {
         TileEntity te = DynamXContext.getPhysicsWorld().getTerrainManager().getWorld().getTileEntity(this.pos);
-        if(!(te instanceof TEDynamXBlock)) { //Not generated, should not happen because this should be removed from chunk
-            throw new IllegalStateException("DynamX block TE failed to load at "+pos);
+        if (!(te instanceof TEDynamXBlock)) { //Not generated, should not happen because this should be removed from chunk
+            throw new IllegalStateException("DynamX block TE failed to load at " + pos);
         }
         PhysicsRigidBody p = new PhysicsRigidBody(((TEDynamXBlock) te).getPhysicsCollision(), 0);
-        p.setPhysicsLocation(pos.add(Vector3fPool.get(x+0.5f, y+1.5f, z+0.5f).addLocal(((TEDynamXBlock) te).getBlockObjectInfo().getTranslation())).addLocal(position));
+        p.setPhysicsLocation(pos.add(Vector3fPool.get(x + 0.5f, y + 1.5f, z + 0.5f).addLocal(((TEDynamXBlock) te).getBlockObjectInfo().getTranslation())).addLocal(position));
         p.setPhysicsRotation(rotation);
         p.setUserObject(new BulletShapeType<>(EnumBulletShapeType.TERRAIN, this));
         body = p;
@@ -104,7 +104,7 @@ public class DynamXBlockTerrainElement implements ITerrainElement
         BoundingBox b = body.getCollisionShape().boundingBox(body.getPhysicsLocation(Vector3fPool.get()), body.getPhysicsRotation(QuaternionPool.get()), BoundingBoxPool.get());
         Vector3f min = b.getMin(Vector3fPool.get());
         Vector3f max = b.getMax(Vector3fPool.get());
-        debugData = new TerrainDebugData(TerrainDebugRenderer.DYNAMXBLOCKS, new float[] {min.x, min.y, min.z, max.x, max.y, max.z});
+        debugData = new TerrainDebugData(TerrainDebugRenderer.DYNAMXBLOCKS, new float[]{min.x, min.y, min.z, max.x, max.y, max.z});
         (mcWorld.isRemote ? DynamXDebugOptions.CLIENT_BLOCK_BOXES : DynamXDebugOptions.BLOCK_BOXES).getDataIn().put(debugData.getUuid(), debugData);
         BoundingBoxPool.getPool().closeSubPool();
         QuaternionPool.closePool();
@@ -112,7 +112,7 @@ public class DynamXBlockTerrainElement implements ITerrainElement
 
     @Override
     public void removeDebugFromWorld(World mcWorld) {
-        if(debugData != null) {
+        if (debugData != null) {
             (mcWorld.isRemote ? DynamXDebugOptions.CLIENT_BLOCK_BOXES : DynamXDebugOptions.BLOCK_BOXES).getDataIn().remove(debugData.getUuid());
         }
     }

@@ -14,20 +14,18 @@ import static fr.dynamx.api.contentpack.registry.DefinitionType.DynamXDefinition
  * @deprecated replaced by annotation system
  */
 @Deprecated
-public class FileDefinitionsRegistry
-{
+public class FileDefinitionsRegistry {
     private static final Map<String, FileDefinition<?>> DEFINITIONS = new HashMap<>();
 
     /**
      * Registers a new {@link FileDefinition} which can be used by the {@link ContentPackLoader}
      *
      * @param configFieldName The name of the field inside of the config, we advise addon creators to put a unique prefix (e.g. "myaddon_"), to avoid conflicts with other addons. Can be shared between different config types.
-     * @param classFieldName The name of the corresponding field name (can be used in various classes at same time). You don't need any prefix here, because the right class would have already been found.
-     * @param type The "parser" which will translate the string config's value into a value of the type of the class field. <br>
-     *             Here it's a builtin dynamx parser but you can use custom ones with the other addFileDefinition method
+     * @param classFieldName  The name of the corresponding field name (can be used in various classes at same time). You don't need any prefix here, because the right class would have already been found.
+     * @param type            The "parser" which will translate the string config's value into a value of the type of the class field. <br>
+     *                        Here it's a builtin dynamx parser but you can use custom ones with the other addFileDefinition method
      */
-    public static void addFileDefinition(String configFieldName, String classFieldName, DynamXDefinitionTypes type)
-    {
+    public static void addFileDefinition(String configFieldName, String classFieldName, DynamXDefinitionTypes type) {
         addFileDefinition(configFieldName, classFieldName, type.type);
     }
 
@@ -35,45 +33,42 @@ public class FileDefinitionsRegistry
      * Registers a new {@link FileDefinition} which can be used by the {@link ContentPackLoader}
      *
      * @param configFieldName The name of the field inside of the config, we advise addon creators to put a unique prefix (e.g. "myaddon_"), to avoid conflicts with other addons. Can be shared between different config types.
-     * @param classFieldName The name of the corresponding field name (can be used in various classes at same time). You don't need any prefix here, because the right class would have already been found.
-     * @param type The "parser" which will translate the string config's value into a value of the type of the class field.
+     * @param classFieldName  The name of the corresponding field name (can be used in various classes at same time). You don't need any prefix here, because the right class would have already been found.
+     * @param type            The "parser" which will translate the string config's value into a value of the type of the class field.
      */
-    public static void addFileDefinition(String configFieldName, String classFieldName, DefinitionType<?> type)
-    {
-        if(DEFINITIONS.containsKey(configFieldName))
-            throw new IllegalArgumentException("File definition with config field name "+configFieldName+" is already registered !");
+    public static void addFileDefinition(String configFieldName, String classFieldName, DefinitionType<?> type) {
+        if (DEFINITIONS.containsKey(configFieldName))
+            throw new IllegalArgumentException("File definition with config field name " + configFieldName + " is already registered !");
         DEFINITIONS.put(configFieldName, new FileDefinition<>(classFieldName, type));
     }
 
     /**
      * Gets a FileDefinition from its config field name (can be shared between different configs types)
+     *
      * @return null If no FileDefinition was found
      */
-    public static FileDefinition<?> getFileDefinition(String configFieldName)
-    {
-        if(!DEFINITIONS.containsKey(configFieldName))
+    public static FileDefinition<?> getFileDefinition(String configFieldName) {
+        if (!DEFINITIONS.containsKey(configFieldName))
             return null;
         return DEFINITIONS.get(configFieldName);
     }
 
     /**
      * Represents a configuration field, contains the corresponding field name (can be used in various classes at same time), and the "parser" ({@link DefinitionType}) able to translation the string value of this field into the correct type
+     *
      * @param <T> The corresponding class field type
      * @deprecated Use the annotation system, replaced by the new FileDefinition
      */
     @Deprecated
-    public static class FileDefinition<T>
-    {
+    public static class FileDefinition<T> {
         private final String fieldName;
         private final DefinitionType<T> type;
 
         /**
-         *
          * @param fieldName The field name corresponding to this definition
-         * @param type The "parser"
+         * @param type      The "parser"
          */
-        public FileDefinition(String fieldName, DefinitionType<T> type)
-        {
+        public FileDefinition(String fieldName, DefinitionType<T> type) {
             this.fieldName = fieldName;
             this.type = type;
         }
@@ -81,7 +76,9 @@ public class FileDefinitionsRegistry
         /**
          * Parses the provided config value (string format) into the appropriate object to affect it to the class field
          */
-        public T parse(String value) { return type.getValue(value); }
+        public T parse(String value) {
+            return type.getValue(value);
+        }
 
         /**
          * @return The field name corresponding to this definition
@@ -95,8 +92,7 @@ public class FileDefinitionsRegistry
      * Built-in file definitions, automatically registered in the DEFINITIONS list
      */
     @Deprecated
-    private enum DynamXDefinitions
-    {
+    private enum DynamXDefinitions {
         //Item
         defaultName("Name", STRING),
         description("Description", STRING),
@@ -144,10 +140,10 @@ public class FileDefinitionsRegistry
         trailerAttachStrength("AttachStrength", INT),
 
         //Caterpillar
-        caterpillar("Caterpillar",BOOL),
-        caterpillarLeftBuffer("CaterpillarPointsBufferLeft",VECTOR3F_ARRAY_BLENDER),
-        caterpillarRightBuffer("CaterpillarPointsBufferRight",VECTOR3F_ARRAY_BLENDER),
-        caterpillarWidth("CaterpillarWidth",FLOAT),
+        caterpillar("Caterpillar", BOOL),
+        caterpillarLeftBuffer("CaterpillarPointsBufferLeft", VECTOR3F_ARRAY_BLENDER),
+        caterpillarRightBuffer("CaterpillarPointsBufferRight", VECTOR3F_ARRAY_BLENDER),
+        caterpillarWidth("CaterpillarWidth", FLOAT),
 
         //Textures
         textures("Textures", STRING_ARRAY),
@@ -167,7 +163,7 @@ public class FileDefinitionsRegistry
 
         wheelWidth("Width", FLOAT),
         wheelRadius("Radius", FLOAT),
-        rimRadius("RimRadius",FLOAT),
+        rimRadius("RimRadius", FLOAT),
         wheelFriction("Friction", FLOAT),
         wheelBrakeForce("BrakeForce", FLOAT),
         wheelRollInInfluence("RollInInfluence", FLOAT),
@@ -196,7 +192,7 @@ public class FileDefinitionsRegistry
         final DynamXDefinitionTypes type;
 
         /**
-         * @param def the definition in the config file
+         * @param def  the definition in the config file
          * @param type the type of the definition {@link DynamXDefinitionTypes}
          */
         DynamXDefinitions(String def, DynamXDefinitionTypes type) {
@@ -208,12 +204,10 @@ public class FileDefinitionsRegistry
     /*
      * We add all built-in definitions to the DEFINITIONS map
      */
-    static
-    {
-        for(DynamXDefinitions def : DynamXDefinitions.values())
-        {
+    static {
+        for (DynamXDefinitions def : DynamXDefinitions.values()) {
             addFileDefinition(def.definition, def.name(), def.type.type);
         }
-       // addFileDefinition("Radius", "wheelRadius", FLOAT);
+        // addFileDefinition("Radius", "wheelRadius", FLOAT);
     }
 }

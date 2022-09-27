@@ -12,10 +12,12 @@ import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
-import fr.dynamx.common.handlers.TaskScheduler;
 import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.debug.DynamXDebugOption;
+import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import lombok.Getter;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
@@ -28,29 +30,39 @@ import java.util.Collections;
 import java.util.List;
 
 public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfoBuilder> implements IPhysicsPackInfo {
+    @Getter
     @PackFileProperty(configNames = "LocalCarAttachPoint", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y, required = false)
-    private Vector3f carAttachPoint = new Vector3f(); //Bouge en fonction de la position de la porte
+    private final Vector3f carAttachPoint = new Vector3f();
+    @Getter
     @PackFileProperty(configNames = "LocalDoorAttachPoint", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y, required = false)
-    private Vector3f doorAttachPoint = new Vector3f(); //Fix, point sur la porte
+    private final Vector3f doorAttachPoint = new Vector3f();
+    @Getter
     @PackFileProperty(configNames = "AttachStrength", required = false)
-    private int attachStrength = 400;
+    private final int attachStrength = 400;
 
+    @Getter
     @PackFileProperty(configNames = "OpenedDoorAngleLimit", required = false)
-    private Vector2f openLimit = new Vector2f(0, 1);
+    private final Vector2f openLimit = new Vector2f();
+    @Getter
     @PackFileProperty(configNames = "ClosedDoorAngleLimit", required = false)
-    private Vector2f closeLimit = new Vector2f(0, 0);
+    private final Vector2f closeLimit = new Vector2f();
+    @Getter
     @PackFileProperty(configNames = "DoorOpenForce", required = false)
-    private Vector2f openMotor = new Vector2f(1, 2);
+    private final Vector2f openMotor = new Vector2f(1, 200);
+    @Getter
     @PackFileProperty(configNames = "DoorCloseForce", required = false)
-    private Vector2f closeMotor = new Vector2f(-1.5f, 3);
+    private final Vector2f closeMotor = new Vector2f(-1.5f, 300);
 
+    @Getter
     @PackFileProperty(configNames = "AutoMountDelay", required = false)
-    private byte mountDelay = (byte) 40;
+    private final byte mountDelay = (byte) 40;
+    @Getter
     @PackFileProperty(configNames = "DoorCloseTime", required = false)
-    private byte doorCloseTime = (byte) 25;
+    private final byte doorCloseTime = (byte) 25;
 
+    @Getter
     @PackFileProperty(configNames = "Enabled", required = false, defaultValue = "true")
-    private boolean enabled = true;
+    private final boolean enabled = true;
 
     public boolean isPlayerMounting;
 
@@ -58,6 +70,11 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
         super(owner, partName, 0, 0);
     }
 
+
+    @Override
+    public DynamXDebugOption getDebugOption() {
+        return DynamXDebugOptions.DOOR_ATTACH_POINTS;
+    }
     public void setPlayerMounting(boolean playerMounting) {
         isPlayerMounting = playerMounting;
     }
@@ -67,10 +84,6 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
      */
     public boolean isPlayerMounting() {
         return isPlayerMounting;
-    }
-
-    public boolean isEnabled() {
-        return enabled;
     }
 
     @Override
@@ -143,42 +156,6 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     @Override
     public <T extends InteractivePart<?, ModularVehicleInfoBuilder>> List<T> getInteractiveParts() {
         return Collections.EMPTY_LIST;
-    }
-
-    public Vector3f getCarAttachPoint() {
-        return carAttachPoint;
-    }
-
-    public Vector3f getDoorAttachPoint() {
-        return doorAttachPoint;
-    }
-
-    public int getAttachStrength() {
-        return attachStrength;
-    }
-
-    public Vector2f getCloseLimit() {
-        return closeLimit;
-    }
-
-    public Vector2f getOpenLimit() {
-        return openLimit;
-    }
-
-    public Vector2f getOpenMotor() {
-        return openMotor;
-    }
-
-    public Vector2f getCloseMotor() {
-        return closeMotor;
-    }
-
-    public byte getDoorCloseTime() {
-        return doorCloseTime;
-    }
-
-    public byte getMountDelay() {
-        return mountDelay;
     }
 
     @Override

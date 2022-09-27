@@ -13,8 +13,7 @@ import net.minecraftforge.fml.common.LoaderException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 
-public class DThreadedLoadingTask implements Runnable
-{
+public class DThreadedLoadingTask implements Runnable {
     private final Runnable task;
     private final ThreadedLoadingService.ModLoadingSteps endBefore;
     private final int id;
@@ -39,18 +38,17 @@ public class DThreadedLoadingTask implements Runnable
         long time = System.currentTimeMillis();
         try {
             task.run();
-            executor.onEnd(this, followingInThreadTask, (System.currentTimeMillis()-time));
+            executor.onEnd(this, followingInThreadTask, (System.currentTimeMillis() - time));
         } catch (Exception e) {
-            ACsLogger.serviceFatal(ACsLib.getPlatform().provideService(ThreadedLoadingService.class), "Error in task "+name, e);
-            DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.INIT, "LoadingTasks", "ThreadTask "+name, e.toString(), ErrorTrackingService.TrackedErrorLevel.FATAL);
-            if(FMLCommonHandler.instance().getSide().isClient()) {
+            ACsLogger.serviceFatal(ACsLib.getPlatform().provideService(ThreadedLoadingService.class), "Error in task " + name, e);
+            DynamXContext.getErrorTracker().addError(DynamXLoadingTasks.INIT, "LoadingTasks", "ThreadTask " + name, e.toString(), ErrorTrackingService.TrackedErrorLevel.FATAL);
+            if (FMLCommonHandler.instance().getSide().isClient()) {
                 executor.onEnd(this, () -> {
                     if (e instanceof CustomModLoadingErrorDisplayException)
                         throw e;
                     throw new ThreadedLoadingException(name, e);
                 }, (System.currentTimeMillis() - time));
-            }
-            else {
+            } else {
                 executor.onEnd(this, () -> {
                     throw new ThreadedLoadingException(name, e);
                 }, (System.currentTimeMillis() - time));
@@ -78,10 +76,9 @@ public class DThreadedLoadingTask implements Runnable
                 '}';
     }
 
-    public static class ThreadedLoadingException extends LoaderException
-    {
+    public static class ThreadedLoadingException extends LoaderException {
         public ThreadedLoadingException(String taskName, Exception e) {
-            super("Exception in task "+taskName, e);
+            super("Exception in task " + taskName, e);
             setStackTrace(new StackTraceElement[0]);
         }
 
@@ -91,32 +88,28 @@ public class DThreadedLoadingTask implements Runnable
         }
 
         @Override
-        public void printStackTrace(final PrintWriter s)
-        {
+        public void printStackTrace(final PrintWriter s) {
             super.printStackTrace(s);
-            printCustomMessage(new WrappedPrintStream()
-            {
+            printCustomMessage(new WrappedPrintStream() {
                 @Override
-                public void println(String line)
-                {
-                    s.println(line);
-                }
-            });
-        }
-        @Override
-        public void printStackTrace(final PrintStream s)
-        {
-            super.printStackTrace(s);
-            printCustomMessage(new WrappedPrintStream()
-            {
-                @Override
-                public void println(String line)
-                {
+                public void println(String line) {
                     s.println(line);
                 }
             });
         }
 
-        protected void printCustomMessage(WrappedPrintStream stream) {}
+        @Override
+        public void printStackTrace(final PrintStream s) {
+            super.printStackTrace(s);
+            printCustomMessage(new WrappedPrintStream() {
+                @Override
+                public void println(String line) {
+                    s.println(line);
+                }
+            });
+        }
+
+        protected void printCustomMessage(WrappedPrintStream stream) {
+        }
     }
 }

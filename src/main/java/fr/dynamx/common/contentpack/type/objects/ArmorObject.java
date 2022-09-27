@@ -16,7 +16,6 @@ import fr.dynamx.common.items.DynamXItemArmor;
 import fr.dynamx.common.obj.texture.TextureData;
 import fr.dynamx.utils.DynamXLoadingTasks;
 import lombok.Getter;
-import lombok.Setter;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.inventory.EntityEquipmentSlot;
@@ -39,27 +38,38 @@ import java.util.Map;
  * Armor object, for "armor_" files
  */
 public class ArmorObject<T extends ArmorObject<T>> extends AbstractItemObject<T> implements IModelTextureSupplier, ISubInfoTypeOwner<ArmorObject<?>> {
-    @Getter @PackFileProperty(configNames = "ArmorHead", required = false)
+    @Getter
+    @PackFileProperty(configNames = "ArmorHead", required = false)
     protected String armorHead;
-    @Getter @PackFileProperty(configNames = "ArmorBody", required = false)
+    @Getter
+    @PackFileProperty(configNames = "ArmorBody", required = false)
     protected String armorBody;
-    @Getter @PackFileProperty(configNames = "ArmorArms", required = false)
+    @Getter
+    @PackFileProperty(configNames = "ArmorArms", required = false)
     protected String[] armorArms;
-    @Getter @PackFileProperty(configNames = "ArmorLegs", required = false)
+    @Getter
+    @PackFileProperty(configNames = "ArmorLegs", required = false)
     protected String[] armorLegs;
-    @Getter @PackFileProperty(configNames = "ArmorFoot", required = false)
+    @Getter
+    @PackFileProperty(configNames = "ArmorFoot", required = false)
     protected String[] armorFoot;
-    @Getter @PackFileProperty(configNames = "Durability", required = false, defaultValue = "5")
+    @Getter
+    @PackFileProperty(configNames = "Durability", required = false, defaultValue = "5")
     protected int durability = 5; //Leather value
-    @Getter @PackFileProperty(configNames = "Enchantability", required = false, defaultValue = "15")
+    @Getter
+    @PackFileProperty(configNames = "Enchantability", required = false, defaultValue = "15")
     protected int enchantibility = 15; //Leather value
-    @Getter @PackFileProperty(configNames = "EquipSound", required = false, defaultValue = "item.armor.equip_leather")
+    @Getter
+    @PackFileProperty(configNames = "EquipSound", required = false, defaultValue = "item.armor.equip_leather")
     protected SoundEvent sound = SoundEvent.REGISTRY.getObject(new ResourceLocation("item.armor.equip_leather"));
-    @Getter @PackFileProperty(configNames = "Toughness", required = false, defaultValue = "0")
+    @Getter
+    @PackFileProperty(configNames = "Toughness", required = false, defaultValue = "0")
     protected float toughness = 0; //Leather value
-    @Getter @PackFileProperty(configNames = "DamageReduction", required = false, defaultValue = "\"1 2 3 1\" (leather)")
+    @Getter
+    @PackFileProperty(configNames = "DamageReduction", required = false, defaultValue = "\"1 2 3 1\" (leather)")
     protected int[] reductionAmount = new int[]{1, 2, 3, 1};
-    @Getter @PackFileProperty(configNames = "Textures", required = false, type = DefinitionType.DynamXDefinitionTypes.STRING_ARRAY_2D)
+    @Getter
+    @PackFileProperty(configNames = "Textures", required = false, type = DefinitionType.DynamXDefinitionTypes.STRING_ARRAY_2D)
     protected String[][] texturesArray;
 
     @SideOnly(Side.CLIENT)
@@ -223,6 +233,6 @@ public class ArmorObject<T extends ArmorObject<T>> extends AbstractItemObject<T>
 
     @Override
     public String toString() {
-        return "ArmorObject named "+getFullName();
+        return "ArmorObject named " + getFullName();
     }
 }

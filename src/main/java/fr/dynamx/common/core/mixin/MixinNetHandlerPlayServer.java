@@ -23,11 +23,9 @@ import org.spongepowered.asm.mixin.Shadow;
  * Patches the NetHandlerPlayServer to disable console spam when players walk on moving vehicles
  */
 @Mixin(NetHandlerPlayServer.class)
-public class MixinNetHandlerPlayServer
-{
+public class MixinNetHandlerPlayServer {
     @Shadow
-    private static boolean isMovePlayerPacketInvalid(CPacketPlayer packetIn)
-    {
+    private static boolean isMovePlayerPacketInvalid(CPacketPlayer packetIn) {
         throw new IllegalStateException("Mixin failed to shadow isMovePlayerPacketInvali()");
     }
 
@@ -81,50 +79,39 @@ public class MixinNetHandlerPlayServer
 
     @Shadow
     public void setPlayerLocation(double x, double y, double z, float yaw, float pitch) {
-        throw new IllegalStateException("Mixin failed to shadow setPlayerLocation()");}
+        throw new IllegalStateException("Mixin failed to shadow setPlayerLocation()");
+    }
 
     /**
      * @author Aym'
+     * @reason
      */
     @Overwrite
-    public void processPlayer(CPacketPlayer packetIn)
-    {
+    public void processPlayer(CPacketPlayer packetIn) {
         PacketThreadUtil.checkThreadAndEnqueue(packetIn, (NetHandlerPlayServer) (Object) this, this.player.getServerWorld());
 
-        if (isMovePlayerPacketInvalid(packetIn))
-        {
-            this.disconnect(new TextComponentTranslation("multiplayer.disconnect.invalid_player_movement", new Object[0]));
-        }
-        else
-        {
+        if (isMovePlayerPacketInvalid(packetIn)) {
+            this.disconnect(new TextComponentTranslation("multiplayer.disconnect.invalid_player_movement"));
+        } else {
             WorldServer worldserver = this.server.getWorld(this.player.dimension);
 
-            if (!this.player.queuedEndExit)
-            {
-                if (this.networkTickCount == 0)
-                {
+            if (!this.player.queuedEndExit) {
+                if (this.networkTickCount == 0) {
                     this.captureCurrentPosition();
                 }
 
-                if (this.targetPos != null)
-                {
-                    if (this.networkTickCount - this.lastPositionUpdate > 20)
-                    {
+                if (this.targetPos != null) {
+                    if (this.networkTickCount - this.lastPositionUpdate > 20) {
                         this.lastPositionUpdate = this.networkTickCount;
                         this.setPlayerLocation(this.targetPos.x, this.targetPos.y, this.targetPos.z, this.player.rotationYaw, this.player.rotationPitch);
                     }
-                }
-                else
-                {
+                } else {
                     this.lastPositionUpdate = this.networkTickCount;
 
-                    if (this.player.isRiding())
-                    {
+                    if (this.player.isRiding()) {
                         this.player.setPositionAndRotation(this.player.posX, this.player.posY, this.player.posZ, packetIn.getYaw(this.player.rotationYaw), packetIn.getPitch(this.player.rotationPitch));
                         this.server.getPlayerList().serverUpdateMovingPlayer(this.player);
-                    }
-                    else
-                    {
+                    } else {
                         double d0 = this.player.posX;
                         double d1 = this.player.posY;
                         double d2 = this.player.posZ;
@@ -140,37 +127,30 @@ public class MixinNetHandlerPlayServer
                         double d10 = this.player.motionX * this.player.motionX + this.player.motionY * this.player.motionY + this.player.motionZ * this.player.motionZ;
                         double d11 = d7 * d7 + d8 * d8 + d9 * d9;
 
-                        if (this.player.isPlayerSleeping())
-                        {
-                            if (d11 > 1.0D)
-                            {
+                        if (this.player.isPlayerSleeping()) {
+                            if (d11 > 1.0D) {
                                 this.setPlayerLocation(this.player.posX, this.player.posY, this.player.posZ, packetIn.getYaw(this.player.rotationYaw), packetIn.getPitch(this.player.rotationPitch));
                             }
-                        }
-                        else
-                        {
+                        } else {
                             ++this.movePacketCounter;
                             int i = this.movePacketCounter - this.lastMovePacketCounter;
 
-                            if (i > 5)
-                            {
+                            if (i > 5) {
                                 LOGGER.debug("{} is sending move packets too frequently ({} packets since last tick)", this.player.getName(), Integer.valueOf(i));
                                 i = 1;
                             }
 
-                            if (!this.player.isInvulnerableDimensionChange() && (!this.player.getServerWorld().getGameRules().getBoolean("disableElytraMovementCheck") || !this.player.isElytraFlying()))
-                            {
+                            if (!this.player.isInvulnerableDimensionChange() && (!this.player.getServerWorld().getGameRules().getBoolean("disableElytraMovementCheck") || !this.player.isElytraFlying())) {
                                 float f2 = this.player.isElytraFlying() ? 300.0F : 100.0F;
 
-                                if (d11 - d10 > (double)(f2 * (float)i) && (!this.server.isSinglePlayer() || !this.server.getServerOwner().equals(this.player.getName())))
-                                {
-                                    if(!DynamXContext.getWalkingPlayers().containsKey(player)) {
+                                if (d11 - d10 > (double) (f2 * (float) i) && (!this.server.isSinglePlayer() || !this.server.getServerOwner().equals(this.player.getName()))) {
+                                    if (!DynamXContext.getWalkingPlayers().containsKey(player)) {
                                         LOGGER.warn("{} moved too quickly! {},{},{}", this.player.getName(), Double.valueOf(d7), Double.valueOf(d8), Double.valueOf(d9));
                                         this.setPlayerLocation(this.player.posX, this.player.posY, this.player.posZ, this.player.rotationYaw, this.player.rotationPitch);
                                         return;
                                     } else {
                                         //TODO IMPROVE SECURITY
-                                        LOGGER.warn("Ignoring moving too quickly from "+player.getName()+" : walking on vehicle !");
+                                        LOGGER.warn("Ignoring moving too quickly from " + player.getName() + " : walking on vehicle !");
                                     }
                                 }
                             }
@@ -180,8 +160,7 @@ public class MixinNetHandlerPlayServer
                             d8 = d5 - this.lastGoodY;
                             d9 = d6 - this.lastGoodZ;
 
-                            if (this.player.onGround && !packetIn.isOnGround() && d8 > 0.0D)
-                            {
+                            if (this.player.onGround && !packetIn.isOnGround() && d8 > 0.0D) {
                                 this.player.jump();
                             }
 
@@ -191,8 +170,7 @@ public class MixinNetHandlerPlayServer
                             d7 = d4 - this.player.posX;
                             d8 = d5 - this.player.posY;
 
-                            if (d8 > -0.5D || d8 < 0.5D)
-                            {
+                            if (d8 > -0.5D || d8 < 0.5D) {
                                 d8 = 0.0D;
                             }
 
@@ -200,26 +178,23 @@ public class MixinNetHandlerPlayServer
                             d11 = d7 * d7 + d8 * d8 + d9 * d9;
                             boolean flag = false;
 
-                            if (!this.player.isInvulnerableDimensionChange() && d11 > 0.0625D && !this.player.isPlayerSleeping() && !this.player.interactionManager.isCreative() && this.player.interactionManager.getGameType() != GameType.SPECTATOR)
-                            {
-                                if(!DynamXContext.getWalkingPlayers().containsKey(player)) {
+                            if (!this.player.isInvulnerableDimensionChange() && d11 > 0.0625D && !this.player.isPlayerSleeping() && !this.player.interactionManager.isCreative() && this.player.interactionManager.getGameType() != GameType.SPECTATOR) {
+                                if (!DynamXContext.getWalkingPlayers().containsKey(player)) {
                                     flag = true;
-                                    LOGGER.warn("{} moved wrongly!", (Object) this.player.getName());
+                                    LOGGER.warn("{} moved wrongly!", this.player.getName());
                                 } else {
                                     //TODO IMPROVE
-                                    LOGGER.warn("Ignoring moving wrongly from "+player.getName()+" : walking on vehicle !");
+                                    LOGGER.warn("Ignoring moving wrongly from " + player.getName() + " : walking on vehicle !");
                                 }
                             }
 
                             this.player.setPositionAndRotation(d4, d5, d6, f, f1);
                             this.player.addMovementStat(this.player.posX - d0, this.player.posY - d1, this.player.posZ - d2);
 
-                            if (!this.player.noClip && !this.player.isPlayerSleeping())
-                            {
+                            if (!this.player.noClip && !this.player.isPlayerSleeping()) {
                                 boolean flag1 = worldserver.getCollisionBoxes(this.player, this.player.getEntityBoundingBox().shrink(0.0625D)).isEmpty();
 
-                                if (flag2 && (flag || !flag1))
-                                {
+                                if (flag2 && (flag || !flag1)) {
                                     this.setPlayerLocation(d0, d1, d2, f, f1);
                                     return;
                                 }

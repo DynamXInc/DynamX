@@ -1,8 +1,8 @@
 package fr.dynamx.common.obj;
 
 public class RawModel {
-    private int vaoID;
-    private int vertexCount;
+    private final int vaoID;
+    private final int vertexCount;
 
     public RawModel(int vaoID, int vertexCount) {
         this.vaoID = vaoID;
@@ -11,7 +11,7 @@ public class RawModel {
 
     /**
      * @return The ID of the VAO which contains the data about all the geometry
-     *         of this model.
+     * of this model.
      */
     public int getVaoID() {
         return vaoID;

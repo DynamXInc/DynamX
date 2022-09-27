@@ -51,8 +51,8 @@ public class VehicleSynchronizedVariables {
         private float[] engineProperties;
         private boolean isEngineStarted;
 
-        private int creationTick;
-        private long creationTime;
+        private final int creationTick;
+        private final long creationTime;
 
         private int lastGetValTick;
         private long lastGetValTime;
@@ -334,8 +334,8 @@ public class VehicleSynchronizedVariables {
         public static final ResourceLocation NAME = new ResourceLocation(DynamXConstants.ID, "visuals");
         private float[] visualProperties;
 
-        private int creationTick;
-        private long creationTime;
+        private final int creationTick;
+        private final long creationTime;
 
         private int lastGetValTick;
         private long lastGetValTime;
@@ -520,7 +520,7 @@ public class VehicleSynchronizedVariables {
     public static class DoorsStatus<A extends PackPhysicsEntity<?, ?>> implements SynchronizedVariable<A> {
         public static final ResourceLocation NAME = new ResourceLocation(DynamXConstants.ID, "doorsstatus");
         //private Map<Byte, Integer> attachedDoors = new HashMap<>();
-        private Map<Byte, DoorsModule.DoorState> doorsState = new HashMap<>();
+        private final Map<Byte, DoorsModule.DoorState> doorsState = new HashMap<>();
 
         @Override
         public SyncTarget getValueFrom(A entity, PhysicsEntityNetHandler<A> network, Side side, int syncTick) {

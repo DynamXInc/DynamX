@@ -17,8 +17,7 @@ import java.util.ArrayList;
 /**
  * Missing obj model indicating errors
  */
-public class MissingObjModel extends ObjModelClient
-{
+public class MissingObjModel extends ObjModelClient {
     private static final AxisAlignedBB BOX = new AxisAlignedBB(-1, -1, -1, 1, 1, 1);
     private static final Vector3f zero = new Vector3f();
     private static final IObjObject emptyPart = new IObjObject() {
@@ -33,7 +32,8 @@ public class MissingObjModel extends ObjModelClient
         }
 
         @Override
-        public void setCenter(Vector3f center) {}
+        public void setCenter(Vector3f center) {
+        }
 
         @Override
         public Mesh getMesh() {
@@ -57,7 +57,8 @@ public class MissingObjModel extends ObjModelClient
     }
 
     @Override
-    public void setupModel() {}
+    public void setupModel() {
+    }
 
     @Override
     public void renderGroup(IObjObject group, byte textureDataId) {
@@ -85,7 +86,7 @@ public class MissingObjModel extends ObjModelClient
     public void renderModel(byte textureDataId) {
         GlStateManager.color(1, 0, 0, 1);
         GlStateManager.pushMatrix();
-        GlStateManager.scale(0.065f,0.065f, 0.065f);
+        GlStateManager.scale(0.065f, 0.065f, 0.065f);
         GlStateManager.rotate(180, 0, 0, 0);
         Minecraft.getMinecraft().fontRenderer.drawString("Error", -16, -16, 0xFFFF0000);
         GlStateManager.popMatrix();

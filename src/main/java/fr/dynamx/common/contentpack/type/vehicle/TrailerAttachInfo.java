@@ -13,12 +13,11 @@ import fr.dynamx.common.entities.modules.TrailerAttachModule;
 /**
  * Info of the trailer attach point of a vehicle
  */
-public class TrailerAttachInfo extends SubInfoType<ModularVehicleInfoBuilder>
-{
+public class TrailerAttachInfo extends SubInfoType<ModularVehicleInfoBuilder> {
     @PackFileProperty(configNames = "AttachPoint", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y)
     private Vector3f trailerAttachPoint;
     @PackFileProperty(configNames = "AttachStrength", required = false)
-    private int trailerAttachStrength = 1000;
+    private final int trailerAttachStrength = 1000;
 
     public TrailerAttachInfo(ISubInfoTypeOwner<ModularVehicleInfoBuilder> owner) {
         super(owner);
@@ -26,8 +25,8 @@ public class TrailerAttachInfo extends SubInfoType<ModularVehicleInfoBuilder>
 
     @Override
     public void appendTo(ModularVehicleInfoBuilder partInfo) {
-        if(trailerAttachPoint == null)
-            throw new IllegalArgumentException("AttachPoint not configured ! In trailer of "+partInfo.toString());
+        if (trailerAttachPoint == null)
+            throw new IllegalArgumentException("AttachPoint not configured ! In trailer of " + partInfo.toString());
         partInfo.addSubProperty(this);
     }
 
@@ -46,6 +45,6 @@ public class TrailerAttachInfo extends SubInfoType<ModularVehicleInfoBuilder>
 
     @Override
     public String getName() {
-        return "TrailerAttachInfo in "+getOwner().getName();
+        return "TrailerAttachInfo in " + getOwner().getName();
     }
 }

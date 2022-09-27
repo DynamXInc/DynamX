@@ -10,24 +10,23 @@ import net.minecraft.util.ResourceLocation;
 
 /**
  * Handles joint creation, re-creation (on entity load, server->client sync...) and destruction <br>
- *     Works with an {@link AttachModule} <br>
- *         Should be registered in the {@link JointHandlerRegistry} <br>
+ * Works with an {@link AttachModule} <br>
+ * Should be registered in the {@link JointHandlerRegistry} <br>
  *
  * @param <A> The class of the entity owning the joint (main entity) (the entity that can be driven, for example the car)
  * @param <B> The class of the second entity, not driveable (other entity) (for example the trailer or the door)
  * @param <D> The class of the {@link AttachModule}, contained in each entity and returned by the getModulesByType function of each entity
  */
-public class JointHandler<A extends PhysicsEntity<?>, B extends PhysicsEntity<?>, D extends AttachModule<B> & IPhysicsModule<?>>
-{
+public class JointHandler<A extends PhysicsEntity<?>, B extends PhysicsEntity<?>, D extends AttachModule<B> & IPhysicsModule<?>> {
     private final ResourceLocation type;
     private final Class<A> entity1;
     private final Class<B> entity2;
     private final Class<D> attachModule;
 
     /**
-     * @param type The registry name of this JointHandler, should be unique
-     * @param entity1 The class of the entity owning the joint (the entity that can be driven, for example the car)
-     * @param entity2 The class of the second entity, not driveable (for example the trailer or the door)
+     * @param type         The registry name of this JointHandler, should be unique
+     * @param entity1      The class of the entity owning the joint (the entity that can be driven, for example the car)
+     * @param entity2      The class of the second entity, not driveable (for example the trailer or the door)
      * @param attachModule The class of the {@link AttachModule}, contained in each entity and returned by the getModulesByType function of each entity
      */
     public JointHandler(ResourceLocation type, Class<A> entity1, Class<B> entity2, Class<D> attachModule) {
@@ -46,9 +45,9 @@ public class JointHandler<A extends PhysicsEntity<?>, B extends PhysicsEntity<?>
 
     /**
      * Tries to create a new joint between the two entities <br>
-     *     The two entities must have a module of the type of D, which will create the joint instance <br>
-     *         In the base implementation, the joint won't be created if one of the AttachModule D refuses the connection <br>
-     *  Should be fired on server side
+     * The two entities must have a module of the type of D, which will create the joint instance <br>
+     * In the base implementation, the joint won't be created if one of the AttachModule D refuses the connection <br>
+     * Should be fired on server side
      *
      * @param entity1 The first entity of the joint (the order doesn't matter)
      * @param entity2 The second entity of the joint (the order doesn't matter)
@@ -57,7 +56,7 @@ public class JointHandler<A extends PhysicsEntity<?>, B extends PhysicsEntity<?>
     public boolean createJoint(PhysicsEntity<?> entity1, PhysicsEntity<?> entity2, byte jointId) {
         A main = findEntity(getEntity1(), entity1, entity2);
         B attached = findEntity(getEntity2(), entity1, entity2);
-        if(main == attached) {
+        if (main == attached) {
             main = (A) entity1;
             attached = (B) entity2;
         }
@@ -75,7 +74,7 @@ public class JointHandler<A extends PhysicsEntity<?>, B extends PhysicsEntity<?>
 
     /**
      * Fired when joint is removed from entity <br>
-     *     Transmits the information to the {@link AttachModule}
+     * Transmits the information to the {@link AttachModule}
      */
     public void onDestroy(EntityJoint<?> joint, PhysicsEntity<?> entity) {
         entity.getModuleByType(getAttachModuleClass()).onJointDestroyed(joint);
@@ -123,8 +122,7 @@ public class JointHandler<A extends PhysicsEntity<?>, B extends PhysicsEntity<?>
      * @return The entity that is assignable from toFind (ie they have the same class or superclass), between e1 and e2, or null
      */
     @SuppressWarnings("unchecked")
-    public static <T extends PhysicsEntity<?>> T findEntity(Class<T> toFind, PhysicsEntity<?> e1, PhysicsEntity<?> e2)
-    {
+    public static <T extends PhysicsEntity<?>> T findEntity(Class<T> toFind, PhysicsEntity<?> e1, PhysicsEntity<?> e2) {
         return e1 == null ? (e2 == null ? null : toFind.isAssignableFrom(e2.getClass()) ? (T) e2 : null) : toFind.isAssignableFrom(e1.getClass()) ? (T) e1 : (e2 == null ? null : toFind.isAssignableFrom(e2.getClass()) ? (T) e2 : null);
     }
 }

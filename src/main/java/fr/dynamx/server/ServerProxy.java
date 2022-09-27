@@ -15,10 +15,9 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.SERVER)
-public class ServerProxy extends CommonProxy
-{
+public class ServerProxy extends CommonProxy {
     @Override
-    public <T extends AbstractEntityPhysicsHandler<?, ?>> PhysicsEntityNetHandler<? extends PhysicsEntity<T>> getNetHandlerForEntity(PhysicsEntity<T> tPhysicsEntity)  {
+    public <T extends AbstractEntityPhysicsHandler<?, ?>> PhysicsEntityNetHandler<? extends PhysicsEntity<T>> getNetHandlerForEntity(PhysicsEntity<T> tPhysicsEntity) {
         return new ServerPhysicsEntityNetHandler(tPhysicsEntity);
     }
 

@@ -21,9 +21,9 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 
-public class RenderRagdoll<T extends RagdollEntity> extends RenderPhysicsEntity<T>
-{
-    private ModelPlayer modelFat = new ModelPlayer(0, false), modelLight = new ModelPlayer(0, true);
+public class RenderRagdoll<T extends RagdollEntity> extends RenderPhysicsEntity<T> {
+    private final ModelPlayer modelFat = new ModelPlayer(0, false);
+    private final ModelPlayer modelLight = new ModelPlayer(0, true);
 
     public RenderRagdoll(RenderManager manager) {
         super(manager);
@@ -41,21 +41,19 @@ public class RenderRagdoll<T extends RagdollEntity> extends RenderPhysicsEntity<
 
     @Override
     public void renderMain(T entity, float partialsTicks) {
-        if(entity.isInvisible())
+        if (entity.isInvisible())
             return;
         BoundingBoxPool.getPool().openSubPool();
 
         String useSkin = entity.getSkin();
         ResourceLocation texture;
         ModelPlayer model = modelFat;
-        if(useSkin.contains(":")) {
+        if (useSkin.contains(":")) {
             texture = new ResourceLocation(useSkin);
-        }
-        else
-        {
+        } else {
             EntityPlayer p = Minecraft.getMinecraft().world.getPlayerEntityByName(useSkin);
-            if(p == null)
-            p = Minecraft.getMinecraft().player;
+            if (p == null)
+                p = Minecraft.getMinecraft().player;
             String skinType = ((AbstractClientPlayer) p).getSkinType();
             model = "default".equals(skinType) ? modelFat : modelLight;
             texture = ((AbstractClientPlayer) p).getLocationSkin();
@@ -103,7 +101,7 @@ public class RenderRagdoll<T extends RagdollEntity> extends RenderPhysicsEntity<
 
                 ModelObjArmor armor = ragdollPhysics.getItemStackFromSlot(EntityEquipmentSlot.HEAD).getItem() instanceof DynamXItemArmor ?
                         ((DynamXItemArmor<?>) ragdollPhysics.getItemStackFromSlot(EntityEquipmentSlot.HEAD).getItem()).getInfo().getObjArmor() : null;
-                if(armor != null) {
+                if (armor != null) {
                     armor.renderHead(0.625f);
                 }
                 break;
@@ -112,14 +110,14 @@ public class RenderRagdoll<T extends RagdollEntity> extends RenderPhysicsEntity<
 
                 armor = ragdollPhysics.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem() instanceof DynamXItemArmor ?
                         ((DynamXItemArmor<?>) ragdollPhysics.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem()).getInfo().getObjArmor() : null;
-                if(armor != null) {
+                if (armor != null) {
                     armor.renderChest(0.0625f);
                 }
                 break;
             case RIGHT_ARM:
                 armor = ragdollPhysics.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem() instanceof DynamXItemArmor ?
                         ((DynamXItemArmor<?>) ragdollPhysics.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem()).getInfo().getObjArmor() : null;
-                if(armor != null) {
+                if (armor != null) {
                     //GlStateManager.translate(0.09, -0.225, 0);
                     GlStateManager.translate(0.369, -0.370, 0);
                     armor.renderRightArm(0.0625f);
@@ -132,7 +130,7 @@ public class RenderRagdoll<T extends RagdollEntity> extends RenderPhysicsEntity<
             case LEFT_ARM:
                 armor = ragdollPhysics.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem() instanceof DynamXItemArmor ?
                         ((DynamXItemArmor<?>) ragdollPhysics.getItemStackFromSlot(EntityEquipmentSlot.CHEST).getItem()).getInfo().getObjArmor() : null;
-                if(armor != null) {
+                if (armor != null) {
                     //GlStateManager.translate(-0.09, -0.225, 0);
                     GlStateManager.translate(-0.369, -0.370, 0);
                     armor.renderLeftArm(0.0625f);
@@ -141,12 +139,12 @@ public class RenderRagdoll<T extends RagdollEntity> extends RenderPhysicsEntity<
                 } else {
                     GlStateManager.translate(-0.369, -0.375, 0);
                 }
-               // DynamXObjectLoaders.ARMORS.owners.get(0).getInfo().getObjArmor().setActivePart(EntityEquipmentSlot.CHEST, (byte) 0);
+                // DynamXObjectLoaders.ARMORS.owners.get(0).getInfo().getObjArmor().setActivePart(EntityEquipmentSlot.CHEST, (byte) 0);
                 break;
             case RIGHT_LEG:
                 armor = ragdollPhysics.getItemStackFromSlot(EntityEquipmentSlot.LEGS).getItem() instanceof DynamXItemArmor ?
                         ((DynamXItemArmor<?>) ragdollPhysics.getItemStackFromSlot(EntityEquipmentSlot.LEGS).getItem()).getInfo().getObjArmor() : null;
-                if(armor != null)  {
+                if (armor != null) {
                     //GlStateManager.translate(0.01, -0.376, 0);
                     GlStateManager.translate(0.125, -1.125, 0);
                     armor.renderRightLeg(0.0625f);
@@ -158,7 +156,7 @@ public class RenderRagdoll<T extends RagdollEntity> extends RenderPhysicsEntity<
             case LEFT_LEG:
                 armor = ragdollPhysics.getItemStackFromSlot(EntityEquipmentSlot.LEGS).getItem() instanceof DynamXItemArmor ?
                         ((DynamXItemArmor<?>) ragdollPhysics.getItemStackFromSlot(EntityEquipmentSlot.LEGS).getItem()).getInfo().getObjArmor() : null;
-                if(armor != null) {
+                if (armor != null) {
                     //GlStateManager.translate(0.025, -0.376, 0);
                     GlStateManager.translate(-0.1, -1.125, 0);
                     armor.renderLeftLeg(0.0625f);

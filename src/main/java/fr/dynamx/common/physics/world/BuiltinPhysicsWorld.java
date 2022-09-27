@@ -44,8 +44,7 @@ public class BuiltinPhysicsWorld extends BasePhysicsWorld {
 
             if (serverAfkTime < 200) {
                 stepSimulationImpl(Profiler.get());
-            }
-            else {
+            } else {
                 flushOperations(Profiler.get());
             }
             CollisionsHandler.tick();

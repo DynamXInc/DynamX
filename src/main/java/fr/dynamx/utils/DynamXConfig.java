@@ -10,6 +10,9 @@ import java.util.List;
 
 public class DynamXConfig
 {
+    //Experimental
+    public static boolean clientOwnsPhysicsInSolo = true;
+
     public static boolean syncPacks;
 
     public static boolean useUdp = true;
@@ -41,7 +44,7 @@ public class DynamXConfig
         Configuration cfg = new Configuration(file);
         cfg.load();
         syncPacks = cfg.getBoolean("SyncContentPacks", "Multiplayer", false, "If enabled, the server will send all content pack objects to the clients (only where there are differences)");
-        allowedWrenchModes = cfg.get("Multiplayer", "AllowedWrenchModes", new int[] {0, 2, 5}).getIntList();
+        allowedWrenchModes = cfg.get("Multiplayer", "AllowedWrenchModes", new int[]{0, 2, 5}).getIntList();
         useUdp = cfg.getBoolean("UseUdpServer", "UDP", true, "True to use (faster) UDP networking, false to use vanilla networking (TCP)");
         udpPort = cfg.getInt("UdpPort", "UDP", 25575, 2000, 65535, "A port for the udp server, if enabled");
         usingProxy = cfg.getBoolean("HasProxy", "UDP", false, "If you have a proxy in front of your server");
@@ -52,11 +55,10 @@ public class DynamXConfig
         blockCollisionRadius = cfg.getInt("BlockCollisionRadius2", "Physics", 3, 0, 100, "The radius of collision checking with DynamX blocks around players. Has an impact on game performance. NOTE : Renamed with a '2' to replace the old default value and stay below 30 for stable performance");
         maxComplexBlockBoxes = cfg.getInt("MaxComplexBoxes", "Physics", 8, 0, 100, "The amount of detailed collisions per each complex block. If the block has more collisions (e.g. Decocraft), it will be a cube containing all collisions. Has an impact on game performance.");
 
-        if(cfg.hasKey("Statistics", "CollectData")) {
-            if(!cfg.getBoolean("CollectData", "Statistics", true, "Enables automatic reporting of your computer info (GPU, memory, OS) and useful crash-reports"))
+        if (cfg.hasKey("Statistics", "CollectData")) {
+            if (!cfg.getBoolean("CollectData", "Statistics", true, "Enables automatic reporting of your computer info (GPU, memory, OS) and useful crash-reports"))
                 ACsLib.getPlatform().provideService(StatsReportingService.class).disable();
-        }
-        else {
+        } else {
             cfg.getBoolean("CollectData", "Statistics", true, "Enables automatic reporting of your computer info (GPU, memory, OS) and useful crash-reports");
             /*DynamXErrorTracker.addError(ErrorType.INIT, "Data collection notice", "Improving DynamX :", "We collect data about your computer (GPU, memory, OS) \n" +
                     "and crash-reports to improve DynamX. \n" +
@@ -68,7 +70,7 @@ public class DynamXConfig
         y = cfg.get("Debug", "ChunkDebugY", new int[3], "Y poses of chunks to debug", Integer.MIN_VALUE, Integer.MAX_VALUE).getIntList();
         z = cfg.get("Debug", "ChunkDebugZ", new int[3], "Z poses of chunks to debug", Integer.MIN_VALUE, Integer.MAX_VALUE).getIntList();
         int s = x.length;
-        if(s != y.length || s != z.length)
+        if (s != y.length || s != z.length)
             throw new IllegalArgumentException("Invalid chunk debug config, wrong config of positions");
         chunkDebugPoses = new ArrayList<>();
         for (int i = 0; i < s; i++) {

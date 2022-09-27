@@ -5,13 +5,11 @@ import fr.dynamx.api.network.EnumNetworkType;
 import fr.dynamx.api.network.EnumPacketTarget;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
-import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.network.sync.MessagePhysicsEntitySync;
 import fr.dynamx.common.network.sync.MessageSeatsSync;
 import fr.dynamx.server.network.ServerPhysicsSyncManager;
 import fr.dynamx.utils.DynamXConfig;
-import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -20,9 +18,10 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 import static fr.dynamx.common.DynamXMain.log;
 
-public class MessageRequestFullEntitySync extends PhysicsEntityMessage<MessageRequestFullEntitySync>
-{
-    public MessageRequestFullEntitySync() {super(null);}
+public class MessageRequestFullEntitySync extends PhysicsEntityMessage<MessageRequestFullEntitySync> {
+    public MessageRequestFullEntitySync() {
+        super(null);
+    }
 
     public MessageRequestFullEntitySync(PhysicsEntity<?> entity) {
         super(entity);
@@ -50,7 +49,7 @@ public class MessageRequestFullEntitySync extends PhysicsEntityMessage<MessageRe
     protected void processMessage(PhysicsEntityMessage<?> message, EntityPlayer player) {
         EntityPlayerMP target = (EntityPlayerMP) player;
         Entity ent = player.world.getEntityByID(message.entityId);
-        log.info("Sending sync data to "+player+" ! Of: "+ent);
+        log.info("Sending sync data to " + player + " ! Of: " + ent);
         if (ent instanceof PhysicsEntity) {
             PhysicsEntity<?> entity = (PhysicsEntity<?>) ent;
             if (target.connection != null && target.connection.getNetworkManager().isChannelOpen()) {
@@ -63,7 +62,7 @@ public class MessageRequestFullEntitySync extends PhysicsEntityMessage<MessageRe
                     entity.getJointsHandler().sync(target);
                 }
             } else {
-                DynamXMain.log.warn("Skipping resync item of "+entity+" for "+target+" : player not connected");
+                DynamXMain.log.warn("Skipping resync item of " + entity + " for " + target + " : player not connected");
             }
         } else if (message instanceof MessageSeatsSync || DynamXConfig.enableDebugTerrainManager) {
             log.warn("PhysicsEntity with id " + message.entityId + " not found for message with type " + message.getMessageId() + " sent from " + player);

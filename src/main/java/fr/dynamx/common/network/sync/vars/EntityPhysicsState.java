@@ -12,45 +12,39 @@ import fr.dynamx.utils.optimization.Vector3fPool;
 
 /**
  * Holds previous states of an entity, to smoothly fix it's position when we receive a sync packet, corresponding to a previous date <br>
- *     Works with {@link PosSynchronizedVariable}
+ * Works with {@link PosSynchronizedVariable}
  */
-public class EntityPhysicsState
-{
+public class EntityPhysicsState {
     protected final PhysicsEntity<?> entityIn;
     public final Vector3f pos = new Vector3f();
     public Quaternion rotation = new Quaternion();
     public int simulationTime;
 
-    public EntityPhysicsState(PhysicsEntity<?> entityIn)
-    {
+    public EntityPhysicsState(PhysicsEntity<?> entityIn) {
         this.entityIn = entityIn;
         pos.set(entityIn.physicsHandler.getPosition());
         rotation.set(entityIn.physicsHandler.getRotation());
         simulationTime = ClientPhysicsSyncManager.simulationTime;
     }
 
-    public void addToOlders(Vector3f offsetn, Quaternion offsetQuat, float step)
-    {
+    public void addToOlders(Vector3f offsetn, Quaternion offsetQuat, float step) {
         Vector3f finalOffsetn = Vector3fPool.get(offsetn);
         PhysicsEntityNetHandler<? extends PhysicsEntity<?>> h = entityIn.getNetwork();
         h.getOldStates().forEach((i, s) -> {
-            if(i < ClientPhysicsSyncManager.simulationTime)
-            {
+            if (i < ClientPhysicsSyncManager.simulationTime) {
                 s.pos.addLocal(finalOffsetn);
                 DynamXGeometry.slerp(s.rotation, offsetQuat, s.rotation, step);
             }
         });
     }
 
-    public void interpolateDeltas(Vector3f with, Quaternion quaternion, boolean bodyActive, int step, int pass)
-    {
+    public void interpolateDeltas(Vector3f with, Quaternion quaternion, boolean bodyActive, int step, int pass) {
         Vector3f nPos = entityIn.physicsHandler.getCollisionObject().getPhysicsLocation(Vector3fPool.get());
         Vector3f oldPos = Vector3fPool.get(pos);
         Vector3f sub = Vector3fPool.get((float) DynamXMath.interpolateDoubleDelta(with.x, oldPos.x, step), (float) DynamXMath.interpolateDoubleDelta(with.y, oldPos.y, step), (float) DynamXMath.interpolateDoubleDelta(with.z, oldPos.z, step));
-        if(pass != 0) {
+        if (pass != 0) {
             sub.y = 0;
-        }
-        else {
+        } else {
             sub.y /= 2;
         }
         if (bodyActive || !(Math.abs(sub.x) < SyncTracker.EPS) || !(Math.abs(sub.y) < SyncTracker.EPS) || !(Math.abs(sub.z) < SyncTracker.EPS)) {

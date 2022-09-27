@@ -3,21 +3,21 @@ package fr.dynamx.common.network.udp;
 import io.netty.buffer.ByteBuf;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 
-public class UdpTestPacket extends UDPPacket
-{
-    private int id;
-    private long sendTime, rcvTime;
-    private String sample;
-    public UdpTestPacket(int id, long sendTime)
-    {
+public class UdpTestPacket extends UDPPacket {
+    private final int id;
+    private final long sendTime;
+    private final long rcvTime;
+    private final String sample;
+
+    public UdpTestPacket(int id, long sendTime) {
         this.id = id;
         this.sample = "By AymericRed";
         this.sendTime = sendTime;
         this.rcvTime = -1;
     }
-    public UdpTestPacket(int id, String sample, long sendTime, long rcvTime)
-    {
-        System.out.println("RCV "+id);
+
+    public UdpTestPacket(int id, String sample, long sendTime, long rcvTime) {
+        System.out.println("RCV " + id);
         this.id = id;
         this.sample = sample;
         this.sendTime = sendTime;

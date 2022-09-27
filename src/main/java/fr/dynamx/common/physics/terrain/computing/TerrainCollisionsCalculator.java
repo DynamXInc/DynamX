@@ -294,14 +294,14 @@ public class TerrainCollisionsCalculator {
                 // été traités ni sur ceux ayant des collisions spéciales (ou aucune collisions) /!\ ordre des conditions important
 
                 if (printDebug && boxStart.getBlock() != Blocks.AIR)
-                    System.out.println("Fail0 at " + cursor+" "+cursor.getHere());
+                    System.out.println("Fail0 at " + cursor + " " + cursor.getHere());
                 if (!stackable[0] && boxStart.getBlock() != Blocks.AIR) {//Si le block a une collision spéciale, on l'ajoute
                     if (printDebug)
                         System.out.println("ADDINGGGGG " + boxStart);
                     behavior.addBlockCollision(terrainBuilder, null, cursor, world, mutable, boxStart, null);
                 }
                 if (!cursor.incrXZY()) {
-                    if(printDebug)
+                    if (printDebug)
                         System.out.println("End has been reached");
                     break y;// on a parcouru toute le chunk et on n'a rien trouvé, on arrête et passe au chunk suivant
                 }
@@ -489,8 +489,7 @@ public class TerrainCollisionsCalculator {
                 if (dz > lz) {
                     dz = 0;
                     dy++;
-                    if (dy > ly)
-                        return false;// on a parcouru toute le chunk et on n'a rien trouvé, on arrête et passe au chunk suivant
+                    return dy <= ly;// on a parcouru toute le chunk et on n'a rien trouvé, on arrête et passe au chunk suivant
                 }
             }
             return true;

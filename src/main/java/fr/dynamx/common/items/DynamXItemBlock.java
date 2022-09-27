@@ -88,7 +88,7 @@ public class DynamXItemBlock extends ItemBlock implements IResourcesOwner, IInfo
         if (state.getBlock() == this.block) {
             setTileEntityNBT(world, player, pos, stack);
 
-            if(dynamxMainBlock.isObj()) {
+            if (dynamxMainBlock.isObj()) {
                 TileEntity tileentity = world.getTileEntity(pos);
 
                 if (tileentity instanceof TEDynamXBlock) {
@@ -124,12 +124,12 @@ public class DynamXItemBlock extends ItemBlock implements IResourcesOwner, IInfo
 
     @Override
     public boolean createJson() {
-        return ((IResourcesOwner) block).createJson();
+        return dynamxMainBlock.createJson();
     }
 
     @Override
     public boolean createTranslation() {
-        return ((IResourcesOwner) block).createTranslation();
+        return dynamxMainBlock.createTranslation();
     }
 
     @Override
@@ -140,5 +140,12 @@ public class DynamXItemBlock extends ItemBlock implements IResourcesOwner, IInfo
     @Override
     public void setInfo(BlockObject<?> info) {
         dynamxMainBlock.setInfo(info);
+    }
+
+    @Override
+    public String toString() {
+        return "DynamXItemBlock{" +
+                "dynamxMainBlock=" + dynamxMainBlock +
+                '}';
     }
 }

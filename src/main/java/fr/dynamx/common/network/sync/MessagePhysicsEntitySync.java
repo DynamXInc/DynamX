@@ -32,7 +32,7 @@ public class MessagePhysicsEntitySync<T extends PhysicsEntity<?>> extends Physic
      */
     private int simulationTimeClient;
 
-    private boolean doSizeTrack = false;
+    private final boolean doSizeTrack = false;
     private SyncType syncType;
     private T targetEntity;
 

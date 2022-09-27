@@ -14,16 +14,15 @@ import java.io.ObjectOutputStream;
 
 /**
  * A TerrainElement is a collision element used by {@link ChunkCollisions} that can be saved in files, then reloaded without computing the collisions again <br>
- *     <strong>NOTE : all TerrainElements must have an empty constructor, used when loading them from a file</strong>
+ * <strong>NOTE : all TerrainElements must have an empty constructor, used when loading them from a file</strong>
  *
  * @see fr.dynamx.common.physics.terrain.element.CompoundBoxTerrainElement
  * @see IPersistentTerrainElement
  */
-public interface ITerrainElement
-{
+public interface ITerrainElement {
     /**
      * Called once, after element init (in constructor), or after load method was called <br>
-     *     Should return the PhysicsRigidBody corresponding to this collision element
+     * Should return the PhysicsRigidBody corresponding to this collision element
      *
      * @param pos The location of the body to create
      * @return A new rigid body for this terrain element
@@ -45,9 +44,10 @@ public interface ITerrainElement
 
     /**
      * Populates this element with collision data, read from "from"
-     *  @param type The type of the save, modifying used optimizations
+     *
+     * @param type The type of the save, modifying used optimizations
      * @param from Data input stream
-     * @param pos Collision position, useful to restore rigid body position
+     * @param pos  Collision position, useful to restore rigid body position
      * @return False to cancel element loading
      */
     boolean load(TerrainSaveType type, ObjectInputStream from, VerticalChunkPos pos) throws IOException, ClassNotFoundException;
@@ -66,7 +66,7 @@ public interface ITerrainElement
 
     /**
      * Clears data contained in this element, freeing some memory <br>
-     *     The TerrainElement is not reused after this
+     * The TerrainElement is not reused after this
      */
     void clear();
 
@@ -74,13 +74,12 @@ public interface ITerrainElement
 
     /**
      * The target of a TerrainElement save <br>
-     *     <ul>
-     *     <li>Disk is a local save of the terrain, where all optimizations can be used </li>
-     *     <li>Network is a save shared between different computers, platform-dependant optimizations (as MeshCollisionShape bvh serialization cannot be used)</li>
-     *     </ul>
+     * <ul>
+     * <li>Disk is a local save of the terrain, where all optimizations can be used </li>
+     * <li>Network is a save shared between different computers, platform-dependant optimizations (as MeshCollisionShape bvh serialization cannot be used)</li>
+     * </ul>
      */
-    enum TerrainSaveType
-    {
+    enum TerrainSaveType {
         DISK, NETWORK;
 
         public boolean usesPlatformDependantOptimizations() {
@@ -88,7 +87,7 @@ public interface ITerrainElement
         }
     }
 
-    int[] DEFAULT_SIZE = new int[] {16, 16, 16};
+    int[] DEFAULT_SIZE = new int[]{16, 16, 16};
 
     /**
      * @return The max size used by this terrain element, in each dimension
@@ -102,5 +101,6 @@ public interface ITerrainElement
      *
      * @see fr.dynamx.common.physics.terrain.element.CustomSlopeTerrainElement
      */
-    interface IPersistentTerrainElement extends ITerrainElement {}
+    interface IPersistentTerrainElement extends ITerrainElement {
+    }
 }

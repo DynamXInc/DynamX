@@ -13,8 +13,7 @@ import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class UDPClientHandler implements Runnable
-{
+public class UDPClientHandler implements Runnable {
     final LinkedBlockingQueue<byte[]> packetQueue;
     private final UdpClientNetworkHandler client;
     private final long startTime;
@@ -35,22 +34,18 @@ public class UDPClientHandler implements Runnable
 
         if (id == 0)
             this.handleAuthComplete();
-        else if(id == 9)
-        {
+        else if (id == 9) {
             int testId = in.readInt();
             String sample = ByteBufUtils.readUTF8String(in);
-            long sentTime = in.readLong()-CommandUdp.startTime, rcvTime = in.readLong()-CommandUdp.startTime, clientRcv = System.currentTimeMillis()-CommandUdp.startTime;
+            long sentTime = in.readLong() - CommandUdp.startTime, rcvTime = in.readLong() - CommandUdp.startTime, clientRcv = System.currentTimeMillis() - CommandUdp.startTime;
             CommandUdp.received[testId] = true;
-            System.out.println("Packet "+testId+" sent at "+sentTime+" received on srv at "+rcvTime+" on client at "+clientRcv);
-        }
-        else {
-            if(id >= 10)
-            {
-                if(Minecraft.getMinecraft().player != null)
+            System.out.println("Packet " + testId + " sent at " + sentTime + " received on srv at " + rcvTime + " on client at " + clientRcv);
+        } else {
+            if (id >= 10) {
+                if (Minecraft.getMinecraft().player != null)
                     EncapsulatedUDPPacket.readAndHandle(id, in, Minecraft.getMinecraft().player);
-            }
-            else
-                throw new IllegalArgumentException("Illegal dynamx packet id "+id);
+            } else
+                throw new IllegalArgumentException("Illegal dynamx packet id " + id);
         }
         UPDByteArrayPool.getINSTANCE().free(data);
     }
@@ -58,8 +53,8 @@ public class UDPClientHandler implements Runnable
     @Override
     public void run() {
         while (UdpClientNetworkHandler.running) {
-            if(DynamXConfig.udpDebug)
-                DynamXMain.log.info("Looping to handle "+packetQueue);
+            if (DynamXConfig.udpDebug)
+                DynamXMain.log.info("Looping to handle " + packetQueue);
             if (!this.packetQueue.isEmpty()) {
                 try {
                     this.read(this.packetQueue.poll());
@@ -69,7 +64,7 @@ public class UDPClientHandler implements Runnable
             } else {
                 synchronized (this) {
                     try {
-                        if(client.isAuthed())
+                        if (client.isAuthed())
                             this.wait(1000);
                         else
                             this.wait();
@@ -78,7 +73,7 @@ public class UDPClientHandler implements Runnable
                     }
                 }
             }
-            if(!client.isAuthed() && (System.currentTimeMillis()-startTime) > 25000) {
+            if (!client.isAuthed() && (System.currentTimeMillis() - startTime) > 25000) {
                 DynamXMain.log.warn("Failed to establish an UDP connection : timed out (0x2)");
                 Minecraft.getMinecraft().getConnection().getNetworkManager().closeChannel(new TextComponentString("DynamX UDP connection timed out (Auth started)"));
             }

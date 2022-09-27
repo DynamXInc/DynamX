@@ -12,10 +12,9 @@ import net.minecraft.command.WrongUsageException;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.TextComponentString;
 
-import static fr.dynamx.utils.debug.ClientDebugSystem.MOVE_DEBUG;
+import static fr.dynamx.client.handlers.ClientDebugSystem.MOVE_DEBUG;
 
-public class CommandUdp extends CommandBase
-{
+public class CommandUdp extends CommandBase {
     private Thread tester;
     private int packetsPerTick;
     private int remainingPackets;
@@ -24,11 +23,11 @@ public class CommandUdp extends CommandBase
     public static boolean[] received;
     public static long startTime = 0;
 
-    private Runnable TESTER = new Runnable() {
+    private final Runnable TESTER = new Runnable() {
         @Override
         public void run() {
             startTime = System.currentTimeMillis();
-            while(remainingPackets > 0) {
+            while (remainingPackets > 0) {
                 remainingTicks--;
                 remainingPackets -= packetsPerTick;
                 for (int i = 0; i < packetsPerTick; i++) {
@@ -47,16 +46,14 @@ public class CommandUdp extends CommandBase
                 e.printStackTrace();
             }
             int failCount = 0;
-            for(boolean b : received)
-            {
-                if(!b)
+            for (boolean b : received) {
+                if (!b)
                     failCount++;
             }
-            if(Minecraft.getMinecraft().player != null)
-                Minecraft.getMinecraft().player.sendMessage(new TextComponentString("UDP test finished over "+packetId+" sent packets with "+failCount+" loss"));
-            else
-            {
-                System.out.println("UDP test finished over "+packetId+" sent packets with "+failCount+" loss");
+            if (Minecraft.getMinecraft().player != null)
+                Minecraft.getMinecraft().player.sendMessage(new TextComponentString("UDP test finished over " + packetId + " sent packets with " + failCount + " loss"));
+            else {
+                System.out.println("UDP test finished over " + packetId + " sent packets with " + failCount + " loss");
             }
         }
     };
@@ -73,11 +70,10 @@ public class CommandUdp extends CommandBase
 
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-        if(args.length == 3 && args[0].matches("test"))
-        {
-            if(tester != null && tester.isAlive())
+        if (args.length == 3 && args[0].matches("test")) {
+            if (tester != null && tester.isAlive())
                 sender.sendMessage(new TextComponentString("Already testing udp !"));
-            else if(!(DynamXContext.getNetwork().getQuickNetwork() instanceof UdpClientNetworkHandler))
+            else if (!(DynamXContext.getNetwork().getQuickNetwork() instanceof UdpClientNetworkHandler))
                 sender.sendMessage(new TextComponentString("UDP isn't started !"));
             else {
                 remainingPackets = parseInt(args[1], 1, 100000);
@@ -86,25 +82,20 @@ public class CommandUdp extends CommandBase
                 received = new boolean[remainingPackets];
                 packetId = 0;
                 tester = new Thread(TESTER);
-                tester.setName("UDP tester "+sender.getCommandSenderEntity().ticksExisted);
-                sender.sendMessage(new TextComponentString("UDP is in test, "+remainingTicks+" ticks remaining..."));
+                tester.setName("UDP tester " + sender.getCommandSenderEntity().ticksExisted);
+                sender.sendMessage(new TextComponentString("UDP is in test, " + remainingTicks + " ticks remaining..."));
                 tester.start();
             }
-        }
-        else if(args.length == 1 && args[0].equalsIgnoreCase("ping"))
-        {
+        } else if (args.length == 1 && args[0].equalsIgnoreCase("ping")) {
             sender.sendMessage(new TextComponentString("[DynamX] Pinging..."));
             ClientPhysicsSyncManager.pingMs = -3;
             DynamXContext.getNetwork().sendToServer(new MessagePing(System.currentTimeMillis(), true));
-        }
-        else if(args.length == 1 && args[0].equalsIgnoreCase("move_debug"))
-        {
+        } else if (args.length == 1 && args[0].equalsIgnoreCase("move_debug")) {
             MOVE_DEBUG++;
-            if(MOVE_DEBUG > 2)
+            if (MOVE_DEBUG > 2)
                 MOVE_DEBUG = 0;
-            sender.sendMessage(new TextComponentString("Move debug is "+MOVE_DEBUG));
-        }
-        else
+            sender.sendMessage(new TextComponentString("Move debug is " + MOVE_DEBUG));
+        } else
             throw new WrongUsageException(getUsage(sender));
     }
 }

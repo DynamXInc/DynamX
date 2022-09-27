@@ -132,7 +132,7 @@ public class MessageQueryChunks implements IDnxPacket {
                                 return;
                             }
                             //System.out.println("Other case "+ticket);
-                            if(ticket.getLoadedCallback() != null) {
+                            if (ticket.getLoadedCallback() != null) {
                                 ticket.getLoadedCallback().whenComplete((collisions2, e) -> {
                                     if (collisions2 != null) {
                                         processElements(ctx, ticket.getPos(), data, collisions2.getElements());
@@ -146,7 +146,7 @@ public class MessageQueryChunks implements IDnxPacket {
                                     return null;
                                 });
                             } else {
-                                DynamXMain.log.error("Ticket "+ticket+" has no loading callback, but it should be loading i think. 0x10301.");
+                                DynamXMain.log.error("Ticket " + ticket + " has no loading callback, but it should be loading i think. 0x10301.");
                             }
                         });
                         boysToLoad.release();

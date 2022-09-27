@@ -26,8 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 @Mod.EventBusSubscriber(modid = DynamXConstants.ID)
-public class DynamXCommands extends CommandBase
-{
+public class DynamXCommands extends CommandBase {
     private final Map<String, ISubCommand> commands = new HashMap<>();
 
     public static float explosionForce = 10;
@@ -54,11 +53,10 @@ public class DynamXCommands extends CommandBase
 
             @Override
             public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-                if(args.length == 2) {
+                if (args.length == 2) {
                     explosionForce = (float) parseDouble(args[1]);
-                    sender.sendMessage(new TextComponentString("Set force to "+explosionForce));
-                }
-                else
+                    sender.sendMessage(new TextComponentString("Set force to " + explosionForce));
+                } else
                     throw new WrongUsageException(getUsage());
             }
         });
@@ -75,12 +73,11 @@ public class DynamXCommands extends CommandBase
 
             @Override
             public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-                if(args.length == 2) {
+                if (args.length == 2) {
                     boolean testFullGo = parseBoolean(args[1]);
                     EnginePhysicsHandler.inTestFullGo = testFullGo;
-                    sender.sendMessage(new TextComponentString("Set test full go to "+testFullGo));
-                }
-                else
+                    sender.sendMessage(new TextComponentString("Set test full go to " + testFullGo));
+                } else
                     throw new WrongUsageException(getUsage());
             }
         });
@@ -97,12 +94,11 @@ public class DynamXCommands extends CommandBase
 
             @Override
             public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-                if(args.length == 2) {
+                if (args.length == 2) {
                     boolean testFullGo = parseBoolean(args[1]);
                     DynamXConfig.enableDebugTerrainManager = testFullGo;
-                    sender.sendMessage(new TextComponentString("Set terrain debug to "+testFullGo));
-                }
-                else
+                    sender.sendMessage(new TextComponentString("Set terrain debug to " + testFullGo));
+                } else
                     throw new WrongUsageException(getUsage());
             }
         });
@@ -119,12 +115,11 @@ public class DynamXCommands extends CommandBase
 
             @Override
             public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-                if(args.length == 2) {
+                if (args.length == 2) {
                     boolean testFullGo = parseBoolean(args[1]);
                     TerrainFile.ULTIMATEDEBUG = testFullGo;
-                    sender.sendMessage(new TextComponentString("Set bigdebugterrain to "+testFullGo));
-                }
-                else
+                    sender.sendMessage(new TextComponentString("Set bigdebugterrain to " + testFullGo));
+                } else
                     throw new WrongUsageException(getUsage());
             }
         });
@@ -141,12 +136,11 @@ public class DynamXCommands extends CommandBase
 
             @Override
             public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-                if(args.length == 2) {
+                if (args.length == 2) {
                     boolean testFullGo = parseBoolean(args[1]);
                     PooledHashMap.DISABLE_POOL = testFullGo;
-                    sender.sendMessage(new TextComponentString("Set disablemappool to "+testFullGo));
-                }
-                else
+                    sender.sendMessage(new TextComponentString("Set disablemappool to " + testFullGo));
+                } else
                     throw new WrongUsageException(getUsage());
             }
         });
@@ -155,7 +149,7 @@ public class DynamXCommands extends CommandBase
 
     public void addCommand(ISubCommand command) {
         commands.put(command.getName(), command);
-        PermissionAPI.registerNode(command.getPermission(), DefaultPermissionLevel.OP, "/dynamx "+command.getUsage());
+        PermissionAPI.registerNode(command.getPermission(), DefaultPermissionLevel.OP, "/dynamx " + command.getUsage());
     }
 
     @Override
@@ -167,21 +161,19 @@ public class DynamXCommands extends CommandBase
     public String getUsage(ICommandSender sender) {
         StringBuilder usage = new StringBuilder();
         commands.keySet().forEach(s -> usage.append("|").append(s));
-        return "/dynamx <"+ usage.substring(1)+">";
+        return "/dynamx <" + usage.substring(1) + ">";
     }
 
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         if (args.length > 0 && commands.containsKey(args[0])) {
             ISubCommand command = commands.get(args[0]);
-            if(!(sender instanceof EntityPlayer) || PermissionAPI.hasPermission((EntityPlayer) sender, command.getPermission())) {
+            if (!(sender instanceof EntityPlayer) || PermissionAPI.hasPermission((EntityPlayer) sender, command.getPermission())) {
                 command.execute(server, sender, args);
-            }
-            else {
+            } else {
                 throw new CommandException("You don't have permission to use this command !");
             }
-        }
-        else
+        } else
             throw new WrongUsageException(this.getUsage(sender));
     }
 
@@ -194,8 +186,7 @@ public class DynamXCommands extends CommandBase
         List<String> r = new ArrayList<String>();
         if (args.length == 1) {
             r.addAll(commands.keySet());
-        }
-        else if(args.length > 1 && commands.containsKey(args[0])) {
+        } else if (args.length > 1 && commands.containsKey(args[0])) {
             commands.get(args[0]).getTabCompletions(server, sender, args, targetPos, r);
         }
         return getListOfStringsMatchingLastWord(args, r);

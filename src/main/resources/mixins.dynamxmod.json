@@ -2,6 +2,8 @@
   "compatibilityLevel": "JAVA_8",
   "package": "fr.dynamx.common.core.mixin",
   "mixins": [
+    "MixinEntity",
+    "MixinEntityLivingBase",
     "MixinWorld",
     "MixinChunk",
     "MixinNetHandlerPlayServer"

@@ -10,8 +10,7 @@ import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.RegistryNameSetter;
 import net.minecraft.item.Item;
 
-public class DynamXItem<T extends AbstractItemObject<?>> extends Item implements IInfoOwner<T>, IResourcesOwner
-{
+public class DynamXItem<T extends AbstractItemObject<?>> extends Item implements IInfoOwner<T>, IResourcesOwner {
     protected T itemInfo;
 
     /**
@@ -34,17 +33,16 @@ public class DynamXItem<T extends AbstractItemObject<?>> extends Item implements
      *
      * <strong>NOTE : Should be called during addons initialization</strong>
      *
-     * @param modid     The mod owning this item used to register the item
+     * @param modid    The mod owning this item used to register the item
      * @param itemName The name of the item
-     * @param model     The obj model of the item, must be under "dynamxmod:models/<model>"
+     * @param model    The obj model of the item, must be under "dynamxmod:models/<model>"
      */
     public DynamXItem(String modid, String itemName, String model) {
-        if(modid.contains("builtin_mod_")) { //Backward-compatibility
+        if (modid.contains("builtin_mod_")) { //Backward-compatibility
             this.itemInfo = (T) DynamXObjectLoaders.ITEMS.addBuiltinObject(this, modid, itemName);
             modid = modid.replace("builtin_mod_", "");
-        }
-        else {
-            this.itemInfo = (T) DynamXObjectLoaders.ITEMS.addBuiltinObject(this, "dynx."+modid, itemName);
+        } else {
+            this.itemInfo = (T) DynamXObjectLoaders.ITEMS.addBuiltinObject(this, "dynx." + modid, itemName);
         }
         this.itemInfo.setModel(model);
         itemInfo.setDescription("Builtin " + modid + "'s item");

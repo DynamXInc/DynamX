@@ -7,15 +7,14 @@ import fr.dynamx.api.contentpack.registry.PackFileProperty;
 /**
  * Automatic gear of an {@link EngineInfo}
  */
-public class GearInfo extends SubInfoType<EngineInfo>
-{
+public class GearInfo extends SubInfoType<EngineInfo> {
     private byte id;
     private final String gearName;
 
     @PackFileProperty(configNames = "SpeedRange")
-    private int[] speedRange = new int[2];
+    private final int[] speedRange = new int[2];
     @PackFileProperty(configNames = "RPMRange")
-    private int[] rpmRange = new int[2];
+    private final int[] rpmRange = new int[2];
 
     public GearInfo(ISubInfoTypeOwner<EngineInfo> owner, String name) {
         super(owner);
@@ -37,7 +36,7 @@ public class GearInfo extends SubInfoType<EngineInfo>
 
     @Override
     public String getName() {
-        return "Gear_"+ getGearName() +" in "+getOwner().getName();
+        return "Gear_" + getGearName() + " in " + getOwner().getName();
     }
 
     public byte getId() {

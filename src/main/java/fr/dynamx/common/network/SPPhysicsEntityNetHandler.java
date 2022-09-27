@@ -35,10 +35,10 @@ import static fr.dynamx.common.DynamXMain.log;
 public class SPPhysicsEntityNetHandler<T extends PhysicsEntity<?>> extends PhysicsEntityNetHandler<T> implements ClientEntityNetHandler {
     private final Side mySide;
     private final List<IVehicleController> controllers = new ArrayList<>();
-    private Map<Integer, SyncTarget> varsToSync = new HashMap<>();
+    private final Map<Integer, SyncTarget> varsToSync = new HashMap<>();
     private int updateCount = 0;
 
-    private Queue<PooledHashMap<Integer, SynchronizedVariable<T>>> updateQueue = Queues.newConcurrentLinkedQueue();
+    private final Queue<PooledHashMap<Integer, SynchronizedVariable<T>>> updateQueue = Queues.newConcurrentLinkedQueue();
 
     public SPPhysicsEntityNetHandler(T entityIn, Side side) {
         super(entityIn);

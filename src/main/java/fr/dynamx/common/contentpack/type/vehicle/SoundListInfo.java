@@ -8,8 +8,7 @@ import java.util.List;
 /**
  * Sounds contained in a sounds file
  */
-public class SoundListInfo implements INamedObject
-{
+public class SoundListInfo implements INamedObject {
     private final String name, packName;
     private final List<EngineSound> soundsIn = new ArrayList<>();
 
@@ -38,6 +37,6 @@ public class SoundListInfo implements INamedObject
 
     @Override
     public String getFullName() {
-        return packName+"."+name;
+        return packName + "." + name;
     }
 }

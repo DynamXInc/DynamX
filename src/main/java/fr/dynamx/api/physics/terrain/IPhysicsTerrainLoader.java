@@ -9,11 +9,11 @@ import fr.dynamx.utils.debug.Profiler;
  * @see fr.dynamx.common.physics.terrain.PhysicsEntityTerrainLoader
  * @see fr.dynamx.common.slopes.SlopesPreviewTerrainLoader
  */
-public interface IPhysicsTerrainLoader
-{
+public interface IPhysicsTerrainLoader {
     /**
      * Updates this terrain loader
-     * @param terrain The current terrain manager, that will load your chunks
+     *
+     * @param terrain  The current terrain manager, that will load your chunks
      * @param profiler
      */
     void update(ITerrainManager terrain, Profiler profiler);

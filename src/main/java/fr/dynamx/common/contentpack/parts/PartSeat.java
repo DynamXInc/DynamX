@@ -12,6 +12,9 @@ import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.common.entities.vehicles.CarEntity;
 import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
 import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.EnumSeatPlayerPosition;
+import fr.dynamx.utils.debug.DynamXDebugOption;
+import fr.dynamx.utils.debug.DynamXDebugOptions;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
@@ -26,11 +29,20 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     private String linkedDoor;
     @PackFileProperty(configNames = "Rotation", required = false, defaultValue = "1 0 0 0")
     private Quaternion rotation;
+
+    @PackFileProperty(configNames = "PlayerPosition", required = false, defaultValue = "SIT")
+    private EnumSeatPlayerPosition playerPosition;
+
     @PackFileProperty(configNames = "CameraRotation", required = false, defaultValue = "0")
     private float rotationYaw;
 
     public PartSeat(ModularVehicleInfoBuilder owner, String partName) {
         super(owner, partName, 0.4f, 1.8f);
+    }
+
+    @Override
+    public DynamXDebugOption getDebugOption() {
+        return DynamXDebugOptions.SEATS_AND_STORAGE;
     }
 
     @Override
@@ -57,7 +69,7 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
                 if (door != null) {
                     if (!door.isPlayerMounting()) {
                         IModuleContainer.IDoorContainer doorContainer = (IModuleContainer.IDoorContainer) vehicleEntity;
-                        if(doorContainer.getDoors() == null)
+                        if (doorContainer.getDoors() == null)
                             return false;
                         if (!door.isEnabled() || doorContainer.getDoors().isDoorAttached(door.getId())) {
                             if (!door.isEnabled() || doorContainer.getDoors().isDoorOpened(door.getId())) {
@@ -104,6 +116,10 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
 
     public Quaternion getRotation() {
         return rotation;
+    }
+
+    public EnumSeatPlayerPosition getPlayerPosition() {
+        return playerPosition;
     }
 
     public float getRotationYaw() {

@@ -6,17 +6,26 @@ import net.minecraftforge.fml.relauncher.Side;
 /**
  * All possible holder of the simulation of an entity, they will be responsible to sync the entity data to the other clients (and to the server if required)
  */
-public enum SimulationHolder
-{
-    /** The driver is holding all entity's physics, sending it to the server (with verifications) */
+public enum SimulationHolder {
+    /**
+     * The driver is holding all entity's physics, sending it to the server (with verifications)
+     */
     DRIVER(true),
-    /** Same as DRIVER, but in singleplayer. The client holds all the physics and the controls. */
+    /**
+     * Same as DRIVER, but in singleplayer. The client holds all the physics and the controls.
+     */
     DRIVER_SP(true),
-    /** The server is holding all entity's physics */
+    /**
+     * The server is holding all entity's physics
+     */
     SERVER(false),
-    /** Another client is holding all entity's physics */
+    /**
+     * Another client is holding all entity's physics
+     */
     OTHER_CLIENT(false),
-    /** Only in singleplayer. The integrated single player server is holding entity's controls. The physics are on the client side. */
+    /**
+     * Only in singleplayer. The integrated single player server is holding entity's controls. The physics are on the client side.
+     */
     SERVER_SP(true);
 
     private final boolean hasClientPhysics;
@@ -68,8 +77,7 @@ public enum SimulationHolder
     /**
      * The simulation holder update context, changes the affected entities (linked entities, entities in props containers...)
      */
-    public enum UpdateContext
-    {
+    public enum UpdateContext {
         /**
          * Normal context, all linked entities will be affected
          */

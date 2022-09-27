@@ -3,11 +3,10 @@ package fr.dynamx.common.physics.utils;
 /**
  * Helping class for sync of {@link RigidBodyTransform} via {@link fr.dynamx.common.network.sync.vars.AttachedBodySynchronizedVariable}
  */
-public class SynchronizedRigidBodyTransform
-{
+public class SynchronizedRigidBodyTransform {
     /**
      * The transform at this tick <br>
-     *     Synchronized by the {@link fr.dynamx.common.network.sync.vars.AttachedBodySynchronizedVariable}
+     * Synchronized by the {@link fr.dynamx.common.network.sync.vars.AttachedBodySynchronizedVariable}
      */
     private final RigidBodyTransform physicTransform;
     /**
@@ -34,7 +33,7 @@ public class SynchronizedRigidBodyTransform
 
     /**
      * @return The transform at this tick <br>
-     *     Synchronized by the {@link fr.dynamx.common.network.sync.vars.AttachedBodySynchronizedVariable}
+     * Synchronized by the {@link fr.dynamx.common.network.sync.vars.AttachedBodySynchronizedVariable}
      */
     public RigidBodyTransform getPhysicTransform() {
         return physicTransform;
@@ -56,7 +55,7 @@ public class SynchronizedRigidBodyTransform
 
     /**
      * Updates current and prev transform using the physic transform <br>
-     *     Fire this in the updatePos method of this module (see {@link fr.dynamx.api.entities.modules.IPhysicsModule.IEntityPosUpdateListener})
+     * Fire this in the updatePos method of this module (see {@link fr.dynamx.api.entities.modules.IPhysicsModule.IEntityPosUpdateListener})
      */
     public void updatePos() {
         prevTransform.set(transform);

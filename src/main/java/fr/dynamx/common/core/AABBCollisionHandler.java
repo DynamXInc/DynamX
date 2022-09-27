@@ -31,56 +31,41 @@ import static fr.dynamx.utils.DynamXReflection.*;
 /**
  * Patches vanilla movement to collide with vehicles and DynamX blocks
  */
-public class AABBCollisionHandler
-{
-    public static void vanillaMove(Entity entity, MoverType type, double x, double y, double z)
-    {
-        if (entity.noClip)
-        {
+public class AABBCollisionHandler {
+    public static void vanillaMove(Entity entity, MoverType type, double x, double y, double z) {
+        if (entity.noClip) {
             entity.setEntityBoundingBox(entity.getEntityBoundingBox().offset(x, y, z));
             entity.resetPositionToBB();
             //new NullPointerException("WTF").printStackTrace();
-        }
-        else
-        {
-            if (type == MoverType.PISTON)
-            {
+        } else {
+            if (type == MoverType.PISTON) {
                 long i = entity.world.getTotalWorldTime();
 
-                if (i != entity.pistonDeltasGameTime)
-                {
+                if (i != entity.pistonDeltasGameTime) {
                     Arrays.fill(entity.pistonDeltas, 0.0D);
                     entity.pistonDeltasGameTime = i;
                 }
 
-                if (x != 0.0D)
-                {
+                if (x != 0.0D) {
                     int j = EnumFacing.Axis.X.ordinal();
                     double d0 = MathHelper.clamp(x + entity.pistonDeltas[j], -0.51D, 0.51D);
                     x = d0 - entity.pistonDeltas[j];
                     entity.pistonDeltas[j] = d0;
 
-                    if (Math.abs(x) <= 9.999999747378752E-6D)
-                    {
+                    if (Math.abs(x) <= 9.999999747378752E-6D) {
                         return;
                     }
-                }
-                else if (y != 0.0D)
-                {
+                } else if (y != 0.0D) {
                     int l4 = EnumFacing.Axis.Y.ordinal();
                     double d12 = MathHelper.clamp(y + entity.pistonDeltas[l4], -0.51D, 0.51D);
                     y = d12 - entity.pistonDeltas[l4];
                     entity.pistonDeltas[l4] = d12;
 
-                    if (Math.abs(y) <= 9.999999747378752E-6D)
-                    {
+                    if (Math.abs(y) <= 9.999999747378752E-6D) {
                         return;
                     }
-                }
-                else
-                {
-                    if (z == 0.0D)
-                    {
+                } else {
+                    if (z == 0.0D) {
                         return;
                     }
 
@@ -89,8 +74,7 @@ public class AABBCollisionHandler
                     z = d13 - entity.pistonDeltas[i5];
                     entity.pistonDeltas[i5] = d13;
 
-                    if (Math.abs(z) <= 9.999999747378752E-6D)
-                    {
+                    if (Math.abs(z) <= 9.999999747378752E-6D) {
                         return;
                     }
                 }
@@ -102,8 +86,7 @@ public class AABBCollisionHandler
             double d11 = entity.posY;
             double d1 = entity.posZ;
 
-            if (entity.isInWeb)
-            {
+            if (entity.isInWeb) {
                 entity.isInWeb = false;
                 x *= 0.25D;
                 y *= 0.05000000074505806D;
@@ -118,67 +101,43 @@ public class AABBCollisionHandler
             double d4 = z;
 
             //SNEAKING
-            if ((type == MoverType.SELF || type == MoverType.PLAYER) && entity.onGround && entity.isSneaking() && entity instanceof EntityPlayer)
-            {
-                for (double d5 = 0.05D; x != 0.0D && entity.world.getCollisionBoxes(entity, entity.getEntityBoundingBox().offset(x, (double)(-entity.stepHeight), 0.0D)).isEmpty(); d2 = x)
-                {
-                    if (x < 0.05D && x >= -0.05D)
-                    {
+            if ((type == MoverType.SELF || type == MoverType.PLAYER) && entity.onGround && entity.isSneaking() && entity instanceof EntityPlayer) {
+                for (double d5 = 0.05D; x != 0.0D && entity.world.getCollisionBoxes(entity, entity.getEntityBoundingBox().offset(x, -entity.stepHeight, 0.0D)).isEmpty(); d2 = x) {
+                    if (x < 0.05D && x >= -0.05D) {
                         x = 0.0D;
-                    }
-                    else if (x > 0.0D)
-                    {
+                    } else if (x > 0.0D) {
                         x -= 0.05D;
-                    }
-                    else
-                    {
+                    } else {
                         x += 0.05D;
                     }
                 }
 
-                for (; z != 0.0D && entity.world.getCollisionBoxes(entity, entity.getEntityBoundingBox().offset(0.0D, (double)(-entity.stepHeight), z)).isEmpty(); d4 = z)
-                {
-                    if (z < 0.05D && z >= -0.05D)
-                    {
+                for (; z != 0.0D && entity.world.getCollisionBoxes(entity, entity.getEntityBoundingBox().offset(0.0D, -entity.stepHeight, z)).isEmpty(); d4 = z) {
+                    if (z < 0.05D && z >= -0.05D) {
                         z = 0.0D;
-                    }
-                    else if (z > 0.0D)
-                    {
+                    } else if (z > 0.0D) {
                         z -= 0.05D;
-                    }
-                    else
-                    {
+                    } else {
                         z += 0.05D;
                     }
                 }
 
-                for (; x != 0.0D && z != 0.0D && entity.world.getCollisionBoxes(entity, entity.getEntityBoundingBox().offset(x, (double)(-entity.stepHeight), z)).isEmpty(); d4 = z)
-                {
-                    if (x < 0.05D && x >= -0.05D)
-                    {
+                for (; x != 0.0D && z != 0.0D && entity.world.getCollisionBoxes(entity, entity.getEntityBoundingBox().offset(x, -entity.stepHeight, z)).isEmpty(); d4 = z) {
+                    if (x < 0.05D && x >= -0.05D) {
                         x = 0.0D;
-                    }
-                    else if (x > 0.0D)
-                    {
+                    } else if (x > 0.0D) {
                         x -= 0.05D;
-                    }
-                    else
-                    {
+                    } else {
                         x += 0.05D;
                     }
 
                     d2 = x;
 
-                    if (z < 0.05D && z >= -0.05D)
-                    {
+                    if (z < 0.05D && z >= -0.05D) {
                         z = 0.0D;
-                    }
-                    else if (z > 0.0D)
-                    {
+                    } else if (z > 0.0D) {
                         z -= 0.05D;
-                    }
-                    else
-                    {
+                    } else {
                         z += 0.05D;
                     }
                 }
@@ -194,12 +153,12 @@ public class AABBCollisionHandler
             y = data[1];
             z = data[2];
             //if(entity instanceof EntityPlayer && (Math.abs(x) > 0.01f || Math.abs(z) > 0.01f || Math.abs(preY-y) > 0.01f))
-              //  System.out.println(RotatedCollisionHandler.motionChanged+" Calculated motion "+(preX-x)+" "+(preY-y)+" "+(preZ-z));
+            //  System.out.println(RotatedCollisionHandler.motionChanged+" Calculated motion "+(preX-x)+" "+(preY-y)+" "+(preZ-z));
             entity.setEntityBoundingBox(axisalignedbb.offset(x, y, z));
 
             boolean flag = entity.onGround || d3 != y && d3 < 0.0D;
 
-            if(!DynamXContext.getCollisionHandler().motionHasChanged()) {
+            if (!DynamXContext.getCollisionHandler().motionHasChanged()) {
                 if (entity.stepHeight > 0.0F && flag && (d2 != x || d4 != z)) {
                     double d14 = x;
                     double d6 = y;
@@ -306,91 +265,73 @@ public class AABBCollisionHandler
             BlockPos blockpos = new BlockPos(j6, i1, k6);
             IBlockState iblockstate = entity.world.getBlockState(blockpos);
 
-            if (iblockstate.getMaterial() == Material.AIR)
-            {
+            if (iblockstate.getMaterial() == Material.AIR) {
                 BlockPos blockpos1 = blockpos.down();
                 IBlockState iblockstate1 = entity.world.getBlockState(blockpos1);
                 Block block1 = iblockstate1.getBlock();
 
-                if (block1 instanceof BlockFence || block1 instanceof BlockWall || block1 instanceof BlockFenceGate)
-                {
+                if (block1 instanceof BlockFence || block1 instanceof BlockWall || block1 instanceof BlockFenceGate) {
                     iblockstate = iblockstate1;
                     blockpos = blockpos1;
                 }
             }
 
-            invokeMethod(DynamXReflection.updateFallState, entity,  y, entity.onGround, iblockstate, blockpos);
+            invokeMethod(DynamXReflection.updateFallState, entity, y, entity.onGround, iblockstate, blockpos);
 
-            if (d2 != x)
-            {
+            if (d2 != x) {
                 entity.motionX = 0.0D;
             }
 
-            if (d4 != z)
-            {
+            if (d4 != z) {
                 entity.motionZ = 0.0D;
             }
 
             Block block = iblockstate.getBlock();
 
-            if (d3 != y)
-            {
+            if (d3 != y) {
                 block.onLanded(entity.world, entity);
             }
 
-            if ((boolean)invokeMethod(canTriggerWalking, entity) && (!entity.onGround || !entity.isSneaking() || !(entity instanceof EntityPlayer)) && !entity.isRiding())
-            {
+            if ((boolean) invokeMethod(canTriggerWalking, entity) && (!entity.onGround || !entity.isSneaking() || !(entity instanceof EntityPlayer)) && !entity.isRiding()) {
                 double d15 = entity.posX - d10;
                 double d16 = entity.posY - d11;
                 double d17 = entity.posZ - d1;
 
-                if (block != Blocks.LADDER)
-                {
+                if (block != Blocks.LADDER) {
                     d16 = 0.0D;
                 }
 
-                if (block != null && entity.onGround)
-                {
+                if (block != null && entity.onGround) {
                     block.onEntityWalk(entity.world, blockpos, entity);
                 }
 
-                entity.distanceWalkedModified = (float)((double)entity.distanceWalkedModified + (double)MathHelper.sqrt(d15 * d15 + d17 * d17) * 0.6D);
-                entity.distanceWalkedOnStepModified = (float)((double)entity.distanceWalkedOnStepModified + (double)MathHelper.sqrt(d15 * d15 + d16 * d16 + d17 * d17) * 0.6D);
+                entity.distanceWalkedModified = (float) ((double) entity.distanceWalkedModified + (double) MathHelper.sqrt(d15 * d15 + d17 * d17) * 0.6D);
+                entity.distanceWalkedOnStepModified = (float) ((double) entity.distanceWalkedOnStepModified + (double) MathHelper.sqrt(d15 * d15 + d16 * d16 + d17 * d17) * 0.6D);
 
-                if (entity.distanceWalkedOnStepModified > (float)entity.nextStepDistance && iblockstate.getMaterial() != Material.AIR)
-                {
-                    entity.nextStepDistance = (int)entity.distanceWalkedOnStepModified + 1;
+                if (entity.distanceWalkedOnStepModified > (float) entity.nextStepDistance && iblockstate.getMaterial() != Material.AIR) {
+                    entity.nextStepDistance = (int) entity.distanceWalkedOnStepModified + 1;
 
-                    if (entity.isInWater())
-                    {
+                    if (entity.isInWater()) {
                         Entity passenger = entity.isBeingRidden() && entity.getControllingPassenger() != null ? entity.getControllingPassenger() : entity;
                         float f = passenger == entity ? 0.35F : 0.4F;
                         float f1 = MathHelper.sqrt(passenger.motionX * passenger.motionX * 0.20000000298023224D + passenger.motionY * passenger.motionY + passenger.motionZ * passenger.motionZ * 0.20000000298023224D) * f;
 
-                        if (f1 > 1.0F)
-                        {
+                        if (f1 > 1.0F) {
                             f1 = 1.0F;
                         }
 
                         entity.playSound(SoundEvents.ENTITY_GENERIC_SWIM, f1, 1.0F + (entity.rand.nextFloat() - entity.rand.nextFloat()) * 0.4F);
-                    }
-                    else
-                    {
+                    } else {
                         invokeMethod(playStepSound, entity, blockpos, block);
                     }
-                }
-                else if (entity.distanceWalkedOnStepModified > entity.nextFlap && (boolean)invokeMethod(makeFlySound, entity) && iblockstate.getMaterial() == Material.AIR)
-                {
-                    entity.nextFlap = (float) invokeMethod(playFlySound,entity,entity.distanceWalkedOnStepModified);
+                } else if (entity.distanceWalkedOnStepModified > entity.nextFlap && (boolean) invokeMethod(makeFlySound, entity) && iblockstate.getMaterial() == Material.AIR) {
+                    entity.nextFlap = (float) invokeMethod(playFlySound, entity, entity.distanceWalkedOnStepModified);
                 }
             }
 
-            try
-            {
+            try {
                 invokeMethod(doBlockCollisions, entity);
-            }
-            catch (Throwable throwable)
-            {
+            } catch (Throwable throwable) {
                 CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Checking entity block collision");
                 CrashReportCategory crashreportcategory = crashreport.makeCategory("Entity being checked for collision");
                 entity.addEntityCrashInfo(crashreportcategory);
@@ -399,27 +340,21 @@ public class AABBCollisionHandler
 
             boolean flag1 = entity.isWet();
 
-            if (entity.world.isFlammableWithin(entity.getEntityBoundingBox().shrink(0.001D)))
-            {
+            if (entity.world.isFlammableWithin(entity.getEntityBoundingBox().shrink(0.001D))) {
                 invokeMethod(DynamXReflection.dealFireDamage, entity, 1);
 
-                if (!flag1)
-                {
+                if (!flag1) {
                     ++entity.fire;
 
-                    if (entity.fire == 0)
-                    {
+                    if (entity.fire == 0) {
                         entity.setFire(8);
                     }
                 }
-            }
-            else if (entity.fire <= 0)
-            {
+            } else if (entity.fire <= 0) {
                 entity.fire = -1;
             }
 
-            if (flag1 && entity.isBurning())
-            {
+            if (flag1 && entity.isBurning()) {
                 entity.playSound(SoundEvents.ENTITY_GENERIC_EXTINGUISH_FIRE, 0.7F, 1.6F + (entity.rand.nextFloat() - entity.rand.nextFloat()) * 0.4F);
                 entity.fire = -1;
             }

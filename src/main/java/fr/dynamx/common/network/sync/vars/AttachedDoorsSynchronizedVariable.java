@@ -5,11 +5,10 @@ import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.util.ResourceLocation;
 
-public class AttachedDoorsSynchronizedVariable extends AttachedBodySynchronizedVariable<BaseVehicleEntity<?>>
-{
+public class AttachedDoorsSynchronizedVariable extends AttachedBodySynchronizedVariable<BaseVehicleEntity<?>> {
     public static final ResourceLocation NAME = new ResourceLocation(DynamXConstants.ID, "attach/doors");
 
-    //TODO IMPEACH SYNC IF NOT OPENED
+    //TODO PREVENT SYNC IF NOT OPENED
 
     @Override
     public AttachedBodySynchronizer getSynchronizer(BaseVehicleEntity<?> on) {

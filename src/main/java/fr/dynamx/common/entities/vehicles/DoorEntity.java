@@ -30,8 +30,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DoorEntity<T extends PackEntityPhysicsHandler<PartDoor, ?>> extends PackPhysicsEntity<T, PartDoor>
-{
+public class DoorEntity<T extends PackEntityPhysicsHandler<PartDoor, ?>> extends PackPhysicsEntity<T, PartDoor> {
     private static final DataParameter<Integer> VEHICLE_ID = EntityDataManager.createKey(DoorEntity.class, DataSerializers.VARINT);
     private static final DataParameter<Byte> DOOR_ID = EntityDataManager.createKey(DoorEntity.class, DataSerializers.BYTE);
     int timer = -1;

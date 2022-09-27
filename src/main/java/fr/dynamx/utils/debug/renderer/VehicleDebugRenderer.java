@@ -19,9 +19,7 @@ import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.entities.vehicles.DoorEntity;
 import fr.dynamx.common.network.sync.vars.DebugPosSynchronizedVariable;
 import fr.dynamx.common.network.sync.vars.PosSynchronizedVariable;
-import fr.dynamx.common.physics.terrain.PhysicsEntityTerrainLoader;
 import fr.dynamx.utils.client.DynamXRenderUtils;
-import fr.dynamx.utils.debug.ClientDebugSystem;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.BoundingBoxPool;
@@ -98,10 +96,9 @@ public class VehicleDebugRenderer {
         @Override
         public void render(BaseVehicleEntity<?> entity, double x, double y, double z, float partialTicks) {
 
-            if(!entity.getPackInfo().getFrictionPoints().isEmpty()) {
+            if (!entity.getPackInfo().getFrictionPoints().isEmpty()) {
                 float horizSpeed = Vector3fPool.get((float) entity.motionX, 0, (float) entity.motionZ).length();
-                for(FrictionPoint f : entity.getPackInfo().getFrictionPoints())
-                {
+                for (FrictionPoint f : entity.getPackInfo().getFrictionPoints()) {
                     Vector3f pushDown = new Vector3f((float) -entity.motionX, -horizSpeed, (float) -entity.motionZ);
                     pushDown.multLocal(f.getIntensity());
                     Vector3f pos = f.getPosition();
@@ -207,43 +204,35 @@ public class VehicleDebugRenderer {
         public boolean shouldRender(PackPhysicsEntity<?, ?> entity) {
             if (!DynamXDebugOptions.DOOR_ATTACH_POINTS.isActive())
                 return false; //avoid following checks
-            return entity instanceof IModuleContainer.IDoorContainer && ((IModuleContainer.IDoorContainer)entity).getDoors() != null;
+            return entity instanceof IModuleContainer.IDoorContainer && ((IModuleContainer.IDoorContainer) entity).getDoors() != null;
         }
 
         @Override
         public void render(PackPhysicsEntity<?, ?> entity, double x, double y, double z, float partialTicks) {
-            Vector3f p1 = new Vector3f();
+            Vector3f point = new Vector3f();
             if (entity instanceof BaseVehicleEntity) {
                 for (PartDoor door : ((BaseVehicleEntity<?>) entity).getPackInfo().getPartsByType(PartDoor.class)) {
-                    p1 = door.getCarAttachPoint();
-                   /* Vector3f doorPos = Trigonometry.rotateVectorByQuaternion(door.getPosition().add(Vector3fPool.get(door.getPosition().x > 0 ? 1 : -1, 0, 0)),
-                            entity.rotationQuat);*/
-                    RenderGlobal.drawBoundingBox(p1.x - 0, p1.y - 0.05f,
-                            p1.z - 0.05f, p1.x + 0.05f, p1.y + 0.05f, p1.z + 0.05f,
+                    point = door.getCarAttachPoint();
+                    RenderGlobal.drawBoundingBox(point.x - 0, point.y - 0.05f,
+                            point.z - 0.05f, point.x + 0.05f, point.y + 0.05f, point.z + 0.05f,
                             1f, 1, 1, 1);
 
                     MutableBoundingBox box = new MutableBoundingBox();
                     door.getBox(box);
-                    //box.offset(Vector3fPool.get(door.getOffset()).multLocal(-1));
                     box.offset(door.getPosition());
 
                     RenderGlobal.drawBoundingBox(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ,
                             0, 0, 1, 1);
 
-                    /*RenderGlobal.drawBoundingBox(door.getPosition().x - door.getBoxDim().x, door.getPosition().y - door.getBoxDim().y,
-                            door.getPosition().z - door.getBoxDim().z, door.getPosition().x + door.getBoxDim().x, door.getPosition().y + door.getBoxDim().y,
-                            door.getPosition().z + door.getBoxDim().z,
-                            0, 0, 1, 1);*/
-
                 }
 
             } else if (entity instanceof DoorEntity) {
                 if (((DoorEntity<?>) entity).getPackInfo() != null) {
-                    p1 = ((DoorEntity<?>) entity).getPackInfo().getDoorAttachPoint();
+                    point = ((DoorEntity<?>) entity).getPackInfo().getDoorAttachPoint();
                 }
 
-                RenderGlobal.drawBoundingBox(p1.x - 0, p1.y - 0.05f,
-                        p1.z - 0.05f, p1.x + 0.05f, p1.y + 0.05f, p1.z + 0.05f,
+                RenderGlobal.drawBoundingBox(point.x - 0, point.y - 0.05f,
+                        point.z - 0.05f, point.x + 0.05f, point.y + 0.05f, point.z + 0.05f,
                         0.5f, 0, 1, 1);
             }
         }
@@ -334,8 +323,7 @@ public class VehicleDebugRenderer {
      *
      * @see IRotatedCollisionHandler
      */
-    public static class PropsContainerDebug implements DebugRenderer<BaseVehicleEntity<?>>
-    {
+    public static class PropsContainerDebug implements DebugRenderer<BaseVehicleEntity<?>> {
         @Override
         public boolean shouldRender(BaseVehicleEntity<?> entity) {
             return DynamXDebugOptions.PROPS_CONTAINERS.isActive();
@@ -349,8 +337,8 @@ public class VehicleDebugRenderer {
         @Override
         public void render(BaseVehicleEntity<?> entity, double x, double y, double z, float partialTicks) {
             List<PartPropsContainer> containers = entity.getPackInfo().getPartsByType(PartPropsContainer.class);
-            if(!containers.isEmpty()) {
-                for(PartPropsContainer container : containers) {
+            if (!containers.isEmpty()) {
+                for (PartPropsContainer container : containers) {
                     GlStateManager.pushMatrix();
                     GlStateManager.translate(-entity.posX, -entity.posY, -entity.posZ);
 
@@ -450,7 +438,7 @@ public class VehicleDebugRenderer {
     public static class SeatDebug implements DebugRenderer<BaseVehicleEntity<?>> {
         @Override
         public boolean shouldRender(BaseVehicleEntity<?> entity) {
-            return DynamXDebugOptions.SEATS.isActive();
+            return DynamXDebugOptions.SEATS_AND_STORAGE.isActive();
         }
 
         @Override

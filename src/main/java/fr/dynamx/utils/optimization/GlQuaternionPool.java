@@ -5,8 +5,7 @@ import org.lwjgl.util.vector.Quaternion;
 import javax.annotation.concurrent.NotThreadSafe;
 
 @NotThreadSafe
-public class GlQuaternionPool extends ClassPool<Quaternion>
-{
+public class GlQuaternionPool extends ClassPool<Quaternion> {
     private static final GlQuaternionPool INSTANCE = new GlQuaternionPool();
 
     public static void openPool() {
@@ -17,37 +16,32 @@ public class GlQuaternionPool extends ClassPool<Quaternion>
         getINSTANCE().closeSubPool();
     }
 
-    public static Quaternion get()
-    {
+    public static Quaternion get() {
         Quaternion v = getINSTANCE().provideNewInstance();
         v.set(0, 0, 0, 0);
         return v;
     }
 
-    public static Quaternion get(Quaternion from)
-    {
+    public static Quaternion get(Quaternion from) {
         Quaternion v = getINSTANCE().provideNewInstance();
         v.set(from);
         return v;
     }
 
-    public static Quaternion get(com.jme3.math.Quaternion from)
-    {
+    public static Quaternion get(com.jme3.math.Quaternion from) {
         Quaternion v = getINSTANCE().provideNewInstance();
         v.set(from.getX(), from.getY(), from.getZ(), from.getW());
         return v;
     }
 
-    public GlQuaternionPool()
-    {
+    public GlQuaternionPool() {
         super(10);
     }
 
     @Override
-    public Quaternion[] createNewPool(int newInstancesStart, int size)
-    {
+    public Quaternion[] createNewPool(int newInstancesStart, int size) {
         Quaternion[] pool = new Quaternion[size];
-        for(int i=newInstancesStart;i<size;i++)
+        for (int i = newInstancesStart; i < size; i++)
             pool[i] = new Quaternion();
         return pool;
     }
@@ -57,8 +51,7 @@ public class GlQuaternionPool extends ClassPool<Quaternion>
         return 10;
     }
 
-    public static GlQuaternionPool getINSTANCE()
-    {
+    public static GlQuaternionPool getINSTANCE() {
         return INSTANCE;
     }
 }

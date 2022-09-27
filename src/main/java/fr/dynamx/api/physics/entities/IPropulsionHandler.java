@@ -4,15 +4,14 @@ import fr.dynamx.api.entities.modules.IEngineModule;
 
 /**
  * Physics handler of {@link fr.dynamx.api.entities.modules.IPropulsionModule} <br>
- *      Controls the behavior of physics wheels for example
+ * Controls the behavior of physics wheels for example
  */
-public interface IPropulsionHandler
-{
+public interface IPropulsionHandler {
     /**
      * Called by the engine to accelerate
      *
-     * @param module The engine
-     * @param strength The strength, between -1 and 1f
+     * @param module     The engine
+     * @param strength   The strength, between -1 and 1f
      * @param speedLimit The speed limit, in km/h (especially for cars)
      */
     void accelerate(IEngineModule module, float strength, float speedLimit);

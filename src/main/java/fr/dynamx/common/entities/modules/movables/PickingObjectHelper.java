@@ -86,7 +86,7 @@ public class PickingObjectHelper {
             } else if (shapeType.getObjectIn() instanceof DoorsModule.DoorVarContainer) {
                 physicsEntity = ((DoorsModule.DoorVarContainer) shapeType.getObjectIn()).getModule().vehicleEntity;
             }
-            if(physicsEntity == null)
+            if (physicsEntity == null)
                 return;
             MovableModule movableModule = physicsEntity.getModuleByType(MovableModule.class);
             //use entity id because instances depends on the side

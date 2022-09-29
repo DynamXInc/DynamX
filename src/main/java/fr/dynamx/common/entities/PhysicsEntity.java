@@ -18,6 +18,7 @@ import fr.dynamx.common.network.sync.vars.PosSynchronizedVariable;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.player.WalkingOnPlayerController;
 import fr.dynamx.common.physics.terrain.PhysicsEntityTerrainLoader;
+import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.PhysicsEntityException;
 import fr.dynamx.utils.debug.Profiler;
 import fr.dynamx.utils.maths.DynamXGeometry;
@@ -135,17 +136,6 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
         rotationYaw = spawnRotationAngle;
     }
 
-    @Override
-    public void writeSpawnData(ByteBuf buffer) {
-        if (CONSTRUYE_DEBUG)
-            System.out.println("WRITE SPAWN DATA " + rotationYaw + " " + physicsRotation + " " + getEntityId() + " " + this);
-    }
-
-    @Override
-    public void readSpawnData(ByteBuf additionalData) {
-        if (CONSTRUYE_DEBUG)
-            System.out.println("READ SPAWN DATA " + rotationYaw + " " + physicsRotation + " " + getEntityId() + " " + this);
-    }
 
     @Override
     protected void entityInit() {
@@ -185,7 +175,6 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
                 if (CONSTRUYE_DEBUG)
                     System.out.println("INIT AT " + posX + " " + posY + " " + posZ + " " + rotationYaw + " " + getEntityId());
                 physicsPosition.set((float) posX, (float) posY, (float) posZ);
-                physicsRotation.set(DynamXGeometry.rotationYawToQuaternion(rotationYaw));
                 if (!initEntityProperties()) {
                     setDead();
                     return;
@@ -201,21 +190,41 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     }
 
     @Override
+    public void writeSpawnData(ByteBuf buffer) {
+        DynamXUtils.writeQuaternion(buffer, physicsRotation);
+        if (CONSTRUYE_DEBUG)
+            System.out.println("WRITE SPAWN DATA " + physicsRotation);
+    }
+
+    @Override
+    public void readSpawnData(ByteBuf additionalData) {
+        physicsRotation.set(DynamXUtils.readQuaternion(additionalData));
+        if (CONSTRUYE_DEBUG)
+            System.out.println("READ SPAWN DATA " + physicsRotation);
+    }
+
+    @Override
+    public NBTTagCompound writeToNBT(NBTTagCompound compound) {
+        DynamXUtils.writeQuaternionNBT(compound, physicsRotation);
+        return super.writeToNBT(compound);
+    }
+
+    @Override
     protected void readEntityFromNBT(NBTTagCompound compound) {
         //Force init here, we have all the info needed
         QuaternionPool.openPool();
         physicsPosition.set((float) posX, (float) posY, (float) posZ);
-        physicsRotation.set(DynamXGeometry.rotationYawToQuaternion(rotationYaw));
+        physicsRotation.set(DynamXUtils.readQuaternionNBT(compound));
         QuaternionPool.closePool();
         if (CONSTRUYE_DEBUG)
-            System.out.println("INIT FROM NBT " + physicsPosition + " " + rotationYaw + " " + getEntityId());
+            System.out.println("INIT FROM NBT " + physicsPosition);
         if (!initEntityProperties()) {
             setDead();
             return;
         }
         if (CONSTRUYE_DEBUG) {
             float spawnRotationAngle = -this.rotationYaw * 3.1415927F / 180.0F;
-            System.out.println("So initial state is " + physicsRotation + " " + rotationYaw + " " + spawnRotationAngle + " " + this);
+            System.out.println("So initial state is " + physicsRotation);
         }
         initialized = 1;
     }
@@ -411,13 +420,12 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
      * Computes yaw and pitch from the given quaternion
      */
     private void alignRotation(Quaternion localQuat) {
-        Vector3f Forward = Vector3fPool.get();
-        Forward = localQuat.mult(DynamXGeometry.multiply[0], Forward);
+        Vector3f forwardVec = Vector3fPool.get();
+        forwardVec = localQuat.mult(DynamXGeometry.multiply[0], forwardVec);
 
-        this.rotationPitch = DynamXGeometry.getPitch(Forward) % 360;
-        float rotationY = DynamXGeometry.getYaw(Forward) % 360;
+        this.rotationPitch = DynamXGeometry.getPitch(forwardVec) % 360;
 
-        rotationYaw = rotationY;
+        rotationYaw = DynamXGeometry.getYaw(forwardVec) % 360;
         if (CONSTRUYE_DEBUG && rotationYaw == 0) {
             System.out.println("HAVE SET ROTATION TO 0 :O " + localQuat + " " + renderRotation + " " + physicsRotation + " " + rotationYaw + " " + this);
         }

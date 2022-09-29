@@ -1,5 +1,6 @@
 package fr.dynamx.common.physics.entities;
 
+import com.jme3.bullet.collision.Activation;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
@@ -18,14 +19,13 @@ import net.minecraft.util.math.Vec3d;
  * @param <T> The entity type
  */
 public abstract class EntityPhysicsHandler<T extends PhysicsEntity<?>> extends AbstractEntityPhysicsHandler<T, PhysicsRigidBody> {
-    private final Vector3f linearVel;
-    private final Vector3f rotationalVel;
+    private final Vector3f linearVel = new Vector3f();
+    private final Vector3f rotationalVel = new Vector3f();
     private boolean appliedBuoy;
 
     public EntityPhysicsHandler(T entity) {
         super(entity);
-        this.linearVel = new Vector3f();
-        this.rotationalVel = new Vector3f();
+        collisionObject.setPhysicsRotation(entity.physicsRotation);
     }
 
     @Override
@@ -35,7 +35,7 @@ public abstract class EntityPhysicsHandler<T extends PhysicsEntity<?>> extends A
         getCollisionObject().getAngularVelocity(rotationalVel);
 
         //Buoyancy effect W.I.P
-        if (getCollisionObject().isInWorld()) {
+        if (collisionObject.isInWorld()) {
             Vector3f bodyPos = getPosition();
             BlockPos pos = new BlockPos(bodyPos.x, bodyPos.y, bodyPos.z);
             IBlockState blockState = handledEntity.world.getBlockState(pos);

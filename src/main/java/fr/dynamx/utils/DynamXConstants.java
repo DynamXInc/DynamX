@@ -15,7 +15,7 @@ public class DynamXConstants
     public static final String DEFAULT_ACSGUIS_VERSION = "1.2.4-3";
     public static final String ACSLIBS_REQUIRED_VERSION = "[1.1.0,)"; //TODO UPGRADE TO 1.2.0
 
-    public static final String LIBBULLET_VERSION = "14.3.0";
+    public static final String LIBBULLET_VERSION = "16.3.0";
     /** .dc file version, only change when an update of libbullet breaks the .dc files, to regenerate them */
     public static final String DC_FILE_VERSION = "12.5.0";
     /**

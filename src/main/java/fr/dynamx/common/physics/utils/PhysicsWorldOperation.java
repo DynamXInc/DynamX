@@ -50,55 +50,57 @@ public class PhysicsWorldOperation<A> {
      * @param entities      The cache of added entities
      */
     public void execute(PhysicsSpace dynamicsWorld,  Set<PhysicsJoint> joints, Collection<PhysicsEntity<?>> entities) {
-        switch (operation) {
-            case ADD_VEHICLE:
-                if (dynamicsWorld.getVehicleList().contains(object))
-                    DynamXMain.log.fatal("PhysicsVehicle " + object + " is already in the physics world, please report this !");
-            case ADD_OBJECT:
-                if (!dynamicsWorld.getRigidBodyList().contains(object))
-                    dynamicsWorld.addCollisionObject((PhysicsCollisionObject) object);
-                else
-                    DynamXMain.log.fatal("PhysicsCollisionObject " + object + " is already registered, please report this !");
-                break;
-            case REMOVE_VEHICLE:
-                if (!dynamicsWorld.getVehicleList().contains(object))
-                    DynamXMain.log.fatal("PhysicsVehicle " + object + " is not is the physics world, please report this !");
-            case REMOVE_OBJECT:
-                if (dynamicsWorld.getRigidBodyList().contains(object))
-                    dynamicsWorld.removeCollisionObject((PhysicsCollisionObject) object);
-                break;
-            case ADD_ENTITY:
-                if (entities.contains(object))
-                    DynamXMain.log.fatal("Entity " + object + " is already registered, please report this !");
-                else
-                    entities.add((PhysicsEntity<?>) object);
-                ((PhysicsEntity<?>) object).isRegistered = 2;
-                break;
-            case REMOVE_ENTITY:
-                PhysicsEntity<?> et = (PhysicsEntity<?>) object;
-                entities.remove(et);
-                DynamXMain.proxy.scheduleTask(et.world, () -> {
-                    List<PhysicsEntity> physicsEntities = et.world.getEntitiesWithinAABB(PhysicsEntity.class, et.getEntityBoundingBox().expand(10, 10, 10));
-                    physicsEntities.forEach(entity -> {
-                        if (entity != et) {
-                            entity.forcePhysicsActivation();
-                        }
+        if(object != null) {
+            switch (operation) {
+                case ADD_VEHICLE:
+                    if (dynamicsWorld.getVehicleList().contains(object))
+                        DynamXMain.log.fatal("PhysicsVehicle " + object + " is already in the physics world, please report this !");
+                case ADD_OBJECT:
+                    if (!dynamicsWorld.getRigidBodyList().contains(object))
+                        dynamicsWorld.addCollisionObject((PhysicsCollisionObject) object);
+                    else
+                        DynamXMain.log.fatal("PhysicsCollisionObject " + object + " is already registered, please report this !");
+                    break;
+                case REMOVE_VEHICLE:
+                    if (!dynamicsWorld.getVehicleList().contains(object))
+                        DynamXMain.log.fatal("PhysicsVehicle " + object + " is not is the physics world, please report this !");
+                case REMOVE_OBJECT:
+                    if (dynamicsWorld.getRigidBodyList().contains(object))
+                        dynamicsWorld.removeCollisionObject((PhysicsCollisionObject) object);
+                    break;
+                case ADD_ENTITY:
+                    if (entities.contains(object))
+                        DynamXMain.log.fatal("Entity " + object + " is already registered, please report this !");
+                    else
+                        entities.add((PhysicsEntity<?>) object);
+                    ((PhysicsEntity<?>) object).isRegistered = 2;
+                    break;
+                case REMOVE_ENTITY:
+                    PhysicsEntity<?> et = (PhysicsEntity<?>) object;
+                    entities.remove(et);
+                    DynamXMain.proxy.scheduleTask(et.world, () -> {
+                        List<PhysicsEntity> physicsEntities = et.world.getEntitiesWithinAABB(PhysicsEntity.class, et.getEntityBoundingBox().expand(10, 10, 10));
+                        physicsEntities.forEach(entity -> {
+                            if (entity != et) {
+                                entity.forcePhysicsActivation();
+                            }
+                        });
                     });
-                });
-                break;
-            case ADD_CONSTRAINT:
-                if (object != null && !joints.contains(object)) {
-                    joints.add((PhysicsJoint) object);
-                    dynamicsWorld.addJoint((PhysicsJoint) object);
-                } else
-                    DynamXMain.log.fatal("PhysicsJoint " + object + " is already registered, please report this !");
-                break;
-            case REMOVE_CONSTRAINT:
-                if (joints.contains(object)) {
-                    joints.remove(object);
-                    dynamicsWorld.removeJoint((PhysicsJoint) object);
-                }
-                break;
+                    break;
+                case ADD_CONSTRAINT:
+                    if (object != null && !joints.contains(object)) {
+                        joints.add((PhysicsJoint) object);
+                        dynamicsWorld.addJoint((PhysicsJoint) object);
+                    } else
+                        DynamXMain.log.fatal("PhysicsJoint " + object + " is already registered, please report this !");
+                    break;
+                case REMOVE_CONSTRAINT:
+                    if (joints.contains(object)) {
+                        joints.remove(object);
+                        dynamicsWorld.removeJoint((PhysicsJoint) object);
+                    }
+                    break;
+            }
         }
         if (callback != null) {
             PhysicsWorldOperation<?> operation = null;

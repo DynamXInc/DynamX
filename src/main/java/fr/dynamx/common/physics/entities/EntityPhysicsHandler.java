@@ -31,6 +31,10 @@ public abstract class EntityPhysicsHandler<T extends PhysicsEntity<?>> extends A
     @Override
     public void update() {
         super.update();
+        if(collisionObject.getActivationState() == Activation.error){
+            handledEntity.setDead();
+            return;
+        }
         getCollisionObject().getLinearVelocity(linearVel);
         getCollisionObject().getAngularVelocity(rotationalVel);
 

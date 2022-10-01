@@ -3,8 +3,6 @@ package fr.dynamx.common.contentpack.parts;
 import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
-import fr.dynamx.api.contentpack.object.IShapeContainer;
-import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
@@ -131,15 +129,13 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
         owner.arrangeDoorID(this);
         owner.addRenderedParts(getPartName());
         carModelPath = DynamXUtils.getModelPath(getPackName(), owner.model);
-        physicsCollisionShape = ShapeUtils.generateComplexModelCollisions(carModelPath, getPartName(), new Vector3f(1,1,1), new Vector3f(), 0);
+        physicsCollisionShape = ShapeUtils.generateComplexModelCollisions(carModelPath, getPartName(), new Vector3f(1, 1, 1), new Vector3f(), 0);
     }
 
     @Override
     public void addModules(BaseVehicleEntity<?> entity, ModuleListBuilder modules) {
         if (!modules.hasModuleOfClass(DoorsModule.class)) {
-                DoorsModule doorsModule = new DoorsModule(entity);
-                modules.add(doorsModule);
-                System.out.println(doorsModule);
+            modules.add(new DoorsModule(entity));
         }
     }
 

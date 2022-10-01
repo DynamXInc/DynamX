@@ -32,11 +32,12 @@ import static fr.dynamx.common.DynamXMain.log;
 public class ShapeUtils {
     // Shape generation
     public static CompoundCollisionShape generateComplexModelCollisions(ObjModelPath path, String objectName, Vector3f scale, Vector3f centerOfMass, float shapeYOffset) {
+        String lowerCaseObjectName = objectName.toLowerCase();
         String modelPath = DynamXMain.resDir + File.separator + path.getPackName() + File.separator + "assets" +
                 File.separator + path.getModelPath().getNamespace() + File.separator + path.getModelPath().getPath().replace("/", File.separator);
 
         String modelName = modelPath.substring(modelPath.lastIndexOf(File.separator) + 1);
-        File file = new File(modelPath.replace(".obj", "_" +objectName+"_"+ DynamXConstants.DC_FILE_VERSION + ".dc"));
+        File file = new File(modelPath.replace(".obj", "_" +lowerCaseObjectName+"_"+ DynamXConstants.DC_FILE_VERSION + ".dc"));
         ShapeGenerator shapeGenerator = null;
         long start = System.currentTimeMillis();
         if (file.exists()) {
@@ -61,7 +62,7 @@ public class ShapeUtils {
             if (unZip.exists()) {
                 //load file
                 try {
-                    log.info("Using dezipped .dc file for " + objectName + " of pack " + path.getPackName() + ". Consider putting it in the zip file and delete the dezipped file.");
+                    log.info("Using dezipped .dc file for " + lowerCaseObjectName + " of pack " + path.getPackName() + ". Consider putting it in the zip file and delete the dezipped file.");
                     shapeGenerator = loadFile(Files.newInputStream(unZip.toPath()));
                 } catch (Exception e) {
                     log.error("Cannot load .dc file of " + modelPath + " (Zipped pack). Re-creating it.", e);
@@ -101,8 +102,8 @@ public class ShapeUtils {
         if (shapeGenerator == null) {
             ObjModelServer model = ObjModelServer.createServerObjModel(path);
 
-            float[] pos = objectName.isEmpty() ? model.getVerticesPos() : model.getVerticesPos(objectName);
-            int[] indices = objectName.isEmpty() ? model.getAllMeshIndices() : model.getMeshIndices(objectName);
+            float[] pos = lowerCaseObjectName.isEmpty() ? model.getVerticesPos() : model.getVerticesPos(lowerCaseObjectName);
+            int[] indices = lowerCaseObjectName.isEmpty() ? model.getAllMeshIndices() : model.getMeshIndices(lowerCaseObjectName);
 
             long end = System.currentTimeMillis();
             long time = end - start;
@@ -139,7 +140,7 @@ public class ShapeUtils {
             }
             end = System.currentTimeMillis();
             time = end - start;
-            log.info("Generated " + modelName + " shape in " + time + " ms");
+            log.info("Generated " + file.getName() + " shape in " + time + " ms");
         }
         CompoundCollisionShape collisionShape = new CompoundCollisionShape();
         for (float[] hullPoint : shapeGenerator.getHullPoints()) {
@@ -149,15 +150,15 @@ public class ShapeUtils {
         }
         long end = System.currentTimeMillis();
         long time = end - start;
-        log.info("Loaded " + modelName + " in " + time + " ms");
+        log.info("Loaded " + file.getName() + " in " + time + " ms");
         return collisionShape;
     }
 
     public static void addFilesToExistingZip(File zipFile, File modelFile, ShapeGenerator shapeGenerator) throws IOException {
         byte[] buf = new byte[1024];
         File outputZipFile = new File(zipFile.getParentFile(), zipFile.getName()+".temp");
-        ZipInputStream zin = new ZipInputStream(new FileInputStream(zipFile));
-        ZipOutputStream out = new ZipOutputStream(new FileOutputStream(outputZipFile));
+        ZipInputStream zin = new ZipInputStream(Files.newInputStream(zipFile.toPath()));
+        ZipOutputStream out = new ZipOutputStream(Files.newOutputStream(outputZipFile.toPath()));
 
         ZipEntry entry = zin.getNextEntry();
         while (entry != null) {
@@ -196,7 +197,7 @@ public class ShapeUtils {
 
     private static void saveFile(File file, ShapeGenerator shapeGenerator) {
         try {
-            ObjectOutputStream out = new ObjectOutputStream(new GZIPOutputStream(new FileOutputStream(file)));
+            ObjectOutputStream out = new ObjectOutputStream(new GZIPOutputStream(Files.newOutputStream(file.toPath())));
             out.writeObject(shapeGenerator);
             out.close();
             log.info("Saved the shape " + file.getName());

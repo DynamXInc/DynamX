@@ -175,6 +175,10 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
                 if (CONSTRUYE_DEBUG)
                     System.out.println("INIT AT " + posX + " " + posY + " " + posZ + " " + rotationYaw + " " + getEntityId());
                 physicsPosition.set((float) posX, (float) posY, (float) posZ);
+                System.out.println("Spawn " +physicsRotation.norm() +" " + physicsRotation);
+                if(physicsRotation.equals(Quaternion.IDENTITY)) {
+                    physicsRotation.set(DynamXGeometry.rotationYawToQuaternion(rotationYaw));
+                }
                 if (!initEntityProperties()) {
                     setDead();
                     return;

@@ -22,6 +22,7 @@ import vhacd.VHACDParameters;
 
 import java.io.*;
 import java.nio.FloatBuffer;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.*;
@@ -31,19 +32,19 @@ import static fr.dynamx.common.DynamXMain.log;
 public class ShapeUtils {
     // Shape generation
     public static CompoundCollisionShape generateComplexModelCollisions(ObjModelPath path, String objectName, Vector3f scale, Vector3f centerOfMass, float shapeYOffset) {
-        String tessellatorModel = DynamXMain.resDir + File.separator + path.getPackName() + File.separator + "assets" +
+        String modelPath = DynamXMain.resDir + File.separator + path.getPackName() + File.separator + "assets" +
                 File.separator + path.getModelPath().getNamespace() + File.separator + path.getModelPath().getPath().replace("/", File.separator);
 
-        String modelName = tessellatorModel.substring(tessellatorModel.lastIndexOf(File.separator) + 1);
-        File file = new File(tessellatorModel.replace(".obj", "_" + DynamXConstants.DC_FILE_VERSION + ".dc"));
+        String modelName = modelPath.substring(modelPath.lastIndexOf(File.separator) + 1);
+        File file = new File(modelPath.replace(".obj", "_" +objectName+"_"+ DynamXConstants.DC_FILE_VERSION + ".dc"));
         ShapeGenerator shapeGenerator = null;
         long start = System.currentTimeMillis();
         if (file.exists()) {
             //load file
             try {
-                shapeGenerator = loadFile(new FileInputStream(file));
+                shapeGenerator = loadFile(Files.newInputStream(file.toPath()));
             } catch (Exception e) {
-                log.error("Cannot load .dc file of " + tessellatorModel + ". Re-creating it", e);
+                log.error("Cannot load .dc file of " + modelPath + ". Re-creating it", e);
                 file.delete();
                 shapeGenerator = null;
             }
@@ -61,9 +62,9 @@ public class ShapeUtils {
                 //load file
                 try {
                     log.info("Using dezipped .dc file for " + objectName + " of pack " + path.getPackName() + ". Consider putting it in the zip file and delete the dezipped file.");
-                    shapeGenerator = loadFile(new FileInputStream(unZip));
+                    shapeGenerator = loadFile(Files.newInputStream(unZip.toPath()));
                 } catch (Exception e) {
-                    log.error("Cannot load .dc file of " + tessellatorModel + " (Zipped pack). Re-creating it.", e);
+                    log.error("Cannot load .dc file of " + modelPath + " (Zipped pack). Re-creating it.", e);
                     unZip.delete();
                 }
             } else {
@@ -89,7 +90,7 @@ public class ShapeUtils {
                             shapeGenerator = loadFile(zip.getInputStream(entry));
                         }
                     } catch (IOException e) {
-                        log.error("Cannot load .dc file of " + tessellatorModel + " (Zipped pack). Creating it out of the zip.", e);
+                        log.error("Cannot load .dc file of " + modelPath + " (Zipped pack). Creating it out of the zip.", e);
                         shapeGenerator = null;
                     }
                 } else {
@@ -120,7 +121,7 @@ public class ShapeUtils {
             if (!file.getPath().contains(".zip") && !file.getPath().contains(ContentPackLoader.PACK_FILE_EXTENSION)) { //not a zip pack
                 saveFile(file, shapeGenerator);
             } else {
-                log.warn("Saving .dc file of " + tessellatorModel + " of a zipped pack in " + file + ". Consider putting it in the zip file of the pack.");
+                log.warn("Saving .dc file of " + modelPath + " of a zipped pack in " + file + ". Consider putting it in the zip file of the pack.");
                 try {
                     boolean zipped = file.getPath().contains(".zip");
                     File zipFile;

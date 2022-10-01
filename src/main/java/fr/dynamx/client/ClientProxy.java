@@ -175,7 +175,6 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
 
     @Override
     public IPhysicsWorld provideClientPhysicsWorld(World world) {
-        System.out.println("Create phy world for " + world);
         return new BuiltinThreadedPhysicsWorld(world, !ClientEventHandler.MC.isSingleplayer());
     }
 

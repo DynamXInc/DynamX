@@ -159,7 +159,4 @@ public class RenderCaterpillar<T extends CaterpillarEntity<?>> extends RenderBas
 
     }
 
-    @Override
-    public void spawnParticles(T carEntity, float partialTicks) {
-    }
 }

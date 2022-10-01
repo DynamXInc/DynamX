@@ -7,7 +7,6 @@ import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
-import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
 
 @RegisteredSubInfoType(name = "forcepoint", registries = SubInfoTypeRegistries.WHEELED_VEHICLES, strictName = false)
 public class FrictionPoint extends SubInfoType<ModularVehicleInfoBuilder> {

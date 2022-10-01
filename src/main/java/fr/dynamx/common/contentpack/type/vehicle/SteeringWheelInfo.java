@@ -5,7 +5,6 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoType;
 import fr.dynamx.api.contentpack.registry.*;
-import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
 
 /**
  * Info of the steering wheel of a {@link ModularVehicleInfoBuilder}

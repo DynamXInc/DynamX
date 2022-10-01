@@ -30,8 +30,4 @@ public class RenderProp<T extends PropsEntity<?>> extends RenderPhysicsEntity<T>
     @Override
     public void renderParts(T entity, float partialTicks) {
     }
-
-    @Override
-    public void spawnParticles(T entity, float partialTicks) {
-    }
 }

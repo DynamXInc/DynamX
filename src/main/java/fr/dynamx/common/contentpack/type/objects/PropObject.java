@@ -15,7 +15,8 @@ import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
-import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
+import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfoBuilder;
 import fr.dynamx.common.contentpack.loader.ObjectLoader;
 import fr.dynamx.common.contentpack.loader.PackFilePropertyData;
 import fr.dynamx.common.contentpack.loader.SubInfoTypeAnnotationCache;
@@ -23,35 +24,49 @@ import fr.dynamx.common.items.ItemProps;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.physics.ShapeUtils;
+import lombok.Getter;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RegisteredSubInfoType(name = "prop", registries = SubInfoTypeRegistries.BLOCKS_AND_PROPS, strictName = false)
-public class PropObject<T extends BlockObject<?>> extends AbstractProp<T> implements IPhysicsPackInfo, ISubInfoType<BlockObject<?>>, ISubInfoTypeOwner<BlockObject<?>> {
+public class PropObject<T extends BlockObject<?>> extends AbstractProp<T> implements IPhysicsPackInfo,
+        ISubInfoType<BlockObject<?>>, ISubInfoTypeOwner<BlockObject<?>>, ParticleEmitterInfo.IParticleEmitterContainer {
     private final BlockObject<?> owner;
     @PackFileProperty(configNames = "EmptyMass")
-    private int emptyMass;
+    @Getter
+    protected int emptyMass;
     @PackFileProperty(configNames = "CenterOfGravityOffset", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F)
-    private Vector3f centerOfMass;
+    @Getter
+    protected Vector3f centerOfMass;
     @PackFileProperty(configNames = "SpawnOffset", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false, defaultValue = "0 0.65 0")
-    private Vector3f spawnOffset = new Vector3f(0, 0.65f, 0);
+    @Getter
+    protected Vector3f spawnOffset = new Vector3f(0, 0.65f, 0);
     @PackFileProperty(configNames = "ContinuousCollisionDetection", required = false, defaultValue = "false")
-    private boolean isCCDEnabled;
+    @Getter
+    protected boolean isCCDEnabled;
     @PackFileProperty(configNames = "Friction", required = false, defaultValue = "0.5")
-    private float friction = 0.5f;
+    @Getter
+    protected float friction = 0.5f;
     @PackFileProperty(configNames = "Margin", required = false, defaultValue = "0.04")
-    private float margin = 0.04f;
+    @Getter
+    protected float margin = 0.04f;
     @PackFileProperty(configNames = "DespawnTime", required = false, defaultValue = "\"-1\" (disabled)")
-    private float despawnTime = -1;
+    @Getter
+    protected float despawnTime = -1;
     @PackFileProperty(configNames = "Damping", required = false, defaultValue = "0")
-    private float dampingFactor;
+    @Getter
+    protected float dampingFactor;
     @PackFileProperty(configNames = "Bounciness", required = false, defaultValue = "0")
-    private float restitutionFactor;
+    @Getter
+    protected float restitutionFactor;
     private List<Vector3f> debugBuffer;
+
+    private List<ParticleEmitterInfo<?>> particleEmitters = new ArrayList<>();
 
     public PropObject(String packName, String fileName) {
         super(packName, fileName);
@@ -76,14 +91,15 @@ public class PropObject<T extends BlockObject<?>> extends AbstractProp<T> implem
         this.scaleModifier = block.getScaleModifier();
         this.renderDistance = block.getRenderDistance();
         this.creativeTabName = block.getCreativeTabName();
-        this.useHullShape = block.doesUseHullShape();
+        this.useHullShape = block.useHullShape();
         this.texturesArray = block.texturesArray;
+        this.particleEmitters = block.getParticleEmitters();
         getPartShapes().addAll(block.getPartShapes());
     }
 
     @Override
     public List<PackFilePropertyData<?>> getInitiallyConfiguredProperties() {
-        //Don't require required properties of the block
+        //Don't require properties of the block
         return SubInfoTypeAnnotationCache.getOrLoadData(BlockObject.class).values().stream().filter(PackFilePropertyData::isRequired).collect(Collectors.toList());
     }
 
@@ -120,47 +136,6 @@ public class PropObject<T extends BlockObject<?>> extends AbstractProp<T> implem
         debugBuffer = ShapeUtils.getDebugVectorList(compoundCollisionShape, ShapeUtils.getDebugBuffer(compoundCollisionShape));
     }
 
-    public CompoundCollisionShape getCompoundCollisionShape() {
-        return compoundCollisionShape;
-    }
-
-    public int getEmptyMass() {
-        return emptyMass;
-    }
-
-    public Vector3f getSpawnOffset() {
-        return spawnOffset;
-    }
-
-    public float getDespawnTime() {
-        return despawnTime;
-    }
-
-    public float getMargin() {
-        return margin;
-    }
-
-    public boolean isCCDEnabled() {
-        return isCCDEnabled;
-    }
-
-    public float getFriction() {
-        return friction;
-    }
-
-    @Override
-    public Vector3f getCenterOfMass() {
-        return centerOfMass;
-    }
-
-    public float getDampingFactor() {
-        return dampingFactor;
-    }
-
-    public float getRestitutionFactor() {
-        return restitutionFactor;
-    }
-
     @Override
     public Collection<? extends IShapeInfo> getShapes() {
         return getCollisionBoxes();
@@ -173,7 +148,7 @@ public class PropObject<T extends BlockObject<?>> extends AbstractProp<T> implem
 
     @Override
     public <U extends InteractivePart<?, ModularVehicleInfoBuilder>> List<U> getInteractiveParts() {
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     @Override
@@ -182,12 +157,22 @@ public class PropObject<T extends BlockObject<?>> extends AbstractProp<T> implem
 
     @Override
     public List<ISubInfoType<BlockObject<?>>> getSubProperties() {
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     @Override
     public boolean shouldRegisterModel() {
         return owner == null || !model.equals(owner.getModel()); //Don't register the model twice if there is a block owning this prop
+    }
+
+    @Override
+    public void addParticleEmitter(ParticleEmitterInfo<?> emitterInfo) {
+        particleEmitters.add(emitterInfo);
+    }
+
+    @Override
+    public List<ParticleEmitterInfo<?>> getParticleEmitters() {
+        return particleEmitters;
     }
 
     @Override

@@ -18,6 +18,7 @@ import fr.dynamx.utils.debug.renderer.VehicleDebugRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraftforge.common.MinecraftForge;
+import org.lwjgl.util.vector.Quaternion;
 
 public class RenderBaseVehicle<T extends BaseVehicleEntity<?>> extends RenderPhysicsEntity<T> {
     public RenderBaseVehicle(RenderManager manager) {
@@ -49,8 +50,8 @@ public class RenderBaseVehicle<T extends BaseVehicleEntity<?>> extends RenderPhy
     }
 
     @Override
-    public void spawnParticles(T carEntity, float partialTicks) {
-        super.spawnParticles(carEntity, partialTicks);
+    public void spawnParticles(T carEntity, Quaternion rotation, float partialTicks) {
+        super.spawnParticles(carEntity, rotation, partialTicks);
         if (!MinecraftForge.EVENT_BUS.post(new RenderVehicleEntityEvent(Type.PARTICLES, this, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks))) {
             if (carEntity instanceof IModuleContainer.IPropulsionContainer) {
                 ((IModuleContainer.IPropulsionContainer<?>) carEntity).getPropulsion().spawnPropulsionParticles(this, partialTicks);

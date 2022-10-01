@@ -1,5 +1,6 @@
 package fr.dynamx.common.contentpack.parts;
 
+import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
@@ -11,15 +12,20 @@ import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.VehicleEntityEvent;
-import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
+import fr.dynamx.api.obj.ObjModelPath;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfoBuilder;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import fr.dynamx.utils.physics.DynamXPhysicsHelper;
+import fr.dynamx.utils.physics.ShapeUtils;
 import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
@@ -44,6 +50,9 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     private int attachStrength = 400;
 
     @Getter
+    @PackFileProperty(configNames = "Axis", required = false)
+    private int axisToUse = DynamXPhysicsHelper.Y_ROTATION_DOF;
+    @Getter
     @PackFileProperty(configNames = "OpenedDoorAngleLimit", required = false)
     private Vector2f openLimit = new Vector2f();
     @Getter
@@ -67,26 +76,24 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     @PackFileProperty(configNames = "Enabled", required = false, defaultValue = "true")
     private boolean enabled = true;
 
+    /**
+     * True if the mounting animation is playing, use to prevent other interactions in the same time
+     */
+    @Getter
+    @Setter
     public boolean isPlayerMounting;
+
+    @Getter
+    private CompoundCollisionShape physicsCollisionShape;
+    private ObjModelPath carModelPath;
 
     public PartDoor(ModularVehicleInfoBuilder owner, String partName) {
         super(owner, partName, 0, 0);
     }
 
-
     @Override
     public DynamXDebugOption getDebugOption() {
         return DynamXDebugOptions.DOOR_ATTACH_POINTS;
-    }
-    public void setPlayerMounting(boolean playerMounting) {
-        isPlayerMounting = playerMounting;
-    }
-
-    /**
-     * @return True if the mounting animation is playing, use to prevent other interactions in the same time
-     */
-    public boolean isPlayerMounting() {
-        return isPlayerMounting;
     }
 
     @Override
@@ -110,7 +117,10 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
 
     @Nullable
     public PartSeat getLinkedSeat(BaseVehicleEntity<?> vehicleEntity) {
-        return vehicleEntity.getPackInfo().getPartsByType(PartSeat.class).stream().filter(seat -> seat.getLinkedDoor() != null && seat.getLinkedDoor().equalsIgnoreCase(getPartName())).findFirst().orElse(null);
+        return vehicleEntity.getPackInfo().getPartsByType(PartSeat.class).stream()
+                .filter(seat -> seat.getLinkedDoor() != null && seat.getLinkedDoor().equalsIgnoreCase(getPartName()))
+                .findFirst()
+                .orElse(null);
     }
 
     @Override
@@ -118,6 +128,8 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
         super.appendTo(owner);
         owner.arrangeDoorID(this);
         owner.addRenderedParts(getPartName());
+        carModelPath = DynamXUtils.getModelPath(getPackName(), owner.model);
+        physicsCollisionShape = ShapeUtils.generateComplexModelCollisions(carModelPath, getPartName(), new Vector3f(1, 1, 1), new Vector3f(), 0);
     }
 
     @Override
@@ -158,7 +170,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
 
     @Override
     public <T extends InteractivePart<?, ModularVehicleInfoBuilder>> List<T> getInteractiveParts() {
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     @Override

@@ -36,8 +36,4 @@ public class RenderDoor<T extends DoorEntity<?>> extends RenderPhysicsEntity<T> 
 
     }
 
-    @Override
-    public void spawnParticles(T entity, float partialTicks) {
-
-    }
 }

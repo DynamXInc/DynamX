@@ -1,6 +1,7 @@
 package fr.dynamx.client.renders;
 
 import com.jme3.math.Quaternion;
+import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.events.DynamXBlockEvent;
 import fr.dynamx.api.events.EventStage;
@@ -8,12 +9,20 @@ import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.blocks.TEDynamXBlock;
+import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
+import fr.dynamx.common.entities.PackPhysicsEntity;
+import fr.dynamx.utils.DynamXUtils;
+import fr.dynamx.utils.client.ClientDynamXUtils;
+import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.debug.renderer.VehicleDebugRenderer;
+import fr.dynamx.utils.maths.DynamXGeometry;
+import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import fr.dynamx.utils.physics.DynamXPhysicsHelper;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
@@ -30,8 +39,18 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
             if (!MinecraftForge.EVENT_BUS.post(new DynamXBlockEvent.RenderTileEntity((DynamXBlock<?>) te.getBlockType(), getWorld(), te, this, x, y, z, partialTicks, destroyStage, alpha, EventStage.PRE))) {
                 GlStateManager.pushMatrix();
                 applyTransform(te, x, y, z);
+
+                Vector3f pos = DynamXUtils.toVector3f(te.getPos())
+                        .add(te.getBlockObjectInfo().getTranslation().add(te.getRelativeTranslation()))
+                        .add(0.5f, 1.5f, 0.5f);
+
+                Vector3f rot = te.getRelativeRotation()
+                        .add(te.getBlockObjectInfo().getRotation())
+                        .add(0, te.getRotation() * 22.5f, 0);
+
                 //Rendering the model
                 DynamXContext.getObjModelRegistry().getModel(te.getBlockObjectInfo().getModel()).renderModel((byte) te.getBlockMetadata());
+                DynamXRenderUtils.spawnParticles(te.getBlockObjectInfo(), te.getWorld(), pos, rot);
                 MinecraftForge.EVENT_BUS.post(new DynamXBlockEvent.RenderTileEntity((DynamXBlock<?>) te.getBlockType(), getWorld(), te, this, x, y, z, partialTicks, destroyStage, alpha, EventStage.POST));
                 GlStateManager.popMatrix();
             }
@@ -41,6 +60,7 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
             }
         }
     }
+
 
     public void applyTransform(TEDynamXBlock te, double x, double y, double z) {
         // Translate to block render pos and add the config translate value

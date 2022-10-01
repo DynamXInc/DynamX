@@ -1,4 +1,4 @@
-package fr.dynamx.common.contentpack.loader;
+package fr.dynamx.common.contentpack.type.vehicle;
 
 import com.jme3.bullet.collision.shapes.BoxCollisionShape;
 import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
@@ -45,42 +45,43 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
     private final String packName, fileName;
 
     @PackFileProperty(configNames = "Name")
-    private String defaultName;
+    protected String defaultName;
     @PackFileProperty(configNames = "Description")
-    private String description;
+    protected String description;
     @PackFileProperty(configNames = "EmptyMass")
-    private int emptyMass;
+    protected int emptyMass;
     @PackFileProperty(configNames = "DragCoefficient")
+    protected float dragFactor;
     private float dragFactor;
-    @PackFileProperty(configNames = "Model", type = DefinitionType.DynamXDefinitionTypes.DYNX_RESOURCE_LOCATION, description = "common.model", defaultValue = "obj/name_of_vehicle/name_of_model.obj")
-    private ResourceLocation model;
     @PackFileProperty(configNames = "PlayerStandOnTop", required = false, defaultValue = "ALWAYS")
     public EnumPlayerStandOnTop playerStandOnTop;
+    @PackFileProperty(configNames = "Model", type = DefinitionType.DynamXDefinitionTypes.DYNX_RESOURCE_LOCATION, description = "common.model", defaultValue = "obj/name_of_vehicle/name_of_model.obj")
+    public ResourceLocation model;
     @PackFileProperty(configNames = "ShapeYOffset", required = false)
-    private float shapeYOffset;
+    protected float shapeYOffset;
     @PackFileProperty(configNames = {"CreativeTabName", "CreativeTab", "TabName"}, required = false, defaultValue = "CreativeTab of DynamX", description = "common.creativetabname")
     protected String creativeTabName;
 
     /**
      * The particle emitters of this vehicle
      */
-    private final List<ParticleEmitterInfo<?>> particleEmitters = new ArrayList<>();
+    protected final List<ParticleEmitterInfo<?>> particleEmitters = new ArrayList<>();
     /**
      * The parts of this vehicle (wheels, seats, doors...)
      */
-    private final List<BasePart<?>> parts = new ArrayList<>();
+    protected final List<BasePart<?>> parts = new ArrayList<>();
     /**
      * The shapes of this vehicle, can be used for collisions
      */
-    private final List<PartShape<?>> partShapes = new ArrayList<>();
+    protected final List<PartShape<?>> partShapes = new ArrayList<>();
     /**
      * The light sources of this vehicle
      */
-    private final Map<String, PartLightSource.CompoundLight> lightSources = new HashMap<>();
+    protected final Map<String, PartLightSource.CompoundLight> lightSources = new HashMap<>();
     /**
      * The friction points of this vehicle
      */
-    private final List<FrictionPoint> frictionPoints = new ArrayList<>();
+    protected final List<FrictionPoint> frictionPoints = new ArrayList<>();
     /**
      * The list of all rendered parts for this vehicle <br>
      * A rendered part will not be rendered with the main part of the obj model <br>
@@ -89,10 +90,10 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
     private final List<String> renderedParts = new ArrayList<>();
 
     @PackFileProperty(configNames = "CenterOfGravityOffset", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F)
-    private Vector3f centerOfMass;
+    protected Vector3f centerOfMass;
     @PackFileProperty(configNames = "ScaleModifier", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false,
             defaultValue = "1 1 1")
-    private final Vector3f scaleModifier = new Vector3f(1, 1, 1);
+    protected final Vector3f scaleModifier = new Vector3f(1, 1, 1);
 
     @PackFileProperty(configNames = "DefaultEngine", required = false)
     private String defaultEngine;
@@ -100,26 +101,26 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
     private String defaultSounds;
 
     @PackFileProperty(configNames = "ItemScale", required = false, description = "common.itemscale", defaultValue = "0.2")
-    private float itemScale = 0.2f;
+    protected float itemScale = 0.2f;
     @PackFileProperty(configNames = "Item3DRenderLocation", required = false, description = "common.item3D", defaultValue = "all")
-    private Enum3DRenderLocation item3DRenderLocation = Enum3DRenderLocation.ALL;
+    protected Enum3DRenderLocation item3DRenderLocation = Enum3DRenderLocation.ALL;
     @PackFileProperty(configNames = "MaxVehicleSpeed", required = false, defaultValue = "infinite")
-    private float vehicleMaxSpeed = Integer.MAX_VALUE;
+    protected float vehicleMaxSpeed = Integer.MAX_VALUE;
     @PackFileProperty(configNames = "UseComplexCollisions", required = false, defaultValue = "true", description = "common.UseComplexCollisions")
-    private boolean useHullShape = true;
+    protected boolean useHullShape = true;
     @PackFileProperty(configNames = "Textures", required = false, type = DefinitionType.DynamXDefinitionTypes.STRING_ARRAY_2D)
     private String[][] texturesArray;
     @PackFileProperty(configNames = "DefaultZoomLevel", required = false, defaultValue = "4")
-    private int defaultZoomLevel = 4;
+    protected int defaultZoomLevel = 4;
 
     /**
      * The collision shape of this vehicle, generated either form the partShapes list, or the obj model of the vehicle (hull shape)
      */
-    private CompoundCollisionShape physicsCollisionShape;
+    protected CompoundCollisionShape physicsCollisionShape;
     /**
      * The debug buffer for the hull shape of the vehicle (generated from the obj model)
      */
-    private List<Vector3f> collisionShapeDebugBuffer;
+    protected List<Vector3f> collisionShapeDebugBuffer;
     /**
      * If something wrong happened building the vehicle (preventing it from loading)
      */
@@ -257,12 +258,16 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
         }
         //Map textures
         Map<Byte, TextureVariantData> bakedTextures = new HashMap<>();
-        bakedTextures.put((byte) 0, new TextureVariantData("default", (byte) 0, getName()));
+        int textureCount = 1;
+        bakedTextures.put((byte) 0, new TextureVariantData("Default", (byte) 0, getName()));
         if (texturesArray != null) {
             byte id = 1;
             for (String[] info : texturesArray) {
-                bakedTextures.put(id, new TextureVariantData(info[0], id, info[1]));
+                TextureVariantData variant = new TextureData(info[0], id, info[1]);
+                bakedTextures.put(id, variant);
                 id++;
+                if (variant.isItem())
+                    textureCount++;
             }
         }
         //Map lights
@@ -280,8 +285,7 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
                 }
             }
         }
-        return new ModularVehicleInfo(defaultName, getPackName(), getName(), description, emptyMass, playerStandOnTop, dragFactor, model, centerOfMass, scaleModifier, bakedTextures, parts, partShapes, subProperties, lightSources,
-                frictionPoints, particleEmitters, vehicleMaxSpeed, directingWheel, itemScale, item3DRenderLocation, FMLCommonHandler.instance().getSide().isClient() ? renderedParts : null, physicsCollisionShape, collisionShapeDebugBuffer, creativeTabName, defaultZoomLevel);
+        return new ModularVehicleInfo<>(this, directingWheel, bakedTextures, textureCount, FMLCommonHandler.instance().getSide().isClient() ? renderedParts : null);
     }
 
     @Override
@@ -304,7 +308,7 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
 
     @Override
     public ModularVehicleInfo<?> build() {
-        return build(DynamXObjectLoaders.WHEELS.infos, DynamXObjectLoaders.ENGINES.infos, DynamXObjectLoaders.SOUNDS.infos);
+        return build(DynamXObjectLoaders.WHEELS.getInfos(), DynamXObjectLoaders.ENGINES.getInfos(), DynamXObjectLoaders.SOUNDS.getInfos());
     }
 
     @Override

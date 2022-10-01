@@ -3,6 +3,7 @@ package fr.dynamx.utils.client;
 import com.jme3.math.Vector3f;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.contentpack.parts.PartDoor;
 import fr.dynamx.common.contentpack.parts.PartLightSource;
@@ -10,6 +11,7 @@ import fr.dynamx.common.contentpack.parts.PartWheel;
 import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.contentpack.type.vehicle.SteeringWheelInfo;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
+import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
@@ -20,6 +22,7 @@ import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.world.World;
 import org.lwjgl.opengl.APPLEVertexArrayObject;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
@@ -204,6 +207,20 @@ public class DynamXRenderUtils {
         GlStateManager.disableBlend();
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         GlStateManager.popMatrix();
+    }
+
+    public static void spawnParticles(ParticleEmitterInfo.IParticleEmitterContainer particleEmitterInfo, World world, Vector3f initialPos, Vector3f initialRot) {
+        particleEmitterInfo.getParticleEmitters()
+                .forEach(emitterInfo -> {
+                    Vector3f rotatedPoint = DynamXGeometry.getRotatedPoint(emitterInfo.position, initialRot.x, initialRot.y, initialRot.z);
+                    world.spawnParticle(emitterInfo.particleType,
+                            initialPos.x + rotatedPoint.x,
+                            initialPos.y + rotatedPoint.y,
+                            initialPos.z + rotatedPoint.z,
+                            emitterInfo.velocity.x,
+                            emitterInfo.velocity.y,
+                            emitterInfo.velocity.z);
+                });
     }
 
     public static int genVertexArrays() {

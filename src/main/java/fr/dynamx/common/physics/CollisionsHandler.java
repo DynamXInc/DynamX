@@ -70,7 +70,7 @@ public class CollisionsHandler {
 
         public void handleCollision() {
             //if (getAppliedImpulse() != 0) {
-            if (entityB.getObjectIn() instanceof PhysicsEntity) {
+            if (entityA.getObjectIn() instanceof PhysicsEntity && entityB.getObjectIn() instanceof PhysicsEntity) {
                 if (entityA.getType().isBulletEntity()) {
                     ((PhysicsEntity<?>) entityA.getObjectIn()).onCollisionEnter(collisionEvent, entityA, entityB);
                 } else if (entityB.getType().isBulletEntity()) {

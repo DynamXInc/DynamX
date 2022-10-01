@@ -6,7 +6,7 @@ import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.*;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
-import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfoBuilder;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.VehicleLightsModule;
 import fr.dynamx.client.renders.model.texture.TextureVariantData;

@@ -9,8 +9,10 @@ import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
+import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.EnumSeatPlayerPosition;
 import fr.dynamx.utils.client.ClientDynamXUtils;
+import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.debug.renderer.DebugRenderer;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.QuaternionPool;
@@ -66,15 +68,12 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
                 appliedRotation = setupRenderTransform(entity, x, y, z, entityYaw, partialTicks);
                 renderMain(entity, partialTicks);
                 renderParts(entity, partialTicks);
-                spawnParticles(entity, partialTicks);
-            /*if (entity instanceof ModularVehicleEntity) {
-                ClientDynamXUtils.renderCar(((ModularVehicleEntity<?>) entity).getPackInfo(), ((ModularVehicleEntity<?>) entity).getTextureInfo().getChassisTextureId());
-            }*/
+                spawnParticles(entity, appliedRotation, partialTicks);
             }
             GlStateManager.popMatrix();
         }
 
-        //Render players inside of the entity
+        //Render players inside the entity
         if (ClientEventHandler.renderPlayer != null && !MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.RenderPhysicsEntityEvent(entity, this, PhysicsEntityEvent.RenderPhysicsEntityEvent.Type.RIDDING_PLAYERS, x, y, z, partialTicks))) {
             renderRidingPlayers(entity, x, y, z, partialTicks, appliedRotation);
         }
@@ -119,13 +118,30 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
                 }
 
                 //Remove player's yaw offset rotation, to avoid stiff neck
-                ((AbstractClientPlayer) e).renderYawOffset = ((AbstractClientPlayer) e).prevRenderYawOffset = 0;
+                PartSeat seat = ((IModuleContainer.ISeatsContainer) entity).getSeats().getRidingSeat(e);
+                if (seat != null && seat.shouldLimitFieldOfView()) {
+                    ((AbstractClientPlayer) e).renderYawOffset = ((AbstractClientPlayer) e).prevRenderYawOffset = 0;
+                }
+
                 //The render the player, e.rotationYaw is the name plate rotation
                 ClientEventHandler.renderPlayer.doRender((AbstractClientPlayer) e, 0, 0, 0, e.rotationYaw, partialTicks);
                 GlStateManager.popMatrix();
             }
         }
         ClientEventHandler.rendering = false;
+    }
+
+    public void spawnParticles(T physicsEntity, Quaternion rotation, float partialTicks) {
+        if (physicsEntity instanceof PackPhysicsEntity) {
+            PackPhysicsEntity<?, ?> packPhysicsEntity = (PackPhysicsEntity<?, ?>) physicsEntity;
+            if (packPhysicsEntity.getPackInfo() instanceof ParticleEmitterInfo.IParticleEmitterContainer) {
+                DynamXRenderUtils.spawnParticles(
+                        (ParticleEmitterInfo.IParticleEmitterContainer) packPhysicsEntity.getPackInfo(),
+                        physicsEntity.world,
+                        DynamXUtils.toVector3f(physicsEntity.getPositionVector()),
+                        new com.jme3.math.Quaternion(rotation.x, rotation.y, rotation.z, rotation.w));
+            }
+        }
     }
 
     /**
@@ -154,25 +170,6 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
      * Renders the core of the entity, like a car chassis
      */
     public abstract void renderMain(T entity, float partialsTicks);
-
-    /**
-     * Spawns particles used for the render (like drift particles)
-     */
-    public void spawnParticles(T entity, float partialTicks) {
-        if (entity instanceof PackPhysicsEntity) {
-            if (((PackPhysicsEntity<?, ?>) entity).getPackInfo() instanceof ParticleEmitterInfo.IParticleEmitterContainer) {
-                ((ParticleEmitterInfo.IParticleEmitterContainer) ((PackPhysicsEntity<?, ?>) entity).getPackInfo()).getParticleEmitters().forEach(emitterInfo -> {
-                    entity.world.spawnParticle(emitterInfo.particleType,
-                            entity.posX + emitterInfo.position.x,
-                            entity.posY + emitterInfo.position.y,
-                            entity.posZ + emitterInfo.position.z,
-                            emitterInfo.velocity.x,
-                            emitterInfo.velocity.y,
-                            emitterInfo.velocity.z);
-                });
-            }
-        }
-    }
 
     /**
      * Renders active {@link DebugRenderer}s <br>

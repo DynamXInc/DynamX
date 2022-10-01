@@ -22,6 +22,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagDouble;
 import net.minecraft.nbt.NBTTagFloat;
 import net.minecraft.nbt.NBTTagList;
@@ -85,6 +86,17 @@ public class DynamXUtils {
         return new Quaternion(buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readFloat());
     }
 
+    public static void writeQuaternionNBT(NBTTagCompound compound, Quaternion quaternion) {
+        compound.setFloat("QuatX", quaternion.getX());
+        compound.setFloat("QuatY", quaternion.getY());
+        compound.setFloat("QuatZ", quaternion.getZ());
+        compound.setFloat("QuatW", quaternion.getW());
+    }
+
+    public static Quaternion readQuaternionNBT(NBTTagCompound compound) {
+        return new Quaternion(compound.getFloat("QuatX"), compound.getFloat("QuatY"), compound.getFloat("QuatZ"), compound.getFloat("QuatW"));
+    }
+
     /**
      * @return A new {@link ObjModelPath} for this model
      */
@@ -111,6 +123,10 @@ public class DynamXUtils {
 
     public static Vector3f toVector3f(Vec3d pos) {
         return Vector3fPool.get((float) pos.x, (float) pos.y, (float) pos.z);
+    }
+
+    public static Vector3f toVector3f(BlockPos pos) {
+        return Vector3fPool.get((float) pos.getX(), (float) pos.getY(), (float) pos.getZ());
     }
 
     public static Vector3f getPositionEyes(Entity entity) {

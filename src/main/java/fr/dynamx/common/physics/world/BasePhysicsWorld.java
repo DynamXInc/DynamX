@@ -45,8 +45,6 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
     protected final ITerrainManager manager;
     protected final World mcWorld;
 
-    protected final Set<PhysicsCollisionObject> collisionObjects = new HashSet<>();
-    protected final Set<PhysicsVehicle> vehicles = new HashSet<>();
     protected final Set<PhysicsJoint> joints = new HashSet<>();
     protected final List<PhysicsEntity<?>> entities = new ArrayList<>();
 
@@ -109,7 +107,7 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
                 throw e;
             }
             while (!operations.isEmpty()) {
-                operations.remove().execute(dynamicsWorld, collisionObjects, vehicles, joints, entities);
+                operations.remove().execute(dynamicsWorld, joints, entities);
             }
         }
         profiler.end(Profiler.Profiles.ADD_REMOVE_BODIES);
@@ -246,15 +244,14 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
 
     @Override
     public void clearAll() {
-        for (PhysicsCollisionObject rb : this.collisionObjects) {
+        for (PhysicsCollisionObject rb : this.dynamicsWorld.getRigidBodyList()) {
             this.dynamicsWorld.removeCollisionObject(rb);
         }
         for (PhysicsJoint jt : this.joints) {
             this.dynamicsWorld.removeJoint(jt);
         }
-        vehicles.clear();
-        collisionObjects.clear();
         entities.clear();
+        joints.clear();
         getTerrainManager().onWorldUnload();
         DynamXContext.setPhysicsWorld(null);
     }

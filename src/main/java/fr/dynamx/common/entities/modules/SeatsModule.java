@@ -122,7 +122,7 @@ public class SeatsModule implements ISeatsModule {
     @Override
     public void applyOrientationToEntity(Entity passenger) {
         PartSeat seat = getRidingSeat(passenger);
-        if(seat.shouldLimitFieldOfView()) {
+        if(seat != null && seat.shouldLimitFieldOfView()) {
             float f = MathHelper.wrapDegrees(passenger.rotationYaw);
             float f1 = MathHelper.clamp(f, seat.getMaxYaw(), seat.getMinYaw());
             passenger.rotationYaw = f1;

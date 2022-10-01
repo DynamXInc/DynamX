@@ -115,8 +115,6 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
 
     private final PhysicsEntityTerrainLoader terrainCache = new PhysicsEntityTerrainLoader(this);
 
-    public static final boolean CONSTRUYE_DEBUG = false;
-
     public PhysicsEntity(World world) {
         super(world);
 
@@ -131,8 +129,6 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     public PhysicsEntity(World world, Vector3f pos, float spawnRotationAngle) {
         this(world);
         setPosition(pos.x, pos.y, pos.z);
-        if (CONSTRUYE_DEBUG)
-            System.out.println("Construct with yaw " + spawnRotationAngle);
         rotationYaw = spawnRotationAngle;
     }
 
@@ -172,10 +168,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     protected void checkEntityInit() {
         if (initialized != 2) {
             if (initialized == 0) {
-                if (CONSTRUYE_DEBUG)
-                    System.out.println("INIT AT " + posX + " " + posY + " " + posZ + " " + rotationYaw + " " + getEntityId());
                 physicsPosition.set((float) posX, (float) posY, (float) posZ);
-                System.out.println("Spawn " +physicsRotation.norm() +" " + physicsRotation);
                 if(physicsRotation.equals(Quaternion.IDENTITY)) {
                     physicsRotation.set(DynamXGeometry.rotationYawToQuaternion(rotationYaw));
                 }
@@ -185,8 +178,6 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
                 }
             }
             getNetwork().setSimulationHolder(getNetwork().getDefaultSimulationHolder());
-            if (CONSTRUYE_DEBUG)
-                System.out.println("When init physics : " + rotationYaw + " " + physicsRotation);
             initPhysicsEntity(usesPhysicsWorld);
             MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.PhysicsEntityInitEvent(world.isRemote ? Side.CLIENT : Side.SERVER, this, usesPhysicsWorld));
             initialized = 2;
@@ -196,15 +187,11 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     @Override
     public void writeSpawnData(ByteBuf buffer) {
         DynamXUtils.writeQuaternion(buffer, physicsRotation);
-        if (CONSTRUYE_DEBUG)
-            System.out.println("WRITE SPAWN DATA " + physicsRotation);
     }
 
     @Override
     public void readSpawnData(ByteBuf additionalData) {
         physicsRotation.set(DynamXUtils.readQuaternion(additionalData));
-        if (CONSTRUYE_DEBUG)
-            System.out.println("READ SPAWN DATA " + physicsRotation);
     }
 
     @Override
@@ -220,15 +207,9 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
         physicsPosition.set((float) posX, (float) posY, (float) posZ);
         physicsRotation.set(DynamXUtils.readQuaternionNBT(compound));
         QuaternionPool.closePool();
-        if (CONSTRUYE_DEBUG)
-            System.out.println("INIT FROM NBT " + physicsPosition);
         if (!initEntityProperties()) {
             setDead();
             return;
-        }
-        if (CONSTRUYE_DEBUG) {
-            float spawnRotationAngle = -this.rotationYaw * 3.1415927F / 180.0F;
-            System.out.println("So initial state is " + physicsRotation);
         }
         initialized = 1;
     }
@@ -430,9 +411,6 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
         this.rotationPitch = DynamXGeometry.getPitch(forwardVec) % 360;
 
         rotationYaw = DynamXGeometry.getYaw(forwardVec) % 360;
-        if (CONSTRUYE_DEBUG && rotationYaw == 0) {
-            System.out.println("HAVE SET ROTATION TO 0 :O " + localQuat + " " + renderRotation + " " + physicsRotation + " " + rotationYaw + " " + this);
-        }
         if (rotationYaw - prevRotationYaw > 270)
             prevRotationYaw += 360;
         else if (prevRotationYaw - rotationYaw > 270)
@@ -494,11 +472,6 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     @Override
     @SideOnly(Side.CLIENT)
     public void setPositionAndRotationDirect(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
-        if (isRegistered != 2) {
-            if (CONSTRUYE_DEBUG)
-                System.out.println("NO INIT : DO NOT LISTEN VANILLA SYNC " + x + " " + y + " " + z + " " + yaw + " " + getEntityId());
-            //this.rotationYaw = yaw;
-        }
     } //Avoid vanilla sync
 
     @Override
@@ -655,9 +628,6 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
 
     @Override
     public void setLocationAndAngles(double x, double y, double z, float yaw, float pitch) {
-        if (CONSTRUYE_DEBUG) {
-            System.out.println("RECEIVE LOCATION AND ANGLES " + yaw + " " + getEntityId() + " " + this);
-        }
         QuaternionPool.openPool();
         physicsRotation.set(DynamXGeometry.rotationYawToQuaternion(yaw));
         QuaternionPool.closePool();

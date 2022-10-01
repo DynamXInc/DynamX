@@ -17,6 +17,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -73,7 +75,7 @@ public class ObjModelData {
         String fullPath = DynamXMain.resDir + File.separator + path.getPackName() + File.separator + "assets" +
                 File.separator + path.getModelPath().getNamespace() + File.separator + path.getModelPath().getPath().replace("/", File.separator);
         //System.out.println("Full path is "+fullPath+" "+path);
-        return new FileInputStream(fullPath);
+        return Files.newInputStream(Paths.get(fullPath));
     }
 
     public ObjModelPath getObjModelPath() {
@@ -117,7 +119,7 @@ public class ObjModelData {
     public float[] getVerticesPos(String objectName) {
         float[] pos = new float[0];
         for (ObjObjectData objObject : objObjects) {
-            if (objObject.getName().toLowerCase().contains(objectName)) {
+            if (objObject.getName().toLowerCase().contains(objectName.toLowerCase())) {
                 pos = new float[objObject.getMesh().vertices.length * 3];
                 for (int i = 0; i < objObject.getMesh().vertices.length; i++) {
                     pos[i * 3] = objObject.getMesh().vertices[i].getPos().x;
@@ -132,7 +134,7 @@ public class ObjModelData {
     public Vector3f[] getVectorVerticesPos(String objectName) {
         Vector3f[] pos = new Vector3f[0];
         for (ObjObjectData objObject : objObjects) {
-            if (objObject.getName().toLowerCase().contains(objectName)) {
+            if (objObject.getName().toLowerCase().contains(objectName.toLowerCase())) {
                 pos = new Vector3f[objObject.getMesh().vertices.length];
                 for (int i = 0; i < objObject.getMesh().vertices.length; i++) {
                     pos[i] = new Vector3f(objObject.getMesh().vertices[i].getPos().x,
@@ -164,7 +166,7 @@ public class ObjModelData {
     public int[] getMeshIndices(String objectName) {
         int[] indices = new int[0];
         for (ObjObjectData objObject : objObjects) {
-            if (objObject.getName().toLowerCase().contains(objectName)) {
+            if (objObject.getName().toLowerCase().contains(objectName.toLowerCase())) {
                 indices = objObject.getMesh().indices;
             }
         }

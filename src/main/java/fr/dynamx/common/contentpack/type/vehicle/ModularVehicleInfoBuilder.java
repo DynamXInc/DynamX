@@ -52,7 +52,6 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
     protected int emptyMass;
     @PackFileProperty(configNames = "DragCoefficient")
     protected float dragFactor;
-    private float dragFactor;
     @PackFileProperty(configNames = "PlayerStandOnTop", required = false, defaultValue = "ALWAYS")
     public EnumPlayerStandOnTop playerStandOnTop;
     @PackFileProperty(configNames = "Model", type = DefinitionType.DynamXDefinitionTypes.DYNX_RESOURCE_LOCATION, description = "common.model", defaultValue = "obj/name_of_vehicle/name_of_model.obj")
@@ -263,7 +262,7 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
         if (texturesArray != null) {
             byte id = 1;
             for (String[] info : texturesArray) {
-                TextureVariantData variant = new TextureData(info[0], id, info[1]);
+                TextureVariantData variant = new TextureVariantData(info[0], id, info[1]);
                 bakedTextures.put(id, variant);
                 id++;
                 if (variant.isItem())

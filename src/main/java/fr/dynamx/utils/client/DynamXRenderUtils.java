@@ -223,6 +223,20 @@ public class DynamXRenderUtils {
                 });
     }
 
+    public static void spawnParticles(ParticleEmitterInfo.IParticleEmitterContainer particleEmitterInfo, World world, Vector3f initialPos, com.jme3.math.Quaternion initialRot) {
+        particleEmitterInfo.getParticleEmitters()
+                .forEach(emitterInfo -> {
+                    Vector3f rotatedPoint = DynamXGeometry.rotateVectorByQuaternion(emitterInfo.position, initialRot);
+                    world.spawnParticle(emitterInfo.particleType,
+                            initialPos.x + rotatedPoint.x,
+                            initialPos.y + rotatedPoint.y,
+                            initialPos.z + rotatedPoint.z,
+                            emitterInfo.velocity.x,
+                            emitterInfo.velocity.y,
+                            emitterInfo.velocity.z);
+                });
+    }
+
     public static int genVertexArrays() {
         return Minecraft.IS_RUNNING_ON_MAC ? APPLEVertexArrayObject.glGenVertexArraysAPPLE() : GL30.glGenVertexArrays();
     }

@@ -2,6 +2,7 @@ package fr.dynamx.common.entities.modules;
 
 import com.jme3.bullet.RotationOrder;
 import com.jme3.bullet.collision.shapes.BoxCollisionShape;
+import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.joints.Constraint;
 import com.jme3.bullet.joints.New6Dof;
 import com.jme3.bullet.joints.motors.MotorParam;

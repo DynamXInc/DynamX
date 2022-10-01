@@ -12,10 +12,10 @@ import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.CreatePackItemEvent;
-import fr.dynamx.api.obj.IModelTextureSupplier;
-import fr.dynamx.api.obj.IObjObject;
+import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
+import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
+import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import fr.dynamx.common.contentpack.loader.BuildableInfoLoader;
-import fr.dynamx.common.contentpack.loader.ModularVehicleInfoBuilder;
 import fr.dynamx.common.contentpack.loader.ObjectLoader;
 import fr.dynamx.common.contentpack.parts.PartLightSource;
 import fr.dynamx.common.contentpack.parts.PartShape;
@@ -23,11 +23,8 @@ import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.contentpack.type.objects.AbstractItemObject;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.items.ItemModularEntity;
-import fr.dynamx.common.obj.texture.TextureData;
 import fr.dynamx.utils.EnumPlayerStandOnTop;
 import fr.dynamx.utils.client.DynamXRenderUtils;
-import fr.dynamx.utils.debug.DynamXDebugOption;
-import fr.dynamx.utils.debug.DynamXDebugOptions;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
@@ -113,7 +110,7 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
     private final List<Vector3f> collisionShapeDebugBuffer;
     private final EnumPlayerStandOnTop playerStandOnTop;
 
-    public ModularVehicleInfo(ModularVehicleInfoBuilder builder, int directingWheel, Map<Byte, TextureData> textures, int textureCount, List<String> renderedParts) {
+    public ModularVehicleInfo(ModularVehicleInfoBuilder builder, int directingWheel, Map<Byte, TextureVariantData> textures, int textureCount, List<String> renderedParts) {
         super(builder.getPackName(), builder.getName());
         this.setDefaultName(builder.defaultName);
         this.setDescription(builder.description);

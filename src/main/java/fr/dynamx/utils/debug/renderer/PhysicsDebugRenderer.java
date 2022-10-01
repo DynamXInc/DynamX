@@ -1,9 +1,6 @@
 package fr.dynamx.utils.debug.renderer;
 
-import com.jme3.bullet.collision.shapes.BoxCollisionShape;
-import com.jme3.bullet.collision.shapes.CollisionShape;
-import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
-import com.jme3.bullet.collision.shapes.SphereCollisionShape;
+import com.jme3.bullet.collision.shapes.*;
 import com.jme3.bullet.collision.shapes.infos.ChildCollisionShape;
 import com.jme3.bullet.joints.Constraint;
 import com.jme3.bullet.joints.PhysicsJoint;
@@ -13,18 +10,22 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.common.physics.utils.RigidBodyTransform;
+import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import fr.dynamx.utils.physics.ShapeUtils;
 import net.minecraft.client.renderer.GlStateManager;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
 import org.lwjgl.util.glu.Sphere;
 
 import java.awt.*;
+import java.util.List;
+
 
 public class PhysicsDebugRenderer {
     public static void debugSoftBody(PhysicsSoftBody physicsSoftBody) {
@@ -85,46 +86,62 @@ public class PhysicsDebugRenderer {
         GlStateManager.popMatrix();
     }
 
-
     public static void debugRigidBody(PhysicsRigidBody physicsRigidBody, RigidBodyTransform prevTransform, RigidBodyTransform curTransform, float partialTicks) {
         Object userObject = physicsRigidBody.getUserObject();
-        if (userObject instanceof BulletShapeType && curTransform != null) {
-            if (!((BulletShapeType<?>) userObject).getType().isTerrain()) {
-                GlStateManager.pushMatrix();
-                Vector3f physicsLocation = curTransform.getPosition();//Vector3fPool.get();
-                Quaternion physicsRotation = curTransform.getRotation();//QuaternionPool.get();
-                /*physicsRigidBody.getPhysicsLocation(physicsLocation);
-                physicsRigidBody.getPhysicsRotation(physicsRotation);*/
-
-                if (prevTransform != null) {
-                    GlStateManager.translate(prevTransform.getPosition().x + (physicsLocation.x - prevTransform.getPosition().x) * partialTicks,
-                            prevTransform.getPosition().y + (physicsLocation.y - prevTransform.getPosition().y) * partialTicks,
-                            prevTransform.getPosition().z + (physicsLocation.z - prevTransform.getPosition().z) * partialTicks);
-                    GlStateManager.rotate(ClientDynamXUtils.computeInterpolatedGlQuaternion(prevTransform.getRotation(), physicsRotation, partialTicks));
-                } else {
-                    GlStateManager.translate(physicsLocation.x, physicsLocation.y, physicsLocation.z);
-                    GlStateManager.rotate(GlQuaternionPool.get(physicsRotation));
-                }
-
-                CollisionShape collisionShape = physicsRigidBody.getCollisionShape();
-                /*List<Vector3f> debugBuffer = DynamXUtils.floatBufferToVec3f(ShapeUtils.getDebugBuffer(collisionShape), Vector3fPool.get());
-                DynamXRenderUtils.drawConvexHull(debugBuffer);*/
-                if (collisionShape instanceof BoxCollisionShape) {
-                    debugBoxCollisionShape((BoxCollisionShape) collisionShape, 1, physicsRigidBody.getActivationState() == 2 ? 1 : 0, physicsRigidBody.getActivationState() == 2 ? 0 : 0.8f, 1);
-                } else if (collisionShape instanceof SphereCollisionShape) {
-                    debugSphereCollisionShape((SphereCollisionShape) collisionShape, 10, 1, physicsRigidBody.getActivationState() == 2 ? 1 : 0, physicsRigidBody.getActivationState() == 2 ? 0 : 0.8f, 1);
-                } else if (collisionShape instanceof CompoundCollisionShape) {
-                    for (ChildCollisionShape childCollisionShape : ((CompoundCollisionShape) collisionShape).listChildren()) {
-                        if (childCollisionShape.getShape() instanceof BoxCollisionShape) {
-                            DynamXRenderUtils.glTranslate(childCollisionShape.copyOffset(Vector3fPool.get()));
-                            debugBoxCollisionShape((BoxCollisionShape) childCollisionShape.getShape(), 1, physicsRigidBody.getActivationState() == 2 ? 1 : 0, physicsRigidBody.getActivationState() == 2 ? 0 : 0.8f, 1);
-                            DynamXRenderUtils.glTranslate(childCollisionShape.copyOffset(Vector3fPool.get()).multLocal(-1));
-                        }
+        Vector3f physicsLocation = Vector3fPool.get();
+        Quaternion physicsRotation = QuaternionPool.get();
+        GlStateManager.pushMatrix();
+        if (userObject instanceof BulletShapeType) {
+            if (curTransform != null) {
+                if (!((BulletShapeType<?>) userObject).getType().isTerrain()) {
+                    physicsLocation = curTransform.getPosition();
+                    physicsRotation = curTransform.getRotation();
+                    if (prevTransform != null) {
+                        GlStateManager.translate(prevTransform.getPosition().x + (physicsLocation.x - prevTransform.getPosition().x) * partialTicks,
+                                prevTransform.getPosition().y + (physicsLocation.y - prevTransform.getPosition().y) * partialTicks,
+                                prevTransform.getPosition().z + (physicsLocation.z - prevTransform.getPosition().z) * partialTicks);
+                        GlStateManager.rotate(ClientDynamXUtils.computeInterpolatedGlQuaternion(prevTransform.getRotation(), physicsRotation, partialTicks));
+                    } else {
+                        GlStateManager.translate(physicsLocation.x, physicsLocation.y, physicsLocation.z);
+                        GlStateManager.rotate(GlQuaternionPool.get(physicsRotation));
                     }
+
                 }
-                GlStateManager.popMatrix();
+            }
+        } else {
+            physicsRigidBody.getPhysicsLocation(physicsLocation);
+            physicsRigidBody.getPhysicsRotation(physicsRotation);
+            GlStateManager.translate(physicsLocation.x, physicsLocation.y, physicsLocation.z);
+            GlStateManager.rotate(GlQuaternionPool.get(physicsRotation));
+        }
+
+
+        CollisionShape collisionShape = physicsRigidBody.getCollisionShape();
+
+        if (collisionShape instanceof BoxCollisionShape) {
+            debugBoxCollisionShape((BoxCollisionShape) collisionShape, 1, physicsRigidBody.getActivationState() == 2 ? 1 : 0, physicsRigidBody.getActivationState() == 2 ? 0 : 0.8f, 1);
+        } else if (collisionShape instanceof SphereCollisionShape) {
+            debugSphereCollisionShape((SphereCollisionShape) collisionShape, 10, 1, physicsRigidBody.getActivationState() == 2 ? 1 : 0, physicsRigidBody.getActivationState() == 2 ? 0 : 0.8f, 1);
+        } else if (collisionShape instanceof HullCollisionShape) {
+            /*List<Vector3f> debugBuffer = DynamXUtils.floatBufferToVec3f(ShapeUtils.getDebugBuffer(collisionShape), Vector3fPool.get());
+            DynamXRenderUtils.drawConvexHull(debugBuffer);*/
+        } else if (collisionShape instanceof CompoundCollisionShape) {
+            for (ChildCollisionShape childCollisionShape : ((CompoundCollisionShape) collisionShape).listChildren()) {
+                if (childCollisionShape.getShape() instanceof BoxCollisionShape) {
+                    DynamXRenderUtils.glTranslate(childCollisionShape.copyOffset(Vector3fPool.get()));
+                    debugBoxCollisionShape((BoxCollisionShape) childCollisionShape.getShape(), 1, physicsRigidBody.getActivationState() == 2 ? 1 : 0, physicsRigidBody.getActivationState() == 2 ? 0 : 0.8f, 1);
+                    DynamXRenderUtils.glTranslate(childCollisionShape.copyOffset(Vector3fPool.get()).multLocal(-1));
+                } else if (childCollisionShape.getShape() instanceof HullCollisionShape) {
+                   /* DynamXRenderUtils.glTranslate(childCollisionShape.copyOffset(Vector3fPool.get()));
+                    if(debugBuffer == null)
+                        debugBuffer = DynamXUtils.floatBufferToVec3f(ShapeUtils.getDebugBuffer(collisionShape), Vector3fPool.get());
+                    GlStateManager.color(1, physicsRigidBody.getActivationState() == 2 ? 1 : 0, physicsRigidBody.getActivationState() == 2 ? 0 : 0.8f, 1);
+                    DynamXRenderUtils.drawConvexHull(debugBuffer);
+                    DynamXRenderUtils.glTranslate(childCollisionShape.copyOffset(Vector3fPool.get()).multLocal(-1));*/
+                }
             }
         }
+        GlStateManager.popMatrix();
     }
 
 

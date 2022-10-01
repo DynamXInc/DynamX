@@ -50,7 +50,6 @@ public class MessagePlayerMountVehicle implements IDnxPacket, IMessageHandler<Me
             }
             PartSeat seat = partDoor.getLinkedSeat(doorsModule.vehicleEntity);
             if (player.isSneaking() || seat == null) {
-                DoorsModule.DoorState switchDoorState = doorsModule.isDoorOpened(message.doorID) ? DoorsModule.DoorState.CLOSE : DoorsModule.DoorState.OPEN;
                 doorsModule.switchDoorState(message.doorID);
             } else {
                 if (partDoor.isEnabled()) {

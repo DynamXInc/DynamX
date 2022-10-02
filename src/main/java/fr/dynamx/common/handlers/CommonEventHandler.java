@@ -18,6 +18,7 @@ import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.items.DynamXItemRegistry;
 import fr.dynamx.common.items.tools.ItemSlopes;
+import fr.dynamx.common.network.packets.MessageHandleExplosion;
 import fr.dynamx.common.network.packets.MessageSyncConfig;
 import fr.dynamx.common.network.sync.MessageSeatsSync;
 import fr.dynamx.common.physics.player.PlayerPhysicsHandler;
@@ -29,7 +30,6 @@ import fr.dynamx.utils.VerticalChunkPos;
 import fr.dynamx.utils.client.ContentPackUtils;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
-import fr.dynamx.utils.physics.DynamXPhysicsHelper;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -173,7 +173,8 @@ public class CommonEventHandler {
 
     @SubscribeEvent
     public void onExplosion(ExplosionEvent.Detonate event) {
-        if (event.getWorld().provider.getDimension() == 0 && !event.getWorld().isRemote) {
+        System.out.println("oui");
+        if (event.getWorld().provider.getDimension() == 0) {
             //We mark as dirty all chunks affected by the explosion
             /*List<VerticalChunkPos> poses = new ArrayList<>();
             VerticalChunkPos.Mutable po = new VerticalChunkPos.Mutable();
@@ -188,13 +189,7 @@ public class CommonEventHandler {
             // Explosion effect
             Vector3f explosionPosition = new Vector3f((float) event.getExplosion().getPosition().x,
                     (float) event.getExplosion().getPosition().y, (float) event.getExplosion().getPosition().z);
-
-            event.getAffectedEntities().forEach(entity -> {
-                if (entity instanceof PhysicsEntity) {
-                    PhysicsEntity<?> physicsEntity = (PhysicsEntity<?>) entity;
-                    DynamXPhysicsHelper.createExplosion(physicsEntity, explosionPosition, 10.0D);
-                }
-            });
+            DynamXContext.getNetwork().sendToClient(new MessageHandleExplosion(explosionPosition, event.getAffectedEntities()), EnumPacketTarget.ALL);
         }
     }
 

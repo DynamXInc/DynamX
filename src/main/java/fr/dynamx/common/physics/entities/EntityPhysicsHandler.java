@@ -4,6 +4,7 @@ import com.jme3.bullet.collision.Activation;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import fr.dynamx.utils.physics.DynamXPhysicsHelper;
@@ -33,6 +34,7 @@ public abstract class EntityPhysicsHandler<T extends PhysicsEntity<?>> extends A
         super.update();
         if(collisionObject.getActivationState() == Activation.error){
             handledEntity.setDead();
+            DynamXMain.log.error("Fatal error on " + handledEntity.getName());
             return;
         }
         getCollisionObject().getLinearVelocity(linearVel);

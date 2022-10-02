@@ -8,8 +8,6 @@ import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import fr.dynamx.utils.physics.DynamXPhysicsHelper;
 
-import javax.vecmath.Quat4f;
-
 /**
  * General geometrical operations with Vector3f and Quaternions
  *
@@ -18,7 +16,6 @@ import javax.vecmath.Quat4f;
  * @see fr.dynamx.utils.client.ClientDynamXUtils
  */
 public class DynamXGeometry {
-    private static final ThreadLocal<SlerpInterpolation> SLERP_INTERPOLATION = ThreadLocal.withInitial(SlerpInterpolation::new);
     public static float degToRad = 0.017453292F;
     public static float radToDeg = 57.295776F;
     public static Vector3f[] multiply = new Vector3f[]{new Vector3f(0.0F, 0.0F, 1.0F), new Vector3f(0.0F, 1.0F, 0.0F), new Vector3f(1.0F, 0.0F, 0.0F)};
@@ -236,22 +233,6 @@ public class DynamXGeometry {
     }
 
     /**
-     * Interpolates the given quaternions, without modifying them
-     */
-    public static Quaternion slerp(Quaternion v0b, Quaternion v1b, float t) {
-        return slerp(v0b, v1b, new Quaternion(), t);
-    }
-
-    /**
-     * Interpolates the given quaternions, without modifying them <br>
-     * Result is stored in non-null store parameter, and returned
-     */
-    public static Quaternion slerp(Quaternion v0b, Quaternion v1b, Quaternion store, float t) {
-        SLERP_INTERPOLATION.get().slerp(v0b, v1b, store, t);
-        return store;
-    }
-
-    /**
      * Euclidean distance between this and the specified vector, returned as double
      */
     public static double distanceBetween(Vector3f vec, Vector3f vec2) {
@@ -262,7 +243,7 @@ public class DynamXGeometry {
     }
 
     /**
-     * Normalizes the input, doesn't creates a new one
+     * Normalizes the input, doesn't create a new one
      */
     public static void normalizeVector(Vector3f vecToNormalize) {
         float length = vecToNormalize.length();
@@ -385,18 +366,4 @@ public class DynamXGeometry {
         return roll * 180.0F / 3.1415927F;
     }
 
-    /**
-     * A thread-safe slerp interpolation
-     */
-    private static class SlerpInterpolation {
-        private final Quat4f v0 = new Quat4f(), v1 = new Quat4f();
-        private volatile boolean slerping;
-
-        private void slerp(Quaternion v0b, Quaternion v1b, Quaternion store, float t) {
-            v0.set(v0b.getX(), v0b.getY(), v0b.getZ(), v0b.getW());
-            v1.set(v1b.getX(), v1b.getY(), v1b.getZ(), v1b.getW());
-            v0.interpolate(v1, t);
-            store.set(v0.x, v0.y, v0.z, v0.w);
-        }
-    }
 }

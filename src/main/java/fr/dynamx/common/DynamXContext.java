@@ -14,6 +14,7 @@ import fr.dynamx.common.objloader.data.ObjModelData;
 import fr.dynamx.common.physics.player.PlayerPhysicsHandler;
 import fr.dynamx.common.physics.world.PhysicsSimulationModes;
 import fr.dynamx.utils.DynamXUtils;
+import lombok.Getter;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
@@ -42,6 +43,9 @@ public class DynamXContext {
     private static final IPhysicsSimulationMode[] physicsSimulationModes = new IPhysicsSimulationMode[]{new PhysicsSimulationModes.FullPhysics(), new PhysicsSimulationModes.FullPhysics()};
 
     private static final Map<ResourceLocation, ObjModelData> OBJ_MODEL_DATA_CACHE = new HashMap<>();
+
+    @Getter
+    private static boolean isOptifineLoaded = false;
 
 
     /**
@@ -146,6 +150,12 @@ public class DynamXContext {
     }
 
     static {
+        try {
+            Class.forName("net.optifine.shaders.Shaders");
+            isOptifineLoaded = true;
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
         network = DynamXNetwork.init(FMLCommonHandler.instance().getSide());
         if (FMLCommonHandler.instance().getSide().isClient())
             objModelRegistry = new DynamXModelRegistry();

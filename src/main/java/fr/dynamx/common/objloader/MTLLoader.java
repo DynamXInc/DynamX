@@ -23,6 +23,7 @@ public class MTLLoader {
     public static final String TEXTURE_AMBIENT = "map_Ka";
     public static final String TEXTURE_DIFFUSE = "map_Kd";
     public static final String TEXTURE_SPECULAR = "map_Ks";
+    public static final String TEXTURE_NORMAL = "map_Bump";
     public static final String TEXTURE_TRANSPARENCY = "map_d";
     @Getter
     private final List<Material> materials = new ArrayList<>();
@@ -51,12 +52,22 @@ public class MTLLoader {
                 case TEXTURE_DIFFUSE:
                     String textureName = parts[1].equalsIgnoreCase("white") ? "textures/white.png" : startPath + parts[1];
                     current.diffuseTexture.put(name.toLowerCase(),
-                            new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault(textureName.toLowerCase()), name.toLowerCase(), -1));
+                            new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault(textureName.toLowerCase()), name.toLowerCase()));
                     break;
                 case TEXTURE_AMBIENT:
                     current.ambientTexture.put(name.toLowerCase(),
-                            new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault((startPath + parts[1]).toLowerCase()), name.toLowerCase(), -1));
+                            new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault((startPath + parts[1]).toLowerCase()), name.toLowerCase()));
                     break;
+                case TEXTURE_SPECULAR: {
+                    current.specularTexture.put(name.toLowerCase(),
+                            new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault((startPath + parts[1]).toLowerCase()), name.toLowerCase()));
+                    break;
+                }
+                case TEXTURE_NORMAL: {
+                    current.normalTexture.put(name.toLowerCase(),
+                            new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault((startPath + parts[1]).toLowerCase()), name.toLowerCase()));
+                    break;
+                }
                 case TRANSPARENCY_D:
                 case TRANSPARENCY_TR:
                     current.transparency = (float) Double.parseDouble(parts[1]);
@@ -64,7 +75,7 @@ public class MTLLoader {
             }
             if (current != null && current.diffuseTexture.isEmpty()){
                 current.diffuseTexture.put(name.toLowerCase(),
-                        new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault("missing_texture_for_" + startPath), name.toLowerCase(), -1));
+                        new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault("missing_texture_for_" + startPath), name.toLowerCase()));
             }
         }
     }
@@ -76,8 +87,10 @@ public class MTLLoader {
     public void loadTextures() {
         TextureManager textureManager = Minecraft.getMinecraft().getTextureManager();
         for (Material material : materials) {
-            material.ambientTexture.forEach((textureName, textures) -> textures.loadTexture(textureManager));
-            material.diffuseTexture.forEach((textureName, textures) -> textures.loadTexture(textureManager));
+            material.ambientTexture.forEach((textureName, textures) -> textures.loadTexture(material, textureManager));
+            material.diffuseTexture.forEach((textureName, textures) -> textures.loadTexture(material, textureManager));
+            material.specularTexture.forEach((textureName, textures) -> textures.loadTexture(material, textureManager));
+            material.normalTexture.forEach((textureName, textures) -> textures.loadTexture(material, textureManager));
         }
     }
 
@@ -90,6 +103,8 @@ public class MTLLoader {
         for (Material material : materials) {
             material.ambientTexture.forEach((textureName, textures) -> textures.uploadTexture(textureManager));
             material.diffuseTexture.forEach((textureName, textures) -> textures.uploadTexture(textureManager));
+            material.specularTexture.forEach((textureName, textures) -> textures.uploadTexture(textureManager));
+            material.normalTexture.forEach((textureName, textures) -> textures.uploadTexture(textureManager));
         }
     }
 }

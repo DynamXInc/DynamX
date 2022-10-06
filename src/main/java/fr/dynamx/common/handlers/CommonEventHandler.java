@@ -173,19 +173,7 @@ public class CommonEventHandler {
 
     @SubscribeEvent
     public void onExplosion(ExplosionEvent.Detonate event) {
-        System.out.println("oui");
         if (event.getWorld().provider.getDimension() == 0) {
-            //We mark as dirty all chunks affected by the explosion
-            /*List<VerticalChunkPos> poses = new ArrayList<>();
-            VerticalChunkPos.Mutable po = new VerticalChunkPos.Mutable();
-            for (BlockPos pos : event.getExplosion().getAffectedBlockPositions()) {
-                po.setPos(pos.getX() >> 4, pos.getY() >> 4, pos.getZ() >> 4);
-                if (!poses.contains(po)) {
-                    onBlockChange(event.getWorld(), pos);
-                    poses.add(po.toImmutable());
-                }
-            }*/
-
             // Explosion effect
             Vector3f explosionPosition = new Vector3f((float) event.getExplosion().getPosition().x,
                     (float) event.getExplosion().getPosition().y, (float) event.getExplosion().getPosition().z);

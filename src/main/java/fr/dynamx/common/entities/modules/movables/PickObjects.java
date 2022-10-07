@@ -3,6 +3,9 @@ package fr.dynamx.common.entities.modules.movables;
 import com.jme3.bullet.joints.Point2PointJoint;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Vector3f;
+import fr.dynamx.api.network.sync.v3.SynchronizationRules;
+import fr.dynamx.api.network.sync.v3.SynchronizedEntityVariable;
+import fr.dynamx.api.network.sync.v3.SynchronizedVariableSerializer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.entities.modules.MovableModule;
@@ -11,16 +14,38 @@ import fr.dynamx.common.physics.joints.JointHandlerRegistry;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import fr.dynamx.utils.physics.DynamXPhysicsHelper;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 
 public class PickObjects extends MovableModule {
 
+    //TODO PRIVATISER
+
     public Point2PointJoint joint;
-    public EntityPlayer mover;
-    public float pickDistance;
+    public final SynchronizedEntityVariable<EntityPlayer> mover = new SynchronizedEntityVariable<>((variable, value) -> {
+        entity.getSynchronizer().onPlayerStartControlling(value, false);
+    }, SynchronizationRules.SERVER_TO_CLIENTS, new SynchronizedVariableSerializer<EntityPlayer>() {
+        @Override
+        public void writeObject(ByteBuf buffer, EntityPlayer object) {
+            buffer.writeInt(object == null ? -1 : object.getEntityId());
+        }
+
+        @Override
+        public EntityPlayer readObject(ByteBuf buffer, EntityPlayer currentValue) {
+            //TODO RENDRE SAFE et mettre dans factory
+            int id = buffer.readInt();
+            if(id == -1)
+                return null;
+            if (DynamXContext.getPlayerPickingObjects().containsKey(id))
+                return (EntityPlayer) Minecraft.getMinecraft().world.getEntityByID(id);
+            return currentValue;
+        }
+    });
+    public final SynchronizedEntityVariable<Float> pickDistance = new SynchronizedEntityVariable<>(SynchronizationRules.SERVER_TO_CLIENTS, null, 0f);
     public PhysicsRigidBody hitBody;
     public float initialMass;
-    private Vector3f localPickPosition = new Vector3f();
+    public final SynchronizedEntityVariable<Vector3f> localPickPosition = new SynchronizedEntityVariable<>(SynchronizationRules.SERVER_TO_CLIENTS, null, new Vector3f());
 
     public PickObjects(PhysicsEntity<?> entity) {
         super(entity);
@@ -36,12 +61,12 @@ public class PickObjects extends MovableModule {
     }
 
     public void pickObject(EntityPlayer playerPicking, PhysicsEntity<?> rayCastHitEntity, PhysicsRigidBody rayCastHitBody, Vector3f rayCastHitPos, float pickDistance) {
-        if (mover == null) {
+        if (mover.get() == null) {
             Vector3f localPickPos = DynamXPhysicsHelper.getBodyLocalPoint(rayCastHitBody, rayCastHitPos);
 
             this.setLocalPickPosition(localPickPos);
-            this.mover = playerPicking;
-            this.pickDistance = pickDistance;
+            this.mover.set(playerPicking);
+            this.pickDistance.set(pickDistance);
             this.hitBody = rayCastHitBody;
             if (rayCastHitBody.getMass() > 0) {
                 this.initialMass = rayCastHitBody.getMass();
@@ -53,13 +78,13 @@ public class PickObjects extends MovableModule {
 
             DynamXContext.getPhysicsWorld().schedule(() -> JointHandlerRegistry.createJointWithSelf(JOINT_NAME, rayCastHitEntity, (byte) 0));
 
-            entity.getNetwork().onPlayerStartControlling(mover, false);
+            entity.getSynchronizer().onPlayerStartControlling(mover.get(), false);
         }
     }
 
     public void unPickObject() {
-        if (mover != null && entity.getJointsHandler() != null) {
-            DynamXContext.getPlayerPickingObjects().remove(mover.getEntityId());
+        if (mover.get() != null && entity.getJointsHandler() != null) {
+            DynamXContext.getPlayerPickingObjects().remove(mover.get().getEntityId());
             entity.getJointsHandler().removeJointWith(entity, MovableModule.JOINT_NAME, (byte) 0);
         }
     }
@@ -67,6 +92,7 @@ public class PickObjects extends MovableModule {
     @Override
     public void preUpdatePhysics(boolean b) {
         //System.out.println("Pd pos "+joint+" "+mover);
+        EntityPlayer mover = this.mover.get();
         if (joint != null && mover != null) {
             Vector3fPool.openPool();
             Vector3f playerPosition = Vector3fPool.get(
@@ -79,7 +105,7 @@ public class PickObjects extends MovableModule {
             Vector3f eyePos = Vector3fPool.get(playerPosition);
             Vector3f dir = newRayTo.subtract(eyePos);
             dir = dir.normalize();
-            dir.multLocal(pickDistance);
+            dir.multLocal(pickDistance.get());
 
             Vector3f newPos = eyePos.add(dir);
             joint.setPivotInB(newPos);
@@ -101,22 +127,22 @@ public class PickObjects extends MovableModule {
 
     @Override
     public void onJointDestroyed(EntityJoint<?> joint) {
-        if (mover != null) {
-            entity.getNetwork().onPlayerStopControlling(mover, false);
+        if (mover.get() != null) {
+            entity.getSynchronizer().onPlayerStopControlling(mover.get(), false);
         }
         this.joint = null;
-        if (this.mover != null) {
-            DynamXContext.getPlayerPickingObjects().remove(mover.getEntityId());
-            this.mover = null;
+        if (this.mover.get() != null) {
+            DynamXContext.getPlayerPickingObjects().remove(mover.get().getEntityId());
+            this.mover.set(null);
         }
     }
 
     public Vector3f getLocalPickPosition() {
-        return localPickPosition;
+        return localPickPosition.get();
     }
 
     public void setLocalPickPosition(Vector3f localPickPosition) {
-        this.localPickPosition = localPickPosition;
+        this.localPickPosition.set(localPickPosition);
     }
 
 }

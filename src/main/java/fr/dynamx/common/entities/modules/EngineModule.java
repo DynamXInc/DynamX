@@ -10,7 +10,6 @@ import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.api.network.sync.SimulationHolder;
 import fr.dynamx.api.network.sync.v3.SynchronizationRules;
 import fr.dynamx.api.network.sync.v3.SynchronizedEntityVariable;
-import fr.dynamx.api.network.sync.v3.SynchronizedEntityVariableFactory;
 import fr.dynamx.api.physics.entities.IEnginePhysicsHandler;
 import fr.dynamx.client.ClientProxy;
 import fr.dynamx.client.handlers.hud.CarController;
@@ -18,24 +17,20 @@ import fr.dynamx.client.sound.EngineSound;
 import fr.dynamx.common.contentpack.type.vehicle.EngineInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.network.sync.v3.DynamXSynchronizedVariables;
-import fr.dynamx.common.network.sync.vars.VehicleSynchronizedVariables;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.EnginePhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.engine.AutomaticGearboxHandler;
-import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static fr.dynamx.client.ClientProxy.SOUND_HANDLER;
@@ -53,16 +48,16 @@ public class EngineModule implements IEngineModule<AbstractEntityPhysicsHandler<
     protected EnginePhysicsHandler physicsHandler;
 
     //Default value is 2 for the handbrake on spawn
-    private SynchronizedEntityVariable<Integer> controls = new SynchronizedEntityVariable<>(SynchronizationRules.CONTROLS_TO_SPECTATORS, null, 2);
+    private final SynchronizedEntityVariable<Integer> controls = new SynchronizedEntityVariable<>(SynchronizationRules.CONTROLS_TO_SPECTATORS, null, 2);
     /**
      * The active speed limit, or Float.MAX_VALUE
      */
-    private SynchronizedEntityVariable<Float> speedLimit = new SynchronizedEntityVariable<>(SynchronizationRules.CONTROLS_TO_SPECTATORS, null, Float.MAX_VALUE);
+    private final SynchronizedEntityVariable<Float> speedLimit = new SynchronizedEntityVariable<>(SynchronizationRules.CONTROLS_TO_SPECTATORS, null, Float.MAX_VALUE);
 
     /**
      * @see fr.dynamx.api.entities.VehicleEntityProperties.EnumEngineProperties
      */
-    private SynchronizedEntityVariable<float[]> engineProperties = new SynchronizedEntityVariable<>(SynchronizationRules.PHYSICS_TO_SPECTATORS, new float[VehicleEntityProperties.EnumEngineProperties.values().length]);
+    private final SynchronizedEntityVariable<float[]> engineProperties = new SynchronizedEntityVariable<>(SynchronizationRules.PHYSICS_TO_SPECTATORS, new float[VehicleEntityProperties.EnumEngineProperties.values().length]);
 
     public EngineModule(BaseVehicleEntity<? extends BaseVehiclePhysicsHandler<?>> entity, EngineInfo engineInfo) {
         this.entity = entity;
@@ -217,7 +212,7 @@ public class EngineModule implements IEngineModule<AbstractEntityPhysicsHandler<
     }
 
     @Override
-    public void addSynchronizedVariables(Side side, SimulationHolder simulationHolder, List<ResourceLocation> variables) {
+    public void addSynchronizedVariables(Side side, SimulationHolder simulationHolder) {
         entity.getSynchronizer().registerVariable(DynamXSynchronizedVariables.CONTROLS, controls);
         entity.getSynchronizer().registerVariable(DynamXSynchronizedVariables.SPEED_LIMIT, speedLimit);
         entity.getSynchronizer().registerVariable(DynamXSynchronizedVariables.ENGINE_PROPERTIES, engineProperties);

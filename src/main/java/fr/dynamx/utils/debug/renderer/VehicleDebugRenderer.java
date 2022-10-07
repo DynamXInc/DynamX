@@ -355,7 +355,7 @@ public class VehicleDebugRenderer {
     public static class NetworkDebug implements DebugRenderer<BaseVehicleEntity<?>> {
         @Override
         public boolean shouldRender(BaseVehicleEntity<?> entity) {
-            return DynamXDebugOptions.FULL_NETWORK_DEBUG.isActive() && DynamXDebugOptions.LATE_NETWORK.isActive() && (entity.getNetwork() instanceof UdpClientPhysicsEntityNetHandler) && entity.getNetwork().getInputSyncVars().get(SynchronizedVariablesRegistry.getSyncVarRegistry().get(PosSynchronizedVariable.NAME)) != null;
+            return false; //TODO NEW SYNC DynamXDebugOptions.FULL_NETWORK_DEBUG.isActive() && DynamXDebugOptions.LATE_NETWORK.isActive() && (entity.getNetwork() instanceof UdpClientPhysicsEntityNetHandler) && entity.getNetwork().getInputSyncVars().get(SynchronizedVariablesRegistry.getSyncVarRegistry().get(PosSynchronizedVariable.NAME)) != null;
         }
 
         @Override
@@ -370,7 +370,7 @@ public class VehicleDebugRenderer {
             {
                 GlStateManager.translate(-entity.posX, -entity.posY, -entity.posZ);
 
-                SynchronizedVariable<?> variable = entity.getNetwork().getInputSyncVars().get(SynchronizedVariablesRegistry.getSyncVarRegistry().get(PosSynchronizedVariable.NAME));
+                SynchronizedVariable<?> variable = null;//TODO NEW SYNC entity.getNetwork().getInputSyncVars().get(SynchronizedVariablesRegistry.getSyncVarRegistry().get(PosSynchronizedVariable.NAME));
                 if (!(variable instanceof DebugPosSynchronizedVariable))
                     return; //wtf
                 Vector3f clientPos = ((DebugPosSynchronizedVariable) variable).clientPos;

@@ -16,7 +16,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 
-public class MovableSynchronizedVariable<A extends PhysicsEntity<?>> implements SynchronizedVariable<A> {
+public class MovableSynchronizedVariable<A extends PhysicsEntity<?>>{/* implements SynchronizedVariable<A> {
     public static final ResourceLocation NAME = new ResourceLocation(DynamXConstants.ID, "movable");
 
     private Vector3f point = new Vector3f();
@@ -127,5 +127,5 @@ public class MovableSynchronizedVariable<A extends PhysicsEntity<?>> implements 
         pickerId = buf.readInt();
         moverId = buf.readInt();
         //entityID = buf.readInt();
-    }
+    }*/
 }

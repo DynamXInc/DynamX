@@ -84,7 +84,7 @@ public abstract class PhysicsEntityMessage<T extends PhysicsEntityMessage> imple
     protected void processMessage(PhysicsEntityMessage<?> message, EntityPlayer player) {
         Entity ent = player.world.getEntityByID(message.entityId);
         if (ent instanceof PhysicsEntity) {
-            ((PhysicsEntity<?>) ent).getNetwork().processPacket(message);
+            ((PhysicsEntity<?>) ent).getSynchronizer().processPacket(message);
         } else if (message instanceof MessageSeatsSync || DynamXConfig.enableDebugTerrainManager) {
             log.warn("PhysicsEntity with id " + message.entityId + " not found for message with type " + message.getMessageId() + " sent from " + player);
         }

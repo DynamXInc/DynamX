@@ -31,7 +31,6 @@ import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.contentpack.type.vehicle.SteeringWheelInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.network.sync.v3.DynamXSynchronizedVariables;
-import fr.dynamx.common.network.sync.vars.VehicleSynchronizedVariables;
 import fr.dynamx.common.obj.texture.TextureData;
 import fr.dynamx.common.physics.entities.BaseWheeledVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
@@ -46,7 +45,6 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -56,7 +54,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static fr.dynamx.api.entities.VehicleEntityProperties.getPropertyIndex;
@@ -114,7 +111,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
     public WheelsModule(BaseVehicleEntity<? extends BaseWheeledVehiclePhysicsHandler<?>> entity) {
         this.entity = entity;
         this.wheelsStates = new SynchronizedEntityVariable<>((variable, value) -> {
-            if (!entity.getNetwork().getSimulationHolder().ownsControls(FMLCommonHandler.instance().getEffectiveSide())) {
+            if (!entity.getSynchronizer().getSimulationHolder().ownsControls(FMLCommonHandler.instance().getEffectiveSide())) {
                 if (DynamXMain.proxy.shouldUseBulletSimulation(entity.world)) {
                     for (int i = 0; i < value.length; i++) {
                         if (variable.get()[i] != value[i]) {
@@ -241,9 +238,6 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
                             w.setGrip((w.isFlattened() ? 0.16f : 1) * floats[1]);
                         else
                             w.setGrip((w.isFlattened() ? 0.16f : 1) * floats[0]);
-                        if(blockState.getBlock() == Blocks.GLASS) {
-                            w.setFlattened(true);
-                        }
                         if (wheelsStates.get()[i] == WheelState.ADDED && w.isFlattened()) {
                             wheelsStates.get()[i] = WheelState.ADDED_FLATTENED;
                             wheelsStates.setChanged(true);
@@ -340,7 +334,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
     }
 
     @Override
-    public void addSynchronizedVariables(Side side, SimulationHolder simulationHolder, List<ResourceLocation> variables) {
+    public void addSynchronizedVariables(Side side, SimulationHolder simulationHolder) {
         entity.getSynchronizer().registerVariable(DynamXSynchronizedVariables.WHEEL_INFOS, wheelInfos);
         entity.getSynchronizer().registerVariable(DynamXSynchronizedVariables.WHEEL_STATES, wheelsStates);
         entity.getSynchronizer().registerVariable(DynamXSynchronizedVariables.WHEEL_PROPERTIES, wheelProperties);

@@ -135,7 +135,7 @@ public class SeatsModule implements ISeatsModule {
             PartSeat hitPart = seatToPassenger.inverse().get(passenger);
             if (hitPart != null) {
                 if (hitPart.isDriver()) {
-                    entity.getNetwork().onPlayerStartControlling((EntityPlayer) passenger, true);
+                    entity.getSynchronizer().onPlayerStartControlling((EntityPlayer) passenger, true);
                 }
                 MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.MountVehicleEntityEvent(Side.SERVER, (EntityPlayer) passenger, entity, this, hitPart));
                 //System.out.println("Send seat sync : add passenger "+entity+" "+passenger);
@@ -156,7 +156,7 @@ public class SeatsModule implements ISeatsModule {
             lastSeat = seat;
             seatToPassenger.remove(seat);
             if (seat.isDriver() && passenger instanceof EntityPlayer) {
-                entity.getNetwork().onPlayerStopControlling((EntityPlayer) passenger, true);
+                entity.getSynchronizer().onPlayerStopControlling((EntityPlayer) passenger, true);
             }
             //System.out.println("Send seat sync : remove passenger "+entity+" "+passenger);
             DynamXContext.getNetwork().sendToClient(new MessageSeatsSync((IModuleContainer.ISeatsContainer) entity), EnumPacketTarget.ALL_TRACKING_ENTITY, entity);

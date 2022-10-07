@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PropsContainerModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, IPhysicsModule.IEntityUpdateListener {
+    //TODO NEW SYNC IMPROVE THIS
     private final BaseVehicleEntity<?> entity;
     private final List<PartPropsContainer> containers;
     private final List<PhysicsEntity<?>> modifiedEntitiesCache = new ArrayList<>();
@@ -31,7 +32,7 @@ public class PropsContainerModule implements IPhysicsModule<BaseVehiclePhysicsHa
             modifiedEntitiesCache.removeIf(e -> {
                 if (e.getDistance(entity) > 10) {
                     System.out.println("[DEV] Remove " + e + " : far from " + entity);
-                    e.getNetwork().setSimulationHolder(SimulationHolder.SERVER, SimulationHolder.UpdateContext.PROPS_CONTAINER_UPDATE);
+                    e.getSynchronizer().setSimulationHolder(SimulationHolder.SERVER, SimulationHolder.UpdateContext.PROPS_CONTAINER_UPDATE);
                     return true;
                 }
                 return false;
@@ -52,7 +53,7 @@ public class PropsContainerModule implements IPhysicsModule<BaseVehiclePhysicsHa
                 System.out.println("[DEV] Found " + entityList.size() + " to set sim holder " + simulationHolder + " from " + entity);
                 for (PhysicsEntity<?> ent : entityList) {
                     System.out.println("[DEV] Set on " + ent);
-                    ent.getNetwork().setSimulationHolder(simulationHolder, SimulationHolder.UpdateContext.PROPS_CONTAINER_UPDATE);
+                    ent.getSynchronizer().setSimulationHolder(simulationHolder, SimulationHolder.UpdateContext.PROPS_CONTAINER_UPDATE);
                     modifiedEntitiesCache.add(ent);
                 }
             } else {

@@ -9,9 +9,13 @@ import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.modules.AttachModule;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.network.sync.SimulationHolder;
+import fr.dynamx.api.network.sync.v3.SynchronizationRules;
+import fr.dynamx.api.network.sync.v3.SynchronizedEntityVariable;
+import fr.dynamx.api.network.sync.v3.SynchronizedVariableSerializer;
 import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.EnumBulletShapeType;
 import fr.dynamx.client.ClientProxy;
@@ -24,6 +28,7 @@ import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.handlers.TaskScheduler;
 import fr.dynamx.common.network.packets.MessageChangeDoorState;
+import fr.dynamx.common.network.sync.v3.DynamXSynchronizedVariables;
 import fr.dynamx.common.network.sync.vars.AttachedBodySynchronizedVariable;
 import fr.dynamx.common.network.sync.vars.AttachedDoorsSynchronizedVariable;
 import fr.dynamx.common.network.sync.vars.VehicleSynchronizedVariables;
@@ -40,9 +45,12 @@ import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import fr.dynamx.utils.physics.DynamXPhysicsHelper;
+import io.netty.buffer.ByteBuf;
 import lombok.Getter;
 import lombok.Setter;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 
@@ -64,10 +72,51 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
     private final Map<Byte, DoorVarContainer> cachedAttachedDoors = new HashMap<>();
     private final HashMap<Byte, SynchronizedRigidBodyTransform> attachedBodiesTransform = new HashMap<>();
     @Getter
-    protected Map<Byte, DoorState> doorsState = new HashMap<>();
+    protected final SynchronizedEntityVariable<Map<Byte, DoorState>> doorsState;
 
     public DoorsModule(BaseVehicleEntity<?> vehicleEntity) {
         this.vehicleEntity = vehicleEntity;
+
+        doorsState = new SynchronizedEntityVariable<>((variable, doorsState) -> {
+            Map<Byte, DoorsModule.DoorState> target = variable.get();
+            //TODO NEW SYNC DEBUG THIS
+            if (true /*|| network.getSimulationHolder() != SimulationHolder.SERVER_SP*/) {
+                doorsState.forEach((i, b) -> {
+                    if (b == DoorsModule.DoorState.OPEN && (!target.containsKey(i) || target.get(i) == DoorsModule.DoorState.CLOSE)) {
+                        ((IModuleContainer.IDoorContainer) vehicleEntity).getDoors().setDoorState(i, DoorsModule.DoorState.OPEN);
+                    } else if (b == DoorsModule.DoorState.CLOSE && (target.containsKey(i) && target.get(i) == DoorsModule.DoorState.OPEN)) {
+                        ((IModuleContainer.IDoorContainer) vehicleEntity).getDoors().setDoorState(i, DoorsModule.DoorState.CLOSE);
+                    }
+                });
+            } else {
+                doorsState.forEach((i, b) -> {
+                    if (b != target.get(i)) {
+                        target.put(i, b);
+                        DoorsModule doors = ((IModuleContainer.IDoorContainer) vehicleEntity).getDoors();
+                        doors.playDoorSound(b == DoorsModule.DoorState.OPEN ? DoorsModule.DoorState.CLOSE : DoorsModule.DoorState.OPEN);
+                    }
+                });
+            }
+        }, SynchronizationRules.SERVER_TO_CLIENTS, new SynchronizedVariableSerializer<Map<Byte, DoorState>>() {
+            @Override
+            public void writeObject(ByteBuf buf, Map<Byte, DoorState> doorsState) {
+                buf.writeByte(doorsState.size());
+                doorsState.forEach((i, s) -> {
+                    buf.writeByte(i);
+                    buf.writeInt(s.ordinal());
+                });
+            }
+
+            @Override
+            public Map<Byte, DoorState> readObject(ByteBuf buf, Map<Byte, DoorState> currentValue) {
+                currentValue.clear();
+                int size = buf.readByte();
+                for (int i = 0; i < size; i++) {
+                    currentValue.put(buf.readByte(), DoorsModule.DoorState.values()[buf.readInt()]);
+                }
+                return currentValue;
+            }
+        }, new HashMap<>());
     }
 
     @Override
@@ -126,18 +175,17 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
     @Override
     public void initEntityProperties() {
         for (PartDoor partDoor : vehicleEntity.getPackInfo().getPartsByType(PartDoor.class)) {
-            doorsState.put(partDoor.getId(), DoorState.CLOSE);
+            doorsState.get().put(partDoor.getId(), DoorState.CLOSE);
         }
+        doorsState.setChanged(true);
     }
 
     @Override
-    public void addSynchronizedVariables(Side side, SimulationHolder simulationHolder, List<ResourceLocation> variables) {
+    public void addSynchronizedVariables(Side side, SimulationHolder simulationHolder) {
         if (simulationHolder.isPhysicsAuthority(side)) {
             variables.add(AttachedDoorsSynchronizedVariable.NAME);
         }
-        if (side.isServer()) {
-            variables.add(VehicleSynchronizedVariables.DoorsStatus.NAME);
-        }
+        vehicleEntity.getSynchronizer().registerVariable(DynamXSynchronizedVariables.DOORS_STATES, doorsState);
     }
 
     @Override
@@ -172,12 +220,14 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
                 PartDoor door = getPartDoor(doorID);
                 if (getCurrentState(doorID) == DoorState.OPENING && isDoorJointOpened(door, varContainer)) {
                     DynamXContext.getNetwork().sendToServer(new MessageChangeDoorState(vehicleEntity, DoorState.OPEN, doorID));
-                    doorsState.put(doorID, DoorState.OPEN);
+                    doorsState.get().put(doorID, DoorState.OPEN);
+                    doorsState.setChanged(true);
                     varContainer.setJointMotorState(DynamXPhysicsHelper.Y_ROTATION_DOF, false);
                 }
                 if ((isDoorOpened(doorID) || getCurrentState(doorID) == DoorState.CLOSING) && isDoorJointClosed(varContainer)) {
                     DynamXContext.getNetwork().sendToServer(new MessageChangeDoorState(vehicleEntity, DoorState.CLOSE, doorID));
-                    doorsState.put(doorID, DoorState.CLOSE);
+                    doorsState.get().put(doorID, DoorState.CLOSE);
+                    doorsState.setChanged(true);
                     playDoorSound(DoorState.CLOSE);
                     varContainer.setJointMotorState(DynamXPhysicsHelper.Y_ROTATION_DOF, false);
                     varContainer.setJointLimit(DynamXPhysicsHelper.Y_ROTATION_DOF, door.getCloseLimit().x, door.getCloseLimit().y);
@@ -206,9 +256,8 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
     public boolean isDoorOpened(byte doorID) {
         if (doorsState == null)
             return true;
-        return !doorsState.containsKey(doorID) || doorsState.get(doorID) == DoorState.OPEN;
+        return !doorsState.get().containsKey(doorID) || doorsState.get().get(doorID) == DoorState.OPEN;
     }
-
 
 
     public void switchDoorState(byte doorId) {
@@ -221,7 +270,7 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
         if (doorVarContainer != null) {
             vehicleEntity.forcePhysicsActivation();
             if (doorState == DoorState.OPEN) {
-                doorsState.put(doorId, DoorState.OPENING);
+                doorsState.get().put(doorId, DoorState.OPENING);
                 playDoorSound(DoorState.OPEN);
                 doorVarContainer.setJointLimit(DynamXPhysicsHelper.Y_ROTATION_DOF,
                         door.getOpenLimit().x, door.getOpenLimit().y);
@@ -231,17 +280,16 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
                 doorVarContainer.setJointRotationMotorVelocity(DynamXPhysicsHelper.Y_ROTATION_DOF,
                         door.getCloseMotor().x, door.getCloseMotor().y);
                 // if (vehicleEntity.getNetwork().getSimulationHolder() != SimulationHolder.SERVER_SP) //TODO SERVER_SP SPLITTED IN SERVER_SP AND DRIVE_SP
-                doorsState.put(doorId, DoorState.CLOSING); //Closes the door (animation) and the plays the closing sound
+                doorsState.get().put(doorId, DoorState.CLOSING); //Closes the door (animation) and the plays the closing sound
 
             }
-            physicsHandler.timer = 20 * 3;
         } else {
             if (doorState == DoorState.OPEN) {
-                doorsState.put(doorId, DoorState.OPEN);
+                doorsState.get().put(doorId, DoorState.OPEN);
                 playDoorSound(DoorState.OPEN);
             } else {
                 //if (entity.getNetwork().getSimulationHolder() != SimulationHolder.SERVER_SP)
-                doorsState.put(doorId, DoorState.CLOSE); //Closes the door (animation) and the plays the closing sound
+                doorsState.get().put(doorId, DoorState.CLOSE); //Closes the door (animation) and the plays the closing sound
                 TaskScheduler.schedule(new TaskScheduler.ScheduledTask(door.getDoorCloseTime()) {
                     @Override
                     public void run() {
@@ -252,6 +300,7 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
                 });
             }
         }
+        doorsState.setChanged(true);
     }
 
 
@@ -355,7 +404,7 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
     }
 
     public DoorState getCurrentState(byte doorId) {
-        return doorsState.get(doorId);
+        return doorsState.get().get(doorId);
     }
 
     public DoorState getInverseCurrentState(byte doorId) {

@@ -517,7 +517,7 @@ public class VehicleSynchronizedVariables {
         }
     }*/
 
-    public static class DoorsStatus<A extends PackPhysicsEntity<?, ?>> implements SynchronizedVariable<A> {
+    /*public static class DoorsStatus<A extends PackPhysicsEntity<?, ?>> implements SynchronizedVariable<A> {
         public static final ResourceLocation NAME = new ResourceLocation(DynamXConstants.ID, "doorsstatus");
         //private Map<Byte, Integer> attachedDoors = new HashMap<>();
         private final Map<Byte, DoorsModule.DoorState> doorsState = new HashMap<>();
@@ -543,7 +543,7 @@ public class VehicleSynchronizedVariables {
                             attachedDoors.put(id, entityID);
                             changed = true;
                         }
-                    }*/
+                    }*//*
                     return changed ? SyncTarget.ALL_CLIENTS : SyncTarget.NONE;
                 }
             }
@@ -586,7 +586,7 @@ public class VehicleSynchronizedVariables {
             attachedDoors.forEach((i, entityID) -> {
                 buf.writeByte(i);
                 buf.writeInt(entityID);
-            });*/
+            });*//*
         }
 
         @Override
@@ -609,7 +609,7 @@ public class VehicleSynchronizedVariables {
             /*size = buf.readByte();
             for (int i = 0; i < size; i++) {
                 attachedDoors.put(buf.readByte(), buf.readInt());
-            }*/
+            }*//*
         }
-    }
+    }*/
 }

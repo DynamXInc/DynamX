@@ -7,22 +7,32 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.modules.IEntityJoints;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.events.PhysicsEntityEvent;
+import fr.dynamx.api.network.EnumPacketTarget;
 import fr.dynamx.api.network.sync.PhysicsEntityNetHandler;
 import fr.dynamx.api.network.sync.SimulationHolder;
+import fr.dynamx.api.network.sync.SyncTarget;
 import fr.dynamx.api.network.sync.SynchronizedVariablesRegistry;
+import fr.dynamx.api.network.sync.v3.ListeningSynchronizedEntityVariable;
 import fr.dynamx.api.network.sync.v3.PhysicsEntitySynchronizer;
+import fr.dynamx.api.network.sync.v3.SynchronizationRules;
+import fr.dynamx.api.network.sync.v3.SynchronizedVariableSerializer;
 import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.entities.EntityPhysicsState;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.items.DynamXItemRegistry;
+import fr.dynamx.common.network.packets.MessageForcePlayerPos;
 import fr.dynamx.common.network.sync.SPPhysicsEntitySynchronizer;
+import fr.dynamx.common.network.sync.v3.DynamXSynchronizedVariables;
 import fr.dynamx.common.network.sync.vars.PosSynchronizedVariable;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.player.WalkingOnPlayerController;
 import fr.dynamx.common.physics.terrain.PhysicsEntityTerrainLoader;
+import fr.dynamx.common.physics.utils.RigidBodyTransform;
+import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.PhysicsEntityException;
 import fr.dynamx.utils.debug.Profiler;
+import fr.dynamx.utils.debug.SyncTracker;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.BoundingBoxPool;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
@@ -31,6 +41,7 @@ import fr.dynamx.utils.optimization.Vector3fPool;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumFacing;
@@ -47,6 +58,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 /**
  * Base class for all entities using bullet to simulate their physics
@@ -57,7 +69,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     /**
      * Entity network
      */
-    private final PhysicsEntityNetHandler<? extends PhysicsEntity<T>> network;
+    //private final PhysicsEntityNetHandler<? extends PhysicsEntity<T>> network;
     private final PhysicsEntitySynchronizer<? extends PhysicsEntity<T>> synchronizer;
     /**
      * The entity physics handler
@@ -127,7 +139,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
         this.preventEntitySpawning = true;
 
         // Network Init
-        network = DynamXMain.proxy.getNetHandlerForEntity(this);
+        //network = DynamXMain.proxy.getNetHandlerForEntity(this);
         synchronizer = new SPPhysicsEntitySynchronizer<>(this, world.isRemote ? Side.CLIENT : Side.SERVER); //TODO
         usesPhysicsWorld = DynamXContext.usesPhysicsWorld(world);
     }
@@ -156,6 +168,83 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     protected void entityInit() {
     }
 
+    public static class EntityPositionData {
+        private final boolean bodyActive;
+        private final Vector3f position = new Vector3f();
+        private final Quaternion rotation = new Quaternion();
+        private final Vector3f linearVel = new Vector3f();
+        private final Vector3f rotationalVel = new Vector3f();
+
+        private EntityPositionData(AbstractEntityPhysicsHandler<?, ?> physicsHandler) {
+            bodyActive = physicsHandler.isBodyActive();
+            position.set(physicsHandler.getPosition());
+            rotation.set(physicsHandler.getRotation());
+            linearVel.set(physicsHandler.getLinearVelocity());
+            rotationalVel.set(physicsHandler.getAngularVelocity());
+        }
+
+        public EntityPositionData(boolean bodyActive, Vector3f position, Quaternion rotation) {
+            this.bodyActive = bodyActive;
+            position.set(position);
+            rotation.set(rotation);
+        }
+    }
+
+    //TODO A CLEAN MAIS C'EST POUR TEST L'IDEE
+    private final ListeningSynchronizedEntityVariable<EntityPositionData> synchronizedPosition = new ListeningSynchronizedEntityVariable<>(((entityPositionDataSynchronizedEntityVariable, entityPositionData) -> {
+//TODO INTPERPOLATION ETC :c
+    }), SynchronizationRules.PHYSICS_TO_SPECTATORS, new SynchronizedVariableSerializer<EntityPositionData>() {
+        @Override
+        public void writeObject(ByteBuf buf, EntityPositionData object) {
+            buf.writeBoolean(object.bodyActive);
+            DynamXUtils.writeVector3f(buf, object.position);
+            DynamXUtils.writeQuaternion(buf, object.rotation);
+            if (object.bodyActive) {
+                DynamXUtils.writeVector3f(buf, object.linearVel);
+                DynamXUtils.writeVector3f(buf, object.rotationalVel);
+            }
+        }
+
+        @Override
+        public EntityPositionData readObject(ByteBuf buffer, EntityPositionData currentValue) {
+            //TODO PAS COOL NEW
+            EntityPositionData result = new EntityPositionData(buffer.readBoolean(), DynamXUtils.readVector3f(buffer), DynamXUtils.readQuaternion(buffer));
+            if (result.bodyActive) {
+                result.linearVel.set(DynamXUtils.readVector3f(buffer));
+                result. rotationalVel.set(DynamXUtils.readVector3f(buffer));
+            }
+            return result;
+        }
+    }, new Callable<EntityPositionData>() {
+        private EntityPositionData positionData;
+        @Override
+        public EntityPositionData call() {
+            AbstractEntityPhysicsHandler<?, ?> physicsHandler = PhysicsEntity.this.physicsHandler;
+            boolean changed = PhysicsEntity.this.ticksExisted % (physicsHandler.isBodyActive() ? 13 : 20) == 0; //Keep low-rate sync while not moving
+            //Detect changes
+            Vector3f pos = PhysicsEntity.this.physicsPosition;
+            //TODO CLEAN
+            if (positionData == null || positionData.bodyActive != physicsHandler.isBodyActive()) {
+                changed = true;
+            } else if (SyncTracker.different(pos.x, positionData.position.x) || SyncTracker.different(pos.y, positionData.position.y) || SyncTracker.different(pos.z, positionData.position.z)) {
+                changed = true;
+            } else if (SyncTracker.different(PhysicsEntity.this.physicsRotation.getX(), positionData.rotation.getX()) || SyncTracker.different(PhysicsEntity.this.physicsRotation.getY(), positionData.rotation.getY()) ||
+                    SyncTracker.different(PhysicsEntity.this.physicsRotation.getZ(), positionData.rotation.getZ()) || SyncTracker.different(PhysicsEntity.this.physicsRotation.getW(), positionData.rotation.getW())) {
+                changed = true;
+            }
+            //TODO PAS COOL NEW
+            if(changed)
+                positionData = new EntityPositionData(physicsHandler);
+            return positionData;
+        }
+    });
+
+    //TODO MOVE
+    public void onTeleported(PhysicsEntity<?> entity, Vector3f newPos) {
+        //TODO DOIT IGNORER LES PROCHAINES UPDATES VENANT DU CLIENT ignoreFor = 22;
+        DynamXContext.getNetwork().sendToClient(new MessageForcePlayerPos(entity, newPos, entity.physicsRotation, entity.physicsHandler.getLinearVelocity(), entity.physicsHandler.getAngularVelocity()), EnumPacketTarget.PLAYER, (EntityPlayerMP) entity.getControllingPassenger());
+    }
+
     /**
      * Adds the {@link fr.dynamx.api.network.sync.SynchronizedVariable} used to synchronize this module <br>
      * The variables must only be added on the side which has the authority over the data (typically the server) <br>
@@ -170,6 +259,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
         if (simulationHolder.isPhysicsAuthority(side)) {
             variables.add(PosSynchronizedVariable.NAME);
         }
+        getSynchronizer().registerVariable(DynamXSynchronizedVariables.POS, synchronizedPosition);
         return variables;
     }
 
@@ -196,7 +286,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
                     return;
                 }
             }
-            getNetwork().setSimulationHolder(getNetwork().getDefaultSimulationHolder());
+            //getNetwork().setSimulationHolder(getNetwork().getDefaultSimulationHolder());
             getSynchronizer().setSimulationHolder(getSynchronizer().getDefaultSimulationHolder());
             if (CONSTRUYE_DEBUG)
                 System.out.println("When init physics : " + rotationYaw + " " + physicsRotation);
@@ -247,9 +337,9 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
 
         //Tick physics if we don't use a physics world
         if (!usesPhysicsWorld) {
-            getNetwork().onPrePhysicsTick(Profiler.get());
+            //getNetwork().onPrePhysicsTick(Profiler.get());
             getSynchronizer().onPrePhysicsTick(Profiler.get());
-            getNetwork().onPostPhysicsTick(Profiler.get());
+            //getNetwork().onPostPhysicsTick(Profiler.get());
             getSynchronizer().onPostPhysicsTick(Profiler.get());
         }
 
@@ -404,9 +494,9 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     /**
      * @return The entity network
      */
-    public PhysicsEntityNetHandler<? extends PhysicsEntity<T>> getNetwork() {
+    /*public PhysicsEntityNetHandler<? extends PhysicsEntity<T>> getNetwork() {
         return network;
-    }
+    }*/
 
     public PhysicsEntitySynchronizer<? extends PhysicsEntity<T>> getSynchronizer() {
         return synchronizer;

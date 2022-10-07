@@ -6,12 +6,10 @@ import fr.dynamx.common.entities.ModularPhysicsEntity;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
-import java.util.List;
 
 /**
  * Base implementation of a {@link ModularPhysicsEntity} module <br>
@@ -93,12 +91,12 @@ public interface IPhysicsModule<P extends AbstractEntityPhysicsHandler<?, ?>> {
      * Adds the {@link fr.dynamx.api.network.sync.SynchronizedVariable} used to synchronize this module <br>
      * The variables must only be added on the side which has the authority over the data (typically the server) <br>
      * Fired on modules initialization and on {@link fr.dynamx.api.network.sync.SimulationHolder} changes
+     * todo doc
+     *  @param side             The current side
      *
-     * @param side             The current side
      * @param simulationHolder The new holder of the simulation of the entity (see {@link SimulationHolder})
-     * @param variables        The list of {@link fr.dynamx.api.network.sync.SynchronizedVariable} used to sync the entity, referenced by they registry name (see {@link fr.dynamx.api.network.sync.SynchronizedVariablesRegistry})
      */
-    default void addSynchronizedVariables(Side side, SimulationHolder simulationHolder, List<ResourceLocation> variables) {
+    default void addSynchronizedVariables(Side side, SimulationHolder simulationHolder) {
     }
 
     /**

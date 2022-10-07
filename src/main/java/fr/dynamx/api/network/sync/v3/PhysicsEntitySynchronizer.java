@@ -58,6 +58,7 @@ public abstract class PhysicsEntitySynchronizer<T extends PhysicsEntity<?>> {
         return receivedVariables;
     }
 
+    //TODO ANNOTATION SYSTEM
     public void registerVariable(ResourceLocation name, SynchronizedEntityVariable<?> variable) {
         Integer id = SynchronizedEntityVariableRegistry.getSyncVarRegistry().get(name);
         if(id == null) { //TODO CLEAN

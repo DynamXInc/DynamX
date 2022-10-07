@@ -158,7 +158,7 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
             QuaternionPool.openPool();
             Vector3fPool.openPool();
             try {
-                e.getNetwork().onPrePhysicsTick(profiler);
+                //e.getNetwork().onPrePhysicsTick(profiler);
                 e.getSynchronizer().onPrePhysicsTick(profiler);
             } catch (Exception ex) {
                 throw new PhysicsEntityException(e, "prePhysicsTick", ex);
@@ -187,7 +187,7 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
             QuaternionPool.openPool();
             Vector3fPool.openPool();
             try {
-                e.getNetwork().onPostPhysicsTick(profiler);
+                //e.getNetwork().onPostPhysicsTick(profiler);
                 e.getSynchronizer().onPostPhysicsTick(profiler);
             } catch (Exception ex) {
                 throw new PhysicsEntityException(e, "postPhysicsTick", ex);

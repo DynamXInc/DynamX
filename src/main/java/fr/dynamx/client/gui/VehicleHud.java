@@ -27,7 +27,7 @@ public class VehicleHud extends GuiFrame {
         super(new GuiScaler.Identity());
         this.riddenEntity = riddenEntity.cast();
         setCssClass("root");
-        List<IVehicleController> controllers = new ArrayList<>(((ClientEntityNetHandler) riddenEntity.cast().getNetwork()).getControllers());
+        List<IVehicleController> controllers = new ArrayList<>(((ClientEntityNetHandler) riddenEntity.cast().getSynchronizer()).getControllers());
         if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.CreateVehicleHudEvent(this, styleSheets, riddenEntity.getSeats().isLocalPlayerDriving(), this.riddenEntity, controllers))) {
             controllers.forEach(c ->
             {

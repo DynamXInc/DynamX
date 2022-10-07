@@ -23,7 +23,7 @@ public class ServerProxy extends CommonProxy {
 
     @Override
     public boolean ownsSimulation(PhysicsEntity<?> entity) {
-        return entity.getNetwork().getSimulationHolder() == SimulationHolder.SERVER;
+        return entity.getSynchronizer().getSimulationHolder() == SimulationHolder.SERVER;
     }
 
     @Override

@@ -23,6 +23,7 @@ public class SynchronizedEntityVariableRegistry {
     private static final List<ResourceLocation> baseSyncVarRegistry = new ArrayList<>();
     private static final BiMap<ResourceLocation, Integer> syncVarRegistry = HashBiMap.create();
 
+    //TODO ANNOTATION SYSTEM
     public static void addSyncVar(ResourceLocation name) {
         if (baseSyncVarRegistry.contains(name))
             throw new IllegalArgumentException("Duplicate SyncVar " + name);

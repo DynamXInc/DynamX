@@ -105,7 +105,7 @@ public class UdpClientPhysicsEntityNetHandler<T extends PhysicsEntity<?>> extend
         //TODO THIS IS BAD
         //if (entity instanceof IModuleContainer.IEngineContainer && entity instanceof IModuleContainer.ISeatsContainer) {
         if (getSimulationHolder().ownsPhysics(Side.CLIENT)) {
-            PooledHashMap<Integer, ? extends SynchronizedVariable<? extends PhysicsEntity<?>>> syncData = retainSyncVars(entity.getNetwork().getOutputSyncVars(), entity.getNetwork().getDirtyVars(HashMapPool.get(), Side.SERVER, ClientPhysicsSyncManager.simulationTime), SyncTarget.SERVER);
+            PooledHashMap<Integer, ? extends SynchronizedVariable<? extends PhysicsEntity<?>>> syncData = retainSyncVars(getOutputSyncVars(), getDirtyVars(HashMapPool.get(), Side.SERVER, ClientPhysicsSyncManager.simulationTime), SyncTarget.SERVER);
             //System.out.println("Send sync "+syncData+" "+ClientPhysicsSyncManager.simulationTime);
             if (!syncData.isEmpty()) {
                 DynamXContext.getNetwork().sendToServer(new MessagePhysicsEntitySync(entity, ClientPhysicsSyncManager.simulationTime, syncData, MessagePhysicsEntitySync.SyncType.UDP_SYNC));

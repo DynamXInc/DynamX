@@ -141,11 +141,12 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
 
     @Override
     public boolean ownsSimulation(PhysicsEntity<?> entity) {
-        if (entity.getNetwork().getSimulationHolder().ownsPhysics(entity.world.isRemote ? Side.CLIENT : Side.SERVER)) {
+        //TODO NEW SYNC CLEAN THIS
+        if (entity.getSynchronizer().getSimulationHolder().ownsPhysics(entity.world.isRemote ? Side.CLIENT : Side.SERVER)) {
             return true;
         }
         if (entity.world.isRemote && ClientEventHandler.MC.player.getRidingEntity() instanceof PhysicsEntity
-                && ((PhysicsEntity<?>) ClientEventHandler.MC.player.getRidingEntity()).getNetwork().getSimulationHolder().ownsPhysics(Side.CLIENT)) {
+                && ((PhysicsEntity<?>) ClientEventHandler.MC.player.getRidingEntity()).getSynchronizer().getSimulationHolder().ownsPhysics(Side.CLIENT)) {
             return true;
         }
         return DynamXContext.getPlayerPickingObjects().containsKey(ClientEventHandler.MC.player.getEntityId()) &&

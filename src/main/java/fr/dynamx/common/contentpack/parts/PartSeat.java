@@ -1,6 +1,7 @@
 package fr.dynamx.common.contentpack.parts;
 
 import com.jme3.math.Quaternion;
+import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.entities.IModuleContainer;
@@ -62,6 +63,10 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     @PackFileProperty(configNames = "CameraPositionY", required = false, defaultValue = "0")
     @Getter
     private float cameraPositionY;
+
+    @PackFileProperty(configNames = "PlayerSize", required = false)
+    @Getter
+    private Vector3f playerSize = new Vector3f(1f, 1f, 1f);
 
     public PartSeat(ModularVehicleInfoBuilder owner, String partName) {
         super(owner, partName, 0.4f, 1.8f);

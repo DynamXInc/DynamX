@@ -32,11 +32,12 @@ public abstract class EntityPhysicsHandler<T extends PhysicsEntity<?>> extends A
     @Override
     public void update() {
         super.update();
+        /* todo more tests to correctly fix this
         if(collisionObject.getActivationState() == Activation.error){
             handledEntity.setDead();
             DynamXMain.log.error("Fatal error on " + handledEntity.getName());
             return;
-        }
+        }*/
         getCollisionObject().getLinearVelocity(linearVel);
         getCollisionObject().getAngularVelocity(rotationalVel);
 

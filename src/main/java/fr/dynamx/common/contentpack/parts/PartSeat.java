@@ -66,7 +66,7 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
 
     @PackFileProperty(configNames = "PlayerSize", required = false)
     @Getter
-    private Vector3f playerSize = new Vector3f(1f, 1f, 1f);
+    private Vector3f playerSize;
 
     public PartSeat(ModularVehicleInfoBuilder owner, String partName) {
         super(owner, partName, 0.4f, 1.8f);

@@ -4,6 +4,7 @@ import com.jme3.math.Vector3f;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.contentpack.object.IShapeContainer;
+import fr.dynamx.api.contentpack.object.IShapeProvider;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoType;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
@@ -13,6 +14,8 @@ import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.errors.DynamXErrorManager;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * @param <T> Should implement ISubInfoTypeOwner<T> and IShapedObject
@@ -31,13 +34,26 @@ public abstract class BasePart<T extends ISubInfoTypeOwner<T>> extends SubInfoTy
         return null;
     };
 
+    /**
+     * Used internally, don't modify the id except you are an expert
+     */
+    @Getter
+    @Setter
     private byte id;
+    @Getter
     private final String partName;
 
     @PackFileProperty(configNames = "Position", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y, description = "common.position")
-    private Vector3f position;
+    @Getter
+    private Vector3f position = new Vector3f();
     @PackFileProperty(configNames = "Scale", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED, required = false, description = "common.scale")
-    private Vector3f scale;
+    @Getter
+    private Vector3f scale = new Vector3f();
+    @PackFileProperty(configNames = "DependsOn", required = false, description = "common.scale")
+    private String partDependingOnName;
+
+    @Getter
+    private BasePart<?> partDependingOn;
 
     public BasePart(T owner, String partName) {
         super(owner);
@@ -47,32 +63,6 @@ public abstract class BasePart<T extends ISubInfoTypeOwner<T>> extends SubInfoTy
     public BasePart(T owner, String partName, Vector3f scale) {
         this(owner, partName);
         this.scale = scale;
-    }
-
-    public String getPartName() {
-        return partName;
-    }
-
-    /**
-     * Used internally, don't modify the id except you are an expert
-     */
-    public void setId(byte id) {
-        this.id = id;
-    }
-
-    /**
-     * @return Internal id of the part
-     */
-    public byte getId() {
-        return id;
-    }
-
-    public Vector3f getPosition() {
-        return position;
-    }
-
-    public Vector3f getScale() {
-        return scale;
     }
 
     /**
@@ -102,7 +92,7 @@ public abstract class BasePart<T extends ISubInfoTypeOwner<T>> extends SubInfoTy
             DynamXErrorManager.addPackError(getPackName(), "required_property", ErrorLevel.HIGH, parent.getName(), "Scale in " + getName());
         }
         ((IShapeContainer) owner).addPart(this);
-        getPosition().multLocal(getScaleModifier(owner));
-        getScale().multLocal(getScaleModifier(owner));
+        position.multLocal(getScaleModifier(owner));
+        scale.multLocal(getScaleModifier(owner));
     }
 }

@@ -6,6 +6,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.entities.PhysicsEntity;
+import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import fr.dynamx.utils.physics.DynamXPhysicsHelper;
 import net.minecraft.block.BlockLiquid;
@@ -32,7 +33,7 @@ public abstract class EntityPhysicsHandler<T extends PhysicsEntity<?>> extends A
     @Override
     public void update() {
         super.update();
-        if(collisionObject.getActivationState() == Activation.error){
+        if (collisionObject.getActivationState() == Activation.error) {
             handledEntity.setDead();
             DynamXMain.log.error("Fatal error on " + handledEntity.getName());
             return;
@@ -49,7 +50,8 @@ public abstract class EntityPhysicsHandler<T extends PhysicsEntity<?>> extends A
                 float liquidHeight = BlockLiquid.getBlockLiquidHeight(blockState, handledEntity.world, pos);
                 if (liquidHeight > bodyPos.y % 1.0) {
                     appliedBuoy = true;
-                    collisionObject.setGravity(Vector3fPool.get(0.0f, 2.0f, 0.0f));
+                    float normalizedMass = DynamXMath.normalizeBetween(collisionObject.getMass(), 0, 1500, 1, 2);
+                    collisionObject.setGravity(Vector3fPool.get(0.0f, 2 - normalizedMass, 0.0f));
                     Vector3f waterVelocity = Vector3fPool.get(blockState.getBlock().modifyAcceleration(handledEntity.world, pos, null, new Vec3d(0, 0, 0)));
                     Vector3f bodyVelocity = linearVel;
                     Vector3f angularVelocity = rotationalVel;

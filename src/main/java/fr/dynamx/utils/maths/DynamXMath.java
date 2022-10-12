@@ -129,8 +129,22 @@ public class DynamXMath {
      * @param max   the maximum of the range.
      * @return A value between 0-1 if the given value is between min/max.
      */
-    public static float unInterpolateLinear(float value, float min, float max) {
+    public static float normalize(float value, float min, float max) {
         return (value - min) / (max - min);
+    }
+
+    /**
+     * Normalize a value between in range [valueRangeMin, valueRangeMin] valueMin and valueMax
+     *
+     * @param value         the value between min-max (inclusive).
+     * @param valueRangeMin the minimum of the range.
+     * @param valueRangeMax the maximum of the range.
+     * @param valueMin      the min of the value
+     * @param valueMax      the max of the value
+     * @return A value between valueMin- valueMax if the given value is between min/max.
+     */
+    public static float normalizeBetween(float value, float valueRangeMin, float valueRangeMax, float valueMin, float valueMax) {
+        return normalize(value, valueRangeMin, valueRangeMax) * (valueMax - valueMin) + valueMin;
     }
 
     /**

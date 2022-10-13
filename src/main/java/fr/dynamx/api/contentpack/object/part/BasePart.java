@@ -3,8 +3,8 @@ package fr.dynamx.api.contentpack.object.part;
 import com.jme3.math.Vector3f;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.INamedObject;
+import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.IShapeContainer;
-import fr.dynamx.api.contentpack.object.IShapeProvider;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoType;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
@@ -20,7 +20,7 @@ import lombok.Setter;
 /**
  * @param <T> Should implement ISubInfoTypeOwner<T> and IShapedObject
  */
-public abstract class BasePart<T extends ISubInfoTypeOwner<T>> extends SubInfoType<T> {
+public abstract class BasePart<T extends ISubInfoTypeOwner<?>> extends SubInfoType<T> {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.BLOCKS_AND_PROPS})
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         switch (key) {
@@ -55,12 +55,12 @@ public abstract class BasePart<T extends ISubInfoTypeOwner<T>> extends SubInfoTy
     @Getter
     private BasePart<?> partDependingOn;
 
-    public BasePart(T owner, String partName) {
+    public BasePart(ISubInfoTypeOwner<T> owner, String partName) {
         super(owner);
         this.partName = partName;
     }
 
-    public BasePart(T owner, String partName, Vector3f scale) {
+    public BasePart(ISubInfoTypeOwner<T> owner, String partName, Vector3f scale) {
         this(owner, partName);
         this.scale = scale;
     }
@@ -91,7 +91,7 @@ public abstract class BasePart<T extends ISubInfoTypeOwner<T>> extends SubInfoTy
             INamedObject parent = getRootOwner();
             DynamXErrorManager.addPackError(getPackName(), "required_property", ErrorLevel.HIGH, parent.getName(), "Scale in " + getName());
         }
-        ((IShapeContainer) owner).addPart(this);
+        ((IPartContainer<T>) owner).addPart(this);
         position.multLocal(getScaleModifier(owner));
         scale.multLocal(getScaleModifier(owner));
     }

@@ -4,6 +4,7 @@ import com.jme3.bullet.collision.shapes.BoxCollisionShape;
 import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.INamedObject;
+import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.IShapeContainer;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
@@ -31,7 +32,7 @@ import java.util.stream.Collectors;
  * Builder of {@link ModularVehicleInfo} <br>
  * Responsible for loading all the configuration/properties of the vehicle and creating a final object
  */
-public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implements IShapeContainer, INamedObject, ParticleEmitterInfo.IParticleEmitterContainer {
+public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implements IPartContainer<ModularVehicleInfoBuilder>, IShapeContainer, INamedObject, ParticleEmitterInfo.IParticleEmitterContainer {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("UseHullShape".equals(key))
@@ -65,7 +66,7 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
     /**
      * The parts of this vehicle (wheels, seats, doors...)
      */
-    protected final List<BasePart<?>> parts = new ArrayList<>();
+    protected final List<BasePart<ModularVehicleInfoBuilder>> parts = new ArrayList<>();
     /**
      * The shapes of this vehicle, can be used for collisions
      */
@@ -145,11 +146,6 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
         partShapes.add(partShape);
     }
 
-    @Override
-    public void addPart(BasePart<?> partToAdd) {
-        parts.add(partToAdd);
-    }
-
     /**
      * Prevents the added parts from being rendered with the main obj model of the vehicle <br>
      * The {@link fr.dynamx.api.entities.modules.IPhysicsModule} using this part is responsible to render the part at the right location
@@ -172,15 +168,6 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
             lightSources.put(source.getPartName(), new PartLightSource.CompoundLight(source));
     }
 
-    /**
-     * @param clazz The class of the parts to return
-     * @param <T>   The type of the parts to return
-     * @return All the parts of the given type
-     */
-    public <T extends BasePart<?>> List<T> getPartsByType(Class<T> clazz) {
-        return (List<T>) this.parts.stream().filter(p -> clazz.equals(p.getClass())).collect(Collectors.toList());
-    }
-
     @Override
     public void generateShape() {
         ObjModelPath modelPath = DynamXUtils.getModelPath(getPackName(), model);
@@ -188,7 +175,8 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
             physicsCollisionShape = ShapeUtils.generateComplexModelCollisions(modelPath, "chassis", scaleModifier, centerOfMass, shapeYOffset);
         else {
             physicsCollisionShape = new CompoundCollisionShape();
-            for (PartShape<?> partShape : getPartsByType(PartShape.class)) {
+            List<PartShape> partsByType = getPartsByType(PartShape.class);
+            for (PartShape partShape : partsByType) {
                 BoxCollisionShape hullShape = new BoxCollisionShape(partShape.getScale());
                 hullShape.setScale(scaleModifier);
                 physicsCollisionShape.addChildShape(hullShape, new Vector3f(centerOfMass.x, shapeYOffset + centerOfMass.y, centerOfMass.z).add(partShape.getPosition()));
@@ -333,5 +321,15 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
     @Override
     public ModularVehicleInfoBuilder getOwner() {
         return null;
+    }
+
+    @Override
+    public List<BasePart<ModularVehicleInfoBuilder>> getAllParts() {
+        return parts;
+    }
+
+    @Override
+    public void addPart(BasePart<ModularVehicleInfoBuilder> partToAdd) {
+        parts.add(partToAdd);
     }
 }

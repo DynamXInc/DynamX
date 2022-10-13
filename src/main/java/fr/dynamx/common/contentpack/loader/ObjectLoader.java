@@ -85,7 +85,7 @@ public class ObjectLoader<T extends ObjectInfo<?>, C extends IInfoOwner<?>, U ex
         T info = assetCreator.apply(modName, objectName);
         owners.add((IInfoOwner<T>) owner);
         builtinObjects.add(info);
-        if(DynamXObjectLoaders.PACKS.findPackInfoByPackName(modName) == null)
+        if (DynamXObjectLoaders.PACKS.findPackInfoByPackName(modName) == null)
             DynamXObjectLoaders.PACKS.addInfo(modName, new PackInfo(modName, ContentPackType.BUILTIN));
         //System.out.println("Builtin pack info added is " + DynamXObjectLoaders.PACKS.findPackInfoByPackName(modName)+" with name " + modName);
         //System.out.println("All info " + DynamXObjectLoaders.PACKS.getInfos());
@@ -105,7 +105,7 @@ public class ObjectLoader<T extends ObjectInfo<?>, C extends IInfoOwner<?>, U ex
             boolean client = FMLCommonHandler.instance().getSide().isClient();
             Object[] tabItem = new Object[1];
             if (info instanceof AbstractItemObject) {
-                String creativeTabName = ((AbstractItemObject<?>) info).getCreativeTabName();
+                String creativeTabName = ((AbstractItemObject<?, ?>) info).getCreativeTabName();
                 if (creativeTabName != null && !creativeTabName.equalsIgnoreCase("None")) {
                     if (DynamXItemRegistry.creativeTabs.stream().noneMatch(p -> DynamXReflection.getCreativeTabName(p).equals(creativeTabName))) {
                         DynamXItemRegistry.creativeTabs.add(new CreativeTabs(creativeTabName) {

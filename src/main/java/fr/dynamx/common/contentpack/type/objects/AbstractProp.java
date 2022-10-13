@@ -6,7 +6,7 @@ import com.jme3.bullet.collision.shapes.CylinderCollisionShape;
 import com.jme3.bullet.collision.shapes.SphereCollisionShape;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IShapeContainer;
-import fr.dynamx.api.contentpack.object.IShapeProvider;
+import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractItemObject<T> implements IShapeContainer, IShapeProvider, ParticleEmitterInfo.IParticleEmitterContainer {
+public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractItemObject<T, T> implements IShapeContainer, ParticleEmitterInfo.IParticleEmitterContainer {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.PROPS})
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("UseHullShape".equals(key))
@@ -60,8 +60,6 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
     @PackFileProperty(configNames = "Textures", required = false, type = DefinitionType.DynamXDefinitionTypes.STRING_ARRAY_2D)
     protected String[][] texturesArray;
 
-    @Getter
-    private final List<BasePart<?>> parts = new ArrayList<>();
     @Getter
     private final List<MutableBoundingBox> collisionBoxes = new ArrayList<>();
     @Getter
@@ -146,10 +144,6 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
         return textures.size() > 1;
     }
 
-    @Override
-    public void addPart(BasePart<?> tBasePart) {
-        parts.add(tBasePart);
-    }
 
     @Override
     public void addCollisionShape(PartShape<?> partShape) {
@@ -166,12 +160,4 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
         return particleEmitters;
     }
 
-    public <A extends BasePart<?>> List<A> getPartsByType(Class<A> clazz) {
-        return (List<A>) this.parts.stream().filter(p -> clazz.equals(p.getClass())).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<BasePart<?>> getAllParts() {
-        return parts;
-    }
 }

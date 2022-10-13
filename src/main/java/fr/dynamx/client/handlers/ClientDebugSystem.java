@@ -3,7 +3,7 @@ package fr.dynamx.client.handlers;
 import com.jme3.bullet.joints.PhysicsJoint;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.contentpack.object.IShapeProvider;
+import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.client.camera.CameraSystem;
 import fr.dynamx.common.DynamXContext;
@@ -205,7 +205,7 @@ public class ClientDebugSystem {
                     return;
                 }
                 PackPhysicsEntity<?, ?> entityHit = (PackPhysicsEntity<?, ?>) MC.objectMouseOver.entityHit;
-                if (!(entityHit.getPackInfo() instanceof IShapeProvider)) {
+                if (!(entityHit.getPackInfo() instanceof IPartContainer)) {
                     disableShapeDebug(lastPart);
                     Vector3fPool.closePool();
                     return;
@@ -223,7 +223,7 @@ public class ClientDebugSystem {
                         return false;
                     };
                 }
-                BasePart<?> basePart = DynamXUtils.rayTestPart(rootPlayer, entityHit, (IShapeProvider<?>) entityHit.getPackInfo(), wantedShape);
+                BasePart<?> basePart = DynamXUtils.rayTestPart(rootPlayer, entityHit, (IPartContainer<?>) entityHit.getPackInfo(), wantedShape);
                 if (basePart == null) {
                     disableShapeDebug(lastPart);
                     Vector3fPool.closePool();

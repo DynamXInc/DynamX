@@ -103,7 +103,7 @@ public class GearBox {
 
     public float getRPM(Engine engine, float speed) {
         GearData gear = getActiveGear();
-        float revs = DynamXMath.unInterpolateLinear(speed, gear.getStart(), gear.getEnd());
+        float revs = DynamXMath.normalize(speed, gear.getStart(), gear.getEnd());
         revs *= (gear.getRpmEnd() - gear.getRpmStart()) / engine.getMaxRevs();
         revs += gear.getRpmStart() / engine.getMaxRevs(); //on ajoute les tours moteurs minimaux (irl si on tombe dessous on cale donc avec une boite auto pas possible)
         return revs;

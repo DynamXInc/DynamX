@@ -11,7 +11,7 @@ buildscript {
 }
 
 plugins {
-    id "com.jfrog.artifactory" version "4.9.8"
+    id "com.jfrog.artifactory" version "4.26.1"
 }
 
 repositories {

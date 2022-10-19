@@ -24,6 +24,15 @@ public interface IObjModelRegistry {
 
     /**
      * Registers a model <br>
+     * The model should be in dynamxmod:models/path
+     *
+     * @param name The model in format path
+     */
+    @Deprecated
+    void registerModel(String name);
+
+    /**
+     * Registers a model <br>
      * The model should be in modid:models/path
      *
      * @param name           The model in format modid:path
@@ -32,10 +41,25 @@ public interface IObjModelRegistry {
     void registerModel(ObjModelPath name, IModelTextureVariantsSupplier customTextures);
 
     /**
+     * Registers a model <br>
+     * The model should be in dynamxmod:models/path
+     *
+     * @param path           The model in format path
+     * @param customTextures A texture supplier for this model (allows multi-texturing)
+     */
+    void registerModel(String path, IModelTextureVariantsSupplier customTextures);
+
+    /**
      * @return The model corresponding to the given name (the name used in registerModel)
      * @throws IllegalArgumentException If the model wasn't registered (should be done before DynamX pre initialization)
      */
     ObjModelRenderer getModel(ResourceLocation name);
+
+    /**
+     * @return The model corresponding to the given name (the name used in registerModel)
+     * @throws IllegalArgumentException If the model wasn't registered (should be done before DynamX pre initialization)
+     */
+    ObjModelRenderer getModel(String path);
 
     /**
      * Reloads all models, may take some time

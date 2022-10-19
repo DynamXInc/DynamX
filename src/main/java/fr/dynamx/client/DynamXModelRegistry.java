@@ -1,23 +1,23 @@
 package fr.dynamx.client;
 
 import fr.aym.acslib.ACsLib;
-import fr.aym.acslib.api.services.ErrorTrackingService;
 import fr.aym.acslib.api.services.ThreadedLoadingService;
 import fr.aym.acslib.api.services.error.ErrorLevel;
+import fr.dynamx.api.contentpack.ContentPackType;
 import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
 import fr.dynamx.api.obj.IObjModelRegistry;
 import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.client.renders.model.MissingObjModel;
 import fr.dynamx.client.renders.model.renderer.ObjItemModelLoader;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
-import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
+import fr.dynamx.common.contentpack.PackInfo;
 import fr.dynamx.common.contentpack.type.objects.ArmorObject;
 import fr.dynamx.common.objloader.MTLLoader;
 import fr.dynamx.common.objloader.OBJLoader;
+import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXLoadingTasks;
-import fr.dynamx.utils.RegistryNameSetter;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
@@ -46,6 +46,19 @@ public class DynamXModelRegistry implements IObjModelRegistry {
     @Override
     public void registerModel(ObjModelPath location) {
         registerModel(location, null);
+    }
+
+    public static final PackInfo BASE_PACKINFO = new PackInfo(DynamXConstants.ID, ContentPackType.BUILTIN);
+
+    @Deprecated
+    @Override
+    public void registerModel(String location) {
+        registerModel(new ObjModelPath(BASE_PACKINFO, new ResourceLocation(DynamXConstants.ID, String.format("models/%s", location))), null);
+    }
+    @Deprecated
+    @Override
+    public void registerModel(String location, IModelTextureVariantsSupplier customTextures) {
+        registerModel(new ObjModelPath(BASE_PACKINFO, new ResourceLocation(DynamXConstants.ID, String.format("models/%s", location))), customTextures);
     }
 
     @Override
@@ -77,6 +90,19 @@ public class DynamXModelRegistry implements IObjModelRegistry {
             return MISSING_MODEL;
         }
         return MODELS.get(name);
+    }
+
+    @Override
+    public ObjModelRenderer getModel(String name) {
+        ResourceLocation path = new ResourceLocation(DynamXConstants.ID, String.format("models/%s", name));
+        if (!MODELS.containsKey(path)) {
+            if (!ERRORED_MODELS.contains(path)) {
+                log.error("Obj model " + path + " isn't registered !");
+                ERRORED_MODELS.add(path);
+            }
+            return MISSING_MODEL;
+        }
+        return MODELS.get(path);
     }
 
     /**

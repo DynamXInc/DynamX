@@ -19,7 +19,6 @@ import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.debug.Profiler;
 import fr.dynamx.utils.debug.SyncTracker;
-import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import io.netty.buffer.ByteBuf;
@@ -192,7 +191,7 @@ public class DebugPosSynchronizedVariable implements SynchronizedVariable<Physic
                 double y = entity.physicsPosition.y + entity.motionY;
                 double z = entity.physicsPosition.z + entity.motionZ;
                 entity.physicsPosition.set((float) x, (float) y, (float) z);
-                DynamXGeometry.slerp(entity.physicsRotation, rotation, entity.physicsRotation, 1f / step);
+                DynamXMath.slerp(1f / step, entity.physicsRotation, rotation, entity.physicsRotation);
 
                 //When the interpolation is finished, we set the new rotation into bullet because it may be used by the prediction system
                 if (step == 1 && DynamXMain.proxy.shouldUseBulletSimulation(entity.world)) {

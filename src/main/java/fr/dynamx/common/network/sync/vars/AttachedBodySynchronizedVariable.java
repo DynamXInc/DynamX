@@ -11,7 +11,6 @@ import fr.dynamx.common.physics.utils.RigidBodyTransform;
 import fr.dynamx.common.physics.utils.SynchronizedRigidBodyTransform;
 import fr.dynamx.utils.debug.Profiler;
 import fr.dynamx.utils.debug.SyncTracker;
-import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import io.netty.buffer.ByteBuf;
@@ -158,8 +157,8 @@ public abstract class AttachedBodySynchronizedVariable<T extends PhysicsEntity<?
                                     DynamXMath.interpolateLinear(1f / step, var.getPhysicTransform().getPosition().z, transform.getValue().getPosition().z)));
                     //entity.onMove(entity.motionX, entity.motionY, entity.motionZ);
                     //entity.setPosition(x, y, z);
-                    DynamXGeometry.slerp(var.getPhysicTransform().getRotation(), transform.getValue().getRotation(),
-                            var.getPhysicTransform().getRotation(), 1f / step);
+                    DynamXMath.slerp(1f / step, var.getPhysicTransform().getRotation(), transform.getValue().getRotation(),
+                            var.getPhysicTransform().getRotation());
 
                     //When the interpolation is finished, we set the new rotation into bullet because it may be used by the prediction system
                     if (step == 1 && DynamXMain.proxy.shouldUseBulletSimulation(entity.world)) {

@@ -26,11 +26,6 @@ public interface IShapeContainer extends INamedObject {
     Vector3f getScaleModifier();
 
     /**
-     * Adds a {@link BasePart} to this object
-     */
-    void addPart(BasePart<?> tBasePart);
-
-    /**
      * Adds a {@link PartShape} to this object
      */
     void addCollisionShape(PartShape<?> tPartShape);

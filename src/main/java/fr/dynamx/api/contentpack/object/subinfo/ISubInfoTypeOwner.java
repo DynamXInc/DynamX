@@ -14,7 +14,7 @@ import java.util.List;
  *
  * @param <T> The type of the implementing class
  */
-public interface ISubInfoTypeOwner<T extends ISubInfoTypeOwner<T>> extends INamedObject {
+public interface ISubInfoTypeOwner<T extends ISubInfoTypeOwner<?>> extends INamedObject {
     /**
      * Adds an {@link ISubInfoType}
      */

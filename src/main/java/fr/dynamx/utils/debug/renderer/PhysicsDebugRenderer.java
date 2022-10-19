@@ -9,22 +9,20 @@ import com.jme3.bullet.objects.PhysicsSoftBody;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.physics.BulletShapeType;
+import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.common.physics.utils.RigidBodyTransform;
-import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
-import fr.dynamx.utils.physics.ShapeUtils;
 import net.minecraft.client.renderer.GlStateManager;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
 import org.lwjgl.util.glu.Sphere;
 
 import java.awt.*;
-import java.util.List;
 
 
 public class PhysicsDebugRenderer {
@@ -159,32 +157,30 @@ public class PhysicsDebugRenderer {
         DynamXRenderUtils.drawBoundingBox(halfExtent, red, green, blue, alpha);
     }
 
-    public static void debugConstraint(PhysicsJoint joint) {
+    public static void debugConstraint(PhysicsJoint joint, float partialTicks) {
         if (joint instanceof Constraint) {
             Constraint constraint = (Constraint) joint;
             Vector3f pivotA = Vector3fPool.get();
             Vector3f pivotB = Vector3fPool.get();
             if (constraint.getBodyA() != null) {
                 constraint.getPivotA(pivotA);
-                drawSingleEndedConstraint(constraint.getBodyA(), pivotA, new Color(1, 0, 0, 1), new Color(1, 0, 0, 0.5f), new Color(1, 0, 0, 1));
+                drawSingleEndedConstraint(constraint.getBodyA(), pivotA, new Color(1, 0, 0, 1), new Color(1, 0, 0, 0.5f), new Color(1, 0, 0, 1), partialTicks);
             }
             if (constraint.getBodyB() != null) {
                 constraint.getPivotB(pivotB);
-                drawSingleEndedConstraint(constraint.getBodyB(), pivotB, new Color(0, 1, 0, 1), new Color(1, 1, 0, 0.5f), new Color(0, 1, 0, 1));
+                drawSingleEndedConstraint(constraint.getBodyB(), pivotB, new Color(0, 1, 0, 1), new Color(1, 1, 0, 0.5f), new Color(0, 1, 0, 1), partialTicks);
             }
             if (constraint.getBodyA() != null && constraint.getBodyB() != null) {
                 constraint.getPivotA(pivotA);
                 constraint.getPivotB(pivotB);
-                drawDoubleEndedConstraint(constraint.getBodyA(), constraint.getBodyB(), pivotA, pivotB, new Color(0.5f, 0, 0.5f, 1));
+                drawDoubleEndedConstraint(constraint.getBodyA(), constraint.getBodyB(), pivotA, pivotB, new Color(0.5f, 0, 0.5f, 1), partialTicks);
             }
         }
     }
 
-    public static void drawSingleEndedConstraint(PhysicsRigidBody rigidBody, Vector3f pivot, Color lineColor, Color endA, Color endB) {
-        Vector3f bodyPos = Vector3fPool.get();
-        Quaternion bodyRot = QuaternionPool.get();
-        rigidBody.getPhysicsLocation(bodyPos);
-        rigidBody.getPhysicsRotation(bodyRot);
+    public static void drawSingleEndedConstraint(PhysicsRigidBody rigidBody, Vector3f pivot, Color lineColor, Color endA, Color endB, float partialTicks) {
+        Vector3f bodyPos = ClientDebugSystem.getInterpolatedTranslation(rigidBody, partialTicks);
+        Quaternion bodyRot = ClientDebugSystem.getInterpolatedRotation(rigidBody, partialTicks);
 
         Vector3f rotatedPosA = DynamXGeometry.rotateVectorByQuaternion(pivot, bodyRot);
         Vector3f translatedPosA = rotatedPosA.add(bodyPos);
@@ -196,15 +192,12 @@ public class PhysicsDebugRenderer {
 
     }
 
-    public static void drawDoubleEndedConstraint(PhysicsRigidBody bodyA, PhysicsRigidBody bodyB, Vector3f pivotA, Vector3f pivotB, Color lineColor) {
-        Vector3f posA = Vector3fPool.get();
-        Quaternion rotA = QuaternionPool.get();
-        Vector3f posB = Vector3fPool.get();
-        Quaternion rotB = QuaternionPool.get();
-        bodyA.getPhysicsLocation(posA);
-        bodyA.getPhysicsRotation(rotA);
-        bodyB.getPhysicsLocation(posB);
-        bodyB.getPhysicsRotation(rotB);
+    public static void drawDoubleEndedConstraint(PhysicsRigidBody bodyA, PhysicsRigidBody bodyB, Vector3f pivotA, Vector3f pivotB, Color lineColor, float partialTicks) {
+        Vector3f posA = ClientDebugSystem.getInterpolatedTranslation(bodyA, partialTicks);
+        Quaternion rotA = ClientDebugSystem.getInterpolatedRotation(bodyA, partialTicks);
+
+        Vector3f posB = ClientDebugSystem.getInterpolatedTranslation(bodyB, partialTicks);
+        Quaternion rotB = ClientDebugSystem.getInterpolatedRotation(bodyB, partialTicks);
 
         Vector3f rotatedPosA = DynamXGeometry.rotateVectorByQuaternion(pivotA, rotA);
         Vector3f rotatedPosB = DynamXGeometry.rotateVectorByQuaternion(pivotB, rotB);

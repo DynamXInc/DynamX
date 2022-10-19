@@ -6,7 +6,7 @@ import fr.dynamx.api.network.sync.PhysicsEntityNetHandler;
 import fr.dynamx.client.network.ClientPhysicsSyncManager;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.physics.utils.RigidBodyTransform;
-import fr.dynamx.utils.maths.DynamXGeometry;
+import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.Vector3fPool;
 
 import java.util.HashMap;
@@ -29,7 +29,7 @@ public class AttachBodyPhysicsState extends EntityPhysicsState {
         h.getOldStates().forEach((i, s) -> {
             if (i < ClientPhysicsSyncManager.simulationTime) {
                 ((AttachBodyPhysicsState) s).transforms.get(part).getPosition().addLocal(finalOffsetn);
-                DynamXGeometry.slerp(((AttachBodyPhysicsState) s).transforms.get(part).getRotation(), offsetQuat, ((AttachBodyPhysicsState) s).transforms.get(part).getRotation(), step);
+                DynamXMath.slerp(step, ((AttachBodyPhysicsState) s).transforms.get(part).getRotation(), offsetQuat, ((AttachBodyPhysicsState) s).transforms.get(part).getRotation());
             }
         });
     }

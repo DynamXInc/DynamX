@@ -9,6 +9,7 @@ import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.maths.DynamXGeometry;
+import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
@@ -42,7 +43,7 @@ public class CameraSystem {
      * Computes a smooth interpolated camera rotation
      */
     private static void animateCameraRotation(com.jme3.math.Quaternion prevRotation, com.jme3.math.Quaternion rotation, float step, float animLength) {
-        DynamXGeometry.slerp(prevRotation, rotation, jmeQuatCache, step);
+        DynamXMath.slerp(step, prevRotation, rotation, jmeQuatCache);
         DynamXGeometry.inverseQuaternion(jmeQuatCache);
         rotationMode.rotator.apply(Minecraft.getMinecraft().gameSettings.thirdPersonView, jmeQuatCache);
 

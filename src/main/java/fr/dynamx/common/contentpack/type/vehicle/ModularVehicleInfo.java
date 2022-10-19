@@ -4,7 +4,7 @@ import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
-import fr.dynamx.api.contentpack.object.IShapeProvider;
+import fr.dynamx.api.contentpack.object.IShapeContainer;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
@@ -22,7 +22,6 @@ import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.contentpack.type.objects.AbstractItemObject;
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.items.ItemModularEntity;
 import fr.dynamx.utils.EnumPlayerStandOnTop;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import lombok.Getter;
@@ -39,12 +38,12 @@ import java.util.stream.Collectors;
 /**
  * All information about a vehicle
  *
- * @param <U> The implementing class type
+ * @param <T> The implementing class type
  * @see ModularVehicleInfoBuilder
  * @see BaseVehicleEntity
  */
-public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends AbstractItemObject<U> implements IPhysicsPackInfo, IModelTextureVariantsSupplier,
-        ParticleEmitterInfo.IParticleEmitterContainer, IShapeProvider<ModularVehicleInfoBuilder> {
+public class ModularVehicleInfo<T extends ModularVehicleInfo<?>> extends AbstractItemObject<T, ModularVehicleInfoBuilder> implements IPhysicsPackInfo, IModelTextureVariantsSupplier,
+        ParticleEmitterInfo.IParticleEmitterContainer {
     private final int emptyMass;
     private final float dragFactor;
     private final Vector3f centerOfMass;
@@ -127,7 +126,7 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
 
         this.parts = (List) builder.parts;
         this.partShapes = builder.partShapes;
-        this.subProperties = builder.getSubProperties();
+        this.subProperties = (List) builder.getSubProperties();
         this.renderedParts = renderedParts;
         this.lightSources = builder.lightSources;
         this.frictionPoints = builder.frictionPoints;
@@ -144,16 +143,12 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
 
     public void addModules(BaseVehicleEntity<?> entity, ModuleListBuilder modules) {
         getSubProperties().forEach(sub -> sub.addModules(entity, modules));
-        getParts().forEach(sub -> sub.addModules(entity, modules));
+        getAllParts().forEach(sub -> sub.addModules(entity, modules));
         getLightSources().forEach(compoundLight -> compoundLight.getSources().forEach(sub -> sub.addModules(entity, modules)));
     }
 
-    public List<BasePart<ModularVehicleInfoBuilder>> getParts() {
-        return parts;
-    }
-
-    public <T extends InteractivePart<?, ModularVehicleInfoBuilder>> List<T> getInteractiveParts() {
-        return (List<T>) getPartsByType(InteractivePart.class);
+    public <A extends InteractivePart<?, ModularVehicleInfoBuilder>> List<A> getInteractiveParts() {
+        return (List<A>) getPartsByType(InteractivePart.class);
     }
 
     public List<PartShape<?>> getPartShapes() {
@@ -224,31 +219,29 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
         return partShapes;
     }
 
-    /**
-     * @param clazz The class of the parts to return
-     * @param <T>   The type of the parts to return
-     * @return All the parts of the given type
-     */
-    public <T extends BasePart<ModularVehicleInfoBuilder>> List<T> getPartsByType(Class<T> clazz) {
-        return (List<T>) this.parts.stream().filter(p -> clazz.isAssignableFrom(p.getClass())).collect(Collectors.toList());
-    }
 
     /**
      * @param clazz The class of the part to return
-     * @param <T>   The type of the part to return
+     * @param <A>   The type of the part to return
      * @return The part with the given type and the given id (wheel index for example), or null
      */
-    public <T extends BasePart<ModularVehicleInfoBuilder>> T getPartByTypeAndId(Class<T> clazz, byte id) {
+    public <A extends BasePart<ModularVehicleInfoBuilder>> A getPartByTypeAndId(Class<A> clazz, byte id) {
         return getPartsByType(clazz).stream().filter(t -> t.getId() == id).findFirst().orElse(null);
     }
 
     /**
      * @param clazz The class of the ISubInfoTypes to returns
-     * @param <T>   The type of the ISubInfoTypes to return
+     * @param <A>   The type of the ISubInfoTypes to return
      * @return All the ISubInfoTypes of the given type
      */
-    public <T extends ISubInfoType<ModularVehicleInfoBuilder>> T getSubPropertyByType(Class<T> clazz) {
-        return (T) this.subProperties.stream().filter(p -> clazz.equals(p.getClass())).findFirst().orElseGet(() -> null); //Don't remove the () -> : idea don't understand it
+    @Override
+    public <A extends ISubInfoType<ModularVehicleInfoBuilder>> A getSubPropertyByType(Class<A> clazz) {
+        return (A) this.subProperties.stream().filter(p -> clazz.equals(p.getClass())).findFirst().orElseGet(() -> null); //Don't remove the () -> : idea don't understand it
+    }
+
+    @Override
+    public void addSubProperty(ISubInfoType<ModularVehicleInfoBuilder> property) {
+        //Done in ModularVehicleInfoBuilder
     }
 
     public List<ISubInfoType<ModularVehicleInfoBuilder>> getSubProperties() {
@@ -296,18 +289,18 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
 
     @Override
     @SuppressWarnings({"unchecked"})
-    public IInfoOwner<U> createOwner(ObjectLoader<U, ?, ?> loader) {
-        CreatePackItemEvent.CreateVehicleItemEvent event = new CreatePackItemEvent.CreateVehicleItemEvent((ObjectLoader<ModularVehicleInfo<?>, ItemModularEntity<ModularVehicleInfo<?>>, ModularVehicleInfoBuilder>) loader, this);
+    public IInfoOwner<T> createOwner(ObjectLoader<T, ?, ?> loader) {
+        CreatePackItemEvent.CreateVehicleItemEvent<T, ?> event = new CreatePackItemEvent.CreateVehicleItemEvent(loader, this);
         MinecraftForge.EVENT_BUS.post(event);
         if (event.isOverridden()) {
-            return (ItemModularEntity<U>) event.getSpawnItem();
+            return (IInfoOwner<T>) event.getSpawnItem();
         } else {
-            return (IInfoOwner<U>) ((BuildableInfoLoader<?, U, ?>) loader).getItem((U) this);
+            return (IInfoOwner<T>) ((BuildableInfoLoader<?, T, ?>) loader).getItem((T) this);
         }
     }
 
     @Override
-    public String getTranslationKey(IInfoOwner<U> item, int itemMeta) {
+    public String getTranslationKey(IInfoOwner<T> item, int itemMeta) {
         if (itemMeta == 0 || variants == null)
             return super.getTranslationKey(item, itemMeta);
         TextureVariantData textureInfo = variants.getVariantsMap().get((byte) itemMeta);
@@ -315,7 +308,7 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
     }
 
     @Override
-    public String getTranslatedName(IInfoOwner<U> item, int itemMeta) {
+    public String getTranslatedName(IInfoOwner<T> item, int itemMeta) {
         if (itemMeta == 0 || variants == null)
             return super.getTranslatedName(item, itemMeta);
         TextureVariantData textureInfo = variants.getVariantsMap().get((byte) itemMeta);
@@ -341,4 +334,8 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
         return parts;
     }
 
+    @Override
+    public void addPart(BasePart<ModularVehicleInfoBuilder> uBasePart) {
+        //Done in ModularVehicleInfoBuilder
+    }
 }

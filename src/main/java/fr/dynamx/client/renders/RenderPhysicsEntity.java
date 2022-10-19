@@ -110,6 +110,8 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
                         EnumSeatPlayerPosition position = seat.getPlayerPosition();
                         shouldRenderPlayerSitting = position == EnumSeatPlayerPosition.SIT || position == null;
 
+                        if(seat.getPlayerSize() != null)
+                        GlStateManager.scale(seat.getPlayerSize().x, seat.getPlayerSize().y, seat.getPlayerSize().z);
                         if (seat.getRotation() != null)
                             GlStateManager.rotate(GlQuaternionPool.get(seat.getRotation()));
                         if (position == EnumSeatPlayerPosition.LYING)

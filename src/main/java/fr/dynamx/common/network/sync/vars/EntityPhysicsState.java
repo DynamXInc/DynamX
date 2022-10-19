@@ -6,7 +6,6 @@ import fr.dynamx.api.network.sync.PhysicsEntityNetHandler;
 import fr.dynamx.client.network.ClientPhysicsSyncManager;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.utils.debug.SyncTracker;
-import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.Vector3fPool;
 
@@ -33,7 +32,7 @@ public class EntityPhysicsState {
         h.getOldStates().forEach((i, s) -> {
             if (i < ClientPhysicsSyncManager.simulationTime) {
                 s.pos.addLocal(finalOffsetn);
-                DynamXGeometry.slerp(s.rotation, offsetQuat, s.rotation, step);
+                DynamXMath.slerp(step, s.rotation, offsetQuat, s.rotation);
             }
         });
     }
@@ -51,7 +50,7 @@ public class EntityPhysicsState {
             nPos.addLocal(sub.x, sub.y, sub.z);
             entityIn.physicsHandler.setPhysicsPosition(nPos);
 
-            Quaternion nQ = DynamXGeometry.slerp(rotation, quaternion, 1f / step);
+            Quaternion nQ = DynamXMath.slerp(1f / step, rotation, quaternion);
             addToOlders(sub, rotation, 1f / step);
             entityIn.physicsHandler.setPhysicsRotation(nQ);
         }

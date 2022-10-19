@@ -16,12 +16,12 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public abstract class ItemModularEntity<T extends ModularVehicleInfo<?>> extends DynamXItemSpawner<T> implements IInfoOwner<T> {
+public abstract class ItemModularEntity<T extends ModularVehicleInfo<T>> extends DynamXItemSpawner<T> implements IInfoOwner<T> {
     private final int textureNum;
 
     public ItemModularEntity(T modulableVehicleInfo) {
         super(modulableVehicleInfo);
-        this.maxStackSize = 1;
+        maxStackSize = 1;
         setCreativeTab(modulableVehicleInfo.getCreativeTab(DynamXItemRegistry.vehicleTab));
 
         textureNum = modulableVehicleInfo.getMaxTextureMetadata();

@@ -35,7 +35,7 @@ import java.util.List;
 /**
  * Armor object, for "armor_" files
  */
-public class ArmorObject<T extends ArmorObject<T>> extends AbstractItemObject<T> implements IModelTextureVariantsSupplier, ISubInfoTypeOwner<ArmorObject<?>> {
+public class ArmorObject<T extends ArmorObject<?>> extends AbstractItemObject<T, T> implements IModelTextureVariantsSupplier {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.ARMORS)
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("Textures".equals(key))
@@ -203,19 +203,19 @@ public class ArmorObject<T extends ArmorObject<T>> extends AbstractItemObject<T>
     /**
      * List of owned {@link ISubInfoType}s
      */
-    protected final List<ISubInfoType<ArmorObject<?>>> subProperties = new ArrayList<>();
+    protected final List<ISubInfoType<T>> subProperties = new ArrayList<>();
 
     /**
      * Adds an {@link ISubInfoType}
      */
-    public void addSubProperty(ISubInfoType<ArmorObject<?>> property) {
+    public void addSubProperty(ISubInfoType<T> property) {
         subProperties.add(property);
     }
 
     /**
      * @return The list of owned {@link ISubInfoType}s
      */
-    public List<ISubInfoType<ArmorObject<?>>> getSubProperties() {
+    public List<ISubInfoType<T>> getSubProperties() {
         return subProperties;
     }
 

@@ -11,7 +11,7 @@ import fr.dynamx.utils.RegistryNameSetter;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 
-public class DynamXItem<T extends AbstractItemObject<?>> extends Item implements IInfoOwner<T>, IResourcesOwner {
+public class DynamXItem<T extends AbstractItemObject<T, ?>> extends Item implements IInfoOwner<T>, IResourcesOwner {
     protected T itemInfo;
 
     /**

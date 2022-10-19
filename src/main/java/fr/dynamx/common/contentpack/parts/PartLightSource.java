@@ -6,6 +6,7 @@ import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.*;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
+import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfoBuilder;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.VehicleLightsModule;
@@ -126,17 +127,23 @@ public class PartLightSource implements ISubInfoType<ModularVehicleInfoBuilder> 
         return colors;
     }
 
-    public static class CompoundLight {
+    public static class CompoundLight implements IModelTextureVariantsSupplier.IModelTextureVariants {
         private final String partName;
         private final List<PartLightSource> sources = new ArrayList<>();
+        private final Map<Byte, TextureVariantData> variantsMap = new HashMap<>();
 
         public CompoundLight(PartLightSource part) {
             this.partName = part.getPartName();
             addSource(part);
+            variantsMap.put((byte) 0, new TextureVariantData("default", (byte) 0)); //todo configurable name
         }
 
         public void addSource(PartLightSource source) {
             sources.add(source);
+            for (TextureVariantData textureVariantData : source.getTextureMap().values()) {
+                //todo tester si ça ne s'entre-écrase pas
+                variantsMap.put(textureVariantData.getId(), textureVariantData);
+            }
         }
 
         public String getPartName() {
@@ -145,6 +152,21 @@ public class PartLightSource implements ISubInfoType<ModularVehicleInfoBuilder> 
 
         public List<PartLightSource> getSources() {
             return sources;
+        }
+
+        @Override
+        public TextureVariantData getDefaultVariant() {
+            return variantsMap.get((byte) 0);
+        }
+
+        @Override
+        public TextureVariantData getVariant(byte variantId) {
+            return variantsMap.getOrDefault(variantId, getDefaultVariant());
+        }
+
+        @Override
+        public Map<Byte, TextureVariantData> getTextureVariants() {
+            return variantsMap;
         }
     }
 }

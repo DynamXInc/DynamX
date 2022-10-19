@@ -7,18 +7,20 @@ import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.contentpack.object.IShapeContainer;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
+import fr.dynamx.api.contentpack.object.render.IObjPackObject;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.obj.ObjModelPath;
+import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.parts.*;
+import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
-import fr.dynamx.common.contentpack.type.vehicle.*;
 import fr.dynamx.common.objloader.data.ObjModelData;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.EnumPlayerStandOnTop;
@@ -34,11 +36,13 @@ import java.util.stream.Collectors;
  * Builder of {@link ModularVehicleInfo} <br>
  * Responsible for loading all the configuration/properties of the vehicle and creating a final object
  */
-public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implements IShapeContainer, INamedObject, ParticleEmitterInfo.IParticleEmitterContainer {
+public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implements IShapeContainer, INamedObject, ParticleEmitterInfo.IParticleEmitterContainer, IObjPackObject {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("UseHullShape".equals(key))
             return new IPackFilePropertyFixer.FixResult("UseComplexCollisions", true);
+        if ("Textures".equals(key))
+            return new IPackFilePropertyFixer.FixResult("MaterialVariants", true, true);
         return null;
     };
 
@@ -53,9 +57,9 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
     @PackFileProperty(configNames = "DragCoefficient")
     protected float dragFactor;
     @PackFileProperty(configNames = "PlayerStandOnTop", required = false, defaultValue = "ALWAYS")
-    public EnumPlayerStandOnTop playerStandOnTop;
+    protected EnumPlayerStandOnTop playerStandOnTop;
     @PackFileProperty(configNames = "Model", type = DefinitionType.DynamXDefinitionTypes.DYNX_RESOURCE_LOCATION, description = "common.model", defaultValue = "obj/name_of_vehicle/name_of_model.obj")
-    public ResourceLocation model;
+    protected ResourceLocation model;
     @PackFileProperty(configNames = "ShapeYOffset", required = false)
     protected float shapeYOffset;
     @PackFileProperty(configNames = {"CreativeTabName", "CreativeTab", "TabName"}, required = false, defaultValue = "CreativeTab of DynamX", description = "common.creativetabname")
@@ -95,9 +99,9 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
     protected final Vector3f scaleModifier = new Vector3f(1, 1, 1);
 
     @PackFileProperty(configNames = "DefaultEngine", required = false)
-    private String defaultEngine;
+    protected String defaultEngine;
     @PackFileProperty(configNames = "DefaultSounds", required = false)
-    private String defaultSounds;
+    protected String defaultSounds;
 
     @PackFileProperty(configNames = "ItemScale", required = false, description = "common.itemscale", defaultValue = "0.2")
     protected float itemScale = 0.2f;
@@ -107,6 +111,7 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
     protected float vehicleMaxSpeed = Integer.MAX_VALUE;
     @PackFileProperty(configNames = "UseComplexCollisions", required = false, defaultValue = "true", description = "common.UseComplexCollisions")
     protected boolean useHullShape = true;
+    @Deprecated
     @PackFileProperty(configNames = "Textures", required = false, type = DefinitionType.DynamXDefinitionTypes.STRING_ARRAY_2D)
     private String[][] texturesArray;
     @PackFileProperty(configNames = "DefaultZoomLevel", required = false, defaultValue = "4")
@@ -188,7 +193,6 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
     public void generateShape() {
         ObjModelPath modelPath = DynamXUtils.getModelPath(getPackName(), model);
         ObjModelData model = DynamXContext.getObjModelDataFromCache(modelPath);
-        model.getObjObjects().forEach(ObjObjectData -> System.out.println(ObjObjectData.getName() +" " + ObjObjectData.getCenter()));
         if (useHullShape)
             physicsCollisionShape = ShapeUtils.generateComplexModelCollisions(modelPath, "chassis", scaleModifier, centerOfMass, shapeYOffset);
         else {
@@ -256,19 +260,10 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
             }
         }
         //Map textures
-        Map<Byte, TextureVariantData> bakedTextures = new HashMap<>();
-        int textureCount = 1;
-        bakedTextures.put((byte) 0, new TextureVariantData("Default", (byte) 0, getName()));
-        if (texturesArray != null) {
-            byte id = 1;
-            for (String[] info : texturesArray) {
-                TextureVariantData variant = new TextureVariantData(info[0], id, info[1]);
-                bakedTextures.put(id, variant);
-                id++;
-                if (variant.isItem())
-                    textureCount++;
-            }
-        }
+        //Backward compatibility code
+        //Will be removed
+        if(texturesArray != null)
+            new MaterialVariantsInfo<>(this, texturesArray).appendTo(this);
         //Map lights
         for (PartLightSource.CompoundLight src : lightSources.values()) {
             if (src != null) {
@@ -284,7 +279,7 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
                 }
             }
         }
-        return new ModularVehicleInfo<>(this, directingWheel, bakedTextures, textureCount, FMLCommonHandler.instance().getSide().isClient() ? renderedParts : null);
+        return new ModularVehicleInfo<>(this, directingWheel, FMLCommonHandler.instance().getSide().isClient() ? renderedParts : null);
     }
 
     @Override
@@ -308,6 +303,12 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
     @Override
     public ModularVehicleInfo<?> build() {
         return build(DynamXObjectLoaders.WHEELS.getInfos(), DynamXObjectLoaders.ENGINES.getInfos(), DynamXObjectLoaders.SOUNDS.getInfos());
+    }
+
+    @Nullable
+    @Override
+    public IModelTextureVariants getTextureVariantsFor(ObjObjectRenderer objObjectRenderer) {
+        throw new UnsupportedOperationException("Not implemented on the builder");
     }
 
     @Override
@@ -338,5 +339,19 @@ public class ModularVehicleInfoBuilder extends SubInfoTypeOwner.Vehicle implemen
     @Override
     public ModularVehicleInfoBuilder getOwner() {
         return null;
+    }
+
+    @Override
+    public ResourceLocation getModel() {
+        return model;
+    }
+
+    @Override
+    public float getItemScale() {
+        return itemScale;
+    }
+    @Override
+    public Enum3DRenderLocation get3DItemRenderLocation() {
+        return item3DRenderLocation;
     }
 }

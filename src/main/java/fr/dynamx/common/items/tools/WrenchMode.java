@@ -327,6 +327,7 @@ public class WrenchMode {
         public void onInteractWithEntity(EntityPlayer player, PhysicsEntity<?> targetEntity, boolean isSneaking) {
             if (targetEntity instanceof BaseVehicleEntity) {
                 BaseVehicleEntity<?> vehicleEntity = (BaseVehicleEntity<?>) targetEntity;
+                //TODO TAKE HIDDEN VARIANTS IN ACCOUNT
                 if (vehicleEntity.getMetadata() + 1 < vehicleEntity.getPackInfo().getMaxTextureMetadata()) {
                     vehicleEntity.setMetadata(vehicleEntity.getMetadata() + 1);
                 } else {

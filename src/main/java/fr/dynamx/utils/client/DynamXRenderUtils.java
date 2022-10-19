@@ -108,8 +108,8 @@ public class DynamXRenderUtils {
                     ObjModelRenderer model = DynamXContext.getObjModelRegistry().getModel(info1.getModel());
                     //System.out.println("Model is "+model+" "+info1.getTextures()+ " "+car.getTextures().get(textureId));
                     GlStateManager.scale(car.getScaleModifier().x, car.getScaleModifier().y, car.getScaleModifier().z);
-                    if (car.getTextures().containsKey(textureId))
-                        model.renderModel(info1.getIdForTexture(car.getTextures().get(textureId).getName()));
+                    if (car.getVariants() != null && car.getVariants().getVariantsMap().containsKey(textureId))
+                        model.renderModel(info1.getIdForVariant(car.getVariantName(textureId)));
                     else
                         model.renderModel((byte) 0);
                 }

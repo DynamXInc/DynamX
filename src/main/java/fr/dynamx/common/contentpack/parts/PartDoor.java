@@ -5,10 +5,7 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
-import fr.dynamx.api.contentpack.registry.DefinitionType;
-import fr.dynamx.api.contentpack.registry.PackFileProperty;
-import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
-import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
+import fr.dynamx.api.contentpack.registry.*;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.VehicleEntityEvent;
@@ -39,6 +36,23 @@ import java.util.List;
 
 @RegisteredSubInfoType(name = "door", registries = SubInfoTypeRegistries.WHEELED_VEHICLES, strictName = false)
 public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfoBuilder> implements IPhysicsPackInfo {
+    @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
+    public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
+        if ("CarAttachPoint".equals(key))
+            return new IPackFilePropertyFixer.FixResult("LocalCarAttachPoint", true);
+        if ("DoorAttachPoint".equals(key))
+            return new IPackFilePropertyFixer.FixResult("LocalDoorAttachPoint", true);
+        if ("OpenLimit".equals(key))
+            return new IPackFilePropertyFixer.FixResult("OpenedDoorAngleLimit", true);
+        if ("CloseLimit".equals(key))
+            return new IPackFilePropertyFixer.FixResult("ClosedDoorAngleLimit", true);
+        if ("OpenMotor".equals(key))
+            return new IPackFilePropertyFixer.FixResult("DoorOpenForce", true);
+        if ("CloseMotor".equals(key))
+            return new IPackFilePropertyFixer.FixResult("DoorCloseForce", true);
+        return null;
+    };
+
     @Getter
     @PackFileProperty(configNames = "LocalCarAttachPoint", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y, required = false)
     private Vector3f carAttachPoint = new Vector3f();
@@ -128,7 +142,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
         super.appendTo(owner);
         owner.arrangeDoorID(this);
         owner.addRenderedParts(getPartName());
-        carModelPath = DynamXUtils.getModelPath(getPackName(), owner.model);
+        carModelPath = DynamXUtils.getModelPath(getPackName(), owner.getModel());
         physicsCollisionShape = ShapeUtils.generateComplexModelCollisions(carModelPath, getPartName(), new Vector3f(1, 1, 1), new Vector3f(), 0);
     }
 

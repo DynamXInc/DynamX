@@ -34,12 +34,12 @@ public class MTLLoader {
         for (String s : lines) {
             String line = s.trim();
             String[] parts = line.split(" ");
-            String name = parts.length >= 3 ? parts[2] : "Default";
+            String name = parts.length >= 3 ? parts[2].toLowerCase() : "default";
             switch (parts[0]) {
                 case COMMENT:
                     break;
                 case NEW_MATERIAL:
-                    Material material = new Material(parts[1]);
+                    Material material = new Material(parts[1].toLowerCase());
                     materials.add(material);
                     current = material;
                     break;
@@ -51,21 +51,21 @@ public class MTLLoader {
                     break;
                 case TEXTURE_DIFFUSE:
                     String textureName = parts[1].equalsIgnoreCase("white") ? "textures/white.png" : startPath + parts[1];
-                    current.diffuseTexture.put(name.toLowerCase(),
-                            new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault(textureName.toLowerCase()), name.toLowerCase()));
+                    current.diffuseTexture.put(name,
+                            new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault(textureName.toLowerCase()), name));
                     break;
                 case TEXTURE_AMBIENT:
-                    current.ambientTexture.put(name.toLowerCase(),
-                            new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault((startPath + parts[1]).toLowerCase()), name.toLowerCase()));
+                    current.ambientTexture.put(name,
+                            new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault((startPath + parts[1]).toLowerCase()), name));
                     break;
                 case TEXTURE_SPECULAR: {
-                    current.specularTexture.put(name.toLowerCase(),
-                            new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault((startPath + parts[1]).toLowerCase()), name.toLowerCase()));
+                    current.specularTexture.put(name,
+                            new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault((startPath + parts[1]).toLowerCase()), name));
                     break;
                 }
                 case TEXTURE_NORMAL: {
-                    current.normalTexture.put(name.toLowerCase(),
-                            new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault((startPath + parts[1]).toLowerCase()), name.toLowerCase()));
+                    current.normalTexture.put(name,
+                            new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault((startPath + parts[1]).toLowerCase()), name));
                     break;
                 }
                 case TRANSPARENCY_D:
@@ -74,8 +74,8 @@ public class MTLLoader {
                     break;
             }
             if (current != null && current.diffuseTexture.isEmpty()){
-                current.diffuseTexture.put(name.toLowerCase(),
-                        new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault("missing_texture_for_" + startPath), name.toLowerCase()));
+                current.diffuseTexture.put(name,
+                        new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault("missing_texture_for_" + startPath), name));
             }
         }
     }

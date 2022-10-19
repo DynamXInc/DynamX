@@ -8,7 +8,6 @@ import fr.dynamx.api.contentpack.object.IShapeProvider;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
-import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.CreatePackItemEvent;
@@ -19,12 +18,14 @@ import fr.dynamx.common.contentpack.loader.BuildableInfoLoader;
 import fr.dynamx.common.contentpack.loader.ObjectLoader;
 import fr.dynamx.common.contentpack.parts.PartLightSource;
 import fr.dynamx.common.contentpack.parts.PartShape;
+import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.contentpack.type.objects.AbstractItemObject;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.items.ItemModularEntity;
 import fr.dynamx.utils.EnumPlayerStandOnTop;
 import fr.dynamx.utils.client.DynamXRenderUtils;
+import lombok.Getter;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
@@ -52,11 +53,8 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
     /**
      * Maps the metadata to the texture data
      */
-    private final Map<Byte, TextureVariantData> textures;
-    /**
-     * The number of textures available for the vehicle
-     */
-    private final int maxTextureMetadata;
+    @Getter
+    private final MaterialVariantsInfo<?> variants;
     /**
      * The parts of this vehicle (wheels, seats, doors...)
      */
@@ -110,7 +108,7 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
     private final List<Vector3f> collisionShapeDebugBuffer;
     private final EnumPlayerStandOnTop playerStandOnTop;
 
-    public ModularVehicleInfo(ModularVehicleInfoBuilder builder, int directingWheel, Map<Byte, TextureVariantData> textures, int textureCount, List<String> renderedParts) {
+    public ModularVehicleInfo(ModularVehicleInfoBuilder builder, int directingWheel, List<String> renderedParts) {
         super(builder.getPackName(), builder.getName());
         this.setDefaultName(builder.defaultName);
         this.setDescription(builder.description);
@@ -125,8 +123,7 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
         this.centerOfMass = builder.centerOfMass;
         this.scaleModifier = builder.scaleModifier;
 
-        this.textures = textures;
-        this.maxTextureMetadata = textureCount;
+        this.variants = builder.getSubPropertyByType(MaterialVariantsInfo.class);
 
         this.parts = (List) builder.parts;
         this.partShapes = builder.partShapes;
@@ -172,7 +169,7 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
     }
 
     public int getMaxTextureMetadata() {
-        return maxTextureMetadata;
+        return variants != null ? variants.getVariantsMap().size() : 1;
     }
 
     public float getVehicleMaxSpeed() {
@@ -183,12 +180,21 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
         return directingWheel;
     }
 
-    public byte getIdForTexture(String textureName) {
-        for (byte i = 0; i < textures.size(); i++) {
-            if (textures.get(i).getName().equalsIgnoreCase(textureName))
-                return i;
+    public byte getIdForVariant(String variantName) {
+        if(variants != null) {
+            for (byte i = 0; i < variants.getVariantsMap().size(); i++) {
+                if (variants.getVariantsMap().get(i).getName().equalsIgnoreCase(variantName))
+                    return i;
+            }
         }
         return 0;
+    }
+
+    public String getVariantName(byte variantId) {
+        if(variants != null) {
+            return variants.getVariantsMap().getOrDefault(variantId, variants.getDefaultVariant()).getName();
+        }
+        return "default";
     }
 
     @Override
@@ -257,35 +263,22 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
         return collisionShapeDebugBuffer;
     }
 
-    public Map<Byte, TextureVariantData> getTextures() {
-        return textures;
-    }
-
     @Override
     public String getIconFileName(byte metadata) {
-        return getTextures().get(metadata).getIconName();
+        return variants != null ? variants.getVariantsMap().get(metadata).getName() : super.getIconFileName(metadata);
     }
 
     @Override
-    public Map<Byte, TextureVariantData> getTextureVariantsFor(ObjObjectRenderer objObjectRenderer) {
+    public IModelTextureVariantsSupplier.IModelTextureVariants getTextureVariantsFor(ObjObjectRenderer objObjectRenderer) {
         PartLightSource.CompoundLight src = getLightSource(objObjectRenderer.getObjObjectData().getName());
-        if (src != null) {
-            Map<Byte, TextureVariantData> ret = new HashMap<>();
-            ret.put((byte) 0, new TextureVariantData("default", (byte) 0));
-            List<PartLightSource> sources = src.getSources();
-            for (PartLightSource source : sources) {
-                for (TextureVariantData textureVariantData : source.getTextureMap().values()) {
-                    ret.put(textureVariantData.getId(), textureVariantData);
-                }
-            }
-            return ret;
-        }
-        return getTextures();
+        if (src != null)
+            return src;
+        return getVariants();
     }
 
     @Override
     public boolean hasVaryingTextures() {
-        return getTextures().size() > 1;
+        return getVariants() != null;
     }
 
     @Override
@@ -315,17 +308,17 @@ public class ModularVehicleInfo<U extends ModularVehicleInfo<?>> extends Abstrac
 
     @Override
     public String getTranslationKey(IInfoOwner<U> item, int itemMeta) {
-        if (itemMeta == 0)
+        if (itemMeta == 0 || variants == null)
             return super.getTranslationKey(item, itemMeta);
-        TextureVariantData textureInfo = getTextures().get((byte) itemMeta);
+        TextureVariantData textureInfo = variants.getVariantsMap().get((byte) itemMeta);
         return super.getTranslationKey(item, itemMeta) + "_" + textureInfo.getName().toLowerCase();
     }
 
     @Override
     public String getTranslatedName(IInfoOwner<U> item, int itemMeta) {
-        if (itemMeta == 0)
+        if (itemMeta == 0 || variants == null)
             return super.getTranslatedName(item, itemMeta);
-        TextureVariantData textureInfo = getTextures().get((byte) itemMeta);
+        TextureVariantData textureInfo = variants.getVariantsMap().get((byte) itemMeta);
         return super.getTranslatedName(item, itemMeta) + " " + textureInfo.getName();
     }
 

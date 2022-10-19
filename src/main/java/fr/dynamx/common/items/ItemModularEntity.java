@@ -31,7 +31,7 @@ public abstract class ItemModularEntity<T extends ModularVehicleInfo<?>> extends
 
     @Override
     public String getJsonName(int meta) {
-        return super.getJsonName(meta) + "_" + getInfo().getTextures().get((byte) meta).getName().toLowerCase();
+        return super.getJsonName(meta) + "_" + getInfo().getVariantName((byte) meta);
     }
 
     @Override
@@ -50,8 +50,8 @@ public abstract class ItemModularEntity<T extends ModularVehicleInfo<?>> extends
 
     @Override
     public String getTranslationKey(ItemStack stack) {
-        if (stack.getMetadata() != 0 && textureNum > stack.getMetadata() && getInfo().getTextures().containsKey((byte) stack.getMetadata())) {
-            return super.getTranslationKey(stack) + "_" + getInfo().getTextures().get((byte) stack.getMetadata()).getName().toLowerCase();
+        if (stack.getMetadata() != 0 && textureNum > stack.getMetadata()) {
+            return super.getTranslationKey(stack) + "_" + getInfo().getVariantName((byte) stack.getMetadata());
         }
         return super.getTranslationKey(stack);
     }
@@ -61,8 +61,8 @@ public abstract class ItemModularEntity<T extends ModularVehicleInfo<?>> extends
         tooltip.add("Description: " + getInfo().getDescription());
         tooltip.add("Pack: " + getInfo().getPackName());
         if (stack.getMetadata() != 0) {
-            if (textureNum > stack.getMetadata() && getInfo().getTextures().containsKey((byte) stack.getMetadata()))
-                tooltip.add("Texture: " + getInfo().getTextures().get((byte) stack.getMetadata()).getName());
+            if (textureNum > stack.getMetadata())
+                tooltip.add("Texture: " + getInfo().getVariantName((byte) stack.getMetadata()));
             else
                 tooltip.add(TextFormatting.RED + "Texture not found, check your pack errors");
         }

@@ -5,7 +5,9 @@ import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.math.Vector3f;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Structure of an {@link ObjObjectData}
@@ -13,8 +15,9 @@ import java.util.List;
 public class Mesh {
     public int[] indices;
     public Vertex[] vertices;
-    public Material[] materialForEachVertex;
-    public List<Material> materialsList = new ArrayList<>();
+    public String[] materialForEachVertex;
+    //public List<Material> materialsList = new ArrayList<>();
+    public Map<String, Material.IndexPair> materials = new HashMap<>();
 
     public float[] getVerticesPos() {
         float[] pos = new float[vertices.length * 3];

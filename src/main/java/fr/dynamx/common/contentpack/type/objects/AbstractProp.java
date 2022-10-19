@@ -12,13 +12,14 @@ import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
+import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
 import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
-import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.PackInfo;
 import fr.dynamx.common.contentpack.parts.PartShape;
+import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
@@ -27,11 +28,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractItemObject<T> implements IShapeContainer, IShapeProvider, ParticleEmitterInfo.IParticleEmitterContainer {
@@ -39,6 +37,8 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("UseHullShape".equals(key))
             return new IPackFilePropertyFixer.FixResult("UseComplexCollisions", true);
+        if ("Textures".equals(key))
+            return new IPackFilePropertyFixer.FixResult("MaterialVariants", true, true);
         return null;
     };
 
@@ -58,6 +58,7 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
     @Accessors(fluent = true)
     @Getter
     protected boolean useHullShape = false;
+    @Deprecated
     @PackFileProperty(configNames = "Textures", required = false, type = DefinitionType.DynamXDefinitionTypes.STRING_ARRAY_2D)
     protected String[][] texturesArray;
 
@@ -67,15 +68,11 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
     private final List<MutableBoundingBox> collisionBoxes = new ArrayList<>();
     @Getter
     private final List<PartShape<?>> partShapes = new ArrayList<>();
-    private final Map<Byte, TextureVariantData> textures = new HashMap<>();
 
     private final List<ParticleEmitterInfo<?>> particleEmitters = new ArrayList<>();
 
     @Getter
     protected CompoundCollisionShape compoundCollisionShape;
-
-    @Getter
-    private int maxTextureMetadata;
 
     public AbstractProp(String packName, String fileName) {
         super(packName, fileName);
@@ -116,34 +113,20 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
         }
     }
 
-    @Override
-    public void onComplete(boolean hotReload) {
-        textures.clear();
-        textures.put((byte) 0, new TextureVariantData("default", (byte) 0, getName()));
-        if (texturesArray != null) {
-            byte id = 1;
-            for (String[] info : texturesArray) {
-                textures.put(id, new TextureVariantData(info[0], id, info[1] == null ? "dummy" : info[1]));
-                id++;
-            }
-        }
-        int texCount = 0;
-        for (TextureVariantData data : textures.values()) {
-            if (data.isItem())
-                texCount++;
-        }
-        this.maxTextureMetadata = texCount;
-    }
+    abstract MaterialVariantsInfo<?> getVariants();
 
-    @Nullable
     @Override
-    public Map<Byte, TextureVariantData> getTextureVariantsFor(ObjObjectRenderer objObjectRenderer) {
-        return textures;
+    public IModelTextureVariantsSupplier.IModelTextureVariants getTextureVariantsFor(ObjObjectRenderer objObjectRenderer) {
+        return getVariants();
     }
 
     @Override
     public boolean hasVaryingTextures() {
-        return textures.size() > 1;
+        return getVariants() != null;
+    }
+
+    public int getMaxTextureMetadata() {
+        return hasVaryingTextures() ? getVariants().getVariantsMap().size() : 1;
     }
 
     @Override

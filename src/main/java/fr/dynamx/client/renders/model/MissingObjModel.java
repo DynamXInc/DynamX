@@ -14,6 +14,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 
 import javax.vecmath.Vector3f;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Missing obj model indicating errors
@@ -45,7 +46,7 @@ public class MissingObjModel extends ObjModelRenderer {
     private static ObjObjectRenderer emptyPartRenderer;
 
     public MissingObjModel() {
-        super(new ResourceLocation(DynamXConstants.ID, "obj/missing.obj"), new ArrayList<>(), null);
+        super(new ResourceLocation(DynamXConstants.ID, "obj/missing.obj"), new ArrayList<>(), new HashMap<>(), null);
         ObjObjectRenderer objObjectRenderer = new ObjObjectRenderer(emptyPart);
         getObjObjects().add(objObjectRenderer);
         emptyPartRenderer = objObjectRenderer;

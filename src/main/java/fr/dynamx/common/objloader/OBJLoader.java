@@ -30,9 +30,11 @@ public class OBJLoader {
     private boolean hasNormals = false;
     private boolean hasTexCoords = false;
     private final List<ObjObjectData> objObjects;
+    private final Map<String, Material> materials;
 
-    public OBJLoader(List<ObjObjectData> objects) {
+    public OBJLoader(List<ObjObjectData> objects, Map<String, Material> materials) {
         this.objObjects = objects;
+        this.materials = materials;
     }
 
     public static String[] trim(String[] split) {
@@ -49,6 +51,7 @@ public class OBJLoader {
      * @param startPath  Path of the obj model directory. Null if it needs to ignore mtl files
      * @param objContent Content of the obj file
      */
+    //TODO CLEAN THIS
     public void readAndLoadModel(String startPath, String objContent) {
         try {
             hasNormals = true;
@@ -65,16 +68,16 @@ public class OBJLoader {
             List<Vector2f> texCoords = new ArrayList<>();
             List<Vector3f> normals = new ArrayList<>();
             List<IndexedModel.OBJIndex> indices = new ArrayList<>();
-            List<Material> indicedMaterials = new ArrayList<>();
+            List<String> indicedMaterials = new ArrayList<>();
 
-            List<Material> materials = new ArrayList<>();
+            //List<Material> materials = new ArrayList<>();
             Map<IndexedModel.OBJIndex, Integer> resultIndexMap = new HashMap<>();
             Map<Integer, Integer> normalIndexMap = new HashMap<>();
             Map<Integer, Integer> indexMap = new HashMap<>();
 
             Map<ObjObjectData, IndexedModel> map = new HashMap<>();
 
-            Material currentMaterial = null;
+            String currentMaterial = null;
             HashMap<ObjObjectData, IndexedModel[]> objects = new HashMap<>();
             String currentObject = "";
             objects.put(new ObjObjectData("main"), new IndexedModel[]{result, normalModel});
@@ -112,24 +115,23 @@ public class OBJLoader {
                                     IResource resp = Minecraft.getMinecraft().getResourceManager().getResource(RegistryNameSetter.getResourceLocationWithDynamXDefault(path));
                                     MTLLoader material = new MTLLoader();
                                     material.parse(startPath, new String(DynamXUtils.readInputStream(resp.getInputStream()), StandardCharsets.UTF_8));
-                                    materials.addAll(material.getMaterials());
+                                    material.getMaterials().forEach(m -> materials.put(m.getName().toLowerCase(), m));
                                     materialLibs.add(material);
                                 }
                                 break;
                             case USE_MATERIAL:
-                                setMaterialFinalIndex(indices, currentMaterial, currentObject);
-                                currentMaterial = getMaterial(materials, parts[1]);
-                                if (currentMaterial != null)
-                                    currentMaterial.indexPairPerObject.put(currentObject, new Material.IndexPair(indices.size(), -1));
+                                setMaterialFinalIndex(indices, currentMaterial, result);
+                                currentMaterial = parts[1].toLowerCase();
+                                result.materials.put(currentMaterial, new Material.IndexPair(indices.size(), -1));
                                 break;
                             case NEW_OBJECT:
                             case NEW_GROUP:
                                 result.getObjIndices().addAll(indices);
-                                result.getMaterials().addAll(indicedMaterials);
+                                result.getIndicedMaterials().addAll(indicedMaterials);
+                                setMaterialFinalIndex(indices, currentMaterial, result);
                                 normalModel.getObjIndices().addAll(indices);
                                 result = new IndexedModel();
                                 normalModel = new IndexedModel();
-                                setMaterialFinalIndex(indices, currentMaterial, currentObject);
                                 indices.clear();
                                 indicedMaterials.clear();
                                 objects.put(new ObjObjectData(parts[1]), new IndexedModel[]{result, normalModel});
@@ -142,9 +144,9 @@ public class OBJLoader {
                 }
             }
             result.getObjIndices().addAll(indices);
-            result.getMaterials().addAll(indicedMaterials);
+            result.getIndicedMaterials().addAll(indicedMaterials);
+            setMaterialFinalIndex(indices, currentMaterial, result);
             normalModel.getObjIndices().addAll(indices);
-            setMaterialFinalIndex(indices, currentMaterial, currentObject);
 
             for (ObjObjectData object : objects.keySet()) {
                 result = objects.get(object)[0];
@@ -207,14 +209,13 @@ public class OBJLoader {
         }
     }
 
-    private void setMaterialFinalIndex(List<IndexedModel.OBJIndex> indices, Material currentMaterial, String currentObject) {
+    private void setMaterialFinalIndex(List<IndexedModel.OBJIndex> indices, String currentMaterial, IndexedModel currentObject) {
         if (currentMaterial == null) {
             return;
         }
-        if (currentMaterial.indexPairPerObject.containsKey(currentObject)) {
-            Material.IndexPair indexPair = currentMaterial.indexPairPerObject.get(currentObject);
+        if (currentObject.materials.containsKey(currentMaterial)) {
+            Material.IndexPair indexPair = currentObject.materials.get(currentMaterial);
             indexPair.setFinalIndex(indices.size());
-            currentMaterial.indexPairPerObject.put(currentObject, indexPair);
         }
     }
 

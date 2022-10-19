@@ -4,16 +4,16 @@ import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
-import fr.dynamx.api.contentpack.object.IShapeProvider;
+import fr.dynamx.api.contentpack.object.IShapeContainer;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.CreatePackItemEvent;
-import fr.dynamx.api.obj.IModelTextureSupplier;
 import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
-import fr.dynamx.api.obj.IObjObject;
+import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
+import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import fr.dynamx.common.contentpack.loader.BuildableInfoLoader;
 import fr.dynamx.common.contentpack.loader.ObjectLoader;
 import fr.dynamx.common.contentpack.parts.PartLightSource;
@@ -21,8 +21,6 @@ import fr.dynamx.common.contentpack.parts.PartShape;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.contentpack.type.objects.AbstractItemObject;
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.items.ItemModularEntity;
-import fr.dynamx.common.obj.texture.TextureData;
 import fr.dynamx.utils.EnumPlayerStandOnTop;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
@@ -38,12 +36,12 @@ import java.util.stream.Collectors;
 /**
  * All information about a vehicle
  *
- * @param <U> The implementing class type
+ * @param <T> The implementing class type
  * @see ModularVehicleInfoBuilder
  * @see BaseVehicleEntity
  */
 public class ModularVehicleInfo<T extends ModularVehicleInfo<?>> extends AbstractItemObject<T, ModularVehicleInfoBuilder> implements IPhysicsPackInfo, IModelTextureVariantsSupplier,
-        ParticleEmitterInfo.IParticleEmitterContainer, IShapeProvider<ModularVehicleInfoBuilder> {
+        ParticleEmitterInfo.IParticleEmitterContainer {
     private final int emptyMass;
     private final float dragFactor;
     private final Vector3f centerOfMass;

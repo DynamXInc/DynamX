@@ -50,7 +50,7 @@ public class DynamXRenderUtils {
         RenderGlobal.drawBoundingBox(aabb.minX, aabb.minY, aabb.minZ, aabb.maxX, aabb.maxY, aabb.maxZ, red, green, blue, alpha);
     }
 
-    public static void renderCar(ModularVehicleInfo<?> car, byte textureId) {
+    public static void renderCar(ModularVehicleInfo car, byte textureId) {
         Vector3fPool.openPool();
         GlQuaternionPool.openPool();
         /* Rendering the chassis */
@@ -82,7 +82,7 @@ public class DynamXRenderUtils {
 
         /* Rendering light sources */
         if (!car.getLightSources().isEmpty()) {
-            for (PartLightSource.CompoundLight source : car.getLightSources()) {
+            for (PartLightSource.CompoundLight source : car.getLightSources().values()) {
                 GlStateManager.scale(car.getScaleModifier().x, car.getScaleModifier().y, car.getScaleModifier().z);
                 vehicleModel.renderGroups(source.getPartName(), (byte) 0);
                 GlStateManager.scale(1 / car.getScaleModifier().x, 1 / car.getScaleModifier().y, 1 / car.getScaleModifier().z);

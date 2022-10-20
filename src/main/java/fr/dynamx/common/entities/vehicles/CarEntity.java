@@ -53,7 +53,7 @@ public class CarEntity<T extends CarEntity.CarPhysicsHandler<?>> extends BaseVeh
     }
 
     @Override
-    protected ModularVehicleInfo<?> createInfo(String infoName) {
+    protected ModularVehicleInfo createInfo(String infoName) {
         return DynamXObjectLoaders.WHEELED_VEHICLES.findInfo(infoName);
     }
 

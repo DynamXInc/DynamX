@@ -292,32 +292,11 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
     }
 
     /**
-     * @return True if postLoad() should be called
-     */
-    public boolean hasPostLoad() {
-        return !infos.isEmpty() && infos.values().iterator().next() instanceof IShapeContainer;
-    }
-
-    /**
-     * Used to compute shapes of {@link IShapeContainer}s
+     * Post-loads the objects (shape generation...), and creates the IInfoOwners
      *
-     * @param hot True if it's an hot reload
+     * @param hot True if it's a hot reload
      */
-    public void postLoad(boolean hot) {
-        if (hasPostLoad()) {
-            ProgressManager.ProgressBar bar1 = ProgressManager.push("Generating " + getPrefix() + " shapes", infos.size());
-            for (T info : infos.values()) {
-                bar1.step(info.getFullName());
-                try {
-                    ((IShapeContainer) info).generateShape();
-                } catch (Exception e) {
-                    ((IShapeContainer) info).markFailedShape();
-                    DynamXErrorManager.addError(info.getPackName(), DynamXErrorManager.PACKS__ERRORS, "collision_shape_error", ErrorLevel.FATAL, info.getName(), null, e);
-                }
-            }
-            ProgressManager.pop(bar1);
-        }
-    }
+    public void postLoad(boolean hot) {}
 
     /**
      * @return The info from the info's full name, or null

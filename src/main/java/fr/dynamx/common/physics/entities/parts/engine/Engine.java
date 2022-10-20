@@ -51,7 +51,7 @@ public class Engine {
      *
      * @param engineInfo The engine info, loaded from the {@link ContentPackLoader}
      */
-    public Engine(PackEntityPhysicsHandler<ModularVehicleInfo<?>, ?> handler, EngineInfo engineInfo) {
+    public Engine(EngineInfo engineInfo) {
         power = engineInfo.getPower();
         maxRevs = engineInfo.getMaxRevs();
         braking = engineInfo.getBraking();

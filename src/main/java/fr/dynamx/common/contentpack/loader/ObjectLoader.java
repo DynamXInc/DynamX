@@ -1,5 +1,6 @@
 package fr.dynamx.common.contentpack.loader;
 
+import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.ContentPackType;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
@@ -13,17 +14,20 @@ import fr.dynamx.common.contentpack.type.objects.AbstractItemObject;
 import fr.dynamx.common.items.DynamXItemRegistry;
 import fr.dynamx.utils.DynamXReflection;
 import fr.dynamx.utils.client.ContentPackUtils;
+import fr.dynamx.utils.errors.DynamXErrorManager;
 import net.minecraft.block.Block;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.ProgressManager;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import static fr.dynamx.common.DynamXMain.log;
 
@@ -34,7 +38,6 @@ import static fr.dynamx.common.DynamXMain.log;
  * @param <C> The owners class
  * @param <U> The object type if it's an {@link ISubInfoTypeOwner} and you use a {@link SubInfoTypesRegistry}, or {@link fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner.Empty}
  * @see ObjectInfo
- * @see BuildableInfoLoader
  */
 public class ObjectLoader<T extends ObjectInfo<?>, C extends IInfoOwner<?>, U extends ISubInfoTypeOwner<?>> extends InfoLoader<T, U> {
     /**
@@ -45,13 +48,19 @@ public class ObjectLoader<T extends ObjectInfo<?>, C extends IInfoOwner<?>, U ex
      * Builtin java objects added by mods, register once and remembered for hot reloads
      */
     protected final List<T> builtinObjects = new ArrayList<>();
+    private final Function<T, C> itemCreator;
 
     /**
      * @param prefix       The prefix used to detect associated .dnx files
      * @param assetCreator A function matching an object packName and name with its object class
      */
     public ObjectLoader(String prefix, BiFunction<String, String, T> assetCreator, @Nullable SubInfoTypesRegistry<U> infoTypesRegistry) {
+        this(prefix, assetCreator, null, infoTypesRegistry);
+    }
+
+    public ObjectLoader(String prefix, BiFunction<String, String, T> assetCreator, Function<T, C> itemCreator, @Nullable SubInfoTypesRegistry<U> infoTypesRegistry) {
         super(prefix, assetCreator, infoTypesRegistry);
+        this.itemCreator = itemCreator;
     }
 
     @Override
@@ -92,60 +101,73 @@ public class ObjectLoader<T extends ObjectInfo<?>, C extends IInfoOwner<?>, U ex
         return info;
     }
 
-    /**
-     * Puts the info into infos map, and updates other references to this objects (in {@link IInfoOwner}s for example)
-     * <br>
-     * Also generates owner of the info
-     */
     @Override
-    @SuppressWarnings("unchecked")
-    public void loadItems(T info, boolean hot) {
-        super.loadItems(info, hot);
-        if (!hot) {
-            boolean client = FMLCommonHandler.instance().getSide().isClient();
-            Object[] tabItem = new Object[1];
-            if (info instanceof AbstractItemObject) {
-                String creativeTabName = ((AbstractItemObject<?, ?>) info).getCreativeTabName();
-                if (creativeTabName != null && !creativeTabName.equalsIgnoreCase("None")) {
-                    if (DynamXItemRegistry.creativeTabs.stream().noneMatch(p -> DynamXReflection.getCreativeTabName(p).equals(creativeTabName))) {
-                        DynamXItemRegistry.creativeTabs.add(new CreativeTabs(creativeTabName) {
-                            @Override
-                            public ItemStack createIcon() {
-                                if (tabItem[0] != null) {
-                                    return tabItem[0] instanceof Item ? new ItemStack((Item) tabItem[0]) : new ItemStack((Block) tabItem[0]);
+    public void postLoad(boolean hot) {
+        super.postLoad(hot);
+        ProgressManager.ProgressBar bar1 = ProgressManager.push("Post-loading " + getPrefix(), infos.size());
+        for (T info : infos.values()) {
+            bar1.step(info.getFullName());
+            try {
+                if (!info.postLoad(hot))
+                    continue;
+            } catch (Exception e) {
+                DynamXErrorManager.addError(info.getPackName(), DynamXErrorManager.PACKS__ERRORS, "complete_vehicle_error", ErrorLevel.FATAL, info.getName(), null, e);
+                continue;
+            }
+            if (!hot) {
+                boolean client = FMLCommonHandler.instance().getSide().isClient();
+                Object[] tabItem = new Object[1];
+                if (info instanceof AbstractItemObject) {
+                    String creativeTabName = ((AbstractItemObject<?, ?>) info).getCreativeTabName();
+                    if (creativeTabName != null && !creativeTabName.equalsIgnoreCase("None")) {
+                        if (DynamXItemRegistry.creativeTabs.stream().noneMatch(p -> DynamXReflection.getCreativeTabName(p).equals(creativeTabName))) {
+                            DynamXItemRegistry.creativeTabs.add(new CreativeTabs(creativeTabName) {
+                                @Override
+                                public ItemStack createIcon() {
+                                    if (tabItem[0] != null) {
+                                        return tabItem[0] instanceof Item ? new ItemStack((Item) tabItem[0]) : new ItemStack((Block) tabItem[0]);
+                                    }
+                                    return new ItemStack(Items.APPLE);
                                 }
-                                return new ItemStack(Items.APPLE);
-                            }
-                        });
-                    }
-                }
-            }
-            C[] obj = (C[]) ((ObjectInfo<T>) info).createOwners(this);
-            if (obj.length > 0) {
-                tabItem[0] = obj[0];
-            }
-            for (C ob : obj) {
-                owners.add((IInfoOwner<T>) ob);
-                if (client) {
-                    if (ob instanceof IResourcesOwner && ((IResourcesOwner) ob).createTranslation()) {
-                        for (int metadata = 0; metadata < ((IResourcesOwner) ob).getMaxMeta(); metadata++) {
-                            ContentPackUtils.addMissingLangFile(DynamXMain.resDir, (IInfoOwner<T>) ob, metadata);
+                            });
                         }
                     }
                 }
-            }
-        } else {
-            boolean found = false;
-            for (IInfoOwner<T> blockImporter : owners) {
-                if (blockImporter.getInfo().getFullName().equalsIgnoreCase(info.getFullName())) {
-                    blockImporter.setInfo(info);
-                    found = true;
-                    //Don't break, multiple items can have the same infos
+                C[] obj = (C[]) ((ObjectInfo<T>) info).createOwners(this);
+                if (obj.length > 0) {
+                    tabItem[0] = obj[0];
+                }
+                for (C ob : obj) {
+                    owners.add((IInfoOwner<T>) ob);
+                    if (client) {
+                        if (ob instanceof IResourcesOwner && ((IResourcesOwner) ob).createTranslation()) {
+                            for (int metadata = 0; metadata < ((IResourcesOwner) ob).getMaxMeta(); metadata++) {
+                                ContentPackUtils.addMissingLangFile(DynamXMain.resDir, (IInfoOwner<T>) ob, metadata);
+                            }
+                        }
+                    }
+                }
+            } else { //Refresh infos objects contained in created info owners
+                boolean found = false;
+                for (IInfoOwner<T> owner : owners) {
+                    if (owner.getInfo().getFullName().equalsIgnoreCase(info.getFullName())) {
+                        owner.setInfo(info);
+                        found = true;
+                        //Don't break, multiple items can have the same infos
+                    }
+                }
+                if (!found) {
+                    log.error("Cannot hotswap " + info.getFullName() + " in " + owners);
                 }
             }
-            if (!found) {
-                log.error("Cannot hotswap " + info.getFullName() + " in " + owners);
-            }
         }
+        ProgressManager.pop(bar1);
+    }
+
+    /**
+     * @return Maps a built info with the right item
+     */
+    public C getItem(T from) {
+        return itemCreator.apply(from);
     }
 }

@@ -12,9 +12,9 @@ import fr.dynamx.utils.errors.DynamXErrorManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 
-public class ItemTrailer<T extends ModularVehicleInfo<T>> extends ItemModularEntity<T> {
-    public ItemTrailer(ModularVehicleInfo<?> modularVehicleInfo) {
-        super((T)modularVehicleInfo);
+public class ItemTrailer extends ItemModularEntity {
+    public ItemTrailer(ModularVehicleInfo modularVehicleInfo) {
+        super(modularVehicleInfo);
         if (getInfo().getPartsByType(PartWheel.class).isEmpty())
             DynamXErrorManager.addPackError(getInfo().getPackName(), "config_error", ErrorLevel.FATAL, getInfo().getName(),  "This trailer has no wheels !");
         if (getInfo().getSubPropertyByType(TrailerAttachInfo.class) == null)

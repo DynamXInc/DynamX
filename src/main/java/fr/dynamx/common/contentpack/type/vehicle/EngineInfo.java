@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * Engine contained in an engine file
  */
-public class EngineInfo extends SubInfoTypeOwner<EngineInfo> implements ISubInfoType<ModularVehicleInfoBuilder>, INamedObject {
+public class EngineInfo extends SubInfoTypeOwner<EngineInfo> implements ISubInfoType<ModularVehicleInfo>, INamedObject {
     private final String packName;
     private final String engineName;
 
@@ -30,7 +30,7 @@ public class EngineInfo extends SubInfoTypeOwner<EngineInfo> implements ISubInfo
     @PackFileProperty(configNames = "Braking")
     private float braking;
     @PackFileProperty(configNames = "TurnSpeed", required = false, defaultValue = "0.09")
-    private float turnSpeed = 0.09f;
+    private final float turnSpeed = 0.09f;
 
     public List<Vector3f> points = new ArrayList<>();
     public List<GearInfo> gears = new ArrayList<>();
@@ -119,7 +119,7 @@ public class EngineInfo extends SubInfoTypeOwner<EngineInfo> implements ISubInfo
     }
 
     @Override
-    public void appendTo(ModularVehicleInfoBuilder owner) {
+    public void appendTo(ModularVehicleInfo owner) {
         //Fix bug : engine duplicated when using pack sync option
         owner.getSubProperties().removeIf(p -> p.getFullName().equals(getFullName()));
         owner.addSubProperty(this);
@@ -127,7 +127,7 @@ public class EngineInfo extends SubInfoTypeOwner<EngineInfo> implements ISubInfo
 
     @Nullable
     @Override
-    public ModularVehicleInfoBuilder getOwner() {
+    public ModularVehicleInfo getOwner() {
         return null;
     }
 

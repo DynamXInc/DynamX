@@ -4,16 +4,16 @@ import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.PackInfo;
 import fr.dynamx.common.contentpack.loader.InfoLoader;
-import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfoBuilder;
 import fr.dynamx.common.contentpack.type.objects.*;
 import fr.dynamx.common.contentpack.type.vehicle.EngineInfo;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 
 public enum SubInfoTypeRegistries {
     PACKS(DynamXObjectLoaders.PACKS, PackInfo.class),
-    WHEELED_VEHICLES(DynamXObjectLoaders.WHEELED_VEHICLES, ModularVehicleInfoBuilder.class),
-    TRAILERS(DynamXObjectLoaders.TRAILERS, ModularVehicleInfoBuilder.class),
-    BOATS(DynamXObjectLoaders.BOATS, ModularVehicleInfoBuilder.class),
+    WHEELED_VEHICLES(DynamXObjectLoaders.WHEELED_VEHICLES, ModularVehicleInfo.class),
+    TRAILERS(DynamXObjectLoaders.TRAILERS, ModularVehicleInfo.class),
+    BOATS(DynamXObjectLoaders.BOATS, ModularVehicleInfo.class),
     ITEMS(DynamXObjectLoaders.ITEMS, ItemObject.class),
     ARMORS(DynamXObjectLoaders.ARMORS, ArmorObject.class),
     BLOCKS_AND_PROPS(DynamXObjectLoaders.BLOCKS, BlockObject.class),

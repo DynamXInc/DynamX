@@ -9,13 +9,13 @@ import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 
 @RegisteredSubInfoType(name = "forcepoint", registries = SubInfoTypeRegistries.WHEELED_VEHICLES, strictName = false)
-public class FrictionPoint extends SubInfoType<ModularVehicleInfoBuilder> {
+public class FrictionPoint extends SubInfoType<ModularVehicleInfo> {
     @PackFileProperty(configNames = "Position", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y)
     private Vector3f position;
     @PackFileProperty(configNames = "Intensity", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F)
     private Vector3f intensity;
 
-    public FrictionPoint(ISubInfoTypeOwner<ModularVehicleInfoBuilder> owner) {
+    public FrictionPoint(ModularVehicleInfo owner) {
         super(owner);
     }
 
@@ -25,7 +25,7 @@ public class FrictionPoint extends SubInfoType<ModularVehicleInfoBuilder> {
     }
 
     @Override
-    public void appendTo(ModularVehicleInfoBuilder owner) {
+    public void appendTo(ModularVehicleInfo owner) {
         owner.addFrictionPoint(this);
     }
 

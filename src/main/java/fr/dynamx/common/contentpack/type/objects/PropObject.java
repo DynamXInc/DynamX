@@ -4,7 +4,6 @@ import com.jme3.math.Vector3f;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
-import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
@@ -16,7 +15,6 @@ import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
-import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfoBuilder;
 import fr.dynamx.common.contentpack.loader.ObjectLoader;
 import fr.dynamx.common.contentpack.loader.PackFilePropertyData;
 import fr.dynamx.common.contentpack.loader.SubInfoTypeAnnotationCache;
@@ -121,9 +119,9 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
     }
 
     @Override
-    public void generateShape() {
+    public boolean postLoad(boolean hot) {
         if (owner == null) {
-            super.generateShape();
+            super.postLoad(hot);
         } else {
             compoundCollisionShape = owner.compoundCollisionShape;
             for (MutableBoundingBox blockBox : owner.getCollisionBoxes()) {
@@ -134,6 +132,7 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
         }
         compoundCollisionShape.setMargin(margin);
         debugBuffer = ShapeUtils.getDebugVectorList(compoundCollisionShape, ShapeUtils.getDebugBuffer(compoundCollisionShape));
+        return true;
     }
 
     @Override
@@ -147,7 +146,7 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
     }
 
     @Override
-    public <U extends InteractivePart<?, ModularVehicleInfoBuilder>> List<U> getInteractiveParts() {
+    public <U extends InteractivePart<?, ?>> List<U> getInteractiveParts() {
         return Collections.emptyList();
     }
 

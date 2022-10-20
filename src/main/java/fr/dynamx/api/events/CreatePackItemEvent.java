@@ -4,16 +4,11 @@ import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
-import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfoBuilder;
 import fr.dynamx.common.contentpack.loader.ObjectLoader;
 import fr.dynamx.common.contentpack.type.ObjectInfo;
 import fr.dynamx.common.contentpack.type.objects.AbstractItemObject;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
-import fr.dynamx.common.contentpack.type.objects.ItemObject;
 import fr.dynamx.common.contentpack.type.objects.PropObject;
-import fr.dynamx.common.items.DynamXItem;
-import fr.dynamx.common.items.ItemModularEntity;
-import fr.dynamx.common.items.ItemProps;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraftforge.fml.common.eventhandler.Cancelable;
@@ -59,7 +54,7 @@ public abstract class CreatePackItemEvent<B extends ObjectInfo<?>, C extends IIn
      */
     @Cancelable
     public static class CreateVehicleItemEvent<B extends ObjectInfo<?>, C extends IInfoOwner<?>> extends CreatePackItemEvent<B,C> {
-        public CreateVehicleItemEvent(ObjectLoader<B,C ,ModularVehicleInfoBuilder> loader, B objectInfo) {
+        public CreateVehicleItemEvent(ObjectLoader<B, C ,?> loader, B objectInfo) {
             super(loader, objectInfo);
         }
     }

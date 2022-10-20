@@ -3,10 +3,9 @@ package fr.dynamx.common.contentpack.parts;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
-import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.*;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
-import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfoBuilder;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.VehicleLightsModule;
 import fr.dynamx.common.obj.texture.TextureData;
@@ -18,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 @RegisteredSubInfoType(name = "light", registries = SubInfoTypeRegistries.WHEELED_VEHICLES, strictName = false)
-public class PartLightSource implements ISubInfoType<ModularVehicleInfoBuilder> {
+public class PartLightSource implements ISubInfoType<ModularVehicleInfo> {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("ShapePosition".equals(key))
@@ -26,7 +25,7 @@ public class PartLightSource implements ISubInfoType<ModularVehicleInfoBuilder> 
         return null;
     };
 
-    private final ModularVehicleInfoBuilder owner;
+    private final ModularVehicleInfo owner;
     private final String name;
 
     @PackFileProperty(configNames = "Position", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y, description = "common.position", required = false)
@@ -46,20 +45,20 @@ public class PartLightSource implements ISubInfoType<ModularVehicleInfoBuilder> 
     @PackFileProperty(configNames = "RotateDuration", required = false)
     private int rotateDuration;
 
-    public PartLightSource(ISubInfoTypeOwner<ModularVehicleInfoBuilder> owner, String name) {
-        this.owner = (ModularVehicleInfoBuilder) owner;
+    public PartLightSource(ModularVehicleInfo owner, String name) {
+        this.owner = owner;
         this.name = name;
     }
 
     @Override
-    public void appendTo(ModularVehicleInfoBuilder owner) {
+    public void appendTo(ModularVehicleInfo owner) {
         owner.addLightSource(this);
         owner.addRenderedParts(getPartName());
     }
 
     @Nullable
     @Override
-    public ModularVehicleInfoBuilder getOwner() {
+    public ModularVehicleInfo getOwner() {
         return owner;
     }
 

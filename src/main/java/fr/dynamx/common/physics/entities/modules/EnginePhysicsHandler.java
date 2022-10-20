@@ -41,7 +41,7 @@ public class EnginePhysicsHandler implements IEnginePhysicsHandler {
         this.module = module;
         this.handler = handler;
         this.propulsionHandler = propulsionHandler;
-        engine = new Engine(handler, module.getEngineInfo());
+        engine = new Engine(module.getEngineInfo());
         List<GearInfo> gears = module.getEngineInfo().gears;
         gearBox = new GearBox(gears.size());
         for (int i = 0; i < gears.size(); i++) {

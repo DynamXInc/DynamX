@@ -6,15 +6,11 @@ import com.jme3.bullet.collision.shapes.CylinderCollisionShape;
 import com.jme3.bullet.collision.shapes.SphereCollisionShape;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IShapeContainer;
-import fr.dynamx.api.contentpack.object.IPartContainer;
-import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.obj.IObjObject;
-import fr.dynamx.common.contentpack.DynamXObjectLoaders;
-import fr.dynamx.common.contentpack.PackInfo;
 import fr.dynamx.common.contentpack.parts.PartShape;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.obj.ObjModelServer;
@@ -31,7 +27,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractItemObject<T, T> implements IShapeContainer, ParticleEmitterInfo.IParticleEmitterContainer {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.PROPS})
@@ -80,22 +75,13 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
     }
 
     @Override
-    public void markFailedShape() {
-        //DO STH ?
-    }
-
-    @Override
-    public void generateShape() {
+    public boolean postLoad(boolean hot) {
         compoundCollisionShape = new CompoundCollisionShape();
         if (getPartShapes().isEmpty()) {
-            if (useHullShape) {
+            if (useHullShape)
                 compoundCollisionShape = ShapeUtils.generateComplexModelCollisions(DynamXUtils.getModelPath(getPackName(), model), "", scaleModifier, new Vector3f(), 0);
-            } else {
-                PackInfo info = DynamXObjectLoaders.PACKS.findPackInfoByPackName(getPackName());
-                //System.out.println("Info for "+getPackName()+" "+info);
-                //System.out.println("All are " + DynamXObjectLoaders.PACKS.getInfos());
+            else
                 ShapeUtils.generateModelCollisions(this, ObjModelServer.createServerObjModel(DynamXUtils.getModelPath(getPackName(), getModel())), compoundCollisionShape);
-            }
         } else {
             getPartShapes().forEach(shape -> {
                 getCollisionBoxes().add(shape.getBoundingBox().offset(0.5, 0.5, 0.5));
@@ -112,6 +98,7 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
                 }
             });
         }
+        return true;
     }
 
     @Override

@@ -27,7 +27,7 @@ public class VehicleLightsModule implements IPhysicsModule<BaseVehiclePhysicsHan
     private final Map<Integer, Boolean> lightStates = new HashMap<>();
 
     public VehicleLightsModule(BaseVehicleEntity<?> entity) {
-        for (PartLightSource.CompoundLight compound : entity.getPackInfo().getLightSources()) {
+        for (PartLightSource.CompoundLight compound : entity.getPackInfo().getLightSources().values()) {
             for (PartLightSource s : compound.getSources()) {
                 lightStates.put(s.getLightId(), false);
             }
@@ -72,7 +72,7 @@ public class VehicleLightsModule implements IPhysicsModule<BaseVehiclePhysicsHan
         if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.RenderVehicleEntityEvent(VehicleEntityEvent.RenderVehicleEntityEvent.Type.LIGHTS, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks))) {
             if (carEntity.hasModuleOfType(VehicleLightsModule.class)) {
                 ObjModelClient vehicleModel = DynamXContext.getObjModelRegistry().getModel(carEntity.getPackInfo().getModel());
-                for (PartLightSource.CompoundLight sources : carEntity.getPackInfo().getLightSources()) {
+                for (PartLightSource.CompoundLight sources : carEntity.getPackInfo().getLightSources().values()) {
                     PartLightSource onSource = null;
                     for (PartLightSource source : sources.getSources()) {
                         if (isLightOn(source.getLightId())) {

@@ -25,7 +25,7 @@ public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A e
 
     @PackFileProperty(configNames = {"CreativeTabName", "CreativeTab", "TabName"}, required = false, defaultValue = "CreativeTab of DynamX", description = "common.creativetabname")
     protected String creativeTabName;
-    @PackFileProperty(configNames = "Model", description = "common.model")
+    @PackFileProperty(configNames = "Model", description = "common.model", defaultValue = "obj/name_of_vehicle/name_of_model.obj")
     protected String model;
     @PackFileProperty(configNames = "ItemScale", required = false, description = "common.itemscale", defaultValue = "0.9")
     protected float itemScale = 0.9f;

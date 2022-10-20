@@ -10,6 +10,7 @@ import fr.dynamx.common.objloader.data.Vertex;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.errors.DynamXErrorManager;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -32,7 +33,7 @@ public class ObjObjectRenderer {
     // Use THIS instead of GlStateManager, it has weird issues due to last bind texture memory and display lists
     private static int bindTexture;
 
-    private final Map<Byte, VariantRenderData> modelDisplayList = new HashMap<>();
+    private final Map<Byte, VariantRenderData> modelRenderData = new HashMap<>();
     @Getter
     private final ObjObjectData objObjectData;
     private boolean isVAOSetup;
@@ -45,12 +46,12 @@ public class ObjObjectRenderer {
     }
 
     public void clearDisplayLists() {
-        if (!modelDisplayList.isEmpty()) {
-            modelDisplayList.forEach((textureID, displayList) -> {
+        if (!modelRenderData.isEmpty()) {
+            modelRenderData.forEach((textureID, displayList) -> {
                 // If the list was created previously, we free the GPU memory
                 GlStateManager.glDeleteLists(displayList.displayListId, 1);
             });
-            modelDisplayList.clear();
+            modelRenderData.clear();
         }
     }
 
@@ -63,12 +64,12 @@ public class ObjObjectRenderer {
         renderCPU(model, baseVariant != null ? baseVariant.getName() : null, textureVariantData != null ? textureVariantData.getName() : null);
         // Finish the compilation process
         GlStateManager.glEndList();
-        modelDisplayList.put(textureVariantData != null ? textureVariantData.getId() : 0, new VariantRenderData(baseVariant, textureVariantData, id, -1));
+        modelRenderData.put(textureVariantData != null ? textureVariantData.getId() : 0, new VariantRenderData(baseVariant, textureVariantData, id, -1));
     }
 
     private void setupVAO() {
         if (!isVAOSetup) {
-            for (Map.Entry<Byte, VariantRenderData> entry : modelDisplayList.entrySet()) {
+            for (Map.Entry<Byte, VariantRenderData> entry : modelRenderData.entrySet()) {
                 if (entry.getValue().vaoId == -1) {
                     int vaoID = DynamXRenderUtils.genVertexArrays();
                     DynamXRenderUtils.bindVertexArray(vaoID);
@@ -109,7 +110,7 @@ public class ObjObjectRenderer {
         else {
             if (logIfNotFound)
                 log.error("Failed to find custom texture for skin " + variant + " of " + model.getLocation() + " in part " + objObjectData.getName());
-            modelDisplayList.put(variant.getId(), modelDisplayList.get(baseVariant.getId()));
+            modelRenderData.put(variant.getId(), modelRenderData.get(baseVariant.getId()));
         }
     }
 
@@ -121,19 +122,19 @@ public class ObjObjectRenderer {
         GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         if (OpenGlHelper.useVbo()) {
             setupVAO();
-            if(!modelDisplayList.containsKey(textureVariantID)) {
-                if(!modelDisplayList.containsKey((byte) 0))
+            if(!modelRenderData.containsKey(textureVariantID)) {
+                if(!modelRenderData.containsKey((byte) 0))
                     return;
-                renderVAO(model, modelDisplayList.get((byte) 0));
+                renderVAO(model, modelRenderData.get((byte) 0));
             } else
-                renderVAO(model, modelDisplayList.get(textureVariantID));
+                renderVAO(model, modelRenderData.get(textureVariantID));
         } else {
-            if (!modelDisplayList.containsKey(textureVariantID)) {
+            if (!modelRenderData.containsKey(textureVariantID)) {
                 GlStateManager.color(1, 0, 0);
-                GlStateManager.callList(modelDisplayList.get((byte) 0).displayListId);
+                GlStateManager.callList(modelRenderData.get((byte) 0).displayListId);
                 GlStateManager.color(1, 1, 1);
             } else
-                GlStateManager.callList(modelDisplayList.get(textureVariantID).displayListId);
+                GlStateManager.callList(modelRenderData.get(textureVariantID).displayListId);
             GlStateManager.disableBlend();
             GlStateManager.bindTexture(ClientEventHandler.MC.getTextureMapBlocks().getGlTextureId());
         }
@@ -293,19 +294,13 @@ public class ObjObjectRenderer {
                 '}';
     }
 
-     @ToString
+    @ToString
+    @AllArgsConstructor
     public static class VariantRenderData {
         private final TextureVariantData baseVariant;
         private final TextureVariantData variant;
         private final int displayListId;
         private int vaoId;
-
-        public VariantRenderData(TextureVariantData baseVariant, TextureVariantData variant, int displayListId, int vaoId) {
-            this.baseVariant = baseVariant;
-            this.variant = variant;
-            this.displayListId = displayListId;
-            this.vaoId = vaoId;
-        }
 
         public String getBaseVariant() {
             return baseVariant != null ? baseVariant.getName() : null;

@@ -61,7 +61,6 @@ public class OBJLoader {
             String[] lines = objContent.split("[\n\r]");
 
             int posOffset = 0;
-            int indicesOffset = 0;
             int texOffset = 0;
             int normOffset = 0;
             List<Vector3f> positions = new ArrayList<>();
@@ -79,7 +78,6 @@ public class OBJLoader {
 
             String currentMaterial = null;
             HashMap<ObjObjectData, IndexedModel[]> objects = new HashMap<>();
-            String currentObject = "";
             objects.put(new ObjObjectData("main"), new IndexedModel[]{result, normalModel});
             for (int j = 0, linesLength = lines.length; j < linesLength; j++) {
                 try {
@@ -135,7 +133,6 @@ public class OBJLoader {
                                 indices.clear();
                                 indicedMaterials.clear();
                                 objects.put(new ObjObjectData(parts[1]), new IndexedModel[]{result, normalModel});
-                                currentObject = parts[1];
                                 break;
                         }
                     }

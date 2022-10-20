@@ -27,11 +27,10 @@ import java.util.stream.Collectors;
  * Automatic loader of specific named objects
  *
  * @param <T> The objects class
- * @param <A> The object type if it's an {@link ISubInfoTypeOwner} and you use a {@link SubInfoTypesRegistry}, or {@link fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner.Empty}
  * @see INamedObject
  * @see ObjectLoader
  */
-public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> {
+public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
     /**
      * Optional dependency matcher : <br>
      * Optional blocks are blocks depending on addons that don't throw errors and that are ignored when their dependency isn't loaded.
@@ -52,13 +51,13 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
     /**
      * SubInfoTypesRegistry for this object
      */
-    protected final SubInfoTypesRegistry<A> infoTypesRegistry;
+    protected final SubInfoTypesRegistry<T> infoTypesRegistry;
 
     /**
      * @param prefix       The prefix used to detect associated .dnx files
      * @param assetCreator A function matching an object packName and name with its object class
      */
-    public InfoLoader(String prefix, BiFunction<String, String, T> assetCreator, @Nullable SubInfoTypesRegistry<A> infoTypesRegistry) {
+    public InfoLoader(String prefix, BiFunction<String, String, T> assetCreator, @Nullable SubInfoTypesRegistry<T> infoTypesRegistry) {
         this.prefix = prefix;
         this.assetCreator = assetCreator;
         this.infoTypesRegistry = infoTypesRegistry;
@@ -111,7 +110,7 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
     @SuppressWarnings("unchecked")
     protected void readInfo(BufferedReader reader, INamedObject info) throws IOException {
         if (info instanceof ISubInfoTypeOwner<?>)
-            readInfoWithSubInfos((A) info, reader);
+            readInfoWithSubInfos((T) info, reader);
         else {
             //TODO FACTORIZE WITH THE NEXT FUNCTION
             List<PackFilePropertyData<?>> foundProperties = new ArrayList<>();
@@ -157,7 +156,7 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
      * @param reader The data of the object
      * @throws IOException If a reading error occurs
      */
-    protected void readInfoWithSubInfos(A obj, BufferedReader reader) throws IOException {
+    protected void readInfoWithSubInfos(T obj, BufferedReader reader) throws IOException {
         List<PackFilePropertyData<?>> foundProperties = obj.getInitiallyConfiguredProperties();
         //Read the category
         String s;
@@ -177,7 +176,7 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
                     inComment = true;
                 } else if (s.contains("{")) { //New sub property
                     String name = s.replace("{", "").trim();
-                    ISubInfoType<A> type = getClassForPropertyOwner(obj, name);
+                    ISubInfoType<T> type = getClassForPropertyOwner(obj, name);
                     if (type != null) { //Read all properties of type
                         readInfo(reader, type);
                         type.appendTo(obj);
@@ -268,11 +267,11 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
      * @see SubInfoTypesRegistry
      */
     @Nullable
-    protected ISubInfoType<A> getClassForPropertyOwner(A obj, String name) {
+    protected ISubInfoType<T> getClassForPropertyOwner(T obj, String name) {
         if(infoTypesRegistry == null) return null;
         String[] tags = name.split("#");
-        Collection<SubInfoTypeEntry<A>> types = infoTypesRegistry.getRegisteredEntries().stream().sorted((t1, t2) -> t1.isStrict() != t2.isStrict() ? (t1.isStrict() ? -1 : 1) : 0).collect(Collectors.toList());
-        for (SubInfoTypeEntry<A> type : types) {
+        Collection<SubInfoTypeEntry<T>> types = infoTypesRegistry.getRegisteredEntries().stream().sorted((t1, t2) -> t1.isStrict() != t2.isStrict() ? (t1.isStrict() ? -1 : 1) : 0).collect(Collectors.toList());
+        for (SubInfoTypeEntry<T> type : types) {
             if (type.matches(tags[0]))
                 return type.create(obj, tags[0]);
         }
@@ -438,7 +437,7 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
     }
 
     @Nullable
-    public SubInfoTypesRegistry<A> getSubInfoTypesRegistry() {
+    public SubInfoTypesRegistry<T> getSubInfoTypesRegistry() {
         return infoTypesRegistry;
     }
 
@@ -447,7 +446,7 @@ public class InfoLoader<T extends INamedObject, A extends ISubInfoTypeOwner<?>> 
      * @deprecated Use {@link fr.dynamx.api.contentpack.registry.RegisteredSubInfoType} annotation
      */
     @Deprecated
-    public void addSubInfoType(SubInfoTypeEntry<A> entry) {
+    public void addSubInfoType(SubInfoTypeEntry<T> entry) {
         if (infoTypesRegistry == null)
             throw new IllegalArgumentException("This object does not support sub info types !");
         infoTypesRegistry.addSubInfoType(entry);

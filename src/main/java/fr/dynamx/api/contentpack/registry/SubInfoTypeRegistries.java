@@ -21,17 +21,17 @@ public enum SubInfoTypeRegistries {
     WHEELS(DynamXObjectLoaders.WHEELS, PartWheelInfo.class),
     ENGINES(DynamXObjectLoaders.ENGINES, EngineInfo.class);
 
-    private final InfoLoader<?, ?> infoLoader;
+    private final InfoLoader<?> infoLoader;
     private final Class<? extends ISubInfoTypeOwner<?>> infoOwnerType;
 
-    SubInfoTypeRegistries(InfoLoader<?, ?> infoLoader, Class<?> infoOwnerType) {
+    SubInfoTypeRegistries(InfoLoader<?> infoLoader, Class<?> infoOwnerType) {
         if (!ISubInfoTypeOwner.class.isAssignableFrom(infoOwnerType))
             throw new IllegalArgumentException(infoOwnerType + " does not implements ISubInfoTypeOwner !");
         this.infoLoader = infoLoader;
         this.infoOwnerType = (Class<ISubInfoTypeOwner<?>>) infoOwnerType;
     }
 
-    public InfoLoader<?, ?> getInfoLoader() {
+    public InfoLoader<?> getInfoLoader() {
         return infoLoader;
     }
 

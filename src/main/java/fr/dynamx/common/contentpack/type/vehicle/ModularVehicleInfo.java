@@ -234,7 +234,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
 
     @Override
     @SuppressWarnings({"unchecked"})
-    public IInfoOwner<ModularVehicleInfo> createOwner(ObjectLoader<ModularVehicleInfo, ?, ?> loader) {
+    public IInfoOwner<ModularVehicleInfo> createOwner(ObjectLoader<ModularVehicleInfo, ?> loader) {
         CreatePackItemEvent.CreateVehicleItemEvent<ModularVehicleInfo, ?> event = new CreatePackItemEvent.CreateVehicleItemEvent(loader, this);
         MinecraftForge.EVENT_BUS.post(event);
         if (event.isOverridden()) {
@@ -313,7 +313,6 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     }
 
     /**
-     * TODO CLEAN AND UPDATE !
      * <p>
      * Creates a final {@link ModularVehicleInfo} from the properties of this builder
      *

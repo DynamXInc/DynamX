@@ -41,40 +41,40 @@ import java.util.List;
 public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfo> implements IPhysicsPackInfo {
     @Getter
     @PackFileProperty(configNames = "LocalCarAttachPoint", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y, required = false)
-    private final Vector3f carAttachPoint = new Vector3f();
+    private Vector3f carAttachPoint = new Vector3f();
     @Getter
     @PackFileProperty(configNames = "LocalDoorAttachPoint", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y, required = false)
-    private final Vector3f doorAttachPoint = new Vector3f();
+    private Vector3f doorAttachPoint = new Vector3f();
     @Getter
     @PackFileProperty(configNames = "AttachStrength", required = false)
-    private final int attachStrength = 400;
+    private int attachStrength = 400;
 
     @Getter
     @PackFileProperty(configNames = "Axis", required = false)
-    private final int axisToUse = DynamXPhysicsHelper.Y_ROTATION_DOF;
+    private int axisToUse = DynamXPhysicsHelper.Y_ROTATION_DOF;
     @Getter
     @PackFileProperty(configNames = "OpenedDoorAngleLimit", required = false)
-    private final Vector2f openLimit = new Vector2f();
+    private Vector2f openLimit = new Vector2f();
     @Getter
     @PackFileProperty(configNames = "ClosedDoorAngleLimit", required = false)
-    private final Vector2f closeLimit = new Vector2f();
+    private Vector2f closeLimit = new Vector2f();
     @Getter
     @PackFileProperty(configNames = "DoorOpenForce", required = false)
-    private final Vector2f openMotor = new Vector2f(1, 200);
+    private Vector2f openMotor = new Vector2f(1, 200);
     @Getter
     @PackFileProperty(configNames = "DoorCloseForce", required = false)
-    private final Vector2f closeMotor = new Vector2f(-1.5f, 300);
+    private Vector2f closeMotor = new Vector2f(-1.5f, 300);
 
     @Getter
     @PackFileProperty(configNames = "AutoMountDelay", required = false)
-    private final byte mountDelay = (byte) 40;
+    private byte mountDelay = (byte) 40;
     @Getter
     @PackFileProperty(configNames = "DoorCloseTime", required = false)
-    private final byte doorCloseTime = (byte) 25;
+    private byte doorCloseTime = (byte) 25;
 
     @Getter
     @PackFileProperty(configNames = "Enabled", required = false, defaultValue = "true")
-    private final boolean enabled = true;
+    private boolean enabled = true;
 
     /**
      * True if the mounting animation is playing, use to prevent other interactions in the same time

@@ -3,6 +3,7 @@ package fr.dynamx.utils.client;
 import com.google.common.collect.Maps;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
+import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.contentpack.type.ObjectInfo;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
@@ -108,7 +109,7 @@ public class ContentPackUtils {
      * Writes the translation of this object in the pack lang file, if not already present in the translation file
      */
     @SuppressWarnings("unchecked")
-    public static <T extends ObjectInfo<?>> void addMissingLangFile(File dynxDir, IInfoOwner<T> item, int metadata) {
+    public static <T extends ObjectInfo<?> & ISubInfoTypeOwner<?>> void addMissingLangFile(File dynxDir, IInfoOwner<T> item, int metadata) {
         ObjectInfo<T> objectInfo = (ObjectInfo<T>) item.getInfo();
         String translation = objectInfo.getTranslationKey(item, metadata) + ".name";
         if (!I18n.hasKey(translation)) {
@@ -154,7 +155,7 @@ public class ContentPackUtils {
     /**
      * Writes the translation of this object in the given lang file, if not already present in the file
      */
-    public static <T extends ObjectInfo<?>> void writeInLangFile(ObjectInfo<T> objectInfo, File langFile, IInfoOwner<T> item, int metadata) throws IOException {
+    public static <T extends ObjectInfo<?> & ISubInfoTypeOwner<?>> void writeInLangFile(ObjectInfo<T> objectInfo, File langFile, IInfoOwner<T> item, int metadata) throws IOException {
         BufferedReader inputStream = new BufferedReader(new InputStreamReader(new FileInputStream(langFile)));
         String translation = objectInfo.getTranslationKey(item, metadata) + ".name=" + objectInfo.getTranslatedName(item, metadata);
 

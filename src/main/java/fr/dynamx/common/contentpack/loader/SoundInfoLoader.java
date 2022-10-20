@@ -13,7 +13,7 @@ import java.util.function.BiFunction;
 /**
  * Sounds files loader
  */
-public class SoundInfoLoader extends InfoLoader<SoundListInfo, ISubInfoTypeOwner.Empty> {
+public class SoundInfoLoader extends InfoLoader<SoundListInfo> {
     public SoundInfoLoader(String prefix, BiFunction<String, String, SoundListInfo> assetCreator) {
         super(prefix, assetCreator, null);
     }

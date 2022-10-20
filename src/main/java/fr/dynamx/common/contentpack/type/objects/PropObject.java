@@ -114,7 +114,7 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
     }
 
     @Override
-    public IInfoOwner<T> createOwner(ObjectLoader<T, ?, ?> loader) {
+    public IInfoOwner<T> createOwner(ObjectLoader<T, ?> loader) {
         return new ItemProps(this);
     }
 

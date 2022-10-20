@@ -39,7 +39,7 @@ import static fr.dynamx.common.DynamXMain.log;
  * @param <U> The object type if it's an {@link ISubInfoTypeOwner} and you use a {@link SubInfoTypesRegistry}, or {@link fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner.Empty}
  * @see ObjectInfo
  */
-public class ObjectLoader<T extends ObjectInfo<?>, C extends IInfoOwner<?>, U extends ISubInfoTypeOwner<?>> extends InfoLoader<T, U> {
+public class ObjectLoader<T extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C extends IInfoOwner<?>> extends InfoLoader<T> {
     /**
      * All {@link IInfoOwner}s associated with our objects
      */
@@ -54,11 +54,11 @@ public class ObjectLoader<T extends ObjectInfo<?>, C extends IInfoOwner<?>, U ex
      * @param prefix       The prefix used to detect associated .dnx files
      * @param assetCreator A function matching an object packName and name with its object class
      */
-    public ObjectLoader(String prefix, BiFunction<String, String, T> assetCreator, @Nullable SubInfoTypesRegistry<U> infoTypesRegistry) {
+    public ObjectLoader(String prefix, BiFunction<String, String, T> assetCreator, @Nullable SubInfoTypesRegistry<T> infoTypesRegistry) {
         this(prefix, assetCreator, null, infoTypesRegistry);
     }
 
-    public ObjectLoader(String prefix, BiFunction<String, String, T> assetCreator, Function<T, C> itemCreator, @Nullable SubInfoTypesRegistry<U> infoTypesRegistry) {
+    public ObjectLoader(String prefix, BiFunction<String, String, T> assetCreator, Function<T, C> itemCreator, @Nullable SubInfoTypesRegistry<T> infoTypesRegistry) {
         super(prefix, assetCreator, infoTypesRegistry);
         this.itemCreator = itemCreator;
     }

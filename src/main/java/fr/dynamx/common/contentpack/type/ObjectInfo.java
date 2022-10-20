@@ -2,6 +2,7 @@ package fr.dynamx.common.contentpack.type;
 
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.INamedObject;
+import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.common.contentpack.loader.ObjectLoader;
 
@@ -12,7 +13,7 @@ import javax.annotation.Nullable;
  *
  * @param <T> The object class
  */
-public abstract class ObjectInfo<T extends ObjectInfo<?>> implements INamedObject {
+public abstract class ObjectInfo<T extends ObjectInfo<?> & ISubInfoTypeOwner<?>> implements INamedObject {
     private final String packName;
     private final String fileName;
     @PackFileProperty(configNames = "Description", description = "common.description")
@@ -71,7 +72,7 @@ public abstract class ObjectInfo<T extends ObjectInfo<?>> implements INamedObjec
      * @return An InfoOwner for this object. Null if the object has failed to load
      */
     @Nullable
-    protected abstract IInfoOwner<T> createOwner(ObjectLoader<T, ?, ?> loader);
+    protected abstract IInfoOwner<T> createOwner(ObjectLoader<T, ?> loader);
 
     /**
      * Inits the infos owners for this object <br>
@@ -81,7 +82,7 @@ public abstract class ObjectInfo<T extends ObjectInfo<?>> implements INamedObjec
      * @return All InfoOwners for this object
      */
     @SuppressWarnings("unchecked")
-    public IInfoOwner<T>[] createOwners(ObjectLoader<T, ?, ?> loader) {
+    public IInfoOwner<T>[] createOwners(ObjectLoader<T, ?> loader) {
         IInfoOwner<T> owner = createOwner(loader);
         if(owner == null)
             return new IInfoOwner[0];

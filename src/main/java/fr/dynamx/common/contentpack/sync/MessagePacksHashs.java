@@ -86,7 +86,7 @@ public class MessagePacksHashs implements IDnxPacket {
                             List<String> l = entry.getValue();
                             fullData.put(s, new HashMap<>());
                             size += s.getBytes(StandardCharsets.UTF_8).length;
-                            InfoLoader<?, ?> loader = DynamXObjectLoaders.getLoaders().stream().filter(i -> i.getPrefix().equals(s)).findFirst().get();
+                            InfoLoader<?> loader = DynamXObjectLoaders.getLoaders().stream().filter(i -> i.getPrefix().equals(s)).findFirst().get();
                             loader.encodeObjects(l, fullData.get(s));
                             for (Map.Entry<String, byte[]> e : fullData.get(s).entrySet()) {
                                 String a = e.getKey();
@@ -118,7 +118,7 @@ public class MessagePacksHashs implements IDnxPacket {
                     for (Map.Entry<String, Map<String, byte[]>> entry : message.objects.entrySet()) {
                         String s = entry.getKey();
                         Map<String, byte[]> l = entry.getValue();
-                        InfoLoader<?, ?> loader = DynamXObjectLoaders.getLoaders().stream().filter(i -> i.getPrefix().equals(s)).findFirst().get();
+                        InfoLoader<?> loader = DynamXObjectLoaders.getLoaders().stream().filter(i -> i.getPrefix().equals(s)).findFirst().get();
                         loader.receiveObjects(l);
                     }
                 } catch (Exception e) {

@@ -194,7 +194,7 @@ public class ContentPackLoader {
         isHotReloading = initialized;
         if (!isHotReloading)
             initialized = true;
-        for (InfoLoader<?, ?> loader : DynamXObjectLoaders.LOADERS)
+        for (InfoLoader<?> loader : DynamXObjectLoaders.LOADERS)
             loader.clear(isHotReloading);
         DynamXErrorManager.getErrorManager().clear(DynamXErrorManager.PACKS__ERRORS);
         try {
@@ -274,7 +274,7 @@ public class ContentPackLoader {
                 }
             }
             //Load shapes
-            for (InfoLoader<?, ?> loader : DynamXObjectLoaders.LOADERS) {
+            for (InfoLoader<?> loader : DynamXObjectLoaders.LOADERS) {
                 bar.step("Post load : " + loader.getPrefix());
                 loader.postLoad(isHotReloading);
             }
@@ -321,7 +321,7 @@ public class ContentPackLoader {
             inputStream = new BufferedReader(new InputStreamReader(file.getInputStream()));
             String configName = file.getName().substring(0, file.getName().length() - suffix.length()).toLowerCase();
             boolean loaded = false;
-            for (InfoLoader<?, ?> loader : DynamXObjectLoaders.LOADERS) {
+            for (InfoLoader<?> loader : DynamXObjectLoaders.LOADERS) {
                 if (loader.load(loadingPack, configName, inputStream, isHotReloading)) {
                     loaded = true;
                     break;

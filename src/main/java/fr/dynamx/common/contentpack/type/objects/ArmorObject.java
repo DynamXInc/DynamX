@@ -100,12 +100,12 @@ public class ArmorObject<T extends ArmorObject<?>> extends AbstractItemObject<T,
     }
 
     @Override
-    protected IInfoOwner<T> createOwner(ObjectLoader<T, ?, ?> loader) {
+    protected IInfoOwner<T> createOwner(ObjectLoader<T, ?> loader) {
         throw new IllegalArgumentException("Call createOwners !");
     }
 
     @Override
-    public IInfoOwner<T>[] createOwners(ObjectLoader<T, ?, ?> loader) {
+    public IInfoOwner<T>[] createOwners(ObjectLoader<T, ?> loader) {
         ItemArmor.ArmorMaterial material = EnumHelper.addArmorMaterial(getFullName(), "", durability, reductionAmount, enchantibility, sound, toughness);
         List<IInfoOwner<T>> owners = new ArrayList<>();
         if (getArmorHead() != null)

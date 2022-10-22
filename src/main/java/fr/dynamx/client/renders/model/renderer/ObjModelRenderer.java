@@ -7,7 +7,9 @@ import fr.dynamx.api.events.EventStage;
 import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
 import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
+import fr.dynamx.common.objloader.data.Material;
 import fr.dynamx.common.objloader.data.ObjModelData;
 import fr.dynamx.common.objloader.data.ObjObjectData;
 import fr.dynamx.client.renders.model.texture.TextureVariantData;
@@ -26,6 +28,7 @@ import net.minecraftforge.common.MinecraftForge;
 import javax.annotation.Nullable;
 import javax.vecmath.Vector4f;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +44,8 @@ public class ObjModelRenderer {
     private final ResourceLocation location;
     @Getter
     private final List<ObjObjectRenderer> objObjects;
+    @Getter
+    private final Map<String, Material> materials;
     /**
      * Used for error logging, see {@link ObjObjectData}
      */
@@ -51,9 +56,10 @@ public class ObjModelRenderer {
     @Setter
     private Vector4f modelColor = new Vector4f(1,1,1,1);
 
-    public ObjModelRenderer(ResourceLocation location, List<ObjObjectRenderer> objObjects, @Nullable IModelTextureVariantsSupplier textureVariants) {
+    public ObjModelRenderer(ResourceLocation location, List<ObjObjectRenderer> objObjects, Map<String, Material> materials, @Nullable IModelTextureVariantsSupplier textureVariants) {
         this.location = location;
         this.objObjects = objObjects;
+        this.materials = materials;
         this.textureVariants = textureVariants;
     }
 
@@ -65,7 +71,7 @@ public class ObjModelRenderer {
             objModelData.getObjObjects().forEach(ObjObjectData -> {
                 objObjects.add(new ObjObjectRenderer(ObjObjectData));
             });
-            return new ObjModelRenderer(objModelPath.getModelPath(), objObjects, textureVariants);
+            return new ObjModelRenderer(objModelPath.getModelPath(), objObjects, objModelData.getMaterials(), textureVariants);
         } catch (Exception e) {
             DynamXErrorManager.addError(textureVariants != null ? textureVariants.getPackName() : "Non-pack model", DynamXErrorManager.MODEL_ERRORS, "obj_error", ErrorLevel.HIGH, objModelPath.toString(), "", e);
         }
@@ -83,17 +89,16 @@ public class ObjModelRenderer {
             for (ObjObjectRenderer object : objObjects) {
                 step = object;
                 object.clearDisplayLists();
-                if (object.getObjObjectData().getMesh().materialForEachVertex.length == 0) continue;
+                if (object.getObjObjectData().getMesh().materials.isEmpty()) continue;
                 if (getTextureVariants() != null) {
-                    Map<Byte, TextureVariantData> textureVariants = this.getTextureVariants().getTextureVariantsFor(object);
+                    IModelTextureVariantsSupplier.IModelTextureVariants textureVariants = this.getTextureVariants().getTextureVariantsFor(object);
                     if (textureVariants != null) {
-                        TextureVariantData defaultTexture = textureVariants.get((byte) 0);
                         boolean log = object.getObjObjectData().getName().equalsIgnoreCase("chassis");
-                        textureVariants.values().forEach(data -> object.createList(defaultTexture, data, this, log));
+                        textureVariants.getTextureVariants().values().forEach(data -> object.createList(this, textureVariants.getDefaultVariant(), data, log));
                         continue;
                     }
                 }
-                object.createDefaultList(this);
+                object.createList(this, null, null, false);
             }
         } catch (Exception e) {
             DynamXErrorManager.addError(textureVariants != null ? textureVariants.getPackName() : "Non-pack model", DynamXErrorManager.MODEL_ERRORS, "obj_error", ErrorLevel.HIGH, getLocation().toString(), (step == null ? null : step.getObjObjectData().getName()), e);

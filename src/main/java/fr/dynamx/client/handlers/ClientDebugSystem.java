@@ -1,7 +1,9 @@
 package fr.dynamx.client.handlers;
 
+import com.jme3.bullet.joints.PhysicsJoint;
 import com.jme3.bullet.objects.PhysicsRigidBody;
-import fr.dynamx.api.contentpack.object.IShapeProvider;
+import com.jme3.math.Vector3f;
+import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.client.camera.CameraSystem;
 import fr.dynamx.common.DynamXContext;
@@ -15,6 +17,7 @@ import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.debug.*;
 import fr.dynamx.utils.debug.renderer.PhysicsDebugRenderer;
+import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
@@ -45,8 +48,10 @@ public class ClientDebugSystem {
     public static boolean enableDebugDrawing;
     public static int MOVE_DEBUG;
 
-    private static final Map<Long, RigidBodyTransform>[] prevRigidBodyStates = new Map[]{new HashMap(), new HashMap()};
+    public static final Map<Long, RigidBodyTransform>[] prevRigidBodyStates = new Map[]{new HashMap<>(), new HashMap<>()};
+
     private static byte curRigidBodyStatesIndex;
+    private static byte prevRigidBodyStatesIndex;
 
     private static final Minecraft MC = Minecraft.getMinecraft();
 
@@ -70,7 +75,7 @@ public class ClientDebugSystem {
                 }
             }
 
-            if (enableDebugDrawing && DynamXDebugOptions.PHYSICS_DEBUG.isActive() && DynamXContext.getPhysicsWorld() != null) {
+            if (DynamXContext.getPhysicsWorld() != null) {
                 QuaternionPool.openPool();
                 Vector3fPool.openPool();
                 curRigidBodyStatesIndex++;
@@ -91,7 +96,7 @@ public class ClientDebugSystem {
     @SideOnly(Side.CLIENT)
     public static void overlay(RenderGameOverlayEvent.Post event) {
         if (event.getType().equals(RenderGameOverlayEvent.ElementType.TEXT) && enableDebugDrawing) {
-            FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
+            FontRenderer fontRenderer = MC.fontRenderer;
             String s = "Drawing debug";
             fontRenderer.drawString(s, event.getResolution().getScaledWidth() - fontRenderer.getStringWidth(s) - 2, 2, 0xFFBC00);
             if (DynamXContext.getPhysicsWorld() != null) {
@@ -128,6 +133,9 @@ public class ClientDebugSystem {
     @SideOnly(Side.CLIENT)
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void worldRender(RenderWorldLastEvent event) {
+        prevRigidBodyStatesIndex = (byte) (ClientDebugSystem.curRigidBodyStatesIndex - 1);
+        if (prevRigidBodyStatesIndex < 0)
+            prevRigidBodyStatesIndex = 1;
         if (enableDebugDrawing) {
             GlStateManager.pushMatrix();
 
@@ -156,11 +164,8 @@ public class ClientDebugSystem {
                 QuaternionPool.openPool();
                 GlQuaternionPool.openPool();
 
-                byte prevRigidBodyStatesIndex = (byte) (curRigidBodyStatesIndex - 1);
-                if (prevRigidBodyStatesIndex < 0)
-                    prevRigidBodyStatesIndex = 1;
                 for (PhysicsRigidBody body : DynamXContext.getPhysicsWorld().getDynamicsWorld().getRigidBodyList()) {
-                    PhysicsDebugRenderer.debugRigidBody(body, prevRigidBodyStates[prevRigidBodyStatesIndex].get(body.nativeId()), prevRigidBodyStates[curRigidBodyStatesIndex].get(body.nativeId()), event.getPartialTicks());
+                    PhysicsDebugRenderer.debugRigidBody(body, getPrevRigidBodyTransform(body.nativeId()), getCurrentRigidBodyTransform(body.nativeId()), event.getPartialTicks());
                 }
                 DynamXContext.getPhysicsWorld().getDynamicsWorld().getSoftBodyList().forEach(PhysicsDebugRenderer::debugSoftBody);
                 Vector3fPool.closePool();
@@ -169,7 +174,9 @@ public class ClientDebugSystem {
                 GlStateManager.disableDepth();
                 Vector3fPool.openPool();
                 QuaternionPool.openPool();
-                DynamXContext.getPhysicsWorld().getDynamicsWorld().getJointList().forEach(PhysicsDebugRenderer::debugConstraint);
+                for (PhysicsJoint physicsJoint : DynamXContext.getPhysicsWorld().getDynamicsWorld().getJointList()) {
+                    PhysicsDebugRenderer.debugConstraint(physicsJoint, event.getPartialTicks());
+                }
                 GlQuaternionPool.closePool();
                 Vector3fPool.closePool();
                 QuaternionPool.closePool();
@@ -198,7 +205,7 @@ public class ClientDebugSystem {
                     return;
                 }
                 PackPhysicsEntity<?, ?> entityHit = (PackPhysicsEntity<?, ?>) MC.objectMouseOver.entityHit;
-                if (!(entityHit.getPackInfo() instanceof IShapeProvider)) {
+                if (!(entityHit.getPackInfo() instanceof IPartContainer)) {
                     disableShapeDebug(lastPart);
                     Vector3fPool.closePool();
                     return;
@@ -216,7 +223,7 @@ public class ClientDebugSystem {
                         return false;
                     };
                 }
-                BasePart<?> basePart = DynamXUtils.rayTestPart(rootPlayer, entityHit, (IShapeProvider<?>) entityHit.getPackInfo(), wantedShape);
+                BasePart<?> basePart = DynamXUtils.rayTestPart(rootPlayer, entityHit, (IPartContainer<?>) entityHit.getPackInfo(), wantedShape);
                 if (basePart == null) {
                     disableShapeDebug(lastPart);
                     Vector3fPool.closePool();
@@ -256,9 +263,8 @@ public class ClientDebugSystem {
                 GlQuaternionPool.closePool();
                 QuaternionPool.closePool();
                 GlStateManager.popMatrix();
-            } else {
-                //disableShapeDebug(lastPart);
             }
+
             Vector3fPool.closePool();
 
         }
@@ -442,5 +448,30 @@ public class ClientDebugSystem {
                 buffer.pos(maxX, minY, minZ).color(red, green, blue, 0.0F).endVertex();
             }
         }
+    }
+
+    public static Vector3f getInterpolatedTranslation(PhysicsRigidBody rigidBody, float partialTicks){
+        RigidBodyTransform prevTransform = ClientDebugSystem.getPrevRigidBodyTransform(rigidBody.nativeId());
+        RigidBodyTransform curTransform = ClientDebugSystem.getCurrentRigidBodyTransform(rigidBody.nativeId());
+        if (prevTransform == null || curTransform == null) {
+            return Vector3fPool.get();
+        }
+        return DynamXMath.interpolateLinear(partialTicks, prevTransform.getPosition(), curTransform.getPosition());
+    }
+
+    public static com.jme3.math.Quaternion getInterpolatedRotation(PhysicsRigidBody rigidBody, float partialTicks){
+        RigidBodyTransform prevTransform = ClientDebugSystem.getPrevRigidBodyTransform(rigidBody.nativeId());
+        RigidBodyTransform curTransform = ClientDebugSystem.getCurrentRigidBodyTransform(rigidBody.nativeId());
+        if (prevTransform == null || curTransform == null) {
+            return QuaternionPool.get();
+        }
+        return DynamXMath.slerp(partialTicks, prevTransform.getRotation(), curTransform.getRotation());
+    }
+
+    public static RigidBodyTransform getCurrentRigidBodyTransform(long nativeBodyId){
+        return ClientDebugSystem.prevRigidBodyStates[ClientDebugSystem.curRigidBodyStatesIndex].get(nativeBodyId);
+    }
+    public static RigidBodyTransform getPrevRigidBodyTransform(long nativeBodyId){
+        return ClientDebugSystem.prevRigidBodyStates[ClientDebugSystem.prevRigidBodyStatesIndex].get(nativeBodyId);
     }
 }

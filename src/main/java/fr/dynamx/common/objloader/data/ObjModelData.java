@@ -15,12 +15,17 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -32,6 +37,8 @@ import java.util.zip.ZipFile;
 public class ObjModelData {
     @Getter
     private final List<ObjObjectData> objObjects = new ArrayList<>();
+    @Getter
+    private final Map<String, Material> materials = new HashMap<>();
     private final ObjModelPath objModelPath;
     private final IMpsClassLoader mpsClassLoader;
 
@@ -42,10 +49,10 @@ public class ObjModelData {
             String content = new String(DynamXUtils.readInputStream(FMLCommonHandler.instance().getSide().isClient() ? client(path) : server(path)), StandardCharsets.UTF_8);
             ResourceLocation location = path.getModelPath();
             String startPath = location.getPath().substring(0, location.getPath().lastIndexOf("/") + 1);
-            new OBJLoader(objObjects).readAndLoadModel(FMLCommonHandler.instance().getSide().isClient() ? startPath : null, content);
+            new OBJLoader(objObjects, materials).readAndLoadModel(FMLCommonHandler.instance().getSide().isClient() ? startPath : null, content);
         } catch (Exception e) {
             //Don't remove the throw - Aym
-            throw new RuntimeException("Model " + path + " cannot be loaded ! Has secure loader: " + (mpsClassLoader != null), e);
+            throw new RuntimeException("Model " + path + " cannot be loaded ! " + e + " Has secure loader: " + (mpsClassLoader != null), e);
         }
     }
 

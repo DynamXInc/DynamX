@@ -3,13 +3,14 @@ package fr.dynamx.common.contentpack.type.objects;
 import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
+import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
-import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.events.CreatePackItemEvent;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.contentpack.loader.ObjectLoader;
+import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,12 +20,11 @@ import net.minecraftforge.common.MinecraftForge;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> implements ISubInfoTypeOwner<BlockObject<?>>,
-        ParticleEmitterInfo.IParticleEmitterContainer {
+public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> implements ParticleEmitterInfo.IParticleEmitterContainer {
     /**
      * List of owned {@link ISubInfoType}s
      */
-    protected final List<ISubInfoType<BlockObject<?>>> subProperties = new ArrayList<>();
+    protected final List<ISubInfoType<T>> subProperties = new ArrayList<>();
     protected PropObject<?> propObject;
 
     @PackFileProperty(configNames = "Rotate", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false, defaultValue = "0 0 0")
@@ -48,6 +48,17 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
     }
 
     @Override
+    public MaterialVariantsInfo<?> getVariants() {
+        return getSubPropertyByType(MaterialVariantsInfo.class);
+    }
+
+    @Override
+    public void onComplete(boolean hotReload) {
+        if (texturesArray != null)
+            new MaterialVariantsInfo<>(this, texturesArray).appendTo(this);
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public IInfoOwner<T> createOwner(ObjectLoader<T, ?, ?> loader) {
         CreatePackItemEvent.CreateSimpleBlockEvent event = new CreatePackItemEvent.CreateSimpleBlockEvent((ObjectLoader<BlockObject<?>, DynamXBlock<BlockObject<?>>, BlockObject<?>>) loader, this);
@@ -65,12 +76,12 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
     }
 
     @Override
-    public void addSubProperty(ISubInfoType<BlockObject<?>> property) {
+    public void addSubProperty(ISubInfoType<T> property) {
         subProperties.add(property);
     }
 
     @Override
-    public List<ISubInfoType<BlockObject<?>>> getSubProperties() {
+    public List<ISubInfoType<T>> getSubProperties() {
         return subProperties;
     }
 
@@ -97,4 +108,8 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
         return getModel().getPath().endsWith(".obj");
     }
 
+    @Override
+    public void addPart(BasePart<T> tBasePart) {
+
+    }
 }

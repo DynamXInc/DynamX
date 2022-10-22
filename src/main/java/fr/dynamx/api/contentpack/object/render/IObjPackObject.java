@@ -2,7 +2,9 @@ package fr.dynamx.api.contentpack.object.render;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
+import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.item.ItemStack;
@@ -11,6 +13,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
+import java.util.Map;
 
 public interface IObjPackObject extends IModelTextureVariantsSupplier {
     @SideOnly(Side.CLIENT)

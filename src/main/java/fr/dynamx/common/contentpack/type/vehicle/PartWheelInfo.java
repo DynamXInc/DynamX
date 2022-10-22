@@ -9,13 +9,14 @@ import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
+import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.client.renders.model.texture.TextureVariantData;
+import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -26,6 +27,8 @@ public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IS
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("WheelRadius".equals(key))
             return new IPackFilePropertyFixer.FixResult("Radius", true);
+        if ("Textures".equals(key))
+            return new IPackFilePropertyFixer.FixResult("MaterialVariants", true, true);
         return null;
     };
 
@@ -64,9 +67,9 @@ public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IS
     @PackFileProperty(configNames = "ScaleModifier", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false)
     private Vector3f scaleModifier = new Vector3f(1, 1, 1);
 
+    @Deprecated
     @PackFileProperty(configNames = "Textures", required = false, type = DefinitionType.DynamXDefinitionTypes.STRING_ARRAY_2D, defaultValue = "\"Textures: DynamX\"")
     private String[][] texturesArray;
-    private Map<Byte, TextureVariantData> bakedTextures;
 
     public PartWheelInfo(String packName, String partName) {
         this.packName = packName;
@@ -104,47 +107,34 @@ public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IS
             handBrakeForce = wheelBrakeForce * 2;
         wheelRadius = getWheelRadius() * getScaleModifier().z;
         wheelWidth = getWheelWidth() * getScaleModifier().x;
+        if(texturesArray != null)
+            new MaterialVariantsInfo<>(this, texturesArray).appendTo(this);
     }
 
-    private void computeTextures() {
-        if (bakedTextures == null) {
-            bakedTextures = new HashMap<>();
-            bakedTextures.put((byte) 0, new TextureVariantData("default", (byte) 0, ""));
-            if (texturesArray != null) {
-                byte id = 1;
-                for (String[] s : texturesArray) {
-                    bakedTextures.put(id, new TextureVariantData(s[0], id));
-                    id++;
-                }
+    public MaterialVariantsInfo<?> getVariants() {
+        return getSubPropertyByType(MaterialVariantsInfo.class);
+    }
+
+    public byte getIdForVariant(String textureName) {
+        MaterialVariantsInfo<?> variantsInfo = getVariants();
+        if(variantsInfo != null) {
+            for (byte i = 0; i < variantsInfo.getVariantsMap().size(); i++) {
+                if (variantsInfo.getVariantsMap().get(i).getName().equalsIgnoreCase(textureName))
+                    return i;
             }
-            texturesArray = null; //clear ram
-        }
-    }
-
-    public Map<Byte, TextureVariantData> getTextures() {
-        computeTextures();
-        return bakedTextures;
-    }
-
-    public byte getIdForTexture(String textureName) {
-        computeTextures();
-        for (byte i = 0; i < bakedTextures.size(); i++) {
-            if (bakedTextures.get(i).getName().equalsIgnoreCase(textureName))
-                return i;
         }
         return 0;
     }
 
     @Override
-    public Map<Byte, TextureVariantData> getTextureVariantsFor(ObjObjectRenderer objObjectRenderer) {
+    public IModelTextureVariantsSupplier.IModelTextureVariants getTextureVariantsFor(ObjObjectRenderer objObjectRenderer) {
         //Here we can make difference between tyre and rim textures
-        return getTextures();
+        return getVariants();
     }
 
     @Override
     public boolean hasVaryingTextures() {
-        computeTextures();
-        return bakedTextures.size() > 1;
+        return getSubPropertyByType(MaterialVariantsInfo.class) != null;
     }
 
     public String getPartName() {

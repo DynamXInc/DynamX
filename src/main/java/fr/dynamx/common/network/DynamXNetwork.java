@@ -72,6 +72,7 @@ public class DynamXNetwork {
         registerMessage(channel, MessageSwitchAutoSlopesMode.Handler.class, MessageSwitchAutoSlopesMode.class, Side.CLIENT);
         registerMessage(channel, MessageCollisionDebugDraw.class, MessageCollisionDebugDraw.class, Side.CLIENT);
         registerMessage(channel, MessageCollisionDebugDraw.class, MessageCollisionDebugDraw.class, Side.CLIENT);
+        registerMessage(channel, MessageHandleExplosion.class, MessageHandleExplosion.class, Side.CLIENT);
 
         //To server
         registerMessage(channel, MessagePacksHashs.HandlerServer.class, MessagePacksHashs.class, Side.SERVER);

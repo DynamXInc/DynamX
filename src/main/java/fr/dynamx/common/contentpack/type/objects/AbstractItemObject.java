@@ -2,8 +2,12 @@ package fr.dynamx.common.contentpack.type.objects;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
+import fr.dynamx.api.contentpack.object.IPartContainer;
+import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
 import fr.dynamx.api.contentpack.object.render.IObjPackObject;
+import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
+import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.common.contentpack.type.ObjectInfo;
@@ -14,8 +18,11 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
-public abstract class AbstractItemObject<T extends AbstractItemObject<?>> extends ObjectInfo<T> implements IObjPackObject {
+public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A extends ISubInfoTypeOwner<?>> extends ObjectInfo<T>
+        implements IObjPackObject, IPartContainer<A> {
 
     @PackFileProperty(configNames = {"CreativeTabName", "CreativeTab", "TabName"}, required = false, defaultValue = "CreativeTab of DynamX", description = "common.creativetabname")
     protected String creativeTabName;
@@ -31,6 +38,9 @@ public abstract class AbstractItemObject<T extends AbstractItemObject<?>> extend
     protected Enum3DRenderLocation item3DRenderLocation = Enum3DRenderLocation.ALL;
     @PackFileProperty(configNames = "IconText", required = false, description = "common.icontext", defaultValue = "Block for blocks, Prop for props")
     protected String itemIcon;
+
+    private final List<BasePart<A>> parts = new ArrayList<>();
+    private final List<ISubInfoType<A>> subProperties = new ArrayList<>();
 
     public AbstractItemObject(String packName, String fileName) {
         super(packName, fileName);
@@ -99,5 +109,25 @@ public abstract class AbstractItemObject<T extends AbstractItemObject<?>> extend
 
     public int getMaxItemStackSize() {
         return 1;
+    }
+
+    @Override
+    public List<BasePart<A>> getAllParts() {
+        return parts;
+    }
+
+    @Override
+    public void addPart(BasePart<A> tBasePart) {
+        parts.add(tBasePart);
+    }
+
+    @Override
+    public void addSubProperty(ISubInfoType<A> property) {
+        subProperties.add(property);
+    }
+
+    @Override
+    public List<ISubInfoType<A>> getSubProperties() {
+        return subProperties;
     }
 }

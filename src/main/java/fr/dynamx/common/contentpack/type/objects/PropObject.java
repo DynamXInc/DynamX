@@ -1,10 +1,10 @@
 package fr.dynamx.common.contentpack.type.objects;
 
-import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.math.Vector3f;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
+import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
@@ -15,6 +15,7 @@ import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
+import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfoBuilder;
 import fr.dynamx.common.contentpack.loader.ObjectLoader;
@@ -34,8 +35,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RegisteredSubInfoType(name = "prop", registries = SubInfoTypeRegistries.BLOCKS_AND_PROPS, strictName = false)
-public class PropObject<T extends BlockObject<?>> extends AbstractProp<T> implements IPhysicsPackInfo,
-        ISubInfoType<BlockObject<?>>, ISubInfoTypeOwner<BlockObject<?>>, ParticleEmitterInfo.IParticleEmitterContainer {
+public class PropObject<T extends PropObject<?>> extends AbstractProp<T> implements IPhysicsPackInfo,
+        ISubInfoType<BlockObject<?>>, ParticleEmitterInfo.IParticleEmitterContainer {
     private final BlockObject<?> owner;
     @PackFileProperty(configNames = "EmptyMass")
     @Getter
@@ -92,7 +93,6 @@ public class PropObject<T extends BlockObject<?>> extends AbstractProp<T> implem
         this.renderDistance = block.getRenderDistance();
         this.creativeTabName = block.getCreativeTabName();
         this.useHullShape = block.useHullShape();
-        this.texturesArray = block.texturesArray;
         this.particleEmitters = block.getParticleEmitters();
         getPartShapes().addAll(block.getPartShapes());
     }
@@ -137,6 +137,11 @@ public class PropObject<T extends BlockObject<?>> extends AbstractProp<T> implem
     }
 
     @Override
+    public MaterialVariantsInfo<?> getVariants() {
+        return owner != null ? owner.getVariants() : null;
+    }
+
+    @Override
     public Collection<? extends IShapeInfo> getShapes() {
         return getCollisionBoxes();
     }
@@ -152,11 +157,11 @@ public class PropObject<T extends BlockObject<?>> extends AbstractProp<T> implem
     }
 
     @Override
-    public void addSubProperty(ISubInfoType<BlockObject<?>> property) {
+    public void addSubProperty(ISubInfoType<T> property) {
     }
 
     @Override
-    public List<ISubInfoType<BlockObject<?>>> getSubProperties() {
+    public List<ISubInfoType<T>> getSubProperties() {
         return Collections.emptyList();
     }
 

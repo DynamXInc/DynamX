@@ -103,11 +103,9 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
     @Override
     @SideOnly(Side.CLIENT)
     public void handleTextureID(byte metadata, BaseVehicleEntity<?> packInfo) {
-        TextureVariantData chassis = packInfo.getPackInfo().getTextures().get(metadata);
-        if (chassis == null)
-            chassis = packInfo.getPackInfo().getTextures().get((byte) 0);
+        String chassis = packInfo.getPackInfo().getVariantName(metadata);
         for (byte i = 0; i < wheelsTextureId.length; i++) {
-            wheelsTextureId[i] = getWheelInfo(i).getIdForTexture(chassis.getName());
+            wheelsTextureId[i] = getWheelInfo(i).getIdForVariant(chassis);
         }
     }
 

@@ -13,13 +13,18 @@ import java.util.Map;
  * @see fr.dynamx.client.renders.model.renderer.ObjModelRenderer
  */
 public interface IModelTextureVariantsSupplier {
+    default IModelTextureVariants getMainObjectVariants() { return getTextureVariantsFor(null); }
+
     /**
      * @return An id to {@link TextureVariantData} map that can be applied to the given {@link ObjObjectData} <br>
      * Return null to always apply default texture
      */
     @Nullable
-    default Map<Byte, TextureVariantData> getTextureVariantsFor(ObjObjectRenderer objObjectRenderer) {
-        return null;
+    IModelTextureVariants getTextureVariantsFor(ObjObjectRenderer objObjectRenderer);
+
+    default String getMainObjectVariantName(byte variantId) {
+        IModelTextureVariants variants = getMainObjectVariants();
+        return variants != null ? variants.getVariant(variantId).getName() : "default";
     }
 
     /**
@@ -37,5 +42,11 @@ public interface IModelTextureVariantsSupplier {
 
     default boolean canRenderPart(String partName) {
         return true;
+    }
+
+    interface IModelTextureVariants {
+        TextureVariantData getDefaultVariant();
+        TextureVariantData getVariant(byte variantId);
+        Map<Byte, TextureVariantData> getTextureVariants();
     }
 }

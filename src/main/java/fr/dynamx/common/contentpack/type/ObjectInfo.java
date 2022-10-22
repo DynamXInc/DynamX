@@ -10,16 +10,16 @@ import javax.annotation.Nullable;
 /**
  * Base of every pack object
  *
- * @param <B> The object class
+ * @param <T> The object class
  */
-public abstract class ObjectInfo<B extends ObjectInfo<?>> implements INamedObject {
+public abstract class ObjectInfo<T extends ObjectInfo<?>> implements INamedObject {
     private final String packName;
     private final String fileName;
     @PackFileProperty(configNames = "Description", description = "common.description")
     private String description;
     @PackFileProperty(configNames = "Name", description = "common.name")
     private String defaultName;
-    protected IInfoOwner<B>[] owners;
+    protected IInfoOwner<T>[] owners;
 
     /**
      * @param packName The name of the pack owning the object
@@ -70,7 +70,7 @@ public abstract class ObjectInfo<B extends ObjectInfo<?>> implements INamedObjec
      *
      * @return An InfoOwner for this object
      */
-    protected abstract IInfoOwner<B> createOwner(ObjectLoader<B, ?, ?> loader);
+    protected abstract IInfoOwner<T> createOwner(ObjectLoader<T, ?, ?> loader);
 
     /**
      * Inits the infos owners for this object <br>
@@ -80,7 +80,7 @@ public abstract class ObjectInfo<B extends ObjectInfo<?>> implements INamedObjec
      * @return All InfoOwners for this object
      */
     @SuppressWarnings("unchecked")
-    public IInfoOwner<B>[] createOwners(ObjectLoader<B, ?, ?> loader) {
+    public IInfoOwner<T>[] createOwners(ObjectLoader<T, ?, ?> loader) {
         owners = new IInfoOwner[]{createOwner(loader)};
         return owners;
     }
@@ -90,21 +90,21 @@ public abstract class ObjectInfo<B extends ObjectInfo<?>> implements INamedObjec
      *
      * @return All InfoOwners for this object, null before object initialization end
      */
-    public IInfoOwner<B>[] getOwners() {
+    public IInfoOwner<T>[] getOwners() {
         return owners;
     }
 
     /**
      * @return The translation key for the given item, used for auto-translation
      */
-    public String getTranslationKey(IInfoOwner<B> item, int itemMeta) {
+    public String getTranslationKey(IInfoOwner<T> item, int itemMeta) {
         return getFullName().toLowerCase();
     }
 
     /**
      * @return The default translation name for the given item, used for auto-translation
      */
-    public String getTranslatedName(IInfoOwner<B> item, int itemMeta) {
+    public String getTranslatedName(IInfoOwner<T> item, int itemMeta) {
         return (getDefaultName() == null ? getName() : getDefaultName());
     }
 

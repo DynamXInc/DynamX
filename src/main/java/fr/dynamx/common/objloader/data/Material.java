@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import net.optifine.shaders.MultiTexID;
+
 
 import javax.vecmath.Vector3f;
 import java.util.HashMap;
@@ -22,8 +24,13 @@ public class Material {
     public final Map<String, MaterialTexture> specularTexture = new HashMap<>();
     public final Map<String, MaterialTexture> normalTexture = new HashMap<>();
     public float transparency = 1f;
-    public final Map<String, IndexPair> indexPairPerObject = new HashMap<>();
 
+    @Override
+    public String toString() {
+        return name;
+    }
+
+    @ToString
     @AllArgsConstructor
     public static class IndexPair {
         @Getter

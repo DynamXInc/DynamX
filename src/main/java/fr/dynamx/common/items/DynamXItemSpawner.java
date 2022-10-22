@@ -21,7 +21,7 @@ import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nonnull;
 
-public abstract class DynamXItemSpawner<T extends AbstractItemObject<?>> extends DynamXItem<T> {
+public abstract class DynamXItemSpawner<T extends AbstractItemObject<T, ?>> extends DynamXItem<T> {
     public DynamXItemSpawner(T itemInfo) {
         super(itemInfo);
     }

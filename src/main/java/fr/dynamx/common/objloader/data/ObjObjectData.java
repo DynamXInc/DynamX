@@ -18,4 +18,10 @@ public class ObjObjectData{
         this.name = name;
     }
 
+    @Override
+    public String toString() {
+        return "ObjObjectData{" +
+                "name='" + name + '\'' +
+                '}';
+    }
 }

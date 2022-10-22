@@ -26,7 +26,7 @@ import javax.annotation.Nullable;
  */
 public abstract class CreatePackItemEvent<B extends ObjectInfo<?>, C extends IInfoOwner<?>> extends Event {
     /**
-     * @return The loader of this object, depends on the type of the object (item, block, armor, trailer, wheeled vehicle, moto...)
+     *  The loader of this object, depends on the type of the object (item, block, armor, trailer, wheeled vehicle, moto...)
      */
     @Getter
     private final ObjectLoader<B, C, ?> loader;
@@ -58,8 +58,8 @@ public abstract class CreatePackItemEvent<B extends ObjectInfo<?>, C extends IIn
      * You can cancel the event to avoid other addons to modify your behavior
      */
     @Cancelable
-    public static class CreateVehicleItemEvent extends CreatePackItemEvent<ModularVehicleInfo<?>, ItemModularEntity<ModularVehicleInfo<?>>> {
-        public CreateVehicleItemEvent(ObjectLoader<ModularVehicleInfo<?>, ItemModularEntity<ModularVehicleInfo<?>>, ModularVehicleInfoBuilder> loader, ModularVehicleInfo<?> objectInfo) {
+    public static class CreateVehicleItemEvent<B extends ObjectInfo<?>, C extends IInfoOwner<?>> extends CreatePackItemEvent<B,C> {
+        public CreateVehicleItemEvent(ObjectLoader<B,C ,ModularVehicleInfoBuilder> loader, B objectInfo) {
             super(loader, objectInfo);
         }
     }
@@ -70,8 +70,8 @@ public abstract class CreatePackItemEvent<B extends ObjectInfo<?>, C extends IIn
      * You can cancel the event to avoid other addons to modify your behavior
      */
     @Cancelable
-    public static class CreateSimpleItemEvent extends CreatePackItemEvent<ItemObject<?>, DynamXItem<ItemObject<?>>> {
-        public CreateSimpleItemEvent(ObjectLoader<ItemObject<?>, DynamXItem<ItemObject<?>>, ISubInfoTypeOwner.Empty> loader, ItemObject<?> objectInfo) {
+    public static class CreateSimpleItemEvent<B extends ObjectInfo<?>, C extends IInfoOwner<?>> extends CreatePackItemEvent<B,C> {
+        public CreateSimpleItemEvent(ObjectLoader<B,C, ISubInfoTypeOwner.Empty> loader, B objectInfo) {
             super(loader, objectInfo);
         }
     }
@@ -94,8 +94,9 @@ public abstract class CreatePackItemEvent<B extends ObjectInfo<?>, C extends IIn
      * You can cancel the event to avoid other addons to modify your behavior
      */
     @Cancelable
-    public static class CreatePropsItemEvent extends CreatePackItemEvent<PropObject<?>, ItemProps<PropObject<?>>> {
-        public CreatePropsItemEvent(ObjectLoader<PropObject<?>, ItemProps<PropObject<?>>, ?> loader, PropObject<?> objectInfo) {
+    public static class CreatePropsItemEvent<B extends ObjectInfo<?>, C extends IInfoOwner<?>> extends CreatePackItemEvent<B,C> {
+
+        public CreatePropsItemEvent(ObjectLoader<B, C, ?> loader, B objectInfo) {
             super(loader, objectInfo);
         }
     }

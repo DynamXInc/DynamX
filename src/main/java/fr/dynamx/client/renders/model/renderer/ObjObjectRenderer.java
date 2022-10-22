@@ -1,6 +1,7 @@
 package fr.dynamx.client.renders.model.renderer;
 
 import fr.aym.acslib.api.services.error.ErrorLevel;
+import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.client.renders.model.texture.MaterialTexture;
 import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import fr.dynamx.common.objloader.data.Material;
@@ -9,8 +10,10 @@ import fr.dynamx.common.objloader.data.Vertex;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.errors.DynamXErrorManager;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
@@ -22,10 +25,7 @@ import org.lwjgl.opengl.GL15;
 
 import javax.annotation.Nullable;
 import javax.vecmath.Vector4f;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static fr.dynamx.common.DynamXMain.log;
 
@@ -33,10 +33,7 @@ public class ObjObjectRenderer {
     // Use THIS instead of GlStateManager, it has weird issues due to last bind texture memory and display lists
     private static int bindTexture;
 
-    private final Map<Byte, Integer> modelDisplayList = new HashMap<>();
-    //VariantTexture / VaoID
-    private final Map<Byte, Integer> vaos = new HashMap<>();
-    private final List<Integer> vbos = new ArrayList<>();
+    private final Map<Byte, VariantRenderData> modelRenderData = new HashMap<>();
     @Getter
     private final ObjObjectData objObjectData;
     private boolean isVAOSetup;
@@ -49,38 +46,34 @@ public class ObjObjectRenderer {
     }
 
     public void clearDisplayLists() {
-        if (!modelDisplayList.isEmpty()) {
-            modelDisplayList.forEach((textureID, displayList) -> {
+        if (!modelRenderData.isEmpty()) {
+            modelRenderData.forEach((textureID, displayList) -> {
                 // If the list was created previously, we free the GPU memory
-                GlStateManager.glDeleteLists(displayList, 1);
+                GlStateManager.glDeleteLists(displayList.displayListId, 1);
             });
-            modelDisplayList.clear();
+            modelRenderData.clear();
         }
     }
 
-    private void compileModel(ObjModelRenderer model, @Nullable TextureVariantData textureVariantData) {
+    private void compileModel(ObjModelRenderer model, @Nullable TextureVariantData baseVariant, @Nullable TextureVariantData textureVariantData) {
         // Create an empty display list
         int id = GlStateManager.glGenLists(1);
         // Start the compilation of the list, this will fill the list with every vertex rendered onwards
         GlStateManager.glNewList(id, GL11.GL_COMPILE);
         //Do immediate render
-        renderCPU(model, textureVariantData != null ? textureVariantData.getName() : "Default");
+        renderCPU(model, baseVariant != null ? baseVariant.getName() : null, textureVariantData != null ? textureVariantData.getName() : null);
         // Finish the compilation process
         GlStateManager.glEndList();
-        modelDisplayList.put(textureVariantData != null ? textureVariantData.getId() : 0, id);
-
-        vaos.put(textureVariantData != null ? textureVariantData.getId() : 0, -1);
+        modelRenderData.put(textureVariantData != null ? textureVariantData.getId() : 0, new VariantRenderData(baseVariant, textureVariantData, id, -1));
     }
 
     private void setupVAO() {
         if (!isVAOSetup) {
-            for (Map.Entry<Byte, Integer> entry : vaos.entrySet()) {
-                Byte variantTextureData = entry.getKey();
-                Integer tempVaoID = entry.getValue();
-                if (tempVaoID == -1) {
+            for (Map.Entry<Byte, VariantRenderData> entry : modelRenderData.entrySet()) {
+                if (entry.getValue().vaoId == -1) {
                     int vaoID = DynamXRenderUtils.genVertexArrays();
                     DynamXRenderUtils.bindVertexArray(vaoID);
-                    vaos.replace(variantTextureData, vaoID);
+                    entry.getValue().vaoId = vaoID;
 
                     setupIndicesBuffer(getObjObjectData().getMesh().indices);
                     setupArraysPointers(EnumGLPointer.VERTEX, getObjObjectData().getMesh().getVerticesPos());
@@ -95,77 +88,93 @@ public class ObjObjectRenderer {
         }
     }
 
-    public void createList(TextureVariantData useDefault, TextureVariantData textureVariantData, ObjModelRenderer model, boolean logIfNotFound) {
-        if (!isMaterialValid(model, objObjectData.getMesh().materialForEachVertex[0]))
+    public void createList(ObjModelRenderer model, @Nullable TextureVariantData baseVariant, @Nullable TextureVariantData variant, boolean logIfNotFound) {
+        if (!isMaterialValid(model, model.getMaterials().get(objObjectData.getMesh().materialForEachVertex[0])))
             return;
-        if (useDefault == null || textureVariantData == null) {
-            compileModel(model, null);
+        if (baseVariant == null || variant == null || baseVariant == variant) { //Default model
+            compileModel(model, null, null);
             return;
         }
-        boolean hasVaryingTextures = textureVariantData.getId() == 0; //0 is the default, base texture
+        boolean hasVaryingTextures = model.getMaterials().containsKey(variant.getName());
         if (!hasVaryingTextures) {
-            for (Material material : objObjectData.getMesh().materialForEachVertex) {
-                if (material.diffuseTexture.containsKey(textureVariantData.getName())) {
+            for (String materialName : objObjectData.getMesh().materialForEachVertex) {
+                Material material = model.getMaterials().get(materialName);
+                if (material != null && material.diffuseTexture.containsKey(variant.getName())) {
                     hasVaryingTextures = true;
                     break;
                 }
             }
         }
-        if (hasVaryingTextures) {
-            compileModel(model, textureVariantData);
-        } else {
+        if (hasVaryingTextures)
+            compileModel(model, baseVariant, variant);
+        else {
             if (logIfNotFound)
-                log.error("Failed to find custom texture for skin " + textureVariantData.getName() + " of " + model.getLocation() + " in part " + objObjectData.getName());
-            modelDisplayList.put(textureVariantData.getId(), modelDisplayList.get(useDefault.getId()));
+                log.error("Failed to find custom texture for skin " + variant + " of " + model.getLocation() + " in part " + objObjectData.getName());
+            modelRenderData.put(variant.getId(), modelRenderData.get(baseVariant.getId()));
         }
     }
 
-    public void createDefaultList(ObjModelRenderer model) {
-        createList(null, null, model, false);
-    }
-
     public void render(ObjModelRenderer model, byte textureVariantID) {
-        if (objObjectData.getMesh().materialForEachVertex.length == 0 || !isMaterialValid(model, objObjectData.getMesh().materialForEachVertex[0]))
+        if (objObjectData.getMesh().materials.isEmpty())
             return;
         GlStateManager.alphaFunc(516, 0.1F);
         GlStateManager.enableBlend();
         GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         if (OpenGlHelper.useVbo()) {
             setupVAO();
-            Map<Byte, TextureVariantData> textureVariant = model.getTextureVariants() != null ? model.getTextureVariants().getTextureVariantsFor(this) : null;
-            if(!vaos.containsKey(textureVariantID) || textureVariant == null || !textureVariant.containsKey(textureVariantID)) {
-                if(!vaos.containsKey((byte) 0))
+            if(!modelRenderData.containsKey(textureVariantID)) {
+                if(!modelRenderData.containsKey((byte) 0))
                     return;
-                renderVAO(model, vaos.get((byte) 0), "default");
+                renderVAO(model, modelRenderData.get((byte) 0));
             } else
-                renderVAO(model, vaos.get(textureVariantID), textureVariant.get(textureVariantID).getName());
+                renderVAO(model, modelRenderData.get(textureVariantID));
         } else {
-            if (!modelDisplayList.containsKey(textureVariantID)) {
+            if (!modelRenderData.containsKey(textureVariantID)) {
                 GlStateManager.color(1, 0, 0);
-                GlStateManager.callList(modelDisplayList.get((byte) 0));
+                GlStateManager.callList(modelRenderData.get((byte) 0).displayListId);
                 GlStateManager.color(1, 1, 1);
             } else
-                GlStateManager.callList(modelDisplayList.get(textureVariantID));
+                GlStateManager.callList(modelRenderData.get(textureVariantID).displayListId);
             GlStateManager.disableBlend();
-            GlStateManager.bindTexture(Minecraft.getMinecraft().getTextureMapBlocks().getGlTextureId());
+            GlStateManager.bindTexture(ClientEventHandler.MC.getTextureMapBlocks().getGlTextureId());
         }
     }
 
-    private void renderVAO(ObjModelRenderer model, int vaoID, String variantTextureName) {
-        DynamXRenderUtils.bindVertexArray(vaoID);
+    private Material bindMaterial(ObjModelRenderer model, String materialName, @Nullable String baseVariantName, @Nullable String variantName, boolean areVbosEnabled) {
+        if(variantName != null && materialName.equals(baseVariantName))
+            materialName = variantName;
+        Material material = model.getMaterials().get(materialName);
+        if(material == null && baseVariantName != null)
+            material = model.getMaterials().get(baseVariantName);
+        if (!isMaterialValid(model, material))
+            return null;
+        // For compatibility with sub-textures directly in materials
+        MaterialTexture materialMultipleTextures = material.diffuseTexture.containsKey(variantName) ? material.diffuseTexture.get(variantName) : material.diffuseTexture.get("default");
+        if (materialMultipleTextures != null) {
+            if (areVbosEnabled)
+                ClientEventHandler.MC.getTextureManager().bindTexture(materialMultipleTextures.getPath());
+            else
+                bindTexture(materialMultipleTextures.getGlTextureId());
+        } else
+            log.error("Failed to load Default texture of " + objObjectData.getName() + " in " + model.getLocation() + " in material " + material.getName());
+        return material;
+    }
+
+    private void renderVAO(ObjModelRenderer model, VariantRenderData renderData) {
+        DynamXRenderUtils.bindVertexArray(renderData.vaoId);
         GlStateManager.glEnableClientState(GL11.GL_VERTEX_ARRAY);
         GlStateManager.glEnableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
         GlStateManager.glEnableClientState(GL11.GL_NORMAL_ARRAY);
-        List<Material> materialsList = getObjObjectData().getMesh().materialsList;
-        for (int i = 0, materialsListSize = materialsList.size(); i < materialsListSize; i++) {
-            Material material = materialsList.get(i);
-            bindTexture(model, material, variantTextureName, true);
-            GlStateManager.color(material.diffuseColor.x * objectColor.x, material.diffuseColor.y * objectColor.y, material.diffuseColor.z * objectColor.z,
-                    material.transparency * objectColor.w);
-            Material.IndexPair indexPair = material.indexPairPerObject.get(getObjObjectData().getName());
-            GL11.glDrawElements(GL11.GL_TRIANGLES, (indexPair.getFinalIndex() - indexPair.getStartIndex()), GL11.GL_UNSIGNED_INT,
-                    4L * indexPair.getStartIndex());
-            objectColor.set(1, 1, 1, 1);
+        for(Map.Entry<String, Material.IndexPair> pair : getObjObjectData().getMesh().materials.entrySet()) {
+            Material material = bindMaterial(model, pair.getKey(), renderData.getBaseVariant(), renderData.getVariant(), true);
+            if(material != null) {
+                GlStateManager.color(material.diffuseColor.x * objectColor.x, material.diffuseColor.y * objectColor.y, material.diffuseColor.z * objectColor.z,
+                        material.transparency * objectColor.w);
+                Material.IndexPair indexPair = pair.getValue();
+                GL11.glDrawElements(GL11.GL_TRIANGLES, (indexPair.getFinalIndex() - indexPair.getStartIndex()), GL11.GL_UNSIGNED_INT,
+                       4L * indexPair.getStartIndex());
+                objectColor.set(1, 1, 1, 1);
+            }
         }
         GlStateManager.glDisableClientState(GL11.GL_VERTEX_ARRAY);
         GlStateManager.glDisableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
@@ -177,14 +186,15 @@ public class ObjObjectRenderer {
     /**
      * Model is assumed to be not empty
      */
-    private void renderCPU(ObjModelRenderer model, String textureName) {
+    private void renderCPU(ObjModelRenderer model, @Nullable String baseMaterial, @Nullable String textureName) {
         //Reset bind texture
         startDrawing();
         Tessellator tess = Tessellator.getInstance();
         BufferBuilder renderer = tess.getBuffer();
-        Material bind = objObjectData.getMesh().materialForEachVertex[0];
-        bindTexture(model, bind, textureName, false);
-
+        String[] materialForEachVertex = objObjectData.getMesh().materialForEachVertex;
+        Material bind = bindMaterial(model, materialForEachVertex[0], baseMaterial, textureName, false);
+        if(bind == null)
+            return;
         int[] indices = objObjectData.getMesh().indices;
         Vertex[] vertices = objObjectData.getMesh().vertices;
 
@@ -197,12 +207,12 @@ public class ObjObjectRenderer {
             Vertex v1 = vertices[i1];
             Vertex v2 = vertices[i2];
 
-            Material materialToBind = objObjectData.getMesh().materialForEachVertex[i / 3];
-            if (isMaterialValid(model, materialToBind) && materialToBind != bind) {
+            //Material materialToBind = objObjectData.getMesh().materialForEachVertex[i / 3];
+            Material materialToBind = bindMaterial(model, materialForEachVertex[i / 3], baseMaterial, textureName, false);
+            if (materialToBind != null && materialToBind != bind) {
                 bind = materialToBind;
                 if (drawing)
                     tess.draw();
-                bindTexture(model, materialToBind, textureName, false);
                 begining = true;
             }
             if (begining) {
@@ -217,24 +227,6 @@ public class ObjObjectRenderer {
         if (drawing)
             tess.draw();
         bindTexture(Minecraft.getMinecraft().getTextureMapBlocks().getGlTextureId());
-    }
-
-    private void bindTexture(ObjModelRenderer model, Material material, String textureName, boolean areVbosEnabled) {
-        String bindName = getExistingTexture(material, textureName);
-        MaterialTexture materialMultipleTextures = material.diffuseTexture.get(bindName);
-        if (materialMultipleTextures != null) {
-            if (areVbosEnabled) {
-                Minecraft.getMinecraft().getTextureManager().bindTexture(materialMultipleTextures.getPath());
-            } else {
-                bindTexture(materialMultipleTextures.getGlTextureId());
-            }
-        } else {
-            log.error("Failed to load Default texture of " + objObjectData.getName() + " in " + model.getLocation() + " in material " + material.getName());
-        }
-    }
-
-    private String getExistingTexture(Material material, String textureName) {
-        return material.diffuseTexture.containsKey(textureName) ? textureName : "default";
     }
 
     /**
@@ -256,14 +248,12 @@ public class ObjObjectRenderer {
 
     private void setupIndicesBuffer(int[] indices) {
         int vboId = GL15.glGenBuffers();
-        vbos.add(vboId);
         GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vboId);
         GL15.glBufferData(GL15.GL_ELEMENT_ARRAY_BUFFER, DynamXUtils.createIntBuffer(indices), GL15.GL_STATIC_DRAW);
     }
 
     private void setupArraysPointers(EnumGLPointer glPointer, float[] data) {
         int vboId = GL15.glGenBuffers();
-        vbos.add(vboId);
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboId);
         GL15.glBufferData(GL15.GL_ARRAY_BUFFER, DynamXUtils.createFloatBuffer(data), GL15.GL_STATIC_DRAW);
         switch (glPointer) {
@@ -295,5 +285,28 @@ public class ObjObjectRenderer {
 
     enum EnumGLPointer {
         VERTEX, TEX_COORDS, NORMAL
+    }
+
+    @Override
+    public String toString() {
+        return "ObjObjectRenderer{" +
+                "objObjectData=" + objObjectData +
+                '}';
+    }
+
+    @ToString
+    @AllArgsConstructor
+    public static class VariantRenderData {
+        private final TextureVariantData baseVariant;
+        private final TextureVariantData variant;
+        private final int displayListId;
+        private int vaoId;
+
+        public String getBaseVariant() {
+            return baseVariant != null ? baseVariant.getName() : null;
+        }
+        public String getVariant() {
+            return variant != null ? variant.getName() : null;
+        }
     }
 }

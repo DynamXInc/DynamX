@@ -8,9 +8,7 @@ import lombok.Getter;
 
 import javax.vecmath.Vector2f;
 import javax.vecmath.Vector3f;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.IntStream;
 
 public class IndexedModel {
@@ -28,7 +26,9 @@ public class IndexedModel {
     @Getter
     private final List<OBJIndex> objIndices = new ArrayList<>();
     @Getter
-    private final List<Material> materials = new ArrayList<>();
+    private final List<String> indicedMaterials = new ArrayList<>();
+    @Getter
+    public final Map<String, Material.IndexPair> materials = new HashMap<>();
 
     public void toMesh(Mesh mesh) {
         int n = Math.min(vertices.size(), Math.min(texCoords.size(), normals.size()));
@@ -39,20 +39,8 @@ public class IndexedModel {
         int[] indicesArrayInt = Arrays.stream(indicesArray).mapToInt(integer -> integer).toArray();
         mesh.vertices = verticesArray;
         mesh.indices = indicesArrayInt;
-        mesh.materialForEachVertex = materials.toArray(new Material[0]);
-
-        List<Material> materialArrayList = new ArrayList<>();
-        if (mesh.materialForEachVertex.length > 0) {
-            materialArrayList.add(mesh.materialForEachVertex[0]);
-            Material firstMaterial = mesh.materialForEachVertex[0];
-            for (int i = 0; i < mesh.materialForEachVertex.length; i++) {
-                if (mesh.materialForEachVertex[i] != firstMaterial) {
-                    firstMaterial = mesh.materialForEachVertex[i];
-                    materialArrayList.add(firstMaterial);
-                }
-            }
-        }
-        mesh.materialsList = materialArrayList;
+        mesh.materialForEachVertex = indicedMaterials.toArray(new String[0]);
+        mesh.materials = materials;
     }
 
     public void computeNormals() {

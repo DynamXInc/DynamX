@@ -20,12 +20,14 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraftforge.client.MinecraftForgeClient;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 
 import javax.annotation.Nullable;
 import javax.vecmath.Vector4f;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 import static fr.dynamx.common.DynamXMain.log;
 
@@ -117,13 +119,10 @@ public class ObjObjectRenderer {
     public void render(ObjModelRenderer model, byte textureVariantID) {
         if (objObjectData.getMesh().materials.isEmpty())
             return;
-        GlStateManager.alphaFunc(516, 0.1F);
-        GlStateManager.enableBlend();
-        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         if (OpenGlHelper.useVbo()) {
             setupVAO();
-            if(!modelRenderData.containsKey(textureVariantID)) {
-                if(!modelRenderData.containsKey((byte) 0))
+            if (!modelRenderData.containsKey(textureVariantID)) {
+                if (!modelRenderData.containsKey((byte) 0))
                     return;
                 renderVAO(model, modelRenderData.get((byte) 0));
             } else
@@ -135,46 +134,57 @@ public class ObjObjectRenderer {
                 GlStateManager.color(1, 1, 1);
             } else
                 GlStateManager.callList(modelRenderData.get(textureVariantID).displayListId);
-            GlStateManager.disableBlend();
             GlStateManager.bindTexture(ClientEventHandler.MC.getTextureMapBlocks().getGlTextureId());
         }
     }
 
     private Material bindMaterial(ObjModelRenderer model, String materialName, @Nullable String baseVariantName, @Nullable String variantName, boolean areVbosEnabled) {
-        if(variantName != null && materialName.equals(baseVariantName))
+        if (variantName != null && materialName.equals(baseVariantName))
             materialName = variantName;
         Material material = model.getMaterials().get(materialName);
-        if(material == null && baseVariantName != null)
+        if (material == null && baseVariantName != null)
             material = model.getMaterials().get(baseVariantName);
         if (!isMaterialValid(model, material))
             return null;
         // For compatibility with sub-textures directly in materials
         MaterialTexture materialMultipleTextures = material.diffuseTexture.containsKey(variantName) ? material.diffuseTexture.get(variantName) : material.diffuseTexture.get("default");
         if (materialMultipleTextures != null) {
-            if (areVbosEnabled)
+            if (areVbosEnabled) {
                 ClientEventHandler.MC.getTextureManager().bindTexture(materialMultipleTextures.getPath());
-            else
+            } else {
                 bindTexture(materialMultipleTextures.getGlTextureId());
+            }
         } else
             log.error("Failed to load Default texture of " + objObjectData.getName() + " in " + model.getLocation() + " in material " + material.getName());
         return material;
     }
+
+    int i = 0;
 
     private void renderVAO(ObjModelRenderer model, VariantRenderData renderData) {
         DynamXRenderUtils.bindVertexArray(renderData.vaoId);
         GlStateManager.glEnableClientState(GL11.GL_VERTEX_ARRAY);
         GlStateManager.glEnableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
         GlStateManager.glEnableClientState(GL11.GL_NORMAL_ARRAY);
-        for(Map.Entry<String, Material.IndexPair> pair : getObjObjectData().getMesh().materials.entrySet()) {
+        for (Map.Entry<String, Material.IndexPair> pair : getObjObjectData().getMesh().materials.entrySet()) {
             Material material = bindMaterial(model, pair.getKey(), renderData.getBaseVariant(), renderData.getVariant(), true);
-            if(material != null) {
-                GlStateManager.color(material.diffuseColor.x * objectColor.x, material.diffuseColor.y * objectColor.y, material.diffuseColor.z * objectColor.z,
+            if (material == null) {
+                continue;
+            }
+            if (MinecraftForgeClient.getRenderPass() == -1 ||
+                    (material.transparency != 1 && MinecraftForgeClient.getRenderPass() == 1) ||
+                    (material.transparency == 1 && MinecraftForgeClient.getRenderPass() == 0)) {
+                GlStateManager.color(
+                        material.diffuseColor.x * objectColor.x,
+                        material.diffuseColor.y * objectColor.y,
+                        material.diffuseColor.z * objectColor.z,
                         material.transparency * objectColor.w);
                 Material.IndexPair indexPair = pair.getValue();
                 GL11.glDrawElements(GL11.GL_TRIANGLES, (indexPair.getFinalIndex() - indexPair.getStartIndex()), GL11.GL_UNSIGNED_INT,
-                       4L * indexPair.getStartIndex());
-                objectColor.set(1, 1, 1, 1);
+                        4L * indexPair.getStartIndex());
             }
+            objectColor.set(1, 1, 1, 1);
+
         }
         GlStateManager.glDisableClientState(GL11.GL_VERTEX_ARRAY);
         GlStateManager.glDisableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
@@ -193,7 +203,7 @@ public class ObjObjectRenderer {
         BufferBuilder renderer = tess.getBuffer();
         String[] materialForEachVertex = objObjectData.getMesh().materialForEachVertex;
         Material bind = bindMaterial(model, materialForEachVertex[0], baseMaterial, textureName, false);
-        if(bind == null)
+        if (bind == null)
             return;
         int[] indices = objObjectData.getMesh().indices;
         Vertex[] vertices = objObjectData.getMesh().vertices;
@@ -207,7 +217,6 @@ public class ObjObjectRenderer {
             Vertex v1 = vertices[i1];
             Vertex v2 = vertices[i2];
 
-            //Material materialToBind = objObjectData.getMesh().materialForEachVertex[i / 3];
             Material materialToBind = bindMaterial(model, materialForEachVertex[i / 3], baseMaterial, textureName, false);
             if (materialToBind != null && materialToBind != bind) {
                 bind = materialToBind;
@@ -305,6 +314,7 @@ public class ObjObjectRenderer {
         public String getBaseVariant() {
             return baseVariant != null ? baseVariant.getName() : null;
         }
+
         public String getVariant() {
             return variant != null ? variant.getName() : null;
         }

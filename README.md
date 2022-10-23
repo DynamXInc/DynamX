@@ -47,7 +47,7 @@ The whole team of DynamX is grateful to :
 + Stephen Gold, the creator of [Libbulletjme](https://github.com/stephengold/Libbulletjme) (the library used by DynamX to handle the physics). For his sympathy and his help
 + GreenPeople, for the 3d models he provided for DynamX
 + [DrawLife](https://discord.gg/tEWfWmASn6) and [StateMC](https://www.statemc.de/), for all the bug report, and their countless tests
-+ Blacknite and MK, for his intensive use of DynamX and this helpful suggestions
++ Blacknite, Ertinox and MK, for their intensive use of DynamX and their helpful suggestions
 + All the content creators (addons & content packs) for using DynamX and making wonderful things with it <3
 
 

@@ -130,7 +130,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
      * Maps the metadata to the texture data
      */
     @Getter
-    private Map<Byte, TextureData> textures;
+    private Map<Byte, TextureData> textures = new HashMap<>();
     /**
      * The number of textures available for the vehicle
      */
@@ -379,7 +379,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
             }
         }
         //Map textures
-        Map<Byte, TextureData> bakedTextures = new HashMap<>();
+        Map<Byte, TextureData> bakedTextures = this.textures;
         int textureCount = 1;
         bakedTextures.put((byte) 0, new TextureData("Default", (byte) 0, getName()));
         if (texturesArray != null) {

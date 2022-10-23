@@ -6,6 +6,7 @@ import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.utils.debug.DynamXDebugOption;
+import fr.dynamx.utils.debug.DynamXDebugOptions;
 import net.minecraft.util.math.AxisAlignedBB;
 
 @RegisteredSubInfoType(name = "float", registries = SubInfoTypeRegistries.WHEELED_VEHICLES, strictName = false)
@@ -27,7 +28,7 @@ public class PartFloat extends BasePart<ModularVehicleInfo> {
     }
     @Override
     public DynamXDebugOption getDebugOption() {
-        return null;
+        return DynamXDebugOptions.WHEELS;
     }
 
     @Override

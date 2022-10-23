@@ -13,6 +13,7 @@ import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.contentpack.parts.PartFloat;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.BoatEngineModule;
+import fr.dynamx.common.entities.modules.EngineModule;
 import fr.dynamx.common.entities.modules.SeatsModule;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
@@ -48,7 +49,7 @@ public class BoatEntity<T extends BoatEntity.BoatPhysicsHandler<?>> extends Base
         modules.add(propulsion = new BoatEngineModule(this));
 
         super.createModules(modules);
-        engine = getModuleByType(IEngineModule.class);
+        engine = modules.getByClass(EngineModule.class);
     }
 
     @Nonnull

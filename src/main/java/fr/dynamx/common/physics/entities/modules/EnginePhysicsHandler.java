@@ -66,7 +66,8 @@ public class EnginePhysicsHandler implements IEnginePhysicsHandler {
         }
         updateMovement();
         setEngineStarted(module.isEngineStarted());
-        gearBoxHandler.update(accelerationForce);
+        if(gearBoxHandler != null)
+            gearBoxHandler.update(accelerationForce);
     }
 
     public void updateTurn0() {

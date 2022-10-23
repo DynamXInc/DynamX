@@ -139,7 +139,7 @@ public class ArmorObject<T extends ArmorObject<?>> extends AbstractItemObject<T,
         if (hotReload && FMLCommonHandler.instance().getSide().isClient())
             getObjArmor().init(DynamXContext.getObjModelRegistry().getModel(getModel()));
         if (texturesArray != null)
-            new MaterialVariantsInfo<>(this, texturesArray).appendTo(this);
+            new MaterialVariantsInfo(this, texturesArray).appendTo(this);
     }
 
     @Override

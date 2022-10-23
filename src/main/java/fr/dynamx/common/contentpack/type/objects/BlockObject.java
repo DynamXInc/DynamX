@@ -55,7 +55,7 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
     @Override
     public void onComplete(boolean hotReload) {
         if (texturesArray != null)
-            new MaterialVariantsInfo<>(this, texturesArray).appendTo(this);
+            new MaterialVariantsInfo(this, texturesArray).appendTo(this);
     }
 
     @Override

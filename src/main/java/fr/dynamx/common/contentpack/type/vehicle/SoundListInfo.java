@@ -1,6 +1,8 @@
 package fr.dynamx.common.contentpack.type.vehicle;
 
 import fr.dynamx.api.contentpack.object.INamedObject;
+import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
+import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +10,7 @@ import java.util.List;
 /**
  * Sounds contained in a sounds file
  */
-public class SoundListInfo implements INamedObject {
+public class SoundListInfo implements INamedObject, ISubInfoTypeOwner<SoundListInfo> {
     private final String name, packName;
     private final List<EngineSound> soundsIn = new ArrayList<>();
 
@@ -38,5 +40,15 @@ public class SoundListInfo implements INamedObject {
     @Override
     public String getFullName() {
         return packName + "." + name;
+    }
+
+    @Override
+    public void addSubProperty(ISubInfoType<SoundListInfo> property) {
+        throw new UnsupportedOperationException("Sound sub info type");
+    }
+
+    @Override
+    public List<ISubInfoType<SoundListInfo>> getSubProperties() {
+        throw new UnsupportedOperationException("Sound sub info type");
     }
 }

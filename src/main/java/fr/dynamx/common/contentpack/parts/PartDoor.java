@@ -5,7 +5,10 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
-import fr.dynamx.api.contentpack.registry.*;
+import fr.dynamx.api.contentpack.registry.DefinitionType;
+import fr.dynamx.api.contentpack.registry.PackFileProperty;
+import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
+import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.VehicleEntityEvent;
@@ -35,7 +38,7 @@ import java.util.Collections;
 import java.util.List;
 
 @RegisteredSubInfoType(name = "door", registries = SubInfoTypeRegistries.WHEELED_VEHICLES, strictName = false)
-public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfoBuilder> implements IPhysicsPackInfo {
+public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfo> implements IPhysicsPackInfo {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("CarAttachPoint".equals(key))
@@ -101,7 +104,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     private CompoundCollisionShape physicsCollisionShape;
     private ObjModelPath carModelPath;
 
-    public PartDoor(ModularVehicleInfoBuilder owner, String partName) {
+    public PartDoor(ModularVehicleInfo owner, String partName) {
         super(owner, partName, 0, 0);
     }
 
@@ -138,7 +141,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     }
 
     @Override
-    public void appendTo(ModularVehicleInfoBuilder owner) {
+    public void appendTo(ModularVehicleInfo owner) {
         super.appendTo(owner);
         owner.arrangeDoorID(this);
         owner.addRenderedParts(getPartName());
@@ -183,7 +186,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     }
 
     @Override
-    public <T extends InteractivePart<?, ModularVehicleInfoBuilder>> List<T> getInteractiveParts() {
+    public <A extends InteractivePart<?, ?>> List<A> getInteractiveParts() {
         return Collections.emptyList();
     }
 

@@ -5,7 +5,7 @@ import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
-import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
+import fr.dynamx.client.renders.model.ObjModelClient;
 import fr.dynamx.client.renders.vehicle.RenderBaseVehicle;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.parts.PartLightSource;
@@ -27,7 +27,7 @@ public class VehicleLightsModule implements IPhysicsModule<BaseVehiclePhysicsHan
     private final Map<Integer, Boolean> lightStates = new HashMap<>();
 
     public VehicleLightsModule(BaseVehicleEntity<?> entity) {
-        for (PartLightSource.CompoundLight compound : entity.getPackInfo().getLightSources()) {
+        for (PartLightSource.CompoundLight compound : entity.getPackInfo().getLightSources().values()) {
             for (PartLightSource s : compound.getSources()) {
                 lightStates.put(s.getLightId(), false);
             }

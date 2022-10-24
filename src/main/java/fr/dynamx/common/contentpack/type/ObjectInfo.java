@@ -2,6 +2,7 @@ package fr.dynamx.common.contentpack.type;
 
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.INamedObject;
+import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.common.contentpack.loader.ObjectLoader;
 
@@ -12,7 +13,7 @@ import javax.annotation.Nullable;
  *
  * @param <T> The object class
  */
-public abstract class ObjectInfo<T extends ObjectInfo<?>> implements INamedObject {
+public abstract class ObjectInfo<T extends ObjectInfo<?> & ISubInfoTypeOwner<?>> implements INamedObject {
     private final String packName;
     private final String fileName;
     @PackFileProperty(configNames = "Description", description = "common.description")
@@ -68,9 +69,10 @@ public abstract class ObjectInfo<T extends ObjectInfo<?>> implements INamedObjec
      * InfoOwners are the objects using this info, can be for example a block or an item, or all armors of an ArmorInfo <br>
      * Called by createOwners() default implementation <br>
      *
-     * @return An InfoOwner for this object
+     * @return An InfoOwner for this object. Null if the object has failed to load
      */
-    protected abstract IInfoOwner<T> createOwner(ObjectLoader<T, ?, ?> loader);
+    @Nullable
+    protected abstract IInfoOwner<T> createOwner(ObjectLoader<T, ?> loader);
 
     /**
      * Inits the infos owners for this object <br>
@@ -80,9 +82,23 @@ public abstract class ObjectInfo<T extends ObjectInfo<?>> implements INamedObjec
      * @return All InfoOwners for this object
      */
     @SuppressWarnings("unchecked")
-    public IInfoOwner<T>[] createOwners(ObjectLoader<T, ?, ?> loader) {
-        owners = new IInfoOwner[]{createOwner(loader)};
+    public IInfoOwner<T>[] createOwners(ObjectLoader<T, ?> loader) {
+        IInfoOwner<T> owner = createOwner(loader);
+        if(owner == null)
+            return new IInfoOwner[0];
+        owners = new IInfoOwner[]{owner};
         return owners;
+    }
+
+    /**
+     * Post loads this object <br>
+     * Can be used for collision shape generation
+     *
+     * @param hot If it's a hot reloading (info owners already created)
+     * @return False if an error occurred and this object shouldn't be loaded
+     */
+    public boolean postLoad(boolean hot) {
+        return true;
     }
 
     /**

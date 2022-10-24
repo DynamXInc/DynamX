@@ -10,17 +10,6 @@ import fr.dynamx.common.contentpack.parts.PartShape;
  */
 public interface IShapeContainer extends INamedObject {
     /**
-     * Generates the shape of the object <br>
-     * If an exception is thrown then setShapeErrored() will be called
-     */
-    void generateShape();
-
-    /**
-     * Marks this object as failed
-     */
-    void markFailedShape();
-
-    /**
      * @return The object's scale modifier
      */
     Vector3f getScaleModifier();

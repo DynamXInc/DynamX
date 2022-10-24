@@ -9,7 +9,7 @@ import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.modules.ISeatsModule;
 import fr.dynamx.common.DynamXMain;
-import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfoBuilder;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.common.entities.vehicles.CarEntity;
@@ -27,7 +27,7 @@ import net.minecraft.util.text.TextComponentString;
 import javax.annotation.Nullable;
 
 @RegisteredSubInfoType(name = "seat", registries = SubInfoTypeRegistries.WHEELED_VEHICLES, strictName = false)
-public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfoBuilder> {
+public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfo> {
     @PackFileProperty(configNames = "Driver")
     private boolean isDriver;
 
@@ -71,7 +71,7 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     @Getter
     private Vector3f playerSize;
 
-    public PartSeat(ModularVehicleInfoBuilder owner, String partName) {
+    public PartSeat(ModularVehicleInfo owner, String partName) {
         super(owner, partName, 0.4f, 1.8f);
     }
 
@@ -81,7 +81,7 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     }
 
     @Override
-    public void appendTo(ModularVehicleInfoBuilder owner) {
+    public void appendTo(ModularVehicleInfo owner) {
         super.appendTo(owner);
         owner.arrangeSeatID(this);
     }

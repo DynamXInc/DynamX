@@ -6,8 +6,6 @@ import com.jme3.bullet.collision.shapes.CylinderCollisionShape;
 import com.jme3.bullet.collision.shapes.SphereCollisionShape;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IShapeContainer;
-import fr.dynamx.api.contentpack.object.IPartContainer;
-import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
@@ -30,7 +28,7 @@ import lombok.experimental.Accessors;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractItemObject<T, T> implements IShapeContainer, ParticleEmitterInfo.IParticleEmitterContainer {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.PROPS})
@@ -78,12 +76,7 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
     }
 
     @Override
-    public void markFailedShape() {
-        //DO STH ?
-    }
-
-    @Override
-    public void generateShape() {
+    public boolean postLoad(boolean hot) {
         compoundCollisionShape = new CompoundCollisionShape();
         if (getPartShapes().isEmpty()) {
             ObjModelPath modelPath = DynamXUtils.getModelPath(getPackName(), model);
@@ -109,6 +102,7 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
                 }
             });
         }
+        return true;
     }
 
     abstract MaterialVariantsInfo<?> getVariants();

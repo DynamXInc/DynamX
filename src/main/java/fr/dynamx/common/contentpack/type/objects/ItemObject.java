@@ -29,7 +29,7 @@ public class ItemObject<T extends ItemObject<?>> extends AbstractItemObject<T, T
 
     @Override
     @SuppressWarnings("unchecked")
-    protected IInfoOwner<T> createOwner(ObjectLoader<T, ?, ?> loader) {
+    protected IInfoOwner<T> createOwner(ObjectLoader<T, ?> loader) {
         CreatePackItemEvent.CreateSimpleItemEvent<T, ?> event = new CreatePackItemEvent.CreateSimpleItemEvent(loader, this);
         MinecraftForge.EVENT_BUS.post(event);
         if (event.isOverridden()) {

@@ -76,15 +76,11 @@ public class SubInfoTypesRegistry<T extends ISubInfoTypeOwner<?>> {
                 //Find the right constructor
                 Constructor<?> constructor = null;
                 for (Constructor<?> cons : object.getDeclaredConstructors()) {
-                    if (subInfoTypeClass != null && Arrays.equals(cons.getParameterTypes(), new Class[]{subInfoTypeClass, String.class})) {
+                    if (subInfoTypeClass != null && (Arrays.equals(cons.getParameterTypes(), new Class[]{subInfoTypeClass, String.class}) || Arrays.equals(cons.getParameterTypes(), new Class[]{subInfoTypeClass}))) {
                         constructor = cons;
                         break;
                     }
-                    if (Arrays.equals(cons.getParameterTypes(), new Class[]{ISubInfoTypeOwner.class, String.class})) {
-                        constructor = cons;
-                        break;
-                    }
-                    if (Arrays.equals(cons.getParameterTypes(), new Class[]{ISubInfoTypeOwner.class})) {
+                    if (Arrays.equals(cons.getParameterTypes(), new Class[]{ISubInfoTypeOwner.class, String.class}) || Arrays.equals(cons.getParameterTypes(), new Class[]{ISubInfoTypeOwner.class})) {
                         constructor = cons;
                         break;
                     }

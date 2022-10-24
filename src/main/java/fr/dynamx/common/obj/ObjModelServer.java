@@ -70,7 +70,7 @@ public class ObjModelServer {
     public float[] getVerticesPos(String objectName) {
         float[] pos = new float[0];
         for (IObjObject objObject : objObjects) {
-            if (objObject.getName().toLowerCase().contains(objectName)) {
+            if (objObject.getName().toLowerCase().contains(objectName.toLowerCase())) {
                 pos = new float[objObject.getMesh().vertices.length * 3];
                 for (int i = 0; i < objObject.getMesh().vertices.length; i++) {
                     pos[i * 3] = objObject.getMesh().vertices[i].getPos().x;
@@ -85,7 +85,7 @@ public class ObjModelServer {
     public Vector3f[] getVectorVerticesPos(String objectName) {
         Vector3f[] pos = new Vector3f[0];
         for (IObjObject objObject : objObjects) {
-            if (objObject.getName().toLowerCase().contains(objectName)) {
+            if (objObject.getName().toLowerCase().contains(objectName.toLowerCase())) {
                 pos = new Vector3f[objObject.getMesh().vertices.length];
                 for (int i = 0; i < objObject.getMesh().vertices.length; i++) {
                     pos[i] = new Vector3f(objObject.getMesh().vertices[i].getPos().x,
@@ -117,7 +117,7 @@ public class ObjModelServer {
     public int[] getMeshIndices(String objectName) {
         int[] indices = new int[0];
         for (IObjObject objObject : objObjects) {
-            if (objObject.getName().toLowerCase().contains(objectName)) {
+            if (objObject.getName().toLowerCase().contains(objectName.toLowerCase())) {
                 indices = objObject.getMesh().indices;
             }
         }

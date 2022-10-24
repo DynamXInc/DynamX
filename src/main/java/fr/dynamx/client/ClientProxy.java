@@ -77,7 +77,7 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
         super.preInit();
 
         //Loads all models avoiding duplicates
-        for (InfoLoader<?, ?> l : DynamXObjectLoaders.getLoaders()) {
+        for (InfoLoader<?> l : DynamXObjectLoaders.getLoaders()) {
             for (INamedObject i : l.getInfos().values()) {
                 if (i instanceof IObjPackObject && ((IObjPackObject) i).shouldRegisterModel()) {
                     DynamXContext.getObjModelRegistry().registerModel(((IObjPackObject) i).getModel(), (IModelTextureSupplier) i);

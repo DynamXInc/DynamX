@@ -3,7 +3,7 @@ package fr.dynamx.utils;
 import com.google.common.base.Predicates;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.contentpack.object.IShapeProvider;
+import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.contentpack.ContentPackType;
@@ -22,6 +22,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagDouble;
 import net.minecraft.nbt.NBTTagFloat;
 import net.minecraft.nbt.NBTTagList;
@@ -80,6 +81,17 @@ public class DynamXUtils {
 
     public static Quaternion readQuaternion(ByteBuf buf) {
         return new Quaternion(buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readFloat());
+    }
+
+    public static void writeQuaternionNBT(NBTTagCompound compound, Quaternion quaternion) {
+        compound.setFloat("QuatX", quaternion.getX());
+        compound.setFloat("QuatY", quaternion.getY());
+        compound.setFloat("QuatZ", quaternion.getZ());
+        compound.setFloat("QuatW", quaternion.getW());
+    }
+
+    public static Quaternion readQuaternionNBT(NBTTagCompound compound) {
+        return new Quaternion(compound.getFloat("QuatX"), compound.getFloat("QuatY"), compound.getFloat("QuatZ"), compound.getFloat("QuatW"));
     }
 
     /**
@@ -246,7 +258,7 @@ public class DynamXUtils {
         return objectMouseOver;
     }
 
-    public static BasePart<?> rayTestPart(EntityPlayer player, PackPhysicsEntity<?, ?> entityPart, IShapeProvider<?> packInfo, Predicate<BasePart<?>> wantedPart) {
+    public static BasePart<?> rayTestPart(EntityPlayer player, PackPhysicsEntity<?, ?> entityPart, IPartContainer<?> packInfo, Predicate<BasePart<?>> wantedPart) {
         Vector3fPool.openPool();
         Vec3d lookVec = player.getLook(1.0F);
         Vec3d hitVec = player.getPositionVector().add(0, player.getEyeHeight(), 0);

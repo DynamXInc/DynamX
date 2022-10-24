@@ -37,7 +37,7 @@ import java.util.List;
  * @see IPhysicsModule
  * @see BaseVehiclePhysicsHandler For the physics implementation
  */
-public abstract class BaseVehicleEntity<T extends BaseVehiclePhysicsHandler<?>> extends PackPhysicsEntity<T, ModularVehicleInfo<?>> {
+public abstract class BaseVehicleEntity<T extends BaseVehiclePhysicsHandler<?>> extends PackPhysicsEntity<T, ModularVehicleInfo> {
     public BaseVehicleEntity(World worldIn) {
         super(worldIn);
     }

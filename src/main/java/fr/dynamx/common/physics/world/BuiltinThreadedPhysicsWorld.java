@@ -84,7 +84,7 @@ public class BuiltinThreadedPhysicsWorld extends BasePhysicsWorld implements Run
                         profiler.reset();
                         //System.out.println("Profiler est actif !");
                     }
-                    DynamXMain.log.warn("Too slow server, physics will skip " + (ticksLate.get() - 1) + " simulation ticks !");
+                    DynamXMain.log.warn("Server too slow, physics will skip " + (ticksLate.get() - 1) + " simulation ticks !");
                     ticksLate.set(1);
                 } else {
                     if (profiler.isActive() && DynamXMain.proxy.getTickTime() % 20 == 0) {

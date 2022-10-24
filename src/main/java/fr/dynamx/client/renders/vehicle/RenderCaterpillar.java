@@ -50,7 +50,7 @@ public class RenderCaterpillar<T extends CaterpillarEntity<?>> extends RenderBas
 
             GlStateManager.pushMatrix();
             GlStateManager.translate(0, .6, 0);
-            ModularVehicleInfo<?> minfo = carEntity.getPackInfo();
+            ModularVehicleInfo minfo = carEntity.getPackInfo();
 
             int index = VehicleEntityProperties.getPropertyIndex(0, VehicleEntityProperties.EnumVisualProperties.ROTATIONANGLE);
             float an = ((module.prevVisualProperties[index] + (module.visualProperties.get()[index] - module.prevVisualProperties[index]) * partialTicks)) % 360;

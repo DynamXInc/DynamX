@@ -6,15 +6,11 @@ import com.jme3.bullet.collision.shapes.CylinderCollisionShape;
 import com.jme3.bullet.collision.shapes.SphereCollisionShape;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IShapeContainer;
-import fr.dynamx.api.contentpack.object.IShapeProvider;
-import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.obj.IObjObject;
-import fr.dynamx.common.contentpack.DynamXObjectLoaders;
-import fr.dynamx.common.contentpack.PackInfo;
 import fr.dynamx.common.contentpack.parts.PartShape;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.obj.ObjModelServer;
@@ -31,9 +27,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractItemObject<T> implements IShapeContainer, IShapeProvider, ParticleEmitterInfo.IParticleEmitterContainer {
+public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractItemObject<T, T> implements IShapeContainer, ParticleEmitterInfo.IParticleEmitterContainer {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.PROPS})
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("UseHullShape".equals(key))
@@ -61,8 +56,6 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
     protected String[][] texturesArray;
 
     @Getter
-    private final List<BasePart<?>> parts = new ArrayList<>();
-    @Getter
     private final List<MutableBoundingBox> collisionBoxes = new ArrayList<>();
     @Getter
     private final List<PartShape<?>> partShapes = new ArrayList<>();
@@ -82,22 +75,13 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
     }
 
     @Override
-    public void markFailedShape() {
-        //DO STH ?
-    }
-
-    @Override
-    public void generateShape() {
+    public boolean postLoad(boolean hot) {
         compoundCollisionShape = new CompoundCollisionShape();
         if (getPartShapes().isEmpty()) {
-            if (useHullShape) {
+            if (useHullShape)
                 compoundCollisionShape = ShapeUtils.generateComplexModelCollisions(DynamXUtils.getModelPath(getPackName(), model), "", scaleModifier, new Vector3f(), 0);
-            } else {
-                PackInfo info = DynamXObjectLoaders.PACKS.findPackInfoByPackName(getPackName());
-                //System.out.println("Info for "+getPackName()+" "+info);
-                //System.out.println("All are " + DynamXObjectLoaders.PACKS.getInfos());
+            else
                 ShapeUtils.generateModelCollisions(this, ObjModelServer.createServerObjModel(DynamXUtils.getModelPath(getPackName(), getModel())), compoundCollisionShape);
-            }
         } else {
             getPartShapes().forEach(shape -> {
                 getCollisionBoxes().add(shape.getBoundingBox().offset(0.5, 0.5, 0.5));
@@ -114,6 +98,7 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
                 }
             });
         }
+        return true;
     }
 
     @Override
@@ -146,10 +131,6 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
         return textures.size() > 1;
     }
 
-    @Override
-    public void addPart(BasePart<?> tBasePart) {
-        parts.add(tBasePart);
-    }
 
     @Override
     public void addCollisionShape(PartShape<?> partShape) {
@@ -166,12 +147,4 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
         return particleEmitters;
     }
 
-    public <A extends BasePart<?>> List<A> getPartsByType(Class<A> clazz) {
-        return (List<A>) this.parts.stream().filter(p -> clazz.equals(p.getClass())).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<BasePart<?>> getAllParts() {
-        return parts;
-    }
 }

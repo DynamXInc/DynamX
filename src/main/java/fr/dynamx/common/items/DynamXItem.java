@@ -10,7 +10,7 @@ import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.RegistryNameSetter;
 import net.minecraft.item.Item;
 
-public class DynamXItem<T extends AbstractItemObject<?>> extends Item implements IInfoOwner<T>, IResourcesOwner {
+public class DynamXItem<T extends AbstractItemObject<T, ?>> extends Item implements IInfoOwner<T>, IResourcesOwner {
     protected T itemInfo;
 
     /**

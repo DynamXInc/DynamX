@@ -1,6 +1,5 @@
 package fr.dynamx.common.contentpack.type.objects;
 
-import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.math.Vector3f;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
@@ -16,7 +15,6 @@ import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
-import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfoBuilder;
 import fr.dynamx.common.contentpack.loader.ObjectLoader;
 import fr.dynamx.common.contentpack.loader.PackFilePropertyData;
 import fr.dynamx.common.contentpack.loader.SubInfoTypeAnnotationCache;
@@ -34,8 +32,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RegisteredSubInfoType(name = "prop", registries = SubInfoTypeRegistries.BLOCKS_AND_PROPS, strictName = false)
-public class PropObject<T extends BlockObject<?>> extends AbstractProp<T> implements IPhysicsPackInfo,
-        ISubInfoType<BlockObject<?>>, ISubInfoTypeOwner<BlockObject<?>>, ParticleEmitterInfo.IParticleEmitterContainer {
+public class PropObject<T extends PropObject<?>> extends AbstractProp<T> implements IPhysicsPackInfo,
+        ISubInfoType<BlockObject<?>>, ParticleEmitterInfo.IParticleEmitterContainer {
     private final BlockObject<?> owner;
     @PackFileProperty(configNames = "EmptyMass")
     @Getter
@@ -116,14 +114,14 @@ public class PropObject<T extends BlockObject<?>> extends AbstractProp<T> implem
     }
 
     @Override
-    public IInfoOwner<T> createOwner(ObjectLoader<T, ?, ?> loader) {
+    public IInfoOwner<T> createOwner(ObjectLoader<T, ?> loader) {
         return new ItemProps(this);
     }
 
     @Override
-    public void generateShape() {
+    public boolean postLoad(boolean hot) {
         if (owner == null) {
-            super.generateShape();
+            super.postLoad(hot);
         } else {
             compoundCollisionShape = owner.compoundCollisionShape;
             for (MutableBoundingBox blockBox : owner.getCollisionBoxes()) {
@@ -134,6 +132,7 @@ public class PropObject<T extends BlockObject<?>> extends AbstractProp<T> implem
         }
         compoundCollisionShape.setMargin(margin);
         debugBuffer = ShapeUtils.getDebugVectorList(compoundCollisionShape, ShapeUtils.getDebugBuffer(compoundCollisionShape));
+        return true;
     }
 
     @Override
@@ -147,16 +146,16 @@ public class PropObject<T extends BlockObject<?>> extends AbstractProp<T> implem
     }
 
     @Override
-    public <U extends InteractivePart<?, ModularVehicleInfoBuilder>> List<U> getInteractiveParts() {
+    public <U extends InteractivePart<?, ?>> List<U> getInteractiveParts() {
         return Collections.emptyList();
     }
 
     @Override
-    public void addSubProperty(ISubInfoType<BlockObject<?>> property) {
+    public void addSubProperty(ISubInfoType<T> property) {
     }
 
     @Override
-    public List<ISubInfoType<BlockObject<?>>> getSubProperties() {
+    public List<ISubInfoType<T>> getSubProperties() {
         return Collections.emptyList();
     }
 

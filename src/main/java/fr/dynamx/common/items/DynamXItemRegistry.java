@@ -38,7 +38,7 @@ public class DynamXItemRegistry {
     public static CreativeTabs vehicleTab = new CreativeTabs(DynamXConstants.ID + "_vehicle") {
         @Override
         public ItemStack createIcon() {
-            Optional<IInfoOwner<ModularVehicleInfo<?>>> item = DynamXObjectLoaders.WHEELED_VEHICLES.owners.stream().filter(blockObjectIInfoOwner -> blockObjectIInfoOwner.getInfo().getCreativeTab(null) == null).findFirst();
+            Optional<IInfoOwner<ModularVehicleInfo>> item = DynamXObjectLoaders.WHEELED_VEHICLES.owners.stream().filter(blockObjectIInfoOwner -> blockObjectIInfoOwner.getInfo().getCreativeTab(null) == null).findFirst();
             return item.map(blockObjectIInfoOwner -> new ItemStack((Item) blockObjectIInfoOwner)).orElseGet(() -> new ItemStack(Items.CARROT));
         }
     };

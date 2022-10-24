@@ -1,6 +1,7 @@
 package fr.dynamx.common.physics.world;
 
 import com.jme3.bullet.PhysicsSoftSpace;
+import com.jme3.bullet.PhysicsSpace;
 import fr.dynamx.api.physics.IPhysicsSimulationMode;
 
 /**
@@ -11,10 +12,15 @@ public class PhysicsSimulationModes {
      * Full physics : 2 calls of bullet physics update per dynamx physics world update, with 0.025 time step
      */
     public static class FullPhysics implements IPhysicsSimulationMode {
+        private long lastPhysicsUpdate;
+
         @Override
         public void updatePhysicsWorld(PhysicsSoftSpace dynamicsWorld) {
-            dynamicsWorld.update(getTimeStep(), 0, false, true, false);
-            dynamicsWorld.update(getTimeStep(), 0, false, true, false);
+            long nanoTime = System.nanoTime();
+            long nanoseconds = nanoTime - lastPhysicsUpdate;
+            float seconds = 1e-9f * nanoseconds;
+            dynamicsWorld.update(seconds);
+            this.lastPhysicsUpdate = nanoTime;
         }
 
         @Override

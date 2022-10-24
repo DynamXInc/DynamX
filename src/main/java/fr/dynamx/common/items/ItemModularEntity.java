@@ -2,8 +2,8 @@ package fr.dynamx.common.items;
 
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
-import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.contentpack.parts.PartWheel;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
@@ -16,12 +16,12 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public abstract class ItemModularEntity<T extends ModularVehicleInfo<?>> extends DynamXItemSpawner<T> implements IInfoOwner<T> {
+public abstract class ItemModularEntity extends DynamXItemSpawner<ModularVehicleInfo> implements IInfoOwner<ModularVehicleInfo> {
     private final int textureNum;
 
-    public ItemModularEntity(T modulableVehicleInfo) {
+    public ItemModularEntity(ModularVehicleInfo modulableVehicleInfo) {
         super(modulableVehicleInfo);
-        this.maxStackSize = 1;
+        maxStackSize = 1;
         setCreativeTab(modulableVehicleInfo.getCreativeTab(DynamXItemRegistry.vehicleTab));
 
         textureNum = modulableVehicleInfo.getMaxTextureMetadata();

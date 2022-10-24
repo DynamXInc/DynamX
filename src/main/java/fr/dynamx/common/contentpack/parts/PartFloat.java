@@ -4,21 +4,20 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
-import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfoBuilder;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import net.minecraft.util.math.AxisAlignedBB;
 
 @RegisteredSubInfoType(name = "float", registries = SubInfoTypeRegistries.WHEELED_VEHICLES, strictName = false)
-public class PartFloat extends BasePart<ModularVehicleInfoBuilder> {
+public class PartFloat extends BasePart<ModularVehicleInfo> {
     public AxisAlignedBB box;
 
-    public PartFloat(ModularVehicleInfoBuilder owner, String partName) {
+    public PartFloat(ModularVehicleInfo owner, String partName) {
         super(owner, partName);
     }
 
-
     @Override
-    public void appendTo(ModularVehicleInfoBuilder vehicleInfo) {
+    public void appendTo(ModularVehicleInfo vehicleInfo) {
         super.appendTo(vehicleInfo);
         Vector3f min = getPosition().subtract(getScale());
         Vector3f max = getPosition().add(getScale());

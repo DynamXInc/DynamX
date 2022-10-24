@@ -11,8 +11,6 @@ import fr.dynamx.utils.optimization.Vector3fPool;
 
 import javax.annotation.Nullable;
 
-import static fr.dynamx.common.entities.PhysicsEntity.CONSTRUYE_DEBUG;
-
 /**
  * Physics handler of {@link PhysicsEntity}, supporting all types of {@link PhysicsCollisionObject} <br>
  * The physics handler is the bridge between the minecraft entity and the physics engine
@@ -54,12 +52,8 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
 
     public AbstractEntityPhysicsHandler(T entity) {
         this.handledEntity = entity;
-        if (CONSTRUYE_DEBUG)
-            System.out.println("Construye with yaw " + entity.rotationYaw + " " + entity);
         this.spawnRotationAngle = entity.rotationYaw;
         this.physicsPosition = new Vector3f((float) entity.posX, (float) entity.posY, (float) entity.posZ);
-        if (CONSTRUYE_DEBUG)
-            System.out.println("Init with spqr " + spawnRotationAngle + " " + Math.toRadians(-spawnRotationAngle));
         this.physicsRotation = new Quaternion(DynamXGeometry.rotationYawToQuaternion(spawnRotationAngle));
 
         collisionObject = createShape(physicsPosition, physicsRotation, spawnRotationAngle);

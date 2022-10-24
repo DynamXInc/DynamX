@@ -20,7 +20,7 @@ import fr.dynamx.utils.optimization.Vector3fPool;
  * @param <T> The entity type
  * @see BaseWheeledVehiclePhysicsHandler
  */
-public abstract class BaseVehiclePhysicsHandler<T extends BaseVehicleEntity<?>> extends PackEntityPhysicsHandler<ModularVehicleInfo<?>, T> {
+public abstract class BaseVehiclePhysicsHandler<T extends BaseVehicleEntity<?>> extends PackEntityPhysicsHandler<ModularVehicleInfo, T> {
     /**
      * @return The propulsion of the entity
      */
@@ -40,7 +40,7 @@ public abstract class BaseVehiclePhysicsHandler<T extends BaseVehicleEntity<?>> 
     public PhysicsRigidBody createShape(Vector3f position, Quaternion rotation, float spawnRotation) {
         Vector3f tmp = Vector3fPool.get(position);
         Transform transform = new Transform(tmp, QuaternionPool.get(rotation));
-        ModularVehicleInfo<?> modularVehicleInfo = getHandledEntity().getPackInfo();
+        ModularVehicleInfo modularVehicleInfo = getHandledEntity().getPackInfo();
 
         //Don't use this.getPackInfo() : it isn't initialized yet
         PhysicsRigidBody vehicleBody = new PhysicsRigidBody(modularVehicleInfo.getPhysicsCollisionShape(), modularVehicleInfo.getEmptyMass());

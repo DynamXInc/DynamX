@@ -12,16 +12,16 @@ import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 /**
  * Info of the trailer attach point of a vehicle
  */
-public class BoatEngineInfo extends SubInfoType<ModularVehicleInfoBuilder> {
+public class BoatEngineInfo extends SubInfoType<ModularVehicleInfo> {
     @PackFileProperty(configNames = "Position", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y)
     private Vector3f position;
 
-    public BoatEngineInfo(ISubInfoTypeOwner<ModularVehicleInfoBuilder> owner) {
+    public BoatEngineInfo(ModularVehicleInfo owner) {
         super(owner);
     }
 
     @Override
-    public void appendTo(ModularVehicleInfoBuilder owner) {
+    public void appendTo(ModularVehicleInfo owner) {
         if (getPosition() == null)
             throw new IllegalArgumentException("AttachPoint not configured ! In trailer of " + owner.toString());
         owner.addSubProperty(this);

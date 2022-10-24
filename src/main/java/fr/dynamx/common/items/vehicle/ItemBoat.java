@@ -11,8 +11,8 @@ import fr.dynamx.utils.errors.DynamXErrorManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 
-public class ItemBoat<T extends ModularVehicleInfo<?>> extends ItemModularEntity<T> {
-    public ItemBoat(T modularVehicleInfo) {
+public class ItemBoat extends ItemModularEntity {
+    public ItemBoat(ModularVehicleInfo modularVehicleInfo) {
         super(modularVehicleInfo);
         if (getInfo().getSubPropertyByType(BoatEngineInfo.class) == null)
             DynamXErrorManager.addPackError(getInfo().getPackName(), "config_error", ErrorLevel.FATAL, getInfo().getName(), "Missing boat_engine config !");

@@ -1,6 +1,7 @@
 package fr.dynamx.common.contentpack.parts;
 
 import com.jme3.math.Quaternion;
+import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
@@ -8,7 +9,7 @@ import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.modules.ISeatsModule;
 import fr.dynamx.common.DynamXMain;
-import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfoBuilder;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.common.entities.vehicles.CarEntity;
@@ -17,6 +18,8 @@ import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.EnumSeatPlayerPosition;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
@@ -25,9 +28,31 @@ import net.minecraft.util.text.TextComponentString;
 import javax.annotation.Nullable;
 
 @RegisteredSubInfoType(name = "seat", registries = SubInfoTypeRegistries.WHEELED_VEHICLES, strictName = false)
-public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfoBuilder> {
+public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfo> {
     @PackFileProperty(configNames = "Driver")
     private boolean isDriver;
+
+    @PackFileProperty(configNames = "ShouldLimitFieldOfView", required = false, defaultValue = "true")
+    @Accessors(fluent = true)
+    @Getter
+    private boolean shouldLimitFieldOfView = true;
+
+    @PackFileProperty(configNames = "MaxYaw", required = false, defaultValue = "-105")
+    @Getter
+    private float maxYaw = -105.0f;
+
+    @PackFileProperty(configNames = "MinYaw", required = false, defaultValue = "105")
+    @Getter
+    private float minYaw = 105.0f;
+
+    @PackFileProperty(configNames = "MaxPitch", required = false, defaultValue = "-105")
+    @Getter
+    private float maxPitch = -105.0f;
+
+    @PackFileProperty(configNames = "MinPitch", required = false, defaultValue = "105")
+    @Getter
+    private float minPitch = 105.0f;
+
     @PackFileProperty(configNames = "LinkedDoorPart", required = false)
     private String linkedDoor;
     @PackFileProperty(configNames = "Rotation", required = false, defaultValue = "1 0 0 0")
@@ -39,7 +64,15 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     @PackFileProperty(configNames = "CameraRotation", required = false, defaultValue = "0")
     private float rotationYaw;
 
-    public PartSeat(ModularVehicleInfoBuilder owner, String partName) {
+    @PackFileProperty(configNames = "CameraPositionY", required = false, defaultValue = "0")
+    @Getter
+    private float cameraPositionY;
+
+    @PackFileProperty(configNames = "PlayerSize", required = false)
+    @Getter
+    private Vector3f playerSize;
+
+    public PartSeat(ModularVehicleInfo owner, String partName) {
         super(owner, partName, 0.4f, 1.8f);
     }
 
@@ -49,7 +82,7 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     }
 
     @Override
-    public void appendTo(ModularVehicleInfoBuilder owner) {
+    public void appendTo(ModularVehicleInfo owner) {
         super.appendTo(owner);
         owner.arrangeSeatID(this);
     }

@@ -9,6 +9,7 @@ import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.maths.DynamXGeometry;
+import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
@@ -32,6 +33,7 @@ public class CameraSystem {
     private static CameraMode rotationMode = CameraMode.AUTO;
 
     private static int zoomLevel = 4;
+    private static float cameraPositionY;
     private static boolean watchingBehind = false;
     private static final Quaternion glQuatCache = new Quaternion();
     private static final com.jme3.math.Quaternion jmeQuatCache = new com.jme3.math.Quaternion();
@@ -41,7 +43,7 @@ public class CameraSystem {
      * Computes a smooth interpolated camera rotation
      */
     private static void animateCameraRotation(com.jme3.math.Quaternion prevRotation, com.jme3.math.Quaternion rotation, float step, float animLength) {
-        DynamXGeometry.slerp(prevRotation, rotation, jmeQuatCache, step);
+        DynamXMath.slerp(step, prevRotation, rotation, jmeQuatCache);
         DynamXGeometry.inverseQuaternion(jmeQuatCache);
         rotationMode.rotator.apply(Minecraft.getMinecraft().gameSettings.thirdPersonView, jmeQuatCache);
 
@@ -80,7 +82,17 @@ public class CameraSystem {
         GlStateManager.rotate(event.getPitch(), 1.0F, 0.0F, 0.0F);
         if (vehicle instanceof IModuleContainer.ISeatsContainer) {
             PartSeat seat = ((IModuleContainer.ISeatsContainer) vehicle).getSeats().getRidingSeat(renderEntity);
-            if (seat != null && seat.getRotation() != null) {
+
+            if(seat == null) {
+                return;
+            }
+
+            if(ClientEventHandler.MC.gameSettings.thirdPersonView > 0 && seat.getCameraPositionY() != 0) {
+                cameraPositionY = seat.getCameraPositionY();
+                GlStateManager.translate(0, -cameraPositionY, 0);
+            }
+
+            if (seat.getRotation() != null) {
                 GlStateManager.rotate(event.getYaw() + (watchingBehind ? 180 : 0) + seat.getRotationYaw(), 0.0F, 1.0F, 0.0F);
             } else {
                 GlStateManager.rotate(event.getYaw() + (watchingBehind ? 180 : 0), 0.0F, 1.0F, 0.0F);
@@ -175,7 +187,7 @@ public class CameraSystem {
         double d2 = (entity.prevPosZ + (entity.posZ - entity.prevPosZ) * partialTicks);
         if (debug)
             pt0.set((float) d0, (float) d1, (float) d2);
-        Vector3f eye = Vector3fPool.get(0, f, 0);
+        Vector3f eye = Vector3fPool.get(0, f + (ClientEventHandler.MC.gameSettings.thirdPersonView > 0 ? cameraPositionY : 0), 0);
         eye = DynamXGeometry.rotateVectorByQuaternion(eye, vRotation.inverse());
         d0 += eye.x;
         d1 += eye.y;

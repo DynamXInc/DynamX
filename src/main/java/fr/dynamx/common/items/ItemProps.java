@@ -17,7 +17,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class ItemProps<T extends PropObject<?>> extends DynamXItemSpawner<PropObject<?>> {
+public class ItemProps<T extends PropObject<T>> extends DynamXItemSpawner<T> {
 
     protected final int textureNum;
 

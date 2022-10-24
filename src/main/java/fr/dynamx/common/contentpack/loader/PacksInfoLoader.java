@@ -6,7 +6,7 @@ import fr.dynamx.common.contentpack.PackInfo;
 import javax.annotation.Nullable;
 import java.util.function.BiFunction;
 
-public class PacksInfoLoader extends InfoLoader<PackInfo, PackInfo> {
+public class PacksInfoLoader extends InfoLoader<PackInfo> {
     public PacksInfoLoader(String prefix, BiFunction<String, String, PackInfo> assetCreator, @Nullable SubInfoTypesRegistry<PackInfo> infoTypesRegistry) {
         super(prefix, assetCreator, infoTypesRegistry);
     }

@@ -145,6 +145,8 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
             VehicleDebugRenderer.PlayerCollisionsDebug.motion = Vector3fPool.getPermanentVector(data);
         Quaternion withRotation = with.getCollidableRotation();
         Quaternion inversedWithRotation = withRotation.inverse();
+        if(inversedWithRotation == null) //error when loading world todo find why
+            return Vector3fPool.get(oldx, oldy, oldz);
         data = rotate(data, inversedWithRotation);
         mx = data.x;
         my = data.y;
@@ -153,9 +155,9 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
 
         List<EnumFacing> collisionFaces = new ArrayList<>();
         List<MutableBoundingBox> list1 = with.getCollisionBoxes();
-        AxisAlignedBB tempBB = rotateBB(withPosition, Vector3fPool.get((float) entity.posX, (float) entity.posY, (float) entity.posZ), entity.getEntityBoundingBox(), withRotation.inverse());
+        AxisAlignedBB tempBB = rotateBB(withPosition, Vector3fPool.get((float) entity.posX, (float) entity.posY, (float) entity.posZ), entity.getEntityBoundingBox(), inversedWithRotation);
         Vector3f offset = with.getCollisionOffset();
-        offset = DynamXGeometry.rotateVectorByQuaternion(offset, withRotation.inverse());
+        offset = DynamXGeometry.rotateVectorByQuaternion(offset, inversedWithRotation);
         tempBB = tempBB.offset(offset.x, offset.y, offset.z);
         //      if(!(with instanceof PhysicsEntity)) //idk why this is needed for blocks
 //            tempBB = tempBB.offset(-0.5f, 0, -0.5f);

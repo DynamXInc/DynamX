@@ -5,7 +5,7 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.contentpack.registry.*;
 import fr.dynamx.api.entities.IModuleContainer;
-import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfoBuilder;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.WheelsModule;
@@ -16,7 +16,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.AxisAlignedBB;
 
 @RegisteredSubInfoType(name = "wheel", registries = SubInfoTypeRegistries.WHEELED_VEHICLES, strictName = false)
-public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfoBuilder> {
+public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfo> {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("isRight".equals(key))
@@ -45,12 +45,12 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
 
     private PartWheelInfo defaultWheelInfo;
 
-    public PartWheel(ModularVehicleInfoBuilder owner, String partName) {
+    public PartWheel(ModularVehicleInfo owner, String partName) {
         super(owner, partName, 0.75f, 0.75f);
     }
 
     @Override
-    public void appendTo(ModularVehicleInfoBuilder owner) {
+    public void appendTo(ModularVehicleInfo owner) {
         super.appendTo(owner);
         if (getRotationPoint() == null)
             rotationPoint = getPosition();
@@ -88,7 +88,7 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
         return false;
     }
 
-    public void setDefaultWheelInfo(ModularVehicleInfoBuilder vehicleInfoBuilder, PartWheelInfo partWheelInfo) {
+    public void setDefaultWheelInfo(PartWheelInfo partWheelInfo) {
         if (partWheelInfo == null) {
             throw new IllegalArgumentException("Attached wheel info " + getDefaultWheelName() + " was not found !");
         } else {

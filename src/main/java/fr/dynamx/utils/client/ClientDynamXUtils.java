@@ -4,6 +4,7 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.network.packets.MessagePlayerToRagdoll;
 import fr.dynamx.utils.maths.DynamXGeometry;
+import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import net.minecraft.entity.player.EntityPlayer;
@@ -40,7 +41,7 @@ public class ClientDynamXUtils {
      */
     public static Quaternion computeInterpolatedGlQuaternion(com.jme3.math.Quaternion prevRotation, com.jme3.math.Quaternion rotation, float step, boolean inverse) {
         com.jme3.math.Quaternion cache = QuaternionPool.get();
-        DynamXGeometry.slerp(prevRotation, rotation, cache, step);
+        DynamXMath.slerp(step, prevRotation, rotation, cache);
         if (inverse)
             DynamXGeometry.inverseQuaternion(cache);
         return GlQuaternionPool.get(cache);

@@ -1,9 +1,12 @@
 package fr.dynamx.common.physics.entities;
 
+import com.jme3.bullet.collision.Activation;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.entities.PhysicsEntity;
+import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import fr.dynamx.utils.physics.DynamXPhysicsHelper;
 import net.minecraft.block.BlockLiquid;
@@ -18,24 +21,29 @@ import net.minecraft.util.math.Vec3d;
  * @param <T> The entity type
  */
 public abstract class EntityPhysicsHandler<T extends PhysicsEntity<?>> extends AbstractEntityPhysicsHandler<T, PhysicsRigidBody> {
-    private final Vector3f linearVel;
-    private final Vector3f rotationalVel;
+    private final Vector3f linearVel = new Vector3f();
+    private final Vector3f rotationalVel = new Vector3f();
     private boolean appliedBuoy;
 
     public EntityPhysicsHandler(T entity) {
         super(entity);
-        this.linearVel = new Vector3f();
-        this.rotationalVel = new Vector3f();
+        collisionObject.setPhysicsRotation(entity.physicsRotation);
     }
 
     @Override
     public void update() {
         super.update();
+        /* todo more tests to correctly fix this
+        if(collisionObject.getActivationState() == Activation.error){
+            handledEntity.setDead();
+            DynamXMain.log.error("Fatal error on " + handledEntity.getName());
+            return;
+        }*/
         getCollisionObject().getLinearVelocity(linearVel);
         getCollisionObject().getAngularVelocity(rotationalVel);
 
         //Buoyancy effect W.I.P
-        if (getCollisionObject().isInWorld()) {
+        if (collisionObject.isInWorld()) {
             Vector3f bodyPos = getPosition();
             BlockPos pos = new BlockPos(bodyPos.x, bodyPos.y, bodyPos.z);
             IBlockState blockState = handledEntity.world.getBlockState(pos);
@@ -43,7 +51,8 @@ public abstract class EntityPhysicsHandler<T extends PhysicsEntity<?>> extends A
                 float liquidHeight = BlockLiquid.getBlockLiquidHeight(blockState, handledEntity.world, pos);
                 if (liquidHeight > bodyPos.y % 1.0) {
                     appliedBuoy = true;
-                    collisionObject.setGravity(Vector3fPool.get(0.0f, 2.0f, 0.0f));
+                    float normalizedMass = DynamXMath.normalizeBetween(collisionObject.getMass(), 0, 1500, 1, 2);
+                    collisionObject.setGravity(Vector3fPool.get(0.0f, 2 - normalizedMass, 0.0f));
                     Vector3f waterVelocity = Vector3fPool.get(blockState.getBlock().modifyAcceleration(handledEntity.world, pos, null, new Vec3d(0, 0, 0)));
                     Vector3f bodyVelocity = linearVel;
                     Vector3f angularVelocity = rotationalVel;

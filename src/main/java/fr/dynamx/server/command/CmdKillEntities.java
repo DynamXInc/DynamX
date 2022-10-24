@@ -71,12 +71,16 @@ public class CmdKillEntities implements ISubCommand {
         }
     }
 
-    private void killEntities(List<Entity> entityList, ICommandSender sender, String name) throws CommandException {
+    private void killEntities(List<Entity> entityList, ICommandSender sender, String name) {
         if (entityList.isEmpty()) {
             sender.sendMessage(new TextComponentString("§cNo " + name + " found"));
             return;
         }
         entityList.forEach(Entity::setDead);
+        if(name.equals("all")) {
+            sender.sendMessage(new TextComponentString(TextFormatting.GOLD + "" + entityList.size() + " " + TextFormatting.GREEN +  "entities have been killed."));
+            return;
+        }
         sender.sendMessage(new TextComponentString(TextFormatting.GOLD + "" + entityList.size() + " " + TextFormatting.GREEN + name + " have been killed."));
     }
 }

@@ -13,7 +13,7 @@ import net.minecraft.util.EnumParticleTypes;
 import java.util.Collections;
 import java.util.List;
 
-@RegisteredSubInfoType(name = "emitter", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.BLOCKS_AND_PROPS}, strictName = false)
+@RegisteredSubInfoType(name = "emitter", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.BLOCKS_AND_PROPS, SubInfoTypeRegistries.HELICOPTER}, strictName = false)
 public class ParticleEmitterInfo<T extends ISubInfoTypeOwner<T> & ParticleEmitterInfo.IParticleEmitterContainer> extends SubInfoType<T> {
     @Getter
     private final String emitterName;

@@ -8,6 +8,8 @@ import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.EngineModule;
+import fr.dynamx.common.entities.modules.HelicopterEngineModule;
+import fr.dynamx.common.entities.vehicles.HelicopterEntity;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -133,7 +135,11 @@ public class EngineInfo extends SubInfoTypeOwner<EngineInfo> implements ISubInfo
 
     @Override
     public void addModules(BaseVehicleEntity<?> entity, ModuleListBuilder modules) {
-        modules.add(new EngineModule(entity, this));
+        //todo clean this
+        if(entity instanceof HelicopterEntity)
+            modules.add(new HelicopterEngineModule(entity, this));
+        else
+            modules.add(new EngineModule(entity, this));
     }
 }
 

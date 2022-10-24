@@ -56,6 +56,7 @@ public class DoorEntity<T extends PackEntityPhysicsHandler<PartDoor, ?>> extends
 
     @Override
     protected PartDoor createInfo(String infoName) {
+        //TODO THIS IS BAD
         return getVehicleEntity(world) instanceof TrailerEntity
                 ? DynamXObjectLoaders.TRAILERS.findInfo(infoName).getPartByTypeAndId(PartDoor.class, getDoorID())
                 : DynamXObjectLoaders.WHEELED_VEHICLES.findInfo(infoName).getPartByTypeAndId(PartDoor.class, getDoorID());

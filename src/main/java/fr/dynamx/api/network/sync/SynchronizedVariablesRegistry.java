@@ -138,6 +138,7 @@ public class SynchronizedVariablesRegistry {
         //addSyncVar(DoorsSynchronizedVariable::new, (s, e) -> e.getEntity() instanceof IHaveModule.IHaveSeats && ((IHaveModule.IHaveSeats)e.getEntity()).getSeats().hasDoors() && s.isServer());
         addSyncVar(AttachedDoorsSynchronizedVariable.NAME, AttachedDoorsSynchronizedVariable::new);
         addSyncVar(RagdollPartsSynchronizedVariable.NAME, RagdollPartsSynchronizedVariable::new);
+        addSyncVar(VehicleSynchronizedVariables.HelicopterControls.NAME, VehicleSynchronizedVariables.HelicopterControls::new);
     }
 
     public static <T extends PhysicsEntity<?>> PooledHashMap<Integer, SynchronizedVariable<T>> retainSyncVars(Map<Integer, SynchronizedVariable<T>> syncVars, Map<Integer, SyncTarget> changes, SyncTarget target) {

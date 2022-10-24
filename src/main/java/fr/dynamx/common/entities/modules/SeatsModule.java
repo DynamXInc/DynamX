@@ -136,6 +136,12 @@ public class SeatsModule implements ISeatsModule {
             f2 = MathHelper.wrapDegrees(passenger.prevRotationPitch);
             f3 = MathHelper.clamp(f2, seat.getMaxPitch(), seat.getMinPitch());
             passenger.prevRotationPitch = f3;
+
+            //fixme for helicopter
+            passenger.rotationYaw = 0;
+            passenger.prevRotationYaw = 0;
+            passenger.rotationPitch = 0;
+            passenger.prevRotationPitch = 0;
         }
     }
 

@@ -70,7 +70,7 @@ public class CameraSystem {
         Entity renderEntity = event.getEntity();
 
         //Compute smoothed vehicle rotation, on axes according to camera mode
-        animateCameraRotation(vehicle.prevRenderRotation, vehicle.renderRotation, (float) event.getRenderPartialTicks(), 0.1f);
+        animateCameraRotation(vehicle.prevRenderRotation, vehicle.renderRotation, (float) event.getRenderPartialTicks(), 1);//fixme for helicopter 0.1f);
 
         //Apply camera zoom
         if (ClientEventHandler.MC.gameSettings.thirdPersonView > 0) {

@@ -90,6 +90,7 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
         RenderingRegistry.registerEntityRenderingHandler(CarEntity.class, RenderBaseVehicle.RenderCar::new);
         RenderingRegistry.registerEntityRenderingHandler(BoatEntity.class, RenderBaseVehicle.RenderBoat::new);
         RenderingRegistry.registerEntityRenderingHandler(TrailerEntity.class, RenderBaseVehicle.RenderTrailer::new);
+        RenderingRegistry.registerEntityRenderingHandler(HelicopterEntity.class, RenderBaseVehicle.RenderHelicopter::new);
         RenderingRegistry.registerEntityRenderingHandler(PropsEntity.class, RenderProp::new);
         RenderingRegistry.registerEntityRenderingHandler(DoorEntity.class, RenderDoor::new);
         RenderingRegistry.registerEntityRenderingHandler(RagdollEntity.class, RenderRagdoll::new);

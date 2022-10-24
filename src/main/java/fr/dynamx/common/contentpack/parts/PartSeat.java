@@ -26,7 +26,7 @@ import net.minecraft.util.text.TextComponentString;
 
 import javax.annotation.Nullable;
 
-@RegisteredSubInfoType(name = "seat", registries = SubInfoTypeRegistries.WHEELED_VEHICLES, strictName = false)
+@RegisteredSubInfoType(name = "seat", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER}, strictName = false)
 public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfo> {
     @PackFileProperty(configNames = "Driver")
     private boolean isDriver;
@@ -99,29 +99,27 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
             }
         }
         if (hasDoor()) {
-            if (vehicleEntity instanceof CarEntity) {
-                PartDoor door = getLinkedPartDoor(vehicleEntity);
-                if (door != null) {
-                    if (!door.isPlayerMounting()) {
-                        IModuleContainer.IDoorContainer doorContainer = (IModuleContainer.IDoorContainer) vehicleEntity;
-                        if (doorContainer.getDoors() == null)
-                            return false;
-                        if (!door.isEnabled() || doorContainer.getDoors().isDoorAttached(door.getId())) {
-                            if (!door.isEnabled() || doorContainer.getDoors().isDoorOpened(door.getId())) {
-                                boolean didMount = mount(vehicleEntity, seats, player);
-                                if (didMount) {
-                                    vehicleEntity.getModuleByType(DoorsModule.class).setDoorState(door.getId(), DoorsModule.DoorState.CLOSE);
-                                }
-                                return didMount;
-                            } else {
-                                return door.interact(vehicleEntity, player);
+            PartDoor door = getLinkedPartDoor(vehicleEntity);
+            if (door != null) {
+                if (!door.isPlayerMounting()) {
+                    IModuleContainer.IDoorContainer doorContainer = (IModuleContainer.IDoorContainer) vehicleEntity;
+                    if (doorContainer.getDoors() == null)
+                        return false;
+                    if (!door.isEnabled() || doorContainer.getDoors().isDoorAttached(door.getId())) {
+                        if (!door.isEnabled() || doorContainer.getDoors().isDoorOpened(door.getId())) {
+                            boolean didMount = mount(vehicleEntity, seats, player);
+                            if (didMount) {
+                                vehicleEntity.getModuleByType(DoorsModule.class).setDoorState(door.getId(), DoorsModule.DoorState.CLOSE);
                             }
+                            return didMount;
+                        } else {
+                            return door.interact(vehicleEntity, player);
                         }
-                    } else
-                        DynamXMain.log.error("Cannot mount : door not attached : " + linkedDoor);
+                    }
                 } else
-                    DynamXMain.log.error("Cannot mount : part door not found : " + linkedDoor);
-            }
+                    DynamXMain.log.error("Cannot mount : door not attached : " + linkedDoor);
+            } else
+                DynamXMain.log.error("Cannot mount : part door not found : " + linkedDoor);
         } else {
             return mount(vehicleEntity, seats, player);
         }

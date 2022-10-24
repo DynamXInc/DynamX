@@ -15,7 +15,7 @@ import fr.dynamx.utils.debug.DynamXDebugOptions;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.AxisAlignedBB;
 
-@RegisteredSubInfoType(name = "wheel", registries = SubInfoTypeRegistries.WHEELED_VEHICLES, strictName = false)
+@RegisteredSubInfoType(name = "wheel", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER}, strictName = false)
 public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfo> {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
@@ -68,7 +68,8 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
 
     @Override
     public void addPart(BaseVehicleEntity<?> vehicle) {
-        if (!(vehicle instanceof IModuleContainer.IPropulsionContainer) || !(((IModuleContainer.IPropulsionContainer) vehicle).getPropulsion() instanceof WheelsModule))
+        //todo clean condition
+        if(!(vehicle instanceof IModuleContainer.IPropulsionContainer) || !(((IModuleContainer.IPropulsionContainer) vehicle).getPropulsion().getPhysicsHandler()  instanceof WheelsPhysicsHandler))
             throw new IllegalStateException("The entity " + vehicle + " has PartWheels, but does not implement IHavePropulsion or the propulsion is not a WheelsModule !");
         ((WheelsPhysicsHandler) ((IModuleContainer.IPropulsionContainer) vehicle).getPropulsion().getPhysicsHandler()).addWheel(this, getDefaultWheelInfo());
     }

@@ -16,6 +16,7 @@ import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.common.entities.modules.EngineModule;
+import fr.dynamx.common.entities.modules.HelicopterEngineModule;
 import fr.dynamx.common.entities.modules.WheelsModule;
 import fr.dynamx.common.network.sync.MessagePhysicsEntitySync;
 import fr.dynamx.common.physics.entities.BaseWheeledVehiclePhysicsHandler;
@@ -355,9 +356,11 @@ public class VehicleSynchronizedVariables {
 
         @Override
         public SyncTarget getValueFrom(A entity, PhysicsEntityNetHandler<A> network, Side side, int syncTick) {
+            boolean changed = false;
+            //FIXME FIX THIS helicopter
+            /*
             this.lastGetValTick = entity.ticksExisted;
             this.lastGetValTime = System.currentTimeMillis();
-            boolean changed = false;
             WheelsModule m = ((IModuleContainer.IPropulsionContainer<WheelsModule>) entity).getPropulsion();
             if (visualProperties == null) //If not initialized
             {
@@ -371,7 +374,7 @@ public class VehicleSynchronizedVariables {
                         visualProperties[i] = m.visualProperties[i];
                     }
                 }
-            }
+            }*/
             lastTarget = changed ? (side.isServer() ? SyncTarget.SERVER : SyncTarget.SPECTATORS_PEDESTRIANS) : SyncTarget.NONE;
             return changed ? (side.isServer() ? SyncTarget.SERVER : SyncTarget.SPECTATORS_PEDESTRIANS) : SyncTarget.NONE;
         }
@@ -471,18 +474,20 @@ public class VehicleSynchronizedVariables {
         @Override
         public SyncTarget getValueFrom(A entity, PhysicsEntityNetHandler<A> network, Side side, int syncTick) {
             boolean changed = syncTick % 30 == 0; //Sync all each 1.5 second, even if it has not changed
-            EngineModule engine = (EngineModule) ((IModuleContainer.IEngineContainer) entity).getEngine();
-            //Detect changes and update values
-            if (controls != engine.getControls()) {
-                controls = engine.getControls();
-                changed = true;
+            if(((IModuleContainer.IEngineContainer) entity).getEngine() instanceof EngineModule) {
+                EngineModule engine = (EngineModule) ((IModuleContainer.IEngineContainer) entity).getEngine();
+                //Detect changes and update values
+                if (controls != engine.getControls()) {
+                    controls = engine.getControls();
+                    changed = true;
+                }
+                if (speedLimit != engine.getSpeedLimit()) {
+                    speedLimit = engine.getSpeedLimit();
+                    changed = true;
+                }
+                if (changed)
+                    SyncTracker.addChange("controls", "main");
             }
-            if (speedLimit != engine.getSpeedLimit()) {
-                speedLimit = engine.getSpeedLimit();
-                changed = true;
-            }
-            if (changed)
-                SyncTracker.addChange("controls", "main");
             return changed ? SyncTarget.spectatorForSide(side) : SyncTarget.NONE;
         }
 
@@ -606,6 +611,51 @@ public class VehicleSynchronizedVariables {
             for (int i = 0; i < size; i++) {
                 attachedDoors.put(buf.readByte(), buf.readInt());
             }*/
+        }
+    }
+
+    /**
+     * All player inputs for a {@link BaseVehicleEntity} that have an {@link fr.dynamx.common.entities.modules.EngineModule}
+     */
+    public static class HelicopterControls<A extends BaseVehicleEntity<?>> implements SynchronizedVariable<A> {
+        public static final ResourceLocation NAME = new ResourceLocation(DynamXConstants.ID, "h_controls");
+
+        private int controls;
+
+        @Override
+        public SyncTarget getValueFrom(A entity, PhysicsEntityNetHandler<A> network, Side side, int syncTick) {
+            boolean changed = syncTick % 30 == 0; //Sync all each 1.5 second, even if it has not changed
+            HelicopterEngineModule engine = (HelicopterEngineModule) ((IModuleContainer.IEngineContainer) entity).getEngine();
+            //Detect changes and update values
+            if (controls != engine.getControls()) {
+                controls = engine.getControls();
+                changed = true;
+            }
+            if (changed)
+                SyncTracker.addChange("controls", "main");
+            return changed ? SyncTarget.spectatorForSide(side) : SyncTarget.NONE;
+        }
+
+        @Override
+        public void setValueTo(A entity, PhysicsEntityNetHandler<A> network, MessagePhysicsEntitySync msg, Side side) {
+            HelicopterEngineModule engine = (HelicopterEngineModule) ((IModuleContainer.IEngineContainer) entity).getEngine();
+            engine.setControls(controls);
+        }
+
+        @Override
+        public void write(ByteBuf buf, boolean compress) {
+            buf.writeInt(controls);
+        }
+
+        @Override
+        public void writeEntityValues(A entity, ByteBuf buf) {
+            HelicopterEngineModule engine = (HelicopterEngineModule) ((IModuleContainer.IEngineContainer) entity).getEngine();
+            buf.writeInt(engine.getControls());
+        }
+
+        @Override
+        public void read(ByteBuf buf) {
+            controls = buf.readInt();
         }
     }
 }

@@ -15,7 +15,7 @@ import fr.dynamx.utils.debug.DynamXDebugOptions;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 
-@RegisteredSubInfoType(name = "storage", registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
+@RegisteredSubInfoType(name = "storage", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER})
 public class PartStorage extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfo> //TODO FIX MULTI-STORAGE ON ONE ENTITY
 {
     @PackFileProperty(configNames = "StorageSize")

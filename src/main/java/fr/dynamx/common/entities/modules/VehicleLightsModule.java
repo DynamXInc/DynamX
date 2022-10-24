@@ -5,7 +5,7 @@ import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
-import fr.dynamx.client.renders.model.ObjModelClient;
+import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.client.renders.vehicle.RenderBaseVehicle;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.parts.PartLightSource;
@@ -72,7 +72,7 @@ public class VehicleLightsModule implements IPhysicsModule<BaseVehiclePhysicsHan
         if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.RenderVehicleEntityEvent(VehicleEntityEvent.RenderVehicleEntityEvent.Type.LIGHTS, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks))) {
             if (carEntity.hasModuleOfType(VehicleLightsModule.class)) {
                 ObjModelRenderer vehicleModel = DynamXContext.getObjModelRegistry().getModel(carEntity.getPackInfo().getModel());
-                for (PartLightSource.CompoundLight sources : carEntity.getPackInfo().getLightSources()) {
+                for (PartLightSource.CompoundLight sources : carEntity.getPackInfo().getLightSources().values()) {
                     PartLightSource onSource = null;
                     for (PartLightSource source : sources.getSources()) {
                         if (isLightOn(source.getLightId())) {

@@ -5,10 +5,11 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.registry.*;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
+import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
+import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.VehicleLightsModule;
-import fr.dynamx.common.obj.texture.TextureData;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;

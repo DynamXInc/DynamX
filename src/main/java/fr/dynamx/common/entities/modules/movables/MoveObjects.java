@@ -22,7 +22,8 @@ public class MoveObjects extends MovableModule {
     //TODO PRIVATISER
 
     public final SynchronizedEntityVariable<EntityPlayer> picker = new SynchronizedEntityVariable<>((variable, value) -> {
-        entity.getSynchronizer().onPlayerStartControlling(value, false);
+        if(value != null)
+            entity.getSynchronizer().onPlayerStartControlling(value, false);
     }, SynchronizationRules.SERVER_TO_CLIENTS, new SynchronizedVariableSerializer<EntityPlayer>() {
         @Override
         public void writeObject(ByteBuf buffer, EntityPlayer object) {
@@ -41,7 +42,8 @@ public class MoveObjects extends MovableModule {
         }
     });
     public final SynchronizedEntityVariable<Boolean> isPicked = new SynchronizedEntityVariable<>((variable, value) -> {
-        entity.getSynchronizer().onPlayerStopControlling(picker.get(), false);
+        if(picker.get() != null)
+            entity.getSynchronizer().onPlayerStopControlling(picker.get(), false);
     }, SynchronizationRules.SERVER_TO_CLIENTS, null, false);
     public final SynchronizedEntityVariable<PhysicsEntity<?>> pickedEntity = new SynchronizedEntityVariable<>(SynchronizationRules.SERVER_TO_CLIENTS, new SynchronizedVariableSerializer<PhysicsEntity<?>>() {
         @Override

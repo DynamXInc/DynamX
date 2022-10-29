@@ -28,13 +28,13 @@ public class EntityPhysicsState {
 
     public void addToOlders(Vector3f offsetn, Quaternion offsetQuat, float step) {
         Vector3f finalOffsetn = Vector3fPool.get(offsetn);
-        PhysicsEntityNetHandler<? extends PhysicsEntity<?>> h = entityIn.getNetwork();
+        /*PhysicsEntityNetHandler<? extends PhysicsEntity<?>> h = entityIn.getNetwork();
         h.getOldStates().forEach((i, s) -> {
             if (i < ClientPhysicsSyncManager.simulationTime) {
                 s.pos.addLocal(finalOffsetn);
                 DynamXMath.slerp(step, s.rotation, offsetQuat, s.rotation);
             }
-        });
+        });*/
     }
 
     public void interpolateDeltas(Vector3f with, Quaternion quaternion, boolean bodyActive, int step, int pass) {

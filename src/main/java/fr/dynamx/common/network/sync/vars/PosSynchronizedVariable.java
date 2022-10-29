@@ -145,17 +145,17 @@ public class PosSynchronizedVariable implements SynchronizedVariable<PhysicsEnti
             if (interpolatingState == null && msg != null) //If interpolation isn't started
             {
                 //System.out.println("Packet received at "+ ClientPhysicsSyncManager.simulationTime+", time is "+ msg.simulationTimeClient +" for entity "+entity.getEntityId()+" rcv at ticks existed "+entity.ticksExisted);
-                EntityPhysicsState state = entity.getNetwork().getStateAndClearOlders(msg.getSimulationTimeClient()); //Get the state corresponding to the tick of the data
-                interpolatingState = state; //Interpolate over it
+                //todo sync EntityPhysicsState state = entity.getNetwork().getStateAndClearOlders(msg.getSimulationTimeClient()); //Get the state corresponding to the tick of the data
+                //interpolatingState = state; //Interpolate over it
 
                 //Debug
                 //float[] rotations = DynamXUtils.quaternionToEuler(rotation, entity.rotationYaw, entity.rotationPitch, entity.rotationRoll); //Prev or not prev ?
-                if (state != null) {
+                /* todo sync if (state != null) {
                     //Smoothly correct entity pos from server's data, only if we are not driving this entity
                     if (!network.getSimulationHolder().ownsPhysics(Side.CLIENT)) {
                         interpolatingState.interpolateDeltas(Vector3fPool.get(posX, posY, posZ), rotation, bodyActive, entity.getSyncTickRate(), 0);
                     }
-                }
+                }*/
             } else if (interpolatingState != null && !network.getSimulationHolder().ownsPhysics(Side.CLIENT)) { //Second interpolation step
                 interpolatingState.interpolateDeltas(Vector3fPool.get(posX, posY, posZ), rotation, bodyActive, entity.getSyncTickRate(), 1);
             }

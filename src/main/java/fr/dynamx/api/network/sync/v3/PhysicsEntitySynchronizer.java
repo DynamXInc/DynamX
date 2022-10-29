@@ -13,6 +13,7 @@ import fr.dynamx.common.physics.player.WalkingOnPlayerController;
 import fr.dynamx.utils.debug.Profiler;
 import fr.dynamx.utils.debug.SyncTracker;
 import fr.dynamx.utils.optimization.PooledHashMap;
+import lombok.Getter;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
@@ -44,6 +45,7 @@ public abstract class PhysicsEntitySynchronizer<T extends PhysicsEntity<?>> {
     /**
      * The entity that we sync
      */
+    @Getter
     protected final T entity;
 
     public PhysicsEntitySynchronizer(T entity) {
@@ -167,5 +169,6 @@ public abstract class PhysicsEntitySynchronizer<T extends PhysicsEntity<?>> {
         if (entity instanceof ModularPhysicsEntity) {
             ((ModularPhysicsEntity<?>) entity).getModules().forEach(m -> m.onSetSimulationHolder(simulationHolder, changeContext));
         }
+        SynchronizedVariablesRegistry.setSyncVarsForContext(entity.world.isRemote ? Side.CLIENT : Side.SERVER, this);
     }
 }

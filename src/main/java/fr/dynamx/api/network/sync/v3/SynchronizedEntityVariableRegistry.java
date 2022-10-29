@@ -78,6 +78,7 @@ public class SynchronizedEntityVariableRegistry {
      * Internal variables, example to add your own variables
      */
     static {
+        addSyncVar(DynamXSynchronizedVariables.POS);
         addSyncVar(DynamXSynchronizedVariables.CONTROLS);
         addSyncVar(DynamXSynchronizedVariables.SPEED_LIMIT);
         addSyncVar(DynamXSynchronizedVariables.ENGINE_PROPERTIES);
@@ -85,6 +86,13 @@ public class SynchronizedEntityVariableRegistry {
         addSyncVar(DynamXSynchronizedVariables.WHEEL_STATES);
         addSyncVar(DynamXSynchronizedVariables.WHEEL_PROPERTIES);
         addSyncVar(DynamXSynchronizedVariables.WHEEL_VISUALS);
+        addSyncVar(DynamXSynchronizedVariables.MOVABLE_MOVER);
+        addSyncVar(DynamXSynchronizedVariables.MOVABLE_PICK_DISTANCE);
+        addSyncVar(DynamXSynchronizedVariables.MOVABLE_PICK_POSITION);
+        addSyncVar(DynamXSynchronizedVariables.MOVABLE_PICKER);
+        addSyncVar(DynamXSynchronizedVariables.MOVABLE_PICKED_ENTITY);
+        addSyncVar(DynamXSynchronizedVariables.MOVABLE_IS_PICKED);
+        addSyncVar(DynamXSynchronizedVariables.DOORS_STATES);
     }
 
     public static PooledHashMap<Integer, SynchronizedEntityVariable<?>> retainSyncVars(Map<Integer, SynchronizedEntityVariable<?>> syncVars, Map<Integer, SyncTarget> changes, SyncTarget target) {

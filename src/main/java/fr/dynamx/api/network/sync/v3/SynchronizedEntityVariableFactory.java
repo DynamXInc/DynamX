@@ -4,6 +4,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import io.netty.buffer.ByteBuf;
 
+//TODO IMPROVE THIS
 public class SynchronizedEntityVariableFactory {
     public static final SynchronizedVariableSerializer<Byte> byteSerializer = new SynchronizedVariableSerializer<Byte>() {
         @Override
@@ -14,6 +15,11 @@ public class SynchronizedEntityVariableFactory {
         @Override
         public Byte readObject(ByteBuf buffer, Byte currentValue) {
             return buffer.readByte();
+        }
+
+        @Override
+        public String toString() {
+            return "byte";
         }
     };
     public static final SynchronizedVariableSerializer<Integer> intSerializer = new SynchronizedVariableSerializer<Integer>() {
@@ -26,6 +32,11 @@ public class SynchronizedEntityVariableFactory {
         public Integer readObject(ByteBuf buffer, Integer currentValue) {
             return buffer.readInt();
         }
+
+        @Override
+        public String toString() {
+            return "int";
+        }
     };
     public static final SynchronizedVariableSerializer<Float> floatSerializer = new SynchronizedVariableSerializer<Float>() {
         @Override
@@ -37,6 +48,11 @@ public class SynchronizedEntityVariableFactory {
         public Float readObject(ByteBuf buffer, Float currentValue) {
             return buffer.readFloat();
         }
+
+        @Override
+        public String toString() {
+            return "float";
+        }
     };
     public static final SynchronizedVariableSerializer<Boolean> booleanSerializer = new SynchronizedVariableSerializer<Boolean>() {
         @Override
@@ -47,6 +63,11 @@ public class SynchronizedEntityVariableFactory {
         @Override
         public Boolean readObject(ByteBuf buffer, Boolean currentValue) {
             return buffer.readBoolean();
+        }
+
+        @Override
+        public String toString() {
+            return "boolean";
         }
     };
     public static final SynchronizedVariableSerializer<float[]> floatArraySerializer = new SynchronizedVariableSerializer<float[]>() {
@@ -64,6 +85,11 @@ public class SynchronizedEntityVariableFactory {
                 currentValue[i] = buffer.readFloat();
             return currentValue;
         }
+
+        @Override
+        public String toString() {
+            return "float[]";
+        }
     };
     public static final SynchronizedVariableSerializer<Vector3f> vector3fSerializer = new SynchronizedVariableSerializer<Vector3f>() {
         @Override
@@ -76,6 +102,11 @@ public class SynchronizedEntityVariableFactory {
         @Override
         public Vector3f readObject(ByteBuf buffer, Vector3f currentValue) {
             return currentValue.set(buffer.readFloat(), buffer.readFloat(), buffer.readFloat());
+        }
+
+        @Override
+        public String toString() {
+            return "vector3f";
         }
     };
     public static final SynchronizedVariableSerializer<Quaternion> quaternionSerializer = new SynchronizedVariableSerializer<Quaternion>() {
@@ -91,6 +122,11 @@ public class SynchronizedEntityVariableFactory {
         public Quaternion readObject(ByteBuf buffer, Quaternion currentValue) {
             return currentValue.set(buffer.readFloat(), buffer.readFloat(), buffer.readFloat(), buffer.readFloat());
         }
+
+        @Override
+        public String toString() {
+            return "quaternion";
+        }
     };
 
     public static <T> SynchronizedVariableSerializer<T> getSerializer(Class<T> dataType) {
@@ -100,6 +136,12 @@ public class SynchronizedEntityVariableFactory {
             return (SynchronizedVariableSerializer<T>) floatSerializer;
         if(dataType == float[].class)
             return (SynchronizedVariableSerializer<T>) floatArraySerializer;
+        if(dataType == Boolean.class)
+            return (SynchronizedVariableSerializer<T>) booleanSerializer;
+        if(dataType == Vector3f.class)
+            return (SynchronizedVariableSerializer<T>) vector3fSerializer;
+        if(dataType == Quaternion.class)
+            return (SynchronizedVariableSerializer<T>) quaternionSerializer;
         throw new IllegalArgumentException("Not serializable " + dataType);
     }
 }

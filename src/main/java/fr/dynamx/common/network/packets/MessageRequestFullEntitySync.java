@@ -53,7 +53,7 @@ public class MessageRequestFullEntitySync extends PhysicsEntityMessage<MessageRe
         if (ent instanceof PhysicsEntity) {
             PhysicsEntity<?> entity = (PhysicsEntity<?>) ent;
             if (target.connection != null && target.connection.getNetworkManager().isChannelOpen()) {
-                DynamXContext.getNetwork().getVanillaNetwork().sendPacket(new MessagePhysicsEntitySync(entity, ServerPhysicsSyncManager.getTime(target), entity.getNetwork().getOutputSyncVars(), MessagePhysicsEntitySync.SyncType.TCP_RESYNC), EnumPacketTarget.PLAYER, target);
+                //todo sync DynamXContext.getNetwork().getVanillaNetwork().sendPacket(new MessagePhysicsEntitySync(entity, ServerPhysicsSyncManager.getTime(target), entity.getNetwork().getOutputSyncVars(), MessagePhysicsEntitySync.SyncType.TCP_RESYNC), EnumPacketTarget.PLAYER, target);
                 if (entity instanceof IModuleContainer.ISeatsContainer) {
                     System.out.println("Forcing seats sync !");
                     DynamXContext.getNetwork().sendToClient(new MessageSeatsSync((IModuleContainer.ISeatsContainer) entity), EnumPacketTarget.PLAYER, target);

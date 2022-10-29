@@ -24,7 +24,8 @@ public class PickObjects extends MovableModule {
 
     public Point2PointJoint joint;
     public final SynchronizedEntityVariable<EntityPlayer> mover = new SynchronizedEntityVariable<>((variable, value) -> {
-        entity.getSynchronizer().onPlayerStartControlling(value, false);
+        if(value != null)
+            entity.getSynchronizer().onPlayerStartControlling(value, false);
     }, SynchronizationRules.SERVER_TO_CLIENTS, new SynchronizedVariableSerializer<EntityPlayer>() {
         @Override
         public void writeObject(ByteBuf buffer, EntityPlayer object) {

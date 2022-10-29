@@ -303,6 +303,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
                 visualProperties[VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.COLLISIONY)] = pos.y;
                 visualProperties[VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.COLLISIONZ)] = pos.z;
             }
+            //TODO SYNC DETECT REAL CHANGES
             this.visualProperties.setChanged(true);
             for (byte b = 0; b < n; b++) {
                 WheelPhysics w = wheelsPhysics.getWheel(b);

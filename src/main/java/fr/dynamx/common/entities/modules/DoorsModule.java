@@ -190,7 +190,7 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
     @Override
     public void addSynchronizedVariables(Side side, SimulationHolder simulationHolder) {
         if (simulationHolder.isPhysicsAuthority(side)) {
-            variables.add(AttachedDoorsSynchronizedVariable.NAME);
+            //TODO SYNC variables.add(AttachedDoorsSynchronizedVariable.NAME);
         }
         vehicleEntity.getSynchronizer().registerVariable(DynamXSynchronizedVariables.DOORS_STATES, doorsState);
     }

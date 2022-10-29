@@ -78,7 +78,7 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
             entity.physicsHandler.setForceActivation(true);
         }
         setSimulationHolder(SimulationHolder.DRIVER_SP);
-        if (player.world.isRemote && player.isUser() && false) {
+        if (player.world.isRemote && player.isUser()) {
             if (entity instanceof BaseVehicleEntity) {
                 for (Object module : ((BaseVehicleEntity) entity).getModules()) {
                     IVehicleController c = ((IPhysicsModule) module).createNewController();
@@ -87,6 +87,8 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
                 }
             }
         }
+
+        System.out.println("Active state " + getSynchronizedVariables());
     }
 
     @Override
@@ -98,6 +100,8 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
         if (player.world.isRemote && player.isUser()) {
             controllers.clear();
         }
+
+        System.out.println("Active state " + getSynchronizedVariables());
     }
 
     @Override
@@ -114,7 +118,7 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
 
     @Override
     public void onPostPhysicsTick(Profiler profiler) {
-        //entity.postUpdatePhysicsWrapper(profiler, entity.usesPhysicsWorld());
+        entity.postUpdatePhysicsWrapper(profiler, entity.usesPhysicsWorld());
 
         Entity other = getOtherSideEntity();
         if (other instanceof PhysicsEntity && ((PhysicsEntity<?>) other).initialized != 0) {
@@ -157,10 +161,10 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
     @Override
     public void processPacket(PhysicsEntityMessage<?> message) {
         if (message.getMessageId() == 3) {//Seats
-            /* todo if (entity instanceof IModuleContainer.ISeatsContainer)
+            if (entity instanceof IModuleContainer.ISeatsContainer)
                 ((IModuleContainer.ISeatsContainer) entity).getSeats().updateSeats((MessageSeatsSync) message, this);
             else
-                log.fatal("Received seats packet for an entity that have no seats !"); */
+                log.fatal("Received seats packet for an entity that have no seats !");
         } else if (message.getMessageId() == 6) {//Joints
             if (entity.getJointsHandler() != null) {
                 List<EntityJoint.CachedJoint> joints = ((MessageJoints) message).getJointList();

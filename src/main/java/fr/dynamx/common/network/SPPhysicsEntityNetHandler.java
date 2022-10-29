@@ -129,7 +129,7 @@ public class SPPhysicsEntityNetHandler<T extends PhysicsEntity<?>> extends Physi
                 varsToSync.clear();
                 getDirtyVars(varsToSync, Side.SERVER, updateCount);
                 getOutputSyncVars().forEach((i, s) -> s.getValueFrom(entity, this, Side.SERVER, entity.ticksExisted));
-                sendMyVars((SPPhysicsEntityNetHandler<T>) ((T) other).getNetwork(), SyncTarget.SERVER);
+                //sendMyVars((SPPhysicsEntityNetHandler<T>) ((T) other).getNetwork(), SyncTarget.SERVER);
             } else {
                 varsToSync.clear();
                 profiler.start(Profiler.Profiles.PKTSEND1);
@@ -137,7 +137,7 @@ public class SPPhysicsEntityNetHandler<T extends PhysicsEntity<?>> extends Physi
                 profiler.end(Profiler.Profiles.PKTSEND1);
 
                 profiler.start(Profiler.Profiles.PKTSEND2);
-                sendMyVars((SPPhysicsEntityNetHandler<T>) ((T) other).getNetwork(), SyncTarget.SPECTATORS);
+                //sendMyVars((SPPhysicsEntityNetHandler<T>) ((T) other).getNetwork(), SyncTarget.SPECTATORS);
                 profiler.end(Profiler.Profiles.PKTSEND2);
             }
             updateCount++;
@@ -165,10 +165,10 @@ public class SPPhysicsEntityNetHandler<T extends PhysicsEntity<?>> extends Physi
     @Override
     public void processPacket(PhysicsEntityMessage<?> message) {
         if (message.getMessageId() == 3) {//Seats
-            if (entity instanceof IModuleContainer.ISeatsContainer)
+            /*if (entity instanceof IModuleContainer.ISeatsContainer)
                 ((IModuleContainer.ISeatsContainer) entity).getSeats().updateSeats((MessageSeatsSync) message, this);
             else
-                log.fatal("Received seats packet for an entity that have no seats !");
+                log.fatal("Received seats packet for an entity that have no seats !");*/
         } else if (message.getMessageId() == 6) {//Joints
             if (entity.getJointsHandler() != null) {
                 List<EntityJoint.CachedJoint> joints = ((MessageJoints) message).getJointList();

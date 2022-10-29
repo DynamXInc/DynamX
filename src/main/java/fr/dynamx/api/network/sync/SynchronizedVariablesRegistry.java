@@ -2,6 +2,8 @@ package fr.dynamx.api.network.sync;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import fr.dynamx.api.network.sync.v3.PhysicsEntitySynchronizer;
+import fr.dynamx.api.network.sync.v3.SynchronizedEntityVariableSnapshot;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.network.sync.vars.*;
@@ -13,6 +15,7 @@ import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
 /**
@@ -173,5 +176,10 @@ public class SynchronizedVariablesRegistry {
             else
                 System.out.println("WTF NOT FOUND "+i);
         }*/
+    }
+
+    public static <T extends PhysicsEntity<?>> void setSyncVarsForContext(Side side, PhysicsEntitySynchronizer<T> network) {
+        List<ResourceLocation> varsToUse = network.getEntity().getSynchronizedVariables(side, network.getSimulationHolder());
+        System.out.println("Set " + varsToUse+" on " + network.getEntity()+" : " + network.getSynchronizedVariables());
     }
 }

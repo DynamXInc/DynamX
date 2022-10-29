@@ -12,11 +12,23 @@ public abstract class SynchronizationRules
 
     public abstract SyncTarget getSyncTarget(SimulationHolder simulationHolder, Side side);
 
+    public abstract boolean listensSide(SimulationHolder simulationHolder, Side side);
+
     private static class ServerToClients extends SynchronizationRules
     {
         @Override
         public SyncTarget getSyncTarget(SimulationHolder simulationHolder, Side side) {
             return side.isServer() ? SyncTarget.ALL_CLIENTS : SyncTarget.NONE;
+        }
+
+        @Override
+        public boolean listensSide(SimulationHolder simulationHolder, Side side) {
+            return side == Side.SERVER;
+        }
+
+        @Override
+        public String toString() {
+            return "StC";
         }
     }
 
@@ -26,6 +38,16 @@ public abstract class SynchronizationRules
         public SyncTarget getSyncTarget(SimulationHolder simulationHolder, Side side) {
             return simulationHolder.ownsPhysics(side) ? side.isServer() ? SyncTarget.SPECTATORS : SyncTarget.SERVER : SyncTarget.NONE;
         }
+
+        @Override
+        public boolean listensSide(SimulationHolder simulationHolder, Side side) {
+            return simulationHolder.ownsPhysics(side);
+        }
+
+        @Override
+        public String toString() {
+            return "PtS";
+        }
     }
 
     private static class ControlsToSpectators extends SynchronizationRules
@@ -33,6 +55,16 @@ public abstract class SynchronizationRules
         @Override
         public SyncTarget getSyncTarget(SimulationHolder simulationHolder, Side side) {
             return simulationHolder.ownsControls(side) ? side.isServer() ? SyncTarget.SPECTATORS : SyncTarget.SERVER : SyncTarget.NONE;
+        }
+
+        @Override
+        public boolean listensSide(SimulationHolder simulationHolder, Side side) {
+            return simulationHolder.ownsControls(side);
+        }
+
+        @Override
+        public String toString() {
+            return "CtS";
         }
     }
 }

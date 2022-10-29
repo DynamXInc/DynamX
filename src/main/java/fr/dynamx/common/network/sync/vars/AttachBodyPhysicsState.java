@@ -25,13 +25,13 @@ public class AttachBodyPhysicsState extends EntityPhysicsState {
 
     protected void addToOlders(byte part, Vector3f offsetn, Quaternion offsetQuat, float step) {
         Vector3f finalOffsetn = Vector3fPool.get(offsetn);
-        PhysicsEntityNetHandler<? extends PhysicsEntity<?>> h = entityIn.getNetwork();
+        /*PhysicsEntityNetHandler<? extends PhysicsEntity<?>> h = entityIn.getNetwork();
         h.getOldStates().forEach((i, s) -> {
             if (i < ClientPhysicsSyncManager.simulationTime) {
                 ((AttachBodyPhysicsState) s).transforms.get(part).getPosition().addLocal(finalOffsetn);
                 DynamXMath.slerp(step, ((AttachBodyPhysicsState) s).transforms.get(part).getRotation(), offsetQuat, ((AttachBodyPhysicsState) s).transforms.get(part).getRotation());
             }
-        });
+        });*/
     }
 
     public void interpolateDeltas(byte part, RigidBodyTransform transform, int step, int pass) {

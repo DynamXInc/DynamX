@@ -2,6 +2,7 @@ package fr.dynamx.api.entities.modules;
 
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.network.sync.PhysicsEntityNetHandler;
+import fr.dynamx.api.network.sync.v3.PhysicsEntitySynchronizer;
 import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.network.sync.MessagePhysicsEntitySync;
@@ -55,7 +56,7 @@ public interface ISeatsModule extends IPhysicsModule {
     /**
      * Called when a {@link MessagePhysicsEntitySync} is received, to update seats on client side
      */
-    void updateSeats(MessageSeatsSync msg, PhysicsEntityNetHandler<?> netHandler);
+    void updateSeats(MessageSeatsSync msg, PhysicsEntitySynchronizer<?> netHandler);
 
     /**
      * @return True if the player is riding the entity

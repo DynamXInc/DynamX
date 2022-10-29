@@ -159,12 +159,12 @@ public class DebugPosSynchronizedVariable implements SynchronizedVariable<Physic
             if (interpolatingState == null && msg != null) //If interpolation isn't started
             {
                 //System.out.println("Packet received at "+ ClientPhysicsSyncManager.simulationTime+", time is "+ msg.simulationTimeClient +" for entity "+entity.getEntityId()+" rcv at ticks existed "+entity.ticksExisted);
-                EntityPhysicsState state = entity.getNetwork().getStateAndClearOlders(msg.getSimulationTimeClient()); //Get the state corresponding to the tick of the data
-                interpolatingState = state; //Interpolate over it
+               //todo sync EntityPhysicsState state = entity.getNetwork().getStateAndClearOlders(msg.getSimulationTimeClient()); //Get the state corresponding to the tick of the data
+                //interpolatingState = state; //Interpolate over it
 
                 //Debug
                 //float[] rotations = DynamXUtils.quaternionToEuler(rotation, entity.rotationYaw, entity.rotationPitch, entity.rotationRoll); //Prev or not prev ?
-                if (state != null) {
+                /*todo sync if (state != null) {
                     clientPos.set(state.pos);
                     serverPos.set(posX, posY, posZ);
                     clientRot.set(state.rotation);
@@ -174,7 +174,7 @@ public class DebugPosSynchronizedVariable implements SynchronizedVariable<Physic
                     if (!network.getSimulationHolder().ownsPhysics(Side.CLIENT))
                         interpolatingState.interpolateDeltas(serverPos, serverRot, bodyActive, entity.getSyncTickRate(), 0);
                 } else if (ClientDebugSystem.MOVE_DEBUG > 0)
-                    System.err.println("State of " + msg.getSimulationTimeClient() + " not found " + entity.getNetwork().getOldStates());
+                    System.err.println("State of " + msg.getSimulationTimeClient() + " not found " + entity.getNetwork().getOldStates());*/
             } else if (interpolatingState != null && !network.getSimulationHolder().ownsPhysics(Side.CLIENT)) //Second interpolation step
                 interpolatingState.interpolateDeltas(serverPos, serverRot, bodyActive, entity.getSyncTickRate(), 1);
         } else {

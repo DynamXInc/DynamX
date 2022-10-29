@@ -2,13 +2,18 @@ package fr.dynamx.api.network.sync.v3;
 
 import fr.dynamx.api.network.sync.SimulationHolder;
 import fr.dynamx.api.network.sync.SyncTarget;
+import fr.dynamx.utils.debug.SyncTracker;
+import lombok.Getter;
 import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.function.BiConsumer;
 
 public class SynchronizedEntityVariable<T> {
+    @Getter
     private final BiConsumer<SynchronizedEntityVariable<T>, T> receiveCallback;
+    @Getter
     private final SynchronizationRules synchronizationRule;
+    @Getter
     private final SynchronizedVariableSerializer<T> serializer;
     private T value;
     private boolean changed = true; //first sync
@@ -48,17 +53,21 @@ public class SynchronizedEntityVariable<T> {
     }
 
     public void set(T value) {
-        if(value != this.value) {
+        // better condition
+        if((value instanceof Float && SyncTracker.different((Float) value, (Float) this.value)) || (!(value instanceof Float) && value != this.value)) {
             this.value = value;
             changed = true;
+            System.out.println("SET " + value);
         }
     }
 
     public void setChanged(boolean changed) {
+        System.out.println("Mark change " + value);
         this.changed = changed;
     }
 
     public void receiveValue(T value) {
+        System.out.println("RCV " + value+" in " +this);
         if(receiveCallback != null)
             receiveCallback.accept(this, value);
         this.value = value;
@@ -68,7 +77,13 @@ public class SynchronizedEntityVariable<T> {
         return changed ? synchronizationRule.getSyncTarget(simulationHolder, side) : SyncTarget.NONE;
     }
 
-    public SynchronizedVariableSerializer<T> getSerializer() {
-        return serializer;
+    @Override
+    public String toString() {
+        return "SynchronizedEntityVariable{" +
+                "synchronizationRule=" + synchronizationRule +
+                ", serializer=" + serializer +
+                ", value=" + value +
+                ", changed=" + changed +
+                '}';
     }
 }

@@ -17,6 +17,8 @@ public class ListeningSynchronizedEntityVariable<T> extends SynchronizedEntityVa
 
     @Override
     public SyncTarget getSyncTarget(SimulationHolder simulationHolder, Side side) {
+        if(!getSynchronizationRule().listensSide(simulationHolder, side))
+            return SyncTarget.NONE;
         try {
             set(getValueUpdater().call());
         } catch (Exception e) {
@@ -27,5 +29,14 @@ public class ListeningSynchronizedEntityVariable<T> extends SynchronizedEntityVa
 
     public Callable<T> getValueUpdater() {
         return valueUpdater;
+    }
+
+    @Override
+    public String toString() {
+        return "ListeningSynchronizedEntityVariable{" +
+                "synchronizationRule=" + getSynchronizationRule() +
+                ", serializer=" + getSerializer() +
+                ", value=" + get()  +
+                '}';
     }
 }

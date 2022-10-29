@@ -8,6 +8,7 @@ import fr.dynamx.api.entities.modules.ISeatsModule;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.api.network.EnumPacketTarget;
 import fr.dynamx.api.network.sync.PhysicsEntityNetHandler;
+import fr.dynamx.api.network.sync.v3.PhysicsEntitySynchronizer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.parts.PartSeat;
@@ -176,7 +177,7 @@ public class SeatsModule implements ISeatsModule {
     }
 
     @Override
-    public void updateSeats(MessageSeatsSync msg, PhysicsEntityNetHandler<?> netHandler) {
+    public void updateSeats(MessageSeatsSync msg, PhysicsEntitySynchronizer<?> netHandler) {
         BaseVehicleEntity<?> vehicleEntity = entity;
         List<PartSeat> remove = new ArrayList<>(0);
         //Search for players who dismounted the entity

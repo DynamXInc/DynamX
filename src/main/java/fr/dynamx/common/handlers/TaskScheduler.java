@@ -94,7 +94,7 @@ public class TaskScheduler {
         public void run() {
             if (target.connection != null && target.connection.getNetworkManager().isChannelOpen()) {
                 //Force tcp for first sync
-                DynamXContext.getNetwork().getVanillaNetwork().sendPacket(new MessagePhysicsEntitySync(entity, ServerPhysicsSyncManager.getTime(target), entity.getNetwork().getOutputSyncVars(), MessagePhysicsEntitySync.SyncType.TCP_RESYNC), EnumPacketTarget.PLAYER, target);
+                //TODO SYNC INITIAL SYNC DynamXContext.getNetwork().getVanillaNetwork().sendPacket(new MessagePhysicsEntitySync(entity, ServerPhysicsSyncManager.getTime(target), entity.getNetwork().getOutputSyncVars(), MessagePhysicsEntitySync.SyncType.TCP_RESYNC), EnumPacketTarget.PLAYER, target);
                 if (entity instanceof IModuleContainer.ISeatsContainer)
                     DynamXContext.getNetwork().sendToClient(new MessageSeatsSync((IModuleContainer.ISeatsContainer) entity), EnumPacketTarget.PLAYER, target);
                 if (entity.getJointsHandler() != null)

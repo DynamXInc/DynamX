@@ -174,10 +174,10 @@ public class UdpClientPhysicsEntityNetHandler<T extends PhysicsEntity<?>> extend
             receivePosSyncPacket((MessagePhysicsEntitySync) message);
         else if (message.getMessageId() == 3) //Seats
         {
-            if (entity instanceof IModuleContainer.ISeatsContainer)
+           /* if (entity instanceof IModuleContainer.ISeatsContainer)
                 ((IModuleContainer.ISeatsContainer) entity).getSeats().updateSeats((MessageSeatsSync) message, this);
             else
-                log.fatal("Received seats packet for an entity that have no seats !");
+                log.fatal("Received seats packet for an entity that have no seats !");*/
         } else if (message.getMessageId() == 4) //Walking player
         {
             MessageWalkingPlayer p = (MessageWalkingPlayer) message;

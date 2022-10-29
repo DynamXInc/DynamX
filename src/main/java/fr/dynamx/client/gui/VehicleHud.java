@@ -39,11 +39,11 @@ public class VehicleHud extends GuiFrame {
                     add(hud);
                 }
             });
-            if (riddenEntity.cast().getNetwork() instanceof UdpClientPhysicsEntityNetHandler) {
+            /* todo sync if (riddenEntity.cast().getNetwork() instanceof UdpClientPhysicsEntityNetHandler) {
                 netWarning = new GuiLabel("");
                 netWarning.setCssId("network_warning");
                 add(netWarning);
-            }
+            }*/
             add(new GuiLabel("DynamX " + DynamXConstants.VERSION_TYPE + " V." + DynamXConstants.VERSION).setCssId("hud_ea_warning"));
         }
     }

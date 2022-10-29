@@ -8,10 +8,7 @@ import fr.dynamx.api.entities.modules.IEntityJoints;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.network.EnumPacketTarget;
-import fr.dynamx.api.network.sync.PhysicsEntityNetHandler;
 import fr.dynamx.api.network.sync.SimulationHolder;
-import fr.dynamx.api.network.sync.SyncTarget;
-import fr.dynamx.api.network.sync.SynchronizedVariablesRegistry;
 import fr.dynamx.api.network.sync.v3.ListeningSynchronizedEntityVariable;
 import fr.dynamx.api.network.sync.v3.PhysicsEntitySynchronizer;
 import fr.dynamx.api.network.sync.v3.SynchronizationRules;
@@ -28,7 +25,6 @@ import fr.dynamx.common.network.sync.vars.PosSynchronizedVariable;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.player.WalkingOnPlayerController;
 import fr.dynamx.common.physics.terrain.PhysicsEntityTerrainLoader;
-import fr.dynamx.common.physics.utils.RigidBodyTransform;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.PhysicsEntityException;
 import fr.dynamx.utils.debug.Profiler;
@@ -170,14 +166,29 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
 
         public EntityPositionData(boolean bodyActive, Vector3f position, Quaternion rotation) {
             this.bodyActive = bodyActive;
-            position.set(position);
-            rotation.set(rotation);
+            this.position.set(position);
+            this.rotation.set(rotation);
         }
     }
 
     //TODO A CLEAN MAIS C'EST POUR TEST L'IDEE
     private final ListeningSynchronizedEntityVariable<EntityPositionData> synchronizedPosition = new ListeningSynchronizedEntityVariable<>(((entityPositionDataSynchronizedEntityVariable, entityPositionData) -> {
 //TODO INTPERPOLATION ETC :c
+        if (!world.isRemote) //Solo mode
+        {
+            motionX = entityPositionData.position.x - physicsPosition.x;
+            motionY = entityPositionData.position.y - physicsPosition.y;
+            motionZ = entityPositionData.position.z - physicsPosition.z;
+            double x = physicsPosition.x + motionX;
+            double y = physicsPosition.y + motionY;
+            double z = physicsPosition.z + motionZ;
+            physicsPosition.set((float) x, (float) y, (float) z);
+
+            physicsRotation.set(entityPositionData.rotation);
+
+        } else {
+            DynamXMain.log.error("Incorrect simulation holder in client set pos value : " + getSynchronizer().getSimulationHolder());
+        }
     }), SynchronizationRules.PHYSICS_TO_SPECTATORS, new SynchronizedVariableSerializer<EntityPositionData>() {
         @Override
         public void writeObject(ByteBuf buf, EntityPositionData object) {
@@ -196,12 +207,13 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
             EntityPositionData result = new EntityPositionData(buffer.readBoolean(), DynamXUtils.readVector3f(buffer), DynamXUtils.readQuaternion(buffer));
             if (result.bodyActive) {
                 result.linearVel.set(DynamXUtils.readVector3f(buffer));
-                result. rotationalVel.set(DynamXUtils.readVector3f(buffer));
+                result.rotationalVel.set(DynamXUtils.readVector3f(buffer));
             }
             return result;
         }
     }, new Callable<EntityPositionData>() {
         private EntityPositionData positionData;
+
         @Override
         public EntityPositionData call() {
             AbstractEntityPhysicsHandler<?, ?> physicsHandler = PhysicsEntity.this.physicsHandler;
@@ -218,8 +230,10 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
                 changed = true;
             }
             //TODO PAS COOL NEW
-            if(changed)
+            if (changed) {
                 positionData = new EntityPositionData(physicsHandler);
+                synchronizedPosition.setChanged(true);
+            }
             return positionData;
         }
     });
@@ -263,7 +277,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
         if (initialized != 2) {
             if (initialized == 0) {
                 physicsPosition.set((float) posX, (float) posY, (float) posZ);
-                if(physicsRotation.equals(Quaternion.IDENTITY)) {
+                if (physicsRotation.equals(Quaternion.IDENTITY)) {
                     physicsRotation.set(DynamXGeometry.rotationYawToQuaternion(rotationYaw));
                 }
                 if (!initEntityProperties()) {
@@ -271,9 +285,9 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
                     return;
                 }
             }
+            initPhysicsEntity(usesPhysicsWorld);
             //getNetwork().setSimulationHolder(getNetwork().getDefaultSimulationHolder());
             getSynchronizer().setSimulationHolder(getSynchronizer().getDefaultSimulationHolder());
-            initPhysicsEntity(usesPhysicsWorld);
             MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.PhysicsEntityInitEvent(world.isRemote ? Side.CLIENT : Side.SERVER, this, usesPhysicsWorld));
             initialized = 2;
         }
@@ -490,7 +504,6 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     /*public PhysicsEntityNetHandler<? extends PhysicsEntity<T>> getNetwork() {
         return network;
     }*/
-
     public PhysicsEntitySynchronizer<? extends PhysicsEntity<T>> getSynchronizer() {
         return synchronizer;
     }

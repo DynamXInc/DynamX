@@ -4,6 +4,9 @@ import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.bullet.collision.PhysicsRayTestResult;
 import com.jme3.bullet.collision.shapes.CollisionShape;
+import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
+import com.jme3.bullet.collision.shapes.HullCollisionShape;
+import com.jme3.bullet.collision.shapes.infos.ChildCollisionShape;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
@@ -16,6 +19,7 @@ import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.QuaternionPool;
+import fr.dynamx.utils.optimization.TransformPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.util.math.MathHelper;
 
@@ -79,7 +83,7 @@ public class DynamXPhysicsHelper {
         Vector3fPool.openPool();
         List<PhysicsRayTestResult> results = new LinkedList<>();
         IPhysicsWorld iPhysicsWorld = DynamXContext.getPhysicsWorld();
-        if(iPhysicsWorld != null) {
+        if (iPhysicsWorld != null) {
             iPhysicsWorld.getDynamicsWorld().rayTest(from, dir, results);
         }
 
@@ -132,5 +136,47 @@ public class DynamXPhysicsHelper {
                     (float) (direction.y * forgeStrength),
                     (float) (direction.z * forgeStrength))));
         }
+    }
+
+
+    public static Vector3f calculateConvexCenter(HullCollisionShape shape, Vector3f planePos, Vector3f planeNormal) {
+        Vector3f sum = Vector3fPool.get();
+        float[] copyHullVertices = shape.copyHullVertices();
+        for (int i = 0; i < copyHullVertices.length; i++) {
+            Vector3f point = Vector3fPool.get(copyHullVertices[i], copyHullVertices[i + 1], copyHullVertices[i + 2]);
+            point.subtractLocal(planePos);
+            if (point.dot(planeNormal) < 0) {
+                sum.addLocal(point);
+            }
+            sum.divideLocal(shape.countHullVertices());
+        }
+
+        return sum;
+    }
+
+    public static Vector3f calculateBuoyantCenter(PhysicsRigidBody rigidBody, Vector3f planePos, Vector3f planeNormal) {
+        Vector3f center = Vector3fPool.get();
+
+        Transform rigidBodyTrans = TransformPool.get();
+        Vector3f relPlanePos = Vector3fPool.get();
+        rigidBodyTrans.invert().transformVector(planePos, relPlanePos);
+        Vector3f relPlaneNormal = DynamXGeometry.rotateVectorByQuaternion(planeNormal, rigidBodyTrans.getRotation());
+
+        CollisionShape collisionShape = rigidBody.getCollisionShape();
+        //COMPOUND_SHAPE_PROXYTYPE = 31, replace this with an instanceof ?
+        if (collisionShape.getShapeType() == 31) {
+            CompoundCollisionShape compoundCollisionShape = (CompoundCollisionShape) collisionShape;
+            for (ChildCollisionShape childCollisionShape : compoundCollisionShape.listChildren()) {
+                //CONVEX_HULL_SHAPE_PROXYTYPE = 4, replace this with an instanceof ?
+                if (childCollisionShape.getShape().getShapeType() == 4) {
+                    center.addLocal(calculateConvexCenter((HullCollisionShape) childCollisionShape.getShape(), relPlanePos, relPlaneNormal));
+                }
+            }
+            int numChildren = compoundCollisionShape.countChildren();
+            if (numChildren > 0) {
+                center.divideLocal(numChildren);
+            }
+        }
+        return center;
     }
 }

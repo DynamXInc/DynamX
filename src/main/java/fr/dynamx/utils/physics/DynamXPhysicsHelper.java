@@ -142,25 +142,24 @@ public class DynamXPhysicsHelper {
     public static Vector3f calculateConvexCenter(HullCollisionShape shape, Vector3f planePos, Vector3f planeNormal) {
         Vector3f sum = Vector3fPool.get();
         float[] copyHullVertices = shape.copyHullVertices();
-        for (int i = 0; i < copyHullVertices.length; i++) {
-            Vector3f point = Vector3fPool.get(copyHullVertices[i], copyHullVertices[i + 1], copyHullVertices[i + 2]);
+        for (int i = 0; i < copyHullVertices.length/3; i++) {
+            Vector3f point = Vector3fPool.get(copyHullVertices[i*3], copyHullVertices[i*3 + 1], copyHullVertices[i*3 + 2]);
             point.subtractLocal(planePos);
             if (point.dot(planeNormal) < 0) {
                 sum.addLocal(point);
             }
-            sum.divideLocal(shape.countHullVertices());
         }
-
+        sum.divideLocal(shape.countHullVertices());
         return sum;
     }
 
     public static Vector3f calculateBuoyantCenter(PhysicsRigidBody rigidBody, Vector3f planePos, Vector3f planeNormal) {
         Vector3f center = Vector3fPool.get();
 
-        Transform rigidBodyTrans = TransformPool.get();
+        Transform rigidBodyTrans = rigidBody.getTransform(TransformPool.get());
         Vector3f relPlanePos = Vector3fPool.get();
-        rigidBodyTrans.invert().transformVector(planePos, relPlanePos);
-        Vector3f relPlaneNormal = DynamXGeometry.rotateVectorByQuaternion(planeNormal, rigidBodyTrans.getRotation());
+        relPlanePos = rigidBodyTrans.invert().transformVector(planePos, relPlanePos);
+        Vector3f relPlaneNormal = DynamXGeometry.rotateVectorByQuaternion(planeNormal, rigidBodyTrans.getRotation().inverse());
 
         CollisionShape collisionShape = rigidBody.getCollisionShape();
         //COMPOUND_SHAPE_PROXYTYPE = 31, replace this with an instanceof ?

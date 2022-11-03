@@ -8,6 +8,7 @@ import fr.dynamx.api.entities.modules.ISeatsModule;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.physics.entities.IPropulsionHandler;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.contentpack.parts.PartFloat;
@@ -101,7 +102,8 @@ public class BoatEntity<T extends BoatEntity.BoatPhysicsHandler<?>> extends Base
         public void update() {
             Vector3f dragForce = null;//SHOULD NOT BE COMMENTED  DynamXPhysicsHelper.getWaterDrag(getLinearVelocity(), getPackInfo().getDragFactor());
 
-            getCollisionObject().setAngularDamping(0.5f);
+            getCollisionObject().setAngularDamping(0.7f);
+            getCollisionObject().setLinearDamping(0.7f);
             //if(getPhysicsPosition().y <= 40)
             {
                 //forces.add(new Force(dragForce, Vector3fPool.get()));
@@ -110,7 +112,7 @@ public class BoatEntity<T extends BoatEntity.BoatPhysicsHandler<?>> extends Base
                 for (PartFloat f : packInfo.getPartsByType(PartFloat.class)) {
                     MutableBoundingBox bb = new MutableBoundingBox(f.box);
                     bb = DynamXContext.getCollisionHandler().rotateBB(Vector3fPool.get(), bb, getRotation());
-                    double dy = (float) (40 - (getPosition().y + bb.minY));
+                    double dy = (float) (40 - (getCollisionObject().getPhysicsLocation(Vector3fPool.get()).y + bb.minY));
                     Vector3f p = f.getPosition();
                     Vector3f forcer = new Vector3f();
 
@@ -122,17 +124,20 @@ public class BoatEntity<T extends BoatEntity.BoatPhysicsHandler<?>> extends Base
                         p.y = (float) bb.minY;
                         double vol = dy * Math.sqrt((bb.maxX - bb.minX) * (bb.maxX - bb.minX)) * Math.sqrt((bb.maxZ - bb.minZ) * (bb.maxZ - bb.minZ));
                         //System.out.println(bb+" "+vol+" "+DynamXMain.physicsWorld.getDynamicsWorld().getGravity(new Vector3f()).multLocal((float) (-1000*vol)));
-                  /*      Force fr = new Force(DynamXMain.physicsWorld.getDynamicsWorld().getGravity(new Vector3f()).multLocal((float) (-vol*1000)), p);
+                        vol = vol * 1000;
+                        //vol *= 0.01f;
+                        Vector3f fr = getCollisionObject().getGravity(Vector3fPool.get()).multLocal((float) (-vol));
                         //fr = new Force(DynamXMain.physicsWorld.getDynamicsWorld().getGravity(new Vector3f()).multLocal(-(packInfo.getEmptyMass()+10)), new Vector3f());
                         //forces.add(fr);
-                        getRigidBody().applyForce(fr.getForce().multLocal(0.05f), fr.getPosition());
-                        forcer.set(fr.getForce());*/
+                        getCollisionObject().applyImpulse(fr.multLocal(0.05f), p);
+                        forcer.set(fr);
                         //SHOULD NOT BE COMMENTED drag = DynamXPhysicsHelper.getWaterDrag(drag, getPackInfo().getDragFactor());
                     }
                     //else
                     //SHOULD NOT BE COMMENTED drag = DynamXPhysicsHelper.getAirDrag(drag, getPackInfo().getDragFactor());
-                    drag.multLocal(0.025f);
-                    getCollisionObject().applyImpulse(drag, p);
+                    drag.multLocal(1f);
+                    drag.multLocal(drag.mult(-1));
+                    //getCollisionObject().applyForce(drag, p);
                     ntmdrag[i] = drag;
                     ntmdrag[i + 5] = new Vector3f();
                     ntmdrag[i + 5].set(forcer);
@@ -191,6 +196,7 @@ public class BoatEntity<T extends BoatEntity.BoatPhysicsHandler<?>> extends Base
                     }
                     System.out.println("[" + i + "] Apply force = " + forcer + " // drag = " + drag + " // at = " + p);
                     i++;
+                    break;
                 }
                 //System.out.println(DynamXMain.physicsWorld.getDynamicsWorld().getGravity(Vector3fPool.get())+" "+packInfo.getEmptyMass());
             }

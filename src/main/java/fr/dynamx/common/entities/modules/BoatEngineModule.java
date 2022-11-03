@@ -42,6 +42,7 @@ public class BoatEngineModule implements IPropulsionModule<BoatEntity.BoatPhysic
             Vector3f look = new Vector3f(0, 0, 1);
             look = DynamXGeometry.rotateVectorByQuaternion(look, boat.physicsRotation);
             look.multLocal(100 * strength);
+            boat.physicsHandler.applyForce(new Vector3f(), look);
             //boat.physicsHandler.forces.add(new Force(look, new Vector3f()));
             if (strength != 0)
                 System.out.println("Accel " + strength + " " + look);
@@ -57,6 +58,7 @@ public class BoatEngineModule implements IPropulsionModule<BoatEntity.BoatPhysic
             Vector3f look = new Vector3f(0, 0, 1);
             look = DynamXGeometry.rotateVectorByQuaternion(look, boat.physicsRotation);
             look.multLocal(-100 * strength);
+            boat.physicsHandler.applyForce(new Vector3f(), look);
             //boat.physicsHandler.forces.add(new Force(look, new Vector3f()));
             if (strength != 0)
                 System.out.println("Brake " + strength + " " + look);
@@ -74,6 +76,7 @@ public class BoatEngineModule implements IPropulsionModule<BoatEntity.BoatPhysic
             Vector3f look = new Vector3f(1, 0, 0);
             look = DynamXGeometry.rotateVectorByQuaternion(look, boat.physicsRotation);
             look.multLocal(10 * strength);
+            boat.physicsHandler.applyForce(DynamXGeometry.rotateVectorByQuaternion(info.getPosition(), boat.physicsRotation), look);
             //boat.physicsHandler.forces.add(new Force(look, Trigonometry.rotateVectorByQuaternion(info.getPosition(), boat.physicsRotation)));
             if (strength != 0)
                 System.out.println("Turn " + strength + " " + look);

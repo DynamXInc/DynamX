@@ -9,9 +9,14 @@ import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import net.minecraft.util.math.AxisAlignedBB;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RegisteredSubInfoType(name = "float", registries = SubInfoTypeRegistries.WHEELED_VEHICLES, strictName = false)
 public class PartFloat extends BasePart<ModularVehicleInfo> {
     public AxisAlignedBB box;
+    public List<Vector3f> listFloaters = new ArrayList<>();
+    public float size;
 
     public PartFloat(ModularVehicleInfo owner, String partName) {
         super(owner, partName);

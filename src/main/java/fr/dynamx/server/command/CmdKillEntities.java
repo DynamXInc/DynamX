@@ -2,6 +2,7 @@ package fr.dynamx.server.command;
 
 import fr.dynamx.common.entities.PropsEntity;
 import fr.dynamx.common.entities.RagdollEntity;
+import fr.dynamx.common.entities.vehicles.BoatEntity;
 import fr.dynamx.common.entities.vehicles.CarEntity;
 import fr.dynamx.common.entities.vehicles.DoorEntity;
 import fr.dynamx.common.entities.vehicles.TrailerEntity;
@@ -51,6 +52,7 @@ public class CmdKillEntities implements ISubCommand {
                 entityList.addAll(sender.getEntityWorld().getEntities(RagdollEntity.class, EntitySelectors.IS_ALIVE));
                 entityList.addAll(sender.getEntityWorld().getEntities(TrailerEntity.class, EntitySelectors.IS_ALIVE));
                 entityList.addAll(sender.getEntityWorld().getEntities(DoorEntity.class, EntitySelectors.IS_ALIVE));
+                entityList.addAll(sender.getEntityWorld().getEntities(BoatEntity.class, EntitySelectors.IS_ALIVE));
             } else {
                 throw new WrongUsageException(getUsage());
             }

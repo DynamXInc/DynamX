@@ -184,7 +184,7 @@ public class DynamXUtils {
         Vec3d vec3d = entity.getPositionEyes(partialTicks);
         Vec3d vec3d1 = entity.getLook(partialTicks);
         Vec3d vec3d2 = vec3d.add(vec3d1.x * blockReachDistance, vec3d1.y * blockReachDistance, vec3d1.z * blockReachDistance);
-        return entity.world.rayTraceBlocks(vec3d, vec3d2, false, false, true);
+        return entity.world.rayTraceBlocks(vec3d, vec3d2, true, false, true);
     }
 
     public static RayTraceResult getMouseOver(Entity entity, float partialTicks) {

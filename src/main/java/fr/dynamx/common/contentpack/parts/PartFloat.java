@@ -2,6 +2,7 @@ package fr.dynamx.common.contentpack.parts;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.part.BasePart;
+import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
@@ -17,6 +18,14 @@ public class PartFloat extends BasePart<ModularVehicleInfo> {
     public AxisAlignedBB box;
     public List<Vector3f> listFloaters = new ArrayList<>();
     public float size;
+
+    @PackFileProperty(configNames = "Axis", required = false)
+    public int axis;
+    @PackFileProperty(configNames = "LineX", required = false)
+    public int lineX;
+    @PackFileProperty(configNames = "LineZ", required = false)
+    public int lineZ;
+
 
     public PartFloat(ModularVehicleInfo owner, String partName) {
         super(owner, partName);

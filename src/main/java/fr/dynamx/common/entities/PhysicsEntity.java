@@ -491,16 +491,10 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
             if (physicsHandler != null) {
                 Vector3f min = Vector3fPool.get();
                 Vector3f max = Vector3fPool.get();
-                BoundingBoxPool.getPool().openSubPool();
-                Vector3f pos = Vector3fPool.get(physicsPosition);
-                if (physicsHandler.getCenterOfMass() != null) {
-                    pos.addLocal(DynamXGeometry.rotateVectorByQuaternion(physicsHandler.getCenterOfMass(), physicsRotation).multLocal(-1));
-                }
-                BoundingBox boundingBox = physicsHandler.getCollisionObject().getCollisionShape().boundingBox(pos, physicsRotation, BoundingBoxPool.get());
+                BoundingBox boundingBox = physicsHandler.getBoundingBox();
                 boundingBox.getMin(min);
                 boundingBox.getMax(max);
                 entityBoxCache = new AxisAlignedBB(min.x, min.y, min.z, max.x, max.y, max.z);
-                BoundingBoxPool.getPool().closeSubPool();
             } else {
                 List<MutableBoundingBox> boxes = getCollisionBoxes(); //Get PartShape boxes
                 if (boxes.isEmpty()) { //If there is no boxes, create a default one

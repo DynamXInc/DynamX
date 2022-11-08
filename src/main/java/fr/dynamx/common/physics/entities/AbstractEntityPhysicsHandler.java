@@ -1,5 +1,6 @@
 package fr.dynamx.common.physics.entities;
 
+import com.jme3.bounding.BoundingBox;
 import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
@@ -8,6 +9,7 @@ import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import lombok.Getter;
 
 import javax.annotation.Nullable;
 
@@ -37,6 +39,11 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
      */
     protected final Quaternion physicsRotation;
     /**
+     * The bounding box
+     */
+    @Getter
+    private final BoundingBox boundingBox;
+    /**
      * The initial spawn yaw angle
      */
     protected final float spawnRotationAngle;
@@ -55,6 +62,7 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
         this.spawnRotationAngle = entity.rotationYaw;
         this.physicsPosition = new Vector3f((float) entity.posX, (float) entity.posY, (float) entity.posZ);
         this.physicsRotation = new Quaternion(DynamXGeometry.rotationYawToQuaternion(spawnRotationAngle));
+        this.boundingBox = new BoundingBox();
 
         collisionObject = createShape(physicsPosition, physicsRotation, spawnRotationAngle);
     }
@@ -95,6 +103,12 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
     public void postUpdate() {
         collisionObject.getPhysicsLocation(physicsPosition);
         collisionObject.getPhysicsRotation(physicsRotation);
+
+        Vector3f pos = Vector3fPool.get(physicsPosition);
+        if (getCenterOfMass() != null)
+            pos.addLocal(DynamXGeometry.rotateVectorByQuaternion(getCenterOfMass(), physicsRotation).multLocal(-1));
+        collisionObject.getCollisionShape().boundingBox(pos, physicsRotation, boundingBox);
+
         isBodyActive = collisionObject.isActive();
     }
 

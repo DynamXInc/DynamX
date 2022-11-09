@@ -44,9 +44,6 @@ public class BoatEngineModule implements IPropulsionModule<BoatEntity.BoatPhysic
             look = DynamXGeometry.rotateVectorByQuaternion(look, boat.physicsRotation);
             look.multLocal(1000 * strength);
             boat.physicsHandler.getCollisionObject().applyForce(look, new Vector3f());
-            //boat.physicsHandler.forces.add(new Force(look, new Vector3f()));
-            if (strength != 0)
-                System.out.println("Accel " + strength + " " + look);
         }
 
         @Override
@@ -60,16 +57,12 @@ public class BoatEngineModule implements IPropulsionModule<BoatEntity.BoatPhysic
             look = DynamXGeometry.rotateVectorByQuaternion(look, boat.physicsRotation);
             look.multLocal(-1000 * strength);
             boat.physicsHandler.getCollisionObject().applyForce(look, new Vector3f());
-            //boat.physicsHandler.forces.add(new Force(look, new Vector3f()));
-            if (strength != 0)
-                System.out.println("Brake " + strength + " " + look);
         }
 
         @Override
         public void handbrake(float strength) {
             Vector3f look = boat.physicsHandler.getLinearVelocity();
             look.multLocal(-0.8f);
-            // boat.physicEntity.forces.add(new Force(look, new Vector3f()));
         }
 
         @Override
@@ -77,12 +70,8 @@ public class BoatEngineModule implements IPropulsionModule<BoatEntity.BoatPhysic
             Vector3f look = new Vector3f(-1, 0, 0);
             look = DynamXGeometry.rotateVectorByQuaternion(look, boat.physicsRotation);
             look.multLocal(50 * strength * boat.physicsHandler.getLinearVelocity().length() / 3);
-            //boat.physicsHandler.getCollisionObject().applyForce(look, DynamXGeometry.rotateVectorByQuaternion(info.getPosition(), boat.physicsRotation));
             Vector3f linearFactor = boat.physicsHandler.getCollisionObject().getLinearFactor(Vector3fPool.get());
             boat.physicsHandler.getCollisionObject().applyTorque(DynamXGeometry.rotateVectorByQuaternion(info.getPosition(), boat.physicsRotation).cross(look.multLocal(linearFactor)));
-            //boat.physicsHandler.forces.add(new Force(look, Trigonometry.rotateVectorByQuaternion(info.getPosition(), boat.physicsRotation)));
-            if (strength != 0)
-                System.out.println("Turn " + strength + " " + look);
         }
 
         @Override

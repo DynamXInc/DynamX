@@ -1,6 +1,5 @@
 package fr.dynamx.common.entities.vehicles;
 
-import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.modules.IEngineModule;
@@ -94,6 +93,7 @@ public class BoatEntity<T extends BoatEntity.BoatPhysicsHandler<?>> extends Base
 
         public List<PartFloat> floatList = new ArrayList<>();
         public List<Vector3f> buoyForces = new ArrayList<>();
+        public List<Vector3f> dragForces = new ArrayList<>();
 
 
         public BoatPhysicsHandler(A entity) {
@@ -106,9 +106,6 @@ public class BoatEntity<T extends BoatEntity.BoatPhysicsHandler<?>> extends Base
                 f.size = 1f;
                 f.listFloaters.clear();
                 AxisAlignedBB bb = f.box;
-                float sizeX = (float) (bb.maxX - bb.minX);
-                float sizeY = (float) (bb.maxY - bb.minY);
-                float sizeZ = (float) (bb.maxZ - bb.minZ);
                 Vector3f pos;
 
                 if (f.axis == 0) {
@@ -118,16 +115,18 @@ public class BoatEntity<T extends BoatEntity.BoatPhysicsHandler<?>> extends Base
                         pos.addLocal(xPos + f.size / 2, 0, 0);
                         f.listFloaters.add(pos);
                         buoyForces.add(new Vector3f());
+                        dragForces.add(new Vector3f());
                     }
-                }else if(f.axis == 2){
+                } else if (f.axis == 2) {
                     for (int j = 0; j < f.lineZ; j++) {
                         pos = new Vector3f().set(f.getPosition());
                         float zPos = (float) (bb.minZ + j * (f.size + spacingX) + offsetZ);
                         pos.addLocal(0, -0.01f, -zPos - f.size / 2);
                         f.listFloaters.add(pos);
                         buoyForces.add(new Vector3f());
+                        dragForces.add(new Vector3f());
                     }
-                }else if(f.axis == 3){
+                } else if (f.axis == 3) {
                     for (int i = 0; i < f.lineX; i++) {
                         for (int j = 0; j < f.lineZ; j++) {
                             pos = new Vector3f().set(f.getPosition());
@@ -136,12 +135,14 @@ public class BoatEntity<T extends BoatEntity.BoatPhysicsHandler<?>> extends Base
                             pos.addLocal(xPos + f.size / 2, -0.01f, zPos + f.size / 2);
                             f.listFloaters.add(pos);
                             buoyForces.add(new Vector3f());
+                            dragForces.add(new Vector3f());
                         }
                     }
-                }else{
+                } else {
                     pos = f.getPosition();
                     f.listFloaters.add(pos);
                     buoyForces.add(new Vector3f());
+                    dragForces.add(new Vector3f());
                 }
 
             }
@@ -157,37 +158,29 @@ public class BoatEntity<T extends BoatEntity.BoatPhysicsHandler<?>> extends Base
             Vector3f inWorldPos = getCollisionObject().getPhysicsLocation(Vector3fPool.get()).add(localPosRotated);
 
             double dy = waterLevel - inWorldPos.y;
-            Vector3f forcer = new Vector3f();
 
             if (dy > 0) {
+                float area = size * size;
                 dy = Math.min(dy, size);
-                double vol = dy * size * size * 997 * 9.81;
-                Vector3f fr = Vector3fPool.get(0, vol, 0);
+                Vector3f buoyForce = Vector3fPool.get(0, dy * area * 997 * 9.81, 0);
 
-                Vector3f posF = DynamXGeometry.rotateVectorByQuaternion(partPos, physicsRotation);
-                collisionObject.applyForce(fr.multLocal(0.05f), posF);
-                //System.out.println(fr);
-                forcer.set(fr);
-                buoyForces.get(i).set(fr.mult(0.01f));
+                Vector3f rotatedFloaterPos = DynamXGeometry.rotateVectorByQuaternion(partPos, physicsRotation);
 
-                Vector3f velocityAtPoint = DynamXPhysicsHelper.getVelocityAtPoint(getLinearVelocity(), getAngularVelocity(), partPos);
-                //velocityAtPoint.multLocal(-1f);
-                float dragCoefficient = 1;
-                /*float velLength = velocityAtPoint.length();
-                float drag = 0.5F * 997 * velLength * dragCoefficient * size * size;*/
-                Vector3f dragForce = velocityAtPoint.mult(velocityAtPoint).multLocal(0.5F * 997 * dragCoefficient * size * size).multLocal(0.05f);
-                float dirX = velocityAtPoint.x == 0 ? 0 : velocityAtPoint.x / FastMath.abs(velocityAtPoint.x);
-                float dirY = velocityAtPoint.y == 0 ? 0 : velocityAtPoint.y / FastMath.abs(velocityAtPoint.y);
-                float dirZ = velocityAtPoint.z == 0 ? 0 : velocityAtPoint.z / FastMath.abs(velocityAtPoint.z);
-                //System.out.println(Vector3fPool.get(dirX, dirY, dirZ));
-                //System.out.println(dragForce);
-                //collisionObject.applyForce(Vector3fPool.get(dirX, dirY, dirZ).multLocal(dragForce), posF);
+                buoyForces.get(i).set(buoyForce.mult(0.001f));
+                collisionObject.applyForce(buoyForce.multLocal(0.05f), rotatedFloaterPos);
+
+                float dragCoefficient = 0.05f;
+                Vector3f velocityAtPoint = DynamXPhysicsHelper.getVelocityAtPoint(getLinearVelocity(), getAngularVelocity(), rotatedFloaterPos);
+                Vector3f velocitySq = velocityAtPoint.multLocal(velocityAtPoint);
+                Vector3f dragForce = velocitySq.multLocal(0.5f * 997 * dragCoefficient * area);
+
+                dragForces.get(i).set(dragForce);
+                collisionObject.applyForce(dragForce.multLocal(0.05f), rotatedFloaterPos);
             }
         }
 
         @Override
         public void update() {
-            collisionObject.setContactResponse(true);
             getCollisionObject().setAngularDamping(0.6f);
             getCollisionObject().setLinearDamping(0.6f);
             getCollisionObject().setEnableSleep(false);

@@ -8,6 +8,7 @@ import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.entities.vehicles.BoatEntity;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
+import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
@@ -16,7 +17,7 @@ import org.lwjgl.opengl.GL11;
 
 public class BoatDebugRenderer {
     public static <T extends PhysicsEntity<?>> void addAll(RenderPhysicsEntity<T> to) {
-        to.addDebugRenderers(new WaterLevelDebug(), new FloatsDebug(), new VehicleDebugRenderer.SteeringWheelDebug(), new VehicleDebugRenderer.SeatDebug(), new VehicleDebugRenderer.PlayerCollisionsDebug(), new VehicleDebugRenderer.NetworkDebug());
+        to.addDebugRenderers(new FloatsDebug(), new VehicleDebugRenderer.SteeringWheelDebug(), new VehicleDebugRenderer.SeatDebug(), new VehicleDebugRenderer.PlayerCollisionsDebug(), new VehicleDebugRenderer.NetworkDebug());
     }
 
     public static class FloatsDebug implements DebugRenderer<BaseVehicleEntity<?>> {
@@ -42,33 +43,19 @@ public class BoatDebugRenderer {
                 for (Vector3f floater : f.listFloaters) {
                     DynamXRenderUtils.drawBoundingBox(floater.subtract(f.size/2, f.size/2, f.size/2),
                             floater.add(f.size/2, f.size/2, f.size/2), 0, 1, 0, 1);
-
-                    Vector3f buoyForce = physicsHandler.buoyForces.get(i++);
-                    bufferbuilder.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION_COLOR);
-                    bufferbuilder.pos(floater.x, floater.y, floater.z).color(1f, 0, 1, 1f).endVertex();
-                    bufferbuilder.pos(floater.x + buoyForce.x + 0.0001, floater.y + buoyForce.y, floater.z + buoyForce.z + 0.0001).color(1f, 0, 0, 1f).endVertex();
-                    tessellator.draw();
+                    drawForce(tessellator, bufferbuilder, floater, physicsHandler.buoyForces.get(i), 1,0,0);
+                    drawForce(tessellator, bufferbuilder, floater, physicsHandler.dragForces.get(i++), 1,1,0);
                 }
             }
             GlStateManager.enableCull();
             GlStateManager.popMatrix();
         }
-    }
-
-    public static class WaterLevelDebug implements DebugRenderer<BaseVehicleEntity<?>> {
-        @Override
-        public boolean shouldRender(BaseVehicleEntity<?> entity) {
-            return DynamXDebugOptions.WHEELS.isActive();
+        private void drawForce(Tessellator tessellator, BufferBuilder bufferBuilder, Vector3f pos, Vector3f force, float red, float green, float blue){
+            bufferBuilder.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION_COLOR);
+            bufferBuilder.pos(pos.x, pos.y, pos.z).color(1f, 0, 1, 1f).endVertex();
+            bufferBuilder.pos(pos.x + force.x + 0.0001, pos.y + force.y, pos.z + force.z + 0.0001).color(red, green, blue, 1f).endVertex();
+            tessellator.draw();
         }
 
-        @Override
-        public void render(BaseVehicleEntity<?> entity, double x, double y, double z, float partialTicks) {
-
-        }
-
-        @Override
-        public boolean hasEntityRotation(BaseVehicleEntity<?> entity) {
-            return false;
-        }
     }
 }

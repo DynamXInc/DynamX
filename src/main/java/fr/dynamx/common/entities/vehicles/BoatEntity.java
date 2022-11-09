@@ -86,12 +86,9 @@ public class BoatEntity<T extends BoatEntity.BoatPhysicsHandler<?>> extends Base
         return DynamXObjectLoaders.BOATS.findInfo(infoName);
     }
 
-    public static Vector3f[] ntm = new Vector3f[10];
-    public static Vector3f[] ntmdrag = new Vector3f[10];
-
     public static class BoatPhysicsHandler<A extends BoatEntity<?>> extends BaseVehiclePhysicsHandler<A> {
 
-        public List<PartFloat> floatList = new ArrayList<>();
+        public List<PartFloat> floatList;
         public List<Vector3f> buoyForces = new ArrayList<>();
         public List<Vector3f> dragForces = new ArrayList<>();
 
@@ -158,11 +155,12 @@ public class BoatEntity<T extends BoatEntity.BoatPhysicsHandler<?>> extends Base
             Vector3f inWorldPos = getCollisionObject().getPhysicsLocation(Vector3fPool.get()).add(localPosRotated);
 
             double dy = waterLevel - inWorldPos.y;
+            float fluidDensity = 997;
 
             if (dy > 0) {
                 float area = size * size;
                 dy = Math.min(dy, size);
-                Vector3f buoyForce = Vector3fPool.get(0, dy * area * 997 * 9.81, 0);
+                Vector3f buoyForce = Vector3fPool.get(0, dy * area * fluidDensity * 9.81, 0);
 
                 Vector3f rotatedFloaterPos = DynamXGeometry.rotateVectorByQuaternion(partPos, physicsRotation);
 
@@ -171,11 +169,13 @@ public class BoatEntity<T extends BoatEntity.BoatPhysicsHandler<?>> extends Base
 
                 float dragCoefficient = 0.05f;
                 Vector3f velocityAtPoint = DynamXPhysicsHelper.getVelocityAtPoint(getLinearVelocity(), getAngularVelocity(), rotatedFloaterPos);
-                Vector3f velocitySq = velocityAtPoint.multLocal(velocityAtPoint);
-                Vector3f dragForce = velocitySq.multLocal(0.5f * 997 * dragCoefficient * area);
+                float length = velocityAtPoint.length();
+                Vector3f dragDir = velocityAtPoint.normalize();
+                Vector3f dragForce = dragDir.multLocal(0.5f * fluidDensity * length * length * dragCoefficient * area);
 
-                dragForces.get(i).set(dragForce);
                 collisionObject.applyForce(dragForce.multLocal(0.05f), rotatedFloaterPos);
+                Vector3f unrotateDrag = DynamXGeometry.rotateVectorByQuaternion(dragForce, DynamXGeometry.inverseQuaternion(physicsRotation, QuaternionPool.get()));
+                dragForces.get(i).set(unrotateDrag);
             }
         }
 

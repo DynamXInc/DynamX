@@ -253,12 +253,16 @@ public class DynamXGeometry {
         }
     }
 
-    public static void inverseQuaternion(Quaternion quaternionToInverse) {
-        float norm = quaternionToInverse.norm();
+    public static Quaternion inverseQuaternion(Quaternion quat, Quaternion result) {
+        if(result == null){
+            result = new Quaternion();
+        }
+        float norm = quat.norm();
         if (norm > 0.0) {
             float invNorm = 1.0f / norm;
-            quaternionToInverse.set(-quaternionToInverse.getX() * invNorm, -quaternionToInverse.getY() * invNorm, -quaternionToInverse.getZ() * invNorm, quaternionToInverse.getW() * invNorm);
+            result.set(-quat.getX() * invNorm, -quat.getY() * invNorm, -quat.getZ() * invNorm, quat.getW() * invNorm);
         }
+        return result;
         // error
     }
 

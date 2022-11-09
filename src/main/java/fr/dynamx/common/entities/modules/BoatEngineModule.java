@@ -43,7 +43,7 @@ public class BoatEngineModule implements IPropulsionModule<BoatEntity.BoatPhysic
             Vector3f look = new Vector3f(0, 0, 1);
             look = DynamXGeometry.rotateVectorByQuaternion(look, boat.physicsRotation);
             look.multLocal(1000 * strength);
-            boat.physicsHandler.getCollisionObject().applyForce(look, new Vector3f());
+            boat.physicsHandler.getCollisionObject().applyForce(look, DynamXGeometry.rotateVectorByQuaternion(new Vector3f(0,-0.5f,-3), boat.physicsRotation));
         }
 
         @Override

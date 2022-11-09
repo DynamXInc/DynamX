@@ -8,7 +8,6 @@ import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.entities.vehicles.BoatEntity;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
-import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
@@ -44,7 +43,8 @@ public class BoatDebugRenderer {
                     DynamXRenderUtils.drawBoundingBox(floater.subtract(f.size/2, f.size/2, f.size/2),
                             floater.add(f.size/2, f.size/2, f.size/2), 0, 1, 0, 1);
                     drawForce(tessellator, bufferbuilder, floater, physicsHandler.buoyForces.get(i), 1,0,0);
-                    drawForce(tessellator, bufferbuilder, floater, physicsHandler.dragForces.get(i++), 1,1,0);
+                    drawForce(tessellator, bufferbuilder, floater, physicsHandler.dragForces.get(i), 1,1,0);
+                    i++;
                 }
             }
             GlStateManager.enableCull();

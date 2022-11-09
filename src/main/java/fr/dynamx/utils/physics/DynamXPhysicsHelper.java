@@ -38,10 +38,10 @@ public class DynamXPhysicsHelper {
     public static final int Y_ROTATION_DOF = 3 + PhysicsSpace.AXIS_Y;
     public static final int Z_ROTATION_DOF = 3 + PhysicsSpace.AXIS_Z;
 
-    public static Vector3f getVelocityAtPoint(Vector3f linearVel, Vector3f rotationalVel, Vector3f point) {
+    public static Vector3f getVelocityAtPoint(Vector3f linearVelocity, Vector3f angularVelocity, Vector3f forcePoint) {
         Vector3f velocityAtPoint = new Vector3f();
-        rotationalVel.cross(point, velocityAtPoint);
-        velocityAtPoint.addLocal(linearVel);
+        angularVelocity.cross(forcePoint, velocityAtPoint);
+        velocityAtPoint.addLocal(linearVelocity);
         return velocityAtPoint;
     }
 

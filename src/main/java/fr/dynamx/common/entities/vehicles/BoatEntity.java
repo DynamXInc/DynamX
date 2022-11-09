@@ -159,28 +159,26 @@ public class BoatEntity<T extends BoatEntity.BoatPhysicsHandler<?>> extends Base
             double dy = waterLevel - inWorldPos.y;
             Vector3f forcer = new Vector3f();
 
-            float area = 4.0F * (FastMath.PI * FastMath.pow(size, 2.0f));
-
             if (dy > 0) {
-                dy = Math.min(dy, area);
-                double vol = dy * area * area * 997 * 9.81;
+                dy = Math.min(dy, size);
+                double vol = dy * size * size * 997 * 9.81;
                 Vector3f fr = Vector3fPool.get(0, vol, 0);
 
                 collisionObject.applyForce(fr.multLocal(0.05f), partPos);
                 //System.out.println(fr);
                 forcer.set(fr);
                 buoyForces.get(i).set(fr.mult(0.01f));
-                //FIXME Experimental drag
-                /*Vector3f velocityAtPoint = DynamXPhysicsHelper.getVelocityAtPoint(getLinearVelocity(), getAngularVelocity(), partPos);
+
+                Vector3f velocityAtPoint = DynamXPhysicsHelper.getVelocityAtPoint(getLinearVelocity(), getAngularVelocity(), partPos);
                 velocityAtPoint.multLocal(-1f);
                 float velLength = velocityAtPoint.length();
 
-                float drag = 0.5F * 997 * velLength * 0.005f * area;
+                float dragCoefficient = 1;
+                float drag = 0.5F * 997 * velLength * dragCoefficient * size;
 
-                Vector3f dragVect = partPos.normalize().multLocal(drag);
+                Vector3f dragForce = partPos.normalize().multLocal(drag);
 
-                System.out.println(velLength);
-                collisionObject.applyForce(dragVect.multLocal(0.05f), partPos);*/
+                collisionObject.applyForce(dragForce.multLocal(0.05f), partPos);
             }
         }
 
@@ -190,7 +188,7 @@ public class BoatEntity<T extends BoatEntity.BoatPhysicsHandler<?>> extends Base
             Vector3f dragForce = null;//SHOULD NOT BE COMMENTED  DynamXPhysicsHelper.getWaterDrag(getLinearVelocity(), getPackInfo().getDragFactor());
 
             collisionObject.setContactResponse(false);
-            getCollisionObject().setAngularDamping(0.95f);
+            getCollisionObject().setAngularDamping(0.7f);
             getCollisionObject().setLinearDamping(0.7f);
             getCollisionObject().setEnableSleep(false);
 

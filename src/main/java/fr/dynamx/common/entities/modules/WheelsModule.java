@@ -163,7 +163,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
                 if (wheelsStates[i] == WheelState.REMOVED)
                     wheelsPhysics.removeWheel(i);
                 else
-                    wheelsPhysics.getWheel(i).setFlattened(wheelsStates[i] == WheelState.ADDED_FLATTENED);
+                    wheelsPhysics.getWheelByPartIndex(i).setFlattened(wheelsStates[i] == WheelState.ADDED_FLATTENED);
             }
         }
     }

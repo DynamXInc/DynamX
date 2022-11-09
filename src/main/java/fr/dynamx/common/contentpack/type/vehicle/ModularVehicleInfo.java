@@ -341,14 +341,12 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
             return false;
         }
 
-        System.out.println("Search: " + wheels + " " + engines + " " + sounds);
         //Attach wheels and verify handbrake (V. 2.13.5)
         boolean hasHandbrake = false;
         int directingWheel = -1;
         List<PartWheel> partsByType = getPartsByType(PartWheel.class);
         for (int i = 0; i < partsByType.size(); i++) {
             PartWheel partWheel = partsByType.get(i);
-            System.out.println("item " + defaultEngine + " " + partWheel.getDefaultWheelName() + " " + defaultSounds);
             partWheel.setDefaultWheelInfo(wheels.get(partWheel.getDefaultWheelName()));
             if (partWheel.isHandBrakingWheel())
                 hasHandbrake = true;

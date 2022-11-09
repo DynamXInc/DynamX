@@ -164,32 +164,32 @@ public class BoatEntity<T extends BoatEntity.BoatPhysicsHandler<?>> extends Base
                 double vol = dy * size * size * 997 * 9.81;
                 Vector3f fr = Vector3fPool.get(0, vol, 0);
 
-                collisionObject.applyForce(fr.multLocal(0.05f), partPos);
+                Vector3f posF = DynamXGeometry.rotateVectorByQuaternion(partPos, physicsRotation);
+                collisionObject.applyForce(fr.multLocal(0.05f), posF);
                 //System.out.println(fr);
                 forcer.set(fr);
                 buoyForces.get(i).set(fr.mult(0.01f));
 
                 Vector3f velocityAtPoint = DynamXPhysicsHelper.getVelocityAtPoint(getLinearVelocity(), getAngularVelocity(), partPos);
-                velocityAtPoint.multLocal(-1f);
-                float velLength = velocityAtPoint.length();
-
+                //velocityAtPoint.multLocal(-1f);
                 float dragCoefficient = 1;
-                float drag = 0.5F * 997 * velLength * dragCoefficient * size;
-
-                Vector3f dragForce = partPos.normalize().multLocal(drag);
-
-                collisionObject.applyForce(dragForce.multLocal(0.05f), partPos);
+                /*float velLength = velocityAtPoint.length();
+                float drag = 0.5F * 997 * velLength * dragCoefficient * size * size;*/
+                Vector3f dragForce = velocityAtPoint.mult(velocityAtPoint).multLocal(0.5F * 997 * dragCoefficient * size * size).multLocal(0.05f);
+                float dirX = velocityAtPoint.x == 0 ? 0 : velocityAtPoint.x / FastMath.abs(velocityAtPoint.x);
+                float dirY = velocityAtPoint.y == 0 ? 0 : velocityAtPoint.y / FastMath.abs(velocityAtPoint.y);
+                float dirZ = velocityAtPoint.z == 0 ? 0 : velocityAtPoint.z / FastMath.abs(velocityAtPoint.z);
+                //System.out.println(Vector3fPool.get(dirX, dirY, dirZ));
+                //System.out.println(dragForce);
+                //collisionObject.applyForce(Vector3fPool.get(dirX, dirY, dirZ).multLocal(dragForce), posF);
             }
         }
 
         @Override
         public void update() {
-            //collisionObject.setMass(0);
-            Vector3f dragForce = null;//SHOULD NOT BE COMMENTED  DynamXPhysicsHelper.getWaterDrag(getLinearVelocity(), getPackInfo().getDragFactor());
-
-            collisionObject.setContactResponse(false);
-            getCollisionObject().setAngularDamping(0.7f);
-            getCollisionObject().setLinearDamping(0.7f);
+            collisionObject.setContactResponse(true);
+            getCollisionObject().setAngularDamping(0.6f);
+            getCollisionObject().setLinearDamping(0.6f);
             getCollisionObject().setEnableSleep(false);
 
             boolean isInLiquid = false;
@@ -207,7 +207,7 @@ public class BoatEntity<T extends BoatEntity.BoatPhysicsHandler<?>> extends Base
 
             if (isInLiquid) {
                 BlockPos blockPos = new BlockPos(physicsPosition.x, physicsPosition.y + liquidOffset, physicsPosition.z);
-                floatReference = (float) handledEntity.getEntityWorld().getBlockState(blockPos).getSelectedBoundingBox(handledEntity.getEntityWorld(), blockPos).maxY - 0.125F;
+                floatReference = (float) handledEntity.getEntityWorld().getBlockState(blockPos).getSelectedBoundingBox(handledEntity.getEntityWorld(), blockPos).maxY - 0.125F + 0.5f;
                 int i = 0;
                 for (PartFloat f : floatList) {
                     for (Vector3f floater : f.listFloaters) {
@@ -215,6 +215,14 @@ public class BoatEntity<T extends BoatEntity.BoatPhysicsHandler<?>> extends Base
                     }
                 }
             }
+            /*Vector3f floatPos = physicsPosition.add(DynamXGeometry.rotateVectorByQuaternion(floater, physicsRotation));
+            BlockPos blockPos = new BlockPos(floatPos.x, floatPos.y + liquidOffset - 1, floatPos.z);
+            //floatReference = (float) handledEntity.getEntityWorld().getBlockState(blockPos).getSelectedBoundingBox(handledEntity.getEntityWorld(), blockPos).maxY - 0.125F + 0.5f;
+            if (handledEntity.getEntityWorld().getBlockState(blockPos).getMaterial().isLiquid()) {
+                floatReference = blockPos.getY() + 1 + BlockLiquid.getBlockLiquidHeight(handledEntity.getEntityWorld().getBlockState(blockPos), handledEntity.world, blockPos);
+                floatPart(f.size, floater, floatReference, i);
+            }
+            i++;*/
             super.update();
         }
     }

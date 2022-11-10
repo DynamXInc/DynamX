@@ -16,16 +16,19 @@ import java.util.List;
 @RegisteredSubInfoType(name = "float", registries = SubInfoTypeRegistries.WHEELED_VEHICLES, strictName = false)
 public class PartFloat extends BasePart<ModularVehicleInfo> {
     public AxisAlignedBB box;
-    public List<Vector3f> listFloaters = new ArrayList<>();
-    public float size;
+    public float size = 1;
 
+    @PackFileProperty(configNames = "DragCoefficient", required = false)
+    public float dragCoefficient = 0.05f;
     @PackFileProperty(configNames = "Axis", required = false)
     public int axis;
-    @PackFileProperty(configNames = "LineX", required = false)
-    public int lineX;
-    @PackFileProperty(configNames = "LineZ", required = false)
-    public int lineZ;
-
+    @PackFileProperty(configNames = "Offset", required = false)
+    public Vector3f offset = new Vector3f();
+    @PackFileProperty(configNames = "LineSize", required = false)
+    public Vector3f lineSize = new Vector3f();
+    @PackFileProperty(configNames = "Spacing", required = false)
+    public Vector3f spacing = new Vector3f();
+    public List<Vector3f> childFloatsPos = new ArrayList<>();
 
     public PartFloat(ModularVehicleInfo owner, String partName) {
         super(owner, partName);

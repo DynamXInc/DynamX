@@ -34,6 +34,7 @@ import java.util.function.Predicate;
  */
 public class DynamXPhysicsHelper {
     public static final Vector3f GRAVITY = new Vector3f(0.0f, -9.81f, 0.0f);
+    public static final float WATER_DENSITY = 997; //kg/m^3
     public static final int X_ROTATION_DOF = 3 + PhysicsSpace.AXIS_X;
     public static final int Y_ROTATION_DOF = 3 + PhysicsSpace.AXIS_Y;
     public static final int Z_ROTATION_DOF = 3 + PhysicsSpace.AXIS_Z;

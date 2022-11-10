@@ -6,6 +6,7 @@ import fr.dynamx.common.contentpack.parts.PartFloat;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.entities.vehicles.BoatEntity;
+import fr.dynamx.common.entities.vehicles.BoatPhysicsHandler;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -37,9 +38,9 @@ public class BoatDebugRenderer {
             int i = 0;
             Tessellator tessellator = Tessellator.getInstance();
             BufferBuilder bufferbuilder = tessellator.getBuffer();
-            BoatEntity.BoatPhysicsHandler<?> physicsHandler = (BoatEntity.BoatPhysicsHandler<?>) entity.physicsHandler;
+            BoatPhysicsHandler<?> physicsHandler = (BoatPhysicsHandler<?>) entity.physicsHandler;
             for (PartFloat f : physicsHandler.floatList) {
-                for (Vector3f floater : f.listFloaters) {
+                for (Vector3f floater : f.childFloatsPos) {
                     DynamXRenderUtils.drawBoundingBox(floater.subtract(f.size/2, f.size/2, f.size/2),
                             floater.add(f.size/2, f.size/2, f.size/2), 0, 1, 0, 1);
                     drawForce(tessellator, bufferbuilder, floater, physicsHandler.buoyForces.get(i), 1,0,0);

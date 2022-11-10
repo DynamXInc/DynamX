@@ -7,16 +7,17 @@ import fr.dynamx.api.physics.entities.IPropulsionHandler;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
 import fr.dynamx.common.contentpack.type.vehicle.BoatEngineInfo;
 import fr.dynamx.common.entities.vehicles.BoatEntity;
+import fr.dynamx.common.entities.vehicles.BoatPhysicsHandler;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class BoatEngineModule implements IPropulsionModule<BoatEntity.BoatPhysicsHandler<?>> {
+public class BoatEngineModule implements IPropulsionModule<BoatPhysicsHandler<?>> {
     private final BoatEngineInfo info;
     private final BoatEntity<?> boat;
 
-    public <T extends BoatEntity.BoatPhysicsHandler<?>> BoatEngineModule(BoatEntity<?> boatEntity) {
+    public <T extends BoatPhysicsHandler<?>> BoatEngineModule(BoatEntity<?> boatEntity) {
         this.boat = boatEntity;
         this.info = boatEntity.getPackInfo().getSubPropertyByType(BoatEngineInfo.class);
     }

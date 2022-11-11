@@ -7,7 +7,7 @@ import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.entities.modules.BoatEngineModule;
+import fr.dynamx.common.entities.modules.BoatPropellerModule;
 import fr.dynamx.common.entities.modules.EngineModule;
 import fr.dynamx.common.entities.modules.SeatsModule;
 import net.minecraft.world.World;
@@ -15,10 +15,10 @@ import net.minecraft.world.World;
 import javax.annotation.Nonnull;
 
 public class BoatEntity<T extends BoatPhysicsHandler<?>> extends BaseVehicleEntity<T> implements IModuleContainer.IEngineContainer,
-        IModuleContainer.IPropulsionContainer<BoatEngineModule>, IModuleContainer.ISeatsContainer {
+        IModuleContainer.IPropulsionContainer<BoatPropellerModule>, IModuleContainer.ISeatsContainer {
     private EngineModule engine;
     private ISeatsModule seats;
-    private BoatEngineModule propulsion;
+    private BoatPropellerModule propulsion;
 
     public BoatEntity(World world) {
         super(world);
@@ -38,7 +38,7 @@ public class BoatEntity<T extends BoatPhysicsHandler<?>> extends BaseVehicleEnti
         //Take care to add seats BEFORE engine (the engine needs to detect dismounts)
         modules.add(seats = new SeatsModule(this));
         //Take care to add propulsion BEFORE engine (the engine needs a propulsion)
-        modules.add(propulsion = new BoatEngineModule(this));
+        modules.add(propulsion = new BoatPropellerModule(this));
 
         super.createModules(modules);
         engine = modules.getByClass(EngineModule.class);
@@ -52,7 +52,7 @@ public class BoatEntity<T extends BoatPhysicsHandler<?>> extends BaseVehicleEnti
 
     @Nonnull
     @Override
-    public BoatEngineModule getPropulsion() {
+    public BoatPropellerModule getPropulsion() {
         return propulsion;
     }
 

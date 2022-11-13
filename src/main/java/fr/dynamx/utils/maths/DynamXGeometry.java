@@ -336,13 +336,13 @@ public class DynamXGeometry {
 
     public static float getYawFromRotationVector(Vector3f forwardRotationVector) {
         Vector3f horizontalRotationVec = Vector3fPool.get(forwardRotationVector.x, 0, forwardRotationVector.z);
-        float yaw = (horizontalRotationVec.length() == 0 ? 0 : DynamXGeometry.angle(LEFT_DIRECTION, horizontalRotationVec) + FastMath.HALF_PI);
+        Vector3f tmpVector = LEFT_DIRECTION.clone();
+        float yaw = (horizontalRotationVec.length() == 0 ? 0 : DynamXGeometry.angle(tmpVector, horizontalRotationVec) + FastMath.HALF_PI);
 
-        Vector3f tmpVector = LEFT_DIRECTION;
         tmpVector.cross(horizontalRotationVec, tmpVector);
 
         if (tmpVector.y < 0)
-            yaw -= FastMath.PI;
+            yaw = FastMath.PI - yaw;
 
         return (float) Math.toDegrees(-yaw);
     }

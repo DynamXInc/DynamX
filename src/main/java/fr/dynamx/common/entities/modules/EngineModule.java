@@ -48,16 +48,16 @@ public class EngineModule implements IEngineModule<AbstractEntityPhysicsHandler<
     protected EnginePhysicsHandler physicsHandler;
 
     //Default value is 2 for the handbrake on spawn
-    private final SynchronizedEntityVariable<Integer> controls = new SynchronizedEntityVariable<>(SynchronizationRules.CONTROLS_TO_SPECTATORS, null, 2);
+    private final SynchronizedEntityVariable<Integer> controls = new SynchronizedEntityVariable<>(SynchronizationRules.CONTROLS_TO_SPECTATORS, null, 2, "control");
     /**
      * The active speed limit, or Float.MAX_VALUE
      */
-    private final SynchronizedEntityVariable<Float> speedLimit = new SynchronizedEntityVariable<>(SynchronizationRules.CONTROLS_TO_SPECTATORS, null, Float.MAX_VALUE);
+    private final SynchronizedEntityVariable<Float> speedLimit = new SynchronizedEntityVariable<>(SynchronizationRules.CONTROLS_TO_SPECTATORS, null, Float.MAX_VALUE, "speed_limit");
 
     /**
      * @see fr.dynamx.api.entities.VehicleEntityProperties.EnumEngineProperties
      */
-    private final SynchronizedEntityVariable<float[]> engineProperties = new SynchronizedEntityVariable<>(SynchronizationRules.PHYSICS_TO_SPECTATORS, new float[VehicleEntityProperties.EnumEngineProperties.values().length]);
+    private final SynchronizedEntityVariable<float[]> engineProperties = new SynchronizedEntityVariable<>(SynchronizationRules.PHYSICS_TO_SPECTATORS, new float[VehicleEntityProperties.EnumEngineProperties.values().length], "engine_props");
 
     public EngineModule(BaseVehicleEntity<? extends BaseVehiclePhysicsHandler<?>> entity, EngineInfo engineInfo) {
         this.entity = entity;

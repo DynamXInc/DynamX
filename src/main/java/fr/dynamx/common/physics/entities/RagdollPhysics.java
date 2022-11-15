@@ -75,13 +75,6 @@ public class RagdollPhysics<T extends RagdollEntity> extends EntityPhysicsHandle
     }
 
     @Override
-    public Vector3f getPosition() {
-        Vector3f vec = Vector3fPool.get(super.getPosition());
-        vec.addLocal(DynamXGeometry.rotateVectorByQuaternion(Vector3fPool.get(0, 0f, 0), getRotation()));
-        return vec;
-    }
-
-    @Override
     public void updatePhysicsState(Vector3f pos, Quaternion rotation, Vector3f linearVel, Vector3f rotationalVel) {
         //pos.addLocal(Trigonometry.rotateVectorByQuaternion(Vector3fPool.get(0, 0f, 0), rotation).multLocal(-1));
         // if(pos.subtract(this.physicsPosition).length() > 0.5 || Trigonometry.angle(Trigonometry.rotateVectorByQuaternion(Vector3fPool.get(1, 0, 0), rotation), Trigonometry.rotateVectorByQuaternion(Vector3fPool.get(1, 0, 0), this.physicsRotation)) > 20)

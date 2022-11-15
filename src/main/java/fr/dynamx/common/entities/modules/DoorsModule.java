@@ -31,8 +31,6 @@ import fr.dynamx.common.handlers.TaskScheduler;
 import fr.dynamx.common.network.packets.MessageChangeDoorState;
 import fr.dynamx.common.network.sync.v3.DynamXSynchronizedVariables;
 import fr.dynamx.common.network.sync.vars.AttachedBodySynchronizedVariable;
-import fr.dynamx.common.network.sync.vars.AttachedDoorsSynchronizedVariable;
-import fr.dynamx.common.network.sync.vars.VehicleSynchronizedVariables;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.joints.EntityJoint;
 import fr.dynamx.common.physics.joints.JointHandler;
@@ -49,9 +47,7 @@ import fr.dynamx.utils.physics.DynamXPhysicsHelper;
 import io.netty.buffer.ByteBuf;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 
@@ -117,7 +113,7 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
                 }
                 return currentValue;
             }
-        }, new HashMap<>());
+        }, new HashMap<>(), "door_states");
     }
 
     @Override
@@ -147,7 +143,7 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
         localVarContainer.setModule(this);
         localVarContainer.setDoorID(jointId);
 
-        Quaternion doorRotation = QuaternionPool.get(vehicleEntity.getPhysicsHandler().getRotation());
+        Quaternion doorRotation = QuaternionPool.get(vehicleEntity.physicsRotation);
         Vector3f doorPos = DynamXGeometry.rotateVectorByQuaternion(p1.subtract(p2).addLocal(vehicleEntity.getPackInfo().getCenterOfMass()), doorRotation).addLocal(vehicleEntity.physicsPosition);
         CollisionShape doorShape = new BoxCollisionShape(partDoor.getScale());
         if(partDoor.getPhysicsCollisionShape() != null)

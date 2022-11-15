@@ -16,28 +16,30 @@ public class SynchronizedEntityVariable<T> {
     @Getter
     private final SynchronizedVariableSerializer<T> serializer;
     private T value;
-    private boolean changed = true; //first sync
+    protected boolean changed = true; //first sync
+    private final String name;
 
-    public SynchronizedEntityVariable(SynchronizationRules synchronizationRule, T initialValue) {
-        this(null, synchronizationRule, null, initialValue);
+    public SynchronizedEntityVariable(SynchronizationRules synchronizationRule, T initialValue, String name) {
+        this(null, synchronizationRule, null, initialValue, name);
     }
 
-    public SynchronizedEntityVariable(SynchronizationRules synchronizationRule, SynchronizedVariableSerializer<T> serializer) {
-        this(null, synchronizationRule, serializer, null);
+    public SynchronizedEntityVariable(SynchronizationRules synchronizationRule, SynchronizedVariableSerializer<T> serializer, String name) {
+        this(null, synchronizationRule, serializer, null, name);
     }
 
-    public SynchronizedEntityVariable(SynchronizationRules synchronizationRule, SynchronizedVariableSerializer<T> serializer, T initialValue) {
-        this(null, synchronizationRule, serializer, initialValue);
+    public SynchronizedEntityVariable(SynchronizationRules synchronizationRule, SynchronizedVariableSerializer<T> serializer, T initialValue, String name) {
+        this(null, synchronizationRule, serializer, initialValue, name);
     }
 
-    public SynchronizedEntityVariable(BiConsumer<SynchronizedEntityVariable<T>, T> receiveCallback, SynchronizationRules synchronizationRule, SynchronizedVariableSerializer<T> serializer) {
-        this(receiveCallback, synchronizationRule, serializer, null);
+    public SynchronizedEntityVariable(BiConsumer<SynchronizedEntityVariable<T>, T> receiveCallback, SynchronizationRules synchronizationRule, SynchronizedVariableSerializer<T> serializer, String name) {
+        this(receiveCallback, synchronizationRule, serializer, null, name);
     }
 
-    public SynchronizedEntityVariable(BiConsumer<SynchronizedEntityVariable<T>, T> receiveCallback, SynchronizationRules synchronizationRule, SynchronizedVariableSerializer<T> serializer, T initialValue) {
+    public SynchronizedEntityVariable(BiConsumer<SynchronizedEntityVariable<T>, T> receiveCallback, SynchronizationRules synchronizationRule, SynchronizedVariableSerializer<T> serializer, T initialValue, String name) {
         this.receiveCallback = receiveCallback;
         this.synchronizationRule = synchronizationRule;
         this.value = initialValue;
+        this.name = name;
 
         if(serializer == null && initialValue != null) {
             this.serializer = (SynchronizedVariableSerializer<T>) SynchronizedEntityVariableFactory.getSerializer(initialValue.getClass());
@@ -62,7 +64,7 @@ public class SynchronizedEntityVariable<T> {
     }
 
     public void setChanged(boolean changed) {
-        System.out.println("Mark change " + value);
+        System.out.println("Mark change " + value+" "+this);
         this.changed = changed;
     }
 
@@ -80,10 +82,12 @@ public class SynchronizedEntityVariable<T> {
     @Override
     public String toString() {
         return "SynchronizedEntityVariable{" +
-                "synchronizationRule=" + synchronizationRule +
+                "receiveCallback=" + receiveCallback +
+                ", synchronizationRule=" + synchronizationRule +
                 ", serializer=" + serializer +
                 ", value=" + value +
                 ", changed=" + changed +
+                ", name='" + name + '\'' +
                 '}';
     }
 }

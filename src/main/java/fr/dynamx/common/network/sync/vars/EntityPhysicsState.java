@@ -13,6 +13,7 @@ import fr.dynamx.utils.optimization.Vector3fPool;
  * Holds previous states of an entity, to smoothly fix it's position when we receive a sync packet, corresponding to a previous date <br>
  * Works with {@link PosSynchronizedVariable}
  */
+@Deprecated
 public class EntityPhysicsState {
     protected final PhysicsEntity<?> entityIn;
     public final Vector3f pos = new Vector3f();
@@ -21,8 +22,8 @@ public class EntityPhysicsState {
 
     public EntityPhysicsState(PhysicsEntity<?> entityIn) {
         this.entityIn = entityIn;
-        pos.set(entityIn.physicsHandler.getPosition());
-        rotation.set(entityIn.physicsHandler.getRotation());
+        //pos.set(entityIn.physicsHandler.getPosition());
+        //rotation.set(entityIn.physicsHandler.getRotation());
         simulationTime = ClientPhysicsSyncManager.simulationTime;
     }
 

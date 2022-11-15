@@ -42,11 +42,11 @@ public class PickObjects extends MovableModule {
                 return (EntityPlayer) Minecraft.getMinecraft().world.getEntityByID(id);
             return currentValue;
         }
-    });
-    public final SynchronizedEntityVariable<Float> pickDistance = new SynchronizedEntityVariable<>(SynchronizationRules.SERVER_TO_CLIENTS, null, 0f);
+    }, "mover");
+    public final SynchronizedEntityVariable<Float> pickDistance = new SynchronizedEntityVariable<>(SynchronizationRules.SERVER_TO_CLIENTS, null, 0f, "pickDistance");
     public PhysicsRigidBody hitBody;
     public float initialMass;
-    public final SynchronizedEntityVariable<Vector3f> localPickPosition = new SynchronizedEntityVariable<>(SynchronizationRules.SERVER_TO_CLIENTS, null, new Vector3f());
+    public final SynchronizedEntityVariable<Vector3f> localPickPosition = new SynchronizedEntityVariable<>(SynchronizationRules.SERVER_TO_CLIENTS, null, new Vector3f(), "localPickPosition");
 
     public PickObjects(PhysicsEntity<?> entity) {
         super(entity);

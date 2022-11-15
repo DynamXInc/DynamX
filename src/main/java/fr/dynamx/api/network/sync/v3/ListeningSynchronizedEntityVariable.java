@@ -10,8 +10,8 @@ import java.util.function.BiConsumer;
 public class ListeningSynchronizedEntityVariable<T> extends SynchronizedEntityVariable<T> {
     private final Callable<T> valueUpdater;
 
-    public ListeningSynchronizedEntityVariable(BiConsumer<SynchronizedEntityVariable<T>, T> receiveCallback, SynchronizationRules synchronizationRule, SynchronizedVariableSerializer<T> serializer, Callable<T> valueUpdater) {
-        super(receiveCallback, synchronizationRule, serializer);
+    public ListeningSynchronizedEntityVariable(BiConsumer<SynchronizedEntityVariable<T>, T> receiveCallback, SynchronizationRules synchronizationRule, SynchronizedVariableSerializer<T> serializer, Callable<T> valueUpdater, String name) {
+        super(receiveCallback, synchronizationRule, serializer, name);
         this.valueUpdater = valueUpdater;
     }
 

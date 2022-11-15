@@ -149,100 +149,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     protected void entityInit() {
     }
 
-    public static class EntityPositionData {
-        private final boolean bodyActive;
-        private final Vector3f position = new Vector3f();
-        private final Quaternion rotation = new Quaternion();
-        private final Vector3f linearVel = new Vector3f();
-        private final Vector3f rotationalVel = new Vector3f();
-
-        private EntityPositionData(AbstractEntityPhysicsHandler<?, ?> physicsHandler) {
-            bodyActive = physicsHandler.isBodyActive();
-            position.set(physicsHandler.getPosition());
-            rotation.set(physicsHandler.getRotation());
-            linearVel.set(physicsHandler.getLinearVelocity());
-            rotationalVel.set(physicsHandler.getAngularVelocity());
-        }
-
-        public EntityPositionData(boolean bodyActive, Vector3f position, Quaternion rotation) {
-            this.bodyActive = bodyActive;
-            this.position.set(position);
-            this.rotation.set(rotation);
-        }
-    }
-
-    //TODO A CLEAN MAIS C'EST POUR TEST L'IDEE
-    private final ListeningSynchronizedEntityVariable<EntityPositionData> synchronizedPosition = new ListeningSynchronizedEntityVariable<>(((entityPositionDataSynchronizedEntityVariable, entityPositionData) -> {
-//TODO INTPERPOLATION ETC :c
-        if (!world.isRemote) //Solo mode
-        {
-            motionX = entityPositionData.position.x - physicsPosition.x;
-            motionY = entityPositionData.position.y - physicsPosition.y;
-            motionZ = entityPositionData.position.z - physicsPosition.z;
-            double x = physicsPosition.x + motionX;
-            double y = physicsPosition.y + motionY;
-            double z = physicsPosition.z + motionZ;
-            physicsPosition.set((float) x, (float) y, (float) z);
-
-            physicsRotation.set(entityPositionData.rotation);
-
-        } else {
-            DynamXMain.log.error("Incorrect simulation holder in client set pos value : " + getSynchronizer().getSimulationHolder());
-        }
-    }), SynchronizationRules.PHYSICS_TO_SPECTATORS, new SynchronizedVariableSerializer<EntityPositionData>() {
-        @Override
-        public void writeObject(ByteBuf buf, EntityPositionData object) {
-            buf.writeBoolean(object.bodyActive);
-            DynamXUtils.writeVector3f(buf, object.position);
-            DynamXUtils.writeQuaternion(buf, object.rotation);
-            if (object.bodyActive) {
-                DynamXUtils.writeVector3f(buf, object.linearVel);
-                DynamXUtils.writeVector3f(buf, object.rotationalVel);
-            }
-        }
-
-        @Override
-        public EntityPositionData readObject(ByteBuf buffer, EntityPositionData currentValue) {
-            //TODO PAS COOL NEW
-            EntityPositionData result = new EntityPositionData(buffer.readBoolean(), DynamXUtils.readVector3f(buffer), DynamXUtils.readQuaternion(buffer));
-            if (result.bodyActive) {
-                result.linearVel.set(DynamXUtils.readVector3f(buffer));
-                result.rotationalVel.set(DynamXUtils.readVector3f(buffer));
-            }
-            return result;
-        }
-    }, new Callable<EntityPositionData>() {
-        private EntityPositionData positionData;
-
-        @Override
-        public EntityPositionData call() {
-            AbstractEntityPhysicsHandler<?, ?> physicsHandler = PhysicsEntity.this.physicsHandler;
-            boolean changed = PhysicsEntity.this.ticksExisted % (physicsHandler.isBodyActive() ? 13 : 20) == 0; //Keep low-rate sync while not moving
-            //Detect changes
-            Vector3f pos = PhysicsEntity.this.physicsPosition;
-            //TODO CLEAN
-            if (positionData == null || positionData.bodyActive != physicsHandler.isBodyActive()) {
-                changed = true;
-            } else if (SyncTracker.different(pos.x, positionData.position.x) || SyncTracker.different(pos.y, positionData.position.y) || SyncTracker.different(pos.z, positionData.position.z)) {
-                changed = true;
-            } else if (SyncTracker.different(PhysicsEntity.this.physicsRotation.getX(), positionData.rotation.getX()) || SyncTracker.different(PhysicsEntity.this.physicsRotation.getY(), positionData.rotation.getY()) ||
-                    SyncTracker.different(PhysicsEntity.this.physicsRotation.getZ(), positionData.rotation.getZ()) || SyncTracker.different(PhysicsEntity.this.physicsRotation.getW(), positionData.rotation.getW())) {
-                changed = true;
-            }
-            //TODO PAS COOL NEW
-            if (changed) {
-                positionData = new EntityPositionData(physicsHandler);
-                synchronizedPosition.setChanged(true);
-            }
-            return positionData;
-        }
-    });
-
-    //TODO MOVE
-    public void onTeleported(PhysicsEntity<?> entity, Vector3f newPos) {
-        //TODO DOIT IGNORER LES PROCHAINES UPDATES VENANT DU CLIENT ignoreFor = 22;
-        DynamXContext.getNetwork().sendToClient(new MessageForcePlayerPos(entity, newPos, entity.physicsRotation, entity.physicsHandler.getLinearVelocity(), entity.physicsHandler.getAngularVelocity()), EnumPacketTarget.PLAYER, (EntityPlayerMP) entity.getControllingPassenger());
-    }
+    public final fr.dynamx.api.network.sync.v3.PosSynchronizedVariable synchronizedPosition = new fr.dynamx.api.network.sync.v3.PosSynchronizedVariable(this);
 
     /**
      * Adds the {@link fr.dynamx.api.network.sync.SynchronizedVariable} used to synchronize this module <br>
@@ -475,11 +382,8 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
      * @param simulatingPhysics If physics should be simulated in this update <br> If false, the physics handler may be null
      */
     public void postUpdatePhysics(boolean simulatingPhysics) {
-        if (simulatingPhysics) {
+        if (simulatingPhysics)
             physicsHandler.postUpdate();
-            this.physicsPosition.set(this.physicsHandler.getPosition());
-            this.physicsRotation.set(this.physicsHandler.getRotation());
-        }
     }
 
     /**

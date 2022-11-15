@@ -44,7 +44,7 @@ public abstract class EntityPhysicsHandler<T extends PhysicsEntity<?>> extends A
 
         //Buoyancy effect W.I.P
         if (collisionObject.isInWorld()) {
-            Vector3f bodyPos = getPosition();
+            Vector3f bodyPos = handledEntity.physicsPosition;
             BlockPos pos = new BlockPos(bodyPos.x, bodyPos.y, bodyPos.z);
             IBlockState blockState = handledEntity.world.getBlockState(pos);
             if (blockState.getBlock() instanceof BlockLiquid) { //TODO IMPROVE
@@ -90,14 +90,14 @@ public abstract class EntityPhysicsHandler<T extends PhysicsEntity<?>> extends A
 
     @Override
     public void setPhysicsPosition(Vector3f position) {
-        this.physicsPosition.set(position);
-        collisionObject.setPhysicsLocation(physicsPosition);
+        handledEntity.physicsPosition.set(position);
+        collisionObject.setPhysicsLocation(position);
     }
 
     @Override
     public void setPhysicsRotation(Quaternion rotation) {
-        this.physicsRotation.set(rotation);
-        collisionObject.setPhysicsRotation(physicsRotation);
+        handledEntity.physicsRotation.set(rotation);
+        collisionObject.setPhysicsRotation(rotation);
     }
 
     @Override

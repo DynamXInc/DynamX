@@ -40,11 +40,11 @@ public class MoveObjects extends MovableModule {
                 return (EntityPlayer) Minecraft.getMinecraft().world.getEntityByID(id);
             return currentValue;
         }
-    });
+    }, "picker");
     public final SynchronizedEntityVariable<Boolean> isPicked = new SynchronizedEntityVariable<>((variable, value) -> {
         if(picker.get() != null)
             entity.getSynchronizer().onPlayerStopControlling(picker.get(), false);
-    }, SynchronizationRules.SERVER_TO_CLIENTS, null, false);
+    }, SynchronizationRules.SERVER_TO_CLIENTS, null, false, "isPicked");
     public final SynchronizedEntityVariable<PhysicsEntity<?>> pickedEntity = new SynchronizedEntityVariable<>(SynchronizationRules.SERVER_TO_CLIENTS, new SynchronizedVariableSerializer<PhysicsEntity<?>>() {
         @Override
         public void writeObject(ByteBuf buffer, PhysicsEntity<?> object) {
@@ -59,7 +59,7 @@ public class MoveObjects extends MovableModule {
                 return null;
             return (PhysicsEntity<?>) Minecraft.getMinecraft().world.getEntityByID(id);
         }
-    });
+    }, "pickedEntity");
     public Vector3f basePos;
 
     public MoveObjects(PhysicsEntity<?> entity) {
@@ -118,7 +118,6 @@ public class MoveObjects extends MovableModule {
                 // Quaternion rotatedQuat = DynamXGeometry.eulerToQuaternion(0, 2 * FastMath.PI - (float) Math.toRadians(picker.rotationYaw), 0);
                 rigidBody.setPhysicsLocation(finalPos);
                 pickedEntity.getPhysicsHandler().setPhysicsPosition(finalPos);
-                pickedEntity.physicsPosition.set(finalPos);
                 //pickedEntity.updateMinecraftPos();
             }
         } else {

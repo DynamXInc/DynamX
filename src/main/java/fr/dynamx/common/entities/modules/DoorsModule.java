@@ -148,7 +148,7 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
         CollisionShape doorShape = new BoxCollisionShape(partDoor.getScale());
         if(partDoor.getPhysicsCollisionShape() != null)
             doorShape = partDoor.getPhysicsCollisionShape();
-        PhysicsRigidBody doorBody = DynamXPhysicsHelper.fastCreateRigidBody(vehicleEntity, 40, doorShape, doorPos, vehicleEntity.getPhysicsHandler().getSpawnRotationAngle());
+        PhysicsRigidBody doorBody = DynamXPhysicsHelper.fastCreateRigidBody(vehicleEntity, 40, doorShape, doorPos, vehicleEntity.rotationYaw);
         localVarContainer.setDoorBody(doorBody);
         doorBody.setUserObject(new BulletShapeType<>(EnumBulletShapeType.BULLET_ENTITY, localVarContainer));
         DynamXContext.getPhysicsWorld().addCollisionObject(doorBody);

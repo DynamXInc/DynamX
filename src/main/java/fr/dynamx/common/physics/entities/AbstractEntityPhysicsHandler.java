@@ -37,10 +37,6 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
     @Getter
     private final BoundingBox boundingBox = new BoundingBox();
     /**
-     * The initial spawn yaw angle
-     */
-    protected final float spawnRotationAngle;
-    /**
      * The activation state of the {@link PhysicsCollisionObject}
      */
     protected boolean isBodyActive;
@@ -52,8 +48,7 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
 
     public AbstractEntityPhysicsHandler(T entity) {
         this.handledEntity = entity;
-        this.spawnRotationAngle = entity.rotationYaw;
-        collisionObject = createShape(entity.physicsPosition, entity.physicsRotation, spawnRotationAngle);
+        this.collisionObject = createShape(entity.physicsPosition, entity.physicsRotation, entity.rotationYaw);
     }
 
     /**
@@ -149,14 +144,6 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
      */
     public P getCollisionObject() {
         return collisionObject;
-    }
-
-
-    /**
-     * @return The initial spawn yaw angle
-     */
-    public float getSpawnRotationAngle() {
-        return spawnRotationAngle;
     }
 
     /**

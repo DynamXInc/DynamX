@@ -1,6 +1,7 @@
 {
   "compatibilityLevel": "JAVA_8",
   "package": "fr.dynamx.common.core.mixin",
+  "refmap": "refmap.dynamxmod.json",
   "mixins": [
     "MixinEntity",
     "MixinEntityLivingBase",

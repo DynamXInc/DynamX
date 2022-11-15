@@ -22,7 +22,6 @@ import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.PhysicsEntityException;
 import fr.dynamx.utils.debug.Profiler;
 import fr.dynamx.utils.maths.DynamXGeometry;
-import fr.dynamx.utils.optimization.BoundingBoxPool;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
@@ -405,12 +404,12 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
      * Computes yaw and pitch from the given quaternion
      */
     private void alignRotation(Quaternion localQuat) {
-        Vector3f forwardVec = Vector3fPool.get();
-        forwardVec = localQuat.mult(DynamXGeometry.multiply[0], forwardVec);
+        Vector3f rotatedForwardDirection = Vector3fPool.get();
+        rotatedForwardDirection = localQuat.mult(DynamXGeometry.FORWARD_DIRECTION, rotatedForwardDirection);
 
-        this.rotationPitch = DynamXGeometry.getPitch(forwardVec) % 360;
+        rotationPitch = DynamXGeometry.getPitchFromRotationVector(rotatedForwardDirection) % 360;
 
-        rotationYaw = DynamXGeometry.getYaw(forwardVec) % 360;
+        rotationYaw = DynamXGeometry.getYawFromRotationVector(rotatedForwardDirection) % 360;
         if (rotationYaw - prevRotationYaw > 270)
             prevRotationYaw += 360;
         else if (prevRotationYaw - rotationYaw > 270)

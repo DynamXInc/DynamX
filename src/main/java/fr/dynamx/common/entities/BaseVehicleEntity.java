@@ -69,7 +69,7 @@ public abstract class BaseVehicleEntity<T extends BaseVehiclePhysicsHandler<?>> 
     @Override
     protected final void fireCreateModulesEvent(Side side) {
         //Don't simplify the generic type, for fml
-        MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.CreateEntityModulesEvent(BaseVehicleEntity.class, this, moduleList, side));
+        MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.CreateEntityModulesEvent<>(BaseVehicleEntity.class, this, moduleList, side));
     }
 
     @Override

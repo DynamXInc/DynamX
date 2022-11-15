@@ -35,7 +35,6 @@ public class PropPhysicsHandler<T extends PropsEntity<?>> extends PackEntityPhys
             rigidBody.setCcdMotionThreshold(0.1f);
             rigidBody.setCcdSweptSphereRadius(0.1f);
         }
-
         return rigidBody;
     }
 

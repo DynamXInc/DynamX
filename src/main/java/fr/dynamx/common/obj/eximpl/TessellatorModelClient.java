@@ -38,7 +38,7 @@ public class TessellatorModelClient extends ObjModelClient {
             String content = new String(DynamXUtils.readInputStream(res.getInputStream()), StandardCharsets.UTF_8);
             String startPath = location.getPath().substring(0, location.getPath().lastIndexOf("/") + 1);
             List<IObjObject> objObjects = new ArrayList<>();
-            new OBJLoader(objObjects).loadModelClient(QuickObjObject::new, startPath, content);
+            new OBJLoader(objObjects).loadModelClient(QuickObjObject::new, new ResourceLocation(location.getNamespace(), startPath), content);
             return new TessellatorModelClient(location, objObjects, customTextures);
         } catch (Exception e) {
             DynamXErrorManager.addError(customTextures != null ? customTextures.getPackName() : "Non-pack model", DynamXErrorManager.MODEL_ERRORS, "obj_error", ErrorLevel.HIGH, location.toString(), "", e);

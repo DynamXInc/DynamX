@@ -405,7 +405,7 @@ public class VehicleSynchronizedVariables {
                     VehicleWheel info = ((BaseWheeledVehiclePhysicsHandler<?>) entity.physicsHandler).getPhysicsVehicle().getWheel(i);
                     if (info != null) {
                         info.setSuspensionLength(this.visualProperties[VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.SUSPENSIONLENGTH)] - info.getRestLength());
-                        info.setRotationAngle(this.visualProperties[VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.ROTATIONANGLE)] / DynamXGeometry.radToDeg);
+                        info.setRotationAngle(this.visualProperties[VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.ROTATIONANGLE)]);
                     }
                 }
             }

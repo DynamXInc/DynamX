@@ -9,6 +9,7 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.ContentPackLoader;
+import fr.dynamx.common.contentpack.PackInfo;
 import fr.dynamx.common.contentpack.type.objects.AbstractProp;
 import fr.dynamx.common.contentpack.type.objects.PropObject;
 import fr.dynamx.common.obj.ObjModelServer;
@@ -16,6 +17,7 @@ import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import net.minecraft.util.ResourceLocation;
 import vhacd.VHACD;
 import vhacd.VHACDHull;
 import vhacd.VHACDParameters;
@@ -33,74 +35,46 @@ public class ShapeUtils {
     // Shape generation
     public static CompoundCollisionShape generateComplexModelCollisions(ObjModelPath path, String objectName, Vector3f scale, Vector3f centerOfMass, float shapeYOffset) {
         String lowerCaseObjectName = objectName.toLowerCase();
-        String modelPath = DynamXMain.resDir + File.separator + path.getPackName() + File.separator + "assets" +
-                File.separator + path.getModelPath().getNamespace() + File.separator + path.getModelPath().getPath().replace("/", File.separator);
+        ResourceLocation dcFileLocation = new ResourceLocation(path.getModelPath().toString().replace(".obj", "_" +lowerCaseObjectName+"_"+ DynamXConstants.DC_FILE_VERSION + ".dc"));
+        InputStream dcInputStream = null;
+        PackInfo dcFilePackInfo = null;
+        for(PackInfo packInfo : path.getPackLocations()) {
+            try {
+                dcInputStream = packInfo.readFile(dcFileLocation);
+                if(dcInputStream != null) {
+                    System.out.println(dcFileLocation + " found in " + packInfo);
+                    dcFilePackInfo = packInfo;
+                    break;
+                }
+            } catch (IOException e) {
+                //TODO FIX
+                throw new RuntimeException(e);
+            }
+        }
 
-        String modelName = modelPath.substring(modelPath.lastIndexOf(File.separator) + 1);
-        File file = new File(modelPath.replace(".obj", "_" +lowerCaseObjectName+"_"+ DynamXConstants.DC_FILE_VERSION + ".dc"));
         ShapeGenerator shapeGenerator = null;
         long start = System.currentTimeMillis();
-        if (file.exists()) {
+        if(dcInputStream != null) {
             //load file
             try {
-                shapeGenerator = loadFile(Files.newInputStream(file.toPath()));
+                shapeGenerator = loadFile(dcInputStream);
             } catch (Exception e) {
-                log.error("Cannot load .dc file of " + modelPath + ". Re-creating it", e);
-                file.delete();
-                shapeGenerator = null;
-            }
-        } else if (file.getPath().contains(".zip") || file.getPath().contains(ContentPackLoader.PACK_FILE_EXTENSION)) {
-            boolean zipped = file.getPath().contains(".zip");
-            //System.out.println("ZIP FILE " + zipped);
-            File unZip;
-            if (zipped) {
-                unZip = new File(file.getPath().replace(".zip", ""));
-            } else {
-                unZip = new File(file.getPath().replace(ContentPackLoader.PACK_FILE_EXTENSION, ""));
-            }
-            //System.out.println("Unzip " + unZip);
-            if (unZip.exists()) {
-                //load file
+                log.error("Cannot load .dc file of " + path + ". Re-creating it. Errored dc file was found in " + dcFilePackInfo, e);
+                //do it just after file.delete();
+            } finally {
                 try {
-                    log.info("Using dezipped .dc file for " + lowerCaseObjectName + " of pack " + path.getPackName() + ". Consider putting it in the zip file and delete the dezipped file.");
-                    shapeGenerator = loadFile(Files.newInputStream(unZip.toPath()));
-                } catch (Exception e) {
-                    log.error("Cannot load .dc file of " + modelPath + " (Zipped pack). Re-creating it.", e);
-                    unZip.delete();
-                }
-            } else {
-                File zipFile;
-                if (zipped) {
-                    zipFile = new File(file.getPath().substring(0, file.getPath().lastIndexOf(".zip") + 4));
-                } else {
-                    zipFile = new File(file.getPath().substring(0, file.getPath().lastIndexOf(ContentPackLoader.PACK_FILE_EXTENSION) + ContentPackLoader.PACK_FILE_EXTENSION.length()));
-                }
-                //System.out.println("So zip file " + zipFile + " " + zipFile.exists());
-                if (zipFile.exists()) {
-                    try {
-                        ZipFile zip = new ZipFile(zipFile);
-                        ZipEntry entry;
-                        if (zipped) {
-                            entry = zip.getEntry(file.getPath().substring(file.getPath().lastIndexOf(".zip") + 5).replace(File.separator, "/"));
-                        } else {
-                            entry = zip.getEntry(file.getPath().substring(file.getPath().lastIndexOf(ContentPackLoader.PACK_FILE_EXTENSION)
-                                    + ContentPackLoader.PACK_FILE_EXTENSION.length() + 1).replace(File.separator, "/"));
-                        }
-                        //System.out.println("Then entry " + entry);
-                        if (entry != null) {
-                            shapeGenerator = loadFile(zip.getInputStream(entry));
-                        }
-                    } catch (IOException e) {
-                        log.error("Cannot load .dc file of " + modelPath + " (Zipped pack). Creating it out of the zip.", e);
-                        shapeGenerator = null;
-                    }
-                } else {
-                    System.out.println("File not found");
+                    dcInputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
         }
         if (shapeGenerator == null) {
-            ObjModelServer model = ObjModelServer.createServerObjModel(path);
+            ObjModelServer model = ObjModelServer.createServerObjModel(path); //TODO GET THE PATH FROM HERE
+            String modelPath = DynamXMain.resDir + File.separator + path.getPackName() + File.separator + "assets" + //todo prevents from searching in zip files : we use the pack name
+                    File.separator + path.getModelPath().getNamespace() + File.separator + path.getModelPath().getPath().replace("/", File.separator);
+            String modelName = modelPath.substring(modelPath.lastIndexOf(File.separator) + 1);
+            File file = new File(modelPath.replace(".obj", "_" +lowerCaseObjectName+"_"+ DynamXConstants.DC_FILE_VERSION + ".dc"));
 
             float[] pos = lowerCaseObjectName.isEmpty() ? model.getVerticesPos() : model.getVerticesPos(lowerCaseObjectName);
             int[] indices = lowerCaseObjectName.isEmpty() ? model.getAllMeshIndices() : model.getMeshIndices(lowerCaseObjectName);
@@ -120,6 +94,7 @@ public class ShapeUtils {
 
             shapeGenerator = new ShapeGenerator(pos, indices, parameters);
             if (!file.getPath().contains(".zip") && !file.getPath().contains(ContentPackLoader.PACK_FILE_EXTENSION)) { //not a zip pack
+                file.getParentFile().mkdirs(); //todo pb if a pack is DartcherPack-Trucks.zip, and PackName: DartcherPack, the file will use DartcherPack
                 saveFile(file, shapeGenerator);
             } else {
                 log.warn("Saving .dc file of " + modelPath + " of a zipped pack in " + file + ". Consider putting it in the zip file of the pack.");
@@ -150,7 +125,7 @@ public class ShapeUtils {
         }
         long end = System.currentTimeMillis();
         long time = end - start;
-        log.info("Loaded " + file.getName() + " in " + time + " ms");
+        log.info("Loaded " + dcFileLocation + " in " + time + " ms");
         return collisionShape;
     }
 

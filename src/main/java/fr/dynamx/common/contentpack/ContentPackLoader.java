@@ -275,7 +275,7 @@ public class ContentPackLoader {
             }
             //Load shapes
             for (InfoLoader<?> loader : DynamXObjectLoaders.LOADERS) {
-                bar.step("Post load : " + loader.getPrefix());
+                bar.step("Post load : " + loader.getPrefix().substring(0, loader.getPrefix().length()-1));
                 loader.postLoad(isHotReloading);
             }
             ProgressManager.pop(bar);

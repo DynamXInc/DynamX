@@ -2,7 +2,6 @@ package fr.dynamx.common.physics.world;
 
 import fr.dynamx.api.events.PhysicsEvent;
 import fr.dynamx.common.DynamXMain;
-import fr.dynamx.common.physics.CollisionsHandler;
 import fr.dynamx.utils.debug.Profiler;
 import fr.dynamx.utils.optimization.BoundingBoxPool;
 import fr.dynamx.utils.optimization.TransformPool;
@@ -47,7 +46,6 @@ public class BuiltinPhysicsWorld extends BasePhysicsWorld {
             } else {
                 flushOperations(Profiler.get());
             }
-            CollisionsHandler.tick();
         }
         TransformPool.getPool().closeSubPool();
         Vector3fPool.closePool();

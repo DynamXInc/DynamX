@@ -19,8 +19,8 @@ public class PhysicsSimulationModes {
             long nanoTime = System.nanoTime();
             long nanoseconds = nanoTime - lastPhysicsUpdate;
             float seconds = 1e-9f * nanoseconds;
-            dynamicsWorld.update(seconds);
-            this.lastPhysicsUpdate = nanoTime;
+            dynamicsWorld.update(seconds, dynamicsWorld.maxSubSteps(), false, true, false);
+            lastPhysicsUpdate = nanoTime;
         }
 
         @Override

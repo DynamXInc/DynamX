@@ -28,9 +28,7 @@ public class ObjModelServer {
     }
 
     public static ObjModelServer createServerObjModel(ObjModelPath location) {
-        ModProtectionContainer container = ContentPackLoader.getProtectedResources().get(location.getPackName());
-        //System.out.println("Search loader " + ContentPackLoader.getProtectedResources() + " : " + location.getPackName());
-        return new TessellatorModelServer(container == null ? null : container.getSecureLoader(), location);
+        return new TessellatorModelServer(location);
     }
 
     public float[] getVerticesPos() {

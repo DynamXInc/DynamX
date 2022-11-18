@@ -16,9 +16,10 @@ import fr.dynamx.utils.physics.DynamXPhysicsHelper;
  * @see fr.dynamx.utils.client.ClientDynamXUtils
  */
 public class DynamXGeometry {
-    public static float degToRad = 0.017453292F;
-    public static float radToDeg = 57.295776F;
-    public static Vector3f[] multiply = new Vector3f[]{new Vector3f(0.0F, 0.0F, 1.0F), new Vector3f(0.0F, 1.0F, 0.0F), new Vector3f(1.0F, 0.0F, 0.0F)};
+
+    public final static Vector3f FORWARD_DIRECTION = new Vector3f(0.0f,0.0f,1.0f);
+    public final static Vector3f LEFT_DIRECTION = new Vector3f(1.0f,0.0f,0.0f);
+    public final static Vector3f UP_DIRECTION = new Vector3f(0.0f,1.0f,0.0f);
 
     /**
      * Returns the angle in radians between this vector and the vector
@@ -337,37 +338,32 @@ public class DynamXGeometry {
         return store;
     }
 
-    public static float getYaw(Vector3f forwardVect) {
-        Vector3f forwardVect1 = Vector3fPool.get(forwardVect.x, 0.0F, forwardVect.z);
-        Vector3f referanceVect = Vector3fPool.get(1.0F, 0.0F, 0.0F);
-        float yaw = (forwardVect1.length() == 0 ? 0 : DynamXGeometry.angle(referanceVect, forwardVect1) + 1.5707964F);
+    public static float getYawFromRotationVector(Vector3f forwardRotationVector) {
+        Vector3f horizontalRotationVec = Vector3fPool.get(forwardRotationVector.x, 0, forwardRotationVector.z);
+        Vector3f tmpVector = LEFT_DIRECTION.clone();
+        float yaw = (horizontalRotationVec.length() == 0 ? 0 : DynamXGeometry.angle(tmpVector, horizontalRotationVec) + FastMath.HALF_PI);
 
-        referanceVect.cross(forwardVect1, referanceVect);
+        tmpVector.cross(horizontalRotationVec, tmpVector);
 
-        if (referanceVect.y < 0.0F) {
-            yaw = 3.1415927F - yaw;
-        }
+        if (tmpVector.y < 0)
+            yaw = FastMath.PI - yaw;
 
-        return -yaw * 180.0F / 3.1415927F;
+        return (float) Math.toDegrees(-yaw);
     }
 
-    public static float getPitch(Vector3f forwardVect) {
-        Vector3f referanceVect = Vector3fPool.get(0.0F, 1.0F, 0.0F);
-        float pitch = 1.5707964F - DynamXGeometry.angle(referanceVect, forwardVect);
-
-        return pitch * 180.0F / 3.1415927F;
+    public static float getPitchFromRotationVector(Vector3f forwardRotationVector) {
+        return (float) Math.toDegrees(FastMath.HALF_PI - DynamXGeometry.angle(UP_DIRECTION, forwardRotationVector));
     }
 
-    public static float getRoll(Vector3f leftVect, Vector3f forwardVect) {
-        Vector3f upVect = Vector3fPool.get(0.0F, 1.0F, 0.0F);
-        Vector3f referanceVect = Vector3fPool.get();
-        upVect.cross(forwardVect, referanceVect);
-        float roll = -DynamXGeometry.angle(referanceVect, leftVect);
+    public static float getRollFromRotationVector(Vector3f leftRotationVector, Vector3f forwardRotationVector) {
+        Vector3f tmpVector = Vector3fPool.get();
+        UP_DIRECTION.cross(forwardRotationVector, tmpVector);
+        float roll = -DynamXGeometry.angle(tmpVector, leftRotationVector);
 
-        if (leftVect.y > 0.0F) {
+        if (leftRotationVector.y > 0)
             roll = -roll;
-        }
-        return roll * 180.0F / 3.1415927F;
+
+        return (float) Math.toDegrees(roll);
     }
 
 }

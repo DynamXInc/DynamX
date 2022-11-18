@@ -3,12 +3,13 @@ package fr.dynamx.utils;
 import com.google.common.base.Predicates;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import fr.dynamx.api.contentpack.ContentPackType;
 import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.entities.VehicleEntityProperties;
-import fr.dynamx.api.contentpack.ContentPackType;
 import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.api.physics.EnumBulletShapeType;
+import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.PackInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
@@ -98,12 +99,12 @@ public class DynamXUtils {
      * @return A new {@link ObjModelPath} for this model
      */
     public static ObjModelPath getModelPath(String packName, String model) {
-        PackInfo info = DynamXObjectLoaders.PACKS.findPackInfoByPackName(packName);
-        if (info == null) {
-            System.err.println("WTF PACK INFO " + packName + " NOT FOUND");
+        List<PackInfo> packLocations = DynamXObjectLoaders.PACKS.findPackLocations(packName);
+        if (packLocations.isEmpty()) {
+            DynamXMain.log.error("Pack info " + packName + " not found. This should not happen.");
             return new ObjModelPath(new PackInfo(packName, ContentPackType.FOLDER), RegistryNameSetter.getDynamXModelResourceLocation(model));
         }
-        return new ObjModelPath(info, RegistryNameSetter.getDynamXModelResourceLocation(model));
+        return new ObjModelPath(packLocations, RegistryNameSetter.getDynamXModelResourceLocation(model));
     }
 
     public static byte[] readInputStream(InputStream resource) throws IOException {
@@ -267,7 +268,7 @@ public class DynamXUtils {
         Vector3f playerPos = Vector3fPool.get((float) player.posX, (float) player.posY, (float) player.posZ);
         for (float f = 1.0F; f < 4.0F; f += 0.1F) {
             for (BasePart<?> part : packInfo.getAllParts()) {
-                if(wantedPart != null && !wantedPart.test(part)){
+                if (wantedPart != null && !wantedPart.test(part)) {
                     continue;
                 }
                 Vector3f partPos = DynamXGeometry.rotateVectorByQuaternion(part.getPosition(), entityPart.physicsRotation);
@@ -310,9 +311,9 @@ public class DynamXUtils {
     //DUPLICATE (function is already in the BasicsAddon)
     public static int getSpeed(BaseVehicleEntity<?> entity) {
         EngineModule engine = entity.getModuleByType(EngineModule.class);
-        if(engine != null){
+        if (engine != null) {
             float[] ab = engine.getEngineProperties();
-            if(ab == null) return 0;
+            if (ab == null) return 0;
             return (int) Math.abs(ab[VehicleEntityProperties.EnumEngineProperties.SPEED.ordinal()]);
         }
         return -1;

@@ -1,5 +1,6 @@
 package fr.dynamx.api.events;
 
+import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.physics.terrain.chunk.ChunkCollisions;
@@ -101,16 +102,23 @@ public class PhysicsEvent extends Event {
         }
     }
 
-   /*
-    public static class PhysicsCollisionEvent extends PhysicsEvent
-    {
-        @Getter private final BulletShapeType<?> object1, object2;
+    /**
+     * Called when a collision occurs in the physics engine
+     */
+    public static class PhysicsCollisionEvent extends PhysicsEvent {
+        @Getter
+        private final BulletShapeType<?> object1, object2;
 
-        public PhysicsCollisionEvent(IPhysicsWorld world, BulletShapeType<?> o1, BulletShapeType<?> o2){
+        /**
+         *
+         * @param world     The physics world owning this chunk
+         * @param object1   First collision object colliding with the second
+         * @param object2   Second collision object colliding with the first
+         */
+        public PhysicsCollisionEvent(IPhysicsWorld world, BulletShapeType<?> object1, BulletShapeType<?> object2){
             super(world);
-            object1 = o1;
-            object2 = o2;
-            System.out.println("Cogne "+o1+" "+o2);
+            this.object1 = object1;
+            this.object2 = object2;
         }
-    }*/
+    }
 }

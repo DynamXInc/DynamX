@@ -232,12 +232,12 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
             for (int i = 0; i < n; i++) {
                 VehicleWheel info = wheelsPhysics.getHandler().getPhysicsVehicle().getWheel(i);
                 if (info.isFrontWheel()) {
-                    visualProperties[VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.STEERANGLE)] = (info.getSteerAngle() * DynamXGeometry.radToDeg);
+                    visualProperties[VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.STEERANGLE)] = (float) Math.toDegrees(info.getSteerAngle());
                 }
 
                 int ind = VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.ROTATIONANGLE);
                 //Update prevRotation, so we have -180<prevRotationYaw-rotationYaw<180 to avoid visual glitch
-                float[] angles = DynamXMath.interpolateAngle((info.getRotationAngle() * DynamXGeometry.radToDeg) % 360, visualProperties[ind], 1);
+                float[] angles = DynamXMath.interpolateAngle((float) (Math.toDegrees(info.getRotationAngle()) % 360), visualProperties[ind], 1);
                 prevVisualProperties[ind] = angles[0];
                 visualProperties[ind] = angles[1];
 

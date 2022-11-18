@@ -5,6 +5,7 @@ import fr.dynamx.api.physics.entities.IGearBoxHandler;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.wheel.WheelPhysics;
+import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.maths.DynamXMath;
 import lombok.RequiredArgsConstructor;
 import net.minecraftforge.fml.relauncher.Side;
@@ -69,11 +70,11 @@ public class AutomaticGearboxHandler implements IGearBoxHandler {
                     revs = DynamXMath.clamp(revs, 0, 1);
                 }
             } else {
-                targetRPM = 1000 / vehicle.getEngine().getMaxRevs();
+                targetRPM = gearBox.getActiveGear().getRpmStart() / vehicle.getEngine().getMaxRevs();
                 revs = vehicle.getEngine().getRevs();
                 if (revs != targetRPM) {
                     float drev = targetRPM - revs;
-                    drev /= 2; //Interpolation : take 10 ticks to come back to required speed
+                    drev /= DynamXConfig.gearChangeDelay; //Interpolation : take some ticks to come back to required speed
                     revs = revs + drev;
                 }
             }

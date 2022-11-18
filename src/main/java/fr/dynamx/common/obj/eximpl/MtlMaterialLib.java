@@ -5,6 +5,7 @@ import fr.dynamx.common.obj.texture.MaterialTexture;
 import fr.dynamx.utils.RegistryNameSetter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.util.ResourceLocation;
 import org.lwjgl.util.vector.Vector3f;
 
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ public class MtlMaterialLib {
 
     private final ArrayList<Material> materials = new ArrayList<>();
 
-    public void parse(String startPath, String content) {
+    public void parse(ResourceLocation location, String content) {
         String[] lines = content.split("\n");
         Material current = null;
         for (String s : lines) {
@@ -48,17 +49,17 @@ public class MtlMaterialLib {
                     current.diffuseColor = new Vector3f(Float.parseFloat(parts[1]), Float.parseFloat(parts[2]), Float.parseFloat(parts[3]));
                     break;
                 case TEXTURE_DIFFUSE: {
-                    //current.diffuseTex = parts[1].contains(File.separator+File.separator) ? startPath + parts[1].replace(File.separator+File.separator,
-                    // File.separator) : startPath + parts[1];
+                    //current.diffuseTex = parts[1].contains(File.separator+File.separator) ? location + parts[1].replace(File.separator+File.separator,
+                    // File.separator) : location + parts[1];
                     String name = parts.length >= 3 ? parts[2] : "Default";
                     current.diffuseTexture.put(name,
-                            new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault(startPath + parts[1]), name, -1));
+                            new MaterialTexture(new ResourceLocation(location.getNamespace(), location.getPath() + parts[1]), name, -1));
                     break;
                 }
                 case TEXTURE_AMBIENT: {
                     String name = parts.length >= 3 ? parts[2] : "Default";
                     current.ambientTexture.put(name,
-                            new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault(startPath + parts[1]), name, -1));
+                            new MaterialTexture(new ResourceLocation(location.getNamespace(), location.getPath() + parts[1]), name, -1));
                     break;
                 }
                 case TRANSPARENCY_D:

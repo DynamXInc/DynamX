@@ -85,7 +85,6 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
 
     @Getter
     private CompoundCollisionShape physicsCollisionShape;
-    private ObjModelPath carModelPath;
 
     public PartDoor(ModularVehicleInfo owner, String partName) {
         super(owner, partName, 0, 0);
@@ -128,7 +127,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
         super.appendTo(owner);
         owner.arrangeDoorID(this);
         owner.addRenderedParts(getPartName());
-        carModelPath = DynamXUtils.getModelPath(getPackName(), owner.getModel());
+        ObjModelPath carModelPath = DynamXUtils.getModelPath(getPackName(), owner.getModel());
         physicsCollisionShape = ShapeUtils.generateComplexModelCollisions(carModelPath, getPartName(), new Vector3f(1, 1, 1), new Vector3f(), 0);
     }
 

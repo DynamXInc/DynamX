@@ -216,7 +216,7 @@ public class PlayerSyncBuffer {
         private void send(Queue<MessagePhysicsEntitySync<?>> sendQueue) {
             varsToSync.forEach((i, t) -> t.validate(entity, 4));
             if (!entity.isDead) {
-                sendQueue.add(new MessagePhysicsEntitySync(entity, syncTime, varsToSync, varsToSync.size() > NEW_SENDS_LIMIT ? MessagePhysicsEntitySync.SyncType.UDP_COMPRESSED_SYNC : MessagePhysicsEntitySync.SyncType.UDP_SYNC));
+                sendQueue.add(new MessagePhysicsEntitySync(entity, syncTime, varsToSync, varsToSync.size() > NEW_SENDS_LIMIT));
             }
         }
 

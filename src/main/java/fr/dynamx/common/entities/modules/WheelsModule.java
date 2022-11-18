@@ -38,6 +38,7 @@ import fr.dynamx.utils.debug.SyncTracker;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
+import fr.dynamx.utils.optimization.HashMapPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.block.state.IBlockState;
@@ -67,24 +68,7 @@ import static fr.dynamx.client.ClientProxy.SOUND_HANDLER;
 public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysicsHandler<?>>, IPhysicsModule.IEntityUpdateListener, IPhysicsModule.IPhysicsUpdateListener, IPhysicsModule.IDrawableModule<BaseVehicleEntity<?>> {
     protected final SynchronizedEntityVariable<Map<Byte, PartWheelInfo>> wheelInfos = new SynchronizedEntityVariable<>((variable, value) -> {
         value.forEach(this::setWheelInfo);
-    }, SynchronizationRules.CONTROLS_TO_SPECTATORS, new SynchronizedVariableSerializer<Map<Byte, PartWheelInfo>>() {
-        @Override
-        public void writeObject(ByteBuf buf, Map<Byte, PartWheelInfo> object) {
-            buf.writeInt(object.size());
-            object.forEach((id, info) -> {
-                buf.writeByte(id);
-                ByteBufUtils.writeUTF8String(buf, info.getFullName());
-            });
-        }
-
-        @Override
-        public Map<Byte, PartWheelInfo> readObject(ByteBuf buf, Map<Byte, PartWheelInfo> currentValue) {
-            int size = buf.readInt();
-            for (byte i = 0; i < size; i++)
-                currentValue.put(buf.readByte(), DynamXObjectLoaders.WHEELS.findInfo(ByteBufUtils.readUTF8String(buf)));
-            return currentValue;
-        }
-    }, new HashMap<>(), "wheel_infos");
+    }, SynchronizationRules.CONTROLS_TO_SPECTATORS, DynamXSynchronizedVariables.wheelInfosSerializer, new HashMap<>(), "wheel_infos");
     /**
      * Wheels visual states, based on the physical states
      */
@@ -122,24 +106,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
                     }
                 }
             }
-        }, SynchronizationRules.CONTROLS_TO_SPECTATORS, new SynchronizedVariableSerializer<WheelState[]>() {
-            @Override
-            public void writeObject(ByteBuf buf, WheelState[] object) {
-                buf.writeInt(object.length);
-                for (WheelState f : object) {
-                    buf.writeByte(f.ordinal());
-                }
-            }
-
-            @Override
-            public WheelState[] readObject(ByteBuf buf, WheelState[] currentValue) {
-                currentValue = new WheelState[buf.readInt()];
-                for (byte i = 0; i < currentValue.length; i++) {
-                    currentValue[i] = WheelState.values()[buf.readByte()];
-                }
-                return currentValue;
-            }
-        }, "wheel_states");
+        }, SynchronizationRules.CONTROLS_TO_SPECTATORS, DynamXSynchronizedVariables.wheelStates, "wheel_states");
     }
 
     public void setWheelInfo(byte partIndex, PartWheelInfo info) {

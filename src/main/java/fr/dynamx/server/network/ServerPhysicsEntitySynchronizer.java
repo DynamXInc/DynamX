@@ -6,9 +6,9 @@ import fr.dynamx.api.network.sync.PhysicsEntityNetHandler;
 import fr.dynamx.api.network.sync.SimulationHolder;
 import fr.dynamx.api.network.sync.SyncTarget;
 import fr.dynamx.api.network.sync.SynchronizedVariable;
+import fr.dynamx.api.network.sync.v3.PhysicsEntitySynchronizer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
-import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.network.packets.MessageWalkingPlayer;
 import fr.dynamx.common.network.packets.PhysicsEntityMessage;
@@ -33,7 +33,7 @@ import java.util.Set;
 import static fr.dynamx.api.network.sync.SynchronizedVariablesRegistry.retainSyncVars;
 
 @SideOnly(Side.SERVER)
-public class ServerPhysicsEntityNetHandler<T extends PhysicsEntity<?>> extends PhysicsEntityNetHandler<T> {
+public class ServerPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends PhysicsEntitySynchronizer<T> {
     /**
      * Ordered sync waiting packet queue, we need this because when network lags, we receive all packets at the same tick
      */
@@ -42,7 +42,7 @@ public class ServerPhysicsEntityNetHandler<T extends PhysicsEntity<?>> extends P
     private final Map<Integer, SyncTarget> varsToSync = new HashMap<>();
     private int updateCount = 0;
 
-    public ServerPhysicsEntityNetHandler(T entityIn) {
+    public ServerPhysicsEntitySynchronizer(T entityIn) {
         super(entityIn);
     }
 
@@ -64,12 +64,15 @@ public class ServerPhysicsEntityNetHandler<T extends PhysicsEntity<?>> extends P
     @Override
     public void onPrePhysicsTick(Profiler profiler) {
         if (!queuedPackets.isEmpty()) {
+
+
+
             //HERE WILL BE THE TRICKY CODE TO FIND DIFFS
             getInputSyncVars().clear(); //temporary thinking
-            //while (queuedPackets.size() > 2)
-            //    replaceInputSyncVars(queuedPackets.remove().varsToSync);
+            while (queuedPackets.size() > 2)
+                replaceInputSyncVars(queuedPackets.remove().varsToSync);
             MessagePhysicsEntitySync pck = queuedPackets.remove();
-            //replaceInputSyncVars(pck.varsToSync);
+            replaceInputSyncVars(pck.varsToSync);
             getInputSyncVars().forEach((i, v) -> v.setValueTo(entity, this, pck, Side.SERVER));
         }
         profiler.start(Profiler.Profiles.PHY1);

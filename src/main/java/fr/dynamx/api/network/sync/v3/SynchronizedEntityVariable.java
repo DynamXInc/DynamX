@@ -3,9 +3,11 @@ package fr.dynamx.api.network.sync.v3;
 import fr.dynamx.api.network.sync.SimulationHolder;
 import fr.dynamx.api.network.sync.SyncTarget;
 import fr.dynamx.utils.debug.SyncTracker;
+import io.netty.buffer.ByteBuf;
 import lombok.Getter;
 import net.minecraftforge.fml.relauncher.Side;
 
+import java.nio.ByteBuffer;
 import java.util.function.BiConsumer;
 
 public class SynchronizedEntityVariable<T> {
@@ -77,6 +79,10 @@ public class SynchronizedEntityVariable<T> {
 
     public SyncTarget getSyncTarget(SimulationHolder simulationHolder, Side side) {
         return changed ? synchronizationRule.getSyncTarget(simulationHolder, side) : SyncTarget.NONE;
+    }
+
+    public void writeValue(ByteBuf buffer, boolean lightData) {
+        serializer.writeObject(buffer, get());
     }
 
     @Override

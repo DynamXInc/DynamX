@@ -59,7 +59,7 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
         for (Map.Entry<Integer, SynchronizedEntityVariable<?>> entry : varsToSync.entrySet()) {
             Integer i = entry.getKey();
             SynchronizedEntityVariable<A> v = (SynchronizedEntityVariable<A>) entry.getValue();
-            v.getSerializer().writeObject(buf, v.get());
+            v.writeValue(buf, false);
             v.setChanged(false);
             SynchronizedEntityVariableSnapshot<A> v2 = (SynchronizedEntityVariableSnapshot<A>) other.getReceivedVariables().get(i);
             if(v2 != null) {

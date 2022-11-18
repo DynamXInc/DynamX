@@ -2,7 +2,12 @@ package fr.dynamx.api.network.sync.v3;
 
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.entities.PhysicsEntity;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 
 //TODO IMPROVE THIS
 public class SynchronizedEntityVariableFactory {
@@ -13,7 +18,7 @@ public class SynchronizedEntityVariableFactory {
         }
 
         @Override
-        public Byte readObject(ByteBuf buffer, Byte currentValue) {
+        public Byte readObject(ByteBuf buffer) {
             return buffer.readByte();
         }
 
@@ -29,7 +34,7 @@ public class SynchronizedEntityVariableFactory {
         }
 
         @Override
-        public Integer readObject(ByteBuf buffer, Integer currentValue) {
+        public Integer readObject(ByteBuf buffer) {
             return buffer.readInt();
         }
 
@@ -45,7 +50,7 @@ public class SynchronizedEntityVariableFactory {
         }
 
         @Override
-        public Float readObject(ByteBuf buffer, Float currentValue) {
+        public Float readObject(ByteBuf buffer) {
             return buffer.readFloat();
         }
 
@@ -61,7 +66,7 @@ public class SynchronizedEntityVariableFactory {
         }
 
         @Override
-        public Boolean readObject(ByteBuf buffer, Boolean currentValue) {
+        public Boolean readObject(ByteBuf buffer) {
             return buffer.readBoolean();
         }
 
@@ -79,8 +84,9 @@ public class SynchronizedEntityVariableFactory {
         }
 
         @Override
-        public float[] readObject(ByteBuf buffer, float[] currentValue) {
+        public float[] readObject(ByteBuf buffer) {
             int size = buffer.readInt();
+            float[] currentValue = new float[size];
             for (int i = 0; i < size; i++)
                 currentValue[i] = buffer.readFloat();
             return currentValue;
@@ -100,8 +106,8 @@ public class SynchronizedEntityVariableFactory {
         }
 
         @Override
-        public Vector3f readObject(ByteBuf buffer, Vector3f currentValue) {
-            return currentValue.set(buffer.readFloat(), buffer.readFloat(), buffer.readFloat());
+        public Vector3f readObject(ByteBuf buffer) {
+            return new Vector3f(buffer.readFloat(), buffer.readFloat(), buffer.readFloat());
         }
 
         @Override
@@ -119,13 +125,45 @@ public class SynchronizedEntityVariableFactory {
         }
 
         @Override
-        public Quaternion readObject(ByteBuf buffer, Quaternion currentValue) {
-            return currentValue.set(buffer.readFloat(), buffer.readFloat(), buffer.readFloat(), buffer.readFloat());
+        public Quaternion readObject(ByteBuf buffer) {
+            return new Quaternion(buffer.readFloat(), buffer.readFloat(), buffer.readFloat(), buffer.readFloat());
         }
 
         @Override
         public String toString() {
             return "quaternion";
+        }
+    };
+
+    public static final SynchronizedVariableSerializer<EntityPlayer> playerSerializer = new SynchronizedVariableSerializer<EntityPlayer>() {
+        @Override
+        public void writeObject(ByteBuf buffer, EntityPlayer object) {
+            buffer.writeInt(object == null ? -1 : object.getEntityId());
+        }
+
+        @Override
+        public EntityPlayer readObject(ByteBuf buffer) {
+            int id = buffer.readInt();
+            if(id == -1)
+                return null;
+            Entity e = Minecraft.getMinecraft().world.getEntityByID(id);
+            return e instanceof EntityPlayer ? (EntityPlayer) e : null;
+        }
+    };
+
+    public static final SynchronizedVariableSerializer<PhysicsEntity<?>> physicsEntitySerializer = new SynchronizedVariableSerializer<PhysicsEntity<?>>() {
+        @Override
+        public void writeObject(ByteBuf buffer, PhysicsEntity<?> object) {
+            buffer.writeInt(object == null ? -1 : object.getEntityId());
+        }
+
+        @Override
+        public PhysicsEntity<?> readObject(ByteBuf buffer) {
+            int id = buffer.readInt();
+            if(id == -1)
+                return null;
+            Entity e = Minecraft.getMinecraft().world.getEntityByID(id);
+            return e instanceof PhysicsEntity ? (PhysicsEntity<?>) e : null;
         }
     };
 

@@ -5,6 +5,7 @@ import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.network.sync.v3.SynchronizationRules;
 import fr.dynamx.api.network.sync.v3.SynchronizedEntityVariable;
+import fr.dynamx.api.network.sync.v3.SynchronizedEntityVariableFactory;
 import fr.dynamx.api.network.sync.v3.SynchronizedVariableSerializer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.PhysicsEntity;
@@ -24,25 +25,9 @@ public class PickObjects extends MovableModule {
 
     public Point2PointJoint joint;
     public final SynchronizedEntityVariable<EntityPlayer> mover = new SynchronizedEntityVariable<>((variable, value) -> {
-        if(value != null)
+        if(value != null && DynamXContext.getPlayerPickingObjects().containsKey(value.getEntityId()))
             entity.getSynchronizer().onPlayerStartControlling(value, false);
-    }, SynchronizationRules.SERVER_TO_CLIENTS, new SynchronizedVariableSerializer<EntityPlayer>() {
-        @Override
-        public void writeObject(ByteBuf buffer, EntityPlayer object) {
-            buffer.writeInt(object == null ? -1 : object.getEntityId());
-        }
-
-        @Override
-        public EntityPlayer readObject(ByteBuf buffer, EntityPlayer currentValue) {
-            //TODO RENDRE SAFE et mettre dans factory
-            int id = buffer.readInt();
-            if(id == -1)
-                return null;
-            if (DynamXContext.getPlayerPickingObjects().containsKey(id))
-                return (EntityPlayer) Minecraft.getMinecraft().world.getEntityByID(id);
-            return currentValue;
-        }
-    }, "mover");
+    }, SynchronizationRules.SERVER_TO_CLIENTS, SynchronizedEntityVariableFactory.playerSerializer, "mover");
     public final SynchronizedEntityVariable<Float> pickDistance = new SynchronizedEntityVariable<>(SynchronizationRules.SERVER_TO_CLIENTS, null, 0f, "pickDistance");
     public PhysicsRigidBody hitBody;
     public float initialMass;

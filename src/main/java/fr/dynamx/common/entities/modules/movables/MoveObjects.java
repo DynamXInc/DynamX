@@ -5,6 +5,7 @@ import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.network.sync.v3.SynchronizationRules;
 import fr.dynamx.api.network.sync.v3.SynchronizedEntityVariable;
+import fr.dynamx.api.network.sync.v3.SynchronizedEntityVariableFactory;
 import fr.dynamx.api.network.sync.v3.SynchronizedVariableSerializer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.PhysicsEntity;
@@ -22,44 +23,14 @@ public class MoveObjects extends MovableModule {
     //TODO PRIVATISER
 
     public final SynchronizedEntityVariable<EntityPlayer> picker = new SynchronizedEntityVariable<>((variable, value) -> {
-        if(value != null)
+        if(value != null && DynamXContext.getPlayerPickingObjects().containsKey(value.getEntityId()))
             entity.getSynchronizer().onPlayerStartControlling(value, false);
-    }, SynchronizationRules.SERVER_TO_CLIENTS, new SynchronizedVariableSerializer<EntityPlayer>() {
-        @Override
-        public void writeObject(ByteBuf buffer, EntityPlayer object) {
-            buffer.writeInt(object == null ? -1 : object.getEntityId());
-        }
-
-        @Override
-        public EntityPlayer readObject(ByteBuf buffer, EntityPlayer currentValue) {
-            //TODO RENDRE SAFE et mettre dans factory
-            int id = buffer.readInt();
-            if(id == -1)
-                return null;
-            if (DynamXContext.getPlayerPickingObjects().containsKey(id))
-                return (EntityPlayer) Minecraft.getMinecraft().world.getEntityByID(id);
-            return currentValue;
-        }
-    }, "picker");
+    }, SynchronizationRules.SERVER_TO_CLIENTS, SynchronizedEntityVariableFactory.playerSerializer, "picker");
     public final SynchronizedEntityVariable<Boolean> isPicked = new SynchronizedEntityVariable<>((variable, value) -> {
         if(picker.get() != null)
             entity.getSynchronizer().onPlayerStopControlling(picker.get(), false);
     }, SynchronizationRules.SERVER_TO_CLIENTS, null, false, "isPicked");
-    public final SynchronizedEntityVariable<PhysicsEntity<?>> pickedEntity = new SynchronizedEntityVariable<>(SynchronizationRules.SERVER_TO_CLIENTS, new SynchronizedVariableSerializer<PhysicsEntity<?>>() {
-        @Override
-        public void writeObject(ByteBuf buffer, PhysicsEntity<?> object) {
-            buffer.writeInt(object == null ? -1 : object.getEntityId());
-        }
-
-        @Override
-        public PhysicsEntity<?> readObject(ByteBuf buffer, PhysicsEntity<?> currentValue) {
-            //TODO RENDRE SAFE et mettre dans factory
-            int id = buffer.readInt();
-            if(id == -1)
-                return null;
-            return (PhysicsEntity<?>) Minecraft.getMinecraft().world.getEntityByID(id);
-        }
-    }, "pickedEntity");
+    public final SynchronizedEntityVariable<PhysicsEntity<?>> pickedEntity = new SynchronizedEntityVariable<>(SynchronizationRules.SERVER_TO_CLIENTS, SynchronizedEntityVariableFactory.physicsEntitySerializer, "pickedEntity");
     public Vector3f basePos;
 
     public MoveObjects(PhysicsEntity<?> entity) {

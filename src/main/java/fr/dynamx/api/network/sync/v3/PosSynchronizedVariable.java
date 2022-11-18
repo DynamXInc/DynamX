@@ -46,9 +46,9 @@ public class PosSynchronizedVariable extends ListeningSynchronizedEntityVariable
             }
 
             @Override
-            public fr.dynamx.api.network.sync.v3.PosSynchronizedVariable.EntityPositionData readObject(ByteBuf buffer, fr.dynamx.api.network.sync.v3.PosSynchronizedVariable.EntityPositionData currentValue) {
+            public PosSynchronizedVariable.EntityPositionData readObject(ByteBuf buffer) {
                 //TODO PAS COOL NEW
-                fr.dynamx.api.network.sync.v3.PosSynchronizedVariable.EntityPositionData result = new fr.dynamx.api.network.sync.v3.PosSynchronizedVariable.EntityPositionData(buffer.readBoolean(), DynamXUtils.readVector3f(buffer), DynamXUtils.readQuaternion(buffer));
+                PosSynchronizedVariable.EntityPositionData result = new PosSynchronizedVariable.EntityPositionData(buffer.readBoolean(), DynamXUtils.readVector3f(buffer), DynamXUtils.readQuaternion(buffer));
                 if (result.bodyActive) {
                     result.linearVel.set(DynamXUtils.readVector3f(buffer));
                     result.rotationalVel.set(DynamXUtils.readVector3f(buffer));

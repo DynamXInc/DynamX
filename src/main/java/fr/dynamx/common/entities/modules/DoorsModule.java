@@ -94,26 +94,7 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
                     }
                 });
             }
-        }, SynchronizationRules.SERVER_TO_CLIENTS, new SynchronizedVariableSerializer<Map<Byte, DoorState>>() {
-            @Override
-            public void writeObject(ByteBuf buf, Map<Byte, DoorState> doorsState) {
-                buf.writeByte(doorsState.size());
-                doorsState.forEach((i, s) -> {
-                    buf.writeByte(i);
-                    buf.writeInt(s.ordinal());
-                });
-            }
-
-            @Override
-            public Map<Byte, DoorState> readObject(ByteBuf buf, Map<Byte, DoorState> currentValue) {
-                currentValue.clear();
-                int size = buf.readByte();
-                for (int i = 0; i < size; i++) {
-                    currentValue.put(buf.readByte(), DoorsModule.DoorState.values()[buf.readInt()]);
-                }
-                return currentValue;
-            }
-        }, new HashMap<>(), "door_states");
+        }, SynchronizationRules.SERVER_TO_CLIENTS, DynamXSynchronizedVariables.doorsStatesSerializer, new HashMap<>(), "door_states");
     }
 
     @Override

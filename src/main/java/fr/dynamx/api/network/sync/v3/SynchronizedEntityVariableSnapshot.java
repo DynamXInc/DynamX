@@ -1,5 +1,6 @@
 package fr.dynamx.api.network.sync.v3;
 
+import fr.dynamx.utils.optimization.PooledHashMap;
 import io.netty.buffer.ByteBuf;
 
 public class SynchronizedEntityVariableSnapshot<T> {
@@ -20,11 +21,13 @@ public class SynchronizedEntityVariableSnapshot<T> {
         if(updated) {
             variable.receiveValue(value);
             updated = false;
+            if(value instanceof PooledHashMap) //TODO CLEAN
+                ((PooledHashMap<?, ?>) value).release();
         }
     }
 
     public void read(ByteBuf buf) {
-        value = serializer.readObject(buf, value);
+        value = serializer.readObject(buf);
         updated = true;
     }
 }

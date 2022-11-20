@@ -3,6 +3,7 @@ package fr.dynamx.api.events;
 import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.common.entities.PhysicsEntity;
+import fr.dynamx.common.physics.CollisionsHandler;
 import fr.dynamx.common.physics.terrain.chunk.ChunkCollisions;
 import fr.dynamx.common.physics.terrain.chunk.EnumChunkCollisionsState;
 import lombok.Getter;
@@ -108,17 +109,21 @@ public class PhysicsEvent extends Event {
     public static class PhysicsCollisionEvent extends PhysicsEvent {
         @Getter
         private final BulletShapeType<?> object1, object2;
+        @Getter
+        private final CollisionsHandler.CollisionInfo collisionInfo;
 
         /**
          *
-         * @param world     The physics world owning this chunk
-         * @param object1   First collision object colliding with the second
-         * @param object2   Second collision object colliding with the first
+         * @param world           The physics world owning this chunk
+         * @param object1         First collision object colliding with the second
+         * @param object2         Second collision object colliding with the first
+         * @param collisionInfo   All the info you want to have about the collision
          */
-        public PhysicsCollisionEvent(IPhysicsWorld world, BulletShapeType<?> object1, BulletShapeType<?> object2){
+        public PhysicsCollisionEvent(IPhysicsWorld world, BulletShapeType<?> object1, BulletShapeType<?> object2, CollisionsHandler.CollisionInfo collisionInfo){
             super(world);
             this.object1 = object1;
             this.object2 = object2;
+            this.collisionInfo = collisionInfo;
         }
     }
 }

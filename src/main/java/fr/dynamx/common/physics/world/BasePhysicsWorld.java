@@ -151,6 +151,9 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
         profiler.end(Profiler.Profiles.LOAD_SHAPES);
         Vector3fPool.closePool();
 
+        //Update collisions handler
+        CollisionsHandler.tick();
+
         //Pre-tick each entity before the physics engine tick
         //Read the input data and send it to the physics
         profiler.start(Profiler.Profiles.PHYSICS_TICK_ENTITIES_PRE);

@@ -1,11 +1,13 @@
 package fr.dynamx.common;
 
 import fr.dynamx.api.network.sync.PhysicsEntityNetHandler;
+import fr.dynamx.api.network.sync.v3.PhysicsEntitySynchronizer;
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.common.blocks.TEDynamXBlock;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.handlers.CommonEventHandler;
 import fr.dynamx.common.network.SPPhysicsEntityNetHandler;
+import fr.dynamx.common.network.sync.SPPhysicsEntitySynchronizer;
 import fr.dynamx.common.physics.PhysicsTickHandler;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.world.BuiltinPhysicsWorld;
@@ -53,8 +55,8 @@ public abstract class CommonProxy {
     /**
      * @return The {@link AbstractEntityPhysicsHandler} for the given entity, according to the side and game type (solo or multi)
      */
-    public <T extends AbstractEntityPhysicsHandler<?, ?>> PhysicsEntityNetHandler<? extends PhysicsEntity<T>> getNetHandlerForEntity(PhysicsEntity<T> tPhysicsEntity) {
-        return new SPPhysicsEntityNetHandler<>(tPhysicsEntity, Side.SERVER); //Does not work at all on dedicated servers or in lan games
+    public <T extends AbstractEntityPhysicsHandler<?, ?>> PhysicsEntitySynchronizer<? extends PhysicsEntity<T>> getNetHandlerForEntity(PhysicsEntity<T> tPhysicsEntity) {
+        return new SPPhysicsEntitySynchronizer<>(tPhysicsEntity, Side.SERVER); //Does not work at all on dedicated servers or in lan games
     }
 
     /**

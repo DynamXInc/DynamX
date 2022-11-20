@@ -132,8 +132,8 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
         this.preventEntitySpawning = true;
 
         // Network Init
-        //network = DynamXMain.proxy.getNetHandlerForEntity(this);
-        synchronizer = new SPPhysicsEntitySynchronizer<>(this, world.isRemote ? Side.CLIENT : Side.SERVER); //TODO
+        synchronizer = DynamXMain.proxy.getNetHandlerForEntity(this);
+        //synchronizer = new SPPhysicsEntitySynchronizer<>(this, world.isRemote ? Side.CLIENT : Side.SERVER); //TODO
         usesPhysicsWorld = DynamXContext.usesPhysicsWorld(world);
     }
 

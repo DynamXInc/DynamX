@@ -110,14 +110,14 @@ public class ServerPhysicsEntityNetHandler<T extends PhysicsEntity<?>> extends P
     private void sendSyncTo(EntityPlayer p, PooledHashMap<Integer, SynchronizedVariable<T>> varsToSync) {
         //if(!ServerPhysicsSyncManager.wasSent(p, ServerPhysicsSyncManager.getTime(p))) {
         if (!varsToSync.isEmpty()) {
-            ServerPhysicsSyncManager.addEntitySync(p, entity, varsToSync);
+            //ServerPhysicsSyncManager.addEntitySync(p, entity, varsToSync);
         }
         //}
     }
 
     @Override
     public void processPacket(PhysicsEntityMessage<?> message) {
-        if (message.getMessageId() == 1) //Sync
+        /*if (message.getMessageId() == 1) //Sync
         {
             //System.out.println("Add pck with time cli "+((SynchronizedVariable.Pos)((MessageBulletEntitySync)message).varsToSync.get(SynchronizedVariablesRegistry.POS)).simulationTimeClient
             //      +" srv "+((SynchronizedVariable.Pos)((MessageBulletEntitySync)message).varsToSync.get(SynchronizedVariablesRegistry.POS)).simulationTimeServer+" here is srv "+serverSimTime);
@@ -125,7 +125,7 @@ public class ServerPhysicsEntityNetHandler<T extends PhysicsEntity<?>> extends P
             queuedPackets.add((MessagePhysicsEntitySync) message);
             /*if (queuedPackets.size() > 2) {
                 queuedPackets.poll();
-            }*/
+            }*//*
         } else if (message.getMessageId() == 4) {
             MessageWalkingPlayer p = (MessageWalkingPlayer) message;
             Entity e = entity.world.getEntityByID(p.playerId);
@@ -139,6 +139,6 @@ public class ServerPhysicsEntityNetHandler<T extends PhysicsEntity<?>> extends P
                 }
             }
             DynamXContext.getNetwork().sendToClientFromOtherThread(new MessageWalkingPlayer(entity, p.playerId, p.offset, p.face), EnumPacketTarget.ALL_TRACKING_ENTITY, entity);
-        }
+        }*/
     }
 }

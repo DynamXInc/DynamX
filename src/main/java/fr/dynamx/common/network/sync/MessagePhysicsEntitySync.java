@@ -2,11 +2,14 @@ package fr.dynamx.common.network.sync;
 
 import fr.dynamx.api.network.EnumNetworkType;
 import fr.dynamx.api.network.sync.SynchronizedVariablesRegistry;
+import fr.dynamx.api.network.sync.v3.MultiplayerPhysicsEntitySynchronizer;
 import fr.dynamx.api.network.sync.v3.SynchronizedEntityVariable;
 import fr.dynamx.api.network.sync.v3.SynchronizedEntityVariableRegistry;
 import fr.dynamx.api.network.sync.v3.SynchronizedEntityVariableSnapshot;
+import fr.dynamx.client.network.ClientPhysicsEntitySynchronizer;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.network.packets.PhysicsEntityMessage;
+import fr.dynamx.server.network.ServerPhysicsEntitySynchronizer;
 import fr.dynamx.utils.optimization.HashMapPool;
 import fr.dynamx.utils.optimization.PooledHashMap;
 import io.netty.buffer.ByteBuf;
@@ -49,13 +52,13 @@ public class MessagePhysicsEntitySync<T extends PhysicsEntity<?>> extends Physic
         this.varsToSend = varsToSync;
         this.simulationTimeClient = simulationTimeClient;
         this.lightData = lightData;
-        //System.out.println("SEND "+varsToSync+" "+entityId);
-        //System.out.println("Send "+simulationTimeClient);
+       // System.out.println("SEND "+entity.ticksExisted+" "+entityId);
+       // System.out.println("Send "+simulationTimeClient);
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
-        //System.out.println("Sending "+simulationTimeClient);
+      //  System.out.println("Sending "+simulationTimeClient);
         int index = buf.writerIndex();
         super.toBytes(buf);
         buf.writeInt(simulationTimeClient);
@@ -71,6 +74,7 @@ public class MessagePhysicsEntitySync<T extends PhysicsEntity<?>> extends Physic
                 System.out.println("Write var " + v.getClass() + " at " + j[0] + " /" + i + " " + entityId);
             buf.writeInt(i);
             v.writeValue(buf, lightData);
+            v.setChanged(false);
             if (doSizeTrack) {
                 size = buf.writerIndex() - size;
                 buf.writeInt(size);
@@ -129,8 +133,14 @@ public class MessagePhysicsEntitySync<T extends PhysicsEntity<?>> extends Physic
     }
 
     @Override
-    public int getMessageId() {
-        return 1;
+    protected void processMessageClient(PhysicsEntityMessage<?> message, PhysicsEntity<?> entity, EntityPlayer player) {
+        //System.out.println("Rcv syncs " + entity.ticksExisted);
+        ((MultiplayerPhysicsEntitySynchronizer<?>)entity.getSynchronizer()).receiveEntitySyncPacket((MessagePhysicsEntitySync) message);
+    }
+
+    @Override
+    protected void processMessageServer(PhysicsEntityMessage<?> message, PhysicsEntity<?> entity, EntityPlayer player) {
+        ((MultiplayerPhysicsEntitySynchronizer<?>)entity.getSynchronizer()).receiveEntitySyncPacket((MessagePhysicsEntitySync) message);
     }
 
     @Override

@@ -1,11 +1,13 @@
 package fr.dynamx.common.network.sync.v3;
 
+import fr.dynamx.api.network.sync.v3.PosSynchronizedVariable;
 import fr.dynamx.api.network.sync.v3.SynchronizedVariableSerializer;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.common.physics.entities.parts.wheel.WheelState;
 import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.optimization.HashMapPool;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.util.ResourceLocation;
@@ -35,6 +37,30 @@ public class DynamXSynchronizedVariables
 
     public static final ResourceLocation DOORS_STATES = new ResourceLocation(DynamXConstants.ID, "DOORS_STATES");
 
+    public static final SynchronizedVariableSerializer<fr.dynamx.api.network.sync.v3.PosSynchronizedVariable.EntityPositionData> posSerializer = new SynchronizedVariableSerializer<fr.dynamx.api.network.sync.v3.PosSynchronizedVariable.EntityPositionData>() {
+        @Override
+        public void writeObject(ByteBuf buf, fr.dynamx.api.network.sync.v3.PosSynchronizedVariable.EntityPositionData object) {
+            buf.writeBoolean(object.isBodyActive());
+            DynamXUtils.writeVector3f(buf, object.getPosition());
+            DynamXUtils.writeQuaternion(buf, object.getRotation());
+            if (object.isBodyActive()) {
+                DynamXUtils.writeVector3f(buf, object.getLinearVel());
+                DynamXUtils.writeVector3f(buf, object.getRotationalVel());
+            }
+        }
+
+        @Override
+        public PosSynchronizedVariable.EntityPositionData readObject(ByteBuf buffer) {
+            //TODO PAS COOL NEW
+            PosSynchronizedVariable.EntityPositionData result = new PosSynchronizedVariable.EntityPositionData(buffer.readBoolean(), DynamXUtils.readVector3f(buffer), DynamXUtils.readQuaternion(buffer));
+            if (result.isBodyActive()) {
+                result.getLinearVel().set(DynamXUtils.readVector3f(buffer));
+                result.getRotationalVel().set(DynamXUtils.readVector3f(buffer));
+            }
+            return result;
+        }
+    };
+
     public static final SynchronizedVariableSerializer<Map<Byte, PartWheelInfo>> wheelInfosSerializer = new SynchronizedVariableSerializer<Map<Byte, PartWheelInfo>>() {
         @Override
         public void writeObject(ByteBuf buf, Map<Byte, PartWheelInfo> object) {
@@ -55,7 +81,7 @@ public class DynamXSynchronizedVariables
         }
     };
 
-    public static final SynchronizedVariableSerializer<WheelState[]> wheelStates = new SynchronizedVariableSerializer<WheelState[]>() {
+    public static final SynchronizedVariableSerializer<WheelState[]> wheelStatesSerializer = new SynchronizedVariableSerializer<WheelState[]>() {
         @Override
         public void writeObject(ByteBuf buf, WheelState[] object) {
             buf.writeInt(object.length);

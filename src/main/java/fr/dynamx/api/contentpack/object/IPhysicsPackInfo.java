@@ -1,5 +1,6 @@
 package fr.dynamx.api.contentpack.object;
 
+import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
@@ -25,4 +26,6 @@ public interface IPhysicsPackInfo {
     List<Vector3f> getCollisionShapeDebugBuffer();
 
     <T extends InteractivePart<?, ?>> List<T> getInteractiveParts();
+
+    CompoundCollisionShape getPhysicsCollisionShape();
 }

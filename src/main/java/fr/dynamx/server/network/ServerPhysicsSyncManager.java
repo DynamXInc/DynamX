@@ -1,6 +1,7 @@
 package fr.dynamx.server.network;
 
 import fr.dynamx.api.network.sync.SynchronizedVariable;
+import fr.dynamx.api.network.sync.v3.SynchronizedEntityVariable;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.network.sync.vars.EntityPhysicsState;
 import fr.dynamx.utils.debug.Profiler;
@@ -65,7 +66,7 @@ public class ServerPhysicsSyncManager {
      * @param entity     The entity to sync
      * @param varsToSync The data to send
      */
-    public static <T extends PhysicsEntity<?>> void addEntitySync(EntityPlayer target, T entity, PooledHashMap<Integer, SynchronizedVariable<T>> varsToSync) {
+    public static <T extends PhysicsEntity<?>> void addEntitySync(EntityPlayer target, T entity, PooledHashMap<Integer, SynchronizedEntityVariable<?>> varsToSync) {
         if (!sendBuffers.containsKey(target))
             sendBuffers.put(target, new PlayerSyncBuffer((EntityPlayerMP) target));
         sendBuffers.get(target).addEntitySync(entity, varsToSync);

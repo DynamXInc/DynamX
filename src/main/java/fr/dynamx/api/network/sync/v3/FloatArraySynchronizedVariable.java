@@ -1,7 +1,9 @@
 package fr.dynamx.api.network.sync.v3;
 
+import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.utils.debug.SyncTracker;
 
+import java.util.Arrays;
 import java.util.function.BiConsumer;
 
 public class FloatArraySynchronizedVariable extends SynchronizedEntityVariable<float[]>

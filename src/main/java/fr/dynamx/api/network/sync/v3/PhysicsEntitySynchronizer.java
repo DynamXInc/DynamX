@@ -8,21 +8,16 @@ import fr.dynamx.api.network.sync.SynchronizedVariablesRegistry;
 import fr.dynamx.common.entities.ModularPhysicsEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.network.packets.PhysicsEntityMessage;
-import fr.dynamx.common.network.sync.vars.EntityPhysicsState;
+import fr.dynamx.common.network.sync.MessagePhysicsEntitySync;
 import fr.dynamx.common.physics.player.WalkingOnPlayerController;
 import fr.dynamx.utils.debug.Profiler;
-import fr.dynamx.utils.debug.SyncTracker;
-import fr.dynamx.utils.optimization.PooledHashMap;
 import lombok.Getter;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * TODO UPDATE DOC
@@ -63,10 +58,10 @@ public abstract class PhysicsEntitySynchronizer<T extends PhysicsEntity<?>> {
     //TODO ANNOTATION SYSTEM
     public void registerVariable(ResourceLocation name, SynchronizedEntityVariable<?> variable) {
         Integer id = SynchronizedEntityVariableRegistry.getSyncVarRegistry().get(name);
-        if(id == null) { //TODO CLEAN
-            throw new IllegalArgumentException("not registered");
+        if (id == null) { //TODO CLEAN
+            throw new IllegalArgumentException("not registered " + name + " " + variable);
         }
-        if(synchronizedVariables.containsKey(id))
+        if (synchronizedVariables.containsKey(id))
             return;
         synchronizedVariables.put(id, variable);
         receivedVariables.put(id, new SynchronizedEntityVariableSnapshot(variable.getSerializer(), variable.get()));
@@ -106,11 +101,6 @@ public abstract class PhysicsEntitySynchronizer<T extends PhysicsEntity<?>> {
      */
     public void onWalkingPlayerChange(int playerId, Vector3f offset, byte face) {
     }
-
-    /**
-     * Called in a vanilla thread when a {@link PhysicsEntityMessage} is handled by the network
-     */
-    public abstract void processPacket(PhysicsEntityMessage<?> message);
 
     /**
      * @return true If the world instance on the other side uses physic (false if you are in single-player)

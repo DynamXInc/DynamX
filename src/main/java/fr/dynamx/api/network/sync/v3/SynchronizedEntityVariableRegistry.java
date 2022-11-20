@@ -2,22 +2,15 @@ package fr.dynamx.api.network.sync.v3;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import fr.dynamx.api.network.sync.PhysicsEntityNetHandler;
 import fr.dynamx.api.network.sync.SyncTarget;
-import fr.dynamx.api.network.sync.SynchronizedVariable;
 import fr.dynamx.common.DynamXMain;
-import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.network.sync.v3.DynamXSynchronizedVariables;
-import fr.dynamx.common.network.sync.vars.*;
-import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.optimization.HashMapPool;
 import fr.dynamx.utils.optimization.PooledHashMap;
 import lombok.Getter;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.*;
-import java.util.concurrent.Callable;
 import java.util.function.Predicate;
 
 public class SynchronizedEntityVariableRegistry {
@@ -64,11 +57,11 @@ public class SynchronizedEntityVariableRegistry {
         fixIds(nw);
     }
 
-    private static void fixIds(Map<ResourceLocation, Integer> syncVarRegistry) {
+    private static void fixIds(Map<ResourceLocation, Integer> newVarsRegistry) {
         DynamXMain.log.debug("Fixing SynchronizedVariables registry ids...");
         syncVarRegistry.clear();
         serializerMap.clear();
-        syncVarRegistry.forEach((r, i) -> {
+        newVarsRegistry.forEach((r, i) -> {
             DynamXMain.log.debug("Add : " + r + " = " + i);
             syncVarRegistry.put(r, i);
             serializerMap.put(i, baseSyncVarRegistry.get(r));
@@ -84,20 +77,21 @@ public class SynchronizedEntityVariableRegistry {
      */
     static {
         //TODO SIMPLIFY
+        System.out.println("REGISTER");
 
-        addSyncVar(DynamXSynchronizedVariables.POS,  null); //TODO
+        addSyncVar(DynamXSynchronizedVariables.POS, DynamXSynchronizedVariables.posSerializer);
         addSyncVar(DynamXSynchronizedVariables.CONTROLS, SynchronizedEntityVariableFactory.intSerializer);
         addSyncVar(DynamXSynchronizedVariables.SPEED_LIMIT, SynchronizedEntityVariableFactory.floatSerializer);
         addSyncVar(DynamXSynchronizedVariables.ENGINE_PROPERTIES, SynchronizedEntityVariableFactory.floatArraySerializer);
-        addSyncVar(DynamXSynchronizedVariables.WHEEL_INFOS, null);
-        addSyncVar(DynamXSynchronizedVariables.WHEEL_STATES, null);
+        addSyncVar(DynamXSynchronizedVariables.WHEEL_INFOS, DynamXSynchronizedVariables.wheelInfosSerializer);
+        addSyncVar(DynamXSynchronizedVariables.WHEEL_STATES, DynamXSynchronizedVariables.wheelStatesSerializer);
         addSyncVar(DynamXSynchronizedVariables.WHEEL_PROPERTIES, SynchronizedEntityVariableFactory.floatArraySerializer);
         addSyncVar(DynamXSynchronizedVariables.WHEEL_VISUALS, SynchronizedEntityVariableFactory.floatArraySerializer);
-        addSyncVar(DynamXSynchronizedVariables.MOVABLE_MOVER, SynchronizedEntityVariableFactory.intSerializer);
+        addSyncVar(DynamXSynchronizedVariables.MOVABLE_MOVER, SynchronizedEntityVariableFactory.playerSerializer);
         addSyncVar(DynamXSynchronizedVariables.MOVABLE_PICK_DISTANCE, SynchronizedEntityVariableFactory.floatSerializer);
         addSyncVar(DynamXSynchronizedVariables.MOVABLE_PICK_POSITION, SynchronizedEntityVariableFactory.vector3fSerializer);
-        addSyncVar(DynamXSynchronizedVariables.MOVABLE_PICKER, SynchronizedEntityVariableFactory.intSerializer);
-        addSyncVar(DynamXSynchronizedVariables.MOVABLE_PICKED_ENTITY, SynchronizedEntityVariableFactory.intSerializer);
+        addSyncVar(DynamXSynchronizedVariables.MOVABLE_PICKER, SynchronizedEntityVariableFactory.playerSerializer);
+        addSyncVar(DynamXSynchronizedVariables.MOVABLE_PICKED_ENTITY, SynchronizedEntityVariableFactory.physicsEntitySerializer);
         addSyncVar(DynamXSynchronizedVariables.MOVABLE_IS_PICKED, SynchronizedEntityVariableFactory.booleanSerializer);
         addSyncVar(DynamXSynchronizedVariables.DOORS_STATES, DynamXSynchronizedVariables.doorsStatesSerializer);
     }

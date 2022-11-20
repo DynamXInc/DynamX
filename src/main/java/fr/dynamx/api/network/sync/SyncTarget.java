@@ -31,7 +31,7 @@ public enum SyncTarget {
      */
     public boolean isIncluded(SyncTarget target)
     {
-        return target == this || (target == ALL_CLIENTS && (this == DRIVER || this == SPECTATORS)) || (target == SPECTATORS);
+        return target == this || (target == ALL_CLIENTS && (this == DRIVER || this == SPECTATORS));
     }
 
     /**

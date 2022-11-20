@@ -5,6 +5,12 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.network.EnumNetworkType;
 import fr.dynamx.common.entities.PhysicsEntity;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
+import static fr.dynamx.common.DynamXMain.log;
 
 public class MessageForcePlayerPos extends PhysicsEntityMessage<MessageForcePlayerPos> {
     public Vector3f rightPos;
@@ -40,8 +46,25 @@ public class MessageForcePlayerPos extends PhysicsEntityMessage<MessageForcePlay
     }
 
     @Override
-    public int getMessageId() {
-        return 5;
+    @SideOnly(Side.CLIENT)
+    protected void processMessageClient(PhysicsEntityMessage<?> message, PhysicsEntity<?> entity, EntityPlayer player) {
+        MessageForcePlayerPos p = (MessageForcePlayerPos) message;
+        if (entity.physicsHandler != null) {
+            entity.physicsPosition.set(p.rightPos);
+            //entity.physicEntity.getPosition().set(p.rightPos);
+            entity.physicsRotation.set(p.rotation);
+            //entity.physicEntity.getRotation().set(p.rotation);
+            entity.physicsHandler.updatePhysicsState(p.rightPos, p.rotation, p.linearVel, p.rotationalVel);
+            log.info("Entity " + entity + " has been resynced");
+
+            Minecraft.getMinecraft().ingameGUI.setOverlayMessage("Resynchronisation...", true);
+        } else
+            log.fatal("Cannot resync entity " + entity + " : not physics found !");
+    }
+
+    @Override
+    protected void processMessageServer(PhysicsEntityMessage<?> message, PhysicsEntity<?> entity, EntityPlayer player) {
+        throw new IllegalStateException();
     }
 
     @Override

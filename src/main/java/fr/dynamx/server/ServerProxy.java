@@ -4,10 +4,12 @@ import fr.aym.acslib.ACsLib;
 import fr.aym.acslib.api.services.ThreadedLoadingService;
 import fr.dynamx.api.network.sync.PhysicsEntityNetHandler;
 import fr.dynamx.api.network.sync.SimulationHolder;
+import fr.dynamx.api.network.sync.v3.PhysicsEntitySynchronizer;
 import fr.dynamx.common.CommonProxy;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.server.network.ServerPhysicsEntityNetHandler;
+import fr.dynamx.server.network.ServerPhysicsEntitySynchronizer;
 import fr.dynamx.utils.DynamXLoadingTasks;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.world.World;
@@ -17,8 +19,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.SERVER)
 public class ServerProxy extends CommonProxy {
     @Override
-    public <T extends AbstractEntityPhysicsHandler<?, ?>> PhysicsEntityNetHandler<? extends PhysicsEntity<T>> getNetHandlerForEntity(PhysicsEntity<T> tPhysicsEntity) {
-        return new ServerPhysicsEntityNetHandler(tPhysicsEntity);
+    public <T extends AbstractEntityPhysicsHandler<?, ?>> PhysicsEntitySynchronizer<? extends PhysicsEntity<T>> getNetHandlerForEntity(PhysicsEntity<T> tPhysicsEntity) {
+        return new ServerPhysicsEntitySynchronizer<>(tPhysicsEntity);
     }
 
     @Override

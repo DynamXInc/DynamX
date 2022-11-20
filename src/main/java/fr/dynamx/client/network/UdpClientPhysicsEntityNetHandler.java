@@ -58,10 +58,10 @@ public class UdpClientPhysicsEntityNetHandler<T extends PhysicsEntity<?>> extend
         if (getSimulationHolder().ownsPhysics(Side.CLIENT)) {
             if (!queuedPackets.isEmpty()) {
                 getInputSyncVars().clear(); //temporary thinking
-                while (queuedPackets.size() > 2)
-                    replaceInputSyncVars(queuedPackets.remove().varsToSync);
+               // while (queuedPackets.size() > 2)
+                 //   replaceInputSyncVars(queuedPackets.remove().varsToSync);
                 MessagePhysicsEntitySync<T> pck = queuedPackets.remove();
-                replaceInputSyncVars(pck.varsToSync);
+               // replaceInputSyncVars(pck.varsToSync);
                 getInputSyncVars().forEach((i, v) -> v.interpolate(entity, this, profiler, pck, 1));
                 //readPacket();
                 //Map<Integer, CleanSynchronizedVariable<T>> map = queuedPackets.remove().varsToSync;
@@ -82,10 +82,10 @@ public class UdpClientPhysicsEntityNetHandler<T extends PhysicsEntity<?>> extend
             {
                 if (!queuedPackets.isEmpty()) {
                     getInputSyncVars().clear(); //temporary thinking
-                    while (queuedPackets.size() > 2)
-                        replaceInputSyncVars(queuedPackets.remove().varsToSync);
+                   // while (queuedPackets.size() > 2)
+                    //    replaceInputSyncVars(queuedPackets.remove().varsToSync);
                     MessagePhysicsEntitySync<T> pck = queuedPackets.remove();
-                    replaceInputSyncVars(pck.varsToSync);
+                    //replaceInputSyncVars(pck.varsToSync);
                     ticksBeforeNextSync = entity.getSyncTickRate();
                     getInputSyncVars().forEach((i, v) -> v.interpolate(entity, this, profiler, pck, ticksBeforeNextSync));
 
@@ -108,7 +108,7 @@ public class UdpClientPhysicsEntityNetHandler<T extends PhysicsEntity<?>> extend
             PooledHashMap<Integer, ? extends SynchronizedVariable<? extends PhysicsEntity<?>>> syncData = retainSyncVars(getOutputSyncVars(), getDirtyVars(HashMapPool.get(), Side.SERVER, ClientPhysicsSyncManager.simulationTime), SyncTarget.SERVER);
             //System.out.println("Send sync "+syncData+" "+ClientPhysicsSyncManager.simulationTime);
             if (!syncData.isEmpty()) {
-                DynamXContext.getNetwork().sendToServer(new MessagePhysicsEntitySync(entity, ClientPhysicsSyncManager.simulationTime, syncData, MessagePhysicsEntitySync.SyncType.UDP_SYNC));
+                //DynamXContext.getNetwork().sendToServer(new MessagePhysicsEntitySync(entity, ClientPhysicsSyncManager.simulationTime, syncData, MessagePhysicsEntitySync.SyncType.UDP_SYNC));
             } else {
                 syncData.release();
             }
@@ -170,14 +170,14 @@ public class UdpClientPhysicsEntityNetHandler<T extends PhysicsEntity<?>> extend
 
     @Override
     public void processPacket(PhysicsEntityMessage<?> message) {
-        if (message.getMessageId() == 1) //PosSync
+        /*if (message.getMessageId() == 1) //PosSync
             receivePosSyncPacket((MessagePhysicsEntitySync) message);
         else if (message.getMessageId() == 3) //Seats
         {
            /* if (entity instanceof IModuleContainer.ISeatsContainer)
                 ((IModuleContainer.ISeatsContainer) entity).getSeats().updateSeats((MessageSeatsSync) message, this);
             else
-                log.fatal("Received seats packet for an entity that have no seats !");*/
+                log.fatal("Received seats packet for an entity that have no seats !");*//*
         } else if (message.getMessageId() == 4) //Walking player
         {
             MessageWalkingPlayer p = (MessageWalkingPlayer) message;
@@ -233,7 +233,7 @@ public class UdpClientPhysicsEntityNetHandler<T extends PhysicsEntity<?>> extend
                 }
             } else
                 log.error("Cannot sync joints of " + entity + " : joint handler is null !");
-        }
+        }*/
     }
 
     private void receivePosSyncPacket(MessagePhysicsEntitySync msg) {

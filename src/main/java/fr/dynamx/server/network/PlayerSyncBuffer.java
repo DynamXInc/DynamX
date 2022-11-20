@@ -3,6 +3,7 @@ package fr.dynamx.server.network;
 import com.google.common.collect.Queues;
 import fr.dynamx.api.network.EnumPacketTarget;
 import fr.dynamx.api.network.sync.SynchronizedVariable;
+import fr.dynamx.api.network.sync.v3.SynchronizedEntityVariable;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.network.sync.MessageMultiPhysicsEntitySync;
@@ -73,7 +74,7 @@ public class PlayerSyncBuffer {
      * @param entity     The entity to sync
      * @param varsToSync Its data
      */
-    public <T extends PhysicsEntity<?>> void addEntitySync(T entity, PooledHashMap<Integer, SynchronizedVariable<T>> varsToSync) {
+    public <T extends PhysicsEntity<?>> void addEntitySync(T entity, PooledHashMap<Integer, SynchronizedEntityVariable<?>> varsToSync) {
         SyncItem<T> sync = new SyncItem<>(entity, varsToSync);
         if (delayedPackets.contains(sync)) {
             for (SyncItem<?> s : delayedPackets) {
@@ -84,9 +85,6 @@ public class PlayerSyncBuffer {
             }
             delayedPackets.remove(sync);
         }
-        varsToSync.forEach((i, v) -> {
-            v.validate(entity, 3);
-        });
         queuedPackets.add(sync);
     }
 
@@ -162,6 +160,7 @@ public class PlayerSyncBuffer {
                 }
                 DynamXContext.getNetwork().sendToClient(new MessageMultiPhysicsEntitySync(sendQueue), EnumPacketTarget.PLAYER, playerIn);
             }
+            //System.out.println("Sent msg sync " + syncTime+" "+playerIn.ticksExisted);
         }
     }
 
@@ -202,10 +201,10 @@ public class PlayerSyncBuffer {
      */
     private class SyncItem<T extends PhysicsEntity<?>> {
         private final T entity;
-        private final PooledHashMap<Integer, SynchronizedVariable<T>> varsToSync;
+        private final PooledHashMap<Integer, SynchronizedEntityVariable<?>> varsToSync;
         private int skippedSends;
 
-        private SyncItem(T entity, PooledHashMap<Integer, SynchronizedVariable<T>> varsToSync) {
+        private SyncItem(T entity, PooledHashMap<Integer, SynchronizedEntityVariable<?>> varsToSync) {
             this.entity = entity;
             this.varsToSync = varsToSync;
         }
@@ -214,7 +213,6 @@ public class PlayerSyncBuffer {
          * Adds a {@link MessagePhysicsEntitySync} to the send queue, if this entity is not dead
          */
         private void send(Queue<MessagePhysicsEntitySync<?>> sendQueue) {
-            varsToSync.forEach((i, t) -> t.validate(entity, 4));
             if (!entity.isDead) {
                 sendQueue.add(new MessagePhysicsEntitySync(entity, syncTime, varsToSync, varsToSync.size() > NEW_SENDS_LIMIT));
             }

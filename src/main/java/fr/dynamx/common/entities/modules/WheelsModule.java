@@ -35,22 +35,17 @@ import fr.dynamx.common.physics.entities.parts.wheel.WheelPhysics;
 import fr.dynamx.common.physics.entities.parts.wheel.WheelState;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.debug.SyncTracker;
-import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
-import fr.dynamx.utils.optimization.HashMapPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
-import io.netty.buffer.ByteBuf;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import scala.actors.threadpool.Arrays;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -106,7 +101,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
                     }
                 }
             }
-        }, SynchronizationRules.CONTROLS_TO_SPECTATORS, DynamXSynchronizedVariables.wheelStates, "wheel_states");
+        }, SynchronizationRules.CONTROLS_TO_SPECTATORS, DynamXSynchronizedVariables.wheelStatesSerializer, "wheel_states");
     }
 
     public void setWheelInfo(byte partIndex, PartWheelInfo info) {
@@ -274,7 +269,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
                 WheelPhysics w = wheelsPhysics.getWheel(b);
                 if (w != null) {
                     if (SyncTracker.different(w.getSkidInfo(), wheelProperties.get()[getPropertyIndex(b, VehicleEntityProperties.EnumWheelProperties.SKIDINFO)])) {
-                        visualProperties.set(getPropertyIndex(b, VehicleEntityProperties.EnumWheelProperties.SKIDINFO), w.getSkidInfo());
+                        wheelProperties.set(getPropertyIndex(b, VehicleEntityProperties.EnumWheelProperties.SKIDINFO), w.getSkidInfo());
                     }
                     if (DynamXDebugOptions.WHEEL_ADVANCED_DATA.isActive()) {
                         wheelProperties.get()[getPropertyIndex(b, VehicleEntityProperties.EnumWheelProperties.FRICTION)] = w.getFriction();

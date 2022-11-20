@@ -159,45 +159,6 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
     }
 
     @Override
-    public void processPacket(PhysicsEntityMessage<?> message) {
-        if (message.getMessageId() == 3) {//Seats
-            if (entity instanceof IModuleContainer.ISeatsContainer)
-                ((IModuleContainer.ISeatsContainer) entity).getSeats().updateSeats((MessageSeatsSync) message, this);
-            else
-                log.fatal("Received seats packet for an entity that have no seats !");
-        } else if (message.getMessageId() == 6) {//Joints
-            if (entity.getJointsHandler() != null) {
-                List<EntityJoint.CachedJoint> joints = ((MessageJoints) message).getJointList();
-                EntityJointsHandler handler = ((EntityJointsHandler) entity.getJointsHandler());
-                Collection<EntityJoint<?>> curJoints = handler.getJoints();
-                curJoints.removeIf(j -> { //done in client thread
-                    EntityJoint.CachedJoint found = null;
-                    for (EntityJoint.CachedJoint g : joints) {
-                        if (g.getId().equals(j.getOtherEntity(entity).getPersistentID())) {
-                            found = g;
-                            break;
-                        }
-                    }
-                    if (found != null) {
-                        joints.remove(found); //keep it
-                        return false;
-                    } else {
-                        handler.onRemoveJoint(j);
-                        return true;
-                    }
-                });
-                for (EntityJoint.CachedJoint g : joints) {
-                    if (g.isJointOwner()) //Only allow the owner to re-create the joint on client side
-                        handler.syncJoint(g);
-                }
-            } else
-                log.error("Cannot sync joints of " + entity + " : joint handler is null !");
-        } else {
-            throw new UnsupportedOperationException("Packets unavailable in single player");
-        }
-    }
-
-    @Override
     public List<IVehicleController> getControllers() {
         return controllers;
     }

@@ -5,10 +5,12 @@ import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.part.BasePart;
+import fr.dynamx.api.network.sync.v3.NetworkActivityTracker;
 import fr.dynamx.client.camera.CameraSystem;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.entities.PackPhysicsEntity;
+import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.network.packets.MessageDebugRequest;
 import fr.dynamx.common.physics.utils.RigidBodyTransform;
 import fr.dynamx.utils.DynamXConstants;
@@ -27,6 +29,7 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -125,6 +128,10 @@ public class ClientDebugSystem {
                 }
             } else if (!physicsTicks.isEmpty())
                 physicsTicks.clear();
+
+            Entity e = MC.objectMouseOver.entityHit;
+            if(e instanceof PhysicsEntity)
+                NetworkActivityTracker.drawNetworkActivity((PhysicsEntity<?>) e, MC.fontRenderer, 10);
         }
     }
 

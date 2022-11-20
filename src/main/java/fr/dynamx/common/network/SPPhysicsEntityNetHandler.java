@@ -164,11 +164,11 @@ public class SPPhysicsEntityNetHandler<T extends PhysicsEntity<?>> extends Physi
 
     @Override
     public void processPacket(PhysicsEntityMessage<?> message) {
-        if (message.getMessageId() == 3) {//Seats
+        /*if (message.getMessageId() == 3) {//Seats
             /*if (entity instanceof IModuleContainer.ISeatsContainer)
                 ((IModuleContainer.ISeatsContainer) entity).getSeats().updateSeats((MessageSeatsSync) message, this);
             else
-                log.fatal("Received seats packet for an entity that have no seats !");*/
+                log.fatal("Received seats packet for an entity that have no seats !");*//*
         } else if (message.getMessageId() == 6) {//Joints
             if (entity.getJointsHandler() != null) {
                 List<EntityJoint.CachedJoint> joints = ((MessageJoints) message).getJointList();
@@ -198,7 +198,7 @@ public class SPPhysicsEntityNetHandler<T extends PhysicsEntity<?>> extends Physi
                 log.error("Cannot sync joints of " + entity + " : joint handler is null !");
         } else {
             throw new UnsupportedOperationException("Packets unavailable in single player");
-        }
+        }*/
     }
 
     @Override

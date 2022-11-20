@@ -55,6 +55,7 @@ public class MessageMultiPhysicsEntitySync implements IDnxPacket, IMessageHandle
 
     @Override
     public void handleUDPReceive(EntityPlayer context, Side side) {
+        System.out.println("Rcv syncs " + context.ticksExisted);
         syncs.forEach(s -> s.handleUDPReceive(context, side));
     }
 

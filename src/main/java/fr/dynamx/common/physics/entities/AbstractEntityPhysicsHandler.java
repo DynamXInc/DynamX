@@ -169,6 +169,7 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
     }
 
     /**
+     * todo update doc
      * Sets the physics position, the physics rotation and the velocities <br>
      * Used for network sync
      */
@@ -188,8 +189,8 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
      */
     public void updatePhysicsStateFromNet(Vector3f pos, Quaternion rotation, Vector3f linearVel, Vector3f rotationalVel) {
         Vector3f centerOfMass = getCenterOfMass();
-        if (centerOfMass != null)
-            pos.addLocal(DynamXGeometry.rotateVectorByQuaternion(centerOfMass, rotation).multLocal(-1));
+        //if (centerOfMass != null)
+          //  pos.addLocal(DynamXGeometry.rotateVectorByQuaternion(centerOfMass, rotation).multLocal(-1));
 
         linearVel.addLocal(pos.subtract(handledEntity.physicsPosition));
         setLinearVelocity(linearVel);

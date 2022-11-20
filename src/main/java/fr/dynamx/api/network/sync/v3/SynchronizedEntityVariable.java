@@ -8,6 +8,7 @@ import lombok.Getter;
 import net.minecraftforge.fml.relauncher.Side;
 
 import java.nio.ByteBuffer;
+import java.util.Map;
 import java.util.function.BiConsumer;
 
 public class SynchronizedEntityVariable<T> {
@@ -19,6 +20,7 @@ public class SynchronizedEntityVariable<T> {
     private final SynchronizedVariableSerializer<T> serializer;
     private T value;
     protected boolean changed = true; //first sync
+    @Getter
     private final String name;
 
     public SynchronizedEntityVariable(SynchronizationRules synchronizationRule, T initialValue, String name) {
@@ -57,24 +59,28 @@ public class SynchronizedEntityVariable<T> {
     }
 
     public void set(T value) {
-        // better condition
+        // todo wtf here
         if((value instanceof Float && SyncTracker.different((Float) value, (Float) this.value)) || (!(value instanceof Float) && value != this.value)) {
             this.value = value;
             changed = true;
-            System.out.println("SET " + value);
+            //System.out.println("SET " + value);
         }
     }
 
     public void setChanged(boolean changed) {
-        System.out.println("Mark change " + value+" "+this);
+        //System.out.println("Mark change " + value+" "+this);
         this.changed = changed;
     }
 
     public void receiveValue(T value) {
-        System.out.println("RCV " + value+" in " +this);
+        //System.out.println("RCV " + value+" in " +this);
         if(receiveCallback != null)
             receiveCallback.accept(this, value);
-        this.value = value;
+        if(value instanceof Map) { //TODO PUT IN SEPARATE CLASS
+            ((Map)this.value).clear();
+            ((Map)this.value).putAll((Map) value);
+        } else
+            this.value = value;
     }
 
     public SyncTarget getSyncTarget(SimulationHolder simulationHolder, Side side) {

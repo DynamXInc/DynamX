@@ -1,9 +1,11 @@
 package fr.dynamx.client.renders;
 
+import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.client.handlers.ClientEventHandler;
+import fr.dynamx.client.network.ClientPhysicsEntitySynchronizer;
 import fr.dynamx.client.renders.model.ObjModelClient;
 import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
@@ -61,6 +63,24 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
         Quaternion appliedRotation = null;
         //Render vehicle
         if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.RenderPhysicsEntityEvent(entity, this, PhysicsEntityEvent.RenderPhysicsEntityEvent.Type.ENTITY, x, y, z, partialTicks))) {
+            if(entity.getSynchronizer() instanceof ClientPhysicsEntitySynchronizer) { //todo clean and use network debug option
+                GlStateManager.pushMatrix();
+                {
+                    Vector3f pos = entity.physicsPosition;
+                    Vector3f serverPos = ((ClientPhysicsEntitySynchronizer)entity.getSynchronizer()).getServerPos();
+                    if(serverPos != null) {
+                        GlStateManager.translate((float) x - pos.x + serverPos.x, (float) y - pos.y + serverPos.y, (float) z - pos.z + serverPos.z);
+                        Quaternion q = GlQuaternionPool.get(((ClientPhysicsEntitySynchronizer<? extends PhysicsEntity<?>>) entity.getSynchronizer()).getServerRotation());
+                        GlStateManager.rotate(q);
+                        GlStateManager.color(0.5f, 0.5f, 0.8f, 0.3f);
+                        renderMain(entity, partialTicks);
+                        renderParts(entity, partialTicks);
+                        GlStateManager.color(1, 1, 1, 1);
+                    }
+                }
+                GlStateManager.popMatrix();
+            }
+
             GlStateManager.pushMatrix();
             {
                 //TODO TRANSPARENT THINGS SHOULD BE RENDER LAST GlStateManager.enableBlend();

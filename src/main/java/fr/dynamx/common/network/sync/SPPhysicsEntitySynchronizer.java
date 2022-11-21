@@ -37,8 +37,6 @@ import static fr.dynamx.common.DynamXMain.log;
 public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends PhysicsEntitySynchronizer<T> implements ClientEntityNetHandler {
     private final Side mySide;
     private final List<IVehicleController> controllers = new ArrayList<>();
-    private Map<Integer, SyncTarget> varsToSync = new HashMap<>();
-    private int updateCount = 0;
 
     public SPPhysicsEntitySynchronizer(T entityIn, Side side) {
         super(entityIn);
@@ -53,19 +51,18 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
     }
 
     private <A> void sendMyVars(SPPhysicsEntitySynchronizer<T> other, SyncTarget to) {
-        //TODO CLEAN METHOD
-        PooledHashMap<Integer, SynchronizedEntityVariable<?>> varsToSync = SynchronizedEntityVariableRegistry.retainSyncVars(getSynchronizedVariables(), this.varsToSync, to);
+        PooledHashMap<Integer, SynchronizedEntityVariable<?>> varsToSync = getVarsToSync(mySide, to);
         ByteBuf buf = Unpooled.buffer();
         for (Map.Entry<Integer, SynchronizedEntityVariable<?>> entry : varsToSync.entrySet()) {
-            Integer i = entry.getKey();
-            SynchronizedEntityVariable<A> v = (SynchronizedEntityVariable<A>) entry.getValue();
-            v.writeValue(buf, false);
-            v.setChanged(false);
-            SynchronizedEntityVariableSnapshot<A> v2 = (SynchronizedEntityVariableSnapshot<A>) other.getReceivedVariables().get(i);
-            if(v2 != null) {
-                v2.read(buf);
+            Integer varId = entry.getKey();
+            SynchronizedEntityVariable<A> sourceVar = (SynchronizedEntityVariable<A>) entry.getValue();
+            sourceVar.writeValue(buf, false);
+            sourceVar.setChanged(false);
+            SynchronizedEntityVariableSnapshot<A> targetVar = (SynchronizedEntityVariableSnapshot<A>) other.getReceivedVariables().get(varId);
+            if(targetVar != null) {
+                targetVar.read(buf);
             } else {
-                System.out.println("Var not found " + i + " " + v + " " + other.getReceivedVariables());
+                DynamXMain.log.error("Var not found " + varId + " " + sourceVar + " " + other.getReceivedVariables() + " on " + entity);
             }
             buf.clear();
         }
@@ -123,20 +120,12 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
         Entity other = getOtherSideEntity();
         if (other instanceof PhysicsEntity && ((PhysicsEntity<?>) other).initialized != 0) {
             if (!mySide.isServer()) {
-                varsToSync.clear();
-                getDirtyVars(varsToSync, Side.SERVER, updateCount);
                 sendMyVars((SPPhysicsEntitySynchronizer<T>) ((T) other).getSynchronizer(), SyncTarget.SERVER);
             } else {
-                varsToSync.clear();
-                profiler.start(Profiler.Profiles.PKTSEND1);
-                getDirtyVars(varsToSync, Side.CLIENT, updateCount);
-                profiler.end(Profiler.Profiles.PKTSEND1);
-
                 profiler.start(Profiler.Profiles.PKTSEND2);
                 sendMyVars((SPPhysicsEntitySynchronizer<T>) ((T) other).getSynchronizer(), SyncTarget.SPECTATORS);
                 profiler.end(Profiler.Profiles.PKTSEND2);
             }
-            updateCount++;
         }
     }
 

@@ -133,7 +133,6 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
 
         // Network Init
         synchronizer = DynamXMain.proxy.getNetHandlerForEntity(this);
-        //synchronizer = new SPPhysicsEntitySynchronizer<>(this, world.isRemote ? Side.CLIENT : Side.SERVER); //TODO
         usesPhysicsWorld = DynamXContext.usesPhysicsWorld(world);
     }
 
@@ -561,20 +560,6 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
             if (damageSource.isExplosion()) {
                 return false;
             }
-            //FIXME BUG WITH BULLET, IF WE DISABLE SLEEP, THEN ACTIVE THEN ENABLE SLEEP, NO BUG, ELSE STAYS NOT ACTIVATED
-            /*if(physicsHandler != null) {
-                System.out.println("ENTITY INFO " + physicsHandler+" "+isRegistered+" "+physicsPosition+" "+physicsHandler.getPosition()+" "+physicsHandler.getPhysicsState()+" "+physicsHandler.isBodyActive()+" "+physicsHandler.getCollisionObject());
-                System.out.println("m is "+physicsHandler.getCollisionObject().getCollisionShape()+" "+physicsHandler.getCollisionObject().getPhysicsLocation(Vector3fPool.get()));
-                ((PhysicsRigidBody)physicsHandler.getCollisionObject()).setSleepingThresholds(0.8f, 1);
-                ((PhysicsRigidBody)physicsHandler.getCollisionObject()).setEnableSleep(false);
-                ((PhysicsRigidBody)physicsHandler.getCollisionObject()).activate(true);
-                System.out.println("But "+((PhysicsRigidBody)physicsHandler.getCollisionObject()).isActive()+" "+((PhysicsRigidBody)physicsHandler.getCollisionObject()).getGravity(Vector3fPool.get())+" "+((PhysicsRigidBody)physicsHandler.getCollisionObject()).getMass());
-                ((PhysicsRigidBody)physicsHandler.getCollisionObject()).setEnableSleep(true);
-                return false;
-            }
-            if(true) {
-                return false;
-            }*/
             if (!this.world.isRemote && !this.isDead && damageSource.getImmediateSource() instanceof EntityPlayer && damageSource.getTrueSource().getRidingEntity() != this
                     && (((EntityPlayer) damageSource.getImmediateSource()).capabilities.isCreativeMode
                     || ((EntityPlayer) damageSource.getImmediateSource()).getHeldItemMainhand().getItem().equals(DynamXItemRegistry.ITEM_WRENCH))) {

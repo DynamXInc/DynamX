@@ -102,7 +102,6 @@ public class UdpClientPhysicsEntityNetHandler<T extends PhysicsEntity<?>> extend
         }
         entity.prePhysicsUpdateWrapper(profiler, usePhysicsThisTick);
 
-        //TODO THIS IS BAD
         //if (entity instanceof IModuleContainer.IEngineContainer && entity instanceof IModuleContainer.ISeatsContainer) {
         if (getSimulationHolder().ownsPhysics(Side.CLIENT)) {
             PooledHashMap<Integer, ? extends SynchronizedVariable<? extends PhysicsEntity<?>>> syncData = retainSyncVars(getOutputSyncVars(), getDirtyVars(HashMapPool.get(), Side.SERVER, ClientPhysicsSyncManager.simulationTime), SyncTarget.SERVER);

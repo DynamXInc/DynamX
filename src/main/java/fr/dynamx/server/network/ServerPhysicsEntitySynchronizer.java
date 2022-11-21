@@ -51,29 +51,16 @@ public class ServerPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends
         entity.prePhysicsUpdateWrapper(profiler, true);
         Vector3fPool.closePool();
         profiler.end(Profiler.Profiles.PHY1);
-        //entity.updatePos();
 
         if (entity.ticksExisted % entity.getSyncTickRate() == 0) //Don't send a packet each tick
         {
-            varsToSync.clear();
-            profiler.start(Profiler.Profiles.PKTSEND1);
-            getDirtyVars(varsToSync, Side.CLIENT, updateCount);
-            profiler.end(Profiler.Profiles.PKTSEND1);
-
             profiler.start(Profiler.Profiles.PKTSEND2);
             Set<? extends EntityPlayer> l = ((WorldServer) entity.world).getEntityTracker().getTrackingPlayers(entity);
-            l.forEach(p -> sendSyncTo(p, SynchronizedEntityVariableRegistry.retainSyncVars(getSynchronizedVariables(), this.varsToSync, p == entity.getControllingPassenger() ? SyncTarget.DRIVER : SyncTarget.SPECTATORS)));
+            l.forEach(p -> sendSyncTo(p, getVarsToSync(Side.SERVER, p == entity.getControllingPassenger() ? SyncTarget.DRIVER : SyncTarget.SPECTATORS)));
             profiler.end(Profiler.Profiles.PKTSEND2);
             updateCount++;
 
             //System.out.println("Send " + entity.ticksExisted);
-        }
-
-        //if(entity.getControllingPassenger() instanceof EntityPlayer)// && DynamXCommands.SERVER_NET_DEBUG)
-        {
-            if ((Math.abs(entity.motionX) > 0.05f || Math.abs(entity.motionY) > 0.05f || Math.abs(entity.motionZ) > 0.05f) && CmdNetworkConfig.SERVER_NET_DEBUG > 0) {
-                DynamXMain.log.info("Entity " + entity.getEntityId() + " is moving motion " + entity.motionX + " " + entity.motionY + " " + entity.motionZ + " cli time " + ServerPhysicsSyncManager.toDebugString() + " ticks exist " + entity.ticksExisted);
-            }
         }
     }
 

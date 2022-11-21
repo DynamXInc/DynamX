@@ -1,18 +1,25 @@
 package fr.dynamx.api.network.sync.v3;
 
 import com.jme3.math.Vector3f;
+import fr.dynamx.api.entities.IModuleContainer;
+import fr.dynamx.api.network.EnumPacketTarget;
 import fr.dynamx.api.network.sync.SimulationHolder;
 import fr.dynamx.api.network.sync.SyncTarget;
 import fr.dynamx.api.network.sync.SynchronizedVariable;
 import fr.dynamx.api.network.sync.SynchronizedVariablesRegistry;
+import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.ModularPhysicsEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
-import fr.dynamx.common.network.packets.PhysicsEntityMessage;
 import fr.dynamx.common.network.sync.MessagePhysicsEntitySync;
+import fr.dynamx.common.network.sync.MessageSeatsSync;
 import fr.dynamx.common.physics.player.WalkingOnPlayerController;
+import fr.dynamx.server.network.ServerPhysicsSyncManager;
 import fr.dynamx.utils.debug.Profiler;
+import fr.dynamx.utils.optimization.HashMapPool;
+import fr.dynamx.utils.optimization.PooledHashMap;
 import lombok.Getter;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 
@@ -110,19 +117,6 @@ public abstract class PhysicsEntitySynchronizer<T extends PhysicsEntity<?>> {
     }
 
     /**
-     * @param container The returned map, to not create new instances each tick (not cleared by this method)
-     * @param side      The target of the sync
-     * @param syncTick  The sync tick (increments on each sync)
-     * @return A map linking each {@link SynchronizedVariable} id to their {@link SyncTarget}
-     * @see SynchronizedVariablesRegistry
-     */
-    public Map<Integer, SyncTarget> getDirtyVars(Map<Integer, SyncTarget> container, Side side, int syncTick) {
-        synchronizedVariables.forEach((i, s) -> container.put(i, s.getSyncTarget(simulationHolder, side.isServer() ? Side.CLIENT : Side.SERVER)));
-        //TODO USE ? SyncTracker.printAndClean(entity);
-        return container;
-    }
-
-    /**
      * @return The {@link SimulationHolder} responsible of this entity
      */
     public SimulationHolder getSimulationHolder() {
@@ -160,5 +154,24 @@ public abstract class PhysicsEntitySynchronizer<T extends PhysicsEntity<?>> {
             ((ModularPhysicsEntity<?>) entity).getModules().forEach(m -> m.onSetSimulationHolder(simulationHolder, changeContext));
         }
         SynchronizedVariablesRegistry.setSyncVarsForContext(entity.world.isRemote ? Side.CLIENT : Side.SERVER, this);
+    }
+
+    public void resyncEntity(EntityPlayerMP target) {
+        //Force tcp for first sync and resyncs
+        DynamXContext.getNetwork().getVanillaNetwork().sendPacket(new MessagePhysicsEntitySync(entity, ServerPhysicsSyncManager.getTime(target), synchronizedVariables, false), EnumPacketTarget.PLAYER, target);
+        if (entity instanceof IModuleContainer.ISeatsContainer)
+            DynamXContext.getNetwork().sendToClient(new MessageSeatsSync((IModuleContainer.ISeatsContainer) entity), EnumPacketTarget.PLAYER, target);
+        if (entity.getJointsHandler() != null)
+            entity.getJointsHandler().sync(target);
+    }
+
+    public PooledHashMap<Integer, SynchronizedEntityVariable<?>> getVarsToSync(Side fromSide, SyncTarget target) {
+        PooledHashMap<Integer, SynchronizedEntityVariable<?>> ret = HashMapPool.get();
+        getSynchronizedVariables().forEach((i, s) -> {
+            SyncTarget varTarget = s.getSyncTarget(simulationHolder, fromSide);
+            if(target.isIncluded(varTarget))
+                ret.put(i, s);
+        });
+        return ret;
     }
 }

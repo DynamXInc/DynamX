@@ -1,5 +1,6 @@
 package fr.dynamx.client.network;
 
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.IVehicleController;
@@ -16,6 +17,8 @@ import fr.dynamx.common.network.sync.vars.EntityPhysicsState;
 import fr.dynamx.utils.debug.Profiler;
 import fr.dynamx.utils.optimization.HashMapPool;
 import fr.dynamx.utils.optimization.PooledHashMap;
+import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.fml.relauncher.Side;
@@ -32,6 +35,13 @@ public class ClientPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends
     private final List<IVehicleController> controllers = new ArrayList<>();
 
     private boolean usePhysicsThisTick;
+
+    @Getter
+    @Setter
+    private Vector3f serverPos;
+    @Getter
+    @Setter
+    private Quaternion serverRotation;
 
     public ClientPhysicsEntitySynchronizer(T entity) {
         super(entity);
@@ -72,27 +82,21 @@ public class ClientPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends
         }
         entity.prePhysicsUpdateWrapper(profiler, usePhysicsThisTick);
 
-        //TODO THIS IS BAD
-        //if (entity instanceof IModuleContainer.IEngineContainer && entity instanceof IModuleContainer.ISeatsContainer) {
-        if (getSimulationHolder().ownsPhysics(Side.CLIENT)) {
-            PooledHashMap<Integer, SynchronizedEntityVariable<?>> syncData = SynchronizedEntityVariableRegistry.retainSyncVars(getSynchronizedVariables(), getDirtyVars(HashMapPool.get(), Side.SERVER, ClientPhysicsSyncManager.simulationTime), SyncTarget.SERVER);
-            //System.out.println("Send sync "+syncData+" "+ClientPhysicsSyncManager.simulationTime);
-            NetworkActivityTracker.addSentVars(entity, syncData.values());
-            if (!syncData.isEmpty()) {
-                DynamXContext.getNetwork().sendToServer(new MessagePhysicsEntitySync(entity, ClientPhysicsSyncManager.simulationTime, syncData, false));
-            } else {
-                syncData.release();
-            }
-        }
-        if (/*entity.getControllingPassenger() instanceof EntityPlayer &&*/ Minecraft.getMinecraft().player.getRidingEntity() instanceof BaseVehicleEntity && ClientDebugSystem.MOVE_DEBUG > 0) {
-            if (Math.abs(entity.motionX) > 0.05f || Math.abs(entity.motionY) > 0.05f || Math.abs(entity.motionZ) > 0.05f) {
-                log.warn("Entity " + entity.getEntityId() + " is moving motion " + entity.motionX + " " + entity.motionY + " " + entity.motionZ + " cli time " + ClientPhysicsSyncManager.simulationTime + " ticks exist " + entity.ticksExisted);
-            }
-        }
-        // }
-        if (DynamXMain.proxy.ownsSimulation(entity)) {
+        if (getSimulationHolder().ownsPhysics(Side.CLIENT))
+            sendVariables();
+        if (DynamXMain.proxy.ownsSimulation(entity))
             states.put(ClientPhysicsSyncManager.simulationTime, entity.createStateSnapshot());
+    }
+
+    protected void sendVariables() {
+        PooledHashMap<Integer, SynchronizedEntityVariable<?>> syncData = getVarsToSync(Side.CLIENT, SyncTarget.SERVER);
+        //System.out.println("Send sync "+syncData+" "+ClientPhysicsSyncManager.simulationTime);
+        if (!syncData.isEmpty()) {
+            DynamXContext.getNetwork().sendToServer(new MessagePhysicsEntitySync(entity, ClientPhysicsSyncManager.simulationTime, syncData, false));
+        } else {
+            syncData.release();
         }
+        NetworkActivityTracker.addSentVars(entity, syncData.values());
     }
 
     @Override

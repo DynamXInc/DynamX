@@ -95,13 +95,4 @@ public class SynchronizedEntityVariableRegistry {
         addSyncVar(DynamXSynchronizedVariables.MOVABLE_IS_PICKED, SynchronizedEntityVariableFactory.booleanSerializer);
         addSyncVar(DynamXSynchronizedVariables.DOORS_STATES, DynamXSynchronizedVariables.doorsStatesSerializer);
     }
-
-    public static PooledHashMap<Integer, SynchronizedEntityVariable<?>> retainSyncVars(Map<Integer, SynchronizedEntityVariable<?>> syncVars, Map<Integer, SyncTarget> changes, SyncTarget target) {
-        PooledHashMap<Integer, SynchronizedEntityVariable<?>> ret = HashMapPool.get();
-        changes.forEach((i, t) -> {
-            if (target.isIncluded(t))
-                ret.put(i, syncVars.get(i));
-        });
-        return ret;
-    }
 }

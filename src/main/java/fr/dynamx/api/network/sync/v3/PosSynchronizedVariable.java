@@ -3,6 +3,7 @@ package fr.dynamx.api.network.sync.v3;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.network.EnumPacketTarget;
+import fr.dynamx.client.network.ClientPhysicsEntitySynchronizer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.entities.PhysicsEntity;
@@ -44,7 +45,7 @@ public class PosSynchronizedVariable extends ListeningSynchronizedEntityVariable
                 }
             } else {
                 //System.out.println("s pos");
-                int ignoreFor = 0;
+                /*int ignoreFor = 0;
                 if (ignoreFor <= 0) {
                     Vector3f pos = entityPositionData.position;
                     float delta = entity.physicsPosition.subtract(pos).length();
@@ -69,7 +70,9 @@ public class PosSynchronizedVariable extends ListeningSynchronizedEntityVariable
                     }
                 } else {
                     ignoreFor--;
-                }
+                }*/
+                ((ClientPhysicsEntitySynchronizer)entity.getSynchronizer()).setServerPos(entityPositionData.position);
+                ((ClientPhysicsEntitySynchronizer)entity.getSynchronizer()).setServerRotation(entityPositionData.rotation);
             }
         }), SynchronizationRules.PHYSICS_TO_SPECTATORS, DynamXSynchronizedVariables.posSerializer, new Callable<fr.dynamx.api.network.sync.v3.PosSynchronizedVariable.EntityPositionData>() {
             private fr.dynamx.api.network.sync.v3.PosSynchronizedVariable.EntityPositionData positionData;

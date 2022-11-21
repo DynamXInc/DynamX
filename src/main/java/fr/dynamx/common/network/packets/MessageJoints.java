@@ -75,7 +75,7 @@ public class MessageJoints extends PhysicsEntityMessage<MessageJoints> {
             });
             for (EntityJoint.CachedJoint g : joints) {
                 if (g.isJointOwner()) //Only allow the owner to re-create the joint on client side
-                    handler.syncJoint(g);
+                    handler.onNewJointSynchronized(g);
             }
         } else
             log.error("Cannot sync joints of " + entity + " : joint handler is null !");

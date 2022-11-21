@@ -418,10 +418,4 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     public void addParticleEmitter(ParticleEmitterInfo<?> particleEmitterInfo) {
         particleEmitters.add(particleEmitterInfo);
     }
-
-    /*@Nullable
-    @Override
-    public ModularVehicleInfo<T> getOwner() {
-        return null;
-    }*/
 }

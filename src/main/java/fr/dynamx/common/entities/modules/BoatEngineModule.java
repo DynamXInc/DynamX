@@ -26,11 +26,6 @@ public class BoatEngineModule implements IPropulsionModule<BoatEntity.BoatPhysic
     }
 
     @Override
-    public float[] getPropulsionProperties() {
-        return new float[0];
-    }
-
-    @Override
     @SideOnly(Side.CLIENT)
     public void spawnPropulsionParticles(RenderPhysicsEntity<?> render, float partialTicks) {
 

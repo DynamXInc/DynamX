@@ -132,9 +132,9 @@ public class SPPhysicsEntityNetHandler<T extends PhysicsEntity<?>> extends Physi
                 //sendMyVars((SPPhysicsEntityNetHandler<T>) ((T) other).getNetwork(), SyncTarget.SERVER);
             } else {
                 varsToSync.clear();
-                profiler.start(Profiler.Profiles.PKTSEND1);
+                //profiler.start(Profiler.Profiles.PKTSEND1);
                 getDirtyVars(varsToSync, Side.CLIENT, updateCount);
-                profiler.end(Profiler.Profiles.PKTSEND1);
+                //profiler.end(Profiler.Profiles.PKTSEND1);
 
                 profiler.start(Profiler.Profiles.PKTSEND2);
                 //sendMyVars((SPPhysicsEntityNetHandler<T>) ((T) other).getNetwork(), SyncTarget.SPECTATORS);

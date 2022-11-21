@@ -33,8 +33,6 @@ import fr.dynamx.common.physics.entities.BaseWheeledVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.wheel.WheelPhysics;
 import fr.dynamx.common.physics.entities.parts.wheel.WheelState;
-import fr.dynamx.utils.debug.DynamXDebugOptions;
-import fr.dynamx.utils.debug.SyncTracker;
 import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
@@ -70,7 +68,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
     protected SynchronizedEntityVariable<WheelState[]> wheelsStates;
     // [0;4] SkidInfo [4;8] Friction [8;12] longitudinal [12;16] lateral [16;20] getRotationDelta
     // todo clean wheelProperties system
-    public FloatArraySynchronizedVariable wheelProperties = new FloatArraySynchronizedVariable(SynchronizationRules.PHYSICS_TO_SPECTATORS, "wheel_props");
+    public FloatArraySynchronizedVariable skidInfos = new FloatArraySynchronizedVariable(SynchronizationRules.PHYSICS_TO_SPECTATORS, "skid_infos");
 
     protected byte[] wheelsTextureId;
 
@@ -152,7 +150,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
     @Override
     public void initEntityProperties() {
         int wheelCount = entity.getPackInfo().getPartsByType(PartWheel.class).size();
-        wheelProperties.set(new float[wheelCount * VehicleEntityProperties.EnumWheelProperties.values().length]);
+        skidInfos.set(new float[wheelCount]);
         for (PartWheel part : entity.getPackInfo().getPartsByType(PartWheel.class)) {
             wheelInfos.get().put(part.getId(), part.getDefaultWheelInfo());
         }
@@ -267,18 +265,8 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
             }
             for (byte b = 0; b < n; b++) {
                 WheelPhysics w = wheelsPhysics.getWheel(b);
-                if (w != null) {
-                    if (SyncTracker.different(w.getSkidInfo(), wheelProperties.get()[getPropertyIndex(b, VehicleEntityProperties.EnumWheelProperties.SKIDINFO)])) {
-                        wheelProperties.set(getPropertyIndex(b, VehicleEntityProperties.EnumWheelProperties.SKIDINFO), w.getSkidInfo());
-                    }
-                    if (DynamXDebugOptions.WHEEL_ADVANCED_DATA.isActive()) {
-                        wheelProperties.get()[getPropertyIndex(b, VehicleEntityProperties.EnumWheelProperties.FRICTION)] = w.getFriction();
-                        wheelProperties.get()[getPropertyIndex(b, VehicleEntityProperties.EnumWheelProperties.PACEJKALONGITUDINAL)] = wheelsPhysics.pacejkaMagicFormula.longitudinal[b] / 10000;
-                        wheelProperties.get()[getPropertyIndex(b, VehicleEntityProperties.EnumWheelProperties.PACEJKALATERAL)] = wheelsPhysics.pacejkaMagicFormula.lateral[b] / 10000;
-                        wheelProperties.get()[getPropertyIndex(b, VehicleEntityProperties.EnumWheelProperties.ROTATIONDELTA)] = w.getDeltaRotation();
-                        wheelProperties.setChanged(true);
-                    }
-                }
+                if (w != null)
+                    skidInfos.set(b, w.getSkidInfo());
             }
         }
     }
@@ -288,16 +276,15 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
         return wheelsPhysics;
     }
 
-    @Override
-    public float[] getPropulsionProperties() {
-        return wheelProperties.get();
+    public float[] getSkidInfos() {
+        return skidInfos.get();
     }
 
     @Override
     public void addSynchronizedVariables(Side side, SimulationHolder simulationHolder) {
         entity.getSynchronizer().registerVariable(DynamXSynchronizedVariables.WHEEL_INFOS, wheelInfos);
         entity.getSynchronizer().registerVariable(DynamXSynchronizedVariables.WHEEL_STATES, wheelsStates);
-        entity.getSynchronizer().registerVariable(DynamXSynchronizedVariables.WHEEL_PROPERTIES, wheelProperties);
+        entity.getSynchronizer().registerVariable(DynamXSynchronizedVariables.SKID_INFOS, skidInfos);
         entity.getSynchronizer().registerVariable(DynamXSynchronizedVariables.WHEEL_VISUALS, visualProperties);
     }
 
@@ -335,13 +322,11 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
         }
 
         if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.RenderVehicleEntityEvent(VehicleEntityEvent.RenderVehicleEntityEvent.Type.PROPULSION, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks))) {
-            if (getPropulsionProperties() != null) {
-                this.entity.getPackInfo().getPartsByType(PartWheel.class).forEach(partWheel -> {
-                    if (wheelsStates.get()[partWheel.getId()] != WheelState.REMOVED) {
-                        renderWheel(render, partWheel, partialTicks);
-                    }
-                });
-            }
+            this.entity.getPackInfo().getPartsByType(PartWheel.class).forEach(partWheel -> {
+                if (wheelsStates.get()[partWheel.getId()] != WheelState.REMOVED) {
+                    renderWheel(render, partWheel, partialTicks);
+                }
+            });
             MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.RenderVehicleEntityEvent(VehicleEntityEvent.RenderVehicleEntityEvent.Type.PROPULSION, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks));
         }
     }
@@ -353,7 +338,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
         entity.getPackInfo().getPartsByType(PartWheel.class).forEach(partWheel -> {
             PartWheelInfo info = getWheelInfo(partWheel.getId());
             if (info.enableRendering() && info.getSkidParticle() != null) {
-                if (((IModuleContainer.IPropulsionContainer<?>) entity).getPropulsion().getPropulsionProperties()[VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumWheelProperties.SKIDINFO)] < 0.1f) {
+                if (skidInfos.get()[partWheel.getId()] < 0.1f) {
                     entity.world.spawnParticle(info.getSkidParticle(), visualProperties.get()[VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.COLLISIONX)],
                             visualProperties.get()[VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.COLLISIONY)],
                             visualProperties.get()[VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.COLLISIONZ)],
@@ -489,7 +474,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
                         }*/
                 int numSkdding = 0;
                 for (int i = 0; i < entity.getPackInfo().getPartsByType(PartWheel.class).size(); i++) {
-                    if (wheelProperties.get()[getPropertyIndex(i, VehicleEntityProperties.EnumWheelProperties.SKIDINFO)] < 0.1f)
+                    if (skidInfos.get()[i] < 0.1f)
                         numSkdding++;
                 }
                 if (numSkdding > 0) {

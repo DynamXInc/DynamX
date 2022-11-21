@@ -82,10 +82,10 @@ public class ServerPhysicsEntityNetHandler<T extends PhysicsEntity<?>> extends P
         if (entity.ticksExisted % entity.getSyncTickRate() == 0) //Don't send a packet each tick
         {
             varsToSync.clear();
-            profiler.start(Profiler.Profiles.PKTSEND1);
+            //profiler.start(Profiler.Profiles.PKTSEND1);
             getDirtyVars(varsToSync, Side.CLIENT, updateCount);
             varsToSync.forEach((i, t) -> getOutputSyncVars().get(i).validate(entity, 1));
-            profiler.end(Profiler.Profiles.PKTSEND1);
+            //profiler.end(Profiler.Profiles.PKTSEND1);
 
             profiler.start(Profiler.Profiles.PKTSEND2);
             Set<? extends EntityPlayer> l = ((WorldServer) entity.world).getEntityTracker().getTrackingPlayers(entity);

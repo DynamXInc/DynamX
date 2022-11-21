@@ -25,7 +25,7 @@ public class DynamXSynchronizedVariables
 
     public static final ResourceLocation WHEEL_INFOS = new ResourceLocation(DynamXConstants.ID, "wheel_infos");
     public static final ResourceLocation WHEEL_STATES = new ResourceLocation(DynamXConstants.ID, "wheel_states");
-    public static final ResourceLocation WHEEL_PROPERTIES = new ResourceLocation(DynamXConstants.ID, "wheel_properties");
+    public static final ResourceLocation SKID_INFOS = new ResourceLocation(DynamXConstants.ID, "skid_infos");
     public static final ResourceLocation WHEEL_VISUALS = new ResourceLocation(DynamXConstants.ID, "wheel_visuals");
 
     public static final ResourceLocation MOVABLE_MOVER = new ResourceLocation(DynamXConstants.ID, "MOVABLE_MOVER");

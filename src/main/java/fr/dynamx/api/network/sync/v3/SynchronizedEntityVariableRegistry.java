@@ -2,11 +2,8 @@ package fr.dynamx.api.network.sync.v3;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import fr.dynamx.api.network.sync.SyncTarget;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.network.sync.v3.DynamXSynchronizedVariables;
-import fr.dynamx.utils.optimization.HashMapPool;
-import fr.dynamx.utils.optimization.PooledHashMap;
 import lombok.Getter;
 import net.minecraft.util.ResourceLocation;
 
@@ -85,7 +82,7 @@ public class SynchronizedEntityVariableRegistry {
         addSyncVar(DynamXSynchronizedVariables.ENGINE_PROPERTIES, SynchronizedEntityVariableFactory.floatArraySerializer);
         addSyncVar(DynamXSynchronizedVariables.WHEEL_INFOS, DynamXSynchronizedVariables.wheelInfosSerializer);
         addSyncVar(DynamXSynchronizedVariables.WHEEL_STATES, DynamXSynchronizedVariables.wheelStatesSerializer);
-        addSyncVar(DynamXSynchronizedVariables.WHEEL_PROPERTIES, SynchronizedEntityVariableFactory.floatArraySerializer);
+        addSyncVar(DynamXSynchronizedVariables.SKID_INFOS, SynchronizedEntityVariableFactory.floatArraySerializer);
         addSyncVar(DynamXSynchronizedVariables.WHEEL_VISUALS, SynchronizedEntityVariableFactory.floatArraySerializer);
         addSyncVar(DynamXSynchronizedVariables.MOVABLE_MOVER, SynchronizedEntityVariableFactory.playerSerializer);
         addSyncVar(DynamXSynchronizedVariables.MOVABLE_PICK_DISTANCE, SynchronizedEntityVariableFactory.floatSerializer);

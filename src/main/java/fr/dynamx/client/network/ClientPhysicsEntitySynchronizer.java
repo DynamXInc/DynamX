@@ -55,7 +55,7 @@ public class ClientPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends
     @Override
     public void onPrePhysicsTick(Profiler profiler) {
         controllers.forEach(IVehicleController::update);
-        if (getSimulationHolder().ownsPhysics(Side.CLIENT)) {
+        if (getSimulationHolder().ownsPhysics(Side.CLIENT) || true) {
             //System.out.println("Read " + entity.ticksExisted);
             readReceivedPackets();
             usePhysicsThisTick = true;
@@ -91,12 +91,12 @@ public class ClientPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends
     protected void sendVariables() {
         PooledHashMap<Integer, SynchronizedEntityVariable<?>> syncData = getVarsToSync(Side.CLIENT, SyncTarget.SERVER);
         //System.out.println("Send sync "+syncData+" "+ClientPhysicsSyncManager.simulationTime);
+        NetworkActivityTracker.addSentVars(entity, syncData.values());
         if (!syncData.isEmpty()) {
             DynamXContext.getNetwork().sendToServer(new MessagePhysicsEntitySync(entity, ClientPhysicsSyncManager.simulationTime, syncData, false));
         } else {
             syncData.release();
         }
-        NetworkActivityTracker.addSentVars(entity, syncData.values());
     }
 
     @Override

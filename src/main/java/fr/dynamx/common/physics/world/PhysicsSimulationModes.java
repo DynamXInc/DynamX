@@ -3,6 +3,7 @@ package fr.dynamx.common.physics.world;
 import com.jme3.bullet.PhysicsSoftSpace;
 import com.jme3.bullet.PhysicsSpace;
 import fr.dynamx.api.physics.IPhysicsSimulationMode;
+import fr.dynamx.common.DynamXMain;
 
 /**
  * DynamX {@link IPhysicsSimulationMode}s
@@ -16,16 +17,13 @@ public class PhysicsSimulationModes {
 
         @Override
         public void updatePhysicsWorld(PhysicsSoftSpace dynamicsWorld) {
-            long nanoTime = System.nanoTime();
-            long nanoseconds = nanoTime - lastPhysicsUpdate;
-            float seconds = 1e-9f * nanoseconds;
-            dynamicsWorld.update(seconds, dynamicsWorld.maxSubSteps(), false, true, false);
-            lastPhysicsUpdate = nanoTime;
+            dynamicsWorld.update(getTimeStep(), 0, false, true, false);
+            dynamicsWorld.update(getTimeStep(), 0, false, true, false);
         }
 
         @Override
         public float getTimeStep() {
-            return 0.025f;
+            return 0.0255f;
         }
 
         @Override

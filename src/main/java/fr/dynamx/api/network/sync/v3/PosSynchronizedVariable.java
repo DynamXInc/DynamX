@@ -45,17 +45,19 @@ public class PosSynchronizedVariable extends ListeningSynchronizedEntityVariable
                 }
             } else {
                 //System.out.println("s pos");
-                /*int ignoreFor = 0;
+                int ignoreFor = 0;
                 if (ignoreFor <= 0) {
                     Vector3f pos = entityPositionData.position;
                     float delta = entity.physicsPosition.subtract(pos).length();
+                    //TODO CLEAN
+                    CRITIC1 = 3;
                     if (delta > CRITIC1) {
                         if (delta > CRITIC1warn)
                             DynamXMain.log.warn("Physics entity " + entity + " is moving too quickly (driven by " + entity.getControllingPassenger() + ") !");
                         if (delta > CRITIC2 && entity.getControllingPassenger() instanceof EntityPlayerMP) {
                             ((EntityPlayerMP) entity.getControllingPassenger()).connection.disconnect(new TextComponentString("Invalid physics entity move packet"));
-                        } else if (entity.getControllingPassenger() instanceof EntityPlayerMP) {
-                            if (delta > CRITIC3) {
+                        } else if (entity.getControllingPassenger() instanceof EntityPlayerMP || entity.world.isRemote) {
+                            if (delta > CRITIC3 && !entity.world.isRemote) {
                                 //Resync
                                 DynamXMain.log.error(entity + " doing resync !!!");
                                 ignoreFor = 20;
@@ -70,9 +72,11 @@ public class PosSynchronizedVariable extends ListeningSynchronizedEntityVariable
                     }
                 } else {
                     ignoreFor--;
-                }*/
-                ((ClientPhysicsEntitySynchronizer)entity.getSynchronizer()).setServerPos(entityPositionData.position);
-                ((ClientPhysicsEntitySynchronizer)entity.getSynchronizer()).setServerRotation(entityPositionData.rotation);
+                }
+                if(entity.getSynchronizer() instanceof ClientPhysicsEntitySynchronizer) {
+                    ((ClientPhysicsEntitySynchronizer) entity.getSynchronizer()).setServerPos(entityPositionData.position);
+                    ((ClientPhysicsEntitySynchronizer) entity.getSynchronizer()).setServerRotation(entityPositionData.rotation);
+                }
             }
         }), SynchronizationRules.PHYSICS_TO_SPECTATORS, DynamXSynchronizedVariables.posSerializer, new Callable<fr.dynamx.api.network.sync.v3.PosSynchronizedVariable.EntityPositionData>() {
             private fr.dynamx.api.network.sync.v3.PosSynchronizedVariable.EntityPositionData positionData;

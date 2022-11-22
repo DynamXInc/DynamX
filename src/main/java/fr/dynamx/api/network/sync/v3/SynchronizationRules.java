@@ -36,12 +36,12 @@ public abstract class SynchronizationRules
     {
         @Override
         public SyncTarget getSyncTarget(SimulationHolder simulationHolder, Side side) {
-            return simulationHolder.ownsPhysics(side) ? side.isServer() ? SyncTarget.SPECTATORS : SyncTarget.SERVER : SyncTarget.NONE;
+            return simulationHolder.isPhysicsAuthority(side) ? side.isServer() ? SyncTarget.SPECTATORS : SyncTarget.SERVER : SyncTarget.NONE;
         }
 
         @Override
         public boolean listensSide(SimulationHolder simulationHolder, Side side) {
-            return simulationHolder.ownsPhysics(side);
+            return simulationHolder.isPhysicsAuthority(side);
         }
 
         @Override

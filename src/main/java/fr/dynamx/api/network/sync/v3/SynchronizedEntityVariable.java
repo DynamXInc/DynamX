@@ -81,6 +81,7 @@ public class SynchronizedEntityVariable<T> {
             ((Map)this.value).putAll((Map) value);
         } else
             this.value = value;
+        setChanged(true); //server will send changes to clients
     }
 
     public SyncTarget getSyncTarget(SimulationHolder simulationHolder, Side side) {

@@ -63,7 +63,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
         Quaternion appliedRotation = null;
         //Render vehicle
         if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.RenderPhysicsEntityEvent(entity, this, PhysicsEntityEvent.RenderPhysicsEntityEvent.Type.ENTITY, x, y, z, partialTicks))) {
-            if(entity.getSynchronizer() instanceof ClientPhysicsEntitySynchronizer) { //todo clean and use network debug option
+            if(ClientDebugSystem.enableDebugDrawing && entity.getSynchronizer() instanceof ClientPhysicsEntitySynchronizer) { //todo clean and use network debug option
                 GlStateManager.pushMatrix();
                 {
                     Vector3f pos = entity.physicsPosition;

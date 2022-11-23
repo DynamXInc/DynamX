@@ -159,11 +159,10 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
     protected abstract void fireCreateModulesEvent(Side side);
 
     @Override
-    public List<ResourceLocation> getSynchronizedVariables(Side side, SimulationHolder simulationHolder) {
-        List<ResourceLocation> vars = super.getSynchronizedVariables(side, simulationHolder);
+    public void registerSynchronizedVariables(Side side, SimulationHolder simulationHolder) {
+        super.registerSynchronizedVariables(side, simulationHolder);
         for (IPhysicsModule<?> module : moduleList)
             module.addSynchronizedVariables(side, simulationHolder);
-        return vars;
     }
 
     @Override

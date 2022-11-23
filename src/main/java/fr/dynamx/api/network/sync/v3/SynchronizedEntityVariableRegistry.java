@@ -91,5 +91,6 @@ public class SynchronizedEntityVariableRegistry {
         addSyncVar(DynamXSynchronizedVariables.MOVABLE_PICKED_ENTITY, SynchronizedEntityVariableFactory.physicsEntitySerializer);
         addSyncVar(DynamXSynchronizedVariables.MOVABLE_IS_PICKED, SynchronizedEntityVariableFactory.booleanSerializer);
         addSyncVar(DynamXSynchronizedVariables.DOORS_STATES, DynamXSynchronizedVariables.doorsStatesSerializer);
+        addSyncVar(DynamXSynchronizedVariables.TRANSFORMS, DynamXSynchronizedVariables.transformsSerializer);
     }
 }

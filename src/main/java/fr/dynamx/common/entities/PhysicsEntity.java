@@ -7,28 +7,20 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.modules.IEntityJoints;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.events.PhysicsEntityEvent;
-import fr.dynamx.api.network.EnumPacketTarget;
 import fr.dynamx.api.network.sync.SimulationHolder;
-import fr.dynamx.api.network.sync.v3.ListeningSynchronizedEntityVariable;
 import fr.dynamx.api.network.sync.v3.PhysicsEntitySynchronizer;
-import fr.dynamx.api.network.sync.v3.SynchronizationRules;
-import fr.dynamx.api.network.sync.v3.SynchronizedVariableSerializer;
 import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.entities.EntityPhysicsState;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.items.DynamXItemRegistry;
-import fr.dynamx.common.network.packets.MessageForcePlayerPos;
-import fr.dynamx.common.network.sync.SPPhysicsEntitySynchronizer;
 import fr.dynamx.common.network.sync.v3.DynamXSynchronizedVariables;
-import fr.dynamx.common.network.sync.vars.PosSynchronizedVariable;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.player.WalkingOnPlayerController;
 import fr.dynamx.common.physics.terrain.PhysicsEntityTerrainLoader;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.PhysicsEntityException;
 import fr.dynamx.utils.debug.Profiler;
-import fr.dynamx.utils.debug.SyncTracker;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.QuaternionPool;
@@ -36,11 +28,9 @@ import fr.dynamx.utils.optimization.Vector3fPool;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
@@ -49,11 +39,9 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 /**
  * Base class for all entities using bullet to simulate their physics
@@ -150,21 +138,17 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     public final fr.dynamx.api.network.sync.v3.PosSynchronizedVariable synchronizedPosition = new fr.dynamx.api.network.sync.v3.PosSynchronizedVariable(this);
 
     /**
+     * TODO UPDATE DOC
+     *
      * Adds the {@link fr.dynamx.api.network.sync.SynchronizedVariable} used to synchronize this module <br>
      * The variables must only be added on the side which has the authority over the data (typically the server) <br>
      * Fired on modules initialization and on {@link fr.dynamx.api.network.sync.SimulationHolder} changes
      *
      * @param side             The current side
      * @param simulationHolder The new holder of the simulation of the entity (see {@link SimulationHolder})
-     * @return The list of {@link fr.dynamx.api.network.sync.SynchronizedVariable} used to sync the entity, referenced by they registry name (see {@link fr.dynamx.api.network.sync.SynchronizedVariablesRegistry})
      */
-    public List<ResourceLocation> getSynchronizedVariables(Side side, SimulationHolder simulationHolder) {
-        List<ResourceLocation> variables = new ArrayList<>();
-        if (simulationHolder.isPhysicsAuthority(side)) {
-            variables.add(PosSynchronizedVariable.NAME);
-        }
+    public void registerSynchronizedVariables(Side side, SimulationHolder simulationHolder) {
         getSynchronizer().registerVariable(DynamXSynchronizedVariables.POS, synchronizedPosition);
-        return variables;
     }
 
     /**

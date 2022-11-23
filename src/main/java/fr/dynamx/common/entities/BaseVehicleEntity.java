@@ -1,7 +1,6 @@
 package fr.dynamx.common.entities;
 
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.PhysicsEntityEvent;
@@ -11,7 +10,6 @@ import fr.dynamx.client.renders.RenderPhysicsEntity;
 import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.contentpack.parts.PartShape;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
-import fr.dynamx.common.network.sync.vars.VehicleSynchronizedVariables;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.DynamXUtils;
@@ -49,15 +47,6 @@ public abstract class BaseVehicleEntity<T extends BaseVehiclePhysicsHandler<?>> 
     @Override
     protected void entityInit() {
         super.entityInit();
-    }
-
-    @Override
-    public List<ResourceLocation> getSynchronizedVariables(Side side, SimulationHolder simulationHolder) {
-        List<ResourceLocation> vars = super.getSynchronizedVariables(side, simulationHolder);
-        /*if (this instanceof IModuleContainer.IEngineContainer && simulationHolder.isPhysicsAuthority(side)) {
-            vars.add(VehicleSynchronizedVariables.Engine.NAME);
-        }*/
-        return vars;
     }
 
     @Override

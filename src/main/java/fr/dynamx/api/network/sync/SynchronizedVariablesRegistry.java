@@ -3,11 +3,8 @@ package fr.dynamx.api.network.sync;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import fr.dynamx.api.network.sync.v3.PhysicsEntitySynchronizer;
-import fr.dynamx.api.network.sync.v3.SynchronizedEntityVariableSnapshot;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.entities.PhysicsEntity;
-import fr.dynamx.common.network.sync.vars.*;
-import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.optimization.HashMapPool;
 import fr.dynamx.utils.optimization.PooledHashMap;
 import net.minecraft.util.ResourceLocation;
@@ -15,7 +12,6 @@ import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.*;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
 /**
@@ -139,8 +135,8 @@ public class SynchronizedVariablesRegistry {
         //addSyncVar(MovableSynchronizedVariable.NAME, MovableSynchronizedVariable::new);//, (s, e) -> e.getEntity() instanceof IHaveModule.IHaveEngine/* && ((IHaveModule.IHaveEngine)e.getEntity()).getEngine() instanceof EngineModule*/ && (e.getSimulationHolder() == SimulationHolder.SERVER_SP ? s.isClient() : s.isServer() || e.getSimulationHolder().isMe(s)));
         //addSyncVar(VehicleSynchronizedVariables.DoorsStatus.NAME, VehicleSynchronizedVariables.DoorsStatus::new);//, (s, e) -> e.getEntity() instanceof IHaveModule.IHaveEngine/* && ((IHaveModule.IHaveEngine)e.getEntity()).getEngine() instanceof EngineModule*/ && (e.getSimulationHolder() == SimulationHolder.SERVER_SP ? s.isClient() : s.isServer() || e.getSimulationHolder().isMe(s)));
         //addSyncVar(DoorsSynchronizedVariable::new, (s, e) -> e.getEntity() instanceof IHaveModule.IHaveSeats && ((IHaveModule.IHaveSeats)e.getEntity()).getSeats().hasDoors() && s.isServer());
-        addSyncVar(AttachedDoorsSynchronizedVariable.NAME, AttachedDoorsSynchronizedVariable::new);
-        addSyncVar(RagdollPartsSynchronizedVariable.NAME, RagdollPartsSynchronizedVariable::new);
+        //addSyncVar(AttachedDoorsSynchronizedVariable.NAME, AttachedDoorsSynchronizedVariable::new);
+        //addSyncVar(RagdollPartsSynchronizedVariable.NAME, RagdollPartsSynchronizedVariable::new);
     }
 
     public static <T extends PhysicsEntity<?>> PooledHashMap<Integer, SynchronizedVariable<T>> retainSyncVars(Map<Integer, SynchronizedVariable<T>> syncVars, Map<Integer, SyncTarget> changes, SyncTarget target) {
@@ -155,7 +151,7 @@ public class SynchronizedVariablesRegistry {
     }
 
     public static <T extends PhysicsEntity<?>> void setSyncVarsForContext(Side side, Map<Integer, SynchronizedVariable<T>> vars, PhysicsEntityNetHandler<T> network) {
-        List<ResourceLocation> varsToUse = network.entity.getSynchronizedVariables(side, network.getSimulationHolder());
+        /*List<ResourceLocation> varsToUse = network.entity.registerSynchronizedVariables(side, network.getSimulationHolder());
         syncVarRegistry.forEach((r, i) -> {
             boolean b = varsToUse.contains(r);
             if (vars.containsKey(i) && !b) {
@@ -163,7 +159,7 @@ public class SynchronizedVariablesRegistry {
             } else if (b) {
                 vars.put(i, (SynchronizedVariable<T>) instantiate(i));
             }
-        });
+        });*/
         /*for (int i = 0; i < syncVars.size(); i++) {
             if(syncVars.containsKey(i))
             {
@@ -179,7 +175,6 @@ public class SynchronizedVariablesRegistry {
     }
 
     public static <T extends PhysicsEntity<?>> void setSyncVarsForContext(Side side, PhysicsEntitySynchronizer<T> network) {
-        List<ResourceLocation> varsToUse = network.getEntity().getSynchronizedVariables(side, network.getSimulationHolder());
-        System.out.println("Set " + varsToUse+" on " + network.getEntity()+" : " + network.getSynchronizedVariables());
+        network.getEntity().registerSynchronizedVariables(side, network.getSimulationHolder());
     }
 }

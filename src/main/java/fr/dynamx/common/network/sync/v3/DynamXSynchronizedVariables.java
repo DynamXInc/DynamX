@@ -6,6 +6,8 @@ import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.common.physics.entities.parts.wheel.WheelState;
+import fr.dynamx.common.physics.utils.RigidBodyTransform;
+import fr.dynamx.common.physics.utils.SynchronizedRigidBodyTransform;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.optimization.HashMapPool;
@@ -36,6 +38,8 @@ public class DynamXSynchronizedVariables
     public static final ResourceLocation MOVABLE_IS_PICKED = new ResourceLocation(DynamXConstants.ID, "MOVABLE_IS_PICKED");
 
     public static final ResourceLocation DOORS_STATES = new ResourceLocation(DynamXConstants.ID, "DOORS_STATES");
+
+    public static final ResourceLocation TRANSFORMS = new ResourceLocation(DynamXConstants.ID, "TRANSFORMS");
 
     public static final SynchronizedVariableSerializer<fr.dynamx.api.network.sync.v3.PosSynchronizedVariable.EntityPositionData> posSerializer = new SynchronizedVariableSerializer<fr.dynamx.api.network.sync.v3.PosSynchronizedVariable.EntityPositionData>() {
         @Override
@@ -116,6 +120,39 @@ public class DynamXSynchronizedVariables
             int size = buf.readByte();
             for (int i = 0; i < size; i++) {
                 currentValue.put(buf.readByte(), DoorsModule.DoorState.values()[buf.readInt()]);
+            }
+            return currentValue;
+        }
+    };
+
+    public static final SynchronizedVariableSerializer<Map<Byte, RigidBodyTransform>> transformsSerializer = new SynchronizedVariableSerializer<Map<Byte, RigidBodyTransform>>() {
+        //TODO COMPRESSION : opnly keep chest for ragdolls
+        @Override
+        public void writeObject(ByteBuf buf, Map<Byte, RigidBodyTransform> object) {
+            buf.writeInt(object.size());
+            object.forEach((id, transform) -> {
+                buf.writeByte(id);
+                buf.writeFloat(transform.getPosition().x);
+                buf.writeFloat(transform.getPosition().y);
+                buf.writeFloat(transform.getPosition().z);
+
+                buf.writeFloat(transform.getRotation().getX());
+                buf.writeFloat(transform.getRotation().getY());
+                buf.writeFloat(transform.getRotation().getZ());
+                buf.writeFloat(transform.getRotation().getW());
+            });
+        }
+
+        @Override
+        public Map<Byte, RigidBodyTransform> readObject(ByteBuf buf) {
+            Map<Byte, RigidBodyTransform> currentValue = HashMapPool.get();
+            int size = buf.readInt();
+            for (byte i = 0; i < size; i++) {
+                byte tr = buf.readByte();
+                RigidBodyTransform transform = new RigidBodyTransform();
+                transform.getPosition().set(buf.readFloat(), buf.readFloat(), buf.readFloat());
+                transform.getRotation().set(buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readFloat());
+                currentValue.put(tr, transform);
             }
             return currentValue;
         }

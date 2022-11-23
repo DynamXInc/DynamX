@@ -73,7 +73,7 @@ public class SynchronizedEntityVariable<T> {
     }
 
     public void receiveValue(T value) {
-        //System.out.println("RCV " + value+" in " +this);
+        ///System.out.println("RCV " + value+" in " +this);
         if(receiveCallback != null)
             receiveCallback.accept(this, value);
         if(value instanceof Map) { //TODO PUT IN SEPARATE CLASS

@@ -59,9 +59,9 @@ import static fr.dynamx.client.ClientProxy.SOUND_HANDLER;
  * @see WheelsPhysicsHandler
  */
 public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysicsHandler<?>>, IPhysicsModule.IEntityUpdateListener, IPhysicsModule.IPhysicsUpdateListener, IPhysicsModule.IDrawableModule<BaseVehicleEntity<?>> {
-    protected final SynchronizedEntityVariable<Map<Byte, PartWheelInfo>> wheelInfos = new SynchronizedEntityVariable<>((variable, value) -> {
+    protected final MapSynchronizedVariable<Byte, PartWheelInfo> wheelInfos = new MapSynchronizedVariable<>((variable, value) -> {
         value.forEach(this::setWheelInfo);
-    }, SynchronizationRules.CONTROLS_TO_SPECTATORS, DynamXSynchronizedVariables.wheelInfosSerializer, new HashMap<>(), "wheel_infos");
+    }, SynchronizationRules.CONTROLS_TO_SPECTATORS, DynamXSynchronizedVariables.wheelInfosSerializer, "wheel_infos");
     /**
      * Wheels visual states, based on the physical states
      */
@@ -106,8 +106,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
         if (wheelInfos.get().get(partIndex) != info) {
             VehicleEntityEvent.ChangeVehicleWheelEvent event = new VehicleEntityEvent.ChangeVehicleWheelEvent(FMLCommonHandler.instance().getEffectiveSide(), entity, this, wheelInfos.get().get(partIndex), info, partIndex);
             if (!MinecraftForge.EVENT_BUS.post(event)) {
-                wheelInfos.get().put(partIndex, event.getNewWheel());
-                wheelInfos.setChanged(true);
+                wheelInfos.put(partIndex, event.getNewWheel());
                 if (wheelsPhysics != null)
                     wheelsPhysics.getWheelByPartIndex(partIndex).setWheelInfo(event.getNewWheel());
                 if (entity.getEntityTextureID() != -1)
@@ -152,9 +151,8 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
         int wheelCount = entity.getPackInfo().getPartsByType(PartWheel.class).size();
         skidInfos.set(new float[wheelCount]);
         for (PartWheel part : entity.getPackInfo().getPartsByType(PartWheel.class)) {
-            wheelInfos.get().put(part.getId(), part.getDefaultWheelInfo());
+            wheelInfos.put(part.getId(), part.getDefaultWheelInfo());
         }
-        wheelInfos.setChanged(true);
         wheelsStates.set(new WheelState[wheelCount]);
         this.wheelsTextureId = new byte[wheelCount];
         for (int i = 0; i < wheelCount; i++) {

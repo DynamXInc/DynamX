@@ -8,6 +8,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 //TODO IMPROVE THIS
 public class SynchronizedEntityVariableFactory {
@@ -164,6 +165,22 @@ public class SynchronizedEntityVariableFactory {
                 return null;
             Entity e = Minecraft.getMinecraft().world.getEntityByID(id);
             return e instanceof PhysicsEntity ? (PhysicsEntity<?>) e : null;
+        }
+    };
+    public static final SynchronizedVariableSerializer<String> stringSerializer = new SynchronizedVariableSerializer<String>() {
+        @Override
+        public void writeObject(ByteBuf buffer, String object) {
+            ByteBufUtils.writeUTF8String(buffer, object);
+        }
+
+        @Override
+        public String readObject(ByteBuf buffer) {
+            return ByteBufUtils.readUTF8String(buffer);
+        }
+
+        @Override
+        public String toString() {
+            return "string";
         }
     };
 

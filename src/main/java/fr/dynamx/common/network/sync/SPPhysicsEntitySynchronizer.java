@@ -84,8 +84,6 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
                 }
             }
         }
-
-        System.out.println("Active state " + getSynchronizedVariables());
     }
 
     @Override
@@ -97,8 +95,6 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
         if (player.world.isRemote && player.isUser()) {
             controllers.clear();
         }
-
-        System.out.println("Active state " + getSynchronizedVariables());
     }
 
     @Override

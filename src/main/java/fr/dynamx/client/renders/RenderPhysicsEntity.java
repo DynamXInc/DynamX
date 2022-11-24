@@ -3,6 +3,7 @@ package fr.dynamx.client.renders;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.events.PhysicsEntityEvent;
+import fr.dynamx.api.network.sync.SimulationHolder;
 import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.client.network.ClientPhysicsEntitySynchronizer;
@@ -72,7 +73,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
                         GlStateManager.translate((float) x - pos.x + serverPos.x, (float) y - pos.y + serverPos.y, (float) z - pos.z + serverPos.z);
                         Quaternion q = GlQuaternionPool.get(((ClientPhysicsEntitySynchronizer<? extends PhysicsEntity<?>>) entity.getSynchronizer()).getServerRotation());
                         GlStateManager.rotate(q);
-                        GlStateManager.color(0.5f, 0.5f, 0.8f, 0.3f);
+                        GlStateManager.color(entity.getSynchronizer().getSimulationHolder() == SimulationHolder.DRIVER ? 0.9f : 0.1f, 0.1f, 0.8f, 0.3f);
                         renderMain(entity, partialTicks);
                         renderParts(entity, partialTicks);
                         GlStateManager.color(1, 1, 1, 1);

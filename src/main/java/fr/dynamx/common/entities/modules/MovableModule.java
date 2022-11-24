@@ -40,7 +40,7 @@ public class MovableModule implements IPhysicsModule<AbstractEntityPhysicsHandle
 
     /* Should not be called in the constructor */
     public void initSubModules(ModuleListBuilder modules, PhysicsEntity<?> entity) {
-        System.out.println("init modules ! " + this);
+        //System.out.println("init modules ! " + this);
         modules.add(moveObjects = new MoveObjects(entity));
         modules.add(pickObjects = new PickObjects(entity));
         modules.add(attachObjects = new AttachObjects(entity));
@@ -58,7 +58,7 @@ public class MovableModule implements IPhysicsModule<AbstractEntityPhysicsHandle
 
     @Override
     public void addSynchronizedVariables(Side side, SimulationHolder simulationHolder) {
-        System.out.println("Add vars " + this+" "+pickObjects+" "+entity.getSynchronizer());
+        //System.out.println("Add vars " + this+" "+pickObjects+" "+entity.getSynchronizer());
         if(pickObjects != null) {
             entity.getSynchronizer().registerVariable(DynamXSynchronizedVariables.MOVABLE_MOVER, pickObjects.mover);
             entity.getSynchronizer().registerVariable(DynamXSynchronizedVariables.MOVABLE_PICK_DISTANCE, pickObjects.pickDistance);

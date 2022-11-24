@@ -146,6 +146,7 @@ public abstract class PhysicsEntitySynchronizer<T extends PhysicsEntity<?>> {
      * @param changeContext    The simulation holder update context, changes the affected entities (linked entities, entities in props containers...)
      */
     public void setSimulationHolder(SimulationHolder simulationHolder, SimulationHolder.UpdateContext changeContext) {
+        System.out.println("SET HOLD " + this.simulationHolder+" "+simulationHolder+" "+entity+" "+changeContext);
         this.simulationHolder = simulationHolder;
         if (changeContext != SimulationHolder.UpdateContext.ATTACHED_ENTITIES && entity.getJointsHandler() != null) {
             entity.getJointsHandler().setSimulationHolderOnJointedEntities(simulationHolder);

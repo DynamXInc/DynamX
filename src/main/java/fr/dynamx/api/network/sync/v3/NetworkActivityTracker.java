@@ -30,6 +30,9 @@ public class NetworkActivityTracker {
     }
 
     public static void drawNetworkActivity(PhysicsEntity<?> entity, FontRenderer fontRenderer, int size) {
+        entity = (PhysicsEntity<?>) entity.world.getEntityByID(12432);
+        if(entity == null)
+            return;
         int viewIndex = NetworkActivityTracker.viewIndex;
         if(viewIndex == -1)
             viewIndex = lastTime;

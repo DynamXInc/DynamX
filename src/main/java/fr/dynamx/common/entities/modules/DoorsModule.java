@@ -79,20 +79,20 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
         doorsState = new MapSynchronizedVariable<>((variable, doorsState) -> {
             Map<Byte, DoorsModule.DoorState> target = variable.get();
             //TODO NEW SYNC DEBUG THIS
+            System.out.println("RCV DOORS " + doorsState);
             if (true /*|| network.getSimulationHolder() != SimulationHolder.SERVER_SP*/) {
                 doorsState.forEach((i, b) -> {
                     if (b == DoorsModule.DoorState.OPEN && (!target.containsKey(i) || target.get(i) == DoorsModule.DoorState.CLOSE)) {
-                        ((IModuleContainer.IDoorContainer) vehicleEntity).getDoors().setDoorState(i, DoorsModule.DoorState.OPEN);
+                        setDoorState(i, DoorsModule.DoorState.OPEN);
                     } else if (b == DoorsModule.DoorState.CLOSE && (target.containsKey(i) && target.get(i) == DoorsModule.DoorState.OPEN)) {
-                        ((IModuleContainer.IDoorContainer) vehicleEntity).getDoors().setDoorState(i, DoorsModule.DoorState.CLOSE);
+                        setDoorState(i, DoorsModule.DoorState.CLOSE);
                     }
                 });
             } else {
                 doorsState.forEach((i, b) -> {
                     if (b != target.get(i)) {
                         target.put(i, b);
-                        DoorsModule doors = ((IModuleContainer.IDoorContainer) vehicleEntity).getDoors();
-                        doors.playDoorSound(b == DoorsModule.DoorState.OPEN ? DoorsModule.DoorState.CLOSE : DoorsModule.DoorState.OPEN);
+                        playDoorSound(b == DoorsModule.DoorState.OPEN ? DoorsModule.DoorState.CLOSE : DoorsModule.DoorState.OPEN);
                     }
                 });
             }
@@ -203,16 +203,17 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
                 DoorVarContainer varContainer = attachedDoors.get(doorID);
                 PartDoor door = getPartDoor(doorID);
                 if (getCurrentState(doorID) == DoorState.OPENING && isDoorJointOpened(door, varContainer)) {
-                    DynamXContext.getNetwork().sendToServer(new MessageChangeDoorState(vehicleEntity, DoorState.OPEN, doorID));
+                    //DynamXContext.getNetwork().sendToServer(new MessageChangeDoorState(vehicleEntity, DoorState.OPEN, doorID));
                     doorsState.put(doorID, DoorState.OPEN);
-                    varContainer.setJointMotorState(door.getAxisToUse(), false);
+                   // varContainer.setJointMotorState(door.getAxisToUse(), false);
                 }
                 if ((isDoorOpened(doorID) || getCurrentState(doorID) == DoorState.CLOSING) && isDoorJointClosed(varContainer)) {
-                    DynamXContext.getNetwork().sendToServer(new MessageChangeDoorState(vehicleEntity, DoorState.CLOSE, doorID));
+                    //DynamXContext.getNetwork().sendToServer(new MessageChangeDoorState(vehicleEntity, DoorState.CLOSE, doorID));
                     doorsState.put(doorID, DoorState.CLOSE);
                     playDoorSound(DoorState.CLOSE);
-                    varContainer.setJointMotorState(door.getAxisToUse(), false);
-                    varContainer.setJointLimit(door.getAxisToUse(), door.getCloseLimit().x, door.getCloseLimit().y);
+                    //TODO PB ICI : PORTE A PAS LE TEMPS DE S'OUVRIR SUR LE CLIENT
+                  //  varContainer.setJointMotorState(door.getAxisToUse(), false);
+                   // varContainer.setJointLimit(door.getAxisToUse(), door.getCloseLimit().x, door.getCloseLimit().y);
                 }
                 //System.out.println(doorID +" " +getCurrentState(doorID) + " " + varContainer.getJointAngle().y);
             }
@@ -225,12 +226,7 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
             for (byte door : attachedDoors.keySet()) {
                 PhysicsRigidBody body = attachedDoors.get(door).doorBody;
                 attachedBodiesTransform.get(door).getPhysicTransform().set(body);
-                //attachedBodiesTransform.get(door).updatePos();
             }
-        } else {
-            /*for (byte door : attachedDoors.keySet()) {
-                attachedBodiesTransform.get(door).updatePos();
-            }*/
         }
     }
 
@@ -249,6 +245,7 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
     public void setDoorState(byte doorId, DoorState doorState) {
         DoorVarContainer doorVarContainer = attachedDoors.get(doorId);
         PartDoor door = getPartDoor(doorId);
+        System.out.println(doorVarContainer+" "+door+" "+doorId+" "+doorState);
         if (doorVarContainer != null) {
             vehicleEntity.forcePhysicsActivation();
             if (doorState == DoorState.OPEN) {
@@ -256,11 +253,12 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
                 playDoorSound(DoorState.OPEN);
                 doorVarContainer.setJointLimit(door.getAxisToUse(), door.getOpenLimit().x, door.getOpenLimit().y);
                 doorVarContainer.setJointRotationMotorVelocity(door.getAxisToUse(), door.getOpenMotor().x, door.getOpenMotor().y);
+                System.out.println("So set to opening");
             } else {
                 doorVarContainer.setJointRotationMotorVelocity(door.getAxisToUse(), door.getCloseMotor().x, door.getCloseMotor().y);
                 // if (vehicleEntity.getNetwork().getSimulationHolder() != SimulationHolder.SERVER_SP) //TODO SERVER_SP SPLITTED IN SERVER_SP AND DRIVE_SP
                 doorsState.put(doorId, DoorState.CLOSING); //Closes the door (animation) and the plays the closing sound
-
+                System.out.println("Set set top closing");
             }
         } else {
             if (doorState == DoorState.OPEN) {

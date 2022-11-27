@@ -176,7 +176,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
             }
             initPhysicsEntity(usesPhysicsWorld);
             //getNetwork().setSimulationHolder(getNetwork().getDefaultSimulationHolder());
-            getSynchronizer().setSimulationHolder(getSynchronizer().getDefaultSimulationHolder());
+            getSynchronizer().setSimulationHolder(getSynchronizer().getDefaultSimulationHolder(), null);
             MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.PhysicsEntityInitEvent(world.isRemote ? Side.CLIENT : Side.SERVER, this, usesPhysicsWorld));
             initialized = 2;
         }

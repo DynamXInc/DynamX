@@ -1,8 +1,10 @@
 package fr.dynamx.api.network.sync.v3;
 
 import fr.dynamx.api.network.sync.SimulationHolder;
+import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.common.entities.PhysicsEntity;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.text.TextFormatting;
 
 import java.awt.*;
@@ -14,8 +16,8 @@ public class NetworkActivityTracker {
     public static final Map<Integer, Map<PhysicsEntity<?>, EntitySyncData>> syncDebug = new HashMap<>();
 
     public static int lastTime;
-
-    public static int viewIndex;
+    public static int viewIndex = -1;
+    public static int viewEntity = -1;
 
     public static Map<PhysicsEntity<?>, EntitySyncData> getDebugAt(int time) {
         return syncDebug.get(time);
@@ -29,10 +31,15 @@ public class NetworkActivityTracker {
         viewIndex = -1;
     }
 
-    public static void drawNetworkActivity(PhysicsEntity<?> entity, FontRenderer fontRenderer, int size) {
-        entity = (PhysicsEntity<?>) entity.world.getEntityByID(12432);
-        if(entity == null)
+    public static void drawNetworkActivity(FontRenderer fontRenderer, int size) {
+        Entity e;
+        if(viewEntity != -1)
+            e = ClientEventHandler.MC.world.getEntityByID(12432);
+        else
+            e = ClientEventHandler.MC.objectMouseOver.entityHit;
+        if(!(e instanceof PhysicsEntity))
             return;
+        PhysicsEntity<?> entity = (PhysicsEntity<?>) e;
         int viewIndex = NetworkActivityTracker.viewIndex;
         if(viewIndex == -1)
             viewIndex = lastTime;
@@ -84,7 +91,7 @@ public class NetworkActivityTracker {
         getDebugAt(lastTime).get(entity).receivedVars.addAll(variables.stream().map(SynchronizedEntityVariable::getName).collect(Collectors.toList()));
 
         if(lastTime == -1)
-        syncDebug.keySet().removeIf(i -> i < lastTime-20);
+            syncDebug.keySet().removeIf(i -> i < lastTime-20);
     }
 
     public static class EntitySyncData {

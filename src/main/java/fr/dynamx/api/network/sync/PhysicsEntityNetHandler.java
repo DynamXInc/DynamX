@@ -177,10 +177,10 @@ public abstract class PhysicsEntityNetHandler<T extends PhysicsEntity<?>> {
         this.simulationHolderChanged = true;
 
         if (changeContext != SimulationHolder.UpdateContext.ATTACHED_ENTITIES && entity.getJointsHandler() != null) {
-            entity.getJointsHandler().setSimulationHolderOnJointedEntities(simulationHolder);
+            //entity.getJointsHandler().setSimulationHolderOnJointedEntities(simulationHolder);
         }
         if (entity instanceof ModularPhysicsEntity) {
-            ((ModularPhysicsEntity<?>) entity).getModules().forEach(m -> m.onSetSimulationHolder(simulationHolder, changeContext));
+            //((ModularPhysicsEntity<?>) entity).getModules().forEach(m -> m.onSetSimulationHolder(simulationHolder, changeContext));
         }
     }
 

@@ -32,14 +32,14 @@ public class ServerPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends
         if (entity.physicsHandler != null)
             entity.physicsHandler.setForceActivation(true);
         ServerPhysicsSyncManager.putTime(player, 0);
-        setSimulationHolder(SimulationHolder.DRIVER);
+        setSimulationHolder(SimulationHolder.DRIVER, player);
     }
 
     @Override
     public void onPlayerStopControlling(EntityPlayer player, boolean removeControllers) {
         if (entity.physicsHandler != null)
             entity.physicsHandler.setForceActivation(false);
-        setSimulationHolder(getDefaultSimulationHolder());
+        setSimulationHolder(getDefaultSimulationHolder(), null);
     }
 
     @Override
@@ -56,7 +56,7 @@ public class ServerPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends
         {
             profiler.start(Profiler.Profiles.PKTSEND2);
             Set<? extends EntityPlayer> l = ((WorldServer) entity.world).getEntityTracker().getTrackingPlayers(entity);
-            l.forEach(p -> sendSyncTo(p, getVarsToSync(Side.SERVER, p == entity.getControllingPassenger() ? SyncTarget.DRIVER : SyncTarget.SPECTATORS)));
+            l.forEach(p -> sendSyncTo(p, getVarsToSync(Side.SERVER, p == getSimulationPlayerHolder() ? SyncTarget.DRIVER : SyncTarget.SPECTATORS)));
             profiler.end(Profiler.Profiles.PKTSEND2);
             updateCount++;
 

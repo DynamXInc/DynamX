@@ -117,11 +117,11 @@ public class ClientPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends
                         controllers.add(c);
                 }
             }
-            setSimulationHolder(SimulationHolder.DRIVER);
+            setSimulationHolder(SimulationHolder.DRIVER, player);
             ClientPhysicsSyncManager.simulationTime = 0;
             states.clear();
         } else {
-            setSimulationHolder(SimulationHolder.OTHER_CLIENT);
+            setSimulationHolder(SimulationHolder.OTHER_CLIENT, player);
         }
     }
 
@@ -130,7 +130,7 @@ public class ClientPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends
         if (entity.physicsHandler != null) {
             entity.physicsHandler.setForceActivation(false);
         }
-        setSimulationHolder(getDefaultSimulationHolder());
+        setSimulationHolder(getDefaultSimulationHolder(), null);
         if (removeControllers && player.isUser()) {
             controllers.clear();
         }

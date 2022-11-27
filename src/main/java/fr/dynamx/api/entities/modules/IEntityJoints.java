@@ -6,6 +6,7 @@ import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.physics.joints.EntityJoint;
 import fr.dynamx.common.physics.joints.EntityJointsHandler;
 import fr.dynamx.common.physics.joints.JointHandler;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ResourceLocation;
 
@@ -62,7 +63,7 @@ public interface IEntityJoints {
     /**
      * Updates the {@link SimulationHolder} of all linked entity, if we own the joint
      */
-    void setSimulationHolderOnJointedEntities(SimulationHolder simulationHolder);
+    void setSimulationHolderOnJointedEntities(SimulationHolder simulationHolder, EntityPlayer simulationPlayerHolder);
 
     /**
      * Sends all the joints to the target client <br>

@@ -74,7 +74,7 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
         if (entity.physicsHandler != null) {
             entity.physicsHandler.setForceActivation(true);
         }
-        setSimulationHolder(SimulationHolder.DRIVER_SP);
+        setSimulationHolder(SimulationHolder.DRIVER_SP, player);
         if (player.world.isRemote && player.isUser()) {
             if (entity instanceof BaseVehicleEntity) {
                 for (Object module : ((BaseVehicleEntity) entity).getModules()) {
@@ -91,7 +91,7 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
         if (entity.physicsHandler != null) {
             entity.physicsHandler.setForceActivation(false);
         }
-        setSimulationHolder(getDefaultSimulationHolder());
+        setSimulationHolder(getDefaultSimulationHolder(), null);
         if (player.world.isRemote && player.isUser()) {
             controllers.clear();
         }

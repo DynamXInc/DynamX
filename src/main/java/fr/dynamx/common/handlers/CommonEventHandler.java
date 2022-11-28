@@ -283,14 +283,14 @@ public class CommonEventHandler {
     }
 
     @SubscribeEvent
-    public void onVehicleMount(VehicleEntityEvent.MountVehicleEntityEvent e) {
+    public void onVehicleMount(VehicleEntityEvent.PlayerMount e) {
         if (DynamXContext.getPlayerToCollision().containsKey(e.getPlayer())) {
             DynamXContext.getPlayerToCollision().get(e.getPlayer()).removeFromWorld(false);
         }
     }
 
     @SubscribeEvent
-    public void onVehicleDismount(VehicleEntityEvent.DismountVehicleEntityEvent e) {
+    public void onVehicleDismount(VehicleEntityEvent.PlayerDismount e) {
         if (DynamXContext.getPlayerToCollision().containsKey(e.getPlayer())) {
             DynamXContext.getPlayerToCollision().get(e.getPlayer()).addToWorld();
         }

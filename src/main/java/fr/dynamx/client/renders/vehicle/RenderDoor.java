@@ -17,7 +17,7 @@ public class RenderDoor<T extends DoorEntity<?>> extends RenderPhysicsEntity<T> 
     public RenderDoor(RenderManager manager) {
         super(manager);
         addDebugRenderers(new VehicleDebugRenderer.DoorPointsDebug(), new DebugRenderer.HullDebug());
-        MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.InitPhysicEntityRenderEvent<>(DoorEntity.class, this));
+        MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.InitRenderer<>(DoorEntity.class, this));
     }
 
     @Override

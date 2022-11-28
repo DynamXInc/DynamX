@@ -2,7 +2,6 @@ package fr.dynamx.common.contentpack.type.objects;
 
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
-import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.events.CreatePackItemEvent;
 import fr.dynamx.common.contentpack.loader.ObjectLoader;
@@ -28,10 +27,10 @@ public class ItemObject<T extends ItemObject<?>> extends AbstractItemObject<T, T
     @Override
     @SuppressWarnings("unchecked")
     protected IInfoOwner<T> createOwner(ObjectLoader<T, ?> loader) {
-        CreatePackItemEvent.CreateSimpleItemEvent<T, ?> event = new CreatePackItemEvent.CreateSimpleItemEvent(loader, this);
+        CreatePackItemEvent.SimpleItem<T, ?> event = new CreatePackItemEvent.SimpleItem(loader, this);
         MinecraftForge.EVENT_BUS.post(event);
         if (event.isOverridden()) {
-            return (IInfoOwner<T>) event.getSpawnItem();
+            return (IInfoOwner<T>) event.getObjectItem();
         } else {
             return new DynamXItem(this);
         }

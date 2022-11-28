@@ -32,7 +32,6 @@ import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.wheel.WheelPhysics;
 import fr.dynamx.common.physics.entities.parts.wheel.WheelState;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
-import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
@@ -89,7 +88,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
 
     public void setWheelInfo(byte partIndex, PartWheelInfo info) {
         if (wheelInfos.get(partIndex) != info) {
-            VehicleEntityEvent.ChangeVehicleWheelEvent event = new VehicleEntityEvent.ChangeVehicleWheelEvent(FMLCommonHandler.instance().getEffectiveSide(), entity, this, wheelInfos.get(partIndex), info, partIndex);
+            VehicleEntityEvent.ChangeWheel event = new VehicleEntityEvent.ChangeWheel(FMLCommonHandler.instance().getEffectiveSide(), entity, this, wheelInfos.get(partIndex), info, partIndex);
             if (!MinecraftForge.EVENT_BUS.post(event)) {
                 wheelInfos.put(partIndex, event.getNewWheel());
                 if (wheelsPhysics != null)
@@ -302,7 +301,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
         if (info != null && !carEntity.getModuleByType(WheelsModule.class).getWheelInfos().isEmpty()) { //If has steering and wheels AND at least one wheel (think to loading errors)
             IObjObject steeringWheel = vehicleModel.getObjObject(info.getPartName());
             if (steeringWheel != null) {
-                if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.RenderVehicleEntityEvent(VehicleEntityEvent.RenderVehicleEntityEvent.Type.STEERING_WHEEL, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks))) {
+                if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.STEERING_WHEEL, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks))) {
                     GlStateManager.pushMatrix();
                     Vector3f center = info.getSteeringWheelPosition();
                     //Translation to the steering wheel rotation point (and render pos)
@@ -321,12 +320,12 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
                     //Render it
                     vehicleModel.renderGroup(steeringWheel, carEntity.getEntityTextureID());
                     GlStateManager.popMatrix();
-                    MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.RenderVehicleEntityEvent(VehicleEntityEvent.RenderVehicleEntityEvent.Type.STEERING_WHEEL, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks));
+                    MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.STEERING_WHEEL, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks));
                 }
             }
         }
 
-        if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.RenderVehicleEntityEvent(VehicleEntityEvent.RenderVehicleEntityEvent.Type.PROPULSION, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks))) {
+        if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.PROPULSION, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks))) {
             if (getPropulsionProperties() != null) {
                 this.entity.getPackInfo().getPartsByType(PartWheel.class).forEach(partWheel -> {
                     if (wheelsStates[partWheel.getId()] != WheelState.REMOVED) {
@@ -334,7 +333,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
                     }
                 });
             }
-            MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.RenderVehicleEntityEvent(VehicleEntityEvent.RenderVehicleEntityEvent.Type.PROPULSION, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks));
+            MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.PROPULSION, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks));
         }
     }
 

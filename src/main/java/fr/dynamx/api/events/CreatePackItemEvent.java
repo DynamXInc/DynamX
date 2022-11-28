@@ -2,12 +2,10 @@ package fr.dynamx.api.events;
 
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
-import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.contentpack.loader.ObjectLoader;
 import fr.dynamx.common.contentpack.type.ObjectInfo;
 import fr.dynamx.common.contentpack.type.objects.AbstractItemObject;
-import fr.dynamx.common.contentpack.type.objects.BlockObject;
 import fr.dynamx.common.contentpack.type.objects.PropObject;
 import lombok.Getter;
 import lombok.Setter;
@@ -33,7 +31,7 @@ public abstract class CreatePackItemEvent<B extends ObjectInfo<?> & ISubInfoType
     @Nullable
     @Getter
     @Setter
-    private C spawnItem;
+    private C objectItem;
 
     public CreatePackItemEvent(ObjectLoader<B, C> loader, B objectInfo) {
         this.loader = loader;
@@ -44,7 +42,7 @@ public abstract class CreatePackItemEvent<B extends ObjectInfo<?> & ISubInfoType
      * @return True if the spawn item has been replaced
      */
     public boolean isOverridden() {
-        return spawnItem != null;
+        return objectItem != null;
     }
 
     /**
@@ -53,8 +51,8 @@ public abstract class CreatePackItemEvent<B extends ObjectInfo<?> & ISubInfoType
      * You can cancel the event to avoid other addons to modify your behavior
      */
     @Cancelable
-    public static class CreateVehicleItemEvent<B extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C extends IInfoOwner<?>> extends CreatePackItemEvent<B,C> {
-        public CreateVehicleItemEvent(ObjectLoader<B, C> loader, B objectInfo) {
+    public static class VehicleItem<B extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C extends IInfoOwner<?>> extends CreatePackItemEvent<B,C> {
+        public VehicleItem(ObjectLoader<B, C> loader, B objectInfo) {
             super(loader, objectInfo);
         }
     }
@@ -65,8 +63,8 @@ public abstract class CreatePackItemEvent<B extends ObjectInfo<?> & ISubInfoType
      * You can cancel the event to avoid other addons to modify your behavior
      */
     @Cancelable
-    public static class CreateSimpleItemEvent<B extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C extends IInfoOwner<?>> extends CreatePackItemEvent<B,C> {
-        public CreateSimpleItemEvent(ObjectLoader<B, C> loader, B objectInfo) {
+    public static class SimpleItem<B extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C extends IInfoOwner<?>> extends CreatePackItemEvent<B,C> {
+        public SimpleItem(ObjectLoader<B, C> loader, B objectInfo) {
             super(loader, objectInfo);
         }
     }
@@ -77,8 +75,8 @@ public abstract class CreatePackItemEvent<B extends ObjectInfo<?> & ISubInfoType
      * You can cancel the event to avoid other addons to modify your behavior
      */
     @Cancelable
-    public static class CreateSimpleBlockEvent extends CreatePackItemEvent<BlockObject<?>, DynamXBlock<BlockObject<?>>> {
-        public CreateSimpleBlockEvent(ObjectLoader<BlockObject<?>, DynamXBlock<BlockObject<?>>> loader, BlockObject<?> objectInfo) {
+    public static class SimpleBlock<B extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C extends IInfoOwner<?>> extends CreatePackItemEvent<B, C> {
+        public SimpleBlock(ObjectLoader<B, C> loader, B objectInfo) {
             super(loader, objectInfo);
         }
     }
@@ -89,9 +87,9 @@ public abstract class CreatePackItemEvent<B extends ObjectInfo<?> & ISubInfoType
      * You can cancel the event to avoid other addons to modify your behavior
      */
     @Cancelable
-    public static class CreatePropsItemEvent<B extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C extends IInfoOwner<?>> extends CreatePackItemEvent<B,C> {
+    public static class PropsItem<B extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C extends IInfoOwner<?>> extends CreatePackItemEvent<B,C> {
 
-        public CreatePropsItemEvent(ObjectLoader<B, C> loader, B objectInfo) {
+        public PropsItem(ObjectLoader<B, C> loader, B objectInfo) {
             super(loader, objectInfo);
         }
     }

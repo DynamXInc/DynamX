@@ -9,7 +9,7 @@ import net.minecraftforge.fml.common.eventhandler.Event;
 
 public class ArmorEvent extends Event {
     @Cancelable
-    public static class RenderArmorEvent extends ArmorEvent {
+    public static class Render extends ArmorEvent {
         @Getter
         private final ModelObjArmor armorModel;
         @Getter
@@ -21,7 +21,7 @@ public class ArmorEvent extends Event {
         @Getter
         private final Type renderType;
 
-        public RenderArmorEvent(ModelObjArmor armorModel, ObjModelClient objModel, IObjObject objObject, PhysicsEntityEvent.Phase phase, Type renderType) {
+        public Render(ModelObjArmor armorModel, ObjModelClient objModel, IObjObject objObject, PhysicsEntityEvent.Phase phase, Type renderType) {
             this.armorModel = armorModel;
             this.objModel = objModel;
             this.objObject = objObject;

@@ -31,7 +31,7 @@ public class RenderCaterpillar<T extends CaterpillarEntity<?>> extends RenderBas
 
     @Override
     public void renderParts(T carEntity, float partialTicks) {
-        if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.RenderVehicleEntityEvent(VehicleEntityEvent.RenderVehicleEntityEvent.Type.PARTS, this, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks))) {
+        if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.PARTS, this, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks))) {
             WheelsModule module = carEntity.getModuleByType(WheelsModule.class);
             /* Rendering the steering wheel */
             GlStateManager.pushMatrix();
@@ -89,7 +89,7 @@ public class RenderCaterpillar<T extends CaterpillarEntity<?>> extends RenderBas
             carEntity.prevAngle = an;
 
         }
-        MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.RenderVehicleEntityEvent(VehicleEntityEvent.RenderVehicleEntityEvent.Type.PARTS, this, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks));
+        MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.PARTS, this, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks));
     }
 
 

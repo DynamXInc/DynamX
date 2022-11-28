@@ -40,10 +40,10 @@ public class PhysicsEntityEvent extends Event {
     }
 
     /**
-     * Fired when an entity is spawn
+     * Fired when an entity is being spawned
      */
     @Cancelable
-    public static class PhysicsEntitySpawnedEvent extends PhysicsEntityEvent {
+    public static class Spawn extends PhysicsEntityEvent {
 
         @Getter
         private final PhysicsEntity<?> physicsEntity;
@@ -57,13 +57,13 @@ public class PhysicsEntityEvent extends Event {
         private final Vec3d pos;
 
         /**
-         * @param world         the physics world where the physics entity was added
-         * @param physicsEntity the physics entity which was spawned
-         * @param player        the player who spawned the entity
+         * @param world         the physics world where the physics entity will be added
+         * @param physicsEntity the physics entity being spawned
+         * @param player        the player who is spawning the entity
          * @param item          item used to spawn the entity
          * @param pos           block pos of the raycast
          */
-        public PhysicsEntitySpawnedEvent(World world, PhysicsEntity<?> physicsEntity, EntityPlayer player, DynamXItemSpawner<?> item, Vec3d pos) {
+        public Spawn(World world, PhysicsEntity<?> physicsEntity, EntityPlayer player, DynamXItemSpawner<?> item, Vec3d pos) {
             super(Side.SERVER, physicsEntity);
             this.world = world;
             this.physicsEntity = physicsEntity;
@@ -77,7 +77,7 @@ public class PhysicsEntityEvent extends Event {
      * Fired on server side when a player tries to kill a physics entity
      */
     @Cancelable
-    public static class AttackedEvent extends PhysicsEntityEvent {
+    public static class Attacked extends PhysicsEntityEvent {
         @Getter
         private final Entity sourceEntity;
         @Getter
@@ -88,7 +88,7 @@ public class PhysicsEntityEvent extends Event {
          * @param physicsEntity the entity concerned
          * @param damageSource  the source of the damage
          */
-        public AttackedEvent(PhysicsEntity<?> physicsEntity, Entity sourceEntity, DamageSource damageSource) {
+        public Attacked(PhysicsEntity<?> physicsEntity, Entity sourceEntity, DamageSource damageSource) {
             super(Side.SERVER, physicsEntity);
             this.sourceEntity = sourceEntity;
             this.damageSource = damageSource;
@@ -98,7 +98,7 @@ public class PhysicsEntityEvent extends Event {
     /**
      * Fired when a physics entity has just initialized its properties and its physic
      */
-    public static class PhysicsEntityInitEvent extends PhysicsEntityEvent {
+    public static class Init extends PhysicsEntityEvent {
         /**
          * Tells if the entity is using physics (for example a client entity with no prediction may not be using physics)
          */
@@ -109,7 +109,7 @@ public class PhysicsEntityEvent extends Event {
          * @param physicsEntity The initialized entity
          * @param usesPhysics   True if the entity is using physics (for example a client entity with no prediction may not be using physics)
          */
-        public PhysicsEntityInitEvent(Side side, PhysicsEntity<?> physicsEntity, boolean usesPhysics) {
+        public Init(Side side, PhysicsEntity<?> physicsEntity, boolean usesPhysics) {
             super(side, physicsEntity);
             this.usesPhysics = usesPhysics;
         }
@@ -118,14 +118,14 @@ public class PhysicsEntityEvent extends Event {
     /**
      * Fired each tick when a physics entity is updated (called for entity update and physics update)
      *
-     * @see PhysicsEntityUpdateType
+     * @see UpdateType
      */
-    public static class PhysicsEntityUpdateEvent extends PhysicsEntityEvent {
+    public static class Update extends PhysicsEntityEvent {
         /**
          * The update type
          */
         @Getter
-        private final PhysicsEntityUpdateType type;
+        private final UpdateType type;
         /**
          * If physics are simulated in this update <br> If false, the physics handler may be null
          */
@@ -137,7 +137,7 @@ public class PhysicsEntityEvent extends Event {
          * @param type            The update type
          * @param simulatePhysics If physics are simulated in this update <br> If false, the physics handler may be null
          */
-        public PhysicsEntityUpdateEvent(Side side, PhysicsEntity<?> physicsEntity, PhysicsEntityUpdateType type, boolean simulatePhysics) {
+        public Update(Side side, PhysicsEntity<?> physicsEntity, UpdateType type, boolean simulatePhysics) {
             super(side, physicsEntity);
             this.type = type;
             this.simulatePhysics = simulatePhysics;
@@ -148,7 +148,7 @@ public class PhysicsEntityEvent extends Event {
      * Fired when rendering a physics entity, before and after the render, with <strong>no</strong> pos and rotations transformations applied <br>
      * All phases are cancellable, except POST
      */
-    public static class RenderPhysicsEntityEvent extends PhysicsEntityEvent {
+    public static class Render extends PhysicsEntityEvent {
         /**
          * The renderer of the entity
          */
@@ -170,7 +170,7 @@ public class PhysicsEntityEvent extends Event {
         @Getter
         private final float partialTicks;
 
-        public RenderPhysicsEntityEvent(PhysicsEntity<?> physicsEntity, RenderPhysicsEntity<?> renderer, Type renderType, double x, double y, double z, float partialTicks) {
+        public Render(PhysicsEntity<?> physicsEntity, RenderPhysicsEntity<?> renderer, Type renderType, double x, double y, double z, float partialTicks) {
             super(Side.CLIENT, physicsEntity);
             this.renderer = renderer;
             this.x = x;
@@ -194,14 +194,14 @@ public class PhysicsEntityEvent extends Event {
      * @see RenderPhysicsEntity
      */
     //Note : don't add parameters to PhysicsEntity : this would break the event on the fml side
-    public static class InitPhysicEntityRenderEvent<T extends PhysicsEntity> extends GenericEvent<T> {
+    public static class InitRenderer<T extends PhysicsEntity> extends GenericEvent<T> {
         /**
          * The renderer for this type of entity
          */
         @Getter
         private final RenderPhysicsEntity<?> renderer;
 
-        public InitPhysicEntityRenderEvent(Class<T> type, RenderPhysicsEntity<?> renderer) {
+        public InitRenderer(Class<T> type, RenderPhysicsEntity<?> renderer) {
             super(type);
             this.renderer = renderer;
         }
@@ -217,12 +217,12 @@ public class PhysicsEntityEvent extends Event {
     /**
      * Fired each tick when a physics entity is updated, on server side
      */
-    public static class ServerPhysicsEntityUpdateEvent extends PhysicsEntityUpdateEvent {
+    public static class ServerUpdate extends Update {
         /**
          * @param physicsEntity   The updated entity
          * @param simulatePhysics If physics are simulated in this update <br> If false, the physics handler may be null
          */
-        public ServerPhysicsEntityUpdateEvent(PhysicsEntity<?> physicsEntity, PhysicsEntityUpdateType type, boolean simulatePhysics) {
+        public ServerUpdate(PhysicsEntity<?> physicsEntity, UpdateType type, boolean simulatePhysics) {
             super(Side.SERVER, physicsEntity, type, simulatePhysics);
         }
     }
@@ -230,20 +230,20 @@ public class PhysicsEntityEvent extends Event {
     /**
      * Fired each tick when a physics entity is updated, on client side
      */
-    public static class ClientPhysicsEntityUpdateEvent extends PhysicsEntityUpdateEvent {
+    public static class ClientUpdate extends Update {
         /**
          * @param physicsEntity   The updated entity
          * @param simulatePhysics If physics are simulated in this update <br> If false, the physics handler may be null
          */
-        public ClientPhysicsEntityUpdateEvent(PhysicsEntity<?> physicsEntity, PhysicsEntityUpdateType type, boolean simulatePhysics) {
+        public ClientUpdate(PhysicsEntity<?> physicsEntity, UpdateType type, boolean simulatePhysics) {
             super(Side.CLIENT, physicsEntity, type, simulatePhysics);
         }
     }
 
     /**
-     * {@link PhysicsEntityUpdateEvent} types
+     * {@link Update} types
      */
-    public enum PhysicsEntityUpdateType {
+    public enum UpdateType {
         /**
          * Called on vanilla entity update, in minecraft thread
          */
@@ -272,12 +272,12 @@ public class PhysicsEntityEvent extends Event {
      * @see ModularPhysicsEntity
      */
     //Note : don't add parameters to ModularPhysicsEntity : this would break the event on the fml side
-    public static class CreateEntityModulesEvent<T extends ModularPhysicsEntity> extends PhysicsEntityEvent implements IGenericEvent<T> {
+    public static class CreateModules<T extends ModularPhysicsEntity> extends PhysicsEntityEvent implements IGenericEvent<T> {
         private final Class<T> type;
         @Getter
         private final List<IPhysicsModule<?>> moduleList;
 
-        public CreateEntityModulesEvent(Class<T> type, T entity, List<IPhysicsModule<?>> moduleList, Side side) {
+        public CreateModules(Class<T> type, T entity, List<IPhysicsModule<?>> moduleList, Side side) {
             super(side, entity);
             this.type = type;
             this.moduleList = moduleList;

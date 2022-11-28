@@ -60,7 +60,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
         GlQuaternionPool.openPool();
         Quaternion appliedRotation = null;
         //Render vehicle
-        if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.RenderPhysicsEntityEvent(entity, this, PhysicsEntityEvent.RenderPhysicsEntityEvent.Type.ENTITY, x, y, z, partialTicks))) {
+        if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.ENTITY, x, y, z, partialTicks))) {
             GlStateManager.pushMatrix();
             {
                 //TODO TRANSPARENT THINGS SHOULD BE RENDER LAST GlStateManager.enableBlend();
@@ -74,14 +74,14 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
         }
 
         //Render players inside the entity
-        if (ClientEventHandler.renderPlayer != null && !MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.RenderPhysicsEntityEvent(entity, this, PhysicsEntityEvent.RenderPhysicsEntityEvent.Type.RIDDING_PLAYERS, x, y, z, partialTicks))) {
+        if (ClientEventHandler.renderPlayer != null && !MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.RIDDING_PLAYERS, x, y, z, partialTicks))) {
             renderRidingPlayers(entity, x, y, z, partialTicks, appliedRotation);
         }
         //Render debug
-        if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.RenderPhysicsEntityEvent(entity, this, PhysicsEntityEvent.RenderPhysicsEntityEvent.Type.DEBUG, x, y, z, partialTicks))) {
+        if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.DEBUG, x, y, z, partialTicks))) {
             renderDebug(entity, x, y, z, partialTicks);
         }
-        MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.RenderPhysicsEntityEvent(entity, this, PhysicsEntityEvent.RenderPhysicsEntityEvent.Type.POST, x, y, z, partialTicks));
+        MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.POST, x, y, z, partialTicks));
         Vector3fPool.closePool();
         QuaternionPool.closePool();
         GlQuaternionPool.closePool();

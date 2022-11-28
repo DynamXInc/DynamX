@@ -201,7 +201,7 @@ public class ContentPackLoader {
             ProgressManager.ProgressBar bar = ProgressManager.push("Loading content pack system", 1 + DynamXObjectLoaders.LOADERS.size());
             bar.step("Discover assets");
 
-            MinecraftForge.EVENT_BUS.post(new ContentPackSystemEvent.ContentPackLoadEvent(PhysicsEntityEvent.Phase.PRE));
+            MinecraftForge.EVENT_BUS.post(new ContentPackSystemEvent.Load(PhysicsEntityEvent.Phase.PRE));
             //List<ModularVehicleInfoBuilder> vehiclesToLoad = new ArrayList<>();
             int packCount = 0;
             int errorCount = 0;
@@ -279,7 +279,7 @@ public class ContentPackLoader {
                 loader.postLoad(isHotReloading);
             }
             ProgressManager.pop(bar);
-            MinecraftForge.EVENT_BUS.post(new ContentPackSystemEvent.ContentPackLoadEvent(PhysicsEntityEvent.Phase.POST));
+            MinecraftForge.EVENT_BUS.post(new ContentPackSystemEvent.Load(PhysicsEntityEvent.Phase.POST));
             log.info("Loaded " + packCount + " content packs");
             if (errorCount > 0)
                 log.warn("Ignored " + errorCount + " errored packs");

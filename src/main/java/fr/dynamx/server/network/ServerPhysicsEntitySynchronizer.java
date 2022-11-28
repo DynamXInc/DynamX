@@ -3,9 +3,7 @@ package fr.dynamx.server.network;
 import fr.dynamx.api.network.sync.SimulationHolder;
 import fr.dynamx.api.network.sync.SyncTarget;
 import fr.dynamx.api.network.sync.v3.*;
-import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.entities.PhysicsEntity;
-import fr.dynamx.server.command.CmdNetworkConfig;
 import fr.dynamx.utils.debug.Profiler;
 import fr.dynamx.utils.optimization.PooledHashMap;
 import fr.dynamx.utils.optimization.Vector3fPool;
@@ -19,7 +17,7 @@ import java.util.Map;
 import java.util.Set;
 
 @SideOnly(Side.SERVER)
-public class ServerPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends MultiplayerPhysicsEntitySynchronizer<T> {
+public class ServerPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends MPPhysicsEntitySynchronizer<T> {
     private final Map<Integer, SyncTarget> varsToSync = new HashMap<>();
     private int updateCount = 0;
 

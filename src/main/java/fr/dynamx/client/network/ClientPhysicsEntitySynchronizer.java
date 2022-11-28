@@ -6,7 +6,6 @@ import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.IVehicleController;
 import fr.dynamx.api.network.sync.*;
 import fr.dynamx.api.network.sync.v3.*;
-import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.entities.BaseVehicleEntity;
@@ -15,19 +14,15 @@ import fr.dynamx.common.network.packets.MessageWalkingPlayer;
 import fr.dynamx.common.network.sync.MessagePhysicsEntitySync;
 import fr.dynamx.common.network.sync.vars.EntityPhysicsState;
 import fr.dynamx.utils.debug.Profiler;
-import fr.dynamx.utils.optimization.HashMapPool;
 import fr.dynamx.utils.optimization.PooledHashMap;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.*;
 
-import static fr.dynamx.common.DynamXMain.log;
-
-public class ClientPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends MultiplayerPhysicsEntitySynchronizer<T> implements ClientEntityNetHandler {
+public class ClientPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends MPPhysicsEntitySynchronizer<T> implements ClientEntityNetHandler {
     private int ticksBeforeNextSync, skippedPacketsCount;
 
     private final Map<Integer, EntityPhysicsState> states = new HashMap<>();

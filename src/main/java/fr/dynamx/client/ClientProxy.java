@@ -131,9 +131,8 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
 
     @Override
     public <T extends AbstractEntityPhysicsHandler<?, ?>> PhysicsEntitySynchronizer<? extends PhysicsEntity<T>> getNetHandlerForEntity(PhysicsEntity<T> tPhysicsEntity) {
-        //System.out.println("[TIMER] World of "+tPhysicsEntity+" is "+tPhysicsEntity.world);
         if (tPhysicsEntity.world.isRemote) {
-            if (Minecraft.getMinecraft().isIntegratedServerRunning())
+            if (FMLCommonHandler.instance().getMinecraftServerInstance() == null)
                 return new SPPhysicsEntitySynchronizer<>(tPhysicsEntity, Side.CLIENT);
             else
                 return new ClientPhysicsEntitySynchronizer<>(tPhysicsEntity);

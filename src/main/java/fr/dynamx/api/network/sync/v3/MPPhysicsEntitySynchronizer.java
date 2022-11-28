@@ -9,14 +9,14 @@ import lombok.Getter;
 import java.util.Queue;
 import java.util.stream.Collectors;
 
-public abstract class MultiplayerPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends PhysicsEntitySynchronizer<T> {
+public abstract class MPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends PhysicsEntitySynchronizer<T> {
     /**
      * Ordered sync waiting packet queue, we need this because when network lags, we receive all packets at the same tick
      */
     @Getter
     private final Queue<MessagePhysicsEntitySync<T>> receivedPackets = Queues.newArrayDeque();
 
-    public MultiplayerPhysicsEntitySynchronizer(T entity) {
+    public MPPhysicsEntitySynchronizer(T entity) {
         super(entity);
     }
 

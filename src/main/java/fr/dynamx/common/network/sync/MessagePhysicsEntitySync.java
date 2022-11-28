@@ -2,14 +2,12 @@ package fr.dynamx.common.network.sync;
 
 import fr.dynamx.api.network.EnumNetworkType;
 import fr.dynamx.api.network.sync.SynchronizedVariablesRegistry;
-import fr.dynamx.api.network.sync.v3.MultiplayerPhysicsEntitySynchronizer;
+import fr.dynamx.api.network.sync.v3.MPPhysicsEntitySynchronizer;
 import fr.dynamx.api.network.sync.v3.SynchronizedEntityVariable;
 import fr.dynamx.api.network.sync.v3.SynchronizedEntityVariableRegistry;
 import fr.dynamx.api.network.sync.v3.SynchronizedEntityVariableSnapshot;
-import fr.dynamx.client.network.ClientPhysicsEntitySynchronizer;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.network.packets.PhysicsEntityMessage;
-import fr.dynamx.server.network.ServerPhysicsEntitySynchronizer;
 import fr.dynamx.utils.optimization.HashMapPool;
 import fr.dynamx.utils.optimization.PooledHashMap;
 import io.netty.buffer.ByteBuf;
@@ -18,7 +16,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.Map;
 
@@ -135,12 +132,12 @@ public class MessagePhysicsEntitySync<T extends PhysicsEntity<?>> extends Physic
     @Override
     protected void processMessageClient(PhysicsEntityMessage<?> message, PhysicsEntity<?> entity, EntityPlayer player) {
         //System.out.println("Rcv syncs " + entity.ticksExisted);
-        ((MultiplayerPhysicsEntitySynchronizer<?>)entity.getSynchronizer()).receiveEntitySyncPacket((MessagePhysicsEntitySync) message);
+        ((MPPhysicsEntitySynchronizer<?>)entity.getSynchronizer()).receiveEntitySyncPacket((MessagePhysicsEntitySync) message);
     }
 
     @Override
     protected void processMessageServer(PhysicsEntityMessage<?> message, PhysicsEntity<?> entity, EntityPlayer player) {
-        ((MultiplayerPhysicsEntitySynchronizer<?>)entity.getSynchronizer()).receiveEntitySyncPacket((MessagePhysicsEntitySync) message);
+        ((MPPhysicsEntitySynchronizer<?>)entity.getSynchronizer()).receiveEntitySyncPacket((MessagePhysicsEntitySync) message);
     }
 
     @Override

@@ -38,10 +38,8 @@ public class TessellatorModelServer extends ObjModelServer {
         InputStream result = null;
         for (PackInfo packInfo : path.getPackLocations()) {
             result = packInfo.readFile(path.getModelPath());
-            if (result != null) {
-                System.out.println(this + " found in " + packInfo);
+            if (result != null)
                 break;
-            }
         }
         if (result == null)
             throw new FileNotFoundException("Model not found : " + path + ". Pack : " + path.getPackName());

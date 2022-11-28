@@ -298,20 +298,42 @@ public class ContentPackLoader {
     private static void loadPack(String loadingPack, File contentPack, ContentPackType packType, String suffix, PackFile packInfo, List<PackFile> packFiles) {
         //Search for real pack name in the pack info
         String packVersion = "<missing pack info>";
-        if (packInfo != null) {
-            loadFile(loadingPack, suffix, packInfo);
-            PackInfo loadedInfo = DynamXObjectLoaders.PACKS.findInfo(loadingPack + ".pack_info");
-            loadedInfo.setPathName(contentPack.getName()).setPackType(packType);
+        PackInfo loadedInfo = packInfo != null ? loadPackInfoFile(loadingPack, suffix, packInfo, contentPack.getName(), packType) : null;
+        if (loadedInfo != null) {
             loadingPack = loadedInfo.getFixedPackName();
             packVersion = loadedInfo.getPackVersion();
         } else {
-            //TODO FORMAT ERROR
-            DynamXErrorManager.addError(loadingPack, DynamXErrorManager.PACKS__ERRORS, "missing_pack_info", ErrorLevel.HIGH, "pack_info", "Add a pack_info.dynx file in the pack !", null, 600);
-            DynamXObjectLoaders.PACKS.addInfo(loadingPack + ".pack_info.dynx", new PackInfo(loadingPack, packType).setPathName(contentPack.getName()).setPackVersion("dummy info"));
+            loadedInfo = new PackInfo(loadingPack, packType).setPathName(contentPack.getName()).setPackVersion("dummy_info");
+            DynamXErrorManager.addError(loadingPack, DynamXErrorManager.PACKS__ERRORS, "missing_pack_info", ErrorLevel.HIGH, loadedInfo.getName(), "Add a pack_info.dynx file in the pack !", null, 600);
+            DynamXObjectLoaders.PACKS.loadItems(loadedInfo, isHotReloading);
         }
         DynamXMain.log.info("Loading " + loadingPack + " version " + packVersion + " (in " + contentPack.getName() + ")");
         for (PackFile packFile : packFiles) {
             loadFile(loadingPack, suffix, packFile);
+        }
+    }
+
+    private static PackInfo loadPackInfoFile(String loadingPack, String suffix, PackFile file, String pathName, ContentPackType packType) {
+        BufferedReader inputStream = null;
+        try {
+            inputStream = new BufferedReader(new InputStreamReader(file.getInputStream()));
+            String configName = file.getName().substring(0, file.getName().length() - suffix.length()).toLowerCase();
+            return DynamXObjectLoaders.PACKS.load(loadingPack, configName, inputStream, isHotReloading, pathName, packType);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (Throwable e) {
+            if (!(e instanceof Exception)) //todo clean
+                e = new RuntimeException("encapsulated error", e);
+            DynamXErrorManager.addError(loadingPack, DynamXErrorManager.PACKS__ERRORS, "pack_file_load_error", ErrorLevel.FATAL, file.getName().replace(suffix, ""), null, (Exception) e, 100);
+            return null;
+        } finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 

@@ -129,9 +129,8 @@ public class ClientDebugSystem {
             } else if (!physicsTicks.isEmpty())
                 physicsTicks.clear();
 
-            Entity e = MC.objectMouseOver.entityHit;
-            if(e instanceof PhysicsEntity)
-                NetworkActivityTracker.drawNetworkActivity((PhysicsEntity<?>) e, MC.fontRenderer, 10);
+            if(DynamXDebugOptions.FULL_NETWORK_DEBUG.isActive())
+                NetworkActivityTracker.drawNetworkActivity(MC.fontRenderer, 10);
         }
     }
 

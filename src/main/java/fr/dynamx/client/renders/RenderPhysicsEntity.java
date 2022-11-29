@@ -1,12 +1,9 @@
 package fr.dynamx.client.renders;
 
-import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.events.PhysicsEntityEvent;
-import fr.dynamx.api.network.sync.SimulationHolder;
 import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.client.handlers.ClientEventHandler;
-import fr.dynamx.client.network.ClientPhysicsEntitySynchronizer;
 import fr.dynamx.client.renders.model.ObjModelClient;
 import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
@@ -204,11 +201,11 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
                                 entity.renderRotation,
                                 partialTicks);
                         GlStateManager.rotate(rotQuat);
-                        validRotatedRenders.forEach(renderer -> renderer.render(entity, x, y, z, partialTicks));
+                        validRotatedRenders.forEach(renderer -> renderer.render(entity, this, x, y, z, partialTicks));
                     }
                     GlStateManager.popMatrix();
 
-                    validPureRenders.forEach(renderer -> renderer.render(entity, x, y, z, partialTicks));
+                    validPureRenders.forEach(renderer -> renderer.render(entity, this, x, y, z, partialTicks));
 
                     GlStateManager.enableLighting();
                     GlStateManager.enableTexture2D();

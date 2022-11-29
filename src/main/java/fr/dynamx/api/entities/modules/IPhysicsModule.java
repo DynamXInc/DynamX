@@ -5,6 +5,7 @@ import fr.dynamx.client.renders.RenderPhysicsEntity;
 import fr.dynamx.common.entities.ModularPhysicsEntity;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -105,7 +106,7 @@ public interface IPhysicsModule<P extends AbstractEntityPhysicsHandler<?, ?>> {
      * @param simulationHolder The new {@link SimulationHolder}
      * @param changeContext    The context of this update
      */
-    default void onSetSimulationHolder(SimulationHolder simulationHolder, SimulationHolder.UpdateContext changeContext) {
+    default void onSetSimulationHolder(SimulationHolder simulationHolder, EntityPlayer simulationPlayerHolder, SimulationHolder.UpdateContext changeContext) {
     }
 
     /**

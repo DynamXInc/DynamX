@@ -44,6 +44,9 @@ public abstract class PhysicsEntitySynchronizer<T extends PhysicsEntity<?>> {
      * The {@link SimulationHolder} of this entity
      */
     private SimulationHolder simulationHolder = getDefaultSimulationHolder();
+    @Getter
+    private EntityPlayer simulationPlayerHolder;
+
     /**
      * The entity that we sync
      */
@@ -135,8 +138,8 @@ public abstract class PhysicsEntitySynchronizer<T extends PhysicsEntity<?>> {
      *
      * @param simulationHolder The new simulation holder
      */
-    public void setSimulationHolder(SimulationHolder simulationHolder) {
-        setSimulationHolder(simulationHolder, SimulationHolder.UpdateContext.NORMAL);
+    public void setSimulationHolder(SimulationHolder simulationHolder, EntityPlayer simulationPlayerHolder) {
+        setSimulationHolder(simulationHolder, simulationPlayerHolder, SimulationHolder.UpdateContext.NORMAL);
     }
 
     /**
@@ -145,14 +148,15 @@ public abstract class PhysicsEntitySynchronizer<T extends PhysicsEntity<?>> {
      * @param simulationHolder The new simulation holder
      * @param changeContext    The simulation holder update context, changes the affected entities (linked entities, entities in props containers...)
      */
-    public void setSimulationHolder(SimulationHolder simulationHolder, SimulationHolder.UpdateContext changeContext) {
-        System.out.println("SET HOLD " + this.simulationHolder+" "+simulationHolder+" "+entity+" "+changeContext);
+    public void setSimulationHolder(SimulationHolder simulationHolder, EntityPlayer simulationPlayerHolder, SimulationHolder.UpdateContext changeContext) {
+        System.out.println("SET HOLD " + this.simulationHolder+" "+simulationHolder+" "+entity+" "+changeContext+" "+simulationPlayerHolder);
         this.simulationHolder = simulationHolder;
+        this.simulationPlayerHolder = simulationPlayerHolder;
         if (changeContext != SimulationHolder.UpdateContext.ATTACHED_ENTITIES && entity.getJointsHandler() != null) {
-            entity.getJointsHandler().setSimulationHolderOnJointedEntities(simulationHolder);
+            entity.getJointsHandler().setSimulationHolderOnJointedEntities(simulationHolder, simulationPlayerHolder);
         }
         if (entity instanceof ModularPhysicsEntity) {
-            ((ModularPhysicsEntity<?>) entity).getModules().forEach(m -> m.onSetSimulationHolder(simulationHolder, changeContext));
+            ((ModularPhysicsEntity<?>) entity).getModules().forEach(m -> m.onSetSimulationHolder(simulationHolder, simulationPlayerHolder, changeContext));
         }
         SynchronizedVariablesRegistry.setSyncVarsForContext(entity.world.isRemote ? Side.CLIENT : Side.SERVER, this);
     }

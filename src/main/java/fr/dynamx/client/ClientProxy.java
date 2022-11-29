@@ -33,6 +33,7 @@ import fr.dynamx.common.network.udp.CommandUdp;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.world.BuiltinThreadedPhysicsWorld;
 import fr.dynamx.utils.DynamXLoadingTasks;
+import fr.dynamx.utils.client.CommandNetworkDebug;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
@@ -108,35 +109,7 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
 
         MinecraftForge.EVENT_BUS.register(new KeyHandler(FMLClientHandler.instance().getClient()));
         ClientCommandHandler.instance.registerCommand(new CommandUdp());
-        ClientCommandHandler.instance.registerCommand(new CommandBase() {
-            @Override
-            public String getName() {
-                return "ntd";
-            }
-
-            @Override
-            public String getUsage(ICommandSender sender) {
-                return "/ntd pause|resume|set|get";
-            }
-
-            @Override
-            public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-                switch (args[0]) {
-                    case "pause":
-                        NetworkActivityTracker.pause();
-                        sender.sendMessage(new TextComponentString("Paused"));
-                        break;
-                    case "resume":
-                        NetworkActivityTracker.resume();
-                        sender.sendMessage(new TextComponentString("Resumed"));
-                        break;
-                    case "set":
-                        NetworkActivityTracker.viewIndex = parseInt(args[1]);
-                        break;
-                }
-                sender.sendMessage(new TextComponentString("Selected tick is " + NetworkActivityTracker.viewIndex + ". Last is " + NetworkActivityTracker.lastTime));
-            }
-        });
+        ClientCommandHandler.instance.registerCommand(new CommandNetworkDebug());
 
         ClientRegistry.bindTileEntitySpecialRenderer(TEDynamXBlock.class, new TESRDynamXBlock<>());
     }
@@ -158,9 +131,8 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
 
     @Override
     public <T extends AbstractEntityPhysicsHandler<?, ?>> PhysicsEntitySynchronizer<? extends PhysicsEntity<T>> getNetHandlerForEntity(PhysicsEntity<T> tPhysicsEntity) {
-        //System.out.println("[TIMER] World of "+tPhysicsEntity+" is "+tPhysicsEntity.world);
         if (tPhysicsEntity.world.isRemote) {
-            if (Minecraft.getMinecraft().isIntegratedServerRunning())
+            if (FMLCommonHandler.instance().getMinecraftServerInstance() == null)
                 return new SPPhysicsEntitySynchronizer<>(tPhysicsEntity, Side.CLIENT);
             else
                 return new ClientPhysicsEntitySynchronizer<>(tPhysicsEntity);

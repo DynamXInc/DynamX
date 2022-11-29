@@ -14,6 +14,7 @@ import fr.dynamx.common.network.packets.MessageJoints;
 import fr.dynamx.common.network.sync.SPPhysicsEntitySynchronizer;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -81,9 +82,9 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
 
         if (otherEntity != entity) {
             if (type.isJointOwner(j, entity))
-                otherEntity.getSynchronizer().setSimulationHolder(entity.getSynchronizer().getSimulationHolder(), SimulationHolder.UpdateContext.ATTACHED_ENTITIES);
+                otherEntity.getSynchronizer().setSimulationHolder(entity.getSynchronizer().getSimulationHolder(), null, SimulationHolder.UpdateContext.ATTACHED_ENTITIES);
             else
-                entity.getSynchronizer().setSimulationHolder(otherEntity.getSynchronizer().getSimulationHolder(), SimulationHolder.UpdateContext.ATTACHED_ENTITIES);
+                entity.getSynchronizer().setSimulationHolder(otherEntity.getSynchronizer().getSimulationHolder(), null, SimulationHolder.UpdateContext.ATTACHED_ENTITIES);
         }
 
         if (j.getJoint() != null) {
@@ -164,9 +165,9 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
         JointHandler<?, ?, ?> handler = joint.getHandler();
         if (entity != otherEntity) {
             if (handler.isJointOwner(joint, entity)) {
-                otherEntity.getSynchronizer().setSimulationHolder(otherEntity.getSynchronizer().getDefaultSimulationHolder(), SimulationHolder.UpdateContext.ATTACHED_ENTITIES);
+                otherEntity.getSynchronizer().setSimulationHolder(otherEntity.getSynchronizer().getDefaultSimulationHolder(), null, SimulationHolder.UpdateContext.ATTACHED_ENTITIES);
             } else {
-                entity.getSynchronizer().setSimulationHolder(otherEntity.getSynchronizer().getDefaultSimulationHolder(), SimulationHolder.UpdateContext.ATTACHED_ENTITIES);
+                entity.getSynchronizer().setSimulationHolder(otherEntity.getSynchronizer().getDefaultSimulationHolder(), null, SimulationHolder.UpdateContext.ATTACHED_ENTITIES);
             }
         }
         handler.onDestroy(joint, entity);
@@ -304,13 +305,13 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
     }
 
     @Override
-    public void setSimulationHolderOnJointedEntities(SimulationHolder holder) {
+    public void setSimulationHolderOnJointedEntities(SimulationHolder holder, EntityPlayer simulationPlayerHolder) {
         System.out.println("joints " + joints);
         for (EntityJoint<?> j : joints) {
             System.out.println("SET JOINT STATE " + j.getHandler().isJointOwner(j, entity)+" "+entity+" "+j);
             if (j.getHandler().isJointOwner(j, entity)) {
                 //NB : le false empêche de faire des remorques attachées à d'autres remorques
-                j.getOtherEntity(entity).getSynchronizer().setSimulationHolder(holder, SimulationHolder.UpdateContext.ATTACHED_ENTITIES);
+                j.getOtherEntity(entity).getSynchronizer().setSimulationHolder(holder, simulationPlayerHolder, SimulationHolder.UpdateContext.ATTACHED_ENTITIES);
             }
         }
     }

@@ -10,6 +10,7 @@ import fr.dynamx.api.entities.modules.IPropulsionModule;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.api.network.sync.SimulationHolder;
+import fr.dynamx.api.network.sync.SyncTarget;
 import fr.dynamx.api.network.sync.v3.FloatArraySynchronizedVariable;
 import fr.dynamx.api.network.sync.v3.MapSynchronizedVariable;
 import fr.dynamx.api.network.sync.v3.SynchronizationRules;
@@ -76,7 +77,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
     /**
      * Entity visual properties, accessible via the {@link IPhysicsModule}s
      */
-    public FloatArraySynchronizedVariable visualProperties = new FloatArraySynchronizedVariable(SynchronizationRules.PHYSICS_TO_SPECTATORS, "visual_props");
+    public float[] visualProperties;
     /**
      * Entity prev visual properties
      */
@@ -160,8 +161,8 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
             wheelsStates.get()[i] = WheelState.ADDED;
             wheelsTextureId[i] = -1;
         }
-        visualProperties.set(new float[wheelCount * VehicleEntityProperties.EnumVisualProperties.values().length]);
-        prevVisualProperties = new float[visualProperties.get().length];
+        visualProperties = new float[wheelCount * VehicleEntityProperties.EnumVisualProperties.values().length];
+        prevVisualProperties = new float[visualProperties.length];
     }
 
     @Override
@@ -212,7 +213,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
 
     @Override
     public void postUpdatePhysics(boolean simulatingPhysics) {
-        System.arraycopy(visualProperties.get(), 0, prevVisualProperties, 0, prevVisualProperties.length);
+        System.arraycopy(visualProperties, 0, prevVisualProperties, 0, prevVisualProperties.length);
         if (simulatingPhysics)
             updateVisualProperties();
     }
@@ -241,25 +242,24 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
         if (wheelsPhysics != null) {
             byte n = wheelsPhysics.getNumWheels();
 
-            float[] visualPropertiesArray = visualProperties.get();
             for (int i = 0; i < n; i++) {
                 VehicleWheel info = wheelsPhysics.getHandler().getPhysicsVehicle().getWheel(i);
                 if (info.isFrontWheel()) {
-                    visualPropertiesArray[VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.STEERANGLE)] = (float) Math.toDegrees(info.getSteerAngle());
+                    visualProperties[VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.STEERANGLE)] = (float) Math.toDegrees(info.getSteerAngle());
                 }
 
                 int ind = VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.ROTATIONANGLE);
                 //Update prevRotation, so we have -180<prevRotationYaw-rotationYaw<180 to avoid visual glitch
-                float[] angles = DynamXMath.interpolateAngle((float) (Math.toDegrees(info.getRotationAngle()) % 360), visualPropertiesArray[ind], 1);
+                float[] angles = DynamXMath.interpolateAngle((float) (Math.toDegrees(info.getRotationAngle()) % 360), visualProperties[ind], 1);
                 prevVisualProperties[ind] = angles[0];
-                visualProperties.set(ind, angles[1]);
+                visualProperties[ind] = angles[1];
 
-                visualProperties.set(VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.SUSPENSIONLENGTH), info.getSuspensionLength() + info.getRestLength());
+                visualProperties[VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.SUSPENSIONLENGTH)] = info.getSuspensionLength() + info.getRestLength();
                 Vector3f pos = Vector3fPool.get();
                 info.getCollisionLocation(pos);
-                visualProperties.set(VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.COLLISIONX), pos.x);
-                visualProperties.set(VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.COLLISIONY), pos.y);
-                visualProperties.set(VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.COLLISIONZ), pos.z);
+                visualProperties[VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.COLLISIONX)] = pos.x;
+                visualProperties[VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.COLLISIONY)] = pos.y;
+                visualProperties[VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.COLLISIONZ)] = pos.z;
             }
             for (byte b = 0; b < n; b++) {
                 WheelPhysics w = wheelsPhysics.getWheel(b);
@@ -283,7 +283,6 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
         entity.getSynchronizer().registerVariable(DynamXSynchronizedVariables.WHEEL_INFOS, wheelInfos);
         entity.getSynchronizer().registerVariable(DynamXSynchronizedVariables.WHEEL_STATES, wheelsStates);
         entity.getSynchronizer().registerVariable(DynamXSynchronizedVariables.SKID_INFOS, skidInfos);
-        entity.getSynchronizer().registerVariable(DynamXSynchronizedVariables.WHEEL_VISUALS, visualProperties);
     }
 
     @Override
@@ -307,7 +306,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
                     //Rotate the steering wheel
                     int directingWheel = VehicleEntityProperties.getPropertyIndex(carEntity.getPackInfo().getDirectingWheel(), VehicleEntityProperties.EnumVisualProperties.STEERANGLE);
                     WheelsModule m = carEntity.getModuleByType(WheelsModule.class);
-                    GlStateManager.rotate(-(m.prevVisualProperties[directingWheel] + (m.visualProperties.get()[directingWheel] - m.prevVisualProperties[directingWheel]) * partialTicks), 0F, 0F, 1F);
+                    GlStateManager.rotate(-(m.prevVisualProperties[directingWheel] + (m.visualProperties[directingWheel] - m.prevVisualProperties[directingWheel]) * partialTicks), 0F, 0F, 1F);
 
                     //Scale it
                     GlStateManager.scale(carEntity.getPackInfo().getScaleModifier().x, carEntity.getPackInfo().getScaleModifier().y, carEntity.getPackInfo().getScaleModifier().z);
@@ -337,9 +336,9 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
             PartWheelInfo info = getWheelInfo(partWheel.getId());
             if (info.enableRendering() && info.getSkidParticle() != null) {
                 if (skidInfos.get()[partWheel.getId()] < 0.1f) {
-                    entity.world.spawnParticle(info.getSkidParticle(), visualProperties.get()[VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.COLLISIONX)],
-                            visualProperties.get()[VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.COLLISIONY)],
-                            visualProperties.get()[VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.COLLISIONZ)],
+                    entity.world.spawnParticle(info.getSkidParticle(), visualProperties[VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.COLLISIONX)],
+                            visualProperties[VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.COLLISIONY)],
+                            visualProperties[VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.COLLISIONZ)],
                             0, 0, 0);
                 }
             }
@@ -363,12 +362,12 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
 
                 /* Suspension translation */
                 index = VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.SUSPENSIONLENGTH);
-                GlStateManager.translate(0, -(prevVisualProperties[index] + (visualProperties.get()[index] - prevVisualProperties[index]) * partialTicks) + 0.2, 0);
+                GlStateManager.translate(0, -(prevVisualProperties[index] + (visualProperties[index] - prevVisualProperties[index]) * partialTicks) + 0.2, 0);
 
                 /* Steering rotation*/
                 if (partWheel.isWheelIsSteerable()) {
                     index = VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.STEERANGLE);
-                    GlStateManager.rotate((prevVisualProperties[index] + (visualProperties.get()[index] - prevVisualProperties[index]) * partialTicks), 0.0F, 1.0F, 0.0F);
+                    GlStateManager.rotate((prevVisualProperties[index] + (visualProperties[index] - prevVisualProperties[index]) * partialTicks), 0.0F, 1.0F, 0.0F);
                 }
 
                 /* Render mudguard */
@@ -390,12 +389,12 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
 
                 /* Suspension translation */
                 index = VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.SUSPENSIONLENGTH);
-                GlStateManager.translate(0, -(prevVisualProperties[index] + (visualProperties.get()[index] - prevVisualProperties[index]) * partialTicks), 0);
+                GlStateManager.translate(0, -(prevVisualProperties[index] + (visualProperties[index] - prevVisualProperties[index]) * partialTicks), 0);
 
                 /* Steering rotation*/
                 if (partWheel.isWheelIsSteerable()) {
                     index = VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.STEERANGLE);
-                    GlStateManager.rotate((prevVisualProperties[index] + (visualProperties.get()[index] - prevVisualProperties[index]) * partialTicks), 0.0F, 1.0F, 0.0F);
+                    GlStateManager.rotate((prevVisualProperties[index] + (visualProperties[index] - prevVisualProperties[index]) * partialTicks), 0.0F, 1.0F, 0.0F);
                 }
 
                 //Remove wheel base rotation
@@ -408,18 +407,18 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
                 index = VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.ROTATIONANGLE);
                 //Fix sign problems for wheel rotation
                 float prev = prevVisualProperties[index];
-                if (prev - visualProperties.get()[index] > 180)
+                if (prev - visualProperties[index] > 180)
                     prev -= 360;
-                if (prev - visualProperties.get()[index] < -180)
+                if (prev - visualProperties[index] < -180)
                     prev += 360;
                 //Then render
                 if (partWheel.isRight()) {
                     /* Wheel rotation (Right-Side)*/
                     GlStateManager.rotate(180, 0, 1, 0);
-                    GlStateManager.rotate((prev + (visualProperties.get()[index] - prev) * partialTicks), -1.0F, 0.0F, 0.0F);
+                    GlStateManager.rotate((prev + (visualProperties[index] - prev) * partialTicks), -1.0F, 0.0F, 0.0F);
                 } else {
                     /* Wheel rotation (Left-Side)*/
-                    GlStateManager.rotate(-(prev + (visualProperties.get()[index] - prev) * partialTicks), -1.0F, 0.0F, 0.0F);
+                    GlStateManager.rotate(-(prev + (visualProperties[index] - prev) * partialTicks), -1.0F, 0.0F, 0.0F);
                 }
                 /*Rendering the wheels */
                 ObjModelClient model = DynamXContext.getObjModelRegistry().getModel(info.getModel());

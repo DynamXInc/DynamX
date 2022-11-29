@@ -185,8 +185,11 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
 
     @Override
     public void updateMinecraftPos() {
-        super.updateMinecraftPos();
-        updateEntityPosListeners.forEach(IPhysicsModule.IEntityPosUpdateListener::updateEntityPos);
+        //All the position variables should be updated in the same time
+        synchronized (updatePhysicsListeners) {
+            super.updateMinecraftPos();
+            updateEntityPosListeners.forEach(IPhysicsModule.IEntityPosUpdateListener::updateEntityPos);
+        }
     }
 
     @Override
@@ -197,8 +200,11 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
 
     @Override
     public void postUpdatePhysics(boolean simulatingPhysics) {
-        super.postUpdatePhysics(simulatingPhysics);
-        updatePhysicsListeners.forEach(m -> m.postUpdatePhysics(simulatingPhysics));
+        //All the position variables should be updated in the same time
+        synchronized (updatePhysicsListeners) {
+            super.postUpdatePhysics(simulatingPhysics);
+            updatePhysicsListeners.forEach(m -> m.postUpdatePhysics(simulatingPhysics));
+        }
     }
 
     @Override

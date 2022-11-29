@@ -13,7 +13,6 @@ import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.common.entities.vehicles.CarEntity;
-import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.EnumSeatPlayerPosition;
 import fr.dynamx.utils.debug.DynamXDebugOption;
@@ -111,7 +110,7 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
                             if (!door.isEnabled() || doorContainer.getDoors().isDoorOpened(door.getId())) {
                                 boolean didMount = mount(vehicleEntity, seats, player);
                                 if (didMount) {
-                                    vehicleEntity.getModuleByType(DoorsModule.class).setDoorState(door.getId(), DoorsModule.DoorState.CLOSE);
+                                    vehicleEntity.getModuleByType(DoorsModule.class).setDoorState(door.getId(), DoorsModule.DoorState.CLOSING);
                                 }
                                 return didMount;
                             } else {

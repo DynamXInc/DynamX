@@ -77,9 +77,8 @@ public class PickObjects extends MovableModule {
 
     @Override
     public void preUpdatePhysics(boolean b) {
-        //System.out.println("Pd pos "+joint+" "+mover);
         EntityPlayer mover = this.mover.get();
-        if (joint != null && mover != null) {
+        if (b && joint != null && mover != null) {
             Vector3fPool.openPool();
             Vector3f playerPosition = Vector3fPool.get(
                     (float) mover.posX,
@@ -89,20 +88,13 @@ public class PickObjects extends MovableModule {
 
             Vector3f newRayTo = Vector3fPool.get(pickRaw);
             Vector3f eyePos = Vector3fPool.get(playerPosition);
-            Vector3f dir = newRayTo.subtract(eyePos);
+            Vector3f dir = newRayTo.subtractLocal(eyePos.x, eyePos.y, eyePos.z);
             dir = dir.normalize();
             dir.multLocal(pickDistance.get());
 
-            Vector3f newPos = eyePos.add(dir);
+            Vector3f newPos = eyePos.addLocal(dir);
             joint.setPivotInB(newPos);
             Vector3fPool.closePool();
-
-            /*if(!(mover.getHeldItemMainhand().getItem() instanceof ItemWrench)){
-                if(entity.getJointsHandler() != null){
-                    entity.getJointsHandler().removeJointWith(JOINT_NAME,entity, getJointID());
-                    mover = null;
-                }
-            }*/
         }
     }
 

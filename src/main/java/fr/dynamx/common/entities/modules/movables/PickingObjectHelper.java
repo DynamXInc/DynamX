@@ -83,8 +83,8 @@ public class PickingObjectHelper {
             PhysicsEntity<?> physicsEntity = null;                //TODO PhysicsEntity<?>) ((SPPhysicsEntityNetHandler)shapeType.getObjectIn().getNetwork()).getOtherSideEntity();
             if (shapeType.getObjectIn() instanceof PhysicsEntity) {
                 physicsEntity = (PhysicsEntity<?>) shapeType.getObjectIn();
-            } else if (shapeType.getObjectIn() instanceof DoorsModule.DoorVarContainer) {
-                physicsEntity = ((DoorsModule.DoorVarContainer) shapeType.getObjectIn()).getModule().vehicleEntity;
+            } else if (shapeType.getObjectIn() instanceof DoorsModule.DoorPhysics) {
+                physicsEntity = ((DoorsModule.DoorPhysics) shapeType.getObjectIn()).getModule().vehicleEntity;
             }
             if (physicsEntity == null)
                 return;

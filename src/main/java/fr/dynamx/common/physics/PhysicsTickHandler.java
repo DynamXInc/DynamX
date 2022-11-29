@@ -154,14 +154,14 @@ public class PhysicsTickHandler {
             if (DynamXMain.proxy.getServerWorld().getMinecraftServer().getTickCounter() % 5 == 0) //requestedDebugInfo is sent all 5 ticks
                 requestedDebugInfo.clear();
             if (networkDebug != DynamXDebugOptions.FULL_NETWORK_DEBUG.isActive()) {
-                System.out.println("Setting FULL_NETWORK_DEBUG active : " + networkDebug);
+                //System.out.println("Setting FULL_NETWORK_DEBUG active : " + networkDebug);
                 if (networkDebug)
                     DynamXDebugOptions.FULL_NETWORK_DEBUG.enable();
                 else
                     DynamXDebugOptions.FULL_NETWORK_DEBUG.disable();
             }
             if (wheelData != DynamXDebugOptions.WHEEL_ADVANCED_DATA.isActive()) {
-                System.out.println("Setting WHEEL_ADVANCED_DATA active : " + wheelData);
+                //System.out.println("Setting WHEEL_ADVANCED_DATA active : " + wheelData);
                 if (wheelData)
                     DynamXDebugOptions.WHEEL_ADVANCED_DATA.enable();
                 else

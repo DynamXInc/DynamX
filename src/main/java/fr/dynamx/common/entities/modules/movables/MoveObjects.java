@@ -74,22 +74,17 @@ public class MoveObjects extends MovableModule {
 
     @Override
     public void preUpdatePhysics(boolean simulatingPhysics) {
-        super.preUpdatePhysics(simulatingPhysics);
         if (simulatingPhysics) {
             PhysicsEntity<?> pickedEntity = this.pickedEntity.get();
             if (picker.get() != null && pickedEntity != null && isPicked.get()) {
                 PhysicsRigidBody rigidBody = (PhysicsRigidBody) pickedEntity.getPhysicsHandler().getCollisionObject();
                 Vector3f playerLookPos = DynamXUtils.toVector3f(picker.get().getLookVec());
-                rigidBody.setGravity(new Vector3f());
-                rigidBody.setAngularVelocity(new Vector3f());
-                rigidBody.setLinearVelocity(new Vector3f());
+                rigidBody.setGravity(Vector3fPool.get());
+                rigidBody.setAngularVelocity(Vector3fPool.get());
+                rigidBody.setLinearVelocity(Vector3fPool.get());
                 Vector3f playerPos = DynamXUtils.toVector3f(picker.get().getPositionEyes(1.0f));
-                Vector3f finalPos = playerPos.add(playerLookPos);
-
-                // Quaternion rotatedQuat = DynamXGeometry.eulerToQuaternion(0, 2 * FastMath.PI - (float) Math.toRadians(picker.rotationYaw), 0);
-                rigidBody.setPhysicsLocation(finalPos);
+                Vector3f finalPos = playerPos.addLocal(playerLookPos);
                 pickedEntity.getPhysicsHandler().setPhysicsPosition(finalPos);
-                //pickedEntity.updateMinecraftPos();
             }
         } else {
             //updateClient();

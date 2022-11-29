@@ -266,7 +266,6 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
         }
 
         if (isDirty()) {
-            System.out.println("Is dirty !!");
             if (!entity.world.isRemote && entity.getSynchronizer().doesOtherSideUsesPhysics()) {
                 DynamXContext.getNetwork().sendToClient(new MessageJoints(entity, computeCachedJoints()), EnumPacketTarget.ALL_TRACKING_ENTITY, entity);
             }
@@ -306,11 +305,9 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
 
     @Override
     public void setSimulationHolderOnJointedEntities(SimulationHolder holder, EntityPlayer simulationPlayerHolder) {
-        System.out.println("joints " + joints);
         for (EntityJoint<?> j : joints) {
-            System.out.println("SET JOINT STATE " + j.getHandler().isJointOwner(j, entity)+" "+entity+" "+j);
-            if (j.getHandler().isJointOwner(j, entity)) {
-                //NB : le false empêche de faire des remorques attachées à d'autres remorques
+            if (j.getHandler().isJointOwner(j, entity) && j.getEntity1() != j.getEntity2()) {
+                //NB : le ATTACHED_ENTITIES empêche les boucles infinies, et donc de faire des remorques attachées à d'autres remorques
                 j.getOtherEntity(entity).getSynchronizer().setSimulationHolder(holder, simulationPlayerHolder, SimulationHolder.UpdateContext.ATTACHED_ENTITIES);
             }
         }

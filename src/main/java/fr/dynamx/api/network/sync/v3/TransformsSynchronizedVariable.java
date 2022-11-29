@@ -1,36 +1,22 @@
 package fr.dynamx.api.network.sync.v3;
 
-import com.jme3.math.Quaternion;
-import com.jme3.math.Vector3f;
-import fr.dynamx.api.network.EnumPacketTarget;
-import fr.dynamx.client.network.ClientPhysicsEntitySynchronizer;
-import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.entities.PhysicsEntity;
-import fr.dynamx.common.entities.RagdollEntity;
-import fr.dynamx.common.network.packets.MessageForcePlayerPos;
 import fr.dynamx.common.network.sync.v3.DynamXSynchronizedVariables;
 import fr.dynamx.common.network.sync.vars.AttachedBodySynchronizedVariable;
-import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.utils.RigidBodyTransform;
 import fr.dynamx.common.physics.utils.SynchronizedRigidBodyTransform;
 import fr.dynamx.utils.debug.SyncTracker;
-import lombok.Getter;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.util.text.TextComponentString;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import static fr.dynamx.common.network.sync.vars.PosSynchronizedVariable.*;
-
-public class TransformsSynchronizedVariable extends ListeningSynchronizedEntityVariable<Map<Byte, RigidBodyTransform>>
-{
+public class TransformsSynchronizedVariable extends ListeningSynchronizedEntityVariable<Map<Byte, RigidBodyTransform>> {
     public TransformsSynchronizedVariable(PhysicsEntity<?> entity, AttachedBodySynchronizedVariable.AttachedBodySynchronizer synchronizer) {
         super(((entityPositionDataSynchronizedEntityVariable, transforms) -> {
 //TODO INTPERPOLATION ETC :c
-            if(entity.getSynchronizer().getSimulationHolder().isSinglePlayer()) {
+            if (entity.getSynchronizer().getSimulationHolder().isSinglePlayer()) {
                 if (!entity.world.isRemote) //Solo mode
                 {
                     Map<Byte, SynchronizedRigidBodyTransform> tar = synchronizer.getTransforms();
@@ -89,7 +75,7 @@ public class TransformsSynchronizedVariable extends ListeningSynchronizedEntityV
                 }
                 return transforms;
             }
-        }, "pos");
+        }, "parts_pos");
         this.set(new HashMap<>());
     }
 }

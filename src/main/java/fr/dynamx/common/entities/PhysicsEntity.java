@@ -175,9 +175,8 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
                 }
             }
             initPhysicsEntity(usesPhysicsWorld);
-            //getNetwork().setSimulationHolder(getNetwork().getDefaultSimulationHolder());
             getSynchronizer().setSimulationHolder(getSynchronizer().getDefaultSimulationHolder());
-            MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.PhysicsEntityInitEvent(world.isRemote ? Side.CLIENT : Side.SERVER, this, usesPhysicsWorld));
+            MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Init(world.isRemote ? Side.CLIENT : Side.SERVER, this, usesPhysicsWorld));
             initialized = 2;
         }
     }
@@ -243,8 +242,8 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
         updateMinecraftPos();
 
         //Post the update event
-        MinecraftForge.EVENT_BUS.post(world.isRemote ? new PhysicsEntityEvent.ClientPhysicsEntityUpdateEvent(this, PhysicsEntityEvent.PhysicsEntityUpdateType.POST_ENTITY_UPDATE, isRegistered == 2 && usesPhysicsWorld) :
-                new PhysicsEntityEvent.ServerPhysicsEntityUpdateEvent(this, PhysicsEntityEvent.PhysicsEntityUpdateType.POST_ENTITY_UPDATE, isRegistered == 2 && usesPhysicsWorld));
+        MinecraftForge.EVENT_BUS.post(world.isRemote ? new PhysicsEntityEvent.ClientUpdate(this, PhysicsEntityEvent.UpdateType.POST_ENTITY_UPDATE, isRegistered == 2 && usesPhysicsWorld) :
+                new PhysicsEntityEvent.ServerUpdate(this, PhysicsEntityEvent.UpdateType.POST_ENTITY_UPDATE, isRegistered == 2 && usesPhysicsWorld));
     }
 
     /**
@@ -320,8 +319,8 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
         simulatePhysics = simulatePhysics && isRegistered == 2;
         preUpdatePhysics(simulatePhysics);
 
-        MinecraftForge.EVENT_BUS.post(world.isRemote ? new PhysicsEntityEvent.ClientPhysicsEntityUpdateEvent(this, PhysicsEntityEvent.PhysicsEntityUpdateType.PRE_PHYSICS_UPDATE, simulatePhysics) :
-                new PhysicsEntityEvent.ServerPhysicsEntityUpdateEvent(this, PhysicsEntityEvent.PhysicsEntityUpdateType.PRE_PHYSICS_UPDATE, simulatePhysics));
+        MinecraftForge.EVENT_BUS.post(world.isRemote ? new PhysicsEntityEvent.ClientUpdate(this, PhysicsEntityEvent.UpdateType.PRE_PHYSICS_UPDATE, simulatePhysics) :
+                new PhysicsEntityEvent.ServerUpdate(this, PhysicsEntityEvent.UpdateType.PRE_PHYSICS_UPDATE, simulatePhysics));
         profiler.end(Profiler.Profiles.PHY2);
     }
 
@@ -351,8 +350,8 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
         simulatePhysics = simulatePhysics && isRegistered == 2;
         postUpdatePhysics(simulatePhysics);
 
-        MinecraftForge.EVENT_BUS.post(world.isRemote ? new PhysicsEntityEvent.ClientPhysicsEntityUpdateEvent(this, PhysicsEntityEvent.PhysicsEntityUpdateType.POST_PHYSICS_UPDATE, simulatePhysics) :
-                new PhysicsEntityEvent.ServerPhysicsEntityUpdateEvent(this, PhysicsEntityEvent.PhysicsEntityUpdateType.POST_PHYSICS_UPDATE, simulatePhysics));
+        MinecraftForge.EVENT_BUS.post(world.isRemote ? new PhysicsEntityEvent.ClientUpdate(this, PhysicsEntityEvent.UpdateType.POST_PHYSICS_UPDATE, simulatePhysics) :
+                new PhysicsEntityEvent.ServerUpdate(this, PhysicsEntityEvent.UpdateType.POST_PHYSICS_UPDATE, simulatePhysics));
         profiler.end(Profiler.Profiles.PHY2P);
     }
 
@@ -540,7 +539,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
 
     @Override
     public boolean attackEntityFrom(DamageSource damageSource, float amount) {
-        if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.AttackedEvent(this, damageSource.getTrueSource(), damageSource))) {
+        if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Attacked(this, damageSource.getTrueSource(), damageSource))) {
             if (damageSource.isExplosion()) {
                 return false;
             }

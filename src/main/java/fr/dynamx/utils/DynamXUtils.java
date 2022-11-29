@@ -116,6 +116,7 @@ public class DynamXUtils {
         }
         out.flush();
         out.close();
+        resource.close();
         return out.toByteArray();
     }
 

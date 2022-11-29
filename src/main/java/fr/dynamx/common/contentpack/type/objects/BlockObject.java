@@ -49,10 +49,10 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
     @Override
     @SuppressWarnings("unchecked")
     public IInfoOwner<T> createOwner(ObjectLoader<T, ?> loader) {
-        CreatePackItemEvent.CreateSimpleBlockEvent event = new CreatePackItemEvent.CreateSimpleBlockEvent((ObjectLoader<BlockObject<?>, DynamXBlock<BlockObject<?>>>) loader, this);
+        CreatePackItemEvent.SimpleBlock<T, ?> event = new CreatePackItemEvent.SimpleBlock(loader, this);
         MinecraftForge.EVENT_BUS.post(event);
         if (event.isOverridden()) {
-            return (IInfoOwner<T>) event.getSpawnItem();
+            return (IInfoOwner<T>) event.getObjectItem();
         } else {
             return new DynamXBlock<>((T) this, material != null ? material : Material.ROCK);
         }

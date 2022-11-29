@@ -148,7 +148,7 @@ public class SeatsModule implements ISeatsModule {
                 if (hitPart.isDriver()) {
                     entity.getSynchronizer().onPlayerStartControlling((EntityPlayer) passenger, true);
                 }
-                MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.MountVehicleEntityEvent(Side.SERVER, (EntityPlayer) passenger, entity, this, hitPart));
+                MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.PlayerMount(Side.SERVER, (EntityPlayer) passenger, entity, this, hitPart));
                 //System.out.println("Send seat sync : add passenger "+entity+" "+passenger);
                 DynamXContext.getNetwork().sendToClient(new MessageSeatsSync((IModuleContainer.ISeatsContainer) entity), EnumPacketTarget.ALL_TRACKING_ENTITY, entity);
             } else {
@@ -171,7 +171,7 @@ public class SeatsModule implements ISeatsModule {
             }
             //System.out.println("Send seat sync : remove passenger "+entity+" "+passenger);
             DynamXContext.getNetwork().sendToClient(new MessageSeatsSync((IModuleContainer.ISeatsContainer) entity), EnumPacketTarget.ALL_TRACKING_ENTITY, entity);
-            MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.DismountVehicleEntityEvent(entity.world.isRemote ? Side.CLIENT : Side.SERVER, (EntityPlayer) passenger, entity, this, seat));
+            MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.PlayerDismount(entity.world.isRemote ? Side.CLIENT : Side.SERVER, (EntityPlayer) passenger, entity, this, seat));
         }
         //Client side is managed by updateSeats
     }
@@ -188,7 +188,7 @@ public class SeatsModule implements ISeatsModule {
                 if (e.getKey().isDriver()) {
                     netHandler.onPlayerStopControlling(e.getValue(), true);
                 }
-                MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.DismountVehicleEntityEvent(Side.CLIENT, e.getValue(), vehicleEntity, this, e.getKey()));
+                MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.PlayerDismount(Side.CLIENT, e.getValue(), vehicleEntity, this, e.getKey()));
             }
         }
         //And remove them
@@ -216,7 +216,7 @@ public class SeatsModule implements ISeatsModule {
                         if (seat.isDriver()) {
                             netHandler.onPlayerStartControlling((EntityPlayer) player, true);
                         }
-                        MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.MountVehicleEntityEvent(Side.CLIENT, (EntityPlayer) player, vehicleEntity, this, seat));
+                        MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.PlayerMount(Side.CLIENT, (EntityPlayer) player, vehicleEntity, this, seat));
                     }
                     //System.out.println("Success to seat-sync " + player + " !");
                 } else {

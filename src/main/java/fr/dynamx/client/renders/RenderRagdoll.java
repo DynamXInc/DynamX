@@ -27,7 +27,7 @@ public class RenderRagdoll<T extends RagdollEntity> extends RenderPhysicsEntity<
 
     public RenderRagdoll(RenderManager manager) {
         super(manager);
-        MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.InitPhysicEntityRenderEvent<>(RagdollEntity.class, this));
+        MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.InitRenderer<>(RagdollEntity.class, this));
     }
 
     @Override

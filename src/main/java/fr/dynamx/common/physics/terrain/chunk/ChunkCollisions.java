@@ -89,8 +89,6 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
      * Sets the state of this chunk, avoids inconsistencies due to threaded loading
      */
     public void setChunkState(EnumChunkCollisionsState state) {
-        if (state != this.state)
-            MinecraftForge.EVENT_BUS.post(new PhysicsEvent.ChunkCollisionsStateEvent(DynamXContext.getPhysicsWorld(), this, state));
         this.state = state;
     }
 

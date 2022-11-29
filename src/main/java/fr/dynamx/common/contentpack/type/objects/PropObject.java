@@ -13,6 +13,7 @@ import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
+import fr.dynamx.api.events.CreatePackItemEvent;
 import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
@@ -24,6 +25,7 @@ import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.physics.ShapeUtils;
 import lombok.Getter;
+import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -116,7 +118,13 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
 
     @Override
     public IInfoOwner<T> createOwner(ObjectLoader<T, ?> loader) {
-        return new ItemProps(this);
+        CreatePackItemEvent.PropsItem<T, ?> event = new CreatePackItemEvent.PropsItem(loader, this);
+        MinecraftForge.EVENT_BUS.post(event);
+        if (event.isOverridden()) {
+            return (IInfoOwner<T>) event.getObjectItem();
+        } else {
+            return new ItemProps(this);
+        }
     }
 
     @Override

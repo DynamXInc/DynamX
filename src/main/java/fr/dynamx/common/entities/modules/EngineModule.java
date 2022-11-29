@@ -243,7 +243,7 @@ public class EngineModule implements IEngineModule<AbstractEntityPhysicsHandler<
     @Override
     @SideOnly(Side.CLIENT)
     public void updateEntity() {
-        if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.UpdateVehicleSoundEntityEvent(entity, this, PhysicsEntityEvent.Phase.PRE))) {
+        if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.UpdateSounds(entity, this, PhysicsEntityEvent.Phase.PRE))) {
             if (entity.getPackInfo() != null) {
                 if (engineInfo != null && engineInfo.getEngineSounds() != null) {
                     if (sounds.isEmpty()) { //Sounds are not initialized
@@ -280,7 +280,7 @@ public class EngineModule implements IEngineModule<AbstractEntityPhysicsHandler<
                     }
                 }
             }
-            MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.UpdateVehicleSoundEntityEvent(entity, this, PhysicsEntityEvent.Phase.POST));
+            MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.UpdateSounds(entity, this, PhysicsEntityEvent.Phase.POST));
         }
     }
 

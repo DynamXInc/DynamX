@@ -20,7 +20,7 @@ public class PhysicsEvent extends Event {
     /**
      * Fired when an entity is added to the physics world
      */
-    public static class PhysicsEntityAddedEvent extends PhysicsEvent {
+    public static class PhysicsEntityAdded extends PhysicsEvent {
 
         @Getter
         private final PhysicsEntity<?> physicsEntity;
@@ -29,7 +29,7 @@ public class PhysicsEvent extends Event {
          * @param physicsEntity the physics entity which was added
          * @param physicsWorld  the physics world where the physics entity was added
          */
-        public PhysicsEntityAddedEvent(PhysicsEntity<?> physicsEntity, IPhysicsWorld physicsWorld) {
+        public PhysicsEntityAdded(PhysicsEntity<?> physicsEntity, IPhysicsWorld physicsWorld) {
             super(physicsWorld);
             this.physicsEntity = physicsEntity;
         }
@@ -38,7 +38,7 @@ public class PhysicsEvent extends Event {
     /**
      * Fired when an entity is removed from the physics world
      */
-    public static class PhysicsEntityRemovedEvent extends PhysicsEvent {
+    public static class PhysicsEntityRemoved extends PhysicsEvent {
 
         @Getter
         private final PhysicsEntity<?> physicsEntity;
@@ -47,7 +47,7 @@ public class PhysicsEvent extends Event {
          * @param physicsEntity the physics entity which was removed
          * @param physicsWorld  the physics world where the physics entity was removed
          */
-        public PhysicsEntityRemovedEvent(PhysicsEntity<?> physicsEntity, IPhysicsWorld physicsWorld) {
+        public PhysicsEntityRemoved(PhysicsEntity<?> physicsEntity, IPhysicsWorld physicsWorld) {
             super(physicsWorld);
             this.physicsEntity = physicsEntity;
         }
@@ -56,7 +56,7 @@ public class PhysicsEvent extends Event {
     /**
      * Called on physics world update
      */
-    public static class StepSimulationEvent extends PhysicsEvent {
+    public static class StepSimulation extends PhysicsEvent {
         @Getter
         private final float deltaTime;
 
@@ -64,7 +64,7 @@ public class PhysicsEvent extends Event {
          * @param physicsWorld The physics world where the simulation took place
          * @param deltaTime    The time that was simulated
          */
-        public StepSimulationEvent(IPhysicsWorld physicsWorld, float deltaTime) {
+        public StepSimulation(IPhysicsWorld physicsWorld, float deltaTime) {
             super(physicsWorld);
             this.deltaTime = deltaTime;
         }
@@ -80,32 +80,9 @@ public class PhysicsEvent extends Event {
     }
 
     /**
-     * Called when the state of a ChunkCollision has changed, see {@link EnumChunkCollisionsState}
-     */
-    public static class ChunkCollisionsStateEvent extends PhysicsEvent {
-        @Getter
-        private final ChunkCollisions collisions;
-        @Getter
-        private final EnumChunkCollisionsState oldState;
-
-        /**
-         * Called when the state of a ChunkCollision has changed, see {@link EnumChunkCollisionsState}
-         *
-         * @param physicsWorld The physics world owning this chunk
-         * @param collisions   The chunk (16*16*16 area)
-         * @param oldState     The old state of the chunk
-         */
-        public ChunkCollisionsStateEvent(IPhysicsWorld physicsWorld, ChunkCollisions collisions, EnumChunkCollisionsState oldState) {
-            super(physicsWorld);
-            this.collisions = collisions;
-            this.oldState = oldState;
-        }
-    }
-
-    /**
      * Called when a collision occurs in the physics engine
      */
-    public static class PhysicsCollisionEvent extends PhysicsEvent {
+    public static class PhysicsCollision extends PhysicsEvent {
         @Getter
         private final BulletShapeType<?> object1, object2;
 
@@ -115,7 +92,7 @@ public class PhysicsEvent extends Event {
          * @param object1   First collision object colliding with the second
          * @param object2   Second collision object colliding with the first
          */
-        public PhysicsCollisionEvent(IPhysicsWorld world, BulletShapeType<?> object1, BulletShapeType<?> object2){
+        public PhysicsCollision(IPhysicsWorld world, BulletShapeType<?> object1, BulletShapeType<?> object2){
             super(world);
             this.object1 = object1;
             this.object2 = object2;

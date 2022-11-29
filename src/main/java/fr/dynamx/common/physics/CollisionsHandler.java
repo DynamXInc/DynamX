@@ -3,10 +3,8 @@ package fr.dynamx.common.physics;
 import com.jme3.bullet.collision.PhysicsCollisionEvent;
 import fr.dynamx.api.events.PhysicsEvent;
 import fr.dynamx.api.physics.BulletShapeType;
-import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.PhysicsEntity;
-import fr.dynamx.common.physics.player.PlayerPhysicsHandler;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraftforge.common.MinecraftForge;
@@ -61,7 +59,7 @@ public class CollisionsHandler {
         }
 
         public void handleCollision() {
-            MinecraftForge.EVENT_BUS.post(new PhysicsEvent.PhysicsCollisionEvent(DynamXContext.getPhysicsWorld(), entityA, entityB));
+            MinecraftForge.EVENT_BUS.post(new PhysicsEvent.PhysicsCollision(DynamXContext.getPhysicsWorld(), entityA, entityB));
             if (entityA.getObjectIn() instanceof PhysicsEntity && entityB.getObjectIn() instanceof PhysicsEntity) {
                 if (entityA.getType().isBulletEntity()) {
                     ((PhysicsEntity<?>) entityA.getObjectIn()).onCollisionEnter(collisionEvent, entityA, entityB);

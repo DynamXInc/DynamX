@@ -107,7 +107,8 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
         Vector3f pos = Vector3fPool.get(physicsPosition);
         if (getCenterOfMass() != null)
             pos.addLocal(DynamXGeometry.rotateVectorByQuaternion(getCenterOfMass(), physicsRotation).multLocal(-1));
-        collisionObject.getCollisionShape().boundingBox(pos, physicsRotation, boundingBox);
+        if(Vector3f.isValidVector(pos))
+            collisionObject.getCollisionShape().boundingBox(pos, physicsRotation, boundingBox);
 
         isBodyActive = collisionObject.isActive();
     }

@@ -12,6 +12,8 @@ import fr.dynamx.common.entities.vehicles.BoatEntity;
 import fr.dynamx.common.entities.vehicles.BoatPhysicsHandler;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import lombok.Getter;
+import lombok.Setter;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -47,12 +49,29 @@ public class BoatPropellerModule implements IPropulsionModule<BoatPhysicsHandler
     }
 
     public class BoatPropellerHandler implements IPropulsionHandler {
+
+
+        private float accelerationForce = 5000;
+        private float brakeForce = -3000;
+        private float steerForce = 300;
+        @Getter
+        @Setter
+        private float accelerationFactor = 1;
+        @Getter
+        @Setter
+        private float brakeFactor = 1;
+        @Getter
+        @Setter
+        private float steerFactor = 1;
+
+
         @Override
         public void accelerate(IEngineModule module, float strength, float speedLimit) {
             Vector3f look = new Vector3f(0, 0, 1);
             look = DynamXGeometry.rotateVectorByQuaternion(look, boat.physicsRotation);
-            look.multLocal(5000 * strength);
-            boat.physicsHandler.getCollisionObject().applyForce(look, DynamXGeometry.rotateVectorByQuaternion(new Vector3f(0,-0.5f,-3), boat.physicsRotation));
+            look.multLocal(getAccelerationForce() * strength);
+            Vector3f rotatedPos = DynamXGeometry.rotateVectorByQuaternion(info.getPosition(), boat.physicsRotation);
+            boat.physicsHandler.getCollisionObject().applyForce(look, rotatedPos);
         }
 
         @Override
@@ -64,28 +83,37 @@ public class BoatPropellerModule implements IPropulsionModule<BoatPhysicsHandler
         public void brake(float strength) {
             Vector3f look = new Vector3f(0, 0, 1);
             look = DynamXGeometry.rotateVectorByQuaternion(look, boat.physicsRotation);
-            look.multLocal(-3000 * strength);
+            look.multLocal(getBrakeForce() * strength);
             boat.physicsHandler.getCollisionObject().applyForce(look, new Vector3f());
         }
 
         @Override
         public void handbrake(float strength) {
-            Vector3f look = boat.physicsHandler.getLinearVelocity();
-            look.multLocal(-0.8f);
         }
 
         @Override
         public void steer(float strength) {
             Vector3f look = new Vector3f(-1, 0, 0);
             look = DynamXGeometry.rotateVectorByQuaternion(look, boat.physicsRotation);
-            look.multLocal(300 * strength * boat.physicsHandler.getLinearVelocity().length() / 3);
+            look.multLocal(getSteerForce() * strength * boat.physicsHandler.getLinearVelocity().length() / 3);
             Vector3f linearFactor = boat.physicsHandler.getCollisionObject().getLinearFactor(Vector3fPool.get());
-            boat.physicsHandler.getCollisionObject().applyTorque(DynamXGeometry.rotateVectorByQuaternion(info.getPosition(), boat.physicsRotation).cross(look.multLocal(linearFactor)));
+            Vector3f rotatedPos = DynamXGeometry.rotateVectorByQuaternion(info.getPosition(), boat.physicsRotation);
+            boat.physicsHandler.getCollisionObject().applyTorque(rotatedPos.cross(look.multLocal(linearFactor)));
         }
 
         @Override
         public void applyEngineBraking(IEngineModule engine) {
 
+        }
+
+        public float getAccelerationForce(){
+            return accelerationForce * accelerationFactor;
+        }
+        public float getBrakeForce(){
+            return brakeForce * brakeFactor;
+        }
+        public float getSteerForce(){
+            return steerForce * steerFactor;
         }
     }
 }

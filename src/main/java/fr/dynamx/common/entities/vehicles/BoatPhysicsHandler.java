@@ -139,7 +139,8 @@ public class BoatPhysicsHandler<T extends BoatEntity<?>> extends BaseVehiclePhys
             Vector3f dragDir = velocityAtPoint.normalize();
             Vector3f dragForce = dragDir.multLocal(0.5f * DynamXPhysicsHelper.WATER_DENSITY * velocityLength * velocityLength * dragCoefficient * area);
 
-            collisionObject.applyForce(dragForce.multLocal(0.05f), rotatedFloaterPos);
+            if(Vector3f.isValidVector(dragForce))
+                collisionObject.applyForce(dragForce.multLocal(0.05f), rotatedFloaterPos);
             Vector3f nonRotatedDrag = DynamXGeometry.rotateVectorByQuaternion(dragForce, DynamXGeometry.inverseQuaternion(physicsRotation, QuaternionPool.get()));
             dragForces.get(i).set(nonRotatedDrag);
         }

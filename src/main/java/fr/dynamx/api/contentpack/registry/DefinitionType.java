@@ -156,10 +156,10 @@ public class DefinitionType<T> {
             return vec_array;
         }, DefinitionType::arrayToString, "type.vector3f.array")),
         VECTOR3F_ARRAY_BLENDER(new DefinitionType<>(Vector3f[].class, (s) -> {
-            String[] t = s.split(",");
+            String[] t = s.split(", ");
             Vector3f[] vec_array = new Vector3f[t.length];
             for (int i = 0; i < vec_array.length; i++) {
-                vec_array[i] = new Vector3f(Float.parseFloat(t[i].split(" ")[2]), Float.parseFloat(t[i].split(" ")[1]), Float.parseFloat(t[i].split(" ")[0]));
+                vec_array[i] = new Vector3f(Float.parseFloat(t[i].split(" ")[0]), Float.parseFloat(t[i].split(" ")[2]), Float.parseFloat(t[i].split(" ")[1])*-1);
             }
             return vec_array;
         }, DefinitionType::arrayToString, "type.vector3f.array.blender")),

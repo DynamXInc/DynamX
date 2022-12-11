@@ -35,7 +35,7 @@ public class GlQuaternionPool extends ClassPool<Quaternion> {
     }
 
     public GlQuaternionPool() {
-        super(10);
+        super(100, 10);
     }
 
     @Override

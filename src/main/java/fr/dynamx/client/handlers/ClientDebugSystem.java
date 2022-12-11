@@ -78,7 +78,7 @@ public class ClientDebugSystem {
                 }
             }
 
-            if (DynamXContext.getPhysicsWorld() != null) {
+            if (enableDebugDrawing && DynamXContext.getPhysicsWorld() != null) {
                 QuaternionPool.openPool();
                 Vector3fPool.openPool();
                 curRigidBodyStatesIndex++;

@@ -1,18 +1,24 @@
 package fr.dynamx.utils.optimization;
 
-import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.common.DynamXMain;
+
+import java.util.Stack;
 
 /**
  * Class pool utility for optimization <br>
  * Permits recycling objects instead of filling the memory
  */
 public abstract class ClassPool<T> {
+    protected final int capacityWarning;
+
     protected T[] pool;
     protected SubClassPool<T> root;
     protected int subPoolCount;
+    protected int sizeWarnings;
+    protected Stack<String> poolNames = new Stack<>();
 
-    public ClassPool(int initialCapacity) {
+    public ClassPool(int capacityWarning, int initialCapacity) {
+        this.capacityWarning = capacityWarning;
         this.pool = createNewPool(0, initialCapacity);
     }
 
@@ -53,11 +59,13 @@ public abstract class ClassPool<T> {
             System.arraycopy(pool, 0, nPool, 0, pool.length);
             pool = nPool;
 
-            if (this instanceof Vector3fPool) {
-                if (ClientDebugSystem.enableDebugDrawing)
-                    new NullPointerException("Bigger pool : " + pool.length + " ! " + this + " open c " + subPoolCount).printStackTrace();
-                else
-                    DynamXMain.log.debug("Bigger pool : " + pool.length + " ! " + this + " open c " + subPoolCount);
+            if (pool.length > capacityWarning) {
+                DynamXMain.log.warn("Optimization issue : Pool is very large : " + poolNames + " " + pool.length + " ! " + this + " open c " + subPoolCount + " of type " + this);
+                if (sizeWarnings < 4)
+                    Thread.dumpStack();
+                sizeWarnings++;
+            } else {
+                DynamXMain.log.info("Bigger pool : " + poolNames + " " + pool.length + " ! " + this + " open c " + subPoolCount + " of type " + this);
             }
         }
         instance = pool[root.getStartIndex() + root.getAffectedObjectsCount()]; //Take an unused instance

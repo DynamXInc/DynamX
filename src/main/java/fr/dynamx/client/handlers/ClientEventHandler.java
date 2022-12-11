@@ -310,13 +310,11 @@ public class ClientEventHandler {
         GlStateManager.translate(-x, -y, -z);
 
         Vector3fPool.openPool();
-        GlQuaternionPool.openPool();
         QuaternionPool.openPool();
         {
             RenderMovableLine.renderLine(event.getPartialTicks());
         }
         Vector3fPool.closePool();
-        GlQuaternionPool.closePool();
         QuaternionPool.closePool();
 
         GlStateManager.enableTexture2D();

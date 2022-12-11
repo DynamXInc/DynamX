@@ -117,15 +117,13 @@ public class ObjObjectRenderer {
     }
 
     public void render(ObjModelRenderer model, byte textureVariantID) {
-        if (objObjectData.getMesh().materials.isEmpty())
+        if (objObjectData.getMesh().materials.isEmpty() || !modelRenderData.containsKey((byte) 0))
             return;
         if (OpenGlHelper.useVbo()) {
             setupVAO();
-            if (!modelRenderData.containsKey(textureVariantID)) {
-                if (!modelRenderData.containsKey((byte) 0))
-                    return;
+            if (!modelRenderData.containsKey(textureVariantID))
                 renderVAO(model, modelRenderData.get((byte) 0));
-            } else
+            else
                 renderVAO(model, modelRenderData.get(textureVariantID));
         } else {
             if (!modelRenderData.containsKey(textureVariantID)) {

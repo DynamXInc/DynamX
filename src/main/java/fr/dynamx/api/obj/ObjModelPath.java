@@ -1,11 +1,11 @@
 package fr.dynamx.api.obj;
 
+import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.common.contentpack.PackInfo;
 import net.minecraft.util.ResourceLocation;
 
 import java.util.Collections;
 import java.util.List;
-
 import java.util.Objects;
 
 /**
@@ -16,6 +16,11 @@ import java.util.Objects;
 public class ObjModelPath implements INamedObject {
     private final List<PackInfo> packLocations;
     private final ResourceLocation modelPath;
+
+    public ObjModelPath(PackInfo packLocation, ResourceLocation modelPath) {
+        this.packLocations = Collections.singletonList(packLocation);
+        this.modelPath = modelPath;
+    }
 
     public ObjModelPath(List<PackInfo> packInfos, ResourceLocation modelPath) {
         this.packLocations = packInfos;
@@ -56,11 +61,11 @@ public class ObjModelPath implements INamedObject {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ObjModelPath that = (ObjModelPath) o;
-        return packInfo.equals(that.packInfo) && modelPath.equals(that.modelPath);
+        return packLocations.equals(that.packLocations) && modelPath.equals(that.modelPath);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(packInfo, modelPath);
+        return Objects.hash(packLocations, modelPath);
     }
 }

@@ -105,9 +105,9 @@ public class DynamXUtils {
         List<PackInfo> packLocations = DynamXObjectLoaders.PACKS.findPackLocations(packName);
         if (packLocations.isEmpty()) {
             DynamXMain.log.error("Pack info " + packName + " not found. This should not happen.");
-            return new ObjModelPath(new PackInfo(packName, ContentPackType.FOLDER), RegistryNameSetter.getDynamXModelResourceLocation(model));
+            return new ObjModelPath(new PackInfo(packName, ContentPackType.FOLDER), model);
         }
-        return new ObjModelPath(packLocations, RegistryNameSetter.getDynamXModelResourceLocation(model));
+        return new ObjModelPath(packLocations, model);
     }
 
     public static byte[] readInputStream(InputStream resource) throws IOException {

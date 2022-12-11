@@ -11,7 +11,7 @@ import fr.dynamx.client.gui.GuiLoadingErrors;
 import fr.dynamx.client.gui.GuiTexturedButton;
 import fr.dynamx.client.gui.VehicleHud;
 import fr.dynamx.client.renders.RenderMovableLine;
-import fr.dynamx.client.renders.model.ObjModelClient;
+import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.blocks.DynamXBlock;
@@ -72,7 +72,7 @@ public class ClientEventHandler {
     public static RenderPlayer renderPlayer;
 
     /* Placing block */
-    private ObjModelClient model;
+    private ObjModelRenderer model;
     private boolean canPlace;
     private BlockPos blockPos;
     private int playerOrientation;

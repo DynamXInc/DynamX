@@ -1,17 +1,53 @@
-package fr.dynamx.common.obj;
+package fr.dynamx.common.objloader.data;
 
 import com.jme3.bullet.collision.shapes.BoxCollisionShape;
 import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.obj.IObjObject;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
- * Structure of an {@link IObjObject}
+ * Structure of an {@link ObjObjectData}
  */
 public class Mesh {
     public int[] indices;
     public Vertex[] vertices;
-    public Material[] materials;
+    public String[] materialForEachVertex;
+    //public List<Material> materialsList = new ArrayList<>();
+    public Map<String, Material.IndexPair> materials = new HashMap<>();
+
+    public float[] getVerticesPos() {
+        float[] pos = new float[vertices.length * 3];
+        for (int i = 0; i < vertices.length; i++) {
+            pos[i * 3] = vertices[i].getPos().x;
+            pos[i * 3 + 1] = vertices[i].getPos().y;
+            pos[i * 3 + 2] = vertices[i].getPos().z;
+        }
+        return pos;
+    }
+
+    public float[] getVerticesNormals() {
+        float[] pos = new float[vertices.length * 3];
+        for (int i = 0; i < vertices.length; i++) {
+            pos[i * 3] = vertices[i].getNormal().x;
+            pos[i * 3 + 1] = vertices[i].getNormal().y;
+            pos[i * 3 + 2] = vertices[i].getNormal().z;
+        }
+        return pos;
+    }
+
+
+    public float[] getTextureCoords() {
+        float[] pos = new float[vertices.length * 2];
+        for (int i = 0; i < vertices.length; i++) {
+            pos[i * 2] = vertices[i].getTexCoords().x;
+            pos[i * 2 + 1] = 1 - vertices[i].getTexCoords().y;
+        }
+        return pos;
+    }
 
     /**
      * Return maximum point in the mesh.

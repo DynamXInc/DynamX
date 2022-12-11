@@ -10,6 +10,7 @@ import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.events.CreatePackItemEvent;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.contentpack.loader.ObjectLoader;
+import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import lombok.Getter;
 import lombok.Setter;
@@ -44,6 +45,17 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
     public BlockObject(String packName, String fileName) {
         super(packName, fileName);
         this.itemIcon = "Block";
+    }
+
+    @Override
+    public MaterialVariantsInfo<?> getVariants() {
+        return getSubPropertyByType(MaterialVariantsInfo.class);
+    }
+
+    @Override
+    public void onComplete(boolean hotReload) {
+        if (texturesArray != null)
+            new MaterialVariantsInfo(this, texturesArray).appendTo(this);
     }
 
     @Override
@@ -93,7 +105,7 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
     }
 
     public boolean isObj() {
-        return getModel().endsWith(".obj");
+        return getModel().getPath().endsWith(".obj");
     }
 
     @Override

@@ -9,6 +9,7 @@ import fr.dynamx.common.contentpack.type.objects.AbstractItemObject;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.RegistryNameSetter;
 import net.minecraft.item.Item;
+import net.minecraft.util.ResourceLocation;
 
 public class DynamXItem<T extends AbstractItemObject<T, ?>> extends Item implements IInfoOwner<T>, IResourcesOwner {
     protected T itemInfo;
@@ -37,7 +38,7 @@ public class DynamXItem<T extends AbstractItemObject<T, ?>> extends Item impleme
      * @param itemName The name of the item
      * @param model    The obj model of the item, must be under "dynamxmod:models/<model>"
      */
-    public DynamXItem(String modid, String itemName, String model) {
+    public DynamXItem(String modid, String itemName, ResourceLocation model) {
         if (modid.contains("builtin_mod_")) { //Backward-compatibility
             this.itemInfo = (T) DynamXObjectLoaders.ITEMS.addBuiltinObject(this, modid, itemName);
             modid = modid.replace("builtin_mod_", "");

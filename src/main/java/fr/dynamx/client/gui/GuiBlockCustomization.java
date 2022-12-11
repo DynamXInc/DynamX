@@ -6,11 +6,10 @@ import fr.aym.acsguis.component.panel.GuiFrame;
 import fr.aym.acsguis.component.panel.GuiPanel;
 import fr.aym.acsguis.component.textarea.GuiFloatField;
 import fr.aym.acsguis.component.textarea.GuiLabel;
-import fr.dynamx.client.renders.model.ObjModelClient;
+import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.blocks.TEDynamXBlock;
 import fr.dynamx.common.network.packets.MessageSyncBlockCustomization;
-import fr.dynamx.common.obj.eximpl.TessellatorModelClient;
 import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockRendererDispatcher;
@@ -27,7 +26,7 @@ public class GuiBlockCustomization extends GuiFrame
 {
     public static final ResourceLocation STYLE = new ResourceLocation(DynamXConstants.ID, "css/block_custom.css");
 
-    private static ObjModelClient model;
+    private static ObjModelRenderer model;
     private static TEDynamXBlock teBlock;
     GuiPanel preview = new GuiPanel();
 
@@ -122,10 +121,10 @@ public class GuiBlockCustomization extends GuiFrame
         Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
         int x = preview.getRenderMinX() + preview.getWidth();
         int y = preview.getRenderMinY() + preview.getHeight();
-        drawModelOnScreen(x / 1.2f - 30, y / 1.2f - 30, 20, mouseX, mouseY, (TessellatorModelClient) model);
+        drawModelOnScreen(x / 1.2f - 30, y / 1.2f - 30, 20, mouseX, mouseY, model);
     }
 
-    public void drawModelOnScreen(float posX, float posY, float scale, float mouseX, float mouseY, TessellatorModelClient model) {
+    public void drawModelOnScreen(float posX, float posY, float scale, float mouseX, float mouseY, ObjModelRenderer model) {
         unbindLayerBounds();
 
         BlockRendererDispatcher blockRenderer = Minecraft.getMinecraft().getBlockRendererDispatcher();

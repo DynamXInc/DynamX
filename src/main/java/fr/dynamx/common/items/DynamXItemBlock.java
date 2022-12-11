@@ -48,7 +48,7 @@ public class DynamXItemBlock extends ItemBlock implements IResourcesOwner, IInfo
 
     @Override
     public String getTranslationKey(ItemStack stack) {
-        return (stack.getMetadata() != 0 && dynamxMainBlock.textureNum > 1) ? super.getTranslationKey(stack) + "_" + dynamxMainBlock.getInfo().getTexturesFor(null).get((byte) stack.getMetadata()).getName().toLowerCase()
+        return (stack.getMetadata() != 0 && dynamxMainBlock.textureNum > 1) ? super.getTranslationKey(stack) + "_" + dynamxMainBlock.getInfo().getMainObjectVariantName((byte) stack.getMetadata())
                 : super.getTranslationKey(stack);
     }
 

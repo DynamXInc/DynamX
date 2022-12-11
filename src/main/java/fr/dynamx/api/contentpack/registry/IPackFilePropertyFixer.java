@@ -14,11 +14,16 @@ public interface IPackFilePropertyFixer
 
     class FixResult {
         private final String newKey;
-        private final boolean isDeprecation;
+        private final boolean isDeprecation, keepOldKey;
 
         public FixResult(String newKey, boolean isDeprecation) {
+            this(newKey, isDeprecation, false);
+        }
+
+        public FixResult(String newKey, boolean isDeprecation, boolean keepOldKey) {
             this.newKey = newKey;
             this.isDeprecation = isDeprecation;
+            this.keepOldKey = keepOldKey;
         }
 
         public String newKey() {
@@ -29,6 +34,10 @@ public interface IPackFilePropertyFixer
 
         public boolean isDeprecation() {
             return isDeprecation;
+        }
+
+        public boolean isKeepOldKey() {
+            return keepOldKey;
         }
     }
 

@@ -118,14 +118,14 @@ public class ClientEventHandler {
     }
 
     @SubscribeEvent
-    public void onMount(VehicleEntityEvent.MountVehicleEntityEvent event) {
+    public void onMount(VehicleEntityEvent.PlayerMount event) {
         if (event.getPlayer().isUser()) {
             ACsGuiApi.asyncLoadThenShowHudGui("Vehicle HUD", () -> new VehicleHud((IModuleContainer.ISeatsContainer) event.getEntity()));
         }
     }
 
     @SubscribeEvent
-    public void onDismount(VehicleEntityEvent.DismountVehicleEntityEvent event) {
+    public void onDismount(VehicleEntityEvent.PlayerDismount event) {
         if (event.getPlayer().isUser()) {
             ACsGuiApi.closeHudGui();
         }

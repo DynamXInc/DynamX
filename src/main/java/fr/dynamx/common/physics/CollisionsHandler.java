@@ -1,9 +1,13 @@
 package fr.dynamx.common.physics;
 
 import com.jme3.bullet.collision.PhysicsCollisionEvent;
+import fr.dynamx.api.events.PhysicsEvent;
 import fr.dynamx.api.physics.BulletShapeType;
+import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.PhysicsEntity;
-import fr.dynamx.common.physics.player.PlayerPhysicsHandler;
+import lombok.Getter;
+import lombok.Setter;
+import net.minecraftforge.common.MinecraftForge;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,10 +15,15 @@ import java.util.Objects;
 
 public class CollisionsHandler {
 
-    private static final List<CollisionInfo> cachedCollisions = new ArrayList<>();
+    @Getter
+    private static final List<CollisionInfo> CACHED_COLLISIONS = new ArrayList<>();
+
+    @Getter
+    @Setter
+    private static int EXPIRATION_TIME = 3 * 20;
 
     public static void tick() {
-        cachedCollisions.removeIf(CollisionInfo::tick);
+        CACHED_COLLISIONS.removeIf(CollisionInfo::tick);
     }
 
     /**
@@ -22,22 +31,20 @@ public class CollisionsHandler {
      */
     public static void handleCollision(PhysicsCollisionEvent collisionEvent, BulletShapeType<?> bodyA, BulletShapeType<?> bodyB) {
         if (bodyA.getType().isEntity() && bodyB.getType().isEntity() || bodyA.getType().isEntity() && bodyB.getType().isTerrain() || bodyA.getType().isTerrain() && bodyB.getType().isEntity()) {
-            CollisionInfo info = new CollisionInfo(bodyA, bodyB, 3 * 20, collisionEvent);
-            if (!cachedCollisions.contains(info)) {
-                cachedCollisions.add(info);
+            CollisionInfo info = new CollisionInfo(bodyA, bodyB, EXPIRATION_TIME, collisionEvent);
+            if (!CACHED_COLLISIONS.contains(info)) {
+                CACHED_COLLISIONS.add(info);
                 info.handleCollision();
             }
         }
     }
 
-
-    public static List<CollisionInfo> getCachedCollisions() {
-        return cachedCollisions;
-    }
-
     public static class CollisionInfo {
+        @Getter
         private final BulletShapeType<?> entityA, entityB;
+        @Getter
         private final PhysicsCollisionEvent collisionEvent;
+        @Getter
         private int time;
 
         public CollisionInfo(BulletShapeType<?> entityA, BulletShapeType<?> entityB, int time, PhysicsCollisionEvent collisionEvent) {
@@ -47,29 +54,12 @@ public class CollisionsHandler {
             this.collisionEvent = collisionEvent;
         }
 
-        public PhysicsCollisionEvent getCollisionEvent() {
-            return collisionEvent;
-        }
-
-        public BulletShapeType<?> getEntityA() {
-            return entityA;
-        }
-
-        public BulletShapeType<?> getEntityB() {
-            return entityB;
-        }
-
-        public int getTime() {
-            return time;
-        }
-
         public boolean tick() {
-            time--;
-            return time <= 0;
+            return time-- <= 0;
         }
 
         public void handleCollision() {
-            //if (getAppliedImpulse() != 0) {
+            MinecraftForge.EVENT_BUS.post(new PhysicsEvent.PhysicsCollision(DynamXContext.getPhysicsWorld(), entityA, entityB));
             if (entityA.getObjectIn() instanceof PhysicsEntity && entityB.getObjectIn() instanceof PhysicsEntity) {
                 if (entityA.getType().isBulletEntity()) {
                     ((PhysicsEntity<?>) entityA.getObjectIn()).onCollisionEnter(collisionEvent, entityA, entityB);
@@ -77,11 +67,10 @@ public class CollisionsHandler {
                     ((PhysicsEntity<?>) entityB.getObjectIn()).onCollisionEnter(collisionEvent, entityA, entityB);
                 }
             }
-            // }
-            if (entityA.getType().isPlayer() && entityB.getType().isBulletEntity()) {
+           /* if (entityA.getType().isPlayer() && entityB.getType().isBulletEntity()) {
                 //((PlayerPhysicsHandler) entity1.getObjectIn()).handleCollision(event, entity2);
             } else if (entityB.getType().isPlayer() && entityA.getType().isBulletEntity())
-                ((PlayerPhysicsHandler) entityB.getObjectIn()).handleCollision(collisionEvent, entityA);
+                ((PlayerPhysicsHandler) entityB.getObjectIn()).handleCollision(collisionEvent, entityA);*/
         }
 
         @Override

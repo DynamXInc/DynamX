@@ -39,7 +39,7 @@ public class VehicleEntityEvent extends Event {
      * Called on server side when a player entity interacts with a vehicle
      */
     @Cancelable
-    public static class VehicleInteractEntityEvent extends VehicleEntityEvent {
+    public static class PlayerInteract extends VehicleEntityEvent {
         /**
          * The player who interacted with the vehicle
          */
@@ -59,7 +59,7 @@ public class VehicleEntityEvent extends Event {
          * @param vehicleEntity the vehicle that the player interacted with
          * @param part          the part that the player interacted with (null if the player interacted with the vehicle itself)
          */
-        public VehicleInteractEntityEvent(EntityPlayer player, BaseVehicleEntity<?> vehicleEntity, @Nullable InteractivePart<?, ?> part) {
+        public PlayerInteract(EntityPlayer player, BaseVehicleEntity<?> vehicleEntity, @Nullable InteractivePart<?, ?> part) {
             super(Side.SERVER, vehicleEntity);
             this.player = player;
             this.part = part;
@@ -89,7 +89,7 @@ public class VehicleEntityEvent extends Event {
      * Called on client and server sides when a entity has mounted on an entity <br>
      * On client side, also called when the vehicle entity starts to be tracked by the local player
      */
-    public static class MountVehicleEntityEvent extends VehicleEntityEvent {
+    public static class PlayerMount extends VehicleEntityEvent {
         @Getter
         private final EntityPlayer player;
         @Getter
@@ -103,7 +103,7 @@ public class VehicleEntityEvent extends Event {
          * @param module        the seats module, calling this event
          * @param seat          the seat that the player mounted
          */
-        public MountVehicleEntityEvent(Side side, EntityPlayer player, BaseVehicleEntity<?> vehicleEntity, ISeatsModule module, PartSeat seat) {
+        public PlayerMount(Side side, EntityPlayer player, BaseVehicleEntity<?> vehicleEntity, ISeatsModule module, PartSeat seat) {
             super(side, vehicleEntity);
             this.player = player;
             this.module = module;
@@ -114,7 +114,7 @@ public class VehicleEntityEvent extends Event {
     /**
      * Called on client and server sides when a entity has dismounted an entity
      */
-    public static class DismountVehicleEntityEvent extends VehicleEntityEvent {
+    public static class PlayerDismount extends VehicleEntityEvent {
         @Getter
         private final EntityPlayer player;
         @Getter
@@ -128,7 +128,7 @@ public class VehicleEntityEvent extends Event {
          * @param module        the seats module, calling this event
          * @param seat          the seat that the player dismounted
          */
-        public DismountVehicleEntityEvent(Side side, EntityPlayer player, BaseVehicleEntity<?> vehicleEntity, ISeatsModule module, PartSeat seat) {
+        public PlayerDismount(Side side, EntityPlayer player, BaseVehicleEntity<?> vehicleEntity, ISeatsModule module, PartSeat seat) {
             super(side, vehicleEntity);
             this.player = player;
             this.module = module;
@@ -139,11 +139,11 @@ public class VehicleEntityEvent extends Event {
     /**
      * Fired when loading a vehicle from NBT
      */
-    public static class LoadVehicleEntityNBT extends VehicleEntityEvent {
+    public static class LoadFromNBT extends VehicleEntityEvent {
         @Getter
         private final NBTTagCompound nbtTagCompound;
 
-        public LoadVehicleEntityNBT(NBTTagCompound nbtTagCompound, BaseVehicleEntity<?> vehicleEntity) {
+        public LoadFromNBT(NBTTagCompound nbtTagCompound, BaseVehicleEntity<?> vehicleEntity) {
             super(vehicleEntity.world.isRemote ? Side.CLIENT : Side.SERVER, vehicleEntity);
             this.nbtTagCompound = nbtTagCompound;
         }
@@ -152,11 +152,11 @@ public class VehicleEntityEvent extends Event {
     /**
      * Fired when saving a vehicle to NBT
      */
-    public static class SaveVehicleEntityNBT extends VehicleEntityEvent {
+    public static class SaveToNBT extends VehicleEntityEvent {
         @Getter
         private final NBTTagCompound nbtTagCompound;
 
-        public SaveVehicleEntityNBT(NBTTagCompound nbtTagCompound, BaseVehicleEntity<?> vehicleEntity) {
+        public SaveToNBT(NBTTagCompound nbtTagCompound, BaseVehicleEntity<?> vehicleEntity) {
             super(vehicleEntity.world.isRemote ? Side.CLIENT : Side.SERVER, vehicleEntity);
             this.nbtTagCompound = nbtTagCompound;
         }
@@ -168,7 +168,7 @@ public class VehicleEntityEvent extends Event {
      * The debug render has not Pre phase
      */
     @Cancelable
-    public static class RenderVehicleEntityEvent extends VehicleEntityEvent {
+    public static class Render extends VehicleEntityEvent {
         @Getter
         private final RenderBaseVehicle<?> renderBaseVehicle;
         @Getter
@@ -187,7 +187,7 @@ public class VehicleEntityEvent extends Event {
          * @param phase             the phase of the render (Post or Pre)
          * @param partialTicks      the partial render ticks
          */
-        public RenderVehicleEntityEvent(Type type, RenderBaseVehicle<?> renderBaseVehicle, BaseVehicleEntity<?> carEntity, PhysicsEntityEvent.Phase phase, float partialTicks) {
+        public Render(Type type, RenderBaseVehicle<?> renderBaseVehicle, BaseVehicleEntity<?> carEntity, PhysicsEntityEvent.Phase phase, float partialTicks) {
             super(Side.CLIENT, carEntity);
             this.type = type;
             this.renderBaseVehicle = renderBaseVehicle;
@@ -206,7 +206,7 @@ public class VehicleEntityEvent extends Event {
      * Cancelling the event will remove DynamX components from the HUD
      */
     @Cancelable
-    public static class CreateVehicleHudEvent extends VehicleEntityEvent {
+    public static class CreateHud extends VehicleEntityEvent {
         /**
          * The vehicle's HUD gui
          */
@@ -235,7 +235,7 @@ public class VehicleEntityEvent extends Event {
          * @param vehicleEntity   the vehicle
          * @param controllers     the vehicle controllers displayed on the HUD
          */
-        public CreateVehicleHudEvent(VehicleHud vehicleHUD, List<ResourceLocation> styleSheets, boolean isPlayerDriving, BaseVehicleEntity<?> vehicleEntity, List<IVehicleController> controllers) {
+        public CreateHud(VehicleHud vehicleHUD, List<ResourceLocation> styleSheets, boolean isPlayerDriving, BaseVehicleEntity<?> vehicleEntity, List<IVehicleController> controllers) {
             super(Side.CLIENT, vehicleEntity);
             this.vehicleHud = vehicleHUD;
             this.styleSheets = styleSheets;
@@ -248,7 +248,7 @@ public class VehicleEntityEvent extends Event {
      * Called on client side when the engine sounds of the entity are updated
      */
     @Cancelable
-    public static class UpdateVehicleSoundEntityEvent extends VehicleEntityEvent {
+    public static class UpdateSounds extends VehicleEntityEvent {
         @Getter
         private final PhysicsEntityEvent.Phase eventPhase;
         /**
@@ -257,7 +257,7 @@ public class VehicleEntityEvent extends Event {
         @Getter
         private final IEngineModule module;
 
-        public UpdateVehicleSoundEntityEvent(BaseVehicleEntity<?> vehicleEntity, IEngineModule module, PhysicsEntityEvent.Phase phase) {
+        public UpdateSounds(BaseVehicleEntity<?> vehicleEntity, IEngineModule module, PhysicsEntityEvent.Phase phase) {
             super(Side.CLIENT, vehicleEntity);
             this.eventPhase = phase;
             this.module = module;
@@ -270,7 +270,7 @@ public class VehicleEntityEvent extends Event {
      * This event is cancellable, and you can change the newWheel to be set
      */
     @Cancelable
-    public static class ChangeVehicleWheelEvent extends VehicleEntityEvent {
+    public static class ChangeWheel extends VehicleEntityEvent {
         /**
          * The part id of the changed wheel
          */
@@ -293,7 +293,7 @@ public class VehicleEntityEvent extends Event {
         @Getter
         private final WheelsModule wheelsModule;
 
-        public ChangeVehicleWheelEvent(Side side, BaseVehicleEntity<?> vehicleEntity, WheelsModule wheelsModule, PartWheelInfo oldWheel, PartWheelInfo newWheel, byte wheelPartId) {
+        public ChangeWheel(Side side, BaseVehicleEntity<?> vehicleEntity, WheelsModule wheelsModule, PartWheelInfo oldWheel, PartWheelInfo newWheel, byte wheelPartId) {
             super(side, vehicleEntity);
             this.wheelsModule = wheelsModule;
             this.wheelPartId = wheelPartId;
@@ -306,11 +306,11 @@ public class VehicleEntityEvent extends Event {
      * Called on {@link CarController} post update, so you can override controls
      * <br> This event is not cancellable, and fired on client side
      */
-    public static class VehicleControllerUpdateEvent<T extends IVehicleController> extends VehicleEntityEvent {
+    public static class ControllerUpdate<T extends IVehicleController> extends VehicleEntityEvent {
         @Getter
         private final T controller;
 
-        public VehicleControllerUpdateEvent(BaseVehicleEntity<?> vehicleEntity, T controller) {
+        public ControllerUpdate(BaseVehicleEntity<?> vehicleEntity, T controller) {
             super(Side.CLIENT, vehicleEntity);
             this.controller = controller;
         }

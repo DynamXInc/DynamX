@@ -160,7 +160,7 @@ public class CarController implements IVehicleController {
                 }
             }
 
-            MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.VehicleControllerUpdateEvent<>(entity, this));
+            MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.ControllerUpdate<>(entity, this));
             int controls = 0;
             if (accelerating)
                 controls = controls | 1;

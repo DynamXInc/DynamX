@@ -5,7 +5,6 @@ import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.PhysicsCollisionEvent;
 import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.bullet.joints.PhysicsJoint;
-import com.jme3.bullet.objects.PhysicsVehicle;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.events.PhysicsEvent;
 import fr.dynamx.api.physics.BulletShapeType;
@@ -151,6 +150,9 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
         profiler.end(Profiler.Profiles.LOAD_SHAPES);
         Vector3fPool.closePool();
 
+        //Update collisions handler
+        CollisionsHandler.tick();
+
         //Pre-tick each entity before the physics engine tick
         //Read the input data and send it to the physics
         profiler.start(Profiler.Profiles.PHYSICS_TICK_ENTITIES_PRE);
@@ -197,7 +199,7 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
 
         // if (false && CmdNetworkConfig.sync_buff)
         //   System.out.println("Took " + (System.currentTimeMillis() - pre) + " ms");
-        MinecraftForge.EVENT_BUS.post(new PhysicsEvent.StepSimulationEvent(this, DynamXContext.getPhysicsSimulationMode(Side.SERVER).getTimeStep()));
+        MinecraftForge.EVENT_BUS.post(new PhysicsEvent.StepSimulation(this, DynamXContext.getPhysicsSimulationMode(Side.SERVER).getTimeStep()));
         profiler.end(Profiler.Profiles.BULLET_STEP_SIM);
     }
 

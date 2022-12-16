@@ -137,7 +137,7 @@ public class PackInfo extends SubInfoTypeOwner<PackInfo> implements INamedObject
 
     @Override
     public String getName() {
-        return "pack_info";
+        return "pack_info in " + packType.name();
     }
 
     @Override
@@ -174,7 +174,8 @@ public class PackInfo extends SubInfoTypeOwner<PackInfo> implements INamedObject
                 ZipEntry e = root.getEntry("assets/" + file.getNamespace() + "/" + file.getPath());
                 if(e != null)
                     result = root.getInputStream(e);
-                root.close();
+                else //if not found, close now, else we close 'result' later
+                    root.close();
                 break;
             case BUILTIN:
                 System.out.println("Builtin model " + this);

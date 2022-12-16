@@ -54,7 +54,7 @@ public interface IPhysicsWorld {
     default void addBulletEntity(PhysicsEntity<?> e) {
         e.isRegistered = 1;
         addOperation(new PhysicsWorldOperation<>(PhysicsWorldOperation.PhysicsWorldOperationType.ADD_ENTITY, e));
-        MinecraftForge.EVENT_BUS.post(new PhysicsEvent.PhysicsEntityAddedEvent(e, this));
+        MinecraftForge.EVENT_BUS.post(new PhysicsEvent.PhysicsEntityAdded(e, this));
     }
 
     /**
@@ -65,7 +65,7 @@ public interface IPhysicsWorld {
     default void removeBulletEntity(PhysicsEntity<?> e) {
         addOperation(new PhysicsWorldOperation<>(PhysicsWorldOperation.PhysicsWorldOperationType.REMOVE_ENTITY, e));
         e.isRegistered = 0;
-        MinecraftForge.EVENT_BUS.post(new PhysicsEvent.PhysicsEntityRemovedEvent(e, this));
+        MinecraftForge.EVENT_BUS.post(new PhysicsEvent.PhysicsEntityRemoved(e, this));
     }
 
     /**

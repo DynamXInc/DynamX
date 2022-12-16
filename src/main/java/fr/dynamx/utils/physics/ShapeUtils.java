@@ -43,7 +43,6 @@ public class ShapeUtils {
             try {
                 dcInputStream = packInfo.readFile(dcFileLocation);
                 if(dcInputStream != null) {
-                    System.out.println(dcFileLocation + " found in " + packInfo);
                     dcFilePackInfo = packInfo;
                     break;
                 }
@@ -72,7 +71,7 @@ public class ShapeUtils {
         }
         if (shapeGenerator == null) {
             ObjModelData model = DynamXContext.getObjModelDataFromCache(path);
-            String modelPath = DynamXMain.resDir + File.separator + path.getPackName() + File.separator + "assets" + //todo prevents from searching in zip files : we use the pack name
+            String modelPath = DynamXMain.resDir + File.separator + path.getPackName() + File.separator + "assets" + //todo prevents from saving in zip files : we use the pack name
                     File.separator + path.getModelPath().getNamespace() + File.separator + path.getModelPath().getPath().replace("/", File.separator);
             String modelName = modelPath.substring(modelPath.lastIndexOf(File.separator) + 1);
             File file = new File(modelPath.replace(".obj", "_" +lowerCaseObjectName+"_"+ DynamXConstants.DC_FILE_VERSION + ".dc"));

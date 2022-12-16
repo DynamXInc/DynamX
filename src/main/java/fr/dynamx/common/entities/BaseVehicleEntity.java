@@ -69,7 +69,7 @@ public abstract class BaseVehicleEntity<T extends BaseVehiclePhysicsHandler<?>> 
     @Override
     protected final void fireCreateModulesEvent(Side side) {
         //Don't simplify the generic type, for fml
-        MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.CreateEntityModulesEvent<>(BaseVehicleEntity.class, this, moduleList, side));
+        MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.CreateModules<>(BaseVehicleEntity.class, this, moduleList, side));
     }
 
     @Override
@@ -77,7 +77,7 @@ public abstract class BaseVehicleEntity<T extends BaseVehiclePhysicsHandler<?>> 
         super.readEntityFromNBT(tagCompound);
 
         setMetadata(tagCompound.getInteger("Metadata"));
-        MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.LoadVehicleEntityNBT(tagCompound, this));
+        MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.LoadFromNBT(tagCompound, this));
     }
 
     @Override
@@ -85,7 +85,7 @@ public abstract class BaseVehicleEntity<T extends BaseVehiclePhysicsHandler<?>> 
         super.writeEntityToNBT(tagCompound);
 
         tagCompound.setInteger("Metadata", getMetadata());
-        MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.SaveVehicleEntityNBT(tagCompound, this));
+        MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.SaveToNBT(tagCompound, this));
     }
 
     @Override

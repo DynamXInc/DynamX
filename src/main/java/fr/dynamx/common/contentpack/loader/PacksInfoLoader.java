@@ -4,6 +4,8 @@ import fr.dynamx.api.contentpack.ContentPackType;
 import fr.dynamx.common.contentpack.PackInfo;
 
 import javax.annotation.Nullable;
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
@@ -35,11 +37,19 @@ public class PacksInfoLoader extends InfoLoader<PackInfo> {
         return infos.values().stream().filter(packInfo -> packInfo.getFixedPackName().equalsIgnoreCase(packName)).collect(Collectors.toList());
     }
 
-    /**
-     * Injects the given pack info <br>
-     * Used to add default pack info to all packs
-     */
-    public void addInfo(String packName, PackInfo dummyInfo) {
-        infos.put(packName, dummyInfo);
+    public PackInfo load(String loadingPack, String configName, BufferedReader inputStream, boolean hot, String pathName, ContentPackType packType) throws IOException {
+        PackInfo info = assetCreator.apply(loadingPack, configName);
+        info.setPathName(pathName);
+        info.setPackType(packType);
+        if (infos.containsKey(info.getFullName()))
+            throw new IllegalArgumentException("Found a duplicated pack file " + configName + " in pack " + loadingPack + " !");
+        readInfo(inputStream, info);
+        loadItems(info, hot);
+        return info;
+    }
+
+    @Override
+    public boolean load(String loadingPack, String configName, BufferedReader inputStream, boolean hot) throws IOException {
+        return false; //Should be manually loaded using the above method
     }
 }

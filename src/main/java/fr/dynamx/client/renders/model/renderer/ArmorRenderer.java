@@ -38,7 +38,7 @@ public class ArmorRenderer extends ModelRenderer {
     public void render(float scale) {
         if (!this.isHidden) {
             if (this.showModel) {
-                if (MinecraftForge.EVENT_BUS.post(new ArmorEvent.RenderArmorEvent(model, objModel, objObjectRenderer, PhysicsEntityEvent.Phase.PRE, ArmorEvent.RenderArmorEvent.Type.NORMAL)))
+                if (MinecraftForge.EVENT_BUS.post(new ArmorEvent.Render(model, objModel, objObjectRenderer, PhysicsEntityEvent.Phase.PRE, ArmorEvent.Render.Type.NORMAL)))
                     return;
                 GlStateManager.pushMatrix();
                 GlStateManager.translate(this.rotationPointX, this.rotationPointY, this.rotationPointZ);
@@ -57,7 +57,7 @@ public class ArmorRenderer extends ModelRenderer {
     public void renderWithRotation(float scale) {
         if (!this.isHidden) {
             if (this.showModel) {
-                if (MinecraftForge.EVENT_BUS.post(new ArmorEvent.RenderArmorEvent(model, objModel, objObjectRenderer, PhysicsEntityEvent.Phase.PRE, ArmorEvent.RenderArmorEvent.Type.WITH_ROTATION)))
+                if (MinecraftForge.EVENT_BUS.post(new ArmorEvent.Render(model, objModel, objObjectRenderer, PhysicsEntityEvent.Phase.PRE, ArmorEvent.Render.Type.WITH_ROTATION)))
                     return;
                 GlStateManager.pushMatrix();
                 GlStateManager.translate(this.rotationPointX * scale, this.rotationPointY * scale, this.rotationPointZ * scale);
@@ -76,7 +76,7 @@ public class ArmorRenderer extends ModelRenderer {
     public void postRender(float scale) {
         if (!this.isHidden) {
             if (this.showModel) {
-                if (MinecraftForge.EVENT_BUS.post(new ArmorEvent.RenderArmorEvent(model, objModel, objObjectRenderer, PhysicsEntityEvent.Phase.POST, ArmorEvent.RenderArmorEvent.Type.NORMAL)))
+                if (MinecraftForge.EVENT_BUS.post(new ArmorEvent.Render(model, objModel, objObjectRenderer, PhysicsEntityEvent.Phase.POST, ArmorEvent.Render.Type.NORMAL)))
                     return;
                 if (this.rotateAngleX == 0.0F && this.rotateAngleY == 0.0F && this.rotateAngleZ == 0.0F) {
                     if (this.rotationPointX != 0.0F || this.rotationPointY != 0.0F || this.rotationPointZ != 0.0F) {

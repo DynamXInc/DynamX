@@ -12,7 +12,7 @@ public class RenderProp<T extends PropsEntity<?>> extends RenderPhysicsEntity<T>
     public RenderProp(RenderManager manager) {
         super(manager);
         addDebugRenderers(new DebugRenderer.HullDebug());
-        MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.InitPhysicEntityRenderEvent<>(PropsEntity.class, this));
+        MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.InitRenderer<>(PropsEntity.class, this));
     }
 
     @Override

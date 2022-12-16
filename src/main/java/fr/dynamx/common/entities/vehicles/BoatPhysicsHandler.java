@@ -99,7 +99,8 @@ public class BoatPhysicsHandler<T extends BoatEntity<?>> extends BaseVehiclePhys
 
         if (isInLiquid) {
             BlockPos blockPos = new BlockPos(physicsPosition.x, physicsPosition.y + liquidOffset, physicsPosition.z);
-            waterLevel = (float) handledEntity.getEntityWorld().getBlockState(blockPos).getSelectedBoundingBox(handledEntity.getEntityWorld(), blockPos).maxY - 0.125F + 0.5f;
+            AxisAlignedBB boundingBox = handledEntity.getEntityWorld().getBlockState(blockPos).getBoundingBox(handledEntity.getEntityWorld(), blockPos);
+            waterLevel = (float) boundingBox.offset(blockPos).maxY - 0.125F + 0.5f;
             int i = 0;
             for (PartFloat partFloat : floatList) {
                 for (Vector3f floatCenter : partFloat.childFloatsPos) {

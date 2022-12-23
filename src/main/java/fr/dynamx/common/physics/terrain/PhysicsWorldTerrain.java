@@ -298,16 +298,12 @@ public class PhysicsWorldTerrain implements ITerrainManager {
         //Process chunk changes
         for (Map.Entry<VerticalChunkPos, Byte> en : scheduledChunkReload.entrySet()) {
             byte state = en.getValue();
-            if (TerrainFile.ULTIMATEDEBUG)
-                System.out.println("Exec " + state + " " + scheduledChunkReload);
             if (state == 1) {
                 remove.add(en.getKey());
                 scheduledChunkReload.remove(en.getKey());
                 onChunkChanged(en.getKey());
             } else
                 en.setValue((byte) (state - 1));
-            if (TerrainFile.ULTIMATEDEBUG)
-                System.out.println("End : " + scheduledChunkReload);
         }
         if (!remove.isEmpty()) {
             remove.forEach(scheduledChunkReload::remove);
@@ -402,8 +398,8 @@ public class PhysicsWorldTerrain implements ITerrainManager {
                     }
                 }
             } else { //If it's loading, it's iznogood
-                if (TerrainFile.ULTIMATEDEBUG) {
-                    System.out.println("This chunk is still loading, wtf " + ticket);
+                if (DynamXConfig.enableDebugTerrainManager) {
+                    DynamXMain.log.error("This chunk is still loading, wtf " + ticket);
                     ChunkGraph graph = ChunkGraph.getAt(pos);
                     if (graph != null) {
                         System.out.println("Printing graph " + pos);
@@ -467,9 +463,6 @@ public class PhysicsWorldTerrain implements ITerrainManager {
      * @param pos   The modified position. The corresponding chunk will be reloaded
      */
     public void onBlockChange(World world, BlockPos pos) {
-        VerticalChunkPos p = new VerticalChunkPos(pos.getX() >> 4, pos.getY() >> 4, pos.getZ() >> 4);
-        if (TerrainFile.ULTIMATEDEBUG)
-            System.out.println("Notify " + p + " " + pos + " " + scheduledChunkReload);
-        scheduledChunkReload.put(p, (byte) 10);
+        scheduledChunkReload.put(new VerticalChunkPos(pos.getX() >> 4, pos.getY() >> 4, pos.getZ() >> 4), (byte) 10);
     }
 }

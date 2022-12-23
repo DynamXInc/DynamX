@@ -65,9 +65,6 @@ public class MessageUpdateChunk implements IDnxPacket, IMessageHandler<MessageUp
 
     @Override
     public void handleUDPReceive(EntityPlayer context, Side side) {
-        //if(DynamXConfig.enableDebugTerrainManager)
-        TerrainFile.ULTIMATEDEBUG = false;
-        //System.out.println("Receive dirty "+ Arrays.toString(chunksToUpdate) +" "+DynamXContext.getPhysicsWorld()+" "+DynamXMain.proxy.shouldUseBulletSimulation(context.world));
         IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(ClientEventHandler.MC.world);
         if (physicsWorld != null && DynamXMain.proxy.shouldUseBulletSimulation(context.world)) {
             physicsWorld.schedule(() -> {
@@ -78,6 +75,6 @@ public class MessageUpdateChunk implements IDnxPacket, IMessageHandler<MessageUp
                 Vector3fPool.closePool();
             });
         } else if (DynamXConfig.enableDebugTerrainManager)
-            System.out.println("RCV FAILZ " + physicsWorld + " " + DynamXMain.proxy.shouldUseBulletSimulation(context.world));
+            DynamXMain.log.info("RCV FAILZ " + physicsWorld + " " + DynamXMain.proxy.shouldUseBulletSimulation(context.world));
     }
 }

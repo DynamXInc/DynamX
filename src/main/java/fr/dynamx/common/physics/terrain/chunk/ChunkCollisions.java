@@ -361,7 +361,7 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
         Vector3fPool.openPool();
         QuaternionPool.openPool();
 
-        boolean debug = DynamXConfig.enableDebugTerrainManager && (DynamXConfig.chunkDebugPoses.contains(getPos()) || TerrainFile.ULTIMATEDEBUG);
+        boolean debug = DynamXConfig.enableDebugTerrainManager && DynamXConfig.chunkDebugPoses.contains(getPos());
         if (debug)
             DynamXMain.log.info("[CHUNK DEBUG] Computing collisions of chunk " + this + " with " + this.elements + " before, and take from " + ticket + " at " + System.currentTimeMillis());
         if (DynamXConfig.enableDebugTerrainManager)

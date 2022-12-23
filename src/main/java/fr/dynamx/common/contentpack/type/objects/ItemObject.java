@@ -4,10 +4,12 @@ import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.events.CreatePackItemEvent;
+import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.common.contentpack.loader.ObjectLoader;
 import fr.dynamx.common.items.DynamXItem;
 import net.minecraftforge.common.MinecraftForge;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,5 +59,12 @@ public class ItemObject<T extends ItemObject<?>> extends AbstractItemObject<T, T
     @Override
     public String toString() {
         return "ItemObject named " + getFullName();
+    }
+
+    @Nullable
+    @Override
+    public IModelTextureVariants getTextureVariantsFor(ObjObjectRenderer objObjectRenderer) {
+        // variants not supported on items
+        return null;
     }
 }

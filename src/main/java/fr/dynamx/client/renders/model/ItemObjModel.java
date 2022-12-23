@@ -3,6 +3,7 @@ package fr.dynamx.client.renders.model;
 import com.google.common.collect.ImmutableList;
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
 import fr.dynamx.api.contentpack.object.render.IObjPackObject;
+import fr.dynamx.client.renders.model.renderer.ObjItemModelLoader;
 import fr.dynamx.common.DynamXMain;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -41,10 +42,8 @@ public class ItemObjModel implements IModel {
 
         DynamXMain.log.debug("Registered item model " + location + " for " + owner.getModel() + " of " + owner.getPackName() + " with render locations " + owner.get3DItemRenderLocation());
         if (owner.get3DItemRenderLocation() != Enum3DRenderLocation.ALL) {
-            //System.out.println("Path is "+location+" "+location.getPath());
             gui = ModelLoaderRegistry.getModel(new ResourceLocation(location.getNamespace(), "item/" + location.getPath().replace(".obj", "")));
         }
-        //objObjects.addAll(DynamXModelRegistry.getModel(location.getPath()).objObjects);
     }
 
     public void setOwner(IObjPackObject owner) {

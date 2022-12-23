@@ -16,6 +16,7 @@ import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.events.CreatePackItemEvent;
 import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
+import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.contentpack.loader.ObjectLoader;
 import fr.dynamx.common.contentpack.loader.PackFilePropertyData;
@@ -93,7 +94,6 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
         this.renderDistance = block.getRenderDistance();
         this.creativeTabName = block.getCreativeTabName();
         this.useHullShape = block.useHullShape();
-        this.texturesArray = block.texturesArray;
         this.particleEmitters = block.getParticleEmitters();
         getPartShapes().addAll(block.getPartShapes());
     }
@@ -142,6 +142,11 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
         compoundCollisionShape.setMargin(margin);
         debugBuffer = ShapeUtils.getDebugVectorList(compoundCollisionShape, ShapeUtils.getDebugBuffer(compoundCollisionShape));
         return true;
+    }
+
+    @Override
+    public MaterialVariantsInfo<?> getVariants() {
+        return owner != null ? owner.getVariants() : null;
     }
 
     @Override

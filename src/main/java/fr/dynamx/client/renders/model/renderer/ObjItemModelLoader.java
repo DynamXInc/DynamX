@@ -1,4 +1,4 @@
-package fr.dynamx.client.renders.model;
+package fr.dynamx.client.renders.model.renderer;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
@@ -6,6 +6,7 @@ import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.api.events.DynamXItemEvent;
 import fr.dynamx.api.events.EventStage;
 import fr.dynamx.api.obj.IObjModelRegistry;
+import fr.dynamx.client.renders.model.ItemObjModel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderItem;

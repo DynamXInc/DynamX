@@ -29,17 +29,20 @@ import net.minecraft.nbt.NBTTagFloat;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.lwjgl.BufferUtils;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -98,13 +101,13 @@ public class DynamXUtils {
     /**
      * @return A new {@link ObjModelPath} for this model
      */
-    public static ObjModelPath getModelPath(String packName, String model) {
+    public static ObjModelPath getModelPath(String packName, ResourceLocation model) {
         List<PackInfo> packLocations = DynamXObjectLoaders.PACKS.findPackLocations(packName);
         if (packLocations.isEmpty()) {
             DynamXMain.log.error("Pack info " + packName + " not found. This should not happen.");
-            return new ObjModelPath(new PackInfo(packName, ContentPackType.FOLDER), RegistryNameSetter.getDynamXModelResourceLocation(model));
+            return new ObjModelPath(new PackInfo(packName, ContentPackType.FOLDER), model);
         }
-        return new ObjModelPath(packLocations, RegistryNameSetter.getDynamXModelResourceLocation(model));
+        return new ObjModelPath(packLocations, model);
     }
 
     public static byte[] readInputStream(InputStream resource) throws IOException {
@@ -307,6 +310,20 @@ public class DynamXUtils {
             vector3fList.add(new Vector3f(xF + offset.x, yF + offset.y, zF + offset.z));
         }
         return vector3fList;
+    }
+
+    public static IntBuffer createIntBuffer(int[] data) {
+        IntBuffer buffer = BufferUtils.createIntBuffer(data.length);
+        buffer.put(data);
+        buffer.flip();
+        return buffer;
+    }
+
+    public static FloatBuffer createFloatBuffer(float[] data) {
+        FloatBuffer buffer = BufferUtils.createFloatBuffer(data.length);
+        buffer.put(data);
+        buffer.flip();
+        return buffer;
     }
 
     //DUPLICATE (function is already in the BasicsAddon)

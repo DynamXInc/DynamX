@@ -130,6 +130,10 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
         rotationYaw = spawnRotationAngle;
     }
 
+    @Override
+    public boolean shouldRenderInPass(int pass) {
+        return pass == 0 || pass == 1;
+    }
 
     @Override
     protected void entityInit() {

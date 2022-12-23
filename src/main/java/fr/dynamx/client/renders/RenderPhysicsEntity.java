@@ -74,8 +74,8 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
         }
 
         //Render players inside the entity
-        if (ClientEventHandler.renderPlayer != null && !MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.RIDDING_PLAYERS, x, y, z, partialTicks, null))) {
-            renderRidingPlayers(entity, x, y, z, partialTicks, appliedRotation);
+        if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.RIDDING_PLAYERS, x, y, z, partialTicks, null))) {
+            renderRidingEntities(entity, x, y, z, partialTicks, appliedRotation);
         }
         //Render debug
         if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.DEBUG, x, y, z, partialTicks, null))) {
@@ -87,11 +87,10 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
         GlQuaternionPool.closePool();
     }
 
-    protected void renderRidingPlayers(T entity, double x, double y, double z, float partialTicks, Quaternion appliedRotation) {
-        //Do not cancel the render event
-        ClientEventHandler.rendering = true;
+    protected void renderRidingEntities(T entity, double x, double y, double z, float partialTicks, Quaternion appliedRotation) {
         for (Entity e : entity.getPassengers()) {
-            if (e instanceof AbstractClientPlayer && (e != Minecraft.getMinecraft().player || Minecraft.getMinecraft().gameSettings.thirdPersonView != 0)) {
+            ClientEventHandler.renderingEntity.add(e.getUniqueID());
+            if ((e != Minecraft.getMinecraft().player || Minecraft.getMinecraft().gameSettings.thirdPersonView != 0)) {
                 GlStateManager.pushMatrix();
                 //Apply vehicle's transform
                 GlStateManager.translate((float) x, (float) y, (float) z);
@@ -110,8 +109,8 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
                         EnumSeatPlayerPosition position = seat.getPlayerPosition();
                         shouldRenderPlayerSitting = position == EnumSeatPlayerPosition.SIT || position == null;
 
-                        if(seat.getPlayerSize() != null)
-                        GlStateManager.scale(seat.getPlayerSize().x, seat.getPlayerSize().y, seat.getPlayerSize().z);
+                        if (seat.getPlayerSize() != null)
+                            GlStateManager.scale(seat.getPlayerSize().x, seat.getPlayerSize().y, seat.getPlayerSize().z);
                         if (seat.getRotation() != null)
                             GlStateManager.rotate(GlQuaternionPool.get(seat.getRotation()));
                         if (position == EnumSeatPlayerPosition.LYING)
@@ -122,15 +121,23 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
                 //Remove player's yaw offset rotation, to avoid stiff neck
                 PartSeat seat = ((IModuleContainer.ISeatsContainer) entity).getSeats().getRidingSeat(e);
                 if (seat != null && seat.shouldLimitFieldOfView()) {
-                    ((AbstractClientPlayer) e).renderYawOffset = ((AbstractClientPlayer) e).prevRenderYawOffset = 0;
+                    if (e instanceof AbstractClientPlayer) {
+                        ((AbstractClientPlayer) e).renderYawOffset = ((AbstractClientPlayer) e).prevRenderYawOffset = 0;
+                    }
                 }
 
                 //The render the player, e.rotationYaw is the name plate rotation
-                ClientEventHandler.renderPlayer.doRender((AbstractClientPlayer) e, 0, 0, 0, e.rotationYaw, partialTicks);
+                if (e instanceof AbstractClientPlayer) {
+                    if(ClientEventHandler.renderPlayer != null){
+                        ClientEventHandler.renderPlayer.doRender((AbstractClientPlayer) e, 0, 0, 0, e.rotationYaw, partialTicks);
+                    }
+                } else {
+                    Minecraft.getMinecraft().getRenderManager().renderEntity(e, 0, 0, 0, e.rotationYaw, partialTicks, false);
+                }
                 GlStateManager.popMatrix();
             }
+            ClientEventHandler.renderingEntity.remove(e.getUniqueID());
         }
-        ClientEventHandler.rendering = false;
     }
 
     public void spawnParticles(T physicsEntity, Quaternion rotation, float partialTicks) {

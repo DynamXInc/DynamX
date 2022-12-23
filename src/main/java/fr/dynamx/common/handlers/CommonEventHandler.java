@@ -121,18 +121,6 @@ public class CommonEventHandler {
 
     /* World events */
 
-   /* @SubscribeEvent
-    public void onBlockPlace(BlockEvent.EntityPlaceEvent e) {
-        onBlockChange(e.getWorld(), e.getPos());
-    }
-
-    @SubscribeEvent
-    public void onBlockBreak(BlockEvent.BreakEvent e) {
-        onBlockChange(e.getWorld(), e.getPos());
-    }*/
-
-    private static final ConcurrentHashMap<VerticalChunkPos, Byte> scheduledChunkReload = new ConcurrentHashMap<>();
-
     /**
      * Marks the physics terrain dirty and schedule a new computation <br>
      * Don't abuse as it may create some lag
@@ -142,33 +130,9 @@ public class CommonEventHandler {
      */
     public static void onBlockChange(World world, BlockPos pos) {
         if ((!world.isRemote || (DynamXConfig.clientOwnsPhysicsInSolo && FMLCommonHandler.instance().getMinecraftServerInstance() != null))) {
-            VerticalChunkPos p = new VerticalChunkPos(pos.getX() >> 4, pos.getY() >> 4, pos.getZ() >> 4);
-            if (TerrainFile.ULTIMATEDEBUG)
-                System.out.println("Notify " + p + " " + pos + " " + scheduledChunkReload);
-            scheduledChunkReload.put(p, (byte) 10);
-        }
-    }
-
-    private static final List<VerticalChunkPos> remove = new ArrayList<>();
-
-    public static void tickBlockUpdates() {
-        for (Map.Entry<VerticalChunkPos, Byte> en : scheduledChunkReload.entrySet()) {
-            byte state = en.getValue();
-            if (TerrainFile.ULTIMATEDEBUG)
-                System.out.println("Exec " + state + " " + scheduledChunkReload);
-            if (state == 1) {
-                remove.add(en.getKey());
-                scheduledChunkReload.remove(en.getKey());
-                if (DynamXContext.getPhysicsWorld() != null)
-                    DynamXContext.getPhysicsWorld().getTerrainManager().onChunkChanged(en.getKey());
-            } else
-                en.setValue((byte) (state - 1));
-            if (TerrainFile.ULTIMATEDEBUG)
-                System.out.println("End : " + scheduledChunkReload);
-        }
-        if (!remove.isEmpty()) {
-            remove.forEach(scheduledChunkReload::remove);
-            remove.clear();
+            IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(world);
+            if(physicsWorld != null)
+                physicsWorld.getTerrainManager().onBlockChange(world, pos);
         }
     }
 

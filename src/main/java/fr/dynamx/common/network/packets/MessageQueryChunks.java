@@ -3,7 +3,9 @@ package fr.dynamx.common.network.packets;
 import fr.dynamx.api.network.EnumNetworkType;
 import fr.dynamx.api.network.EnumPacketTarget;
 import fr.dynamx.api.network.IDnxPacket;
+import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.api.physics.terrain.ITerrainElement;
+import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.physics.terrain.cache.FileTerrainCache;
@@ -18,6 +20,8 @@ import fr.dynamx.utils.optimization.PooledHashMap;
 import io.netty.buffer.ByteBuf;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.ArrayList;
 
@@ -73,15 +77,25 @@ public class MessageQueryChunks implements IDnxPacket {
             }
         }
 
+        @SideOnly(Side.CLIENT)
+        private void onMessageClient(MessageQueryChunks message) {
+            IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(ClientEventHandler.MC.world);
+            if (physicsWorld != null) {;
+                message.requests.forEach((pos, dataType) -> ((RemoteTerrainCache) physicsWorld.getTerrainManager().getCache()).receiveChunkData(pos, dataType[0], dataType[1], null));
+                message.requests.release();
+            }
+        }
+
         @Override
         public IDnxPacket onMessage(MessageQueryChunks message, MessageContext ctx) {
             if (ctx.side.isServer()) {
                 PooledHashMap<VerticalChunkPos, byte[]> emptyGuys = HashMapPool.get();
                 PooledHashMap<ChunkLoadingTicket, byte[]> boysToLoad = HashMapPool.get();
+                IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(ctx.getServerHandler().player.world);
                 message.requests.forEach((pos, data) -> {
                     byte dataType = data[0];
                     if (dataType == 0 || dataType == 1) {
-                        ChunkLoadingTicket ticket = DynamXContext.getPhysicsWorld().getTerrainManager().getTicket(pos);
+                        ChunkLoadingTicket ticket = physicsWorld.getTerrainManager().getTicket(pos);
                         if (ticket.getStatus() == ChunkState.LOADED) {
                             // System.out.println("Already loaded "+ticket);
                             processElements(ctx, pos, data, ticket.getCollisions().getElements());
@@ -89,31 +103,33 @@ public class MessageQueryChunks implements IDnxPacket {
                             boysToLoad.put(ticket, data);
                         }
                     } else if (dataType == 2) {
-                        byte[] dt = ((FileTerrainCache) DynamXContext.getPhysicsWorld().getTerrainManager().getCache()).getSlopesFile().getRawChunkData(pos);
+                        byte[] dt = ((FileTerrainCache) physicsWorld.getTerrainManager().getCache()).getSlopesFile().getRawChunkData(pos);
                         //System.out.println("Found "+dt+" at "+pos);
                         if (dt == null) {
                             emptyGuys.put(pos, data);
                         } else {
+                            //Don't use reply (return) system, because it may interfere with packet sending (weird bugs seen, maybe due to Mohist)
                             DynamXContext.getNetwork().sendToClientFromOtherThread(new MessageChunkData(pos, data, dt), EnumPacketTarget.PLAYER, ctx.getServerHandler().player);
                         }
                     }
                 });
                 if (!emptyGuys.isEmpty()) {
                     //Copy the map for packet sending
+                    //Don't use reply (return) system, because it may interfere with packet sending (weird bugs seen, maybe due to Mohist)
                     DynamXContext.getNetwork().sendToClientFromOtherThread(new MessageQueryChunks(emptyGuys), EnumPacketTarget.PLAYER, ctx.getServerHandler().player);
                 } else {
                     emptyGuys.release();
                 }
                 if (!boysToLoad.isEmpty()) {
-                    DynamXContext.getPhysicsWorld().schedule(() -> { //Be sync with physics/terrain thread
+                    physicsWorld.schedule(() -> { //Be sync with physics/terrain thread
                         boysToLoad.forEach((ticket, data) -> {
                             if (ticket.getStatus() != ChunkState.LOADING) {
-                                DynamXContext.getPhysicsWorld().getTerrainManager().subscribeToChunk(ticket.getPos(), ChunkLoadingTicket.TicketPriority.MEDIUM, Profiler.get());
+                                physicsWorld.getTerrainManager().subscribeToChunk(ticket.getPos(), ChunkLoadingTicket.TicketPriority.MEDIUM, Profiler.get());
                             } else if (ticket.getStatus() == ChunkState.LOADING && ticket.getPriority() == ChunkLoadingTicket.TicketPriority.LOW) {
                                 //System.out.println("Other case "+ticket);
                                 ticket.getLoadedCallback().thenAccept((collisions -> {
                                     if (ticket.getPriority() == ChunkLoadingTicket.TicketPriority.LOW) { //If it stills low (not loaded at another location)
-                                        DynamXContext.getPhysicsWorld().getTerrainManager().subscribeToChunk(ticket.getPos(), ChunkLoadingTicket.TicketPriority.MEDIUM, Profiler.get());
+                                        physicsWorld.getTerrainManager().subscribeToChunk(ticket.getPos(), ChunkLoadingTicket.TicketPriority.MEDIUM, Profiler.get());
                                         ticket.getLoadedCallback().whenComplete((collisions2, e) -> {
                                             if (collisions2 != null) {
                                                 processElements(ctx, ticket.getPos(), data, collisions2.getElements());
@@ -155,10 +171,8 @@ public class MessageQueryChunks implements IDnxPacket {
                     boysToLoad.release();
                 }
                 message.requests.release();
-                //Don't use reply (return) system, because it may interfere with packet sending (weird bugs seen, maybe due to Mohist)
-            } else if (DynamXContext.getPhysicsWorld() != null) {
-                message.requests.forEach((pos, dataType) -> ((RemoteTerrainCache) DynamXContext.getPhysicsWorld().getTerrainManager().getCache()).receiveChunkData(pos, dataType[0], dataType[1], null));
-                message.requests.release();
+            } else {
+                onMessageClient(message);
             }
             return null;
         }

@@ -100,7 +100,7 @@ public class CompoundStairsTerrainElement implements ITerrainElement {
     }
 
     @Override
-    public PhysicsRigidBody build(Vector3f pos) {
+    public PhysicsRigidBody build(World world, Vector3f pos) {
         if (shape == null) { //Not generated
             if (meshes.isEmpty()) //No boxes (empty element)
                 return null;

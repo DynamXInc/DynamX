@@ -41,7 +41,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public abstract class BasePhysicsWorld implements IPhysicsWorld {
     protected final PhysicsSoftSpace dynamicsWorld;
-    protected final ITerrainManager manager;
+    protected final PhysicsWorldTerrain manager;
     protected final World mcWorld;
 
     protected final Set<PhysicsJoint> joints = new HashSet<>();
@@ -217,7 +217,7 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
     }
 
     @Override
-    public ITerrainManager getTerrainManager() {
+    public PhysicsWorldTerrain getTerrainManager() {
         return manager;
     }
 

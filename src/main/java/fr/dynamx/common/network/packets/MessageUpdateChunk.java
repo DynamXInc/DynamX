@@ -2,6 +2,8 @@ package fr.dynamx.common.network.packets;
 
 import fr.dynamx.api.network.EnumNetworkType;
 import fr.dynamx.api.network.IDnxPacket;
+import fr.dynamx.api.physics.IPhysicsWorld;
+import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.physics.terrain.cache.TerrainFile;
@@ -63,18 +65,16 @@ public class MessageUpdateChunk implements IDnxPacket, IMessageHandler<MessageUp
 
     @Override
     public void handleUDPReceive(EntityPlayer context, Side side) {
-        //if(DynamXConfig.enableDebugTerrainManager)
-        TerrainFile.ULTIMATEDEBUG = false;
-        //System.out.println("Receive dirty "+ Arrays.toString(chunksToUpdate) +" "+DynamXContext.getPhysicsWorld()+" "+DynamXMain.proxy.shouldUseBulletSimulation(context.world));
-        if (DynamXContext.getPhysicsWorld() != null && DynamXMain.proxy.shouldUseBulletSimulation(context.world)) {
-            DynamXContext.getPhysicsWorld().schedule(() -> {
+        IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(ClientEventHandler.MC.world);
+        if (physicsWorld != null && DynamXMain.proxy.shouldUseBulletSimulation(context.world)) {
+            physicsWorld.schedule(() -> {
                 Vector3fPool.openPool();
                 for (VerticalChunkPos pos : chunksToUpdate) {
-                    DynamXContext.getPhysicsWorld().getTerrainManager().onChunkChanged(pos);
+                    physicsWorld.getTerrainManager().onChunkChanged(pos);
                 }
                 Vector3fPool.closePool();
             });
         } else if (DynamXConfig.enableDebugTerrainManager)
-            System.out.println("RCV FAILZ " + DynamXContext.getPhysicsWorld() + " " + DynamXMain.proxy.shouldUseBulletSimulation(context.world));
+            DynamXMain.log.info("RCV FAILZ " + physicsWorld + " " + DynamXMain.proxy.shouldUseBulletSimulation(context.world));
     }
 }

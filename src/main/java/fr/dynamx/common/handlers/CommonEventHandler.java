@@ -276,7 +276,7 @@ public class CommonEventHandler {
                 DynamXContext.getPlayerToCollision().put(e.player, playerPhysicsHandler);
                 playerPhysicsHandler.addToWorld();
             }
-            DynamXContext.getPlayerToCollision().get(e.player).update(DynamXContext.getPhysicsWorld(e.player.world));
+            DynamXContext.getPlayerToCollision().get(e.player).update(e.player.world);
             Vector3fPool.closePool();
             QuaternionPool.closePool();
         }
@@ -285,7 +285,7 @@ public class CommonEventHandler {
     @SubscribeEvent
     public void onVehicleMount(VehicleEntityEvent.PlayerMount e) {
         if (DynamXContext.getPlayerToCollision().containsKey(e.getPlayer())) {
-            DynamXContext.getPlayerToCollision().get(e.getPlayer()).removeFromWorld(false);
+            DynamXContext.getPlayerToCollision().get(e.getPlayer()).removeFromWorld(false, e.getPlayer().world);
         }
     }
 

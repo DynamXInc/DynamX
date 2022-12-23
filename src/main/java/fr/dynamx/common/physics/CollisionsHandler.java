@@ -59,7 +59,8 @@ public class CollisionsHandler {
         }
 
         public void handleCollision() {
-            MinecraftForge.EVENT_BUS.post(new PhysicsEvent.PhysicsCollision(DynamXContext.getPhysicsWorld(), entityA, entityB));
+            //TODO
+            //MinecraftForge.EVENT_BUS.post(new PhysicsEvent.PhysicsCollision(collisionEvent.getObjectB().getCollisionSpace(), entityA, entityB));
             if (entityA.getObjectIn() instanceof PhysicsEntity && entityB.getObjectIn() instanceof PhysicsEntity) {
                 if (entityA.getType().isBulletEntity()) {
                     ((PhysicsEntity<?>) entityA.getObjectIn()).onCollisionEnter(collisionEvent, entityA, entityB);

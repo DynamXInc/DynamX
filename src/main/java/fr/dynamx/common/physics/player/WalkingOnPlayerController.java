@@ -29,7 +29,7 @@ public class WalkingOnPlayerController {
         this.face = face;
         this.offset = offset;
         if (DynamXContext.getPlayerToCollision().containsKey(player)) {
-            DynamXContext.getPlayerToCollision().get(player).removeFromWorld(false);
+            DynamXContext.getPlayerToCollision().get(player).removeFromWorld(false, player.world);
         }
     }
 

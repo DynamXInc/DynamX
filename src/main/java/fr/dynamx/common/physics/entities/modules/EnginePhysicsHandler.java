@@ -188,7 +188,7 @@ public class EnginePhysicsHandler implements IEnginePhysicsHandler {
             System.out.println("Will print chunk data at " + handler.getHandledEntity().chunkCoordX + " " + handler.getHandledEntity().chunkCoordY + " " + handler.getHandledEntity().chunkCoordZ);
             ChunkGraph c = ChunkGraph.getAt(new VerticalChunkPos(handler.getHandledEntity().chunkCoordX, handler.getHandledEntity().chunkCoordY, handler.getHandledEntity().chunkCoordZ));
             if (c != null) {
-                System.out.println("Other info : current status : " + DynamXContext.getPhysicsWorld().getTerrainManager().getTicket(c.listenedPos));
+                System.out.println("Other info : current status : " + DynamXContext.getPhysicsWorld(handler.getHandledEntity().world).getTerrainManager().getTicket(c.listenedPos));
                 c.prettyPrint();
             } else
                 System.err.println("Graph pas trouvé :c :O !! :mamamia:");

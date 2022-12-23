@@ -2,6 +2,7 @@ package fr.dynamx.common.network.packets;
 
 import fr.dynamx.api.network.EnumNetworkType;
 import fr.dynamx.api.network.IDnxPacket;
+import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.network.sync.MessageSeatsSync;
@@ -62,7 +63,7 @@ public abstract class PhysicsEntityMessage<T extends PhysicsEntityMessage> imple
         if (ctx.side.isClient()) {
             clientSchedule(() -> processMessage(message, getClientPlayer()));
         } else {
-            DynamXContext.getPhysicsWorld().schedule(() -> processMessage(message, ctx.getServerHandler().player));
+            DynamXContext.getPhysicsWorld(ctx.getServerHandler().player.world).schedule(() -> processMessage(message, ctx.getServerHandler().player));
         }
         return null;
     }
@@ -77,7 +78,7 @@ public abstract class PhysicsEntityMessage<T extends PhysicsEntityMessage> imple
         if (side.isClient()) {
             clientSchedule(() -> processMessage(this, context));
         } else {
-            DynamXContext.getPhysicsWorld().schedule(() -> processMessage(this, context));
+            DynamXContext.getPhysicsWorld(context.world).schedule(() -> processMessage(this, context));
         }
     }
 
@@ -97,8 +98,9 @@ public abstract class PhysicsEntityMessage<T extends PhysicsEntityMessage> imple
 
     @SideOnly(Side.CLIENT)
     protected void clientSchedule(Runnable task) {
-        if (getPreferredNetwork() != EnumNetworkType.VANILLA_TCP && DynamXContext.getPhysicsWorld() != null) { //If initialized, and not a "vanilla packet" (vanilla packet does not always concern physics, like seats)
-            DynamXContext.getPhysicsWorld().schedule(task);
+        IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(getClientPlayer().world);
+        if (getPreferredNetwork() != EnumNetworkType.VANILLA_TCP && physicsWorld != null) { //If initialized, and not a "vanilla packet" (vanilla packet does not always concern physics, like seats)
+            physicsWorld.schedule(task);
         } else {
             Minecraft.getMinecraft().addScheduledTask(task);
         }

@@ -83,7 +83,7 @@ public class ClientEventHandler {
     @SubscribeEvent
     public void onWorldLoaded(WorldEvent.Load event) {
         //FIXME SOLO : SIMPLIFY CONDITION
-        if (DynamXContext.getPhysicsWorld() == null && event.getWorld().provider.getDimension() == 0 && ((DynamXConfig.clientOwnsPhysicsInSolo && event.getWorld().isRemote) || FMLCommonHandler.instance().getMinecraftServerInstance() == null)) {
+        if (((DynamXConfig.clientOwnsPhysicsInSolo && event.getWorld().isRemote) || FMLCommonHandler.instance().getMinecraftServerInstance() == null)) {
             DynamXContext.setPhysicsWorld(DynamXMain.proxy.provideClientPhysicsWorld(event.getWorld()));
         }
     }

@@ -6,6 +6,7 @@ import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.api.network.EnumPacketTarget;
+import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.api.physics.player.DynamXPhysicsWorldBlacklistApi;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
@@ -140,7 +141,7 @@ public class CommonEventHandler {
      * @param pos   The modified position. The corresponding chunk will be reloaded
      */
     public static void onBlockChange(World world, BlockPos pos) {
-        if (world.provider.getDimension() == 0 && (!world.isRemote || (DynamXConfig.clientOwnsPhysicsInSolo && FMLCommonHandler.instance().getMinecraftServerInstance() != null))) {
+        if ((!world.isRemote || (DynamXConfig.clientOwnsPhysicsInSolo && FMLCommonHandler.instance().getMinecraftServerInstance() != null))) {
             VerticalChunkPos p = new VerticalChunkPos(pos.getX() >> 4, pos.getY() >> 4, pos.getZ() >> 4);
             if (TerrainFile.ULTIMATEDEBUG)
                 System.out.println("Notify " + p + " " + pos + " " + scheduledChunkReload);
@@ -173,12 +174,10 @@ public class CommonEventHandler {
 
     @SubscribeEvent
     public void onExplosion(ExplosionEvent.Detonate event) {
-        if (event.getWorld().provider.getDimension() == 0) {
             // Explosion effect
             Vector3f explosionPosition = new Vector3f((float) event.getExplosion().getPosition().x,
                     (float) event.getExplosion().getPosition().y, (float) event.getExplosion().getPosition().z);
             DynamXContext.getNetwork().sendToClient(new MessageHandleExplosion(explosionPosition, event.getAffectedEntities()), EnumPacketTarget.ALL);
-        }
     }
 
     @SubscribeEvent
@@ -201,16 +200,17 @@ public class CommonEventHandler {
 
     @SubscribeEvent
     public void onChunkUnload(ChunkEvent.Unload e) {
-        if (e.getWorld().provider.getDimension() == 0 && DynamXMain.proxy.shouldUseBulletSimulation(e.getWorld())) {
-            DynamXContext.getPhysicsWorld().schedule(() -> DynamXContext.getPhysicsWorld().getTerrainManager().onChunkUnload(e));
+        if (DynamXMain.proxy.shouldUseBulletSimulation(e.getWorld())) {
+            DynamXContext.getPhysicsWorld(e.getWorld()).schedule(() -> DynamXContext.getPhysicsWorld(e.getWorld()).getTerrainManager().onChunkUnload(e));
         }
     }
 
     @SubscribeEvent
     public void onWorldUnload(WorldEvent.Unload e) {
         try {
-            if (DynamXContext.getPhysicsWorld() != null && DynamXContext.getPhysicsWorld().ownsWorld(e.getWorld())) {
-                DynamXContext.getPhysicsWorld().clearAll();
+            IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(e.getWorld());
+            if (physicsWorld != null && physicsWorld.ownsWorld(e.getWorld())) {
+                physicsWorld.clearAll();
                 DynamXContext.getPlayerToCollision().clear();
             }
         } catch (Exception ex) {
@@ -267,7 +267,7 @@ public class CommonEventHandler {
 
     @SubscribeEvent
     public void onPlayerUpdate(TickEvent.PlayerTickEvent e) {
-        if (!(e.player.getRidingEntity() instanceof BaseVehicleEntity) && DynamXContext.getPhysicsWorld() != null && !e.player.isDead) {
+        if (!(e.player.getRidingEntity() instanceof BaseVehicleEntity) && DynamXContext.getPhysicsWorld(e.player.world) != null && !e.player.isDead) {
             if(!DynamXContext.getPlayerToCollision().containsKey(e.player) && DynamXPhysicsWorldBlacklistApi.isBlacklisted(e.player)) return;
             Vector3fPool.openPool();
             QuaternionPool.openPool();
@@ -276,7 +276,7 @@ public class CommonEventHandler {
                 DynamXContext.getPlayerToCollision().put(e.player, playerPhysicsHandler);
                 playerPhysicsHandler.addToWorld();
             }
-            DynamXContext.getPlayerToCollision().get(e.player).update(DynamXContext.getPhysicsWorld());
+            DynamXContext.getPlayerToCollision().get(e.player).update(DynamXContext.getPhysicsWorld(e.player.world));
             Vector3fPool.closePool();
             QuaternionPool.closePool();
         }

@@ -24,7 +24,7 @@ public class ArmorEvent extends Event {
         public Render(ModelObjArmor armorModel, ObjModelRenderer objModel, ObjObjectRenderer objObject, PhysicsEntityEvent.Phase phase, Type renderType) {
             this.armorModel = armorModel;
             this.objModel = objModel;
-            this.objObjectRenderer = objObjectRenderer;
+            this.objObjectRenderer = objObject;
             this.eventPhase = phase;
             this.renderType = renderType;
         }

@@ -12,6 +12,7 @@ import fr.dynamx.common.handlers.RotatedCollisionHandlerImpl;
 import fr.dynamx.common.network.DynamXNetwork;
 import fr.dynamx.common.objloader.data.ObjModelData;
 import fr.dynamx.common.physics.player.PlayerPhysicsHandler;
+import fr.dynamx.common.physics.world.BuiltinThreadedPhysicsWorld;
 import fr.dynamx.common.physics.world.PhysicsSimulationModes;
 import fr.dynamx.utils.DynamXUtils;
 import lombok.Getter;
@@ -44,6 +45,8 @@ public class DynamXContext {
 
     private static final Map<ResourceLocation, ObjModelData> OBJ_MODEL_DATA_CACHE = new HashMap<>();
 
+    private static final Map<Integer, BuiltinThreadedPhysicsWorld> PHYSICS_WORLD_PER_DIMENSION = new HashMap<>();
+
     @Getter
     private static boolean isOptifineLoaded = false;
 
@@ -62,8 +65,8 @@ public class DynamXContext {
     /**
      * @return The local physics world
      */
-    public static IPhysicsWorld getPhysicsWorld() {
-        return physicsWorld;
+    public static IPhysicsWorld getPhysicsWorld(World world) {
+        return getPhysicsWorldPerDimensionMap().get(world.provider.getDimension());
     }
 
     /**
@@ -113,6 +116,10 @@ public class DynamXContext {
         DynamXContext.physicsWorld = physicsWorld;
     }
 
+    public static Map<Integer, BuiltinThreadedPhysicsWorld> getPhysicsWorldPerDimensionMap(){
+        return PHYSICS_WORLD_PER_DIMENSION;
+    }
+
     public static void setPlayerPickingObjects(Map<Integer, Integer> playerPickingObjects) {
         DynamXContext.playerPickingObjects = playerPickingObjects;
     }
@@ -148,6 +155,7 @@ public class DynamXContext {
     public static Map<ResourceLocation, ObjModelData> getObjModelDataCache(){
         return OBJ_MODEL_DATA_CACHE;
     }
+
 
     static {
         try {

@@ -16,6 +16,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -34,7 +36,7 @@ public class PhysicsTickHandler {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void tickClient(TickEvent.ClientTickEvent event) {
         if (canTickClient(Minecraft.getMinecraft())) {
-            tickPhysics(event.phase);
+            tickPhysics(event.phase, Minecraft.getMinecraft().world);
         }
 
         if (event.phase == TickEvent.Phase.START) {
@@ -63,14 +65,17 @@ public class PhysicsTickHandler {
 
     @SideOnly(Side.CLIENT)
     private boolean canTickClient(Minecraft mc) {
-        return mc.world != null && !mc.isGamePaused() && DynamXMain.proxy.shouldUseBulletSimulation(mc.world) && DynamXContext.getPhysicsWorld() != null;
+        return mc.world != null && !mc.isGamePaused() && DynamXMain.proxy.shouldUseBulletSimulation(mc.world) && DynamXContext.getPhysicsWorld(mc.world) != null;
     }
 
     @SubscribeEvent
     public void tickServer(TickEvent.ServerTickEvent event) {
-        if (canTickServer(FMLCommonHandler.instance().getMinecraftServerInstance())) {
-            tickPhysics(event.phase);
+        for (WorldServer world : FMLCommonHandler.instance().getMinecraftServerInstance().worlds) {
+            if (canTickServer(world)) {
+                tickPhysics(event.phase, world);
+            }
         }
+
 
         if (event.phase == TickEvent.Phase.START) {
             QuaternionPool.openPool();
@@ -87,11 +92,11 @@ public class PhysicsTickHandler {
         }
     }
 
-    private boolean canTickServer(MinecraftServer server) {
-        return server.getWorld(0) != null && DynamXMain.proxy.shouldUseBulletSimulation(server.getWorld(0)) && DynamXContext.getPhysicsWorld() != null;
+    private boolean canTickServer(World world) {
+        return world != null && DynamXMain.proxy.shouldUseBulletSimulation(world) && DynamXContext.getPhysicsWorld(world) != null;
     }
 
-    private void tickPhysics(TickEvent.Phase phase) {
+    private void tickPhysics(TickEvent.Phase phase, World world) {
         if (phase == TickEvent.Phase.START) {
             try {
                 Profiler.get().start(Profiler.Profiles.TICK);
@@ -102,24 +107,24 @@ public class PhysicsTickHandler {
             TransformPool.getPool().openSubPool();
             QuaternionPool.openPool();
             Vector3fPool.openPool();
-            DynamXContext.getPhysicsWorld().tickStart();
+            DynamXContext.getPhysicsWorld(world).tickStart();
 
             float deltaTimeSecond = getDeltaTimeMilliseconds() * 1.0E-3F;
             if (deltaTimeSecond > 0.5f) // game was paused ?
                 deltaTimeSecond = 0.05f;
 
             Profiler.get().start(Profiler.Profiles.STEP_SIMULATION);
-            DynamXContext.getPhysicsWorld().stepSimulation(deltaTimeSecond);
+            DynamXContext.getPhysicsWorld(world).stepSimulation(deltaTimeSecond);
             Profiler.get().end(Profiler.Profiles.STEP_SIMULATION);
 
-            DynamXContext.getPhysicsWorld().getDynamicsWorld().getJointList().forEach(joint -> {
-                if ((joint.getBodyA() != null && !DynamXContext.getPhysicsWorld().getDynamicsWorld().contains(joint.getBodyA()))
-                        || (joint.getBodyB() != null && !DynamXContext.getPhysicsWorld().getDynamicsWorld().contains(joint.getBodyB()))) {
-                    DynamXContext.getPhysicsWorld().removeJoint(joint);
+            DynamXContext.getPhysicsWorld(world).getDynamicsWorld().getJointList().forEach(joint -> {
+                if ((joint.getBodyA() != null && !DynamXContext.getPhysicsWorld(world).getDynamicsWorld().contains(joint.getBodyA()))
+                        || (joint.getBodyB() != null && !DynamXContext.getPhysicsWorld(world).getDynamicsWorld().contains(joint.getBodyB()))) {
+                    DynamXContext.getPhysicsWorld(world).removeJoint(joint);
                 }
             });
         } else {
-            DynamXContext.getPhysicsWorld().tickEnd();
+            DynamXContext.getPhysicsWorld(world).tickEnd();
 
             //Close Pool
             Vector3fPool.closePool();

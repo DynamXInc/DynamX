@@ -9,9 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DynamXConfig {
-    //Experimental
-    public static boolean clientOwnsPhysicsInSolo = true;
-
     public static boolean syncPacks;
 
     public static boolean useUdp = true;

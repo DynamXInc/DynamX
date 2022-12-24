@@ -10,6 +10,7 @@ import fr.dynamx.client.gui.GuiBlockCustomization;
 import fr.dynamx.client.gui.GuiDnxDebug;
 import fr.dynamx.client.gui.GuiLoadingErrors;
 import fr.dynamx.client.handlers.hud.CarController;
+import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.loader.InfoLoader;
 import fr.dynamx.common.contentpack.loader.SubInfoTypesRegistry;
@@ -197,6 +198,7 @@ public class ContentPackLoader {
         for (InfoLoader<?> loader : DynamXObjectLoaders.LOADERS)
             loader.clear(isHotReloading);
         DynamXErrorManager.getErrorManager().clear(DynamXErrorManager.PACKS__ERRORS);
+        DynamXContext.getObjModelDataCache().clear();
         try {
             ProgressManager.ProgressBar bar = ProgressManager.push("Loading content pack system", 1 + DynamXObjectLoaders.LOADERS.size());
             bar.step("Discover assets");

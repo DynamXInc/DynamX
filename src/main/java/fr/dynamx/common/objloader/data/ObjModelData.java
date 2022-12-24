@@ -5,6 +5,7 @@ import fr.aym.mps.IMpsClassLoader;
 import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.ContentPackLoader;
+import fr.dynamx.common.objloader.OBJLoader;
 import fr.dynamx.utils.DynamXUtils;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
@@ -45,7 +46,7 @@ public class ObjModelData {
             String content = new String(DynamXUtils.readInputStream(FMLCommonHandler.instance().getSide().isClient() ? client(path) : server(path)), StandardCharsets.UTF_8);
             ResourceLocation location = path.getModelPath();
             String startPath = location.getPath().substring(0, location.getPath().lastIndexOf("/") + 1);
-            //new OBJLoader(objObjects, materials).readAndLoadModel(FMLCommonHandler.instance().getSide().isClient() ? startPath : null, content);
+            new OBJLoader(objObjects, materials).readAndLoadModel(FMLCommonHandler.instance().getSide().isClient() ? startPath : null, content);
         } catch (Exception e) {
             //Don't remove the throw - Aym
             throw new RuntimeException("Model " + path + " cannot be loaded ! " + e + " Has secure loader: " + (mpsClassLoader != null), e);

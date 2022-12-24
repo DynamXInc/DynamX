@@ -129,7 +129,7 @@ public class CommonEventHandler {
      * @param pos   The modified position. The corresponding chunk will be reloaded
      */
     public static void onBlockChange(World world, BlockPos pos) {
-        if ((!world.isRemote || (DynamXConfig.clientOwnsPhysicsInSolo && FMLCommonHandler.instance().getMinecraftServerInstance() != null))) {
+        if ((!world.isRemote || FMLCommonHandler.instance().getMinecraftServerInstance() != null)) {
             IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(world);
             if(physicsWorld != null)
                 physicsWorld.getTerrainManager().onBlockChange(world, pos);
@@ -148,11 +148,7 @@ public class CommonEventHandler {
     public void onWorldLoad(WorldEvent.Load event) {
         World world = event.getWorld();
         world.addEventListener(new DynamXWorldListener());
-        //FIXME SOLO : SIMPLIFY CONDITION
-        if (((DynamXConfig.clientOwnsPhysicsInSolo && event.getWorld().isRemote) || FMLCommonHandler.instance().getMinecraftServerInstance() == null)) {
-            DynamXMain.proxy.providePhysicsWorld(event.getWorld());
-        }
-        if (!DynamXConfig.clientOwnsPhysicsInSolo || FMLCommonHandler.instance().getMinecraftServerInstance().isDedicatedServer()) {
+        if(event.getWorld().isRemote || FMLCommonHandler.instance().getMinecraftServerInstance().isDedicatedServer()) {
             DynamXMain.proxy.providePhysicsWorld(event.getWorld());
         }
     }

@@ -20,11 +20,16 @@ import fr.dynamx.utils.VerticalChunkPos;
 import fr.dynamx.utils.debug.ChunkGraph;
 import fr.dynamx.utils.debug.Profiler;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraftforge.event.world.ChunkEvent;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import static fr.dynamx.utils.debug.Profiler.Profiles.*;
@@ -58,6 +63,12 @@ public class PhysicsWorldTerrain implements ITerrainManager {
      * The async loaded chunks, ready to be added to the physics world
      */
     private final LinkedBlockingQueue<ChunkLoadingTicket.AsyncLoadedChunk> asyncLoadedQueue = new LinkedBlockingQueue<>();
+    private final List<VerticalChunkPos> remove = new ArrayList<>();
+
+    /**
+     * todo doc
+     */
+    private final ConcurrentHashMap<VerticalChunkPos, Byte> scheduledChunkReload = new ConcurrentHashMap<>();
 
     private final WorldTerrainState terrainState = new WorldTerrainState();
 
@@ -66,7 +77,7 @@ public class PhysicsWorldTerrain implements ITerrainManager {
     public PhysicsWorldTerrain(IPhysicsWorld physicsWorld, World world, boolean isRemoteWorld) {
         this.physicsWorld = physicsWorld;
         this.world = world;
-        this.terrainCache = isRemoteWorld ? new RemoteTerrainCache() : new FileTerrainCache();
+        this.terrainCache = isRemoteWorld ? new RemoteTerrainCache(world) : new FileTerrainCache();
         this.isDebug = DynamXConfig.enableDebugTerrainManager;
     }
 
@@ -284,6 +295,20 @@ public class PhysicsWorldTerrain implements ITerrainManager {
         }
         //Tick terrain loaders (as the slopes item)
         DynamXTerrainApi.getCustomTerrainLoaders().forEach(l -> l.update(this, Profiler.get()));
+        //Process chunk changes
+        for (Map.Entry<VerticalChunkPos, Byte> en : scheduledChunkReload.entrySet()) {
+            byte state = en.getValue();
+            if (state == 1) {
+                remove.add(en.getKey());
+                scheduledChunkReload.remove(en.getKey());
+                onChunkChanged(en.getKey());
+            } else
+                en.setValue((byte) (state - 1));
+        }
+        if (!remove.isEmpty()) {
+            remove.forEach(scheduledChunkReload::remove);
+            remove.clear();
+        }
     }
 
     @Override
@@ -337,8 +362,8 @@ public class PhysicsWorldTerrain implements ITerrainManager {
 
     @Override
     public void notifyWillChange() {
-        if (!DynamXContext.getPhysicsWorld().isCallingFromPhysicsThread())
-            DynamXContext.getPhysicsWorld().schedule(this::notifyWillChangeInternal);
+        if (!DynamXContext.getPhysicsWorld(world).isCallingFromPhysicsThread())
+            DynamXContext.getPhysicsWorld(world).schedule(this::notifyWillChangeInternal);
         else
             notifyWillChangeInternal();
     }
@@ -350,8 +375,8 @@ public class PhysicsWorldTerrain implements ITerrainManager {
 
     @Override
     public void onChunkChanged(VerticalChunkPos pos) {
-        if (!DynamXContext.getPhysicsWorld().isCallingFromPhysicsThread())
-            DynamXContext.getPhysicsWorld().schedule(() -> onChunkChangedInternal(pos));
+        if (!DynamXContext.getPhysicsWorld(world).isCallingFromPhysicsThread())
+            DynamXContext.getPhysicsWorld(world).schedule(() -> onChunkChangedInternal(pos));
         else
             onChunkChangedInternal(pos);
     }
@@ -373,8 +398,8 @@ public class PhysicsWorldTerrain implements ITerrainManager {
                     }
                 }
             } else { //If it's loading, it's iznogood
-                if (TerrainFile.ULTIMATEDEBUG) {
-                    System.out.println("This chunk is still loading, wtf " + ticket);
+                if (DynamXConfig.enableDebugTerrainManager) {
+                    DynamXMain.log.error("This chunk is still loading, wtf " + ticket);
                     ChunkGraph graph = ChunkGraph.getAt(pos);
                     if (graph != null) {
                         System.out.println("Printing graph " + pos);
@@ -428,5 +453,16 @@ public class PhysicsWorldTerrain implements ITerrainManager {
 
     public boolean isDebug() {
         return isDebug;
+    }
+
+    /**
+     * Marks the physics terrain dirty and schedule a new computation <br>
+     * Don't abuse as it may create some lag
+     *
+     * @param world The world
+     * @param pos   The modified position. The corresponding chunk will be reloaded
+     */
+    public void onBlockChange(World world, BlockPos pos) {
+        scheduledChunkReload.put(new VerticalChunkPos(pos.getX() >> 4, pos.getY() >> 4, pos.getZ() >> 4), (byte) 10);
     }
 }

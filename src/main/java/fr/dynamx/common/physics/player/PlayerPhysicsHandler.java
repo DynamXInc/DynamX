@@ -1,6 +1,5 @@
 package fr.dynamx.common.physics.player;
 
-import com.jme3.bullet.collision.PhysicsCollisionEvent;
 import com.jme3.bullet.collision.shapes.BoxCollisionShape;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Quaternion;
@@ -10,15 +9,12 @@ import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.EnumBulletShapeType;
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.common.DynamXContext;
-import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.entities.RagdollEntity;
-import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import fr.dynamx.utils.physics.DynamXPhysicsHelper;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.world.World;
 
 /**
  * Handles player's rigid body
@@ -42,11 +38,12 @@ public class PlayerPhysicsHandler {
         bodyIn.setEnableSleep(false);
     }
 
-    public void update(IPhysicsWorld world) {
-        if(playerIn.isDead)
-            removeFromWorld(true);
+    public void update(World world) {
+        if (playerIn.isDead)
+            removeFromWorld(true, world);
         if (removedCountdown > 0)
             removedCountdown--;
+        IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(world);
         switch (state) {
             case DISABLED:
                 if (removedCountdown == 0)
@@ -56,22 +53,22 @@ public class PlayerPhysicsHandler {
                 if (removedCountdown == 0 && !playerIn.isSpectator()) {
                     if (bodyIn == null)
                         throw new IllegalStateException("Body is null while adding " + removedCountdown + " " + state + " " + playerIn);
-                    DynamXContext.getPhysicsWorld().addCollisionObject(bodyIn);
+                    physicsWorld.addCollisionObject(bodyIn);
                     state = PlayerBodyState.ACTIVATING;
                 }
                 break;
             case ACTIVATING:
-                if(playerIn.isSpectator())
-                    removeFromWorld(false);
-                else if(bodyIn.isInWorld()) {
-                    DynamXContext.getPhysicsWorld().schedule(() -> bodyIn.setGravity(Vector3fPool.get()));
+                if (playerIn.isSpectator())
+                    removeFromWorld(false, world);
+                else if (bodyIn.isInWorld()) {
+                    physicsWorld.schedule(() -> bodyIn.setGravity(Vector3fPool.get()));
                     state = PlayerBodyState.ACTIVATED;
                 }
                 break;
             case ACTIVATED:
-                if(playerIn.isSpectator())
-                    removeFromWorld(false);
-                else if(bodyIn != null) {
+                if (playerIn.isSpectator())
+                    removeFromWorld(false, world);
+                else if (bodyIn != null) {
                     Vector3f position = Vector3fPool.get();
                     position.set((float) playerIn.posX, (float) playerIn.posY + 0.8f, (float) playerIn.posZ);
                     if (Vector3f.isValidVector(position) && playerIn.fallDistance < 10) { //fixes a crash with elytra
@@ -85,7 +82,7 @@ public class PlayerPhysicsHandler {
         }
     }
 
-    public void handleCollision(PhysicsCollisionEvent collisionEvent, BulletShapeType<?> with) {
+    /*public void handleCollision(PhysicsCollisionEvent collisionEvent, BulletShapeType<?> with) {
         //System.out.println("collision " + event.getAppliedImpulse());
         if (with.getObjectIn() instanceof BaseVehicleEntity && state == PlayerBodyState.ACTIVATED) {
             //System.out.println(event.getAppliedImpulse());
@@ -107,17 +104,17 @@ public class PlayerPhysicsHandler {
                 }
             }
         }
-    }
+    }*/
 
     public void addToWorld() {
         if (state == PlayerBodyState.DISABLED)
             state = PlayerBodyState.ACTIONABLE;
     }
 
-    public void removeFromWorld(boolean delete) {
+    public void removeFromWorld(boolean delete, World world) {
         removedCountdown = 30;
         if (bodyIn != null && state == PlayerBodyState.ACTIVATED)
-            DynamXContext.getPhysicsWorld().removeCollisionObject(bodyIn);
+            DynamXContext.getPhysicsWorld(world).removeCollisionObject(bodyIn);
         if (delete) {
             bodyIn = null;
             DynamXContext.getPlayerToCollision().remove(playerIn);

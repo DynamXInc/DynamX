@@ -110,7 +110,7 @@ public class SlopeTerrainElement implements ITerrainElement {
     }
 
     @Override
-    public PhysicsRigidBody build(Vector3f pos) {
+    public PhysicsRigidBody build(World world, Vector3f pos) {
         applyOffset(pos.multLocal(-1));
         pos.multLocal(-1);
         if (shape == null) { //Not generated

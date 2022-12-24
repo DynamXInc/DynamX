@@ -117,7 +117,6 @@ public class DynamXCommands extends CommandBase {
             public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
                 if (args.length == 2) {
                     boolean testFullGo = parseBoolean(args[1]);
-                    TerrainFile.ULTIMATEDEBUG = testFullGo;
                     sender.sendMessage(new TextComponentString("Set bigdebugterrain to " + testFullGo));
                 } else
                     throw new WrongUsageException(getUsage());

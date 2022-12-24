@@ -3,7 +3,6 @@ package fr.dynamx.common.objloader.data;
 import com.jme3.math.Vector3f;
 import fr.aym.mps.IMpsClassLoader;
 import fr.dynamx.api.obj.ObjModelPath;
-import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.objloader.OBJLoader;
@@ -31,8 +30,6 @@ import java.util.zip.ZipFile;
 
 /**
  * An obj model not able to be rendered, used for collisions generation
- *
- * @see ObjModelRenderer
  */
 public class ObjModelData {
     @Getter

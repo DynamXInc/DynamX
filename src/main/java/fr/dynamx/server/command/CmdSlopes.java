@@ -3,6 +3,7 @@ package fr.dynamx.server.command;
 import com.jme3.bounding.BoundingBox;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.network.EnumPacketTarget;
+import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.api.physics.terrain.ITerrainElement;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.ContentPackLoader;
@@ -94,6 +95,7 @@ public class CmdSlopes implements ISubCommand {
     }
 
     private void exec(MinecraftServer server, EntityPlayer sender, ItemStack stack, String[] args) throws CommandException {
+        IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(sender.world);
         if (args[1].equalsIgnoreCase("create")) {
             if (stack.getTagCompound().getInteger("mode") != 1) {
                 sender.sendMessage(new TextComponentTranslation("cmd.slopes.needcreate"));
@@ -119,10 +121,10 @@ public class CmdSlopes implements ISubCommand {
             //VerticalChunkPos cp = new VerticalChunkPos((int) p1.x / 16, (int) p1.y / 16, (int) p1.z / 16);
             boolean error = false;
             for (Map.Entry<VerticalChunkPos, List<ITerrainElement.IPersistentTerrainElement>> cst : l3.entrySet()) {
-                c = DynamXContext.getPhysicsWorld().getTerrainManager().getChunkAt(cst.getKey());
+                c = physicsWorld.getTerrainManager().getChunkAt(cst.getKey());
                 if (c == null) {
                     sender.sendMessage(new TextComponentString(TextFormatting.GRAY + "[SLOPES] Force-load chunk " + cst.getKey()));
-                    c = DynamXContext.getPhysicsWorld().getTerrainManager().loadChunkCollisionsNow(DynamXContext.getPhysicsWorld().getTerrainManager().getTicket(cst.getKey()), Profiler.get());
+                    c = physicsWorld.getTerrainManager().loadChunkCollisionsNow(physicsWorld.getTerrainManager().getTicket(cst.getKey()), Profiler.get());
                 }
                 if (c == null) {
                     error = true;
@@ -134,10 +136,10 @@ public class CmdSlopes implements ISubCommand {
                 return;
             }
             //Very important : will set newest computed chunks
-            DynamXContext.getPhysicsWorld().getTerrainManager().notifyWillChange();
+            physicsWorld.getTerrainManager().notifyWillChange();
             for (Map.Entry<VerticalChunkPos, List<ITerrainElement.IPersistentTerrainElement>> cst : l3.entrySet()) {
-                if ((c = DynamXContext.getPhysicsWorld().getTerrainManager().getChunkAt(cst.getKey())) != null) {
-                    c.addPersistentElements(DynamXContext.getPhysicsWorld().getTerrainManager(), cst.getValue());
+                if ((c = physicsWorld.getTerrainManager().getChunkAt(cst.getKey())) != null) {
+                    c.addPersistentElements(physicsWorld.getTerrainManager(), cst.getValue());
                     if (server.isDedicatedServer()) {
                         //Send updates to client
                         //Set<VerticalChunkPos> set = new HashSet<>();
@@ -181,7 +183,7 @@ public class CmdSlopes implements ISubCommand {
             Set<VerticalChunkPos> set = new HashSet<>();
             int count = 0;
             //Very important : will set newest computed chunks
-            DynamXContext.getPhysicsWorld().getTerrainManager().notifyWillChange();
+            physicsWorld.getTerrainManager().notifyWillChange();
             for (float i = minX; i <= maxX + 16; i += 16) {
                 for (float j = minZ; j <= maxZ + 16; j += 16) {
                     for (float k = minY; k <= maxY + 16; k += 16) {
@@ -192,10 +194,10 @@ public class CmdSlopes implements ISubCommand {
                         if (jr < 0)
                             jr -= 16;
                         VerticalChunkPos chunkPos = new VerticalChunkPos((int) ir / 16, (int) k / 16, (int) jr / 16);
-                        ChunkCollisions chunkData = DynamXContext.getPhysicsWorld().getTerrainManager().getChunkAt(chunkPos);
+                        ChunkCollisions chunkData = physicsWorld.getTerrainManager().getChunkAt(chunkPos);
                         if (chunkData == null) {
                             sender.sendMessage(new TextComponentString(TextFormatting.GRAY + "[SLOPES] Force-load chunk " + chunkPos));
-                            chunkData = DynamXContext.getPhysicsWorld().getTerrainManager().loadChunkCollisionsNow(DynamXContext.getPhysicsWorld().getTerrainManager().getTicket(chunkPos), Profiler.get());
+                            chunkData = physicsWorld.getTerrainManager().loadChunkCollisionsNow(physicsWorld.getTerrainManager().getTicket(chunkPos), Profiler.get());
                         }
                         if (chunkData != null) {
                             List<ITerrainElement.IPersistentTerrainElement> toRemove = new ArrayList<>();
@@ -213,7 +215,7 @@ public class CmdSlopes implements ISubCommand {
                                 } else
                                     out = true;
                             }
-                            chunkData.removePersistentElements(DynamXContext.getPhysicsWorld().getTerrainManager(), toRemove);
+                            chunkData.removePersistentElements(physicsWorld.getTerrainManager(), toRemove);
                         } else {
                             sender.sendMessage(new TextComponentTranslation("cmd.slopes.delete.terrainerror", chunkPos.toString()));
                         }
@@ -324,10 +326,10 @@ public class CmdSlopes implements ISubCommand {
                     //VerticalChunkPos cp = new VerticalChunkPos((int) p1.x / 16, (int) p1.y / 16, (int) p1.z / 16);
                     boolean error = false;
                     for (Map.Entry<VerticalChunkPos, List<ITerrainElement.IPersistentTerrainElement>> cst : l3.entrySet()) {
-                        c = DynamXContext.getPhysicsWorld().getTerrainManager().getChunkAt(cst.getKey());
+                        c = physicsWorld.getTerrainManager().getChunkAt(cst.getKey());
                         if (c == null) {
                             sender.sendMessage(new TextComponentTranslation(TextFormatting.GRAY + "[SLOPES] Force-load chunk " + cst.getKey()));
-                            c = DynamXContext.getPhysicsWorld().getTerrainManager().loadChunkCollisionsNow(DynamXContext.getPhysicsWorld().getTerrainManager().getTicket(cst.getKey()), Profiler.get());
+                            c = physicsWorld.getTerrainManager().loadChunkCollisionsNow(physicsWorld.getTerrainManager().getTicket(cst.getKey()), Profiler.get());
                         }
                         if (c == null) {
                             error = true;
@@ -339,10 +341,10 @@ public class CmdSlopes implements ISubCommand {
                         return;
                     }
                     //Very important : will set newest computed chunks
-                    DynamXContext.getPhysicsWorld().getTerrainManager().notifyWillChange();
+                    physicsWorld.getTerrainManager().notifyWillChange();
                     for (Map.Entry<VerticalChunkPos, List<ITerrainElement.IPersistentTerrainElement>> cst : l3.entrySet()) {
-                        if ((c = DynamXContext.getPhysicsWorld().getTerrainManager().getChunkAt(cst.getKey())) != null) {
-                            c.addPersistentElements(DynamXContext.getPhysicsWorld().getTerrainManager(), cst.getValue());
+                        if ((c = physicsWorld.getTerrainManager().getChunkAt(cst.getKey())) != null) {
+                            c.addPersistentElements(physicsWorld.getTerrainManager(), cst.getValue());
                             if (server.isDedicatedServer()) {
                                 //Send updates to client
                                 //Set<VerticalChunkPos> set = new HashSet<>();

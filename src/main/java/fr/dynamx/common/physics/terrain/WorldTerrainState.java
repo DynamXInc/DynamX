@@ -66,7 +66,7 @@ public class WorldTerrainState //TODO INTERFACE
                     if (ticket.getCollisions() == null) {
                         throw new IllegalStateException("Cannot remove null collisions of " + ticket);
                     }
-                    ticket.getCollisions().removeFromBulletWorld(terrain.getPhysicsWorld());
+                    ticket.getCollisions().removeFromBulletWorld();
                     if (ticket.getCollisions().getChunkState().areComputedElementsAdded() || ticket.getCollisions().getChunkState().arePersistentElementsAdded()) {
                         throw new IllegalStateException("Elements still added ! " + ticket.getCollisions() + " wtf " + ticket);
                     }
@@ -104,7 +104,7 @@ public class WorldTerrainState //TODO INTERFACE
             if (ticket.getCollisions() == null)
                 DynamXMain.log.warn("[World Unload] Cannot remove null collisions of " + ticket);
             else
-                ticket.getCollisions().removeFromBulletWorld(physicsWorld);
+                ticket.getCollisions().removeFromBulletWorld();
         }
         //Clear lists
         loadedTerrain.clear();

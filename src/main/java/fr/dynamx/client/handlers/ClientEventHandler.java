@@ -81,13 +81,6 @@ public class ClientEventHandler {
     /* World events */
 
     @SubscribeEvent
-    public void onWorldLoaded(WorldEvent.Load event) {
-        if (DynamXContext.getPhysicsWorld() == null && event.getWorld().isRemote && event.getWorld().provider.getDimension() == 0) {
-            DynamXContext.setPhysicsWorld(DynamXMain.proxy.provideClientPhysicsWorld(event.getWorld()));
-        }
-    }
-
-    @SubscribeEvent
     public void onWorldUnloaded(WorldEvent.Unload event) {
         if (event.getWorld().isRemote) {
             ClientProxy.SOUND_HANDLER.unload();

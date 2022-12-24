@@ -10,6 +10,7 @@ import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.network.sync.SimulationHolder;
 import fr.dynamx.api.network.sync.v3.PhysicsEntitySynchronizer;
 import fr.dynamx.api.physics.BulletShapeType;
+import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.api.physics.entities.EntityPhysicsState;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
@@ -230,7 +231,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
                 this.physicsHandler.setPhysicsState(EntityPhysicsState.ENABLE);
             }
             if (isRegistered == 0) {
-                DynamXContext.getPhysicsWorld().addBulletEntity(this);
+                DynamXContext.getPhysicsWorld(world).addBulletEntity(this);
             }
         }
 
@@ -527,10 +528,11 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     @Override
     public void onRemovedFromWorld() {
         super.onRemovedFromWorld();
-        if (usesPhysicsWorld && DynamXContext.getPhysicsWorld() != null) //onRemovedFromWorld may be called before physicsWorld is loaded (in case of failing to load from nbt)
+        IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(world);
+        if (usesPhysicsWorld && physicsWorld != null) //onRemovedFromWorld may be called before physicsWorld is loaded (in case of failing to load from nbt)
         {
-            DynamXContext.getPhysicsWorld().removeBulletEntity(this);
-            terrainCache.onRemoved(DynamXContext.getPhysicsWorld().getTerrainManager());
+            physicsWorld.removeBulletEntity(this);
+            terrainCache.onRemoved(physicsWorld.getTerrainManager());
         }
         if (physicsHandler != null)
             physicsHandler.removePhysicsEntity();

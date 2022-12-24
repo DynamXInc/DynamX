@@ -9,6 +9,7 @@ import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.api.physics.EnumBulletShapeType;
+import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.PackInfo;
@@ -151,7 +152,7 @@ public class DynamXUtils {
         eyeLook.multLocal(distanceMax);
         lookAt.addLocal(eyeLook);
 
-        return DynamXPhysicsHelper.castRay(eyePos, lookAt, ignoredPredicate);
+        return DynamXPhysicsHelper.castRay( DynamXContext.getPhysicsWorld(entity.world), eyePos, lookAt, ignoredPredicate);
     }
 
     public static NBTTagList newDoubleNBTList(double... numbers) {

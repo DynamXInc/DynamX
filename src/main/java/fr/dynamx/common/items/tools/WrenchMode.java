@@ -5,6 +5,7 @@ import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.EnumBulletShapeType;
+import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.entities.BaseVehicleEntity;
@@ -226,10 +227,11 @@ public class WrenchMode {
                             // Single ended joint
                             attachObjects.initObject((PhysicsRigidBody) containedEntity.physicsHandler.getCollisionObject(), result.hitPos, JointEnd.A);
                         }
+                        IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(containedEntity.world);
                         if (shapeType.getType().isBulletEntity()) {
-                            DynamXContext.getPhysicsWorld().schedule(() -> JointHandlerRegistry.createJointWithOther(MovableModule.JOINT_NAME, containedEntity, (PhysicsEntity<?>) shapeType.getObjectIn(), (byte) (shouldWeldObjects ? 2 : 1)));
+                            physicsWorld.schedule(() -> JointHandlerRegistry.createJointWithOther(MovableModule.JOINT_NAME, containedEntity, (PhysicsEntity<?>) shapeType.getObjectIn(), (byte) (shouldWeldObjects ? 2 : 1)));
                         } else {
-                            DynamXContext.getPhysicsWorld().schedule(() -> JointHandlerRegistry.createJointWithSelf(MovableModule.JOINT_NAME, containedEntity, (byte) (shouldWeldObjects ? 2 : 1)));
+                            physicsWorld.schedule(() -> JointHandlerRegistry.createJointWithSelf(MovableModule.JOINT_NAME, containedEntity, (byte) (shouldWeldObjects ? 2 : 1)));
                         }
                         ItemWrench.removeEntity(itemStack);
                     }

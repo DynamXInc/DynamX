@@ -44,7 +44,7 @@ public class CmdRefreshChunks implements ISubCommand {
                         po.setPos(x >> 4, y >> 4, z >> 4);
                         if (!poses.contains(po)) {
                             VerticalChunkPos imm = po.toImmutable();
-                            DynamXContext.getPhysicsWorld().getTerrainManager().onChunkChanged(imm);
+                            DynamXContext.getPhysicsWorld(sender.getEntityWorld()).getTerrainManager().onChunkChanged(imm);
                             poses.add(imm);
                             count++;
                         }

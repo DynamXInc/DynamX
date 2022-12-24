@@ -39,8 +39,7 @@ public enum SimulationHolder {
      *
      * @return True if this physics simulation holder is me
      */
-    public boolean ownsPhysics(Side side)
-    {
+    public boolean ownsPhysics(Side side) {
         return side.isClient() ? this.hasClientPhysics : this == SERVER;
     }
 

@@ -1,8 +1,7 @@
 package fr.dynamx.utils.client;
 
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.obj.IObjObject;
-import fr.dynamx.client.renders.model.ObjModelClient;
+import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
@@ -11,11 +10,11 @@ import fr.dynamx.common.contentpack.parts.PartLightSource;
 import fr.dynamx.common.contentpack.parts.PartWheel;
 import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.contentpack.type.vehicle.SteeringWheelInfo;
-import fr.dynamx.common.entities.PhysicsEntity;
-import fr.dynamx.common.entities.vehicles.BoatEntity;
+import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
@@ -24,7 +23,9 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
+import org.lwjgl.opengl.APPLEVertexArrayObject;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL30;
 import org.lwjgl.util.glu.Sphere;
 import org.lwjgl.util.vector.Quaternion;
 
@@ -56,15 +57,15 @@ public class DynamXRenderUtils {
         Vector3fPool.openPool();
         GlQuaternionPool.openPool();
         /* Rendering the chassis */
-        ObjModelClient vehicleModel = DynamXContext.getObjModelRegistry().getModel(car.getModel());
+        ObjModelRenderer vehicleModel = DynamXContext.getObjModelRegistry().getModel(car.getModel());
         GlStateManager.scale(car.getScaleModifier().x, car.getScaleModifier().y, car.getScaleModifier().z);
-        vehicleModel.renderMainParts(textureId);//.renderGroups("Chassis", textureId);
+        vehicleModel.renderDefaultParts(textureId);//.renderGroups("Chassis", textureId);
         GlStateManager.scale(1 / car.getScaleModifier().x, 1 / car.getScaleModifier().y, 1 / car.getScaleModifier().z);
 
         /* Rendering the steering wheel */
         SteeringWheelInfo info = car.getSubPropertyByType(SteeringWheelInfo.class);
         if (info != null) {
-            IObjObject steeringWheel = vehicleModel.getObjObject(info.getPartName());
+            ObjObjectRenderer steeringWheel = vehicleModel.getObjObjectRenderer(info.getPartName());
             if (steeringWheel != null) {
                 GlStateManager.pushMatrix();
                 Vector3f center = info.getSteeringWheelPosition();
@@ -93,7 +94,7 @@ public class DynamXRenderUtils {
 
         /* Rendering the wheels */
         car.getPartsByType(PartWheel.class).forEach(partWheel -> {
-            if (partWheel.getDefaultWheelInfo().enableRendering()) {
+            if (partWheel.getDefaultWheelInfo().isModelValid()) {
                 GlStateManager.pushMatrix();
                 {
                     /* Translation to the wheel position */
@@ -104,11 +105,11 @@ public class DynamXRenderUtils {
                     }
                     /*Rendering the wheels */
                     PartWheelInfo info1 = partWheel.getDefaultWheelInfo();
-                    ObjModelClient model = DynamXContext.getObjModelRegistry().getModel(info1.getModel());
+                    ObjModelRenderer model = DynamXContext.getObjModelRegistry().getModel(info1.getModel());
                     //System.out.println("Model is "+model+" "+info1.getTextures()+ " "+car.getTextures().get(textureId));
                     GlStateManager.scale(car.getScaleModifier().x, car.getScaleModifier().y, car.getScaleModifier().z);
-                    if (car.getTextures().containsKey(textureId))
-                        model.renderModel(info1.getIdForTexture(car.getTextures().get(textureId).getName()));
+                    if (car.getVariants() != null && car.getVariants().getVariantsMap().containsKey(textureId))
+                        model.renderModel(info1.getIdForVariant(car.getVariantName(textureId)));
                     else
                         model.renderModel((byte) 0);
                 }
@@ -268,5 +269,17 @@ public class DynamXRenderUtils {
                             emitterInfo.velocity.y,
                             emitterInfo.velocity.z);
                 });
+    }
+
+    public static int genVertexArrays() {
+        return Minecraft.IS_RUNNING_ON_MAC ? APPLEVertexArrayObject.glGenVertexArraysAPPLE() : GL30.glGenVertexArrays();
+    }
+
+    public static void bindVertexArray(int vaoID) {
+        if (Minecraft.IS_RUNNING_ON_MAC) {
+            APPLEVertexArrayObject.glBindVertexArrayAPPLE(vaoID);
+        } else {
+            GL30.glBindVertexArray(vaoID);
+        }
     }
 }

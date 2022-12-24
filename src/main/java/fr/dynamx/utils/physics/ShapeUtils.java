@@ -7,12 +7,13 @@ import com.jme3.bullet.collision.shapes.infos.ChildCollisionShape;
 import com.jme3.bullet.util.DebugShapeFactory;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.obj.ObjModelPath;
+import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.contentpack.PackInfo;
 import fr.dynamx.common.contentpack.type.objects.AbstractProp;
 import fr.dynamx.common.contentpack.type.objects.PropObject;
-import fr.dynamx.common.obj.ObjModelServer;
+import fr.dynamx.common.objloader.data.ObjModelData;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
@@ -42,7 +43,6 @@ public class ShapeUtils {
             try {
                 dcInputStream = packInfo.readFile(dcFileLocation);
                 if(dcInputStream != null) {
-                    System.out.println(dcFileLocation + " found in " + packInfo);
                     dcFilePackInfo = packInfo;
                     break;
                 }
@@ -70,8 +70,8 @@ public class ShapeUtils {
             }
         }
         if (shapeGenerator == null) {
-            ObjModelServer model = ObjModelServer.createServerObjModel(path); //TODO GET THE PATH FROM HERE
-            String modelPath = DynamXMain.resDir + File.separator + path.getPackName() + File.separator + "assets" + //todo prevents from searching in zip files : we use the pack name
+            ObjModelData model = DynamXContext.getObjModelDataFromCache(path);
+            String modelPath = DynamXMain.resDir + File.separator + path.getPackName() + File.separator + "assets" + //todo prevents from saving in zip files : we use the pack name
                     File.separator + path.getModelPath().getNamespace() + File.separator + path.getModelPath().getPath().replace("/", File.separator);
             String modelName = modelPath.substring(modelPath.lastIndexOf(File.separator) + 1);
             File file = new File(modelPath.replace(".obj", "_" +lowerCaseObjectName+"_"+ DynamXConstants.DC_FILE_VERSION + ".dc"));
@@ -246,8 +246,8 @@ public class ShapeUtils {
         return aabb;
     }
 
-    public static void generateModelCollisions(AbstractProp<?> abstractProp, ObjModelServer objModelServer, CompoundCollisionShape compoundCollisionShape) {
-        objModelServer.objObjects.forEach(objObject -> {
+    public static void generateModelCollisions(AbstractProp<?> abstractProp, ObjModelData objModelData, CompoundCollisionShape compoundCollisionShape) {
+        objModelData.getObjObjects().forEach(objObject -> {
             abstractProp.getCollisionBoxes().add(ShapeUtils.getAABB(abstractProp, objObject.getMesh().min(), objObject.getMesh().max(), new Vector3f(), new Vector3f()));
             objObject.getMesh().addCollisionShape(compoundCollisionShape, abstractProp.getScaleModifier());
         });

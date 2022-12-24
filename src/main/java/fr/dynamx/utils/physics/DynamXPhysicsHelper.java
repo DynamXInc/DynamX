@@ -4,9 +4,6 @@ import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.bullet.collision.PhysicsRayTestResult;
 import com.jme3.bullet.collision.shapes.CollisionShape;
-import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
-import com.jme3.bullet.collision.shapes.HullCollisionShape;
-import com.jme3.bullet.collision.shapes.infos.ChildCollisionShape;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
@@ -19,7 +16,6 @@ import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.QuaternionPool;
-import fr.dynamx.utils.optimization.TransformPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.util.math.MathHelper;
 
@@ -34,7 +30,6 @@ import java.util.function.Predicate;
  */
 public class DynamXPhysicsHelper {
     public static final Vector3f GRAVITY = new Vector3f(0.0f, -9.81f, 0.0f);
-    public static final float WATER_DENSITY = 997; //kg/m^3
     public static final int X_ROTATION_DOF = 3 + PhysicsSpace.AXIS_X;
     public static final int Y_ROTATION_DOF = 3 + PhysicsSpace.AXIS_Y;
     public static final int Z_ROTATION_DOF = 3 + PhysicsSpace.AXIS_Z;
@@ -80,11 +75,10 @@ public class DynamXPhysicsHelper {
         return createRigidBody(mass, bodyTransform, collisionShape, new BulletShapeType<>(EnumBulletShapeType.BULLET_ENTITY, physicsEntity));
     }
 
-    public static PhysicsRaycastResult castRay(Vector3f from, Vector3f dir, Predicate<EnumBulletShapeType> ignoredBody) {
+    public static PhysicsRaycastResult castRay(IPhysicsWorld iPhysicsWorld, Vector3f from, Vector3f dir, Predicate<EnumBulletShapeType> ignoredBody) {
         Vector3fPool.openPool();
         List<PhysicsRayTestResult> results = new LinkedList<>();
-        IPhysicsWorld iPhysicsWorld = DynamXContext.getPhysicsWorld();
-        if (iPhysicsWorld != null) {
+        if(iPhysicsWorld != null) {
             iPhysicsWorld.getDynamicsWorld().rayTest(from, dir, results);
         }
 

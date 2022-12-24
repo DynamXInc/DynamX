@@ -11,22 +11,24 @@ import fr.dynamx.api.contentpack.object.IShapeContainer;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
+import fr.dynamx.api.contentpack.object.render.IObjPackObject;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.CreatePackItemEvent;
-import fr.dynamx.api.obj.IModelTextureSupplier;
-import fr.dynamx.api.obj.IObjObject;
+import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
 import fr.dynamx.api.obj.ObjModelPath;
+import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
+import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.loader.ObjectLoader;
 import fr.dynamx.common.contentpack.parts.*;
+import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.contentpack.type.objects.AbstractItemObject;
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.obj.texture.TextureData;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.EnumPlayerStandOnTop;
 import fr.dynamx.utils.client.DynamXRenderUtils;
@@ -45,12 +47,14 @@ import java.util.*;
  * @see BaseVehicleEntity
  */
 //TODO CLEAN THIS CLASS
-public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, ModularVehicleInfo> implements IPhysicsPackInfo, IModelTextureSupplier,
-        ParticleEmitterInfo.IParticleEmitterContainer, IPartContainer<ModularVehicleInfo>, IShapeContainer {
+public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, ModularVehicleInfo> implements IPhysicsPackInfo, IModelTextureVariantsSupplier,
+        ParticleEmitterInfo.IParticleEmitterContainer, IObjPackObject, IPartContainer<ModularVehicleInfo>, IShapeContainer {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("UseHullShape".equals(key))
             return new IPackFilePropertyFixer.FixResult("UseComplexCollisions", true);
+        if ("Textures".equals(key))
+            return new IPackFilePropertyFixer.FixResult("MaterialVariants", true, true);
         return null;
     };
 
@@ -105,10 +109,10 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
 
     @Getter
     @PackFileProperty(configNames = "DefaultEngine", required = false)
-    private String defaultEngine;
+    protected String defaultEngine;
     @Getter
     @PackFileProperty(configNames = "DefaultSounds", required = false)
-    private String defaultSounds;
+    protected String defaultSounds;
 
     @Getter
     @PackFileProperty(configNames = "ItemScale", required = false, description = "common.itemscale", defaultValue = "0.2")
@@ -120,22 +124,19 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     @PackFileProperty(configNames = "UseComplexCollisions", required = false, defaultValue = "true", description = "common.UseComplexCollisions")
     protected boolean useHullShape = true;
     @Getter
+    @Deprecated
     @PackFileProperty(configNames = "Textures", required = false, type = DefinitionType.DynamXDefinitionTypes.STRING_ARRAY_2D)
     private String[][] texturesArray;
     @Getter
     @PackFileProperty(configNames = "DefaultZoomLevel", required = false, defaultValue = "4")
     protected int defaultZoomLevel = 4;
 
+
     /**
      * Maps the metadata to the texture data
      */
     @Getter
-    private Map<Byte, TextureData> textures = new HashMap<>();
-    /**
-     * The number of textures available for the vehicle
-     */
-    @Getter
-    private int maxTextureMetadata;
+    private MaterialVariantsInfo<ModularVehicleInfo> variants;
 
     /**
      * The directing wheel id <br>
@@ -178,12 +179,21 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
         return lightSources.get(partName);
     }
 
-    public byte getIdForTexture(String textureName) {
-        for (byte i = 0; i < textures.size(); i++) {
-            if (textures.get(i).getName().equalsIgnoreCase(textureName))
-                return i;
+    public byte getIdForVariant(String variantName) {
+        if(variants != null) {
+            for (byte i = 0; i < variants.getVariantsMap().size(); i++) {
+                if (variants.getVariantsMap().get(i).getName().equalsIgnoreCase(variantName))
+                    return i;
+            }
         }
         return 0;
+    }
+
+    public String getVariantName(byte variantId) {
+        if(variants != null) {
+            return variants.getVariantsMap().getOrDefault(variantId, variants.getDefaultVariant()).getName();
+        }
+        return "default";
     }
 
     @Override
@@ -202,29 +212,24 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
 
     @Override
     public String getIconFileName(byte metadata) {
-        return getTextures().get(metadata).getIconName();
+        return variants != null ? variants.getVariantsMap().get(metadata).getName() : super.getIconFileName(metadata);
     }
 
     @Override
-    public Map<Byte, TextureData> getTexturesFor(IObjObject object) {
-        PartLightSource.CompoundLight src = getLightSource(object.getName());
-        if (src != null) {
-            Map<Byte, TextureData> ret = new HashMap<>();
-            ret.put((byte) 0, new TextureData("Default", (byte) 0));
-            List<PartLightSource> sources = src.getSources();
-            for (PartLightSource source : sources) {
-                for (TextureData textureData : source.getTextureMap().values()) {
-                    ret.put(textureData.getId(), textureData);
-                }
-            }
-            return ret;
-        }
-        return getTextures();
+    public IModelTextureVariantsSupplier.IModelTextureVariants getTextureVariantsFor(ObjObjectRenderer objObjectRenderer) {
+        PartLightSource.CompoundLight src = getLightSource(objObjectRenderer.getObjObjectData().getName());
+        if (src != null)
+            return src;
+        return getVariants();
     }
 
     @Override
-    public boolean hasCustomTextures() {
-        return getTextures().size() > 1;
+    public boolean hasVaryingTextures() {
+        return getVariants() != null;
+    }
+
+    public int getMaxTextureMetadata() {
+        return hasVaryingTextures() ? getVariants().getVariantsMap().size() : 1;
     }
 
     @Override
@@ -235,10 +240,10 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     @Override
     @SuppressWarnings({"unchecked"})
     public IInfoOwner<ModularVehicleInfo> createOwner(ObjectLoader<ModularVehicleInfo, ?> loader) {
-        CreatePackItemEvent.CreateVehicleItemEvent<ModularVehicleInfo, ?> event = new CreatePackItemEvent.CreateVehicleItemEvent(loader, this);
+        CreatePackItemEvent.VehicleItem<ModularVehicleInfo, ?> event = new CreatePackItemEvent.VehicleItem(loader, this);
         MinecraftForge.EVENT_BUS.post(event);
         if (event.isOverridden()) {
-            return (IInfoOwner<ModularVehicleInfo>) event.getSpawnItem();
+            return (IInfoOwner<ModularVehicleInfo>) event.getObjectItem();
         } else {
             return (IInfoOwner<ModularVehicleInfo>) loader.getItem(this);
         }
@@ -248,7 +253,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     public String getTranslationKey(IInfoOwner<ModularVehicleInfo> item, int itemMeta) {
         if (itemMeta == 0)
             return super.getTranslationKey(item, itemMeta);
-        TextureData textureInfo = getTextures().get((byte) itemMeta);
+        TextureVariantData textureInfo = variants.getVariantsMap().get((byte) itemMeta);
         return super.getTranslationKey(item, itemMeta) + "_" + textureInfo.getName().toLowerCase();
     }
 
@@ -256,7 +261,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     public String getTranslatedName(IInfoOwner<ModularVehicleInfo> item, int itemMeta) {
         if (itemMeta == 0)
             return super.getTranslatedName(item, itemMeta);
-        TextureData textureInfo = getTextures().get((byte) itemMeta);
+        TextureVariantData textureInfo = variants.getVariantsMap().get((byte) itemMeta);
         return super.getTranslatedName(item, itemMeta) + " " + textureInfo.getName();
     }
 
@@ -376,22 +381,14 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
                 engine.setSounds(engineSound.getSoundsIn());
             }
         }
+        variants = getSubPropertyByType(MaterialVariantsInfo.class);
         //Map textures
-        Map<Byte, TextureData> bakedTextures = this.textures;
-        int textureCount = 1;
-        bakedTextures.put((byte) 0, new TextureData("Default", (byte) 0, getName()));
-        if (texturesArray != null) {
-            byte id = 1;
-            for (String[] info : texturesArray) {
-                TextureData variant = new TextureData(info[0], id, info[1]);
-                bakedTextures.put(id, variant);
-                id++;
-                if (variant.isItem())
-                    textureCount++;
-            }
+        //Backward compatibility code
+        //Will be removed
+        if(texturesArray != null) {
+            variants = new MaterialVariantsInfo(this, texturesArray);
+            variants.appendTo(this);
         }
-        this.textures = bakedTextures;
-        this.maxTextureMetadata = textureCount;
         //Map lights
         for (PartLightSource.CompoundLight src : lightSources.values()) {
             if (src != null) {
@@ -400,7 +397,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
                     PartLightSource source = sources.get(i);
                     if (source.getTextures() != null) {
                         for (int j = 0; j < source.getTextures().length; j++) {
-                            TextureData data = new TextureData(source.getTextures()[j], (byte) (1 + i + j));
+                            TextureVariantData data = new TextureVariantData(source.getTextures()[j], (byte) (1 + i + j));
                             source.mapTexture(j, data);
                         }
                     }
@@ -419,9 +416,4 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
         particleEmitters.add(particleEmitterInfo);
     }
 
-    /*@Nullable
-    @Override
-    public ModularVehicleInfo<T> getOwner() {
-        return null;
-    }*/
 }

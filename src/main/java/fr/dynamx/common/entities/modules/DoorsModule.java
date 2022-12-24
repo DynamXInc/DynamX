@@ -17,7 +17,7 @@ import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.EnumBulletShapeType;
 import fr.dynamx.client.ClientProxy;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
-import fr.dynamx.client.renders.model.ObjModelClient;
+import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.parts.PartDoor;
@@ -106,7 +106,7 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
         PhysicsRigidBody doorBody = DynamXPhysicsHelper.fastCreateRigidBody(vehicleEntity, 40, doorShape, doorPos, vehicleEntity.getPhysicsHandler().getSpawnRotationAngle());
         localVarContainer.setDoorBody(doorBody);
         doorBody.setUserObject(new BulletShapeType<>(EnumBulletShapeType.BULLET_ENTITY, localVarContainer));
-        DynamXContext.getPhysicsWorld().addCollisionObject(doorBody);
+        DynamXContext.getPhysicsWorld(vehicleEntity.world).addCollisionObject(doorBody);
 
         attachedDoors.forEach((doorId, doorVarContainer) -> {
             doorBody.addToIgnoreList(doorVarContainer.doorBody);
@@ -280,7 +280,7 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
     public void onRemovedFromWorld() {
         if (DynamXMain.proxy.shouldUseBulletSimulation(vehicleEntity.world)) {
             for (DoorVarContainer body : cachedAttachedDoors.values())
-                DynamXContext.getPhysicsWorld().removeCollisionObject(body.doorBody);
+                DynamXContext.getPhysicsWorld(vehicleEntity.world).removeCollisionObject(body.doorBody);
             cachedAttachedDoors.clear();
         }
     }
@@ -326,7 +326,7 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
 
             }
 
-            ObjModelClient vehicleModel = DynamXContext.getObjModelRegistry().getModel(carEntity.getPackInfo().getModel());
+            ObjModelRenderer vehicleModel = DynamXContext.getObjModelRegistry().getModel(carEntity.getPackInfo().getModel());
             GlStateManager.scale(carEntity.getPackInfo().getScaleModifier().x, carEntity.getPackInfo().getScaleModifier().y, carEntity.getPackInfo().getScaleModifier().z);
             render.renderModelGroup(vehicleModel, door.getPartName(), carEntity, carEntity.getEntityTextureID());
             GlStateManager.scale(1 / carEntity.getPackInfo().getScaleModifier().x, 1 / carEntity.getPackInfo().getScaleModifier().y, 1 / carEntity.getPackInfo().getScaleModifier().z);

@@ -15,8 +15,6 @@ import java.util.zip.GZIPOutputStream;
  * Terrain data cache
  */
 public class TerrainFile extends VirtualTerrainFile {
-    public static boolean ULTIMATEDEBUG;
-
     private static final int VERSION = 6;
     private static final int SLOPES_VERSION = 4;
 
@@ -41,14 +39,8 @@ public class TerrainFile extends VirtualTerrainFile {
     @Override
     public void lock(VerticalChunkPos pos) {
         if (ioLoading) {
-            if (ULTIMATEDEBUG) {
-                System.out.println("Got locked on " + this + " " + container.getName() + " at " + pos);
-            }
             ioLock.lock(); //simply wait until io load end
             ioLock.unlock(); //yes this is ugly
-            if (ULTIMATEDEBUG) {
-                System.out.println("Finished get locked on " + this + " " + container.getName() + " at " + pos);
-            }
         }
         super.lock(pos);
     }
@@ -58,9 +50,6 @@ public class TerrainFile extends VirtualTerrainFile {
     }
 
     public void load() throws IOException, ClassNotFoundException {
-        if (ULTIMATEDEBUG) {
-            System.out.println("Locking ! " + this + " " + container.getName());
-        }
         ioLock.lock();
         ioLoading = true;
         try {
@@ -88,16 +77,10 @@ public class TerrainFile extends VirtualTerrainFile {
         } finally {
             ioLoading = false;
             ioLock.unlock();
-            if (ULTIMATEDEBUG) {
-                System.out.println("Unlocking ! " + this + " " + container.getName());
-            }
         }
     }
 
     public void save() throws IOException {
-        if (ULTIMATEDEBUG) {
-            System.out.println("SAV Locking ! " + this + " " + container.getName());
-        }
         ioLock.lock();
         ioLoading = true;
         try {
@@ -117,9 +100,6 @@ public class TerrainFile extends VirtualTerrainFile {
         } finally {
             ioLoading = false;
             ioLock.unlock();
-            if (ULTIMATEDEBUG) {
-                System.out.println("SAV Unlocking ! " + this + " " + container.getName());
-            }
         }
     }
 }

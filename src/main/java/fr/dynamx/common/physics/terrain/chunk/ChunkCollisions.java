@@ -3,7 +3,6 @@ package fr.dynamx.common.physics.terrain.chunk;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.events.PhysicsEvent;
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.api.physics.terrain.ITerrainCache;
 import fr.dynamx.api.physics.terrain.ITerrainElement;
@@ -26,7 +25,6 @@ import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
@@ -89,8 +87,6 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
      * Sets the state of this chunk, avoids inconsistencies due to threaded loading
      */
     public void setChunkState(EnumChunkCollisionsState state) {
-        if (state != this.state)
-            MinecraftForge.EVENT_BUS.post(new PhysicsEvent.ChunkCollisionsStateEvent(DynamXContext.getPhysicsWorld(), this, state));
         this.state = state;
     }
 
@@ -233,7 +229,8 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
      * Removes this chunk from the physics world. <br>
      * At the end, all elements of the chunk will be removed from the physics world (see {@link TerrainElementType}).
      */
-    public void removeFromBulletWorld(IPhysicsWorld physicsWorld) {
+    public void removeFromBulletWorld() {
+        IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(mcWorld);
         if (getChunkState().areComputedElementsAdded() && getChunkState().arePersistentElementsAdded())
             removeFromBulletWorld(physicsWorld, TerrainElementType.ALL);
         else if (getChunkState().areComputedElementsAdded())
@@ -364,7 +361,7 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
         Vector3fPool.openPool();
         QuaternionPool.openPool();
 
-        boolean debug = DynamXConfig.enableDebugTerrainManager && (DynamXConfig.chunkDebugPoses.contains(getPos()) || TerrainFile.ULTIMATEDEBUG);
+        boolean debug = DynamXConfig.enableDebugTerrainManager && DynamXConfig.chunkDebugPoses.contains(getPos());
         if (debug)
             DynamXMain.log.info("[CHUNK DEBUG] Computing collisions of chunk " + this + " with " + this.elements + " before, and take from " + ticket + " at " + System.currentTimeMillis());
         if (DynamXConfig.enableDebugTerrainManager)
@@ -396,7 +393,7 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
         maxSize = ITerrainElement.DEFAULT_SIZE;
         this.elements.getElements().forEach(element -> {
             try {
-                PhysicsRigidBody b = element.build(pos);
+                PhysicsRigidBody b = element.build(mcWorld, pos);
                 if (b == null && debug)
                     DynamXMain.log.info("[CHUNK DEBUG] Body of " + element + " is null");
                 else if (debug)
@@ -404,11 +401,11 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
             } catch (Exception e) {
                 DynamXMain.log.error("Failed to add " + element + " in " + this, e);
                 //Mark dirty for refresh
-                DynamXContext.getPhysicsWorld().getTerrainManager().onChunkChanged(getPos());
+                DynamXContext.getPhysicsWorld(mcWorld).getTerrainManager().onChunkChanged(getPos());
             }
         });
         this.elements.getPersistentElements().forEach(element -> {
-            PhysicsRigidBody b = element.build(pos);
+            PhysicsRigidBody b = element.build(mcWorld, pos);
             if (b == null)
                 DynamXMain.log.warn("[CHUNK DEBUG] Body of " + element + " (persistent) is null");
             else if (debug)
@@ -443,7 +440,7 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
             removeFromBulletWorld(manager.getPhysicsWorld(), TerrainElementType.PERSISTENT_ELEMENTS);
         elements.getPersistentElements().addAll(elementList);
         for (ITerrainElement element : elementList) {
-            element.build(Vector3fPool.get(myPos.x * 16, myPos.y * 16, myPos.z * 16));
+            element.build(mcWorld, Vector3fPool.get(myPos.x * 16, myPos.y * 16, myPos.z * 16));
         }
         if (added)
             addToBulletWorld(manager.getPhysicsWorld(), TerrainElementType.PERSISTENT_ELEMENTS, null);

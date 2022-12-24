@@ -1,6 +1,7 @@
 package fr.dynamx.api.contentpack;
 
 public enum ContentPackType {
+    NOTSET(false),
     FOLDER(false),
     DNXPACK(true),
     ZIP(true),

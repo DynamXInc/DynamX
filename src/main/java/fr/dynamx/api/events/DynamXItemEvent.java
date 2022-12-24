@@ -19,7 +19,7 @@ public class DynamXItemEvent extends Event {
     }
 
     @Cancelable
-    public static class RenderItem extends DynamXItemEvent {
+    public static class Render extends DynamXItemEvent {
         @Getter
         private final Item item;
         @Getter
@@ -27,7 +27,7 @@ public class DynamXItemEvent extends Event {
         @Getter
         private final ItemCameraTransforms.TransformType transformType;
 
-        public RenderItem(Item item, EventStage stage, ItemCameraTransforms.TransformType transformType) {
+        public Render(Item item, EventStage stage, ItemCameraTransforms.TransformType transformType) {
             super(Side.CLIENT, item);
             this.item = item;
             this.stage = stage;

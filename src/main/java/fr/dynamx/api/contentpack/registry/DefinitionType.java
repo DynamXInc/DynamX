@@ -7,6 +7,7 @@ import fr.dynamx.common.contentpack.loader.PackConstants;
 import fr.dynamx.common.contentpack.parts.PartShape;
 import fr.dynamx.utils.EnumPlayerStandOnTop;
 import fr.dynamx.utils.EnumSeatPlayerPosition;
+import fr.dynamx.utils.RegistryNameSetter;
 import fr.dynamx.utils.physics.EnumCollisionType;
 import net.minecraft.block.material.Material;
 import net.minecraft.util.EnumParticleTypes;
@@ -226,6 +227,7 @@ public class DefinitionType<T> {
         COLLISION_TYPE(new DefinitionType<>(EnumCollisionType.class, EnumCollisionType::valueOf,
                 p -> p == null ? EnumCollisionType.SIMPLE.name() : p.name(), "type.collision")),
         SHAPE_TYPE(new DefinitionType<>(PartShape.EnumPartType.class, PartShape.EnumPartType::fromString, "type.shapetype")),
+        DYNX_RESOURCE_LOCATION(new DefinitionType<>(ResourceLocation.class, RegistryNameSetter::getDynamXModelResourceLocation, "type.resourcelocation")),
         PLAYER_STAND_ON_TOP(new DefinitionType<>(EnumPlayerStandOnTop.class, EnumPlayerStandOnTop::fromString, "type.player_stand_on_top")),
         PLAYER_SEAT_POSITION(new DefinitionType<>(EnumSeatPlayerPosition.class, EnumSeatPlayerPosition::fromString, "type.player_seat_position")),
         MATERIAL(new DefinitionType<>(Material.class, (s) -> {

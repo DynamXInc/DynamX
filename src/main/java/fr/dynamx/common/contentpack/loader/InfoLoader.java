@@ -222,7 +222,8 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
                             parent = ((ISubInfoType<?>) parent).getRootOwner();
                         DynamXErrorManager.addPackError(obj.getPackName(), "deprecated_prop", ErrorLevel.LOW, parent.getName(), "Deprecated config key found " + key + " in " + obj.getName() + ". You should now use " + fixResult.newKey());
                     }
-                    key = fixResult.newKey();
+                    if(!fixResult.isKeepOldKey())
+                        key = fixResult.newKey();
                     value = fixResult.newValue(value);
                 }
             }

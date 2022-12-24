@@ -11,7 +11,7 @@ import fr.dynamx.client.gui.GuiLoadingErrors;
 import fr.dynamx.client.gui.GuiTexturedButton;
 import fr.dynamx.client.gui.VehicleHud;
 import fr.dynamx.client.renders.RenderMovableLine;
-import fr.dynamx.client.renders.model.ObjModelClient;
+import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.blocks.DynamXBlock;
@@ -72,21 +72,13 @@ public class ClientEventHandler {
     public static RenderPlayer renderPlayer;
 
     /* Placing block */
-    private ObjModelClient model;
+    private ObjModelRenderer model;
     private boolean canPlace;
     private BlockPos blockPos;
     private int playerOrientation;
     private BlockObject<?> blockObjectInfo;
 
     /* World events */
-
-    @SubscribeEvent
-    public void onWorldLoaded(WorldEvent.Load event) {
-        //FIXME SOLO : SIMPLIFY CONDITION
-        if (DynamXContext.getPhysicsWorld() == null && event.getWorld().provider.getDimension() == 0 && ((DynamXConfig.clientOwnsPhysicsInSolo && event.getWorld().isRemote) || FMLCommonHandler.instance().getMinecraftServerInstance() == null)) {
-            DynamXContext.setPhysicsWorld(DynamXMain.proxy.provideClientPhysicsWorld(event.getWorld()));
-        }
-    }
 
     @SubscribeEvent
     public void onWorldUnloaded(WorldEvent.Unload event) {
@@ -118,14 +110,14 @@ public class ClientEventHandler {
     }
 
     @SubscribeEvent
-    public void onMount(VehicleEntityEvent.MountVehicleEntityEvent event) {
+    public void onMount(VehicleEntityEvent.PlayerMount event) {
         if (event.getPlayer().isUser()) {
             ACsGuiApi.asyncLoadThenShowHudGui("Vehicle HUD", () -> new VehicleHud((IModuleContainer.ISeatsContainer) event.getEntity()));
         }
     }
 
     @SubscribeEvent
-    public void onDismount(VehicleEntityEvent.DismountVehicleEntityEvent event) {
+    public void onDismount(VehicleEntityEvent.PlayerDismount event) {
         if (event.getPlayer().isUser()) {
             ACsGuiApi.closeHudGui();
         }

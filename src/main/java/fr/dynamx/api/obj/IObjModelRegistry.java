@@ -2,7 +2,7 @@ package fr.dynamx.api.obj;
 
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.client.renders.model.ItemObjModel;
-import fr.dynamx.client.renders.model.ObjModelClient;
+import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.ICustomModelLoader;
@@ -20,6 +20,15 @@ public interface IObjModelRegistry {
      *
      * @param name The model in format modid:path
      */
+    void registerModel(ObjModelPath name);
+
+    /**
+     * Registers a model <br>
+     * The model should be in dynamxmod:models/path
+     *
+     * @param name The model in format path
+     */
+    @Deprecated
     void registerModel(String name);
 
     /**
@@ -29,42 +38,28 @@ public interface IObjModelRegistry {
      * @param name           The model in format modid:path
      * @param customTextures A texture supplier for this model (allows multi-texturing)
      */
-    void registerModel(String name, IModelTextureSupplier customTextures);
+    void registerModel(ObjModelPath name, IModelTextureVariantsSupplier customTextures);
 
     /**
      * Registers a model <br>
-     * The model should be in modid:models/path
+     * The model should be in dynamxmod:models/path
      *
-     * @param location The model resource location
-     */
-    default void registerModel(ResourceLocation location) {
-        registerModel(location.toString());
-    }
-
-    /**
-     * Registers a model <br>
-     * The model should be in modid:models/path
-     *
-     * @param location       The model resource location
+     * @param path           The model in format path
      * @param customTextures A texture supplier for this model (allows multi-texturing)
      */
-    default void registerModel(ResourceLocation location, IModelTextureSupplier customTextures) {
-        registerModel(location.toString(), customTextures);
-    }
-
-    /**
-     * @return The model corresponding to the given resource location (the location used in registerModel)
-     * @throws IllegalArgumentException If the model wasn't registered (should be done before DynamX pre initialization)
-     */
-    default ObjModelClient getModel(ResourceLocation location) {
-        return getModel(location.toString());
-    }
+    void registerModel(String path, IModelTextureVariantsSupplier customTextures);
 
     /**
      * @return The model corresponding to the given name (the name used in registerModel)
      * @throws IllegalArgumentException If the model wasn't registered (should be done before DynamX pre initialization)
      */
-    ObjModelClient getModel(String name);
+    ObjModelRenderer getModel(ResourceLocation name);
+
+    /**
+     * @return The model corresponding to the given name (the name used in registerModel)
+     * @throws IllegalArgumentException If the model wasn't registered (should be done before DynamX pre initialization)
+     */
+    ObjModelRenderer getModel(String path);
 
     /**
      * Reloads all models, may take some time

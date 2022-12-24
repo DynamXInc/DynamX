@@ -157,9 +157,6 @@ public class DynamXMain {
 
     @EventHandler
     public void onServerStarting(FMLServerStartingEvent event) {
-        if (!DynamXConfig.clientOwnsPhysicsInSolo || event.getServer().isDedicatedServer()) {
-            DynamXContext.setPhysicsWorld(proxy.provideServerPhysicsWorld(event.getServer().getEntityWorld()));
-        }
         event.registerServerCommand(new DynamXCommands());
     }
 

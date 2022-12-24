@@ -255,6 +255,6 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
         entities.clear();
         joints.clear();
         getTerrainManager().onWorldUnload();
-        DynamXContext.setPhysicsWorld(null);
+        DynamXContext.getPhysicsWorldPerDimensionMap().remove(mcWorld.provider.getDimension());
     }
 }

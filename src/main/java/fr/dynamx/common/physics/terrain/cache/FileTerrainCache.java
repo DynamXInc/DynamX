@@ -59,7 +59,7 @@ public class FileTerrainCache implements ITerrainCache {
     }
 
     private void initV4(File slopes) {
-        DynamXMain.log.info("V4 terrain format detected !");
+        DynamXMain.log.debug("V4 terrain format detected !");
         try {
             if (!slopes.exists()) //when the world is created
                 isSlopesToSave = true; //ensure to write a new file, and don't detect V3 the next time

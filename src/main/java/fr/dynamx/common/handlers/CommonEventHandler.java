@@ -138,16 +138,23 @@ public class CommonEventHandler {
 
     @SubscribeEvent
     public void onExplosion(ExplosionEvent.Detonate event) {
-            // Explosion effect
-            Vector3f explosionPosition = new Vector3f((float) event.getExplosion().getPosition().x,
-                    (float) event.getExplosion().getPosition().y, (float) event.getExplosion().getPosition().z);
-            DynamXContext.getNetwork().sendToClient(new MessageHandleExplosion(explosionPosition, event.getAffectedEntities()), EnumPacketTarget.ALL);
+        // Explosion effect
+        Vector3f explosionPosition = new Vector3f((float) event.getExplosion().getPosition().x,
+                (float) event.getExplosion().getPosition().y, (float) event.getExplosion().getPosition().z);
+        DynamXContext.getNetwork().sendToClient(new MessageHandleExplosion(explosionPosition, event.getAffectedEntities()), EnumPacketTarget.ALL);
     }
 
     @SubscribeEvent
     public void onWorldLoad(WorldEvent.Load event) {
         World world = event.getWorld();
         world.addEventListener(new DynamXWorldListener());
+        //FIXME SOLO : SIMPLIFY CONDITION
+        if (((DynamXConfig.clientOwnsPhysicsInSolo && event.getWorld().isRemote) || FMLCommonHandler.instance().getMinecraftServerInstance() == null)) {
+            DynamXMain.proxy.providePhysicsWorld(event.getWorld());
+        }
+        if (!DynamXConfig.clientOwnsPhysicsInSolo || FMLCommonHandler.instance().getMinecraftServerInstance().isDedicatedServer()) {
+            DynamXMain.proxy.providePhysicsWorld(event.getWorld());
+        }
     }
 
     /*@SubscribeEvent

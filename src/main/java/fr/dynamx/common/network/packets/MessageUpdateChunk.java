@@ -3,10 +3,8 @@ package fr.dynamx.common.network.packets;
 import fr.dynamx.api.network.EnumNetworkType;
 import fr.dynamx.api.network.IDnxPacket;
 import fr.dynamx.api.physics.IPhysicsWorld;
-import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
-import fr.dynamx.common.physics.terrain.cache.TerrainFile;
 import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.VerticalChunkPos;
 import fr.dynamx.utils.optimization.Vector3fPool;
@@ -65,7 +63,7 @@ public class MessageUpdateChunk implements IDnxPacket, IMessageHandler<MessageUp
 
     @Override
     public void handleUDPReceive(EntityPlayer context, Side side) {
-        IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(ClientEventHandler.MC.world);
+        IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(context.world);
         if (physicsWorld != null && DynamXMain.proxy.shouldUseBulletSimulation(context.world)) {
             physicsWorld.schedule(() -> {
                 Vector3fPool.openPool();

@@ -81,14 +81,6 @@ public class ClientEventHandler {
     /* World events */
 
     @SubscribeEvent
-    public void onWorldLoaded(WorldEvent.Load event) {
-        //FIXME SOLO : SIMPLIFY CONDITION
-        if (((DynamXConfig.clientOwnsPhysicsInSolo && event.getWorld().isRemote) || FMLCommonHandler.instance().getMinecraftServerInstance() == null)) {
-            DynamXContext.setPhysicsWorld(DynamXMain.proxy.provideClientPhysicsWorld(event.getWorld()));
-        }
-    }
-
-    @SubscribeEvent
     public void onWorldUnloaded(WorldEvent.Unload event) {
         if (event.getWorld().isRemote) {
             ClientProxy.SOUND_HANDLER.unload();

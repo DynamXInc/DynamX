@@ -65,7 +65,7 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
      * Adds the collision object to the physics world
      */
     public void addToWorld() {
-        DynamXContext.getPhysicsWorld().addCollisionObject(collisionObject);
+        DynamXContext.getPhysicsWorld(handledEntity.world).addCollisionObject(collisionObject);
     }
 
     /**
@@ -73,7 +73,7 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
      */
     public void removePhysicsEntity() {
         if (collisionObject != null) {
-            DynamXContext.getPhysicsWorld().removeCollisionObject(collisionObject);
+            DynamXContext.getPhysicsWorld(handledEntity.world).removeCollisionObject(collisionObject);
         }
     }
 

@@ -7,6 +7,7 @@ import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.EnumBulletShapeType;
+import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.type.vehicle.FrictionPoint;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
@@ -45,10 +46,11 @@ public abstract class BaseWheeledVehiclePhysicsHandler<T extends BaseVehicleEnti
 
     @Override
     public void addToWorld() {
-        if (DynamXContext.getPhysicsWorld() == null) {
+        IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(getHandledEntity().world);
+        if (physicsWorld == null) {
             throw new NullPointerException("Physics world is null, wtf " + handledEntity.getEntityWorld() + " " + getCollisionObject());
         }
-        DynamXContext.getPhysicsWorld().addVehicle((PhysicsVehicle) getCollisionObject());
+        physicsWorld.addVehicle((PhysicsVehicle) getCollisionObject());
     }
 
     @Override
@@ -78,7 +80,7 @@ public abstract class BaseWheeledVehiclePhysicsHandler<T extends BaseVehicleEnti
     @Override
     public void removePhysicsEntity() {
         if (physicsVehicle != null) {
-            DynamXContext.getPhysicsWorld().removeVehicle(physicsVehicle);
+            DynamXContext.getPhysicsWorld(getHandledEntity().world).removeVehicle(physicsVehicle);
         }
     }
 }

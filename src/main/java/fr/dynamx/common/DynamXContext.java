@@ -14,7 +14,6 @@ import fr.dynamx.common.objloader.data.ObjModelData;
 import fr.dynamx.common.physics.player.PlayerPhysicsHandler;
 import fr.dynamx.common.physics.world.PhysicsSimulationModes;
 import fr.dynamx.utils.DynamXUtils;
-import lombok.Getter;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
@@ -30,7 +29,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * Common DynamX variables
  */
 public class DynamXContext {
-    private static IPhysicsWorld physicsWorld;
     private static final IRotatedCollisionHandler collisionHandler = new RotatedCollisionHandlerImpl();
     private static final IDnxNetworkSystem network;
     @SideOnly(Side.CLIENT)
@@ -44,8 +42,7 @@ public class DynamXContext {
 
     private static final Map<ResourceLocation, ObjModelData> OBJ_MODEL_DATA_CACHE = new HashMap<>();
 
-    @Getter
-    private static boolean isOptifineLoaded = false;
+    private static final Map<Integer, IPhysicsWorld> PHYSICS_WORLD_PER_DIMENSION = new HashMap<>();
 
 
     /**
@@ -62,8 +59,8 @@ public class DynamXContext {
     /**
      * @return The local physics world
      */
-    public static IPhysicsWorld getPhysicsWorld() {
-        return physicsWorld;
+    public static IPhysicsWorld getPhysicsWorld(World world) {
+        return getPhysicsWorldPerDimensionMap().get(world.provider.getDimension());
     }
 
     /**
@@ -109,8 +106,8 @@ public class DynamXContext {
         return network;
     }
 
-    public static void setPhysicsWorld(IPhysicsWorld physicsWorld) {
-        DynamXContext.physicsWorld = physicsWorld;
+    public static Map<Integer, IPhysicsWorld> getPhysicsWorldPerDimensionMap() {
+        return PHYSICS_WORLD_PER_DIMENSION;
     }
 
     public static void setPlayerPickingObjects(Map<Integer, Integer> playerPickingObjects) {
@@ -145,17 +142,11 @@ public class DynamXContext {
         }
     }
 
-    public static Map<ResourceLocation, ObjModelData> getObjModelDataCache(){
+    public static Map<ResourceLocation, ObjModelData> getObjModelDataCache() {
         return OBJ_MODEL_DATA_CACHE;
     }
 
     static {
-        try {
-            Class.forName("net.optifine.shaders.Shaders");
-            isOptifineLoaded = true;
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
         network = DynamXNetwork.init(FMLCommonHandler.instance().getSide());
         if (FMLCommonHandler.instance().getSide().isClient())
             objModelRegistry = new DynamXModelRegistry();

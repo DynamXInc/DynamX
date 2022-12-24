@@ -40,7 +40,7 @@ public class CustomSlopeTerrainElement implements ITerrainElement.IPersistentTer
     }
 
     @Override
-    public PhysicsRigidBody build(Vector3f pos) {
+    public PhysicsRigidBody build(World world, Vector3f pos) {
         SimplexCollisionShape shape = new SimplexCollisionShape(points);
         PhysicsRigidBody pr = new PhysicsRigidBody(shape, 0);
         Vector3f posFixed = Vector3fPool.get(pos).addLocal(8, -0.04f, 8);

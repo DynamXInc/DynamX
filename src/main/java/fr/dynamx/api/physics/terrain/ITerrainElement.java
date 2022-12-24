@@ -24,10 +24,12 @@ public interface ITerrainElement {
      * Called once, after element init (in constructor), or after load method was called <br>
      * Should return the PhysicsRigidBody corresponding to this collision element
      *
+     *
+     * @param world
      * @param pos The location of the body to create
      * @return A new rigid body for this terrain element
      */
-    PhysicsRigidBody build(Vector3f pos);
+    PhysicsRigidBody build(World world, Vector3f pos);
 
     /**
      * Called after build has been called, should return the same body

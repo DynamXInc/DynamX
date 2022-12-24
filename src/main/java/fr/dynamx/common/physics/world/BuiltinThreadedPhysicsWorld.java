@@ -54,7 +54,7 @@ public class BuiltinThreadedPhysicsWorld extends BasePhysicsWorld implements Run
                 sendRestartMsg();
         });
         alive = true;
-        DynamXMain.log.info("Starting a new ThreadedPhysicsWorld !");
+        DynamXMain.log.info("Loading the threaded physics world for the dimension " + world.provider.getDimension());
         MinecraftForge.EVENT_BUS.post(new PhysicsEvent.PhysicsWorldLoad(this));
         myThread.start();
     }
@@ -115,9 +115,8 @@ public class BuiltinThreadedPhysicsWorld extends BasePhysicsWorld implements Run
                 }
             }
         }
-        DynamXMain.log.info("Unloading the physics world");
+        DynamXMain.log.info("Unloading the threaded physics world of the dimension " + mcWorld.provider.getDimension());
         super.clearAll();
-        DynamXMain.log.info("ThreadedPhysicsWorld cleared");
     }
 
     private final Semaphore simLock = new Semaphore(1);

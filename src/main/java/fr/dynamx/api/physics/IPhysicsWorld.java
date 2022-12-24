@@ -7,6 +7,7 @@ import com.jme3.bullet.objects.PhysicsVehicle;
 import fr.dynamx.api.events.PhysicsEvent;
 import fr.dynamx.api.physics.terrain.ITerrainManager;
 import fr.dynamx.common.entities.PhysicsEntity;
+import fr.dynamx.common.physics.terrain.PhysicsWorldTerrain;
 import fr.dynamx.common.physics.utils.PhysicsWorldOperation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
@@ -139,7 +140,7 @@ public interface IPhysicsWorld {
     /**
      * @return The {@link ITerrainManager} used by this world
      */
-    ITerrainManager getTerrainManager();
+    PhysicsWorldTerrain getTerrainManager();
 
     /**
      * @return True if this {@link IPhysicsWorld} is simulating this minecraft world

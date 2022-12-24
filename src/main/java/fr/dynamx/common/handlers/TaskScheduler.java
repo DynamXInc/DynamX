@@ -37,7 +37,6 @@ public class TaskScheduler {
             });
             rm.forEach(tasks::remove);
         }
-        CommonEventHandler.tickBlockUpdates();
     }
 
     /**

@@ -15,7 +15,7 @@ import fr.dynamx.api.network.sync.v3.MapSynchronizedVariable;
 import fr.dynamx.api.network.sync.v3.SynchronizationRules;
 import fr.dynamx.api.network.sync.v3.SynchronizedEntityVariable;
 import fr.dynamx.api.physics.entities.IPropulsionHandler;
-import fr.dynamx.client.renders.RenderPhysicsEntity;
+import fr.dynamx.client.²renders.RenderPhysicsEntity;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.client.renders.vehicle.RenderBaseVehicle;

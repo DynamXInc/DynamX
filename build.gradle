@@ -64,17 +64,17 @@ minecraft {
 dependencies {
     minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2860'
 
-    implementation 'com.github.stephengold:Libbulletjme:' + libbulletjme_version
+    implementation 'com.github.stephengold:Libbulletjme:' + libbulletjme_versionDynamXCons
     implementation "fr.aym.acsguis:ACsGuis:1.2.4-3"
     implementation ":ModProtectionLib:1.2.4"
-    implementation('org.spongepowered:mixin:0.8.5') {
+    implementation('org.spongepowered:mixin:0.8.3-SNAPSHOT') {
         exclude module: 'guava'
         exclude module: 'commons-io'
         exclude module: 'gson'
     }
     compileOnly 'org.projectlombok:lombok:1.18.24'
 
-    shadow('org.spongepowered:mixin:0.8.5') {
+    shadow('org.spongepowered:mixin:0.8.3-SNAPSHOT') {
         exclude module: 'guava'
         exclude module: 'commons-io'
         exclude module: 'gson'

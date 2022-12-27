@@ -3,8 +3,9 @@ package fr.dynamx.common.physics;
 import com.jme3.bullet.collision.PhysicsCollisionEvent;
 import fr.dynamx.api.events.PhysicsEvent;
 import fr.dynamx.api.physics.BulletShapeType;
-import fr.dynamx.common.DynamXContext;
+import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.common.entities.PhysicsEntity;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraftforge.common.MinecraftForge;
@@ -29,9 +30,9 @@ public class CollisionsHandler {
     /**
      * Handles collision between two bodies <br>
      */
-    public static void handleCollision(PhysicsCollisionEvent collisionEvent, BulletShapeType<?> bodyA, BulletShapeType<?> bodyB) {
+    public static void handleCollision(IPhysicsWorld physicsWorld, PhysicsCollisionEvent collisionEvent, BulletShapeType<?> bodyA, BulletShapeType<?> bodyB) {
         if (bodyA.getType().isEntity() && bodyB.getType().isEntity() || bodyA.getType().isEntity() && bodyB.getType().isTerrain() || bodyA.getType().isTerrain() && bodyB.getType().isEntity()) {
-            CollisionInfo info = new CollisionInfo(bodyA, bodyB, EXPIRATION_TIME, collisionEvent);
+            CollisionInfo info = new CollisionInfo(physicsWorld, bodyA, bodyB, EXPIRATION_TIME, collisionEvent);
             if (!CACHED_COLLISIONS.contains(info)) {
                 CACHED_COLLISIONS.add(info);
                 info.handleCollision();
@@ -39,28 +40,24 @@ public class CollisionsHandler {
         }
     }
 
+    @AllArgsConstructor
     public static class CollisionInfo {
+        @Getter
+        private IPhysicsWorld physicsWorld;
         @Getter
         private final BulletShapeType<?> entityA, entityB;
         @Getter
-        private final PhysicsCollisionEvent collisionEvent;
-        @Getter
         private int time;
+        @Getter
+        private final PhysicsCollisionEvent collisionEvent;
 
-        public CollisionInfo(BulletShapeType<?> entityA, BulletShapeType<?> entityB, int time, PhysicsCollisionEvent collisionEvent) {
-            this.entityA = entityA;
-            this.entityB = entityB;
-            this.time = time;
-            this.collisionEvent = collisionEvent;
-        }
 
         public boolean tick() {
             return time-- <= 0;
         }
 
         public void handleCollision() {
-            //TODO
-            //MinecraftForge.EVENT_BUS.post(new PhysicsEvent.PhysicsCollision(collisionEvent.getObjectB().getCollisionSpace(), entityA, entityB));
+            MinecraftForge.EVENT_BUS.post(new PhysicsEvent.PhysicsCollision(physicsWorld, entityA, entityB));
             if (entityA.getObjectIn() instanceof PhysicsEntity && entityB.getObjectIn() instanceof PhysicsEntity) {
                 if (entityA.getType().isBulletEntity()) {
                     ((PhysicsEntity<?>) entityA.getObjectIn()).onCollisionEnter(collisionEvent, entityA, entityB);

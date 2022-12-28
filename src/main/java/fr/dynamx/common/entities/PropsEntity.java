@@ -28,7 +28,7 @@ public class PropsEntity<T extends PackEntityPhysicsHandler<PropObject<?>, ?>> e
     }
 
     @Override
-    protected PropObject<?> createInfo(String infoName) {
+    public PropObject<?> createInfo(String infoName) {
         return DynamXObjectLoaders.PROPS.findInfo(infoName);
     }
 

@@ -1,6 +1,7 @@
 package fr.dynamx.common.entities.modules;
 
 import com.jme3.math.Vector3f;
+import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent;
@@ -19,14 +20,22 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.Constants;
+import scala.xml.dtd.impl.Base;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class VehicleLightsModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, IPhysicsModule.IDrawableModule<BaseVehicleEntity<?>> {
+public class VehicleLightsModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, IPhysicsModule.IDrawableModule<BaseVehicleEntity<?>>, IPackInfoReloadListener {
+    private final BaseVehicleEntity<?> entity;
     private final Map<Integer, Boolean> lightStates = new HashMap<>();
 
     public VehicleLightsModule(BaseVehicleEntity<?> entity) {
+        this.entity = entity;
+        onPackInfosReloaded();
+    }
+
+    @Override
+    public void onPackInfosReloaded() {
         for (PartLightSource.CompoundLight compound : entity.getPackInfo().getLightSources().values()) {
             for (PartLightSource s : compound.getSources()) {
                 lightStates.put(s.getLightId(), false);

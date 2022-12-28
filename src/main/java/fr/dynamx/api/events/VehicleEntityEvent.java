@@ -6,6 +6,7 @@ import fr.dynamx.api.entities.modules.ISeatsModule;
 import fr.dynamx.api.entities.modules.IVehicleController;
 import fr.dynamx.client.gui.VehicleHud;
 import fr.dynamx.client.handlers.hud.CarController;
+import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.client.renders.vehicle.RenderBaseVehicle;
 import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
@@ -179,6 +180,8 @@ public class VehicleEntityEvent extends Event {
         private final PhysicsEntityEvent.Phase eventPase;
         @Getter
         private final float partialTicks;
+        @Getter
+        private final ObjModelRenderer objModelRenderer;
 
         /**
          * @param type              the type of the render
@@ -187,13 +190,14 @@ public class VehicleEntityEvent extends Event {
          * @param phase             the phase of the render (Post or Pre)
          * @param partialTicks      the partial render ticks
          */
-        public Render(Type type, RenderBaseVehicle<?> renderBaseVehicle, BaseVehicleEntity<?> carEntity, PhysicsEntityEvent.Phase phase, float partialTicks) {
+        public Render(Type type, RenderBaseVehicle<?> renderBaseVehicle, BaseVehicleEntity<?> carEntity, PhysicsEntityEvent.Phase phase, float partialTicks, @Nullable ObjModelRenderer objModelRenderer) {
             super(Side.CLIENT, carEntity);
             this.type = type;
             this.renderBaseVehicle = renderBaseVehicle;
             this.carEntity = carEntity;
             this.eventPase = phase;
             this.partialTicks = partialTicks;
+            this.objModelRenderer = objModelRenderer;
         }
 
         public enum Type {

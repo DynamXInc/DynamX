@@ -45,7 +45,7 @@ public class ObjModelData {
         try {
             String content = new String(DynamXUtils.readInputStream(FMLCommonHandler.instance().getSide().isClient() ? client(path) : server(path)), StandardCharsets.UTF_8);
             ResourceLocation location = path.getModelPath();
-            String startPath = location.getPath().substring(0, location.getPath().lastIndexOf("/") + 1);
+            ResourceLocation startPath = new ResourceLocation(location.getNamespace(), location.getPath().substring(0, location.getPath().lastIndexOf("/") + 1));
             new OBJLoader(objObjects, materials).readAndLoadModel(FMLCommonHandler.instance().getSide().isClient() ? startPath : null, content);
         } catch (Exception e) {
             //Don't remove the throw - Aym

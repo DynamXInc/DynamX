@@ -3,10 +3,7 @@ package fr.dynamx.utils.optimization;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.*;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
@@ -292,8 +289,9 @@ public class MutableBoundingBox implements Serializable, IShapeInfo {
      * If contracting and the amount to contract by is larger than the length of a side, then the side will wrap (still
      * creating a valid AABB - see samples on {@link #grow(double, double, double)}).
      */
-    public void grow(double value) {
+    public MutableBoundingBox grow(double value) {
         this.grow(value, value, value);
+        return this;
     }
 
     /**
@@ -314,6 +312,18 @@ public class MutableBoundingBox implements Serializable, IShapeInfo {
         if (vec.x > this.minX && vec.x < this.maxX) {
             if (vec.y > this.minY && vec.y < this.maxY) {
                 return vec.z > this.minZ && vec.z < this.maxZ;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    public boolean contains(Vec3i vec) {
+        if (vec.getX() > this.minX && vec.getX() < this.maxX) {
+            if (vec.getY() > this.minY && vec.getY() < this.maxY) {
+                return vec.getZ() > this.minZ && vec.getZ() < this.maxZ;
             } else {
                 return false;
             }

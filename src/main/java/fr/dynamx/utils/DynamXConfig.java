@@ -48,7 +48,8 @@ public class DynamXConfig {
         maxZoomOut = cfg.getInt("MaxZoomOut", "Visuals", 20, 0, 200, "Max de-zoom in F5 view");
         allowPlayersToMoveObjects = cfg.getBoolean("AllowPlayersToMoveObjects", "Physics", true, "Allow player in survival to move ");
         ragdollSpawnMinForce = cfg.getInt("RagdollSpawnMinForce", "Physics", -1, -1, Integer.MAX_VALUE, "The minimum force of collision to spawn player ragdolls. Set to -1 to disable it.");
-        blockCollisionRadius = cfg.getInt("BlockCollisionRadius2", "Physics", 3, 0, 100, "The radius of collision checking with DynamX blocks around players. Has an impact on game performance. NOTE : Renamed with a '2' to replace the old default value and stay below 30 for stable performance");
+        //todo update doc and see new impact on perfs
+        blockCollisionRadius = cfg.getInt("BlockCollisionRadius2", "Physics", 3, 0, 16, "The radius of collision checking with DynamX blocks around players. Has an impact on game performance. NOTE : Renamed with a '2' to replace the old default value and stay below 30 for stable performance");
         maxComplexBlockBoxes = cfg.getInt("MaxComplexBoxes", "Physics", 8, 0, 100, "The amount of detailed collisions per each complex block. If the block has more collisions (e.g. Decocraft), it will be a cube containing all collisions. Has an impact on game performance.");
 
         if (cfg.hasKey("Statistics", "CollectData")) {

@@ -78,7 +78,7 @@ public class VehicleLightsModule implements IPhysicsModule<BaseVehiclePhysicsHan
         //    setLightOn(9, true);
         //    setLightOn(1, false);
         /* Rendering light sources */
-        if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.LIGHTS, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks))) {
+        if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.LIGHTS, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks, null))) {
             if (carEntity.hasModuleOfType(VehicleLightsModule.class)) {
                 ObjModelRenderer vehicleModel = DynamXContext.getObjModelRegistry().getModel(carEntity.getPackInfo().getModel());
                 for (PartLightSource.CompoundLight sources : carEntity.getPackInfo().getLightSources().values()) {
@@ -159,7 +159,7 @@ public class VehicleLightsModule implements IPhysicsModule<BaseVehiclePhysicsHan
                     GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
                 }
             }
-            MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.LIGHTS, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks));
+            MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.LIGHTS, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks, null));
         }
     }
 }

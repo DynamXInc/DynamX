@@ -3,6 +3,7 @@ package fr.dynamx.common.entities.modules;
 import com.jme3.bullet.joints.Constraint;
 import com.jme3.bullet.joints.Point2PointJoint;
 import com.jme3.math.Vector3f;
+import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.entities.modules.AttachModule;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.common.contentpack.type.vehicle.TrailerAttachInfo;
@@ -18,7 +19,7 @@ import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.util.ResourceLocation;
 
-public class TrailerAttachModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, AttachModule.AttachToOtherModule<TrailerEntity<?>> {
+public class TrailerAttachModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, AttachModule.AttachToOtherModule<TrailerEntity<?>>, IPackInfoReloadListener {
     public static final ResourceLocation JOINT_NAME = new ResourceLocation(DynamXConstants.ID, "trailer_module");
     public static final JointHandler<CarEntity<?>, TrailerEntity<?>, TrailerAttachModule> HANDLER;
 
@@ -27,12 +28,17 @@ public class TrailerAttachModule implements IPhysicsModule<BaseVehiclePhysicsHan
     }
 
     private final BaseVehicleEntity<?> entity;
-    private final TrailerAttachInfo info;
+    private TrailerAttachInfo info;
     private int connectedEntity = -1;
 
     public TrailerAttachModule(BaseVehicleEntity<?> entity, TrailerAttachInfo info) {
         this.entity = entity;
         this.info = info;
+    }
+
+    @Override
+    public void onPackInfosReloaded() {
+        info = entity.getPackInfo().getSubPropertyByType(TrailerAttachInfo.class);
     }
 
     public Vector3f getAttachPoint() {

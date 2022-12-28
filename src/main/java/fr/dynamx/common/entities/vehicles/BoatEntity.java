@@ -70,7 +70,7 @@ public class BoatEntity<T extends BoatPhysicsHandler<?>> extends BaseVehicleEnti
     }
 
     @Override
-    protected ModularVehicleInfo createInfo(String infoName) {
+    public ModularVehicleInfo createInfo(String infoName) {
         return DynamXObjectLoaders.BOATS.findInfo(infoName);
     }
 

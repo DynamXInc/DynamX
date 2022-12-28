@@ -1,5 +1,6 @@
 package fr.dynamx.common.physics.entities.modules;
 
+import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.physics.entities.IEnginePhysicsHandler;
 import fr.dynamx.api.physics.entities.IGearBoxHandler;
 import fr.dynamx.api.physics.entities.IPropulsionHandler;
@@ -22,7 +23,7 @@ import java.util.List;
  * @see IEnginePhysicsHandler
  * @see EngineModule
  */
-public class EnginePhysicsHandler implements IEnginePhysicsHandler {
+public class EnginePhysicsHandler implements IEnginePhysicsHandler, IPackInfoReloadListener {
     private final EngineModule module;
     private final BaseVehiclePhysicsHandler<?> handler;
     private final IPropulsionHandler propulsionHandler;
@@ -41,6 +42,11 @@ public class EnginePhysicsHandler implements IEnginePhysicsHandler {
         this.module = module;
         this.handler = handler;
         this.propulsionHandler = propulsionHandler;
+        onPackInfosReloaded();
+    }
+
+    @Override
+    public void onPackInfosReloaded() {
         engine = new Engine(module.getEngineInfo());
         List<GearInfo> gears = module.getEngineInfo().gears;
         gearBox = new GearBox(gears.size());

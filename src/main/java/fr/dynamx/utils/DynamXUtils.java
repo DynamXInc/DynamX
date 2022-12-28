@@ -4,6 +4,7 @@ import com.google.common.base.Predicates;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.ContentPackType;
+import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.entities.VehicleEntityProperties;
@@ -28,6 +29,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagDouble;
 import net.minecraft.nbt.NBTTagFloat;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
@@ -56,7 +58,6 @@ import java.util.function.Predicate;
  * @see DynamXPhysicsHelper
  */
 public class DynamXUtils {
-
     public static void writeBlockPos(ByteBuf buf, BlockPos blockPos) {
         buf.writeDouble(blockPos.getX());
         buf.writeDouble(blockPos.getY());
@@ -338,4 +339,15 @@ public class DynamXUtils {
         return -1;
     }
 
+    public static void hotswapWorldPackInfos(World w) {
+        System.out.println("Hotswap : " + w);
+        for(Entity e : w.loadedEntityList) {
+            if(e instanceof IPackInfoReloadListener)
+                ((IPackInfoReloadListener) e).onPackInfosReloaded();
+        }
+        for(TileEntity te : w.loadedTileEntityList) {
+            if(te instanceof IPackInfoReloadListener)
+                ((IPackInfoReloadListener) te).onPackInfosReloaded();
+        }
+    }
 }

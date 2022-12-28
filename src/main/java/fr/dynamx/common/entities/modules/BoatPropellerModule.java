@@ -1,29 +1,38 @@
 package fr.dynamx.common.entities.modules;
 
 import com.jme3.math.Vector3f;
+import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.entities.modules.IEngineModule;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.IPropulsionModule;
 import fr.dynamx.api.physics.entities.IPropulsionHandler;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
-import fr.dynamx.common.contentpack.type.vehicle.BoatEngineInfo;
+import fr.dynamx.common.contentpack.type.vehicle.BoatPropellerInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.vehicles.BoatEntity;
 import fr.dynamx.common.entities.vehicles.BoatPhysicsHandler;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class BoatPropellerModule implements IPropulsionModule<BoatPhysicsHandler<?>>, IPhysicsModule.IDrawableModule<BaseVehicleEntity<?>> {
-    private final BoatEngineInfo info;
+import java.util.Objects;
+
+public class BoatPropellerModule implements IPropulsionModule<BoatPhysicsHandler<?>>, IPhysicsModule.IDrawableModule<BaseVehicleEntity<?>>, IPackInfoReloadListener {
+    private BoatPropellerInfo info;
     private final BoatEntity<?> boat;
 
-    public <T extends BoatPhysicsHandler<?>> BoatPropellerModule(BoatEntity<?> boatEntity) {
+    public BoatPropellerModule(BoatEntity<?> boatEntity) {
         this.boat = boatEntity;
-        this.info = boatEntity.getPackInfo().getSubPropertyByType(BoatEngineInfo.class);
+        onPackInfosReloaded();
+    }
+
+    @Override
+    public void onPackInfosReloaded() {
+        this.info = Objects.requireNonNull(boat.getPackInfo().getSubPropertyByType(BoatPropellerInfo.class));
     }
 
     @Override
@@ -36,11 +45,10 @@ public class BoatPropellerModule implements IPropulsionModule<BoatPhysicsHandler
         return new float[0];
     }
 
-
     @Override
     @SideOnly(Side.CLIENT)
     public void spawnPropulsionParticles(RenderPhysicsEntity<?> render, float partialTicks) {
-
+        //todo particules autour de l'hélice ?
     }
 
     @Override
@@ -49,25 +57,9 @@ public class BoatPropellerModule implements IPropulsionModule<BoatPhysicsHandler
     }
 
     public class BoatPropellerHandler implements IPropulsionHandler {
-
-
-        private float accelerationForce = 5000;
-        private float brakeForce = -3000;
-        private float steerForce = 300;
-        @Getter
-        @Setter
-        private float accelerationFactor = 1;
-        @Getter
-        @Setter
-        private float brakeFactor = 1;
-        @Getter
-        @Setter
-        private float steerFactor = 1;
-
-
         @Override
         public void accelerate(IEngineModule module, float strength, float speedLimit) {
-            Vector3f look = new Vector3f(0, 0, 1);
+            Vector3f look = DynamXGeometry.FORWARD_DIRECTION;
             look = DynamXGeometry.rotateVectorByQuaternion(look, boat.physicsRotation);
             look.multLocal(getAccelerationForce() * strength);
             Vector3f rotatedPos = DynamXGeometry.rotateVectorByQuaternion(info.getPosition(), boat.physicsRotation);
@@ -75,25 +67,22 @@ public class BoatPropellerModule implements IPropulsionModule<BoatPhysicsHandler
         }
 
         @Override
-        public void disengageEngine() {
-
-        }
+        public void disengageEngine() {}
 
         @Override
         public void brake(float strength) {
-            Vector3f look = new Vector3f(0, 0, 1);
+            Vector3f look = DynamXGeometry.FORWARD_DIRECTION;
             look = DynamXGeometry.rotateVectorByQuaternion(look, boat.physicsRotation);
-            look.multLocal(getBrakeForce() * strength);
-            boat.physicsHandler.getCollisionObject().applyForce(look, new Vector3f());
+            look.multLocal(-getBrakeForce() * strength);
+            boat.physicsHandler.getCollisionObject().applyForce(look, Vector3fPool.get());
         }
 
         @Override
-        public void handbrake(float strength) {
-        }
+        public void handbrake(float strength) {}
 
         @Override
         public void steer(float strength) {
-            Vector3f look = new Vector3f(-1, 0, 0);
+            Vector3f look = Vector3fPool.get(-1, 0, 0);
             look = DynamXGeometry.rotateVectorByQuaternion(look, boat.physicsRotation);
             look.multLocal(getSteerForce() * strength * boat.physicsHandler.getLinearVelocity().length() / 3);
             Vector3f linearFactor = boat.physicsHandler.getCollisionObject().getLinearFactor(Vector3fPool.get());
@@ -102,18 +91,16 @@ public class BoatPropellerModule implements IPropulsionModule<BoatPhysicsHandler
         }
 
         @Override
-        public void applyEngineBraking(IEngineModule engine) {
-
-        }
+        public void applyEngineBraking(IEngineModule engine) {}
 
         public float getAccelerationForce(){
-            return accelerationForce * accelerationFactor;
+            return info.getAccelerationForce();
         }
         public float getBrakeForce(){
-            return brakeForce * brakeFactor;
+            return info.getBrakeForce();
         }
         public float getSteerForce(){
-            return steerForce * steerFactor;
+            return info.getSteerForce();
         }
     }
 }

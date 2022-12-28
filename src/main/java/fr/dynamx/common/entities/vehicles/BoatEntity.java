@@ -74,5 +74,11 @@ public class BoatEntity<T extends BoatPhysicsHandler<?>> extends BaseVehicleEnti
         return DynamXObjectLoaders.BOATS.findInfo(infoName);
     }
 
+    @Override
+    public void onPackInfosReloaded() {
+        super.onPackInfosReloaded();
+        if(physicsHandler != null)
+            physicsHandler.onPackInfosReloaded();
+    }
 
 }

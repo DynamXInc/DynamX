@@ -15,8 +15,6 @@ import net.minecraft.world.World;
 public class ItemCar extends ItemModularEntity {
     public ItemCar(ModularVehicleInfo info) {
         super(info);
-        if (info.getSubPropertyByType(EngineInfo.class) == null)
-            DynamXErrorManager.addPackError(getInfo().getPackName(), "config_error", ErrorLevel.FATAL, getInfo().getName(), "Missing engine config !");
     }
 
     @Override
@@ -25,9 +23,6 @@ public class ItemCar extends ItemModularEntity {
     }
 
     public static ItemCar getItemForCar(ModularVehicleInfo info) {
-        if (info.getPartsByType(PartWheel.class).isEmpty()) {
-            DynamXErrorManager.addPackError(info.getPackName(), "config_error", ErrorLevel.FATAL, info.getName(), "This car has no wheels !");
-        }
         return new ItemCar(info);
     }
 }

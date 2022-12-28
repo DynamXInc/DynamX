@@ -1,6 +1,7 @@
 package fr.dynamx.common.entities.modules;
 
 import com.jme3.math.Vector3f;
+import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.network.sync.SimulationHolder;
 import fr.dynamx.common.DynamXContext;
@@ -16,7 +17,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PropsContainerModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, IPhysicsModule.IEntityUpdateListener {
+public class PropsContainerModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, IPhysicsModule.IEntityUpdateListener, IPackInfoReloadListener {
     //TODO NEW SYNC IMPROVE THIS
     private final BaseVehicleEntity<?> entity;
     private final List<PartPropsContainer> containers;
@@ -28,12 +29,20 @@ public class PropsContainerModule implements IPhysicsModule<BaseVehiclePhysicsHa
     }
 
     @Override
+    public void onPackInfosReloaded() {
+        modifiedEntitiesCache.forEach(e -> e.getSynchronizer().setSimulationHolder(e.getSynchronizer().getDefaultSimulationHolder(), null, SimulationHolder.UpdateContext.PROPS_CONTAINER_UPDATE));
+        containers.clear();
+        containers.addAll(entity.getPackInfo().getPartsByType(PartPropsContainer.class));
+        onSetSimulationHolder(entity.getSynchronizer().getSimulationHolder(), null, SimulationHolder.UpdateContext.NORMAL);
+    }
+
+    @Override
     public void updateEntity() {
         if (entity.ticksExisted % 20 == 0 && !modifiedEntitiesCache.isEmpty()) {
             modifiedEntitiesCache.removeIf(e -> {
                 if (e.getDistance(entity) > 10) {
                     System.out.println("[DEV] Remove " + e + " : far from " + entity);
-                    e.getSynchronizer().setSimulationHolder(SimulationHolder.SERVER, null, SimulationHolder.UpdateContext.PROPS_CONTAINER_UPDATE);
+                    e.getSynchronizer().setSimulationHolder(e.getSynchronizer().getDefaultSimulationHolder(), null, SimulationHolder.UpdateContext.PROPS_CONTAINER_UPDATE);
                     return true;
                 }
                 return false;
@@ -43,6 +52,7 @@ public class PropsContainerModule implements IPhysicsModule<BaseVehiclePhysicsHa
 
     @Override
     public void onSetSimulationHolder(SimulationHolder simulationHolder, EntityPlayer simulationPlayerHolder, SimulationHolder.UpdateContext changeContext) {
+        modifiedEntitiesCache.forEach(e -> e.getSynchronizer().setSimulationHolder(e.getSynchronizer().getDefaultSimulationHolder(), null, SimulationHolder.UpdateContext.PROPS_CONTAINER_UPDATE));
         modifiedEntitiesCache.clear();
         for (PartPropsContainer container : containers) {
             Vector3f pos = DynamXGeometry.rotateVectorByQuaternion(container.getPosition(), entity.physicsRotation);

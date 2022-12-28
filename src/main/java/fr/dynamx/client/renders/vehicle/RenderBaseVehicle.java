@@ -29,34 +29,34 @@ public class RenderBaseVehicle<T extends BaseVehicleEntity<?>> extends RenderPhy
 
     @Override
     public void renderMain(T carEntity, float partialTicks) {
-        if (!MinecraftForge.EVENT_BUS.post(new Render(Type.CHASSIS, this, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks)) && carEntity.getPackInfo().isModelValid()) {
+        ObjModelRenderer vehicleModel = DynamXContext.getObjModelRegistry().getModel(carEntity.getPackInfo().getModel());
+        if (!MinecraftForge.EVENT_BUS.post(new Render(Type.CHASSIS, this, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks, vehicleModel)) && carEntity.getPackInfo().isModelValid()) {
             /* Rendering the chassis */
-            ObjModelRenderer vehicleModel = DynamXContext.getObjModelRegistry().getModel(carEntity.getPackInfo().getModel());
             GlStateManager.scale(carEntity.getPackInfo().getScaleModifier().x, carEntity.getPackInfo().getScaleModifier().y, carEntity.getPackInfo().getScaleModifier().z);
             renderMainModel(vehicleModel, carEntity, carEntity.getEntityTextureID());
             GlStateManager.scale(1 / carEntity.getPackInfo().getScaleModifier().x, 1 / carEntity.getPackInfo().getScaleModifier().y, 1 / carEntity.getPackInfo().getScaleModifier().z);
         }
-        MinecraftForge.EVENT_BUS.post(new Render(Type.CHASSIS, this, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks));
+        MinecraftForge.EVENT_BUS.post(new Render(Type.CHASSIS, this, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks, vehicleModel));
     }
 
     @Override
     public void renderParts(T carEntity, float partialTicks) {
-        if (!MinecraftForge.EVENT_BUS.post(new Render(Type.PARTS, this, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks))) {
+        if (!MinecraftForge.EVENT_BUS.post(new Render(Type.PARTS, this, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks, null))) {
             if (carEntity.getPackInfo().isModelValid()) {
                 carEntity.getDrawableModules().forEach(d -> ((IPhysicsModule.IDrawableModule<T>) d).drawParts(this, partialTicks, carEntity));
             }
         }
-        MinecraftForge.EVENT_BUS.post(new Render(Type.PARTS, this, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks));
+        MinecraftForge.EVENT_BUS.post(new Render(Type.PARTS, this, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks, null));
     }
 
     @Override
     public void spawnParticles(T carEntity, Quaternion rotation, float partialTicks) {
         super.spawnParticles(carEntity, rotation, partialTicks);
-        if (!MinecraftForge.EVENT_BUS.post(new Render(Type.PARTICLES, this, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks))) {
+        if (!MinecraftForge.EVENT_BUS.post(new Render(Type.PARTICLES, this, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks, null))) {
             if (carEntity instanceof IModuleContainer.IPropulsionContainer) {
                 ((IModuleContainer.IPropulsionContainer<?>) carEntity).getPropulsion().spawnPropulsionParticles(this, partialTicks);
             }
-            MinecraftForge.EVENT_BUS.post(new Render(Type.PARTICLES, this, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks));
+            MinecraftForge.EVENT_BUS.post(new Render(Type.PARTICLES, this, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks, null));
         }
     }
 

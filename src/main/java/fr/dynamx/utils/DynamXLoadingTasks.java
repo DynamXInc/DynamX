@@ -11,6 +11,7 @@ import fr.dynamx.common.contentpack.sync.MessagePacksHashs;
 import fr.dynamx.common.contentpack.sync.PackSyncHandler;
 import fr.dynamx.common.network.packets.MessageSyncConfig;
 import net.minecraft.client.Minecraft;
+import net.minecraft.world.World;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -36,9 +37,17 @@ public class DynamXLoadingTasks {
                 if (taskContext == TaskContext.CLIENT && !taskContext.isSinglePlayer() && DynamXConfig.syncPacks) {
                     DynamXMain.log.debug("Requesting pack sync...");
                     DynamXContext.getNetwork().sendToServer(new MessagePacksHashs(PackSyncHandler.getObjects()));
+                } else if(taskContext != TaskContext.MC_INIT) {
+                    DynamXUtils.hotswapWorldPackInfos(DynamXMain.proxy.getClientWorld());
+                    if (taskContext.isSinglePlayer())
+                        DynamXUtils.hotswapWorldPackInfos(DynamXMain.proxy.getServerWorld());
                 }
-            } else if (taskContext == TaskContext.SERVER_RUNNING)
+            } else if (taskContext == TaskContext.SERVER_RUNNING) {
                 DynamXContext.getNetwork().sendToClient(new MessageSyncConfig(true, DynamXConfig.mountedVehiclesSyncTickRate, ContentPackLoader.getBlocksGrip(), ContentPackLoader.slopes, ContentPackLoader.SLOPES_LENGTH, ContentPackLoader.PLACE_SLOPES, DynamXContext.getPhysicsSimulationMode(Side.CLIENT)), EnumPacketTarget.ALL);
+                for(World w : FMLCommonHandler.instance().getMinecraftServerInstance().worlds) {
+                    DynamXUtils.hotswapWorldPackInfos(w);
+                }
+            }
         }
 
         @Override

@@ -4,6 +4,8 @@ import com.jme3.bullet.objects.VehicleWheel;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.audio.EnumSoundState;
+import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
+import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.IPropulsionModule;
@@ -49,6 +51,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static fr.dynamx.client.ClientProxy.SOUND_HANDLER;
 
@@ -58,7 +61,7 @@ import static fr.dynamx.client.ClientProxy.SOUND_HANDLER;
  *
  * @see WheelsPhysicsHandler
  */
-public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysicsHandler<?>>, IPhysicsModule.IEntityUpdateListener, IPhysicsModule.IPhysicsUpdateListener, IPhysicsModule.IDrawableModule<BaseVehicleEntity<?>> {
+public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysicsHandler<?>>, IPhysicsModule.IEntityUpdateListener, IPhysicsModule.IPhysicsUpdateListener, IPhysicsModule.IDrawableModule<BaseVehicleEntity<?>>, IPackInfoReloadListener {
     protected final MapSynchronizedVariable<Byte, PartWheelInfo> wheelInfos = new MapSynchronizedVariable<>((variable, value) -> {
         value.forEach(this::setWheelInfo);
     }, SynchronizationRules.CONTROLS_TO_SPECTATORS, DynamXSynchronizedVariables.wheelInfosSerializer, "wheel_infos");
@@ -100,6 +103,14 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
                 }
             }
         }, SynchronizationRules.CONTROLS_TO_SPECTATORS, DynamXSynchronizedVariables.wheelStatesSerializer, "wheel_states");
+    }
+
+    @Override
+    public void onPackInfosReloaded() {
+        for (PartWheel part : entity.getPackInfo().getPartsByType(PartWheel.class)) {
+            if(wheelInfos.containsKey(part.getId()) && Objects.equals(wheelInfos.get(part.getId()).getFullName(), part.getDefaultWheelInfo().getFullName()))
+                setWheelInfo(part.getId(), part.getDefaultWheelInfo());
+        }
     }
 
     public void setWheelInfo(byte partIndex, PartWheelInfo info) {
@@ -290,7 +301,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
         if (info != null && !carEntity.getModuleByType(WheelsModule.class).getWheelInfos().isEmpty()) { //If has steering and wheels AND at least one wheel (think to loading errors)
             ObjObjectRenderer steeringWheel = vehicleModel.getObjObjectRenderer(info.getPartName());
             if (steeringWheel != null) {
-                if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.STEERING_WHEEL, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks))) {
+                if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.STEERING_WHEEL, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks, vehicleModel))) {
                     GlStateManager.pushMatrix();
                     Vector3f center = info.getSteeringWheelPosition();
                     //Translation to the steering wheel rotation point (and render pos)
@@ -309,18 +320,18 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
                     //Render it
                     vehicleModel.renderGroup(steeringWheel, carEntity.getEntityTextureID());
                     GlStateManager.popMatrix();
-                    MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.STEERING_WHEEL, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks));
+                    MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.STEERING_WHEEL, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks, vehicleModel));
                 }
             }
         }
 
-        if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.PROPULSION, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks))) {
+        if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.PROPULSION, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks, vehicleModel))) {
             this.entity.getPackInfo().getPartsByType(PartWheel.class).forEach(partWheel -> {
                 if (wheelsStates.get()[partWheel.getId()] != WheelState.REMOVED) {
                     renderWheel(render, partWheel, partialTicks);
                 }
             });
-            MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.PROPULSION, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks));
+            MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.PROPULSION, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks, vehicleModel));
         }
     }
 

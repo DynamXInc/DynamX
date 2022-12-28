@@ -58,6 +58,8 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
         return null;
     };
 
+    private final VehicleValidator validator;
+
     @Getter
     @PackFileProperty(configNames = "EmptyMass")
     protected int emptyMass;
@@ -155,8 +157,9 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     @Getter
     private List<Vector3f> collisionShapeDebugBuffer;
 
-    public ModularVehicleInfo(String packName, String fileName) {
+    public ModularVehicleInfo(String packName, String fileName, VehicleValidator validator) {
         super(packName, fileName);
+        this.validator = validator;
     }
 
     public void addModules(BaseVehicleEntity<?> entity, ModuleListBuilder modules) {
@@ -404,6 +407,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
                 }
             }
         }
+        validator.validate(this);
         return true;
     }
 

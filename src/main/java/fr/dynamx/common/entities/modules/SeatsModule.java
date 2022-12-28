@@ -197,11 +197,7 @@ public class SeatsModule implements ISeatsModule {
         //Search for players who mounted on the entity
         if (entity.getPackInfo() == null) //The seats may be sync before the entity's vehicle info is initialized
         {
-            entity.setPackInfo(DynamXObjectLoaders.WHEELED_VEHICLES.findInfo(entity.getInfoName()));
-            if (entity.getPackInfo() == null)
-                entity.setPackInfo(DynamXObjectLoaders.TRAILERS.findInfo(entity.getInfoName()));
-            if (entity.getPackInfo() == null)
-                entity.setPackInfo(DynamXObjectLoaders.BOATS.findInfo(entity.getInfoName()));
+            entity.setPackInfo(vehicleEntity.createInfo(entity.getInfoName()));
             if (entity.getPackInfo() == null)
                 log.fatal("Failed to find info " + entity.getInfoName() + " for modular entity seats sync. Entity : " + entity);
         }

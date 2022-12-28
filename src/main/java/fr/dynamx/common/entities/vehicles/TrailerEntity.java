@@ -57,7 +57,7 @@ public class TrailerEntity<T extends TrailerEntity.TrailerPhysicsHandler<?>> ext
     }
 
     @Override
-    protected ModularVehicleInfo createInfo(String infoName) {
+    public ModularVehicleInfo createInfo(String infoName) {
         return DynamXObjectLoaders.TRAILERS.findInfo(infoName);
     }
 

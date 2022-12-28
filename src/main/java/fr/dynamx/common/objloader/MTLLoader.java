@@ -6,6 +6,8 @@ import fr.dynamx.utils.RegistryNameSetter;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.util.ResourceLocation;
+
 import javax.vecmath.Vector3f;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +30,7 @@ public class MTLLoader {
     @Getter
     private final List<Material> materials = new ArrayList<>();
 
-    public void parse(String startPath, String content) {
+    public void parse(ResourceLocation location, String content) {
         String[] lines = content.split("\n");
         Material current = null;
         for (String s : lines) {
@@ -50,22 +52,22 @@ public class MTLLoader {
                     current.diffuseColor = new Vector3f(Float.parseFloat(parts[1]), Float.parseFloat(parts[2]), Float.parseFloat(parts[3]));
                     break;
                 case TEXTURE_DIFFUSE:
-                    String textureName = parts[1].equalsIgnoreCase("white") ? "textures/white.png" : startPath + parts[1];
+                    String textureName = parts[1].equalsIgnoreCase("white") ? "textures/white.png" : location.getPath() + parts[1];
                     current.diffuseTexture.put(name,
-                            new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault(textureName.toLowerCase()), name));
+                            new MaterialTexture(new ResourceLocation(location.getNamespace(), textureName), name));
                     break;
                 case TEXTURE_AMBIENT:
                     current.ambientTexture.put(name,
-                            new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault((startPath + parts[1]).toLowerCase()), name));
+                            new MaterialTexture(new ResourceLocation(location.getNamespace(), (location.getPath() + parts[1]).toLowerCase()), name));
                     break;
                 case TEXTURE_SPECULAR: {
                     current.specularTexture.put(name,
-                            new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault((startPath + parts[1]).toLowerCase()), name));
+                            new MaterialTexture(new ResourceLocation(location.getNamespace(), (location.getPath() + parts[1]).toLowerCase()), name));
                     break;
                 }
                 case TEXTURE_NORMAL: {
                     current.normalTexture.put(name,
-                            new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault((startPath + parts[1]).toLowerCase()), name));
+                            new MaterialTexture(new ResourceLocation(location.getNamespace(), (location.getPath() + parts[1]).toLowerCase()), name));
                     break;
                 }
                 case TRANSPARENCY_D:
@@ -75,7 +77,7 @@ public class MTLLoader {
             }
             if (current != null && current.diffuseTexture.isEmpty()){
                 current.diffuseTexture.put(name,
-                        new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault("missing_texture_for_" + startPath), name));
+                        new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault("missing_texture_for_" + location.getPath()), name));
             }
         }
     }

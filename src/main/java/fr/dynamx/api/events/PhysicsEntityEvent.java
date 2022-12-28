@@ -2,6 +2,7 @@ package fr.dynamx.api.events;
 
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
+import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.entities.ModularPhysicsEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.items.DynamXItemSpawner;
@@ -18,6 +19,7 @@ import net.minecraftforge.fml.common.eventhandler.GenericEvent;
 import net.minecraftforge.fml.common.eventhandler.IGenericEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Type;
 import java.util.List;
 
@@ -169,8 +171,10 @@ public class PhysicsEntityEvent extends Event {
          */
         @Getter
         private final float partialTicks;
+        @Getter
+        private final ObjModelRenderer objModelRenderer;
 
-        public Render(PhysicsEntity<?> physicsEntity, RenderPhysicsEntity<?> renderer, Type renderType, double x, double y, double z, float partialTicks) {
+        public Render(PhysicsEntity<?> physicsEntity, RenderPhysicsEntity<?> renderer, Type renderType, double x, double y, double z, float partialTicks, @Nullable ObjModelRenderer objModelRenderer) {
             super(Side.CLIENT, physicsEntity);
             this.renderer = renderer;
             this.x = x;
@@ -178,6 +182,7 @@ public class PhysicsEntityEvent extends Event {
             this.z = z;
             this.renderType = renderType;
             this.partialTicks = partialTicks;
+            this.objModelRenderer = objModelRenderer;
         }
 
         public enum Type {

@@ -108,7 +108,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
     @Override
     public void onPackInfosReloaded() {
         for (PartWheel part : entity.getPackInfo().getPartsByType(PartWheel.class)) {
-            if(wheelInfos.containsKey(part.getId()) && Objects.equals(wheelInfos.get(part.getId()).getFullName(), part.getDefaultWheelInfo().getFullName()))
+            if(wheelInfos.get().containsKey(part.getId()) && Objects.equals(wheelInfos.get().get(part.getId()).getFullName(), part.getDefaultWheelInfo().getFullName()))
                 setWheelInfo(part.getId(), part.getDefaultWheelInfo());
         }
     }

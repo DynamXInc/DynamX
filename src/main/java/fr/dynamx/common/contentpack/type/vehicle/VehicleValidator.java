@@ -26,5 +26,7 @@ public interface VehicleValidator {
         EngineInfo engine = info.getSubPropertyByType(EngineInfo.class);
         if (engine == null)
             throw new IllegalArgumentException("Boat " + info.getFullName() + " has no engine");
+        if (info.getSubPropertyByType(BoatPropellerInfo.class) == null)
+            throw new IllegalArgumentException("Boat " + info.getFullName() + " has no propeller");
     };
 }

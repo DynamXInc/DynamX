@@ -7,6 +7,7 @@ import fr.dynamx.utils.RegistryNameSetter;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IResource;
+import net.minecraft.util.ResourceLocation;
 
 import javax.vecmath.Vector2f;
 import javax.vecmath.Vector3f;
@@ -48,11 +49,11 @@ public class OBJLoader {
     /**
      * Reads an obj models, including mtl files
      *
-     * @param startPath  Path of the obj model directory. Null if it needs to ignore mtl files
+     * @param location  Path of the obj model directory. Null if it needs to ignore mtl files
      * @param objContent Content of the obj file
      */
     //TODO CLEAN THIS
-    public void readAndLoadModel(String startPath, String objContent) {
+    public void readAndLoadModel(ResourceLocation location, String objContent) {
         try {
             hasNormals = true;
             hasTexCoords = true;
@@ -104,15 +105,15 @@ public class OBJLoader {
                                 normals.add(new Vector3f(Float.parseFloat(parts[1]), Float.parseFloat(parts[2]), Float.parseFloat(parts[3])));
                                 break;
                             case TEX_COORDS:
-                                if(startPath != null)
+                                if(location != null)
                                     texCoords.add(new Vector2f(Float.parseFloat(parts[1]), Float.parseFloat(parts[2])));
                                 break;
                             case NEW_MATERIAL:
-                                if(startPath != null) {
-                                    String path = startPath + parts[1];
-                                    IResource resp = Minecraft.getMinecraft().getResourceManager().getResource(RegistryNameSetter.getResourceLocationWithDynamXDefault(path));
+                                if(location != null) {
+                                    ResourceLocation path = new ResourceLocation(location.getNamespace(),location.getPath() + parts[1]);
+                                    IResource resp = Minecraft.getMinecraft().getResourceManager().getResource(path);
                                     MTLLoader material = new MTLLoader();
-                                    material.parse(startPath, new String(DynamXUtils.readInputStream(resp.getInputStream()), StandardCharsets.UTF_8));
+                                    material.parse(location, new String(DynamXUtils.readInputStream(resp.getInputStream()), StandardCharsets.UTF_8));
                                     material.getMaterials().forEach(m -> materials.put(m.getName().toLowerCase(), m));
                                     materialLibs.add(material);
                                 }
@@ -153,7 +154,7 @@ public class OBJLoader {
                 object.setCenter(result.computeCenter());
                 for (IndexedModel.OBJIndex current : indices) {
                     Vector3f pos = positions.get(current.positionIndex);
-                    Vector2f texCoord = hasTexCoords && startPath != null ? texCoords.get(current.texCoordsIndex) : new Vector2f();
+                    Vector2f texCoord = hasTexCoords && location != null ? texCoords.get(current.texCoordsIndex) : new Vector2f();
                     Vector3f normal = hasNormals && current.normalIndex < normals.size() ? normals.get(current.normalIndex) : new Vector3f();
 
                     int modelVertexIndex = resultIndexMap.getOrDefault(current, -1);

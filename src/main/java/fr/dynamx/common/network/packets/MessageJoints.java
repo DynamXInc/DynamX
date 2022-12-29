@@ -53,12 +53,10 @@ public class MessageJoints extends PhysicsEntityMessage<MessageJoints> {
 
     @Override
     protected void processMessageClient(PhysicsEntityMessage<?> message, PhysicsEntity<?> entity, EntityPlayer player) {
-        System.out.println("RCV JOINTS " + entity+" "+player+" "+entity.getJointsHandler());
         if (entity.getJointsHandler() != null) {
             List<EntityJoint.CachedJoint> joints = ((MessageJoints) message).getJointList();
             EntityJointsHandler handler = ((EntityJointsHandler) entity.getJointsHandler());
             Collection<EntityJoint<?>> curJoints = handler.getJoints();
-            System.out.println("RCV " + joints);
             curJoints.removeIf(j -> { //done in client thread
                 EntityJoint.CachedJoint found = null;
                 for (EntityJoint.CachedJoint g : joints) {
@@ -71,12 +69,10 @@ public class MessageJoints extends PhysicsEntityMessage<MessageJoints> {
                     joints.remove(found); //keep it
                     return false;
                 } else {
-                    System.out.println("RM "+ j);
                     handler.onRemoveJoint(j);
                     return true;
                 }
             });
-            System.out.println("Add "+ joints);
             for (EntityJoint.CachedJoint g : joints) {
                 if (g.isJointOwner()) //Only allow the owner to re-create the joint on client side
                     handler.onNewJointSynchronized(g);

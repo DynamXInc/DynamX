@@ -2,6 +2,7 @@ package fr.dynamx.utils.optimization;
 
 import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.common.DynamXMain;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 
 /**
  * Class pool utility for optimization <br>
@@ -54,7 +55,7 @@ public abstract class ClassPool<T> {
             pool = nPool;
 
             if (this instanceof Vector3fPool) {
-                if (ClientDebugSystem.enableDebugDrawing)
+                if (FMLCommonHandler.instance().getSide().isClient() && ClientDebugSystem.enableDebugDrawing)
                     new NullPointerException("Bigger pool : " + pool.length + " ! " + this + " open c " + subPoolCount).printStackTrace();
                 else
                     DynamXMain.log.debug("Bigger pool : " + pool.length + " ! " + this + " open c " + subPoolCount);

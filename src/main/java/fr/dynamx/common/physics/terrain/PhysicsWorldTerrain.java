@@ -320,8 +320,6 @@ public class PhysicsWorldTerrain implements ITerrainManager {
             ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.LOAD_NOW, ChunkGraph.ActionLocation.MAIN, coll, "Ticket " + ticket);
         ticket.incrStatusIndex("Load now"); //When we start to load the chunk, we can consider it's the more up-to-date version, and we are in the physics thread, so very good
         coll.loadCollisionsSync(this, getCache(), ticket, Vector3fPool.get(pos.x * 16, pos.y * 16, pos.z * 16), profiler);
-        ticket.incrStatusIndex("Set loaded");
-        ticket.setLoaded(terrainState, coll); //Will remove the previous chunk from loaded terrain
         ticket.fireLoadedCallback(); //Call this after adding the chunk : the callback may ask for a new load of this ticket
         profiler.end(Profiler.Profiles.EMERGENCY_CHUNK_LOAD);
         if (isDebug)

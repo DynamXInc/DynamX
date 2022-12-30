@@ -299,6 +299,10 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
         //System.out.println("Load, have "+elements+" "+this);
         ChunkTerrain cached = cache.load(ticket, profiler);
         localLoadCollisions(cached, cache, needType, ticket, pos, profiler);
+        // set loaded, need to be done before async loading of the slopes (because of the status index update)
+        ticket.incrStatusIndex("Set loaded");
+        ticket.setLoaded(manager.getTerrainState(), this); //Will remove the previous chunk from loaded terrain
+        // and load the slopes, async
         if (cached == null && cache.isRemoteCache()) {
             cache.asyncLoad(ticket, TerrainElementType.PERSISTENT_ELEMENTS).thenAccept(elements -> {
                 if (DynamXConfig.enableDebugTerrainManager)

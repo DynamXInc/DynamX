@@ -7,6 +7,7 @@ import fr.dynamx.api.events.DynamXItemEvent;
 import fr.dynamx.api.events.EventStage;
 import fr.dynamx.api.obj.IObjModelRegistry;
 import fr.dynamx.client.renders.model.ItemObjModel;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderItem;
@@ -68,58 +69,8 @@ public class ObjItemModelLoader extends TileEntityItemStackRenderer implements I
                     GlStateManager.translate(0.5F, 0.5F, 0.5F);
                     Minecraft.getMinecraft().getRenderItem().renderItem(stack, model.getGuiBaked());
                 } else {
-                    switch (renderType) {
-                        case NONE:
-                            break;
-                        case THIRD_PERSON_LEFT_HAND:
-                        case THIRD_PERSON_RIGHT_HAND:
-                            if (!MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack.getItem(), EventStage.PRE, renderType))) {
-                                GlStateManager.translate(0.5, 0.3, 0.3);
-                                GlStateManager.rotate(-100, 1, 0, 0);
-                                GlStateManager.rotate(200, 0, 0, 1);
-                            }
-                            break;
-                        case FIRST_PERSON_LEFT_HAND:
-                        case FIRST_PERSON_RIGHT_HAND:
-                            if (!MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack.getItem(), EventStage.PRE, renderType))) {
-                                GlStateManager.translate(0.5, 0.3, -0.3);
-                                GlStateManager.rotate(-100, 1, 0, 0);
-                                GlStateManager.rotate(200, 0, 0, 1);
-                            }
-                            break;
-                        case HEAD:
-                            break;
-                        case GUI:
-                            if (!MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack.getItem(), EventStage.PRE, renderType))) {
-                                GlStateManager.translate(0.5, 0.3, 0);
-
-                                String tip = model.getOwner().getItemIcon();
-                                if (!StringUtils.isNullOrEmpty(tip)) {
-                                    GlStateManager.pushMatrix();
-                                    GlStateManager.disableLighting();
-                                    GlStateManager.translate(0, 0, 20);
-                                    GlStateManager.rotate(-150, 1, 0, 0);
-                                    GlStateManager.scale(0.035, 0.035f, 1);
-                                    Minecraft.getMinecraft().fontRenderer.drawString(tip, -13, -22, 0xFFFFFFFF);
-                                    GlStateManager.popMatrix();
-                                }
-                                GlStateManager.rotate(-150, 1, 0, 0);
-                                GlStateManager.rotate(200, 0, 0, 1);
-                                GlStateManager.rotate(-25, 0, 1, 0);
-                            }
-                            break;
-                        case GROUND:
-                            if (!MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack.getItem(), EventStage.PRE, renderType))) {
-                                GlStateManager.translate(0.5, 0.3, 0.5);
-                            }
-                            break;
-                        case FIXED:
-                            if (!MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack.getItem(), EventStage.PRE, renderType))) {
-                                GlStateManager.rotate(-100, 1, 0, 0);
-                                GlStateManager.rotate(200, 0, 0, 1);
-                            }
-                            break;
-                    }
+                    if (!MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack.getItem(), EventStage.PRE, renderType)))
+                        model.getOwner().applyItemTransforms(renderType, stack, model);
                     float scale = model.getOwner().getItemScale();
                     Vector3f translate = model.getOwner().getItemTranslate();
                     Vector3f rotate = model.getOwner().getItemRotate();
@@ -128,9 +79,8 @@ public class ObjItemModelLoader extends TileEntityItemStackRenderer implements I
                     GlStateManager.rotate(rotate.x, 1, 0, 0);
                     GlStateManager.rotate(rotate.y, 0, 1, 0);
                     GlStateManager.rotate(rotate.z, 0, 0, 1);
-                    if (!MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack.getItem(), EventStage.RENDER, ItemCameraTransforms.TransformType.FIXED))) {
+                    if (!MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack.getItem(), EventStage.RENDER, ItemCameraTransforms.TransformType.FIXED)))
                         model.renderModel(stack, renderType);
-                    }
                     MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack.getItem(), EventStage.POST, ItemCameraTransforms.TransformType.NONE));
                 }
             }

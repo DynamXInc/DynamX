@@ -234,7 +234,6 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
                                             }
                                         }
                                         jointHandler.createJoint(entity, (PhysicsEntity<?>) e, j.getJid());
-                                        System.out.println("Restorated joint");
                                     } else {
                                         DynamXMain.log.warn("[Joints NBT Load] Failed to re attach " + entity + " to " + e + " : joint handler " + j.getType() + " not found !");
                                     }

@@ -101,7 +101,6 @@ public class EngineModule implements IEngineModule<AbstractEntityPhysicsHandler<
      */
     @Override
     public void setEngineProperties(float[] engineProperties) {
-        System.out.println("ouioui " + engineProperties);
         this.engineProperties.set(engineProperties);
     }
 

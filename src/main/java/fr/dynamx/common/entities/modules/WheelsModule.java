@@ -4,21 +4,22 @@ import com.jme3.bullet.objects.VehicleWheel;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.audio.EnumSoundState;
+import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
+import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.IPropulsionModule;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.api.network.sync.SimulationHolder;
-import fr.dynamx.api.network.sync.SyncTarget;
 import fr.dynamx.api.network.sync.v3.FloatArraySynchronizedVariable;
 import fr.dynamx.api.network.sync.v3.MapSynchronizedVariable;
 import fr.dynamx.api.network.sync.v3.SynchronizationRules;
 import fr.dynamx.api.network.sync.v3.SynchronizedEntityVariable;
-import fr.dynamx.api.obj.IObjObject;
 import fr.dynamx.api.physics.entities.IPropulsionHandler;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
-import fr.dynamx.client.renders.model.ObjModelClient;
+import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
+import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.client.renders.vehicle.RenderBaseVehicle;
 import fr.dynamx.client.sound.SkiddingSound;
 import fr.dynamx.client.sound.VehicleSound;
@@ -31,7 +32,6 @@ import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.contentpack.type.vehicle.SteeringWheelInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.network.sync.v3.DynamXSynchronizedVariables;
-import fr.dynamx.common.obj.texture.TextureData;
 import fr.dynamx.common.physics.entities.BaseWheeledVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.wheel.WheelPhysics;
@@ -51,6 +51,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static fr.dynamx.client.ClientProxy.SOUND_HANDLER;
 
@@ -60,7 +61,7 @@ import static fr.dynamx.client.ClientProxy.SOUND_HANDLER;
  *
  * @see WheelsPhysicsHandler
  */
-public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysicsHandler<?>>, IPhysicsModule.IEntityUpdateListener, IPhysicsModule.IPhysicsUpdateListener, IPhysicsModule.IDrawableModule<BaseVehicleEntity<?>> {
+public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysicsHandler<?>>, IPhysicsModule.IEntityUpdateListener, IPhysicsModule.IPhysicsUpdateListener, IPhysicsModule.IDrawableModule<BaseVehicleEntity<?>>, IPackInfoReloadListener {
     protected final MapSynchronizedVariable<Byte, PartWheelInfo> wheelInfos = new MapSynchronizedVariable<>((variable, value) -> {
         value.forEach(this::setWheelInfo);
     }, SynchronizationRules.CONTROLS_TO_SPECTATORS, DynamXSynchronizedVariables.wheelInfosSerializer, "wheel_infos");
@@ -104,6 +105,14 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
         }, SynchronizationRules.CONTROLS_TO_SPECTATORS, DynamXSynchronizedVariables.wheelStatesSerializer, "wheel_states");
     }
 
+    @Override
+    public void onPackInfosReloaded() {
+        for (PartWheel part : entity.getPackInfo().getPartsByType(PartWheel.class)) {
+            if(wheelInfos.get().containsKey(part.getId()) && Objects.equals(wheelInfos.get().get(part.getId()).getFullName(), part.getDefaultWheelInfo().getFullName()))
+                setWheelInfo(part.getId(), part.getDefaultWheelInfo());
+        }
+    }
+
     public void setWheelInfo(byte partIndex, PartWheelInfo info) {
         if (wheelInfos.get().get(partIndex) != info) {
             VehicleEntityEvent.ChangeWheel event = new VehicleEntityEvent.ChangeWheel(FMLCommonHandler.instance().getEffectiveSide(), entity, this, wheelInfos.get().get(partIndex), info, partIndex);
@@ -120,11 +129,9 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
     @Override
     @SideOnly(Side.CLIENT)
     public void handleTextureID(byte metadata, BaseVehicleEntity<?> packInfo) {
-        TextureData chassis = packInfo.getPackInfo().getTextures().get(metadata);
-        if (chassis == null)
-            chassis = packInfo.getPackInfo().getTextures().get((byte) 0);
+        String chassis = packInfo.getPackInfo().getVariantName(metadata);
         for (byte i = 0; i < wheelsTextureId.length; i++) {
-            wheelsTextureId[i] = getWheelInfo(i).getIdForTexture(chassis.getName());
+            wheelsTextureId[i] = getWheelInfo(i).getIdForVariant(chassis);
         }
     }
 
@@ -288,13 +295,13 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
     @Override
     @SideOnly(Side.CLIENT)
     public void drawParts(RenderPhysicsEntity<?> render, float partialTicks, BaseVehicleEntity<?> carEntity) {
-        ObjModelClient vehicleModel = DynamXContext.getObjModelRegistry().getModel(carEntity.getPackInfo().getModel());
+        ObjModelRenderer vehicleModel = DynamXContext.getObjModelRegistry().getModel(carEntity.getPackInfo().getModel());
         /* Rendering the steering wheel */
         SteeringWheelInfo info = carEntity.getPackInfo().getSubPropertyByType(SteeringWheelInfo.class);
         if (info != null && !carEntity.getModuleByType(WheelsModule.class).getWheelInfos().isEmpty()) { //If has steering and wheels AND at least one wheel (think to loading errors)
-            IObjObject steeringWheel = vehicleModel.getObjObject(info.getPartName());
+            ObjObjectRenderer steeringWheel = vehicleModel.getObjObjectRenderer(info.getPartName());
             if (steeringWheel != null) {
-                if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.STEERING_WHEEL, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks))) {
+                if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.STEERING_WHEEL, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks, vehicleModel))) {
                     GlStateManager.pushMatrix();
                     Vector3f center = info.getSteeringWheelPosition();
                     //Translation to the steering wheel rotation point (and render pos)
@@ -313,18 +320,18 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
                     //Render it
                     vehicleModel.renderGroup(steeringWheel, carEntity.getEntityTextureID());
                     GlStateManager.popMatrix();
-                    MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.STEERING_WHEEL, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks));
+                    MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.STEERING_WHEEL, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks, vehicleModel));
                 }
             }
         }
 
-        if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.PROPULSION, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks))) {
+        if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.PROPULSION, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks, vehicleModel))) {
             this.entity.getPackInfo().getPartsByType(PartWheel.class).forEach(partWheel -> {
                 if (wheelsStates.get()[partWheel.getId()] != WheelState.REMOVED) {
                     renderWheel(render, partWheel, partialTicks);
                 }
             });
-            MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.PROPULSION, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks));
+            MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.PROPULSION, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks, vehicleModel));
         }
     }
 
@@ -334,7 +341,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
         //Dust particles when the vehicle friction is very low
         entity.getPackInfo().getPartsByType(PartWheel.class).forEach(partWheel -> {
             PartWheelInfo info = getWheelInfo(partWheel.getId());
-            if (info.enableRendering() && info.getSkidParticle() != null) {
+            if (info.isModelValid() && info.getSkidParticle() != null) {
                 if (skidInfos.get()[partWheel.getId()] < 0.1f) {
                     entity.world.spawnParticle(info.getSkidParticle(), visualProperties[VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.COLLISIONX)],
                             visualProperties[VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.COLLISIONY)],
@@ -350,7 +357,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
         int index;
         Quaternion baseRotation = partWheel.getSuspensionAxis();
         PartWheelInfo info = getWheelInfo(partWheel.getId());
-        if (info.enableRendering()) {
+        if (info.isModelValid()) {
             GlStateManager.pushMatrix();
             {
                 /* Translation to the wheel rotation point */
@@ -421,7 +428,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
                     GlStateManager.rotate(-(prev + (visualProperties[index] - prev) * partialTicks), -1.0F, 0.0F, 0.0F);
                 }
                 /*Rendering the wheels */
-                ObjModelClient model = DynamXContext.getObjModelRegistry().getModel(info.getModel());
+                ObjModelRenderer model = DynamXContext.getObjModelRegistry().getModel(info.getModel());
                 //Scale
                 GlStateManager.scale(info.getScaleModifier().x, info.getScaleModifier().y, info.getScaleModifier().z);
                 //If the wheel is not flattened, or the model does not supports flattening

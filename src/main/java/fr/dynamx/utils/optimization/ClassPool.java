@@ -1,6 +1,7 @@
 package fr.dynamx.utils.optimization;
 
 import fr.dynamx.common.DynamXMain;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 
 import java.util.Stack;
 

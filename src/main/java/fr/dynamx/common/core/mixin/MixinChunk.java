@@ -151,21 +151,9 @@ public abstract class MixinChunk {
     }
 
     private void updatePhysicChunk(IBlockState oldState, IBlockState newState, BlockPos pos) {
-        //if(flags != 4) {
         if (/*flags != 4 &&*/DynamXContext.usesPhysicsWorld(world)) { // 4 is random leaves update
-            //System.out.println("vroum vroum");
-            //System.out.println("=====================");
-            // System.out.println("SET BLOCK CALLBACK " + pos + " " + (newState)+ " <- "+oldState);
-            //IBlockCollisionBehavior bvh0 = TerrainCollisionsCalculator.findBehavior(TerrainCollisionsCalculator.behaviorLookup.get(), world, pos, oldState);
-            //IBlockCollisionBehavior bvh1 = TerrainCollisionsCalculator.findBehavior(TerrainCollisionsCalculator.behaviorLookup.get(), world, pos, oldState);
-            //System.out.println(oldState.isFullCube()+" // "+newState.isFullCube());
-            if (!(oldState.isFullCube() && newState.isFullCube()) && (oldState.getMaterial().blocksMovement() || newState.getMaterial().blocksMovement())) {
-                // System.out.println("Processing " + oldState+" -> "+newState);
+            if (!(oldState.isFullCube() && newState.isFullCube()) && (oldState.getMaterial().blocksMovement() || newState.getMaterial().blocksMovement()))
                 CommonEventHandler.onBlockChange(world, pos);
-            }/* else {
-                        //System.out.println("No bb change : "+oldState+" // "+newState);
-                    }*/
         }
-        //}
     }
 }

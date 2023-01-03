@@ -1,22 +1,26 @@
 package fr.dynamx.api.contentpack.object.render;
 
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.obj.IModelTextureSupplier;
+import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
+import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
+import java.util.Map;
 
-public interface IObjPackObject extends IModelTextureSupplier {
+public interface IObjPackObject extends IModelTextureVariantsSupplier {
     @SideOnly(Side.CLIENT)
-    String getModel();
+    ResourceLocation getModel();
 
     default boolean isModelValid() {
-        return getModel() != null && !getModel().equalsIgnoreCase("disable_rendering");
+        return getModel() != null && !getModel().getPath().toLowerCase().contains("disable_rendering");
     }
 
     default boolean shouldRegisterModel() {

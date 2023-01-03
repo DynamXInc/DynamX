@@ -1,6 +1,7 @@
 package fr.dynamx.common.entities.modules;
 
 import fr.dynamx.api.audio.EnumSoundState;
+import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.entities.modules.IEngineModule;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
@@ -42,9 +43,9 @@ import static fr.dynamx.client.ClientProxy.SOUND_HANDLER;
  * @see fr.dynamx.api.entities.VehicleEntityProperties.EnumEngineProperties
  * @see EnginePhysicsHandler
  */
-public class EngineModule implements IEngineModule<AbstractEntityPhysicsHandler<?, ?>>, IPhysicsModule.IPhysicsUpdateListener, IPhysicsModule.IEntityUpdateListener {
+public class EngineModule implements IEngineModule<AbstractEntityPhysicsHandler<?, ?>>, IPhysicsModule.IPhysicsUpdateListener, IPhysicsModule.IEntityUpdateListener, IPackInfoReloadListener {
     protected final BaseVehicleEntity<? extends BaseVehiclePhysicsHandler<?>> entity;
-    protected final EngineInfo engineInfo;
+    protected EngineInfo engineInfo;
     protected EnginePhysicsHandler physicsHandler;
 
     //Default value is 2 for the handbrake on spawn
@@ -83,6 +84,14 @@ public class EngineModule implements IEngineModule<AbstractEntityPhysicsHandler<
     }
 
     @Override
+    public void onPackInfosReloaded() {
+        this.engineInfo = entity.getPackInfo().getSubPropertyByType(EngineInfo.class);
+        if(physicsHandler != null)
+            physicsHandler.onPackInfosReloaded();
+        sounds.clear();
+    }
+
+    @Override
     public IEnginePhysicsHandler getPhysicsHandler() {
         return physicsHandler;
     }
@@ -92,7 +101,6 @@ public class EngineModule implements IEngineModule<AbstractEntityPhysicsHandler<
      */
     @Override
     public void setEngineProperties(float[] engineProperties) {
-        System.out.println("ouioui " + engineProperties);
         this.engineProperties.set(engineProperties);
     }
 

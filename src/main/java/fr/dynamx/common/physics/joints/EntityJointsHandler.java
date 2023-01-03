@@ -88,7 +88,7 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
         }
 
         if (j.getJoint() != null) {
-            DynamXContext.getPhysicsWorld().addJoint(j.getJoint());
+            DynamXContext.getPhysicsWorld(entity.world).addJoint(j.getJoint());
             entity.physicsHandler.activate();
             if (otherEntity != entity)
                 otherEntity.physicsHandler.activate();
@@ -179,7 +179,7 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
             ((EntityJointsHandler) otherEntity.getJointsHandler()).setDirty(true);
         }
         if (joint.getJoint() != null) {
-            DynamXContext.getPhysicsWorld().removeJoint(joint.getJoint());
+            DynamXContext.getPhysicsWorld(entity.world).removeJoint(joint.getJoint());
             entity.physicsHandler.activate();
             if (otherEntity != entity) {
                 otherEntity.physicsHandler.activate();
@@ -234,7 +234,6 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
                                             }
                                         }
                                         jointHandler.createJoint(entity, (PhysicsEntity<?>) e, j.getJid());
-                                        System.out.println("Restorated joint");
                                     } else {
                                         DynamXMain.log.warn("[Joints NBT Load] Failed to re attach " + entity + " to " + e + " : joint handler " + j.getType() + " not found !");
                                     }

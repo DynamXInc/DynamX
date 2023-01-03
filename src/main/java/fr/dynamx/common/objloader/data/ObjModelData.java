@@ -1,40 +1,95 @@
-package fr.dynamx.common.obj;
+package fr.dynamx.common.objloader.data;
 
 import com.jme3.math.Vector3f;
-import fr.aym.acslib.api.services.mps.ModProtectionContainer;
-import fr.dynamx.api.obj.IObjObject;
+import fr.aym.mps.IMpsClassLoader;
 import fr.dynamx.api.obj.ObjModelPath;
+import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.ContentPackLoader;
-import fr.dynamx.common.obj.eximpl.TessellatorModelServer;
+import fr.dynamx.common.objloader.OBJLoader;
+import fr.dynamx.utils.DynamXUtils;
+import lombok.Getter;
+import net.minecraft.client.Minecraft;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 /**
  * An obj model not able to be rendered, used for collisions generation
- *
- * @see fr.dynamx.client.renders.model.ObjModelClient
  */
-public class ObjModelServer {
-    public final List<IObjObject> objObjects = new ArrayList<>();
+public class ObjModelData {
+    @Getter
+    private final List<ObjObjectData> objObjects = new ArrayList<>();
+    @Getter
+    private final Map<String, Material> materials = new HashMap<>();
     private final ObjModelPath objModelPath;
+    private final IMpsClassLoader mpsClassLoader;
 
-    public ObjModelServer(ObjModelPath objModelPath) {
-        this.objModelPath = objModelPath;
+    public ObjModelData(ObjModelPath path) {
+        this.mpsClassLoader = ContentPackLoader.getProtectedResources().getOrDefault(path.getPackName(), DynamXMain.container).getSecureLoader();
+        this.objModelPath = path;
+        try {
+            String content = new String(DynamXUtils.readInputStream(FMLCommonHandler.instance().getSide().isClient() ? client(path) : server(path)), StandardCharsets.UTF_8);
+            ResourceLocation location = path.getModelPath();
+            ResourceLocation startPath = new ResourceLocation(location.getNamespace(), location.getPath().substring(0, location.getPath().lastIndexOf("/") + 1));
+            new OBJLoader(objObjects, materials).readAndLoadModel(FMLCommonHandler.instance().getSide().isClient() ? startPath : null, content);
+        } catch (Exception e) {
+            //Don't remove the throw - Aym
+            throw new RuntimeException("Model " + path + " cannot be loaded ! " + e + " Has secure loader: " + (mpsClassLoader != null), e);
+        }
+    }
+
+    @SideOnly(Side.CLIENT)
+    private InputStream client(ObjModelPath path) throws IOException {
+        return Minecraft.getMinecraft().getResourceManager().getResource(path.getModelPath()).getInputStream();
+    }
+
+    private InputStream server(ObjModelPath path) throws IOException {
+        if (mpsClassLoader != null) {
+            InputStream protectedd = mpsClassLoader.getResourceAsStream("assets/" + path.getModelPath().getNamespace() + "/" + path.getModelPath().getPath());
+            if (protectedd != null) {
+                return protectedd;
+            }
+        }
+        if (path.getPackName().contains(".zip") || path.getPackName().contains(ContentPackLoader.PACK_FILE_EXTENSION)) {
+            ZipFile root = new ZipFile(DynamXMain.resDir + File.separator + path.getPackName());
+            //System.out.println("Root is "+root);
+            String entry = "assets/" + path.getModelPath().getNamespace() + "/" + path.getModelPath().getPath();
+            //System.out.println("Entry path is "+entry+" "+path);
+            ZipEntry t = root.getEntry(entry);
+            if (t == null) {
+                throw new FileNotFoundException("Not found in zip : " + path + ". Has mps class loader : " + (mpsClassLoader != null));
+            }
+            return root.getInputStream(t);
+        }
+        String fullPath = DynamXMain.resDir + File.separator + path.getPackName() + File.separator + "assets" +
+                File.separator + path.getModelPath().getNamespace() + File.separator + path.getModelPath().getPath().replace("/", File.separator);
+        //System.out.println("Full path is "+fullPath+" "+path);
+        return Files.newInputStream(Paths.get(fullPath));
     }
 
     public ObjModelPath getObjModelPath() {
         return objModelPath;
     }
 
-    public static ObjModelServer createServerObjModel(ObjModelPath location) {
-        return new TessellatorModelServer(location);
-    }
-
     public float[] getVerticesPos() {
         List<float[]> posList = new ArrayList<>();
         int size = 0;
-        for (IObjObject objObject : objObjects) {
+        for (ObjObjectData objObject : objObjects) {
             if (!objObject.getName().toLowerCase().contains("main")) {
                 float[] pos = getVerticesPos(objObject.getName().toLowerCase());
                 posList.add(pos);
@@ -51,7 +106,7 @@ public class ObjModelServer {
     public Vector3f[] getVectorVerticesPos() {
         List<Vector3f[]> posList = new ArrayList<>();
         int size = 0;
-        for (IObjObject objObject : objObjects) {
+        for (ObjObjectData objObject : objObjects) {
             if (!objObject.getName().toLowerCase().contains("main")) {
                 Vector3f[] pos = getVectorVerticesPos(objObject.getName().toLowerCase());
                 posList.add(pos);
@@ -67,7 +122,7 @@ public class ObjModelServer {
 
     public float[] getVerticesPos(String objectName) {
         float[] pos = new float[0];
-        for (IObjObject objObject : objObjects) {
+        for (ObjObjectData objObject : objObjects) {
             if (objObject.getName().toLowerCase().contains(objectName.toLowerCase())) {
                 pos = new float[objObject.getMesh().vertices.length * 3];
                 for (int i = 0; i < objObject.getMesh().vertices.length; i++) {
@@ -82,7 +137,7 @@ public class ObjModelServer {
 
     public Vector3f[] getVectorVerticesPos(String objectName) {
         Vector3f[] pos = new Vector3f[0];
-        for (IObjObject objObject : objObjects) {
+        for (ObjObjectData objObject : objObjects) {
             if (objObject.getName().toLowerCase().contains(objectName.toLowerCase())) {
                 pos = new Vector3f[objObject.getMesh().vertices.length];
                 for (int i = 0; i < objObject.getMesh().vertices.length; i++) {
@@ -98,7 +153,7 @@ public class ObjModelServer {
     public int[] getAllMeshIndices() {
         List<int[]> indicesList = new ArrayList<>();
         int size = 0;
-        for (IObjObject objObject : objObjects) {
+        for (ObjObjectData objObject : objObjects) {
             if (!objObject.getName().toLowerCase().contains("main")) {
                 int[] indices = getMeshIndices(objObject.getName().toLowerCase());
                 indicesList.add(indices);
@@ -114,7 +169,7 @@ public class ObjModelServer {
 
     public int[] getMeshIndices(String objectName) {
         int[] indices = new int[0];
-        for (IObjObject objObject : objObjects) {
+        for (ObjObjectData objObject : objObjects) {
             if (objObject.getName().toLowerCase().contains(objectName.toLowerCase())) {
                 indices = objObject.getMesh().indices;
             }
@@ -122,8 +177,8 @@ public class ObjModelServer {
         return indices;
     }
 
-    public IObjObject getObjObject(String objectName) {
-        for (IObjObject objObject : objObjects) {
+    public ObjObjectData getObjObject(String objectName) {
+        for (ObjObjectData objObject : objObjects) {
             if (objObject.getName().toLowerCase().contains(objectName.toLowerCase())) {
                 return objObject;
             }
@@ -136,7 +191,7 @@ public class ObjModelServer {
         float minX = firstMin.x;
         float minY = firstMin.y;
         float minZ = firstMin.z;
-        for (IObjObject objObject : objObjects) {
+        for (ObjObjectData objObject : objObjects) {
             if (objObject.getMesh().min().x < minX) minX = objObject.getMesh().min().x;
             if (objObject.getMesh().min().y < minY) minY = objObject.getMesh().min().y;
             if (objObject.getMesh().min().z < minZ) minZ = objObject.getMesh().min().z;
@@ -149,7 +204,7 @@ public class ObjModelServer {
         float maxX = firstMax.x;
         float maxY = firstMax.y;
         float maxZ = firstMax.z;
-        for (IObjObject objObject : objObjects) {
+        for (ObjObjectData objObject : objObjects) {
 
             if (objObject.getMesh().max().x > maxX) maxX = objObject.getMesh().max().x;
             if (objObject.getMesh().max().y > maxY) maxY = objObject.getMesh().max().y;

@@ -25,6 +25,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
@@ -86,7 +87,7 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IInf
      * @param blockName The name of the block
      * @param model     The obj model of the block, must be under "dynamxmod:models/<model>"
      */
-    public DynamXBlock(Material material, String modid, String blockName, String model) {
+    public DynamXBlock(Material material, String modid, String blockName, ResourceLocation model) {
         super(material);
         if (modid.contains("builtin_mod_")) { //Backward-compatibility
             blockObjectInfo = (T) DynamXObjectLoaders.BLOCKS.addBuiltinObject(this, modid, blockName);
@@ -126,7 +127,7 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IInf
         tooltip.add("Description: " + getInfo().getDescription());
         tooltip.add("Pack: " + getInfo().getPackName());
         if (stack.getMetadata() > 0 && textureNum > 1) {
-            tooltip.add("Texture: " + getInfo().getTexturesFor(null).get((byte) stack.getMetadata()).getName());
+            tooltip.add("Texture: " + getInfo().getMainObjectVariantName((byte) stack.getMetadata()));
         }
     }
 

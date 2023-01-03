@@ -5,9 +5,9 @@ import fr.aym.acslib.api.services.ThreadedLoadingService;
 import fr.dynamx.api.audio.IDynamXSoundHandler;
 import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.contentpack.object.render.IObjPackObject;
-import fr.dynamx.api.network.sync.v3.NetworkActivityTracker;
 import fr.dynamx.api.network.sync.v3.PhysicsEntitySynchronizer;
-import fr.dynamx.api.obj.IModelTextureSupplier;
+import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
+import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.client.handlers.KeyHandler;
@@ -33,16 +33,13 @@ import fr.dynamx.common.network.udp.CommandUdp;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.world.BuiltinThreadedPhysicsWorld;
 import fr.dynamx.utils.DynamXLoadingTasks;
+import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.client.CommandNetworkDebug;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.resources.SimpleReloadableResourceManager;
-import net.minecraft.command.CommandBase;
-import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
@@ -83,10 +80,11 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
         super.preInit();
 
         //Loads all models avoiding duplicates
-        for (InfoLoader<?> l : DynamXObjectLoaders.getLoaders()) {
-            for (INamedObject i : l.getInfos().values()) {
-                if (i instanceof IObjPackObject && ((IObjPackObject) i).shouldRegisterModel()) {
-                    DynamXContext.getObjModelRegistry().registerModel(((IObjPackObject) i).getModel(), (IModelTextureSupplier) i);
+        for (InfoLoader<?> infoLoader : DynamXObjectLoaders.getLoaders()) {
+            for (INamedObject namedObject : infoLoader.getInfos().values()) {
+                if (namedObject instanceof IObjPackObject && ((IObjPackObject) namedObject).shouldRegisterModel()) {
+                    ObjModelPath modelPath = DynamXUtils.getModelPath(namedObject.getPackName(), ((IObjPackObject) namedObject).getModel());
+                    DynamXContext.getObjModelRegistry().registerModel(modelPath, (IModelTextureVariantsSupplier) namedObject);
                 }
             }
         }
@@ -178,8 +176,10 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
     }
 
     @Override
-    public IPhysicsWorld provideClientPhysicsWorld(World world) {
-        return new BuiltinThreadedPhysicsWorld(world, !ClientEventHandler.MC.isSingleplayer());
+    public void providePhysicsWorld(World world) {
+        if (DynamXContext.getPhysicsWorldPerDimensionMap().containsKey(world.provider.getDimension()))
+            throw new IllegalStateException("Physics world of " + world + " is already loaded !");
+        DynamXContext.getPhysicsWorldPerDimensionMap().put(world.provider.getDimension(), new BuiltinThreadedPhysicsWorld(world, !ClientEventHandler.MC.isSingleplayer()));
     }
 
     private byte loadingState;

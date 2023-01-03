@@ -17,6 +17,7 @@ import fr.dynamx.utils.debug.Profiler;
 import fr.dynamx.utils.optimization.HashMapPool;
 import fr.dynamx.utils.optimization.PooledHashMap;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
 import java.io.ByteArrayInputStream;
@@ -33,6 +34,8 @@ import java.util.zip.GZIPInputStream;
 public class RemoteTerrainCache implements ITerrainCache {
     private static boolean HAD_THE_ERROR;
 
+    private final World world;
+
     private final VirtualTerrainFile rawSlopeDataCache = new VirtualTerrainFile();
     private final Map<VerticalChunkPos, ChunkTerrain> dataCache = new HashMap<>();
 
@@ -43,6 +46,10 @@ public class RemoteTerrainCache implements ITerrainCache {
     private final LinkedBlockingQueue<ChunkLoadingTicket.Snap> sendQueue = new LinkedBlockingQueue<>();
 
     private final List<VerticalChunkPos> erroredChunks = new ArrayList<>();
+
+    public RemoteTerrainCache(World world) {
+        this.world = world;
+    }
 
     @Override
     public void invalidate(VerticalChunkPos pos, boolean changed, boolean syncChanges) {
@@ -139,7 +146,7 @@ public class RemoteTerrainCache implements ITerrainCache {
                     DynamXMain.log.error("PRE: Ignoring request answer " + snapIdMod + ". Now we want " + snap.getSnapIdMod() + " " + pos + ". Some data was " + (rawData == null));
                 return;
             }
-            if (DynamXContext.getPhysicsWorld() != null) {
+            if (DynamXContext.getPhysicsWorld(world) != null) {
                 ChunkTerrain data = null;
                 //If received data is not null, and if there are normal elements
                 if (rawData != null && dataType != 2) {
@@ -201,7 +208,7 @@ public class RemoteTerrainCache implements ITerrainCache {
                 }
                 //Handle received data
                 ChunkTerrain finalData = data;
-                DynamXContext.getPhysicsWorld().schedule(() -> receiveChunkData(pos, dataType, snapIdMod, rawData, finalData));
+                DynamXContext.getPhysicsWorld(world).schedule(() -> receiveChunkData(pos, dataType, snapIdMod, rawData, finalData));
             }
         } else {
             //TODO DEBUG THIS AND THE BOY BELOW

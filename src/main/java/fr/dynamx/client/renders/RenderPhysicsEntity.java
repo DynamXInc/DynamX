@@ -4,7 +4,7 @@ import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.client.handlers.ClientEventHandler;
-import fr.dynamx.client.renders.model.ObjModelClient;
+import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.entities.PackPhysicsEntity;
@@ -60,7 +60,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
         GlQuaternionPool.openPool();
         Quaternion appliedRotation = null;
         //Render vehicle
-        if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.ENTITY, x, y, z, partialTicks))) {
+        if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.ENTITY, x, y, z, partialTicks, null))) {
             GlStateManager.pushMatrix();
             {
                 //TODO TRANSPARENT THINGS SHOULD BE RENDER LAST GlStateManager.enableBlend();
@@ -74,14 +74,14 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
         }
 
         //Render players inside the entity
-        if (ClientEventHandler.renderPlayer != null && !MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.RIDDING_PLAYERS, x, y, z, partialTicks))) {
+        if (ClientEventHandler.renderPlayer != null && !MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.RIDDING_PLAYERS, x, y, z, partialTicks, null))) {
             renderRidingPlayers(entity, x, y, z, partialTicks, appliedRotation);
         }
         //Render debug
-        if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.DEBUG, x, y, z, partialTicks))) {
+        if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.DEBUG, x, y, z, partialTicks, null))) {
             renderDebug(entity, x, y, z, partialTicks);
         }
-        MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.POST, x, y, z, partialTicks));
+        MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.POST, x, y, z, partialTicks, null));
         Vector3fPool.closePool();
         QuaternionPool.closePool();
         GlQuaternionPool.closePool();
@@ -238,8 +238,8 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
      * Called to render this part <br>
      * Will draw a white box over the all entity if model wasn't loaded (not found for example)
      */
-    public void renderModel(ObjModelClient model, Entity entity, byte textureDataId) {
-        if (model.objObjects.isEmpty()) //Error while loading the model
+    public void renderModel(ObjModelRenderer model, Entity entity, byte textureDataId) {
+        if (model.getObjObjects().isEmpty()) //Error while loading the model
         {
             renderOffsetAABB(entity.getEntityBoundingBox(), -entity.lastTickPosX, -entity.lastTickPosY, -entity.lastTickPosZ);
         } else {
@@ -251,8 +251,8 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
      * Called to render the main part of this model with the custom texture <br>
      * Will draw a white box over the all entity if model wasn't loaded (not found for example)
      */
-    public void renderMainModel(ObjModelClient model, Entity entity, byte textureDataId) {
-        boolean drawn = model.renderMainParts(textureDataId);
+    public void renderMainModel(ObjModelRenderer model, Entity entity, byte textureDataId) {
+        boolean drawn = model.renderDefaultParts(textureDataId);
         if (!drawn) {
             renderOffsetAABB(entity.getEntityBoundingBox(), -entity.lastTickPosX, -entity.lastTickPosY, -entity.lastTickPosZ);
         }
@@ -262,7 +262,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
      * Called to render specific parts with the custom texture <br>
      * Will draw a white box over the all entity if model wasn't loaded (not found for example)
      */
-    public void renderModelGroup(ObjModelClient model, String group, Entity entity, byte textureDataId) {
+    public void renderModelGroup(ObjModelRenderer model, String group, Entity entity, byte textureDataId) {
         boolean drawn = model.renderGroups(group, textureDataId);
         if (!drawn) {
             renderOffsetAABB(entity.getEntityBoundingBox(), -entity.lastTickPosX, -entity.lastTickPosY, -entity.lastTickPosZ);

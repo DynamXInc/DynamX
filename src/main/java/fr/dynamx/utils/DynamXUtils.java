@@ -4,11 +4,13 @@ import com.google.common.base.Predicates;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.ContentPackType;
+import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.api.physics.EnumBulletShapeType;
+import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.PackInfo;
@@ -27,19 +29,23 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagDouble;
 import net.minecraft.nbt.NBTTagFloat;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.lwjgl.BufferUtils;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -52,7 +58,6 @@ import java.util.function.Predicate;
  * @see DynamXPhysicsHelper
  */
 public class DynamXUtils {
-
     public static void writeBlockPos(ByteBuf buf, BlockPos blockPos) {
         buf.writeDouble(blockPos.getX());
         buf.writeDouble(blockPos.getY());
@@ -98,13 +103,13 @@ public class DynamXUtils {
     /**
      * @return A new {@link ObjModelPath} for this model
      */
-    public static ObjModelPath getModelPath(String packName, String model) {
+    public static ObjModelPath getModelPath(String packName, ResourceLocation model) {
         List<PackInfo> packLocations = DynamXObjectLoaders.PACKS.findPackLocations(packName);
         if (packLocations.isEmpty()) {
             DynamXMain.log.error("Pack info " + packName + " not found. This should not happen.");
-            return new ObjModelPath(new PackInfo(packName, ContentPackType.FOLDER), RegistryNameSetter.getDynamXModelResourceLocation(model));
+            return new ObjModelPath(new PackInfo(packName, ContentPackType.FOLDER), model);
         }
-        return new ObjModelPath(packLocations, RegistryNameSetter.getDynamXModelResourceLocation(model));
+        return new ObjModelPath(packLocations, model);
     }
 
     public static byte[] readInputStream(InputStream resource) throws IOException {
@@ -148,7 +153,7 @@ public class DynamXUtils {
         eyeLook.multLocal(distanceMax);
         lookAt.addLocal(eyeLook);
 
-        return DynamXPhysicsHelper.castRay(eyePos, lookAt, ignoredPredicate);
+        return DynamXPhysicsHelper.castRay( DynamXContext.getPhysicsWorld(entity.world), eyePos, lookAt, ignoredPredicate);
     }
 
     public static NBTTagList newDoubleNBTList(double... numbers) {
@@ -309,6 +314,20 @@ public class DynamXUtils {
         return vector3fList;
     }
 
+    public static IntBuffer createIntBuffer(int[] data) {
+        IntBuffer buffer = BufferUtils.createIntBuffer(data.length);
+        buffer.put(data);
+        buffer.flip();
+        return buffer;
+    }
+
+    public static FloatBuffer createFloatBuffer(float[] data) {
+        FloatBuffer buffer = BufferUtils.createFloatBuffer(data.length);
+        buffer.put(data);
+        buffer.flip();
+        return buffer;
+    }
+
     //DUPLICATE (function is already in the BasicsAddon)
     public static int getSpeed(BaseVehicleEntity<?> entity) {
         EngineModule engine = entity.getModuleByType(EngineModule.class);
@@ -320,4 +339,15 @@ public class DynamXUtils {
         return -1;
     }
 
+    public static void hotswapWorldPackInfos(World w) {
+        System.out.println("Hotswap : " + w);
+        for(Entity e : w.loadedEntityList) {
+            if(e instanceof IPackInfoReloadListener)
+                ((IPackInfoReloadListener) e).onPackInfosReloaded();
+        }
+        for(TileEntity te : w.loadedTileEntityList) {
+            if(te instanceof IPackInfoReloadListener)
+                ((IPackInfoReloadListener) te).onPackInfosReloaded();
+        }
+    }
 }

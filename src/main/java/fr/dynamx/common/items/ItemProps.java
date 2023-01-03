@@ -69,7 +69,7 @@ public class ItemProps<T extends PropObject<T>> extends DynamXItemSpawner<T> {
 
     @Override
     public String getTranslationKey(ItemStack stack) {
-        return (stack.getMetadata() != 0 && textureNum > stack.getMetadata()) ? super.getTranslationKey(stack) + "_" + getInfo().getTexturesFor(null).get((byte) stack.getMetadata()).getName().toLowerCase()
+        return (stack.getMetadata() != 0 && textureNum > stack.getMetadata()) ? super.getTranslationKey(stack) + "_" + getInfo().getMainObjectVariantName((byte) stack.getMetadata())
                 : super.getTranslationKey(stack);
     }
 
@@ -84,7 +84,7 @@ public class ItemProps<T extends PropObject<T>> extends DynamXItemSpawner<T> {
         tooltip.add("Pack: " + getInfo().getPackName());
         if (stack.getMetadata() != 0) {
             if (textureNum > stack.getMetadata())
-                tooltip.add("Texture: " + getInfo().getTexturesFor(null).get((byte) stack.getMetadata()).getName());
+                tooltip.add("Texture: " + getInfo().getMainObjectVariantName((byte) stack.getMetadata()));
             else
                 tooltip.add(TextFormatting.RED + "Texture not found, check your pack errors");
         }

@@ -3,15 +3,18 @@ package fr.dynamx.common.contentpack.type.objects;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
+import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
+import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
-import fr.dynamx.api.obj.IModelTextureSupplier;
-import fr.dynamx.api.obj.IObjObject;
+import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
+import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
 import fr.dynamx.client.renders.model.ModelObjArmor;
+import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.loader.ObjectLoader;
+import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
 import fr.dynamx.common.items.DynamXItemArmor;
-import fr.dynamx.common.obj.texture.TextureData;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import lombok.Getter;
 import net.minecraft.client.renderer.GlStateManager;
@@ -26,16 +29,20 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Armor object, for "armor_" files
  */
-public class ArmorObject<T extends ArmorObject<?>> extends AbstractItemObject<T, T> implements IModelTextureSupplier {
+public class ArmorObject<T extends ArmorObject<?>> extends AbstractItemObject<T, T> implements IModelTextureVariantsSupplier {
+    @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.ARMORS)
+    public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
+        if ("Textures".equals(key))
+            return new IPackFilePropertyFixer.FixResult("MaterialVariants", true, true);
+        return null;
+    };
+
     @Getter
     @PackFileProperty(configNames = "ArmorHead", required = false)
     protected String armorHead;
@@ -67,6 +74,7 @@ public class ArmorObject<T extends ArmorObject<?>> extends AbstractItemObject<T,
     @PackFileProperty(configNames = "DamageReduction", required = false, defaultValue = "\"1 2 3 1\" (leather)")
     protected int[] reductionAmount = new int[]{1, 2, 3, 1};
     @Getter
+    @Deprecated
     @PackFileProperty(configNames = "Textures", required = false, type = DefinitionType.DynamXDefinitionTypes.STRING_ARRAY_2D)
     protected String[][] texturesArray;
 
@@ -85,18 +93,22 @@ public class ArmorObject<T extends ArmorObject<?>> extends AbstractItemObject<T,
         return objArmor;
     }
 
-    private final Map<Byte, TextureData> textures = new HashMap<>();
-    private int maxTextureMetadata;
-
-    @Nullable
-    @Override
-    public Map<Byte, TextureData> getTexturesFor(IObjObject object) {
-        return textures;
+    public MaterialVariantsInfo<?> getVariants() {
+        return getSubPropertyByType(MaterialVariantsInfo.class);
     }
 
     @Override
-    public boolean hasCustomTextures() {
-        return textures.size() > 1;
+    public IModelTextureVariants getTextureVariantsFor(ObjObjectRenderer objObjectRenderer) {
+        return getVariants();
+    }
+
+    @Override
+    public boolean hasVaryingTextures() {
+        return getVariants() != null;
+    }
+
+    public int getMaxTextureMetadata() {
+        return getVariants() != null ? getVariants().getVariantsMap().size() : 1;
     }
 
     @Override
@@ -126,29 +138,15 @@ public class ArmorObject<T extends ArmorObject<?>> extends AbstractItemObject<T,
     public void onComplete(boolean hotReload) {
         if (hotReload && FMLCommonHandler.instance().getSide().isClient())
             getObjArmor().init(DynamXContext.getObjModelRegistry().getModel(getModel()));
-
-        textures.clear();
-        textures.put((byte) 0, new TextureData("Default", (byte) 0, getName()));
-        if (texturesArray != null) {
-            byte id = 1;
-            for (String[] info : texturesArray) {
-                textures.put(id, new TextureData(info[0], id, info[1] == null ? "dummy" : info[1]));
-                id++;
-            }
-        }
-        int texCount = 0;
-        for (TextureData data : textures.values()) {
-            if (data.isItem())
-                texCount++;
-        }
-        this.maxTextureMetadata = texCount;
+        if (texturesArray != null)
+            new MaterialVariantsInfo(this, texturesArray).appendTo(this);
     }
 
     @Override
     @SideOnly(Side.CLIENT)
     public void renderItem3D(ItemStack item, ItemCameraTransforms.TransformType renderType) {
         EntityEquipmentSlot slot = ((DynamXItemArmor<?>) item.getItem()).armorType;
-        getObjArmor().setActivePart(slot, maxTextureMetadata > 1 ? (byte) item.getMetadata() : 0);
+        getObjArmor().setActivePart(slot, getMaxTextureMetadata() > 1 ? (byte) item.getMetadata() : 0);
         //restore default rotations (contained in ModelBiped)
         getObjArmor().setModelAttributes(getObjArmor());
         if (renderType != ItemCameraTransforms.TransformType.GUI)
@@ -174,10 +172,9 @@ public class ArmorObject<T extends ArmorObject<?>> extends AbstractItemObject<T,
     @Override
     public String getTranslationKey(IInfoOwner<T> item, int itemMeta) {
         EntityEquipmentSlot slot = ((DynamXItemArmor<T>) item).armorType;
-        if (itemMeta == 0)
+        if (itemMeta == 0 || getVariants() == null)
             return super.getTranslationKey(item, itemMeta) + "_" + slot.getName();
-        TextureData textureInfo = textures.get((byte) itemMeta);
-        return super.getTranslationKey(item, itemMeta) + "_" + slot.getName() + "_" + textureInfo.getName().toLowerCase();
+        return super.getTranslationKey(item, itemMeta) + "_" + slot.getName() + "_" + getVariants().getVariant((byte) itemMeta).getName();
     }
 
     @Override
@@ -198,14 +195,9 @@ public class ArmorObject<T extends ArmorObject<?>> extends AbstractItemObject<T,
                 prefix = "Casque de";
                 break;
         }
-        if (itemMeta == 0)
+        if (itemMeta == 0 || getVariants() == null)
             return prefix + " " + super.getTranslatedName(item, itemMeta);
-        TextureData textureInfo = textures.get((byte) itemMeta);
-        return prefix + " " + super.getTranslatedName(item, itemMeta) + " " + textureInfo.getName();
-    }
-
-    public int getMaxTextureMetadata() {
-        return maxTextureMetadata;
+        return prefix + " " + super.getTranslatedName(item, itemMeta) + "_" + getVariants().getVariant((byte) itemMeta).getName();
     }
 
     /**

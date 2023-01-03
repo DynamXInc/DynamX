@@ -5,10 +5,11 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.registry.*;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
+import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
+import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.VehicleLightsModule;
-import fr.dynamx.common.obj.texture.TextureData;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -111,13 +112,13 @@ public class PartLightSource implements ISubInfoType<ModularVehicleInfo> {
         return rotateDuration;
     }
 
-    private final Map<Integer, TextureData> textureMap = new HashMap<>();
+    private final Map<Integer, TextureVariantData> textureMap = new HashMap<>();
 
-    public void mapTexture(int blinkStep, TextureData textureData) {
-        textureMap.put(blinkStep, textureData);
+    public void mapTexture(int blinkStep, TextureVariantData textureVariantData) {
+        textureMap.put(blinkStep, textureVariantData);
     }
 
-    public Map<Integer, TextureData> getTextureMap() {
+    public Map<Integer, TextureVariantData> getTextureMap() {
         return textureMap;
     }
 
@@ -125,17 +126,23 @@ public class PartLightSource implements ISubInfoType<ModularVehicleInfo> {
         return colors;
     }
 
-    public static class CompoundLight {
+    public static class CompoundLight implements IModelTextureVariantsSupplier.IModelTextureVariants {
         private final String partName;
         private final List<PartLightSource> sources = new ArrayList<>();
+        private final Map<Byte, TextureVariantData> variantsMap = new HashMap<>();
 
         public CompoundLight(PartLightSource part) {
             this.partName = part.getPartName();
             addSource(part);
+            variantsMap.put((byte) 0, new TextureVariantData("default", (byte) 0)); //todo configurable name
         }
 
         public void addSource(PartLightSource source) {
             sources.add(source);
+            for (TextureVariantData textureVariantData : source.getTextureMap().values()) {
+                //todo tester si ça ne s'entre-écrase pas
+                variantsMap.put(textureVariantData.getId(), textureVariantData);
+            }
         }
 
         public String getPartName() {
@@ -144,6 +151,21 @@ public class PartLightSource implements ISubInfoType<ModularVehicleInfo> {
 
         public List<PartLightSource> getSources() {
             return sources;
+        }
+
+        @Override
+        public TextureVariantData getDefaultVariant() {
+            return variantsMap.get((byte) 0);
+        }
+
+        @Override
+        public TextureVariantData getVariant(byte variantId) {
+            return variantsMap.getOrDefault(variantId, getDefaultVariant());
+        }
+
+        @Override
+        public Map<Byte, TextureVariantData> getTextureVariants() {
+            return variantsMap;
         }
     }
 }

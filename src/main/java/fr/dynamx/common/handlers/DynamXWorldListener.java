@@ -58,7 +58,7 @@ public class DynamXWorldListener implements IWorldEventListener {
         if(entityIn instanceof EntityPlayer) {
             EntityPlayer player = (EntityPlayer) entityIn;
             if (DynamXContext.getPlayerToCollision().containsKey(player)) {
-                DynamXContext.getPlayerToCollision().get(player).removeFromWorld(true);
+                DynamXContext.getPlayerToCollision().get(player).removeFromWorld(true, player.world);
             }
         }
     }

@@ -35,7 +35,7 @@ apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'org.spongepowered.mixin'
 apply plugin: 'idea'
 
-version = version_major + "." + version_minor + "." + version_patch
+version = version_major + "." + version_minor + "." + version_patch + "-" + version_suffix
 group = "fr.dynamx"
 archivesBaseName = "DynamX"
 
@@ -67,14 +67,14 @@ dependencies {
     implementation 'com.github.stephengold:Libbulletjme:' + libbulletjme_version
     implementation "fr.aym.acsguis:ACsGuis:1.2.4-3"
     implementation ":ModProtectionLib:1.2.4"
-    implementation('org.spongepowered:mixin:0.8.5') {
+    implementation('org.spongepowered:mixin:0.8.3-SNAPSHOT') {
         exclude module: 'guava'
         exclude module: 'commons-io'
         exclude module: 'gson'
     }
     compileOnly 'org.projectlombok:lombok:1.18.24'
 
-    shadow('org.spongepowered:mixin:0.8.5') {
+    shadow('org.spongepowered:mixin:0.8.3-SNAPSHOT') {
         exclude module: 'guava'
         exclude module: 'commons-io'
         exclude module: 'gson'

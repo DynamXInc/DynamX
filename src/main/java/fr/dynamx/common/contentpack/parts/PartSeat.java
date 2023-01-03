@@ -117,8 +117,8 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
                                 return door.interact(vehicleEntity, player);
                             }
                         }
-                    } else
-                        DynamXMain.log.error("Cannot mount : player mounting : " + linkedDoor);
+                    } //else
+                        //DynamXMain.log.error("Cannot mount : player mounting : " + linkedDoor);
                 } else
                     DynamXMain.log.error("Cannot mount : part door not found : " + linkedDoor);
             }

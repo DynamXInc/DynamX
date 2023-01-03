@@ -3,6 +3,7 @@ package fr.dynamx.utils.errors;
 import fr.aym.acsguis.api.ACsGuiApi;
 import fr.aym.acslib.ACsLib;
 import fr.aym.acslib.api.services.error.*;
+import fr.aym.mps.ModProtectionSystem;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.util.ResourceLocation;
@@ -56,9 +57,9 @@ public class DynamXErrorManager {
         if(errorManager.getAllErrors().values().stream().anyMatch(e -> e.getHighestErrorLevel().ordinal() >= minLevel.ordinal())) {
             DynamXMain.log.error("==== DynamX loading errors ====");
             if(side.isClient())
-                errorManager.printErrors(DynamXMain.log, Arrays.asList(INIT_ERRORS, PACKS__ERRORS, MODEL_ERRORS, ACsLib.getPlatform().getACsLibErrorCategory(), ACsGuiApi.getCssErrorType()), minLevel);
+                errorManager.printErrors(DynamXMain.log, Arrays.asList(INIT_ERRORS, PACKS__ERRORS, MODEL_ERRORS, ACsLib.getPlatform().getACsLibErrorCategory(), ACsGuiApi.getCssErrorType(), ModProtectionSystem.getMpsErrorCategory()), minLevel);
             else
-                errorManager.printErrors(DynamXMain.log, Arrays.asList(INIT_ERRORS, PACKS__ERRORS, MODEL_ERRORS, ACsLib.getPlatform().getACsLibErrorCategory()), minLevel);
+                errorManager.printErrors(DynamXMain.log, Arrays.asList(INIT_ERRORS, PACKS__ERRORS, MODEL_ERRORS, ACsLib.getPlatform().getACsLibErrorCategory(), ModProtectionSystem.getMpsErrorCategory()), minLevel);
         }
     }
 

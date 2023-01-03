@@ -14,8 +14,8 @@ import java.util.Map;
 
 @RegisteredSubInfoType(name = "MaterialVariants", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.WHEELS, SubInfoTypeRegistries.ARMORS, SubInfoTypeRegistries.BLOCKS_AND_PROPS})
 public class MaterialVariantsInfo<T extends ISubInfoTypeOwner<T>> extends SubInfoType<T> implements IModelTextureVariantsSupplier.IModelTextureVariants {
-    @PackFileProperty(configNames = "BaseMaterial")
-    private String baseMaterial;
+    @PackFileProperty(configNames = "BaseMaterial", required = false)
+    private String baseMaterial = "Default";
     @PackFileProperty(configNames = "Variants", defaultValue = "\"DynamX1 DynamX2\"")
     private String[] texturesArray;
     /* todo use @Getter
@@ -34,7 +34,6 @@ public class MaterialVariantsInfo<T extends ISubInfoTypeOwner<T>> extends SubInf
     @Deprecated
     public MaterialVariantsInfo(ISubInfoTypeOwner<T> owner, String[][] texturesArray) {
         super(owner);
-        this.baseMaterial = "default";
         this.texturesArray = new String[texturesArray.length];
         for (int i = 0; i < texturesArray.length; i++) {
             String[] info = texturesArray[i];

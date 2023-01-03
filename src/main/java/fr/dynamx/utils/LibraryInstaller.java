@@ -81,8 +81,8 @@ public class LibraryInstaller {
                 SSLContext.setDefault(sslContext);
             }
 
-        } catch (Exception var7) {
-            throw new ProtectionException("Cannot setup SSL", var7);
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot setup SSL", e);
         }
     }
 

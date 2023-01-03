@@ -1,14 +1,22 @@
 package fr.dynamx.api.contentpack.object.render;
 
 import com.jme3.math.Vector3f;
+import fr.dynamx.api.events.DynamXItemEvent;
+import fr.dynamx.api.events.EventStage;
 import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
+import fr.dynamx.client.renders.model.ItemObjModel;
 import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.StringUtils;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -56,5 +64,51 @@ public interface IObjPackObject extends IModelTextureVariantsSupplier {
     @SideOnly(Side.CLIENT)
     default String getItemIcon() {
         return null;
+    }
+
+    @SideOnly(Side.CLIENT)
+    default void applyItemTransforms(ItemCameraTransforms.TransformType renderType, ItemStack stack, ItemObjModel model) {
+        switch (renderType) {
+            case NONE:
+                break;
+            case THIRD_PERSON_LEFT_HAND:
+            case THIRD_PERSON_RIGHT_HAND:
+                GlStateManager.translate(0.5, 0.3, 0.3);
+                GlStateManager.rotate(-100, 1, 0, 0);
+                GlStateManager.rotate(200, 0, 0, 1);
+                break;
+            case FIRST_PERSON_LEFT_HAND:
+            case FIRST_PERSON_RIGHT_HAND:
+                GlStateManager.translate(0.5, 0.3, -0.3);
+                GlStateManager.rotate(-100, 1, 0, 0);
+                GlStateManager.rotate(200, 0, 0, 1);
+                break;
+            case HEAD:
+                break;
+            case GUI:
+                GlStateManager.translate(0.5, 0.32, 0);
+
+                String tip = model.getOwner().getItemIcon();
+                if (!StringUtils.isNullOrEmpty(tip)) {
+                    GlStateManager.pushMatrix();
+                    GlStateManager.disableLighting();
+                    GlStateManager.translate(0, 0, 20);
+                    GlStateManager.rotate(-150, 1, 0, 0);
+                    GlStateManager.scale(0.035, 0.035f, 1);
+                    Minecraft.getMinecraft().fontRenderer.drawString(tip, -13, -22, 0xFFFFFFFF);
+                    GlStateManager.popMatrix();
+                }
+                GlStateManager.rotate(-150, 1, 0, 0);
+                GlStateManager.rotate(200, 0, 0, 1);
+                GlStateManager.rotate(-25, 0, 1, 0);
+                break;
+            case GROUND:
+                GlStateManager.translate(0.5, 0.3, 0.5);
+                break;
+            case FIXED:
+                GlStateManager.rotate(-100, 1, 0, 0);
+                GlStateManager.rotate(200, 0, 0, 1);
+                break;
+        }
     }
 }

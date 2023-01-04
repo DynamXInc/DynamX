@@ -109,7 +109,7 @@ public class ObjectLoader<T extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C exte
                 if (!info.postLoad(hot))
                     continue;
             } catch (Exception e) {
-                DynamXErrorManager.addError(info.getPackName(), DynamXErrorManager.PACKS__ERRORS, "complete_vehicle_error", ErrorLevel.FATAL, info.getName(), null, e);
+                DynamXErrorManager.addError(info.getPackName(), DynamXErrorManager.PACKS__ERRORS, "complete_object_error", ErrorLevel.FATAL, info.getName(), null, e);
                 continue;
             }
             if (!hot) {
@@ -131,21 +131,23 @@ public class ObjectLoader<T extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C exte
                         }
                     }
                 }
-                C[] obj = (C[]) ((ObjectInfo<T>) info).createOwners(this);
-                if (obj.length > 0) {
-                    tabItem[0] = obj[0];
-                }
-                for (C ob : obj) {
-                    owners.add((IInfoOwner<T>) ob);
-                    if (client) {
-                        if (ob instanceof IResourcesOwner && ((IResourcesOwner) ob).createTranslation()) {
-                            for (int metadata = 0; metadata < ((IResourcesOwner) ob).getMaxMeta(); metadata++) {
-                                ContentPackUtils.addMissingLangFile(DynamXMain.resDir, (IInfoOwner<T>) ob, metadata);
+                if(!builtinObjects.contains(info)) {
+                    C[] obj = (C[]) ((ObjectInfo<T>) info).createOwners(this);
+                    if (obj.length > 0) {
+                        tabItem[0] = obj[0];
+                    }
+                    for (C ob : obj) {
+                        owners.add((IInfoOwner<T>) ob);
+                        if (client) {
+                            if (ob instanceof IResourcesOwner && ((IResourcesOwner) ob).createTranslation()) {
+                                for (int metadata = 0; metadata < ((IResourcesOwner) ob).getMaxMeta(); metadata++) {
+                                    ContentPackUtils.addMissingLangFile(DynamXMain.resDir, (IInfoOwner<T>) ob, metadata);
+                                }
                             }
                         }
                     }
                 }
-            } else { //Refresh infos objects contained in created info owners
+            } else if(!builtinObjects.contains(info)) { //Refresh infos objects contained in created info owners
                 boolean found = false;
                 for (IInfoOwner<T> owner : owners) {
                     if (owner.getInfo().getFullName().equalsIgnoreCase(info.getFullName())) {

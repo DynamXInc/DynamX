@@ -31,7 +31,7 @@ public class RenderCaterpillar<T extends CaterpillarEntity<?>> extends RenderBas
 
     @Override
     public void renderParts(T carEntity, float partialTicks) {
-        if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.RenderVehicleEntityEvent(VehicleEntityEvent.RenderVehicleEntityEvent.Type.PARTS, this, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks))) {
+        if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.PARTS, this, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks,null))) {
             WheelsModule module = carEntity.getModuleByType(WheelsModule.class);
             /* Rendering the steering wheel */
             GlStateManager.pushMatrix();
@@ -58,7 +58,7 @@ public class RenderCaterpillar<T extends CaterpillarEntity<?>> extends RenderBas
             carEntity.trackProgress += Math.toRadians(dif) * minfo.getPartsByType(PartWheel.class).get(0).getDefaultWheelInfo().getWheelRadius();
             /* Rendering the wheels */
             CaterpillarInfo info = minfo.getSubPropertyByType(CaterpillarInfo.class);
-            if (info.caterpillarLeftBuffer != null && info.caterpillarRightBuffer != null && carEntity.getPackInfo().getPartsByType(PartWheel.class).get(0).getDefaultWheelInfo().enableRendering()) {
+            if (info.caterpillarLeftBuffer != null && info.caterpillarRightBuffer != null && carEntity.getPackInfo().getPartsByType(PartWheel.class).get(0).getDefaultWheelInfo().isModelValid()) {
                 if (carEntity.trackProgress > info.caterpillarWidth) carEntity.trackProgress = 0;
                 if (carEntity.trackProgress < -info.caterpillarWidth) carEntity.trackProgress = 0;
 
@@ -89,7 +89,7 @@ public class RenderCaterpillar<T extends CaterpillarEntity<?>> extends RenderBas
             carEntity.prevAngle = an;
 
         }
-        MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.RenderVehicleEntityEvent(VehicleEntityEvent.RenderVehicleEntityEvent.Type.PARTS, this, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks));
+        MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.PARTS, this, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks, null));
     }
 
 

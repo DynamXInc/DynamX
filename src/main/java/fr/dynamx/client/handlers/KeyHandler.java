@@ -1,25 +1,22 @@
 package fr.dynamx.client.handlers;
 
-import fr.dynamx.api.physics.BulletShapeType;
-import fr.dynamx.api.physics.EnumBulletShapeType;
+import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.client.camera.CameraSystem;
 import fr.dynamx.client.handlers.hud.CarController;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.contentpack.parts.PartDoor;
+import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.common.entities.modules.MovableModule;
 import fr.dynamx.common.entities.modules.movables.PickingObjectHelper;
 import fr.dynamx.common.items.tools.ItemSlopes;
 import fr.dynamx.common.items.tools.ItemWrench;
+import fr.dynamx.common.network.packets.MessageChangeDoorState;
 import fr.dynamx.common.network.packets.MessageDebugRequest;
 import fr.dynamx.common.network.packets.MessagePickObject;
-import fr.dynamx.common.network.packets.MessagePlayerMountVehicle;
 import fr.dynamx.common.physics.player.WalkingOnPlayerController;
-import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.DynamXConstants;
-import fr.dynamx.utils.DynamXUtils;
-import fr.dynamx.utils.debug.Profiler;
-import fr.dynamx.utils.physics.PhysicsRaycastResult;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
@@ -30,8 +27,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
-
-import java.util.function.Predicate;
 
 import static fr.dynamx.client.handlers.ClientEventHandler.MC;
 
@@ -74,12 +69,6 @@ public class KeyHandler {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void tick(TickEvent.ClientTickEvent event) {
         if ((mc.player != null) && (event.phase == TickEvent.Phase.START)) {
-            //FIXME SOLO : SIMPLIFY CONDITION
-            if (mc.player.getRidingEntity() instanceof BaseVehicleEntity && mc.isSingleplayer() && !DynamXConfig.clientOwnsPhysicsInSolo) {
-                //INEFFICIENT BUT NOT USED ANYMORE
-                ((BaseVehicleEntity<?>) mc.player.getRidingEntity()).getNetwork().onPrePhysicsTick(Profiler.get());
-                ((BaseVehicleEntity<?>) mc.player.getRidingEntity()).getNetwork().onPostPhysicsTick(Profiler.get());
-            }
             if (WalkingOnPlayerController.controller != null && (MC.player.isRiding() || MC.gameSettings.keyBindForward.isKeyDown() || MC.gameSettings.keyBindBack.isKeyDown() || MC.gameSettings.keyBindLeft.isKeyDown() || MC.gameSettings.keyBindRight.isKeyDown() || MC.gameSettings.keyBindJump.isKeyDown())) {
                 WalkingOnPlayerController.controller.disable();
             }
@@ -91,7 +80,7 @@ public class KeyHandler {
 
             if (KEY_PICK_OBJECT.isKeyDown() && MC.player.getRidingEntity() == null && MC.player.getHeldItemMainhand().isEmpty()) {
                 if (!DynamXContext.getPlayerPickingObjects().containsKey(MC.player.getEntityId())) {
-                    if (DynamXConfig.clientOwnsPhysicsInSolo && MC.isSingleplayer()) {
+                    if (MC.isSingleplayer()) {
                         PickingObjectHelper.handlePickingControl(new MovableModule.Action(MovableModule.EnumAction.PICK, 3), MC.player);
                     } else {
                         DynamXContext.getNetwork().sendToServer(new MessagePickObject(new MovableModule.Action(MovableModule.EnumAction.PICK, 3)));
@@ -99,11 +88,23 @@ public class KeyHandler {
                 }
             } else {
                 if (DynamXContext.getPlayerPickingObjects().containsKey(MC.player.getEntityId())) {
-                    if (DynamXConfig.clientOwnsPhysicsInSolo && MC.isSingleplayer()) {
+                    if (MC.isSingleplayer()) {
                         PickingObjectHelper.handlePickingControl(new MovableModule.Action(MovableModule.EnumAction.UNPICK), MC.player);
                     } else {
                         DynamXContext.getNetwork().sendToServer(new MessagePickObject(new MovableModule.Action(MovableModule.EnumAction.UNPICK)));
                     }
+                }
+            }
+
+            if (CarController.toggleLockDoor.isPressed()) {
+                Entity entity = mc.player.getRidingEntity();
+                if (entity instanceof BaseVehicleEntity && entity instanceof IModuleContainer.IDoorContainer && ((IModuleContainer.IDoorContainer) entity).getDoors() != null) {
+                    PartSeat seat = ((IModuleContainer.ISeatsContainer) entity).getSeats().getRidingSeat(MC.player);
+                    DoorsModule doors = ((IModuleContainer.IDoorContainer) entity).getDoors();
+                    PartDoor door = seat.getLinkedPartDoor((BaseVehicleEntity<?>) entity);
+                    if (door == null)
+                        return;
+                    DynamXContext.getNetwork().sendToServer(new MessageChangeDoorState((BaseVehicleEntity<?>) entity, doors.getInverseCurrentState(door.getId()), door.getId()));
                 }
             }
 
@@ -114,7 +115,7 @@ public class KeyHandler {
                         if (MC.player.getRidingEntity() == null && MC.player.getHeldItemMainhand().isEmpty() && !DynamXContext.getPlayerPickingObjects().containsKey(MC.player.getEntityId())) {
                             if (entityHit != null) {
                                 justPressed = true;
-                                if (DynamXConfig.clientOwnsPhysicsInSolo && MC.isSingleplayer()) {
+                                if (MC.isSingleplayer()) {
                                     PickingObjectHelper.handlePickingControl(new MovableModule.Action(MovableModule.EnumAction.TAKE, entityHit.getEntityId()), MC.player);
                                 } else {
                                     DynamXContext.getNetwork().sendToServer(new MessagePickObject(new MovableModule.Action(MovableModule.EnumAction.TAKE, entityHit.getEntityId())));
@@ -126,7 +127,7 @@ public class KeyHandler {
                 } else {
                     if (holdingDown > 10) {
                         if (DynamXContext.getPlayerPickingObjects().containsKey(MC.player.getEntityId())) {
-                            if (DynamXConfig.clientOwnsPhysicsInSolo && MC.isSingleplayer()) {
+                            if (MC.isSingleplayer()) {
                                 PickingObjectHelper.handlePickingControl(new MovableModule.Action(MovableModule.EnumAction.THROW, holdingDown), MC.player);
                             } else {
                                 DynamXContext.getNetwork().sendToServer(new MessagePickObject(new MovableModule.Action(MovableModule.EnumAction.THROW, holdingDown)));
@@ -136,7 +137,7 @@ public class KeyHandler {
                     } else if (holdingDown > 0) {
                         if (!justPressed) {
                             if (DynamXContext.getPlayerPickingObjects().containsKey(MC.player.getEntityId())) {
-                                if (DynamXConfig.clientOwnsPhysicsInSolo && MC.isSingleplayer()) {
+                                if (MC.isSingleplayer()) {
                                     PickingObjectHelper.handlePickingControl(new MovableModule.Action(MovableModule.EnumAction.UNTAKE), MC.player);
                                 } else {
                                     DynamXContext.getNetwork().sendToServer(new MessagePickObject(new MovableModule.Action(MovableModule.EnumAction.UNTAKE)));
@@ -182,7 +183,7 @@ public class KeyHandler {
                 }
             }
             //Door interact
-            if (Mouse.isButtonDown(1)) {
+            /*if (Mouse.isButtonDown(1)) {
                 if (!justPressed) {
                     justPressed = true;
                     Predicate<EnumBulletShapeType> predicateShape = p -> !p.isTerrain() && !p.isPlayer() && p != EnumBulletShapeType.VEHICLE;
@@ -205,7 +206,7 @@ public class KeyHandler {
                 }
             } else {
                 justPressed = false;
-            }
+            }*/
         }
     }
 }

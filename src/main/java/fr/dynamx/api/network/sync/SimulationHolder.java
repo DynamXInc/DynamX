@@ -40,10 +40,7 @@ public enum SimulationHolder {
      * @return True if this physics simulation holder is me
      */
     public boolean ownsPhysics(Side side) {
-        if (DynamXConfig.clientOwnsPhysicsInSolo) {
-            return side.isClient() ? this.hasClientPhysics : this == SERVER;
-        }
-        return side.isClient() ? (this == DRIVER || this == DRIVER_SP) : (this == SERVER || this == SERVER_SP);
+        return side.isClient() ? this.hasClientPhysics : this == SERVER;
     }
 
     /**
@@ -51,8 +48,9 @@ public enum SimulationHolder {
      *
      * @return True if this controls simulation holder is me
      */
-    public boolean ownsControls(Side side) {
-        return side.isClient() ? (this == DRIVER || this == DRIVER_SP) : (this == SERVER || this == SERVER_SP);
+    public boolean ownsControls(Side side)
+    {
+        return side.isClient() ? (this == DRIVER || this == DRIVER_SP) : (this == DRIVER || this == SERVER || this == SERVER_SP);
     }
 
     /**

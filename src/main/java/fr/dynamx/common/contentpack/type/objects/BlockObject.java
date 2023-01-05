@@ -10,6 +10,7 @@ import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.events.CreatePackItemEvent;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.contentpack.loader.ObjectLoader;
+import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import lombok.Getter;
 import lombok.Setter;
@@ -47,12 +48,23 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
     }
 
     @Override
+    public MaterialVariantsInfo<?> getVariants() {
+        return getSubPropertyByType(MaterialVariantsInfo.class);
+    }
+
+    @Override
+    public void onComplete(boolean hotReload) {
+        if (texturesArray != null)
+            new MaterialVariantsInfo(this, texturesArray).appendTo(this);
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public IInfoOwner<T> createOwner(ObjectLoader<T, ?> loader) {
-        CreatePackItemEvent.CreateSimpleBlockEvent event = new CreatePackItemEvent.CreateSimpleBlockEvent((ObjectLoader<BlockObject<?>, DynamXBlock<BlockObject<?>>>) loader, this);
+        CreatePackItemEvent.SimpleBlock<T, ?> event = new CreatePackItemEvent.SimpleBlock(loader, this);
         MinecraftForge.EVENT_BUS.post(event);
         if (event.isOverridden()) {
-            return (IInfoOwner<T>) event.getSpawnItem();
+            return (IInfoOwner<T>) event.getObjectItem();
         } else {
             return new DynamXBlock<>((T) this, material != null ? material : Material.ROCK);
         }
@@ -93,7 +105,7 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
     }
 
     public boolean isObj() {
-        return getModel().endsWith(".obj");
+        return getModel().getPath().endsWith(".obj");
     }
 
     @Override

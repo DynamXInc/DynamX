@@ -1,11 +1,10 @@
 package fr.dynamx.common;
 
-import fr.dynamx.api.network.sync.PhysicsEntityNetHandler;
-import fr.dynamx.api.physics.IPhysicsWorld;
+import fr.dynamx.common.network.sync.PhysicsEntitySynchronizer;
 import fr.dynamx.common.blocks.TEDynamXBlock;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.handlers.CommonEventHandler;
-import fr.dynamx.common.network.SPPhysicsEntityNetHandler;
+import fr.dynamx.common.network.sync.SPPhysicsEntitySynchronizer;
 import fr.dynamx.common.physics.PhysicsTickHandler;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.world.BuiltinPhysicsWorld;
@@ -47,14 +46,14 @@ public abstract class CommonProxy {
      * @return True if the bullet physics engine should be used for the world. Always true except for client single player worlds
      */
     public boolean shouldUseBulletSimulation(World world) {
-        return world.provider.getDimension() == 0;
+        return DynamXContext.getPhysicsWorldPerDimensionMap().containsKey(world.provider.getDimension());
     }
 
     /**
      * @return The {@link AbstractEntityPhysicsHandler} for the given entity, according to the side and game type (solo or multi)
      */
-    public <T extends AbstractEntityPhysicsHandler<?, ?>> PhysicsEntityNetHandler<? extends PhysicsEntity<T>> getNetHandlerForEntity(PhysicsEntity<T> tPhysicsEntity) {
-        return new SPPhysicsEntityNetHandler<>(tPhysicsEntity, Side.SERVER); //Does not work at all on dedicated servers or in lan games
+    public <T extends AbstractEntityPhysicsHandler<?, ?>> PhysicsEntitySynchronizer<? extends PhysicsEntity<T>> getNetHandlerForEntity(PhysicsEntity<T> tPhysicsEntity) {
+        return new SPPhysicsEntitySynchronizer<>(tPhysicsEntity, Side.SERVER); //Does not work at all on dedicated servers or in lan games
     }
 
     /**
@@ -76,17 +75,12 @@ public abstract class CommonProxy {
     public abstract void scheduleTask(World mcWorld, Runnable task);
 
     /**
-     * Creates the client physics world
+     * Creates the physics world
      */
-    public IPhysicsWorld provideClientPhysicsWorld(World world) {
-        return null;
-    }
-
-    /**
-     * Creates the server physics world
-     */
-    public IPhysicsWorld provideServerPhysicsWorld(World world) {
-        return new BuiltinPhysicsWorld(world, false);
+    public void providePhysicsWorld(World world) {
+        if (DynamXContext.getPhysicsWorldPerDimensionMap().containsKey(world.provider.getDimension()))
+            throw new IllegalStateException("Physics world of " + world + " is already loaded !");
+        DynamXContext.getPhysicsWorldPerDimensionMap().put(world.provider.getDimension(), new BuiltinPhysicsWorld(world, false));
     }
 
     public abstract void schedulePacksInit();

@@ -1,6 +1,7 @@
 package fr.dynamx.common.contentpack;
 
 import fr.aym.acslib.api.services.error.ErrorLevel;
+import fr.aym.acslib.api.services.mps.ModProtectionContainer;
 import fr.dynamx.api.contentpack.ContentPackType;
 import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
@@ -13,13 +14,22 @@ import fr.dynamx.common.DynamXMain;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import lombok.Getter;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StringUtils;
 import net.minecraftforge.fml.common.versioning.DefaultArtifactVersion;
 import net.minecraftforge.fml.common.versioning.InvalidVersionSpecificationException;
 import net.minecraftforge.fml.common.versioning.VersionRange;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 public class PackInfo extends SubInfoTypeOwner<PackInfo> implements INamedObject {
     private final String originalPackName;
@@ -127,7 +137,7 @@ public class PackInfo extends SubInfoTypeOwner<PackInfo> implements INamedObject
 
     @Override
     public String getName() {
-        return "pack_info";
+        return "pack_info in " + packType.name();
     }
 
     @Override
@@ -140,6 +150,41 @@ public class PackInfo extends SubInfoTypeOwner<PackInfo> implements INamedObject
      */
     public String getFixedPackName() {
         return packName;
+    }
+
+    public InputStream readFile(ResourceLocation file) throws IOException {
+        InputStream result = null;
+        ModProtectionContainer container = ContentPackLoader.getProtectedResources().get(getPathName());
+        if (container.getSecureLoader() != null) {
+            InputStream protectedIs = container.getSecureLoader().getResourceAsStream("assets/" + file.getNamespace() + "/" + file.getPath());
+            if (protectedIs != null)
+                return protectedIs;
+        }
+        switch (getPackType()) {
+            case FOLDER:
+                String fullPath = DynamXMain.resDir + File.separator + getPathName() + File.separator + "assets" +
+                        File.separator + file.getNamespace() + File.separator + file.getPath().replace("/", File.separator);
+                File f = new File(fullPath);
+                if(f.exists())
+                    result = Files.newInputStream(f.toPath());
+                break;
+            case DNXPACK:
+            case ZIP:
+                ZipFile root = new ZipFile(DynamXMain.resDir + File.separator + getPathName());
+                ZipEntry e = root.getEntry("assets/" + file.getNamespace() + "/" + file.getPath());
+                if(e != null)
+                    result = root.getInputStream(e);
+                else //if not found, close now, else we close 'result' later
+                    root.close();
+                break;
+            case BUILTIN:
+                System.out.println("Builtin model " + this);
+                String entry = "/assets/" + file.getNamespace() + "/" + file.getPath();
+                System.out.println("entry " + entry + " " + ContentPackType.class.getResourceAsStream(entry));
+                result = ContentPackType.class.getResourceAsStream(entry);
+                break;
+        }
+        return result;
     }
 
     @RegisteredSubInfoType(name = "RequiredAddon", registries = SubInfoTypeRegistries.PACKS, strictName = false)

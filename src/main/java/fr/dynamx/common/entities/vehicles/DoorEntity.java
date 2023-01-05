@@ -55,8 +55,7 @@ public class DoorEntity<T extends PackEntityPhysicsHandler<PartDoor, ?>> extends
     }
 
     @Override
-    protected PartDoor createInfo(String infoName) {
-        //TODO THIS IS BAD
+    public PartDoor createInfo(String infoName) {
         return getVehicleEntity(world) instanceof TrailerEntity
                 ? DynamXObjectLoaders.TRAILERS.findInfo(infoName).getPartByTypeAndId(PartDoor.class, getDoorID())
                 : DynamXObjectLoaders.WHEELED_VEHICLES.findInfo(infoName).getPartByTypeAndId(PartDoor.class, getDoorID());
@@ -90,7 +89,7 @@ public class DoorEntity<T extends PackEntityPhysicsHandler<PartDoor, ?>> extends
     @Override
     protected final void fireCreateModulesEvent(Side side) {
         //Don't simplify the generic type, for fml
-        MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.CreateEntityModulesEvent<>(DoorEntity.class, this, moduleList, side));
+        MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.CreateModules<>(DoorEntity.class, this, moduleList, side));
     }
 
     @Override

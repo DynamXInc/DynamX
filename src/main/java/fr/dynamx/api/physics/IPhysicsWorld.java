@@ -7,6 +7,7 @@ import com.jme3.bullet.objects.PhysicsVehicle;
 import fr.dynamx.api.events.PhysicsEvent;
 import fr.dynamx.api.physics.terrain.ITerrainManager;
 import fr.dynamx.common.entities.PhysicsEntity;
+import fr.dynamx.common.physics.terrain.PhysicsWorldTerrain;
 import fr.dynamx.common.physics.utils.PhysicsWorldOperation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
@@ -54,7 +55,7 @@ public interface IPhysicsWorld {
     default void addBulletEntity(PhysicsEntity<?> e) {
         e.isRegistered = 1;
         addOperation(new PhysicsWorldOperation<>(PhysicsWorldOperation.PhysicsWorldOperationType.ADD_ENTITY, e));
-        MinecraftForge.EVENT_BUS.post(new PhysicsEvent.PhysicsEntityAddedEvent(e, this));
+        MinecraftForge.EVENT_BUS.post(new PhysicsEvent.PhysicsEntityAdded(e, this));
     }
 
     /**
@@ -65,7 +66,7 @@ public interface IPhysicsWorld {
     default void removeBulletEntity(PhysicsEntity<?> e) {
         addOperation(new PhysicsWorldOperation<>(PhysicsWorldOperation.PhysicsWorldOperationType.REMOVE_ENTITY, e));
         e.isRegistered = 0;
-        MinecraftForge.EVENT_BUS.post(new PhysicsEvent.PhysicsEntityRemovedEvent(e, this));
+        MinecraftForge.EVENT_BUS.post(new PhysicsEvent.PhysicsEntityRemoved(e, this));
     }
 
     /**
@@ -139,7 +140,7 @@ public interface IPhysicsWorld {
     /**
      * @return The {@link ITerrainManager} used by this world
      */
-    ITerrainManager getTerrainManager();
+    PhysicsWorldTerrain getTerrainManager();
 
     /**
      * @return True if this {@link IPhysicsWorld} is simulating this minecraft world

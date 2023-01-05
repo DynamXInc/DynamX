@@ -6,12 +6,11 @@ import fr.dynamx.api.entities.callbacks.ModularEntityInitCallback;
 import fr.dynamx.api.entities.callbacks.ModularEntityPhysicsInitCallback;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
-import fr.dynamx.api.network.sync.SimulationHolder;
+import fr.dynamx.api.network.sync.SynchronizedEntityVariableRegistry;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.entities.PackEntityPhysicsHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 
@@ -123,6 +122,7 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
         }
         //Init them before sorting because listened functions may change
         sortModules();
+        //SynchronizedVariablesRegistry.setSyncVarsForContext(world.isRemote ? Side.CLIENT : Side.SERVER, new HashMap<>(), getNetwork());
         return true;
     }
 
@@ -158,11 +158,10 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
     protected abstract void fireCreateModulesEvent(Side side);
 
     @Override
-    public List<ResourceLocation> getSynchronizedVariables(Side side, SimulationHolder simulationHolder) {
-        List<ResourceLocation> vars = super.getSynchronizedVariables(side, simulationHolder);
+    public void registerSynchronizedVariables() {
+        super.registerSynchronizedVariables();
         for (IPhysicsModule<?> module : moduleList)
-            module.addSynchronizedVariables(side, simulationHolder, vars);
-        return vars;
+            SynchronizedEntityVariableRegistry.addVarsOf(this.getSynchronizer(), module);
     }
 
     @Override

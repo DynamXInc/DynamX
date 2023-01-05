@@ -23,20 +23,15 @@ public enum SyncTarget {
      * Send to all tracking clients except the driver (reduces network charge)
      */
     SPECTATORS,
-    /**
-     * Send to all tracking clients except the driver (reduces network charge)
-     */
-    SPECTATORS_PEDESTRIANS,
-    /**
-     * Send to the driver of this entity
-     */
+    /** Send to the driver of this entity */
     DRIVER;
 
     /**
      * True if the given target (in parameter) includes this target (example : ALL_CLIENTS includes SPECTATORS)
      */
-    public boolean isIncluded(SyncTarget target) {
-        return target == this || (target == ALL_CLIENTS && (this == DRIVER || this == SPECTATORS || this == SPECTATORS_PEDESTRIANS)) || (target == SPECTATORS && this == SPECTATORS_PEDESTRIANS);
+    public boolean isIncluded(SyncTarget target)
+    {
+        return target == this || (target == ALL_CLIENTS && (this == DRIVER || this == SPECTATORS));
     }
 
     /**

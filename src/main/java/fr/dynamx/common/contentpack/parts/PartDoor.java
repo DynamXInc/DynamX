@@ -5,10 +5,7 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
-import fr.dynamx.api.contentpack.registry.DefinitionType;
-import fr.dynamx.api.contentpack.registry.PackFileProperty;
-import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
-import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
+import fr.dynamx.api.contentpack.registry.*;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.VehicleEntityEvent;
@@ -16,6 +13,7 @@ import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
+import fr.dynamx.common.handlers.TaskScheduler;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.debug.DynamXDebugOption;
@@ -39,6 +37,23 @@ import java.util.List;
 
 @RegisteredSubInfoType(name = "door", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER}, strictName = false)
 public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfo> implements IPhysicsPackInfo {
+    @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
+    public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
+        if ("CarAttachPoint".equals(key))
+            return new IPackFilePropertyFixer.FixResult("LocalCarAttachPoint", true);
+        if ("DoorAttachPoint".equals(key))
+            return new IPackFilePropertyFixer.FixResult("LocalDoorAttachPoint", true);
+        if ("OpenLimit".equals(key))
+            return new IPackFilePropertyFixer.FixResult("OpenedDoorAngleLimit", true);
+        if ("CloseLimit".equals(key))
+            return new IPackFilePropertyFixer.FixResult("ClosedDoorAngleLimit", true);
+        if ("OpenMotor".equals(key))
+            return new IPackFilePropertyFixer.FixResult("DoorOpenForce", true);
+        if ("CloseMotor".equals(key))
+            return new IPackFilePropertyFixer.FixResult("DoorCloseForce", true);
+        return null;
+    };
+
     @Getter
     @PackFileProperty(configNames = "LocalCarAttachPoint", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y, required = false)
     private Vector3f carAttachPoint = new Vector3f();
@@ -85,7 +100,6 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
 
     @Getter
     private CompoundCollisionShape physicsCollisionShape;
-    private ObjModelPath carModelPath;
 
     public PartDoor(ModularVehicleInfo owner, String partName) {
         super(owner, partName, 0, 0);
@@ -99,9 +113,36 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     @Override
     public boolean interact(BaseVehicleEntity<?> entity, EntityPlayer player) {
         DoorsModule doors = ((IModuleContainer.IDoorContainer) entity).getDoors();
+        if(doors == null)
+            return false;
         if (isEnabled() && !doors.isDoorAttached(getId())) {
             if (!entity.world.isRemote) {
                 doors.spawnDoor(this);
+            }
+        } else if(!isPlayerMounting()) {
+            PartSeat seat = getLinkedSeat(entity);
+            if (player.isSneaking() || seat == null) {
+                doors.switchDoorState(getId());
+            } else {
+                if (isEnabled()) {
+                    if (doors.isDoorOpened(getId())) {
+                        mount(entity, seat, player);
+                        doors.setDoorState(getId(), DoorsModule.DoorState.CLOSING);
+                        return true;
+                    }
+                    isPlayerMounting = true;
+                    doors.setDoorState(getId(), DoorsModule.DoorState.OPENING);
+                    TaskScheduler.schedule(new TaskScheduler.ScheduledTask(getMountDelay()) {
+                        @Override
+                        public void run() {
+                            isPlayerMounting = false;
+                            mount(entity, seat, player);
+                            doors.setDoorState(getId(), DoorsModule.DoorState.CLOSING);
+                        }
+                    });
+                } else {
+                    mount(entity, seat, player);
+                }
             }
         }
         return true;
@@ -109,7 +150,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
 
     public void mount(BaseVehicleEntity<?> vehicleEntity, PartSeat seat, EntityPlayer context) {
         Vector3fPool.openPool();
-        if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.VehicleInteractEntityEvent(context, vehicleEntity, seat))) {
+        if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.PlayerInteract(context, vehicleEntity, seat))) {
             seat.interact(vehicleEntity, context);
         }
         Vector3fPool.closePool();
@@ -128,7 +169,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
         super.appendTo(owner);
         owner.arrangeDoorID(this);
         owner.addRenderedParts(getPartName());
-        carModelPath = DynamXUtils.getModelPath(getPackName(), owner.getModel());
+        ObjModelPath carModelPath = DynamXUtils.getModelPath(getPackName(), owner.getModel());
         physicsCollisionShape = ShapeUtils.generateComplexModelCollisions(carModelPath, getPartName(), new Vector3f(1, 1, 1), new Vector3f(), 0);
     }
 

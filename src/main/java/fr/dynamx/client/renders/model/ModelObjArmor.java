@@ -1,7 +1,13 @@
 package fr.dynamx.client.renders.model;
 
+import fr.aym.acslib.api.services.ErrorTrackingService;
 import fr.aym.acslib.api.services.error.ErrorLevel;
+import fr.dynamx.client.renders.model.renderer.ArmorRenderer;
+import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
+import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.type.objects.ArmorObject;
+import fr.dynamx.utils.DynamXLoadingTasks;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelBiped;
@@ -30,7 +36,7 @@ public class ModelObjArmor extends ModelBiped {
         this.armorObject = armorObject;
     }
 
-    public void init(ObjModelClient model) {
+    public void init(ObjModelRenderer model) {
         if (armorObject.getArmorHead() != null) {
             head = new ArmorRenderer(model, this, armorObject.getArmorHead());
             setBodyPart(head, bipedHead);

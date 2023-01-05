@@ -7,14 +7,16 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.modules.IEntityJoints;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.events.PhysicsEntityEvent;
-import fr.dynamx.api.network.sync.PhysicsEntityNetHandler;
-import fr.dynamx.api.network.sync.SimulationHolder;
+import fr.dynamx.common.network.sync.variables.EntityPosVariable;
+import fr.dynamx.common.network.sync.PhysicsEntitySynchronizer;
+import fr.dynamx.api.network.sync.SynchronizedEntityVariableRegistry;
 import fr.dynamx.api.physics.BulletShapeType;
+import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.api.physics.entities.EntityPhysicsState;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.items.DynamXItemRegistry;
-import fr.dynamx.common.network.sync.vars.PosSynchronizedVariable;
+import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.player.WalkingOnPlayerController;
 import fr.dynamx.common.physics.terrain.PhysicsEntityTerrainLoader;
@@ -22,7 +24,6 @@ import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.PhysicsEntityException;
 import fr.dynamx.utils.debug.Profiler;
 import fr.dynamx.utils.maths.DynamXGeometry;
-import fr.dynamx.utils.optimization.BoundingBoxPool;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
@@ -32,7 +33,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
@@ -41,7 +41,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,11 +50,13 @@ import java.util.Map;
  *
  * @param <T> The physics handler type
  */
+@SynchronizedEntityVariable.SynchronizedPhysicsModule()
 public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>> extends Entity implements ICollidableObject, IEntityAdditionalSpawnData {
     /**
      * Entity network
      */
-    private final PhysicsEntityNetHandler<? extends PhysicsEntity<T>> network;
+    //private final PhysicsEntityNetHandler<? extends PhysicsEntity<T>> network;
+    private final PhysicsEntitySynchronizer<? extends PhysicsEntity<T>> synchronizer;
     /**
      * The entity physics handler
      */
@@ -122,7 +123,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
         this.preventEntitySpawning = true;
 
         // Network Init
-        network = DynamXMain.proxy.getNetHandlerForEntity(this);
+        synchronizer = DynamXMain.proxy.getNetHandlerForEntity(this);
         usesPhysicsWorld = DynamXContext.usesPhysicsWorld(world);
     }
 
@@ -132,26 +133,27 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
         rotationYaw = spawnRotationAngle;
     }
 
+    @Override
+    public boolean shouldRenderInPass(int pass) {
+        return pass == 0 || pass == 1;
+    }
 
     @Override
     protected void entityInit() {
     }
 
+    @SynchronizedEntityVariable(name = "pos")
+    public final EntityPosVariable synchronizedPosition = new EntityPosVariable(this);
+
     /**
+     * TODO UPDATE DOC
+     * <p>
      * Adds the {@link fr.dynamx.api.network.sync.SynchronizedVariable} used to synchronize this module <br>
      * The variables must only be added on the side which has the authority over the data (typically the server) <br>
      * Fired on modules initialization and on {@link fr.dynamx.api.network.sync.SimulationHolder} changes
-     *
-     * @param side             The current side
-     * @param simulationHolder The new holder of the simulation of the entity (see {@link SimulationHolder})
-     * @return The list of {@link fr.dynamx.api.network.sync.SynchronizedVariable} used to sync the entity, referenced by they registry name (see {@link fr.dynamx.api.network.sync.SynchronizedVariablesRegistry})
      */
-    public List<ResourceLocation> getSynchronizedVariables(Side side, SimulationHolder simulationHolder) {
-        List<ResourceLocation> variables = new ArrayList<>();
-        if (simulationHolder.isPhysicsAuthority(side)) {
-            variables.add(PosSynchronizedVariable.NAME);
-        }
-        return variables;
+    public void registerSynchronizedVariables() {
+        SynchronizedEntityVariableRegistry.addVarsOf(this.getSynchronizer(), this);
     }
 
     /**
@@ -169,7 +171,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
         if (initialized != 2) {
             if (initialized == 0) {
                 physicsPosition.set((float) posX, (float) posY, (float) posZ);
-                if(physicsRotation.equals(Quaternion.IDENTITY)) {
+                if (physicsRotation.equals(Quaternion.IDENTITY)) {
                     physicsRotation.set(DynamXGeometry.rotationYawToQuaternion(rotationYaw));
                 }
                 if (!initEntityProperties()) {
@@ -177,9 +179,10 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
                     return;
                 }
             }
-            getNetwork().setSimulationHolder(getNetwork().getDefaultSimulationHolder());
             initPhysicsEntity(usesPhysicsWorld);
-            MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.PhysicsEntityInitEvent(world.isRemote ? Side.CLIENT : Side.SERVER, this, usesPhysicsWorld));
+            getSynchronizer().setSimulationHolder(getSynchronizer().getDefaultSimulationHolder(), null);
+            registerSynchronizedVariables();
+            MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Init(world.isRemote ? Side.CLIENT : Side.SERVER, this, usesPhysicsWorld));
             initialized = 2;
         }
     }
@@ -229,22 +232,24 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
                 this.physicsHandler.setPhysicsState(EntityPhysicsState.ENABLE);
             }
             if (isRegistered == 0) {
-                DynamXContext.getPhysicsWorld().addBulletEntity(this);
+                DynamXContext.getPhysicsWorld(world).addBulletEntity(this);
             }
         }
 
         //Tick physics if we don't use a physics world
         if (!usesPhysicsWorld) {
-            getNetwork().onPrePhysicsTick(Profiler.get());
-            getNetwork().onPostPhysicsTick(Profiler.get());
+            //getNetwork().onPrePhysicsTick(Profiler.get());
+            getSynchronizer().onPrePhysicsTick(Profiler.get());
+            //getNetwork().onPostPhysicsTick(Profiler.get());
+            getSynchronizer().onPostPhysicsTick(Profiler.get());
         }
 
         //Update visual pos
         updateMinecraftPos();
 
         //Post the update event
-        MinecraftForge.EVENT_BUS.post(world.isRemote ? new PhysicsEntityEvent.ClientPhysicsEntityUpdateEvent(this, PhysicsEntityEvent.PhysicsEntityUpdateType.POST_ENTITY_UPDATE, isRegistered == 2 && usesPhysicsWorld) :
-                new PhysicsEntityEvent.ServerPhysicsEntityUpdateEvent(this, PhysicsEntityEvent.PhysicsEntityUpdateType.POST_ENTITY_UPDATE, isRegistered == 2 && usesPhysicsWorld));
+        MinecraftForge.EVENT_BUS.post(world.isRemote ? new PhysicsEntityEvent.ClientUpdate(this, PhysicsEntityEvent.UpdateType.POST_ENTITY_UPDATE, isRegistered == 2 && usesPhysicsWorld) :
+                new PhysicsEntityEvent.ServerUpdate(this, PhysicsEntityEvent.UpdateType.POST_ENTITY_UPDATE, isRegistered == 2 && usesPhysicsWorld));
     }
 
     /**
@@ -320,8 +325,8 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
         simulatePhysics = simulatePhysics && isRegistered == 2;
         preUpdatePhysics(simulatePhysics);
 
-        MinecraftForge.EVENT_BUS.post(world.isRemote ? new PhysicsEntityEvent.ClientPhysicsEntityUpdateEvent(this, PhysicsEntityEvent.PhysicsEntityUpdateType.PRE_PHYSICS_UPDATE, simulatePhysics) :
-                new PhysicsEntityEvent.ServerPhysicsEntityUpdateEvent(this, PhysicsEntityEvent.PhysicsEntityUpdateType.PRE_PHYSICS_UPDATE, simulatePhysics));
+        MinecraftForge.EVENT_BUS.post(world.isRemote ? new PhysicsEntityEvent.ClientUpdate(this, PhysicsEntityEvent.UpdateType.PRE_PHYSICS_UPDATE, simulatePhysics) :
+                new PhysicsEntityEvent.ServerUpdate(this, PhysicsEntityEvent.UpdateType.PRE_PHYSICS_UPDATE, simulatePhysics));
         profiler.end(Profiler.Profiles.PHY2);
     }
 
@@ -351,8 +356,8 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
         simulatePhysics = simulatePhysics && isRegistered == 2;
         postUpdatePhysics(simulatePhysics);
 
-        MinecraftForge.EVENT_BUS.post(world.isRemote ? new PhysicsEntityEvent.ClientPhysicsEntityUpdateEvent(this, PhysicsEntityEvent.PhysicsEntityUpdateType.POST_PHYSICS_UPDATE, simulatePhysics) :
-                new PhysicsEntityEvent.ServerPhysicsEntityUpdateEvent(this, PhysicsEntityEvent.PhysicsEntityUpdateType.POST_PHYSICS_UPDATE, simulatePhysics));
+        MinecraftForge.EVENT_BUS.post(world.isRemote ? new PhysicsEntityEvent.ClientUpdate(this, PhysicsEntityEvent.UpdateType.POST_PHYSICS_UPDATE, simulatePhysics) :
+                new PhysicsEntityEvent.ServerUpdate(this, PhysicsEntityEvent.UpdateType.POST_PHYSICS_UPDATE, simulatePhysics));
         profiler.end(Profiler.Profiles.PHY2P);
     }
 
@@ -364,11 +369,8 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
      * @param simulatingPhysics If physics should be simulated in this update <br> If false, the physics handler may be null
      */
     public void postUpdatePhysics(boolean simulatingPhysics) {
-        if (simulatingPhysics) {
+        if (simulatingPhysics)
             physicsHandler.postUpdate();
-            this.physicsPosition.set(this.physicsHandler.getPosition());
-            this.physicsRotation.set(this.physicsHandler.getRotation());
-        }
     }
 
     /**
@@ -390,8 +392,11 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     /**
      * @return The entity network
      */
-    public PhysicsEntityNetHandler<? extends PhysicsEntity<T>> getNetwork() {
+    /*public PhysicsEntityNetHandler<? extends PhysicsEntity<T>> getNetwork() {
         return network;
+    }*/
+    public PhysicsEntitySynchronizer<? extends PhysicsEntity<T>> getSynchronizer() {
+        return synchronizer;
     }
 
     /**
@@ -405,12 +410,12 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
      * Computes yaw and pitch from the given quaternion
      */
     private void alignRotation(Quaternion localQuat) {
-        Vector3f forwardVec = Vector3fPool.get();
-        forwardVec = localQuat.mult(DynamXGeometry.multiply[0], forwardVec);
+        Vector3f rotatedForwardDirection = Vector3fPool.get();
+        rotatedForwardDirection = localQuat.mult(DynamXGeometry.FORWARD_DIRECTION, rotatedForwardDirection);
 
-        this.rotationPitch = DynamXGeometry.getPitch(forwardVec) % 360;
+        rotationPitch = DynamXGeometry.getPitchFromRotationVector(rotatedForwardDirection) % 360;
 
-        rotationYaw = DynamXGeometry.getYaw(forwardVec) % 360;
+        rotationYaw = DynamXGeometry.getYawFromRotationVector(rotatedForwardDirection) % 360;
         if (rotationYaw - prevRotationYaw > 270)
             prevRotationYaw += 360;
         else if (prevRotationYaw - rotationYaw > 270)
@@ -491,16 +496,10 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
             if (physicsHandler != null) {
                 Vector3f min = Vector3fPool.get();
                 Vector3f max = Vector3fPool.get();
-                BoundingBoxPool.getPool().openSubPool();
-                Vector3f pos = Vector3fPool.get(physicsPosition);
-                if (physicsHandler.getCenterOfMass() != null) {
-                    pos.addLocal(DynamXGeometry.rotateVectorByQuaternion(physicsHandler.getCenterOfMass(), physicsRotation).multLocal(-1));
-                }
-                BoundingBox boundingBox = physicsHandler.getCollisionObject().getCollisionShape().boundingBox(pos, physicsRotation, BoundingBoxPool.get());
+                BoundingBox boundingBox = physicsHandler.getBoundingBox();
                 boundingBox.getMin(min);
                 boundingBox.getMax(max);
                 entityBoxCache = new AxisAlignedBB(min.x, min.y, min.z, max.x, max.y, max.z);
-                BoundingBoxPool.getPool().closeSubPool();
             } else {
                 List<MutableBoundingBox> boxes = getCollisionBoxes(); //Get PartShape boxes
                 if (boxes.isEmpty()) { //If there is no boxes, create a default one
@@ -530,10 +529,11 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     @Override
     public void onRemovedFromWorld() {
         super.onRemovedFromWorld();
-        if (usesPhysicsWorld && DynamXContext.getPhysicsWorld() != null) //onRemovedFromWorld may be called before physicsWorld is loaded (in case of failing to load from nbt)
+        IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(world);
+        if (usesPhysicsWorld && physicsWorld != null) //onRemovedFromWorld may be called before physicsWorld is loaded (in case of failing to load from nbt)
         {
-            DynamXContext.getPhysicsWorld().removeBulletEntity(this);
-            terrainCache.onRemoved(DynamXContext.getPhysicsWorld().getTerrainManager());
+            physicsWorld.removeBulletEntity(this);
+            terrainCache.onRemoved(physicsWorld.getTerrainManager());
         }
         if (physicsHandler != null)
             physicsHandler.removePhysicsEntity();
@@ -546,24 +546,10 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
 
     @Override
     public boolean attackEntityFrom(DamageSource damageSource, float amount) {
-        if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.AttackedEvent(this, damageSource.getTrueSource(), damageSource))) {
+        if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Attacked(this, damageSource.getTrueSource(), damageSource))) {
             if (damageSource.isExplosion()) {
                 return false;
             }
-            //FIXME BUG WITH BULLET, IF WE DISABLE SLEEP, THEN ACTIVE THEN ENABLE SLEEP, NO BUG, ELSE STAYS NOT ACTIVATED
-            /*if(physicsHandler != null) {
-                System.out.println("ENTITY INFO " + physicsHandler+" "+isRegistered+" "+physicsPosition+" "+physicsHandler.getPosition()+" "+physicsHandler.getPhysicsState()+" "+physicsHandler.isBodyActive()+" "+physicsHandler.getCollisionObject());
-                System.out.println("m is "+physicsHandler.getCollisionObject().getCollisionShape()+" "+physicsHandler.getCollisionObject().getPhysicsLocation(Vector3fPool.get()));
-                ((PhysicsRigidBody)physicsHandler.getCollisionObject()).setSleepingThresholds(0.8f, 1);
-                ((PhysicsRigidBody)physicsHandler.getCollisionObject()).setEnableSleep(false);
-                ((PhysicsRigidBody)physicsHandler.getCollisionObject()).activate(true);
-                System.out.println("But "+((PhysicsRigidBody)physicsHandler.getCollisionObject()).isActive()+" "+((PhysicsRigidBody)physicsHandler.getCollisionObject()).getGravity(Vector3fPool.get())+" "+((PhysicsRigidBody)physicsHandler.getCollisionObject()).getMass());
-                ((PhysicsRigidBody)physicsHandler.getCollisionObject()).setEnableSleep(true);
-                return false;
-            }
-            if(true) {
-                return false;
-            }*/
             if (!this.world.isRemote && !this.isDead && damageSource.getImmediateSource() instanceof EntityPlayer && damageSource.getTrueSource().getRidingEntity() != this
                     && (((EntityPlayer) damageSource.getImmediateSource()).capabilities.isCreativeMode
                     || ((EntityPlayer) damageSource.getImmediateSource()).getHeldItemMainhand().getItem().equals(DynamXItemRegistry.ITEM_WRENCH))) {

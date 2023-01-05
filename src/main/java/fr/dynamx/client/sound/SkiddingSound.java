@@ -23,8 +23,8 @@ public class SkiddingSound extends VehicleSound {
         super.update(handler);
         float numSkdding = 0;
         for (int i = 0; i < vehicleEntity.getPackInfo().getPartsByType(PartWheel.class).size(); i++) {
-            if (wheelsModule.getPropulsionProperties()[getPropertyIndex(i, VehicleEntityProperties.EnumWheelProperties.SKIDINFO)] < 0.2f) {
-                numSkdding += 1 - wheelsModule.getPropulsionProperties()[getPropertyIndex(i, VehicleEntityProperties.EnumWheelProperties.SKIDINFO)];
+            if (wheelsModule.getSkidInfos()[i] < 0.2f) {
+                numSkdding += 1 - wheelsModule.getSkidInfos()[i];
             }
         }
         //System.out.println(playing+" "+numSkdding);

@@ -145,7 +145,7 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
             VehicleDebugRenderer.PlayerCollisionsDebug.motion = Vector3fPool.getPermanentVector(data);
         Quaternion withRotation = with.getCollidableRotation();
         Quaternion inversedWithRotation = withRotation.inverse();
-        if(inversedWithRotation == null) //error when loading world todo find why
+        if (inversedWithRotation == null) //error when loading world todo find why
             return Vector3fPool.get(oldx, oldy, oldz);
         data = rotate(data, inversedWithRotation);
         mx = data.x;
@@ -274,7 +274,7 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
                                         WalkingOnPlayerController.controller = new WalkingOnPlayerController((EntityPlayer) entity, collidingWith, f, offset);
                                         collidingWith.walkingOnPlayers.put((EntityPlayer) entity, WalkingOnPlayerController.controller);
                                         DynamXContext.getWalkingPlayers().put((EntityPlayer) entity, collidingWith);
-                                        collidingWith.getNetwork().onWalkingPlayerChange(entity.getEntityId(), offset, (byte) f.getIndex());
+                                        collidingWith.getSynchronizer().onWalkingPlayerChange(entity.getEntityId(), offset, (byte) f.getIndex());
                                     } else
                                         data.y += collidingWith.motionY;
                                     break;
@@ -299,21 +299,30 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
         return a;
     }
 
-    private PooledHashMap<Vector3f, ICollidableObject> getCollidableTileEntities(World world, AxisAlignedBB inBox) {
+    /**
+     * Gets all the {@link ICollidableObject} TileEntities in the given bounding box
+     *
+     * @param world The world
+     * @param inBox The box where we search the {@link ICollidableObject}
+     * @return The {@link ICollidableObject} {@link TileEntity} inside of the box
+     */
+    private PooledHashMap<Vector3f, ICollidableObject> getCollidableTileEntities(World world, MutableBoundingBox inBox) {
         PooledHashMap<Vector3f, ICollidableObject> entities = HashMapPool.get();
         BlockPos.MutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain();
         Chunk lastChunk = null;
-        for (int x = (int) Math.floor(inBox.minX); x < inBox.maxX; x++) {
-            for (int y = (int) Math.floor(inBox.minY); y < inBox.maxY; y++) {
-                for (int z = (int) Math.floor(inBox.minZ); z < inBox.maxZ; z++) {
+        Vector3f radius = inBox.getSize().divideLocal(2);
+        // Iterate on chunks near to the player
+        for (int x = (int) Math.floor(inBox.minX); x <= inBox.maxX; x += Math.ceil(radius.x)) {
+            for (int y = (int) Math.floor(inBox.minY); y <= inBox.maxY; y += Math.ceil(radius.y)) {
+                for (int z = (int) Math.floor(inBox.minZ); z <= inBox.maxZ; z += Math.ceil(radius.z)) {
                     pos.setPos(x, y, z);
                     if (lastChunk == null || lastChunk.x != (x >> 4) || lastChunk.z != (z >> 4)) {
+                        // If it's a new chunk, add all ICollidableObject inside the box
                         lastChunk = world.getChunk(pos);
-                        //data = lastChunk.getCapability(DynamXChunkDataProvider.DYNAM_X_CHUNK_DATA_CAPABILITY, null);
-                    }
-                    TileEntity e = lastChunk.getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK);
-                    if (e instanceof ICollidableObject) {
-                        entities.put(Vector3fPool.get(pos.getX(), pos.getY(), pos.getZ()), (ICollidableObject) e);
+                        for (Map.Entry<BlockPos, TileEntity> te : lastChunk.getTileEntityMap().entrySet()) {
+                            if (te.getValue() instanceof ICollidableObject && inBox.contains(te.getKey()))
+                                entities.put(Vector3fPool.get(te.getKey().getX(), te.getKey().getY(), te.getKey().getZ()), (ICollidableObject) te.getValue());
+                        }
                     }
                 }
             }
@@ -367,7 +376,7 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
         motionChanged = false;
         if (entity instanceof EntityLivingBase) // && !(entity instanceof PhysicsEntity))
         {
-            PooledHashMap<Vector3f, ICollidableObject> collidableEntities = getCollidableTileEntities(entity.world, entity.getEntityBoundingBox().grow(icollidableCheckRadius));
+            PooledHashMap<Vector3f, ICollidableObject> collidableEntities = getCollidableTileEntities(entity.world, new MutableBoundingBox(entity.getEntityBoundingBox()).grow(icollidableCheckRadius));
             for (Map.Entry<Vector3f, ICollidableObject> e : collidableEntities.entrySet()) {
                 //System.out.println("Input "+mx+" "+my+" "+mz+" "+nx+" "+ny+" "+nz+" "+entity.onGround+" "+entity.collidedVertically+" "+e.physicsPosition);
                 Vector3fPool.openPool();

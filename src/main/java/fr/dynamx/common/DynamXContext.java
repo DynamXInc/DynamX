@@ -2,6 +2,7 @@ package fr.dynamx.common;
 
 import fr.dynamx.api.network.IDnxNetworkSystem;
 import fr.dynamx.api.obj.IObjModelRegistry;
+import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.api.physics.IPhysicsSimulationMode;
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.api.physics.IRotatedCollisionHandler;
@@ -9,9 +10,12 @@ import fr.dynamx.client.DynamXModelRegistry;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.handlers.RotatedCollisionHandlerImpl;
 import fr.dynamx.common.network.DynamXNetwork;
+import fr.dynamx.common.objloader.data.ObjModelData;
 import fr.dynamx.common.physics.player.PlayerPhysicsHandler;
 import fr.dynamx.common.physics.world.PhysicsSimulationModes;
+import fr.dynamx.utils.DynamXUtils;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
@@ -25,7 +29,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * Common DynamX variables
  */
 public class DynamXContext {
-    private static IPhysicsWorld physicsWorld;
     private static final IRotatedCollisionHandler collisionHandler = new RotatedCollisionHandlerImpl();
     private static final IDnxNetworkSystem network;
     @SideOnly(Side.CLIENT)
@@ -36,6 +39,11 @@ public class DynamXContext {
     private static Map<Integer, Integer> playerPickingObjects = new HashMap<>();
 
     private static final IPhysicsSimulationMode[] physicsSimulationModes = new IPhysicsSimulationMode[]{new PhysicsSimulationModes.FullPhysics(), new PhysicsSimulationModes.FullPhysics()};
+
+    private static final Map<ResourceLocation, ObjModelData> OBJ_MODEL_DATA_CACHE = new HashMap<>();
+
+    private static final Map<Integer, IPhysicsWorld> PHYSICS_WORLD_PER_DIMENSION = new HashMap<>();
+
 
     /**
      * Use this to avoid manipulating physics on invalid sides
@@ -51,8 +59,8 @@ public class DynamXContext {
     /**
      * @return The local physics world
      */
-    public static IPhysicsWorld getPhysicsWorld() {
-        return physicsWorld;
+    public static IPhysicsWorld getPhysicsWorld(World world) {
+        return getPhysicsWorldPerDimensionMap().get(world.provider.getDimension());
     }
 
     /**
@@ -98,8 +106,8 @@ public class DynamXContext {
         return network;
     }
 
-    public static void setPhysicsWorld(IPhysicsWorld physicsWorld) {
-        DynamXContext.physicsWorld = physicsWorld;
+    public static Map<Integer, IPhysicsWorld> getPhysicsWorldPerDimensionMap() {
+        return PHYSICS_WORLD_PER_DIMENSION;
     }
 
     public static void setPlayerPickingObjects(Map<Integer, Integer> playerPickingObjects) {
@@ -122,6 +130,20 @@ public class DynamXContext {
      */
     public static void setPhysicsSimulationMode(Side side, IPhysicsSimulationMode physicsSimulationMode) {
         DynamXContext.physicsSimulationModes[side.ordinal()] = physicsSimulationMode;
+    }
+
+    public static ObjModelData getObjModelDataFromCache(ObjModelPath objModelPath) {
+        if (OBJ_MODEL_DATA_CACHE.containsKey(objModelPath.getModelPath())) {
+            return OBJ_MODEL_DATA_CACHE.get(objModelPath.getModelPath());
+        } else {
+            ObjModelData objModelData = new ObjModelData(DynamXUtils.getModelPath(objModelPath.getPackName(), objModelPath.getModelPath()));
+            OBJ_MODEL_DATA_CACHE.put(objModelPath.getModelPath(), objModelData);
+            return objModelData;
+        }
+    }
+
+    public static Map<ResourceLocation, ObjModelData> getObjModelDataCache() {
+        return OBJ_MODEL_DATA_CACHE;
     }
 
     static {

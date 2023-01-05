@@ -1,6 +1,7 @@
 package fr.dynamx.common.entities;
 
 import com.jme3.math.Vector3f;
+import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.entities.modules.IMovableModuleContainer;
@@ -29,7 +30,7 @@ import net.minecraft.world.World;
  * @see IPhysicsModule
  * @see PackEntityPhysicsHandler For the physics implementation
  */
-public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>, A extends IPhysicsPackInfo> extends ModularPhysicsEntity<T> implements IMovableModuleContainer {
+public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>, A extends IPhysicsPackInfo> extends ModularPhysicsEntity<T> implements IMovableModuleContainer, IPackInfoReloadListener {
     private static final DataParameter<String> INFO_NAME = EntityDataManager.createKey(PackPhysicsEntity.class, DataSerializers.STRING);
     private static final DataParameter<Integer> METADATA = EntityDataManager.createKey(PackPhysicsEntity.class, DataSerializers.VARINT);
     private int lastMetadata = -1;
@@ -57,17 +58,24 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
         this.getDataManager().register(METADATA, -1);
     }
 
-    protected abstract A createInfo(String infoName);
+    public abstract A createInfo(String infoName);
 
     @Override
     public boolean initEntityProperties() {
         packInfo = createInfo(getInfoName());
-        if (packInfo == null)
-            DynamXMain.log.warn("Failed to find info of " + this + ". Should be " + getInfoName());
-        if (packInfo != null) {
+        if (packInfo != null && packInfo.getPhysicsCollisionShape() != null)
             return super.initEntityProperties();
-        }
+        DynamXMain.log.warn("Failed to find info of " + this + ". Should be " + getInfoName());
         return false;
+    }
+
+    @Override
+    public void onPackInfosReloaded() {
+        setPackInfo(createInfo(getInfoName()));
+        for(IPhysicsModule<?> module : moduleList) {
+            if(module instanceof IPackInfoReloadListener)
+                ((IPackInfoReloadListener) module).onPackInfosReloaded();
+        }
     }
 
     @Override

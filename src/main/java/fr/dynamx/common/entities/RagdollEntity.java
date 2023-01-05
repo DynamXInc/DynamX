@@ -8,14 +8,15 @@ import fr.dynamx.api.entities.modules.AttachModule;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.PhysicsEntityEvent;
-import fr.dynamx.api.network.sync.SimulationHolder;
+import fr.dynamx.common.network.sync.variables.EntityTransformsVariable;
+import fr.dynamx.api.network.sync.SynchronizedEntityVariableRegistry;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.entities.modules.MovableModule;
+import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
 import fr.dynamx.common.network.sync.vars.AttachBodyPhysicsState;
 import fr.dynamx.common.network.sync.vars.AttachedBodySynchronizedVariable;
 import fr.dynamx.common.network.sync.vars.EntityPhysicsState;
-import fr.dynamx.common.network.sync.vars.RagdollPartsSynchronizedVariable;
 import fr.dynamx.common.physics.entities.EntityPhysicsHandler;
 import fr.dynamx.common.physics.entities.EnumRagdollBodyPart;
 import fr.dynamx.common.physics.entities.RagdollPhysics;
@@ -49,6 +50,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@SynchronizedEntityVariable.SynchronizedPhysicsModule()
 public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> implements AttachedBodySynchronizedVariable.AttachedBodySynchronizer {
     private static final DataParameter<String> SKIN = EntityDataManager.createKey(RagdollEntity.class, DataSerializers.STRING);
 
@@ -67,6 +69,9 @@ public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> imple
 
     private final List<MutableBoundingBox> unrotatedBoxes = new ArrayList<>();
     private final HashMap<Byte, SynchronizedRigidBodyTransform> transforms = new HashMap<>();
+
+    @SynchronizedEntityVariable(name = "parts_pos")
+    private final EntityTransformsVariable synchronizedTransforms = new EntityTransformsVariable(this, this);
 
     private short handlingTime;
     private EntityPlayer handledPlayer;
@@ -183,7 +188,7 @@ public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> imple
     @Override
     protected void fireCreateModulesEvent(Side side) {
         //Don't simplify the generic type, for fml
-        MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.CreateEntityModulesEvent<>(RagdollEntity.class, this, moduleList, side));
+        MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.CreateModules<>(RagdollEntity.class, this, moduleList, side));
     }
 
     @Override
@@ -229,12 +234,9 @@ public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> imple
     }
 
     @Override
-    public List<ResourceLocation> getSynchronizedVariables(Side side, SimulationHolder simulationHolder) {
-        List<ResourceLocation> r = super.getSynchronizedVariables(side, simulationHolder);
-        if (simulationHolder.isPhysicsAuthority(side)) {
-            r.add(RagdollPartsSynchronizedVariable.NAME);
-        }
-        return r;
+    public void registerSynchronizedVariables() {
+        super.registerSynchronizedVariables();
+        SynchronizedEntityVariableRegistry.addVarsOf(this.getSynchronizer(), this);
     }
 
     @Override
@@ -250,6 +252,7 @@ public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> imple
     @Override
     public void onUpdate() {
         super.onUpdate();
+        synchronizedTransforms.setChanged(true);
         handler.updateEntity();
         if (handledPlayer != null && handlingTime > 0) {
             handlingTime--;

@@ -28,7 +28,7 @@ public class BoatDebugRenderer {
         }
 
         @Override
-        public void render(BaseVehicleEntity<?> entity, double x, double y, double z, float partialTicks) {
+        public void render(BaseVehicleEntity<?> entity, RenderPhysicsEntity<BaseVehicleEntity<?>> renderer, double x, double y, double z, float partialTicks) {
             GlStateManager.pushMatrix();
             GlStateManager.disableTexture2D();
             GlStateManager.enableAlpha();
@@ -86,7 +86,7 @@ public class BoatDebugRenderer {
         }
 
         @Override
-        public void render(BaseVehicleEntity<?> entity, double x, double y, double z, float partialTicks) {
+        public void render(BaseVehicleEntity<?> entity, RenderPhysicsEntity<BaseVehicleEntity<?>> renderer, double x, double y, double z, float partialTicks) {
             GlStateManager.glBegin(GL11.GL_QUADS);
             ClientDebugSystem.fillFaceBox((float) -20, (float) (39.9999999999f - entity.posY), (float) -20, (float) +20, (float) (40.000000001f - entity.posY), (float) +20);
             GlStateManager.glEnd();

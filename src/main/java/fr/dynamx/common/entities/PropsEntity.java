@@ -28,7 +28,7 @@ public class PropsEntity<T extends PackEntityPhysicsHandler<PropObject<?>, ?>> e
     }
 
     @Override
-    protected PropObject<?> createInfo(String infoName) {
+    public PropObject<?> createInfo(String infoName) {
         return DynamXObjectLoaders.PROPS.findInfo(infoName);
     }
 
@@ -52,7 +52,7 @@ public class PropsEntity<T extends PackEntityPhysicsHandler<PropObject<?>, ?>> e
     @Override
     protected final void fireCreateModulesEvent(Side side) {
         //Don't simplify the generic type, for fml
-        MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.CreateEntityModulesEvent<>(PropsEntity.class, this, moduleList, side));
+        MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.CreateModules<>(PropsEntity.class, this, moduleList, side));
     }
 
     @Override

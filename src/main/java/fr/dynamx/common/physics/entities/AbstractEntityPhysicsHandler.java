@@ -1,5 +1,6 @@
 package fr.dynamx.common.physics.entities;
 
+import com.jme3.bounding.BoundingBox;
 import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
@@ -7,7 +8,9 @@ import fr.dynamx.api.physics.entities.EntityPhysicsState;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.utils.maths.DynamXGeometry;
+import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import lombok.Getter;
 
 import javax.annotation.Nullable;
 
@@ -29,17 +32,10 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
      */
     protected final P collisionObject;
     /**
-     * The position
+     * The bounding box
      */
-    protected final Vector3f physicsPosition;
-    /**
-     * The rotation
-     */
-    protected final Quaternion physicsRotation;
-    /**
-     * The initial spawn yaw angle
-     */
-    protected final float spawnRotationAngle;
+    @Getter
+    private final BoundingBox boundingBox = new BoundingBox();
     /**
      * The activation state of the {@link PhysicsCollisionObject}
      */
@@ -52,11 +48,7 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
 
     public AbstractEntityPhysicsHandler(T entity) {
         this.handledEntity = entity;
-        this.spawnRotationAngle = entity.rotationYaw;
-        this.physicsPosition = new Vector3f((float) entity.posX, (float) entity.posY, (float) entity.posZ);
-        this.physicsRotation = new Quaternion(DynamXGeometry.rotationYawToQuaternion(spawnRotationAngle));
-
-        collisionObject = createShape(physicsPosition, physicsRotation, spawnRotationAngle);
+        this.collisionObject = createShape(entity.physicsPosition, entity.physicsRotation, entity.rotationYaw);
     }
 
     /**
@@ -73,7 +65,7 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
      * Adds the collision object to the physics world
      */
     public void addToWorld() {
-        DynamXContext.getPhysicsWorld().addCollisionObject(collisionObject);
+        DynamXContext.getPhysicsWorld(handledEntity.world).addCollisionObject(collisionObject);
     }
 
     /**
@@ -81,7 +73,7 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
      */
     public void removePhysicsEntity() {
         if (collisionObject != null) {
-            DynamXContext.getPhysicsWorld().removeCollisionObject(collisionObject);
+            DynamXContext.getPhysicsWorld(handledEntity.world).removeCollisionObject(collisionObject);
         }
     }
 
@@ -93,9 +85,20 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
 
     //TODO DOC
     public void postUpdate() {
-        collisionObject.getPhysicsLocation(physicsPosition);
-        collisionObject.getPhysicsRotation(physicsRotation);
         isBodyActive = collisionObject.isActive();
+
+        Vector3f physicsPosition = collisionObject.getPhysicsLocation(Vector3fPool.get());
+        Quaternion physicsRotation = collisionObject.getPhysicsRotation(QuaternionPool.get());
+        Vector3f centerOfMass = getCenterOfMass();
+        Vector3f pos = Vector3fPool.get(physicsPosition);
+        if (centerOfMass != null) { //TODO OPTIMIZE
+            physicsPosition.addLocal(DynamXGeometry.rotateVectorByQuaternion(centerOfMass, physicsRotation));
+            pos.addLocal(DynamXGeometry.rotateVectorByQuaternion(centerOfMass, physicsRotation).multLocal(-1));
+        }
+        handledEntity.physicsPosition.set(physicsPosition);
+        handledEntity.physicsRotation.set(physicsRotation);
+        collisionObject.getCollisionShape().boundingBox(pos, physicsRotation, boundingBox);
+
     }
 
     /**
@@ -143,14 +146,6 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
         return collisionObject;
     }
 
-
-    /**
-     * @return The initial spawn yaw angle
-     */
-    public float getSpawnRotationAngle() {
-        return spawnRotationAngle;
-    }
-
     /**
      * @return The physics state of the object
      */
@@ -166,26 +161,6 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
     }
 
     /**
-     * @return the rotation in the physics world
-     */
-    public Quaternion getRotation() {
-        return this.physicsRotation;
-    }
-
-    /**
-     * @return The in-world position of this entity
-     */
-    public Vector3f getPosition() {
-        Vector3f mass = getCenterOfMass();
-        if (mass == null) {
-            return physicsPosition;
-        }
-        Vector3f vec = Vector3fPool.get(physicsPosition);
-        vec.addLocal(DynamXGeometry.rotateVectorByQuaternion(mass, getRotation()));
-        return vec;
-    }
-
-    /**
      * @return The center of mass of the object, or null if (0, 0, 0)
      */
     @Nullable
@@ -194,14 +169,14 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
     }
 
     /**
+     * todo update doc
      * Sets the physics position, the physics rotation and the velocities <br>
      * Used for network sync
      */
     public void updatePhysicsState(Vector3f pos, Quaternion rotation, Vector3f linearVel, Vector3f rotationalVel) {
-        Vector3f mass = getCenterOfMass();
-        if (mass != null) {
-            pos.addLocal(DynamXGeometry.rotateVectorByQuaternion(mass, rotation).multLocal(-1));
-        }
+        Vector3f centerOfMass = getCenterOfMass();
+        if (centerOfMass != null)
+            pos.addLocal(DynamXGeometry.rotateVectorByQuaternion(centerOfMass, rotation).multLocal(-1));
 
         setPhysicsPosition(pos);
         setPhysicsRotation(rotation);
@@ -213,16 +188,24 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
      * Adjusts the physics position and velocity to match the given pos, and sets the physics rotation and velocities
      */
     public void updatePhysicsStateFromNet(Vector3f pos, Quaternion rotation, Vector3f linearVel, Vector3f rotationalVel) {
-        Vector3f mass = getCenterOfMass();
-        if (mass != null) {
-            pos.addLocal(DynamXGeometry.rotateVectorByQuaternion(mass, rotation).multLocal(-1));
-        }
+        Vector3f centerOfMass = getCenterOfMass();
+        //if (centerOfMass != null)
+          //  pos.addLocal(DynamXGeometry.rotateVectorByQuaternion(centerOfMass, rotation).multLocal(-1));
 
-        linearVel.addLocal(pos.subtract(physicsPosition));
+        linearVel.addLocal(pos.subtract(handledEntity.physicsPosition));
         setLinearVelocity(linearVel);
 
         setPhysicsRotation(rotation);
         setAngularVelocity(rotationalVel);
+    }
+
+    //TODO DOC
+    public Vector3f getPosition() {
+        return handledEntity.physicsPosition;
+    }
+
+    public Quaternion getRotation() {
+        return handledEntity.physicsRotation;
     }
 
     /**

@@ -5,6 +5,7 @@ import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.part.BasePart;
+import fr.dynamx.common.network.sync.variables.NetworkActivityTracker;
 import fr.dynamx.client.camera.CameraSystem;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.parts.PartSeat;
@@ -75,7 +76,7 @@ public class ClientDebugSystem {
                 }
             }
 
-            if (DynamXContext.getPhysicsWorld() != null) {
+            if (enableDebugDrawing && MC.world != null && DynamXContext.getPhysicsWorld(MC.world) != null) {
                 QuaternionPool.openPool();
                 Vector3fPool.openPool();
                 curRigidBodyStatesIndex++;
@@ -83,7 +84,7 @@ public class ClientDebugSystem {
                     curRigidBodyStatesIndex = 0;
                 }
                 prevRigidBodyStates[curRigidBodyStatesIndex].clear();
-                for (PhysicsRigidBody body : DynamXContext.getPhysicsWorld().getDynamicsWorld().getRigidBodyList()) {
+                for (PhysicsRigidBody body : DynamXContext.getPhysicsWorld(MC.world).getDynamicsWorld().getRigidBodyList()) {
                     prevRigidBodyStates[curRigidBodyStatesIndex].put(body.nativeId(), new RigidBodyTransform(body));
                 }
                 Vector3fPool.closePool();
@@ -99,8 +100,8 @@ public class ClientDebugSystem {
             FontRenderer fontRenderer = MC.fontRenderer;
             String s = "Drawing debug";
             fontRenderer.drawString(s, event.getResolution().getScaledWidth() - fontRenderer.getStringWidth(s) - 2, 2, 0xFFBC00);
-            if (DynamXContext.getPhysicsWorld() != null) {
-                s = "Entities: " + DynamXContext.getPhysicsWorld().getLoadedEntityCount();
+            if (DynamXContext.getPhysicsWorld(MC.world) != null) {
+                s = "Entities: " + DynamXContext.getPhysicsWorld(MC.world).getLoadedEntityCount();
             } else
                 s = "Not simulating...";
             fontRenderer.drawString(s, event.getResolution().getScaledWidth() - fontRenderer.getStringWidth(s) - 2, 12, 0xFFBC00);
@@ -125,6 +126,9 @@ public class ClientDebugSystem {
                 }
             } else if (!physicsTicks.isEmpty())
                 physicsTicks.clear();
+
+            if(DynamXDebugOptions.FULL_NETWORK_DEBUG.isActive())
+                NetworkActivityTracker.drawNetworkActivity(MC.fontRenderer, 10);
         }
     }
 
@@ -164,17 +168,17 @@ public class ClientDebugSystem {
                 QuaternionPool.openPool();
                 GlQuaternionPool.openPool();
 
-                for (PhysicsRigidBody body : DynamXContext.getPhysicsWorld().getDynamicsWorld().getRigidBodyList()) {
+                for (PhysicsRigidBody body : DynamXContext.getPhysicsWorld(MC.world).getDynamicsWorld().getRigidBodyList()) {
                     PhysicsDebugRenderer.debugRigidBody(body, getPrevRigidBodyTransform(body.nativeId()), getCurrentRigidBodyTransform(body.nativeId()), event.getPartialTicks());
                 }
-                DynamXContext.getPhysicsWorld().getDynamicsWorld().getSoftBodyList().forEach(PhysicsDebugRenderer::debugSoftBody);
+                DynamXContext.getPhysicsWorld(MC.world).getDynamicsWorld().getSoftBodyList().forEach(PhysicsDebugRenderer::debugSoftBody);
                 Vector3fPool.closePool();
                 QuaternionPool.closePool();
 
                 GlStateManager.disableDepth();
                 Vector3fPool.openPool();
                 QuaternionPool.openPool();
-                for (PhysicsJoint physicsJoint : DynamXContext.getPhysicsWorld().getDynamicsWorld().getJointList()) {
+                for (PhysicsJoint physicsJoint : DynamXContext.getPhysicsWorld(MC.world).getDynamicsWorld().getJointList()) {
                     PhysicsDebugRenderer.debugConstraint(physicsJoint, event.getPartialTicks());
                 }
                 GlQuaternionPool.closePool();

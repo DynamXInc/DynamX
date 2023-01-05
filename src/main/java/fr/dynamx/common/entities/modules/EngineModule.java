@@ -1,20 +1,22 @@
 package fr.dynamx.common.entities.modules;
 
 import fr.dynamx.api.audio.EnumSoundState;
+import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.entities.modules.IEngineModule;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.IVehicleController;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent;
-import fr.dynamx.api.network.sync.SimulationHolder;
+import fr.dynamx.api.network.sync.EntityVariable;
+import fr.dynamx.api.network.sync.SynchronizationRules;
 import fr.dynamx.api.physics.entities.IEnginePhysicsHandler;
 import fr.dynamx.client.ClientProxy;
 import fr.dynamx.client.handlers.hud.CarController;
 import fr.dynamx.client.sound.EngineSound;
 import fr.dynamx.common.contentpack.type.vehicle.EngineInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.network.sync.vars.VehicleSynchronizedVariables;
+import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.EnginePhysicsHandler;
@@ -23,14 +25,12 @@ import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static fr.dynamx.client.ClientProxy.SOUND_HANDLER;
@@ -42,22 +42,26 @@ import static fr.dynamx.client.ClientProxy.SOUND_HANDLER;
  * @see fr.dynamx.api.entities.VehicleEntityProperties.EnumEngineProperties
  * @see EnginePhysicsHandler
  */
-public class EngineModule implements IEngineModule<AbstractEntityPhysicsHandler<?, ?>>, IPhysicsModule.IPhysicsUpdateListener, IPhysicsModule.IEntityUpdateListener {
+@SynchronizedEntityVariable.SynchronizedPhysicsModule()
+public class EngineModule implements IEngineModule<AbstractEntityPhysicsHandler<?, ?>>, IPhysicsModule.IPhysicsUpdateListener, IPhysicsModule.IEntityUpdateListener, IPackInfoReloadListener {
     protected final BaseVehicleEntity<? extends BaseVehiclePhysicsHandler<?>> entity;
-    protected final EngineInfo engineInfo;
+    protected EngineInfo engineInfo;
     protected EnginePhysicsHandler physicsHandler;
 
-    //Handbrake on spawn
-    private int controls = 2;
+    //Default value is 2 for the handbrake on spawn
+    @SynchronizedEntityVariable(name = "controls")
+    private final EntityVariable<Integer> controls = new EntityVariable<>(SynchronizationRules.CONTROLS_TO_SPECTATORS, 2);
     /**
-     * The active speed limit, or Integer.MAX_VALUE
+     * The active speed limit, or Float.MAX_VALUE
      */
-    private float speedLimit = Integer.MAX_VALUE;
+    @SynchronizedEntityVariable(name = "speed_limit")
+    private final EntityVariable<Float> speedLimit = new EntityVariable<>(SynchronizationRules.CONTROLS_TO_SPECTATORS, Float.MAX_VALUE);
 
     /**
      * @see fr.dynamx.api.entities.VehicleEntityProperties.EnumEngineProperties
      */
-    private float[] engineProperties = new float[VehicleEntityProperties.EnumEngineProperties.values().length];
+    @SynchronizedEntityVariable(name = "engine_props")
+    private final EntityVariable<float[]> engineProperties = new EntityVariable<>(SynchronizationRules.PHYSICS_TO_SPECTATORS, new float[VehicleEntityProperties.EnumEngineProperties.values().length]);
 
     public EngineModule(BaseVehicleEntity<? extends BaseVehiclePhysicsHandler<?>> entity, EngineInfo engineInfo) {
         this.entity = entity;
@@ -71,15 +75,23 @@ public class EngineModule implements IEngineModule<AbstractEntityPhysicsHandler<
      */
     @Override
     public float[] getEngineProperties() {
-        return engineProperties;
+        return engineProperties.get();
     }
 
     public float getEngineProperty(VehicleEntityProperties.EnumEngineProperties engineProperty) {
-        return engineProperties[engineProperty.ordinal()];
+        return engineProperties.get()[engineProperty.ordinal()];
     }
 
     public EngineInfo getEngineInfo() {
         return engineInfo;
+    }
+
+    @Override
+    public void onPackInfosReloaded() {
+        this.engineInfo = entity.getPackInfo().getSubPropertyByType(EngineInfo.class);
+        if (physicsHandler != null)
+            physicsHandler.onPackInfosReloaded();
+        sounds.clear();
     }
 
     @Override
@@ -92,46 +104,45 @@ public class EngineModule implements IEngineModule<AbstractEntityPhysicsHandler<
      */
     @Override
     public void setEngineProperties(float[] engineProperties) {
-        this.engineProperties = engineProperties;
+        this.engineProperties.set(engineProperties);
     }
 
     public boolean isAccelerating() {
-        return EnginePhysicsHandler.inTestFullGo || (controls & 1) == 1;
+        return EnginePhysicsHandler.inTestFullGo || (controls.get() & 1) == 1;
     }
 
     public boolean isHandBraking() {
-        return (controls & 2) == 2;
+        return (controls.get() & 2) == 2;
     }
 
     public boolean isReversing() {
-        return (controls & 4) == 4;
+        return (controls.get() & 4) == 4;
     }
 
     public boolean isTurningLeft() {
-        return (controls & 8) == 8;
+        return (controls.get() & 8) == 8;
     }
 
     public boolean isTurningRight() {
-        return (controls & 16) == 16;
+        return (controls.get() & 16) == 16;
     }
 
     @Override
     public void setEngineStarted(boolean started) {
-        //System.out.println("Setting start " + started);
         if (started) {
-            setControls(controls | 32);
+            setControls(controls.get() | 32);
         } else {
-            setControls((Integer.MAX_VALUE - 32) & controls);
+            setControls(controls.get() & ~32);
         }
     }
 
     @Override
     public boolean isEngineStarted() {
-        return (EnginePhysicsHandler.inTestFullGo) || ((controls & 32) == 32);
+        return (EnginePhysicsHandler.inTestFullGo) || ((controls.get() & 32) == 32);
     }
 
     public int getControls() {
-        return controls;
+        return controls.get();
     }
 
 
@@ -143,15 +154,14 @@ public class EngineModule implements IEngineModule<AbstractEntityPhysicsHandler<
         if (entity.world.isRemote && entity.ticksExisted > 60 && !this.isEngineStarted() && (controls & 32) == 32) {
             playStartingSound();
         }
-        //System.out.println("Set start " + ((controls & 32) == 32) + " was " + isEngineStarted());
-        this.controls = controls;
+        this.controls.set(controls);
     }
 
     /**
      * Resets all controls except engine on/off state
      */
     public void resetControls() {
-        setControls(controls & 32 | (controls & 2));
+        setControls(controls.get() & 32 | (controls.get() & 2));
     }
 
     @Override
@@ -163,7 +173,7 @@ public class EngineModule implements IEngineModule<AbstractEntityPhysicsHandler<
     @Override
     public void readFromNBT(NBTTagCompound tag) {
         if (tag.getBoolean("isEngineStarted"))
-            setControls(controls | 32); //set engine on
+            setControls(controls.get() | 32); //set engine on
     }
 
     @Override
@@ -188,10 +198,10 @@ public class EngineModule implements IEngineModule<AbstractEntityPhysicsHandler<
     @Override
     public void postUpdatePhysics(boolean simulatingPhysics) {
         if (simulatingPhysics) {
-            this.engineProperties[VehicleEntityProperties.EnumEngineProperties.SPEED.ordinal()] = entity.physicsHandler.getSpeed(BaseVehiclePhysicsHandler.SpeedUnit.KMH);
-            this.engineProperties[VehicleEntityProperties.EnumEngineProperties.REVS.ordinal()] = physicsHandler.getEngine().getRevs();
+            this.engineProperties.get()[VehicleEntityProperties.EnumEngineProperties.SPEED.ordinal()] = entity.physicsHandler.getSpeed(BaseVehiclePhysicsHandler.SpeedUnit.KMH);
+            this.engineProperties.get()[VehicleEntityProperties.EnumEngineProperties.REVS.ordinal()] = physicsHandler.getEngine().getRevs();
             //this.engineProperties[VehicleEntityProperties.EnumEngineProperties.MAXREVS.ordinal()] = physicEntity.getEngine().getMaxRevs();
-            this.engineProperties[VehicleEntityProperties.EnumEngineProperties.ACTIVE_GEAR.ordinal()] = physicsHandler.getGearBox().getActiveGearNum();
+            this.engineProperties.get()[VehicleEntityProperties.EnumEngineProperties.ACTIVE_GEAR.ordinal()] = physicsHandler.getGearBox().getActiveGearNum();
             //this.engineProperties[VehicleEntityProperties.EnumEngineProperties.MAXSPEED.ordinal()] = physicEntity.getGearBox().getMaxSpeed(Vehicle.SpeedUnit.KMH);
             //this.engineProperties[VehicleEntityProperties.EnumEngineProperties.POWER.ordinal()] = physicsHandler.getEngine().getPower();
             //this.engineProperties[VehicleEntityProperties.EnumEngineProperties.BRAKING.ordinal()] = physicsHandler.getEngine().getBraking();
@@ -209,14 +219,7 @@ public class EngineModule implements IEngineModule<AbstractEntityPhysicsHandler<
      * @return The max speed, set by the current driver, or from the vehicle info
      */
     public float getRealSpeedLimit() {
-        return speedLimit == Integer.MAX_VALUE ? entity.getPackInfo().getVehicleMaxSpeed() : speedLimit;
-    }
-
-    @Override
-    public void addSynchronizedVariables(Side side, SimulationHolder simulationHolder, List<ResourceLocation> variables) {
-        if (simulationHolder.isPhysicsAuthority(side) || simulationHolder.ownsControls(side)) {
-            variables.add(VehicleSynchronizedVariables.Controls.NAME);
-        }
+        return speedLimit.get() == Float.MAX_VALUE ? entity.getPackInfo().getVehicleMaxSpeed() : speedLimit.get();
     }
 
     //Sounds
@@ -243,7 +246,7 @@ public class EngineModule implements IEngineModule<AbstractEntityPhysicsHandler<
     @Override
     @SideOnly(Side.CLIENT)
     public void updateEntity() {
-        if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.UpdateVehicleSoundEntityEvent(entity, this, PhysicsEntityEvent.Phase.PRE))) {
+        if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.UpdateSounds(entity, this, PhysicsEntityEvent.Phase.PRE))) {
             if (entity.getPackInfo() != null) {
                 if (engineInfo != null && engineInfo.getEngineSounds() != null) {
                     if (sounds.isEmpty()) { //Sounds are not initialized
@@ -252,7 +255,7 @@ public class EngineModule implements IEngineModule<AbstractEntityPhysicsHandler<
                     if (isEngineStarted()) {
                         if (engineProperties != null) {
                             boolean forInterior = Minecraft.getMinecraft().gameSettings.thirdPersonView == 0 && entity.isRidingOrBeingRiddenBy(Minecraft.getMinecraft().player);
-                            float rpm = engineProperties[VehicleEntityProperties.EnumEngineProperties.REVS.ordinal()] * engineInfo.getMaxRevs();
+                            float rpm = engineProperties.get()[VehicleEntityProperties.EnumEngineProperties.REVS.ordinal()] * engineInfo.getMaxRevs();
                             lastVehicleSound = currentVehicleSound;
                             if (currentVehicleSound == null || !currentVehicleSound.shouldPlay(rpm, forInterior)) {
                                 sounds.forEach((id, vehicleSound) -> {
@@ -280,18 +283,18 @@ public class EngineModule implements IEngineModule<AbstractEntityPhysicsHandler<
                     }
                 }
             }
-            MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.UpdateVehicleSoundEntityEvent(entity, this, PhysicsEntityEvent.Phase.POST));
+            MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.UpdateSounds(entity, this, PhysicsEntityEvent.Phase.POST));
         }
     }
 
     /**
-     * The active speed limit, or Integer.MAX_VALUE
+     * The active speed limit, or Float.MAX_VALUE
      */
     public float getSpeedLimit() {
-        return speedLimit;
+        return speedLimit.get();
     }
 
     public void setSpeedLimit(float speedLimit) {
-        this.speedLimit = speedLimit;
+        this.speedLimit.set(speedLimit);
     }
 }

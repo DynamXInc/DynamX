@@ -1,5 +1,6 @@
 package fr.dynamx.common.physics.entities.modules;
 
+import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.physics.entities.IEnginePhysicsHandler;
 import fr.dynamx.api.physics.entities.IGearBoxHandler;
 import fr.dynamx.api.physics.entities.IPropulsionHandler;
@@ -22,7 +23,7 @@ import java.util.List;
  * @see IEnginePhysicsHandler
  * @see EngineModule
  */
-public class EnginePhysicsHandler implements IEnginePhysicsHandler {
+public class EnginePhysicsHandler implements IEnginePhysicsHandler, IPackInfoReloadListener {
     private final EngineModule module;
     private final BaseVehiclePhysicsHandler<?> handler;
     private final IPropulsionHandler propulsionHandler;
@@ -41,6 +42,11 @@ public class EnginePhysicsHandler implements IEnginePhysicsHandler {
         this.module = module;
         this.handler = handler;
         this.propulsionHandler = propulsionHandler;
+        onPackInfosReloaded();
+    }
+
+    @Override
+    public void onPackInfosReloaded() {
         engine = new Engine(module.getEngineInfo());
         List<GearInfo> gears = module.getEngineInfo().gears;
         gearBox = new GearBox(gears.size());
@@ -66,6 +72,7 @@ public class EnginePhysicsHandler implements IEnginePhysicsHandler {
         }
         updateMovement();
         setEngineStarted(module.isEngineStarted());
+        if(gearBoxHandler != null)
         gearBoxHandler.update(accelerationForce);
     }
 
@@ -182,20 +189,6 @@ public class EnginePhysicsHandler implements IEnginePhysicsHandler {
             brake(0);
         }
 
-        if (TerrainFile.ULTIMATEDEBUG && handler.getHandledEntity().posY <= 3.5) {
-            System.out.println("========== EMERGENCY MESSAGE =============");
-            System.err.println("UN VEHICULE EST TOMBE !!!! " + handler.getHandledEntity() + " AT " + System.currentTimeMillis());
-            System.out.println("Will print chunk data at " + handler.getHandledEntity().chunkCoordX + " " + handler.getHandledEntity().chunkCoordY + " " + handler.getHandledEntity().chunkCoordZ);
-            ChunkGraph c = ChunkGraph.getAt(new VerticalChunkPos(handler.getHandledEntity().chunkCoordX, handler.getHandledEntity().chunkCoordY, handler.getHandledEntity().chunkCoordZ));
-            if (c != null) {
-                System.out.println("Other info : current status : " + DynamXContext.getPhysicsWorld().getTerrainManager().getTicket(c.listenedPos));
-                c.prettyPrint();
-            } else
-                System.err.println("Graph pas trouvé :c :O !! :mamamia:");
-            inTestFullGo = false;
-            handler.getHandledEntity().setDead();
-            System.out.println("========== END OF THE MESSAGE ==============");
-        }
         if (module.isAccelerating()) {
             if (inTestFullGo) {
                 module.setSpeedLimit(80);

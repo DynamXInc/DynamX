@@ -2,7 +2,6 @@ package fr.dynamx.common.physics.world;
 
 import fr.dynamx.api.events.PhysicsEvent;
 import fr.dynamx.common.DynamXMain;
-import fr.dynamx.common.physics.CollisionsHandler;
 import fr.dynamx.utils.debug.Profiler;
 import fr.dynamx.utils.optimization.BoundingBoxPool;
 import fr.dynamx.utils.optimization.TransformPool;
@@ -22,7 +21,7 @@ public class BuiltinPhysicsWorld extends BasePhysicsWorld {
         super(world, isRemoteWorld);
         this.physicsThread = Thread.currentThread();
 
-        DynamXMain.log.info("Starting a new McPhysicsWorld !");
+        DynamXMain.log.info("Loading the physics world for the dimension " + world.provider.getDimension());
         MinecraftForge.EVENT_BUS.post(new PhysicsEvent.PhysicsWorldLoad(this));
     }
 
@@ -43,11 +42,10 @@ public class BuiltinPhysicsWorld extends BasePhysicsWorld {
             }
 
             if (serverAfkTime < 200) {
-                stepSimulationImpl(Profiler.get());
+                stepSimulationImpl(Profiler.get(), null);
             } else {
                 flushOperations(Profiler.get());
             }
-            CollisionsHandler.tick();
         }
         TransformPool.getPool().closeSubPool();
         Vector3fPool.closePool();
@@ -60,8 +58,8 @@ public class BuiltinPhysicsWorld extends BasePhysicsWorld {
 
     @Override
     public void clearAll() {
+        DynamXMain.log.info("Unloading the physics world of the dimension " + mcWorld.provider.getDimension());
         super.clearAll();
-        DynamXMain.log.info("McPhysicsWorld cleared");
     }
 
     @Override

@@ -3,10 +3,9 @@ package fr.dynamx.utils.debug.renderer;
 import com.jme3.bounding.BoundingBox;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.IModuleContainer;
-import fr.dynamx.api.network.sync.SynchronizedVariable;
-import fr.dynamx.api.network.sync.SynchronizedVariablesRegistry;
+import fr.dynamx.api.network.sync.SimulationHolder;
 import fr.dynamx.api.physics.IRotatedCollisionHandler;
-import fr.dynamx.client.network.UdpClientPhysicsEntityNetHandler;
+import fr.dynamx.client.network.ClientPhysicsEntitySynchronizer;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.parts.*;
@@ -18,8 +17,6 @@ import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.entities.vehicles.DoorEntity;
 import fr.dynamx.common.entities.vehicles.HelicopterEntity;
-import fr.dynamx.common.network.sync.vars.DebugPosSynchronizedVariable;
-import fr.dynamx.common.network.sync.vars.PosSynchronizedVariable;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.maths.DynamXGeometry;
@@ -73,7 +70,7 @@ public class VehicleDebugRenderer {
         }
 
         @Override
-        public void render(BaseVehicleEntity<?> entity, double x, double y, double z, float partialTicks) {
+        public void render(BaseVehicleEntity<?> entity, RenderPhysicsEntity<BaseVehicleEntity<?>> renderer, double x, double y, double z, float partialTicks) {
             MutableBoundingBox box = new MutableBoundingBox();
             //Render wheels
             for (PartWheel wheel : entity.getPackInfo().getPartsByType(PartWheel.class)) {
@@ -131,7 +128,7 @@ public class VehicleDebugRenderer {
         }
 
         @Override
-        public void render(BaseVehicleEntity<?> entity, double x, double y, double z, float partialTicks) {
+        public void render(BaseVehicleEntity<?> entity, RenderPhysicsEntity<BaseVehicleEntity<?>> renderer, double x, double y, double z, float partialTicks) {
 
             if (!entity.getPackInfo().getFrictionPoints().isEmpty()) {
                 float horizSpeed = Vector3fPool.get((float) entity.motionX, 0, (float) entity.motionZ).length();
@@ -189,7 +186,7 @@ public class VehicleDebugRenderer {
         }
 
         @Override
-        public void render(BaseVehicleEntity<?> entity, double x, double y, double z, float partialTicks) {
+        public void render(BaseVehicleEntity<?> entity, RenderPhysicsEntity<BaseVehicleEntity<?>> renderer, double x, double y, double z, float partialTicks) {
             /* Rendering the steering wheel debug */
             SteeringWheelInfo info = entity.getPackInfo().getSubPropertyByType(SteeringWheelInfo.class);
             GlStateManager.pushMatrix();
@@ -220,7 +217,7 @@ public class VehicleDebugRenderer {
         }
 
         @Override
-        public void render(BaseVehicleEntity<?> entity, double x, double y, double z, float partialTicks) {
+        public void render(BaseVehicleEntity<?> entity, RenderPhysicsEntity<BaseVehicleEntity<?>> renderer, double x, double y, double z, float partialTicks) {
             Vector3f p1 = entity.getPackInfo().getSubPropertyByType(TrailerAttachInfo.class).getAttachPoint();
             RenderGlobal.drawBoundingBox(p1.x - 0, p1.y - 0.05f,
                     p1.z - 0.05f, p1.x + 0.05f, p1.y + 0.05f, p1.z + 0.05f,
@@ -240,7 +237,7 @@ public class VehicleDebugRenderer {
         }
 
         @Override
-        public void render(PackPhysicsEntity<?, ?> entity, double x, double y, double z, float partialTicks) {
+        public void render(PackPhysicsEntity<?, ?> entity, RenderPhysicsEntity<PackPhysicsEntity<?, ?>> renderer, double x, double y, double z, float partialTicks) {
             Vector3f point = new Vector3f();
             if (entity instanceof BaseVehicleEntity) {
                 for (PartDoor door : ((BaseVehicleEntity<?>) entity).getPackInfo().getPartsByType(PartDoor.class)) {
@@ -295,7 +292,7 @@ public class VehicleDebugRenderer {
         }
 
         @Override
-        public void render(BaseVehicleEntity<?> entity, double x, double y, double z, float partialTicks) {
+        public void render(BaseVehicleEntity<?> entity, RenderPhysicsEntity<BaseVehicleEntity<?>> renderer, double x, double y, double z, float partialTicks) {
             /* Start of Aymeric's collision debug */
             GlStateManager.pushMatrix();
             GlStateManager.translate(-entity.posX, -entity.posY, -entity.posZ);
@@ -367,7 +364,7 @@ public class VehicleDebugRenderer {
         }
 
         @Override
-        public void render(BaseVehicleEntity<?> entity, double x, double y, double z, float partialTicks) {
+        public void render(BaseVehicleEntity<?> entity, RenderPhysicsEntity<BaseVehicleEntity<?>> renderer, double x, double y, double z, float partialTicks) {
             List<PartPropsContainer> containers = entity.getPackInfo().getPartsByType(PartPropsContainer.class);
             if (!containers.isEmpty()) {
                 for (PartPropsContainer container : containers) {
@@ -392,7 +389,7 @@ public class VehicleDebugRenderer {
     public static class NetworkDebug implements DebugRenderer<BaseVehicleEntity<?>> {
         @Override
         public boolean shouldRender(BaseVehicleEntity<?> entity) {
-            return DynamXDebugOptions.FULL_NETWORK_DEBUG.isActive() && DynamXDebugOptions.LATE_NETWORK.isActive() && (entity.getNetwork() instanceof UdpClientPhysicsEntityNetHandler) && entity.getNetwork().getInputSyncVars().get(SynchronizedVariablesRegistry.getSyncVarRegistry().get(PosSynchronizedVariable.NAME)) != null;
+            return DynamXDebugOptions.FULL_NETWORK_DEBUG.isActive() && entity.getSynchronizer() instanceof ClientPhysicsEntitySynchronizer;
         }
 
         @Override
@@ -401,62 +398,20 @@ public class VehicleDebugRenderer {
         }
 
         @Override
-        public void render(BaseVehicleEntity<?> entity, double x, double y, double z, float partialTicks) {
+        public void render(BaseVehicleEntity<?> entity, RenderPhysicsEntity<BaseVehicleEntity<?>> renderer, double x, double y, double z, float partialTicks) {
             /* Start of Aymeric's network debug */
             GlStateManager.pushMatrix();
             {
-                GlStateManager.translate(-entity.posX, -entity.posY, -entity.posZ);
-
-                SynchronizedVariable<?> variable = entity.getNetwork().getInputSyncVars().get(SynchronizedVariablesRegistry.getSyncVarRegistry().get(PosSynchronizedVariable.NAME));
-                if (!(variable instanceof DebugPosSynchronizedVariable))
-                    return; //wtf
-                Vector3f clientPos = ((DebugPosSynchronizedVariable) variable).clientPos;
-                if (clientPos != null) {
-                    GlStateManager.pushMatrix();
-                    {
-                        GlStateManager.translate(clientPos.x, clientPos.y, clientPos.z);
-                        com.jme3.math.Quaternion clientRot = ((DebugPosSynchronizedVariable) variable).clientRot;
-                        GlStateManager.rotate(new Quaternion(clientRot.getX(), clientRot.getY(), clientRot.getZ(), clientRot.getW()));
-                        try {
-                            for (PartShape partShape : entity.getPackInfo().getPartShapes()) {
-                                RenderGlobal.drawBoundingBox(
-                                        (partShape.getPosition().x - partShape.getScale().x),
-                                        (partShape.getPosition().y - partShape.getScale().y),
-                                        (partShape.getPosition().z - partShape.getScale().z),
-                                        (partShape.getPosition().x + partShape.getScale().x),
-                                        (partShape.getPosition().y + partShape.getScale().y),
-                                        (partShape.getPosition().z + partShape.getScale().z),
-                                        1, 0, 1, 1);
-                            }
-                        } catch (ConcurrentModificationException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    GlStateManager.popMatrix();
-                }
-                Vector3f serverPos = ((DebugPosSynchronizedVariable) variable).serverPos;
-                if (serverPos != null) {
-                    GlStateManager.pushMatrix();
-                    {
-                        GlStateManager.translate(serverPos.x, serverPos.y, serverPos.z);
-                        com.jme3.math.Quaternion serverRot = ((DebugPosSynchronizedVariable) variable).serverRot;
-                        GlStateManager.rotate(new Quaternion(serverRot.getX(), serverRot.getY(), serverRot.getZ(), serverRot.getW()));
-                        try {
-                            for (PartShape<?> partShape : entity.getPackInfo().getPartShapes()) {
-                                RenderGlobal.drawBoundingBox(
-                                        (partShape.getPosition().x - partShape.getScale().x),
-                                        (partShape.getPosition().y - partShape.getScale().y),
-                                        (partShape.getPosition().z - partShape.getScale().z),
-                                        (partShape.getPosition().x + partShape.getScale().x),
-                                        (partShape.getPosition().y + partShape.getScale().y),
-                                        (partShape.getPosition().z + partShape.getScale().z),
-                                        1, 1, 0, 1);
-                            }
-                        } catch (ConcurrentModificationException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    GlStateManager.popMatrix();
+                Vector3f pos = entity.physicsPosition;
+                Vector3f serverPos = ((ClientPhysicsEntitySynchronizer)entity.getSynchronizer()).getServerPos();
+                if(serverPos != null) {
+                    GlStateManager.translate(- pos.x + serverPos.x, - pos.y + serverPos.y, - pos.z + serverPos.z);
+                    Quaternion q = GlQuaternionPool.get(((ClientPhysicsEntitySynchronizer<? extends PhysicsEntity<?>>) entity.getSynchronizer()).getServerRotation());
+                    GlStateManager.rotate(q);
+                    GlStateManager.color(entity.getSynchronizer().getSimulationHolder() == SimulationHolder.DRIVER ? 0.9f : 0.1f, 0.1f, 0.8f, 0.3f);
+                    renderer.renderMain(entity, partialTicks);
+                    renderer.renderParts(entity, partialTicks);
+                    GlStateManager.color(1, 1, 1, 1);
                 }
             }
             GlStateManager.popMatrix();
@@ -474,7 +429,7 @@ public class VehicleDebugRenderer {
         }
 
         @Override
-        public void render(BaseVehicleEntity<?> entity, double x, double y, double z, float partialTicks) {
+        public void render(BaseVehicleEntity<?> entity, RenderPhysicsEntity<BaseVehicleEntity<?>> renderer, double x, double y, double z, float partialTicks) {
             MutableBoundingBox box = new MutableBoundingBox();
             for (PartSeat seat : entity.getPackInfo().getPartsByType(PartSeat.class)) {
                 seat.getBox(box);

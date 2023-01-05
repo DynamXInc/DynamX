@@ -35,7 +35,7 @@ public class DynamXDebugOptions {
             TRAILER_ATTACH_POINTS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Trailer attach points").withSubCategory(VehicleDebugTypes.ATTACH_POINTS.title),
             PROPS_CONTAINERS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Props container boxes").withSubCategory(VehicleDebugTypes.OTHER.title),
             DOOR_ATTACH_POINTS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Door attach points").withSubCategory(VehicleDebugTypes.ATTACH_POINTS.title),
-            LATE_NETWORK = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Network sync").withDescription("Renders past server and client positions of the vehicle. Requires Full network debug.").withSubCategory(VehicleDebugTypes.OTHER.title),
+            //LATE_NETWORK = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Network sync").withDescription("Renders past server and client positions of the vehicle. Requires Full network debug.").withSubCategory(VehicleDebugTypes.OTHER.title),
             CAMERA_RAYCAST = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Camera").withDescription("Debug for the camera raycast").withSubCategory(VehicleDebugTypes.OTHER.title),
             FULL_NETWORK_DEBUG = DynamXDebugOption.newServerDependantOption(DebugCategories.VEHICLES, "Full network debug").withDescription("Enables network debug functions, may produce lag").withSubCategory(VehicleDebugTypes.OTHER.title),
             WHEEL_ADVANCED_DATA = DynamXDebugOption.newServerDependantOption(DebugCategories.VEHICLES, "Sync wheel advanced data").withDescription("WIP - Has no effects except more network usage").withSubCategory(VehicleDebugTypes.OTHER.title);

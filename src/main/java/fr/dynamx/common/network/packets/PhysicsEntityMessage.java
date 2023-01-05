@@ -2,6 +2,7 @@ package fr.dynamx.common.network.packets;
 
 import fr.dynamx.api.network.EnumNetworkType;
 import fr.dynamx.api.network.IDnxPacket;
+import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.network.sync.MessageSeatsSync;
@@ -50,45 +51,39 @@ public abstract class PhysicsEntityMessage<T extends PhysicsEntityMessage> imple
         entityId = buf.readInt();
     }
 
-    /**
-     * @return A unique id for the packet, used to handle the packet (can be different from the forge's network system id)
-     */
-    public abstract int getMessageId();
-
     @Override
     public IMessage onMessage(PhysicsEntityMessage message, MessageContext ctx) {
-        if (message.entityId == -1)
-            throw new IllegalArgumentException("EntityId isn't valid, maybe you don't call fromBytes and toBytes " + message);
-        if (ctx.side.isClient()) {
-            clientSchedule(() -> processMessage(message, getClientPlayer()));
+        if(ctx.side.isClient()) {
+            clientSchedule(() -> processMessage(ctx.side, message, getClientPlayer()));
         } else {
-            DynamXContext.getPhysicsWorld().schedule(() -> processMessage(message, ctx.getServerHandler().player));
+            DynamXContext.getPhysicsWorld(ctx.getServerHandler().player.world).schedule(() -> processMessage(ctx.side, message, ctx.getServerHandler().player));
         }
         return null;
     }
 
     @Override
     public void handleUDPReceive(EntityPlayer context, Side side) {
-        if (entityId == -1)
-            throw new IllegalArgumentException("EntityId isn't valid, maybe you don't call fromBytes and toBytes " + this);
-        //Entity ent = context.world.getEntityByID(entityId);
-        //if(this instanceof MessageBulletEntitySync)
-        //  System.out.println("UDP receive at "+ent.ticksExisted+" with data "+((SynchronizedVariable.Pos)((MessageBulletEntitySync)this).varsToSync.get(SynchronizedVariablesRegistry.POS)).simulationTimeClient+" "+((SynchronizedVariable.Pos)((MessageBulletEntitySync)this).varsToSync.get(SynchronizedVariablesRegistry.POS)).simulationTimeServer);
-        if (side.isClient()) {
-            clientSchedule(() -> processMessage(this, context));
-        } else {
-            DynamXContext.getPhysicsWorld().schedule(() -> processMessage(this, context));
+        processMessage(side, this, context);
+    }
+
+    protected void processMessage(Side side, PhysicsEntityMessage<?> message, EntityPlayer player) {
+        if (message.entityId == -1)
+            throw new IllegalArgumentException("EntityId isn't valid, maybe you don't call fromBytes and toBytes " + message);
+        Entity ent = player.world.getEntityByID(message.entityId);
+        if (ent instanceof PhysicsEntity) {
+            if (side.isClient()) {
+                processMessageClient(message, (PhysicsEntity<?>) ent, player);
+            } else {
+                processMessageServer(message, (PhysicsEntity<?>) ent, player);
+            }
+        } else if (message instanceof MessageSeatsSync || DynamXConfig.enableDebugTerrainManager) {
+            log.warn("PhysicsEntity with id " + message.entityId + " not found for message with type " + message + " sent from " + player);
         }
     }
 
-    protected void processMessage(PhysicsEntityMessage<?> message, EntityPlayer player) {
-        Entity ent = player.world.getEntityByID(message.entityId);
-        if (ent instanceof PhysicsEntity) {
-            ((PhysicsEntity<?>) ent).getNetwork().processPacket(message);
-        } else if (message instanceof MessageSeatsSync || DynamXConfig.enableDebugTerrainManager) {
-            log.warn("PhysicsEntity with id " + message.entityId + " not found for message with type " + message.getMessageId() + " sent from " + player);
-        }
-    }
+    @SideOnly(Side.CLIENT)
+    protected abstract void processMessageClient(PhysicsEntityMessage<?> message, PhysicsEntity<?> entity, EntityPlayer player);
+    protected abstract void processMessageServer(PhysicsEntityMessage<?> message, PhysicsEntity<?> entity, EntityPlayer player);
 
     @SideOnly(Side.CLIENT)
     protected EntityPlayer getClientPlayer() {
@@ -97,8 +92,9 @@ public abstract class PhysicsEntityMessage<T extends PhysicsEntityMessage> imple
 
     @SideOnly(Side.CLIENT)
     protected void clientSchedule(Runnable task) {
-        if (getPreferredNetwork() != EnumNetworkType.VANILLA_TCP && DynamXContext.getPhysicsWorld() != null) { //If initialized, and not a "vanilla packet" (vanilla packet does not always concern physics, like seats)
-            DynamXContext.getPhysicsWorld().schedule(task);
+        IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(getClientPlayer().world);
+        if (getPreferredNetwork() != EnumNetworkType.VANILLA_TCP && physicsWorld != null) { //If initialized, and not a "vanilla packet" (vanilla packet does not always concern physics, like seats)
+            physicsWorld.schedule(task);
         } else {
             Minecraft.getMinecraft().addScheduledTask(task);
         }

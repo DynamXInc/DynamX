@@ -15,6 +15,7 @@ import fr.dynamx.common.items.DynamXItemRegistry;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXReflection;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -25,8 +26,8 @@ public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A e
 
     @PackFileProperty(configNames = {"CreativeTabName", "CreativeTab", "TabName"}, required = false, defaultValue = "CreativeTab of DynamX", description = "common.creativetabname")
     protected String creativeTabName;
-    @PackFileProperty(configNames = "Model", description = "common.model", defaultValue = "obj/name_of_vehicle/name_of_model.obj")
-    protected String model;
+    @PackFileProperty(configNames = "Model", type = DefinitionType.DynamXDefinitionTypes.DYNX_RESOURCE_LOCATION, description = "common.model", defaultValue = "obj/name_of_vehicle/name_of_model.obj")
+    protected ResourceLocation model;
     @PackFileProperty(configNames = "ItemScale", required = false, description = "common.itemscale", defaultValue = "0.9")
     protected float itemScale = 0.9f;
     @PackFileProperty(configNames = "ItemTranslate", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false, defaultValue = "0 0 0")
@@ -57,11 +58,11 @@ public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A e
     }
 
     @Override
-    public String getModel() {
+    public ResourceLocation getModel() {
         return model;
     }
 
-    public void setModel(String model) {
+    public void setModel(ResourceLocation model) {
         this.model = model;
     }
 

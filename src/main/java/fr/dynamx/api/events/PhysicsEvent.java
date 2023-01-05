@@ -1,5 +1,6 @@
 package fr.dynamx.api.events;
 
+import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.physics.terrain.chunk.ChunkCollisions;
@@ -19,7 +20,7 @@ public class PhysicsEvent extends Event {
     /**
      * Fired when an entity is added to the physics world
      */
-    public static class PhysicsEntityAddedEvent extends PhysicsEvent {
+    public static class PhysicsEntityAdded extends PhysicsEvent {
 
         @Getter
         private final PhysicsEntity<?> physicsEntity;
@@ -28,7 +29,7 @@ public class PhysicsEvent extends Event {
          * @param physicsEntity the physics entity which was added
          * @param physicsWorld  the physics world where the physics entity was added
          */
-        public PhysicsEntityAddedEvent(PhysicsEntity<?> physicsEntity, IPhysicsWorld physicsWorld) {
+        public PhysicsEntityAdded(PhysicsEntity<?> physicsEntity, IPhysicsWorld physicsWorld) {
             super(physicsWorld);
             this.physicsEntity = physicsEntity;
         }
@@ -37,7 +38,7 @@ public class PhysicsEvent extends Event {
     /**
      * Fired when an entity is removed from the physics world
      */
-    public static class PhysicsEntityRemovedEvent extends PhysicsEvent {
+    public static class PhysicsEntityRemoved extends PhysicsEvent {
 
         @Getter
         private final PhysicsEntity<?> physicsEntity;
@@ -46,7 +47,7 @@ public class PhysicsEvent extends Event {
          * @param physicsEntity the physics entity which was removed
          * @param physicsWorld  the physics world where the physics entity was removed
          */
-        public PhysicsEntityRemovedEvent(PhysicsEntity<?> physicsEntity, IPhysicsWorld physicsWorld) {
+        public PhysicsEntityRemoved(PhysicsEntity<?> physicsEntity, IPhysicsWorld physicsWorld) {
             super(physicsWorld);
             this.physicsEntity = physicsEntity;
         }
@@ -55,7 +56,7 @@ public class PhysicsEvent extends Event {
     /**
      * Called on physics world update
      */
-    public static class StepSimulationEvent extends PhysicsEvent {
+    public static class StepSimulation extends PhysicsEvent {
         @Getter
         private final float deltaTime;
 
@@ -63,7 +64,7 @@ public class PhysicsEvent extends Event {
          * @param physicsWorld The physics world where the simulation took place
          * @param deltaTime    The time that was simulated
          */
-        public StepSimulationEvent(IPhysicsWorld physicsWorld, float deltaTime) {
+        public StepSimulation(IPhysicsWorld physicsWorld, float deltaTime) {
             super(physicsWorld);
             this.deltaTime = deltaTime;
         }
@@ -79,38 +80,22 @@ public class PhysicsEvent extends Event {
     }
 
     /**
-     * Called when the state of a ChunkCollision has changed, see {@link EnumChunkCollisionsState}
+     * Called when a collision occurs in the physics engine
      */
-    public static class ChunkCollisionsStateEvent extends PhysicsEvent {
+    public static class PhysicsCollision extends PhysicsEvent {
         @Getter
-        private final ChunkCollisions collisions;
-        @Getter
-        private final EnumChunkCollisionsState oldState;
+        private final BulletShapeType<?> object1, object2;
 
         /**
-         * Called when the state of a ChunkCollision has changed, see {@link EnumChunkCollisionsState}
          *
-         * @param physicsWorld The physics world owning this chunk
-         * @param collisions   The chunk (16*16*16 area)
-         * @param oldState     The old state of the chunk
+         * @param world     The physics world owning this chunk
+         * @param object1   First collision object colliding with the second
+         * @param object2   Second collision object colliding with the first
          */
-        public ChunkCollisionsStateEvent(IPhysicsWorld physicsWorld, ChunkCollisions collisions, EnumChunkCollisionsState oldState) {
-            super(physicsWorld);
-            this.collisions = collisions;
-            this.oldState = oldState;
+        public PhysicsCollision(IPhysicsWorld world, BulletShapeType<?> object1, BulletShapeType<?> object2){
+            super(world);
+            this.object1 = object1;
+            this.object2 = object2;
         }
     }
-
-   /*
-    public static class PhysicsCollisionEvent extends PhysicsEvent
-    {
-        @Getter private final BulletShapeType<?> object1, object2;
-
-        public PhysicsCollisionEvent(IPhysicsWorld world, BulletShapeType<?> o1, BulletShapeType<?> o2){
-            super(world);
-            object1 = o1;
-            object2 = o2;
-            System.out.println("Cogne "+o1+" "+o2);
-        }
-    }*/
 }

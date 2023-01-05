@@ -36,6 +36,7 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
     @Override
     public void render(T te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
         if (te.getBlockObjectInfo() != null && te.getBlockType() instanceof DynamXBlock) { //the instanceof fixes a crash
+            Vector3fPool.openPool();
             if (!MinecraftForge.EVENT_BUS.post(new DynamXBlockEvent.RenderTileEntity((DynamXBlock<?>) te.getBlockType(), getWorld(), te, this, x, y, z, partialTicks, destroyStage, alpha, EventStage.PRE))) {
                 GlStateManager.pushMatrix();
                 applyTransform(te, x, y, z);
@@ -58,6 +59,7 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
             if (shouldRenderDebug()) {
                 renderDebug(te, x, y, z);
             }
+            Vector3fPool.closePool();
         }
     }
 

@@ -106,7 +106,7 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
         PhysicsRigidBody doorBody = DynamXPhysicsHelper.fastCreateRigidBody(vehicleEntity, 40, doorShape, doorPos, vehicleEntity.getPhysicsHandler().getSpawnRotationAngle());
         localVarContainer.setDoorBody(doorBody);
         doorBody.setUserObject(new BulletShapeType<>(EnumBulletShapeType.BULLET_ENTITY, localVarContainer));
-        DynamXContext.getPhysicsWorld().addCollisionObject(doorBody);
+        DynamXContext.getPhysicsWorld(vehicleEntity.world).addCollisionObject(doorBody);
 
         attachedDoors.forEach((doorId, doorVarContainer) -> {
             doorBody.addToIgnoreList(doorVarContainer.doorBody);
@@ -280,7 +280,7 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
     public void onRemovedFromWorld() {
         if (DynamXMain.proxy.shouldUseBulletSimulation(vehicleEntity.world)) {
             for (DoorVarContainer body : cachedAttachedDoors.values())
-                DynamXContext.getPhysicsWorld().removeCollisionObject(body.doorBody);
+                DynamXContext.getPhysicsWorld(vehicleEntity.world).removeCollisionObject(body.doorBody);
             cachedAttachedDoors.clear();
         }
     }

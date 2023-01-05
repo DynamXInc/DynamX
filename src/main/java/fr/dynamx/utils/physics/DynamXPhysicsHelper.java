@@ -18,6 +18,7 @@ import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.World;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -75,10 +76,9 @@ public class DynamXPhysicsHelper {
         return createRigidBody(mass, bodyTransform, collisionShape, new BulletShapeType<>(EnumBulletShapeType.BULLET_ENTITY, physicsEntity));
     }
 
-    public static PhysicsRaycastResult castRay(Vector3f from, Vector3f dir, Predicate<EnumBulletShapeType> ignoredBody) {
+    public static PhysicsRaycastResult castRay(IPhysicsWorld iPhysicsWorld, Vector3f from, Vector3f dir, Predicate<EnumBulletShapeType> ignoredBody) {
         Vector3fPool.openPool();
         List<PhysicsRayTestResult> results = new LinkedList<>();
-        IPhysicsWorld iPhysicsWorld = DynamXContext.getPhysicsWorld();
         if(iPhysicsWorld != null) {
             iPhysicsWorld.getDynamicsWorld().rayTest(from, dir, results);
         }

@@ -4,6 +4,7 @@ import fr.aym.acslib.services.impl.thrload.DynamXThreadedModLoader;
 import fr.dynamx.api.network.EnumNetworkType;
 import fr.dynamx.api.network.IDnxPacket;
 import fr.dynamx.api.physics.terrain.ITerrainElement;
+import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.physics.terrain.cache.RemoteTerrainCache;
 import fr.dynamx.utils.VerticalChunkPos;
@@ -11,6 +12,8 @@ import fr.dynamx.utils.debug.Profiler;
 import io.netty.buffer.ByteBuf;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -89,11 +92,12 @@ public class MessageChunkData implements IDnxPacket {
         private final ExecutorService POOL = Executors.newFixedThreadPool(2, new DynamXThreadedModLoader.DefaultThreadFactory("DnxCliCollsLoader"));
 
         @Override
+        @SideOnly(Side.CLIENT)
         public IDnxPacket onMessage(MessageChunkData message, MessageContext ctx) {
             POOL.submit(() -> {
                 Profiler profiler = Profiler.get();
                 profiler.start(Profiler.Profiles.TERRAIN_LOADER_TICK);
-                ((RemoteTerrainCache) DynamXContext.getPhysicsWorld().getTerrainManager().getCache()).receiveChunkData(message.pos, message.dataType[0], message.dataType[1], message.data);
+                ((RemoteTerrainCache) DynamXContext.getPhysicsWorld(ClientEventHandler.MC.world).getTerrainManager().getCache()).receiveChunkData(message.pos, message.dataType[0], message.dataType[1], message.data);
                 profiler.end(Profiler.Profiles.TERRAIN_LOADER_TICK);
                 profiler.update();
                 if (profiler.isActive()) //Profiling

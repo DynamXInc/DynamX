@@ -2,6 +2,7 @@ package fr.dynamx.client.handlers;
 
 import fr.aym.acsguis.api.ACsGuiApi;
 import fr.aym.acslib.ACsLib;
+import fr.aym.mps.ModProtectionSystem;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.events.VehicleEntityEvent;
@@ -81,14 +82,6 @@ public class ClientEventHandler {
     /* World events */
 
     @SubscribeEvent
-    public void onWorldLoaded(WorldEvent.Load event) {
-        //FIXME SOLO : SIMPLIFY CONDITION
-        if (DynamXContext.getPhysicsWorld() == null && event.getWorld().provider.getDimension() == 0 && ((DynamXConfig.clientOwnsPhysicsInSolo && event.getWorld().isRemote) || FMLCommonHandler.instance().getMinecraftServerInstance() == null)) {
-            DynamXContext.setPhysicsWorld(DynamXMain.proxy.provideClientPhysicsWorld(event.getWorld()));
-        }
-    }
-
-    @SubscribeEvent
     public void onWorldUnloaded(WorldEvent.Unload event) {
         if (event.getWorld().isRemote) {
             ClientProxy.SOUND_HANDLER.unload();
@@ -137,7 +130,7 @@ public class ClientEventHandler {
 
     @SubscribeEvent
     public void initMainMenu(GuiScreenEvent.InitGuiEvent.Post event) {
-        if (event.getGui() instanceof GuiMainMenu && DynamXErrorManager.getErrorManager().hasErrors(ACsLib.getPlatform().getACsLibErrorCategory(), DynamXErrorManager.INIT_ERRORS, DynamXErrorManager.PACKS__ERRORS, DynamXErrorManager.MODEL_ERRORS, ACsGuiApi.getCssErrorType()))
+        if (event.getGui() instanceof GuiMainMenu && DynamXErrorManager.getErrorManager().hasErrors(ACsLib.getPlatform().getACsLibErrorCategory(), DynamXErrorManager.INIT_ERRORS, DynamXErrorManager.PACKS__ERRORS, DynamXErrorManager.MODEL_ERRORS, ACsGuiApi.getCssErrorType(), ModProtectionSystem.getMpsErrorCategory()))
             event.getButtonList().add(new GuiTexturedButton(-54391, event.getGui().width - 25, 5, 20, 20, TextFormatting.GOLD + "DynamX loading errors" + TextFormatting.RESET, new ResourceLocation(DynamXConstants.ID, "textures/mark.png")));
         else if (event.getGui() instanceof GuiMainMenu && DynamXErrorManager.getErrorManager().hasErrors(DynamXErrorManager.UPDATES)) //TODO MAJ INFO BUTTON
             event.getButtonList().add(new GuiButton(-54391, event.getGui().width / 2 - 110, event.getGui().height - 30, 220, 20, TextFormatting.AQUA + "Mise à jour DynamX disponible !" + TextFormatting.RESET));
@@ -330,50 +323,51 @@ public class ClientEventHandler {
                 CameraSystem.drawDebug();
             }
         }
+        renderBigEntities((float) partialTicks);
+    }
 
+    private static void renderBigEntities(float partialTicks) {
         boolean setup = false;
         Entity entity = MC.getRenderViewEntity();
         ICamera icamera = null;
         double d0 = 0, d1 = 0, d2 = 0;
 
-        for (PhysicsEntity<?> entityp : MC.world.getEntities(PhysicsEntity.class, e -> true)) {
-            if (!entityp.wasRendered && entityp.isRidingOrBeingRiddenBy(entity)) {
-                if (!setup) {
-                    GlStateManager.pushMatrix();
-                    RenderHelper.enableStandardItemLighting();
-                    MC.entityRenderer.enableLightmap();
-                    icamera = new Frustum();
+        for (Entity e : MC.world.loadedEntityList) {
+            if(e instanceof PhysicsEntity) {
+                if (!((PhysicsEntity<?>) e).wasRendered) {
+                    if (!setup) {
+                        GlStateManager.pushMatrix();
+                        RenderHelper.enableStandardItemLighting();
+                        MC.entityRenderer.enableLightmap();
+                        icamera = new Frustum();
 
-                    d0 = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks;
-                    d1 = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks;
-                    d2 = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks;
-                    icamera.setPosition(d0, d1, d2);
+                        d0 = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks;
+                        d1 = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks;
+                        d2 = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks;
+                        icamera.setPosition(d0, d1, d2);
 
-                    d0 = entity.prevPosX + (entity.posX - entity.prevPosX) * partialTicks;
-                    d1 = entity.prevPosY + (entity.posY - entity.prevPosY) * partialTicks;
-                    d2 = entity.prevPosZ + (entity.posZ - entity.prevPosZ) * partialTicks;
-                    setup = true;
+                        d0 = entity.prevPosX + (entity.posX - entity.prevPosX) * partialTicks;
+                        d1 = entity.prevPosY + (entity.posY - entity.prevPosY) * partialTicks;
+                        d2 = entity.prevPosZ + (entity.posZ - entity.prevPosZ) * partialTicks;
+                        setup = true;
+                    }
+                    boolean flag = MC.getRenderManager().shouldRender(e, icamera, d0, d1, d2) || e.isRidingOrBeingRiddenBy(MC.player);
+
+                    if (flag) {
+                        boolean flag1 = MC.getRenderViewEntity() instanceof EntityLivingBase && ((EntityLivingBase) MC.getRenderViewEntity()).isPlayerSleeping();
+
+                        if ((e != MC.getRenderViewEntity() || MC.gameSettings.thirdPersonView != 0 || flag1) && (e.posY < 0.0D || e.posY >= 256.0D || MC.world.isBlockLoaded(e.getPosition()))) {
+                            MC.getRenderManager().renderEntityStatic(e, partialTicks, false);
+                        }
+                    }
                 }
-                tryRenderEntity(entityp, icamera, d0, d1, d2, (float) partialTicks);
+                ((PhysicsEntity<?>) e).wasRendered = false;
             }
-            entityp.wasRendered = false;
         }
         if (setup) {
             MC.entityRenderer.disableLightmap();
             RenderHelper.disableStandardItemLighting();
             GlStateManager.popMatrix();
-        }
-    }
-
-    private static void tryRenderEntity(Entity entity2, ICamera camera, double d0, double d1, double d2, float partialTicks) {
-        boolean flag = MC.getRenderManager().shouldRender(entity2, camera, d0, d1, d2) || entity2.isRidingOrBeingRiddenBy(MC.player);
-
-        if (flag) {
-            boolean flag1 = MC.getRenderViewEntity() instanceof EntityLivingBase && ((EntityLivingBase) MC.getRenderViewEntity()).isPlayerSleeping();
-
-            if ((entity2 != MC.getRenderViewEntity() || MC.gameSettings.thirdPersonView != 0 || flag1) && (entity2.posY < 0.0D || entity2.posY >= 256.0D || MC.world.isBlockLoaded(entity2.getPosition()))) {
-                MC.getRenderManager().renderEntityStatic(entity2, partialTicks, false);
-            }
         }
     }
 

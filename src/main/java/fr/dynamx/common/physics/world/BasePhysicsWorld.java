@@ -41,7 +41,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public abstract class BasePhysicsWorld implements IPhysicsWorld {
     protected final PhysicsSoftSpace dynamicsWorld;
-    protected final ITerrainManager manager;
+    protected final PhysicsWorldTerrain manager;
     protected final World mcWorld;
 
     protected final Set<PhysicsJoint> joints = new HashSet<>();
@@ -63,6 +63,7 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
         Vector3f max = new Vector3f(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
 
         PhysicsSpace.BroadphaseType bPhase = PhysicsSpace.BroadphaseType.DBVT;
+        IPhysicsWorld physicsWorld = this;
         dynamicsWorld = new PhysicsSoftSpace(min, max, bPhase) {
             @Override
             public void onContactStarted(long manifoldId) {
@@ -72,7 +73,7 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
             @Override
             public void onContactProcessed(PhysicsCollisionObject pcoA, PhysicsCollisionObject pcoB, long contactPointId) {
                 // memory leak fix : don't call super method : bullets stores all collision events in a queue
-                CollisionsHandler.handleCollision(new PhysicsCollisionEvent(pcoA, pcoB, contactPointId), (BulletShapeType<?>) pcoA.getUserObject(), (BulletShapeType<?>) pcoB.getUserObject());
+                CollisionsHandler.handleCollision(physicsWorld,new PhysicsCollisionEvent(pcoA, pcoB, contactPointId), (BulletShapeType<?>) pcoA.getUserObject(), (BulletShapeType<?>) pcoB.getUserObject());
             }
 
             @Override
@@ -217,7 +218,7 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
     }
 
     @Override
-    public ITerrainManager getTerrainManager() {
+    public PhysicsWorldTerrain getTerrainManager() {
         return manager;
     }
 
@@ -255,6 +256,6 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
         entities.clear();
         joints.clear();
         getTerrainManager().onWorldUnload();
-        DynamXContext.setPhysicsWorld(null);
+        DynamXContext.getPhysicsWorldPerDimensionMap().remove(mcWorld.provider.getDimension());
     }
 }

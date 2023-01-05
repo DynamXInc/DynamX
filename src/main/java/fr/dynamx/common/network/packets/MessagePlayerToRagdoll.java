@@ -49,7 +49,7 @@ public class MessagePlayerToRagdoll implements IDnxPacket, IMessageHandler<Messa
         player.setInvisible(true);
         player.world.spawnEntity(ragdollEntity);
         DynamXContext.getPlayerToCollision().get(player).ragdollEntity = ragdollEntity;
-        DynamXContext.getPlayerToCollision().get(player).removeFromWorld(false);
+        DynamXContext.getPlayerToCollision().get(player).removeFromWorld(false, player.world);
         Vector3fPool.closePool();
         return null;
     }

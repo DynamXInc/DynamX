@@ -32,9 +32,9 @@ import fr.dynamx.common.network.SPPhysicsEntityNetHandler;
 import fr.dynamx.common.network.udp.CommandUdp;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.world.BuiltinThreadedPhysicsWorld;
+import fr.dynamx.utils.DynamXLoadingTasks;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.errors.DynamXErrorManager;
-import fr.dynamx.utils.DynamXLoadingTasks;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IResourceManager;
@@ -174,8 +174,10 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
     }
 
     @Override
-    public IPhysicsWorld provideClientPhysicsWorld(World world) {
-        return new BuiltinThreadedPhysicsWorld(world, !ClientEventHandler.MC.isSingleplayer());
+    public void providePhysicsWorld(World world) {
+        if (DynamXContext.getPhysicsWorldPerDimensionMap().containsKey(world.provider.getDimension()))
+            throw new IllegalStateException("Physics world of " + world + " is already loaded !");
+        DynamXContext.getPhysicsWorldPerDimensionMap().put(world.provider.getDimension(), new BuiltinThreadedPhysicsWorld(world, !ClientEventHandler.MC.isSingleplayer()));
     }
 
     private byte loadingState;

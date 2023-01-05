@@ -15,10 +15,6 @@ import net.minecraft.world.World;
 public class ItemTrailer extends ItemModularEntity {
     public ItemTrailer(ModularVehicleInfo modularVehicleInfo) {
         super(modularVehicleInfo);
-        if (getInfo().getPartsByType(PartWheel.class).isEmpty())
-            DynamXErrorManager.addPackError(getInfo().getPackName(), "config_error", ErrorLevel.FATAL, getInfo().getName(),  "This trailer has no wheels !");
-        if (getInfo().getSubPropertyByType(TrailerAttachInfo.class) == null)
-            DynamXErrorManager.addPackError(getInfo().getPackName(), "config_error", ErrorLevel.FATAL, getInfo().getName(),  "Missing trailer config !");
     }
 
     @Override

@@ -17,7 +17,6 @@ import lombok.ToString;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraftforge.client.MinecraftForgeClient;
@@ -119,13 +118,13 @@ public class ObjObjectRenderer {
     public void render(ObjModelRenderer model, byte textureVariantID) {
         if (objObjectData.getMesh().materials.isEmpty() || !modelRenderData.containsKey((byte) 0))
             return;
-        if (OpenGlHelper.useVbo()) {
-            setupVAO();
-            if (!modelRenderData.containsKey(textureVariantID))
-                renderVAO(model, modelRenderData.get((byte) 0));
-            else
-                renderVAO(model, modelRenderData.get(textureVariantID));
-        } else {
+        //if (OpenGlHelper.useVbo()) {
+        setupVAO();
+        if (!modelRenderData.containsKey(textureVariantID))
+            renderVAO(model, modelRenderData.get((byte) 0));
+        else
+            renderVAO(model, modelRenderData.get(textureVariantID));
+      /*  }else {
             if (!modelRenderData.containsKey(textureVariantID)) {
                 GlStateManager.color(1, 0, 0);
                 GlStateManager.callList(modelRenderData.get((byte) 0).displayListId);
@@ -133,7 +132,7 @@ public class ObjObjectRenderer {
             } else
                 GlStateManager.callList(modelRenderData.get(textureVariantID).displayListId);
             GlStateManager.bindTexture(ClientEventHandler.MC.getTextureMapBlocks().getGlTextureId());
-        }
+        }*/
     }
 
     private Material bindMaterial(ObjModelRenderer model, String materialName, @Nullable String baseVariantName, @Nullable String variantName, boolean areVbosEnabled) {

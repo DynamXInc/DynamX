@@ -55,7 +55,7 @@ public class MessagePickObject implements IDnxPacket, IMessageHandler<MessagePic
     @Override
     public IDnxPacket onMessage(MessagePickObject message, MessageContext ctx) {
         EntityPlayerMP player = ctx.getServerHandler().player;
-        DynamXContext.getPhysicsWorld().schedule(() -> PickingObjectHelper.handlePickingControl(message.moduleAction, player));
+        DynamXContext.getPhysicsWorld(player.world).schedule(() -> PickingObjectHelper.handlePickingControl(message.moduleAction, player));
         return null;
     }
 

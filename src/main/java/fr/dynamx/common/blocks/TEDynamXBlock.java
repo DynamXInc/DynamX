@@ -4,6 +4,7 @@ import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.aym.acsguis.api.ACsGuiApi;
+import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.events.DynamXBlockEvent;
 import fr.dynamx.client.gui.GuiBlockCustomization;
 import fr.dynamx.common.DynamXContext;
@@ -31,7 +32,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class TEDynamXBlock extends TileEntity implements ICollidableObject, ITickable {
+public class TEDynamXBlock extends TileEntity implements ICollidableObject, ITickable, IPackInfoReloadListener {
     private BlockObject<?> blockObjectInfo;
     private int rotation;
     private Vector3f relativeTranslation = new Vector3f(), relativeScale = new Vector3f(), relativeRotation = new Vector3f();
@@ -247,7 +248,7 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, ITic
         boundingBoxCache = null;
         unrotatedCollisionsCache.clear();
         if (world != null && DynamXContext.usesPhysicsWorld(world)) {
-            DynamXContext.getPhysicsWorld().getTerrainManager().onChunkChanged(new VerticalChunkPos(getPos().getX() >> 4, getPos().getY() >> 4, getPos().getZ() >> 4));
+            DynamXContext.getPhysicsWorld(world).getTerrainManager().onChunkChanged(new VerticalChunkPos(getPos().getX() >> 4, getPos().getY() >> 4, getPos().getZ() >> 4));
         }
         if (world != null) {
             DynamXChunkData data = world.getChunk(pos).getCapability(DynamXChunkDataProvider.DYNAM_X_CHUNK_DATA_CAPABILITY, null);
@@ -276,5 +277,10 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, ITic
     @Override
     public void update() {
         MinecraftForge.EVENT_BUS.post(new DynamXBlockEvent.TickTileEntity(Side.SERVER, (DynamXBlock<?>) this.getBlockType(), getWorld(), this));
+    }
+
+    @Override
+    public void onPackInfosReloaded() {
+        blockObjectInfo = DynamXObjectLoaders.BLOCKS.findInfo(blockObjectInfo.getFullName());
     }
 }

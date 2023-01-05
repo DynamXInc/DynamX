@@ -77,7 +77,7 @@ public class PhysicsWorldTerrain implements ITerrainManager {
     public PhysicsWorldTerrain(IPhysicsWorld physicsWorld, World world, boolean isRemoteWorld) {
         this.physicsWorld = physicsWorld;
         this.world = world;
-        this.terrainCache = isRemoteWorld ? new RemoteTerrainCache(world) : new FileTerrainCache();
+        this.terrainCache = isRemoteWorld ? new RemoteTerrainCache(world) : new FileTerrainCache(world);
         this.isDebug = DynamXConfig.enableDebugTerrainManager;
     }
 

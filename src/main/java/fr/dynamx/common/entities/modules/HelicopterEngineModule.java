@@ -1,38 +1,37 @@
 package fr.dynamx.common.entities.modules;
 
 import fr.dynamx.api.audio.EnumSoundState;
+import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.entities.modules.IEngineModule;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.IVehicleController;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent;
-import fr.dynamx.api.network.sync.SimulationHolder;
-import fr.dynamx.api.physics.entities.IEnginePhysicsHandler;
+import fr.dynamx.api.network.sync.EntityVariable;
+import fr.dynamx.api.network.sync.SynchronizationRules;
+import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
 import fr.dynamx.client.ClientProxy;
 import fr.dynamx.client.handlers.hud.HelicopterController;
 import fr.dynamx.client.sound.EngineSound;
 import fr.dynamx.common.contentpack.type.vehicle.EngineInfo;
+import fr.dynamx.common.contentpack.type.vehicle.HelicopterPhysicsInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.network.sync.vars.VehicleSynchronizedVariables;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.EnginePhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.HelicopterEnginePhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.engine.AutomaticGearboxHandler;
 import fr.dynamx.utils.optimization.Vector3fPool;
-import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static fr.dynamx.client.ClientProxy.SOUND_HANDLER;
@@ -44,13 +43,14 @@ import static fr.dynamx.client.ClientProxy.SOUND_HANDLER;
  * @see VehicleEntityProperties.EnumEngineProperties
  * @see EnginePhysicsHandler
  */
+@SynchronizedEntityVariable.SynchronizedPhysicsModule
 public class HelicopterEngineModule implements IEngineModule<AbstractEntityPhysicsHandler<?, ?>>, IPhysicsModule.IPhysicsUpdateListener, IPhysicsModule.IEntityUpdateListener {
     protected final BaseVehicleEntity<? extends BaseVehiclePhysicsHandler<?>> entity;
-    protected final EngineInfo engineInfo;
     protected HelicopterEnginePhysicsHandler physicsHandler;
 
     //Handbrake on spawn
-    private int controls = 2;
+    @SynchronizedEntityVariable(name = "pcontrols")
+    private EntityVariable<Integer> controls = new EntityVariable<>(SynchronizationRules.CONTROLS_TO_SPECTATORS, 2);
     private float power = 0;
 
 
@@ -67,11 +67,9 @@ public class HelicopterEngineModule implements IEngineModule<AbstractEntityPhysi
      */
     private float[] engineProperties = new float[VehicleEntityProperties.EnumEngineProperties.values().length];
 
-    public HelicopterEngineModule(BaseVehicleEntity<? extends BaseVehiclePhysicsHandler<?>> entity, EngineInfo engineInfo) {
+    public HelicopterEngineModule(BaseVehicleEntity<? extends BaseVehiclePhysicsHandler<?>> entity) {
         this.entity = entity;
-        this.engineInfo = engineInfo;
     }
-
     /**
      * These vars are automatically synchronised from server (or driver) to others
      *
@@ -82,16 +80,11 @@ public class HelicopterEngineModule implements IEngineModule<AbstractEntityPhysi
         return engineProperties;
     }
 
-    public float getEngineProperty(VehicleEntityProperties.EnumEngineProperties engineProperty){
+    public float getEngineProperty(VehicleEntityProperties.EnumEngineProperties engineProperty) {
         return engineProperties[engineProperty.ordinal()];
     }
 
-    public EngineInfo getEngineInfo() {
-        return engineInfo;
-    }
-
-    @Override
-    public IEnginePhysicsHandler getPhysicsHandler() {
+    public HelicopterEnginePhysicsHandler getPhysicsHandler() {
         return physicsHandler;
     }
 
@@ -104,41 +97,41 @@ public class HelicopterEngineModule implements IEngineModule<AbstractEntityPhysi
     }
 
     public boolean isAccelerating() {
-        return (EnginePhysicsHandler.inTestFullGo) || (isEngineStarted() && (controls & 1) == 1);
+        return (EnginePhysicsHandler.inTestFullGo) || (isEngineStarted() && (controls.get() & 1) == 1);
     }
 
     public boolean isHandBraking() {
-        return (controls & 2) == 2;
+        return (controls.get() & 2) == 2;
     }
 
     public boolean isReversing() {
-        return isEngineStarted() && (controls & 4) == 4;
+        return isEngineStarted() && (controls.get() & 4) == 4;
     }
 
     public boolean isTurningLeft() {
-        return (controls & 8) == 8;
+        return (controls.get() & 8) == 8;
     }
 
     public boolean isTurningRight() {
-        return (controls & 16) == 16;
+        return (controls.get() & 16) == 16;
     }
 
     @Override
     public void setEngineStarted(boolean started) {
         if (started) {
-            setControls(controls | 32);
+            setControls(controls.get() | 32);
         } else {
-            setControls((Integer.MAX_VALUE - 32) & controls);
+            setControls((Integer.MAX_VALUE - 32) & controls.get());
         }
     }
 
     @Override
     public boolean isEngineStarted() {
-        return (EnginePhysicsHandler.inTestFullGo) || ((controls & 32) == 32);
+        return (EnginePhysicsHandler.inTestFullGo) || ((controls.get() & 32) == 32);
     }
 
     public int getControls() {
-        return controls;
+        return controls.get();
     }
 
     /**
@@ -148,14 +141,14 @@ public class HelicopterEngineModule implements IEngineModule<AbstractEntityPhysi
     public void setControls(int controls) {
         if (entity.world.isRemote && entity.ticksExisted > 60 && !this.isEngineStarted() && (controls & 32) == 32)
             playStartingSound();
-        this.controls = controls;
+        this.controls.set(controls);
     }
 
     /**
      * Resets all controls except engine on/off state
      */
     public void resetControls() {
-        setControls(controls & 32 | (controls & 2));
+        setControls(controls.get() & 32 | (controls.get() & 2));
     }
 
     @Override
@@ -167,7 +160,7 @@ public class HelicopterEngineModule implements IEngineModule<AbstractEntityPhysi
     @Override
     public void readFromNBT(NBTTagCompound tag) {
         if (tag.getBoolean("isEngineStarted"))
-            setControls(controls | 32); //set engine on
+            setControls(controls.get() | 32); //set engine on
     }
 
     @Override
@@ -178,23 +171,24 @@ public class HelicopterEngineModule implements IEngineModule<AbstractEntityPhysi
     @Override
     public void initPhysicsEntity(AbstractEntityPhysicsHandler<?, ?> handler) {
         if (handler != null) {
-            physicsHandler = new HelicopterEnginePhysicsHandler(this, (BaseVehiclePhysicsHandler<?>) handler, ((BaseVehiclePhysicsHandler<?>) handler).getPropulsion());
+            physicsHandler = new HelicopterEnginePhysicsHandler(this, (BaseVehiclePhysicsHandler<?>) handler);
         }
     }
 
     @Override
     public void preUpdatePhysics(boolean simulatingPhysics) {
-        if(simulatingPhysics)
+        if (simulatingPhysics)
             physicsHandler.update();
     }
 
     @Override
     public void postUpdatePhysics(boolean simulatingPhysics) {
         if (simulatingPhysics) {
+            //TODO CLEAN
             this.engineProperties[VehicleEntityProperties.EnumEngineProperties.SPEED.ordinal()] = entity.physicsHandler.getSpeed(BaseVehiclePhysicsHandler.SpeedUnit.KMH);
-            this.engineProperties[VehicleEntityProperties.EnumEngineProperties.REVS.ordinal()] = physicsHandler.getEngine().getRevs();
+            //this.engineProperties[VehicleEntityProperties.EnumEngineProperties.REVS.ordinal()] = physicsHandler.getEngine().getRevs();
             //this.engineProperties[VehicleEntityProperties.EnumEngineProperties.MAXREVS.ordinal()] = physicEntity.getEngine().getMaxRevs();
-            this.engineProperties[VehicleEntityProperties.EnumEngineProperties.ACTIVE_GEAR.ordinal()] = physicsHandler.upForce;//physicsHandler.getGearBox().getActiveGearNum();
+            //this.engineProperties[VehicleEntityProperties.EnumEngineProperties.ACTIVE_GEAR.ordinal()] = physicsHandler.upForce;//physicsHandler.getGearBox().getActiveGearNum();
             //this.engineProperties[VehicleEntityProperties.EnumEngineProperties.MAXSPEED.ordinal()] = physicEntity.getGearBox().getMaxSpeed(Vehicle.SpeedUnit.KMH);
             //this.engineProperties[VehicleEntityProperties.EnumEngineProperties.POWER.ordinal()] = physicsHandler.getEngine().getPower();
             //this.engineProperties[VehicleEntityProperties.EnumEngineProperties.BRAKING.ordinal()] = physicsHandler.getEngine().getBraking();
@@ -206,12 +200,6 @@ public class HelicopterEngineModule implements IEngineModule<AbstractEntityPhysi
         if (entity.getControllingPassenger() == null) {
             resetControls();
         }
-    }
-
-    @Override
-    public void addSynchronizedVariables(Side side, SimulationHolder simulationHolder, List<ResourceLocation> variables) {
-        if (simulationHolder.isPhysicsAuthority(side) || simulationHolder.ownsControls(side))
-            variables.add(VehicleSynchronizedVariables.HelicopterControls.NAME);
     }
 
     //Sounds
@@ -227,7 +215,7 @@ public class HelicopterEngineModule implements IEngineModule<AbstractEntityPhysi
     @SideOnly(Side.CLIENT)
     private void playStartingSound() {
         boolean forInterior = Minecraft.getMinecraft().gameSettings.thirdPersonView == 0 && entity.isRidingOrBeingRiddenBy(Minecraft.getMinecraft().player);
-        ClientProxy.SOUND_HANDLER.playSingleSound(entity.physicsPosition, forInterior ? engineInfo.startingSoundInterior : engineInfo.startingSoundExterior, 1, 1);
+        //TODO ClientProxy.SOUND_HANDLER.playSingleSound(entity.physicsPosition, forInterior ? engineInfo.startingSoundInterior : engineInfo.startingSoundExterior, 1, 1);
     }
 
     @Override
@@ -238,9 +226,9 @@ public class HelicopterEngineModule implements IEngineModule<AbstractEntityPhysi
     @Override
     @SideOnly(Side.CLIENT)
     public void updateEntity() {
-        if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.UpdateVehicleSoundEntityEvent(entity, this, PhysicsEntityEvent.Phase.PRE))) {
+        if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.UpdateSounds(entity, this, PhysicsEntityEvent.Phase.PRE))) {
             if (entity.getPackInfo() != null) {
-                if (engineInfo != null && engineInfo.getEngineSounds() != null) {
+                /* todo if (engineInfo != null && engineInfo.getEngineSounds() != null) {
                     if (sounds.isEmpty()) { //Sounds are not initialized
                         engineInfo.getEngineSounds().forEach(engineSound -> sounds.put(engineSound.id, new EngineSound(engineSound, entity, this)));
                     }
@@ -273,9 +261,9 @@ public class HelicopterEngineModule implements IEngineModule<AbstractEntityPhysi
                             SOUND_HANDLER.stopSound(currentVehicleSound);
                         currentVehicleSound = lastVehicleSound = null;
                     }
-                }
+                }*/
             }
-            MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.UpdateVehicleSoundEntityEvent(entity, this, PhysicsEntityEvent.Phase.POST));
+            MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.UpdateSounds(entity, this, PhysicsEntityEvent.Phase.POST));
         }
     }
 }

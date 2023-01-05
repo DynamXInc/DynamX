@@ -1,6 +1,5 @@
 package fr.dynamx.api.entities.modules;
 
-import fr.dynamx.api.physics.entities.IEnginePhysicsHandler;
 import fr.dynamx.client.handlers.hud.CarController;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 
@@ -27,11 +26,6 @@ public interface IEngineModule<P extends AbstractEntityPhysicsHandler<?, ?>> ext
      * Sets the engine started state
      */
     void setEngineStarted(boolean started);
-
-    /**
-     * @return The physics of this engine
-     */
-    IEnginePhysicsHandler getPhysicsHandler();
 
     /**
      * Used for sync and {@link CarController}, currently hard coded

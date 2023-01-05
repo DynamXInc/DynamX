@@ -76,8 +76,8 @@ public class HelicopterController implements IVehicleController {
     public static void tickMouse(MouseEvent event) {
         if (MC.player.getRidingEntity() instanceof HelicopterEntity) {
             //System.out.println("Dx is " + event.getDx() + " Dy is " + event.getDy());
-            HelicopterEnginePhysicsHandler.AngleBack = event.getDx();
-            HelicopterEnginePhysicsHandler.AngleFront = event.getDy();
+            HelicopterEnginePhysicsHandler.dx = event.getDx();
+            HelicopterEnginePhysicsHandler.dy = event.getDy();
 
         }
     }
@@ -142,7 +142,7 @@ public class HelicopterController implements IVehicleController {
                 }
             }*/
 
-            MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.VehicleControllerUpdateEvent<>(entity, this));
+            MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.ControllerUpdate<>(entity, this));
             int controls = 0;
             if (accelerating)
                 controls = controls | 1;
@@ -166,82 +166,8 @@ public class HelicopterController implements IVehicleController {
     @SideOnly(Side.CLIENT)
     public GuiComponent<?> createHud() {
         GuiPanel panel = new GuiPanel();
-        float maxRpm = entity.getPackInfo().getSubPropertyByType(EngineInfo.class).getMaxRevs() + 3000; // todo CONFIGURABLE
         float scale = 90f / 300;
-        GuiPanel speed = new GuiPanel() {
-            private float prevRpm, rpm;
-
-            @Override
-            public void tick() {
-                super.tick();
-                prevRpm = rpm;
-                //Don't use modified maxRpm here
-                rpm = engine.getEngineProperty(VehicleEntityProperties.EnumEngineProperties.REVS) * entity.getPackInfo().getSubPropertyByType(EngineInfo.class).getMaxRevs();
-            }
-
-            @Override
-            public void drawBackground(int mouseX, int mouseY, float partialTicks) {
-                super.drawBackground(mouseX, mouseY, partialTicks);
-
-                GL11.glDisable(GL11.GL_SCISSOR_TEST);
-
-                ResourceLocation loc = new ResourceLocation(DynamXConstants.ID, "textures/waw.png");
-                Minecraft.getMinecraft().getTextureManager().bindTexture(loc);
-
-                GlStateManager.pushMatrix();
-                GlStateManager.translate(getScreenX(), getScreenY(), 0);
-
-                GlStateManager.scale(scale, scale, 1);
-
-                GlStateManager.enableTexture2D();
-                GL11.glColor4f(1, 1, 1, 1);
-
-                float curRpm = prevRpm + (this.rpm - this.prevRpm) * partialTicks;
-                float tierMaxRpm = maxRpm / 3;
-
-                float y = (curRpm * 300) / tierMaxRpm;
-                if (curRpm >= tierMaxRpm) {
-                    y = 300;
-                }
-
-                float f1 = 0.00390625F;
-                Tessellator tessellator = Tessellator.getInstance();
-                BufferBuilder bufferbuilder = tessellator.getBuffer();
-                bufferbuilder.begin(GL11.GL_TRIANGLE_FAN, DefaultVertexFormats.POSITION_TEX);
-                bufferbuilder.pos(150, 150, 0).tex(0.5, 0.5).endVertex();
-                bufferbuilder.pos(0, 300 - y, 0).tex(0, (300 - y) / 300).endVertex();
-                bufferbuilder.pos(0, 300, 0).tex(0, 300f / 300).endVertex();
-                tessellator.draw();
-
-                if (curRpm >= tierMaxRpm) {
-                    float x = ((curRpm - tierMaxRpm) * 300) / tierMaxRpm;
-                    if (curRpm >= tierMaxRpm * 2) {
-                        x = 300;
-                    }
-
-                    bufferbuilder.begin(GL11.GL_TRIANGLE_FAN, DefaultVertexFormats.POSITION_TEX);
-                    bufferbuilder.pos(150, 150, 0).tex(0.5, 0.5).endVertex();
-                    bufferbuilder.pos(x, 0, 0).tex(x / 300, 0).endVertex();
-                    bufferbuilder.pos(0, 0, 0).tex(0, 0).endVertex();
-                    tessellator.draw();
-                }
-
-                if (curRpm >= tierMaxRpm * 2) {
-                    y = ((curRpm - tierMaxRpm * 2) * 300) / tierMaxRpm;
-                    if (curRpm >= maxRpm) {
-                        y = 300;
-                    }
-
-                    bufferbuilder.begin(GL11.GL_TRIANGLE_FAN, DefaultVertexFormats.POSITION_TEX);
-                    bufferbuilder.pos(150, 150, 0).tex(0.5, 0.5).endVertex();
-                    bufferbuilder.pos(300, y, 0).tex(1, y / 300).endVertex();
-                    bufferbuilder.pos(300, 0, 0).tex(1, 0).endVertex();
-                    tessellator.draw();
-                }
-
-                GlStateManager.popMatrix();
-            }
-        };
+        GuiPanel speed = new GuiPanel();
         speed.setCssId("speed_pane");
         float[] engineProperties = engine.getEngineProperties();
         speed.add(new UpdatableGuiLabel("%s", s -> String.format(s, engine.isEngineStarted() ? (int) engineProperties[VehicleEntityProperties.EnumEngineProperties.SPEED.ordinal()] : "--", "")).setCssId("engine_speed"));
@@ -250,7 +176,7 @@ public class HelicopterController implements IVehicleController {
 
         speed.add(new UpdatableGuiLabel("power %f", s -> String.format(s, engine.getPower())).setCssId("engine_gear"));
 
-        panel.add(new UpdatableGuiLabel("                             AngleFront %f", s -> String.format(s, HelicopterEnginePhysicsHandler.AngleFront)).setCssId("engine_gear"));
+        //panel.add(new UpdatableGuiLabel("                             AngleFront %f", s -> String.format(s, HelicopterEnginePhysicsHandler.AngleFront)).setCssId("engine_gear"));
 
         //Debug
         String cclass = ClientDebugSystem.enableDebugDrawing ? "hud_label_debug" : "hud_label_hidden";
@@ -258,50 +184,6 @@ public class HelicopterController implements IVehicleController {
         panel.add(new UpdatableGuiLabel("Sounds : %s", s -> String.format(s, (engine.getCurrentEngineSound() == null ? "none" : engine.getCurrentEngineSound().getSoundName()))).setCssId("engine_sounds").setCssClass(cclass));
 
         panel.setCssId("engine_hud");
-
-
-
-        int nmL = (int) (maxRpm / 1000);
-
-        for (int i = 1; i <= nmL; i++) {
-            double angle = ((i * 3f / 2 * Math.PI) / nmL) - Math.PI / 3;
-
-            float r = (150 - 29) * scale;
-
-            double halfLetter = 6 * scale;
-
-            double x = (45 - Math.cos(angle) * r) - Math.abs(halfLetter * Math.cos(angle));
-            double y = (45 - Math.sin(angle) * r) - Math.abs(halfLetter * Math.sin(angle)) - 2;
-
-            float power = engine.getPower();
-
-            speed.add(new GuiLabel("v: " + i+" p: "+power).setCssClass("rpm_letter").getStyle().addAutoStyleHandler(new AutoStyleHandler<ComponentStyleManager>() {
-                @Override
-                public boolean handleProperty(EnumCssStyleProperties property, EnumSelectorContext context, ComponentStyleManager target) {
-                    if (property == EnumCssStyleProperties.LEFT) {
-                        target.getXPos().setAbsolute(-(float) x, GuiConstants.ENUM_RELATIVE_POS.END);
-                        return true;
-                    }
-                    if (property == EnumCssStyleProperties.TOP) {
-                        target.getYPos().setAbsolute((float) y);
-                        return true;
-                    }
-                    if (property == EnumCssStyleProperties.COLOR) {
-                        if (angle > Math.PI - Math.PI / 3) {
-                            target.setForegroundColor(0xFFE23F3F);
-                        }
-                        return true;
-                    }
-                    return false;
-                }
-
-                @Override
-                public Collection<EnumCssStyleProperties> getModifiedProperties(ComponentStyleManager target) {
-                    return Arrays.asList(EnumCssStyleProperties.LEFT, EnumCssStyleProperties.TOP, EnumCssStyleProperties.COLOR);
-                }
-            }).getOwner());
-        }
-
         return panel;
     }
 

@@ -3,6 +3,7 @@ package fr.dynamx.utils.client;
 import com.jme3.math.Vector3f;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.contentpack.parts.PartRotor;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.contentpack.parts.PartDoor;
@@ -115,6 +116,20 @@ public class DynamXRenderUtils {
                 }
                 GlStateManager.popMatrix();
             }
+        });
+
+        car.getPartsByType(PartRotor.class).forEach(partWheel -> {
+            GlStateManager.pushMatrix();
+            {
+                /* Translation to the wheel position */
+                GlStateManager.translate(partWheel.getPosition().x, partWheel.getPosition().y, partWheel.getPosition().z);
+                /*Rendering the wheels */
+                ObjModelRenderer model = DynamXContext.getObjModelRegistry().getModel(car.getModel());
+                //System.out.println("Model is "+model+" "+info1.getTextures()+ " "+car.getTextures().get(textureId));
+                GlStateManager.scale(car.getScaleModifier().x, car.getScaleModifier().y, car.getScaleModifier().z);
+                vehicleModel.renderGroup(model.getObjObjectRenderer(partWheel.getPartName()), (byte) 0);
+            }
+            GlStateManager.popMatrix();
         });
 
         /* Rendering doors */

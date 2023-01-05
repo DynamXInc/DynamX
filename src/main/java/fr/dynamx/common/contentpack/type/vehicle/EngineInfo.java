@@ -135,11 +135,7 @@ public class EngineInfo extends SubInfoTypeOwner<EngineInfo> implements ISubInfo
 
     @Override
     public void addModules(BaseVehicleEntity<?> entity, ModuleListBuilder modules) {
-        //todo clean this
-        if(entity instanceof HelicopterEntity)
-            modules.add(new HelicopterEngineModule(entity, this));
-        else
-            modules.add(new EngineModule(entity, this));
+        modules.add(new EngineModule(entity, this));
     }
 }
 

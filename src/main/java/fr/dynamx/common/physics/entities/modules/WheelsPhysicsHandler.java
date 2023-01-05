@@ -5,11 +5,11 @@ import com.google.common.collect.HashBiMap;
 import com.jme3.bullet.objects.VehicleWheel;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.modules.IEngineModule;
-import fr.dynamx.api.physics.entities.IEnginePhysicsHandler;
 import fr.dynamx.api.physics.entities.IPropulsionHandler;
 import fr.dynamx.common.contentpack.parts.PartWheel;
 import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.modules.EngineModule;
 import fr.dynamx.common.entities.modules.WheelsModule;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.BaseWheeledVehiclePhysicsHandler;
@@ -19,7 +19,6 @@ import fr.dynamx.common.physics.entities.parts.wheel.WheelState;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.minecraft.util.math.MathHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -111,7 +110,8 @@ public class WheelsPhysicsHandler implements IPropulsionHandler {
 
     @Override
     public void accelerate(IEngineModule engine, float strength, float speedLimit) {
-        IEnginePhysicsHandler module = engine.getPhysicsHandler();
+        EngineModule engine2 = (EngineModule) engine;
+        EnginePhysicsHandler module = engine2.getPhysicsHandler();
         if (module.getEngine().isStarted()) {
             for (WheelPhysics wheelPhysics : vehicleWheelData) {
                 if (wheelPhysics.isDrivingWheel()) {
@@ -161,11 +161,12 @@ public class WheelsPhysicsHandler implements IPropulsionHandler {
 
     @Override
     public void applyEngineBraking(IEngineModule engine) {
+        EngineModule engine2 = (EngineModule) engine;
         disengageEngine();
         for (int i = 0; i < getNumWheels(); i++) {
             WheelPhysics wheelPhysics = getWheel(i);
             if (wheelPhysics.isDrivingWheel())
-                wheelPhysics.brake(0, 0, engine.getPhysicsHandler().getEngine().getBraking());
+                wheelPhysics.brake(0, 0, engine2.getPhysicsHandler().getEngine().getBraking());
         }
     }
 

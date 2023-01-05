@@ -53,7 +53,7 @@ public class HelicopterEntity<T extends HelicopterEntity.HelicopterPhysicsHandle
     }
 
     @Override
-    protected ModularVehicleInfo createInfo(String infoName) {
+    public ModularVehicleInfo createInfo(String infoName) {
         return DynamXObjectLoaders.HELICOPTERS.findInfo(infoName);
     }
 

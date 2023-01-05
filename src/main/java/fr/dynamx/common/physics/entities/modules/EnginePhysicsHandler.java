@@ -1,19 +1,14 @@
 package fr.dynamx.common.physics.entities.modules;
 
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
-import fr.dynamx.api.physics.entities.IEnginePhysicsHandler;
 import fr.dynamx.api.physics.entities.IGearBoxHandler;
 import fr.dynamx.api.physics.entities.IPropulsionHandler;
-import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.type.vehicle.GearInfo;
 import fr.dynamx.common.entities.modules.EngineModule;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.engine.AutomaticGearboxHandler;
 import fr.dynamx.common.physics.entities.parts.engine.Engine;
 import fr.dynamx.common.physics.entities.parts.engine.GearBox;
-import fr.dynamx.common.physics.terrain.cache.TerrainFile;
-import fr.dynamx.utils.VerticalChunkPos;
-import fr.dynamx.utils.debug.ChunkGraph;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,7 +18,7 @@ import java.util.List;
  * @see IEnginePhysicsHandler
  * @see EngineModule
  */
-public class EnginePhysicsHandler implements IEnginePhysicsHandler, IPackInfoReloadListener {
+public class EnginePhysicsHandler implements IPackInfoReloadListener {
     private final EngineModule module;
     private final BaseVehiclePhysicsHandler<?> handler;
     private final IPropulsionHandler propulsionHandler;
@@ -72,8 +67,8 @@ public class EnginePhysicsHandler implements IEnginePhysicsHandler, IPackInfoRel
         }
         updateMovement();
         setEngineStarted(module.isEngineStarted());
-        if(gearBoxHandler != null)
-        gearBoxHandler.update(accelerationForce);
+        if (gearBoxHandler != null)
+            gearBoxHandler.update(accelerationForce);
     }
 
     public void updateTurn0() {
@@ -219,7 +214,7 @@ public class EnginePhysicsHandler implements IEnginePhysicsHandler, IPackInfoRel
             accelerate(0);
         }
     }
-    @Override
+
     public boolean isEngaged() {
         return getGearBox().getActiveGearNum() != 0;
     }
@@ -246,7 +241,6 @@ public class EnginePhysicsHandler implements IEnginePhysicsHandler, IPackInfoRel
         }
     }
 
-    @Override
     public void syncActiveGear(int activeGearNum) {
         gearBox.syncActiveGearNum(activeGearNum);
     }

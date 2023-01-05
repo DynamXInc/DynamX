@@ -10,7 +10,6 @@ import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.api.network.sync.EntityVariable;
 import fr.dynamx.api.network.sync.SynchronizationRules;
-import fr.dynamx.api.physics.entities.IEnginePhysicsHandler;
 import fr.dynamx.client.ClientProxy;
 import fr.dynamx.client.handlers.hud.CarController;
 import fr.dynamx.client.sound.EngineSound;
@@ -94,8 +93,7 @@ public class EngineModule implements IEngineModule<AbstractEntityPhysicsHandler<
         sounds.clear();
     }
 
-    @Override
-    public IEnginePhysicsHandler getPhysicsHandler() {
+    public EnginePhysicsHandler getPhysicsHandler() {
         return physicsHandler;
     }
 

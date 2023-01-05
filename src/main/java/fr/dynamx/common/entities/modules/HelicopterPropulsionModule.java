@@ -8,20 +8,25 @@ import fr.dynamx.api.entities.modules.IPropulsionModule;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.api.network.sync.SimulationHolder;
+import fr.dynamx.api.obj.IObjObject;
 import fr.dynamx.api.physics.entities.IPropulsionHandler;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
 import fr.dynamx.client.renders.model.ObjModelClient;
 import fr.dynamx.client.renders.vehicle.RenderBaseVehicle;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.contentpack.parts.PartRotor;
 import fr.dynamx.common.contentpack.parts.PartWheel;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.vehicles.HelicopterEntity;
 import fr.dynamx.common.network.sync.vars.VehicleSynchronizedVariables;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
+import fr.dynamx.common.physics.entities.modules.HelicopterEnginePhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.HelicopterPhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
@@ -136,6 +141,9 @@ public class HelicopterPropulsionModule implements IPropulsionModule<BaseVehicle
                 this.entity.getPackInfo().getPartsByType(PartWheel.class).forEach(partWheel -> {
                     renderWheel(render, partWheel, partialTicks);
                 });
+                this.entity.getPackInfo().getPartsByType(PartRotor.class).forEach(partRotor -> {
+                    renderRotor(render, partRotor, partialTicks,carEntity);
+                });
             }
             MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.RenderVehicleEntityEvent(VehicleEntityEvent.RenderVehicleEntityEvent.Type.PROPULSION, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks));
         }
@@ -144,6 +152,34 @@ public class HelicopterPropulsionModule implements IPropulsionModule<BaseVehicle
     @Override
     @SideOnly(Side.CLIENT)
     public void spawnPropulsionParticles(RenderPhysicsEntity<?> render, float partialTicks) {
+    }
+
+    @SideOnly(Side.CLIENT)
+    private void renderRotor(RenderPhysicsEntity<?> render, PartRotor partRotor, float partialTicks,BaseVehicleEntity<?> helicopterEntity) {
+        ObjModelClient vehicleModel = DynamXContext.getObjModelRegistry().getModel(helicopterEntity.getPackInfo().getModel());
+        IObjObject rotor = vehicleModel.getObjObject(partRotor.getPartName());
+        if (rotor != null) {
+            if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.RenderVehicleEntityEvent(VehicleEntityEvent.RenderVehicleEntityEvent.Type.ROTOR, (RenderBaseVehicle<?>) render, helicopterEntity, PhysicsEntityEvent.Phase.PRE, partialTicks))) {
+                GlStateManager.pushMatrix();
+                Vector3f center = partRotor.getPosition();
+                //Translation to the steering wheel rotation point (and render pos)
+                GlStateManager.translate(center.x, center.y, center.z);
+                // Rotating the rotor.
+                HelicopterEntity helicopter = (HelicopterEntity) helicopterEntity;
+                if(helicopter.getEngine().isEngineStarted()) {
+                    //get power from engine
+                    HelicopterEngineModule d = (HelicopterEngineModule) helicopter.getEngine();
+                    float power = d.getPower();
+                    GlStateManager.rotate((entity.ticksExisted+partialTicks)* partRotor.getRotationSpeed()*power , partRotor.getRotation().x, partRotor.getRotation().y, partRotor.getRotation().z);
+                }
+                //Scale it
+                GlStateManager.scale(helicopterEntity.getPackInfo().getScaleModifier().x, helicopterEntity.getPackInfo().getScaleModifier().y, helicopterEntity.getPackInfo().getScaleModifier().z);
+                //Render it
+                vehicleModel.renderGroup(rotor, helicopterEntity.getEntityTextureID());
+                GlStateManager.popMatrix();
+                MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.RenderVehicleEntityEvent(VehicleEntityEvent.RenderVehicleEntityEvent.Type.ROTOR, (RenderBaseVehicle<?>) render, helicopterEntity, PhysicsEntityEvent.Phase.POST, partialTicks));
+            }
+        }
     }
 
     @SideOnly(Side.CLIENT)

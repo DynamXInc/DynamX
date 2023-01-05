@@ -15,6 +15,7 @@ import fr.dynamx.api.entities.modules.IVehicleController;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.client.camera.CameraSystem;
 import fr.dynamx.client.handlers.ClientDebugSystem;
+import fr.dynamx.client.handlers.KeyHandler;
 import fr.dynamx.common.contentpack.type.vehicle.EngineInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.HelicopterEngineModule;
@@ -74,15 +75,36 @@ public class HelicopterController implements IVehicleController {
     @SubscribeEvent
     public static void tickMouse(MouseEvent event) {
         if (MC.player.getRidingEntity() instanceof HelicopterEntity) {
-            System.out.println("Dx is " + event.getDx() + " Dy is " + event.getDy());
-            HelicopterEnginePhysicsHandler.orderedDx = event.getDx();
-            HelicopterEnginePhysicsHandler.orderedDy = event.getDy();
+            //System.out.println("Dx is " + event.getDx() + " Dy is " + event.getDy());
+            HelicopterEnginePhysicsHandler.AngleBack = event.getDx();
+            HelicopterEnginePhysicsHandler.AngleFront = event.getDy();
+
         }
     }
+
 
     @Override
     public void update() {
         if (((IModuleContainer.ISeatsContainer) entity).getSeats().isLocalPlayerDriving() && engine.getEngineProperties() != null) {
+            if (KeyHandler.KEY_POWERUP.isPressed()) {
+                if (onCooldown == 0) {
+                    HelicopterEngineModule engine = entity.getModuleByType(HelicopterEngineModule.class);
+                    if (engine != null) {
+                        engine.setPower(engine.getPower() + 0.05f);
+                    }
+                    onCooldown = 5;
+                }
+            }
+            if (KeyHandler.KEY_POWERDOWN.isPressed()) {
+                if (onCooldown == 0) {
+                    HelicopterEngineModule engine = entity.getModuleByType(HelicopterEngineModule.class);
+                    if (engine != null) {
+                        engine.setPower(engine.getPower() - 0.05f);
+                        System.out.println("down");
+                    }
+                    onCooldown = 5;
+                }
+            }
             if (accelerating != MC.gameSettings.keyBindForward.isKeyDown()) {
                 accelerating = MC.gameSettings.keyBindForward.isKeyDown();
             }
@@ -226,7 +248,9 @@ public class HelicopterController implements IVehicleController {
         // speed.add(new UpdatableGuiLabel("%d", s -> String.format(s, (int) (engineProperties[VehicleEntityProperties.EnumEngineProperties.REVS.ordinal()] * entity.getPackInfo().getSubPropertyByType(EngineInfo.class).getMaxRevs()), "")).setCssId("engine_rpm"));
         panel.add(speed);
 
-        speed.add(new UpdatableGuiLabel("%s", s -> String.format(s, getGearString((int) engineProperties[VehicleEntityProperties.EnumEngineProperties.ACTIVE_GEAR.ordinal()]))).setCssId("engine_gear"));
+        speed.add(new UpdatableGuiLabel("power %f", s -> String.format(s, engine.getPower())).setCssId("engine_gear"));
+
+        panel.add(new UpdatableGuiLabel("                             AngleFront %f", s -> String.format(s, HelicopterEnginePhysicsHandler.AngleFront)).setCssId("engine_gear"));
 
         //Debug
         String cclass = ClientDebugSystem.enableDebugDrawing ? "hud_label_debug" : "hud_label_hidden";
@@ -234,6 +258,8 @@ public class HelicopterController implements IVehicleController {
         panel.add(new UpdatableGuiLabel("Sounds : %s", s -> String.format(s, (engine.getCurrentEngineSound() == null ? "none" : engine.getCurrentEngineSound().getSoundName()))).setCssId("engine_sounds").setCssClass(cclass));
 
         panel.setCssId("engine_hud");
+
+
 
         int nmL = (int) (maxRpm / 1000);
 
@@ -247,7 +273,9 @@ public class HelicopterController implements IVehicleController {
             double x = (45 - Math.cos(angle) * r) - Math.abs(halfLetter * Math.cos(angle));
             double y = (45 - Math.sin(angle) * r) - Math.abs(halfLetter * Math.sin(angle)) - 2;
 
-            speed.add(new GuiLabel("" + i).setCssClass("rpm_letter").getStyle().addAutoStyleHandler(new AutoStyleHandler<ComponentStyleManager>() {
+            float power = engine.getPower();
+
+            speed.add(new GuiLabel("v: " + i+" p: "+power).setCssClass("rpm_letter").getStyle().addAutoStyleHandler(new AutoStyleHandler<ComponentStyleManager>() {
                 @Override
                 public boolean handleProperty(EnumCssStyleProperties property, EnumSelectorContext context, ComponentStyleManager target) {
                     if (property == EnumCssStyleProperties.LEFT) {

@@ -197,7 +197,7 @@ public class VehicleEntityEvent extends Event {
         }
 
         public enum Type {
-            CHASSIS, PROPULSION, PARTS, PARTICLES, LIGHTS, STEERING_WHEEL
+            CHASSIS, PROPULSION, PARTS, PARTICLES, LIGHTS, STEERING_WHEEL,ROTOR
         }
     }
 

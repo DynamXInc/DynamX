@@ -21,10 +21,12 @@ import fr.dynamx.common.physics.entities.modules.EnginePhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.HelicopterEnginePhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.engine.AutomaticGearboxHandler;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -49,6 +51,16 @@ public class HelicopterEngineModule implements IEngineModule<AbstractEntityPhysi
 
     //Handbrake on spawn
     private int controls = 2;
+    private float power = 0;
+
+
+    public void setPower(float power) {
+        this.power = MathHelper.clamp(power, 0, 1);
+    }
+
+    public float getPower() {
+        return power;
+    }
 
     /**
      * 0  = Speed(KM/H) , 1 = RPM, 2 = maxRPM, 3 = gearNumber, 4 = MaxSpeed, 5 = power, 6 = brake

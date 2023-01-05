@@ -3,6 +3,8 @@ package fr.dynamx.common.physics.entities.modules;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.modules.IEngineModule;
 import fr.dynamx.api.physics.entities.IPropulsionHandler;
+import fr.dynamx.common.contentpack.parts.PartHandle;
+import fr.dynamx.common.contentpack.parts.PartRotor;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.HelicopterPropulsionModule;
 import fr.dynamx.common.entities.modules.WheelsModule;
@@ -52,5 +54,20 @@ public class HelicopterPhysicsHandler implements IPropulsionHandler
 
     @Override
     public void applyEngineBraking(IEngineModule engine) {
+    }
+
+
+    public void addRotor(PartRotor partRotor) {
+
+    }
+
+    public void removeRotor(PartRotor partRotor) {
+
+    }
+
+    public void removeHandle(PartHandle partHandle) {
+    }
+
+    public void addHandle(PartHandle partHandle) {
     }
 }

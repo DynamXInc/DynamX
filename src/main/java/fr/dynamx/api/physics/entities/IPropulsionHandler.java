@@ -1,6 +1,7 @@
 package fr.dynamx.api.physics.entities;
 
 import fr.dynamx.api.entities.modules.IEngineModule;
+import fr.dynamx.common.contentpack.parts.PartRotor;
 
 /**
  * Physics handler of {@link fr.dynamx.api.entities.modules.IPropulsionModule} <br>

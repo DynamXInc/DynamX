@@ -17,6 +17,7 @@ import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.entities.vehicles.DoorEntity;
+import fr.dynamx.common.entities.vehicles.HelicopterEntity;
 import fr.dynamx.common.network.sync.vars.DebugPosSynchronizedVariable;
 import fr.dynamx.common.network.sync.vars.PosSynchronizedVariable;
 import fr.dynamx.utils.client.DynamXRenderUtils;
@@ -48,7 +49,16 @@ public class VehicleDebugRenderer {
      * @param hasSeats True to add seats debug
      */
     public static <T extends PhysicsEntity<?>> void addAll(RenderPhysicsEntity<T> to, boolean hasSeats) {
-        to.addDebugRenderers(new WheelDebug(), new FrictionPointsDebug(), new SteeringWheelDebug(), new TrailerPointsDebug(), new PlayerCollisionsDebug(), new NetworkDebug(), new DoorPointsDebug(), new PropsContainerDebug());
+        to.addDebugRenderers(
+                new WheelDebug(),
+                new FrictionPointsDebug(),
+                new SteeringWheelDebug(),
+                new TrailerPointsDebug(),
+                new PlayerCollisionsDebug(),
+                new NetworkDebug(),
+                new DoorPointsDebug(),
+                new PropsContainerDebug(),
+                new RotorDebug());
         if (hasSeats)
             to.addDebugRenderers(new SeatDebug());
     }
@@ -72,6 +82,33 @@ public class VehicleDebugRenderer {
                 if (!wheel.isDrivingWheel())
                     RenderGlobal.drawBoundingBox(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ,
                             1, 0, 0, 1);
+                else
+                    RenderGlobal.drawBoundingBox(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ,
+                            0, 1, 0, 1);
+            }
+        }
+    }
+    /**
+     * Rotors render
+     */
+    public static class RotorDebug implements DebugRenderer<BaseVehicleEntity<?>> {
+        @Override
+        public boolean shouldRender(BaseVehicleEntity<?> entity) {
+            if (entity instanceof HelicopterEntity) {
+                return DynamXDebugOptions.ROTORS.isActive();
+            }
+            return false;
+        }
+
+        @Override
+        public void render(BaseVehicleEntity<?> entity, double x, double y, double z, float partialTicks) {
+            MutableBoundingBox box = new MutableBoundingBox(-0.5, -0.5, -0.5, 0.5, 0.5, 0.5);
+            //Render wheels
+            for (PartRotor rotor : entity.getPackInfo().getPartsByType(PartRotor.class)) {
+                box.offset(rotor.getPosition());
+                if (!rotor.isMainRotor())
+                    RenderGlobal.drawBoundingBox(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ,
+                            204F/255, 123F/255, 0, 1);
                 else
                     RenderGlobal.drawBoundingBox(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ,
                             0, 1, 0, 1);

@@ -8,16 +8,15 @@ import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.IVehicleController;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent;
-import fr.dynamx.api.network.sync.SimulationHolder;
-import fr.dynamx.api.network.sync.v3.SynchronizationRules;
-import fr.dynamx.api.network.sync.v3.SynchronizedEntityVariable;
+import fr.dynamx.api.network.sync.EntityVariable;
+import fr.dynamx.api.network.sync.SynchronizationRules;
 import fr.dynamx.api.physics.entities.IEnginePhysicsHandler;
 import fr.dynamx.client.ClientProxy;
 import fr.dynamx.client.handlers.hud.CarController;
 import fr.dynamx.client.sound.EngineSound;
 import fr.dynamx.common.contentpack.type.vehicle.EngineInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.network.sync.v3.DynamXSynchronizedVariables;
+import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.EnginePhysicsHandler;
@@ -43,22 +42,26 @@ import static fr.dynamx.client.ClientProxy.SOUND_HANDLER;
  * @see fr.dynamx.api.entities.VehicleEntityProperties.EnumEngineProperties
  * @see EnginePhysicsHandler
  */
+@SynchronizedEntityVariable.SynchronizedPhysicsModule()
 public class EngineModule implements IEngineModule<AbstractEntityPhysicsHandler<?, ?>>, IPhysicsModule.IPhysicsUpdateListener, IPhysicsModule.IEntityUpdateListener, IPackInfoReloadListener {
     protected final BaseVehicleEntity<? extends BaseVehiclePhysicsHandler<?>> entity;
     protected EngineInfo engineInfo;
     protected EnginePhysicsHandler physicsHandler;
 
     //Default value is 2 for the handbrake on spawn
-    private final SynchronizedEntityVariable<Integer> controls = new SynchronizedEntityVariable<>(SynchronizationRules.CONTROLS_TO_SPECTATORS, null, 2, "control");
+    @SynchronizedEntityVariable(name = "controls")
+    private final EntityVariable<Integer> controls = new EntityVariable<>(SynchronizationRules.CONTROLS_TO_SPECTATORS, 2);
     /**
      * The active speed limit, or Float.MAX_VALUE
      */
-    private final SynchronizedEntityVariable<Float> speedLimit = new SynchronizedEntityVariable<>(SynchronizationRules.CONTROLS_TO_SPECTATORS, null, Float.MAX_VALUE, "speed_limit");
+    @SynchronizedEntityVariable(name = "speed_limit")
+    private final EntityVariable<Float> speedLimit = new EntityVariable<>(SynchronizationRules.CONTROLS_TO_SPECTATORS, Float.MAX_VALUE);
 
     /**
      * @see fr.dynamx.api.entities.VehicleEntityProperties.EnumEngineProperties
      */
-    private final SynchronizedEntityVariable<float[]> engineProperties = new SynchronizedEntityVariable<>(SynchronizationRules.PHYSICS_TO_SPECTATORS, new float[VehicleEntityProperties.EnumEngineProperties.values().length], "engine_props");
+    @SynchronizedEntityVariable(name = "engine_props")
+    private final EntityVariable<float[]> engineProperties = new EntityVariable<>(SynchronizationRules.PHYSICS_TO_SPECTATORS, new float[VehicleEntityProperties.EnumEngineProperties.values().length]);
 
     public EngineModule(BaseVehicleEntity<? extends BaseVehiclePhysicsHandler<?>> entity, EngineInfo engineInfo) {
         this.entity = entity;
@@ -86,7 +89,7 @@ public class EngineModule implements IEngineModule<AbstractEntityPhysicsHandler<
     @Override
     public void onPackInfosReloaded() {
         this.engineInfo = entity.getPackInfo().getSubPropertyByType(EngineInfo.class);
-        if(physicsHandler != null)
+        if (physicsHandler != null)
             physicsHandler.onPackInfosReloaded();
         sounds.clear();
     }
@@ -126,11 +129,10 @@ public class EngineModule implements IEngineModule<AbstractEntityPhysicsHandler<
 
     @Override
     public void setEngineStarted(boolean started) {
-        //System.out.println("Setting start " + started);
         if (started) {
             setControls(controls.get() | 32);
         } else {
-            setControls((Integer.MAX_VALUE - 32) & controls.get());
+            setControls(controls.get() & ~32);
         }
     }
 
@@ -218,13 +220,6 @@ public class EngineModule implements IEngineModule<AbstractEntityPhysicsHandler<
      */
     public float getRealSpeedLimit() {
         return speedLimit.get() == Float.MAX_VALUE ? entity.getPackInfo().getVehicleMaxSpeed() : speedLimit.get();
-    }
-
-    @Override
-    public void addSynchronizedVariables(Side side, SimulationHolder simulationHolder) {
-        entity.getSynchronizer().registerVariable(DynamXSynchronizedVariables.CONTROLS, controls);
-        entity.getSynchronizer().registerVariable(DynamXSynchronizedVariables.SPEED_LIMIT, speedLimit);
-        entity.getSynchronizer().registerVariable(DynamXSynchronizedVariables.ENGINE_PROPERTIES, engineProperties);
     }
 
     //Sounds

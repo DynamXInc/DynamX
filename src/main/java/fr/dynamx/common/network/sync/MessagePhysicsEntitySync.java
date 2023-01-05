@@ -1,11 +1,9 @@
 package fr.dynamx.common.network.sync;
 
 import fr.dynamx.api.network.EnumNetworkType;
-import fr.dynamx.api.network.sync.SynchronizedVariablesRegistry;
-import fr.dynamx.api.network.sync.v3.MPPhysicsEntitySynchronizer;
-import fr.dynamx.api.network.sync.v3.SynchronizedEntityVariable;
-import fr.dynamx.api.network.sync.v3.SynchronizedEntityVariableRegistry;
-import fr.dynamx.api.network.sync.v3.SynchronizedEntityVariableSnapshot;
+import fr.dynamx.api.network.sync.EntityVariable;
+import fr.dynamx.api.network.sync.SynchronizedEntityVariableRegistry;
+import fr.dynamx.common.network.sync.variables.SynchronizedEntityVariableSnapshot;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.network.packets.PhysicsEntityMessage;
 import fr.dynamx.utils.optimization.HashMapPool;
@@ -27,7 +25,7 @@ import java.util.Map;
  */
 public class MessagePhysicsEntitySync<T extends PhysicsEntity<?>> extends PhysicsEntityMessage<MessagePhysicsEntitySync<T>> {
     //@Getter
-    private Map<Integer, SynchronizedEntityVariable<?>> varsToSend;
+    private Map<Integer, EntityVariable<?>> varsToSend;
     @Getter
     private Map<Integer, SynchronizedEntityVariableSnapshot<?>> varsToRead;
     /**
@@ -43,7 +41,7 @@ public class MessagePhysicsEntitySync<T extends PhysicsEntity<?>> extends Physic
         super(null);
     }
 
-    public MessagePhysicsEntitySync(T entity, int simulationTimeClient, Map<Integer, SynchronizedEntityVariable<?>> varsToSync, boolean lightData) {
+    public MessagePhysicsEntitySync(T entity, int simulationTimeClient, Map<Integer, EntityVariable<?>> varsToSync, boolean lightData) {
         super(entity);
         this.targetEntity = entity;
         this.varsToSend = varsToSync;
@@ -64,9 +62,9 @@ public class MessagePhysicsEntitySync<T extends PhysicsEntity<?>> extends Physic
         final int[] j = {0};
         boolean[] log = {doSizeTrack};
         int size = buf.writerIndex();
-        for (Map.Entry<Integer, SynchronizedEntityVariable<?>> entry : varsToSend.entrySet()) {
+        for (Map.Entry<Integer, EntityVariable<?>> entry : varsToSend.entrySet()) {
             Integer i = entry.getKey();
-            SynchronizedEntityVariable<Object> v = (SynchronizedEntityVariable<Object>) entry.getValue();
+            EntityVariable<Object> v = (EntityVariable<Object>) entry.getValue();
             if (log[0])
                 System.out.println("Write var " + v.getClass() + " at " + j[0] + " /" + i + " " + entityId);
             buf.writeInt(i);
@@ -80,7 +78,7 @@ public class MessagePhysicsEntitySync<T extends PhysicsEntity<?>> extends Physic
             j[0]++;
         }
         if (varsToSend instanceof PooledHashMap) {
-            ((PooledHashMap<Integer, SynchronizedEntityVariable<?>>) varsToSend).release();
+            ((PooledHashMap<Integer, EntityVariable<?>>) varsToSend).release();
         }
 
         ByteBuf f = buf.duplicate();

@@ -8,12 +8,12 @@ import fr.dynamx.api.entities.modules.AttachModule;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.PhysicsEntityEvent;
-import fr.dynamx.api.network.sync.SimulationHolder;
-import fr.dynamx.api.network.sync.v3.TransformsSynchronizedVariable;
+import fr.dynamx.common.network.sync.variables.EntityTransformsVariable;
+import fr.dynamx.api.network.sync.SynchronizedEntityVariableRegistry;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.entities.modules.MovableModule;
-import fr.dynamx.common.network.sync.v3.DynamXSynchronizedVariables;
+import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
 import fr.dynamx.common.network.sync.vars.AttachBodyPhysicsState;
 import fr.dynamx.common.network.sync.vars.AttachedBodySynchronizedVariable;
 import fr.dynamx.common.network.sync.vars.EntityPhysicsState;
@@ -50,6 +50,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@SynchronizedEntityVariable.SynchronizedPhysicsModule()
 public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> implements AttachedBodySynchronizedVariable.AttachedBodySynchronizer {
     private static final DataParameter<String> SKIN = EntityDataManager.createKey(RagdollEntity.class, DataSerializers.STRING);
 
@@ -69,7 +70,8 @@ public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> imple
     private final List<MutableBoundingBox> unrotatedBoxes = new ArrayList<>();
     private final HashMap<Byte, SynchronizedRigidBodyTransform> transforms = new HashMap<>();
 
-    private final TransformsSynchronizedVariable synchronizedTransforms = new TransformsSynchronizedVariable(this, this);
+    @SynchronizedEntityVariable(name = "parts_pos")
+    private final EntityTransformsVariable synchronizedTransforms = new EntityTransformsVariable(this, this);
 
     private short handlingTime;
     private EntityPlayer handledPlayer;
@@ -232,9 +234,9 @@ public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> imple
     }
 
     @Override
-    public void registerSynchronizedVariables(Side side, SimulationHolder simulationHolder) {
-        super.registerSynchronizedVariables(side, simulationHolder);
-        getSynchronizer().registerVariable(DynamXSynchronizedVariables.TRANSFORMS, synchronizedTransforms);
+    public void registerSynchronizedVariables() {
+        super.registerSynchronizedVariables();
+        SynchronizedEntityVariableRegistry.addVarsOf(this.getSynchronizer(), this);
     }
 
     @Override

@@ -89,18 +89,6 @@ public interface IPhysicsModule<P extends AbstractEntityPhysicsHandler<?, ?>> {
     }
 
     /**
-     * Adds the {@link fr.dynamx.api.network.sync.SynchronizedVariable} used to synchronize this module <br>
-     * The variables must only be added on the side which has the authority over the data (typically the server) <br>
-     * Fired on modules initialization and on {@link fr.dynamx.api.network.sync.SimulationHolder} changes
-     * todo doc
-     *  @param side             The current side
-     *
-     * @param simulationHolder The new holder of the simulation of the entity (see {@link SimulationHolder})
-     */
-    default void addSynchronizedVariables(Side side, SimulationHolder simulationHolder) {
-    }
-
-    /**
      * Fired when the {@link SimulationHolder} of this entity changes
      *
      * @param simulationHolder The new {@link SimulationHolder}

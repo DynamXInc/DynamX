@@ -1,7 +1,5 @@
-package fr.dynamx.api.network.sync.v3;
+package fr.dynamx.api.network.sync;
 
-import fr.dynamx.api.network.sync.SimulationHolder;
-import fr.dynamx.api.network.sync.SyncTarget;
 import net.minecraftforge.fml.relauncher.Side;
 
 public abstract class SynchronizationRules

@@ -6,17 +6,11 @@ import fr.dynamx.api.entities.modules.IVehicleController;
 import fr.dynamx.api.network.sync.ClientEntityNetHandler;
 import fr.dynamx.api.network.sync.SimulationHolder;
 import fr.dynamx.api.network.sync.SyncTarget;
-import fr.dynamx.api.network.sync.v3.PhysicsEntitySynchronizer;
-import fr.dynamx.api.network.sync.v3.SynchronizedEntityVariable;
-import fr.dynamx.api.network.sync.v3.SynchronizedEntityVariableRegistry;
-import fr.dynamx.api.network.sync.v3.SynchronizedEntityVariableSnapshot;
+import fr.dynamx.api.network.sync.EntityVariable;
+import fr.dynamx.common.network.sync.variables.SynchronizedEntityVariableSnapshot;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
-import fr.dynamx.common.network.packets.MessageJoints;
-import fr.dynamx.common.network.packets.PhysicsEntityMessage;
-import fr.dynamx.common.physics.joints.EntityJoint;
-import fr.dynamx.common.physics.joints.EntityJointsHandler;
 import fr.dynamx.utils.debug.Profiler;
 import fr.dynamx.utils.optimization.PooledHashMap;
 import io.netty.buffer.ByteBuf;
@@ -28,8 +22,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.*;
-
-import static fr.dynamx.common.DynamXMain.log;
 
 /**
  * Simplified networks handler (there are no packets sent) for singleplayer games
@@ -51,11 +43,11 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
     }
 
     private <A> void sendMyVars(SPPhysicsEntitySynchronizer<T> other, SyncTarget to) {
-        PooledHashMap<Integer, SynchronizedEntityVariable<?>> varsToSync = getVarsToSync(mySide, to);
+        PooledHashMap<Integer, EntityVariable<?>> varsToSync = getVarsToSync(mySide, to);
         ByteBuf buf = Unpooled.buffer();
-        for (Map.Entry<Integer, SynchronizedEntityVariable<?>> entry : varsToSync.entrySet()) {
+        for (Map.Entry<Integer, EntityVariable<?>> entry : varsToSync.entrySet()) {
             Integer varId = entry.getKey();
-            SynchronizedEntityVariable<A> sourceVar = (SynchronizedEntityVariable<A>) entry.getValue();
+            EntityVariable<A> sourceVar = (EntityVariable<A>) entry.getValue();
             sourceVar.writeValue(buf, false);
             sourceVar.setChanged(false);
             SynchronizedEntityVariableSnapshot<A> targetVar = (SynchronizedEntityVariableSnapshot<A>) other.getReceivedVariables().get(varId);
@@ -104,7 +96,7 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
         }
         Entity other = getOtherSideEntity();
         if (other instanceof PhysicsEntity) {
-            getReceivedVariables().forEach((key, value) -> ((SynchronizedEntityVariableSnapshot<Object>) value).updateVariable((SynchronizedEntityVariable<Object>) getSynchronizedVariables().get(key)));
+            getReceivedVariables().forEach((key, value) -> ((SynchronizedEntityVariableSnapshot<Object>) value).updateVariable((EntityVariable<Object>) getSynchronizedVariables().get(key)));
         }
         entity.prePhysicsUpdateWrapper(profiler, entity.usesPhysicsWorld());
     }

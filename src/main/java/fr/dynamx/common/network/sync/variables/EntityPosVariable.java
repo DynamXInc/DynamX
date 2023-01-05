@@ -1,35 +1,29 @@
-package fr.dynamx.api.network.sync.v3;
+package fr.dynamx.common.network.sync.variables;
 
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.network.EnumPacketTarget;
+import fr.dynamx.api.network.sync.SynchronizationRules;
 import fr.dynamx.client.network.ClientPhysicsEntitySynchronizer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.network.packets.MessageForcePlayerPos;
-import fr.dynamx.common.network.sync.v3.DynamXSynchronizedVariables;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
-import fr.dynamx.server.network.ServerPhysicsSyncManager;
-import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.debug.SyncTracker;
-import fr.dynamx.utils.optimization.Vector3fPool;
-import io.netty.buffer.ByteBuf;
 import lombok.Getter;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.text.TextComponentString;
 
 import java.util.concurrent.Callable;
 
-import static fr.dynamx.common.network.sync.vars.PosSynchronizedVariable.*;
+public class EntityPosVariable extends ListeningEntityVariable<EntityPosVariable.EntityPositionData> {
+    public static int CRITIC1 = 30, CRITIC1warn = 100, CRITIC2 = 400, CRITIC3 = 50;
 
-public class PosSynchronizedVariable extends ListeningSynchronizedEntityVariable<PosSynchronizedVariable.EntityPositionData>
-{
-    public PosSynchronizedVariable(PhysicsEntity<?> entity) {
+    public EntityPosVariable(PhysicsEntity<?> entity) {
         super(((entityPositionDataSynchronizedEntityVariable, entityPositionData) -> {
 //TODO INTPERPOLATION ETC :c
-            if(entity.getSynchronizer().getSimulationHolder().isSinglePlayer()) {
+            if (entity.getSynchronizer().getSimulationHolder().isSinglePlayer()) {
                 if (!entity.world.isRemote) //Solo mode
                 {
                     entity.motionX = entityPositionData.position.x - entity.physicsPosition.x;
@@ -66,23 +60,23 @@ public class PosSynchronizedVariable extends ListeningSynchronizedEntityVariable
                                 entity.physicsHandler.updatePhysicsState(pos, entityPositionData.rotation, entityPositionData.linearVel, entityPositionData.rotationalVel);
                         } else
                             DynamXMain.log.error(entity + " lost his player for sync. ");//Packet sent from "+(msg != null ? msg.getSender() : "solo"));
-                    } else if(entityPositionData.isBodyActive()){
+                    } else if (entityPositionData.isBodyActive()) {
                         //Update entity pos
                         entity.physicsHandler.updatePhysicsStateFromNet(pos, entityPositionData.rotation, entityPositionData.linearVel, entityPositionData.rotationalVel);
                     }
                 } else {
                     ignoreFor--;
                 }
-                if(entity.getSynchronizer() instanceof ClientPhysicsEntitySynchronizer) {
+                if (entity.getSynchronizer() instanceof ClientPhysicsEntitySynchronizer) {
                     ((ClientPhysicsEntitySynchronizer) entity.getSynchronizer()).setServerPos(entityPositionData.position);
                     ((ClientPhysicsEntitySynchronizer) entity.getSynchronizer()).setServerRotation(entityPositionData.rotation);
                 }
             }
-        }), SynchronizationRules.PHYSICS_TO_SPECTATORS, DynamXSynchronizedVariables.posSerializer, new Callable<fr.dynamx.api.network.sync.v3.PosSynchronizedVariable.EntityPositionData>() {
-            private fr.dynamx.api.network.sync.v3.PosSynchronizedVariable.EntityPositionData positionData;
+        }), SynchronizationRules.PHYSICS_TO_SPECTATORS, new Callable<EntityPosVariable.EntityPositionData>() {
+            private EntityPosVariable.EntityPositionData positionData;
 
             @Override
-            public fr.dynamx.api.network.sync.v3.PosSynchronizedVariable.EntityPositionData call() {
+            public EntityPosVariable.EntityPositionData call() {
                 AbstractEntityPhysicsHandler<?, ?> physicsHandler = entity.physicsHandler;
                 boolean changed = entity.ticksExisted % (physicsHandler.isBodyActive() ? 13 : 20) == 0; //Keep low-rate sync while not moving
                 //Detect changes
@@ -98,12 +92,12 @@ public class PosSynchronizedVariable extends ListeningSynchronizedEntityVariable
                 }
                 //TODO PAS COOL NEW
                 if (changed) {
-                    positionData = new fr.dynamx.api.network.sync.v3.PosSynchronizedVariable.EntityPositionData(physicsHandler);
+                    positionData = new EntityPosVariable.EntityPositionData(physicsHandler);
                     entity.synchronizedPosition.setChanged(true);
                 }
                 return positionData;
             }
-        }, "pos");
+        });
     }
 
     public static class EntityPositionData {

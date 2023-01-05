@@ -1,17 +1,15 @@
-package fr.dynamx.api.network.sync.v3;
+package fr.dynamx.common.network.sync;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.network.EnumPacketTarget;
 import fr.dynamx.api.network.sync.SimulationHolder;
 import fr.dynamx.api.network.sync.SyncTarget;
-import fr.dynamx.api.network.sync.SynchronizedVariable;
-import fr.dynamx.api.network.sync.SynchronizedVariablesRegistry;
+import fr.dynamx.api.network.sync.EntityVariable;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.ModularPhysicsEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
-import fr.dynamx.common.network.sync.MessagePhysicsEntitySync;
-import fr.dynamx.common.network.sync.MessageSeatsSync;
+import fr.dynamx.common.network.sync.variables.SynchronizedEntityVariableSnapshot;
 import fr.dynamx.common.physics.player.WalkingOnPlayerController;
 import fr.dynamx.server.network.ServerPhysicsSyncManager;
 import fr.dynamx.utils.debug.Profiler;
@@ -20,10 +18,8 @@ import fr.dynamx.utils.optimization.PooledHashMap;
 import lombok.Getter;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -32,11 +28,11 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public abstract class PhysicsEntitySynchronizer<T extends PhysicsEntity<?>> {
     /**
-     * All {@link SynchronizedVariable} to sync with the clients (or with the server if we are the driver)
+     * All {@link EntityVariable} to sync with the clients (or with the server if we are the driver)
      */
-    private ConcurrentHashMap<Integer, SynchronizedEntityVariable<?>> synchronizedVariables = new ConcurrentHashMap<>(3, 0.75f, 2);
+    private ConcurrentHashMap<Integer, EntityVariable<?>> synchronizedVariables = new ConcurrentHashMap<>(3, 0.75f, 2);
     /**
-     * All {@link SynchronizedVariable} received from the network, and that need to be synced with the entity
+     * All {@link EntityVariable} received from the network, and that need to be synced with the entity
      */
     private ConcurrentHashMap<Integer, SynchronizedEntityVariableSnapshot<?>> receivedVariables = new ConcurrentHashMap<>(3, 0.75f, 2);
 
@@ -57,7 +53,7 @@ public abstract class PhysicsEntitySynchronizer<T extends PhysicsEntity<?>> {
         this.entity = entity;
     }
 
-    public ConcurrentHashMap<Integer, SynchronizedEntityVariable<?>> getSynchronizedVariables() {
+    public ConcurrentHashMap<Integer, EntityVariable<?>> getSynchronizedVariables() {
         return synchronizedVariables;
     }
 
@@ -65,14 +61,9 @@ public abstract class PhysicsEntitySynchronizer<T extends PhysicsEntity<?>> {
         return receivedVariables;
     }
 
-    //TODO ANNOTATION SYSTEM
-    public void registerVariable(ResourceLocation name, SynchronizedEntityVariable<?> variable) {
-        Integer id = SynchronizedEntityVariableRegistry.getSyncVarRegistry().get(name);
-        if (id == null) { //TODO CLEAN
-            throw new IllegalArgumentException("not registered " + name + " " + variable);
-        }
+    public void registerVariable(Integer id, EntityVariable<?> variable) {
         if (synchronizedVariables.containsKey(id))
-            return;
+            throw new IllegalArgumentException("Duplicated synchronized entity variable " + id + " " + variable);
         synchronizedVariables.put(id, variable);
         receivedVariables.put(id, new SynchronizedEntityVariableSnapshot(variable.getSerializer(), variable.get()));
     }
@@ -158,7 +149,6 @@ public abstract class PhysicsEntitySynchronizer<T extends PhysicsEntity<?>> {
         if (entity instanceof ModularPhysicsEntity) {
             ((ModularPhysicsEntity<?>) entity).getModules().forEach(m -> m.onSetSimulationHolder(simulationHolder, simulationPlayerHolder, changeContext));
         }
-        SynchronizedVariablesRegistry.setSyncVarsForContext(entity.world.isRemote ? Side.CLIENT : Side.SERVER, this);
     }
 
     public void resyncEntity(EntityPlayerMP target) {
@@ -170,11 +160,11 @@ public abstract class PhysicsEntitySynchronizer<T extends PhysicsEntity<?>> {
             entity.getJointsHandler().sync(target);
     }
 
-    public PooledHashMap<Integer, SynchronizedEntityVariable<?>> getVarsToSync(Side fromSide, SyncTarget target) {
-        PooledHashMap<Integer, SynchronizedEntityVariable<?>> ret = HashMapPool.get();
+    public PooledHashMap<Integer, EntityVariable<?>> getVarsToSync(Side fromSide, SyncTarget target) {
+        PooledHashMap<Integer, EntityVariable<?>> ret = HashMapPool.get();
         getSynchronizedVariables().forEach((i, s) -> {
             SyncTarget varTarget = s.getSyncTarget(simulationHolder, fromSide);
-            if(target.isIncluded(varTarget))
+            if (target.isIncluded(varTarget))
                 ret.put(i, s);
         });
         return ret;

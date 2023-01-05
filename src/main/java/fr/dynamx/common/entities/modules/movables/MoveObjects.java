@@ -3,34 +3,36 @@ package fr.dynamx.common.entities.modules.movables;
 import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.network.sync.v3.SynchronizationRules;
-import fr.dynamx.api.network.sync.v3.SynchronizedEntityVariable;
-import fr.dynamx.api.network.sync.v3.SynchronizedEntityVariableFactory;
-import fr.dynamx.api.network.sync.v3.SynchronizedVariableSerializer;
+import fr.dynamx.api.network.sync.EntityVariable;
+import fr.dynamx.api.network.sync.SynchronizationRules;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.entities.modules.MovableModule;
+import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import fr.dynamx.utils.physics.DynamXPhysicsHelper;
-import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+@SynchronizedEntityVariable.SynchronizedPhysicsModule()
 public class MoveObjects extends MovableModule {
     //TODO PRIVATISER
 
-    public final SynchronizedEntityVariable<EntityPlayer> picker = new SynchronizedEntityVariable<>((variable, value) -> {
+    @SynchronizedEntityVariable(name = "picker")
+    public final EntityVariable<EntityPlayer> picker = new EntityVariable<>((variable, value) -> {
         if(value != null && DynamXContext.getPlayerPickingObjects().containsKey(value.getEntityId()))
             entity.getSynchronizer().onPlayerStartControlling(value, false);
-    }, SynchronizationRules.SERVER_TO_CLIENTS, SynchronizedEntityVariableFactory.playerSerializer, "picker");
-    public final SynchronizedEntityVariable<Boolean> isPicked = new SynchronizedEntityVariable<>((variable, value) -> {
+    }, SynchronizationRules.SERVER_TO_CLIENTS);
+    @SynchronizedEntityVariable(name = "isPicked")
+    public final EntityVariable<Boolean> isPicked = new EntityVariable<>((variable, value) -> {
         if(picker.get() != null)
             entity.getSynchronizer().onPlayerStopControlling(picker.get(), false);
-    }, SynchronizationRules.SERVER_TO_CLIENTS, null, false, "isPicked");
-    public final SynchronizedEntityVariable<PhysicsEntity<?>> pickedEntity = new SynchronizedEntityVariable<>(SynchronizationRules.SERVER_TO_CLIENTS, SynchronizedEntityVariableFactory.physicsEntitySerializer, "pickedEntity");
+    }, SynchronizationRules.SERVER_TO_CLIENTS, false);
+    @SynchronizedEntityVariable(name = "pickedEntity")
+    public final EntityVariable<PhysicsEntity<?>> pickedEntity = new EntityVariable<>(SynchronizationRules.SERVER_TO_CLIENTS, null);
     public Vector3f basePos;
 
     public MoveObjects(PhysicsEntity<?> entity) {

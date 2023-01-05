@@ -6,6 +6,7 @@ import fr.aym.acslib.api.services.mps.ModProtectionContainer;
 import fr.dynamx.api.contentpack.ContentPackType;
 import fr.dynamx.api.events.ContentPackSystemEvent;
 import fr.dynamx.api.events.PhysicsEntityEvent;
+import fr.dynamx.api.network.sync.SynchronizedEntityVariableRegistry;
 import fr.dynamx.client.gui.GuiBlockCustomization;
 import fr.dynamx.client.gui.GuiDnxDebug;
 import fr.dynamx.client.gui.GuiLoadingErrors;
@@ -103,6 +104,7 @@ public class ContentPackLoader {
         //Discover addons
         AddonLoader.discoverAddons(event);
         SubInfoTypesRegistry.discoverSubInfoTypes(event);
+        SynchronizedEntityVariableRegistry.discoverSyncVars(event);
         //Discover resources
         int packCount = 0;
         for (File file : myDir.listFiles()) {

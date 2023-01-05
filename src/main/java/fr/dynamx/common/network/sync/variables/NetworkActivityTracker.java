@@ -1,11 +1,11 @@
-package fr.dynamx.api.network.sync.v3;
+package fr.dynamx.common.network.sync.variables;
 
 import fr.dynamx.api.network.sync.SimulationHolder;
+import fr.dynamx.api.network.sync.EntityVariable;
 import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.common.entities.PhysicsEntity;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.text.TextFormatting;
 
 import java.awt.*;
 import java.util.*;
@@ -69,26 +69,26 @@ public class NetworkActivityTracker {
         return y;
     }
 
-    public static void addSentVars(PhysicsEntity<?> entity, Collection<SynchronizedEntityVariable<?>> variables) {
+    public static void addSentVars(PhysicsEntity<?> entity, Collection<EntityVariable<?>> variables) {
         lastTime = entity.ticksExisted;
         if (!syncDebug.containsKey(lastTime))
             syncDebug.put(lastTime, new HashMap<>());
         if (!getDebugAt(lastTime).containsKey(entity))
-            getDebugAt(lastTime).put(entity, new EntitySyncData(entity.getSynchronizer().getSimulationHolder(), entity.getSynchronizer().getSynchronizedVariables().values().stream().map(SynchronizedEntityVariable::getName).collect(Collectors.toList())));
-        getDebugAt(lastTime).get(entity).sentVars.addAll(variables.stream().map(SynchronizedEntityVariable::getName).collect(Collectors.toList()));
+            getDebugAt(lastTime).put(entity, new EntitySyncData(entity.getSynchronizer().getSimulationHolder(), entity.getSynchronizer().getSynchronizedVariables().values().stream().map(EntityVariable::getName).collect(Collectors.toList())));
+        getDebugAt(lastTime).get(entity).sentVars.addAll(variables.stream().map(EntityVariable::getName).collect(Collectors.toList()));
 
         if(lastTime == -1)
         syncDebug.keySet().removeIf(i -> i < lastTime-20);
     }
 
-    public static void addReceivedVars(PhysicsEntity<?> entity, Collection<SynchronizedEntityVariable<?>> variables) {
+    public static void addReceivedVars(PhysicsEntity<?> entity, Collection<EntityVariable<?>> variables) {
         lastTime = entity.ticksExisted;
         //System.out.println("Rcv " + lastTime+" "+variables.stream().map(SynchronizedEntityVariable::getName).collect(Collectors.toList()));
         if (!syncDebug.containsKey(lastTime))
             syncDebug.put(lastTime, new HashMap<>());
         if (!getDebugAt(lastTime).containsKey(entity))
-            getDebugAt(lastTime).put(entity, new EntitySyncData(entity.getSynchronizer().getSimulationHolder(), entity.getSynchronizer().getSynchronizedVariables().values().stream().map(SynchronizedEntityVariable::getName).collect(Collectors.toList())));
-        getDebugAt(lastTime).get(entity).receivedVars.addAll(variables.stream().map(SynchronizedEntityVariable::getName).collect(Collectors.toList()));
+            getDebugAt(lastTime).put(entity, new EntitySyncData(entity.getSynchronizer().getSimulationHolder(), entity.getSynchronizer().getSynchronizedVariables().values().stream().map(EntityVariable::getName).collect(Collectors.toList())));
+        getDebugAt(lastTime).get(entity).receivedVars.addAll(variables.stream().map(EntityVariable::getName).collect(Collectors.toList()));
 
         if(lastTime == -1)
             syncDebug.keySet().removeIf(i -> i < lastTime-20);

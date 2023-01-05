@@ -1,57 +1,43 @@
-package fr.dynamx.api.network.sync.v3;
+package fr.dynamx.api.network.sync;
 
-import fr.dynamx.api.network.sync.SimulationHolder;
-import fr.dynamx.api.network.sync.SyncTarget;
 import fr.dynamx.utils.debug.SyncTracker;
 import io.netty.buffer.ByteBuf;
 import lombok.Getter;
 import net.minecraftforge.fml.relauncher.Side;
 
-import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
-public class SynchronizedEntityVariable<T> {
+public class EntityVariable<T> {
     @Getter
-    private final BiConsumer<SynchronizedEntityVariable<T>, T> receiveCallback;
+    private final BiConsumer<EntityVariable<T>, T> receiveCallback;
     @Getter
     private final SynchronizationRules synchronizationRule;
     @Getter
-    private final SynchronizedVariableSerializer<T> serializer;
+    private EntityVariableSerializer<T> serializer;
     private T value;
     protected boolean changed = true; //first sync
     @Getter
-    private final String name;
+    private String name = "not_loaded";
 
-    public SynchronizedEntityVariable(SynchronizationRules synchronizationRule, T initialValue, String name) {
-        this(null, synchronizationRule, null, initialValue, name);
+    public EntityVariable(SynchronizationRules synchronizationRule, T initialValue) {
+        this(null, synchronizationRule, initialValue);
     }
 
-    public SynchronizedEntityVariable(SynchronizationRules synchronizationRule, SynchronizedVariableSerializer<T> serializer, String name) {
-        this(null, synchronizationRule, serializer, null, name);
+    public EntityVariable(BiConsumer<EntityVariable<T>, T> receiveCallback, SynchronizationRules synchronizationRule) {
+        this(receiveCallback, synchronizationRule, null);
     }
 
-    public SynchronizedEntityVariable(SynchronizationRules synchronizationRule, SynchronizedVariableSerializer<T> serializer, T initialValue, String name) {
-        this(null, synchronizationRule, serializer, initialValue, name);
-    }
-
-    public SynchronizedEntityVariable(BiConsumer<SynchronizedEntityVariable<T>, T> receiveCallback, SynchronizationRules synchronizationRule, SynchronizedVariableSerializer<T> serializer, String name) {
-        this(receiveCallback, synchronizationRule, serializer, null, name);
-    }
-
-    public SynchronizedEntityVariable(BiConsumer<SynchronizedEntityVariable<T>, T> receiveCallback, SynchronizationRules synchronizationRule, SynchronizedVariableSerializer<T> serializer, T initialValue, String name) {
+    public EntityVariable(BiConsumer<EntityVariable<T>, T> receiveCallback, SynchronizationRules synchronizationRule, T initialValue) {
         this.receiveCallback = receiveCallback;
         this.synchronizationRule = synchronizationRule;
         this.value = initialValue;
-        this.name = name;
+    }
 
-        if(serializer == null && initialValue != null) {
-            this.serializer = (SynchronizedVariableSerializer<T>) SynchronizedEntityVariableFactory.getSerializer(initialValue.getClass());
-        } else if(serializer != null) {
-            this.serializer = serializer;
-        } else {
-            throw new IllegalArgumentException("Must set a serializer or a initial value");
-        }
+    protected void init(String name, EntityVariableSerializer<?> type) {
+        this.name = name;
+        this.serializer = (EntityVariableSerializer<T>) type;
+        System.out.println("INIT " + name+" with " + type);
     }
 
     public T get() {

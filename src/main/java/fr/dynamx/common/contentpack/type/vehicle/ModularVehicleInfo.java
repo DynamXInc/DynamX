@@ -20,6 +20,7 @@ import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.CreatePackItemEvent;
 import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
 import fr.dynamx.api.obj.ObjModelPath;
+import fr.dynamx.client.renders.model.ItemObjModel;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
@@ -35,9 +36,12 @@ import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.physics.ShapeUtils;
 import lombok.Getter;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.*;
 
@@ -117,9 +121,6 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     protected String defaultSounds;
 
     @Getter
-    @PackFileProperty(configNames = "ItemScale", required = false, description = "common.itemscale", defaultValue = "0.2")
-    protected float itemScale = 0.2f;
-    @Getter
     @PackFileProperty(configNames = "MaxVehicleSpeed", required = false, defaultValue = "infinite")
     protected float vehicleMaxSpeed = Integer.MAX_VALUE;
     @Getter
@@ -160,6 +161,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     public ModularVehicleInfo(String packName, String fileName, VehicleValidator validator) {
         super(packName, fileName);
         this.validator = validator;
+        this.setItemScale(0.2f);
     }
 
     public void addModules(BaseVehicleEntity<?> entity, ModuleListBuilder modules) {
@@ -418,5 +420,13 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     @Override
     public void addParticleEmitter(ParticleEmitterInfo<?> particleEmitterInfo) {
         particleEmitters.add(particleEmitterInfo);
+    }
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void applyItemTransforms(ItemCameraTransforms.TransformType renderType, ItemStack stack, ItemObjModel model) {
+        super.applyItemTransforms(renderType, stack, model);
+        if(renderType == ItemCameraTransforms.TransformType.GUI)
+            GlStateManager.rotate(180, 0, 1, 0);
     }
 }

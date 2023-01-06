@@ -1,14 +1,9 @@
 package fr.dynamx.common.entities.modules;
 
-import com.jme3.bullet.objects.VehicleWheel;
-import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
-import fr.dynamx.api.entities.modules.IPropulsionModule;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent;
-import fr.dynamx.api.physics.entities.IPropulsionHandler;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
@@ -20,8 +15,6 @@ import fr.dynamx.common.entities.vehicles.HelicopterEntity;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.HelicopterPhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
-import fr.dynamx.utils.maths.DynamXMath;
-import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
@@ -33,10 +26,10 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  *
  * @see WheelsPhysicsHandler
  */
-public class HelicopterPropulsionModule implements IPropulsionModule<BaseVehiclePhysicsHandler<?>>, IPhysicsModule.IEntityUpdateListener, IPhysicsModule.IPhysicsUpdateListener, IPhysicsModule.IDrawableModule<BaseVehicleEntity<?>> {
+public class HelicopterPropulsionModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, IPhysicsModule.IEntityUpdateListener, IPhysicsModule.IPhysicsUpdateListener, IPhysicsModule.IDrawableModule<BaseVehicleEntity<?>> {
     protected final BaseVehicleEntity<? extends BaseVehiclePhysicsHandler<?>> entity;
     private final HelicopterEngineModule module;
-    protected HelicopterPhysicsHandler wheelsPhysics;
+    protected HelicopterPhysicsHandler helicopterPhysics;
 
     //TODO private float targetPower;
 
@@ -51,7 +44,7 @@ public class HelicopterPropulsionModule implements IPropulsionModule<BaseVehicle
 
     @Override
     public void initPhysicsEntity(BaseVehiclePhysicsHandler<?> handler) {
-        wheelsPhysics = new HelicopterPhysicsHandler(this, handler);
+        helicopterPhysics = new HelicopterPhysicsHandler(this, handler);
     }
 
     @Override
@@ -63,9 +56,8 @@ public class HelicopterPropulsionModule implements IPropulsionModule<BaseVehicle
         }
     }
 
-    @Override
-    public IPropulsionHandler getPhysicsHandler() {
-        return wheelsPhysics;
+    public HelicopterPhysicsHandler getPhysicsHandler() {
+        return helicopterPhysics;
     }
 
     @Override
@@ -78,11 +70,6 @@ public class HelicopterPropulsionModule implements IPropulsionModule<BaseVehicle
             });
             MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.PROPULSION, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks, vehicleModel));
         }
-    }
-
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void spawnPropulsionParticles(RenderPhysicsEntity<?> render, float partialTicks) {
     }
 
     @SideOnly(Side.CLIENT)

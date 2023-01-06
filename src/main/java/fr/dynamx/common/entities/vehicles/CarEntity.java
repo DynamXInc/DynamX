@@ -2,10 +2,7 @@ package fr.dynamx.common.entities.vehicles;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.IModuleContainer;
-import fr.dynamx.api.entities.modules.IEngineModule;
-import fr.dynamx.api.entities.modules.ISeatsModule;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
-import fr.dynamx.api.physics.entities.IPropulsionHandler;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
@@ -14,15 +11,15 @@ import fr.dynamx.common.entities.modules.EngineModule;
 import fr.dynamx.common.entities.modules.SeatsModule;
 import fr.dynamx.common.entities.modules.WheelsModule;
 import fr.dynamx.common.physics.entities.BaseWheeledVehiclePhysicsHandler;
+import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
 import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
 
 public class CarEntity<T extends CarEntity.CarPhysicsHandler<?>> extends BaseVehicleEntity<T> implements
-        IModuleContainer.IEngineContainer, IModuleContainer.IPropulsionContainer<WheelsModule>,
         IModuleContainer.ISeatsContainer, IModuleContainer.IDoorContainer {
-    private IEngineModule<?> engine;
-    private ISeatsModule seats;
+    private EngineModule engine;
+    private SeatsModule seats;
     private WheelsModule propulsion;
     private DoorsModule doors;
 
@@ -58,13 +55,11 @@ public class CarEntity<T extends CarEntity.CarPhysicsHandler<?>> extends BaseVeh
     }
 
     @Nonnull
-    @Override
-    public IEngineModule<?> getEngine() {
+    public EngineModule getEngine() {
         return engine;
     }
 
     @Nonnull
-    @Override
     public WheelsModule getPropulsion() {
         return propulsion;
     }
@@ -76,7 +71,7 @@ public class CarEntity<T extends CarEntity.CarPhysicsHandler<?>> extends BaseVeh
 
     @Nonnull
     @Override
-    public ISeatsModule getSeats() {
+    public SeatsModule getSeats() {
         if (seats == null) //We may need seats before modules are created, because of seats sync
             seats = new SeatsModule(this);
         return seats;
@@ -92,8 +87,7 @@ public class CarEntity<T extends CarEntity.CarPhysicsHandler<?>> extends BaseVeh
             super(entity);
         }
 
-        @Override
-        public IPropulsionHandler getPropulsion() {
+        public WheelsPhysicsHandler getWheels() {
             return getHandledEntity().getPropulsion().getPhysicsHandler(); //WHEELS
         }
     }

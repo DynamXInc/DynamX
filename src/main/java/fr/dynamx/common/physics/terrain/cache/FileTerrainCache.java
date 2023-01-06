@@ -16,6 +16,7 @@ import fr.dynamx.utils.debug.ChunkGraph;
 import fr.dynamx.utils.debug.Profiler;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.World;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 
 import java.io.File;
@@ -41,8 +42,8 @@ public class FileTerrainCache implements ITerrainCache {
     //The Set avoids duplicates
     protected Set<VerticalChunkPos> dirtyChunks = ConcurrentHashMap.newKeySet();
 
-    public FileTerrainCache() {
-        storageDir = new File(FMLCommonHandler.instance().getMinecraftServerInstance().getEntityWorld().getSaveHandler().getWorldDirectory(), "DnxChunks");
+    public FileTerrainCache(World world) {
+        storageDir = new File(world.getSaveHandler().getWorldDirectory(), "DnxChunks");
         storageDir.mkdirs();
 
         File f = new File(storageDir, "dnxregion_main.dnx");

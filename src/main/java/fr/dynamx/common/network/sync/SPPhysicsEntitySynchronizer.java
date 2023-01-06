@@ -91,7 +91,7 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
 
     @Override
     public void onPrePhysicsTick(Profiler profiler) {
-        if (entity.world.isRemote && entity.initialized == 2 && isLocalPlayerDriving() && entity instanceof IModuleContainer.IEngineContainer) {
+        if (entity.world.isRemote && entity.initialized == 2 && isLocalPlayerDriving()) {
             controllers.forEach(IVehicleController::update);
         }
         Entity other = getOtherSideEntity();

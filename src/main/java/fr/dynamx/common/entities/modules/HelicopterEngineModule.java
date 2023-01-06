@@ -3,7 +3,6 @@ package fr.dynamx.common.entities.modules;
 import fr.dynamx.api.audio.EnumSoundState;
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.entities.VehicleEntityProperties;
-import fr.dynamx.api.entities.modules.IEngineModule;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.IVehicleController;
 import fr.dynamx.api.events.PhysicsEntityEvent;
@@ -11,6 +10,7 @@ import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.api.network.sync.EntityVariable;
 import fr.dynamx.api.network.sync.SynchronizationRules;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
+import fr.dynamx.api.network.sync.SimulationHolder;
 import fr.dynamx.client.ClientProxy;
 import fr.dynamx.client.handlers.hud.HelicopterController;
 import fr.dynamx.client.sound.EngineSound;
@@ -44,7 +44,7 @@ import static fr.dynamx.client.ClientProxy.SOUND_HANDLER;
  * @see EnginePhysicsHandler
  */
 @SynchronizedEntityVariable.SynchronizedPhysicsModule
-public class HelicopterEngineModule implements IEngineModule<AbstractEntityPhysicsHandler<?, ?>>, IPhysicsModule.IPhysicsUpdateListener, IPhysicsModule.IEntityUpdateListener {
+public class HelicopterEngineModule implements IPhysicsModule<AbstractEntityPhysicsHandler<?, ?>>, IPhysicsModule.IPhysicsUpdateListener, IPhysicsModule.IEntityUpdateListener, EngineSound.IEngineSoundHandler {
     protected final BaseVehicleEntity<? extends BaseVehiclePhysicsHandler<?>> entity;
     protected HelicopterEnginePhysicsHandler physicsHandler;
 
@@ -75,7 +75,6 @@ public class HelicopterEngineModule implements IEngineModule<AbstractEntityPhysi
      *
      * @return All engine properties, see {@link VehicleEntityProperties.EnumEngineProperties}
      */
-    @Override
     public float[] getEngineProperties() {
         return engineProperties;
     }
@@ -91,7 +90,6 @@ public class HelicopterEngineModule implements IEngineModule<AbstractEntityPhysi
     /**
      * Used for synchronization, don't use this
      */
-    @Override
     public void setEngineProperties(float[] engineProperties) {
         this.engineProperties = engineProperties;
     }
@@ -116,7 +114,6 @@ public class HelicopterEngineModule implements IEngineModule<AbstractEntityPhysi
         return (controls.get() & 16) == 16;
     }
 
-    @Override
     public void setEngineStarted(boolean started) {
         if (started) {
             setControls(controls.get() | 32);
@@ -125,9 +122,14 @@ public class HelicopterEngineModule implements IEngineModule<AbstractEntityPhysi
         }
     }
 
-    @Override
     public boolean isEngineStarted() {
         return (EnginePhysicsHandler.inTestFullGo) || ((controls.get() & 32) == 32);
+    }
+
+    @Override
+    public float getSoundPitch() {
+        //TODO
+        return 0;
     }
 
     public int getControls() {

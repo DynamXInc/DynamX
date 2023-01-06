@@ -4,7 +4,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.IModuleContainer;
-import fr.dynamx.api.entities.modules.ISeatsModule;
+import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.api.network.EnumPacketTarget;
 import fr.dynamx.common.network.sync.PhysicsEntitySynchronizer;
@@ -12,6 +12,7 @@ import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.network.sync.MessageSeatsSync;
+import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
@@ -29,7 +30,7 @@ import java.util.*;
 
 import static fr.dynamx.common.DynamXMain.log;
 
-public class SeatsModule implements ISeatsModule {
+public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<?, ?>> {
     protected final BaseVehicleEntity<?> entity;
     protected BiMap<PartSeat, EntityPlayer> seatToPassenger = HashBiMap.create();
     protected Map<Byte, Boolean> doorsStatus;
@@ -53,24 +54,20 @@ public class SeatsModule implements ISeatsModule {
         return seatToPassenger.containsValue(player);
     }
 
-    @Override
     public PartSeat getRidingSeat(Entity entity) {
         return seatToPassenger.inverse().get(entity);
     }
 
-    @Override
     @SideOnly(Side.CLIENT)
     public boolean isLocalPlayerDriving() {
         PartSeat seat = getRidingSeat(Minecraft.getMinecraft().player);
         return seat != null && seat.isDriver();
     }
 
-    @Override
     public PartSeat getLastRiddenSeat() {
         return lastSeat;
     }
 
-    @Override
     public BiMap<PartSeat, EntityPlayer> getSeatToPassengerMap() {
         return seatToPassenger;
     }
@@ -93,7 +90,6 @@ public class SeatsModule implements ISeatsModule {
     }
 
     @Nullable
-    @Override
     public Entity getControllingPassenger() {
         for (Map.Entry<PartSeat, EntityPlayer> e : seatToPassenger.entrySet()) {
             if (e.getKey().isDriver()) {
@@ -103,7 +99,6 @@ public class SeatsModule implements ISeatsModule {
         return null;
     }
 
-    @Override
     public void updatePassenger(Entity passenger) {
         PartSeat seat = getRidingSeat(passenger);
         //System.out.println("Update passenger : "+passenger+" on "+seat);
@@ -118,7 +113,6 @@ public class SeatsModule implements ISeatsModule {
     /**
      * Rotates the passenger, limiting his field of view to avoid stiff necks
      */
-    @Override
     public void applyOrientationToEntity(Entity passenger) {
         PartSeat seat = getRidingSeat(passenger);
         if(seat != null && seat.shouldLimitFieldOfView()) {
@@ -135,12 +129,6 @@ public class SeatsModule implements ISeatsModule {
             f2 = MathHelper.wrapDegrees(passenger.prevRotationPitch);
             f3 = MathHelper.clamp(f2, seat.getMaxPitch(), seat.getMinPitch());
             passenger.prevRotationPitch = f3;
-
-            //fixme for helicopter
-            passenger.rotationYaw = 0;
-            passenger.prevRotationYaw = 0;
-            passenger.rotationPitch = 0;
-            passenger.prevRotationPitch = 0;
         }
     }
 
@@ -180,7 +168,6 @@ public class SeatsModule implements ISeatsModule {
         //Client side is managed by updateSeats
     }
 
-    @Override
     public void updateSeats(MessageSeatsSync msg, PhysicsEntitySynchronizer<?> netHandler) {
         BaseVehicleEntity<?> vehicleEntity = entity;
         List<PartSeat> remove = new ArrayList<>(0);

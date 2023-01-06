@@ -1,10 +1,8 @@
 package fr.dynamx.api.entities;
 
-import fr.dynamx.api.entities.modules.IEngineModule;
-import fr.dynamx.api.entities.modules.IPropulsionModule;
-import fr.dynamx.api.entities.modules.ISeatsModule;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
+import fr.dynamx.common.entities.modules.SeatsModule;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -21,19 +19,9 @@ public interface IModuleContainer {
      */
     BaseVehicleEntity<?> cast();
 
-    interface IEngineContainer extends IModuleContainer {
-        @Nonnull
-        IEngineModule<?> getEngine();
-    }
-
-    interface IPropulsionContainer<T extends IPropulsionModule<?>> extends IModuleContainer {
-        @Nonnull
-        T getPropulsion();
-    }
-
     interface ISeatsContainer extends IModuleContainer {
         @Nonnull
-        ISeatsModule getSeats();
+        SeatsModule getSeats();
     }
 
     interface IDoorContainer extends IModuleContainer {

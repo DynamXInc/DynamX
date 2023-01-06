@@ -7,14 +7,11 @@ import fr.dynamx.api.audio.EnumSoundState;
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
-import fr.dynamx.api.entities.modules.IPropulsionModule;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent;
-import fr.dynamx.common.network.sync.variables.EntityFloatArrayVariable;
-import fr.dynamx.common.network.sync.variables.EntityMapVariable;
 import fr.dynamx.api.network.sync.EntityVariable;
 import fr.dynamx.api.network.sync.SynchronizationRules;
-import fr.dynamx.api.physics.entities.IPropulsionHandler;
+import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
@@ -29,7 +26,8 @@ import fr.dynamx.common.contentpack.parts.PartWheel;
 import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.contentpack.type.vehicle.SteeringWheelInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
+import fr.dynamx.common.network.sync.variables.EntityFloatArrayVariable;
+import fr.dynamx.common.network.sync.variables.EntityMapVariable;
 import fr.dynamx.common.physics.entities.BaseWheeledVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.wheel.WheelPhysics;
@@ -60,7 +58,7 @@ import static fr.dynamx.client.ClientProxy.SOUND_HANDLER;
  * @see WheelsPhysicsHandler
  */
 @SynchronizedEntityVariable.SynchronizedPhysicsModule()
-public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysicsHandler<?>>, IPhysicsModule.IEntityUpdateListener, IPhysicsModule.IPhysicsUpdateListener, IPhysicsModule.IDrawableModule<BaseVehicleEntity<?>>, IPackInfoReloadListener {
+public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHandler<?>>, IPhysicsModule.IEntityUpdateListener, IPhysicsModule.IPhysicsUpdateListener, IPhysicsModule.IDrawableModule<BaseVehicleEntity<?>>, IPackInfoReloadListener {
     @SynchronizedEntityVariable(name = "wheel_infos")
     protected final EntityMapVariable<Map<Byte, PartWheelInfo>, Byte, PartWheelInfo> wheelInfos = new EntityMapVariable<>((variable, value) -> {
         value.forEach(this::setWheelInfo);
@@ -278,8 +276,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
         }
     }
 
-    @Override
-    public IPropulsionHandler getPhysicsHandler() {
+    public WheelsPhysicsHandler getPhysicsHandler() {
         return wheelsPhysics;
     }
 
@@ -307,7 +304,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
                         GlStateManager.rotate(GlQuaternionPool.get(info.getSteeringWheelBaseRotation()));
                     //Rotate the steering wheel
                     int directingWheel = VehicleEntityProperties.getPropertyIndex(carEntity.getPackInfo().getDirectingWheel(), VehicleEntityProperties.EnumVisualProperties.STEERANGLE);
-                    WheelsModule m = carEntity.getModuleByType(WheelsModule.class);
+                    WheelsModule m = this;
                     GlStateManager.rotate(-(m.prevVisualProperties[directingWheel] + (m.visualProperties[directingWheel] - m.prevVisualProperties[directingWheel]) * partialTicks), 0F, 0F, 1F);
 
                     //Scale it
@@ -330,7 +327,6 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
         }
     }
 
-    @Override
     @SideOnly(Side.CLIENT)
     public void spawnPropulsionParticles(RenderPhysicsEntity<?> render, float partialTicks) {
         //Dust particles when the vehicle friction is very low

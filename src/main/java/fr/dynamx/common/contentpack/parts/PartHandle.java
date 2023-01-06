@@ -31,19 +31,6 @@ public class PartHandle extends BasePart<ModularVehicleInfo> {
     }
 
     @Override
-    public void addPart(BaseVehicleEntity<?> vehicle) {
-        //todo clean condition
-        if(!(vehicle instanceof IModuleContainer.IPropulsionContainer) || !(((IModuleContainer.IPropulsionContainer) vehicle).getPropulsion().getPhysicsHandler()  instanceof HelicopterPhysicsHandler))
-            throw new IllegalStateException("The entity " + vehicle + " has PartRotor, but does not implement IHavePropulsion or the propulsion is not a RotorModule !");
-        ((HelicopterPhysicsHandler) ((IModuleContainer.IPropulsionContainer<?>) vehicle).getPropulsion().getPhysicsHandler()).addHandle(this);
-    }
-
-    @Override
-    public void removePart(BaseVehicleEntity<?> vehicle) {
-        ((HelicopterPhysicsHandler) ((IModuleContainer.IPropulsionContainer<?>) vehicle).getPropulsion().getPhysicsHandler()).removeHandle(this);
-    }
-
-    @Override
     public DynamXDebugOption getDebugOption() {
         return DynamXDebugOptions.HANDLES;
     }

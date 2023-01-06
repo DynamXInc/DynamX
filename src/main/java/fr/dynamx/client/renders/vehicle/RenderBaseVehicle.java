@@ -9,6 +9,7 @@ import fr.dynamx.client.renders.RenderPhysicsEntity;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.modules.WheelsModule;
 import fr.dynamx.common.entities.vehicles.BoatEntity;
 import fr.dynamx.common.entities.vehicles.CarEntity;
 import fr.dynamx.common.entities.vehicles.HelicopterEntity;
@@ -54,8 +55,9 @@ public class RenderBaseVehicle<T extends BaseVehicleEntity<?>> extends RenderPhy
     public void spawnParticles(T carEntity, Quaternion rotation, float partialTicks) {
         super.spawnParticles(carEntity, rotation, partialTicks);
         if (!MinecraftForge.EVENT_BUS.post(new Render(Type.PARTICLES, this, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks, null))) {
-            if (carEntity instanceof IModuleContainer.IPropulsionContainer) {
-                ((IModuleContainer.IPropulsionContainer<?>) carEntity).getPropulsion().spawnPropulsionParticles(this, partialTicks);
+            if (carEntity.hasModuleOfType(WheelsModule.class)) {
+                //TODO GENERALIZE
+                carEntity.getModuleByType(WheelsModule.class).spawnPropulsionParticles(this, partialTicks);
             }
             MinecraftForge.EVENT_BUS.post(new Render(Type.PARTICLES, this, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks, null));
         }

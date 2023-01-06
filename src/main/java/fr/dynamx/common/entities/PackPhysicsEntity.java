@@ -4,7 +4,6 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
-import fr.dynamx.api.entities.modules.IMovableModuleContainer;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.common.DynamXMain;
@@ -30,7 +29,7 @@ import net.minecraft.world.World;
  * @see IPhysicsModule
  * @see PackEntityPhysicsHandler For the physics implementation
  */
-public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>, A extends IPhysicsPackInfo> extends ModularPhysicsEntity<T> implements IMovableModuleContainer, IPackInfoReloadListener {
+public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>, A extends IPhysicsPackInfo> extends ModularPhysicsEntity<T> implements IPackInfoReloadListener {
     private static final DataParameter<String> INFO_NAME = EntityDataManager.createKey(PackPhysicsEntity.class, DataSerializers.STRING);
     private static final DataParameter<Integer> METADATA = EntityDataManager.createKey(PackPhysicsEntity.class, DataSerializers.VARINT);
     private int lastMetadata = -1;
@@ -149,11 +148,6 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
     @Override
     public EntityJointsHandler getJointsHandler() {
         return jointsHandler;
-    }
-
-    @Override
-    public MovableModule getMovableModule() {
-        return movableModule;
     }
 
     /**

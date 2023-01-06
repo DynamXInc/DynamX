@@ -2,17 +2,14 @@ package fr.dynamx.common.entities.vehicles;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.IModuleContainer;
-import fr.dynamx.api.entities.modules.IEngineModule;
-import fr.dynamx.api.entities.modules.IPropulsionModule;
-import fr.dynamx.api.entities.modules.ISeatsModule;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
-import fr.dynamx.api.physics.entities.IPropulsionHandler;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.contentpack.parts.PartFloat;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.BoatEngineModule;
+import fr.dynamx.common.entities.modules.EngineModule;
 import fr.dynamx.common.entities.modules.SeatsModule;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
@@ -22,10 +19,10 @@ import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
 
-public class BoatEntity<T extends BoatEntity.BoatPhysicsHandler<?>> extends BaseVehicleEntity<T> implements IModuleContainer.IEngineContainer, IModuleContainer.IPropulsionContainer, IModuleContainer.ISeatsContainer {
-    private IEngineModule engine;
-    private ISeatsModule seats;
-    private IPropulsionModule propulsion;
+public class BoatEntity<T extends BoatEntity.BoatPhysicsHandler<?>> extends BaseVehicleEntity<T> implements IModuleContainer.ISeatsContainer {
+    private EngineModule engine;
+    private SeatsModule seats;
+    private BoatEngineModule propulsion;
 
     public BoatEntity(World world) {
         super(world);
@@ -48,24 +45,22 @@ public class BoatEntity<T extends BoatEntity.BoatPhysicsHandler<?>> extends Base
         modules.add(propulsion = new BoatEngineModule(this));
 
         super.createModules(modules);
-        engine = getModuleByType(IEngineModule.class);
+        engine = getModuleByType(EngineModule.class);
     }
 
     @Nonnull
-    @Override
-    public IEngineModule getEngine() {
+    public EngineModule getEngine() {
         return engine;
     }
 
     @Nonnull
-    @Override
-    public IPropulsionModule getPropulsion() {
+    public BoatEngineModule getPropulsion() {
         return propulsion;
     }
 
     @Nonnull
     @Override
-    public ISeatsModule getSeats() {
+    public SeatsModule getSeats() {
         if (seats == null) //We may need seats before modules are created, because of seats sync
             seats = new SeatsModule(this);
         return seats;
@@ -89,11 +84,6 @@ public class BoatEntity<T extends BoatEntity.BoatPhysicsHandler<?>> extends Base
             super(entity);
             //getPhysicsVehicle().setAngularFactor(0);
             //System.out.println("Gravity is " + getPhysicsVehicle().getGravity(Vector3fPool.get()));
-        }
-
-        @Override
-        public IPropulsionHandler getPropulsion() {
-            return getHandledEntity().getPropulsion().getPhysicsHandler(); //BOAT ENGINE
         }
 
         @Override

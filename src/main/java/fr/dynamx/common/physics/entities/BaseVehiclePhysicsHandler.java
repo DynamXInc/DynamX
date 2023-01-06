@@ -6,10 +6,10 @@ import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.EnumBulletShapeType;
-import fr.dynamx.api.physics.entities.IPropulsionHandler;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.physics.entities.modules.EnginePhysicsHandler;
+import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 
@@ -21,11 +21,6 @@ import fr.dynamx.utils.optimization.Vector3fPool;
  * @see BaseWheeledVehiclePhysicsHandler
  */
 public abstract class BaseVehiclePhysicsHandler<T extends BaseVehicleEntity<?>> extends PackEntityPhysicsHandler<ModularVehicleInfo, T> {
-    /**
-     * @return The propulsion of the entity
-     */
-    public abstract IPropulsionHandler getPropulsion();
-
     public enum SpeedUnit {KMH, MPH}
 
     public static final float KMH_TO_MPH = 0.62137f;
@@ -86,5 +81,9 @@ public abstract class BaseVehiclePhysicsHandler<T extends BaseVehicleEntity<?>> 
                 return getCollisionObject().getLinearVelocity(Vector3fPool.get()).length() * 3.6f * KMH_TO_MPH;
         }
         return 0;
+    }
+
+    public WheelsPhysicsHandler getWheels() {
+        return null;
     }
 }

@@ -78,7 +78,6 @@ public class HelicopterController implements IVehicleController {
             //System.out.println("Dx is " + event.getDx() + " Dy is " + event.getDy());
             HelicopterEnginePhysicsHandler.dx = event.getDx();
             HelicopterEnginePhysicsHandler.dy = event.getDy();
-
         }
     }
 

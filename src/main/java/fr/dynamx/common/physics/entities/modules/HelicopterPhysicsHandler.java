@@ -1,8 +1,6 @@
 package fr.dynamx.common.physics.entities.modules;
 
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.entities.modules.IEngineModule;
-import fr.dynamx.api.physics.entities.IPropulsionHandler;
 import fr.dynamx.common.contentpack.parts.PartHandle;
 import fr.dynamx.common.contentpack.parts.PartRotor;
 import fr.dynamx.common.entities.BaseVehicleEntity;
@@ -14,8 +12,10 @@ import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
  * @see IPropulsionHandler
  * @see WheelsModule
  */
-public class HelicopterPhysicsHandler implements IPropulsionHandler
+public class HelicopterPhysicsHandler
 {
+    //TODO USELESS
+
     private final HelicopterPropulsionModule module;
     private final BaseVehiclePhysicsHandler<? extends BaseVehicleEntity<?>> handler;
 
@@ -29,45 +29,5 @@ public class HelicopterPhysicsHandler implements IPropulsionHandler
 
     public BaseVehiclePhysicsHandler<? extends BaseVehicleEntity<?>> getHandler() {
         return handler;
-    }
-
-    @Override
-    public void accelerate(IEngineModule engine, float strength, float speedLimit) {
-
-    }
-
-    @Override
-    public void disengageEngine() {
-    }
-
-    @Override
-    public void brake(float strength) {
-    }
-
-    @Override
-    public void handbrake(float strength) {
-    }
-
-    @Override
-    public void steer(float strength) {
-    }
-
-    @Override
-    public void applyEngineBraking(IEngineModule engine) {
-    }
-
-
-    public void addRotor(PartRotor partRotor) {
-
-    }
-
-    public void removeRotor(PartRotor partRotor) {
-
-    }
-
-    public void removeHandle(PartHandle partHandle) {
-    }
-
-    public void addHandle(PartHandle partHandle) {
     }
 }

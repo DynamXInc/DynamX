@@ -4,7 +4,6 @@ import com.jme3.bounding.BoundingBox;
 import com.jme3.bullet.collision.PhysicsCollisionEvent;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.entities.modules.IEntityJoints;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.common.network.sync.variables.EntityPosVariable;
@@ -18,6 +17,7 @@ import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.items.DynamXItemRegistry;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
+import fr.dynamx.common.physics.joints.EntityJointsHandler;
 import fr.dynamx.common.physics.player.WalkingOnPlayerController;
 import fr.dynamx.common.physics.terrain.PhysicsEntityTerrainLoader;
 import fr.dynamx.utils.DynamXUtils;
@@ -571,7 +571,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
      * @return The entity joint handler, null by default
      */
     @Nullable
-    public IEntityJoints getJointsHandler() {
+    public EntityJointsHandler getJointsHandler() {
         return null;
     }
 

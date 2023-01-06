@@ -2,7 +2,6 @@ package fr.dynamx.common.physics.entities.modules;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
-import fr.dynamx.api.physics.entities.IPropulsionHandler;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.type.vehicle.HelicopterPhysicsInfo;
 import fr.dynamx.common.entities.modules.EngineModule;
@@ -11,6 +10,7 @@ import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.engine.Engine;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import net.minecraftforge.fml.relauncher.Side;
 
 /**
  * @see EngineModule

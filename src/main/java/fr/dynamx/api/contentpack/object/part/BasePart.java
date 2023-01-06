@@ -65,18 +65,6 @@ public abstract class BasePart<T extends ISubInfoTypeOwner<?>> extends SubInfoTy
         this.scale = scale;
     }
 
-    /**
-     * Adds this part to the vehicle (it shouldn't be already added)
-     */
-    public void addPart(BaseVehicleEntity<?> vehicle) {
-    }
-
-    /**
-     * Removes this part from the vehicle (it should have been added before)
-     */
-    public void removePart(BaseVehicleEntity<?> vehicle) {
-    }
-
     public Vector3f getScaleModifier(T vehicleInfo) {
         return ((IShapeContainer) vehicleInfo).getScaleModifier();
     }

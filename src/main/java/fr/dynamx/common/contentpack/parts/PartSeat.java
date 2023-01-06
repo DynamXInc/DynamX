@@ -7,11 +7,11 @@ import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.entities.IModuleContainer;
-import fr.dynamx.api.entities.modules.ISeatsModule;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
+import fr.dynamx.common.entities.modules.SeatsModule;
 import fr.dynamx.common.entities.vehicles.CarEntity;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.EnumSeatPlayerPosition;
@@ -90,7 +90,7 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     public boolean interact(BaseVehicleEntity<?> vehicleEntity, EntityPlayer player) {
         if (!(vehicleEntity instanceof IModuleContainer.ISeatsContainer))
             throw new IllegalStateException("The entity " + vehicleEntity + " has PartSeats, but does not implement IHaveSeats !");
-        ISeatsModule seats = ((IModuleContainer.ISeatsContainer) vehicleEntity).getSeats();
+        SeatsModule seats = ((IModuleContainer.ISeatsContainer) vehicleEntity).getSeats();
         Entity seatRider = seats.getSeatToPassengerMap().get(this);
         if (seatRider != null) {
             if (seatRider != player) {
@@ -128,7 +128,7 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
         return false;
     }
 
-    private boolean mount(BaseVehicleEntity<?> vehicleEntity, ISeatsModule seats, EntityPlayer player) {
+    private boolean mount(BaseVehicleEntity<?> vehicleEntity, SeatsModule seats, EntityPlayer player) {
         if (seats.getSeatToPassengerMap().containsValue(player)) {
             return false; //Player on another seat
         }

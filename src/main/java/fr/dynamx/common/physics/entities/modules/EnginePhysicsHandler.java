@@ -1,10 +1,9 @@
 package fr.dynamx.common.physics.entities.modules;
 
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
-import fr.dynamx.api.physics.entities.IGearBoxHandler;
-import fr.dynamx.api.physics.entities.IPropulsionHandler;
 import fr.dynamx.common.contentpack.type.vehicle.GearInfo;
 import fr.dynamx.common.entities.modules.EngineModule;
+import fr.dynamx.common.entities.modules.WheelsModule;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.engine.AutomaticGearboxHandler;
 import fr.dynamx.common.physics.entities.parts.engine.Engine;
@@ -21,19 +20,19 @@ import java.util.List;
 public class EnginePhysicsHandler implements IPackInfoReloadListener {
     private final EngineModule module;
     private final BaseVehiclePhysicsHandler<?> handler;
-    private final IPropulsionHandler propulsionHandler;
+    private final WheelsPhysicsHandler propulsionHandler;
     @Getter
     @Setter
     private Engine engine;
     @Getter
     @Setter
     private GearBox gearBox;
-    private IGearBoxHandler gearBoxHandler;
+    private AutomaticGearboxHandler gearBoxHandler;
     @Getter
     private float accelerationForce;
     private float steeringForce = 0;
 
-    public EnginePhysicsHandler(EngineModule module, BaseVehiclePhysicsHandler<?> handler, IPropulsionHandler propulsionHandler) {
+    public EnginePhysicsHandler(EngineModule module, BaseVehiclePhysicsHandler<?> handler, WheelsPhysicsHandler propulsionHandler) {
         this.module = module;
         this.handler = handler;
         this.propulsionHandler = propulsionHandler;
@@ -49,6 +48,7 @@ public class EnginePhysicsHandler implements IPackInfoReloadListener {
             GearInfo gear = gears.get(i);
             gearBox.setGear(i, gear.getSpeedRange()[0], gear.getSpeedRange()[1], gear.getRpmRange()[0], gear.getRpmRange()[1]);
         }
+        //TODO BOUGER ça
         if (propulsionHandler instanceof WheelsPhysicsHandler)
             gearBoxHandler = new AutomaticGearboxHandler(this, gearBox, (WheelsPhysicsHandler) propulsionHandler);// propulsionHandler.createGearBox(module, this);
     }

@@ -67,19 +67,6 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
     }
 
     @Override
-    public void addPart(BaseVehicleEntity<?> vehicle) {
-        //todo clean condition
-        if(!(vehicle instanceof IModuleContainer.IPropulsionContainer) || !(((IModuleContainer.IPropulsionContainer) vehicle).getPropulsion().getPhysicsHandler()  instanceof WheelsPhysicsHandler))
-            throw new IllegalStateException("The entity " + vehicle + " has PartWheels, but does not implement IHavePropulsion or the propulsion is not a WheelsModule !");
-        ((WheelsPhysicsHandler) ((IModuleContainer.IPropulsionContainer) vehicle).getPropulsion().getPhysicsHandler()).addWheel(this, getDefaultWheelInfo());
-    }
-
-    @Override
-    public void removePart(BaseVehicleEntity<?> vehicle) {
-        ((WheelsPhysicsHandler) ((IModuleContainer.IPropulsionContainer) vehicle).getPropulsion().getPhysicsHandler()).removeWheel(getId());
-    }
-
-    @Override
     public DynamXDebugOption getDebugOption() {
         return DynamXDebugOptions.WHEELS;
     }

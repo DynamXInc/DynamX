@@ -3,7 +3,6 @@ package fr.dynamx.common.entities.modules;
 import fr.dynamx.api.audio.EnumSoundState;
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.entities.VehicleEntityProperties;
-import fr.dynamx.api.entities.modules.IEngineModule;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.IVehicleController;
 import fr.dynamx.api.events.PhysicsEntityEvent;
@@ -16,7 +15,6 @@ import fr.dynamx.client.sound.EngineSound;
 import fr.dynamx.common.contentpack.type.vehicle.EngineInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
-import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.EnginePhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.engine.AutomaticGearboxHandler;
@@ -42,7 +40,8 @@ import static fr.dynamx.client.ClientProxy.SOUND_HANDLER;
  * @see EnginePhysicsHandler
  */
 @SynchronizedEntityVariable.SynchronizedPhysicsModule()
-public class EngineModule implements IEngineModule<AbstractEntityPhysicsHandler<?, ?>>, IPhysicsModule.IPhysicsUpdateListener, IPhysicsModule.IEntityUpdateListener, IPackInfoReloadListener {
+public class EngineModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, IPhysicsModule.IPhysicsUpdateListener, IPhysicsModule.IEntityUpdateListener, IPackInfoReloadListener, EngineSound.IEngineSoundHandler {
+    //TODO BASE ENGINE WITH NO GEARBOX, NO SOUNDS AND NO INFO
     protected final BaseVehicleEntity<? extends BaseVehiclePhysicsHandler<?>> entity;
     protected EngineInfo engineInfo;
     protected EnginePhysicsHandler physicsHandler;
@@ -72,7 +71,6 @@ public class EngineModule implements IEngineModule<AbstractEntityPhysicsHandler<
      *
      * @return All engine properties, see {@link fr.dynamx.api.entities.VehicleEntityProperties.EnumEngineProperties}
      */
-    @Override
     public float[] getEngineProperties() {
         return engineProperties.get();
     }
@@ -97,10 +95,6 @@ public class EngineModule implements IEngineModule<AbstractEntityPhysicsHandler<
         return physicsHandler;
     }
 
-    /**
-     * Used for synchronization, don't use this
-     */
-    @Override
     public void setEngineProperties(float[] engineProperties) {
         this.engineProperties.set(engineProperties);
     }
@@ -125,7 +119,6 @@ public class EngineModule implements IEngineModule<AbstractEntityPhysicsHandler<
         return (controls.get() & 16) == 16;
     }
 
-    @Override
     public void setEngineStarted(boolean started) {
         if (started) {
             setControls(controls.get() | 32);
@@ -134,9 +127,13 @@ public class EngineModule implements IEngineModule<AbstractEntityPhysicsHandler<
         }
     }
 
-    @Override
     public boolean isEngineStarted() {
         return (EnginePhysicsHandler.inTestFullGo) || ((controls.get() & 32) == 32);
+    }
+
+    @Override
+    public float getSoundPitch() {
+        return getEngineProperty(VehicleEntityProperties.EnumEngineProperties.REVS);
     }
 
     public int getControls() {
@@ -180,9 +177,9 @@ public class EngineModule implements IEngineModule<AbstractEntityPhysicsHandler<
     }
 
     @Override
-    public void initPhysicsEntity(@Nullable AbstractEntityPhysicsHandler<?, ?> handler) {
+    public void initPhysicsEntity(@Nullable BaseVehiclePhysicsHandler<?> handler) {
         if (handler != null) {
-            physicsHandler = new EnginePhysicsHandler(this, (BaseVehiclePhysicsHandler<?>) handler, ((BaseVehiclePhysicsHandler<?>) handler).getPropulsion());
+            physicsHandler = new EnginePhysicsHandler(this, handler, handler.getWheels());
         }
     }
 

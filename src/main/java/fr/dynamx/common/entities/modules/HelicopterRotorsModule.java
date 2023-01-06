@@ -24,11 +24,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  *
  * @see WheelsPhysicsHandler
  */
-public class HelicopterRotorsModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, IPhysicsModule.IDrawableModule<BaseVehicleEntity<?>> {
+public class HelicopterRotorsModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, IPhysicsModule.IDrawableModule<BaseVehicleEntity<?>>, IPhysicsModule.IEntityUpdateListener {
     protected final BaseVehicleEntity<? extends BaseVehiclePhysicsHandler<?>> entity;
     private HelicopterEngineModule engine;
 
-    //TODO private float targetPower;
+    private float curPower, curAngle;
 
     public HelicopterRotorsModule(BaseVehicleEntity<? extends BaseVehiclePhysicsHandler<?>> entity) {
         this.entity = entity;
@@ -37,6 +37,18 @@ public class HelicopterRotorsModule implements IPhysicsModule<BaseVehiclePhysics
     @Override
     public void initEntityProperties() {
         engine = entity.getModuleByType(HelicopterEngineModule.class);
+    }
+
+    @Override
+    public boolean listenEntityUpdates(Side side) {
+        return side.isClient();
+    }
+
+    @Override
+    public void updateEntity() {
+        float targetPower = engine.getPower();
+        curPower = curPower + (targetPower - curPower) / 60; //3-seconds interpolation
+        curAngle += curPower;
     }
 
     @Override
@@ -61,12 +73,7 @@ public class HelicopterRotorsModule implements IPhysicsModule<BaseVehiclePhysics
                 //Translation to the steering wheel rotation point (and render pos)
                 GlStateManager.translate(center.x, center.y, center.z);
                 // Rotating the rotor.
-                if (engine.isEngineStarted()) {
-                    //get power from engine
-                    HelicopterEngineModule d = engine;
-                    float power = d.getPower(); //TODO INTERPOLATION
-                    GlStateManager.rotate((entity.ticksExisted + partialTicks) * partRotor.getRotationSpeed() * power, partRotor.getRotation().x, partRotor.getRotation().y, partRotor.getRotation().z);
-                }
+                GlStateManager.rotate((curAngle + partialTicks * curPower) * partRotor.getRotationSpeed(), partRotor.getRotation().x, partRotor.getRotation().y, partRotor.getRotation().z);
                 //Scale it
                 GlStateManager.scale(helicopterEntity.getPackInfo().getScaleModifier().x, helicopterEntity.getPackInfo().getScaleModifier().y, helicopterEntity.getPackInfo().getScaleModifier().z);
                 //Render it

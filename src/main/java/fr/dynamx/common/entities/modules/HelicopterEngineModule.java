@@ -37,8 +37,6 @@ import java.util.Map;
  */
 @SynchronizedEntityVariable.SynchronizedPhysicsModule
 public class HelicopterEngineModule extends BasicEngineModule {
-    //FIXME CLEAN THIS
-
     @Getter
     @SynchronizedEntityVariable(name = "roll_controls")
     private EntityFloatArrayVariable rollControls = new EntityFloatArrayVariable(SynchronizationRules.CONTROLS_TO_SPECTATORS, new float[2]);
@@ -58,6 +56,12 @@ public class HelicopterEngineModule extends BasicEngineModule {
     }
 
     @Override
+    public void onEngineSwitchedOff() {
+        super.onEngineSwitchedOff();
+        power.set(0f);
+    }
+
+    @Override
     @SideOnly(Side.CLIENT)
     public IVehicleController createNewController() {
         return new HelicopterController(entity, this);
@@ -66,16 +70,19 @@ public class HelicopterEngineModule extends BasicEngineModule {
     //TODO HELICOPTER SOUNDS
 
     @Override
+    @SideOnly(Side.CLIENT)
     protected String getStartingSound(boolean forInterior) {
         return "todo";
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
     protected void updateSounds() {
 
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
     public float getSoundPitch() {
         //TODO
         return 0;

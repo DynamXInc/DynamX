@@ -27,7 +27,7 @@ public class HelicopterPhysicsInfo extends SubInfoType<ModularVehicleInfo> {
     private final float verticalThrustCompensation = 2000;
     @Getter
     @PackFileProperty(configNames = "BrakeForce", defaultValue = "200", description = "The force apllied to the rotor when the player down")
-    private final float brakeForce = 200;
+    private final float brakeForce = 500;
     @Getter
     @PackFileProperty(configNames = "MouseYawForce", defaultValue = "2600", description = "The force applied to the rotor when the player move the mouse")
     private final float mouseYawForce = 2600;

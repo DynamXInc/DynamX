@@ -96,17 +96,28 @@ public abstract class BasicEngineModule implements IPhysicsModule<BaseVehiclePhy
      * If called on client side and if the engine is switched on, plays the starting sound
      */
     public void setControls(int controls) {
-        if (entity.world.isRemote && entity.ticksExisted > 60 && !this.isEngineStarted() && (controls & 32) == 32) {
-            playStartingSound();
-        }
+        if (!this.isEngineStarted() && (controls & 1) == 1)
+            onEngineSwitchedOn();
+        else if(isEngineStarted() && (controls & 1) != 1)
+            onEngineSwitchedOff();
         this.controls.set(controls);
     }
 
+    public void onEngineSwitchedOn() {
+        if (entity.world.isRemote && entity.ticksExisted > 60) {
+            playStartingSound();
+        }
+    }
+
+    public void onEngineSwitchedOff() {
+
+    }
+
     /**
-     * Resets all controls except engine on/off state
+     * Resets all controls except engine on/off state and handbrake
      */
     public void resetControls() {
-        setControls(controls.get() & 32 | (controls.get() & 2));
+        setControls(controls.get() & 1 | (controls.get() & 32));
     }
 
     @Nullable

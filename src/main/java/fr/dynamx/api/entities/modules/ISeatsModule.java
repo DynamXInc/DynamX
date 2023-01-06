@@ -50,7 +50,7 @@ public interface ISeatsModule extends IPhysicsModule {
     /**
      * Used for network sync
      */
-    Map<PartSeat, EntityPlayer> getSeatToPassengerMap();
+    Map<PartSeat, Entity> getSeatToPassengerMap();
 
     /**
      * Called when a {@link MessagePhysicsEntitySync} is received, to update seats on client side
@@ -60,7 +60,7 @@ public interface ISeatsModule extends IPhysicsModule {
     /**
      * @return True if the player is riding the entity
      */
-    boolean isPlayerSitting(EntityPlayer player);
+    boolean isEntitySitting(Entity player);
 
     PartSeat getRidingSeat(Entity entity);
 }

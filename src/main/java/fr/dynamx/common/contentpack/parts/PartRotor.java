@@ -1,13 +1,9 @@
 package fr.dynamx.common.contentpack.parts;
 
-import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.registry.*;
-import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
-import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.physics.entities.modules.HelicopterPhysicsHandler;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import lombok.Getter;

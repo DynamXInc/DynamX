@@ -11,9 +11,7 @@ import fr.dynamx.client.renders.vehicle.RenderBaseVehicle;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.parts.PartRotor;
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.entities.vehicles.HelicopterEntity;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
-import fr.dynamx.common.physics.entities.modules.HelicopterPhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraftforge.common.MinecraftForge;
@@ -22,42 +20,23 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * Basic wheel implementation <br>
- * Works with an {@link EngineModule} but you can use your own engines
+ * Works with an {@link CarEngineModule} but you can use your own engines
  *
  * @see WheelsPhysicsHandler
  */
-public class HelicopterPropulsionModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, IPhysicsModule.IEntityUpdateListener, IPhysicsModule.IPhysicsUpdateListener, IPhysicsModule.IDrawableModule<BaseVehicleEntity<?>> {
+public class HelicopterRotorsModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, IPhysicsModule.IDrawableModule<BaseVehicleEntity<?>> {
     protected final BaseVehicleEntity<? extends BaseVehiclePhysicsHandler<?>> entity;
-    private final HelicopterEngineModule module;
-    protected HelicopterPhysicsHandler helicopterPhysics;
+    private HelicopterEngineModule engine;
 
     //TODO private float targetPower;
 
-    public HelicopterPropulsionModule(BaseVehicleEntity<? extends BaseVehiclePhysicsHandler<?>> entity) {
+    public HelicopterRotorsModule(BaseVehicleEntity<? extends BaseVehiclePhysicsHandler<?>> entity) {
         this.entity = entity;
-        module = entity.getModuleByType(HelicopterEngineModule.class);
     }
 
     @Override
     public void initEntityProperties() {
-    }
-
-    @Override
-    public void initPhysicsEntity(BaseVehiclePhysicsHandler<?> handler) {
-        helicopterPhysics = new HelicopterPhysicsHandler(this, handler);
-    }
-
-    @Override
-    public void postUpdatePhysics(boolean simulatingPhysics) {
-        if (simulatingPhysics) {
-            if (entity.ticksExisted > 10) {
-                //TODO RAYTRACE IF ON GROUND
-            }
-        }
-    }
-
-    public HelicopterPhysicsHandler getPhysicsHandler() {
-        return helicopterPhysics;
+        engine = entity.getModuleByType(HelicopterEngineModule.class);
     }
 
     @Override
@@ -82,10 +61,9 @@ public class HelicopterPropulsionModule implements IPhysicsModule<BaseVehiclePhy
                 //Translation to the steering wheel rotation point (and render pos)
                 GlStateManager.translate(center.x, center.y, center.z);
                 // Rotating the rotor.
-                HelicopterEntity helicopter = (HelicopterEntity) helicopterEntity;
-                if (helicopter.getEngine().isEngineStarted()) {
+                if (engine.isEngineStarted()) {
                     //get power from engine
-                    HelicopterEngineModule d = (HelicopterEngineModule) helicopter.getEngine();
+                    HelicopterEngineModule d = engine;
                     float power = d.getPower(); //TODO INTERPOLATION
                     GlStateManager.rotate((entity.ticksExisted + partialTicks) * partRotor.getRotationSpeed() * power, partRotor.getRotation().x, partRotor.getRotation().y, partRotor.getRotation().z);
                 }

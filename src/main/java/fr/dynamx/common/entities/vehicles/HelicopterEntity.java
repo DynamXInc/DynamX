@@ -8,19 +8,17 @@ import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.common.entities.modules.HelicopterEngineModule;
-import fr.dynamx.common.entities.modules.HelicopterPropulsionModule;
+import fr.dynamx.common.entities.modules.HelicopterRotorsModule;
 import fr.dynamx.common.entities.modules.SeatsModule;
-import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
+import fr.dynamx.common.physics.entities.HelicopterPhysicsHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
 
-public class HelicopterEntity<T extends HelicopterEntity.HelicopterPhysicsHandler<?>> extends BaseVehicleEntity<T> implements
+public class HelicopterEntity<T extends HelicopterPhysicsHandler<?>> extends BaseVehicleEntity<T> implements
         IModuleContainer.ISeatsContainer, IModuleContainer.IDoorContainer {
-    private HelicopterEngineModule engine;
     private SeatsModule seats;
-    private HelicopterPropulsionModule propulsion;
     private DoorsModule doors;
 
     public HelicopterEntity(World world) {
@@ -49,28 +47,14 @@ public class HelicopterEntity<T extends HelicopterEntity.HelicopterPhysicsHandle
                 passenger.prevRotationPitch = 0;
             }
         });
-        //Take care to add propulsion BEFORE engine (the engine needs a propulsion)
-        modules.add(propulsion = new HelicopterPropulsionModule(this));
-
+        modules.add(new HelicopterRotorsModule(this));
         super.createModules(modules);
-
-        engine = getModuleByType(HelicopterEngineModule.class);
         doors = getModuleByType(DoorsModule.class);
     }
 
     @Override
     public ModularVehicleInfo createInfo(String infoName) {
         return DynamXObjectLoaders.HELICOPTERS.findInfo(infoName);
-    }
-
-    @Nonnull
-    public HelicopterEngineModule getEngine() {
-        return engine;
-    }
-
-    @Nonnull
-    public HelicopterPropulsionModule getPropulsion() {
-        return propulsion;
     }
 
     @Override
@@ -89,11 +73,5 @@ public class HelicopterEntity<T extends HelicopterEntity.HelicopterPhysicsHandle
     @Override
     public BaseVehicleEntity<?> cast() {
         return this;
-    }
-
-    public static class HelicopterPhysicsHandler<A extends HelicopterEntity<?>> extends BaseVehiclePhysicsHandler<A> {
-        public HelicopterPhysicsHandler(A entity) {
-            super(entity);
-        }
     }
 }

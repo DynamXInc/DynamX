@@ -10,6 +10,7 @@ import fr.dynamx.client.sound.EngineSound;
 import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.modules.BasicEngineModule;
 import fr.dynamx.common.entities.modules.SeatsModule;
 import fr.dynamx.common.entities.modules.WheelsModule;
 import lombok.Getter;
@@ -259,9 +260,9 @@ public class VehicleEntityEvent extends Event {
          * The {@link fr.dynamx.api.entities.modules.IEngineModule} of the entity, responsible for sounds update
          */
         @Getter
-        private final EngineSound.IEngineSoundHandler module;
+        private final BasicEngineModule module;
 
-        public UpdateSounds(BaseVehicleEntity<?> vehicleEntity, EngineSound.IEngineSoundHandler module, PhysicsEntityEvent.Phase phase) {
+        public UpdateSounds(BaseVehicleEntity<?> vehicleEntity, BasicEngineModule module, PhysicsEntityEvent.Phase phase) {
             super(Side.CLIENT, vehicleEntity);
             this.eventPhase = phase;
             this.module = module;

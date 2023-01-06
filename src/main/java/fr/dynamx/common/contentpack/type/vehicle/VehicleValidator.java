@@ -11,7 +11,7 @@ public interface VehicleValidator {
     void validate(ModularVehicleInfo info);
 
     VehicleValidator CAR_VALIDATOR = info -> {
-        EngineInfo engine = info.getSubPropertyByType(EngineInfo.class);
+        CarEngineInfo engine = info.getSubPropertyByType(CarEngineInfo.class);
         if (engine == null) //This will prevent any crash when spawning the vehicle
             throw new IllegalArgumentException("Car " + info.getFullName() + " has no engine");
         if (engine.getEngineSounds() == null)
@@ -26,7 +26,7 @@ public interface VehicleValidator {
             DynamXErrorManager.addPackError(info.getPackName(), "config_error", ErrorLevel.FATAL, info.getName(), "Missing trailer config !");
     };
     VehicleValidator BOAT_VALIDATOR = info -> {
-        EngineInfo engine = info.getSubPropertyByType(EngineInfo.class);
+        CarEngineInfo engine = info.getSubPropertyByType(CarEngineInfo.class);
         if (engine == null)
             throw new IllegalArgumentException("Boat " + info.getFullName() + " has no engine");
     };

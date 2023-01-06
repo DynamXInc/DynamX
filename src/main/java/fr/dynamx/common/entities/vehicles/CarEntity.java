@@ -7,7 +7,6 @@ import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
-import fr.dynamx.common.entities.modules.EngineModule;
 import fr.dynamx.common.entities.modules.SeatsModule;
 import fr.dynamx.common.entities.modules.WheelsModule;
 import fr.dynamx.common.physics.entities.BaseWheeledVehiclePhysicsHandler;
@@ -18,9 +17,8 @@ import javax.annotation.Nonnull;
 
 public class CarEntity<T extends CarEntity.CarPhysicsHandler<?>> extends BaseVehicleEntity<T> implements
         IModuleContainer.ISeatsContainer, IModuleContainer.IDoorContainer {
-    private EngineModule engine;
     private SeatsModule seats;
-    private WheelsModule propulsion;
+    private WheelsModule wheels;
     private DoorsModule doors;
 
     public CarEntity(World world) {
@@ -40,12 +38,9 @@ public class CarEntity<T extends CarEntity.CarPhysicsHandler<?>> extends BaseVeh
     public void createModules(ModuleListBuilder modules) {
         //Take care to add seats BEFORE engine (the engine needs to detect dismounts)
         modules.add(seats = new SeatsModule(this));
-        //Take care to add propulsion BEFORE engine (the engine needs a propulsion)
-        modules.add(propulsion = new WheelsModule(this));
-
+        //Take care to add propulsion BEFORE engine (the engine needs a propulsion) (engine is added by its SubInfoType)
+        modules.add(wheels = new WheelsModule(this));
         super.createModules(modules);
-
-        engine = getModuleByType(EngineModule.class);
         doors = getModuleByType(DoorsModule.class);
     }
 
@@ -55,13 +50,8 @@ public class CarEntity<T extends CarEntity.CarPhysicsHandler<?>> extends BaseVeh
     }
 
     @Nonnull
-    public EngineModule getEngine() {
-        return engine;
-    }
-
-    @Nonnull
-    public WheelsModule getPropulsion() {
-        return propulsion;
+    public WheelsModule getWheels() {
+        return wheels;
     }
 
     @Override
@@ -88,7 +78,7 @@ public class CarEntity<T extends CarEntity.CarPhysicsHandler<?>> extends BaseVeh
         }
 
         public WheelsPhysicsHandler getWheels() {
-            return getHandledEntity().getPropulsion().getPhysicsHandler(); //WHEELS
+            return getHandledEntity().getWheels().getPhysicsHandler();
         }
     }
 }

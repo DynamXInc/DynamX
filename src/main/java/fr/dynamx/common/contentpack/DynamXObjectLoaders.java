@@ -33,7 +33,7 @@ public class DynamXObjectLoaders {
     public static ObjectLoader<ArmorObject<?>, DynamXItemArmor<?>> ARMORS = new ObjectLoader<>("armor", ArmorObject::new, new SubInfoTypesRegistry<>());
     public static ObjectLoader<PropObject<?>, ItemProps<?>> PROPS = new ObjectLoader<>("prop", PropObject::new, new SubInfoTypesRegistry<>());
     public static InfoLoader<PartWheelInfo> WHEELS = new InfoLoader<>("wheel", PartWheelInfo::new, new SubInfoTypesRegistry<>());
-    public static InfoLoader<EngineInfo> ENGINES = new InfoLoader<>("engine", EngineInfo::new, new SubInfoTypesRegistry<>());
+    public static InfoLoader<CarEngineInfo> ENGINES = new InfoLoader<>("engine", CarEngineInfo::new, new SubInfoTypesRegistry<>());
     public static SoundInfoLoader SOUNDS = new SoundInfoLoader("sounds", SoundListInfo::new);
 
     static {

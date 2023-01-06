@@ -329,7 +329,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
      * @param sounds  The loaded sounds
      * @return A new, fresh, vehicle
      */
-    public boolean build(Map<String, PartWheelInfo> wheels, Map<String, EngineInfo> engines, Map<String, SoundListInfo> sounds) {
+    public boolean build(Map<String, PartWheelInfo> wheels, Map<String, CarEngineInfo> engines, Map<String, SoundListInfo> sounds) {
         ObjModelPath modelPath = DynamXUtils.getModelPath(getPackName(), model);
         try {
             if (useHullShape)
@@ -372,7 +372,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
         }
         //Attach engine
         if (defaultEngine != null) {
-            EngineInfo engine = engines.get(defaultEngine);
+            CarEngineInfo engine = engines.get(defaultEngine);
             if (engine == null)
                 throw new IllegalArgumentException("Engine " + defaultEngine + " of " + getFullName() + " was not found, check file names and previous loading errors !");
             engine.appendTo(this);

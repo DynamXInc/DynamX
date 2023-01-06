@@ -2,8 +2,7 @@ package fr.dynamx.common.physics.entities.modules;
 
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.common.contentpack.type.vehicle.GearInfo;
-import fr.dynamx.common.entities.modules.EngineModule;
-import fr.dynamx.common.entities.modules.WheelsModule;
+import fr.dynamx.common.entities.modules.CarEngineModule;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.engine.AutomaticGearboxHandler;
 import fr.dynamx.common.physics.entities.parts.engine.Engine;
@@ -15,10 +14,11 @@ import java.util.List;
 
 /**
  * @see IEnginePhysicsHandler
- * @see EngineModule
+ * @see CarEngineModule
  */
 public class EnginePhysicsHandler implements IPackInfoReloadListener {
-    private final EngineModule module;
+    //TODO HANDLE STEERING IN CAR PHYSICS HANDLER
+    private final CarEngineModule module;
     private final BaseVehiclePhysicsHandler<?> handler;
     private final WheelsPhysicsHandler propulsionHandler;
     @Getter
@@ -32,7 +32,7 @@ public class EnginePhysicsHandler implements IPackInfoReloadListener {
     private float accelerationForce;
     private float steeringForce = 0;
 
-    public EnginePhysicsHandler(EngineModule module, BaseVehiclePhysicsHandler<?> handler, WheelsPhysicsHandler propulsionHandler) {
+    public EnginePhysicsHandler(CarEngineModule module, BaseVehiclePhysicsHandler<?> handler, WheelsPhysicsHandler propulsionHandler) {
         this.module = module;
         this.handler = handler;
         this.propulsionHandler = propulsionHandler;

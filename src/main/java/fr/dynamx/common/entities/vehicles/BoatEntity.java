@@ -9,7 +9,7 @@ import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.contentpack.parts.PartFloat;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.BoatEngineModule;
-import fr.dynamx.common.entities.modules.EngineModule;
+import fr.dynamx.common.entities.modules.CarEngineModule;
 import fr.dynamx.common.entities.modules.SeatsModule;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
@@ -20,7 +20,7 @@ import net.minecraft.world.World;
 import javax.annotation.Nonnull;
 
 public class BoatEntity<T extends BoatEntity.BoatPhysicsHandler<?>> extends BaseVehicleEntity<T> implements IModuleContainer.ISeatsContainer {
-    private EngineModule engine;
+    private CarEngineModule engine;
     private SeatsModule seats;
     private BoatEngineModule propulsion;
 
@@ -45,11 +45,11 @@ public class BoatEntity<T extends BoatEntity.BoatPhysicsHandler<?>> extends Base
         modules.add(propulsion = new BoatEngineModule(this));
 
         super.createModules(modules);
-        engine = getModuleByType(EngineModule.class);
+        engine = getModuleByType(CarEngineModule.class);
     }
 
     @Nonnull
-    public EngineModule getEngine() {
+    public CarEngineModule getEngine() {
         return engine;
     }
 

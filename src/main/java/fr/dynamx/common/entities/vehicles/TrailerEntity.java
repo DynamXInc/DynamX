@@ -42,7 +42,7 @@ public class TrailerEntity<T extends TrailerEntity.TrailerPhysicsHandler<?>> ext
     }
 
     @Nonnull
-    public WheelsModule getPropulsion() {
+    public WheelsModule getWheels() {
         return wheels;
     }
 
@@ -75,7 +75,7 @@ public class TrailerEntity<T extends TrailerEntity.TrailerPhysicsHandler<?>> ext
         }
 
         public WheelsPhysicsHandler getWheels() {
-            return getHandledEntity().getPropulsion().getPhysicsHandler(); //WHEELS
+            return getHandledEntity().getWheels().getPhysicsHandler(); //WHEELS
         }
     }
 }

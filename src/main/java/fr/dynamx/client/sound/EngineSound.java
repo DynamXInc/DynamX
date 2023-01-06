@@ -3,12 +3,13 @@ package fr.dynamx.client.sound;
 import fr.dynamx.api.audio.EnumSoundState;
 import fr.dynamx.api.audio.IDynamXSoundHandler;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.modules.BasicEngineModule;
 
 public class EngineSound extends VehicleSound {
-    private final IEngineSoundHandler engine;
+    private final BasicEngineModule engine;
     private final fr.dynamx.common.contentpack.type.vehicle.EngineSound soundIn;
 
-    public EngineSound(fr.dynamx.common.contentpack.type.vehicle.EngineSound sound, BaseVehicleEntity<?> vehicle, IEngineSoundHandler engine) {
+    public EngineSound(fr.dynamx.common.contentpack.type.vehicle.EngineSound sound, BaseVehicleEntity<?> vehicle, BasicEngineModule engine) {
         super(sound.getSoundName(), vehicle);
         this.soundIn = sound;
         this.engine = engine;
@@ -81,11 +82,5 @@ public class EngineSound extends VehicleSound {
 
         //System.out.println(pitch+" "+value+" "+soundIn.pitchRange[1]+" "+min);
         return pitch;
-    }
-
-    public interface IEngineSoundHandler {
-        boolean isEngineStarted();
-
-        float getSoundPitch();
     }
 }

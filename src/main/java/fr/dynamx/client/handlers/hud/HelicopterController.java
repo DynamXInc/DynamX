@@ -2,13 +2,7 @@ package fr.dynamx.client.handlers.hud;
 
 import fr.aym.acsguis.component.GuiComponent;
 import fr.aym.acsguis.component.panel.GuiPanel;
-import fr.aym.acsguis.component.style.AutoStyleHandler;
-import fr.aym.acsguis.component.style.ComponentStyleManager;
-import fr.aym.acsguis.component.textarea.GuiLabel;
 import fr.aym.acsguis.component.textarea.UpdatableGuiLabel;
-import fr.aym.acsguis.cssengine.selectors.EnumSelectorContext;
-import fr.aym.acsguis.cssengine.style.EnumCssStyleProperties;
-import fr.aym.acsguis.utils.GuiConstants;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.entities.modules.IVehicleController;
@@ -16,17 +10,12 @@ import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.client.camera.CameraSystem;
 import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.client.handlers.KeyHandler;
-import fr.dynamx.common.contentpack.type.vehicle.EngineInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.HelicopterEngineModule;
 import fr.dynamx.common.entities.vehicles.HelicopterEntity;
-import fr.dynamx.common.physics.entities.modules.HelicopterEnginePhysicsHandler;
+import fr.dynamx.common.physics.entities.HelicopterPhysicsHandler;
 import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.client.event.MouseEvent;
@@ -35,15 +24,14 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import org.lwjgl.opengl.GL11;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 @Mod.EventBusSubscriber(modid = DynamXConstants.ID, value = Side.CLIENT)
 public class HelicopterController implements IVehicleController {
+    //TODO CLEAN
+
     public static final ResourceLocation STYLE = new ResourceLocation(DynamXConstants.ID, "css/vehicle_hud.css");
     private static final Minecraft MC = Minecraft.getMinecraft();
 
@@ -75,12 +63,11 @@ public class HelicopterController implements IVehicleController {
     @SubscribeEvent
     public static void tickMouse(MouseEvent event) {
         if (MC.player.getRidingEntity() instanceof HelicopterEntity) {
-            //System.out.println("Dx is " + event.getDx() + " Dy is " + event.getDy());
-            HelicopterEnginePhysicsHandler.dx = event.getDx();
-            HelicopterEnginePhysicsHandler.dy = event.getDy();
+            HelicopterEngineModule engineModule = ((HelicopterEntity<?>) MC.player.getRidingEntity()).getModuleByType(HelicopterEngineModule.class);
+            engineModule.getRollControls().set(0, event.getDx());
+            engineModule.getRollControls().set(1, event.getDy());
         }
     }
-
 
     @Override
     public void update() {
@@ -144,9 +131,9 @@ public class HelicopterController implements IVehicleController {
             MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.ControllerUpdate<>(entity, this));
             int controls = 0;
             if (accelerating)
-                controls = controls | 1;
-            if (handbraking)
                 controls = controls | 2;
+            if (handbraking)
+                controls = controls | 32;
             if (reversing)
                 controls = controls | 4;
             if (turningLeft)
@@ -154,7 +141,7 @@ public class HelicopterController implements IVehicleController {
             if (turningRight)
                 controls = controls | 16;
             if (isEngineStarted)
-                controls = controls | 32;
+                controls = controls | 1;
             engine.setControls(controls);
         }
     }
@@ -176,12 +163,6 @@ public class HelicopterController implements IVehicleController {
         speed.add(new UpdatableGuiLabel("power %f", s -> String.format(s, engine.getPower())).setCssId("engine_gear"));
 
         //panel.add(new UpdatableGuiLabel("                             AngleFront %f", s -> String.format(s, HelicopterEnginePhysicsHandler.AngleFront)).setCssId("engine_gear"));
-
-        //Debug
-        String cclass = ClientDebugSystem.enableDebugDrawing ? "hud_label_debug" : "hud_label_hidden";
-        panel.add(new UpdatableGuiLabel("Handbrake : %s", s -> String.format(s, (engine.isHandBraking() ? "§cON" : "§aOFF"))).setCssId("handbrake_state").setCssClass(cclass));
-        panel.add(new UpdatableGuiLabel("Sounds : %s", s -> String.format(s, (engine.getCurrentEngineSound() == null ? "none" : engine.getCurrentEngineSound().getSoundName()))).setCssId("engine_sounds").setCssClass(cclass));
-
         panel.setCssId("engine_hud");
         return panel;
     }

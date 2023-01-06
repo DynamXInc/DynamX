@@ -2,12 +2,9 @@ package fr.dynamx.common.entities.modules;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
-import fr.dynamx.client.renders.RenderPhysicsEntity;
 import fr.dynamx.common.contentpack.type.vehicle.BoatEngineInfo;
 import fr.dynamx.common.entities.vehicles.BoatEntity;
 import fr.dynamx.utils.maths.DynamXGeometry;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BoatEngineModule implements IPhysicsModule<BoatEntity.BoatPhysicsHandler<?>> {
     private final BoatEngineInfo info;
@@ -24,7 +21,7 @@ public class BoatEngineModule implements IPhysicsModule<BoatEntity.BoatPhysicsHa
 
     public class BoatEngineHandler {
         //TODO CHANGE ENGINE
-        public void accelerate(EngineModule module, float strength, float speedLimit) {
+        public void accelerate(CarEngineModule module, float strength, float speedLimit) {
             Vector3f look = new Vector3f(0, 0, 1);
             look = DynamXGeometry.rotateVectorByQuaternion(look, boat.physicsRotation);
             look.multLocal(100 * strength);

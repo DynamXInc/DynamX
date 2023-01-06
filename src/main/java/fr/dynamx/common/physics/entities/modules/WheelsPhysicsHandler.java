@@ -7,7 +7,7 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.common.contentpack.parts.PartWheel;
 import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.entities.modules.EngineModule;
+import fr.dynamx.common.entities.modules.CarEngineModule;
 import fr.dynamx.common.entities.modules.WheelsModule;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.BaseWheeledVehiclePhysicsHandler;
@@ -106,7 +106,7 @@ public class WheelsPhysicsHandler {
         }
     }
 
-    public void accelerate(EngineModule engine, float strength, float speedLimit) {
+    public void accelerate(CarEngineModule engine, float strength, float speedLimit) {
         EnginePhysicsHandler module = engine.getPhysicsHandler();
         if (module.getEngine().isStarted()) {
             for (WheelPhysics wheelPhysics : vehicleWheelData) {
@@ -151,7 +151,7 @@ public class WheelsPhysicsHandler {
         }
     }
 
-    public void applyEngineBraking(EngineModule engine) {
+    public void applyEngineBraking(CarEngineModule engine) {
         disengageEngine();
         for (int i = 0; i < getNumWheels(); i++) {
             WheelPhysics wheelPhysics = getWheel(i);

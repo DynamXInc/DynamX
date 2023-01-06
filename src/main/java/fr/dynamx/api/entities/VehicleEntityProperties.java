@@ -1,6 +1,7 @@
 package fr.dynamx.api.entities;
 
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.modules.CarEngineModule;
 import net.minecraftforge.common.util.EnumHelper;
 
 /**
@@ -31,7 +32,7 @@ public class VehicleEntityProperties {
     }
 
     /**
-     * Float properties stored in all {@link fr.dynamx.common.entities.modules.EngineModule}s <br>
+     * Float properties stored in all {@link CarEngineModule}s <br>
      * Describes the engine state
      */
     public enum EnumEngineProperties {
@@ -86,7 +87,7 @@ public class VehicleEntityProperties {
     }
 
     /**
-     * Adds an engine property, each {@link fr.dynamx.common.entities.modules.EngineModule} will contain this property, and it will be automatically synced over the network
+     * Adds an engine property, each {@link CarEngineModule} will contain this property, and it will be automatically synced over the network
      *
      * @param name The property name, should be unique (add your modid)
      * @return The property instance

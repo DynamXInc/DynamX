@@ -37,7 +37,6 @@ public class EntityVariable<T> {
     protected void init(String name, EntityVariableSerializer<?> type) {
         this.name = name;
         this.serializer = (EntityVariableSerializer<T>) type;
-        System.out.println("INIT " + name+" with " + type);
     }
 
     public T get() {
@@ -49,17 +48,14 @@ public class EntityVariable<T> {
         if((value instanceof Float && SyncTracker.different((Float) value, (Float) this.value)) || (!(value instanceof Float) && value != this.value)) {
             this.value = value;
             changed = true;
-            //System.out.println("SET " + value);
         }
     }
 
     public void setChanged(boolean changed) {
-        //System.out.println("Mark change " + value+" "+this);
         this.changed = changed;
     }
 
     public void receiveValue(T value) {
-        ///System.out.println("RCV " + value+" in " +this);
         if(receiveCallback != null)
             receiveCallback.accept(this, value);
         if(value instanceof Map) { //TODO PUT IN SEPARATE CLASS

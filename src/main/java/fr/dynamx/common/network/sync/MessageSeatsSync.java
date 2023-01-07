@@ -6,6 +6,7 @@ import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.network.packets.PhysicsEntityMessage;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 
 import java.util.HashMap;
 import java.util.Map;

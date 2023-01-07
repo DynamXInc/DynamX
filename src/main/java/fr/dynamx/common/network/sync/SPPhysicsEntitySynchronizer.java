@@ -53,7 +53,7 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
             SynchronizedEntityVariableSnapshot<A> targetVar = (SynchronizedEntityVariableSnapshot<A>) other.getReceivedVariables().get(varId);
             if(targetVar != null) {
                 targetVar.read(buf);
-            } else {
+            } else if(other.getEntity().ticksExisted > 20) {
                 DynamXMain.log.error("Var not found " + varId + " " + sourceVar + " " + other.getReceivedVariables() + " on " + entity);
             }
             buf.clear();

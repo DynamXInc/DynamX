@@ -76,7 +76,7 @@ public class SynchronizedEntityVariableRegistry {
         EntityVariableSerializer<?> serializer = EntityVariableTypes.getSerializerRegistry().get(type.getActualTypeArguments()[0]);
         if (serializer == null && type.getActualTypeArguments()[0] instanceof ParameterizedType) {
             serializer = EntityVariableTypes.getSerializerRegistry().get(((ParameterizedType) type.getActualTypeArguments()[0]).getRawType());
-            System.out.println("Second try " + serializer + " " + ((ParameterizedType) type.getActualTypeArguments()[0]).getRawType());
+            //System.out.println("Second try " + serializer + " " + ((ParameterizedType) type.getActualTypeArguments()[0]).getRawType());
         }
         if (serializer == null) {
             //System.out.println(EntityVariableTypes.getSerializerRegistry());

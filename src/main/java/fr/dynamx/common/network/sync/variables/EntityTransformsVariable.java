@@ -1,8 +1,8 @@
-package fr.dynamx.api.network.sync.v3;
+package fr.dynamx.common.network.sync.variables;
 
+import fr.dynamx.api.network.sync.SynchronizationRules;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.entities.PhysicsEntity;
-import fr.dynamx.common.network.sync.v3.DynamXSynchronizedVariables;
 import fr.dynamx.common.network.sync.vars.AttachedBodySynchronizedVariable;
 import fr.dynamx.common.physics.utils.RigidBodyTransform;
 import fr.dynamx.common.physics.utils.SynchronizedRigidBodyTransform;
@@ -12,8 +12,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-public class TransformsSynchronizedVariable extends ListeningSynchronizedEntityVariable<Map<Byte, RigidBodyTransform>> {
-    public TransformsSynchronizedVariable(PhysicsEntity<?> entity, AttachedBodySynchronizedVariable.AttachedBodySynchronizer synchronizer) {
+public class EntityTransformsVariable extends ListeningEntityVariable<Map<Byte, RigidBodyTransform>> {
+    public EntityTransformsVariable(PhysicsEntity<?> entity, AttachedBodySynchronizedVariable.AttachedBodySynchronizer synchronizer) {
         super(((entityPositionDataSynchronizedEntityVariable, transforms) -> {
 //TODO INTPERPOLATION ETC :c
             if (entity.getSynchronizer().getSimulationHolder().isSinglePlayer()) {
@@ -37,7 +37,7 @@ public class TransformsSynchronizedVariable extends ListeningSynchronizedEntityV
                     synchronizer.setPhysicsTransform(transform.getKey(), transform.getValue());
                 }
             }
-        }), SynchronizationRules.PHYSICS_TO_SPECTATORS, DynamXSynchronizedVariables.transformsSerializer, new Callable<Map<Byte, RigidBodyTransform>>() {
+        }), SynchronizationRules.PHYSICS_TO_SPECTATORS, new Callable<Map<Byte, RigidBodyTransform>>() {
             private final Map<Byte, RigidBodyTransform> transforms = new HashMap<>();
 
             @Override
@@ -75,7 +75,7 @@ public class TransformsSynchronizedVariable extends ListeningSynchronizedEntityV
                 }
                 return transforms;
             }
-        }, "parts_pos");
+        });
         this.set(new HashMap<>());
     }
 }

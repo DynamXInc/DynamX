@@ -1,9 +1,10 @@
 package fr.dynamx.server.network;
 
+import fr.dynamx.api.network.sync.EntityVariable;
 import fr.dynamx.api.network.sync.SimulationHolder;
 import fr.dynamx.api.network.sync.SyncTarget;
-import fr.dynamx.api.network.sync.v3.*;
 import fr.dynamx.common.entities.PhysicsEntity;
+import fr.dynamx.common.network.sync.MPPhysicsEntitySynchronizer;
 import fr.dynamx.utils.debug.Profiler;
 import fr.dynamx.utils.optimization.PooledHashMap;
 import fr.dynamx.utils.optimization.Vector3fPool;
@@ -67,7 +68,7 @@ public class ServerPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends
         entity.postUpdatePhysicsWrapper(profiler, true);
     }
 
-    private void sendSyncTo(EntityPlayer p, PooledHashMap<Integer, SynchronizedEntityVariable<?>> varsToSync) {
+    private void sendSyncTo(EntityPlayer p, PooledHashMap<Integer, EntityVariable<?>> varsToSync) {
         //System.out.println("out " + varsToSync);
         if (!varsToSync.isEmpty())
             ServerPhysicsSyncManager.addEntitySync(p, entity, varsToSync);

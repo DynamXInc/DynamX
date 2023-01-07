@@ -2,8 +2,7 @@ package fr.dynamx.server.network;
 
 import com.google.common.collect.Queues;
 import fr.dynamx.api.network.EnumPacketTarget;
-import fr.dynamx.api.network.sync.SynchronizedVariable;
-import fr.dynamx.api.network.sync.v3.SynchronizedEntityVariable;
+import fr.dynamx.api.network.sync.EntityVariable;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.network.sync.MessageMultiPhysicsEntitySync;
@@ -74,7 +73,7 @@ public class PlayerSyncBuffer {
      * @param entity     The entity to sync
      * @param varsToSync Its data
      */
-    public <T extends PhysicsEntity<?>> void addEntitySync(T entity, PooledHashMap<Integer, SynchronizedEntityVariable<?>> varsToSync) {
+    public <T extends PhysicsEntity<?>> void addEntitySync(T entity, PooledHashMap<Integer, EntityVariable<?>> varsToSync) {
         SyncItem<T> sync = new SyncItem<>(entity, varsToSync);
         if (delayedPackets.contains(sync)) {
             for (SyncItem<?> s : delayedPackets) {
@@ -201,10 +200,10 @@ public class PlayerSyncBuffer {
      */
     private class SyncItem<T extends PhysicsEntity<?>> {
         private final T entity;
-        private final PooledHashMap<Integer, SynchronizedEntityVariable<?>> varsToSync;
+        private final PooledHashMap<Integer, EntityVariable<?>> varsToSync;
         private int skippedSends;
 
-        private SyncItem(T entity, PooledHashMap<Integer, SynchronizedEntityVariable<?>> varsToSync) {
+        private SyncItem(T entity, PooledHashMap<Integer, EntityVariable<?>> varsToSync) {
             this.entity = entity;
             this.varsToSync = varsToSync;
         }

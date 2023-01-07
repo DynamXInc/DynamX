@@ -1,17 +1,19 @@
-package fr.dynamx.api.network.sync.v3;
+package fr.dynamx.common.network.sync.variables;
 
 import fr.dynamx.api.network.sync.SimulationHolder;
 import fr.dynamx.api.network.sync.SyncTarget;
+import fr.dynamx.api.network.sync.EntityVariable;
+import fr.dynamx.api.network.sync.SynchronizationRules;
 import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.concurrent.Callable;
 import java.util.function.BiConsumer;
 
-public class ListeningSynchronizedEntityVariable<T> extends SynchronizedEntityVariable<T> {
+public class ListeningEntityVariable<T> extends EntityVariable<T> {
     private final Callable<T> valueUpdater;
 
-    public ListeningSynchronizedEntityVariable(BiConsumer<SynchronizedEntityVariable<T>, T> receiveCallback, SynchronizationRules synchronizationRule, SynchronizedVariableSerializer<T> serializer, Callable<T> valueUpdater, String name) {
-        super(receiveCallback, synchronizationRule, serializer, name);
+    public ListeningEntityVariable(BiConsumer<EntityVariable<T>, T> receiveCallback, SynchronizationRules synchronizationRule, Callable<T> valueUpdater) {
+        super(receiveCallback, synchronizationRule);
         this.valueUpdater = valueUpdater;
     }
 

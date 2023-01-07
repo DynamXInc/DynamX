@@ -1,14 +1,16 @@
-package fr.dynamx.api.network.sync.v3;
+package fr.dynamx.common.network.sync.variables;
 
+import fr.dynamx.api.network.sync.EntityVariable;
+import fr.dynamx.api.network.sync.EntityVariableSerializer;
 import fr.dynamx.utils.optimization.PooledHashMap;
 import io.netty.buffer.ByteBuf;
 
 public class SynchronizedEntityVariableSnapshot<T> {
-    private final SynchronizedVariableSerializer<T> serializer;
+    private final EntityVariableSerializer<T> serializer;
     private T value;
     private boolean updated;
 
-    public SynchronizedEntityVariableSnapshot(SynchronizedVariableSerializer<T> serializer, T initialValue) {
+    public SynchronizedEntityVariableSnapshot(EntityVariableSerializer<T> serializer, T initialValue) {
         this.value = initialValue;
         this.serializer = serializer;
     }
@@ -17,7 +19,7 @@ public class SynchronizedEntityVariableSnapshot<T> {
         return value;
     }
 
-    public void updateVariable(SynchronizedEntityVariable<T> variable) {
+    public void updateVariable(EntityVariable<T> variable) {
         if(updated) {
             variable.receiveValue(value);
             updated = false;

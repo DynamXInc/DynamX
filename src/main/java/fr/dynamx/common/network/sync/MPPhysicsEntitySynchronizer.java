@@ -1,9 +1,11 @@
-package fr.dynamx.api.network.sync.v3;
+package fr.dynamx.common.network.sync;
 
 import com.google.common.collect.Queues;
+import fr.dynamx.api.network.sync.EntityVariable;
 import fr.dynamx.client.network.ClientPhysicsEntitySynchronizer;
 import fr.dynamx.common.entities.PhysicsEntity;
-import fr.dynamx.common.network.sync.MessagePhysicsEntitySync;
+import fr.dynamx.common.network.sync.variables.NetworkActivityTracker;
+import fr.dynamx.common.network.sync.variables.SynchronizedEntityVariableSnapshot;
 import lombok.Getter;
 
 import java.util.Queue;
@@ -33,7 +35,7 @@ public abstract class MPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> ex
                 if(this instanceof ClientPhysicsEntitySynchronizer) //todo clean
                     NetworkActivityTracker.addReceivedVars(entity, msg.getVarsToRead().keySet().stream().map(v -> getSynchronizedVariables().get(v)).collect(Collectors.toList()));
             }
-            getReceivedVariables().forEach((key, value) -> ((SynchronizedEntityVariableSnapshot<Object>) value).updateVariable((SynchronizedEntityVariable<Object>) getSynchronizedVariables().get(key)));
+            getReceivedVariables().forEach((key, value) -> ((SynchronizedEntityVariableSnapshot<Object>) value).updateVariable((EntityVariable<Object>) getSynchronizedVariables().get(key)));
         }
     }
 

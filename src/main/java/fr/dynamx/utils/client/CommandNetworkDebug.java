@@ -1,6 +1,6 @@
 package fr.dynamx.utils.client;
 
-import fr.dynamx.api.network.sync.v3.NetworkActivityTracker;
+import fr.dynamx.common.network.sync.variables.NetworkActivityTracker;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;

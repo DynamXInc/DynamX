@@ -27,7 +27,7 @@ public class TransformPool extends ClassPool<Transform> {
     }
 
     public TransformPool() {
-        super(100);
+        super(1000, 100);
     }
 
     @Override

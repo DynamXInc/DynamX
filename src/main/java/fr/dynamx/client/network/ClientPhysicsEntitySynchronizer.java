@@ -5,13 +5,14 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.IVehicleController;
 import fr.dynamx.api.network.sync.*;
-import fr.dynamx.api.network.sync.v3.*;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.network.packets.MessageWalkingPlayer;
+import fr.dynamx.common.network.sync.MPPhysicsEntitySynchronizer;
 import fr.dynamx.common.network.sync.MessagePhysicsEntitySync;
+import fr.dynamx.common.network.sync.variables.NetworkActivityTracker;
 import fr.dynamx.common.network.sync.vars.EntityPhysicsState;
 import fr.dynamx.utils.debug.Profiler;
 import fr.dynamx.utils.optimization.PooledHashMap;
@@ -84,7 +85,7 @@ public class ClientPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends
     }
 
     protected void sendVariables() {
-        PooledHashMap<Integer, SynchronizedEntityVariable<?>> syncData = getVarsToSync(Side.CLIENT, SyncTarget.SERVER);
+        PooledHashMap<Integer, EntityVariable<?>> syncData = getVarsToSync(Side.CLIENT, SyncTarget.SERVER);
         //System.out.println("Send sync "+syncData+" "+ClientPhysicsSyncManager.simulationTime);
         NetworkActivityTracker.addSentVars(entity, syncData.values());
         if (!syncData.isEmpty()) {

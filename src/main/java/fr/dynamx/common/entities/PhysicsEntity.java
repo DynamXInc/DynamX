@@ -7,15 +7,16 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.modules.IEntityJoints;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.events.PhysicsEntityEvent;
-import fr.dynamx.api.network.sync.SimulationHolder;
-import fr.dynamx.api.network.sync.v3.PhysicsEntitySynchronizer;
+import fr.dynamx.common.network.sync.variables.EntityPosVariable;
+import fr.dynamx.common.network.sync.PhysicsEntitySynchronizer;
+import fr.dynamx.api.network.sync.SynchronizedEntityVariableRegistry;
 import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.api.physics.entities.EntityPhysicsState;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.items.DynamXItemRegistry;
-import fr.dynamx.common.network.sync.v3.DynamXSynchronizedVariables;
+import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.player.WalkingOnPlayerController;
 import fr.dynamx.common.physics.terrain.PhysicsEntityTerrainLoader;
@@ -49,6 +50,7 @@ import java.util.Map;
  *
  * @param <T> The physics handler type
  */
+@SynchronizedEntityVariable.SynchronizedPhysicsModule()
 public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>> extends Entity implements ICollidableObject, IEntityAdditionalSpawnData {
     /**
      * Entity network
@@ -140,20 +142,18 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     protected void entityInit() {
     }
 
-    public final fr.dynamx.api.network.sync.v3.PosSynchronizedVariable synchronizedPosition = new fr.dynamx.api.network.sync.v3.PosSynchronizedVariable(this);
+    @SynchronizedEntityVariable(name = "pos")
+    public final EntityPosVariable synchronizedPosition = new EntityPosVariable(this);
 
     /**
      * TODO UPDATE DOC
-     *
+     * <p>
      * Adds the {@link fr.dynamx.api.network.sync.SynchronizedVariable} used to synchronize this module <br>
      * The variables must only be added on the side which has the authority over the data (typically the server) <br>
      * Fired on modules initialization and on {@link fr.dynamx.api.network.sync.SimulationHolder} changes
-     *
-     * @param side             The current side
-     * @param simulationHolder The new holder of the simulation of the entity (see {@link SimulationHolder})
      */
-    public void registerSynchronizedVariables(Side side, SimulationHolder simulationHolder) {
-        getSynchronizer().registerVariable(DynamXSynchronizedVariables.POS, synchronizedPosition);
+    public void registerSynchronizedVariables() {
+        SynchronizedEntityVariableRegistry.addVarsOf(this.getSynchronizer(), this);
     }
 
     /**
@@ -181,6 +181,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
             }
             initPhysicsEntity(usesPhysicsWorld);
             getSynchronizer().setSimulationHolder(getSynchronizer().getDefaultSimulationHolder(), null);
+            registerSynchronizedVariables();
             MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Init(world.isRemote ? Side.CLIENT : Side.SERVER, this, usesPhysicsWorld));
             initialized = 2;
         }

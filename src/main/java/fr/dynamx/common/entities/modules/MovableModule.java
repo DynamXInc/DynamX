@@ -4,20 +4,16 @@ import com.jme3.bullet.joints.Constraint;
 import fr.dynamx.api.entities.modules.AttachModule;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
-import fr.dynamx.api.network.sync.SimulationHolder;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.entities.modules.movables.AttachObjects;
 import fr.dynamx.common.entities.modules.movables.MoveObjects;
 import fr.dynamx.common.entities.modules.movables.PickObjects;
-import fr.dynamx.common.network.sync.v3.DynamXSynchronizedVariables;
-import fr.dynamx.common.network.sync.vars.MovableSynchronizedVariable;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.joints.EntityJoint;
 import fr.dynamx.common.physics.joints.JointHandler;
 import fr.dynamx.common.physics.joints.JointHandlerRegistry;
 import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.Arrays;
 
@@ -54,21 +50,6 @@ public class MovableModule implements IPhysicsModule<AbstractEntityPhysicsHandle
             return attachObjects.createJointBetween2Objects(jointId);
         }
         return null;
-    }
-
-    @Override
-    public void addSynchronizedVariables(Side side, SimulationHolder simulationHolder) {
-        //System.out.println("Add vars " + this+" "+pickObjects+" "+entity.getSynchronizer());
-        if(pickObjects != null) {
-            entity.getSynchronizer().registerVariable(DynamXSynchronizedVariables.MOVABLE_MOVER, pickObjects.mover);
-            entity.getSynchronizer().registerVariable(DynamXSynchronizedVariables.MOVABLE_PICK_DISTANCE, pickObjects.pickDistance);
-            entity.getSynchronizer().registerVariable(DynamXSynchronizedVariables.MOVABLE_PICK_POSITION, pickObjects.localPickPosition);
-        }
-        if(moveObjects != null) {
-            entity.getSynchronizer().registerVariable(DynamXSynchronizedVariables.MOVABLE_PICKER, moveObjects.picker);
-            entity.getSynchronizer().registerVariable(DynamXSynchronizedVariables.MOVABLE_PICKED_ENTITY, moveObjects.pickedEntity);
-            entity.getSynchronizer().registerVariable(DynamXSynchronizedVariables.MOVABLE_IS_PICKED, moveObjects.isPicked);
-        }
     }
 
     @Override

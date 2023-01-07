@@ -5,17 +5,15 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.audio.EnumSoundState;
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
-import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.IPropulsionModule;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent;
-import fr.dynamx.api.network.sync.SimulationHolder;
-import fr.dynamx.api.network.sync.v3.FloatArraySynchronizedVariable;
-import fr.dynamx.api.network.sync.v3.MapSynchronizedVariable;
-import fr.dynamx.api.network.sync.v3.SynchronizationRules;
-import fr.dynamx.api.network.sync.v3.SynchronizedEntityVariable;
+import fr.dynamx.common.network.sync.variables.EntityFloatArrayVariable;
+import fr.dynamx.common.network.sync.variables.EntityMapVariable;
+import fr.dynamx.api.network.sync.EntityVariable;
+import fr.dynamx.api.network.sync.SynchronizationRules;
 import fr.dynamx.api.physics.entities.IPropulsionHandler;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
@@ -31,7 +29,7 @@ import fr.dynamx.common.contentpack.parts.PartWheel;
 import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.contentpack.type.vehicle.SteeringWheelInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.network.sync.v3.DynamXSynchronizedVariables;
+import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
 import fr.dynamx.common.physics.entities.BaseWheeledVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.wheel.WheelPhysics;
@@ -61,17 +59,21 @@ import static fr.dynamx.client.ClientProxy.SOUND_HANDLER;
  *
  * @see WheelsPhysicsHandler
  */
+@SynchronizedEntityVariable.SynchronizedPhysicsModule()
 public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysicsHandler<?>>, IPhysicsModule.IEntityUpdateListener, IPhysicsModule.IPhysicsUpdateListener, IPhysicsModule.IDrawableModule<BaseVehicleEntity<?>>, IPackInfoReloadListener {
-    protected final MapSynchronizedVariable<Byte, PartWheelInfo> wheelInfos = new MapSynchronizedVariable<>((variable, value) -> {
+    @SynchronizedEntityVariable(name = "wheel_infos")
+    protected final EntityMapVariable<Map<Byte, PartWheelInfo>, Byte, PartWheelInfo> wheelInfos = new EntityMapVariable<>((variable, value) -> {
         value.forEach(this::setWheelInfo);
-    }, SynchronizationRules.CONTROLS_TO_SPECTATORS, DynamXSynchronizedVariables.wheelInfosSerializer, "wheel_infos");
+    }, SynchronizationRules.CONTROLS_TO_SPECTATORS);
     /**
      * Wheels visual states, based on the physical states
      */
-    protected SynchronizedEntityVariable<WheelState[]> wheelsStates;
+    @SynchronizedEntityVariable(name = "wheel_states")
+    protected EntityVariable<WheelState[]> wheelsStates;
     // [0;4] SkidInfo [4;8] Friction [8;12] longitudinal [12;16] lateral [16;20] getRotationDelta
     // todo clean wheelProperties system
-    public FloatArraySynchronizedVariable skidInfos = new FloatArraySynchronizedVariable(SynchronizationRules.PHYSICS_TO_SPECTATORS, "skid_infos");
+    @SynchronizedEntityVariable(name = "skid_infos")
+    public EntityFloatArrayVariable skidInfos = new EntityFloatArrayVariable(SynchronizationRules.PHYSICS_TO_SPECTATORS, null);
 
     protected byte[] wheelsTextureId;
 
@@ -89,7 +91,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
 
     public WheelsModule(BaseVehicleEntity<? extends BaseWheeledVehiclePhysicsHandler<?>> entity) {
         this.entity = entity;
-        this.wheelsStates = new SynchronizedEntityVariable<>((variable, value) -> {
+        this.wheelsStates = new EntityVariable<>((variable, value) -> {
             if (!entity.getSynchronizer().getSimulationHolder().ownsControls(FMLCommonHandler.instance().getEffectiveSide())) {
                 if (DynamXMain.proxy.shouldUseBulletSimulation(entity.world)) {
                     for (int i = 0; i < value.length; i++) {
@@ -102,13 +104,13 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
                     }
                 }
             }
-        }, SynchronizationRules.CONTROLS_TO_SPECTATORS, DynamXSynchronizedVariables.wheelStatesSerializer, "wheel_states");
+        }, SynchronizationRules.CONTROLS_TO_SPECTATORS);
     }
 
     @Override
     public void onPackInfosReloaded() {
         for (PartWheel part : entity.getPackInfo().getPartsByType(PartWheel.class)) {
-            if(wheelInfos.get().containsKey(part.getId()) && Objects.equals(wheelInfos.get().get(part.getId()).getFullName(), part.getDefaultWheelInfo().getFullName()))
+            if (wheelInfos.get().containsKey(part.getId()) && Objects.equals(wheelInfos.get().get(part.getId()).getFullName(), part.getDefaultWheelInfo().getFullName()))
                 setWheelInfo(part.getId(), part.getDefaultWheelInfo());
         }
     }
@@ -283,13 +285,6 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
 
     public float[] getSkidInfos() {
         return skidInfos.get();
-    }
-
-    @Override
-    public void addSynchronizedVariables(Side side, SimulationHolder simulationHolder) {
-        entity.getSynchronizer().registerVariable(DynamXSynchronizedVariables.WHEEL_INFOS, wheelInfos);
-        entity.getSynchronizer().registerVariable(DynamXSynchronizedVariables.WHEEL_STATES, wheelsStates);
-        entity.getSynchronizer().registerVariable(DynamXSynchronizedVariables.SKID_INFOS, skidInfos);
     }
 
     @Override

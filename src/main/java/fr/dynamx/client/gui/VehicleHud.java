@@ -9,7 +9,6 @@ import fr.dynamx.api.entities.modules.IVehicleController;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.api.network.sync.ClientEntityNetHandler;
 import fr.dynamx.client.network.ClientPhysicsSyncManager;
-import fr.dynamx.client.network.UdpClientPhysicsEntityNetHandler;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.util.ResourceLocation;

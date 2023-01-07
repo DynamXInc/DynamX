@@ -2,11 +2,8 @@ package fr.dynamx.common.network.sync.vars;
 
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.network.sync.PhysicsEntityNetHandler;
-import fr.dynamx.client.network.ClientPhysicsSyncManager;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.physics.utils.RigidBodyTransform;
-import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.Vector3fPool;
 
 import java.util.HashMap;

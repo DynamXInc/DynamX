@@ -24,7 +24,7 @@ public class BoundingBoxPool extends ClassPool<BoundingBox> {
     }
 
     public BoundingBoxPool() {
-        super(30);
+        super(100, 30);
     }
 
     @Override

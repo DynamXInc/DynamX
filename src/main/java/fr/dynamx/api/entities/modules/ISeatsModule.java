@@ -1,8 +1,7 @@
 package fr.dynamx.api.entities.modules;
 
 import fr.dynamx.api.entities.IModuleContainer;
-import fr.dynamx.api.network.sync.PhysicsEntityNetHandler;
-import fr.dynamx.api.network.sync.v3.PhysicsEntitySynchronizer;
+import fr.dynamx.common.network.sync.PhysicsEntitySynchronizer;
 import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.network.sync.MessagePhysicsEntitySync;

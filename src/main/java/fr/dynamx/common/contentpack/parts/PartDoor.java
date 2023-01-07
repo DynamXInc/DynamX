@@ -13,6 +13,7 @@ import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
+import fr.dynamx.common.handlers.TaskScheduler;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.debug.DynamXDebugOption;
@@ -112,9 +113,36 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     @Override
     public boolean interact(BaseVehicleEntity<?> entity, EntityPlayer player) {
         DoorsModule doors = ((IModuleContainer.IDoorContainer) entity).getDoors();
+        if(doors == null)
+            return false;
         if (isEnabled() && !doors.isDoorAttached(getId())) {
             if (!entity.world.isRemote) {
                 doors.spawnDoor(this);
+            }
+        } else if(!isPlayerMounting()) {
+            PartSeat seat = getLinkedSeat(entity);
+            if (player.isSneaking() || seat == null) {
+                doors.switchDoorState(getId());
+            } else {
+                if (isEnabled()) {
+                    if (doors.isDoorOpened(getId())) {
+                        mount(entity, seat, player);
+                        doors.setDoorState(getId(), DoorsModule.DoorState.CLOSING);
+                        return true;
+                    }
+                    isPlayerMounting = true;
+                    doors.setDoorState(getId(), DoorsModule.DoorState.OPENING);
+                    TaskScheduler.schedule(new TaskScheduler.ScheduledTask(getMountDelay()) {
+                        @Override
+                        public void run() {
+                            isPlayerMounting = false;
+                            mount(entity, seat, player);
+                            doors.setDoorState(getId(), DoorsModule.DoorState.CLOSING);
+                        }
+                    });
+                } else {
+                    mount(entity, seat, player);
+                }
             }
         }
         return true;

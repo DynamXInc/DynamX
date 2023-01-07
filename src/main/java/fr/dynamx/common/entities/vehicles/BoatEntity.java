@@ -108,8 +108,8 @@ public class BoatEntity<T extends BoatEntity.BoatPhysicsHandler<?>> extends Base
                 System.out.println("=== === Linear vel " + getLinearVelocity() + " === === Angular vel " + getAngularVelocity() + " === ===");
                 for (PartFloat f : packInfo.getPartsByType(PartFloat.class)) {
                     MutableBoundingBox bb = new MutableBoundingBox(f.box);
-                    bb = DynamXContext.getCollisionHandler().rotateBB(Vector3fPool.get(), bb, getRotation());
-                    double dy = (float) (40 - (getPosition().y + bb.minY));
+                    bb = DynamXContext.getCollisionHandler().rotateBB(Vector3fPool.get(), bb, handledEntity.physicsRotation);
+                    double dy = (float) (40 - (handledEntity.physicsPosition.y + bb.minY));
                     Vector3f p = f.getPosition();
                     Vector3f forcer = new Vector3f();
 

@@ -208,11 +208,11 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
                                 entity.renderRotation,
                                 partialTicks);
                         GlStateManager.rotate(rotQuat);
-                        validRotatedRenders.forEach(renderer -> renderer.render(entity, x, y, z, partialTicks));
+                        validRotatedRenders.forEach(renderer -> renderer.render(entity, this, x, y, z, partialTicks));
                     }
                     GlStateManager.popMatrix();
 
-                    validPureRenders.forEach(renderer -> renderer.render(entity, x, y, z, partialTicks));
+                    validPureRenders.forEach(renderer -> renderer.render(entity, this, x, y, z, partialTicks));
 
                     GlStateManager.enableLighting();
                     GlStateManager.enableTexture2D();

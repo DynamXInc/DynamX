@@ -16,6 +16,7 @@ import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.client.camera.CameraSystem;
 import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.contentpack.parts.PartDoor;
 import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.contentpack.type.vehicle.EngineInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
@@ -108,7 +109,6 @@ public class CarController implements IVehicleController {
         while (car_brake.isPressed()) ;
         while (speedLimiter.isPressed()) ;
         while (car_engineOn.isPressed()) ;
-        while (toggleLockDoor.isPressed()) ;
     }
 
     @Override
@@ -141,23 +141,10 @@ public class CarController implements IVehicleController {
                 }
             }
             if (speedLimiter.isPressed()) {
-                if (speedLimit == Integer.MAX_VALUE)
+                if (speedLimit == Float.MAX_VALUE)
                     speedLimit = Math.abs(engine.getEngineProperties()[0]);
                 else
-                    speedLimit = Integer.MAX_VALUE;
-            }
-
-            if (toggleLockDoor.isPressed()) {
-                if (onCooldown == 0) {
-                    if (entity instanceof IModuleContainer.IDoorContainer && ((IModuleContainer.IDoorContainer) entity).getDoors() != null) {
-                        PartSeat seat = ((IModuleContainer.ISeatsContainer) entity).getSeats().getRidingSeat(MC.player);
-                        DoorsModule doors = ((IModuleContainer.IDoorContainer) entity).getDoors();
-                        if (seat.getLinkedPartDoor(entity) == null)
-                            return;
-                        DynamXContext.getNetwork().sendToServer(new MessageChangeDoorState(entity, doors.getInverseCurrentState(seat.getLinkedPartDoor(entity).getId()), (byte) -1));
-                    }
-                    onCooldown = 30;
-                }
+                    speedLimit = Float.MAX_VALUE;
             }
 
             MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.ControllerUpdate<>(entity, this));
@@ -176,7 +163,6 @@ public class CarController implements IVehicleController {
                 controls = controls | 32;
             engine.setControls(controls);
             engine.setSpeedLimit(speedLimit);
-
         }
     }
 
@@ -217,7 +203,7 @@ public class CarController implements IVehicleController {
         panel.add(speed);
 
         panel.add(new UpdatableGuiLabel("hud.car.speedlimit", s -> {
-            if (speedLimit != Integer.MAX_VALUE) {
+            if (speedLimit != Float.MAX_VALUE) {
                 return I18n.format(s, (int) speedLimit);
             } else {
                 return "";

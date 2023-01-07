@@ -110,15 +110,15 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
                             if (!door.isEnabled() || doorContainer.getDoors().isDoorOpened(door.getId())) {
                                 boolean didMount = mount(vehicleEntity, seats, player);
                                 if (didMount) {
-                                    vehicleEntity.getModuleByType(DoorsModule.class).setDoorState(door.getId(), DoorsModule.DoorState.CLOSE);
+                                    vehicleEntity.getModuleByType(DoorsModule.class).setDoorState(door.getId(), DoorsModule.DoorState.CLOSING);
                                 }
                                 return didMount;
                             } else {
                                 return door.interact(vehicleEntity, player);
                             }
                         }
-                    } else
-                        DynamXMain.log.error("Cannot mount : door not attached : " + linkedDoor);
+                    } //else
+                        //DynamXMain.log.error("Cannot mount : player mounting : " + linkedDoor);
                 } else
                     DynamXMain.log.error("Cannot mount : part door not found : " + linkedDoor);
             }

@@ -27,6 +27,9 @@ public class BuiltinThreadedPhysicsWorld extends BasePhysicsWorld implements Run
     private final Thread myThread;
 
     private final AtomicInteger ticksLate = new AtomicInteger(0);
+
+    private final Semaphore simLock = new Semaphore(1);
+
     private static int myId;
     private boolean alive;
     private static int crashCount;
@@ -71,18 +74,10 @@ public class BuiltinThreadedPhysicsWorld extends BasePhysicsWorld implements Run
         Profiler profiler = Profiler.get();
         while (alive) {
             if (ticksLate.get() > 0) {
-                try {
-                    simLock.acquire();
-                } catch (InterruptedException ignored) {
-                    //System.out.println("Inter 1 !");
-                } //Should not happen (buts actually happens...)
-                //System.out.println("Phi tick start " + GlobalPhysicsTickHandler.tickCounter);
-                //System.out.println("Mais wtf");
                 if (ticksLate.get() > 1) {
                     if (profiler.isActive()) {
                         profiler.printData("Physics thread");
                         profiler.reset();
-                        //System.out.println("Profiler est actif !");
                     }
                     DynamXMain.log.warn("Server too slow, physics will skip " + (ticksLate.get() - 1) + " simulation ticks !");
                     ticksLate.set(1);
@@ -90,12 +85,11 @@ public class BuiltinThreadedPhysicsWorld extends BasePhysicsWorld implements Run
                     if (profiler.isActive() && DynamXMain.proxy.getTickTime() % 20 == 0) {
                         profiler.printData("Physics thread");
                         profiler.reset();
-                        //System.out.println("Profiler est actif !");
                     }
                 }
                 profiler.start(Profiler.Profiles.STEP_SIMULATION);
                 if (ticksLate.get() > 0) {
-                    stepSimulationImpl(profiler);
+                    stepSimulationImpl(profiler, simLock);
 
                     profiler.start(Profiler.Profiles.TICK_TERRAIN);
                     manager.tickTerrain();
@@ -105,7 +99,6 @@ public class BuiltinThreadedPhysicsWorld extends BasePhysicsWorld implements Run
                 }
                 profiler.end(Profiler.Profiles.STEP_SIMULATION);
                 profiler.update();
-                simLock.release();
             }
             if (ticksLate.get() == 0 && alive) {
                 try {
@@ -119,14 +112,13 @@ public class BuiltinThreadedPhysicsWorld extends BasePhysicsWorld implements Run
         super.clearAll();
     }
 
-    private final Semaphore simLock = new Semaphore(1);
-    //TODO IMPROVE MT CODE
-
     @Override
     public void stepSimulation(float deltaTime) {
         alive = true;
         ticksLate.getAndIncrement();
-        myThread.interrupt();
+        if (myThread.getState() == Thread.State.TIMED_WAITING) { //Thread is in sleep(50), waiting for the next tick
+            myThread.interrupt();
+        }
 
         if (crashCount >= 2) {
             throw new RuntimeException("DynamX physics thread has crashed too many times, more info can be found in the log");

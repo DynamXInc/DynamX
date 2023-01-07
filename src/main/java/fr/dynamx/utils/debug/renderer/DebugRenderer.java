@@ -2,6 +2,7 @@ package fr.dynamx.utils.debug.renderer;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
+import fr.dynamx.client.renders.RenderPhysicsEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.utils.client.DynamXRenderUtils;
@@ -36,7 +37,7 @@ public interface DebugRenderer<T extends PhysicsEntity<?>> {
     /**
      * Renders this debug
      */
-    void render(T entity, double x, double y, double z, float partialTicks);
+    void render(T entity, RenderPhysicsEntity<T> renderer, double x, double y, double z, float partialTicks);
 
     /**
      * Entity collisions shapes render
@@ -48,7 +49,7 @@ public interface DebugRenderer<T extends PhysicsEntity<?>> {
         }
 
         @Override
-        public void render(PhysicsEntity<?> entity, double x, double y, double z, float partialTicks) {
+        public void render(PhysicsEntity<?> entity, RenderPhysicsEntity<PhysicsEntity<?>> renderer, double x, double y, double z, float partialTicks) {
             for (IShapeInfo shapeInfo : ((PackPhysicsEntity<?, ?>) entity).getPackInfo().getShapes()) {
                 RenderGlobal.drawBoundingBox(
                         (shapeInfo.getPosition().x - shapeInfo.getSize().x),
@@ -72,7 +73,7 @@ public interface DebugRenderer<T extends PhysicsEntity<?>> {
         }
 
         @Override
-        public void render(PhysicsEntity<?> entity, double x, double y, double z, float partialTicks) {
+        public void render(PhysicsEntity<?> entity, RenderPhysicsEntity<PhysicsEntity<?>> renderer, double x, double y, double z, float partialTicks) {
             RenderGlobal.drawBoundingBox(-((PackPhysicsEntity<?, ?>) entity).getPackInfo().getCenterOfMass().x - 0.05f, -((PackPhysicsEntity<?, ?>) entity).getPackInfo().getCenterOfMass().y - 0.05f,
                     -((PackPhysicsEntity<?, ?>) entity).getPackInfo().getCenterOfMass().z - 0.05f, -((PackPhysicsEntity<?, ?>) entity).getPackInfo().getCenterOfMass().x + 0.05f,
                     -((PackPhysicsEntity<?, ?>) entity).getPackInfo().getCenterOfMass().y + 0.05f, -((PackPhysicsEntity<?, ?>) entity).getPackInfo().getCenterOfMass().z + 0.05f,
@@ -87,7 +88,7 @@ public interface DebugRenderer<T extends PhysicsEntity<?>> {
         }
 
         @Override
-        public void render(PackPhysicsEntity<?, ?> entity, double x, double y, double z, float partialTicks) {
+        public void render(PackPhysicsEntity<?, ?> entity, RenderPhysicsEntity<PackPhysicsEntity<?, ?>> renderer, double x, double y, double z, float partialTicks) {
             List<Vector3f> debugBuffer = entity.getPackInfo().getCollisionShapeDebugBuffer();
             if (debugBuffer != null) {
                 GlStateManager.pushMatrix();

@@ -72,6 +72,7 @@ public class EnginePhysicsHandler implements IEnginePhysicsHandler, IPackInfoRel
         }
         updateMovement();
         setEngineStarted(module.isEngineStarted());
+        if(gearBoxHandler != null)
         gearBoxHandler.update(accelerationForce);
     }
 

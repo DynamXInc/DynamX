@@ -35,7 +35,7 @@ apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'org.spongepowered.mixin'
 apply plugin: 'idea'
 
-version = version_major + "." + version_minor + "." + version_patch
+version = version_major + "." + version_minor + "." + version_patch + "-" + version_suffix
 group = "fr.dynamx"
 archivesBaseName = "DynamX"
 

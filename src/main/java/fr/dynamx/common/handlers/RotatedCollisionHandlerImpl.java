@@ -274,7 +274,7 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
                                         WalkingOnPlayerController.controller = new WalkingOnPlayerController((EntityPlayer) entity, collidingWith, f, offset);
                                         collidingWith.walkingOnPlayers.put((EntityPlayer) entity, WalkingOnPlayerController.controller);
                                         DynamXContext.getWalkingPlayers().put((EntityPlayer) entity, collidingWith);
-                                        collidingWith.getNetwork().onWalkingPlayerChange(entity.getEntityId(), offset, (byte) f.getIndex());
+                                        collidingWith.getSynchronizer().onWalkingPlayerChange(entity.getEntityId(), offset, (byte) f.getIndex());
                                     } else
                                         data.y += collidingWith.motionY;
                                     break;

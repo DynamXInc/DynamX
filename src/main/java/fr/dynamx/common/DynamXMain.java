@@ -6,7 +6,7 @@ import fr.aym.acslib.api.services.ThreadedLoadingService;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.aym.acslib.api.services.mps.ModProtectionContainer;
 import fr.aym.acslib.api.services.mps.ModProtectionService;
-import fr.dynamx.api.network.sync.SynchronizedVariablesRegistry;
+import fr.dynamx.api.network.sync.SynchronizedEntityVariableRegistry;
 import fr.dynamx.common.capability.DynamXChunkData;
 import fr.dynamx.common.capability.DynamXChunkDataStorage;
 import fr.dynamx.common.contentpack.AddonInfo;
@@ -140,7 +140,7 @@ public class DynamXMain {
     @EventHandler
     public void postInit(FMLPostInitializationEvent event) {
         DynamXReflection.initReflection();
-        SynchronizedVariablesRegistry.sortRegistry(mod -> true);
+        SynchronizedEntityVariableRegistry.sortRegistry(mod -> true);
     }
 
     @EventHandler
@@ -183,7 +183,7 @@ public class DynamXMain {
                 }
             }
         } else {
-            SynchronizedVariablesRegistry.sortRegistry(mods::containsKey);
+            SynchronizedEntityVariableRegistry.sortRegistry(mods::containsKey);
         }
         return true;
     }

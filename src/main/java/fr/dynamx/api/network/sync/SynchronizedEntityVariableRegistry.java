@@ -16,10 +16,10 @@ import java.util.*;
 import java.util.function.Predicate;
 
 public class SynchronizedEntityVariableRegistry {
-    private static final Map<Class<?>, List<SynchronizedEntityVariable>> baseSyncVarRegistry = new HashMap<>();
+    private static final Map<Class<?>, List<String>> baseSyncVarRegistry = new HashMap<>();
     private static final Map<Class<?>, String> classToMod = new HashMap<>();
-    private static final Map<SynchronizedEntityVariable, Field> fieldMap = HashBiMap.create();
-    private static final BiMap<SynchronizedEntityVariable, Integer> syncVarRegistry = HashBiMap.create();
+    private static final Map<String, Field> fieldMap = HashBiMap.create();
+    private static final BiMap<String, Integer> syncVarRegistry = HashBiMap.create();
     @Getter
     private static final Map<Integer, EntityVariableSerializer<?>> serializerMap = new HashMap<>();
 
@@ -37,8 +37,10 @@ public class SynchronizedEntityVariableRegistry {
                         SynchronizedEntityVariable property = f.getAnnotation(SynchronizedEntityVariable.class);
                         if (!baseSyncVarRegistry.containsKey(classToParse))
                             baseSyncVarRegistry.put(classToParse, new ArrayList<>());
-                        baseSyncVarRegistry.get(classToParse).add(property);
-                        fieldMap.put(property, f);
+                        String propName = classToParse.getSimpleName() + "." + property.name();
+                        System.out.println("Add " + propName);
+                        baseSyncVarRegistry.get(classToParse).add(propName);
+                        fieldMap.put(propName, f);
                     }
                 }
                 if(baseSyncVarRegistry.containsKey(classToParse))
@@ -51,7 +53,7 @@ public class SynchronizedEntityVariableRegistry {
         }
     }
 
-    private static int getIndex(SynchronizedEntityVariable of, List<SynchronizedEntityVariable> in) {
+    private static int getIndex(String of, List<String> in) {
         for (int i = 0; i < in.size(); i++) {
             if (in.get(i).equals(of)) {
                 return i;
@@ -60,7 +62,7 @@ public class SynchronizedEntityVariableRegistry {
         throw new IllegalArgumentException(of + " is not in input list " + in);
     }
 
-    private static EntityVariableSerializer<?> findSerializer(SynchronizedEntityVariable res) { //TODO CLEAN & ADD DEBUG LOGS
+    private static EntityVariableSerializer<?> findSerializer(String res) { //TODO CLEAN & ADD DEBUG LOGS
         Field f = fieldMap.get(res);
         /*System.out.println(f.getName());
         System.out.println(f.getGenericType());
@@ -71,7 +73,7 @@ public class SynchronizedEntityVariableRegistry {
         } else if (f.getType().getGenericSuperclass() instanceof ParameterizedType) {
             type = (ParameterizedType) f.getType().getGenericSuperclass();
         } else {
-            throw new IllegalArgumentException("Bad entity variable " + f + " name : " + res.name());
+            throw new IllegalArgumentException("Bad entity variable " + f + " name : " + res);
         }
         EntityVariableSerializer<?> serializer = EntityVariableTypes.getSerializerRegistry().get(type.getActualTypeArguments()[0]);
         if (serializer == null && type.getActualTypeArguments()[0] instanceof ParameterizedType) {
@@ -80,7 +82,7 @@ public class SynchronizedEntityVariableRegistry {
         }
         if (serializer == null) {
             //System.out.println(EntityVariableTypes.getSerializerRegistry());
-            throw new IllegalArgumentException("Bad entity variable " + f + " " + type.getActualTypeArguments()[0] + " name : " + res.name());
+            throw new IllegalArgumentException("Bad entity variable " + f + " " + type.getActualTypeArguments()[0] + " name : " + res);
         }
         return serializer;
     }
@@ -90,17 +92,17 @@ public class SynchronizedEntityVariableRegistry {
      */
     public static void sortRegistry(Predicate<String> useMod) {
         DynamXMain.log.info("Sorting SynchronizedVariables registry ids...");
-        List<SynchronizedEntityVariable> buff = new ArrayList<>();
+        List<String> buff = new ArrayList<>();
         for (Class<?> res : baseSyncVarRegistry.keySet()) {
             if (useMod.test(classToMod.get(res))) {
                 buff.addAll(baseSyncVarRegistry.get(res));
             }
         }
-        buff.sort(Comparator.comparing(SynchronizedEntityVariable::name)); //Unique sorting
+        buff.sort(Comparator.comparing(String::toString)); //Unique sorting
         DynamXMain.log.debug("Fixing SynchronizedVariables registry ids...");
         syncVarRegistry.clear();
         serializerMap.clear();
-        for (SynchronizedEntityVariable res : buff) {
+        for (String res : buff) {
             int index = getIndex(res, buff);
             DynamXMain.log.debug("Add : " + res + " = " + index);
             syncVarRegistry.put(res, index);
@@ -113,13 +115,13 @@ public class SynchronizedEntityVariableRegistry {
         Class<?> clazz = instance.getClass();
         while (clazz != null) {
             if (baseSyncVarRegistry.containsKey(clazz)) {
-                for (SynchronizedEntityVariable variable : baseSyncVarRegistry.get(clazz)) {
+                for (String variable : baseSyncVarRegistry.get(clazz)) {
                     Field f = fieldMap.get(variable);
                     f.setAccessible(true);
                     //System.out.println(instance + " plus " + variable + " " + variable.name() + " " + variable.hashCode() + " " + f.getName() + " " + f.getDeclaringClass() + " " + f + " " + clazz);
                     EntityVariable<?> v = (EntityVariable<?>) f.get(instance);
                     f.setAccessible(false);
-                    v.init(variable.name(), findSerializer(variable));
+                    v.init(variable, findSerializer(variable));
                     synchronizer.registerVariable(syncVarRegistry.get(variable), v);
                 }
             }

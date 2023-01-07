@@ -10,7 +10,6 @@ import fr.dynamx.api.events.PhysicsEvent;
 import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.api.physics.entities.EntityPhysicsState;
-import fr.dynamx.api.physics.terrain.ITerrainManager;
 import fr.dynamx.client.network.ClientPhysicsSyncManager;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
@@ -74,7 +73,7 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
             @Override
             public void onContactProcessed(PhysicsCollisionObject pcoA, PhysicsCollisionObject pcoB, long contactPointId) {
                 // memory leak fix : don't call super method : bullets stores all collision events in a queue
-                CollisionsHandler.handleCollision(physicsWorld,new PhysicsCollisionEvent(pcoA, pcoB, contactPointId), (BulletShapeType<?>) pcoA.getUserObject(), (BulletShapeType<?>) pcoB.getUserObject());
+                CollisionsHandler.handleCollision(physicsWorld, new PhysicsCollisionEvent(pcoA, pcoB, contactPointId), (BulletShapeType<?>) pcoA.getUserObject(), (BulletShapeType<?>) pcoB.getUserObject());
             }
 
             @Override
@@ -117,7 +116,7 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
     /**
      * Ticks the physics world
      *
-     * @param profiler The current profiler
+     * @param profiler        The current profiler
      * @param syncThreadsLock Semaphore to acquire when getting the positions from the physics engine to the minecraft thread. Can be null if the physics are in the minecraft thread
      */
     protected void stepSimulationImpl(Profiler profiler, Semaphore syncThreadsLock) {
@@ -188,26 +187,27 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
         //Post-tick each entity after the physics engine tick
         //Retrieves the simulated data
         profiler.start(Profiler.Profiles.PHYSICS_TICK_ENTITIES_POST);
+        if (syncThreadsLock != null) {
+            try {
+                syncThreadsLock.acquire();
+            } catch (InterruptedException ignored) {
+                //System.out.println("Inter 1 !");
+            }
+        }
         entities.forEach(e -> {
             QuaternionPool.openPool();
             Vector3fPool.openPool();
-            if(syncThreadsLock != null) {
-                try {
-                    syncThreadsLock.acquire();
-                } catch (InterruptedException ignored) {
-                    //System.out.println("Inter 1 !");
-                }
-            }
             try {
                 e.getSynchronizer().onPostPhysicsTick(profiler);
             } catch (Exception ex) {
                 throw new PhysicsEntityException(e, "postPhysicsTick", ex);
             }
-            if(syncThreadsLock != null)
-                syncThreadsLock.release();
             QuaternionPool.closePool();
             Vector3fPool.closePool();
         });
+        if (syncThreadsLock != null) {
+            syncThreadsLock.release();
+        }
         profiler.end(Profiler.Profiles.PHYSICS_TICK_ENTITIES_POST);
 
         // if (false && CmdNetworkConfig.sync_buff)

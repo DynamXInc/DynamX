@@ -68,7 +68,7 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
     @SynchronizedEntityVariable(name = "door_states")
     private final EntityTransformsVariable synchronizedTransforms;
     @Getter
-    @SynchronizedEntityVariable(name = "dparts_pos")
+    @SynchronizedEntityVariable(name = "parts_pos")
     protected final EntityMapVariable<Map<Byte, DoorsModule.DoorState>, Byte, DoorState> doorsState;
 
     public DoorsModule(BaseVehicleEntity<?> vehicleEntity) {

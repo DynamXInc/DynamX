@@ -23,11 +23,9 @@ import fr.dynamx.common.network.packets.MessageHandleExplosion;
 import fr.dynamx.common.network.packets.MessageSyncConfig;
 import fr.dynamx.common.network.sync.MessageSeatsSync;
 import fr.dynamx.common.physics.player.PlayerPhysicsHandler;
-import fr.dynamx.common.physics.terrain.cache.TerrainFile;
 import fr.dynamx.server.network.ServerPhysicsSyncManager;
 import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.DynamXConstants;
-import fr.dynamx.utils.VerticalChunkPos;
 import fr.dynamx.utils.client.ContentPackUtils;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
@@ -53,11 +51,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.registries.IForgeRegistry;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static fr.dynamx.common.handlers.TaskScheduler.schedule;
 
@@ -251,15 +244,15 @@ public class CommonEventHandler {
 
     @SubscribeEvent
     public void onVehicleMount(VehicleEntityEvent.PlayerMount e) {
-        if (DynamXContext.getPlayerToCollision().containsKey(e.getPlayer())) {
-            DynamXContext.getPlayerToCollision().get(e.getPlayer()).removeFromWorld(false, e.getPlayer().world);
+        if (DynamXContext.getPlayerToCollision().containsKey(e.getEntityMounted())) {
+            DynamXContext.getPlayerToCollision().get(e.getEntityMounted()).removeFromWorld(false, e.getEntityMounted().world);
         }
     }
 
     @SubscribeEvent
-    public void onVehicleDismount(VehicleEntityEvent.PlayerDismount e) {
-        if (DynamXContext.getPlayerToCollision().containsKey(e.getPlayer())) {
-            DynamXContext.getPlayerToCollision().get(e.getPlayer()).addToWorld();
+    public void onVehicleDismount(VehicleEntityEvent.EntityDismount e) {
+        if (DynamXContext.getPlayerToCollision().containsKey(e.getEntityDismounted())) {
+            DynamXContext.getPlayerToCollision().get(e.getEntityDismounted()).addToWorld();
         }
     }
 

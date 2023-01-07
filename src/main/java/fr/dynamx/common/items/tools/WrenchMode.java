@@ -3,15 +3,20 @@ package fr.dynamx.common.items.tools;
 import com.jme3.bullet.joints.JointEnd;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Vector3f;
+import fr.dynamx.api.entities.IModuleContainer;
+import fr.dynamx.api.entities.modules.ISeatsModule;
 import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.EnumBulletShapeType;
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
+import fr.dynamx.common.contentpack.parts.PartSeat;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.entities.PropsEntity;
 import fr.dynamx.common.entities.modules.MovableModule;
+import fr.dynamx.common.entities.modules.SeatsModule;
 import fr.dynamx.common.entities.modules.TrailerAttachModule;
 import fr.dynamx.common.entities.modules.movables.AttachObjects;
 import fr.dynamx.common.entities.vehicles.CarEntity;
@@ -41,6 +46,7 @@ import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -53,6 +59,7 @@ public class WrenchMode {
     public static final WrenchMode ATTACH_TRAILERS = new AttachTrailersWrenchMode();
     public static final WrenchMode ATTACH_OBJECTS = new AttachObjectsWrenchMode();
     public static final WrenchMode REPLACE_ENTITIES = new ReplaceEntitiesWrenchMode();
+    public static final WrenchMode ENTITY_SEAT_MODE = new EntitySeatWrenchMode();
     public static final WrenchMode LAUNCH_ENTITIES = new WrenchMode("Launch Entities", TextFormatting.GOLD + "Wrench mode set to launch entities") {
         @Override
         public void onWrenchRightClick(EntityPlayer playerIn, EnumHand handIn) {
@@ -334,6 +341,48 @@ public class WrenchMode {
                     vehicleEntity.setMetadata(vehicleEntity.getMetadata() + 1);
                 } else {
                     vehicleEntity.setMetadata(0);
+                }
+            }
+        }
+    }
+
+    private static class EntitySeatWrenchMode extends WrenchMode {
+        public EntitySeatWrenchMode() {
+            super(TextFormatting.LIGHT_PURPLE + "Entity seat", TextFormatting.LIGHT_PURPLE + "Wrench mode set to entity seat set");
+        }
+
+        HashMap<EntityPlayer, Entity> playerEntityHashMap = new HashMap<>();
+
+        @Override
+        public void onWrenchLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
+            if (!(entity instanceof BaseVehicleEntity)) {
+                playerEntityHashMap.put(player, entity);
+                player.sendMessage(new TextComponentString("Entity selected: " + entity.getName()));
+            } else {
+                player.sendMessage(new TextComponentString("You can not mount a vehicle to a vehicle"));
+            }
+        }
+
+        @Override
+        public void onInteractWithEntity(EntityPlayer context, PhysicsEntity<?> physicsEntity, boolean isSneaking) {
+            if (physicsEntity instanceof BaseVehicleEntity) {
+                BaseVehicleEntity baseVehicleEntity = (BaseVehicleEntity) physicsEntity;
+                SeatsModule seatsModule = (SeatsModule) baseVehicleEntity.getModuleByType(SeatsModule.class);
+                Entity entity = playerEntityHashMap.remove(context);
+                if (entity != null) {
+                    for (Object object : ((ModularVehicleInfo) baseVehicleEntity.getPackInfo()).getPartsByType(PartSeat.class)) {
+                        PartSeat partSeat = (PartSeat) object;
+                        if (!partSeat.isDriver()) {
+                            ISeatsModule seats = ((IModuleContainer.ISeatsContainer) baseVehicleEntity).getSeats();
+                            Entity seatRider = seats.getSeatToPassengerMap().get(partSeat);
+                            if (seatRider == null) {
+                                partSeat.mount(baseVehicleEntity, seatsModule, entity);
+                                context.sendMessage(new TextComponentString("Entity added to vehicle"));
+                                return;
+                            }
+                        }
+                    }
+                    context.sendMessage(new TextComponentString("No seat for entity was found"));
                 }
             }
         }

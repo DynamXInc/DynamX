@@ -41,11 +41,6 @@ public class BoatPropellerModule implements IPropulsionModule<BoatPhysicsHandler
     }
 
     @Override
-    public float[] getPropulsionProperties() {
-        return new float[0];
-    }
-
-    @Override
     @SideOnly(Side.CLIENT)
     public void spawnPropulsionParticles(RenderPhysicsEntity<?> render, float partialTicks) {
         //todo particules autour de l'hélice ?

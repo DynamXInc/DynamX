@@ -53,7 +53,7 @@ public class BoatPhysicsHandler<T extends BoatEntity<?>> extends BaseVehiclePhys
         float waterLevel;
 
         for (int offset = -1; offset <= 2; offset++) {
-            BlockPos blockPos = new BlockPos(physicsPosition.x, physicsPosition.y + offset, physicsPosition.z);
+            BlockPos blockPos = new BlockPos(handledEntity.physicsPosition.x, handledEntity.physicsPosition.y + offset, handledEntity.physicsPosition.z);
             if (handledEntity.getEntityWorld().getBlockState(blockPos).getMaterial().isLiquid()) {
                 liquidOffset = offset;
                 isInLiquid = true;
@@ -61,7 +61,7 @@ public class BoatPhysicsHandler<T extends BoatEntity<?>> extends BaseVehiclePhys
         }
 
         if (isInLiquid) {
-            BlockPos blockPos = new BlockPos(physicsPosition.x, physicsPosition.y + liquidOffset, physicsPosition.z);
+            BlockPos blockPos = new BlockPos(handledEntity.physicsPosition.x, handledEntity.physicsPosition.y + liquidOffset, handledEntity.physicsPosition.z);
             AxisAlignedBB boundingBox = handledEntity.getEntityWorld().getBlockState(blockPos).getBoundingBox(handledEntity.getEntityWorld(), blockPos);
             waterLevel = (float) boundingBox.offset(blockPos).maxY - 0.125F + 0.5f;
             int i = 0;
@@ -75,8 +75,8 @@ public class BoatPhysicsHandler<T extends BoatEntity<?>> extends BaseVehiclePhys
     }
 
     private void handleBuoyancy(Vector3f partPos, float dragCoefficient, float size, float floatYSize, float waterLevel, int i) {
-        Vector3f localPosRotated = DynamXGeometry.rotateVectorByQuaternion(partPos, physicsRotation);
-        Vector3f inWorldPos = physicsPosition.add(localPosRotated);
+        Vector3f localPosRotated = DynamXGeometry.rotateVectorByQuaternion(partPos, handledEntity.physicsRotation);
+        Vector3f inWorldPos = handledEntity.physicsPosition.add(localPosRotated);
 
         double dy = waterLevel - inWorldPos.y;
 
@@ -85,7 +85,7 @@ public class BoatPhysicsHandler<T extends BoatEntity<?>> extends BaseVehiclePhys
             dy = Math.min(dy, floatYSize);
             Vector3f buoyForce = Vector3fPool.get(0, dy * area * DynamXPhysicsHelper.WATER_DENSITY * 9.81, 0);
 
-            Vector3f rotatedFloaterPos = DynamXGeometry.rotateVectorByQuaternion(partPos, physicsRotation);
+            Vector3f rotatedFloaterPos = DynamXGeometry.rotateVectorByQuaternion(partPos, handledEntity.physicsRotation);
 
             buoyForces.get(i).set(buoyForce.mult(0.001f));
             collisionObject.applyForce(buoyForce.multLocal(0.05f), rotatedFloaterPos);
@@ -97,7 +97,7 @@ public class BoatPhysicsHandler<T extends BoatEntity<?>> extends BaseVehiclePhys
 
             if(Vector3f.isValidVector(dragForce))
                 collisionObject.applyForce(dragForce.multLocal(0.05f), rotatedFloaterPos);
-            Vector3f nonRotatedDrag = DynamXGeometry.rotateVectorByQuaternion(dragForce, DynamXGeometry.inverseQuaternion(physicsRotation, QuaternionPool.get()));
+            Vector3f nonRotatedDrag = DynamXGeometry.rotateVectorByQuaternion(dragForce, DynamXGeometry.inverseQuaternion(handledEntity.physicsRotation, QuaternionPool.get()));
             dragForces.get(i).set(nonRotatedDrag);
         }
     }

@@ -28,21 +28,20 @@ public class GuiBlockCustomization extends GuiFrame
 
     private static ObjModelRenderer model;
     private static TEDynamXBlock teBlock;
-    GuiPanel preview = new GuiPanel();
+    private final GuiPanel preview = new GuiPanel();
 
-    GuiFloatField translationX = new GuiFloatField(-100, 100);
-    GuiFloatField translationY = new GuiFloatField(-100, 100);
-    GuiFloatField translationZ = new GuiFloatField(-100, 100);
-    GuiFloatField scaleX = new GuiFloatField(0, 100);
-    GuiFloatField scaleY = new GuiFloatField(0, 100);
-    GuiFloatField scaleZ = new GuiFloatField(0, 100);
-    GuiFloatField rotationX = new GuiFloatField(-360, 360);
-    GuiFloatField rotationY = new GuiFloatField(-360, 360);
-    GuiFloatField rotationZ = new GuiFloatField(-360, 360);
+    private final GuiFloatField translationX = new GuiFloatField(-100, 100);
+    private final GuiFloatField translationY = new GuiFloatField(-100, 100);
+    private final GuiFloatField translationZ = new GuiFloatField(-100, 100);
+    private final GuiFloatField scaleX = new GuiFloatField(0, 100);
+    private final GuiFloatField scaleY = new GuiFloatField(0, 100);
+    private final GuiFloatField scaleZ = new GuiFloatField(0, 100);
+    private final GuiFloatField rotationX = new GuiFloatField(-360, 360);
+    private final GuiFloatField rotationY = new GuiFloatField(-360, 360);
+    private final GuiFloatField rotationZ = new GuiFloatField(-360, 360);
 
-    float angleX, angleY;
-    int scroll = 0;
-    int maxScroll = 100;
+    private float angleX, angleY;
+    private int scroll = 0;
 
     public GuiBlockCustomization(TEDynamXBlock te) {
         super(new GuiScaler.Identity());
@@ -135,6 +134,7 @@ public class GuiBlockCustomization extends GuiFrame
         int i = Mouse.getEventDWheel() / 100;
         if (i != 0) {
             scroll += i;
+            int maxScroll = 100;
             scroll = Math.max(Math.min(scroll, maxScroll), 0);
         }
         scale += scroll / 2f;

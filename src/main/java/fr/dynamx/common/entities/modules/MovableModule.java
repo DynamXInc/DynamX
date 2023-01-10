@@ -4,22 +4,18 @@ import com.jme3.bullet.joints.Constraint;
 import fr.dynamx.api.entities.modules.AttachModule;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
-import fr.dynamx.api.network.sync.SimulationHolder;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.entities.modules.movables.AttachObjects;
 import fr.dynamx.common.entities.modules.movables.MoveObjects;
 import fr.dynamx.common.entities.modules.movables.PickObjects;
-import fr.dynamx.common.network.sync.vars.MovableSynchronizedVariable;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.joints.EntityJoint;
 import fr.dynamx.common.physics.joints.JointHandler;
 import fr.dynamx.common.physics.joints.JointHandlerRegistry;
 import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.Arrays;
-import java.util.List;
 
 public class MovableModule implements IPhysicsModule<AbstractEntityPhysicsHandler<?, ?>>, AttachModule.AttachToSelfModule, IPhysicsModule.IEntityUpdateListener, IPhysicsModule.IPhysicsUpdateListener {
     public static final ResourceLocation JOINT_NAME = new ResourceLocation(DynamXConstants.ID, "movable_module");
@@ -40,6 +36,7 @@ public class MovableModule implements IPhysicsModule<AbstractEntityPhysicsHandle
 
     /* Should not be called in the constructor */
     public void initSubModules(ModuleListBuilder modules, PhysicsEntity<?> entity) {
+        //System.out.println("init modules ! " + this);
         modules.add(moveObjects = new MoveObjects(entity));
         modules.add(pickObjects = new PickObjects(entity));
         modules.add(attachObjects = new AttachObjects(entity));
@@ -53,13 +50,6 @@ public class MovableModule implements IPhysicsModule<AbstractEntityPhysicsHandle
             return attachObjects.createJointBetween2Objects(jointId);
         }
         return null;
-    }
-
-    @Override
-    public void addSynchronizedVariables(Side side, SimulationHolder simulationHolder, List<ResourceLocation> variables) {
-        if (side.isServer()) {
-            variables.add(MovableSynchronizedVariable.NAME);
-        }
     }
 
     @Override

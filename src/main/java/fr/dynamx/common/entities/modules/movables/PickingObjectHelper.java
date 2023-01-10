@@ -83,8 +83,8 @@ public class PickingObjectHelper {
             PhysicsEntity<?> physicsEntity = null;                //TODO PhysicsEntity<?>) ((SPPhysicsEntityNetHandler)shapeType.getObjectIn().getNetwork()).getOtherSideEntity();
             if (shapeType.getObjectIn() instanceof PhysicsEntity) {
                 physicsEntity = (PhysicsEntity<?>) shapeType.getObjectIn();
-            } else if (shapeType.getObjectIn() instanceof DoorsModule.DoorVarContainer) {
-                physicsEntity = ((DoorsModule.DoorVarContainer) shapeType.getObjectIn()).getModule().vehicleEntity;
+            } else if (shapeType.getObjectIn() instanceof DoorsModule.DoorPhysics) {
+                physicsEntity = ((DoorsModule.DoorPhysics) shapeType.getObjectIn()).getModule().vehicleEntity;
             }
             if (physicsEntity == null)
                 return;
@@ -120,8 +120,8 @@ public class PickingObjectHelper {
             case LENGTH_CHANGE:
                 boolean mouseWheelInc = (boolean) moduleAction.getInfo()[0];
                 int distanceMax = (int) moduleAction.getInfo()[1];
-                movableModule.pickObjects.pickDistance = (MathHelper.clamp(
-                        movableModule.pickObjects.pickDistance + (mouseWheelInc ? 1 : -1), 1.5f, distanceMax));
+                movableModule.pickObjects.pickDistance.set(MathHelper.clamp(
+                        movableModule.pickObjects.pickDistance.get() + (mouseWheelInc ? 1 : -1), 1.5f, distanceMax));
                 break;
             case FREEZE_OBJECT:
                 if (movableModule.pickObjects.hitBody.getMass() > 0)

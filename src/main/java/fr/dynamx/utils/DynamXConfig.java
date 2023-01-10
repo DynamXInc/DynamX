@@ -8,7 +8,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DynamXConfig {
+public class DynamXConfig
+{
     public static boolean syncPacks;
 
     public static boolean useUdp = true;

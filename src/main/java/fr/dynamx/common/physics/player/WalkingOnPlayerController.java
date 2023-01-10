@@ -54,7 +54,7 @@ public class WalkingOnPlayerController {
         controller = null;
         entity.walkingOnPlayers.remove(player);
         DynamXContext.getWalkingPlayers().remove(player);
-        entity.getNetwork().onWalkingPlayerChange(player.getEntityId(), offset, (byte) -1);
+        entity.getSynchronizer().onWalkingPlayerChange(player.getEntityId(), offset, (byte) -1);
         if (!player.isRiding() && DynamXContext.getPlayerToCollision().containsKey(player)) {
             DynamXContext.getPlayerToCollision().get(player).addToWorld();
         }

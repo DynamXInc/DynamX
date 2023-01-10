@@ -4,7 +4,7 @@ import fr.dynamx.api.network.EnumPacketTarget;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.network.packets.MessageSyncConfig;
-import fr.dynamx.common.network.sync.vars.PosSynchronizedVariable;
+import fr.dynamx.common.network.sync.variables.EntityPosVariable;
 import fr.dynamx.server.network.PlayerSyncBuffer;
 import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.debug.SyncTracker;
@@ -61,10 +61,10 @@ public class CmdNetworkConfig implements ISubCommand {
         } else if (args[0].equalsIgnoreCase("syncCrit")) {
             if (args.length != 4)
                 throw new WrongUsageException("To be used by aym");
-            PosSynchronizedVariable.CRITIC1 = parseInt(args[1]);
-            PosSynchronizedVariable.CRITIC2 = parseInt(args[2]);
-            PosSynchronizedVariable.CRITIC3 = parseInt(args[3]);
-            sender.sendMessage(new TextComponentString("SyncCrit are " + PosSynchronizedVariable.CRITIC1 + " " + PosSynchronizedVariable.CRITIC2 + " " + PosSynchronizedVariable.CRITIC3));
+            EntityPosVariable.CRITIC1 = parseInt(args[1]);
+            EntityPosVariable.CRITIC2 = parseInt(args[2]);
+            EntityPosVariable.CRITIC3 = parseInt(args[3]);
+            sender.sendMessage(new TextComponentString("SyncCrit are " + EntityPosVariable.CRITIC1 + " " + EntityPosVariable.CRITIC2 + " " + EntityPosVariable.CRITIC3));
         } else if (args[0].equalsIgnoreCase("sync_buff") && args.length == 7) {
             PlayerSyncBuffer.NEW_SENDS_LIMIT = parseInt(args[1]);
             PlayerSyncBuffer.DELAYED_SENDS_LIMIT = parseInt(args[2]);

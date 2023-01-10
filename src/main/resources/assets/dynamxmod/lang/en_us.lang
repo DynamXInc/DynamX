@@ -76,7 +76,7 @@ dynamx.error.mps_error=Cannot connect to DynamX server
 dynamx.error.addon_init_error=Addon initialization error
 dynamx.error.pack_requirements=Pack requirements not met
 dynamx.error.collision_shape_error=Cannot load the physics collision shape
-dynamx.error.complete_vehicle_error=Cannot complete the vehicle
+dynamx.error.complete_object_error=Cannot complete the object
 dynamx.error.property_parse_error=Cannot parse the following properties. Check the documentation for the correct syntax.
 dynamx.error.loading_tasks=Loading task error
 dynamx.error.addon_load_error=Addon cannot be loaded !
@@ -85,3 +85,5 @@ dynamx.error.pack_load_fail=Cannot load content pack
 dynamx.error.missing_pack_info=Pack info is missing
 dynamx.error.pack_file_load_error=Cannot load pack file
 dynamx.error.addon_error=Addon loading error
+
+dynamx.reload.models.errors=§c[DynamX] Some models have errors, use the debug menu to see them

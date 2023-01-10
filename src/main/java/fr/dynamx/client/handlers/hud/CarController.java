@@ -15,13 +15,9 @@ import fr.dynamx.api.entities.modules.IVehicleController;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.client.camera.CameraSystem;
 import fr.dynamx.client.handlers.ClientDebugSystem;
-import fr.dynamx.common.DynamXContext;
-import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.contentpack.type.vehicle.EngineInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.common.entities.modules.EngineModule;
-import fr.dynamx.common.network.packets.MessageChangeDoorState;
 import fr.dynamx.utils.DynamXConstants;
 import lombok.Getter;
 import lombok.Setter;
@@ -51,6 +47,8 @@ public class CarController implements IVehicleController {
     public static final KeyBinding toggleLockDoor = new KeyBinding("key.toggleLockDoor", Keyboard.KEY_Y, "key.categories." + DynamXConstants.ID);
 
     //TODO CREATE EVENT TO INIT THIS ?
+    @Getter
+    @Setter
     private static HudIcons hudIcons;
 
     public static void registerControls() {
@@ -58,22 +56,6 @@ public class CarController implements IVehicleController {
         ClientRegistry.registerKeyBinding(car_engineOn);
         ClientRegistry.registerKeyBinding(speedLimiter);
         ClientRegistry.registerKeyBinding(toggleLockDoor);
-    }
-
-    /**
-     * @return The current hud icons
-     */
-    public static HudIcons getHudIcons() {
-        return hudIcons;
-    }
-
-    /**
-     * Sets the current hud icons
-     *
-     * @param hudIcons The new hud icons
-     */
-    public static void setHudIcons(HudIcons hudIcons) {
-        CarController.hudIcons = hudIcons;
     }
 
     protected final BaseVehicleEntity<?> entity;
@@ -108,7 +90,6 @@ public class CarController implements IVehicleController {
         while (car_brake.isPressed()) ;
         while (speedLimiter.isPressed()) ;
         while (car_engineOn.isPressed()) ;
-        while (toggleLockDoor.isPressed()) ;
     }
 
     @Override
@@ -141,23 +122,10 @@ public class CarController implements IVehicleController {
                 }
             }
             if (speedLimiter.isPressed()) {
-                if (speedLimit == Integer.MAX_VALUE)
+                if (speedLimit == Float.MAX_VALUE)
                     speedLimit = Math.abs(engine.getEngineProperties()[0]);
                 else
-                    speedLimit = Integer.MAX_VALUE;
-            }
-
-            if (toggleLockDoor.isPressed()) {
-                if (onCooldown == 0) {
-                    if (entity instanceof IModuleContainer.IDoorContainer && ((IModuleContainer.IDoorContainer) entity).getDoors() != null) {
-                        PartSeat seat = ((IModuleContainer.ISeatsContainer) entity).getSeats().getRidingSeat(MC.player);
-                        DoorsModule doors = ((IModuleContainer.IDoorContainer) entity).getDoors();
-                        if (seat.getLinkedPartDoor(entity) == null)
-                            return;
-                        DynamXContext.getNetwork().sendToServer(new MessageChangeDoorState(entity, doors.getInverseCurrentState(seat.getLinkedPartDoor(entity).getId()), (byte) -1));
-                    }
-                    onCooldown = 30;
-                }
+                    speedLimit = Float.MAX_VALUE;
             }
 
             MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.ControllerUpdate<>(entity, this));
@@ -176,7 +144,6 @@ public class CarController implements IVehicleController {
                 controls = controls | 32;
             engine.setControls(controls);
             engine.setSpeedLimit(speedLimit);
-
         }
     }
 
@@ -186,7 +153,11 @@ public class CarController implements IVehicleController {
     @SideOnly(Side.CLIENT)
     public GuiComponent<?> createHud() {
         GuiPanel panel = new GuiPanel();
-        float maxRpm = entity.getPackInfo().getSubPropertyByType(EngineInfo.class).getMaxRevs() + 3000; // todo CONFIGURABLE
+        EngineInfo engineInfo = entity.getPackInfo().getSubPropertyByType(EngineInfo.class);
+        if(engineInfo == null){
+            return panel;
+        }
+        float maxRpm = engineInfo.getMaxRevs() + 3000; // todo CONFIGURABLE
         float scale = 90f / 300;
         GuiPanel speed = new SpeedometerPanel(this, scale, maxRpm);
         speed.setCssClass("speed_pane");
@@ -209,15 +180,13 @@ public class CarController implements IVehicleController {
                 }.setCssId("icon_" + i).setCssClass("hud_icon"));
                 hudIcons.initIcon(i, icons[i]);
             }
-            speed.addTickListener(() -> {
-                hudIcons.tick(icons);
-            });
+            speed.addTickListener(() -> hudIcons.tick(icons));
         }
 
         panel.add(speed);
 
         panel.add(new UpdatableGuiLabel("hud.car.speedlimit", s -> {
-            if (speedLimit != Integer.MAX_VALUE) {
+            if (speedLimit != Float.MAX_VALUE) {
                 return I18n.format(s, (int) speedLimit);
             } else {
                 return "";

@@ -35,7 +35,7 @@ public class QuaternionPool extends ClassPool<Quaternion> {
     }
 
     public QuaternionPool() {
-        super(600);
+        super(3000, 600);
     }
 
     @Override

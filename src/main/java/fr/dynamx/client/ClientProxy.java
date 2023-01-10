@@ -5,13 +5,11 @@ import fr.aym.acslib.api.services.ThreadedLoadingService;
 import fr.dynamx.api.audio.IDynamXSoundHandler;
 import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.contentpack.object.render.IObjPackObject;
-import fr.dynamx.api.network.sync.PhysicsEntityNetHandler;
 import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
 import fr.dynamx.api.obj.ObjModelPath;
-import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.client.handlers.KeyHandler;
-import fr.dynamx.client.network.UdpClientPhysicsEntityNetHandler;
+import fr.dynamx.client.network.ClientPhysicsEntitySynchronizer;
 import fr.dynamx.client.renders.RenderProp;
 import fr.dynamx.client.renders.RenderRagdoll;
 import fr.dynamx.client.renders.TESRDynamXBlock;
@@ -28,19 +26,20 @@ import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.entities.PropsEntity;
 import fr.dynamx.common.entities.RagdollEntity;
 import fr.dynamx.common.entities.vehicles.*;
-import fr.dynamx.common.network.SPPhysicsEntityNetHandler;
+import fr.dynamx.common.network.sync.PhysicsEntitySynchronizer;
+import fr.dynamx.common.network.sync.SPPhysicsEntitySynchronizer;
 import fr.dynamx.common.network.udp.CommandUdp;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.world.BuiltinThreadedPhysicsWorld;
 import fr.dynamx.utils.DynamXLoadingTasks;
 import fr.dynamx.utils.DynamXUtils;
+import fr.dynamx.utils.client.CommandNetworkDebug;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.resources.SimpleReloadableResourceManager;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
@@ -106,6 +105,7 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
 
         MinecraftForge.EVENT_BUS.register(new KeyHandler(FMLClientHandler.instance().getClient()));
         ClientCommandHandler.instance.registerCommand(new CommandUdp());
+        ClientCommandHandler.instance.registerCommand(new CommandNetworkDebug());
 
         ClientRegistry.bindTileEntitySpecialRenderer(TEDynamXBlock.class, new TESRDynamXBlock<>());
     }
@@ -126,13 +126,12 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
     }
 
     @Override
-    public <T extends AbstractEntityPhysicsHandler<?, ?>> PhysicsEntityNetHandler<? extends PhysicsEntity<T>> getNetHandlerForEntity(PhysicsEntity<T> tPhysicsEntity) {
-        //System.out.println("[TIMER] World of "+tPhysicsEntity+" is "+tPhysicsEntity.world);
+    public <T extends AbstractEntityPhysicsHandler<?, ?>> PhysicsEntitySynchronizer<? extends PhysicsEntity<T>> getNetHandlerForEntity(PhysicsEntity<T> tPhysicsEntity) {
         if (tPhysicsEntity.world.isRemote) {
-            if (Minecraft.getMinecraft().isIntegratedServerRunning())
-                return new SPPhysicsEntityNetHandler<>(tPhysicsEntity, Side.CLIENT);
+            if (FMLCommonHandler.instance().getMinecraftServerInstance() != null)
+                return new SPPhysicsEntitySynchronizer<>(tPhysicsEntity, Side.CLIENT);
             else
-                return new UdpClientPhysicsEntityNetHandler<>(tPhysicsEntity);
+                return new ClientPhysicsEntitySynchronizer<>(tPhysicsEntity);
         }
         return super.getNetHandlerForEntity(tPhysicsEntity);
     }
@@ -144,11 +143,12 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
 
     @Override
     public boolean ownsSimulation(PhysicsEntity<?> entity) {
-        if (entity.getNetwork().getSimulationHolder().ownsPhysics(entity.world.isRemote ? Side.CLIENT : Side.SERVER)) {
+        //TODO NEW SYNC CLEAN THIS
+        if (entity.getSynchronizer().getSimulationHolder().ownsPhysics(entity.world.isRemote ? Side.CLIENT : Side.SERVER)) {
             return true;
         }
         if (entity.world.isRemote && ClientEventHandler.MC.player.getRidingEntity() instanceof PhysicsEntity
-                && ((PhysicsEntity<?>) ClientEventHandler.MC.player.getRidingEntity()).getNetwork().getSimulationHolder().ownsPhysics(Side.CLIENT)) {
+                && ((PhysicsEntity<?>) ClientEventHandler.MC.player.getRidingEntity()).getSynchronizer().getSimulationHolder().ownsPhysics(Side.CLIENT)) {
             return true;
         }
         return DynamXContext.getPlayerPickingObjects().containsKey(ClientEventHandler.MC.player.getEntityId()) &&
@@ -163,12 +163,8 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
     public void onResourceManagerReload(IResourceManager resourceManager, Predicate<IResourceType> resourcePredicate) {
         if (resourcePredicate.test(VanillaResourceType.MODELS)) {
             DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.CLIENT, DynamXLoadingTasks.MODEL).thenAccept(empty -> {
-                if (Minecraft.getMinecraft().player != null) {
-                    if (DynamXErrorManager.getErrorManager().hasErrors(DynamXErrorManager.MODEL_ERRORS)) {
-                        //TODO TRANSLATE
-                        Minecraft.getMinecraft().player.sendMessage(new TextComponentString(TextFormatting.RED + "[DynamX] Certains modèles ont des problèmes, utilisez le menu de debug pour les voir"));
-                    }
-                }
+                if (Minecraft.getMinecraft().player != null && DynamXErrorManager.getErrorManager().hasErrors(DynamXErrorManager.MODEL_ERRORS))
+                    Minecraft.getMinecraft().player.sendMessage(new TextComponentTranslation("dynamx.reload.models.errors"));
             });
         }
     }

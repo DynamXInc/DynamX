@@ -10,6 +10,8 @@ import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
  * Needs an {@link IEnginePhysicsHandler}
  */
 public interface IEngineModule<P extends AbstractEntityPhysicsHandler<?, ?>> extends IPhysicsModule<P> {
+    //TODO CLEAN THIS
+
     /**
      * @return engine properties such as speed or rpm <br>
      * {@link fr.dynamx.common.entities.modules.EngineModule} implementation uses {@link fr.dynamx.api.entities.VehicleEntityProperties.EnumEngineProperties}

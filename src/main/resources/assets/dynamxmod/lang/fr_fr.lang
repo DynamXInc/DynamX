@@ -59,3 +59,5 @@ cmd.slopes.auto.result=§6[AUTO] Génération et ajout des pentes réalisés en 
 cmd.slopes.auto.success=§a[AUTO] Les pentes ont bien été ajoutées !
 
 hud.car.speedlimit=Limite de vitesse : %s
+
+dynamx.reload.models.errors=§c[DynamX] Certains modèles ont des problèmes, utilisez le menu de debug pour les voir

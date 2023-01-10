@@ -85,3 +85,5 @@ dynamx.error.pack_load_fail=Cannot load content pack
 dynamx.error.missing_pack_info=Pack info is missing
 dynamx.error.pack_file_load_error=Cannot load pack file
 dynamx.error.addon_error=Addon loading error
+
+dynamx.reload.models.errors=§c[DynamX] Some models have errors, use the debug menu to see them

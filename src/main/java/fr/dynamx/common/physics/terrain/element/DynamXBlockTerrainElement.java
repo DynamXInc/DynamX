@@ -2,12 +2,10 @@ package fr.dynamx.common.physics.terrain.element;
 
 import com.jme3.bounding.BoundingBox;
 import com.jme3.bullet.objects.PhysicsRigidBody;
-import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.EnumBulletShapeType;
 import fr.dynamx.api.physics.terrain.ITerrainElement;
-import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.blocks.TEDynamXBlock;
 import fr.dynamx.utils.VerticalChunkPos;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
@@ -33,18 +31,14 @@ public class DynamXBlockTerrainElement implements ITerrainElement {
     private BlockPos pos;
     private PhysicsRigidBody body;
     private TerrainDebugData debugData;
-    private Vector3f position; //TODO OPTI : THIS IS IN THE TE
-    private Quaternion rotation;
 
     public DynamXBlockTerrainElement() {
     }
 
-    public DynamXBlockTerrainElement(int x, int y, int z, BlockPos pos, Vector3f position, Quaternion rotation) {
+    public DynamXBlockTerrainElement(int x, int y, int z, BlockPos pos) {
         this.x = x;
         this.y = y;
         this.z = z;
-        this.position = position;
-        this.rotation = rotation;
         this.pos = new BlockPos(pos);
     }
 
@@ -53,13 +47,6 @@ public class DynamXBlockTerrainElement implements ITerrainElement {
         out.writeInt(x);
         out.writeInt(y);
         out.writeInt(z);
-        out.writeFloat(position.x);
-        out.writeFloat(position.y);
-        out.writeFloat(position.z);
-        out.writeFloat(rotation.getX());
-        out.writeFloat(rotation.getY());
-        out.writeFloat(rotation.getZ());
-        out.writeFloat(rotation.getW());
         out.writeInt(pos.getX());
         out.writeInt(pos.getY());
         out.writeInt(pos.getZ());
@@ -70,8 +57,6 @@ public class DynamXBlockTerrainElement implements ITerrainElement {
         x = in.readInt();
         y = in.readInt();
         z = in.readInt();
-        position = new Vector3f(in.readFloat(), in.readFloat(), in.readFloat());
-        rotation = new Quaternion(in.readFloat(), in.readFloat(), in.readFloat(), in.readFloat());
         this.pos = new BlockPos(in.readInt(), in.readInt(), in.readInt());
         return true;
     }
@@ -83,8 +68,8 @@ public class DynamXBlockTerrainElement implements ITerrainElement {
             throw new IllegalStateException("DynamX block TE failed to load at " + pos);
         }
         PhysicsRigidBody p = new PhysicsRigidBody(((TEDynamXBlock) te).getPhysicsCollision(), 0);
-        p.setPhysicsLocation(pos.add(Vector3fPool.get(x + 0.5f, y + 1.5f, z + 0.5f).addLocal(((TEDynamXBlock) te).getBlockObjectInfo().getTranslation())).addLocal(position));
-        p.setPhysicsRotation(rotation);
+        p.setPhysicsLocation(pos.add(Vector3fPool.get(x + 0.5f, y + 1.5f, z + 0.5f).addLocal(((TEDynamXBlock) te).getBlockObjectInfo().getTranslation())).addLocal(((TEDynamXBlock) te).getRelativeTranslation()));
+        p.setPhysicsRotation(((TEDynamXBlock) te).getCollidableRotation());
         p.setUserObject(new BulletShapeType<>(EnumBulletShapeType.TERRAIN, this));
         body = p;
         return p;

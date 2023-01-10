@@ -70,8 +70,6 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
      */
     @SynchronizedEntityVariable(name = "wheel_states")
     protected EntityVariable<WheelState[]> wheelsStates;
-    // [0;4] SkidInfo [4;8] Friction [8;12] longitudinal [12;16] lateral [16;20] getRotationDelta
-    // todo clean wheelProperties system
     @SynchronizedEntityVariable(name = "skid_infos")
     public EntityFloatArrayVariable skidInfos = new EntityFloatArrayVariable(SynchronizationRules.PHYSICS_TO_SPECTATORS, null);
 

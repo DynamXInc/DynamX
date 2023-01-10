@@ -88,27 +88,6 @@ public class MoveObjects extends MovableModule {
                 Vector3f finalPos = playerPos.addLocal(playerLookPos);
                 pickedEntity.getPhysicsHandler().setPhysicsPosition(finalPos);
             }
-        } else {
-            //updateClient();
         }
     }
-
-    @SideOnly(Side.CLIENT)
-    private void updateClient() { //TODO WTF DEMANDER A YANIS
-        picker.set(Minecraft.getMinecraft().player);
-        if (picker.get() != null) {
-            if (picker.get().world.isRemote) {
-                if (pickedEntity.get() != null) {
-                    if (isPicked.get()) {
-                        Vector3f playerLookPos = DynamXUtils.toVector3f(picker.get().getLookVec());
-                        Vector3f playerPos = DynamXUtils.toVector3f(picker.get().getPositionEyes(1.0f));
-                        Vector3f finalPos = playerPos.add(playerLookPos);
-                        pickedEntity.get().physicsPosition.set(finalPos);
-                        //pickedEntity.updateMinecraftPos();
-                    }
-                }
-            }
-        }
-    }
-
 }

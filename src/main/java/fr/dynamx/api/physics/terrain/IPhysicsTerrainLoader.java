@@ -13,11 +13,14 @@ public interface IPhysicsTerrainLoader {
     /**
      * Updates this terrain loader
      *
-     * @param terrain  The current terrain manager, that will load your chunks
-     * @param profiler
+     * @param terrain The current terrain manager, that will load your chunks
+     * @param profiler The current profiler
      */
     void update(ITerrainManager terrain, Profiler profiler);
 
-    //TODO DOC
+    /**
+     * Releases the chunks loaded by this terrain loader
+     * @param terrain The current terrain manager, that loaded your chunks
+     */
     void onRemoved(ITerrainManager terrain);
 }

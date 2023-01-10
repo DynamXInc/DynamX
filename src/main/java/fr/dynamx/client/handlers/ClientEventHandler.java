@@ -1,5 +1,7 @@
 package fr.dynamx.client.handlers;
 
+import com.jme3.math.Quaternion;
+import com.jme3.math.Vector3f;
 import fr.aym.acsguis.api.ACsGuiApi;
 import fr.aym.acslib.ACsLib;
 import fr.aym.mps.ModProtectionSystem;
@@ -29,6 +31,8 @@ import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.errors.DynamXErrorManager;
+import fr.dynamx.utils.maths.DynamXGeometry;
+import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
@@ -36,11 +40,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiMainMenu;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.renderer.entity.RenderPlayer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -54,6 +61,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.client.event.*;
@@ -329,6 +337,45 @@ public class ClientEventHandler {
             }
         }
         renderBigEntities((float) partialTicks);
+
+        /*
+        GlStateManager.pushMatrix();
+        GlStateManager.disableTexture2D();
+        GlStateManager.disableDepth();
+        GlStateManager.depthMask(false);
+        GlStateManager.disableTexture2D();
+        GlStateManager.disableLighting();
+        GlStateManager.disableCull();
+        GlStateManager.disableBlend();
+
+        x = y =z = 0;
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+
+        float f = MathHelper.cos(-0 * 0.017453292F - (float)Math.PI);
+        float f1 = MathHelper.sin(-0 * 0.017453292F - (float)Math.PI);
+        float f2 = -MathHelper.cos(-0 * 0.017453292F);
+        float f3 = MathHelper.sin(-0 * 0.017453292F);
+        Vec3d vec3d = new Vec3d((double)(f1 * f2), (double)f3, (double)(f * f2));
+
+        //Vec3d vec3d = MC.player.getLook((float) partialTicks);
+        Vector3f vector3f = Vector3fPool.get(vec3d);
+        if(MC.player.getRidingEntity() instanceof BaseVehicleEntity) {
+            Quaternion q = QuaternionPool.get();
+            DynamXMath.slerp((float) partialTicks, ((BaseVehicleEntity<?>) MC.player.getRidingEntity()).renderRotation, ((BaseVehicleEntity<?>) MC.player.getRidingEntity()).renderRotation, q);
+            vector3f = DynamXGeometry.rotateVectorByQuaternion(vector3f, q);
+        }
+        bufferbuilder.begin(3, DefaultVertexFormats.POSITION_COLOR);
+        bufferbuilder.pos(x, y + (double)MC.player.getEyeHeight(), z).color(0, 255, 255, 255).endVertex();
+        bufferbuilder.pos(x + vector3f.x * 20.0D, y + (double)MC.player.getEyeHeight() + vector3f.y * 20.0D, z + vector3f.z * 20.0D).color(0, 255, 255, 255).endVertex();
+        tessellator.draw();
+        GlStateManager.enableTexture2D();
+        GlStateManager.enableLighting();
+        GlStateManager.enableCull();
+        GlStateManager.disableBlend();
+        GlStateManager.depthMask(true);
+        GlStateManager.popMatrix();
+         */
     }
 
     private static void renderBigEntities(float partialTicks) {

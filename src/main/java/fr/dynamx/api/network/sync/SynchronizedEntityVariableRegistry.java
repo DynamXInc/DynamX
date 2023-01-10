@@ -15,6 +15,9 @@ import java.lang.reflect.ParameterizedType;
 import java.util.*;
 import java.util.function.Predicate;
 
+/**
+ * TODO ALL NEW SYNC DOC
+ */
 public class SynchronizedEntityVariableRegistry {
     private static final Map<Class<?>, List<String>> baseSyncVarRegistry = new HashMap<>();
     private static final Map<Class<?>, String> classToMod = new HashMap<>();

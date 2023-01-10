@@ -71,7 +71,6 @@ public class EntityTransformsVariable extends ListeningEntityVariable<Map<Byte, 
                             transforms.get(transform.getKey()).set(transform.getValue().getPhysicTransform());
                         }
                     }
-                    //TODO FIX entity.synchronizedPosition.setChanged(true);
                 }
                 return transforms;
             }

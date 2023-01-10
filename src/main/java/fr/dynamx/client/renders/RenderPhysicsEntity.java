@@ -63,8 +63,6 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
         if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.ENTITY, x, y, z, partialTicks, null))) {
             GlStateManager.pushMatrix();
             {
-                //TODO TRANSPARENT THINGS SHOULD BE RENDER LAST GlStateManager.enableBlend();
-
                 appliedRotation = setupRenderTransform(entity, x, y, z, entityYaw, partialTicks);
                 renderMain(entity, partialTicks);
                 renderParts(entity, partialTicks);

@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class WorldTerrainState //TODO INTERFACE
+public class WorldTerrainState
 {
     //TODO DOC
     private final Map<VerticalChunkPos, Short> loadedTerrain = new HashMap<>();

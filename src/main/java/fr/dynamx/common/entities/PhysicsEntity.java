@@ -148,7 +148,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     /**
      * TODO UPDATE DOC
      * <p>
-     * Adds the {@link fr.dynamx.api.network.sync.SynchronizedVariable} used to synchronize this module <br>
+     * Adds the {@link fr.dynamx.api.network.sync} used to synchronize this module <br>
      * The variables must only be added on the side which has the authority over the data (typically the server) <br>
      * Fired on modules initialization and on {@link fr.dynamx.api.network.sync.SimulationHolder} changes
      */

@@ -15,7 +15,7 @@ public class PartHandle extends BasePart<ModularVehicleInfo> {
 
     @Getter
     @PackFileProperty(configNames = "PartName")
-    private String PartName = "Handle";
+    private String PartName = "handle";
 
     @Override
     public void appendTo(ModularVehicleInfo owner) {

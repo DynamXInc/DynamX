@@ -1,7 +1,6 @@
 package fr.dynamx.client.sound;
 
 import fr.dynamx.api.audio.EnumSoundState;
-import fr.dynamx.api.audio.IDynamXSoundHandler;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.BasicEngineModule;
 
@@ -34,7 +33,7 @@ public class EngineSound extends VehicleSound {
     }
 
     @Override
-    public void update(IDynamXSoundHandler handler) {
+    public void update(DynamXSoundHandler handler) {
         if (getState() == EnumSoundState.STOPPING) {
             setVolumeFactor(getVolumeFactor() - 0.02f);
             if (getVolumeFactor() <= 0) {

@@ -10,6 +10,9 @@ import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.HelicopterEngineModule;
 import lombok.Getter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RegisteredSubInfoType(name = "HelicopterPhysics", registries = {SubInfoTypeRegistries.HELICOPTER})
 public class HelicopterPhysicsInfo extends SubInfoType<ModularVehicleInfo> {
 
@@ -41,8 +44,32 @@ public class HelicopterPhysicsInfo extends SubInfoType<ModularVehicleInfo> {
     @PackFileProperty(configNames = "RollForce", defaultValue = "6000", description = "The force of inclination when the player keep the key pressed")
     private float rollForce = 6000;
 
+    private List<EngineSound> soundsEngine;
+    public String startingSoundInterior;
+    public String startingSoundExterior;
+
     public HelicopterPhysicsInfo(ISubInfoTypeOwner<ModularVehicleInfo> owner) {
         super(owner);
+    }
+
+    public void setSounds(List<EngineSound> sounds) {
+        soundsEngine = new ArrayList<>();
+        for (EngineSound sound : sounds) {
+            if (sound.isSpecialSound()) {
+                if (sound.getRpmRange()[0] == -1) //A starting sound
+                {
+                    if (sound.isInterior())
+                        startingSoundInterior = sound.getSoundName();
+                    else
+                        startingSoundExterior = sound.getSoundName();
+                }
+            } else
+                soundsEngine.add(sound);
+        }
+    }
+
+    public List<EngineSound> getEngineSounds() {
+        return soundsEngine;
     }
 
     @Override

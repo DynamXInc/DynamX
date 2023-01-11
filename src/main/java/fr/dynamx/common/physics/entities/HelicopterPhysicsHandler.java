@@ -4,6 +4,7 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.type.vehicle.HelicopterPhysicsInfo;
+import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.HelicopterEngineModule;
 import fr.dynamx.common.entities.vehicles.HelicopterEntity;
 import fr.dynamx.utils.maths.DynamXGeometry;

@@ -103,12 +103,10 @@ public class VehicleDebugRenderer {
             //Render wheels
             for (PartRotor rotor : entity.getPackInfo().getPartsByType(PartRotor.class)) {
                 box.offset(rotor.getPosition());
-                if (!rotor.isMainRotor())
-                    RenderGlobal.drawBoundingBox(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ,
+
+                RenderGlobal.drawBoundingBox(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ,
                             204F/255, 123F/255, 0, 1);
-                else
-                    RenderGlobal.drawBoundingBox(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ,
-                            0, 1, 0, 1);
+
             }
         }
     }

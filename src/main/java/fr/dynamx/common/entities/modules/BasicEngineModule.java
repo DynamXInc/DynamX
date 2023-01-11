@@ -9,7 +9,6 @@ import fr.dynamx.api.network.sync.EntityVariable;
 import fr.dynamx.api.network.sync.SynchronizationRules;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
 import fr.dynamx.client.ClientProxy;
-import fr.dynamx.client.sound.EngineSound;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.EnginePhysicsHandler;
@@ -24,7 +23,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import javax.annotation.Nullable;
 
 /**
- * Basic {@link IEngineModule} implementation for cars <br>
+ * Basic {@link } implementation for cars <br>
  * Works with an {@link AutomaticGearboxHandler} and a {@link WheelsModule}
  *
  * @see VehicleEntityProperties.EnumEngineProperties

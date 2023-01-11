@@ -1,12 +1,8 @@
 package fr.dynamx.client.sound;
 
-import fr.dynamx.api.audio.IDynamXSoundHandler;
-import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.common.contentpack.parts.PartWheel;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.WheelsModule;
-
-import static fr.dynamx.api.entities.VehicleEntityProperties.getPropertyIndex;
 
 public class SkiddingSound extends VehicleSound {
     private final WheelsModule wheelsModule;
@@ -19,7 +15,7 @@ public class SkiddingSound extends VehicleSound {
     }
 
     @Override
-    public void update(IDynamXSoundHandler handler) {
+    public void update(DynamXSoundHandler handler) {
         super.update(handler);
         float numSkdding = 0;
         for (int i = 0; i < vehicleEntity.getPackInfo().getPartsByType(PartWheel.class).size(); i++) {

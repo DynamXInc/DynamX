@@ -2,6 +2,7 @@ package fr.dynamx.utils;
 
 import fr.aym.acslib.ACsLib;
 import fr.aym.acslib.api.services.StatsReportingService;
+import lombok.Getter;
 import net.minecraftforge.common.config.Configuration;
 
 import java.io.File;
@@ -37,8 +38,13 @@ public class DynamXConfig
 
     public static boolean disableSSLCertification;
 
+    @Getter
+    private static float masterSoundVolume;
+
+    private static Configuration cfg;
+
     public static void load(File file) {
-        Configuration cfg = new Configuration(file);
+        cfg = new Configuration(file);
         cfg.load();
         syncPacks = cfg.getBoolean("SyncContentPacks", "Multiplayer", false, "If enabled, the server will send all content pack objects to the clients (only where there are differences)");
         allowedWrenchModes = cfg.get("Multiplayer", "AllowedWrenchModes", new int[]{0, 2, 5}).getIntList();
@@ -78,6 +84,14 @@ public class DynamXConfig
         enableDebugTerrainManager = cfg.get("Debug", "UseDebugTerrainManager", false, "Permits to debug terrain loading issues but may produce lag and instabilities").getBoolean();
         ignoreDangerousTerrainErrors = cfg.get("Debug", "IgnoreDangerousTerrainErrors", false, "Will try to prevent the game from crashing when there is a weird error in the terrain. Only enable this if you want server stability.").getBoolean();
         disableSSLCertification = cfg.get("Debug", "DisableSSLVerification", false, "Disables ssl certificates for dynamx.fr, may be a security breach for your computer, DO NOT disable it if you don't know what you are doing").getBoolean();
+
+        masterSoundVolume = (float) cfg.get("Sounds", "Volume", 1f, "The volume of DynamX sounds (engines...)").getDouble();
+        cfg.save();
+    }
+
+    public static void setMasterSoundVolume(float volume) {
+        masterSoundVolume = volume;
+        cfg.get("Sounds", "Volume", 1f, "The volume of DynamX sounds (engines...)").set(volume);
         cfg.save();
     }
 }

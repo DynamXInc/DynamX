@@ -6,10 +6,8 @@ import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.entities.modules.DoorsModule;
-import fr.dynamx.common.entities.modules.HelicopterEngineModule;
-import fr.dynamx.common.entities.modules.HelicopterRotorsModule;
-import fr.dynamx.common.entities.modules.SeatsModule;
+import fr.dynamx.common.entities.modules.*;
+import fr.dynamx.common.physics.entities.BaseWheeledVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.HelicopterPhysicsHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
@@ -20,6 +18,7 @@ public class HelicopterEntity<T extends HelicopterPhysicsHandler<?>> extends Bas
         IModuleContainer.ISeatsContainer, IModuleContainer.IDoorContainer {
     private SeatsModule seats;
     private DoorsModule doors;
+    private WheelsModule wheels;
 
     public HelicopterEntity(World world) {
         super(world);
@@ -33,7 +32,7 @@ public class HelicopterEntity<T extends HelicopterPhysicsHandler<?>> extends Bas
     public T createPhysicsHandler() {
         return (T) new HelicopterPhysicsHandler(this);
     }
-
+    //TODO siege conducteur  et cam  et effect fumé et rotation vitesse en fonction de la vitesse
     @Override
     protected void createModules(ModuleListBuilder modules) {
         //Take care to add seats BEFORE engine (the engine needs to detect dismounts)
@@ -49,9 +48,10 @@ public class HelicopterEntity<T extends HelicopterPhysicsHandler<?>> extends Bas
                 }
             }
         });
-        modules.add(new HelicopterRotorsModule(this));
+        //modules.add(wheels = new WheelsModule(this));
         super.createModules(modules);
         doors = getModuleByType(DoorsModule.class);
+
     }
 
     @Override
@@ -70,6 +70,10 @@ public class HelicopterEntity<T extends HelicopterPhysicsHandler<?>> extends Bas
         if (seats == null) //We may need seats before modules are created, because of seats sync
             seats = new SeatsModule(this);
         return seats;
+    }
+
+    public WheelsModule getWheels() {
+        return wheels;
     }
 
     @Override

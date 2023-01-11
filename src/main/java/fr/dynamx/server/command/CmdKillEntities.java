@@ -1,10 +1,9 @@
 package fr.dynamx.server.command;
 
+import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.entities.PropsEntity;
 import fr.dynamx.common.entities.RagdollEntity;
-import fr.dynamx.common.entities.vehicles.CarEntity;
-import fr.dynamx.common.entities.vehicles.DoorEntity;
-import fr.dynamx.common.entities.vehicles.TrailerEntity;
+import fr.dynamx.common.entities.vehicles.*;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
@@ -27,7 +26,7 @@ public class CmdKillEntities implements ISubCommand {
 
     @Override
     public String getUsage() {
-        return getName() + " <all|cars|props|ragdolls|trailers|doors>";
+        return getName() + " <all|cars|boats|helicopters|props|ragdolls|trailers|doors>";
     }
 
     @Override
@@ -36,7 +35,11 @@ public class CmdKillEntities implements ISubCommand {
             List<Entity> entityList;
             if (args[1].equalsIgnoreCase("cars")) {
                 entityList = sender.getEntityWorld().getEntities(CarEntity.class, EntitySelectors.IS_ALIVE);
-            } else if (args[1].equalsIgnoreCase("props")) {
+            } else if (args[1].equalsIgnoreCase("boats")) {
+                entityList = sender.getEntityWorld().getEntities(BoatEntity.class, EntitySelectors.IS_ALIVE);
+            }else if (args[1].equalsIgnoreCase("helicopters")) {
+                entityList = sender.getEntityWorld().getEntities(HelicopterEntity.class, EntitySelectors.IS_ALIVE);
+            }else if (args[1].equalsIgnoreCase("props")) {
                 entityList = sender.getEntityWorld().getEntities(PropsEntity.class, EntitySelectors.IS_ALIVE);
             } else if (args[1].equalsIgnoreCase("ragdolls")) {
                 entityList = sender.getEntityWorld().getEntities(RagdollEntity.class, EntitySelectors.IS_ALIVE);
@@ -46,11 +49,7 @@ public class CmdKillEntities implements ISubCommand {
                 entityList = sender.getEntityWorld().getEntities(DoorEntity.class, EntitySelectors.IS_ALIVE);
             } else if (args[1].equalsIgnoreCase("all")) {
                 entityList = new ArrayList<>();
-                entityList.addAll(sender.getEntityWorld().getEntities(CarEntity.class, EntitySelectors.IS_ALIVE));
-                entityList.addAll(sender.getEntityWorld().getEntities(PropsEntity.class, EntitySelectors.IS_ALIVE));
-                entityList.addAll(sender.getEntityWorld().getEntities(RagdollEntity.class, EntitySelectors.IS_ALIVE));
-                entityList.addAll(sender.getEntityWorld().getEntities(TrailerEntity.class, EntitySelectors.IS_ALIVE));
-                entityList.addAll(sender.getEntityWorld().getEntities(DoorEntity.class, EntitySelectors.IS_ALIVE));
+                entityList.addAll(sender.getEntityWorld().getEntities(PhysicsEntity.class, EntitySelectors.IS_ALIVE));
             } else {
                 throw new WrongUsageException(getUsage());
             }
@@ -65,6 +64,8 @@ public class CmdKillEntities implements ISubCommand {
         if (args.length > 1) {
             r.add("all");
             r.add("cars");
+            r.add("boats");
+            r.add("helicopters");
             r.add("props");
             r.add("ragdolls");
             r.add("doors");

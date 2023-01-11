@@ -98,7 +98,7 @@ public class PackFilePropertyData<T> {
         String docKey = description.isEmpty() ? field.getDeclaringClass().getSimpleName() + "." + configFieldName : description;
         String sep = "|";
         String typeName = locale.format(this.type.getTypeName());
-        builder.append(sep).append(type).append(sep).append(configFieldName).append(sep).append(typeName).append(sep)
+        builder.append(sep).append(configFieldName).append(sep).append(typeName).append(sep)
                 .append(locale.format(docKey)).append(sep).append(defaultValue.isEmpty() ? "   " : defaultValue).append(sep).append("\n");
     }
 }

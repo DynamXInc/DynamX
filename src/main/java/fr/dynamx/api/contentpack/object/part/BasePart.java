@@ -49,7 +49,7 @@ public abstract class BasePart<T extends ISubInfoTypeOwner<?>> extends SubInfoTy
     @PackFileProperty(configNames = "Scale", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED, required = false, description = "common.scale")
     @Getter
     private Vector3f scale = new Vector3f();
-    @PackFileProperty(configNames = "DependsOn", required = false, description = "common.scale")
+    @PackFileProperty(configNames = "DependsOn", required = false, description = "common.unused")
     private String partDependingOnName;
 
     @Getter

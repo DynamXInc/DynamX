@@ -6,14 +6,14 @@ import fr.dynamx.common.contentpack.loader.PackFilePropertyData;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.List;
+import java.util.Collection;
 import java.util.Scanner;
 
 public class ContentPackDocGenerator {
     private static final DocLocale locale = new DocLocale();
     private static boolean hasInit;
 
-    public static void generateDoc(String name, String lang, List<PackFilePropertyData<?>> data) {
+    public static void generateDoc(String name, String lang, Collection<PackFilePropertyData<?>> data) {
         if (data.isEmpty()) {
             System.out.println("Ignoring " + name);
             return;
@@ -23,12 +23,22 @@ public class ContentPackDocGenerator {
             locale.loadLocaleDataFiles("doc_" + lang + ".lang");
         }
 
-        //System.out.println("Generating "+name+".md");
+        System.out.println("Generating "+name+".md");
         StringBuilder builder = new StringBuilder();
-        builder.append("|Category|").append("Name|").append("Type|").append("Description|").append("Example or default value|").append("\n");
-        //builder.append("Category;").append("Name;").append("Type;").append("Description;").append("Example or default value;").append("\n");
+        builder.append('\n').append("##### ").append(locale.format("category.REQUIRED"));
+        builder.append("|").append(locale.format("title.name")).append("|")
+                .append(locale.format("title.type")).append("|")
+                .append(locale.format("title.description")).append("|")
+                .append(locale.format("title.example")).append("|").append("\n");
         builder.append("| -------- | ------------- | ------------------ | ---------------------------- | ---------------- |\n");
         data.forEach(d -> d.writeDocLine(builder, locale, DocType.REQUIRED));
+
+        builder.append('\n').append("##### ").append(locale.format("category.OPTIONAL"));
+        builder.append("|").append(locale.format("title.name")).append("|")
+                .append(locale.format("title.type")).append("|")
+                .append(locale.format("title.description")).append("|")
+                .append(locale.format("title.default_value")).append("|").append("\n");
+        builder.append("| -------- | ------------- | ------------------ | ---------------------------- | ---------------- |\n");
         data.forEach(d -> d.writeDocLine(builder, locale, DocType.OPTIONAL));
         //data.forEach(d -> d.writeDocLine(builder, locale, DocType.DEPRECATED));
         File docDir = new File("Doc");
@@ -39,7 +49,8 @@ public class ContentPackDocGenerator {
                 file.delete();
             }
             FileWriter writer = new FileWriter(file, true);
-            writer.write("\nDoc of " + name + " : \n");
+            writer.write("\n ## " + name +" : \n");
+            writer.write("\n" + locale.format("info.desc."+name) + "\n");
             writer.write(builder.toString());
             writer.close();
             //System.out.println("Generated " + file);

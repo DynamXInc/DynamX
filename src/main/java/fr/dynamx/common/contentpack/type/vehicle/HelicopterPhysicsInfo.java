@@ -42,14 +42,15 @@ public class HelicopterPhysicsInfo extends SubInfoType<ModularVehicleInfo> {
     private float mouseRollForce = 400;
     @Getter
     @PackFileProperty(configNames = "RollForce", defaultValue = "6000", description = "The force of inclination when the player keep the key pressed")
-    private  float rollForce = 6000;
+    private float rollForce = 6000;
+
+    private List<EngineSound> soundsEngine;
+    public String startingSoundInterior;
+    public String startingSoundExterior;
 
     public HelicopterPhysicsInfo(ISubInfoTypeOwner<ModularVehicleInfo> owner) {
         super(owner);
     }
-    private List<EngineSound> soundsEngine;
-    public String startingSoundInterior;
-    public String startingSoundExterior;
 
     public void setSounds(List<EngineSound> sounds) {
         soundsEngine = new ArrayList<>();

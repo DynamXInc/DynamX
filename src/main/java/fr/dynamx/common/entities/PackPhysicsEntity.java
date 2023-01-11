@@ -71,11 +71,8 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
     @Override
     public void onPackInfosReloaded() {
         setPackInfo(createInfo(getInfoName()));
-        if (physicsHandler == null) {
-            DynamXMain.log.warn("Failed to reload info of " + this + ". Should be " + getInfoName());
-        } else {
+        if(physicsHandler != null)
             physicsHandler.onPackInfosReloaded();
-        }
         for(IPhysicsModule<?> module : moduleList) {
             if(module instanceof IPackInfoReloadListener)
                 ((IPackInfoReloadListener) module).onPackInfosReloaded();

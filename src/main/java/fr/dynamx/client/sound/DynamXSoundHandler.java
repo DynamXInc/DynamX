@@ -2,7 +2,7 @@ package fr.dynamx.client.sound;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.audio.IDynamXSound;
-import fr.dynamx.api.audio.IDynamXSoundHandler;
+import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
@@ -10,6 +10,7 @@ import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.audio.SoundManager;
 import net.minecraft.client.resources.IResource;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.event.sound.SoundLoadEvent;
 import net.minecraftforge.client.event.sound.SoundSetupEvent;
@@ -32,12 +33,11 @@ import java.util.List;
 import static fr.dynamx.common.DynamXMain.log;
 
 /**
- * Default DynamX implementation of {@link IDynamXSoundHandler}
- * <p>
+ * Handles all DynamX sounds (engines...) <br>
  * author DonBruce and modified by the DynamX team
  */
 @SideOnly(Side.CLIENT)
-public class DynamXSoundHandler implements IDynamXSoundHandler {
+public class DynamXSoundHandler {
     //Reflection variables.
     private static final String[] soundSystemNames = {"sndSystem", "field_148620_e"};
     private SoundManager mcSoundManager;
@@ -47,12 +47,16 @@ public class DynamXSoundHandler implements IDynamXSoundHandler {
 
     private final URLStreamHandler resourceStreamHandler = new ResourceStreamHandler();
 
-    @Override
+    /**
+     * Called on mc sound system setup
+     */
     public void setup(SoundSetupEvent event) {
         mcSoundManager = event.getManager();
     }
 
-    @Override
+    /**
+     * Called on mc sound system load
+     */
     public void load(SoundLoadEvent event) {
         mcSoundSystem = null;
         secondStartupTry = false;
@@ -60,7 +64,9 @@ public class DynamXSoundHandler implements IDynamXSoundHandler {
         playingSounds.clear();
     }
 
-    @Override
+    /**
+     * Called on world unload
+     */
     public void unload() {
         for (IDynamXSound soundID : getPlayingSounds()) {
             if (mcSoundSystem.playing(soundID.getSoundUniqueName())) {
@@ -87,7 +93,9 @@ public class DynamXSoundHandler implements IDynamXSoundHandler {
      */
     private final List<String> erroredSounds = new ArrayList<>();
 
-    @Override
+    /**
+     * Called each tick to update the sounds
+     */
     public void tick() {
         if (ready()) {
             //Update all sounds
@@ -106,19 +114,40 @@ public class DynamXSoundHandler implements IDynamXSoundHandler {
         }
     }
 
-    @Override
+    /**
+     * @return The list of all currently playing sounds !
+     */
     public List<IDynamXSound> getPlayingSounds() {
         return playingSounds;
     }
 
-    @Override
+    /**
+     * Plays a single sound.  Format of soundName should be modID:soundFileName and the sound should be in the sounds folder <br>
+     * No sounds.json needed
+     *
+     * @param soundPosition The position of the sound
+     * @param soundName     The sound file name
+     * @param volume        The sound volume
+     * @param pitch         The sound pitch, 1 for no deformation
+     * @implNote The default sound distance is 48 blocks with a linear attenuation
+     */
     public void playSingleSound(Vector3f soundPosition, String soundName, float volume, float pitch) {
         playSingleSound(soundPosition, soundName, volume, pitch, SoundSystemConfig.ATTENUATION_LINEAR, 48);
     }
 
-    @Override
+    /**
+     * Plays a single sound.  Format of soundName should be modID:soundFileName and the sound should be in the sounds folder <br>
+     * No sounds.json needed
+     *
+     * @param soundPosition   The position of the sound
+     * @param soundName       The sound file name
+     * @param volume          The sound volume
+     * @param pitch           The sound pitch, 1 for no deformation
+     * @param attenuationType The sound attenuation type - see {@link paulscode.sound.SoundSystemConfig} fields
+     * @param distOrRoll      Either the fading distance or rolloff factor, depending on the value of "attenuationType"
+     */
     public void playSingleSound(Vector3f soundPosition, String soundName, float volume, float pitch, int attenuationType, float distOrRoll) {
-        if (ready()) {
+        if (ready() && DynamXConfig.getMasterSoundVolume() > 0) {
             try {
                 //Need to add the DynamX_Main.MODID: prefix as the URL will trim off the first section, leading to a bad parse.
                 URL soundURL = new URL(null, DynamXConstants.ID + ":" + soundName + ".ogg", resourceStreamHandler);
@@ -144,14 +173,27 @@ public class DynamXSoundHandler implements IDynamXSoundHandler {
         }
     }
 
-    @Override
+    /**
+     * Plays a streaming sound, used for engines sound, for example
+     *
+     * @param soundPosition The position of the sound (can be later updated by the sound)
+     * @param sound         The sound to play
+     * @implNote The default sound distance is 48 blocks with a linear attenuation
+     */
     public void playStreamingSound(Vector3f soundPosition, IDynamXSound sound) {
         playStreamingSound(soundPosition, sound, SoundSystemConfig.ATTENUATION_LINEAR, 48);
     }
 
-    @Override
+    /**
+     * Plays a streaming sound, used for engines sound, for example
+     *
+     * @param soundPosition   The position of the sound (can be later updated by the sound)
+     * @param sound           The sound to play
+     * @param attenuationType The sound attenuation type - see {@link paulscode.sound.SoundSystemConfig} fields
+     * @param distOrRoll      Either the fading distance or rolloff factor, depending on the value of "attenuationType"
+     */
     public void playStreamingSound(Vector3f soundPosition, IDynamXSound sound, int attenuationType, float distOrRoll) {
-        if (ready()) {
+        if (ready() && DynamXConfig.getMasterSoundVolume() > 0) {
             if (playingSounds.contains(sound))
                 throw new IllegalStateException("Sound " + sound + " is already playing !");
             String soundID = sound.getSoundUniqueName();
@@ -162,10 +204,11 @@ public class DynamXSoundHandler implements IDynamXSoundHandler {
                     if (trustedSounds.contains(soundName) || soundURL.openStream() != null) {
                         if (!trustedSounds.contains(soundName))
                             trustedSounds.add(soundName);
+                        playingSounds.add(sound);
                         mcSoundSystem.newSource(false, soundID, soundURL, soundURL.toString(), true, soundPosition.x, soundPosition.y, soundPosition.z, attenuationType, distOrRoll);
+                        setSoundVolume(sound, sound.getVolume());
                         mcSoundSystem.play(soundID);
                         sound.onStarted();
-                        playingSounds.add(sound);
                     }
                 } catch (FileNotFoundException e) {
                     if (!erroredSounds.contains(soundName)) {
@@ -182,7 +225,9 @@ public class DynamXSoundHandler implements IDynamXSoundHandler {
         }
     }
 
-    @Override
+    /**
+     * Tries to stop a sound (the sound must return true in the IDynamXSound.tryStop method)
+     */
     public void stopSound(IDynamXSound sound) {
         if (playingSounds.contains(sound)) {
             if (sound.tryStop()) {
@@ -206,46 +251,76 @@ public class DynamXSoundHandler implements IDynamXSoundHandler {
         return mcSoundSystem;
     }
 
-    @Override
-    public void setVolume(IDynamXSound sound, float volume) {
+    /**
+     * Sets the volume of a streaming sound
+     *
+     * @param volume Must be between 0 and 1
+     */
+    public void setSoundVolume(IDynamXSound sound, float volume) {
         if (playingSounds.contains(sound))
-            mcSoundSystem.setVolume(sound.getSoundUniqueName(), volume);
+            mcSoundSystem.setVolume(sound.getSoundUniqueName(), MathHelper.clamp(volume * DynamXConfig.getMasterSoundVolume(), 0.0F, 1.0F));
     }
 
-    @Override
+    /**
+     * Sets the pitch of a streaming sound
+     *
+     * @param pitch Must be between 0.5 and 2
+     */
     public void setPitch(IDynamXSound sound, float pitch) {
         if (playingSounds.contains(sound))
             mcSoundSystem.setPitch(sound.getSoundUniqueName(), pitch);
     }
 
-    @Override
+    /**
+     * Sets the attenuation type of streaming sound
+     *
+     * @param attenuationType The sound attenuation type - see {@link paulscode.sound.SoundSystemConfig} fields
+     */
     public void setAttenuationType(IDynamXSound sound, int attenuationType) {
         if (playingSounds.contains(sound))
             mcSoundSystem.setAttenuation(sound.getSoundUniqueName(), attenuationType);
     }
 
-    @Override
+    /**
+     * Sets the radius of a streaming sound
+     *
+     * @param radius Either the fading distance or rolloff factor, depending on the value of the attenuationType
+     */
     public void setSoundDistance(IDynamXSound sound, float radius) {
         if (playingSounds.contains(sound))
             mcSoundSystem.setDistOrRoll(sound.getSoundUniqueName(), radius);
     }
 
-    @Override
+    /**
+     * Sets the position of a streaming sound
+     */
     public void setPosition(IDynamXSound sound, float x, float y, float z) {
         if (playingSounds.contains(sound))
             mcSoundSystem.setPosition(sound.getSoundUniqueName(), x, y, z);
     }
 
-    @Override
+    /**
+     * Pauses a streaming sound
+     */
     public void pause(IDynamXSound sound) {
         if (playingSounds.contains(sound))
             mcSoundSystem.pause(sound.getSoundUniqueName());
     }
 
-    @Override
+    /**
+     * Resumes a streaming sound
+     */
     public void resume(IDynamXSound sound) {
         if (playingSounds.contains(sound))
             mcSoundSystem.play(sound.getSoundUniqueName());
+    }
+
+
+    public void setMasterVolume(float masterVolume) {
+        DynamXConfig.setMasterSoundVolume(masterVolume);
+        for(IDynamXSound sound : playingSounds) {
+            setSoundVolume(sound, sound.getVolume());
+        }
     }
 
     /**
@@ -299,13 +374,17 @@ public class DynamXSoundHandler implements IDynamXSoundHandler {
         }
     }
 
+    public float getMasterVolume() {
+        return DynamXConfig.getMasterSoundVolume();
+    }
+
     /**
      * Custom stream handler for our sounds, to bypass sounds.json
      */
     private static class ResourceStreamHandler extends URLStreamHandler {
+
         public ResourceStreamHandler() {
         }
-
         protected URLConnection openConnection(URL connection) {
             return new URLConnection(connection) {
                 @Override
@@ -328,5 +407,6 @@ public class DynamXSoundHandler implements IDynamXSoundHandler {
                 }
             };
         }
+
     }
 }

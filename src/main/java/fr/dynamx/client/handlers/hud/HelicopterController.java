@@ -65,10 +65,6 @@ public class HelicopterController implements IVehicleController {
             HelicopterEngineModule engineModule = ((HelicopterEntity<?>) MC.player.getRidingEntity()).getModuleByType(HelicopterEngineModule.class);
             engineModule.getRollControls().set(0, event.getDx());
             engineModule.getRollControls().set(1, event.getDy());
-            HelicopterPartModule rotorsModule = ((HelicopterEntity<?>) MC.player.getRidingEntity()).getModuleByType(HelicopterPartModule.class);
-            rotorsModule.Dx = event.getDx();
-            rotorsModule.Dy = event.getDy();
-
         }
     }
 

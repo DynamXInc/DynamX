@@ -14,15 +14,15 @@ import static fr.aym.acsguis.api.GuiAPIClientHelper.mc;
 
 public class ButtonSlider extends GuiButton {
     private final String categoryName;
-    public float volume = 1.0F;
-    public boolean pressed;
+    private float volume = 1.0F;
+    private boolean pressed;
     private final String offDisplayString = I18n.format("options.off");
 
-    public ButtonSlider(int buttonId, int x, int y, boolean master, String ButtonText) {
-        super(buttonId, x, y, master ? 310 : 150, 20, "");
-        this.categoryName = ButtonText;
-        this.volume = ClientProxy.SOUND_HANDLER.getMasterVolume();
-        this.displayString = this.categoryName + ": " + getDisplayString();
+    public ButtonSlider(int buttonId, int x, int y, boolean isMaster, String buttonText) {
+        super(buttonId, x, y, isMaster ? 310 : 150, 20, "");
+        categoryName = buttonText;
+        volume = ClientProxy.SOUND_HANDLER.getMasterVolume();
+        displayString = categoryName + ": " + getDisplayString();
     }
 
     @Override
@@ -34,25 +34,25 @@ public class ButtonSlider extends GuiButton {
     protected void mouseDragged(Minecraft mc, int mouseX, int mouseY) {
         if (visible) {
             if (pressed) {
-                this.volume = (float) (mouseX - (this.x + 4)) / (float) (this.width - 8);
-                this.volume = MathHelper.clamp(this.volume, 0.0F, 1.0F);
-                ClientProxy.SOUND_HANDLER.setMasterVolume(this.volume);
-                this.displayString = this.categoryName + ": " + getDisplayString();
+                volume = (float) (mouseX - (x + 4)) / (float) (width - 8);
+                volume = MathHelper.clamp(volume, 0.0F, 1.0F);
+                ClientProxy.SOUND_HANDLER.setMasterVolume(volume);
+                displayString = categoryName + ": " + getDisplayString();
             }
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            this.drawTexturedModalRect(this.x + (int) (this.volume * (float) (this.width - 8)), this.y, 0, 66, 4, 20);
-            this.drawTexturedModalRect(this.x + (int) (this.volume * (float) (this.width - 8)) + 4, this.y, 196, 66, 4, 20);
+            drawTexturedModalRect(x + (int) (volume * (float) (width - 8)), y, 0, 66, 4, 20);
+            drawTexturedModalRect(x + (int) (volume * (float) (width - 8)) + 4, y, 196, 66, 4, 20);
         }
     }
 
     @Override
     public boolean mousePressed(Minecraft mc, int mouseX, int mouseY) {
         if (super.mousePressed(mc, mouseX, mouseY)) {
-            this.volume = (float) (mouseX - (this.x + 4)) / (float) (this.width - 8);
-            this.volume = MathHelper.clamp(this.volume, 0.0F, 1.0F);
-            ClientProxy.SOUND_HANDLER.setMasterVolume(this.volume);
-            this.displayString = this.categoryName + ": " + getDisplayString();
-            this.pressed = true;
+            volume = (float) (mouseX - (x + 4)) / (float) (width - 8);
+            volume = MathHelper.clamp(volume, 0.0F, 1.0F);
+            ClientProxy.SOUND_HANDLER.setMasterVolume(volume);
+            displayString = categoryName + ": " + getDisplayString();
+            pressed = true;
             return true;
         } else {
             return false;
@@ -65,15 +65,13 @@ public class ButtonSlider extends GuiButton {
 
     @Override
     public void mouseReleased(int mouseX, int mouseY) {
-        if (this.pressed) {
+        if (pressed) {
             mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
         }
-
-        this.pressed = false;
+        pressed = false;
     }
 
     protected String getDisplayString() {
-        return volume == 0.0F ? this.offDisplayString : (int) (volume * 100.0F) + "%";
+        return volume == 0.0F ? offDisplayString : (int) (volume * 100.0F) + "%";
     }
-
 }

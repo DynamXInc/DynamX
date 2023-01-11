@@ -18,7 +18,7 @@ public class EngineSound implements INamedObject {
      * RPM range of this sound (array containing the min and the max) <br>
      * OR if it's the starting sound, equals to {-1}
      */
-    @PackFileProperty(configNames = "RPMRange")
+    @PackFileProperty(configNames = {"RPMRange","PowerRange"})
     private int[] rpmRange;
     @PackFileProperty(configNames = "Sound")
     private String soundName;

@@ -67,7 +67,7 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     @Getter
     private float cameraPositionY;
 
-    @PackFileProperty(configNames = "PlayerSize", required = false)
+    @PackFileProperty(configNames = "PlayerSize", required = false, defaultValue = "1 1 1")
     @Getter
     private Vector3f playerSize;
 

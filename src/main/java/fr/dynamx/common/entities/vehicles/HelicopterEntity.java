@@ -40,11 +40,13 @@ public class HelicopterEntity<T extends HelicopterPhysicsHandler<?>> extends Bas
         modules.add(seats = new SeatsModule(this) {
             @Override
             public void applyOrientationToEntity(Entity passenger) {
-                //TODO ADD FREE CAMERA MODE
-                passenger.rotationYaw = 0;
-                passenger.prevRotationYaw = 0;
-                passenger.rotationPitch = 0;
-                passenger.prevRotationPitch = 0;
+                if(seatToPassenger.inverse().get(passenger).isDriver()) {
+                    //TODO ADD FREE CAMERA MODE
+                    passenger.rotationYaw = 0;
+                    passenger.prevRotationYaw = 0;
+                    passenger.rotationPitch = 0;
+                    passenger.prevRotationPitch = 0;
+                }
             }
         });
         modules.add(new HelicopterRotorsModule(this));

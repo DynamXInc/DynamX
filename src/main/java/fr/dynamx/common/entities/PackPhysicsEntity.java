@@ -71,7 +71,8 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
     @Override
     public void onPackInfosReloaded() {
         setPackInfo(createInfo(getInfoName()));
-        physicsHandler.onPackInfosReloaded();
+        if(physicsHandler != null)
+            physicsHandler.onPackInfosReloaded();
         for(IPhysicsModule<?> module : moduleList) {
             if(module instanceof IPackInfoReloadListener)
                 ((IPackInfoReloadListener) module).onPackInfosReloaded();

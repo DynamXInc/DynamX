@@ -15,31 +15,31 @@ public class HelicopterPhysicsInfo extends SubInfoType<ModularVehicleInfo> {
 
     @Getter
     @PackFileProperty(configNames = "MinPower", defaultValue = "0.4f", description = "The minimum power of the rotor")
-    private final float minPower = 0.4f;
+    private float minPower = 0.4f;
     @Getter
     @PackFileProperty(configNames = "InclinedGravityFactor", defaultValue = "1.8f", description = "The gravity factor when the helicopter is inclined")
-    private final float inclinedGravityFactor = 1.8f;
+    private float inclinedGravityFactor = 1.8f;
     @Getter
     @PackFileProperty(configNames = "ThrustForce", defaultValue = "3000", description = "The force of the gravity when the helicopter is inclined")
-    private final float thrustForce = 3000;
+    private float thrustForce = 3000;
     @Getter
     @PackFileProperty(configNames = "VerticalThrustCompensation", defaultValue = "2000", description = "todo")
-    private final float verticalThrustCompensation = 2000;
+    private float verticalThrustCompensation = 2000;
     @Getter
     @PackFileProperty(configNames = "BrakeForce", defaultValue = "200", description = "The force apllied to the rotor when the player down")
-    private final float brakeForce = 500;
+    private float brakeForce = 500;
     @Getter
     @PackFileProperty(configNames = "MouseYawForce", defaultValue = "2600", description = "The force applied to the rotor when the player move the mouse")
-    private final float mouseYawForce = 2600;
+    private float mouseYawForce = 2600;
     @Getter
     @PackFileProperty(configNames = "MousePitchForce", defaultValue = "2000", description = "The force applied to the rotor when the player move the mouse")
-    private final float mousePitchForce = 2000;
+    private float mousePitchForce = 2000;
     @Getter
     @PackFileProperty(configNames = "MouseRollForce", defaultValue = "400", description = "The force applied to the rotor when the player move the mouse")
-    private final float mouseRollForce = 400;
+    private float mouseRollForce = 400;
     @Getter
     @PackFileProperty(configNames = "RollForce", defaultValue = "6000", description = "The force of inclination when the player keep the key pressed")
-    private final float rollForce = 6000;
+    private float rollForce = 6000;
 
     public HelicopterPhysicsInfo(ISubInfoTypeOwner<ModularVehicleInfo> owner) {
         super(owner);

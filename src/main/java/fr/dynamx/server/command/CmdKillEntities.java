@@ -26,7 +26,7 @@ public class CmdKillEntities implements ISubCommand {
 
     @Override
     public String getUsage() {
-        return getName() + " <all|cars|boat|helicopter|props|ragdolls|trailers|doors>";
+        return getName() + " <all|cars|boats|helicopters|props|ragdolls|trailers|doors>";
     }
 
     @Override
@@ -35,9 +35,9 @@ public class CmdKillEntities implements ISubCommand {
             List<Entity> entityList;
             if (args[1].equalsIgnoreCase("cars")) {
                 entityList = sender.getEntityWorld().getEntities(CarEntity.class, EntitySelectors.IS_ALIVE);
-            } else if (args[1].equalsIgnoreCase("boat")) {
+            } else if (args[1].equalsIgnoreCase("boats")) {
                 entityList = sender.getEntityWorld().getEntities(BoatEntity.class, EntitySelectors.IS_ALIVE);
-            }else if (args[1].equalsIgnoreCase("helicopter")) {
+            }else if (args[1].equalsIgnoreCase("helicopters")) {
                 entityList = sender.getEntityWorld().getEntities(HelicopterEntity.class, EntitySelectors.IS_ALIVE);
             }else if (args[1].equalsIgnoreCase("props")) {
                 entityList = sender.getEntityWorld().getEntities(PropsEntity.class, EntitySelectors.IS_ALIVE);
@@ -64,8 +64,8 @@ public class CmdKillEntities implements ISubCommand {
         if (args.length > 1) {
             r.add("all");
             r.add("cars");
-            r.add("boat");
-            r.add("helicopter");
+            r.add("boats");
+            r.add("helicopters");
             r.add("props");
             r.add("ragdolls");
             r.add("doors");

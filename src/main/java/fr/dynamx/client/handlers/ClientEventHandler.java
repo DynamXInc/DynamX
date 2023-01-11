@@ -142,7 +142,7 @@ public class ClientEventHandler {
         //else if (event.getGui() instanceof GuiWorldSelection || event.getGui() instanceof GuiMultiplayer)
         //    event.getButtonList().add(new GuiButtonImage(-54392, event.getGui().width - 25, 5, 20, 18, 0, 168, 19, CRAFTING_TABLE_GUI_TEXTURES));
         else if (event.getGui() instanceof GuiScreenOptionsSounds)
-            event.getButtonList().add(new ButtonSlider(-54393, event.getGui().width / 2 +5, event.getGui().height / 6 - 12 + 24*5, 150, 20,  false,"DynamX Sounds" + TextFormatting.RESET));
+            event.getButtonList().add(new ButtonSlider(-54393,  150, 20,  false,"DynamX Sounds" + TextFormatting.RESET));
     }
 
     @SubscribeEvent

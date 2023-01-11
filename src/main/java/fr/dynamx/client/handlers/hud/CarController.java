@@ -41,12 +41,6 @@ public class CarController extends BaseController {
     @Setter
     private static HudIcons hudIcons;
 
-    public static final KeyBinding attachTrailer = new KeyBinding("key.attachTrailer", Keyboard.KEY_H, "key.categories." + DynamXConstants.ID);
-    public static void registerControls() {
-        ClientRegistry.registerKeyBinding(attachTrailer);
-    }
-
-    protected final BaseVehicleEntity<?> entity;
     protected final CarEngineModule engine;
 
     @Getter
@@ -73,11 +67,8 @@ public class CarController extends BaseController {
                 else
                     speedLimit = Float.MAX_VALUE;
             }
-
-            if(attachTrailer.isPressed()){
-                ClientDynamXUtils.attachTrailer(MC.player);
-            }
-
+            if (KeyHandler.KEY_ATTACH_TRAILER.isPressed())
+                ClientDynamXUtils.attachTrailer();
             MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.ControllerUpdate<>(entity, this));
             int controls = 0;
             if (accelerating)

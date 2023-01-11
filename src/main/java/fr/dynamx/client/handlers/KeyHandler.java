@@ -47,6 +47,7 @@ public class KeyHandler {
 
     public static final KeyBinding KEY_POWERUP = new KeyBinding("key.powerup", Keyboard.KEY_CAPITAL, "key.categories." + DynamXConstants.ID);
     public static final KeyBinding KEY_POWERDOWN = new KeyBinding("key.powerdown", Keyboard.KEY_LSHIFT, "key.categories." + DynamXConstants.ID);
+    public static final KeyBinding KEY_ATTACH_TRAILER = new KeyBinding("key.attachTrailer", Keyboard.KEY_H, "key.categories." + DynamXConstants.ID);
 
 
     private final Minecraft mc;
@@ -60,6 +61,7 @@ public class KeyHandler {
         ClientRegistry.registerKeyBinding(KEY_ENGINE_ON);
         ClientRegistry.registerKeyBinding(KEY_SPEED_LIMITIER);
         ClientRegistry.registerKeyBinding(KEY_LOCK_DOOR);
+        ClientRegistry.registerKeyBinding(KEY_ATTACH_TRAILER);
 
         ClientRegistry.registerKeyBinding(KEY_CAMERA_MODE);
         ClientRegistry.registerKeyBinding(KEY_ZOOM_IN);

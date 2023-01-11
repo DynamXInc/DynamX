@@ -16,8 +16,6 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import java.util.List;
 
 public class MessageAttachTrailer implements IDnxPacket, IMessageHandler<MessageAttachTrailer, IMessage> {
-
-
     public MessageAttachTrailer() {
     }
 
@@ -29,7 +27,6 @@ public class MessageAttachTrailer implements IDnxPacket, IMessageHandler<Message
 
     @Override
     public IMessage onMessage(MessageAttachTrailer message, MessageContext ctx) {
-
         EntityPlayerMP player = ctx.getServerHandler().player;
         if (player.getRidingEntity() instanceof BaseVehicleEntity) {
             CarEntity carEntity = (CarEntity) player.getRidingEntity();
@@ -54,7 +51,6 @@ public class MessageAttachTrailer implements IDnxPacket, IMessageHandler<Message
                         return null;
                     }
                     DynamXUtils.attachTrailer(player, carEntity, trailer);
-
                 }
             }
         }

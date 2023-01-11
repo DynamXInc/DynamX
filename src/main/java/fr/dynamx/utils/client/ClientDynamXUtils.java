@@ -72,7 +72,7 @@ public class ClientDynamXUtils {
         DynamXContext.getNetwork().sendToServer(new MessagePlayerToRagdoll(new Vector3f((float) player.motionX, (float) player.motionY, (float) player.motionZ).mult(velMult, null)));
     }
 
-    public static void attachTrailer(EntityPlayer player){
+    public static void attachTrailer(){
         DynamXContext.getNetwork().sendToServer(new MessageAttachTrailer());
     }
 }

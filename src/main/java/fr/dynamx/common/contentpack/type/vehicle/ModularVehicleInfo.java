@@ -386,6 +386,16 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
                 engine.setSounds(engineSound.getSoundsIn());
             }
         }
+        if (getSubPropertyByType(HelicopterPhysicsInfo.class) != null) {
+            HelicopterPhysicsInfo engine = getSubPropertyByType(HelicopterPhysicsInfo.class);
+            //And sounds
+            if (defaultSounds != null) {
+                SoundListInfo engineSound = sounds.get(defaultSounds);
+                if (engineSound == null)
+                    throw new IllegalArgumentException("Engine sounds " + defaultSounds + " of " + getFullName() + " were not found, check file names and previous loading errors !");
+                engine.setSounds(engineSound.getSoundsIn());
+            }
+        }
         variants = getSubPropertyByType(MaterialVariantsInfo.class);
         //Map textures
         //Backward compatibility code

@@ -8,12 +8,11 @@ import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.entities.modules.IVehicleController;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.client.camera.CameraSystem;
-import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.client.handlers.KeyHandler;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.HelicopterEngineModule;
+import fr.dynamx.common.entities.modules.HelicopterPartModule;
 import fr.dynamx.common.entities.vehicles.HelicopterEntity;
-import fr.dynamx.common.physics.entities.HelicopterPhysicsHandler;
 import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
@@ -66,6 +65,10 @@ public class HelicopterController implements IVehicleController {
             HelicopterEngineModule engineModule = ((HelicopterEntity<?>) MC.player.getRidingEntity()).getModuleByType(HelicopterEngineModule.class);
             engineModule.getRollControls().set(0, event.getDx());
             engineModule.getRollControls().set(1, event.getDy());
+            HelicopterPartModule rotorsModule = ((HelicopterEntity<?>) MC.player.getRidingEntity()).getModuleByType(HelicopterPartModule.class);
+            rotorsModule.Dx = event.getDx();
+            rotorsModule.Dy = event.getDy();
+
         }
     }
 

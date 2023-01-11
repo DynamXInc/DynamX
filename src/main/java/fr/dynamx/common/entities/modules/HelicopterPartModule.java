@@ -57,6 +57,12 @@ public class HelicopterPartModule implements IPhysicsModule<BaseVehiclePhysicsHa
             curPower = curPower + (targetPower - curPower) / 60; //3-seconds interpolation
             curAngle += curPower;
         }
+        if (entity.world.isRemote) {
+            int height = (int) (entity.getPosition().getY() - entity.world.getHeight((int) entity.getPosition().getX(), (int) entity.getPosition().getZ()));
+            if (height < 10) {
+                renderParticles(entity,height);
+            }
+        }
     }
 
     @Override
@@ -71,35 +77,32 @@ public class HelicopterPartModule implements IPhysicsModule<BaseVehiclePhysicsHa
             this.entity.getPackInfo().getPartsByType(PartHandle.class).forEach(partHandle -> {
                 renderHandle(render, partHandle, partialTicks, carEntity, vehicleModel);
             });
-            int height = (int) (carEntity.getPosition().getY() - carEntity.world.getHeight((int) carEntity.getPosition().getX(), (int) carEntity.getPosition().getZ()));
-            if (height < 5) {
-                renderParticles(render, partialTicks, carEntity, vehicleModel);
-            }
             MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.PROPULSION, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks, vehicleModel));
         }
     }
 
 
-    private void renderParticles(RenderPhysicsEntity<?> render, float partialTicks, BaseVehicleEntity<?> carEntity, ObjModelRenderer vehicleModel) {
+
+    private void renderParticles( BaseVehicleEntity<?> carEntity, int height) {
         World world = carEntity.world;
-        for (int i = 0; i < 360; i += 10) {
+        for (int i = 0; i < 360; i += 2) {
             int power = (int) (engine.getPower() * 10);
 
             if (world.rand.nextInt(100) < power) {
 
-                if (world.rand.nextInt(2) == 0) {
-                    float radius = world.rand.nextFloat() * 4;
+                float radius = world.rand.nextFloat() * 4;
+                float minradius = 5.5f;
+                minradius -= height * 0.5f;
 
-                    double x = Math.cos(Math.toRadians(i)) * 6.5 + radius - 2;
-                    double z = Math.sin(Math.toRadians(i)) * 6.5 + radius - 2;
+                double x = Math.cos(Math.toRadians(i)) * (minradius + radius);
+                double z = Math.sin(Math.toRadians(i)) * (minradius + radius);
 
-                    double y = world.getHeight((int) (carEntity.getPosition().getX() + x), (int) (carEntity.getPosition().getZ() + z));
-                    double zSpeed = Math.sin(Math.toRadians(i + curAngle)) * 0.9;
-                    double xSpeed = Math.cos(Math.toRadians(i + curAngle)) * 0.9;
+                double y = world.getHeight((int) (carEntity.getPosition().getX() + x), (int) (carEntity.getPosition().getZ() + z));
+                double zSpeed = Math.sin(Math.toRadians(i)) * 0.9;
+                double xSpeed = Math.cos(Math.toRadians(i)) * 0.9;
 
-                    if (world.isAirBlock(new BlockPos((int) (carEntity.getPosition().getX() + x), (int) (carEntity.getPosition().getY() + y), (int) (carEntity.getPosition().getZ() + z)))) {
-                        world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, carEntity.posX + x, y, carEntity.posZ + z, xSpeed, 0, zSpeed);
-                    }
+                if (world.isAirBlock(new BlockPos((int) (carEntity.getPosition().getX() + x), (int) (carEntity.getPosition().getY() + y), (int) (carEntity.getPosition().getZ() + z)))) {
+                    world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, carEntity.posX + x, y, carEntity.posZ + z, xSpeed, 0, zSpeed);
                 }
 
             }

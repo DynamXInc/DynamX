@@ -45,6 +45,9 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
 
     public ModularPhysicsEntity(World world, Vector3f pos, float spawnRotationAngle) {
         super(world, pos, spawnRotationAngle);
+        setInitCallback((modularEntity, modules) -> {
+            System.out.println("test");
+        });
     }
 
     /**

@@ -8,6 +8,7 @@ import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.modules.IVehicleController;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.api.network.sync.ClientEntityNetHandler;
+import fr.dynamx.client.network.ClientPhysicsEntitySynchronizer;
 import fr.dynamx.client.network.ClientPhysicsSyncManager;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.utils.DynamXConstants;
@@ -38,11 +39,11 @@ public class VehicleHud extends GuiFrame {
                     add(hud);
                 }
             });
-            /* todo sync if (riddenEntity.cast().getNetwork() instanceof UdpClientPhysicsEntityNetHandler) {
+            if (riddenEntity.cast().getSynchronizer() instanceof ClientPhysicsEntitySynchronizer) {
                 netWarning = new GuiLabel("");
                 netWarning.setCssId("network_warning");
                 add(netWarning);
-            }*/
+            }
             //add(new GuiLabel("DynamX " + DynamXConstants.VERSION_TYPE + " V." + DynamXConstants.VERSION).setCssId("hud_ea_warning"));
         }
     }

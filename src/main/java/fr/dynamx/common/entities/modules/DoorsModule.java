@@ -10,6 +10,7 @@ import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.entities.modules.AttachModule;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.common.network.sync.variables.EntityMapVariable;
@@ -54,7 +55,7 @@ import java.util.Map;
 @SynchronizedEntityVariable.SynchronizedPhysicsModule()
 public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<?, ?>>, AttachModule.AttachToSelfModule,
         IPhysicsModule.IEntityPosUpdateListener, IPhysicsModule.IPhysicsUpdateListener,
-        AttachedBodySynchronizedVariable.AttachedBodySynchronizer, IPhysicsModule.IDrawableModule<BaseVehicleEntity<?>> {
+        AttachedBodySynchronizedVariable.AttachedBodySynchronizer {
     public static final ResourceLocation JOINT_NAME = new ResourceLocation(DynamXConstants.ID, "door_module");
 
     static {
@@ -68,7 +69,7 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
     @SynchronizedEntityVariable(name = "door_states")
     private final EntityTransformsVariable synchronizedTransforms;
     @Getter
-    @SynchronizedEntityVariable(name = "dparts_pos")
+    @SynchronizedEntityVariable(name = "parts_pos")
     protected final EntityMapVariable<Map<Byte, DoorsModule.DoorState>, Byte, DoorState> doorsState;
 
     public DoorsModule(BaseVehicleEntity<?> vehicleEntity) {
@@ -286,41 +287,6 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
     @Override
     public void updateEntityPos() {
         attachedBodiesTransform.values().forEach(SynchronizedRigidBodyTransform::updatePos);
-    }
-
-    @Override
-    public void drawParts(RenderPhysicsEntity<?> render, float partialTicks, BaseVehicleEntity<?> carEntity) {
-        List<PartDoor> doors = carEntity.getPackInfo().getPartsByType(PartDoor.class);
-        for (byte id = 0; id < doors.size(); id++) {
-            PartDoor door = doors.get(id);
-            GlStateManager.pushMatrix();
-            if (!door.isEnabled()) {
-                Vector3f pos = Vector3fPool.get().addLocal(door.getCarAttachPoint());
-                pos.subtract(door.getDoorAttachPoint(), pos);
-
-                GlStateManager.translate(pos.x, pos.y, pos.z);
-            } else if (getTransforms().containsKey(id)) {
-                SynchronizedRigidBodyTransform sync = getTransforms().get(id);
-                RigidBodyTransform transform = sync.getTransform();
-                RigidBodyTransform prev = sync.getPrevTransform();
-
-                Vector3f pos = Vector3fPool.get(prev.getPosition()).addLocal(transform.getPosition().subtract(prev.getPosition(), Vector3fPool.get()).multLocal(partialTicks));
-                GlStateManager.rotate(ClientDynamXUtils.computeInterpolatedGlQuaternion(carEntity.prevRenderRotation, carEntity.renderRotation, partialTicks, true));
-                GlStateManager.translate(
-                        (float) -(carEntity.prevPosX + (carEntity.posX - carEntity.prevPosX) * partialTicks),
-                        (float) -(carEntity.prevPosY + (carEntity.posY - carEntity.prevPosY) * partialTicks),
-                        (float) -(carEntity.prevPosZ + (carEntity.posZ - carEntity.prevPosZ) * partialTicks));
-                GlStateManager.translate(pos.x, pos.y, pos.z);
-                GlStateManager.rotate(ClientDynamXUtils.computeInterpolatedGlQuaternion(prev.getRotation(), transform.getRotation(), partialTicks));
-            }
-
-            ObjModelRenderer vehicleModel = DynamXContext.getObjModelRegistry().getModel(carEntity.getPackInfo().getModel());
-            GlStateManager.scale(carEntity.getPackInfo().getScaleModifier().x, carEntity.getPackInfo().getScaleModifier().y, carEntity.getPackInfo().getScaleModifier().z);
-            render.renderModelGroup(vehicleModel, door.getPartName(), carEntity, carEntity.getEntityTextureID());
-            GlStateManager.scale(1 / carEntity.getPackInfo().getScaleModifier().x, 1 / carEntity.getPackInfo().getScaleModifier().y, 1 / carEntity.getPackInfo().getScaleModifier().z);
-
-            GlStateManager.popMatrix();
-        }
     }
 
     public PartDoor getPartDoor(byte doorID) {

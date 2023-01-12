@@ -145,13 +145,6 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     @SynchronizedEntityVariable(name = "pos")
     public final EntityPosVariable synchronizedPosition = new EntityPosVariable(this);
 
-    /**
-     * TODO UPDATE DOC
-     * <p>
-     * Adds the {@link fr.dynamx.api.network.sync} used to synchronize this module <br>
-     * The variables must only be added on the side which has the authority over the data (typically the server) <br>
-     * Fired on modules initialization and on {@link fr.dynamx.api.network.sync.SimulationHolder} changes
-     */
     public void registerSynchronizedVariables() {
         SynchronizedEntityVariableRegistry.addVarsOf(this.getSynchronizer(), this);
     }

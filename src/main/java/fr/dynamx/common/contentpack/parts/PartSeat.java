@@ -128,12 +128,12 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
         return false;
     }
 
-    private boolean mount(BaseVehicleEntity<?> vehicleEntity, SeatsModule seats, EntityPlayer player) {
-        if (seats.getSeatToPassengerMap().containsValue(player)) {
+    private boolean mount(BaseVehicleEntity<?> vehicleEntity, SeatsModule seats, Entity entity) {
+        if (seats.getSeatToPassengerMap().containsValue(entity)) {
             return false; //Player on another seat
         }
-        seats.getSeatToPassengerMap().put(this, player);
-        if (!player.startRiding(vehicleEntity, false)) //something went wrong : dismount
+        seats.getSeatToPassengerMap().put(this, entity);
+        if (!entity.startRiding(vehicleEntity, false)) //something went wrong : dismount
         {
             seats.getSeatToPassengerMap().remove(this);
             return false;

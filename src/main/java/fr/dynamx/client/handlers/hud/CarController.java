@@ -47,6 +47,8 @@ public class CarController implements IVehicleController {
     public static final KeyBinding toggleLockDoor = new KeyBinding("key.toggleLockDoor", Keyboard.KEY_Y, "key.categories." + DynamXConstants.ID);
 
     //TODO CREATE EVENT TO INIT THIS ?
+    @Getter
+    @Setter
     private static HudIcons hudIcons;
 
     public static void registerControls() {
@@ -54,22 +56,6 @@ public class CarController implements IVehicleController {
         ClientRegistry.registerKeyBinding(car_engineOn);
         ClientRegistry.registerKeyBinding(speedLimiter);
         ClientRegistry.registerKeyBinding(toggleLockDoor);
-    }
-
-    /**
-     * @return The current hud icons
-     */
-    public static HudIcons getHudIcons() {
-        return hudIcons;
-    }
-
-    /**
-     * Sets the current hud icons
-     *
-     * @param hudIcons The new hud icons
-     */
-    public static void setHudIcons(HudIcons hudIcons) {
-        CarController.hudIcons = hudIcons;
     }
 
     protected final BaseVehicleEntity<?> entity;
@@ -190,9 +176,7 @@ public class CarController implements IVehicleController {
                 }.setCssId("icon_" + i).setCssClass("hud_icon"));
                 hudIcons.initIcon(i, icons[i]);
             }
-            speed.addTickListener(() -> {
-                hudIcons.tick(icons);
-            });
+            speed.addTickListener(() -> hudIcons.tick(icons));
         }
 
         panel.add(speed);

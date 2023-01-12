@@ -15,6 +15,7 @@ import fr.dynamx.common.entities.modules.SeatsModule;
 import fr.dynamx.common.entities.modules.WheelsModule;
 import lombok.Getter;
 import lombok.Setter;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
@@ -93,21 +94,21 @@ public class VehicleEntityEvent extends Event {
      */
     public static class PlayerMount extends VehicleEntityEvent {
         @Getter
-        private final EntityPlayer player;
+        private final Entity entityMounted;
         @Getter
         private final SeatsModule module;
         @Getter
         private final PartSeat seat;
 
         /**
-         * @param player        the player who mounted the vehicle
+         * @param entityMounted the player who mounted the vehicle
          * @param vehicleEntity the vehicle that the player mounted
          * @param module        the seats module, calling this event
          * @param seat          the seat that the player mounted
          */
-        public PlayerMount(Side side, EntityPlayer player, BaseVehicleEntity<?> vehicleEntity, SeatsModule module, PartSeat seat) {
+        public PlayerMount(Side side, Entity entityMounted, BaseVehicleEntity<?> vehicleEntity, SeatsModule module, PartSeat seat) {
             super(side, vehicleEntity);
-            this.player = player;
+            this.entityMounted = entityMounted;
             this.module = module;
             this.seat = seat;
         }
@@ -116,23 +117,23 @@ public class VehicleEntityEvent extends Event {
     /**
      * Called on client and server sides when a entity has dismounted an entity
      */
-    public static class PlayerDismount extends VehicleEntityEvent {
+    public static class EntityDismount extends VehicleEntityEvent {
         @Getter
-        private final EntityPlayer player;
+        private final Entity entityDismounted;
         @Getter
         private final SeatsModule module;
         @Getter
         private final PartSeat seat;
 
         /**
-         * @param player        the player who dismounted the vehicle
-         * @param vehicleEntity the vehicle that the player dismounted
-         * @param module        the seats module, calling this event
-         * @param seat          the seat that the player dismounted
+         * @param entityDismounted the entity who dismounted the vehicle
+         * @param vehicleEntity    the vehicle that the player dismounted
+         * @param module           the seats module, calling this event
+         * @param seat             the seat that the player dismounted
          */
-        public PlayerDismount(Side side, EntityPlayer player, BaseVehicleEntity<?> vehicleEntity, SeatsModule module, PartSeat seat) {
+        public EntityDismount(Side side, Entity entityDismounted, BaseVehicleEntity<?> vehicleEntity, SeatsModule module, PartSeat seat) {
             super(side, vehicleEntity);
-            this.player = player;
+            this.entityDismounted = entityDismounted;
             this.module = module;
             this.seat = seat;
         }
@@ -174,6 +175,7 @@ public class VehicleEntityEvent extends Event {
         @Getter
         private final RenderBaseVehicle<?> renderBaseVehicle;
         @Getter
+        @Nullable
         private final BaseVehicleEntity<?> carEntity;
         @Getter
         private final Type type;
@@ -187,11 +189,11 @@ public class VehicleEntityEvent extends Event {
         /**
          * @param type              the type of the render
          * @param renderBaseVehicle the class the render of the car
-         * @param carEntity         the rendered car
+         * @param carEntity         the rendered car, null if it's an item
          * @param phase             the phase of the render (Post or Pre)
          * @param partialTicks      the partial render ticks
          */
-        public Render(Type type, RenderBaseVehicle<?> renderBaseVehicle, BaseVehicleEntity<?> carEntity, PhysicsEntityEvent.Phase phase, float partialTicks, @Nullable ObjModelRenderer objModelRenderer) {
+        public Render(Type type, RenderBaseVehicle<?> renderBaseVehicle, @Nullable BaseVehicleEntity<?> carEntity, PhysicsEntityEvent.Phase phase, float partialTicks, @Nullable ObjModelRenderer objModelRenderer) {
             super(Side.CLIENT, carEntity);
             this.type = type;
             this.renderBaseVehicle = renderBaseVehicle;

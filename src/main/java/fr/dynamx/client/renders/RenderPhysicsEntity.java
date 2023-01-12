@@ -27,6 +27,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import org.lwjgl.util.vector.Quaternion;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -63,8 +64,6 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
         if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.ENTITY, x, y, z, partialTicks, null))) {
             GlStateManager.pushMatrix();
             {
-                //TODO TRANSPARENT THINGS SHOULD BE RENDER LAST GlStateManager.enableBlend();
-
                 appliedRotation = setupRenderTransform(entity, x, y, z, entityYaw, partialTicks);
                 renderMain(entity, partialTicks);
                 renderParts(entity, partialTicks);
@@ -74,8 +73,8 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
         }
 
         //Render players inside the entity
-        if (ClientEventHandler.renderPlayer != null && !MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.RIDDING_PLAYERS, x, y, z, partialTicks, null))) {
-            renderRidingPlayers(entity, x, y, z, partialTicks, appliedRotation);
+        if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.RIDDING_PLAYERS, x, y, z, partialTicks, null))) {
+            renderRidingEntities(entity, x, y, z, partialTicks, appliedRotation);
         }
         //Render debug
         if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.DEBUG, x, y, z, partialTicks, null))) {
@@ -87,11 +86,10 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
         GlQuaternionPool.closePool();
     }
 
-    protected void renderRidingPlayers(T entity, double x, double y, double z, float partialTicks, Quaternion appliedRotation) {
-        //Do not cancel the render event
-        ClientEventHandler.rendering = true;
+    protected void renderRidingEntities(T entity, double x, double y, double z, float partialTicks, Quaternion appliedRotation) {
         for (Entity e : entity.getPassengers()) {
-            if (e instanceof AbstractClientPlayer && (e != Minecraft.getMinecraft().player || Minecraft.getMinecraft().gameSettings.thirdPersonView != 0)) {
+            ClientEventHandler.renderingEntity.add(e.getUniqueID());
+            if ((e != Minecraft.getMinecraft().player || Minecraft.getMinecraft().gameSettings.thirdPersonView != 0)) {
                 GlStateManager.pushMatrix();
                 //Apply vehicle's transform
                 GlStateManager.translate((float) x, (float) y, (float) z);
@@ -110,7 +108,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
                         EnumSeatPlayerPosition position = seat.getPlayerPosition();
                         shouldRenderPlayerSitting = position == EnumSeatPlayerPosition.SIT || position == null;
 
-                        if(seat.getPlayerSize() != null)
+                        if (seat.getPlayerSize() != null)
                             GlStateManager.scale(seat.getPlayerSize().x, seat.getPlayerSize().y, seat.getPlayerSize().z);
                         if (seat.getRotation() != null)
                             GlStateManager.rotate(GlQuaternionPool.get(seat.getRotation()));
@@ -122,15 +120,23 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
                 //Remove player's yaw offset rotation, to avoid stiff neck
                 PartSeat seat = ((IModuleContainer.ISeatsContainer) entity).getSeats().getRidingSeat(e);
                 if (seat != null && seat.shouldLimitFieldOfView()) {
-                    ((AbstractClientPlayer) e).renderYawOffset = ((AbstractClientPlayer) e).prevRenderYawOffset = 0;
+                    if (e instanceof AbstractClientPlayer) {
+                        ((AbstractClientPlayer) e).renderYawOffset = ((AbstractClientPlayer) e).prevRenderYawOffset = 0;
+                    }
                 }
 
                 //The render the player, e.rotationYaw is the name plate rotation
-                ClientEventHandler.renderPlayer.doRender((AbstractClientPlayer) e, 0, 0, 0, e.rotationYaw, partialTicks);
+                if (e instanceof AbstractClientPlayer) {
+                    if(ClientEventHandler.renderPlayer != null){
+                        ClientEventHandler.renderPlayer.doRender((AbstractClientPlayer) e, 0, 0, 0, e.rotationYaw, partialTicks);
+                    }
+                } else {
+                    Minecraft.getMinecraft().getRenderManager().renderEntity(e, 0, 0, 0, e.rotationYaw, partialTicks, false);
+                }
                 GlStateManager.popMatrix();
             }
+            ClientEventHandler.renderingEntity.remove(e.getUniqueID());
         }
-        ClientEventHandler.rendering = false;
     }
 
     public void spawnParticles(T physicsEntity, Quaternion rotation, float partialTicks) {
@@ -238,22 +244,20 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
      * Called to render this part <br>
      * Will draw a white box over the all entity if model wasn't loaded (not found for example)
      */
-    public void renderModel(ObjModelRenderer model, Entity entity, byte textureDataId) {
-        if (model.getObjObjects().isEmpty()) //Error while loading the model
-        {
-            renderOffsetAABB(entity.getEntityBoundingBox(), -entity.lastTickPosX, -entity.lastTickPosY, -entity.lastTickPosZ);
-        } else {
+    public void renderModel(ObjModelRenderer model, @Nullable Entity entity, byte textureDataId) {
+        if (!model.getObjObjects().isEmpty())
             model.renderModel(textureDataId);
-        }
+        else if(entity != null) //Error while loading the model
+            renderOffsetAABB(entity.getEntityBoundingBox(), -entity.lastTickPosX, -entity.lastTickPosY, -entity.lastTickPosZ);
     }
 
     /**
      * Called to render the main part of this model with the custom texture <br>
      * Will draw a white box over the all entity if model wasn't loaded (not found for example)
      */
-    public void renderMainModel(ObjModelRenderer model, Entity entity, byte textureDataId) {
+    public void renderMainModel(ObjModelRenderer model, @Nullable Entity entity, byte textureDataId) {
         boolean drawn = model.renderDefaultParts(textureDataId);
-        if (!drawn) {
+        if (!drawn && entity != null) {
             renderOffsetAABB(entity.getEntityBoundingBox(), -entity.lastTickPosX, -entity.lastTickPosY, -entity.lastTickPosZ);
         }
     }
@@ -262,9 +266,9 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
      * Called to render specific parts with the custom texture <br>
      * Will draw a white box over the all entity if model wasn't loaded (not found for example)
      */
-    public void renderModelGroup(ObjModelRenderer model, String group, Entity entity, byte textureDataId) {
+    public void renderModelGroup(ObjModelRenderer model, String group, @Nullable Entity entity, byte textureDataId) {
         boolean drawn = model.renderGroups(group, textureDataId);
-        if (!drawn) {
+        if (!drawn && entity != null) {
             renderOffsetAABB(entity.getEntityBoundingBox(), -entity.lastTickPosX, -entity.lastTickPosY, -entity.lastTickPosZ);
         }
     }

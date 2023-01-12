@@ -82,4 +82,5 @@ public abstract class BasePart<T extends ISubInfoTypeOwner<?>> extends SubInfoTy
         position.multLocal(getScaleModifier(this.owner));
         scale.multLocal(getScaleModifier(this.owner));
     }
+
 }

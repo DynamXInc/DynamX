@@ -160,11 +160,6 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
     }
 
     @Override
-    public <U extends InteractivePart<?, ?>> List<U> getInteractiveParts() {
-        return Collections.emptyList();
-    }
-
-    @Override
     public CompoundCollisionShape getPhysicsCollisionShape() {
         return compoundCollisionShape;
     }

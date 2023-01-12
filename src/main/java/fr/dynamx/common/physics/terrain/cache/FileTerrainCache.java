@@ -74,8 +74,6 @@ public class FileTerrainCache implements ITerrainCache {
     }
 
     private void initV3(File slopes) {
-        //throw new UnsupportedOperationException("V3 terrain format is no longer supported, use DynamX V2.16.6 to convert it to V4 !");
-
         DynamXMain.log.warn("V3 terrain format detected ! You should convert your slopes.");
         throw new UnsupportedOperationException("Terrain V3 no longer supported. Use the version 2.17.0 to convert it, or delete your DnxChunks folder (this will delete your custom slopes)");
     }

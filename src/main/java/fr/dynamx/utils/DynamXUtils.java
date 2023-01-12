@@ -38,6 +38,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.lwjgl.BufferUtils;
 
@@ -340,7 +341,7 @@ public class DynamXUtils {
     }
 
     public static void hotswapWorldPackInfos(World w) {
-        System.out.println("Hotswap : " + w);
+        DynamXMain.log.info("Hot-swapping pack infos in models and spawn entities/tile entities in world " + w);
         for(Entity e : w.loadedEntityList) {
             if(e instanceof IPackInfoReloadListener)
                 ((IPackInfoReloadListener) e).onPackInfosReloaded();
@@ -349,5 +350,7 @@ public class DynamXUtils {
             if(te instanceof IPackInfoReloadListener)
                 ((IPackInfoReloadListener) te).onPackInfosReloaded();
         }
+        if(w.isRemote)
+            DynamXContext.getObjModelRegistry().onPackInfosReloaded();
     }
 }

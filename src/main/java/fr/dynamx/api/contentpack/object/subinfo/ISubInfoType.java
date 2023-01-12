@@ -18,18 +18,16 @@ import javax.annotation.Nullable;
  * ShapePosition: -0.023108 0.605695 1.45133 <br>
  * }
  * </code> <br> is a {@link fr.dynamx.common.contentpack.parts.PartShape}
- * <br>For vehicles, it should be registered in the registry in order to be used by the loader
+ * <br> The SubInfoTypes must be registered with the @{@link fr.dynamx.api.contentpack.registry.RegisteredSubInfoType} annotation
  *
  * @param <T> The type of the {@link ISubInfoTypeOwner} owning this sub info
- * @see SubInfoTypesRegistry
+ * @see fr.dynamx.api.contentpack.registry.RegisteredSubInfoType
  * @see SubInfoType
  */
 public interface ISubInfoType<T extends ISubInfoTypeOwner<?>> extends INamedObject {
     /**
      * Called when this sub info has been read and should be added to the corresponding {@link ISubInfoTypeOwner} <br>
      * See {@link ModularVehicleInfo} for the most common {@link ISubInfoTypeOwner}
-     * <p>
-     * todo update doc
      */
     void appendTo(T owner);
 
@@ -58,9 +56,9 @@ public interface ISubInfoType<T extends ISubInfoTypeOwner<?>> extends INamedObje
     }
 
     /**
-     * todo doc
-     *
-     * @return
+     * Used for error messages
+     * @return The root owner of this sub info type (generally the {@link ModularVehicleInfo} or the {@link fr.dynamx.common.contentpack.type.objects.BlockObject})
+     * where this sub info is declared
      */
     default INamedObject getRootOwner() {
         INamedObject parent = this;

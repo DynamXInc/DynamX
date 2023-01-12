@@ -38,8 +38,7 @@ import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.resources.SimpleReloadableResourceManager;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
@@ -77,16 +76,7 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
     public void preInit() {
         super.preInit();
 
-        //Loads all models avoiding duplicates
-        for (InfoLoader<?> infoLoader : DynamXObjectLoaders.getLoaders()) {
-            for (INamedObject namedObject : infoLoader.getInfos().values()) {
-                if (namedObject instanceof IObjPackObject && ((IObjPackObject) namedObject).shouldRegisterModel()) {
-                    ObjModelPath modelPath = DynamXUtils.getModelPath(namedObject.getPackName(), ((IObjPackObject) namedObject).getModel());
-                    DynamXContext.getObjModelRegistry().registerModel(modelPath, (IModelTextureVariantsSupplier) namedObject);
-                }
-            }
-        }
-        log.info("Registered " + DynamXContext.getObjModelRegistry().getLoadedModelCount() + " obj models");
+        DynamXContext.getObjModelRegistry().onPackInfosReloaded();
 
         RenderingRegistry.registerEntityRenderingHandler(CaterpillarEntity.class, RenderCaterpillar::new);
         RenderingRegistry.registerEntityRenderingHandler(CarEntity.class, RenderBaseVehicle.RenderCar::new);
@@ -164,12 +154,8 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
     public void onResourceManagerReload(IResourceManager resourceManager, Predicate<IResourceType> resourcePredicate) {
         if (resourcePredicate.test(VanillaResourceType.MODELS)) {
             DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.CLIENT, DynamXLoadingTasks.MODEL).thenAccept(empty -> {
-                if (Minecraft.getMinecraft().player != null) {
-                    if (DynamXErrorManager.getErrorManager().hasErrors(DynamXErrorManager.MODEL_ERRORS)) {
-                        //TODO TRANSLATE
-                        Minecraft.getMinecraft().player.sendMessage(new TextComponentString(TextFormatting.RED + "[DynamX] Certains modèles ont des problèmes, utilisez le menu de debug pour les voir"));
-                    }
-                }
+                if (Minecraft.getMinecraft().player != null && DynamXErrorManager.getErrorManager().hasErrors(DynamXErrorManager.MODEL_ERRORS))
+                    Minecraft.getMinecraft().player.sendMessage(new TextComponentTranslation("dynamx.reload.models.errors"));
             });
         }
     }

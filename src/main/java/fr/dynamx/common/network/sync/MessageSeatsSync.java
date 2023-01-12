@@ -5,6 +5,7 @@ import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.network.packets.PhysicsEntityMessage;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 
 import java.util.HashMap;
@@ -21,7 +22,7 @@ public class MessageSeatsSync extends PhysicsEntityMessage<MessageSeatsSync> {
 
     public MessageSeatsSync(IModuleContainer.ISeatsContainer vehicleEntity) {
         super(vehicleEntity.cast());
-        for (Map.Entry<PartSeat, EntityPlayer> e : vehicleEntity.getSeats().getSeatToPassengerMap().entrySet()) {
+        for (Map.Entry<PartSeat, Entity> e : vehicleEntity.getSeats().getSeatToPassengerMap().entrySet()) {
             seatToEntity.put(e.getKey().getId(), e.getValue().getEntityId());
         }
     }

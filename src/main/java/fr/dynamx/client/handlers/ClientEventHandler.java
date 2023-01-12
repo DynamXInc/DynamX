@@ -30,7 +30,6 @@ import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.errors.DynamXErrorManager;
-import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
@@ -64,7 +63,6 @@ import net.minecraftforge.client.event.sound.SoundLoadEvent;
 import net.minecraftforge.client.event.sound.SoundSetupEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.WorldEvent;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -72,9 +70,12 @@ import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.util.HashSet;
+import java.util.UUID;
+
 public class ClientEventHandler {
     public static final Minecraft MC = Minecraft.getMinecraft();
-    public static boolean rendering;
+    public static HashSet<UUID> renderingEntity = new HashSet<>();
     public static RenderPlayer renderPlayer;
 
     /* Placing block */
@@ -117,15 +118,19 @@ public class ClientEventHandler {
 
     @SubscribeEvent
     public void onMount(VehicleEntityEvent.PlayerMount event) {
-        if (event.getPlayer().isUser()) {
-            ACsGuiApi.asyncLoadThenShowHudGui("Vehicle HUD", () -> new VehicleHud((IModuleContainer.ISeatsContainer) event.getEntity()));
+        if (event.getEntityMounted() instanceof EntityPlayer) {
+            if (((EntityPlayer) event.getEntityMounted()).isUser()) {
+                ACsGuiApi.asyncLoadThenShowHudGui("Vehicle HUD", () -> new VehicleHud((IModuleContainer.ISeatsContainer) event.getEntity()));
+            }
         }
     }
 
     @SubscribeEvent
-    public void onDismount(VehicleEntityEvent.PlayerDismount event) {
-        if (event.getPlayer().isUser()) {
-            ACsGuiApi.closeHudGui();
+    public void onDismount(VehicleEntityEvent.EntityDismount event) {
+        if (event.getEntityDismounted() instanceof EntityPlayer) {
+            if (((EntityPlayer) event.getEntityDismounted()).isUser()) {
+                ACsGuiApi.closeHudGui();
+            }
         }
     }
 
@@ -187,10 +192,9 @@ public class ClientEventHandler {
                 }
             }
             Vector3fPool.closePool();
-        } else if(event.getType() == RenderGameOverlayEvent.ElementType.ALL && !Minecraft.getMinecraft().isSingleplayer() && DynamXConfig.useUdp && (!DynamXContext.getNetwork().isConnected() || !DynamXContext.getNetwork().getQuickNetwork().isAuthenticated())) {
+        } else if (event.getType() == RenderGameOverlayEvent.ElementType.ALL && !Minecraft.getMinecraft().isSingleplayer() && DynamXConfig.useUdp && (!DynamXContext.getNetwork().isConnected() || !DynamXContext.getNetwork().getQuickNetwork().isAuthenticated())) {
             String text = "DynamX: connecting to the server " + (DynamXContext.getNetwork().isConnected() ? "2/2" : "1/2");
-            switch ((int)(Minecraft.getSystemTime() / 600L % 3L))
-            {
+            switch ((int) (Minecraft.getSystemTime() / 600L % 3L)) {
                 case 0:
                 default:
                     text += ".  ";
@@ -254,10 +258,10 @@ public class ClientEventHandler {
         model = null;
         EntityPlayer entityPlayer = Minecraft.getMinecraft().player;
         if (entityPlayer != null) {
-            if(DynamXContext.getWalkingPlayers().containsKey(entityPlayer)){
+            if (DynamXContext.getWalkingPlayers().containsKey(entityPlayer)) {
                 PhysicsEntity<?> physicsEntity = DynamXContext.getWalkingPlayers().get(entityPlayer);
-                if(!physicsEntity.canPlayerStandOnTop()){
-                    if(WalkingOnPlayerController.controller != null) {
+                if (!physicsEntity.canPlayerStandOnTop()) {
+                    if (WalkingOnPlayerController.controller != null) {
                         WalkingOnPlayerController.controller.disable();
                         entityPlayer.motionY += 0.2D;
                     }
@@ -330,6 +334,45 @@ public class ClientEventHandler {
             }
         }
         renderBigEntities((float) partialTicks);
+
+        /*
+        GlStateManager.pushMatrix();
+        GlStateManager.disableTexture2D();
+        GlStateManager.disableDepth();
+        GlStateManager.depthMask(false);
+        GlStateManager.disableTexture2D();
+        GlStateManager.disableLighting();
+        GlStateManager.disableCull();
+        GlStateManager.disableBlend();
+
+        x = y =z = 0;
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+
+        float f = MathHelper.cos(-0 * 0.017453292F - (float)Math.PI);
+        float f1 = MathHelper.sin(-0 * 0.017453292F - (float)Math.PI);
+        float f2 = -MathHelper.cos(-0 * 0.017453292F);
+        float f3 = MathHelper.sin(-0 * 0.017453292F);
+        Vec3d vec3d = new Vec3d((double)(f1 * f2), (double)f3, (double)(f * f2));
+
+        //Vec3d vec3d = MC.player.getLook((float) partialTicks);
+        Vector3f vector3f = Vector3fPool.get(vec3d);
+        if(MC.player.getRidingEntity() instanceof BaseVehicleEntity) {
+            Quaternion q = QuaternionPool.get();
+            DynamXMath.slerp((float) partialTicks, ((BaseVehicleEntity<?>) MC.player.getRidingEntity()).renderRotation, ((BaseVehicleEntity<?>) MC.player.getRidingEntity()).renderRotation, q);
+            vector3f = DynamXGeometry.rotateVectorByQuaternion(vector3f, q);
+        }
+        bufferbuilder.begin(3, DefaultVertexFormats.POSITION_COLOR);
+        bufferbuilder.pos(x, y + (double)MC.player.getEyeHeight(), z).color(0, 255, 255, 255).endVertex();
+        bufferbuilder.pos(x + vector3f.x * 20.0D, y + (double)MC.player.getEyeHeight() + vector3f.y * 20.0D, z + vector3f.z * 20.0D).color(0, 255, 255, 255).endVertex();
+        tessellator.draw();
+        GlStateManager.enableTexture2D();
+        GlStateManager.enableLighting();
+        GlStateManager.enableCull();
+        GlStateManager.disableBlend();
+        GlStateManager.depthMask(true);
+        GlStateManager.popMatrix();
+         */
     }
 
     private static void renderBigEntities(float partialTicks) {
@@ -339,7 +382,7 @@ public class ClientEventHandler {
         double d0 = 0, d1 = 0, d2 = 0;
 
         for (Entity e : MC.world.loadedEntityList) {
-            if(e instanceof PhysicsEntity) {
+            if (e instanceof PhysicsEntity) {
                 if (!((PhysicsEntity<?>) e).wasRendered) {
                     if (!setup) {
                         GlStateManager.pushMatrix();
@@ -380,10 +423,17 @@ public class ClientEventHandler {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void playerRender(RenderPlayerEvent.Pre event) {
         renderPlayer = event.getRenderer();
-        if (event.getEntityPlayer().getRidingEntity() instanceof BaseVehicleEntity && !rendering && event.getRenderer().getRenderManager().isRenderShadow()) { //If shadows are disabled, were are in GuiInventory, CAN BREAK OTHER MODS
+        if (event.getEntityPlayer().getRidingEntity() instanceof BaseVehicleEntity && !renderingEntity.contains(event.getEntity().getUniqueID()) && event.getRenderer().getRenderManager().isRenderShadow()) { //If shadows are disabled, were are in GuiInventory, CAN BREAK OTHER MODS
             //If the player is on a seat, and GlobalRender isn't rendering players riding the entity, just cancel the event, and cancel all modifications by other mods (priority = EventPriority.HIGHEST)
             event.setCanceled(true);
         }
     }
 
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public void entityRender(RenderLivingEvent.Pre event) {
+        if (event.getEntity().getRidingEntity() instanceof BaseVehicleEntity && !renderingEntity.contains(event.getEntity().getUniqueID()) && event.getRenderer().getRenderManager().isRenderShadow()) { //If shadows are disabled, were are in GuiInventory, CAN BREAK OTHER MODS
+            //If the entity is on a seat, and GlobalRender isn't rendering entity riding the entity, just cancel the event, and cancel all modifications by other mods (priority = EventPriority.HIGHEST)
+            event.setCanceled(true);
+        }
+    }
 }

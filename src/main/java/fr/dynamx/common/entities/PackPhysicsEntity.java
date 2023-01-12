@@ -3,6 +3,7 @@ package fr.dynamx.common.entities;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
+import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
@@ -113,7 +114,7 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
         {
             lastMetadata = getMetadata();
             entityTextureID = (byte) getMetadata();
-            getDrawableModules().forEach(m -> ((IPhysicsModule.IDrawableModule<PackPhysicsEntity<?, ?>>) m).handleTextureID(entityTextureID, this));
+            packInfo.getDrawableParts().forEach(m -> ((IDrawablePart<PackPhysicsEntity<?, ?>>) m).onTexturesChange(this));
         }
     }
 

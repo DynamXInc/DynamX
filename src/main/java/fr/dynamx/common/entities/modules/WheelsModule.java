@@ -51,7 +51,7 @@ import static fr.dynamx.client.ClientProxy.SOUND_HANDLER;
  * @see WheelsPhysicsHandler
  */
 @SynchronizedEntityVariable.SynchronizedPhysicsModule()
-public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHandler<?>>, IPhysicsModule.IEntityUpdateListener, IPhysicsModule.IPhysicsUpdateListener, IPhysicsModule.IDrawableModule<BaseVehicleEntity<?>>, IPackInfoReloadListener {
+public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHandler<?>>, IPhysicsModule.IEntityUpdateListener, IPhysicsModule.IPhysicsUpdateListener, IPackInfoReloadListener {
     //TODO CLEAN WHEELS CODE
     @SynchronizedEntityVariable(name = "wheel_infos")
     protected final EntityMapVariable<Map<Byte, PartWheelInfo>, Byte, PartWheelInfo> wheelInfos = new EntityMapVariable<>((variable, value) -> {
@@ -277,7 +277,6 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
         return skidInfos.get();
     }
 
-    @Override
     @SideOnly(Side.CLIENT)
     public void spawnPropulsionParticles(RenderPhysicsEntity<?> render, float partialTicks) {
         //Dust particles when the vehicle friction is very low

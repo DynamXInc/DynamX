@@ -68,7 +68,6 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
         return lastSeat;
     }
 
-    @Override
     public BiMap<PartSeat, Entity> getSeatToPassengerMap() {
         return seatToPassenger;
     }

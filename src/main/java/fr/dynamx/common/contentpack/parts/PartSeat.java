@@ -128,7 +128,7 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
         return false;
     }
 
-    private boolean mount(BaseVehicleEntity<?> vehicleEntity, SeatsModule seats, Entity entity) {
+    public boolean mount(BaseVehicleEntity<?> vehicleEntity, SeatsModule seats, Entity entity) {
         if (seats.getSeatToPassengerMap().containsValue(entity)) {
             return false; //Player on another seat
         }

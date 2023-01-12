@@ -14,6 +14,7 @@ import fr.dynamx.common.contentpack.parts.PartRotor;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
+import lombok.Getter;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
@@ -28,10 +29,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
  *
  * @see WheelsPhysicsHandler
  */
-public class HelicopterPartModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, IPhysicsModule.IDrawableModule<BaseVehicleEntity<?>>, IPhysicsModule.IEntityUpdateListener {
+public class HelicopterPartModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, IPhysicsModule.IEntityUpdateListener {
     protected final BaseVehicleEntity<? extends BaseVehiclePhysicsHandler<?>> entity;
     private HelicopterEngineModule engine;
 
+    @Getter
     private float curPower, curAngle;
 
     public HelicopterPartModule(BaseVehicleEntity<? extends BaseVehiclePhysicsHandler<?>> entity) {
@@ -63,22 +65,6 @@ public class HelicopterPartModule implements IPhysicsModule<BaseVehiclePhysicsHa
         }
     }
 
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void drawParts(RenderPhysicsEntity<?> render, float partialTicks, BaseVehicleEntity<?> carEntity) {
-        ObjModelRenderer vehicleModel = DynamXContext.getObjModelRegistry().getModel(carEntity.getPackInfo().getModel());
-        if (MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.PROPULSION, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks, vehicleModel)))
-            return;
-        entity.getPackInfo().getPartsByType(PartRotor.class).forEach(partRotor ->
-                renderRotor(render, partRotor, partialTicks, carEntity, vehicleModel)
-        );
-        //TODO: patch handle
-        entity.getPackInfo().getPartsByType(PartHandle.class).forEach(partHandle ->
-                renderHandle(render, partHandle, partialTicks, carEntity, vehicleModel)
-        );
-        MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.PROPULSION, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks, vehicleModel));
-    }
-
     private void renderParticles( BaseVehicleEntity<?> carEntity, int height) {
         World world = carEntity.world;
         for (int i = 0; i < 360; i += 2) {
@@ -100,46 +86,5 @@ public class HelicopterPartModule implements IPhysicsModule<BaseVehiclePhysicsHa
                 }
             }
         }
-    }
-
-    @SideOnly(Side.CLIENT)
-    private void renderRotor(RenderPhysicsEntity<?> render, PartRotor partRotor, float partialTicks, BaseVehicleEntity<?> helicopterEntity, ObjModelRenderer vehicleModel) {
-        ObjObjectRenderer rotor = vehicleModel.getObjObjectRenderer(partRotor.getPartName());
-        if(rotor == null || MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.ROTOR, (RenderBaseVehicle<?>) render, helicopterEntity, PhysicsEntityEvent.Phase.PRE, partialTicks, vehicleModel)))
-            return;
-        GlStateManager.pushMatrix();
-        Vector3f center = partRotor.getPosition();
-        //Translation to the steering wheel rotation point (and render pos)
-        GlStateManager.translate(center.x, center.y, center.z);
-        // Rotating the rotor.
-        GlStateManager.rotate((curAngle + partialTicks * curPower) * partRotor.getRotationSpeed(), partRotor.getRotation().x, partRotor.getRotation().y, partRotor.getRotation().z);
-        //Scale it
-        GlStateManager.scale(helicopterEntity.getPackInfo().getScaleModifier().x, helicopterEntity.getPackInfo().getScaleModifier().y, helicopterEntity.getPackInfo().getScaleModifier().z);
-        //Render it
-        vehicleModel.renderGroup(rotor, helicopterEntity.getEntityTextureID());
-        GlStateManager.popMatrix();
-        MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.ROTOR, (RenderBaseVehicle<?>) render, helicopterEntity, PhysicsEntityEvent.Phase.POST, partialTicks, vehicleModel));
-    }
-
-    @SideOnly(Side.CLIENT)
-    private void renderHandle(RenderPhysicsEntity<?> render, PartHandle partHandle, float partialTicks, BaseVehicleEntity<?> carEntity, ObjModelRenderer vehicleModel) {
-        ObjObjectRenderer handle = vehicleModel.getObjObjectRenderer(partHandle.getPartName());
-        if (handle == null || MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.HANDLE, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks, vehicleModel)))
-            return;
-        GlStateManager.pushMatrix();
-        Vector3f center = partHandle.getPosition();
-        //Translation to the steering wheel rotation point (and render pos)
-        GlStateManager.translate(center.x, center.y, center.z);
-        // Rotating the handle with Dx and Dy
-        float dx = engine.getRollControls().get(0);
-        float dy = engine.getRollControls().get(1);
-        GlStateManager.rotate(dx, 0, 0, dx > 0 ? 0.5f : -0.5f);
-        GlStateManager.rotate(dy, dy > 0 ? 0.5f : -0.5f, 0, 0);
-        //Scale it
-        GlStateManager.scale(carEntity.getPackInfo().getScaleModifier().x, carEntity.getPackInfo().getScaleModifier().y, carEntity.getPackInfo().getScaleModifier().z);
-        //Render it
-        vehicleModel.renderGroup(handle, carEntity.getEntityTextureID());
-        GlStateManager.popMatrix();
-        MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.HANDLE, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks, vehicleModel));
     }
 }

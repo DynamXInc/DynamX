@@ -9,9 +9,11 @@ import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
 import fr.dynamx.api.contentpack.object.IShapeContainer;
 import fr.dynamx.api.contentpack.object.part.BasePart;
+import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.contentpack.object.render.IObjPackObject;
+import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
@@ -104,6 +106,8 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
      */
     @Getter
     private final List<String> renderedParts = new ArrayList<>();
+    @Getter
+    private final List<IDrawablePart<?>> drawableParts = new ArrayList<>();
 
     @Getter
     @PackFileProperty(configNames = "CenterOfGravityOffset", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F)
@@ -296,16 +300,6 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     }
 
     /**
-     * Prevents the added parts from being rendered with the main obj model of the vehicle <br>
-     * The {@link fr.dynamx.api.entities.modules.IPhysicsModule} using this part is responsible to render the part at the right location
-     *
-     * @param parts The parts to hide when rendering the main obj model
-     */
-    public void addRenderedParts(String... parts) {
-        renderedParts.addAll(Arrays.asList(parts));
-    }
-
-    /**
      * Adds a light source to this vehicle
      *
      * @param source The light source to add
@@ -315,6 +309,29 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
             lightSources.get(source.getPartName()).addSource(source);
         else
             lightSources.put(source.getPartName(), new PartLightSource.CompoundLight(source));
+        addDrawablePart(source);
+    }
+
+    @Override
+    public void addPart(BasePart<ModularVehicleInfo> tBasePart) {
+        super.addPart(tBasePart);
+        if(tBasePart instanceof IDrawablePart)
+            addDrawablePart((IDrawablePart<?>) tBasePart);
+    }
+
+    @Override
+    public void addSubProperty(ISubInfoType<ModularVehicleInfo> property) {
+        super.addSubProperty(property);
+        if(property instanceof IDrawablePart)
+            addDrawablePart((IDrawablePart<?>) property);
+    }
+
+    public void addDrawablePart(IDrawablePart<?> part) {
+        String[] names = part.getRenderedParts();
+        if(names.length > 0)
+            renderedParts.addAll(Arrays.asList(names));
+        if(drawableParts.stream().noneMatch(p -> p.getClass() == part.getClass()))
+            drawableParts.add(part);
     }
 
     @Override
@@ -362,7 +379,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
         }
         //Attach engine
         if (defaultEngine != null) {
-            CarEngineInfo engine = DynamXObjectLoaders.ENGINES.findInfo(defaultEngine);
+            EngineInfo engine = DynamXObjectLoaders.ENGINES.findInfo(defaultEngine);
             if (engine == null)
                 throw new IllegalArgumentException("Engine " + defaultEngine + " of " + getFullName() + " was not found, check file names and previous loading errors !");
             engine.appendTo(this);

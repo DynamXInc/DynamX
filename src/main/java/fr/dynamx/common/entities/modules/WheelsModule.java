@@ -1,14 +1,12 @@
 package fr.dynamx.common.entities.modules;
 
 import com.jme3.bullet.objects.VehicleWheel;
-import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.audio.EnumSoundState;
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.IPropulsionModule;
-import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.common.network.sync.variables.EntityFloatArrayVariable;
 import fr.dynamx.common.network.sync.variables.EntityMapVariable;
@@ -16,18 +14,13 @@ import fr.dynamx.api.network.sync.EntityVariable;
 import fr.dynamx.api.network.sync.SynchronizationRules;
 import fr.dynamx.api.physics.entities.IPropulsionHandler;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
-import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
-import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
-import fr.dynamx.client.renders.vehicle.RenderBaseVehicle;
 import fr.dynamx.client.sound.SkiddingSound;
 import fr.dynamx.client.sound.VehicleSound;
-import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.parts.PartWheel;
 import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
-import fr.dynamx.common.contentpack.type.vehicle.SteeringWheelInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
 import fr.dynamx.common.physics.entities.BaseWheeledVehiclePhysicsHandler;
@@ -35,10 +28,9 @@ import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.wheel.WheelPhysics;
 import fr.dynamx.common.physics.entities.parts.wheel.WheelState;
 import fr.dynamx.utils.maths.DynamXMath;
-import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import lombok.Getter;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.MinecraftForge;
@@ -60,7 +52,7 @@ import static fr.dynamx.client.ClientProxy.SOUND_HANDLER;
  * @see WheelsPhysicsHandler
  */
 @SynchronizedEntityVariable.SynchronizedPhysicsModule()
-public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysicsHandler<?>>, IPhysicsModule.IEntityUpdateListener, IPhysicsModule.IPhysicsUpdateListener, IPhysicsModule.IDrawableModule<BaseVehicleEntity<?>>, IPackInfoReloadListener {
+public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysicsHandler<?>>, IPhysicsModule.IEntityUpdateListener, IPhysicsModule.IPhysicsUpdateListener, IPackInfoReloadListener {
     @SynchronizedEntityVariable(name = "wheel_infos")
     protected final EntityMapVariable<Map<Byte, PartWheelInfo>, Byte, PartWheelInfo> wheelInfos = new EntityMapVariable<>((variable, value) -> {
         value.forEach(this::setWheelInfo);
@@ -73,6 +65,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
     @SynchronizedEntityVariable(name = "skid_infos")
     public EntityFloatArrayVariable skidInfos = new EntityFloatArrayVariable(SynchronizationRules.PHYSICS_TO_SPECTATORS, null);
 
+    @Getter
     protected byte[] wheelsTextureId;
 
     /**
@@ -120,16 +113,16 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
                 wheelInfos.put(partIndex, event.getNewWheel());
                 if (wheelsPhysics != null)
                     wheelsPhysics.getWheelByPartIndex(partIndex).setWheelInfo(event.getNewWheel());
-                if (entity.getEntityTextureID() != -1)
-                    handleTextureID(entity.getEntityTextureID(), entity);
+                computeWheelsTextureIds();
             }
         }
     }
 
-    @Override
     @SideOnly(Side.CLIENT)
-    public void handleTextureID(byte metadata, BaseVehicleEntity<?> packInfo) {
-        String chassis = packInfo.getPackInfo().getVariantName(metadata);
+    public void computeWheelsTextureIds() {
+        if (entity.getEntityTextureID() == -1)
+            return;
+        String chassis = entity.getPackInfo().getVariantName(entity.getEntityTextureID());
         for (byte i = 0; i < wheelsTextureId.length; i++) {
             wheelsTextureId[i] = getWheelInfo(i).getIdForVariant(chassis);
         }
@@ -287,49 +280,6 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
 
     @Override
     @SideOnly(Side.CLIENT)
-    public void drawParts(RenderPhysicsEntity<?> render, float partialTicks, BaseVehicleEntity<?> carEntity) {
-        ObjModelRenderer vehicleModel = DynamXContext.getObjModelRegistry().getModel(carEntity.getPackInfo().getModel());
-        /* Rendering the steering wheel */
-        SteeringWheelInfo info = carEntity.getPackInfo().getSubPropertyByType(SteeringWheelInfo.class);
-        if (info != null && !carEntity.getModuleByType(WheelsModule.class).getWheelInfos().isEmpty()) { //If has steering and wheels AND at least one wheel (think to loading errors)
-            ObjObjectRenderer steeringWheel = vehicleModel.getObjObjectRenderer(info.getPartName());
-            if (steeringWheel != null) {
-                if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.STEERING_WHEEL, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks, vehicleModel))) {
-                    GlStateManager.pushMatrix();
-                    Vector3f center = info.getSteeringWheelPosition();
-                    //Translation to the steering wheel rotation point (and render pos)
-                    GlStateManager.translate(center.x, center.y, center.z);
-
-                    //Apply steering wheel base rotation
-                    if (info.getSteeringWheelBaseRotation() != null)
-                        GlStateManager.rotate(GlQuaternionPool.get(info.getSteeringWheelBaseRotation()));
-                    //Rotate the steering wheel
-                    int directingWheel = VehicleEntityProperties.getPropertyIndex(carEntity.getPackInfo().getDirectingWheel(), VehicleEntityProperties.EnumVisualProperties.STEERANGLE);
-                    WheelsModule m = carEntity.getModuleByType(WheelsModule.class);
-                    GlStateManager.rotate(-(m.prevVisualProperties[directingWheel] + (m.visualProperties[directingWheel] - m.prevVisualProperties[directingWheel]) * partialTicks), 0F, 0F, 1F);
-
-                    //Scale it
-                    GlStateManager.scale(carEntity.getPackInfo().getScaleModifier().x, carEntity.getPackInfo().getScaleModifier().y, carEntity.getPackInfo().getScaleModifier().z);
-                    //Render it
-                    vehicleModel.renderGroup(steeringWheel, carEntity.getEntityTextureID());
-                    GlStateManager.popMatrix();
-                    MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.STEERING_WHEEL, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks, vehicleModel));
-                }
-            }
-        }
-
-        if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.PROPULSION, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks, vehicleModel))) {
-            this.entity.getPackInfo().getPartsByType(PartWheel.class).forEach(partWheel -> {
-                if (wheelsStates.get()[partWheel.getId()] != WheelState.REMOVED) {
-                    renderWheel(render, partWheel, partialTicks);
-                }
-            });
-            MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.PROPULSION, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks, vehicleModel));
-        }
-    }
-
-    @Override
-    @SideOnly(Side.CLIENT)
     public void spawnPropulsionParticles(RenderPhysicsEntity<?> render, float partialTicks) {
         //Dust particles when the vehicle friction is very low
         entity.getPackInfo().getPartsByType(PartWheel.class).forEach(partWheel -> {
@@ -343,94 +293,6 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
                 }
             }
         });
-    }
-
-    @SideOnly(Side.CLIENT)
-    protected void renderWheel(RenderPhysicsEntity<?> render, PartWheel partWheel, float partialTicks) {
-        int index;
-        Quaternion baseRotation = partWheel.getSuspensionAxis();
-        PartWheelInfo info = getWheelInfo(partWheel.getId());
-        if (info.isModelValid()) {
-            GlStateManager.pushMatrix();
-            {
-                /* Translation to the wheel rotation point */
-                GlStateManager.translate(partWheel.getRotationPoint().x, partWheel.getRotationPoint().y, partWheel.getRotationPoint().z);
-
-                /* Apply wheel base rotation */
-                if (baseRotation.getW() != 0)
-                    GlStateManager.rotate(GlQuaternionPool.get(baseRotation));
-
-                /* Suspension translation */
-                index = VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.SUSPENSIONLENGTH);
-                GlStateManager.translate(0, -(prevVisualProperties[index] + (visualProperties[index] - prevVisualProperties[index]) * partialTicks) + 0.2, 0);
-
-                /* Steering rotation*/
-                if (partWheel.isWheelIsSteerable()) {
-                    index = VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.STEERANGLE);
-                    GlStateManager.rotate((prevVisualProperties[index] + (visualProperties[index] - prevVisualProperties[index]) * partialTicks), 0.0F, 1.0F, 0.0F);
-                }
-
-                /* Render mudguard */
-                if (partWheel.getMudGuardPartName() != null) {
-                    GlStateManager.scale(entity.getPackInfo().getScaleModifier().x, entity.getPackInfo().getScaleModifier().y, entity.getPackInfo().getScaleModifier().z);
-                    DynamXContext.getObjModelRegistry().getModel(this.entity.getPackInfo().getModel()).renderGroups(partWheel.getMudGuardPartName(), entity.getEntityTextureID());
-                }
-            }
-            GlStateManager.popMatrix();
-
-            GlStateManager.pushMatrix();
-            {
-                /* Translation to the wheel rotation point */
-                GlStateManager.translate(partWheel.getRotationPoint().x, partWheel.getRotationPoint().y, partWheel.getRotationPoint().z);
-
-                /* Apply wheel base rotation */
-                if (baseRotation.getW() != 0)
-                    GlStateManager.rotate(GlQuaternionPool.get(baseRotation));
-
-                /* Suspension translation */
-                index = VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.SUSPENSIONLENGTH);
-                GlStateManager.translate(0, -(prevVisualProperties[index] + (visualProperties[index] - prevVisualProperties[index]) * partialTicks), 0);
-
-                /* Steering rotation*/
-                if (partWheel.isWheelIsSteerable()) {
-                    index = VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.STEERANGLE);
-                    GlStateManager.rotate((prevVisualProperties[index] + (visualProperties[index] - prevVisualProperties[index]) * partialTicks), 0.0F, 1.0F, 0.0F);
-                }
-
-                //Remove wheel base rotation
-                if (baseRotation.getW() != 0)
-                    GlStateManager.rotate(GlQuaternionPool.get(baseRotation.inverse()));
-
-                // Translate to render pos, from rotation pos
-                GlStateManager.translate(partWheel.getPosition().x - partWheel.getRotationPoint().x, partWheel.getPosition().y - partWheel.getRotationPoint().y, partWheel.getPosition().z - partWheel.getRotationPoint().z);
-
-                index = VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.ROTATIONANGLE);
-                //Fix sign problems for wheel rotation
-                float prev = prevVisualProperties[index];
-                if (prev - visualProperties[index] > 180)
-                    prev -= 360;
-                if (prev - visualProperties[index] < -180)
-                    prev += 360;
-                //Then render
-                if (partWheel.isRight()) {
-                    /* Wheel rotation (Right-Side)*/
-                    GlStateManager.rotate(180, 0, 1, 0);
-                    GlStateManager.rotate((prev + (visualProperties[index] - prev) * partialTicks), -1.0F, 0.0F, 0.0F);
-                } else {
-                    /* Wheel rotation (Left-Side)*/
-                    GlStateManager.rotate(-(prev + (visualProperties[index] - prev) * partialTicks), -1.0F, 0.0F, 0.0F);
-                }
-                /*Rendering the wheels */
-                ObjModelRenderer model = DynamXContext.getObjModelRegistry().getModel(info.getModel());
-                //Scale
-                GlStateManager.scale(info.getScaleModifier().x, info.getScaleModifier().y, info.getScaleModifier().z);
-                //If the wheel is not flattened, or the model does not supports flattening
-                if (wheelsStates.get()[partWheel.getId()] != WheelState.ADDED_FLATTENED || !model.renderGroups("rim", wheelsTextureId[partWheel.getId()])) {
-                    render.renderModel(model, entity, wheelsTextureId[partWheel.getId()]);
-                }
-            }
-            GlStateManager.popMatrix();
-        }
     }
 
     public final Map<Integer, VehicleSound> sounds = new HashMap<>();

@@ -27,6 +27,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import org.lwjgl.util.vector.Quaternion;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -243,22 +244,20 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
      * Called to render this part <br>
      * Will draw a white box over the all entity if model wasn't loaded (not found for example)
      */
-    public void renderModel(ObjModelRenderer model, Entity entity, byte textureDataId) {
-        if (model.getObjObjects().isEmpty()) //Error while loading the model
-        {
-            renderOffsetAABB(entity.getEntityBoundingBox(), -entity.lastTickPosX, -entity.lastTickPosY, -entity.lastTickPosZ);
-        } else {
+    public void renderModel(ObjModelRenderer model, @Nullable Entity entity, byte textureDataId) {
+        if (!model.getObjObjects().isEmpty())
             model.renderModel(textureDataId);
-        }
+        else if(entity != null) //Error while loading the model
+            renderOffsetAABB(entity.getEntityBoundingBox(), -entity.lastTickPosX, -entity.lastTickPosY, -entity.lastTickPosZ);
     }
 
     /**
      * Called to render the main part of this model with the custom texture <br>
      * Will draw a white box over the all entity if model wasn't loaded (not found for example)
      */
-    public void renderMainModel(ObjModelRenderer model, Entity entity, byte textureDataId) {
+    public void renderMainModel(ObjModelRenderer model, @Nullable Entity entity, byte textureDataId) {
         boolean drawn = model.renderDefaultParts(textureDataId);
-        if (!drawn) {
+        if (!drawn && entity != null) {
             renderOffsetAABB(entity.getEntityBoundingBox(), -entity.lastTickPosX, -entity.lastTickPosY, -entity.lastTickPosZ);
         }
     }
@@ -267,9 +266,9 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
      * Called to render specific parts with the custom texture <br>
      * Will draw a white box over the all entity if model wasn't loaded (not found for example)
      */
-    public void renderModelGroup(ObjModelRenderer model, String group, Entity entity, byte textureDataId) {
+    public void renderModelGroup(ObjModelRenderer model, String group, @Nullable Entity entity, byte textureDataId) {
         boolean drawn = model.renderGroups(group, textureDataId);
-        if (!drawn) {
+        if (!drawn && entity != null) {
             renderOffsetAABB(entity.getEntityBoundingBox(), -entity.lastTickPosX, -entity.lastTickPosY, -entity.lastTickPosZ);
         }
     }

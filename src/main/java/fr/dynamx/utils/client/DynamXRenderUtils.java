@@ -1,7 +1,12 @@
 package fr.dynamx.utils.client;
 
 import com.jme3.math.Vector3f;
+import fr.dynamx.api.contentpack.object.part.IDrawablePart;
+import fr.dynamx.api.events.PhysicsEntityEvent;
+import fr.dynamx.api.events.VehicleEntityEvent;
+import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
+import fr.dynamx.client.renders.vehicle.RenderBaseVehicle;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
@@ -23,6 +28,7 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
 import org.lwjgl.opengl.APPLEVertexArrayObject;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
@@ -53,82 +59,15 @@ public class DynamXRenderUtils {
         RenderGlobal.drawBoundingBox(aabb.minX, aabb.minY, aabb.minZ, aabb.maxX, aabb.maxY, aabb.maxZ, red, green, blue, alpha);
     }
 
+    private static RenderBaseVehicle<?> renderBaseVehicle;
+
     public static void renderCar(ModularVehicleInfo car, byte textureId) {
+        if(renderBaseVehicle == null)
+            renderBaseVehicle = new RenderBaseVehicle<>(ClientEventHandler.MC.getRenderManager());
         Vector3fPool.openPool();
         GlQuaternionPool.openPool();
-        /* Rendering the chassis */
-        ObjModelRenderer vehicleModel = DynamXContext.getObjModelRegistry().getModel(car.getModel());
-        GlStateManager.scale(car.getScaleModifier().x, car.getScaleModifier().y, car.getScaleModifier().z);
-        vehicleModel.renderDefaultParts(textureId);//.renderGroups("Chassis", textureId);
-        GlStateManager.scale(1 / car.getScaleModifier().x, 1 / car.getScaleModifier().y, 1 / car.getScaleModifier().z);
-
-        /* Rendering the steering wheel */
-        SteeringWheelInfo info = car.getSubPropertyByType(SteeringWheelInfo.class);
-        if (info != null) {
-            ObjObjectRenderer steeringWheel = vehicleModel.getObjObjectRenderer(info.getPartName());
-            if (steeringWheel != null) {
-                GlStateManager.pushMatrix();
-                Vector3f center = info.getSteeringWheelPosition();
-                //Translation to the steering wheel rotation point (and render pos)
-                GlStateManager.translate(center.x, center.y, center.z);
-
-                //Apply steering wheel base rotation
-                if (info.getSteeringWheelBaseRotation() != null)
-                    GlStateManager.rotate(GlQuaternionPool.get(info.getSteeringWheelBaseRotation()));
-                //Scale it
-                GlStateManager.scale(car.getScaleModifier().x, car.getScaleModifier().y, car.getScaleModifier().z);
-                //Render it
-                vehicleModel.renderGroup(steeringWheel, textureId);
-                GlStateManager.popMatrix();
-            }
-        }
-
-        /* Rendering light sources */
-        if (!car.getLightSources().isEmpty()) {
-            for (PartLightSource.CompoundLight source : car.getLightSources().values()) {
-                GlStateManager.scale(car.getScaleModifier().x, car.getScaleModifier().y, car.getScaleModifier().z);
-                vehicleModel.renderGroups(source.getPartName(), (byte) 0);
-                GlStateManager.scale(1 / car.getScaleModifier().x, 1 / car.getScaleModifier().y, 1 / car.getScaleModifier().z);
-            }
-        }
-
-        /* Rendering the wheels */
-        car.getPartsByType(PartWheel.class).forEach(partWheel -> {
-            if (partWheel.getDefaultWheelInfo().isModelValid()) {
-                GlStateManager.pushMatrix();
-                {
-                    /* Translation to the wheel position */
-                    GlStateManager.translate(partWheel.getPosition().x, partWheel.getPosition().y, partWheel.getPosition().z);
-                    if (partWheel.isRight()) {
-                        /* Wheel rotation (Right-Side)*/
-                        GlStateManager.rotate(180, 0, 1, 0);
-                    }
-                    /*Rendering the wheels */
-                    PartWheelInfo info1 = partWheel.getDefaultWheelInfo();
-                    ObjModelRenderer model = DynamXContext.getObjModelRegistry().getModel(info1.getModel());
-                    //System.out.println("Model is "+model+" "+info1.getTextures()+ " "+car.getTextures().get(textureId));
-                    GlStateManager.scale(car.getScaleModifier().x, car.getScaleModifier().y, car.getScaleModifier().z);
-                    if (car.getVariants() != null && car.getVariants().getVariantsMap().containsKey(textureId))
-                        model.renderModel(info1.getIdForVariant(car.getVariantName(textureId)));
-                    else
-                        model.renderModel((byte) 0);
-                }
-                GlStateManager.popMatrix();
-            }
-        });
-
-        /* Rendering doors */
-        for (PartDoor source : car.getPartsByType(PartDoor.class)) {
-            GlStateManager.pushMatrix();
-            {
-                Vector3f pos = Vector3fPool.get(source.getCarAttachPoint());
-                pos.subtractLocal(source.getDoorAttachPoint().x, source.getDoorAttachPoint().y, source.getDoorAttachPoint().z);
-                GlStateManager.translate(pos.x, pos.y, pos.z);
-                GlStateManager.scale(car.getScaleModifier().x, car.getScaleModifier().y, car.getScaleModifier().z);
-                vehicleModel.renderGroups(source.getPartName(), textureId);
-            }
-            GlStateManager.popMatrix();
-        }
+        renderBaseVehicle.renderMain(null, car, textureId, 1);
+        renderBaseVehicle.renderParts(null, car, textureId, 1);
         GlQuaternionPool.closePool();
         Vector3fPool.closePool();
     }

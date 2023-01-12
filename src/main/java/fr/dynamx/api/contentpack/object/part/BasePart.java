@@ -11,6 +11,7 @@ import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
+import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import lombok.Getter;
@@ -94,4 +95,5 @@ public abstract class BasePart<T extends ISubInfoTypeOwner<?>> extends SubInfoTy
         position.multLocal(getScaleModifier(this.owner));
         scale.multLocal(getScaleModifier(this.owner));
     }
+
 }

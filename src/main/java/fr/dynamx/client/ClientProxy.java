@@ -77,16 +77,7 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
     public void preInit() {
         super.preInit();
 
-        //Loads all models avoiding duplicates
-        for (InfoLoader<?> infoLoader : DynamXObjectLoaders.getLoaders()) {
-            for (INamedObject namedObject : infoLoader.getInfos().values()) {
-                if (namedObject instanceof IObjPackObject && ((IObjPackObject) namedObject).shouldRegisterModel()) {
-                    ObjModelPath modelPath = DynamXUtils.getModelPath(namedObject.getPackName(), ((IObjPackObject) namedObject).getModel());
-                    DynamXContext.getObjModelRegistry().registerModel(modelPath, (IModelTextureVariantsSupplier) namedObject);
-                }
-            }
-        }
-        log.info("Registered " + DynamXContext.getObjModelRegistry().getLoadedModelCount() + " obj models");
+        DynamXContext.getObjModelRegistry().onPackInfosReloaded();
 
         RenderingRegistry.registerEntityRenderingHandler(CaterpillarEntity.class, RenderCaterpillar::new);
         RenderingRegistry.registerEntityRenderingHandler(CarEntity.class, RenderBaseVehicle.RenderCar::new);

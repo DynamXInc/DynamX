@@ -1,13 +1,14 @@
 package fr.dynamx.client.renders.vehicle;
 
+import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.entities.IModuleContainer;
-import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent.Render;
 import fr.dynamx.api.events.VehicleEntityEvent.Render.Type;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.vehicles.BoatEntity;
 import fr.dynamx.common.entities.vehicles.CarEntity;
@@ -20,6 +21,8 @@ import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraftforge.common.MinecraftForge;
 import org.lwjgl.util.vector.Quaternion;
 
+import javax.annotation.Nullable;
+
 public class RenderBaseVehicle<T extends BaseVehicleEntity<?>> extends RenderPhysicsEntity<T> {
     public RenderBaseVehicle(RenderManager manager) {
         super(manager);
@@ -28,22 +31,30 @@ public class RenderBaseVehicle<T extends BaseVehicleEntity<?>> extends RenderPhy
     }
 
     @Override
-    public void renderMain(T carEntity, float partialTicks) {
-        ObjModelRenderer vehicleModel = DynamXContext.getObjModelRegistry().getModel(carEntity.getPackInfo().getModel());
-        if (!MinecraftForge.EVENT_BUS.post(new Render(Type.CHASSIS, this, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks, vehicleModel)) && carEntity.getPackInfo().isModelValid()) {
+    public void renderMain(T entity, float partialTicks) {
+        renderMain(entity, entity.getPackInfo(), entity.getEntityTextureID(), partialTicks);
+    }
+
+    public void renderMain(@Nullable T carEntity, ModularVehicleInfo packInfo, byte textureId, float partialTicks) {
+        ObjModelRenderer vehicleModel = DynamXContext.getObjModelRegistry().getModel(packInfo.getModel());
+        if (!MinecraftForge.EVENT_BUS.post(new Render(Type.CHASSIS, this, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks, vehicleModel)) && packInfo.isModelValid()) {
             /* Rendering the chassis */
-            GlStateManager.scale(carEntity.getPackInfo().getScaleModifier().x, carEntity.getPackInfo().getScaleModifier().y, carEntity.getPackInfo().getScaleModifier().z);
-            renderMainModel(vehicleModel, carEntity, carEntity.getEntityTextureID());
-            GlStateManager.scale(1 / carEntity.getPackInfo().getScaleModifier().x, 1 / carEntity.getPackInfo().getScaleModifier().y, 1 / carEntity.getPackInfo().getScaleModifier().z);
+            GlStateManager.scale(packInfo.getScaleModifier().x, packInfo.getScaleModifier().y, packInfo.getScaleModifier().z);
+            renderMainModel(vehicleModel, carEntity, textureId);
+            GlStateManager.scale(1 / packInfo.getScaleModifier().x, 1 / packInfo.getScaleModifier().y, 1 / packInfo.getScaleModifier().z);
         }
         MinecraftForge.EVENT_BUS.post(new Render(Type.CHASSIS, this, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks, vehicleModel));
     }
 
     @Override
-    public void renderParts(T carEntity, float partialTicks) {
+    public void renderParts(T entity, float partialTicks) {
+        renderParts(entity, entity.getPackInfo(), entity.getEntityTextureID(), partialTicks);
+    }
+
+    public void renderParts(@Nullable T carEntity, ModularVehicleInfo packInfo, byte textureId, float partialTicks) {
         if (!MinecraftForge.EVENT_BUS.post(new Render(Type.PARTS, this, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks, null))) {
-            if (carEntity.getPackInfo().isModelValid()) {
-                carEntity.getDrawableModules().forEach(d -> ((IPhysicsModule.IDrawableModule<T>) d).drawParts(this, partialTicks, carEntity));
+            if (packInfo.isModelValid()) {
+                packInfo.getDrawableParts().forEach(d -> ((IDrawablePart<T>) d).drawParts(carEntity, this, packInfo, textureId, partialTicks));
             }
         }
         MinecraftForge.EVENT_BUS.post(new Render(Type.PARTS, this, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks, null));

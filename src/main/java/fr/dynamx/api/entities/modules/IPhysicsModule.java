@@ -156,19 +156,4 @@ public interface IPhysicsModule<P extends AbstractEntityPhysicsHandler<?, ?>> {
         default void postUpdatePhysics(boolean simulatingPhysics) {
         }
     }
-
-    interface IDrawableModule<T extends ModularPhysicsEntity<?>> {
-        /**
-         * Called to update textures of this module (egg for wheels) according to the new entity's metadata
-         *
-         * @param metadata The metadata of the entity
-         * @param entity   The info of the entity, giving textures corresponding to the metadata
-         */
-        @SideOnly(Side.CLIENT)
-        default void handleTextureID(byte metadata, T entity) {
-        }
-
-        @SideOnly(Side.CLIENT)
-        void drawParts(RenderPhysicsEntity<?> render, float partialTicks, T entity);
-    }
 }

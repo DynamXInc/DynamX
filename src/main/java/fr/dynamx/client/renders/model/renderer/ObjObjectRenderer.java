@@ -281,7 +281,7 @@ public class ObjObjectRenderer {
         if (material.getName().equals("none")) //BlockBench uses "none" materials, this is a bug
         {
             if (!model.hasNoneMaterials) {
-                DynamXErrorManager.addError(model.getTextureVariants() != null ? model.getTextureVariants().getPackName() : "Non-pack model", DynamXErrorManager.MODEL_ERRORS, "obj_none_material", ErrorLevel.LOW, model.getLocation().toString(), objObjectData.getName());
+                DynamXErrorManager.addError(model.getTextureVariants() != null ? model.getTextureVariants().getPackName() : "Non-pack model", DynamXErrorManager.MODEL_ERRORS, "obj_none_material", ErrorLevel.LOW, model.getLocation().getModelPath().toString(), objObjectData.getName());
             }
             model.hasNoneMaterials = true;
             return false;

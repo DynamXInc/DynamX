@@ -85,7 +85,6 @@ public class HelicopterController implements IVehicleController {
                     HelicopterEngineModule engine = entity.getModuleByType(HelicopterEngineModule.class);
                     if (engine != null) {
                         engine.setPower(engine.getPower() - 0.05f);
-                        System.out.println("down");
                     }
                     onCooldown = 5;
                 }

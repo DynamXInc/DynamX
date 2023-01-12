@@ -40,6 +40,15 @@ public interface ISubInfoType<T extends ISubInfoTypeOwner<?>> extends INamedObje
     T getOwner();
 
     /**
+     * Post loads this sub info <br>
+     * Can be used to complete this sub info with other infos (for example, add the 'sounds_' to an engine)
+     *
+     * @param owner The owner of this sub property
+     * @param hot If it's a hot reloading (info owners already created)
+     */
+    default void postLoad(T owner, boolean hot) {}
+
+    /**
      * Adds the {@link IPhysicsModule}s associated with this sub info type to the given entity
      *
      * @param entity  The entity being initialized

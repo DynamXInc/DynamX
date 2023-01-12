@@ -167,5 +167,21 @@ public class PartLightSource implements ISubInfoType<ModularVehicleInfo> {
         public Map<Byte, TextureVariantData> getTextureVariants() {
             return variantsMap;
         }
+
+        /**
+         * Post loads this light (computes texture variants)
+         */
+        public void postLoad() {
+            List<PartLightSource> sources = getSources();
+            for (int i = 0; i < sources.size(); i++) {
+                PartLightSource source = sources.get(i);
+                if (source.getTextures() != null) {
+                    for (int j = 0; j < source.getTextures().length; j++) {
+                        TextureVariantData data = new TextureVariantData(source.getTextures()[j], (byte) (1 + i + j));
+                        source.mapTexture(j, data);
+                    }
+                }
+            }
+        }
     }
 }

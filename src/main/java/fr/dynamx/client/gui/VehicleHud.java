@@ -43,7 +43,7 @@ public class VehicleHud extends GuiFrame {
                 netWarning.setCssId("network_warning");
                 add(netWarning);
             }*/
-            add(new GuiLabel("DynamX " + DynamXConstants.VERSION_TYPE + " V." + DynamXConstants.VERSION).setCssId("hud_ea_warning"));
+            //add(new GuiLabel("DynamX " + DynamXConstants.VERSION_TYPE + " V." + DynamXConstants.VERSION).setCssId("hud_ea_warning"));
         }
     }
 

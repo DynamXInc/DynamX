@@ -29,7 +29,7 @@ public class MaterialVariantsInfo<T extends ISubInfoTypeOwner<T>> extends SubInf
     }
 
     /**
-     * Backward compatibility
+     * Backward compatibility with 3.3.0
      */
     @Deprecated
     public MaterialVariantsInfo(ISubInfoTypeOwner<T> owner, String[][] texturesArray) {

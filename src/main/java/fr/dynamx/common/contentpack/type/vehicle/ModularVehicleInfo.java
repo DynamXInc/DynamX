@@ -319,19 +319,6 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
 
     @Override
     public boolean postLoad(boolean hot) {
-        return build(DynamXObjectLoaders.WHEELS.getInfos(), DynamXObjectLoaders.ENGINES.getInfos(), DynamXObjectLoaders.SOUNDS.getInfos());
-    }
-
-    /**
-     * <p>
-     * Creates a final {@link ModularVehicleInfo} from the properties of this builder
-     *
-     * @param wheels  The loaded wheels
-     * @param engines The loaded engines
-     * @param sounds  The loaded sounds
-     * @return A new, fresh, vehicle
-     */
-    public boolean build(Map<String, PartWheelInfo> wheels, Map<String, CarEngineInfo> engines, Map<String, SoundListInfo> sounds) {
         ObjModelPath modelPath = DynamXUtils.getModelPath(getPackName(), model);
         try {
             if (useHullShape)
@@ -339,7 +326,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
             else {
                 physicsCollisionShape = new CompoundCollisionShape();
                 List<PartShape> partsByType = getPartsByType(PartShape.class);
-                for (PartShape partShape : partsByType) {
+                for (PartShape<?> partShape : partsByType) {
                     BoxCollisionShape hullShape = new BoxCollisionShape(partShape.getScale());
                     hullShape.setScale(scaleModifier);
                     physicsCollisionShape.addChildShape(hullShape, new Vector3f(centerOfMass.x, shapeYOffset + centerOfMass.y, centerOfMass.z).add(partShape.getPosition()));
@@ -352,6 +339,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
         }
 
         //Attach wheels and verify handbrake (V. 2.13.5)
+        Map<String, PartWheelInfo> wheels = DynamXObjectLoaders.WHEELS.getInfos();
         boolean hasHandbrake = false;
         int directingWheel = -1;
         List<PartWheel> partsByType = getPartsByType(PartWheel.class);
@@ -367,58 +355,32 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
             directingWheel = 0;
         this.directingWheel = directingWheel;
         if (!hasHandbrake) {
-            for (PartWheel partWheel : this.getPartsByType(PartWheel.class)) {
+            for (PartWheel partWheel : partsByType) {
                 if (!partWheel.isDrivingWheel())
                     partWheel.setHandBrakingWheel(true);
             }
         }
         //Attach engine
         if (defaultEngine != null) {
-            CarEngineInfo engine = engines.get(defaultEngine);
+            CarEngineInfo engine = DynamXObjectLoaders.ENGINES.findInfo(defaultEngine);
             if (engine == null)
                 throw new IllegalArgumentException("Engine " + defaultEngine + " of " + getFullName() + " was not found, check file names and previous loading errors !");
             engine.appendTo(this);
-            //And sounds
-            if (defaultSounds != null) {
-                SoundListInfo engineSound = sounds.get(defaultSounds);
-                if (engineSound == null)
-                    throw new IllegalArgumentException("Engine sounds " + defaultSounds + " of " + getFullName() + " were not found, check file names and previous loading errors !");
-                engine.setSounds(engineSound.getSoundsIn());
-            }
-        }
-        if (getSubPropertyByType(HelicopterPhysicsInfo.class) != null) {
-            HelicopterPhysicsInfo engine = getSubPropertyByType(HelicopterPhysicsInfo.class);
-            //And sounds
-            if (defaultSounds != null) {
-                SoundListInfo engineSound = sounds.get(defaultSounds);
-                if (engineSound == null)
-                    throw new IllegalArgumentException("Engine sounds " + defaultSounds + " of " + getFullName() + " were not found, check file names and previous loading errors !");
-                engine.setSounds(engineSound.getSoundsIn());
-            }
         }
         variants = getSubPropertyByType(MaterialVariantsInfo.class);
         //Map textures
-        //Backward compatibility code
+        //Backward compatibility with 3.3.0
         //Will be removed
         if(texturesArray != null) {
             variants = new MaterialVariantsInfo(this, texturesArray);
             variants.appendTo(this);
         }
         //Map lights
-        for (PartLightSource.CompoundLight src : lightSources.values()) {
-            if (src != null) {
-                List<PartLightSource> sources = src.getSources();
-                for (int i = 0; i < sources.size(); i++) {
-                    PartLightSource source = sources.get(i);
-                    if (source.getTextures() != null) {
-                        for (int j = 0; j < source.getTextures().length; j++) {
-                            TextureVariantData data = new TextureVariantData(source.getTextures()[j], (byte) (1 + i + j));
-                            source.mapTexture(j, data);
-                        }
-                    }
-                }
-            }
-        }
+        lightSources.values().forEach(PartLightSource.CompoundLight::postLoad);
+        //Post-load sub-properties
+        if(!super.postLoad(hot))
+            return false;
+        //Validate vehicle type
         validator.validate(this);
         return true;
     }

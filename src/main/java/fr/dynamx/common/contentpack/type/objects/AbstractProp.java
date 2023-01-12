@@ -101,7 +101,7 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
                 }
             });
         }
-        return true;
+        return super.postLoad(hot);
     }
 
     abstract MaterialVariantsInfo<?> getVariants();

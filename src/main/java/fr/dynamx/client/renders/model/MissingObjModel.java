@@ -1,6 +1,8 @@
 package fr.dynamx.client.renders.model;
 
 import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
+import fr.dynamx.api.obj.ObjModelPath;
+import fr.dynamx.client.DynamXModelRegistry;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.common.objloader.data.Mesh;
@@ -46,7 +48,7 @@ public class MissingObjModel extends ObjModelRenderer {
     private static ObjObjectRenderer emptyPartRenderer;
 
     public MissingObjModel() {
-        super(new ResourceLocation(DynamXConstants.ID, "obj/missing.obj"), new ArrayList<>(), new HashMap<>(), null);
+        super(new ObjModelPath(DynamXModelRegistry.BASE_PACKINFO, new ResourceLocation(DynamXConstants.ID, "obj/missing.obj")), new ArrayList<>(), new HashMap<>(), null);
         ObjObjectRenderer objObjectRenderer = new ObjObjectRenderer(emptyPart);
         getObjObjects().add(objObjectRenderer);
         emptyPartRenderer = objObjectRenderer;

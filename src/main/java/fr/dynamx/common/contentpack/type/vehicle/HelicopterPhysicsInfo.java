@@ -6,6 +6,7 @@ import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
+import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.HelicopterEngineModule;
 import lombok.Getter;
@@ -52,22 +53,6 @@ public class HelicopterPhysicsInfo extends SubInfoType<ModularVehicleInfo> {
         super(owner);
     }
 
-    public void setSounds(List<EngineSound> sounds) {
-        soundsEngine = new ArrayList<>();
-        for (EngineSound sound : sounds) {
-            if (sound.isSpecialSound()) {
-                if (sound.getRpmRange()[0] == -1) //A starting sound
-                {
-                    if (sound.isInterior())
-                        startingSoundInterior = sound.getSoundName();
-                    else
-                        startingSoundExterior = sound.getSoundName();
-                }
-            } else
-                soundsEngine.add(sound);
-        }
-    }
-
     public List<EngineSound> getEngineSounds() {
         return soundsEngine;
     }
@@ -85,5 +70,32 @@ public class HelicopterPhysicsInfo extends SubInfoType<ModularVehicleInfo> {
     @Override
     public void addModules(BaseVehicleEntity<?> entity, ModuleListBuilder modules) {
         modules.add(new HelicopterEngineModule(entity));
+    }
+
+    @Override
+    public void postLoad(ModularVehicleInfo owner, boolean hot) {
+        //And sounds
+        if (owner.defaultSounds != null) {
+            SoundListInfo engineSound = DynamXObjectLoaders.SOUNDS.findInfo(owner.defaultSounds);
+            if (engineSound == null)
+                throw new IllegalArgumentException("Engine sounds " + owner.defaultSounds + " of " + owner.getFullName() + " were not found, check file names and previous loading errors !");
+            setSounds(engineSound.getSoundsIn());
+        }
+    }
+
+    public void setSounds(List<EngineSound> sounds) {
+        soundsEngine = new ArrayList<>();
+        for (EngineSound sound : sounds) {
+            if (sound.isSpecialSound()) {
+                if (sound.getRpmRange()[0] == -1) //A starting sound
+                {
+                    if (sound.isInterior())
+                        startingSoundInterior = sound.getSoundName();
+                    else
+                        startingSoundExterior = sound.getSoundName();
+                }
+            } else
+                soundsEngine.add(sound);
+        }
     }
 }

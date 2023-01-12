@@ -1,7 +1,6 @@
 package fr.dynamx.common.contentpack.type.vehicle;
 
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoType;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;

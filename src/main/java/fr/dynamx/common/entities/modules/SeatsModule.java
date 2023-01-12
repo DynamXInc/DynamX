@@ -91,12 +91,7 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
 
     @Nullable
     public Entity getControllingPassenger() {
-        for (Map.Entry<PartSeat, EntityPlayer> e : seatToPassenger.entrySet()) {
-            if (e.getKey().isDriver()) {
-                return e.getValue();
-            }
-        }
-        return null;
+        return seatToPassenger.entrySet().stream().filter(e -> e.getKey().isDriver()).findFirst().map(Map.Entry::getValue).orElse(null);
     }
 
     public void updatePassenger(Entity passenger) {

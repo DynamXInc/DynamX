@@ -11,13 +11,11 @@ import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
-import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.Nullable;
-import java.util.Map;
 
 /**
  * Wheel contained in a wheel file
@@ -102,7 +100,7 @@ public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IS
     }
 
     @Override
-    public void onComplete(boolean hotReload) {
+    public void postLoad(PartWheelInfo owner, boolean hot) {
         if (handBrakeForce == -1)
             handBrakeForce = wheelBrakeForce * 2;
         wheelRadius = getWheelRadius() * getScaleModifier().z;

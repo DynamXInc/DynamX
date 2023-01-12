@@ -37,6 +37,7 @@ public class EntityVariable<T> {
     protected void init(String name, EntityVariableSerializer<?> type) {
         this.name = name;
         this.serializer = (EntityVariableSerializer<T>) type;
+        //System.out.println("INIT " + name+" with " + type);
     }
 
     public T get() {

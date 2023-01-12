@@ -35,8 +35,8 @@ public abstract class InteractivePart<A extends PhysicsEntity<?>, T extends ISub
     }
 
     @Override
-    public void appendTo(T partInfo) {
-        super.appendTo(partInfo);
+    public void appendTo(T owner) {
+        super.appendTo(owner);
         box = new AxisAlignedBB(-getScale().x, 0, -getScale().z, getScale().x, getScale().y, getScale().z);
     }
 

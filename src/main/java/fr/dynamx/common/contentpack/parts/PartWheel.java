@@ -4,12 +4,9 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.contentpack.registry.*;
-import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.entities.modules.WheelsModule;
-import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import net.minecraft.entity.player.EntityPlayer;
@@ -59,23 +56,6 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
         owner.arrangeWheelID(this);
         if (getMudGuardPartName() != null)
             owner.addRenderedParts(getMudGuardPartName());
-    }
-
-    @Override
-    public void onComplete(boolean hotReload) {
-        //suspensionAxis[0] *= 180f/Math.PI; //Convert to degrees
-    }
-
-    @Override
-    public void addPart(BaseVehicleEntity<?> vehicle) {
-        if (!(vehicle instanceof IModuleContainer.IPropulsionContainer) || !(((IModuleContainer.IPropulsionContainer) vehicle).getPropulsion() instanceof WheelsModule))
-            throw new IllegalStateException("The entity " + vehicle + " has PartWheels, but does not implement IHavePropulsion or the propulsion is not a WheelsModule !");
-        ((WheelsPhysicsHandler) ((IModuleContainer.IPropulsionContainer) vehicle).getPropulsion().getPhysicsHandler()).addWheel(this, getDefaultWheelInfo());
-    }
-
-    @Override
-    public void removePart(BaseVehicleEntity<?> vehicle) {
-        ((WheelsPhysicsHandler) ((IModuleContainer.IPropulsionContainer) vehicle).getPropulsion().getPhysicsHandler()).removeWheel(getId());
     }
 
     @Override

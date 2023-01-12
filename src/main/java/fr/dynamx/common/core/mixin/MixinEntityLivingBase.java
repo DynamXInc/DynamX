@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 /**
  * Patches the world raytrace to raytrace on dynamx blocks
  */
-@Mixin(EntityLivingBase.class)
+@Mixin(value = EntityLivingBase.class, remap = MixinChunk.REMAP)
 public abstract class MixinEntityLivingBase {
     /**
      * @author Aym'

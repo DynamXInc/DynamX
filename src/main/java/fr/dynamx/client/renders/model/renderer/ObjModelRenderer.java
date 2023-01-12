@@ -41,7 +41,7 @@ import static fr.dynamx.common.DynamXMain.log;
  */
 public class ObjModelRenderer {
     @Getter
-    private final ResourceLocation location;
+    private final ObjModelPath location;
     @Getter
     private final List<ObjObjectRenderer> objObjects;
     @Getter
@@ -56,7 +56,7 @@ public class ObjModelRenderer {
     @Setter
     private Vector4f modelColor = new Vector4f(1,1,1,1);
 
-    public ObjModelRenderer(ResourceLocation location, List<ObjObjectRenderer> objObjects, Map<String, Material> materials, @Nullable IModelTextureVariantsSupplier textureVariants) {
+    protected ObjModelRenderer(ObjModelPath location, List<ObjObjectRenderer> objObjects, Map<String, Material> materials, @Nullable IModelTextureVariantsSupplier textureVariants) {
         this.location = location;
         this.objObjects = objObjects;
         this.materials = materials;
@@ -71,9 +71,9 @@ public class ObjModelRenderer {
             objModelData.getObjObjects().forEach(ObjObjectData -> {
                 objObjects.add(new ObjObjectRenderer(ObjObjectData));
             });
-            return new ObjModelRenderer(objModelPath.getModelPath(), objObjects, objModelData.getMaterials(), textureVariants);
+            return new ObjModelRenderer(objModelPath, objObjects, objModelData.getMaterials(), textureVariants);
         } catch (Exception e) {
-            DynamXErrorManager.addError(textureVariants != null ? textureVariants.getPackName() : "Non-pack model", DynamXErrorManager.MODEL_ERRORS, "obj_error", ErrorLevel.HIGH, objModelPath.toString(), "", e);
+            DynamXErrorManager.addError(textureVariants != null ? textureVariants.getPackName() : "Non-pack model", DynamXErrorManager.MODEL_ERRORS, "obj_error", ErrorLevel.HIGH, objModelPath.getModelPath().toString(), "", e);
         }
         return null;
     }
@@ -101,7 +101,7 @@ public class ObjModelRenderer {
                 object.createList(this, null, null, false);
             }
         } catch (Exception e) {
-            DynamXErrorManager.addError(textureVariants != null ? textureVariants.getPackName() : "Non-pack model", DynamXErrorManager.MODEL_ERRORS, "obj_error", ErrorLevel.HIGH, getLocation().toString(), (step == null ? null : step.getObjObjectData().getName()), e);
+            DynamXErrorManager.addError(textureVariants != null ? textureVariants.getPackName() : "Non-pack model", DynamXErrorManager.MODEL_ERRORS, "obj_error", ErrorLevel.HIGH, getLocation().getModelPath().toString(), (step == null ? null : step.getObjObjectData().getName()), e);
         }
     }
 

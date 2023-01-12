@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * Patches the world raytrace to raytrace on dynamx blocks
  */
-@Mixin(World.class)
+@Mixin(value = World.class, remap = MixinChunk.REMAP)
 public abstract class MixinWorld {
     @Shadow
     public abstract World init();

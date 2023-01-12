@@ -3,7 +3,6 @@ package fr.dynamx.common.contentpack.loader;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.INamedObject;
-import fr.dynamx.api.contentpack.object.IShapeContainer;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
@@ -11,7 +10,6 @@ import fr.dynamx.api.contentpack.registry.SubInfoTypeEntry;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.sync.PackSyncHandler;
 import fr.dynamx.utils.errors.DynamXErrorManager;
-import net.minecraftforge.fml.common.ProgressManager;
 
 import javax.annotation.Nullable;
 import java.io.BufferedReader;

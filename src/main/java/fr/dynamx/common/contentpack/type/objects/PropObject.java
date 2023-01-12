@@ -72,7 +72,7 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
 
     public PropObject(String packName, String fileName) {
         super(packName, fileName);
-        DynamXErrorManager.addPackError(getPackName(), "deprecated_prop", ErrorLevel.LOW, fileName, "Props should now be declared in the corresponding block_" + getName() + ".dynx file");
+        DynamXErrorManager.addPackError(getPackName(), "deprecated_prop_format", ErrorLevel.LOW, fileName, "Props should now be declared in the corresponding block_" + getName() + ".dynx file");
         owner = null;
         this.itemIcon = "Prop";
     }
@@ -129,9 +129,9 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
 
     @Override
     public boolean postLoad(boolean hot) {
-        if (owner == null) {
-            super.postLoad(hot);
-        } else {
+        if(!super.postLoad(hot))
+            return false;
+        if (owner != null) {
             compoundCollisionShape = owner.compoundCollisionShape;
             for (MutableBoundingBox blockBox : owner.getCollisionBoxes()) {
                 MutableBoundingBox propBox = new MutableBoundingBox(blockBox);

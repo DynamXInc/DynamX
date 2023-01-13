@@ -6,6 +6,7 @@ import fr.dynamx.common.network.VanillaNetworkHandler;
 import fr.dynamx.server.network.udp.ServerIPAdressRetriever;
 import fr.dynamx.server.network.udp.UdpServerConnectionHandler;
 import fr.dynamx.server.network.udp.UdpServerNetworkHandler;
+import fr.dynamx.utils.DynamXConfig;
 import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nullable;
@@ -16,6 +17,7 @@ public class DynamXServerNetworkSystem implements IDnxNetworkSystem {
     private ServerIPAdressRetriever serverIPAdressRetriever;
 
     public DynamXServerNetworkSystem(EnumNetworkType networkType) {
+        System.out.println("START NET OF TYPE " + networkType + " " + DynamXConfig.useUdp);
         VANILLA_NETWORK = new VanillaNetworkHandler();
         switch (networkType) {
             case VANILLA_TCP:

@@ -78,5 +78,7 @@ public class DynamXConfig {
         ignoreDangerousTerrainErrors = cfg.get("Debug", "IgnoreDangerousTerrainErrors", false, "Will try to prevent the game from crashing when there is a weird error in the terrain. Only enable this if you want server stability.").getBoolean();
         disableSSLCertification = cfg.get("Debug", "DisableSSLVerification", false, "Disables ssl certificates for dynamx.fr, may be a security breach for your computer, DO NOT disable it if you don't know what you are doing").getBoolean();
         cfg.save();
+
+        System.out.println("CONFIG IS " + useUdp + " " + udpDebug);
     }
 }

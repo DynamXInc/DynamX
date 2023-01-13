@@ -18,9 +18,6 @@ public class MaterialVariantsInfo<T extends ISubInfoTypeOwner<T>> extends SubInf
     private String baseMaterial = "Default";
     @PackFileProperty(configNames = "Variants", defaultValue = "\"DynamX1 DynamX2\"")
     private String[] texturesArray;
-    /* todo use @Getter
-    @PackFileProperty(configNames = "ItemIcons", required = false, defaultValue = "\"Default DynamX1 DynamX2\"")
-    private String[] itemIcons;*/
     @Getter
     private final Map<Byte, TextureVariantData> variantsMap = new HashMap<>();
 

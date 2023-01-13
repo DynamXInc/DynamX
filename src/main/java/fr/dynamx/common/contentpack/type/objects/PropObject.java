@@ -1,5 +1,6 @@
 package fr.dynamx.common.contentpack.type.objects;
 
+import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.math.Vector3f;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
@@ -161,6 +162,11 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
     @Override
     public <U extends InteractivePart<?, ?>> List<U> getInteractiveParts() {
         return Collections.emptyList();
+    }
+
+    @Override
+    public CompoundCollisionShape getPhysicsCollisionShape() {
+        return compoundCollisionShape;
     }
 
     @Override

@@ -5,6 +5,7 @@ import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.part.BasePart;
+import fr.dynamx.common.network.sync.variables.NetworkActivityTracker;
 import fr.dynamx.client.camera.CameraSystem;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.parts.PartSeat;
@@ -75,7 +76,7 @@ public class ClientDebugSystem {
                 }
             }
 
-            if (MC.world != null && DynamXContext.getPhysicsWorld(MC.world) != null) {
+            if (enableDebugDrawing && MC.world != null && DynamXContext.getPhysicsWorld(MC.world) != null) {
                 QuaternionPool.openPool();
                 Vector3fPool.openPool();
                 curRigidBodyStatesIndex++;
@@ -125,6 +126,9 @@ public class ClientDebugSystem {
                 }
             } else if (!physicsTicks.isEmpty())
                 physicsTicks.clear();
+
+            if(DynamXDebugOptions.FULL_NETWORK_DEBUG.isActive())
+                NetworkActivityTracker.drawNetworkActivity(MC.fontRenderer, 10);
         }
     }
 

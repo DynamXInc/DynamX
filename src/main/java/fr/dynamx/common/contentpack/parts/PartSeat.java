@@ -110,15 +110,15 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
                             if (!door.isEnabled() || doorContainer.getDoors().isDoorOpened(door.getId())) {
                                 boolean didMount = mount(vehicleEntity, seats, player);
                                 if (didMount) {
-                                    vehicleEntity.getModuleByType(DoorsModule.class).setDoorState(door.getId(), DoorsModule.DoorState.CLOSE);
+                                    vehicleEntity.getModuleByType(DoorsModule.class).setDoorState(door.getId(), DoorsModule.DoorState.CLOSING);
                                 }
                                 return didMount;
                             } else {
                                 return door.interact(vehicleEntity, player);
                             }
                         }
-                    } else
-                        DynamXMain.log.error("Cannot mount : door not attached : " + linkedDoor);
+                    } //else
+                        //DynamXMain.log.error("Cannot mount : player mounting : " + linkedDoor);
                 } else
                     DynamXMain.log.error("Cannot mount : part door not found : " + linkedDoor);
             }
@@ -128,12 +128,12 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
         return false;
     }
 
-    private boolean mount(BaseVehicleEntity<?> vehicleEntity, ISeatsModule seats, EntityPlayer player) {
-        if (seats.getSeatToPassengerMap().containsValue(player)) {
+    public boolean mount(BaseVehicleEntity<?> vehicleEntity, ISeatsModule seats, Entity entity) {
+        if (seats.getSeatToPassengerMap().containsValue(entity)) {
             return false; //Player on another seat
         }
-        seats.getSeatToPassengerMap().put(this, player);
-        if (!player.startRiding(vehicleEntity, false)) //something went wrong : dismount
+        seats.getSeatToPassengerMap().put(this, entity);
+        if (!entity.startRiding(vehicleEntity, false)) //something went wrong : dismount
         {
             seats.getSeatToPassengerMap().remove(this);
             return false;

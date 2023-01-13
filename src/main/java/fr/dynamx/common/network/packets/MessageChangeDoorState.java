@@ -3,8 +3,6 @@ package fr.dynamx.common.network.packets;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.network.EnumNetworkType;
 import fr.dynamx.api.network.IDnxPacket;
-import fr.dynamx.common.DynamXMain;
-import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
 import io.netty.buffer.ByteBuf;
@@ -44,18 +42,9 @@ public class MessageChangeDoorState implements IDnxPacket, IMessageHandler<Messa
     @Override
     public IMessage onMessage(MessageChangeDoorState message, MessageContext ctx) {
         BaseVehicleEntity<?> vehicleEntity = (BaseVehicleEntity<?>) ctx.getServerHandler().player.getEntityWorld().getEntityByID(message.vehicleID);
-        //System.out.println(vehicleEntity);
         if (vehicleEntity != null) {
-            IModuleContainer.ISeatsContainer seatsContainer = (IModuleContainer.ISeatsContainer) vehicleEntity;
             IModuleContainer.IDoorContainer doorContainer = (IModuleContainer.IDoorContainer) vehicleEntity;
-            PartSeat seat = seatsContainer.getSeats().getRidingSeat(ctx.getServerHandler().player);
-            if (seat == null)
-                return null;
-            if (seat.getLinkedPartDoor(vehicleEntity) == null) {
-                DynamXMain.log.warn("No linked door for seat " + seat.getPartName());
-                return null;
-            }
-            doorContainer.getDoors().setDoorState(message.doorId != -1 ? message.doorId : seat.getLinkedPartDoor(vehicleEntity).getId(), message.doorState);
+            doorContainer.getDoors().setDoorState(message.doorId, message.doorState);
         }
         return null;
     }

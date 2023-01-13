@@ -200,7 +200,7 @@ public class BlockCollisionBehaviors {
         public void addBlockCollision(TerrainBoxConstructor terrainBoxConstructor, TerrainBoxBuilder boxBuilder, TerrainCollisionsCalculator.TerrainCursor cursor, World world, BlockPos at, IBlockState ofBlock, EnumFacing.Axis axis) {
             TileEntity te = world.getTileEntity(at);
             if (te instanceof TEDynamXBlock)
-                terrainBoxConstructor.addCustomShapedElement(new DynamXBlockTerrainElement(cursor.dx, cursor.dy, cursor.dz, at, ((TEDynamXBlock) te).getRelativeTranslation(), ((TEDynamXBlock) te).getCollidableRotation()));
+                terrainBoxConstructor.addCustomShapedElement(new DynamXBlockTerrainElement(cursor.dx, cursor.dy, cursor.dz, at));
         }
 
         @Override

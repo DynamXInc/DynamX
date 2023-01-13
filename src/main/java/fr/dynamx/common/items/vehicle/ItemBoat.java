@@ -15,6 +15,6 @@ public class ItemBoat extends ItemModularEntity {
 
     @Override
     public BaseVehicleEntity<?> getSpawnEntity(World worldIn, EntityPlayer playerIn, Vector3f pos, float spawnRotation, int metadata) {
-        return new BoatEntity<>(getInfo().getFullName(), worldIn, pos, spawnRotation, metadata);
+        return new BoatEntity<>(getInfo().getFullName(), worldIn, pos.subtractLocal(0,1,0), spawnRotation, metadata);
     }
 }

@@ -1,25 +1,22 @@
 package fr.dynamx.client.handlers;
 
-import fr.dynamx.api.physics.BulletShapeType;
-import fr.dynamx.api.physics.EnumBulletShapeType;
+import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.client.camera.CameraSystem;
 import fr.dynamx.client.handlers.hud.CarController;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.contentpack.parts.PartDoor;
+import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.common.entities.modules.MovableModule;
 import fr.dynamx.common.entities.modules.movables.PickingObjectHelper;
 import fr.dynamx.common.items.tools.ItemSlopes;
 import fr.dynamx.common.items.tools.ItemWrench;
+import fr.dynamx.common.network.packets.MessageChangeDoorState;
 import fr.dynamx.common.network.packets.MessageDebugRequest;
 import fr.dynamx.common.network.packets.MessagePickObject;
-import fr.dynamx.common.network.packets.MessagePlayerMountVehicle;
 import fr.dynamx.common.physics.player.WalkingOnPlayerController;
-import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.DynamXConstants;
-import fr.dynamx.utils.DynamXUtils;
-import fr.dynamx.utils.debug.Profiler;
-import fr.dynamx.utils.physics.PhysicsRaycastResult;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
@@ -30,8 +27,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
-
-import java.util.function.Predicate;
 
 import static fr.dynamx.client.handlers.ClientEventHandler.MC;
 
@@ -90,6 +85,18 @@ public class KeyHandler {
                     } else {
                         DynamXContext.getNetwork().sendToServer(new MessagePickObject(new MovableModule.Action(MovableModule.EnumAction.UNPICK)));
                     }
+                }
+            }
+
+            if (CarController.toggleLockDoor.isPressed()) {
+                Entity entity = mc.player.getRidingEntity();
+                if (entity instanceof BaseVehicleEntity && entity instanceof IModuleContainer.IDoorContainer && ((IModuleContainer.IDoorContainer) entity).getDoors() != null) {
+                    PartSeat seat = ((IModuleContainer.ISeatsContainer) entity).getSeats().getRidingSeat(MC.player);
+                    DoorsModule doors = ((IModuleContainer.IDoorContainer) entity).getDoors();
+                    PartDoor door = seat.getLinkedPartDoor((BaseVehicleEntity<?>) entity);
+                    if (door == null)
+                        return;
+                    DynamXContext.getNetwork().sendToServer(new MessageChangeDoorState((BaseVehicleEntity<?>) entity, doors.getInverseCurrentState(door.getId()), door.getId()));
                 }
             }
 
@@ -168,7 +175,7 @@ public class KeyHandler {
                 }
             }
             //Door interact
-            if (Mouse.isButtonDown(1)) {
+            /*if (Mouse.isButtonDown(1)) {
                 if (!justPressed) {
                     justPressed = true;
                     Predicate<EnumBulletShapeType> predicateShape = p -> !p.isTerrain() && !p.isPlayer() && p != EnumBulletShapeType.VEHICLE;
@@ -191,7 +198,7 @@ public class KeyHandler {
                 }
             } else {
                 justPressed = false;
-            }
+            }*/
         }
     }
 }

@@ -31,19 +31,6 @@ public class VehicleEntityProperties {
     }
 
     /**
-     * Float properties stored in all {@link fr.dynamx.common.entities.modules.WheelsModule}s <br>
-     * One wheel has all of these properties <br>
-     * Currently used for debug except for SKIDINFO
-     */
-    public enum EnumWheelProperties {
-        SKIDINFO,
-        FRICTION,
-        PACEJKALONGITUDINAL,
-        PACEJKALATERAL,
-        ROTATIONDELTA
-    }
-
-    /**
      * Float properties stored in all {@link fr.dynamx.common.entities.modules.EngineModule}s <br>
      * Describes the engine state
      */
@@ -84,17 +71,6 @@ public class VehicleEntityProperties {
     }
 
     /**
-     * Returns the index of a wheel property in the wheelProperties array, for {@link fr.dynamx.common.entities.modules.WheelsModule}
-     *
-     * @param partIndex           The wheel id
-     * @param enumWheelProperties The wheel property
-     * @return The index of the property in the array containing all wheel's properties
-     */
-    public static int getPropertyIndex(int partIndex, EnumWheelProperties enumWheelProperties) {
-        return EnumWheelProperties.values().length * partIndex + enumWheelProperties.ordinal();
-    }
-
-    /**
      * Adds a visual property, each wheel of each {@link fr.dynamx.common.entities.modules.WheelsModule} will contain this property, and it will be automatically synced over the network
      *
      * @param name              The property name, should be unique (add your modid)
@@ -107,20 +83,6 @@ public class VehicleEntityProperties {
                 throw new IllegalArgumentException("Visual property with name " + name + " already exists !");
         }
         return EnumHelper.addEnum(EnumVisualProperties.class, name, new Class[]{byte.class}, interpolationType);
-    }
-
-    /**
-     * Adds a wheel property, each wheel of each {@link fr.dynamx.common.entities.modules.WheelsModule} will contain this property, and it will be automatically synced over the network
-     *
-     * @param name The property name, should be unique (add your modid)
-     * @return The property instance
-     */
-    public static EnumWheelProperties addWheelProperty(String name) {
-        for (EnumWheelProperties prop : EnumWheelProperties.values()) {
-            if (prop.name().equalsIgnoreCase(name))
-                throw new IllegalArgumentException("Wheel property with name " + name + " already exists !");
-        }
-        return EnumHelper.addEnum(EnumWheelProperties.class, name, new Class[0]);
     }
 
     /**

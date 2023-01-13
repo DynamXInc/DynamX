@@ -14,6 +14,7 @@ import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.WheelsModule;
 import lombok.Getter;
 import lombok.Setter;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
@@ -92,21 +93,21 @@ public class VehicleEntityEvent extends Event {
      */
     public static class PlayerMount extends VehicleEntityEvent {
         @Getter
-        private final EntityPlayer player;
+        private final Entity entityMounted;
         @Getter
         private final ISeatsModule module;
         @Getter
         private final PartSeat seat;
 
         /**
-         * @param player        the player who mounted the vehicle
+         * @param entityMounted the player who mounted the vehicle
          * @param vehicleEntity the vehicle that the player mounted
          * @param module        the seats module, calling this event
          * @param seat          the seat that the player mounted
          */
-        public PlayerMount(Side side, EntityPlayer player, BaseVehicleEntity<?> vehicleEntity, ISeatsModule module, PartSeat seat) {
+        public PlayerMount(Side side, Entity entityMounted, BaseVehicleEntity<?> vehicleEntity, ISeatsModule module, PartSeat seat) {
             super(side, vehicleEntity);
-            this.player = player;
+            this.entityMounted = entityMounted;
             this.module = module;
             this.seat = seat;
         }
@@ -115,23 +116,23 @@ public class VehicleEntityEvent extends Event {
     /**
      * Called on client and server sides when a entity has dismounted an entity
      */
-    public static class PlayerDismount extends VehicleEntityEvent {
+    public static class EntityDismount extends VehicleEntityEvent {
         @Getter
-        private final EntityPlayer player;
+        private final Entity entityDismounted;
         @Getter
         private final ISeatsModule module;
         @Getter
         private final PartSeat seat;
 
         /**
-         * @param player        the player who dismounted the vehicle
-         * @param vehicleEntity the vehicle that the player dismounted
-         * @param module        the seats module, calling this event
-         * @param seat          the seat that the player dismounted
+         * @param entityDismounted the entity who dismounted the vehicle
+         * @param vehicleEntity    the vehicle that the player dismounted
+         * @param module           the seats module, calling this event
+         * @param seat             the seat that the player dismounted
          */
-        public PlayerDismount(Side side, EntityPlayer player, BaseVehicleEntity<?> vehicleEntity, ISeatsModule module, PartSeat seat) {
+        public EntityDismount(Side side, Entity entityDismounted, BaseVehicleEntity<?> vehicleEntity, ISeatsModule module, PartSeat seat) {
             super(side, vehicleEntity);
-            this.player = player;
+            this.entityDismounted = entityDismounted;
             this.module = module;
             this.seat = seat;
         }

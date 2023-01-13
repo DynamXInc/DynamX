@@ -14,12 +14,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public interface IPropulsionModule<P extends AbstractEntityPhysicsHandler<?, ?>> extends IPhysicsModule<P> {
     IPropulsionHandler getPhysicsHandler();
 
-    /**
-     * Used by the render and by the sync code <br>
-     * Currently hard-coded
-     */
-    float[] getPropulsionProperties();
-
     @SideOnly(Side.CLIENT)
     void spawnPropulsionParticles(RenderPhysicsEntity<?> render, float partialTicks);
 }

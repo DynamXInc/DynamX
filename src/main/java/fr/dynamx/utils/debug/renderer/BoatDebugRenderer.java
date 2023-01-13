@@ -27,7 +27,7 @@ public class BoatDebugRenderer {
         }
 
         @Override
-        public void render(BaseVehicleEntity<?> entity, double x, double y, double z, float partialTicks) {
+        public void render(BaseVehicleEntity<?> entity, RenderPhysicsEntity<BaseVehicleEntity<?>> renderer, double x, double y, double z, float partialTicks) {
             GlStateManager.pushMatrix();
             GlStateManager.disableTexture2D();
             GlStateManager.enableAlpha();

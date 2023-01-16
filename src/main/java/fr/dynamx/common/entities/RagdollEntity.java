@@ -8,15 +8,12 @@ import fr.dynamx.api.entities.modules.AttachModule;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.PhysicsEntityEvent;
+import fr.dynamx.api.network.sync.AttachedBodySynchronizer;
 import fr.dynamx.common.network.sync.variables.EntityTransformsVariable;
-import fr.dynamx.api.network.sync.SynchronizedEntityVariableRegistry;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.entities.modules.MovableModule;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
-import fr.dynamx.common.network.sync.vars.AttachBodyPhysicsState;
-import fr.dynamx.common.network.sync.vars.AttachedBodySynchronizedVariable;
-import fr.dynamx.common.network.sync.vars.EntityPhysicsState;
 import fr.dynamx.common.physics.entities.EntityPhysicsHandler;
 import fr.dynamx.common.physics.entities.EnumRagdollBodyPart;
 import fr.dynamx.common.physics.entities.RagdollPhysics;
@@ -51,7 +48,7 @@ import java.util.List;
 import java.util.Map;
 
 @SynchronizedEntityVariable.SynchronizedPhysicsModule()
-public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> implements AttachedBodySynchronizedVariable.AttachedBodySynchronizer {
+public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> implements AttachedBodySynchronizer {
     private static final DataParameter<String> SKIN = EntityDataManager.createKey(RagdollEntity.class, DataSerializers.STRING);
 
     public static final Vector3f HEAD_BOX_SIZE = new Vector3f(0.25f, 0.25f, 0.25f);
@@ -231,11 +228,6 @@ public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> imple
         }
         handler.onRemovedFromWorld();
         super.onRemovedFromWorld();
-    }
-
-    @Override
-    public EntityPhysicsState createStateSnapshot() {
-        return new AttachBodyPhysicsState(this);
     }
 
     @Override

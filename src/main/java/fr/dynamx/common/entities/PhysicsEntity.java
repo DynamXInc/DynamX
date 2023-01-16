@@ -7,8 +7,7 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.modules.IEntityJoints;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.events.PhysicsEntityEvent;
-import fr.dynamx.common.network.sync.variables.EntityPosVariable;
-import fr.dynamx.common.network.sync.PhysicsEntitySynchronizer;
+import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariableRegistry;
 import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.IPhysicsWorld;
@@ -16,7 +15,8 @@ import fr.dynamx.api.physics.entities.EntityPhysicsState;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.items.DynamXItemRegistry;
-import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
+import fr.dynamx.common.network.sync.PhysicsEntitySynchronizer;
+import fr.dynamx.common.network.sync.variables.EntityPosVariable;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.player.WalkingOnPlayerController;
 import fr.dynamx.common.physics.terrain.PhysicsEntityTerrainLoader;
@@ -147,14 +147,6 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
 
     public void registerSynchronizedVariables() {
         SynchronizedEntityVariableRegistry.addVarsOf(this.getSynchronizer(), this);
-    }
-
-    /**
-     * Captures the state of this entity at this instant <br>
-     * Permits interpolation of position and rotation on client side
-     */
-    public fr.dynamx.common.network.sync.vars.EntityPhysicsState createStateSnapshot() {
-        return new fr.dynamx.common.network.sync.vars.EntityPhysicsState(this);
     }
 
     /**

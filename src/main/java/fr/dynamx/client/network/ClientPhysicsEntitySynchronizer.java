@@ -4,7 +4,10 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.IVehicleController;
-import fr.dynamx.api.network.sync.*;
+import fr.dynamx.api.network.sync.ClientEntityNetHandler;
+import fr.dynamx.api.network.sync.EntityVariable;
+import fr.dynamx.api.network.sync.SimulationHolder;
+import fr.dynamx.api.network.sync.SyncTarget;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.entities.BaseVehicleEntity;
@@ -13,7 +16,6 @@ import fr.dynamx.common.network.packets.MessageWalkingPlayer;
 import fr.dynamx.common.network.sync.MPPhysicsEntitySynchronizer;
 import fr.dynamx.common.network.sync.MessagePhysicsEntitySync;
 import fr.dynamx.common.network.sync.variables.NetworkActivityTracker;
-import fr.dynamx.common.network.sync.vars.EntityPhysicsState;
 import fr.dynamx.utils.debug.Profiler;
 import fr.dynamx.utils.optimization.PooledHashMap;
 import lombok.Getter;
@@ -21,12 +23,11 @@ import lombok.Setter;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.fml.relauncher.Side;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ClientPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends MPPhysicsEntitySynchronizer<T> implements ClientEntityNetHandler {
     private int ticksBeforeNextSync, skippedPacketsCount;
-
-    private final Map<Integer, EntityPhysicsState> states = new HashMap<>();
 
     private final List<IVehicleController> controllers = new ArrayList<>();
 
@@ -80,8 +81,6 @@ public class ClientPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends
 
         if (getSimulationHolder().ownsPhysics(Side.CLIENT))
             sendVariables();
-        if (DynamXMain.proxy.ownsSimulation(entity))
-            states.put(ClientPhysicsSyncManager.simulationTime, entity.createStateSnapshot());
     }
 
     protected void sendVariables() {
@@ -115,7 +114,6 @@ public class ClientPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends
             }
             setSimulationHolder(SimulationHolder.DRIVER, player);
             ClientPhysicsSyncManager.simulationTime = 0;
-            states.clear();
         } else {
             setSimulationHolder(SimulationHolder.OTHER_CLIENT, player);
         }
@@ -130,7 +128,6 @@ public class ClientPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends
         if (removeControllers && player.isUser()) {
             controllers.clear();
         }
-        states.clear();
     }
 
     @Override

@@ -234,12 +234,6 @@ public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> imple
     }
 
     @Override
-    public void registerSynchronizedVariables() {
-        super.registerSynchronizedVariables();
-        SynchronizedEntityVariableRegistry.addVarsOf(this.getSynchronizer(), this);
-    }
-
-    @Override
     public EntityPhysicsState createStateSnapshot() {
         return new AttachBodyPhysicsState(this);
     }

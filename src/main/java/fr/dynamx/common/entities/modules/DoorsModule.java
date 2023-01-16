@@ -10,17 +10,15 @@ import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.entities.modules.AttachModule;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
+import fr.dynamx.api.network.sync.AttachedBodySynchronizer;
 import fr.dynamx.common.network.sync.variables.EntityMapVariable;
 import fr.dynamx.common.network.sync.variables.EntityTransformsVariable;
 import fr.dynamx.api.network.sync.SynchronizationRules;
 import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.EnumBulletShapeType;
 import fr.dynamx.client.ClientProxy;
-import fr.dynamx.client.renders.RenderPhysicsEntity;
-import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.parts.PartDoor;
@@ -28,7 +26,6 @@ import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.network.packets.MessageChangeDoorState;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
-import fr.dynamx.common.network.sync.vars.AttachedBodySynchronizedVariable;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.joints.EntityJoint;
 import fr.dynamx.common.physics.joints.JointHandler;
@@ -36,7 +33,6 @@ import fr.dynamx.common.physics.joints.JointHandlerRegistry;
 import fr.dynamx.common.physics.utils.RigidBodyTransform;
 import fr.dynamx.common.physics.utils.SynchronizedRigidBodyTransform;
 import fr.dynamx.utils.DynamXConstants;
-import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.QuaternionPool;
@@ -44,18 +40,16 @@ import fr.dynamx.utils.optimization.Vector3fPool;
 import fr.dynamx.utils.physics.DynamXPhysicsHelper;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @SynchronizedEntityVariable.SynchronizedPhysicsModule()
 public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<?, ?>>, AttachModule.AttachToSelfModule,
         IPhysicsModule.IEntityPosUpdateListener, IPhysicsModule.IPhysicsUpdateListener,
-        AttachedBodySynchronizedVariable.AttachedBodySynchronizer {
+        AttachedBodySynchronizer {
     public static final ResourceLocation JOINT_NAME = new ResourceLocation(DynamXConstants.ID, "door_module");
 
     static {

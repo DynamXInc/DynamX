@@ -85,9 +85,9 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IInf
      * @param material  The block material
      * @param modid     The mod owning this block, used to register the block
      * @param blockName The name of the block
-     * @param model     The obj model of the block, must be under "dynamxmod:models/<model>"
+     * @param model     The obj model of the block "namespace:resourceName.obj". The default namespace is "dynamxmod". The model file must be under "namespace:models/resourceName.obj"
      */
-    public DynamXBlock(Material material, String modid, String blockName, ResourceLocation model) {
+    public DynamXBlock(Material material, String modid, String blockName, String model) {
         super(material);
         if (modid.contains("builtin_mod_")) { //Backward-compatibility
             blockObjectInfo = (T) DynamXObjectLoaders.BLOCKS.addBuiltinObject(this, modid, blockName);
@@ -95,7 +95,7 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IInf
         } else {
             blockObjectInfo = (T) DynamXObjectLoaders.BLOCKS.addBuiltinObject(this, "dynx." + modid, blockName);
         }
-        blockObjectInfo.setModel(model);
+        blockObjectInfo.setModel(RegistryNameSetter.getDynamXModelResourceLocation(model));
         blockObjectInfo.setDescription("Builtin " + modid + "'s block");
         textureNum = 1;
         isObj = blockObjectInfo.isObj();
@@ -189,9 +189,10 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IInf
 
     @Nullable
     protected RayTraceResult rayTrace(BlockPos pos, Vec3d start, Vec3d end, AxisAlignedBB boundingBox) {
-        Vec3d vec3d = start.subtract(pos.getX(), pos.getY(), pos.getZ());
+        /*Vec3d vec3d = start.subtract(pos.getX(), pos.getY(), pos.getZ());
         Vec3d vec3d1 = end.subtract(pos.getX(), pos.getY(), pos.getZ());
-        return !intersects(boundingBox, vec3d, vec3d1) ? null : new RayTraceResult(new Vec3d(0, 0, 0), EnumFacing.DOWN, pos);
+        return !intersects(boundingBox, vec3d, vec3d1) ? null : new RayTraceResult(new Vec3d(0, 0, 0), EnumFacing.DOWN, pos);*/
+        return super.rayTrace(pos, start, end, boundingBox);
     }
 
     public static boolean intersects(AxisAlignedBB boundingBox, Vec3d min, Vec3d max) {

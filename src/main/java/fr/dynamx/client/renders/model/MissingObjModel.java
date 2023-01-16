@@ -22,26 +22,10 @@ import java.util.HashMap;
  * Missing obj model indicating errors
  */
 public class MissingObjModel extends ObjModelRenderer {
-    private static final AxisAlignedBB BOX = new AxisAlignedBB(-1, -1, -1, 1, 1, 1);
-    private static final Vector3f zero = new Vector3f();
     private static final ObjObjectData emptyPart = new ObjObjectData("empty") {
         @Override
         public String getName() {
             return "empty";
-        }
-
-        @Override
-        public Vector3f getCenter() {
-            return zero;
-        }
-
-        @Override
-        public void setCenter(Vector3f center) {
-        }
-
-        @Override
-        public Mesh getMesh() {
-            return null;
         }
     };
 
@@ -49,7 +33,13 @@ public class MissingObjModel extends ObjModelRenderer {
 
     public MissingObjModel() {
         super(new ObjModelPath(DynamXModelRegistry.BASE_PACKINFO, new ResourceLocation(DynamXConstants.ID, "obj/missing.obj")), new ArrayList<>(), new HashMap<>(), null);
-        ObjObjectRenderer objObjectRenderer = new ObjObjectRenderer(emptyPart);
+        emptyPart.setCenter(new Vector3f());
+        ObjObjectRenderer objObjectRenderer = new ObjObjectRenderer(emptyPart) {
+            @Override
+            public void render(ObjModelRenderer model, byte textureVariantID) {
+                MissingObjModel.this.renderModel(textureVariantID); //take care, MissingObjModel.this != model
+            }
+        };
         getObjObjects().add(objObjectRenderer);
         emptyPartRenderer = objObjectRenderer;
     }

@@ -172,9 +172,9 @@ public class ObjObjectRenderer {
                     (material.transparency != 1 && MinecraftForgeClient.getRenderPass() == 1) ||
                     (material.transparency == 1 && MinecraftForgeClient.getRenderPass() == 0)) {
                 GlStateManager.color(
-                        material.diffuseColor.x * objectColor.x,
-                        material.diffuseColor.y * objectColor.y,
-                        material.diffuseColor.z * objectColor.z,
+                        material.ambientColor.x * objectColor.x,
+                        material.ambientColor.y * objectColor.y,
+                        material.ambientColor.z * objectColor.z,
                         material.transparency * objectColor.w);
                 Material.IndexPair indexPair = pair.getValue();
                 GL11.glDrawElements(GL11.GL_TRIANGLES, (indexPair.getFinalIndex() - indexPair.getStartIndex()), GL11.GL_UNSIGNED_INT,

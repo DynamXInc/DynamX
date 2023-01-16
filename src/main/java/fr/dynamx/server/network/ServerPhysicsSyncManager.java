@@ -2,7 +2,6 @@ package fr.dynamx.server.network;
 
 import fr.dynamx.api.network.sync.EntityVariable;
 import fr.dynamx.common.entities.PhysicsEntity;
-import fr.dynamx.common.network.sync.vars.EntityPhysicsState;
 import fr.dynamx.utils.debug.Profiler;
 import fr.dynamx.utils.optimization.PooledHashMap;
 import net.minecraft.entity.player.EntityPlayer;

@@ -1,9 +1,9 @@
 package fr.dynamx.common.network.sync.variables;
 
+import fr.dynamx.api.network.sync.AttachedBodySynchronizer;
 import fr.dynamx.api.network.sync.SynchronizationRules;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.entities.PhysicsEntity;
-import fr.dynamx.common.network.sync.vars.AttachedBodySynchronizedVariable;
 import fr.dynamx.common.physics.utils.RigidBodyTransform;
 import fr.dynamx.common.physics.utils.SynchronizedRigidBodyTransform;
 import fr.dynamx.utils.debug.SyncTracker;
@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 public class EntityTransformsVariable extends ListeningEntityVariable<Map<Byte, RigidBodyTransform>> {
-    public EntityTransformsVariable(PhysicsEntity<?> entity, AttachedBodySynchronizedVariable.AttachedBodySynchronizer synchronizer) {
+    public EntityTransformsVariable(PhysicsEntity<?> entity, AttachedBodySynchronizer synchronizer) {
         super(((entityPositionDataSynchronizedEntityVariable, transforms) -> {
 //TODO INTPERPOLATION ETC :c
             if (entity.getSynchronizer().getSimulationHolder().isSinglePlayer()) {

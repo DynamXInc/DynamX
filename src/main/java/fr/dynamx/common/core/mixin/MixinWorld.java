@@ -36,36 +36,38 @@ public abstract class MixinWorld {
     public RayTraceResult rayTraceBlocks(Vec3d vec31, Vec3d vec32, boolean stopOnLiquid, boolean ignoreBlockWithoutBoundingBox, boolean returnLastUncollidableBlock) {
         if (!Double.isNaN(vec31.x) && !Double.isNaN(vec31.y) && !Double.isNaN(vec31.z)) {
             if (!Double.isNaN(vec32.x) && !Double.isNaN(vec32.y) && !Double.isNaN(vec32.z)) {
+                Vec3d rayTraceStart = new Vec3d(vec31.x, vec31.y, vec31.z);
                 int x = MathHelper.floor(vec32.x);
                 int y = MathHelper.floor(vec32.y);
                 int z = MathHelper.floor(vec32.z);
                 int x1 = MathHelper.floor(vec31.x);
                 int y1 = MathHelper.floor(vec31.y);
                 int z1 = MathHelper.floor(vec31.z);
-                AtomicReference<BlockPos> blockpos = new AtomicReference<>(new BlockPos(x1, y1, z1));
-                //System.out.println("First " +blockpos);
-                IBlockState iblockstate = this.getBlockState(blockpos.get());
+                BlockPos blockpos = new BlockPos(x1, y1, z1);
+                IBlockState iblockstate = this.getBlockState(blockpos);
                 Block block = iblockstate.getBlock();
-                //System.out.println("First " +block);
 
-                if ((!ignoreBlockWithoutBoundingBox || iblockstate.getCollisionBoundingBox((World) (Object) this, blockpos.get()) != Block.NULL_AABB) && block.canCollideCheck(iblockstate, stopOnLiquid)) {
-                    RayTraceResult raytraceresult = iblockstate.collisionRayTrace((World) (Object) this, blockpos.get(), vec31, vec32);
+                if ((!ignoreBlockWithoutBoundingBox || iblockstate.getCollisionBoundingBox((World) (Object) this, blockpos) != Block.NULL_AABB) && block.canCollideCheck(iblockstate, stopOnLiquid)) {
+                    RayTraceResult raytraceresult = iblockstate.collisionRayTrace((World) (Object) this, blockpos, vec31, vec32);
                     if (raytraceresult != null) {
                         return raytraceresult;
                     }
                 }
 
                 RayTraceResult raytraceresult2 = null;
-                AtomicReference<RayTraceResult> rayResult = new AtomicReference<>(null);
                 int k1 = 200;
 
+                RayTraceResult dynamXHit = null;
+                BlockPos dynamXHitPos = null;
                 while (k1-- >= 0) {
                     if (Double.isNaN(vec31.x) || Double.isNaN(vec31.y) || Double.isNaN(vec31.z)) {
                         return null;
                     }
 
                     if (x1 == x && y1 == y && z1 == z) {
-                        return returnLastUncollidableBlock ? raytraceresult2 : null;
+                        if(returnLastUncollidableBlock && raytraceresult2 != null)
+                            return getCloserHit(rayTraceStart, raytraceresult2, dynamXHit, dynamXHitPos);
+                        return dynamXHit != null ? new RayTraceResult(dynamXHit.hitVec.add(dynamXHitPos.getX(), dynamXHitPos.getY(), dynamXHitPos.getZ()), dynamXHit.sideHit, dynamXHitPos) : null;
                     }
 
                     boolean flag2 = true;
@@ -146,44 +148,46 @@ public abstract class MixinWorld {
                     x1 = MathHelper.floor(vec31.x) - (enumfacing == EnumFacing.EAST ? 1 : 0);
                     y1 = MathHelper.floor(vec31.y) - (enumfacing == EnumFacing.UP ? 1 : 0);
                     z1 = MathHelper.floor(vec31.z) - (enumfacing == EnumFacing.SOUTH ? 1 : 0);
-                    Vec3d vec3d = new Vec3d(x1, y1, z1);
-                    blockpos.set(new BlockPos(vec3d));
+                    blockpos = new BlockPos(x1, y1, z1);
 
-                    Chunk chunk = getChunk(blockpos.get());
+                    //Ray-trace DynamX blocks
+                    Chunk chunk = getChunk(blockpos);
                     DynamXChunkData capability = chunk.getCapability(DynamXChunkDataProvider.DYNAM_X_CHUNK_DATA_CAPABILITY, null);
-
-                    rayResult.set(null); //Ray-trace DynamX blocks
-                    for (Map.Entry<BlockPos, AxisAlignedBB> e : capability.getBlocksAABB().entrySet()) {
-                        RayTraceResult res = e.getValue().calculateIntercept(vec31, vec32);
-                        if (res != null) {
-                            rayResult.set(res);
-                            blockpos.set(e.getKey());
-                            break;
+                    if(dynamXHit == null) {
+                        for (Map.Entry<BlockPos, AxisAlignedBB> e : capability.getBlocksAABB().entrySet()) {
+                            RayTraceResult res = e.getValue().calculateIntercept(vec31, vec32);
+                            if (res != null) {
+                                dynamXHit = res;
+                                dynamXHitPos = e.getKey();
+                                break;
+                            }
+                        }
+                        //Remove outdated collision boxes
+                        if(dynamXHitPos != null) {
+                            IBlockState iblockstate1 = this.getBlockState(dynamXHitPos);
+                            Block block1 = iblockstate1.getBlock();
+                            if (!(block1 instanceof DynamXBlock)) {
+                                capability.getBlocksAABB().remove(dynamXHitPos);
+                                dynamXHit = null;
+                            }
                         }
                     }
 
-                    IBlockState iblockstate1 = this.getBlockState(blockpos.get());
+                    IBlockState iblockstate1 = this.getBlockState(blockpos);
                     Block block1 = iblockstate1.getBlock();
-                    if (rayResult.get() != null && !(block1 instanceof DynamXBlock)) {
-                        capability.getBlocksAABB().remove(blockpos.get());
-                    }
-                    if (!ignoreBlockWithoutBoundingBox || iblockstate1.getMaterial() == Material.PORTAL || iblockstate1.getCollisionBoundingBox((World) (Object) this, blockpos.get()) != Block.NULL_AABB) {
+                    if (!ignoreBlockWithoutBoundingBox || iblockstate1.getMaterial() == Material.PORTAL || iblockstate1.getCollisionBoundingBox((World) (Object) this, blockpos) != Block.NULL_AABB) {
                         if (block1.canCollideCheck(iblockstate1, stopOnLiquid)) {
-                            if (rayResult.get() == null) { //Don't re-raytrace DynamX blocks
-                                rayResult.set(iblockstate1.collisionRayTrace((World) (Object) this, blockpos.get(), vec31, vec32));
-                                if (rayResult.get() != null) {
-                                    return rayResult.get();
-                                }
-                            } else {
-                                return new RayTraceResult(rayResult.get().hitVec.add(blockpos.get().getX(), blockpos.get().getY(), blockpos.get().getZ()), rayResult.get().sideHit, blockpos.get());
-                            }
+                            RayTraceResult rayResult = iblockstate1.collisionRayTrace((World) (Object) this, blockpos, vec31, vec32);
+                            if(rayResult != null)
+                                return getCloserHit(rayTraceStart, rayResult, dynamXHit, dynamXHitPos);
                         } else {
-                            raytraceresult2 = new RayTraceResult(RayTraceResult.Type.MISS, vec31, enumfacing, blockpos.get());
+                            raytraceresult2 = new RayTraceResult(RayTraceResult.Type.MISS, vec31, enumfacing, blockpos);
                         }
                     }
                 }
-
-                return returnLastUncollidableBlock ? raytraceresult2 : null;
+                if(returnLastUncollidableBlock && raytraceresult2 != null)
+                    return getCloserHit(rayTraceStart, raytraceresult2, dynamXHit, dynamXHitPos);
+                return dynamXHit != null ? new RayTraceResult(dynamXHit.hitVec.add(dynamXHitPos.getX(), dynamXHitPos.getY(), dynamXHitPos.getZ()), dynamXHit.sideHit, dynamXHitPos) : null;
             } else {
                 return null;
             }
@@ -192,6 +196,14 @@ public abstract class MixinWorld {
         }
     }
 
+    private RayTraceResult getCloserHit(Vec3d rayTraceStart, RayTraceResult rayTraceResult, RayTraceResult dynamXHit, BlockPos dynamXHitPos) {
+        // If there is a DynamXhit, but Minecraft hit is closer
+        if(dynamXHit == null || rayTraceResult.hitVec.subtract(rayTraceStart).lengthSquared() < dynamXHit.hitVec.subtract(rayTraceStart).lengthSquared())
+            return rayTraceResult;
+        else //Mc's hit is farther, so DynamX hit is closer :)
+            return new RayTraceResult(dynamXHit.hitVec.add(dynamXHitPos.getX(), dynamXHitPos.getY(), dynamXHitPos.getZ()), dynamXHit.sideHit, dynamXHitPos);
+    }
+    
     @Shadow
     public IBlockState getBlockState(BlockPos pos) {
         throw new IllegalStateException("Mixin failed to shadow getBlockState()");

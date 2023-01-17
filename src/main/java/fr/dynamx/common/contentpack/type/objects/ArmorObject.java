@@ -3,7 +3,6 @@ package fr.dynamx.common.contentpack.type.objects;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
-import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
@@ -135,11 +134,12 @@ public class ArmorObject<T extends ArmorObject<?>> extends AbstractItemObject<T,
     }
 
     @Override
-    public void onComplete(boolean hotReload) {
-        if (hotReload && FMLCommonHandler.instance().getSide().isClient())
+    public boolean postLoad(boolean hot) {
+        if (hot && FMLCommonHandler.instance().getSide().isClient())
             getObjArmor().init(DynamXContext.getObjModelRegistry().getModel(getModel()));
         if (texturesArray != null)
             new MaterialVariantsInfo(this, texturesArray).appendTo(this);
+        return super.postLoad(hot);
     }
 
     @Override

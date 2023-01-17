@@ -1,7 +1,5 @@
 package fr.dynamx.client.handlers;
 
-import com.jme3.math.Quaternion;
-import com.jme3.math.Vector3f;
 import fr.aym.acsguis.api.ACsGuiApi;
 import fr.aym.acslib.ACsLib;
 import fr.aym.mps.ModProtectionSystem;
@@ -31,23 +29,17 @@ import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.errors.DynamXErrorManager;
-import fr.dynamx.utils.maths.DynamXGeometry;
-import fr.dynamx.utils.maths.DynamXMath;
-import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiMainMenu;
-import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.renderer.entity.RenderPlayer;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -61,7 +53,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.client.event.*;
@@ -69,7 +60,6 @@ import net.minecraftforge.client.event.sound.SoundLoadEvent;
 import net.minecraftforge.client.event.sound.SoundSetupEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.WorldEvent;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -123,7 +113,7 @@ public class ClientEventHandler {
 
     @SubscribeEvent
     public void onMount(VehicleEntityEvent.PlayerMount event) {
-        if(event.getEntityMounted() instanceof EntityPlayer){
+        if (event.getEntityMounted() instanceof EntityPlayer) {
             if (((EntityPlayer) event.getEntityMounted()).isUser()) {
                 ACsGuiApi.asyncLoadThenShowHudGui("Vehicle HUD", () -> new VehicleHud((IModuleContainer.ISeatsContainer) event.getEntity()));
             }
@@ -132,7 +122,7 @@ public class ClientEventHandler {
 
     @SubscribeEvent
     public void onDismount(VehicleEntityEvent.EntityDismount event) {
-        if(event.getEntityDismounted() instanceof EntityPlayer){
+        if (event.getEntityDismounted() instanceof EntityPlayer) {
             if (((EntityPlayer) event.getEntityDismounted()).isUser()) {
                 ACsGuiApi.closeHudGui();
             }
@@ -194,10 +184,9 @@ public class ClientEventHandler {
                 }
             }
             Vector3fPool.closePool();
-        } else if(event.getType() == RenderGameOverlayEvent.ElementType.ALL && !Minecraft.getMinecraft().isSingleplayer() && DynamXConfig.useUdp && (!DynamXContext.getNetwork().isConnected() || !DynamXContext.getNetwork().getQuickNetwork().isAuthenticated())) {
+        } else if (event.getType() == RenderGameOverlayEvent.ElementType.ALL && !Minecraft.getMinecraft().isSingleplayer() && DynamXConfig.useUdp && (!DynamXContext.getNetwork().isConnected() || !DynamXContext.getNetwork().getQuickNetwork().isAuthenticated())) {
             String text = "DynamX: connecting to the server " + (DynamXContext.getNetwork().isConnected() ? "2/2" : "1/2");
-            switch ((int)(Minecraft.getSystemTime() / 600L % 3L))
-            {
+            switch ((int) (Minecraft.getSystemTime() / 600L % 3L)) {
                 case 0:
                 default:
                     text += ".  ";
@@ -261,10 +250,10 @@ public class ClientEventHandler {
         model = null;
         EntityPlayer entityPlayer = Minecraft.getMinecraft().player;
         if (entityPlayer != null) {
-            if(DynamXContext.getWalkingPlayers().containsKey(entityPlayer)){
+            if (DynamXContext.getWalkingPlayers().containsKey(entityPlayer)) {
                 PhysicsEntity<?> physicsEntity = DynamXContext.getWalkingPlayers().get(entityPlayer);
-                if(!physicsEntity.canPlayerStandOnTop()){
-                    if(WalkingOnPlayerController.controller != null) {
+                if (!physicsEntity.canPlayerStandOnTop()) {
+                    if (WalkingOnPlayerController.controller != null) {
                         WalkingOnPlayerController.controller.disable();
                         entityPlayer.motionY += 0.2D;
                     }
@@ -385,7 +374,7 @@ public class ClientEventHandler {
         double d0 = 0, d1 = 0, d2 = 0;
 
         for (Entity e : MC.world.loadedEntityList) {
-            if(e instanceof PhysicsEntity) {
+            if (e instanceof PhysicsEntity) {
                 if (!((PhysicsEntity<?>) e).wasRendered) {
                     if (!setup) {
                         GlStateManager.pushMatrix();

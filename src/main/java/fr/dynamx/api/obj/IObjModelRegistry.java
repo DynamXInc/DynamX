@@ -1,5 +1,6 @@
 package fr.dynamx.api.obj;
 
+import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.client.renders.model.ItemObjModel;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
@@ -9,11 +10,12 @@ import net.minecraftforge.client.model.ICustomModelLoader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+//TODO REMOVE INTERFACE
 /**
  * The DynamX obj model loader <br>
  * All models should be registered here before DynamX pre initialization
  */
-public interface IObjModelRegistry {
+public interface IObjModelRegistry extends IPackInfoReloadListener {
     /**
      * Registers a model <br>
      * The model should be in modid:models/path

@@ -130,4 +130,10 @@ public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A e
     public List<ISubInfoType<A>> getSubProperties() {
         return subProperties;
     }
+
+    @Override
+    public boolean postLoad(boolean hot) {
+        subProperties.forEach(subInfoType -> subInfoType.postLoad((A) this, hot));
+        return super.postLoad(hot);
+    }
 }

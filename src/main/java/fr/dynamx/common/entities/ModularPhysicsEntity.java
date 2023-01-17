@@ -1,6 +1,7 @@
 package fr.dynamx.common.entities;
 
 import com.jme3.math.Vector3f;
+import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.callbacks.ModularEntityInitCallback;
 import fr.dynamx.api.entities.callbacks.ModularEntityPhysicsInitCallback;
@@ -31,7 +32,6 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
     protected final List<IPhysicsModule.IEntityUpdateListener> updateEntityListeners = new ArrayList<>();
     protected final List<IPhysicsModule.IEntityPosUpdateListener> updateEntityPosListeners = new ArrayList<>();
     protected final List<IPhysicsModule.IPhysicsUpdateListener> updatePhysicsListeners = new ArrayList<>();
-    protected final List<IPhysicsModule.IDrawableModule<?>> drawableModules = new ArrayList<>();
 
     /**
      * Entity init callback
@@ -100,8 +100,6 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
                 updateEntityPosListeners.add((IPhysicsModule.IEntityPosUpdateListener) m);
             if (m instanceof IPhysicsModule.IPhysicsUpdateListener)
                 updatePhysicsListeners.add((IPhysicsModule.IPhysicsUpdateListener) m);
-            if (m instanceof IPhysicsModule.IDrawableModule)
-                drawableModules.add((IPhysicsModule.IDrawableModule) m);
         });
     }
 
@@ -246,9 +244,5 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
 
     public List<IPhysicsModule<?>> getModules() {
         return moduleList;
-    }
-
-    public List<IPhysicsModule.IDrawableModule<?>> getDrawableModules() {
-        return drawableModules;
     }
 }

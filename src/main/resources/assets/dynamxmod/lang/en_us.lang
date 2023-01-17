@@ -66,7 +66,8 @@ dynamx.error.obj_duplicated_custom_textures=Duplicated custom textures
 dynamx.error.armor_error=Bad armor parts
 dynamx.error.updates=DynamX update available
 dynamx.error.syntax_error=Syntax error
-dynamx.error.deprecated_prop=props_ files are deprecated
+dynamx.error.deprecated_prop=Deprecated properties (that will be removed in future)
+dynamx.error.deprecated_prop_format=props_ files are deprecated
 dynamx.error.missing_prop=Unknown pack file properties
 dynamx.error.unknown_sub_info=Unknown sub properties
 dynamx.error.sound_error=Invalid sound config
@@ -85,5 +86,6 @@ dynamx.error.pack_load_fail=Cannot load content pack
 dynamx.error.missing_pack_info=Pack info is missing
 dynamx.error.pack_file_load_error=Cannot load pack file
 dynamx.error.addon_error=Addon loading error
+dynamx.error.obj_error=Obj loading error
 
 dynamx.reload.models.errors=§c[DynamX] Some models have errors, use the debug menu to see them

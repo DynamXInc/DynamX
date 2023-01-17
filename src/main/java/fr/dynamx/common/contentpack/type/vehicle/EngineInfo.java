@@ -6,6 +6,7 @@ import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
+import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.EngineModule;
 
@@ -56,22 +57,6 @@ public class EngineInfo extends SubInfoTypeOwner<EngineInfo> implements ISubInfo
         points.add(rpmPower.getRpmPower());
     }
 
-    public void setSounds(List<EngineSound> sounds) {
-        soundsEngine = new ArrayList<>();
-        for (EngineSound sound : sounds) {
-            if (sound.isSpecialSound()) {
-                if (sound.getRpmRange()[0] == -1) //A starting sound
-                {
-                    if (sound.isInterior())
-                        startingSoundInterior = sound.getSoundName();
-                    else
-                        startingSoundExterior = sound.getSoundName();
-                }
-            } else
-                soundsEngine.add(sound);
-        }
-    }
-
     public List<EngineSound> getEngineSounds() {
         return soundsEngine;
     }
@@ -108,7 +93,7 @@ public class EngineInfo extends SubInfoTypeOwner<EngineInfo> implements ISubInfo
     }
 
     @Override
-    public void onComplete(boolean hotReload) {
+    public void appendTo(ModularVehicleInfo owner) {
         float max = 0;
         for (Vector3f power : points) {
             if (power.x > max)
@@ -116,13 +101,36 @@ public class EngineInfo extends SubInfoTypeOwner<EngineInfo> implements ISubInfo
         }
         if (max < maxRevs)
             throw new IllegalArgumentException("Engine's MaxRPM must be lower or equal to the bigger point's RPM");
-    }
 
-    @Override
-    public void appendTo(ModularVehicleInfo owner) {
         //Fix bug : engine duplicated when using pack sync option
         owner.getSubProperties().removeIf(p -> p.getFullName().equals(getFullName()));
         owner.addSubProperty(this);
+    }
+
+    @Override
+    public void postLoad(ModularVehicleInfo owner, boolean hot) {
+        if (owner.defaultSounds != null) {
+            SoundListInfo engineSound = DynamXObjectLoaders.SOUNDS.findInfo(owner.defaultSounds);
+            if (engineSound == null)
+                throw new IllegalArgumentException("Engine sounds " + owner.defaultSounds + " of " + owner.getFullName() + " were not found, check file names and previous loading errors !");
+            setSounds(engineSound.getSoundsIn());
+        }
+    }
+
+    public void setSounds(List<EngineSound> sounds) {
+        soundsEngine = new ArrayList<>();
+        for (EngineSound sound : sounds) {
+            if (sound.isSpecialSound()) {
+                if (sound.getRpmRange()[0] == -1) //A starting sound
+                {
+                    if (sound.isInterior())
+                        startingSoundInterior = sound.getSoundName();
+                    else
+                        startingSoundExterior = sound.getSoundName();
+                }
+            } else
+                soundsEngine.add(sound);
+        }
     }
 
     @Nullable

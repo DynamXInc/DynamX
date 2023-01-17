@@ -7,7 +7,6 @@ import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.network.sync.MessageMultiPhysicsEntitySync;
 import fr.dynamx.common.network.sync.MessagePhysicsEntitySync;
-import fr.dynamx.common.network.sync.vars.EntityPhysicsState;
 import fr.dynamx.server.command.CmdNetworkConfig;
 import fr.dynamx.utils.optimization.PooledHashMap;
 import net.minecraft.entity.player.EntityPlayerMP;

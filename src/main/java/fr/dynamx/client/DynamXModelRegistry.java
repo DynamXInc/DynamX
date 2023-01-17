@@ -4,20 +4,26 @@ import fr.aym.acslib.ACsLib;
 import fr.aym.acslib.api.services.ThreadedLoadingService;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.ContentPackType;
+import fr.dynamx.api.contentpack.object.INamedObject;
+import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
+import fr.dynamx.api.contentpack.object.render.IObjPackObject;
 import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
 import fr.dynamx.api.obj.IObjModelRegistry;
 import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.client.renders.model.MissingObjModel;
 import fr.dynamx.client.renders.model.renderer.ObjItemModelLoader;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
+import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.PackInfo;
+import fr.dynamx.common.contentpack.loader.InfoLoader;
 import fr.dynamx.common.contentpack.type.objects.ArmorObject;
 import fr.dynamx.common.objloader.MTLLoader;
 import fr.dynamx.common.objloader.OBJLoader;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXLoadingTasks;
+import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
@@ -167,5 +173,26 @@ public class DynamXModelRegistry implements IObjModelRegistry {
     @Override
     public int getLoadedModelCount() {
         return MODELS_REGISTRY.size();
+    }
+
+    @Override
+    public void onPackInfosReloaded() {
+        MODELS_REGISTRY.clear();
+        //Registers all models avoiding duplicates
+        //This doesn't load them, its done by the MC's resource manager
+        for (InfoLoader<?> infoLoader : DynamXObjectLoaders.getLoaders()) {
+            for (INamedObject namedObject : infoLoader.getInfos().values()) {
+                if (namedObject instanceof IObjPackObject && ((IObjPackObject) namedObject).shouldRegisterModel()) {
+                    ObjModelPath modelPath = DynamXUtils.getModelPath(namedObject.getPackName(), ((IObjPackObject) namedObject).getModel());
+                    if(REGISTRY_CLOSED) {
+                        // override old variants supplier
+                        MODELS_REGISTRY.put(modelPath, (IModelTextureVariantsSupplier) namedObject);
+                    } else {
+                        registerModel(modelPath, (IModelTextureVariantsSupplier) namedObject);
+                    }
+                }
+            }
+        }
+        log.info("Registered " + getLoadedModelCount() + " obj models");
     }
 }

@@ -44,7 +44,6 @@ public class RegistryNameSetter {
     public static ResourceLocation getDynamXResourceLocation(String pathPrefix, String resourceName) {
         String[] astring = new String[]{DynamXConstants.ID, resourceName};
         int i = resourceName.indexOf(58);
-
         if (i >= 0) {
             astring[1] = resourceName.substring(i + 1);
 

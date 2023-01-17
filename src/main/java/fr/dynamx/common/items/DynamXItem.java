@@ -36,16 +36,16 @@ public class DynamXItem<T extends AbstractItemObject<T, ?>> extends Item impleme
      *
      * @param modid    The mod owning this item used to register the item
      * @param itemName The name of the item
-     * @param model    The obj model of the item, must be under "dynamxmod:models/<model>"
+     * @param model     The obj model of the block "namespace:resourceName.obj". The default namespace is "dynamxmod". The model file must be under "namespace:models/resourceName.obj"
      */
-    public DynamXItem(String modid, String itemName, ResourceLocation model) {
+    public DynamXItem(String modid, String itemName, String model) {
         if (modid.contains("builtin_mod_")) { //Backward-compatibility
-            this.itemInfo = (T) DynamXObjectLoaders.ITEMS.addBuiltinObject(this, modid, itemName);
+            itemInfo = (T) DynamXObjectLoaders.ITEMS.addBuiltinObject(this, modid, itemName);
             modid = modid.replace("builtin_mod_", "");
         } else {
-            this.itemInfo = (T) DynamXObjectLoaders.ITEMS.addBuiltinObject(this, "dynx." + modid, itemName);
+            itemInfo = (T) DynamXObjectLoaders.ITEMS.addBuiltinObject(this, "dynx." + modid, itemName);
         }
-        this.itemInfo.setModel(model);
+        itemInfo.setModel(RegistryNameSetter.getDynamXModelResourceLocation(model));
         itemInfo.setDescription("Builtin " + modid + "'s item");
 
         RegistryNameSetter.setRegistryName(this, modid, itemInfo.getFullName().toLowerCase());

@@ -3,6 +3,7 @@ package fr.dynamx.common.contentpack.parts;
 import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
+import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.contentpack.registry.*;
@@ -10,12 +11,18 @@ import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.api.obj.ObjModelPath;
+import fr.dynamx.client.renders.RenderPhysicsEntity;
+import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
+import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.common.handlers.TaskScheduler;
+import fr.dynamx.common.physics.utils.RigidBodyTransform;
+import fr.dynamx.common.physics.utils.SynchronizedRigidBodyTransform;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXUtils;
+import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
@@ -24,6 +31,7 @@ import fr.dynamx.utils.physics.DynamXPhysicsHelper;
 import fr.dynamx.utils.physics.ShapeUtils;
 import lombok.Getter;
 import lombok.Setter;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
@@ -36,7 +44,7 @@ import java.util.Collections;
 import java.util.List;
 
 @RegisteredSubInfoType(name = "door", registries = SubInfoTypeRegistries.WHEELED_VEHICLES, strictName = false)
-public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfo> implements IPhysicsPackInfo {
+public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfo> implements IPhysicsPackInfo, IDrawablePart<BaseVehicleEntity<?>> {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("CarAttachPoint".equals(key))
@@ -168,7 +176,6 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     public void appendTo(ModularVehicleInfo owner) {
         super.appendTo(owner);
         owner.arrangeDoorID(this);
-        owner.addRenderedParts(getPartName());
         ObjModelPath carModelPath = DynamXUtils.getModelPath(getPackName(), owner.getModel());
         physicsCollisionShape = ShapeUtils.generateComplexModelCollisions(carModelPath, getPartName(), new Vector3f(1, 1, 1), new Vector3f(), 0);
     }
@@ -210,11 +217,6 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     }
 
     @Override
-    public <A extends InteractivePart<?, ?>> List<A> getInteractiveParts() {
-        return Collections.emptyList();
-    }
-
-    @Override
     public ResourceLocation getHudCursorTexture() {
         return new ResourceLocation(DynamXConstants.ID, "textures/door.png");
     }
@@ -230,5 +232,43 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     @Override
     public void getBox(MutableBoundingBox out) {
         out.setTo(new MutableBoundingBox(getScale()));
+    }
+
+    @Override
+    public void drawParts(BaseVehicleEntity<?> entity, RenderPhysicsEntity<?> render, ModularVehicleInfo packInfo, byte textureId, float partialTicks) {
+        List<PartDoor> doors = packInfo.getPartsByType(PartDoor.class);
+        DoorsModule module = entity != null ? entity.getModuleByType(DoorsModule.class) : null;
+        for (byte id = 0; id < doors.size(); id++) {
+            PartDoor door = doors.get(id);
+            GlStateManager.pushMatrix();
+            if (!door.isEnabled() || module == null) {
+                Vector3f pos = Vector3fPool.get().addLocal(door.getCarAttachPoint());
+                pos.subtract(door.getDoorAttachPoint(), pos);
+                GlStateManager.translate(pos.x, pos.y, pos.z);
+            } else if (module.getTransforms().containsKey(id)) {
+                SynchronizedRigidBodyTransform sync = module.getTransforms().get(id);
+                RigidBodyTransform transform = sync.getTransform();
+                RigidBodyTransform prev = sync.getPrevTransform();
+
+                Vector3f pos = Vector3fPool.get(prev.getPosition()).addLocal(transform.getPosition().subtract(prev.getPosition(), Vector3fPool.get()).multLocal(partialTicks));
+                GlStateManager.rotate(ClientDynamXUtils.computeInterpolatedGlQuaternion(entity.prevRenderRotation, entity.renderRotation, partialTicks, true));
+                GlStateManager.translate(
+                        (float) -(entity.prevPosX + (entity.posX - entity.prevPosX) * partialTicks),
+                        (float) -(entity.prevPosY + (entity.posY - entity.prevPosY) * partialTicks),
+                        (float) -(entity.prevPosZ + (entity.posZ - entity.prevPosZ) * partialTicks));
+                GlStateManager.translate(pos.x, pos.y, pos.z);
+                GlStateManager.rotate(ClientDynamXUtils.computeInterpolatedGlQuaternion(prev.getRotation(), transform.getRotation(), partialTicks));
+            }
+            ObjModelRenderer vehicleModel = DynamXContext.getObjModelRegistry().getModel(packInfo.getModel());
+            GlStateManager.scale(packInfo.getScaleModifier().x, packInfo.getScaleModifier().y, packInfo.getScaleModifier().z);
+            render.renderModelGroup(vehicleModel, door.getPartName(), entity, textureId);
+            GlStateManager.scale(1 / packInfo.getScaleModifier().x, 1 / packInfo.getScaleModifier().y, 1 / packInfo.getScaleModifier().z);
+            GlStateManager.popMatrix();
+        }
+    }
+
+    @Override
+    public String[] getRenderedParts() {
+        return new String[] {getPartName()};
     }
 }

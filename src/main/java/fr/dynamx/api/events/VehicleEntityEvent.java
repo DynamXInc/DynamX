@@ -174,6 +174,7 @@ public class VehicleEntityEvent extends Event {
         @Getter
         private final RenderBaseVehicle<?> renderBaseVehicle;
         @Getter
+        @Nullable
         private final BaseVehicleEntity<?> carEntity;
         @Getter
         private final Type type;
@@ -187,11 +188,11 @@ public class VehicleEntityEvent extends Event {
         /**
          * @param type              the type of the render
          * @param renderBaseVehicle the class the render of the car
-         * @param carEntity         the rendered car
+         * @param carEntity         the rendered car, null if it's an item
          * @param phase             the phase of the render (Post or Pre)
          * @param partialTicks      the partial render ticks
          */
-        public Render(Type type, RenderBaseVehicle<?> renderBaseVehicle, BaseVehicleEntity<?> carEntity, PhysicsEntityEvent.Phase phase, float partialTicks, @Nullable ObjModelRenderer objModelRenderer) {
+        public Render(Type type, RenderBaseVehicle<?> renderBaseVehicle, @Nullable BaseVehicleEntity<?> carEntity, PhysicsEntityEvent.Phase phase, float partialTicks, @Nullable ObjModelRenderer objModelRenderer) {
             super(Side.CLIENT, carEntity);
             this.type = type;
             this.renderBaseVehicle = renderBaseVehicle;

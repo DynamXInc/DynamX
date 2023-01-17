@@ -95,12 +95,7 @@ public class SeatsModule implements ISeatsModule {
     @Nullable
     @Override
     public Entity getControllingPassenger() {
-        for (Map.Entry<PartSeat, Entity> e : seatToPassenger.entrySet()) {
-            if (e.getKey().isDriver()) {
-                return e.getValue();
-            }
-        }
-        return null;
+        return seatToPassenger.entrySet().stream().filter(e -> e.getKey().isDriver()).findFirst().map(Map.Entry::getValue).orElse(null);
     }
 
     @Override

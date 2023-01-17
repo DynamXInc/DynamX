@@ -35,8 +35,8 @@ public class PartFloat extends BasePart<ModularVehicleInfo> {
     }
 
     @Override
-    public void appendTo(ModularVehicleInfo vehicleInfo) {
-        super.appendTo(vehicleInfo);
+    public void appendTo(ModularVehicleInfo owner) {
+        super.appendTo(owner);
         Vector3f min = getPosition().subtract(getScale());
         Vector3f max = getPosition().add(getScale());
         this.box = new AxisAlignedBB(

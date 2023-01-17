@@ -172,9 +172,9 @@ public class ObjObjectRenderer {
                     (material.transparency != 1 && MinecraftForgeClient.getRenderPass() == 1) ||
                     (material.transparency == 1 && MinecraftForgeClient.getRenderPass() == 0)) {
                 GlStateManager.color(
-                        material.diffuseColor.x * objectColor.x,
-                        material.diffuseColor.y * objectColor.y,
-                        material.diffuseColor.z * objectColor.z,
+                        material.ambientColor.x * objectColor.x,
+                        material.ambientColor.y * objectColor.y,
+                        material.ambientColor.z * objectColor.z,
                         material.transparency * objectColor.w);
                 Material.IndexPair indexPair = pair.getValue();
                 GL11.glDrawElements(GL11.GL_TRIANGLES, (indexPair.getFinalIndex() - indexPair.getStartIndex()), GL11.GL_UNSIGNED_INT,
@@ -281,7 +281,7 @@ public class ObjObjectRenderer {
         if (material.getName().equals("none")) //BlockBench uses "none" materials, this is a bug
         {
             if (!model.hasNoneMaterials) {
-                DynamXErrorManager.addError(model.getTextureVariants() != null ? model.getTextureVariants().getPackName() : "Non-pack model", DynamXErrorManager.MODEL_ERRORS, "obj_none_material", ErrorLevel.LOW, model.getLocation().toString(), objObjectData.getName());
+                DynamXErrorManager.addError(model.getTextureVariants() != null ? model.getTextureVariants().getPackName() : "Non-pack model", DynamXErrorManager.MODEL_ERRORS, "obj_none_material", ErrorLevel.LOW, model.getLocation().getModelPath().toString(), objObjectData.getName());
             }
             model.hasNoneMaterials = true;
             return false;

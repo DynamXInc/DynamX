@@ -186,7 +186,7 @@ public class GuiLoadingErrors extends GuiFrame {
         Map<String, List<ErrorData>> errorsPerObject = ErrorManagerService.groupBy(errorList, ErrorData::getObject);
         errorsPerObject.forEach((s1, errorListPerObject) -> {
             int id = i.get();
-            GuiTextArea label = new GuiTextArea();
+            GuiTextArea label = new GuiLabel("");
             label.setEditable(false);
             heightMap.put(label, setDeployed(label, s1, errorListPerObject, deployAll != deployObjs.contains(id)));
             errorsPanel.add(label.getStyle().setPaddingLeft(2).setPaddingTop(2).getOwner().addClickListener((x, y, b) -> {

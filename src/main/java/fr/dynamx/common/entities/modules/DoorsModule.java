@@ -12,14 +12,13 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.modules.AttachModule;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
+import fr.dynamx.api.network.sync.AttachedBodySynchronizer;
 import fr.dynamx.common.network.sync.variables.EntityMapVariable;
 import fr.dynamx.common.network.sync.variables.EntityTransformsVariable;
 import fr.dynamx.api.network.sync.SynchronizationRules;
 import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.EnumBulletShapeType;
 import fr.dynamx.client.ClientProxy;
-import fr.dynamx.client.renders.RenderPhysicsEntity;
-import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.parts.PartDoor;
@@ -27,7 +26,6 @@ import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.network.packets.MessageChangeDoorState;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
-import fr.dynamx.common.network.sync.vars.AttachedBodySynchronizedVariable;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.joints.EntityJoint;
 import fr.dynamx.common.physics.joints.JointHandler;
@@ -35,7 +33,6 @@ import fr.dynamx.common.physics.joints.JointHandlerRegistry;
 import fr.dynamx.common.physics.utils.RigidBodyTransform;
 import fr.dynamx.common.physics.utils.SynchronizedRigidBodyTransform;
 import fr.dynamx.utils.DynamXConstants;
-import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.QuaternionPool;
@@ -43,18 +40,16 @@ import fr.dynamx.utils.optimization.Vector3fPool;
 import fr.dynamx.utils.physics.DynamXPhysicsHelper;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @SynchronizedEntityVariable.SynchronizedPhysicsModule()
 public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<?, ?>>, AttachModule.AttachToSelfModule,
         IPhysicsModule.IEntityPosUpdateListener, IPhysicsModule.IPhysicsUpdateListener,
-        AttachedBodySynchronizedVariable.AttachedBodySynchronizer, IPhysicsModule.IDrawableModule<BaseVehicleEntity<?>> {
+        AttachedBodySynchronizer {
     public static final ResourceLocation JOINT_NAME = new ResourceLocation(DynamXConstants.ID, "door_module");
 
     static {
@@ -286,41 +281,6 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
     @Override
     public void updateEntityPos() {
         attachedBodiesTransform.values().forEach(SynchronizedRigidBodyTransform::updatePos);
-    }
-
-    @Override
-    public void drawParts(RenderPhysicsEntity<?> render, float partialTicks, BaseVehicleEntity<?> carEntity) {
-        List<PartDoor> doors = carEntity.getPackInfo().getPartsByType(PartDoor.class);
-        for (byte id = 0; id < doors.size(); id++) {
-            PartDoor door = doors.get(id);
-            GlStateManager.pushMatrix();
-            if (!door.isEnabled()) {
-                Vector3f pos = Vector3fPool.get().addLocal(door.getCarAttachPoint());
-                pos.subtract(door.getDoorAttachPoint(), pos);
-
-                GlStateManager.translate(pos.x, pos.y, pos.z);
-            } else if (getTransforms().containsKey(id)) {
-                SynchronizedRigidBodyTransform sync = getTransforms().get(id);
-                RigidBodyTransform transform = sync.getTransform();
-                RigidBodyTransform prev = sync.getPrevTransform();
-
-                Vector3f pos = Vector3fPool.get(prev.getPosition()).addLocal(transform.getPosition().subtract(prev.getPosition(), Vector3fPool.get()).multLocal(partialTicks));
-                GlStateManager.rotate(ClientDynamXUtils.computeInterpolatedGlQuaternion(carEntity.prevRenderRotation, carEntity.renderRotation, partialTicks, true));
-                GlStateManager.translate(
-                        (float) -(carEntity.prevPosX + (carEntity.posX - carEntity.prevPosX) * partialTicks),
-                        (float) -(carEntity.prevPosY + (carEntity.posY - carEntity.prevPosY) * partialTicks),
-                        (float) -(carEntity.prevPosZ + (carEntity.posZ - carEntity.prevPosZ) * partialTicks));
-                GlStateManager.translate(pos.x, pos.y, pos.z);
-                GlStateManager.rotate(ClientDynamXUtils.computeInterpolatedGlQuaternion(prev.getRotation(), transform.getRotation(), partialTicks));
-            }
-
-            ObjModelRenderer vehicleModel = DynamXContext.getObjModelRegistry().getModel(carEntity.getPackInfo().getModel());
-            GlStateManager.scale(carEntity.getPackInfo().getScaleModifier().x, carEntity.getPackInfo().getScaleModifier().y, carEntity.getPackInfo().getScaleModifier().z);
-            render.renderModelGroup(vehicleModel, door.getPartName(), carEntity, carEntity.getEntityTextureID());
-            GlStateManager.scale(1 / carEntity.getPackInfo().getScaleModifier().x, 1 / carEntity.getPackInfo().getScaleModifier().y, 1 / carEntity.getPackInfo().getScaleModifier().z);
-
-            GlStateManager.popMatrix();
-        }
     }
 
     public PartDoor getPartDoor(byte doorID) {

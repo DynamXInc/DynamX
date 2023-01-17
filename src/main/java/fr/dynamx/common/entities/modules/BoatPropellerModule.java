@@ -21,7 +21,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.Objects;
 
-public class BoatPropellerModule implements IPropulsionModule<BoatPhysicsHandler<?>>, IPhysicsModule.IDrawableModule<BaseVehicleEntity<?>>, IPackInfoReloadListener {
+public class BoatPropellerModule implements IPropulsionModule<BoatPhysicsHandler<?>>, IPackInfoReloadListener {
     private BoatPropellerInfo info;
     private final BoatEntity<?> boat;
 
@@ -44,11 +44,6 @@ public class BoatPropellerModule implements IPropulsionModule<BoatPhysicsHandler
     @SideOnly(Side.CLIENT)
     public void spawnPropulsionParticles(RenderPhysicsEntity<?> render, float partialTicks) {
         //todo particules autour de l'hélice ?
-    }
-
-    @Override
-    public void drawParts(RenderPhysicsEntity<?> render, float partialTicks, BaseVehicleEntity<?> entity) {
-
     }
 
     public class BoatPropellerHandler implements IPropulsionHandler {

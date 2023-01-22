@@ -3,13 +3,17 @@
   "package": "fr.dynamx.common.core.mixin",
   "refmap": "refmap.dynamxmod.json",
   "mixins": [
+    "MixinChunk",
     "MixinEntity",
     "MixinEntityLivingBase",
-    "MixinWorld",
-    "MixinChunk",
-    "MixinNetHandlerPlayServer"
+    "MixinNetHandlerPlayServer",
+    "MixinWater",
+    "MixinWorld"
   ],
   "minVersion": "0.6",
-  "client": [],
-  "server": []
+  "server": [],
+  "client": [
+    "MixinRenderGlobal",
+    "MixinRenderManager"
+  ]
 }

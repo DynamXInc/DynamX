@@ -26,6 +26,7 @@ import fr.dynamx.utils.DynamXMpsConfig;
 import fr.dynamx.utils.DynamXReflection;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.physics.NativeEngineInstaller;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeVersion;
 import net.minecraftforge.common.capabilities.CapabilityManager;
@@ -111,6 +112,10 @@ public class DynamXMain {
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
+        if(!Minecraft.getMinecraft().getFramebuffer().isStencilEnabled()){
+            Minecraft.getMinecraft().getFramebuffer().enableStencil();
+        }
+
         /* Loading configuration file */
         DynamXConfig.load(event.getSuggestedConfigurationFile());
 

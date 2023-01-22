@@ -61,6 +61,7 @@ public class DynamXModelRegistry implements IObjModelRegistry {
     public void registerModel(String location) {
         registerModel(new ObjModelPath(BASE_PACKINFO, new ResourceLocation(DynamXConstants.ID, String.format("models/%s", location))), null);
     }
+
     @Deprecated
     @Override
     public void registerModel(String location, IModelTextureVariantsSupplier customTextures) {
@@ -184,7 +185,7 @@ public class DynamXModelRegistry implements IObjModelRegistry {
             for (INamedObject namedObject : infoLoader.getInfos().values()) {
                 if (namedObject instanceof IObjPackObject && ((IObjPackObject) namedObject).shouldRegisterModel()) {
                     ObjModelPath modelPath = DynamXUtils.getModelPath(namedObject.getPackName(), ((IObjPackObject) namedObject).getModel());
-                    if(REGISTRY_CLOSED) {
+                    if (REGISTRY_CLOSED) {
                         // override old variants supplier
                         MODELS_REGISTRY.put(modelPath, (IModelTextureVariantsSupplier) namedObject);
                     } else {

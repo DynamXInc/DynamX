@@ -65,7 +65,7 @@ dependencies {
     minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2860'
 
     implementation 'com.github.stephengold:Libbulletjme:' + libbulletjme_version
-    implementation "fr.aym.acsguis:ACsGuis:1.2.4-5"
+    implementation "fr.aym.acsguis:ACsGuis:1.2.5"
     implementation ":ModProtectionLib:1.2.5"
     implementation('org.spongepowered:mixin:0.8.3-SNAPSHOT') {
         exclude module: 'guava'

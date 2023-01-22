@@ -40,7 +40,7 @@ public class ItemObjModel implements IModel {
         this.location = location;
         this.owner = owner;
 
-        DynamXMain.log.debug("Registered item model " + location + " for " + owner.getModel() + " of " + owner.getPackName() + " with render locations " + owner.get3DItemRenderLocation());
+        //DynamXMain.log.debug("Registered item model " + location + " for " + owner.getModel() + " of " + owner.getPackName() + " with render locations " + owner.get3DItemRenderLocation());
         if (owner.get3DItemRenderLocation() != Enum3DRenderLocation.ALL) {
             gui = ModelLoaderRegistry.getModel(new ResourceLocation(location.getNamespace(), "item/" + location.getPath().replace(".obj", "")));
         }

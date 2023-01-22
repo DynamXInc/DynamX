@@ -18,9 +18,7 @@ public abstract class MixinRenderGlobal {
     private void preRenderTranslucent(BlockRenderLayer blockLayerIn, double partialTicks, int pass, Entity entityIn, CallbackInfoReturnable<Integer> cir) {
         if (blockLayerIn.equals(BlockRenderLayer.TRANSLUCENT)) {
             GL11.glStencilFunc(GL11.GL_NOTEQUAL, 1, 0xFF);
-            //GL11.glStencilMask(0x00);
         }
-
     }
 
     @Inject(method = "renderBlockLayer(Lnet/minecraft/util/BlockRenderLayer;DILnet/minecraft/entity/Entity;)I",
@@ -29,10 +27,7 @@ public abstract class MixinRenderGlobal {
     private void postRenderTranslucent(BlockRenderLayer blockLayerIn, double partialTicks, int pass, Entity entityIn, CallbackInfoReturnable<Integer> cir) {
         if (blockLayerIn.equals(BlockRenderLayer.TRANSLUCENT)) {
             GL11.glStencilFunc(GL11.GL_ALWAYS, 1, 0xFF);
-            GL11.glStencilMask(0x00);
-            GL11.glClear(GL11.GL_STENCIL_BUFFER_BIT);
             GL11.glDisable(GL11.GL_STENCIL_TEST);
         }
-
     }
 }

@@ -85,9 +85,9 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IInf
      * @param material  The block material
      * @param modid     The mod owning this block, used to register the block
      * @param blockName The name of the block
-     * @param model     The obj model of the block "namespace:resourceName.obj". The default namespace is "dynamxmod". The model file must be under "namespace:models/resourceName.obj"
+     * @param model     The obj model of the block
      */
-    public DynamXBlock(Material material, String modid, String blockName, String model) {
+    public DynamXBlock(Material material, String modid, String blockName, ResourceLocation model) {
         super(material);
         if (modid.contains("builtin_mod_")) { //Backward-compatibility
             blockObjectInfo = (T) DynamXObjectLoaders.BLOCKS.addBuiltinObject(this, modid, blockName);
@@ -95,7 +95,7 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IInf
         } else {
             blockObjectInfo = (T) DynamXObjectLoaders.BLOCKS.addBuiltinObject(this, "dynx." + modid, blockName);
         }
-        blockObjectInfo.setModel(RegistryNameSetter.getDynamXModelResourceLocation(model));
+        blockObjectInfo.setModel(model);
         blockObjectInfo.setDescription("Builtin " + modid + "'s block");
         textureNum = 1;
         isObj = blockObjectInfo.isObj();

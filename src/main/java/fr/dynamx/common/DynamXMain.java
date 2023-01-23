@@ -112,10 +112,6 @@ public class DynamXMain {
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
-        if(!Minecraft.getMinecraft().getFramebuffer().isStencilEnabled()){
-            Minecraft.getMinecraft().getFramebuffer().enableStencil();
-        }
-
         /* Loading configuration file */
         DynamXConfig.load(event.getSuggestedConfigurationFile());
 

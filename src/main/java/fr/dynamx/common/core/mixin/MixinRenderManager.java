@@ -25,7 +25,7 @@ public abstract class MixinRenderManager {
                     shift = At.Shift.AFTER))
     private void postDoRenderEntities(Entity entityIn, double x, double y, double z, float yaw, float partialTicks, boolean p_188391_10_, CallbackInfo ci) {
         if (MinecraftForgeClient.getRenderPass() == 0) {
-            if (entityIn instanceof BaseVehicleEntity) {
+            if (entityIn instanceof BaseVehicleEntity && ((BaseVehicleEntity<?>) entityIn).getPackInfo() != null) {
                 GlQuaternionPool.openPool();
                 QuaternionPool.openPool();
                 BaseVehicleEntity<?> physicsEntity = (BaseVehicleEntity<?>) entityIn;
@@ -49,12 +49,12 @@ public abstract class MixinRenderManager {
                 QuaternionPool.closePool();
                 GlQuaternionPool.closePool();
 
+                GL11.glColorMask(true, true, true, true);
+                GL11.glDepthMask(true);
+                GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
+                GL11.glStencilFunc(GL11.GL_ALWAYS, 1, 0xFF);
+                GL11.glStencilMask(0x00);
             }
-            GL11.glColorMask(true, true, true, true);
-            GL11.glDepthMask(true);
-            GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
-            GL11.glStencilFunc(GL11.GL_ALWAYS, 1, 0xFF);
-            GL11.glStencilMask(0x00);
         }
     }
 }

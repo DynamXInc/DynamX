@@ -236,12 +236,12 @@ public class ClientEventHandler {
     public void onClientTick(TickEvent.ClientTickEvent event) {
         ClientProxy.SOUND_HANDLER.tick();
 
-        if (connectionTime != -1 && !Minecraft.getMinecraft().isSingleplayer() && DynamXConfig.useUdp) {
+        if (connectionTime != -1 && !Minecraft.getMinecraft().isSingleplayer()) {
             if ((System.currentTimeMillis() - connectionTime) > 30000) {
                 if (!DynamXContext.getNetwork().isConnected()) {
-                    DynamXMain.log.warn("Failed to establish an UDP connection : timed out (0x1)");
+                    DynamXMain.log.warn("Failed to establish an TCP/UDP connection : timed out (0x1)");
                     if (Minecraft.getMinecraft().getConnection() != null)
-                        Minecraft.getMinecraft().getConnection().getNetworkManager().closeChannel(new TextComponentString("DynamX UDP connection timed out (Auth not started)"));
+                        Minecraft.getMinecraft().getConnection().getNetworkManager().closeChannel(new TextComponentString("DynamX TCP/UDP connection timed out (Auth not started)"));
                 } else
                     connectionTime = -1;
             }

@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * @see MixinRenderManager for the second step
  */
 @Mixin(value = EntityRenderer.class, remap = MixinChunk.REMAP)
-public abstract class MixinWater {
+public abstract class MixinEntityRenderer {
 
     @Inject(method = "renderWorldPass(IFJ)V",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderGlobal;renderEntities(Lnet/minecraft/entity/Entity;Lnet/minecraft/client/renderer/culling/ICamera;F)V"))

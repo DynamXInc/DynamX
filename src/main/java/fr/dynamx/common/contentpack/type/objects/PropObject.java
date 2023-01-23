@@ -22,6 +22,7 @@ import fr.dynamx.common.contentpack.loader.ObjectLoader;
 import fr.dynamx.common.contentpack.loader.PackFilePropertyData;
 import fr.dynamx.common.contentpack.loader.SubInfoTypeAnnotationCache;
 import fr.dynamx.common.items.ItemProps;
+import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.physics.ShapeUtils;
@@ -140,7 +141,6 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
             }
         }
         compoundCollisionShape.setMargin(margin);
-        debugBuffer = ShapeUtils.getDebugVectorList(compoundCollisionShape, ShapeUtils.getDebugBuffer(compoundCollisionShape));
         return true;
     }
 
@@ -156,6 +156,8 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
 
     @Override
     public List<Vector3f> getCollisionShapeDebugBuffer() {
+        if(debugBuffer == null)
+            debugBuffer = ShapeUtils.getDebugVectorList(compoundCollisionShape, ShapeUtils.getDebugBuffer(compoundCollisionShape));
         return debugBuffer;
     }
 

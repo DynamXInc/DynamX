@@ -30,7 +30,6 @@ public class PartStorage extends InteractivePart<BaseVehicleEntity<?>, ModularVe
         if (storageSize % 9 != 0)
             throw new IllegalArgumentException("StorageSize must be a multiple of 9 !");
         super.appendTo(owner);
-        owner.arrangeStorageID(this);
     }
 
     @Override

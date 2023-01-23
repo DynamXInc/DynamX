@@ -43,9 +43,7 @@ public abstract class BaseVehiclePhysicsHandler<T extends BaseVehicleEntity<?>> 
         vehicleBody.setUserObject(new BulletShapeType<>(EnumBulletShapeType.VEHICLE, getHandledEntity()));
         vehicleBody.setSleepingThresholds(0.9f, 1.2f);
 
-        //fixme configurable
-        vehicleBody.setAngularDamping(0.9f);
-        vehicleBody.setLinearDamping(0.5f);
+        vehicleBody.setDamping(modularVehicleInfo.getLinearDamping(), modularVehicleInfo.getAngularDamping());
         return vehicleBody;
     }
 

@@ -8,6 +8,8 @@ import fr.dynamx.utils.errors.DynamXErrorManager;
 import java.util.List;
 
 public interface VehicleValidator {
+    default void initProperties(ModularVehicleInfo info) {}
+
     void validate(ModularVehicleInfo info);
 
     VehicleValidator CAR_VALIDATOR = info -> {
@@ -25,17 +27,34 @@ public interface VehicleValidator {
         if (info.getSubPropertyByType(TrailerAttachInfo.class) == null)
             DynamXErrorManager.addPackError(info.getPackName(), "config_error", ErrorLevel.FATAL, info.getName(), "Missing trailer config !");
     };
-    VehicleValidator BOAT_VALIDATOR = info -> {
-        CarEngineInfo engine = info.getSubPropertyByType(CarEngineInfo.class);
-        if (engine == null)
-            throw new IllegalArgumentException("Boat " + info.getFullName() + " has no engine");
+    VehicleValidator BOAT_VALIDATOR = new VehicleValidator() {
+        @Override
+        public void initProperties(ModularVehicleInfo info) {
+            info.angularDamping = 0.5f;
+        }
+
+        @Override
+        public void validate(ModularVehicleInfo info) {
+            CarEngineInfo engine = info.getSubPropertyByType(CarEngineInfo.class);
+            if (engine == null)
+                throw new IllegalArgumentException("Boat " + info.getFullName() + " has no engine");
+        }
     };
-    VehicleValidator HELICOPTER_VALIDATOR = info -> {
-        HelicopterPhysicsInfo physicsInfo = info.getSubPropertyByType(HelicopterPhysicsInfo.class);
-        if (physicsInfo == null)
-            throw new IllegalArgumentException("Boat " + info.getFullName() + " has no HelicopterPhysics");
-        List<PartRotor> rotors = info.getPartsByType(PartRotor.class);
-        if (rotors.isEmpty())
-            throw new IllegalArgumentException("Helicopter " + info.getFullName() + " has no rotors");
+    VehicleValidator HELICOPTER_VALIDATOR = new VehicleValidator() {
+        @Override
+        public void initProperties(ModularVehicleInfo info) {
+            info.linearDamping = 0.5f;
+            info.angularDamping = 0.9f;
+        }
+
+        @Override
+        public void validate(ModularVehicleInfo info) {
+            HelicopterPhysicsInfo physicsInfo = info.getSubPropertyByType(HelicopterPhysicsInfo.class);
+            if (physicsInfo == null)
+                throw new IllegalArgumentException("Boat " + info.getFullName() + " has no HelicopterPhysics");
+            List<PartRotor> rotors = info.getPartsByType(PartRotor.class);
+            if (rotors.isEmpty())
+                throw new IllegalArgumentException("Helicopter " + info.getFullName() + " has no rotors");
+        }
     };
 }

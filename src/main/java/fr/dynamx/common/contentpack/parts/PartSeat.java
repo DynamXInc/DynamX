@@ -81,12 +81,6 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     }
 
     @Override
-    public void appendTo(ModularVehicleInfo owner) {
-        super.appendTo(owner);
-        owner.arrangeSeatID(this);
-    }
-
-    @Override
     public boolean interact(BaseVehicleEntity<?> vehicleEntity, EntityPlayer player) {
         if (!(vehicleEntity instanceof IModuleContainer.ISeatsContainer))
             throw new IllegalStateException("The entity " + vehicleEntity + " has PartSeats, but does not implement IHaveSeats !");

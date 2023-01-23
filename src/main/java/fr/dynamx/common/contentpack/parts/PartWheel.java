@@ -72,7 +72,6 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
             rotationPoint = getPosition();
         else
             getRotationPoint().multLocal(getScaleModifier(owner));
-        owner.arrangeWheelID(this);
     }
 
     @Override

@@ -140,7 +140,7 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
                 DynamXErrorManager.addPackError(info.getPackName(), "syntax_error", ErrorLevel.FATAL, parent.getName(), "Found a never ending multi-line comment in " + info.getName() + ", some properties may be missing in-game");
             INamedObject finalParent = parent;
             SubInfoTypeAnnotationCache.getOrLoadData(info.getClass()).values().forEach(p -> {
-                if (p.isRequired() && !foundProperties.contains(p))
+                if (p.isRequired() && !foundProperties.contains(p) && foundProperties.stream().noneMatch(p2 -> p2.getField() == p.getField()))
                     DynamXErrorManager.addPackError(info.getPackName(), "required_property", ErrorLevel.HIGH, finalParent.getName(), "'" + p.getConfigFieldName() + "' in " + info.getName());
             });
         }
@@ -191,7 +191,7 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
             DynamXErrorManager.addPackError(obj.getPackName(), "syntax_error", ErrorLevel.FATAL, parent.getName(), "Found a never ending multi-line comment in " + obj.getName() + ", some properties may be missing in-game");
         INamedObject finalParent = parent;
         SubInfoTypeAnnotationCache.getOrLoadData(obj.getClass()).values().forEach(p -> {
-            if (p.isRequired() && !foundProperties.contains(p))
+            if (p.isRequired() && !foundProperties.contains(p) && foundProperties.stream().noneMatch(p2 -> p2.getField() == p.getField()))
                 DynamXErrorManager.addPackError(obj.getPackName(), "required_property", ErrorLevel.HIGH, finalParent.getName(), "'" + p.getConfigFieldName() + "' in " + obj.getName());
         });
     }

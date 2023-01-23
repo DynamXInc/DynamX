@@ -7,7 +7,7 @@
     "MixinEntity",
     "MixinEntityLivingBase",
     "MixinNetHandlerPlayServer",
-    "MixinWater",
+    "MixinEntityRenderer",
     "MixinWorld"
   ],
   "minVersion": "0.6",

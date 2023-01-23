@@ -281,7 +281,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
 
     // Methods from ModularVehicleInfoBuilder
 
-    private byte seatID, wheelID, doorID;
+    private byte seatID, wheelID, doorID, storageID;
 
     public void arrangeSeatID(PartSeat seat) {
         seat.setId(seatID++);
@@ -293,6 +293,10 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
 
     public void arrangeWheelID(PartWheel wheel) {
         wheel.setId(wheelID++);
+    }
+
+    public void arrangeStorageID(PartStorage storage) {
+        storage.setId(storageID++);
     }
 
     public void addCollisionShape(PartShape partShape) {

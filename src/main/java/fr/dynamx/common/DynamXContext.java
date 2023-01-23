@@ -1,7 +1,6 @@
 package fr.dynamx.common;
 
 import fr.dynamx.api.network.IDnxNetworkSystem;
-import fr.dynamx.api.obj.IObjModelRegistry;
 import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.api.physics.IPhysicsSimulationMode;
 import fr.dynamx.api.physics.IPhysicsWorld;
@@ -32,7 +31,7 @@ public class DynamXContext {
     private static final IRotatedCollisionHandler collisionHandler = new RotatedCollisionHandlerImpl();
     private static final IDnxNetworkSystem network;
     @SideOnly(Side.CLIENT)
-    private static IObjModelRegistry objModelRegistry;
+    private static DynamXModelRegistry objModelRegistry;
 
     private static final Map<EntityPlayer, PlayerPhysicsHandler> playerToCollision = new HashMap<>();
     private static final ConcurrentHashMap<EntityPlayer, PhysicsEntity<?>> walkingPlayers = new ConcurrentHashMap<>(0, 0.75f, 2);
@@ -74,7 +73,7 @@ public class DynamXContext {
      * @return The obj model loader
      */
     @SideOnly(Side.CLIENT)
-    public static IObjModelRegistry getObjModelRegistry() {
+    public static DynamXModelRegistry getObjModelRegistry() {
         return objModelRegistry;
     }
 

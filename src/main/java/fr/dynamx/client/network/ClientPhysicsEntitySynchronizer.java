@@ -25,6 +25,7 @@ import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ClientPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends MPPhysicsEntitySynchronizer<T> implements ClientEntityNetHandler {
     private int ticksBeforeNextSync, skippedPacketsCount;
@@ -47,6 +48,11 @@ public class ClientPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends
     @Override
     public void setSimulationTimeClient(int simulationTimeClient) {
 
+    }
+
+    @Override
+    protected void onDataReceived(MessagePhysicsEntitySync<T> msg) {
+        NetworkActivityTracker.addReceivedVars(entity, msg.getVarsToRead().keySet().stream().map(v -> getSynchronizedVariables().get(v)).collect(Collectors.toList()));
     }
 
     @Override

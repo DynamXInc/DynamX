@@ -32,12 +32,13 @@ public abstract class MPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> ex
                 MessagePhysicsEntitySync<T> msg = receivedPackets.remove();
                 getReceivedVariables().putAll(msg.getVarsToRead());
                 setSimulationTimeClient(msg.getSimulationTimeClient());
-                if(this instanceof ClientPhysicsEntitySynchronizer) //todo clean
-                    NetworkActivityTracker.addReceivedVars(entity, msg.getVarsToRead().keySet().stream().map(v -> getSynchronizedVariables().get(v)).collect(Collectors.toList()));
+                onDataReceived(msg);
             }
             getReceivedVariables().forEach((key, value) -> ((SynchronizedEntityVariableSnapshot<Object>) value).updateVariable((EntityVariable<Object>) getSynchronizedVariables().get(key)));
         }
     }
+
+    protected void onDataReceived(MessagePhysicsEntitySync<T> msg) {}
 
     public abstract void setSimulationTimeClient(int simulationTimeClient);
 }

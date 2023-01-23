@@ -8,12 +8,10 @@ import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.contentpack.object.render.IObjPackObject;
 import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
-import fr.dynamx.api.obj.IObjModelRegistry;
 import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.client.renders.model.MissingObjModel;
 import fr.dynamx.client.renders.model.renderer.ObjItemModelLoader;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
-import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.PackInfo;
@@ -36,7 +34,11 @@ import java.util.Map;
 
 import static fr.dynamx.common.DynamXMain.log;
 
-public class DynamXModelRegistry implements IObjModelRegistry {
+/**
+ * The DynamX obj model loader <br>
+ * All models should be registered here before DynamX pre initialization
+ */
+public class DynamXModelRegistry implements IPackInfoReloadListener {
     private static final ObjItemModelLoader OBJ_ITEM_MODEL_LOADER = new ObjItemModelLoader();
     private static final Map<ObjModelPath, IModelTextureVariantsSupplier> MODELS_REGISTRY = new HashMap<>();
     private static final Map<ResourceLocation, ObjModelRenderer> MODELS = new HashMap<>();
@@ -49,7 +51,11 @@ public class DynamXModelRegistry implements IObjModelRegistry {
 
     private static boolean REGISTRY_CLOSED;
 
-    @Override
+    /**
+     * Registers a model
+     *
+     * @param location The model location
+     */
     public void registerModel(ObjModelPath location) {
         registerModel(location, null);
     }
@@ -57,18 +63,21 @@ public class DynamXModelRegistry implements IObjModelRegistry {
     public static final PackInfo BASE_PACKINFO = new PackInfo(DynamXConstants.ID, ContentPackType.BUILTIN);
 
     @Deprecated
-    @Override
     public void registerModel(String location) {
         registerModel(new ObjModelPath(BASE_PACKINFO, new ResourceLocation(DynamXConstants.ID, String.format("models/%s", location))), null);
     }
 
     @Deprecated
-    @Override
     public void registerModel(String location, IModelTextureVariantsSupplier customTextures) {
         registerModel(new ObjModelPath(BASE_PACKINFO, new ResourceLocation(DynamXConstants.ID, String.format("models/%s", location))), customTextures);
     }
 
-    @Override
+    /**
+     * Registers a model
+     *
+     * @param location       The model location
+     * @param customTextures A texture supplier for this model (allows multi-texturing)
+     */
     public void registerModel(ObjModelPath location, IModelTextureVariantsSupplier customTextures) {
         if (REGISTRY_CLOSED)
             throw new IllegalStateException("Model registry closed, you should register your model before DynamX pre-initialization");
@@ -87,7 +96,10 @@ public class DynamXModelRegistry implements IObjModelRegistry {
         }
     }
 
-    @Override
+    /**
+     * @return The model corresponding to the given name (the name used in registerModel)
+     * @throws IllegalArgumentException If the model wasn't registered (should be done before DynamX pre initialization)
+     */
     public ObjModelRenderer getModel(ResourceLocation name) {
         if (!MODELS.containsKey(name)) {
             if (!ERRORED_MODELS.contains(name)) {
@@ -99,7 +111,7 @@ public class DynamXModelRegistry implements IObjModelRegistry {
         return MODELS.get(name);
     }
 
-    @Override
+    @Deprecated
     public ObjModelRenderer getModel(String name) {
         ResourceLocation path = new ResourceLocation(DynamXConstants.ID, String.format("models/%s", name));
         if (!MODELS.containsKey(path)) {
@@ -113,10 +125,9 @@ public class DynamXModelRegistry implements IObjModelRegistry {
     }
 
     /**
-     * Reloads all obj models <br>
+     * Reloads all obj models, may take some time <br>
      * <strong>DON'T CALL THIS, USE {@link DynamXLoadingTasks} !</strong>
      */
-    @Override
     public void reloadModels() {
         log.info("Reloading all models...");
         REGISTRY_CLOSED = true;
@@ -166,12 +177,16 @@ public class DynamXModelRegistry implements IObjModelRegistry {
         });
     }
 
-    @Override
-    public IObjItemModelRenderer getItemRenderer() {
+    /**
+     * @return The obj item renderer
+     */
+    public ObjItemModelLoader getItemRenderer() {
         return OBJ_ITEM_MODEL_LOADER;
     }
 
-    @Override
+    /**
+     * @return The number of loaded models
+     */
     public int getLoadedModelCount() {
         return MODELS_REGISTRY.size();
     }

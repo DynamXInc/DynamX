@@ -5,9 +5,7 @@ import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.api.events.DynamXItemEvent;
 import fr.dynamx.api.events.EventStage;
-import fr.dynamx.api.obj.IObjModelRegistry;
 import fr.dynamx.client.renders.model.ItemObjModel;
-import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderItem;
@@ -18,7 +16,7 @@ import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.StringUtils;
+import net.minecraftforge.client.model.ICustomModelLoader;
 import net.minecraftforge.client.model.IModel;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.MinecraftForge;
@@ -28,7 +26,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ObjItemModelLoader extends TileEntityItemStackRenderer implements IObjModelRegistry.IObjItemModelRenderer {
+public class ObjItemModelLoader extends TileEntityItemStackRenderer implements ICustomModelLoader {
     private final Map<ModelResourceLocation, IResourcesOwner> REGISTRY = new HashMap<>();
     private final Map<Item, Map<Byte, ItemObjModel>> ITEM_TO_MODEL = new HashMap<>();
 
@@ -91,7 +89,13 @@ public class ObjItemModelLoader extends TileEntityItemStackRenderer implements I
         }
     }
 
-    @Override
+    /**
+     * Registers the obj model of the given item
+     *
+     * @param item     The item
+     * @param meta     The metadata
+     * @param location An identifier for the item model - typically modid:itemname
+     */
     public void registerItemModel(IResourcesOwner item, int meta, ResourceLocation location) {
         ModelResourceLocation loc = new ModelResourceLocation(new ResourceLocation(location.getNamespace(), location.getPath() + ".obj"), "inventory_" + meta);
         if (!REGISTRY.containsValue(loc)) {
@@ -101,12 +105,17 @@ public class ObjItemModelLoader extends TileEntityItemStackRenderer implements I
         ModelLoader.setCustomModelResourceLocation(item.getItem(), meta, loc);
     }
 
-    @Override
+    /**
+     * @return The model corresponding to the given item, or null
+     */
     public ItemObjModel getModel(Item of, byte meta) {
         return ITEM_TO_MODEL.get(of).get(meta);
     }
 
-    @Override
+    /**
+     * Refreshes the obj models used to render the items <br>
+     * Called after packs reload
+     */
     @SideOnly(Side.CLIENT)
     public void refreshItemInfos() {
         REGISTRY.values().forEach(owner -> {

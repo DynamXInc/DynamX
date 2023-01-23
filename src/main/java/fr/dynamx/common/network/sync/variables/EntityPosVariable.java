@@ -18,6 +18,7 @@ import net.minecraft.util.text.TextComponentString;
 import java.util.concurrent.Callable;
 
 public class EntityPosVariable extends ListeningEntityVariable<EntityPosVariable.EntityPositionData> {
+    //TODO CLEAN
     public static int CRITIC1 = 30, CRITIC1warn = 100, CRITIC2 = 400, CRITIC3 = 50;
 
     public EntityPosVariable(PhysicsEntity<?> entity) {
@@ -43,7 +44,6 @@ public class EntityPosVariable extends ListeningEntityVariable<EntityPosVariable
                 if (ignoreFor <= 0) {
                     Vector3f pos = entityPositionData.position;
                     float delta = entity.physicsPosition.subtract(pos).length();
-                    //TODO CLEAN
                     CRITIC1 = 3;
                     if (delta > CRITIC1) {
                         if (delta > CRITIC1warn)
@@ -81,7 +81,6 @@ public class EntityPosVariable extends ListeningEntityVariable<EntityPosVariable
                 boolean changed = entity.ticksExisted % (physicsHandler.isBodyActive() ? 13 : 20) == 0; //Keep low-rate sync while not moving
                 //Detect changes
                 Vector3f pos = entity.physicsPosition;
-                //TODO CLEAN
                 if (positionData == null || positionData.bodyActive != physicsHandler.isBodyActive()) {
                     changed = true;
                 } else if (SyncTracker.different(pos.x, positionData.position.x) || SyncTracker.different(pos.y, positionData.position.y) || SyncTracker.different(pos.z, positionData.position.z)) {
@@ -90,8 +89,8 @@ public class EntityPosVariable extends ListeningEntityVariable<EntityPosVariable
                         SyncTracker.different(entity.physicsRotation.getZ(), positionData.rotation.getZ()) || SyncTracker.different(entity.physicsRotation.getW(), positionData.rotation.getW())) {
                     changed = true;
                 }
-                //TODO PAS COOL NEW
                 if (changed) {
+                    // pas cool, new
                     positionData = new EntityPosVariable.EntityPositionData(physicsHandler);
                     entity.synchronizedPosition.setChanged(true);
                 }
@@ -129,7 +128,7 @@ public class EntityPosVariable extends ListeningEntityVariable<EntityPosVariable
 
     //TODO USE
     public void onTeleported(PhysicsEntity<?> entity, Vector3f newPos) {
-        //TODO DOIT IGNORER LES PROCHAINES UPDATES VENANT DU CLIENT ignoreFor = 22;
+        //DOIT IGNORER LES PROCHAINES UPDATES VENANT DU CLIENT ignoreFor = 22;
         DynamXContext.getNetwork().sendToClient(new MessageForcePlayerPos(entity, newPos, entity.physicsRotation, entity.physicsHandler.getLinearVelocity(), entity.physicsHandler.getAngularVelocity()), EnumPacketTarget.PLAYER, (EntityPlayerMP) entity.getControllingPassenger());
     }
 }

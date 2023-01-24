@@ -134,7 +134,6 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
      * <strong>DON'T CALL THIS, USE {@link DynamXLoadingTasks} !</strong>
      */
     public void reloadModels() {
-        log.info("Reloading all models...");
         REGISTRY_CLOSED = true;
         MODELS.values().forEach(ObjModelRenderer::clearVAOs);
         MODELS.clear();

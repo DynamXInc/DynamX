@@ -25,7 +25,7 @@ public class OBJLoader {
     private static final String USE_MATERIAL = "usemtl";
     private static final String NEW_MATERIAL = "mtllib";
     @Getter
-    private static final List<MTLLoader> materialLibs = new ArrayList<>();
+    private static final List<MTLLoader> mtlLoaders = new ArrayList<>();
 
     private boolean hasNormals = false;
     private boolean hasTexCoords = false;
@@ -114,7 +114,7 @@ public class OBJLoader {
                                     MTLLoader material = new MTLLoader();
                                     material.parse(location, new String(DynamXUtils.readInputStream(resp.getInputStream()), StandardCharsets.UTF_8));
                                     material.getMaterials().forEach(m -> materials.put(m.getName().toLowerCase(), m));
-                                    materialLibs.add(material);
+                                    mtlLoaders.add(material);
                                 }
                                 break;
                             case USE_MATERIAL:

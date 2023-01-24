@@ -139,6 +139,7 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
         MODELS.values().forEach(ObjModelRenderer::clearVAOs);
         MODELS.clear();
         ERRORED_MODELS.clear();
+        DynamXContext.getObjModelDataCache().clear();
         DynamXErrorManager.getErrorManager().clear(DynamXErrorManager.MODEL_ERRORS);
 
         ExecutorService modelLoader = Executors.newScheduledThreadPool(LOADER_POOL_SIZE, new DynamXThreadedModLoader.DefaultThreadFactory("DnxModelLoader"));
@@ -175,7 +176,7 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
 
                 /* == Load textures == */
                 List<Callable<?>> loadTexturesTasks = new ArrayList<>();
-                OBJLoader.getMaterialLibs().forEach(mtlLoader -> loadTexturesTasks.add(() -> {
+                OBJLoader.getMtlLoaders().forEach(mtlLoader -> loadTexturesTasks.add(() -> {
                     mtlLoader.loadTextures();
                     return null;
                 }));
@@ -197,7 +198,8 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
             log.info("Loading model textures...");
             //Loads all textures of models, cannot be done before because the TextureManager is not initialized
             bar.step("Uploading textures");
-            OBJLoader.getMaterialLibs().forEach(MTLLoader::uploadTextures);
+            OBJLoader.getMtlLoaders().forEach(MTLLoader::uploadTextures);
+            OBJLoader.getMtlLoaders().clear();
             ProgressManager.pop(bar);
             DynamXLoadingTasks.endTask(DynamXLoadingTasks.MODEL);
         });

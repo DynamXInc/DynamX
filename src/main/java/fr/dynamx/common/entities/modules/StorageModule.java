@@ -29,7 +29,7 @@ public class StorageModule implements IPhysicsModule<PackEntityPhysicsHandler<?,
         inventories.put(partStorage.getId(), new InventoryBasic(entity.getPackInfo().getName(), false, partStorage.getStorageSize()));
     }
 
-    public IInventory getInventory(int id) {
+    public IInventory getInventory(byte id) {
         return inventories.get(id);
     }
 
@@ -58,7 +58,7 @@ public class StorageModule implements IPhysicsModule<PackEntityPhysicsHandler<?,
         }
         for (int j = 0; j < Math.min(tag.getInteger("StorageCount"), inventories.size()); j++) {
             NBTTagList list = tag.getTagList("StorageInv"+j, Constants.NBT.TAG_COMPOUND);
-            InventoryBasic inventory = inventories.get(j);
+            InventoryBasic inventory = inventories.get((byte) j);
             for (int i = 0; i < Math.min(inventory.getSizeInventory(), list.tagCount()); i++) {
                 inventory.setInventorySlotContents(i, new ItemStack(list.getCompoundTagAt(i)));
             }

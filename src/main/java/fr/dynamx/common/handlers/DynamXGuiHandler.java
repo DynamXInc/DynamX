@@ -18,7 +18,7 @@ public class DynamXGuiHandler implements IGuiHandler {
         if (ID == 1) //storage
         {
             BaseVehicleEntity<?> e = (BaseVehicleEntity<?>) world.getEntityByID(x);
-            IInventory inventory = e != null && e.hasModuleOfType(StorageModule.class) ? e.getModuleByType(StorageModule.class).getInventory(y) : null;
+            IInventory inventory = e != null && e.hasModuleOfType(StorageModule.class) ? e.getModuleByType(StorageModule.class).getInventory((byte) y) : null;
             return inventory == null ? null : new ContainerChest(player.inventory, inventory, player);
         }
         return null;
@@ -30,7 +30,7 @@ public class DynamXGuiHandler implements IGuiHandler {
         if (ID == 1) //storage
         {
             BaseVehicleEntity<?> e = (BaseVehicleEntity<?>) world.getEntityByID(x);
-            IInventory inventory = e != null && e.hasModuleOfType(StorageModule.class) ? e.getModuleByType(StorageModule.class).getInventory(y) : null;
+            IInventory inventory = e != null && e.hasModuleOfType(StorageModule.class) ? e.getModuleByType(StorageModule.class).getInventory((byte) y) : null;
             return inventory == null ? null : new GuiChest(player.inventory, inventory);
         }
         return null;

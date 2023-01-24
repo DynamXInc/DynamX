@@ -68,6 +68,7 @@ dynamx.error.updates=DynamX update available
 dynamx.error.syntax_error=Syntax error
 dynamx.error.deprecated_prop=Deprecated properties (that will be removed in future)
 dynamx.error.deprecated_prop_format=props_ files are deprecated
+dynamx.error.deprecated_light_format=Legacy Light parts are deprecated when using multiple lights on one part. It should now be declared in a 'MultiLight' sub property.
 dynamx.error.missing_prop=Unknown pack file properties
 dynamx.error.unknown_sub_info=Unknown sub properties
 dynamx.error.sound_error=Invalid sound config

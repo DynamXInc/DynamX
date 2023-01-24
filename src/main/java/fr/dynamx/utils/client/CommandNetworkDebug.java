@@ -4,6 +4,7 @@ import fr.dynamx.common.network.sync.variables.NetworkActivityTracker;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.command.WrongUsageException;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.TextComponentString;
 
@@ -41,6 +42,8 @@ public class CommandNetworkDebug extends CommandBase {
             case "set_entity":
                 NetworkActivityTracker.viewEntity = parseInt(args[1]);
                 break;
+            default:
+                throw new WrongUsageException(getUsage(sender));
         }
         sender.sendMessage(new TextComponentString("Selected tick is " + NetworkActivityTracker.viewIndex + ". Last is " + NetworkActivityTracker.lastTime));
         sender.sendMessage(new TextComponentString("Selected entity is " + NetworkActivityTracker.viewEntity));

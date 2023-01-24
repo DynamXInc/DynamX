@@ -2,7 +2,8 @@ package fr.dynamx.client.sound;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.audio.IDynamXSound;
-import fr.dynamx.utils.DynamXConfig;
+import fr.dynamx.client.handlers.ClientEventHandler;
+import fr.dynamx.common.core.DynamXCoreMod;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
@@ -147,7 +148,7 @@ public class DynamXSoundHandler {
      * @param distOrRoll      Either the fading distance or rolloff factor, depending on the value of "attenuationType"
      */
     public void playSingleSound(Vector3f soundPosition, String soundName, float volume, float pitch, int attenuationType, float distOrRoll) {
-        if (ready() && DynamXConfig.getMasterSoundVolume() > 0) {
+        if (ready() && getMasterVolume() > 0) {
             try {
                 //Need to add the DynamX_Main.MODID: prefix as the URL will trim off the first section, leading to a bad parse.
                 URL soundURL = new URL(null, DynamXConstants.ID + ":" + soundName + ".ogg", resourceStreamHandler);
@@ -193,7 +194,7 @@ public class DynamXSoundHandler {
      * @param distOrRoll      Either the fading distance or rolloff factor, depending on the value of "attenuationType"
      */
     public void playStreamingSound(Vector3f soundPosition, IDynamXSound sound, int attenuationType, float distOrRoll) {
-        if (ready() && DynamXConfig.getMasterSoundVolume() > 0) {
+        if (ready() && getMasterVolume() > 0) {
             if (playingSounds.contains(sound))
                 throw new IllegalStateException("Sound " + sound + " is already playing !");
             String soundID = sound.getSoundUniqueName();
@@ -258,7 +259,7 @@ public class DynamXSoundHandler {
      */
     public void setSoundVolume(IDynamXSound sound, float volume) {
         if (playingSounds.contains(sound))
-            mcSoundSystem.setVolume(sound.getSoundUniqueName(), MathHelper.clamp(volume * DynamXConfig.getMasterSoundVolume(), 0.0F, 1.0F));
+            mcSoundSystem.setVolume(sound.getSoundUniqueName(), MathHelper.clamp(volume * getMasterVolume(), 0.0F, 1.0F));
     }
 
     /**
@@ -315,9 +316,7 @@ public class DynamXSoundHandler {
             mcSoundSystem.play(sound.getSoundUniqueName());
     }
 
-
-    public void setMasterVolume(float masterVolume) {
-        DynamXConfig.setMasterSoundVolume(masterVolume);
+    public void updateMasterVolume() {
         for(IDynamXSound sound : playingSounds) {
             setSoundVolume(sound, sound.getVolume());
         }
@@ -375,7 +374,7 @@ public class DynamXSoundHandler {
     }
 
     public float getMasterVolume() {
-        return DynamXConfig.getMasterSoundVolume();
+        return ClientEventHandler.MC.gameSettings.getSoundLevel(DynamXCoreMod.DYNAMX_SOUND_CATEGORY);
     }
 
     /**

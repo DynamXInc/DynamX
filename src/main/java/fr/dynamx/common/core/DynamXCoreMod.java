@@ -4,6 +4,8 @@ import fr.aym.acslib.services.impl.stats.core.StatsBotCorePlugin;
 import fr.aym.loadingscreen.client.SplashScreenTransformer;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.LibraryInstaller;
+import net.minecraft.util.SoundCategory;
+import net.minecraftforge.common.util.EnumHelper;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,9 +19,12 @@ import java.util.Map;
 public class DynamXCoreMod implements IFMLLoadingPlugin {
     public static final Logger LOG = LogManager.getLogger("DynamXCoreMod");
 
+    public static SoundCategory DYNAMX_SOUND_CATEGORY;
+
     public DynamXCoreMod() {
         MixinBootstrap.init();
         Mixins.addConfiguration("mixins.dynamxmod.json");
+        DYNAMX_SOUND_CATEGORY = EnumHelper.addEnum(SoundCategory.class, "dynamx", new Class[] {String.class}, "dynamx");
     }
 
     @Override

@@ -4,7 +4,12 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
-import fr.dynamx.api.contentpack.registry.*;
+import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
+import fr.dynamx.api.contentpack.object.subinfo.SubInfoType;
+import fr.dynamx.api.contentpack.registry.DefinitionType;
+import fr.dynamx.api.contentpack.registry.PackFileProperty;
+import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
+import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent;
@@ -19,47 +24,39 @@ import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.VehicleLightsModule;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
+import lombok.Getter;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-@RegisteredSubInfoType(name = "light", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER}, strictName = false)
-public class PartLightSource implements ISubInfoType<ModularVehicleInfo>, IDrawablePart<BaseVehicleEntity<?>> {
-    @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
-    public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
-        if ("ShapePosition".equals(key))
-            return new IPackFilePropertyFixer.FixResult("Position", true);
-        return null;
-    };
-
-    private final ModularVehicleInfo owner;
+/**
+ * Contains multiple {@link LightObject}
+ */
+@RegisteredSubInfoType(name = "MultiLight", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER}, strictName = false)
+public class PartLightSource extends SubInfoType<ModularVehicleInfo> implements ISubInfoTypeOwner<PartLightSource>, IDrawablePart<BaseVehicleEntity<?>>, IModelTextureVariantsSupplier.IModelTextureVariants {
     private final String name;
 
-    @PackFileProperty(configNames = "Position", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y, description = "common.position", required = false)
-    private Vector3f position;
-    @PackFileProperty(configNames = "Rotation", required = false, defaultValue = "1 0 0 0")
-    private Quaternion rotation = new Quaternion();
-    @PackFileProperty(configNames = "LightId")
-    private int lightId;
+    @Getter
+    private final List<LightObject> sources = new ArrayList<>();
+
+    @Getter
     @PackFileProperty(configNames = "PartName")
-    private String partName;
-    @PackFileProperty(configNames = "Textures", required = false)
-    private String[] textures;
-    @PackFileProperty(configNames = "Colors", required = false, type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_ARRAY_ORDERED)
-    private Vector3f[] colors;
-    @PackFileProperty(configNames = "BlinkSequenceTicks", required = false)
-    private int[] blinkSequence;
-    @PackFileProperty(configNames = "RotateDuration", required = false)
-    private int rotateDuration;
+    protected String partName;
+    @Getter
+    @PackFileProperty(configNames = "BaseMaterial", required = false)
+    protected String baseMaterial = "default";
+    @Getter
+    @PackFileProperty(configNames = "Position", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y, description = "common.position", required = false)
+    protected Vector3f position;
+    @Getter
+    @PackFileProperty(configNames = "Rotation", required = false, defaultValue = "1 0 0 0")
+    protected Quaternion rotation = new Quaternion();
 
     public PartLightSource(ModularVehicleInfo owner, String name) {
-        this.owner = owner;
+        super(owner);
         this.name = name;
     }
 
@@ -81,13 +78,9 @@ public class PartLightSource implements ISubInfoType<ModularVehicleInfo>, IDrawa
         }
     }
 
-    public String getLightName() {
-        return name;
-    }
-
     @Override
     public String getName() {
-        return "LightSource_" + name;
+        return name;
     }
 
     @Override
@@ -95,75 +88,35 @@ public class PartLightSource implements ISubInfoType<ModularVehicleInfo>, IDrawa
         return owner.getPackName();
     }
 
-    public int getLightId() {
-        return lightId;
-    }
-
-    public String getPartName() {
-        return partName;
-    }
-
-    public String[] getTextures() {
-        return textures;
-    }
-
-    public int[] getBlinkSequence() {
-        return blinkSequence;
-    }
-
-    public Vector3f getPosition() {
-        return position;
-    }
-
-    public Quaternion getRotation() {
-        return rotation;
-    }
-
-    public int getRotateDuration() {
-        return rotateDuration;
-    }
-
-    private final Map<Integer, TextureVariantData> textureMap = new HashMap<>();
-
-    public void mapTexture(int blinkStep, TextureVariantData textureVariantData) {
-        textureMap.put(blinkStep, textureVariantData);
-    }
-
-    public Map<Integer, TextureVariantData> getTextureMap() {
-        return textureMap;
-    }
-
-    public Vector3f[] getColors() {
-        return colors;
-    }
-
     @Override
     public void drawParts(@Nullable BaseVehicleEntity<?> entity, RenderPhysicsEntity<?> render, ModularVehicleInfo packInfo, byte textureId, float partialTicks) {
-        //    setLightOn(9, true);
-        //    setLightOn(1, false);
         /* Rendering light sources */
         if (MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.LIGHTS, (RenderBaseVehicle<?>) render, entity, PhysicsEntityEvent.Phase.PRE, partialTicks, null))) {
             return;
         }
         VehicleLightsModule lights = entity != null ? entity.getModuleByType(VehicleLightsModule.class) : null;
         ObjModelRenderer vehicleModel = DynamXContext.getObjModelRegistry().getModel(packInfo.getModel());
-        for (PartLightSource.CompoundLight sources : packInfo.getLightSources().values()) {
-            PartLightSource onSource = null;
+        for (PartLightSource lightSource : packInfo.getLightSources().values()) {
+            LightObject onLightObject = null;
             if (lights != null) {
-                for (PartLightSource source : sources.getSources()) {
+                lights.setLightOn("gyro", true);
+                // Find the first light object that is on
+                for (LightObject source : lightSource.getSources()) {
                     if (lights.isLightOn(source.getLightId())) {
-                        onSource = source;
+                        onLightObject = source;
+                        break;
                     }
                 }
             }
             boolean isOn = true;
-            if (onSource == null) {
+            if (onLightObject == null) {
                 isOn = false;
-                onSource = sources.getSources().get(0);
+                onLightObject = lightSource.getSources().get(0);
             }
+            // Do blinking
             int activeStep = 0;
-            if (isOn && onSource.getBlinkSequence() != null) {
-                int[] seq = onSource.getBlinkSequence();
+            if (isOn && onLightObject.getBlinkSequence() != null) {
+                int[] seq = onLightObject.getBlinkSequence();
                 int mod = entity.ticksExisted % seq[seq.length - 1];
                 isOn = false; //Default state
                 for (int i = seq.length - 1; i >= 0; i--) {
@@ -173,6 +126,11 @@ public class PartLightSource implements ISubInfoType<ModularVehicleInfo>, IDrawa
                         break;
                     }
                 }
+            }
+            byte texId = 0;
+            if (isOn && !onLightObject.getBlinkTextures().isEmpty()) {
+                activeStep = activeStep % onLightObject.getBlinkTextures().size();
+                texId = onLightObject.getBlinkTextures().get(activeStep).getId();
             }
 
             //Set luminescent
@@ -184,39 +142,19 @@ public class PartLightSource implements ISubInfoType<ModularVehicleInfo>, IDrawa
                 GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             }
 
+            //Render the light
             GlQuaternionPool.openPool();
             GlStateManager.pushMatrix();
             GlStateManager.scale(packInfo.getScaleModifier().x, packInfo.getScaleModifier().y, packInfo.getScaleModifier().z);
-
-            if (onSource.getPosition() != null) {
-                DynamXRenderUtils.glTranslate(onSource.getPosition());
-            }
-            GlStateManager.rotate(GlQuaternionPool.get(onSource.getRotation()));
-
-            if (lights != null && lights.isLightOn(onSource.getLightId()) && onSource.getRotateDuration() > 0) {
-                float step = ((float) (entity.ticksExisted % onSource.getRotateDuration())) / onSource.getRotateDuration();
+            if (lightSource.getPosition() != null)
+                DynamXRenderUtils.glTranslate(lightSource.getPosition());
+            GlStateManager.rotate(GlQuaternionPool.get(lightSource.getRotation()));
+            if (lights != null && lights.isLightOn(onLightObject.getLightId()) && onLightObject.getRotateDuration() > 0) {
+                float step = ((float) (entity.ticksExisted % onLightObject.getRotateDuration())) / onLightObject.getRotateDuration();
                 step = step * 360;
                 GlStateManager.rotate(step, 0, 1, 0);
             }
-            byte texId = 0;
-            if (onSource.getTextures() != null) {
-                if (isOn && !onSource.getTextureMap().containsKey(activeStep)) {
-                    activeStep = activeStep % onSource.getTextureMap().size();
-                    if (!onSource.getTextureMap().containsKey(activeStep)) {
-                        isOn = false;
-                        //TODO CLEAN
-                        System.out.println("WARN TEXT NOT FOUND " + activeStep + " :" + onSource + " " + onSource.getTextureMap());
-                    } else {
-                        texId = onSource.getTextureMap().get(activeStep).getId();
-                    }
-                } else {
-                    texId = isOn ? onSource.getTextureMap().get(activeStep).getId() : (byte) 0;
-                }
-            } else if (onSource.getColors() != null && activeStep < onSource.getColors().length) {
-                Vector3f color = onSource.getColors()[activeStep];
-                GlStateManager.color(color.x / 255, color.y / 255, color.z / 255, 1);
-            }
-            render.renderModelGroup(vehicleModel, onSource.getPartName(), entity, texId);
+            render.renderModelGroup(vehicleModel, lightSource.getPartName(), entity, texId);
             GlStateManager.popMatrix();
             GlQuaternionPool.closePool();
 
@@ -236,62 +174,62 @@ public class PartLightSource implements ISubInfoType<ModularVehicleInfo>, IDrawa
         return new String[]{getPartName()};
     }
 
-    public static class CompoundLight implements IModelTextureVariantsSupplier.IModelTextureVariants {
-        private final String partName;
-        private final List<PartLightSource> sources = new ArrayList<>();
-        private final Map<Byte, TextureVariantData> variantsMap = new HashMap<>();
+    private final Map<Byte, TextureVariantData> variantsMap = new HashMap<>();
 
-        public CompoundLight(PartLightSource part) {
-            this.partName = part.getPartName();
-            addSource(part);
-            variantsMap.put((byte) 0, new TextureVariantData("default", (byte) 0)); //todo configurable name
-        }
+    @Override
+    public TextureVariantData getDefaultVariant() {
+        return variantsMap.get((byte) 0);
+    }
 
-        public void addSource(PartLightSource source) {
-            sources.add(source);
-            for (TextureVariantData textureVariantData : source.getTextureMap().values()) {
-                //todo tester si ça ne s'entre-écrase pas
-                variantsMap.put(textureVariantData.getId(), textureVariantData);
-            }
-        }
+    @Override
+    public TextureVariantData getVariant(byte variantId) {
+        return variantsMap.getOrDefault(variantId, getDefaultVariant());
+    }
 
-        public String getPartName() {
-            return partName;
-        }
+    @Override
+    public Map<Byte, TextureVariantData> getTextureVariants() {
+        return variantsMap;
+    }
 
-        public List<PartLightSource> getSources() {
-            return sources;
-        }
+    /**
+     * Post loads this light (computes texture variants)
+     */
+    public void postLoad() {
+        Map<String, TextureVariantData> nameToVariant = new HashMap<>();
+        byte nextTextureId = 0;
+        TextureVariantData data = new TextureVariantData(baseMaterial, nextTextureId);
+        variantsMap.put(data.getId(), data);
+        nameToVariant.put(baseMaterial, data);
 
-        @Override
-        public TextureVariantData getDefaultVariant() {
-            return variantsMap.get((byte) 0);
-        }
-
-        @Override
-        public TextureVariantData getVariant(byte variantId) {
-            return variantsMap.getOrDefault(variantId, getDefaultVariant());
-        }
-
-        @Override
-        public Map<Byte, TextureVariantData> getTextureVariants() {
-            return variantsMap;
-        }
-
-        /**
-         * Post loads this light (computes texture variants)
-         */
-        public void postLoad() {
-            List<PartLightSource> sources = getSources();
-            for (int i = 0; i < sources.size(); i++) {
-                PartLightSource source = sources.get(i);
-                if (source.getTextures() != null) {
-                    for (int j = 0; j < source.getTextures().length; j++) {
-                        TextureVariantData data = new TextureVariantData(source.getTextures()[j], (byte) (1 + i + j));
-                        source.mapTexture(j, data);
+        List<LightObject> sources = getSources();
+        for (LightObject source : sources) {
+            if (source.getTextures() != null) {
+                source.getBlinkTextures().clear();
+                for (int j = 0; j < source.getTextures().length; j++) {
+                    String name = source.getTextures()[j];
+                    if (nameToVariant.containsKey(name)) {
+                        source.getBlinkTextures().add(nameToVariant.get(name));
+                    } else {
+                        data = new TextureVariantData(name, ++nextTextureId);
+                        source.getBlinkTextures().add(data);
+                        variantsMap.put(data.getId(), data);
+                        nameToVariant.put(name, data);
                     }
                 }
             }
         }
+    }
+
+    public void addLightSource(LightObject object) {
+        sources.add(object);
+    }
+
+    @Override
+    public void addSubProperty(ISubInfoType<PartLightSource> property) {
+    }
+
+    @Override
+    public List<ISubInfoType<PartLightSource>> getSubProperties() {
+        return Collections.emptyList();
     }
 }

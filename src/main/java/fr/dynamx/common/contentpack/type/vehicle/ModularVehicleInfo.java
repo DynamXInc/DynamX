@@ -166,7 +166,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
      * The light sources of this vehicle
      */
     @Getter
-    protected final Map<String, PartLightSource.CompoundLight> lightSources = new HashMap<>();
+    protected final Map<String, PartLightSource> lightSources = new HashMap<>();
 
     /**
      * The list of all rendered parts for this vehicle <br>
@@ -256,7 +256,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
             variants.appendTo(this);
         }
         //Map lights
-        lightSources.values().forEach(PartLightSource.CompoundLight::postLoad);
+        lightSources.values().forEach(PartLightSource::postLoad);
         //Post-load sub-properties
         if (!super.postLoad(hot))
             return false;
@@ -280,7 +280,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     public void addModules(BaseVehicleEntity<?> entity, ModuleListBuilder modules) {
         getSubProperties().forEach(sub -> sub.addModules(entity, modules));
         getAllParts().forEach(sub -> sub.addModules(entity, modules));
-        getLightSources().values().forEach(compoundLight -> compoundLight.getSources().forEach(sub -> sub.addModules(entity, modules)));
+        getLightSources().values().forEach(compoundLight -> compoundLight.addModules(entity, modules));
     }
 
     @Override
@@ -328,7 +328,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
         return collisionShapeDebugBuffer;
     }
 
-    public PartLightSource.CompoundLight getLightSource(String partName) {
+    public PartLightSource getLightSource(String partName) {
         return lightSources.get(partName);
     }
 
@@ -356,7 +356,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
 
     @Override
     public IModelTextureVariantsSupplier.IModelTextureVariants getTextureVariantsFor(ObjObjectRenderer objObjectRenderer) {
-        PartLightSource.CompoundLight src = getLightSource(objObjectRenderer.getObjObjectData().getName());
+        PartLightSource src = getLightSource(objObjectRenderer.getObjObjectData().getName());
         if (src != null)
             return src;
         return getVariants();
@@ -411,10 +411,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
      * @param source The light source to add
      */
     public void addLightSource(PartLightSource source) {
-        if (lightSources.containsKey(source.getPartName()))
-            lightSources.get(source.getPartName()).addSource(source);
-        else
-            lightSources.put(source.getPartName(), new PartLightSource.CompoundLight(source));
+        lightSources.put(source.getPartName(), source);
         addDrawablePart(source);
     }
 

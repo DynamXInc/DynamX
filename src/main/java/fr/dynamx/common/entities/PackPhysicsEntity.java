@@ -16,10 +16,12 @@ import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.entity.Entity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
@@ -72,10 +74,10 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
     @Override
     public void onPackInfosReloaded() {
         setPackInfo(createInfo(getInfoName()));
-        if(physicsHandler != null)
+        if (physicsHandler != null)
             physicsHandler.onPackInfosReloaded();
-        for(IPhysicsModule<?> module : moduleList) {
-            if(module instanceof IPackInfoReloadListener)
+        for (IPhysicsModule<?> module : moduleList) {
+            if (module instanceof IPackInfoReloadListener)
                 ((IPackInfoReloadListener) module).onPackInfosReloaded();
         }
     }
@@ -116,6 +118,11 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
             entityTextureID = (byte) getMetadata();
             packInfo.getDrawableParts().forEach(m -> ((IDrawablePart<PackPhysicsEntity<?, ?>>) m).onTexturesChange(this));
         }
+    }
+
+    @Override
+    public ItemStack getPickedResult(RayTraceResult target) {
+        return packInfo.getPickedResult();
     }
 
     /**

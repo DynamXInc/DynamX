@@ -99,7 +99,6 @@ public class PartLightSource extends SubInfoType<ModularVehicleInfo> implements 
         for (PartLightSource lightSource : packInfo.getLightSources().values()) {
             LightObject onLightObject = null;
             if (lights != null) {
-                lights.setLightOn("gyro", true);
                 // Find the first light object that is on
                 for (LightObject source : lightSource.getSources()) {
                     if (lights.isLightOn(source.getLightId())) {

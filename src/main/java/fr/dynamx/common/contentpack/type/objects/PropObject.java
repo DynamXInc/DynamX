@@ -6,7 +6,6 @@ import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
-import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
@@ -16,17 +15,18 @@ import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.events.CreatePackItemEvent;
 import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
-import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
-import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.contentpack.loader.ObjectLoader;
 import fr.dynamx.common.contentpack.loader.PackFilePropertyData;
 import fr.dynamx.common.contentpack.loader.SubInfoTypeAnnotationCache;
+import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
+import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.items.ItemProps;
-import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.physics.ShapeUtils;
 import lombok.Getter;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nullable;
@@ -130,7 +130,7 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
 
     @Override
     public boolean postLoad(boolean hot) {
-        if(!super.postLoad(hot))
+        if (!super.postLoad(hot))
             return false;
         if (owner != null) {
             compoundCollisionShape = owner.compoundCollisionShape;
@@ -156,7 +156,7 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
 
     @Override
     public List<Vector3f> getCollisionShapeDebugBuffer() {
-        if(debugBuffer == null)
+        if (debugBuffer == null)
             debugBuffer = ShapeUtils.getDebugVectorList(compoundCollisionShape, ShapeUtils.getDebugBuffer(compoundCollisionShape));
         return debugBuffer;
     }
@@ -164,6 +164,11 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
     @Override
     public CompoundCollisionShape getPhysicsCollisionShape() {
         return compoundCollisionShape;
+    }
+
+    @Override
+    public ItemStack getPickedResult() {
+        return new ItemStack((Item) getOwners()[0]);
     }
 
     @Override

@@ -33,6 +33,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 
@@ -213,6 +214,11 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     @Override
     public List<Vector3f> getCollisionShapeDebugBuffer() {
         return new ArrayList<>();
+    }
+
+    @Override
+    public ItemStack getPickedResult() {
+        return ItemStack.EMPTY;
     }
 
     @Override

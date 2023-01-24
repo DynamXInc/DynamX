@@ -6,6 +6,7 @@ import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.common.contentpack.type.ObjectInfo;
+import net.minecraft.item.ItemStack;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -36,4 +37,6 @@ public interface IPhysicsPackInfo {
     default List<IDrawablePart<?>> getDrawableParts() {
         return Collections.emptyList();
     }
+
+    ItemStack getPickedResult();
 }

@@ -6,6 +6,7 @@ import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
+import fr.dynamx.common.contentpack.type.objects.ItemObject;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
 import fr.dynamx.common.items.tools.ItemWrench;
@@ -45,8 +46,9 @@ public class DynamXItemRegistry {
     public static CreativeTabs objectTab = new CreativeTabs(DynamXConstants.ID + "_object") {
         @Override
         public ItemStack createIcon() {
-            Optional<IInfoOwner<BlockObject<?>>> item = DynamXObjectLoaders.BLOCKS.owners.stream().filter(blockObjectIInfoOwner -> blockObjectIInfoOwner.getInfo().getCreativeTab(null) == null).findFirst();
-            return item.map(blockObjectIInfoOwner -> new ItemStack((Block) blockObjectIInfoOwner)).orElseGet(() -> new ItemStack(Items.CARROT));
+            Optional<IInfoOwner<ItemObject<?>>> item = DynamXObjectLoaders.ITEMS.owners.stream().filter(blockObjectIInfoOwner -> blockObjectIInfoOwner.getInfo().getCreativeTab(null) == null).findFirst();
+            Optional<IInfoOwner<BlockObject<?>>> block = DynamXObjectLoaders.BLOCKS.owners.stream().filter(blockObjectIInfoOwner -> blockObjectIInfoOwner.getInfo().getCreativeTab(null) == null).findFirst();
+            return item.map(blockObjectIInfoOwner -> new ItemStack((Item) blockObjectIInfoOwner)).orElseGet(() -> block.map(blockOwner -> new ItemStack((Block) blockOwner)).orElseGet(() -> new ItemStack(Items.CARROT)));
         }
     };
 

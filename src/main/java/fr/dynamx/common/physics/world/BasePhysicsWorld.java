@@ -192,6 +192,7 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
                 syncThreadsLock.acquire();
             } catch (InterruptedException ignored) {
                 //System.out.println("Inter 1 !");
+                syncThreadsLock = null; //fix: don't release if interrupted
             }
         }
         entities.forEach(e -> {

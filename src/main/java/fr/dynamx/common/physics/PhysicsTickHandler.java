@@ -15,7 +15,6 @@ import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -35,8 +34,15 @@ public class PhysicsTickHandler {
     @SideOnly(Side.CLIENT)
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void tickClient(TickEvent.ClientTickEvent event) {
+        if(event.phase == TickEvent.Phase.START) {
+            try {
+                Profiler.get().start(Profiler.Profiles.TICK);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         if (canTickClient(Minecraft.getMinecraft())) {
-            tickPhysics(event.phase, Minecraft.getMinecraft().world);
+            tickWorldPhysics(event.phase, Minecraft.getMinecraft().world);
         }
 
         if (event.phase == TickEvent.Phase.START) {
@@ -44,6 +50,7 @@ public class PhysicsTickHandler {
             Vector3fPool.openPool();
             DynamXLoadingTasks.tick();
         } else {
+            Profiler.get().end(Profiler.Profiles.TICK);
             if (Minecraft.getMinecraft().world != null) {
                 boolean profiling = DynamXDebugOptions.PROFILING.isActive();
                 if (profiling) {
@@ -70,9 +77,16 @@ public class PhysicsTickHandler {
 
     @SubscribeEvent
     public void tickServer(TickEvent.ServerTickEvent event) {
+        if(event.phase == TickEvent.Phase.START) {
+            try {
+                Profiler.get().start(Profiler.Profiles.TICK);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         for (WorldServer world : FMLCommonHandler.instance().getMinecraftServerInstance().worlds) {
             if (canTickServer(world)) {
-                tickPhysics(event.phase, world);
+                tickWorldPhysics(event.phase, world);
             }
         }
 
@@ -84,6 +98,7 @@ public class PhysicsTickHandler {
                 DynamXLoadingTasks.tick();
             }
         } else {
+            Profiler.get().end(Profiler.Profiles.TICK);
             sendClientsDebug();
             Profiler.get().update();
             TaskScheduler.tick();
@@ -96,13 +111,8 @@ public class PhysicsTickHandler {
         return world != null && DynamXMain.proxy.shouldUseBulletSimulation(world) && DynamXContext.getPhysicsWorld(world) != null;
     }
 
-    private void tickPhysics(TickEvent.Phase phase, World world) {
+    private void tickWorldPhysics(TickEvent.Phase phase, World world) {
         if (phase == TickEvent.Phase.START) {
-            try {
-                Profiler.get().start(Profiler.Profiles.TICK);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
             //Open Pool
             TransformPool.getPool().openSubPool();
             QuaternionPool.openPool();
@@ -130,7 +140,6 @@ public class PhysicsTickHandler {
             Vector3fPool.closePool();
             QuaternionPool.closePool();
             TransformPool.getPool().closeSubPool();
-            Profiler.get().end(Profiler.Profiles.TICK);
         }
     }
 

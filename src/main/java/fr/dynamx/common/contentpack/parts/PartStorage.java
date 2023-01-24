@@ -34,7 +34,7 @@ public class PartStorage extends InteractivePart<BaseVehicleEntity<?>, ModularVe
 
     @Override
     public void addModules(BaseVehicleEntity<?> entity, ModuleListBuilder modules) {
-        if(modules.hasModuleOfClass(StorageModule.class))
+        if(!modules.hasModuleOfClass(StorageModule.class))
             modules.add(new StorageModule(entity, this));
         else
             modules.getByClass(StorageModule.class).addInventory(entity, this);

@@ -90,5 +90,3 @@ dynamx.error.addon_error=Addon loading error
 dynamx.error.obj_error=Obj loading error
 
 dynamx.reload.models.errors=§c[DynamX] Some models have errors, use the debug menu to see them
-
-soundCategory.dynamx=DynamX

@@ -146,8 +146,10 @@ public class ClientEventHandler {
             event.getButtonList().add(new GuiButton(-54391, event.getGui().width / 2 - 110, event.getGui().height - 30, 220, 20, TextFormatting.AQUA + "Mise à jour DynamX disponible !" + TextFormatting.RESET));
         //else if (event.getGui() instanceof GuiWorldSelection || event.getGui() instanceof GuiMultiplayer)
         //    event.getButtonList().add(new GuiButtonImage(-54392, event.getGui().width - 25, 5, 20, 18, 0, 168, 19, CRAFTING_TABLE_GUI_TEXTURES));
-        else if (event.getGui() instanceof GuiScreenOptionsSounds)
-            event.getButtonList().add(new ButtonSlider(-54393,  150, 20,  false,"DynamX Sounds" + TextFormatting.RESET));
+        else if (event.getGui() instanceof GuiScreenOptionsSounds) {
+            int i = 1+SoundCategory.values().length;
+            event.getButtonList().add(new ButtonSlider(-54393, event.getGui().width / 2 - 155 + i % 2 * 160, event.getGui().height / 6 - 12 + 24 * (i >> 1), false, "DynamX Sounds" + TextFormatting.RESET));
+        }
     }
 
     @SubscribeEvent

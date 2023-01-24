@@ -21,9 +21,8 @@ import javax.annotation.Nullable;
 /**
  * Patches the world raytrace to raytrace on dynamx blocks
  */
-@Mixin(value = Chunk.class, remap = MixinChunk.REMAP)
+@Mixin(value = Chunk.class)
 public abstract class MixinChunk {
-    public static final boolean REMAP = false;
     @Final
     @Shadow
     private ExtendedBlockStorage[] storageArrays;

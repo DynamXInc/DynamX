@@ -3,7 +3,6 @@ package fr.dynamx.common.objloader;
 import fr.dynamx.common.objloader.data.Material;
 import fr.dynamx.common.objloader.data.ObjObjectData;
 import fr.dynamx.utils.DynamXUtils;
-import fr.dynamx.utils.RegistryNameSetter;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IResource;
@@ -49,7 +48,7 @@ public class OBJLoader {
     /**
      * Reads an obj models, including mtl files
      *
-     * @param location  Path of the obj model directory. Null if it needs to ignore mtl files
+     * @param location   Path of the obj model directory. Null if it needs to ignore mtl files
      * @param objContent Content of the obj file
      */
     //TODO CLEAN THIS
@@ -87,7 +86,7 @@ public class OBJLoader {
                         String[] parts = trim(line.split(" "));
                         if (parts.length == 0)
                             continue;
-                        switch (parts[0]){
+                        switch (parts[0]) {
                             case COMMENT:
                                 continue;
                             case POSITION:
@@ -105,12 +104,12 @@ public class OBJLoader {
                                 normals.add(new Vector3f(Float.parseFloat(parts[1]), Float.parseFloat(parts[2]), Float.parseFloat(parts[3])));
                                 break;
                             case TEX_COORDS:
-                                if(location != null)
+                                if (location != null)
                                     texCoords.add(new Vector2f(Float.parseFloat(parts[1]), Float.parseFloat(parts[2])));
                                 break;
                             case NEW_MATERIAL:
-                                if(location != null) {
-                                    ResourceLocation path = new ResourceLocation(location.getNamespace(),location.getPath() + parts[1]);
+                                if (location != null) {
+                                    ResourceLocation path = new ResourceLocation(location.getNamespace(), location.getPath() + parts[1]);
                                     IResource resp = Minecraft.getMinecraft().getResourceManager().getResource(path);
                                     MTLLoader material = new MTLLoader();
                                     material.parse(location, new String(DynamXUtils.readInputStream(resp.getInputStream()), StandardCharsets.UTF_8));
@@ -169,7 +168,7 @@ public class OBJLoader {
                         result.getTangents().add(new Vector3f());
                     }
 
-                    int normalModelIndex = normalIndexMap.getOrDefault(current.positionIndex,-1);
+                    int normalModelIndex = normalIndexMap.getOrDefault(current.positionIndex, -1);
 
                     if (normalModelIndex == -1) {
                         normalModelIndex = normalModel.getVertices().size();
@@ -190,7 +189,7 @@ public class OBJLoader {
                     normalModel.computeNormals();
 
                     for (int i = 0; i < result.getNormals().size(); i++) {
-                        result.getNormals().add(normalModel.getNormals().get(indexMap.getOrDefault(i,-1)));
+                        result.getNormals().add(normalModel.getNormals().get(indexMap.getOrDefault(i, -1)));
                     }
                 }
                 object.setCenter(result.computeCenter());

@@ -123,9 +123,9 @@ public class ShapeUtils {
             hullShape.setScale(scale.subtract(new Vector3f(.1f, .1f, .1f)));
             collisionShape.addChildShape(hullShape, new Vector3f(centerOfMass.x, shapeYOffset + centerOfMass.y, centerOfMass.z));
         }
-        long end = System.currentTimeMillis();
-        long time = end - start;
-        log.info("Loaded " + dcFileLocation + " in " + time + " ms");
+        long time = System.currentTimeMillis() - start;
+        if(time > 10)
+            log.warn("Loaded " + dcFileLocation + " in " + time + " ms");
         return collisionShape;
     }
 

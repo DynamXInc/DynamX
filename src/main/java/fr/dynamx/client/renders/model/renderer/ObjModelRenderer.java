@@ -1,26 +1,21 @@
 package fr.dynamx.client.renders.model.renderer;
 
-import fr.aym.acslib.api.services.ErrorTrackingService;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.events.DynamXModelRenderEvent;
 import fr.dynamx.api.events.EventStage;
 import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
 import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.common.DynamXContext;
-import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
 import fr.dynamx.common.objloader.data.Material;
 import fr.dynamx.common.objloader.data.ObjModelData;
 import fr.dynamx.common.objloader.data.ObjObjectData;
-import fr.dynamx.client.renders.model.texture.TextureVariantData;
-import fr.dynamx.utils.DynamXLoadingTasks;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.common.MinecraftForge;
@@ -28,11 +23,8 @@ import net.minecraftforge.common.MinecraftForge;
 import javax.annotation.Nullable;
 import javax.vecmath.Vector4f;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static fr.dynamx.common.DynamXMain.log;
 
 /**
  * A render-able obj model
@@ -61,6 +53,23 @@ public class ObjModelRenderer {
         this.objObjects = objObjects;
         this.materials = materials;
         this.textureVariants = textureVariants;
+
+        // Load variants
+        hasNoneMaterials = false;
+        ObjObjectRenderer loadingObject = null;
+        try {
+            for (ObjObjectRenderer object : objObjects) {
+                loadingObject = object;
+                object.clearVAO();
+                if (object.getObjObjectData().getMesh().materials.isEmpty() || getTextureVariants() == null)
+                    continue;
+                IModelTextureVariantsSupplier.IModelTextureVariants variants = this.getTextureVariants().getTextureVariantsFor(object);
+                if (variants != null)
+                    object.setTextureVariants(this, variants);
+            }
+        } catch (Exception e) {
+            DynamXErrorManager.addError(textureVariants != null ? textureVariants.getPackName() : "Non-pack model", DynamXErrorManager.MODEL_ERRORS, "obj_error", ErrorLevel.HIGH, getLocation().getModelPath().toString(), (loadingObject == null ? null : loadingObject.getObjObjectData().getName()), e);
+        }
     }
 
     public static ObjModelRenderer loadObjModel(ObjModelPath objModelPath, @Nullable IModelTextureVariantsSupplier textureVariants) {
@@ -78,31 +87,8 @@ public class ObjModelRenderer {
         return null;
     }
 
-    /**
-     * Creates display list for each {@link ObjObjectData}
-     */
-    public void setupModel() {
-        if (objObjects.isEmpty()) return; // Error while loading the model
-        hasNoneMaterials = false;
-        ObjObjectRenderer step = null;
-        try {
-            for (ObjObjectRenderer object : objObjects) {
-                step = object;
-                object.clearDisplayLists();
-                if (object.getObjObjectData().getMesh().materials.isEmpty()) continue;
-                if (getTextureVariants() != null) {
-                    IModelTextureVariantsSupplier.IModelTextureVariants textureVariants = this.getTextureVariants().getTextureVariantsFor(object);
-                    if (textureVariants != null) {
-                        boolean log = object.getObjObjectData().getName().equalsIgnoreCase("chassis");
-                        textureVariants.getTextureVariants().values().forEach(data -> object.createList(this, textureVariants.getDefaultVariant(), data, log));
-                        continue;
-                    }
-                }
-                object.createList(this, null, null, false);
-            }
-        } catch (Exception e) {
-            DynamXErrorManager.addError(textureVariants != null ? textureVariants.getPackName() : "Non-pack model", DynamXErrorManager.MODEL_ERRORS, "obj_error", ErrorLevel.HIGH, getLocation().getModelPath().toString(), (step == null ? null : step.getObjObjectData().getName()), e);
-        }
+    public void clearVAOs() {
+        objObjects.forEach(ObjObjectRenderer::clearVAO);
     }
 
     /**

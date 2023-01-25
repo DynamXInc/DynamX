@@ -8,10 +8,10 @@ import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.modules.IVehicleController;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.api.network.sync.ClientEntityNetHandler;
+import fr.dynamx.client.camera.CameraSystem;
 import fr.dynamx.client.network.ClientPhysicsEntitySynchronizer;
 import fr.dynamx.client.network.ClientPhysicsSyncManager;
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 
@@ -23,12 +23,12 @@ public class VehicleHud extends GuiFrame {
     private GuiLabel netWarning;
     private final List<ResourceLocation> styleSheets = new ArrayList<>();
 
-    public VehicleHud(IModuleContainer.ISeatsContainer riddenEntity) {
+    public VehicleHud(IModuleContainer.ISeatsContainer entity) {
         super(new GuiScaler.Identity());
-        this.riddenEntity = riddenEntity.cast();
+        this.riddenEntity = entity.cast();
         setCssClass("root");
-        List<IVehicleController> controllers = new ArrayList<>(((ClientEntityNetHandler) riddenEntity.cast().getSynchronizer()).getControllers());
-        if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.CreateHud(this, styleSheets, riddenEntity.getSeats().isLocalPlayerDriving(), this.riddenEntity, controllers))) {
+        List<IVehicleController> controllers = new ArrayList<>(((ClientEntityNetHandler) entity.cast().getSynchronizer()).getControllers());
+        if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.CreateHud(this, styleSheets, entity.getSeats().isLocalPlayerDriving(), this.riddenEntity, controllers))) {
             controllers.forEach(c ->
             {
                 List<ResourceLocation> hudStyle = c.getHudCssStyles();
@@ -39,13 +39,14 @@ public class VehicleHud extends GuiFrame {
                     add(hud);
                 }
             });
-            if (riddenEntity.cast().getSynchronizer() instanceof ClientPhysicsEntitySynchronizer) {
+            if (entity.cast().getSynchronizer() instanceof ClientPhysicsEntitySynchronizer) {
                 netWarning = new GuiLabel("");
                 netWarning.setCssId("network_warning");
                 add(netWarning);
             }
             //add(new GuiLabel("DynamX " + DynamXConstants.VERSION_TYPE + " V." + DynamXConstants.VERSION).setCssId("hud_ea_warning"));
         }
+        CameraSystem.setCameraZoom(entity.cast().getPackInfo().getDefaultZoomLevel());
     }
 
     @Override

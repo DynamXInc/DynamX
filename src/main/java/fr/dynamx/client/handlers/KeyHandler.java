@@ -2,7 +2,6 @@ package fr.dynamx.client.handlers;
 
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.client.camera.CameraSystem;
-import fr.dynamx.client.handlers.hud.CarController;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.parts.PartDoor;
 import fr.dynamx.common.contentpack.parts.PartSeat;
@@ -31,6 +30,11 @@ import org.lwjgl.input.Mouse;
 import static fr.dynamx.client.handlers.ClientEventHandler.MC;
 
 public class KeyHandler {
+    public static final KeyBinding KEY_ENGINE_ON = new KeyBinding("key.startEngine", Keyboard.KEY_O, "key.categories." + DynamXConstants.ID);
+    public static final KeyBinding KEY_HANDBRAKE = new KeyBinding("key.brake", Keyboard.KEY_SPACE, "key.categories." + DynamXConstants.ID);
+    public static final KeyBinding KEY_SPEED_LIMITIER = new KeyBinding("key.speedlimit", Keyboard.KEY_J, "key.categories." + DynamXConstants.ID);
+    public static final KeyBinding KEY_LOCK_DOOR = new KeyBinding("key.toggleLockDoor", Keyboard.KEY_Y, "key.categories." + DynamXConstants.ID);
+
     public static final KeyBinding KEY_CAMERA_MODE = new KeyBinding("key.cammode", Keyboard.KEY_MULTIPLY, "key.categories." + DynamXConstants.ID);
     public static final KeyBinding KEY_ZOOM_IN = new KeyBinding("key.camin", Keyboard.KEY_ADD, "key.categories." + DynamXConstants.ID);
     public static final KeyBinding KEY_ZOOM_OUT = new KeyBinding("key.camout", Keyboard.KEY_SUBTRACT, "key.categories." + DynamXConstants.ID);
@@ -45,13 +49,17 @@ public class KeyHandler {
     public static final KeyBinding KEY_POWERDOWN = new KeyBinding("key.powerdown", Keyboard.KEY_LSHIFT, "key.categories." + DynamXConstants.ID);
 
 
-
     private final Minecraft mc;
     private int holdingDown;
     private boolean justPressed;
 
     public KeyHandler(Minecraft minecraft) {
         this.mc = minecraft;
+
+        ClientRegistry.registerKeyBinding(KEY_HANDBRAKE);
+        ClientRegistry.registerKeyBinding(KEY_ENGINE_ON);
+        ClientRegistry.registerKeyBinding(KEY_SPEED_LIMITIER);
+        ClientRegistry.registerKeyBinding(KEY_LOCK_DOOR);
 
         ClientRegistry.registerKeyBinding(KEY_CAMERA_MODE);
         ClientRegistry.registerKeyBinding(KEY_ZOOM_IN);
@@ -62,8 +70,6 @@ public class KeyHandler {
         ClientRegistry.registerKeyBinding(KEY_TAKE_OBJECT);
         ClientRegistry.registerKeyBinding(KEY_POWERUP);
         ClientRegistry.registerKeyBinding(KEY_POWERDOWN);
-
-        CarController.registerControls();
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -96,7 +102,7 @@ public class KeyHandler {
                 }
             }
 
-            if (CarController.toggleLockDoor.isPressed()) {
+            if (KEY_LOCK_DOOR.isPressed()) {
                 Entity entity = mc.player.getRidingEntity();
                 if (entity instanceof BaseVehicleEntity && entity instanceof IModuleContainer.IDoorContainer && ((IModuleContainer.IDoorContainer) entity).getDoors() != null) {
                     PartSeat seat = ((IModuleContainer.ISeatsContainer) entity).getSeats().getRidingSeat(MC.player);

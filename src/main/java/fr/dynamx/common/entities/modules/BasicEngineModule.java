@@ -81,8 +81,21 @@ public abstract class BasicEngineModule implements IPhysicsModule<BaseVehiclePhy
         return (getControls() & 32) == 32;
     }
 
+    /**
+     * @return The engine off/on state
+     */
     public boolean isEngineStarted() {
         return (EnginePhysicsHandler.inTestFullGo) || ((controls.get() & 1) == 1);
+    }
+
+    /**
+     * Set the engine off/on state <br>
+     * Not used in DynamX, here for the addons
+     *
+     * @param started engine on/off state
+     */
+    public void setEngineStarted(boolean started) {
+        setControls(started ? getControls() | 1 : getControls() &~ 1);
     }
 
     public int getControls() {

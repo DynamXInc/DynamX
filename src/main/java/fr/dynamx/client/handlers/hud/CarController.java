@@ -52,8 +52,6 @@ public class CarController extends BaseController {
     public CarController(BaseVehicleEntity<?> entity, CarEngineModule engine) {
         super(entity, engine);
         this.engine = engine;
-
-        handbraking = engine.isHandBraking();
         speedLimit = engine.getSpeedLimit();
     }
 
@@ -98,6 +96,7 @@ public class CarController extends BaseController {
         float scale = 90f / 300;
         GuiPanel speed = new SpeedometerPanel(this, scale, maxRpm);
         speed.setCssClass("speed_pane");
+        speed.setCssId("speedometer_texture");
         float[] engineProperties = engine.getEngineProperties();
         speed.add(new UpdatableGuiLabel("%s", s -> String.format(s, engine.isEngineStarted() ? Math.abs((int) engineProperties[VehicleEntityProperties.EnumEngineProperties.SPEED.ordinal()]) : "--", "")).setCssId("engine_speed"));
         // speed.add(new UpdatableGuiLabel("%d", s -> String.format(s, (int) (engineProperties[VehicleEntityProperties.EnumEngineProperties.REVS.ordinal()] * entity.getPackInfo().getSubPropertyByType(EngineInfo.class).getMaxRevs()), "")).setCssId("engine_rpm"));

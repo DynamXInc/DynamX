@@ -39,6 +39,7 @@ public abstract class BaseController implements IVehicleController {
     public BaseController(BaseVehicleEntity<?> entity, BasicEngineModule engine) {
         this.entity = entity;
         isEngineStarted = engine.isEngineStarted();
+        handbraking = engine.isHandBraking();
         while (KeyHandler.KEY_HANDBRAKE.isPressed()) ;
         while (KeyHandler.KEY_SPEED_LIMITIER.isPressed()) ;
         while (KeyHandler.KEY_ENGINE_ON.isPressed()) ;

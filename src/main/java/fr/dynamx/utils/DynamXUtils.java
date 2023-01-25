@@ -347,16 +347,14 @@ public class DynamXUtils {
         return -1;
     }
 
-    public static void connectTrailer(EntityPlayer player, BaseVehicleEntity<?> carEntity, BaseVehicleEntity<?> trailer){
-
+    public static void attachTrailer(EntityPlayer player, BaseVehicleEntity<?> carEntity, BaseVehicleEntity<?> trailer){
         Vector3fPool.openPool();
-        Vector3f p1r = DynamXGeometry.rotateVectorByQuaternion(((TrailerAttachModule) carEntity.getModuleByType(TrailerAttachModule.class)).getAttachPoint(), carEntity.physicsRotation);
-        Vector3f p2r = DynamXGeometry.rotateVectorByQuaternion(((TrailerAttachModule) trailer.getModuleByType(TrailerAttachModule.class)).getAttachPoint(), trailer.physicsRotation);
+        Vector3f p1r = DynamXGeometry.rotateVectorByQuaternion(carEntity.getModuleByType(TrailerAttachModule.class).getAttachPoint(), carEntity.physicsRotation);
+        Vector3f p2r = DynamXGeometry.rotateVectorByQuaternion(trailer.getModuleByType(TrailerAttachModule.class).getAttachPoint(), trailer.physicsRotation);
         if (p1r.addLocal(carEntity.physicsPosition).subtract(p2r.addLocal(trailer.physicsPosition)).lengthSquared() < 60) {
             if (carEntity.getJointsHandler() == null) {
                 return;
             }
-
             EntityJointsHandler handler = (EntityJointsHandler) carEntity.getJointsHandler();
             Collection<EntityJoint<?>> curJoints = handler.getJoints();
             TrailerEntity trailerIsAttached = null;

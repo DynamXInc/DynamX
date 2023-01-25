@@ -55,7 +55,7 @@ public class MessageAttachTrailer implements IDnxPacket, IMessageHandler<Message
                         return null;
                     }
 
-                    DynamXUtils.connectTrailer(player, carEntity, trailer);
+                    DynamXUtils.attachTrailer(player, carEntity, trailer);
 
                 }
             }

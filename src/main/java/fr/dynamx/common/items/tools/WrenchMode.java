@@ -264,17 +264,7 @@ public class WrenchMode {
                     BaseVehicleEntity<?> trailer = vehicleEntity instanceof TrailerEntity ? vehicleEntity : temp instanceof TrailerEntity ? temp : null;
                     if (car != null && trailer != null && car.getModuleByType(TrailerAttachModule.class) != null && trailer.getModuleByType(TrailerAttachModule.class) != null
                             && car.getModuleByType(TrailerAttachModule.class).getConnectedEntity() == -1 && trailer.getModuleByType(TrailerAttachModule.class).getConnectedEntity() == -1) {
-                        Vector3fPool.openPool();
-                        Vector3f p1r = DynamXGeometry.rotateVectorByQuaternion(car.getModuleByType(TrailerAttachModule.class).getAttachPoint(), car.physicsRotation);
-                        Vector3f p2r = DynamXGeometry.rotateVectorByQuaternion(trailer.getModuleByType(TrailerAttachModule.class).getAttachPoint(), trailer.physicsRotation);
-                        if ((p1r.addLocal(car.physicsPosition).subtract(p2r.addLocal(trailer.physicsPosition)).lengthSquared() < 60)) {
-                            if (TrailerAttachModule.HANDLER.createJoint(car, trailer, (byte) 0))
-                                context.sendMessage(new TextComponentString("Attached " + trailer.getPackInfo().getName() + " to " + car.getPackInfo().getName()));
-                            else
-                                context.sendMessage(new TextComponentString("Cannot attach " + trailer.getPackInfo().getName() + " to " + car.getPackInfo().getName()));
-                        } else
-                            context.sendMessage(new TextComponentString("The joint points are too far away !"));
-                        Vector3fPool.closePool();
+                        DynamXUtils.connectTrailer(context, car, trailer);
                     } else
                         context.sendMessage(new TextComponentString("[old] Cannot attach " + temp.getPackInfo().getName() + " to " + vehicleEntity.getPackInfo().getName() + " !"));
                     ItemWrench.removeEntity(context.getHeldItemMainhand());

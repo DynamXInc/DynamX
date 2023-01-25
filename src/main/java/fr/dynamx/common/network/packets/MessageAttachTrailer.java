@@ -50,9 +50,8 @@ public class MessageAttachTrailer implements IDnxPacket, IMessageHandler<Message
                     float x = carEntity.getPosition().getX() + trailerAttachModule.getAttachPoint().x;
                     float y = carEntity.getPosition().getY() + trailerAttachModule.getAttachPoint().y;
                     float z = carEntity.getPosition().getZ() + trailerAttachModule.getAttachPoint().z;
-                    int range = 20;
                     TrailerEntity trailer = null;
-                    List<TrailerEntity> list = player.world.getEntitiesWithinAABB(TrailerEntity.class, carEntity.getEntityBoundingBox().grow(range));
+                    List<TrailerEntity> list = player.world.getEntitiesWithinAABB(TrailerEntity.class, carEntity.getEntityBoundingBox().grow(20));
                     for (TrailerEntity<?> trailerEntity : list) {
                         if (trailer != null) {
                             if (trailerEntity.getDistance(x, y, z) < trailer.getDistance(x, y, z)) {

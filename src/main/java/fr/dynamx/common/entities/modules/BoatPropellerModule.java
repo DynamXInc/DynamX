@@ -3,6 +3,7 @@ package fr.dynamx.common.entities.modules;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.entities.modules.IVehicleController;
+import fr.dynamx.client.handlers.hud.BoatController;
 import fr.dynamx.client.handlers.hud.CarController;
 import fr.dynamx.common.contentpack.type.vehicle.BoatPropellerInfo;
 import fr.dynamx.common.entities.vehicles.BoatEntity;
@@ -50,7 +51,7 @@ public class BoatPropellerModule extends BasicEngineModule implements IPackInfoR
     @Nullable
     @Override
     public IVehicleController createNewController() {
-        return new CarController(entity, this);
+        return new BoatController(entity, this);
     }
 
     @Override

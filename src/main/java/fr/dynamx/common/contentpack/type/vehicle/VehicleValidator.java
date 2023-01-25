@@ -35,9 +35,9 @@ public interface VehicleValidator {
 
         @Override
         public void validate(ModularVehicleInfo info) {
-            EngineInfo engine = info.getSubPropertyByType(EngineInfo.class);
-            if (engine == null)
-                throw new IllegalArgumentException("Boat " + info.getFullName() + " has no engine");
+            CarEngineInfo engine = info.getSubPropertyByType(CarEngineInfo.class);
+            if (engine != null)
+                throw new IllegalArgumentException("Boat " + info.getFullName() + " has a car engine !");
             if (info.getSubPropertyByType(BoatPropellerInfo.class) == null)
                 throw new IllegalArgumentException("Boat " + info.getFullName() + " has no propeller");
         }

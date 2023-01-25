@@ -2,7 +2,6 @@ package fr.dynamx.common.entities.vehicles;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
-import fr.dynamx.api.physics.entities.IPropulsionHandler;
 import fr.dynamx.common.contentpack.parts.PartFloat;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.utils.maths.DynamXGeometry;
@@ -15,33 +14,34 @@ import net.minecraft.util.math.BlockPos;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BoatPhysicsHandler<T extends BoatEntity<?>> extends BaseVehiclePhysicsHandler<T> implements IPackInfoReloadListener {
+public class BoatPhysicsHandler<T extends BoatEntity<?>> extends BaseVehiclePhysicsHandler<T> {
     public List<PartFloat> floatList;
-    public List<Vector3f> buoyForces = new ArrayList<>();
-    public List<Vector3f> dragForces = new ArrayList<>();
+    public List<Vector3f> buoyForces;
+    public List<Vector3f> dragForces;
 
     public BoatPhysicsHandler(T entity) {
         super(entity);
-        onPackInfosReloaded();
     }
 
     @Override
     public void onPackInfosReloaded() {
+        super.onPackInfosReloaded();
         floatList = packInfo.getPartsByType(PartFloat.class);
         //Debug, to clean
-        buoyForces.clear();
-        dragForces.clear();
+        if(buoyForces == null)
+            buoyForces = new ArrayList<>();
+        else
+            buoyForces.clear();
+        if(dragForces == null)
+            dragForces = new ArrayList<>();
+        else
+            dragForces.clear();
         floatList.forEach(pf -> pf.childFloatsPos.forEach(p -> {
             buoyForces.add(new Vector3f());
             dragForces.add(new Vector3f());
         }));
     }
-
-    @Override
-    public IPropulsionHandler getPropulsion() {
-        return getHandledEntity().getPropulsion().getPhysicsHandler(); //BOAT ENGINE
-    }
-
+    
     @Override
     public void update() {
         collisionObject.setAngularDamping(0.6f);
@@ -95,7 +95,7 @@ public class BoatPhysicsHandler<T extends BoatEntity<?>> extends BaseVehiclePhys
             Vector3f dragDir = velocityAtPoint.normalize();
             Vector3f dragForce = dragDir.multLocal(0.5f * DynamXPhysicsHelper.WATER_DENSITY * velocityLength * velocityLength * dragCoefficient * area);
 
-            if(Vector3f.isValidVector(dragForce))
+            if (Vector3f.isValidVector(dragForce))
                 collisionObject.applyForce(dragForce.multLocal(0.05f), rotatedFloaterPos);
             Vector3f nonRotatedDrag = DynamXGeometry.rotateVectorByQuaternion(dragForce, DynamXGeometry.inverseQuaternion(handledEntity.physicsRotation, QuaternionPool.get()));
             dragForces.get(i).set(nonRotatedDrag);

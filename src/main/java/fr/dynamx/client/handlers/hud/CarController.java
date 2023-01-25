@@ -17,6 +17,7 @@ import fr.dynamx.client.camera.CameraSystem;
 import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.common.contentpack.type.vehicle.CarEngineInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.modules.BasicEngineModule;
 import fr.dynamx.common.entities.modules.CarEngineModule;
 import fr.dynamx.utils.DynamXConstants;
 import lombok.Getter;
@@ -59,7 +60,7 @@ public class CarController implements IVehicleController {
     }
 
     protected final BaseVehicleEntity<?> entity;
-    protected final CarEngineModule engine;
+    protected final BasicEngineModule engine;
 
     @Getter
     @Setter
@@ -77,13 +78,13 @@ public class CarController implements IVehicleController {
     /**
      * @param entity is assumed to implement {@link IModuleContainer.ISeatsContainer}
      */
-    public CarController(BaseVehicleEntity<?> entity, CarEngineModule engine) {
+    public CarController(BaseVehicleEntity<?> entity, BasicEngineModule engine) {
         this.entity = entity;
         this.engine = engine;
 
         isEngineStarted = engine.isEngineStarted();
         handbraking = engine.isHandBraking();
-        speedLimit = engine.getSpeedLimit();
+        //speedLimit = engine.getSpeedLimit();
 
         CameraSystem.setCameraZoom(entity.getPackInfo().getDefaultZoomLevel());
 
@@ -143,7 +144,7 @@ public class CarController implements IVehicleController {
             if (isEngineStarted)
                 controls = controls | 1;
             engine.setControls(controls);
-            engine.setSpeedLimit(speedLimit);
+            //engine.setSpeedLimit(speedLimit);
         }
     }
 
@@ -192,7 +193,7 @@ public class CarController implements IVehicleController {
         //Debug
         String cclass = ClientDebugSystem.enableDebugDrawing ? "hud_label_debug" : "hud_label_hidden";
         panel.add(new UpdatableGuiLabel("Handbrake : %s", s -> String.format(s, (engine.isHandBraking() ? "§cON" : "§aOFF"))).setCssId("handbrake_state").setCssClass(cclass));
-        panel.add(new UpdatableGuiLabel("Sounds : %s", s -> String.format(s, (engine.getCurrentEngineSound() == null ? "none" : engine.getCurrentEngineSound().getSoundName()))).setCssId("engine_sounds").setCssClass(cclass));
+        //panel.add(new UpdatableGuiLabel("Sounds : %s", s -> String.format(s, (engine.getCurrentEngineSound() == null ? "none" : engine.getCurrentEngineSound().getSoundName()))).setCssId("engine_sounds").setCssClass(cclass));
         panel.setCssId("engine_hud");
 
         return panel;

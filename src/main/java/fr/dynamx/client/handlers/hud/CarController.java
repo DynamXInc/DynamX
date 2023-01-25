@@ -19,6 +19,7 @@ import fr.dynamx.common.contentpack.type.vehicle.CarEngineInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.CarEngineModule;
 import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.client.ClientDynamXUtils;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.Minecraft;
@@ -45,6 +46,7 @@ public class CarController implements IVehicleController {
     public static final KeyBinding car_brake = new KeyBinding("key.brake", Keyboard.KEY_SPACE, "key.categories." + DynamXConstants.ID);
     public static final KeyBinding speedLimiter = new KeyBinding("key.speedlimit", Keyboard.KEY_J, "key.categories." + DynamXConstants.ID);
     public static final KeyBinding toggleLockDoor = new KeyBinding("key.toggleLockDoor", Keyboard.KEY_Y, "key.categories." + DynamXConstants.ID);
+    public static final KeyBinding attachTrailer = new KeyBinding("key.attachTrailer", Keyboard.KEY_H, "key.categories." + DynamXConstants.ID);
 
     //TODO CREATE EVENT TO INIT THIS ?
     @Getter
@@ -56,6 +58,7 @@ public class CarController implements IVehicleController {
         ClientRegistry.registerKeyBinding(car_engineOn);
         ClientRegistry.registerKeyBinding(speedLimiter);
         ClientRegistry.registerKeyBinding(toggleLockDoor);
+        ClientRegistry.registerKeyBinding(attachTrailer);
     }
 
     protected final BaseVehicleEntity<?> entity;
@@ -126,6 +129,10 @@ public class CarController implements IVehicleController {
                     speedLimit = Math.abs(engine.getEngineProperties()[0]);
                 else
                     speedLimit = Float.MAX_VALUE;
+            }
+
+            if(attachTrailer.isPressed()){
+                ClientDynamXUtils.attachTrailer(MC.player);
             }
 
             MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.ControllerUpdate<>(entity, this));

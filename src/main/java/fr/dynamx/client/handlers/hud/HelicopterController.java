@@ -92,7 +92,7 @@ public class HelicopterController extends BaseController {
     public GuiComponent<?> createHud() {
         GuiPanel panel = new GuiPanel();
         GuiPanel speed = new GuiPanel();
-        speed.setCssId("speed_pane");
+        speed.setCssClass("speed_pane");
         float[] engineProperties = engine.getEngineProperties();
         speed.add(new UpdatableGuiLabel("%s", s -> String.format(s, engine.isEngineStarted() ? (int) engineProperties[VehicleEntityProperties.EnumEngineProperties.SPEED.ordinal()] : "--", "")).setCssId("engine_speed"));
         speed.add(new UpdatableGuiLabel("power %f", s -> String.format(s, engine.getPower())).setCssId("engine_gear"));

@@ -49,6 +49,9 @@ label {
     bottom: 0px;
     width: 90px;
     height: 90px;
+}
+
+#speedometer_texture {
     background-image: url("dynamxmod:textures/speedometer.png");
 }
 

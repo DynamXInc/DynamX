@@ -31,7 +31,7 @@ public class MessageAttachTrailer implements IDnxPacket, IMessageHandler<Message
     public IMessage onMessage(MessageAttachTrailer message, MessageContext ctx) {
 
         EntityPlayerMP player = ctx.getServerHandler().player;
-        if(player.getRidingEntity() instanceof BaseVehicleEntity) {
+        if (player.getRidingEntity() instanceof BaseVehicleEntity) {
             CarEntity carEntity = (CarEntity) player.getRidingEntity();
             TrailerAttachModule trailerAttachModule = (TrailerAttachModule) carEntity.getModuleByType(TrailerAttachModule.class);
             if (trailerAttachModule != null) {
@@ -50,11 +50,9 @@ public class MessageAttachTrailer implements IDnxPacket, IMessageHandler<Message
                             trailer = trailerEntity;
                         }
                     }
-
                     if (trailer == null) {
                         return null;
                     }
-
                     DynamXUtils.attachTrailer(player, carEntity, trailer);
 
                 }

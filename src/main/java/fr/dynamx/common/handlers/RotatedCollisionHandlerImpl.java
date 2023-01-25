@@ -145,7 +145,7 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
             VehicleDebugRenderer.PlayerCollisionsDebug.motion = Vector3fPool.getPermanentVector(data);
         Quaternion withRotation = with.getCollidableRotation();
         Quaternion inversedWithRotation = withRotation.inverse();
-        if (inversedWithRotation == null) //error when loading world todo find why
+        if (inversedWithRotation == null) //error when loading world
             return Vector3fPool.get(oldx, oldy, oldz);
         data = rotate(data, inversedWithRotation);
         mx = data.x;

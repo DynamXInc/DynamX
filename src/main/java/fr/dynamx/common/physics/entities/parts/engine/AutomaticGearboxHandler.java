@@ -1,8 +1,7 @@
 package fr.dynamx.common.physics.entities.parts.engine;
 
-import fr.dynamx.api.physics.entities.IEnginePhysicsHandler;
-import fr.dynamx.api.physics.entities.IGearBoxHandler;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.physics.entities.modules.EnginePhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.wheel.WheelPhysics;
 import fr.dynamx.utils.DynamXConfig;
@@ -11,8 +10,8 @@ import lombok.RequiredArgsConstructor;
 import net.minecraftforge.fml.relauncher.Side;
 
 @RequiredArgsConstructor
-public class AutomaticGearboxHandler implements IGearBoxHandler {
-    private final IEnginePhysicsHandler vehicle;
+public class AutomaticGearboxHandler {
+    private final EnginePhysicsHandler vehicle;
     private final GearBox gearBox;
     private final WheelsPhysicsHandler wheels;
     private float targetRPM;

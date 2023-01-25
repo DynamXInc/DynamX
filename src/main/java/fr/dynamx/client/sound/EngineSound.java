@@ -1,15 +1,14 @@
 package fr.dynamx.client.sound;
 
 import fr.dynamx.api.audio.EnumSoundState;
-import fr.dynamx.api.audio.IDynamXSoundHandler;
-import fr.dynamx.api.entities.modules.IEngineModule;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.modules.BasicEngineModule;
 
 public class EngineSound extends VehicleSound {
-    private final IEngineModule<?> engine;
+    private final BasicEngineModule engine;
     private final fr.dynamx.common.contentpack.type.vehicle.EngineSound soundIn;
 
-    public EngineSound(fr.dynamx.common.contentpack.type.vehicle.EngineSound sound, BaseVehicleEntity<?> vehicle, IEngineModule<?> engine) {
+    public EngineSound(fr.dynamx.common.contentpack.type.vehicle.EngineSound sound, BaseVehicleEntity<?> vehicle, BasicEngineModule engine) {
         super(sound.getSoundName(), vehicle);
         this.soundIn = sound;
         this.engine = engine;
@@ -34,7 +33,7 @@ public class EngineSound extends VehicleSound {
     }
 
     @Override
-    public void update(IDynamXSoundHandler handler) {
+    public void update(DynamXSoundHandler handler) {
         if (getState() == EnumSoundState.STOPPING) {
             setVolumeFactor(getVolumeFactor() - 0.02f);
             if (getVolumeFactor() <= 0) {
@@ -62,12 +61,12 @@ public class EngineSound extends VehicleSound {
 
     @Override
     protected float getCurrentVolume() {
-        return (30F * (engine.getEngineProperties()[1]));
+        return (30F * (engine.getSoundPitch()));
     }
 
     @Override
     protected float getCurrentPitch() {
-        float pitch = engine.getEngineProperties()[1];
+        float pitch = engine.getSoundPitch();
         float min = soundIn.getPitchRange()[0];
 
         pitch = (soundIn.getPitchRange()[1] - min) * pitch + min;

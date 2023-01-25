@@ -112,13 +112,13 @@ public abstract class EntityPhysicsHandler<T extends PhysicsEntity<?>> extends A
 
     @Override
     public void applyForce(Vector3f at, Vector3f force) {
-        if (getLinearVelocity().length() > 0.12f)
+        if(getLinearVelocity().length() > 0.05f)
             getCollisionObject().applyImpulse(force, at);
     }
 
     @Override
     public void applyTorque(Vector3f force) {
-        if (getLinearVelocity().length() > 0.12f)
+        if(getLinearVelocity().length() > 0.05f)
             getCollisionObject().applyTorque(force);
     }
 

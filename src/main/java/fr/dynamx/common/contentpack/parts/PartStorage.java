@@ -15,8 +15,8 @@ import fr.dynamx.utils.debug.DynamXDebugOptions;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 
-@RegisteredSubInfoType(name = "storage", registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
-public class PartStorage extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfo> //TODO FIX MULTI-STORAGE ON ONE ENTITY
+@RegisteredSubInfoType(name = "storage", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER}, strictName = false)
+public class PartStorage extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfo>
 {
     @PackFileProperty(configNames = "StorageSize")
     private int storageSize;
@@ -34,7 +34,10 @@ public class PartStorage extends InteractivePart<BaseVehicleEntity<?>, ModularVe
 
     @Override
     public void addModules(BaseVehicleEntity<?> entity, ModuleListBuilder modules) {
-        modules.add(new StorageModule(entity, this));
+        if(!modules.hasModuleOfClass(StorageModule.class))
+            modules.add(new StorageModule(entity, this));
+        else
+            modules.getByClass(StorageModule.class).addInventory(entity, this);
     }
 
     @Override
@@ -45,7 +48,7 @@ public class PartStorage extends InteractivePart<BaseVehicleEntity<?>, ModularVe
     @Override
     public boolean interact(BaseVehicleEntity<?> vehicleEntity, EntityPlayer player) {
         if (player.isSneaking()) {
-            player.openGui(DynamXMain.instance, 1, player.world, vehicleEntity.getEntityId(), storageSize, 0);
+            player.openGui(DynamXMain.instance, 1, player.world, vehicleEntity.getEntityId(), getId(), 0);
             return true;
         }
         return false;

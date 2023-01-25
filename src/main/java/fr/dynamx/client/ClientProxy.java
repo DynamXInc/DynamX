@@ -2,7 +2,6 @@ package fr.dynamx.client;
 
 import fr.aym.acslib.ACsLib;
 import fr.aym.acslib.api.services.ThreadedLoadingService;
-import fr.dynamx.api.audio.IDynamXSoundHandler;
 import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.contentpack.object.render.IObjPackObject;
 import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
@@ -58,7 +57,7 @@ import java.util.function.Predicate;
 import static fr.dynamx.common.DynamXMain.log;
 
 public class ClientProxy extends CommonProxy implements ISelectiveResourceReloadListener {
-    public static IDynamXSoundHandler SOUND_HANDLER = new DynamXSoundHandler();
+    public static DynamXSoundHandler SOUND_HANDLER = new DynamXSoundHandler();
 
     public ClientProxy() {
         ModelLoaderRegistry.registerLoader(DynamXContext.getObjModelRegistry().getItemRenderer());
@@ -83,6 +82,7 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
         RenderingRegistry.registerEntityRenderingHandler(CarEntity.class, RenderBaseVehicle.RenderCar::new);
         RenderingRegistry.registerEntityRenderingHandler(BoatEntity.class, RenderBaseVehicle.RenderBoat::new);
         RenderingRegistry.registerEntityRenderingHandler(TrailerEntity.class, RenderBaseVehicle.RenderTrailer::new);
+        RenderingRegistry.registerEntityRenderingHandler(HelicopterEntity.class, RenderBaseVehicle.RenderHelicopter::new);
         RenderingRegistry.registerEntityRenderingHandler(PropsEntity.class, RenderProp::new);
         RenderingRegistry.registerEntityRenderingHandler(DoorEntity.class, RenderDoor::new);
         RenderingRegistry.registerEntityRenderingHandler(RagdollEntity.class, RenderRagdoll::new);

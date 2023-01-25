@@ -1,16 +1,17 @@
 package fr.dynamx.api.events;
 
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
-import fr.dynamx.api.entities.modules.IEngineModule;
-import fr.dynamx.api.entities.modules.ISeatsModule;
 import fr.dynamx.api.entities.modules.IVehicleController;
 import fr.dynamx.client.gui.VehicleHud;
 import fr.dynamx.client.handlers.hud.CarController;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.client.renders.vehicle.RenderBaseVehicle;
+import fr.dynamx.client.sound.EngineSound;
 import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.modules.BasicEngineModule;
+import fr.dynamx.common.entities.modules.SeatsModule;
 import fr.dynamx.common.entities.modules.WheelsModule;
 import lombok.Getter;
 import lombok.Setter;
@@ -95,7 +96,7 @@ public class VehicleEntityEvent extends Event {
         @Getter
         private final Entity entityMounted;
         @Getter
-        private final ISeatsModule module;
+        private final SeatsModule module;
         @Getter
         private final PartSeat seat;
 
@@ -105,7 +106,7 @@ public class VehicleEntityEvent extends Event {
          * @param module        the seats module, calling this event
          * @param seat          the seat that the player mounted
          */
-        public PlayerMount(Side side, Entity entityMounted, BaseVehicleEntity<?> vehicleEntity, ISeatsModule module, PartSeat seat) {
+        public PlayerMount(Side side, Entity entityMounted, BaseVehicleEntity<?> vehicleEntity, SeatsModule module, PartSeat seat) {
             super(side, vehicleEntity);
             this.entityMounted = entityMounted;
             this.module = module;
@@ -120,7 +121,7 @@ public class VehicleEntityEvent extends Event {
         @Getter
         private final Entity entityDismounted;
         @Getter
-        private final ISeatsModule module;
+        private final SeatsModule module;
         @Getter
         private final PartSeat seat;
 
@@ -130,7 +131,7 @@ public class VehicleEntityEvent extends Event {
          * @param module           the seats module, calling this event
          * @param seat             the seat that the player dismounted
          */
-        public EntityDismount(Side side, Entity entityDismounted, BaseVehicleEntity<?> vehicleEntity, ISeatsModule module, PartSeat seat) {
+        public EntityDismount(Side side, Entity entityDismounted, BaseVehicleEntity<?> vehicleEntity, SeatsModule module, PartSeat seat) {
             super(side, vehicleEntity);
             this.entityDismounted = entityDismounted;
             this.module = module;
@@ -203,7 +204,7 @@ public class VehicleEntityEvent extends Event {
         }
 
         public enum Type {
-            CHASSIS, PROPULSION, PARTS, PARTICLES, LIGHTS, STEERING_WHEEL
+            CHASSIS, PROPULSION, PARTS, PARTICLES, LIGHTS, STEERING_WHEEL,ROTOR,HANDLE
         }
     }
 
@@ -261,9 +262,9 @@ public class VehicleEntityEvent extends Event {
          * The {@link fr.dynamx.api.entities.modules.IEngineModule} of the entity, responsible for sounds update
          */
         @Getter
-        private final IEngineModule module;
+        private final BasicEngineModule module;
 
-        public UpdateSounds(BaseVehicleEntity<?> vehicleEntity, IEngineModule module, PhysicsEntityEvent.Phase phase) {
+        public UpdateSounds(BaseVehicleEntity<?> vehicleEntity, BasicEngineModule module, PhysicsEntityEvent.Phase phase) {
             super(Side.CLIENT, vehicleEntity);
             this.eventPhase = phase;
             this.module = module;

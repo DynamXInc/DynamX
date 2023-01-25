@@ -130,7 +130,7 @@ public class BuiltinThreadedPhysicsWorld extends BasePhysicsWorld implements Run
         try {
             simLock.acquire();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            DynamXMain.log.error("Client thread was interrupted !", e);
         }
     }
 

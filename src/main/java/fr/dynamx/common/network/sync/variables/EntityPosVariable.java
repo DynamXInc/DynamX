@@ -12,12 +12,14 @@ import fr.dynamx.common.network.packets.MessageForcePlayerPos;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.utils.debug.SyncTracker;
 import lombok.Getter;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.text.TextComponentString;
 
 import java.util.concurrent.Callable;
 
 public class EntityPosVariable extends ListeningEntityVariable<EntityPosVariable.EntityPositionData> {
+    //TODO CLEAN
     public static int CRITIC1 = 30, CRITIC1warn = 100, CRITIC2 = 400, CRITIC3 = 50;
 
     public EntityPosVariable(PhysicsEntity<?> entity) {
@@ -43,19 +45,20 @@ public class EntityPosVariable extends ListeningEntityVariable<EntityPosVariable
                 if (ignoreFor <= 0) {
                     Vector3f pos = entityPositionData.position;
                     float delta = entity.physicsPosition.subtract(pos).length();
-                    //TODO CLEAN
                     CRITIC1 = 3;
                     if (delta > CRITIC1) {
+                        EntityPlayer controllingPlayer = entity.getSynchronizer().getSimulationPlayerHolder();
+                        boolean isControllingPlayerRidingThisEntity = controllingPlayer == entity.getControllingPassenger();
                         if (delta > CRITIC1warn)
-                            DynamXMain.log.warn("Physics entity " + entity + " is moving too quickly (driven by " + entity.getControllingPassenger() + ") !");
-                        if (delta > CRITIC2 && entity.getControllingPassenger() instanceof EntityPlayerMP) {
-                            ((EntityPlayerMP) entity.getControllingPassenger()).connection.disconnect(new TextComponentString("Invalid physics entity move packet"));
-                        } else if (entity.getControllingPassenger() instanceof EntityPlayerMP || entity.world.isRemote) {
-                            if (delta > CRITIC3 && !entity.world.isRemote) {
+                            DynamXMain.log.warn("Physics entity " + entity + " is moving too quickly (ridden by " + entity.getControllingPassenger() + ", simulated by " + controllingPlayer + ") !");
+                        if (delta > CRITIC2 && controllingPlayer instanceof EntityPlayerMP && isControllingPlayerRidingThisEntity) {
+                            ((EntityPlayerMP) controllingPlayer).connection.disconnect(new TextComponentString("Invalid physics entity move packet"));
+                        } else if (controllingPlayer instanceof EntityPlayerMP || entity.world.isRemote) {
+                            if (delta > CRITIC3 && !entity.world.isRemote && isControllingPlayerRidingThisEntity) {
                                 //Resync
                                 DynamXMain.log.error(entity + " doing resync !!!");
                                 ignoreFor = 20;
-                                DynamXContext.getNetwork().sendToClient(new MessageForcePlayerPos(entity, entity.physicsPosition, entity.physicsRotation, entity.physicsHandler.getLinearVelocity(), entity.physicsHandler.getAngularVelocity()), EnumPacketTarget.PLAYER, (EntityPlayerMP) entity.getControllingPassenger());
+                                DynamXContext.getNetwork().sendToClient(new MessageForcePlayerPos(entity, entity.physicsPosition, entity.physicsRotation, entity.physicsHandler.getLinearVelocity(), entity.physicsHandler.getAngularVelocity()), EnumPacketTarget.PLAYER, (EntityPlayerMP) controllingPlayer);
                             } else
                                 entity.physicsHandler.updatePhysicsState(pos, entityPositionData.rotation, entityPositionData.linearVel, entityPositionData.rotationalVel);
                         } else
@@ -81,7 +84,6 @@ public class EntityPosVariable extends ListeningEntityVariable<EntityPosVariable
                 boolean changed = entity.ticksExisted % (physicsHandler.isBodyActive() ? 13 : 20) == 0; //Keep low-rate sync while not moving
                 //Detect changes
                 Vector3f pos = entity.physicsPosition;
-                //TODO CLEAN
                 if (positionData == null || positionData.bodyActive != physicsHandler.isBodyActive()) {
                     changed = true;
                 } else if (SyncTracker.different(pos.x, positionData.position.x) || SyncTracker.different(pos.y, positionData.position.y) || SyncTracker.different(pos.z, positionData.position.z)) {
@@ -90,8 +92,8 @@ public class EntityPosVariable extends ListeningEntityVariable<EntityPosVariable
                         SyncTracker.different(entity.physicsRotation.getZ(), positionData.rotation.getZ()) || SyncTracker.different(entity.physicsRotation.getW(), positionData.rotation.getW())) {
                     changed = true;
                 }
-                //TODO PAS COOL NEW
                 if (changed) {
+                    // pas cool, new
                     positionData = new EntityPosVariable.EntityPositionData(physicsHandler);
                     entity.synchronizedPosition.setChanged(true);
                 }
@@ -129,7 +131,7 @@ public class EntityPosVariable extends ListeningEntityVariable<EntityPosVariable
 
     //TODO USE
     public void onTeleported(PhysicsEntity<?> entity, Vector3f newPos) {
-        //TODO DOIT IGNORER LES PROCHAINES UPDATES VENANT DU CLIENT ignoreFor = 22;
+        //DOIT IGNORER LES PROCHAINES UPDATES VENANT DU CLIENT ignoreFor = 22;
         DynamXContext.getNetwork().sendToClient(new MessageForcePlayerPos(entity, newPos, entity.physicsRotation, entity.physicsHandler.getLinearVelocity(), entity.physicsHandler.getAngularVelocity()), EnumPacketTarget.PLAYER, (EntityPlayerMP) entity.getControllingPassenger());
     }
 }

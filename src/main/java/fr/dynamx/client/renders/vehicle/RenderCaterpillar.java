@@ -70,7 +70,7 @@ public class RenderCaterpillar<T extends CaterpillarEntity<?>> extends RenderBas
                     Vector4f a = getAdvancement(p + carEntity.trackProgress, info.caterpillarLeftBuffer);
                     GL11.glTranslated(a.x, a.y, a.z);
                     GL11.glRotated(-Math.toDegrees(a.w), 1, 0, 0);
-                    DynamXContext.getObjModelRegistry().getModel(carEntity.getPackInfo().getPartsByType(PartWheel.class).get(0).getDefaultWheelInfo().getModel()).renderModel(((IModuleContainer.IPropulsionContainer<WheelsModule>) carEntity).getPropulsion().getWheelsTextureId(0));
+                    DynamXContext.getObjModelRegistry().getModel(carEntity.getPackInfo().getPartsByType(PartWheel.class).get(0).getDefaultWheelInfo().getModel()).renderModel(module.getWheelsTextureId(0));
                     GL11.glPopMatrix();
                     p += info.caterpillarWidth;
                 }
@@ -80,7 +80,7 @@ public class RenderCaterpillar<T extends CaterpillarEntity<?>> extends RenderBas
                     Vector4f a = getAdvancement(p + carEntity.trackProgress, info.caterpillarRightBuffer);
                     GL11.glTranslated(a.x, a.y, a.z);
                     GL11.glRotated(-Math.toDegrees(a.w), 1, 0, 0);
-                    DynamXContext.getObjModelRegistry().getModel(carEntity.getPackInfo().getPartsByType(PartWheel.class).get(carEntity.getPackInfo().getPartsByType(PartWheel.class).size() - 1).getDefaultWheelInfo().getModel()).renderModel(((IModuleContainer.IPropulsionContainer<WheelsModule>) carEntity).getPropulsion().getWheelsTextureId(0));
+                    DynamXContext.getObjModelRegistry().getModel(carEntity.getPackInfo().getPartsByType(PartWheel.class).get(carEntity.getPackInfo().getPartsByType(PartWheel.class).size() - 1).getDefaultWheelInfo().getModel()).renderModel(module.getWheelsTextureId(0));
                     GL11.glPopMatrix();
                     p += info.caterpillarWidth;
                 }

@@ -75,7 +75,7 @@ public class MTLLoader {
                     current.transparency = (float) Double.parseDouble(parts[1]);
                     break;
             }
-            if (current != null && current.diffuseTexture.isEmpty()){
+            if (current != null && current.diffuseTexture.isEmpty()) {
                 current.diffuseTexture.put(name,
                         new MaterialTexture(RegistryNameSetter.getResourceLocationWithDynamXDefault("missing_texture_for_" + location.getPath()), name));
             }

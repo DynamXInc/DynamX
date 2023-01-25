@@ -11,7 +11,6 @@ import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
-import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import lombok.Getter;
@@ -49,7 +48,7 @@ public abstract class BasePart<T extends ISubInfoTypeOwner<?>> extends SubInfoTy
     @PackFileProperty(configNames = "Scale", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED, required = false, description = "common.scale")
     @Getter
     private Vector3f scale = new Vector3f();
-    @PackFileProperty(configNames = "DependsOn", required = false, description = "common.scale")
+    @PackFileProperty(configNames = "DependsOn", required = false, description = "common.unused")
     private String partDependingOnName;
 
     @Getter
@@ -63,18 +62,6 @@ public abstract class BasePart<T extends ISubInfoTypeOwner<?>> extends SubInfoTy
     public BasePart(ISubInfoTypeOwner<T> owner, String partName, Vector3f scale) {
         this(owner, partName);
         this.scale = scale;
-    }
-
-    /**
-     * Adds this part to the vehicle (it shouldn't be already added)
-     */
-    public void addPart(BaseVehicleEntity<?> vehicle) {
-    }
-
-    /**
-     * Removes this part from the vehicle (it should have been added before)
-     */
-    public void removePart(BaseVehicleEntity<?> vehicle) {
     }
 
     public Vector3f getScaleModifier(T vehicleInfo) {

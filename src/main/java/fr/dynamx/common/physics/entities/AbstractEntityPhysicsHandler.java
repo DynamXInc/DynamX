@@ -89,11 +89,12 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
 
         Vector3f physicsPosition = collisionObject.getPhysicsLocation(Vector3fPool.get());
         Quaternion physicsRotation = collisionObject.getPhysicsRotation(QuaternionPool.get());
-        Vector3f centerOfMass = getCenterOfMass();
         Vector3f pos = Vector3fPool.get(physicsPosition);
-        if (centerOfMass != null) { //TODO OPTIMIZE
-            physicsPosition.addLocal(DynamXGeometry.rotateVectorByQuaternion(centerOfMass, physicsRotation));
-            pos.addLocal(DynamXGeometry.rotateVectorByQuaternion(centerOfMass, physicsRotation).multLocal(-1));
+        Vector3f centerOfMass = getCenterOfMass();
+        if (centerOfMass != null) {
+            Vector3f rotatedCenterOfMass = DynamXGeometry.rotateVectorByQuaternion(centerOfMass, physicsRotation);
+            physicsPosition.addLocal(rotatedCenterOfMass);
+            pos.addLocal(rotatedCenterOfMass.multLocal(-1));
         }
         handledEntity.physicsPosition.set(physicsPosition);
         handledEntity.physicsRotation.set(physicsRotation);

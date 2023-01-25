@@ -4,37 +4,64 @@ import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.common.contentpack.parts.PartStorage;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.physics.entities.PackEntityPhysicsHandler;
+import lombok.Getter;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraftforge.common.util.Constants;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class StorageModule implements IPhysicsModule<PackEntityPhysicsHandler<?, ?>> {
-    private final InventoryBasic inventory;
+    @Getter
+    private final Map<Byte, InventoryBasic> inventories = new HashMap<>();
 
     public StorageModule(BaseVehicleEntity<?> entity, PartStorage partStorage) {
-        this.inventory = new InventoryBasic(entity.getPackInfo().getName(), false, partStorage.getStorageSize());
+        addInventory(entity, partStorage);
     }
 
-    public InventoryBasic getInventory() {
-        return inventory;
+    public void addInventory(BaseVehicleEntity<?> entity, PartStorage partStorage) {
+        inventories.put(partStorage.getId(), new InventoryBasic(entity.getPackInfo().getName(), false, partStorage.getStorageSize()));
+    }
+
+    public IInventory getInventory(byte id) {
+        return inventories.get(id);
     }
 
     @Override
     public void writeToNBT(NBTTagCompound tag) {
-        NBTTagList list = new NBTTagList();
-        for (int i = 0; i < inventory.getSizeInventory(); i++) {
-            list.appendTag(inventory.getStackInSlot(i).writeToNBT(new NBTTagCompound()));
+        int j = 0;
+        for(Map.Entry<Byte, InventoryBasic> inventoryBasic : inventories.entrySet()) {
+            NBTTagList list = new NBTTagList();
+            for (int i = 0; i < inventoryBasic.getValue().getSizeInventory(); i++) {
+                list.appendTag(inventoryBasic.getValue().getStackInSlot(i).writeToNBT(new NBTTagCompound()));
+            }
+            tag.setTag("StorageInv"+j, list);
+            j++;
         }
-        tag.setTag("StorageInv", list);
+        tag.setInteger("StorageCount", j);
     }
 
     @Override
     public void readFromNBT(NBTTagCompound tag) {
-        NBTTagList list = tag.getTagList("StorageInv", Constants.NBT.TAG_COMPOUND);
-        for (int i = 0; i < Math.min(inventory.getSizeInventory(), list.tagCount()); i++) {
-            inventory.setInventorySlotContents(i, new ItemStack(list.getCompoundTagAt(i)));
+        if(tag.hasKey("StorageInv", Constants.NBT.TAG_LIST)) {
+            NBTTagList list = tag.getTagList("StorageInv", Constants.NBT.TAG_COMPOUND);
+            InventoryBasic inventory = inventories.get(0);
+            for (int i = 0; i < Math.min(inventory.getSizeInventory(), list.tagCount()); i++) {
+                inventory.setInventorySlotContents(i, new ItemStack(list.getCompoundTagAt(i)));
+            }
+        }
+        for (int j = 0; j < Math.min(tag.getInteger("StorageCount"), inventories.size()); j++) {
+            NBTTagList list = tag.getTagList("StorageInv"+j, Constants.NBT.TAG_COMPOUND);
+            InventoryBasic inventory = inventories.get((byte) j);
+            for (int i = 0; i < Math.min(inventory.getSizeInventory(), list.tagCount()); i++) {
+                inventory.setInventorySlotContents(i, new ItemStack(list.getCompoundTagAt(i)));
+            }
         }
     }
 }

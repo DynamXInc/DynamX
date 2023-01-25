@@ -4,12 +4,10 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.jme3.bullet.objects.VehicleWheel;
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.entities.modules.IEngineModule;
-import fr.dynamx.api.physics.entities.IEnginePhysicsHandler;
-import fr.dynamx.api.physics.entities.IPropulsionHandler;
 import fr.dynamx.common.contentpack.parts.PartWheel;
 import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.modules.CarEngineModule;
 import fr.dynamx.common.entities.modules.WheelsModule;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.BaseWheeledVehiclePhysicsHandler;
@@ -19,7 +17,6 @@ import fr.dynamx.common.physics.entities.parts.wheel.WheelState;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.minecraft.util.math.MathHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +27,7 @@ import java.util.Map;
  * @see WheelsModule
  */
 @RequiredArgsConstructor
-public class WheelsPhysicsHandler implements IPropulsionHandler {
+public class WheelsPhysicsHandler {
     private final WheelsModule module;
     private final BaseWheeledVehiclePhysicsHandler<? extends BaseVehicleEntity<?>> handler;
 
@@ -62,7 +59,7 @@ public class WheelsPhysicsHandler implements IPropulsionHandler {
     }
 
     public void init() {
-        handler.getPackInfo().getPartsByType(PartWheel.class).forEach(partWheel -> partWheel.addPart(handler.getHandledEntity()));
+        handler.getPackInfo().getPartsByType(PartWheel.class).forEach(partWheel -> addWheel(partWheel, partWheel.getDefaultWheelInfo()));
         pacejkaMagicFormula = new PacejkaMagicFormula(this);
     }
 
@@ -109,9 +106,8 @@ public class WheelsPhysicsHandler implements IPropulsionHandler {
         }
     }
 
-    @Override
-    public void accelerate(IEngineModule engine, float strength, float speedLimit) {
-        IEnginePhysicsHandler module = engine.getPhysicsHandler();
+    public void accelerate(CarEngineModule engine, float strength, float speedLimit) {
+        EnginePhysicsHandler module = engine.getPhysicsHandler();
         if (module.getEngine().isStarted()) {
             for (WheelPhysics wheelPhysics : vehicleWheelData) {
                 if (wheelPhysics.isDrivingWheel()) {
@@ -129,21 +125,18 @@ public class WheelsPhysicsHandler implements IPropulsionHandler {
         }
     }
 
-    @Override
     public void disengageEngine() {
         for (WheelPhysics wheelPhysics : vehicleWheelData) {
             wheelPhysics.accelerate(0);
         }
     }
 
-    @Override
     public void brake(float strength) {
         for (WheelPhysics wheelPhysics : vehicleWheelData) {
             wheelPhysics.brake(strength, 0);
         }
     }
 
-    @Override
     public void handbrake(float strength) {
         // just apply the brakes to the rear wheels.
         for (WheelPhysics wheel : vehicleWheelData) {
@@ -152,15 +145,13 @@ public class WheelsPhysicsHandler implements IPropulsionHandler {
         }
     }
 
-    @Override
     public void steer(float strength) {
         for (WheelPhysics wheelPhysics : vehicleWheelData) {
             wheelPhysics.steer(strength);
         }
     }
 
-    @Override
-    public void applyEngineBraking(IEngineModule engine) {
+    public void applyEngineBraking(CarEngineModule engine) {
         disengageEngine();
         for (int i = 0; i < getNumWheels(); i++) {
             WheelPhysics wheelPhysics = getWheel(i);

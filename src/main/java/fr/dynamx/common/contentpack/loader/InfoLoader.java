@@ -110,7 +110,7 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
         if (info instanceof ISubInfoTypeOwner<?>)
             readInfoWithSubInfos((T) info, reader);
         else {
-            //TODO FACTORIZE WITH THE NEXT FUNCTION
+            //TODO FACTORIZE WITH THE NEXT FUNCTION  AND ERROR IF SUBINFO DECLARED HERE
             List<PackFilePropertyData<?>> foundProperties = new ArrayList<>();
             String s;
             boolean inComment = false;
@@ -269,7 +269,8 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
     protected ISubInfoType<T> getClassForPropertyOwner(T obj, String name) {
         if(infoTypesRegistry == null) return null;
         String[] tags = name.split("#");
-        Collection<SubInfoTypeEntry<T>> types = infoTypesRegistry.getRegisteredEntries().stream().sorted((t1, t2) -> t1.isStrict() != t2.isStrict() ? (t1.isStrict() ? -1 : 1) : 0).collect(Collectors.toList());
+        //Take strict before, and longer keys before
+        Collection<SubInfoTypeEntry<T>> types = infoTypesRegistry.getRegisteredEntries().stream().sorted((t1, t2) -> t1.isStrict() != t2.isStrict() ? (t1.isStrict() ? -1 : 1) : t2.getKey().length() - t1.getKey().length()).collect(Collectors.toList());
         for (SubInfoTypeEntry<T> type : types) {
             if (type.matches(tags[0]))
                 return type.create(obj, tags[0]);

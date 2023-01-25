@@ -9,14 +9,14 @@ import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 
 /**
- * Power point of the rpm graph of an {@link EngineInfo}
+ * Power point of the rpm graph of an {@link CarEngineInfo}
  */
 @RegisteredSubInfoType(name = "point", registries = SubInfoTypeRegistries.ENGINES, strictName = false)
-public class RPMPower extends SubInfoType<EngineInfo> {
+public class RPMPower extends SubInfoType<CarEngineInfo> {
     @PackFileProperty(configNames = "RPMPower", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_0Z)
     private Vector3f rpmPower; //It's a Vector3f because of the Spline
 
-    public RPMPower(ISubInfoTypeOwner<EngineInfo> owner) {
+    public RPMPower(ISubInfoTypeOwner<CarEngineInfo> owner) {
         super(owner);
     }
 
@@ -25,7 +25,7 @@ public class RPMPower extends SubInfoType<EngineInfo> {
     }
 
     @Override
-    public void appendTo(EngineInfo owner) {
+    public void appendTo(CarEngineInfo owner) {
         owner.addPoint(this);
     }
 

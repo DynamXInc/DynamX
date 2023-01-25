@@ -2,9 +2,7 @@ package fr.dynamx.common.physics.entities.parts.engine;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.common.contentpack.ContentPackLoader;
-import fr.dynamx.common.contentpack.type.vehicle.EngineInfo;
-import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
-import fr.dynamx.common.physics.entities.PackEntityPhysicsHandler;
+import fr.dynamx.common.contentpack.type.vehicle.CarEngineInfo;
 import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.maths.LinearSpline;
 import lombok.Getter;
@@ -51,7 +49,7 @@ public class Engine {
      *
      * @param engineInfo The engine info, loaded from the {@link ContentPackLoader}
      */
-    public Engine(EngineInfo engineInfo) {
+    public Engine(CarEngineInfo engineInfo) {
         power = engineInfo.getPower();
         maxRevs = engineInfo.getMaxRevs();
         braking = engineInfo.getBraking();

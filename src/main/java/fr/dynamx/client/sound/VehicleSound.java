@@ -3,7 +3,6 @@ package fr.dynamx.client.sound;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.audio.EnumSoundState;
 import fr.dynamx.api.audio.IDynamXSound;
-import fr.dynamx.api.audio.IDynamXSoundHandler;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
@@ -50,12 +49,12 @@ public abstract class VehicleSound implements IDynamXSound {
     }
 
     @Override
-    public void update(IDynamXSoundHandler handler) {
+    public void update(DynamXSoundHandler handler) {
         if (isSoundActive() && !vehicleEntity.isDead) {
             this.playerPos.set((float) player.posX, (float) player.posY, (float) player.posZ);
             this.sourcePos.set(vehicleEntity.physicsPosition);
 
-            handler.setVolume(this, getVolume());
+            handler.setSoundVolume(this, getVolume());
             handler.setPitch(this, getPitch());
             //Set the position to 5 blocks from the player in the direction of the sound.
             //Don't worry about motion as that's used in the sound itself for the pitch.
@@ -97,6 +96,7 @@ public abstract class VehicleSound implements IDynamXSound {
         return volumeFactor;
     }
 
+    @Override
     public float getVolume() {
         //If the player is riding the source, volume will either be 1.0 or 0.5.
         if (vehicleEntity.equals(player.getRidingEntity())) {

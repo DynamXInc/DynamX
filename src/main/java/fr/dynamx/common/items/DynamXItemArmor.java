@@ -53,11 +53,11 @@ public class DynamXItemArmor<T extends ArmorObject<?>> extends ItemArmor impleme
      *
      * @param modid     The mod owning this item used to register the item
      * @param itemName  The name of the item
-     * @param model     The obj model of the block "namespace:resourceName.obj". The default namespace is "dynamxmod". The model file must be under "namespace:models/resourceName.obj"
+     * @param model     The obj model of the block "namespace:resourceName.obj"
      * @param material  The armor material
      * @param armorType The armor type
      */
-    public DynamXItemArmor(String modid, String itemName, String model, ArmorMaterial material, EntityEquipmentSlot armorType) {
+    public DynamXItemArmor(String modid, String itemName, ResourceLocation model, ArmorMaterial material, EntityEquipmentSlot armorType) {
         super(material, 0, armorType);
         if (modid.contains("builtin_mod_")) { //Backward-compatibility
             armorInfo = (T) DynamXObjectLoaders.ARMORS.addBuiltinObject(this, modid, itemName);
@@ -65,7 +65,7 @@ public class DynamXItemArmor<T extends ArmorObject<?>> extends ItemArmor impleme
         } else {
             armorInfo = (T) DynamXObjectLoaders.ARMORS.addBuiltinObject(this, "dynx." + modid, itemName);
         }
-        armorInfo.setModel(RegistryNameSetter.getDynamXModelResourceLocation(model));
+        armorInfo.setModel(model);
         armorInfo.setDescription("Builtin " + modid + "'s armor");
         textureNum = 1;
 

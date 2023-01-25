@@ -7,11 +7,11 @@ import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.entities.IModuleContainer;
-import fr.dynamx.api.entities.modules.ISeatsModule;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
+import fr.dynamx.common.entities.modules.SeatsModule;
 import fr.dynamx.common.entities.vehicles.CarEntity;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.EnumSeatPlayerPosition;
@@ -26,7 +26,7 @@ import net.minecraft.util.text.TextComponentString;
 
 import javax.annotation.Nullable;
 
-@RegisteredSubInfoType(name = "seat", registries = SubInfoTypeRegistries.WHEELED_VEHICLES, strictName = false)
+@RegisteredSubInfoType(name = "seat", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER}, strictName = false)
 public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfo> {
     @PackFileProperty(configNames = "Driver")
     private boolean isDriver;
@@ -67,7 +67,7 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     @Getter
     private float cameraPositionY;
 
-    @PackFileProperty(configNames = "PlayerSize", required = false)
+    @PackFileProperty(configNames = "PlayerSize", required = false, defaultValue = "1 1 1")
     @Getter
     private Vector3f playerSize;
 
@@ -81,16 +81,10 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     }
 
     @Override
-    public void appendTo(ModularVehicleInfo owner) {
-        super.appendTo(owner);
-        owner.arrangeSeatID(this);
-    }
-
-    @Override
     public boolean interact(BaseVehicleEntity<?> vehicleEntity, EntityPlayer player) {
         if (!(vehicleEntity instanceof IModuleContainer.ISeatsContainer))
             throw new IllegalStateException("The entity " + vehicleEntity + " has PartSeats, but does not implement IHaveSeats !");
-        ISeatsModule seats = ((IModuleContainer.ISeatsContainer) vehicleEntity).getSeats();
+        SeatsModule seats = ((IModuleContainer.ISeatsContainer) vehicleEntity).getSeats();
         Entity seatRider = seats.getSeatToPassengerMap().get(this);
         if (seatRider != null) {
             if (seatRider != player) {
@@ -128,7 +122,7 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
         return false;
     }
 
-    public boolean mount(BaseVehicleEntity<?> vehicleEntity, ISeatsModule seats, Entity entity) {
+    public boolean mount(BaseVehicleEntity<?> vehicleEntity, SeatsModule seats, Entity entity) {
         if (seats.getSeatToPassengerMap().containsValue(entity)) {
             return false; //Player on another seat
         }

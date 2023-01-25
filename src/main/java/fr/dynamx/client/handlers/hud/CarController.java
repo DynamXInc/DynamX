@@ -15,9 +15,9 @@ import fr.dynamx.api.entities.modules.IVehicleController;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.client.camera.CameraSystem;
 import fr.dynamx.client.handlers.ClientDebugSystem;
-import fr.dynamx.common.contentpack.type.vehicle.EngineInfo;
+import fr.dynamx.common.contentpack.type.vehicle.CarEngineInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.entities.modules.EngineModule;
+import fr.dynamx.common.entities.modules.CarEngineModule;
 import fr.dynamx.utils.DynamXConstants;
 import lombok.Getter;
 import lombok.Setter;
@@ -59,7 +59,7 @@ public class CarController implements IVehicleController {
     }
 
     protected final BaseVehicleEntity<?> entity;
-    protected final EngineModule engine;
+    protected final CarEngineModule engine;
 
     @Getter
     @Setter
@@ -77,7 +77,7 @@ public class CarController implements IVehicleController {
     /**
      * @param entity is assumed to implement {@link IModuleContainer.ISeatsContainer}
      */
-    public CarController(BaseVehicleEntity<?> entity, EngineModule engine) {
+    public CarController(BaseVehicleEntity<?> entity, CarEngineModule engine) {
         this.entity = entity;
         this.engine = engine;
 
@@ -131,9 +131,9 @@ public class CarController implements IVehicleController {
             MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.ControllerUpdate<>(entity, this));
             int controls = 0;
             if (accelerating)
-                controls = controls | 1;
-            if (handbraking)
                 controls = controls | 2;
+            if (handbraking)
+                controls = controls | 32;
             if (reversing)
                 controls = controls | 4;
             if (turningLeft)
@@ -141,7 +141,7 @@ public class CarController implements IVehicleController {
             if (turningRight)
                 controls = controls | 16;
             if (isEngineStarted)
-                controls = controls | 32;
+                controls = controls | 1;
             engine.setControls(controls);
             engine.setSpeedLimit(speedLimit);
         }
@@ -153,11 +153,7 @@ public class CarController implements IVehicleController {
     @SideOnly(Side.CLIENT)
     public GuiComponent<?> createHud() {
         GuiPanel panel = new GuiPanel();
-        EngineInfo engineInfo = entity.getPackInfo().getSubPropertyByType(EngineInfo.class);
-        if(engineInfo == null){
-            return panel;
-        }
-        float maxRpm = engineInfo.getMaxRevs() + 3000; // todo CONFIGURABLE
+        float maxRpm = entity.getPackInfo().getSubPropertyByType(CarEngineInfo.class).getMaxRevs() + 3000; // todo CONFIGURABLE
         float scale = 90f / 300;
         GuiPanel speed = new SpeedometerPanel(this, scale, maxRpm);
         speed.setCssClass("speed_pane");

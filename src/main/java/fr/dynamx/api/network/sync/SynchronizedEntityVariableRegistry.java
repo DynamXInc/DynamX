@@ -4,7 +4,6 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.network.sync.PhysicsEntitySynchronizer;
-import fr.dynamx.common.network.sync.variables.EntityTransformsVariable;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import net.minecraftforge.fml.common.discovery.ASMDataTable;
@@ -34,21 +33,17 @@ public class SynchronizedEntityVariableRegistry {
                 Class<?> classToParse = Class.forName(data.getClassName());
                 classToMod.put(classToParse, data.getCandidate().getContainedMods().get(0).getModId());
                 for (Field f : classToParse.getDeclaredFields()) {
-                    //System.out.println("Test " + f.getName() + " " + EntityVariable.class.isAssignableFrom(f.getType()) + " " + f.getType().isAssignableFrom(EntityTransformsVariable.class) + " " + f.isAnnotationPresent(SynchronizedEntityVariable.class));
                     if (EntityVariable.class.isAssignableFrom(f.getType()) && f.isAnnotationPresent(SynchronizedEntityVariable.class)) {
-                        //System.out.println("Detected in " + classToParse);
                         SynchronizedEntityVariable property = f.getAnnotation(SynchronizedEntityVariable.class);
                         if (!baseSyncVarRegistry.containsKey(classToParse))
                             baseSyncVarRegistry.put(classToParse, new ArrayList<>());
                         String propName = classToParse.getSimpleName() + "." + property.name();
-                        System.out.println("Add " + propName);
+                        DynamXMain.log.debug("Registered synchronized entity variable " + propName + " in " + classToParse.getName());
                         baseSyncVarRegistry.get(classToParse).add(propName);
                         fieldMap.put(propName, f);
                     }
                 }
-                if(baseSyncVarRegistry.containsKey(classToParse))
-                    DynamXMain.log.debug("Detected " + baseSyncVarRegistry.get(classToParse).size()+" synchronized entity variables in " + classToParse);
-                else
+                if (!baseSyncVarRegistry.containsKey(classToParse))
                     DynamXMain.log.warn("Failed to detect any synchronized entity variable in " + classToParse);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to detect synchronized entity variables in " + name);
@@ -65,12 +60,9 @@ public class SynchronizedEntityVariableRegistry {
         throw new IllegalArgumentException(of + " is not in input list " + in);
     }
 
-    private static EntityVariableSerializer<?> findSerializer(String res) { //TODO CLEAN & ADD DEBUG LOGS
+    private static EntityVariableSerializer<?> findSerializer(String res) {
         Field f = fieldMap.get(res);
-        /*System.out.println(f.getName());
-        System.out.println(f.getGenericType());
-        System.out.println(f.getType().getGenericSuperclass());*/
-        ParameterizedType type = null;
+        ParameterizedType type;
         if (f.getGenericType() instanceof ParameterizedType) {
             type = (ParameterizedType) f.getGenericType();
         } else if (f.getType().getGenericSuperclass() instanceof ParameterizedType) {
@@ -81,10 +73,11 @@ public class SynchronizedEntityVariableRegistry {
         EntityVariableSerializer<?> serializer = EntityVariableTypes.getSerializerRegistry().get(type.getActualTypeArguments()[0]);
         if (serializer == null && type.getActualTypeArguments()[0] instanceof ParameterizedType) {
             serializer = EntityVariableTypes.getSerializerRegistry().get(((ParameterizedType) type.getActualTypeArguments()[0]).getRawType());
-            //System.out.println("Second try " + serializer + " " + ((ParameterizedType) type.getActualTypeArguments()[0]).getRawType());
+            if (serializer == null)
+                DynamXMain.log.error("Cannot find serializer for entity variable " + res + ". Tried: " + ((ParameterizedType) type.getActualTypeArguments()[0]).getRawType());
         }
         if (serializer == null) {
-            //System.out.println(EntityVariableTypes.getSerializerRegistry());
+            DynamXMain.log.error("Cannot find serializer for entity variable " + res + ". Tried: " + type.getActualTypeArguments()[0] + ". Generic type is " + f.getGenericType() + ". Generic superclass is " + f.getType().getGenericSuperclass());
             throw new IllegalArgumentException("Bad entity variable " + f + " " + type.getActualTypeArguments()[0] + " name : " + res);
         }
         return serializer;
@@ -94,7 +87,7 @@ public class SynchronizedEntityVariableRegistry {
      * Sorts variable ids in alphabetical order
      */
     public static void sortRegistry(Predicate<String> useMod) {
-        DynamXMain.log.info("Sorting SynchronizedVariables registry ids...");
+        DynamXMain.log.debug("Sorting SynchronizedVariables registry ids...");
         List<String> buff = new ArrayList<>();
         for (Class<?> res : baseSyncVarRegistry.keySet()) {
             if (useMod.test(classToMod.get(res))) {
@@ -102,7 +95,6 @@ public class SynchronizedEntityVariableRegistry {
             }
         }
         buff.sort(Comparator.comparing(String::toString)); //Unique sorting
-        DynamXMain.log.debug("Fixing SynchronizedVariables registry ids...");
         syncVarRegistry.clear();
         serializerMap.clear();
         for (String res : buff) {
@@ -121,7 +113,6 @@ public class SynchronizedEntityVariableRegistry {
                 for (String variable : baseSyncVarRegistry.get(clazz)) {
                     Field f = fieldMap.get(variable);
                     f.setAccessible(true);
-                    //System.out.println(instance + " plus " + variable + " " + variable.name() + " " + variable.hashCode() + " " + f.getName() + " " + f.getDeclaringClass() + " " + f + " " + clazz);
                     EntityVariable<?> v = (EntityVariable<?>) f.get(instance);
                     f.setAccessible(false);
                     v.init(variable, findSerializer(variable));

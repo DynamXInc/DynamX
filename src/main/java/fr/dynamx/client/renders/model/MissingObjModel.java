@@ -54,10 +54,6 @@ public class MissingObjModel extends ObjModelRenderer {
     }
 
     @Override
-    public void setupModel() {
-    }
-
-    @Override
     public void renderGroup(ObjObjectRenderer group, byte textureDataId) {
         renderModel(textureDataId);
     }

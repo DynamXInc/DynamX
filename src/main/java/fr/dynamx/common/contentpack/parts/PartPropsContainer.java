@@ -13,7 +13,7 @@ import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 
-@RegisteredSubInfoType(name = "propscontainer", registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
+@RegisteredSubInfoType(name = "propscontainer", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER})
 public class PartPropsContainer extends BasePart<ModularVehicleInfo> implements IShapeInfo {
     protected MutableBoundingBox box;
 

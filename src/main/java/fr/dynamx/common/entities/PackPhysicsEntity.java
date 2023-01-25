@@ -5,7 +5,6 @@ import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
 import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
-import fr.dynamx.api.entities.modules.IMovableModuleContainer;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.common.DynamXMain;
@@ -17,10 +16,12 @@ import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.entity.Entity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
@@ -31,7 +32,7 @@ import net.minecraft.world.World;
  * @see IPhysicsModule
  * @see PackEntityPhysicsHandler For the physics implementation
  */
-public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>, A extends IPhysicsPackInfo> extends ModularPhysicsEntity<T> implements IMovableModuleContainer, IPackInfoReloadListener {
+public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>, A extends IPhysicsPackInfo> extends ModularPhysicsEntity<T> implements IPackInfoReloadListener {
     private static final DataParameter<String> INFO_NAME = EntityDataManager.createKey(PackPhysicsEntity.class, DataSerializers.STRING);
     private static final DataParameter<Integer> METADATA = EntityDataManager.createKey(PackPhysicsEntity.class, DataSerializers.VARINT);
     private int lastMetadata = -1;
@@ -73,8 +74,10 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
     @Override
     public void onPackInfosReloaded() {
         setPackInfo(createInfo(getInfoName()));
-        for(IPhysicsModule<?> module : moduleList) {
-            if(module instanceof IPackInfoReloadListener)
+        if (physicsHandler != null)
+            physicsHandler.onPackInfosReloaded();
+        for (IPhysicsModule<?> module : moduleList) {
+            if (module instanceof IPackInfoReloadListener)
                 ((IPackInfoReloadListener) module).onPackInfosReloaded();
         }
     }
@@ -117,6 +120,11 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
         }
     }
 
+    @Override
+    public ItemStack getPickedResult(RayTraceResult target) {
+        return packInfo.getPickedResult();
+    }
+
     /**
      * Ray-traces to get hit part when interacting with the entity
      */
@@ -150,11 +158,6 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
     @Override
     public EntityJointsHandler getJointsHandler() {
         return jointsHandler;
-    }
-
-    @Override
-    public MovableModule getMovableModule() {
-        return movableModule;
     }
 
     /**

@@ -71,7 +71,7 @@ public class SubInfoTypesRegistry<T extends ISubInfoTypeOwner<?>> {
 
                 RegisteredSubInfoType an = object.getAnnotation(RegisteredSubInfoType.class);
                 Class<? extends ISubInfoTypeOwner<?>> subInfoTypeClass = null;
-                if (an.registries().length == 1)
+                if (an.registries().length >= 1)
                     subInfoTypeClass = an.registries()[0].getInfoOwnerType();
                 //Find the right constructor
                 Constructor<?> constructor = null;

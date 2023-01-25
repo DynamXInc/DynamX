@@ -16,7 +16,7 @@ import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.PackInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
-import fr.dynamx.common.entities.modules.EngineModule;
+import fr.dynamx.common.entities.modules.CarEngineModule;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import fr.dynamx.utils.physics.DynamXPhysicsHelper;
@@ -331,7 +331,7 @@ public class DynamXUtils {
 
     //DUPLICATE (function is already in the BasicsAddon)
     public static int getSpeed(BaseVehicleEntity<?> entity) {
-        EngineModule engine = entity.getModuleByType(EngineModule.class);
+        CarEngineModule engine = entity.getModuleByType(CarEngineModule.class);
         if (engine != null) {
             float[] ab = engine.getEngineProperties();
             if (ab == null) return 0;

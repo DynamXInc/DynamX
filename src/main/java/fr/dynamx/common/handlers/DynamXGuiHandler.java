@@ -5,6 +5,7 @@ import fr.dynamx.common.entities.modules.StorageModule;
 import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ContainerChest;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.IGuiHandler;
 
@@ -17,7 +18,8 @@ public class DynamXGuiHandler implements IGuiHandler {
         if (ID == 1) //storage
         {
             BaseVehicleEntity<?> e = (BaseVehicleEntity<?>) world.getEntityByID(x);
-            return new ContainerChest(player.inventory, e.getModuleByType(StorageModule.class).getInventory(), player);
+            IInventory inventory = e != null && e.hasModuleOfType(StorageModule.class) ? e.getModuleByType(StorageModule.class).getInventory((byte) y) : null;
+            return inventory == null ? null : new ContainerChest(player.inventory, inventory, player);
         }
         return null;
     }
@@ -28,7 +30,8 @@ public class DynamXGuiHandler implements IGuiHandler {
         if (ID == 1) //storage
         {
             BaseVehicleEntity<?> e = (BaseVehicleEntity<?>) world.getEntityByID(x);
-            return new GuiChest(player.inventory, e.getModuleByType(StorageModule.class).getInventory());
+            IInventory inventory = e != null && e.hasModuleOfType(StorageModule.class) ? e.getModuleByType(StorageModule.class).getInventory((byte) y) : null;
+            return inventory == null ? null : new GuiChest(player.inventory, inventory);
         }
         return null;
     }

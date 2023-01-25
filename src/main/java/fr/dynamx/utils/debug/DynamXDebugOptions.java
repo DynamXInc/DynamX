@@ -10,6 +10,7 @@ import java.util.List;
  * Feel free to create yours
  */
 public class DynamXDebugOptions {
+
     private static final List<DynamXDebugOption> ALL_OPTIONS = new ArrayList<>();
     public static final DynamXDebugOption DEBUG_RENDER = DynamXDebugOption.newServerDependantOption(DebugCategories.GENERAL, "Debug renderer").withSubCategory("DynamX"),
             PROFILING = DynamXDebugOption.newServerDependantOption(DebugCategories.GENERAL, "Profiling").withDescription("Find why DynamX is lagging - prints timings in the logs. May produce lag").withSubCategory("DynamX"),
@@ -27,6 +28,8 @@ public class DynamXDebugOptions {
     public static final DynamXDebugOption CENTER_OF_MASS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Center of mass").withSubCategory(VehicleDebugTypes.GENERAL.title),
             SEATS_AND_STORAGE = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Seats and storage").withSubCategory(VehicleDebugTypes.GENERAL.title),
             WHEELS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Wheels").withSubCategory(VehicleDebugTypes.GENERAL.title),
+            ROTORS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Rotors").withSubCategory(VehicleDebugTypes.GENERAL.title),
+            HANDLES = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Handles").withSubCategory(VehicleDebugTypes.GENERAL.title),
             FRICTION_POINTS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Force points").withSubCategory(VehicleDebugTypes.GENERAL.title),
             PLAYER_COLLISIONS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Player collisions").withDescription("Debug for collisions between players and vehicles").withSubCategory(VehicleDebugTypes.COLLISIONS.title),
             TRAILER_ATTACH_POINTS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Trailer attach points").withSubCategory(VehicleDebugTypes.ATTACH_POINTS.title),

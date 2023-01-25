@@ -40,6 +40,12 @@ public class KeyHandler {
 
     public static final KeyBinding KEY_DEBUG = new KeyBinding("key.debug", -1, "key.categories." + DynamXConstants.ID);
 
+
+    public static final KeyBinding KEY_POWERUP = new KeyBinding("key.powerup", Keyboard.KEY_CAPITAL, "key.categories." + DynamXConstants.ID);
+    public static final KeyBinding KEY_POWERDOWN = new KeyBinding("key.powerdown", Keyboard.KEY_LSHIFT, "key.categories." + DynamXConstants.ID);
+
+
+
     private final Minecraft mc;
     private int holdingDown;
     private boolean justPressed;
@@ -54,6 +60,8 @@ public class KeyHandler {
         ClientRegistry.registerKeyBinding(KEY_WATCH_BEHIND);
         ClientRegistry.registerKeyBinding(KEY_PICK_OBJECT);
         ClientRegistry.registerKeyBinding(KEY_TAKE_OBJECT);
+        ClientRegistry.registerKeyBinding(KEY_POWERUP);
+        ClientRegistry.registerKeyBinding(KEY_POWERDOWN);
 
         CarController.registerControls();
     }

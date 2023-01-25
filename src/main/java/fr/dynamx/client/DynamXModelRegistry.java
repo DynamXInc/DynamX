@@ -3,12 +3,12 @@ package fr.dynamx.client;
 import fr.aym.acslib.ACsLib;
 import fr.aym.acslib.api.services.ThreadedLoadingService;
 import fr.aym.acslib.api.services.error.ErrorLevel;
+import fr.aym.acslib.services.impl.thrload.DynamXThreadedModLoader;
 import fr.dynamx.api.contentpack.ContentPackType;
 import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.contentpack.object.render.IObjPackObject;
 import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
-import fr.dynamx.api.obj.IObjModelRegistry;
 import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.client.renders.model.MissingObjModel;
 import fr.dynamx.client.renders.model.renderer.ObjItemModelLoader;
@@ -33,13 +33,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.*;
 
 import static fr.dynamx.common.DynamXMain.log;
 
-public class DynamXModelRegistry implements IObjModelRegistry {
+/**
+ * The DynamX obj model loader <br>
+ * All models should be registered here before DynamX pre initialization
+ */
+public class DynamXModelRegistry implements IPackInfoReloadListener {
+    private static final int LOADER_POOL_SIZE = 6;
+
     private static final ObjItemModelLoader OBJ_ITEM_MODEL_LOADER = new ObjItemModelLoader();
     private static final Map<ObjModelPath, IModelTextureVariantsSupplier> MODELS_REGISTRY = new HashMap<>();
-    private static final Map<ResourceLocation, ObjModelRenderer> MODELS = new HashMap<>();
+    private static final Map<ResourceLocation, ObjModelRenderer> MODELS = new ConcurrentHashMap<>();
     private static final List<ResourceLocation> ERRORED_MODELS = new ArrayList<>();
 
     /**
@@ -49,7 +56,11 @@ public class DynamXModelRegistry implements IObjModelRegistry {
 
     private static boolean REGISTRY_CLOSED;
 
-    @Override
+    /**
+     * Registers a model
+     *
+     * @param location The model location
+     */
     public void registerModel(ObjModelPath location) {
         registerModel(location, null);
     }
@@ -57,17 +68,21 @@ public class DynamXModelRegistry implements IObjModelRegistry {
     public static final PackInfo BASE_PACKINFO = new PackInfo(DynamXConstants.ID, ContentPackType.BUILTIN);
 
     @Deprecated
-    @Override
     public void registerModel(String location) {
         registerModel(new ObjModelPath(BASE_PACKINFO, new ResourceLocation(DynamXConstants.ID, String.format("models/%s", location))), null);
     }
+
     @Deprecated
-    @Override
     public void registerModel(String location, IModelTextureVariantsSupplier customTextures) {
         registerModel(new ObjModelPath(BASE_PACKINFO, new ResourceLocation(DynamXConstants.ID, String.format("models/%s", location))), customTextures);
     }
 
-    @Override
+    /**
+     * Registers a model
+     *
+     * @param location       The model location
+     * @param customTextures A texture supplier for this model (allows multi-texturing)
+     */
     public void registerModel(ObjModelPath location, IModelTextureVariantsSupplier customTextures) {
         if (REGISTRY_CLOSED)
             throw new IllegalStateException("Model registry closed, you should register your model before DynamX pre-initialization");
@@ -86,7 +101,10 @@ public class DynamXModelRegistry implements IObjModelRegistry {
         }
     }
 
-    @Override
+    /**
+     * @return The model corresponding to the given name (the name used in registerModel)
+     * @throws IllegalArgumentException If the model wasn't registered (should be done before DynamX pre initialization)
+     */
     public ObjModelRenderer getModel(ResourceLocation name) {
         if (!MODELS.containsKey(name)) {
             if (!ERRORED_MODELS.contains(name)) {
@@ -98,7 +116,7 @@ public class DynamXModelRegistry implements IObjModelRegistry {
         return MODELS.get(name);
     }
 
-    @Override
+    @Deprecated
     public ObjModelRenderer getModel(String name) {
         ResourceLocation path = new ResourceLocation(DynamXConstants.ID, String.format("models/%s", name));
         if (!MODELS.containsKey(path)) {
@@ -112,65 +130,90 @@ public class DynamXModelRegistry implements IObjModelRegistry {
     }
 
     /**
-     * Reloads all obj models <br>
+     * Reloads all obj models, may take some time <br>
      * <strong>DON'T CALL THIS, USE {@link DynamXLoadingTasks} !</strong>
      */
-    @Override
     public void reloadModels() {
-        log.info("Reloading all models...");
         REGISTRY_CLOSED = true;
+        MODELS.values().forEach(ObjModelRenderer::clearVAOs);
         MODELS.clear();
         ERRORED_MODELS.clear();
+        DynamXContext.getObjModelDataCache().clear();
         DynamXErrorManager.getErrorManager().clear(DynamXErrorManager.MODEL_ERRORS);
 
+        ExecutorService modelLoader = Executors.newScheduledThreadPool(LOADER_POOL_SIZE, new DynamXThreadedModLoader.DefaultThreadFactory("DnxModelLoader"));
         ACsLib.getPlatform().provideService(ThreadedLoadingService.class).addTask(ThreadedLoadingService.ModLoadingSteps.FINISH_LOAD, "model_load", () -> {
-            //bar.step("Loading model files");
-            for (Map.Entry<ObjModelPath, IModelTextureVariantsSupplier> name : MODELS_REGISTRY.entrySet()) {
-                log.debug("Loading tessellator model " + name.getKey());
-
-                ObjModelRenderer model = ObjModelRenderer.loadObjModel(name.getKey(), name.getValue());
-                if (model != null) {
-                    MODELS.put(name.getKey().getModelPath(), model);
-                } else {
-                    MODELS.put(name.getKey().getModelPath(), MISSING_MODEL);
+            try {
+                /* == Load models == */
+                List<Callable<?>> loadObjTasks = new ArrayList<>();
+                for (Map.Entry<ObjModelPath, IModelTextureVariantsSupplier> name : MODELS_REGISTRY.entrySet()) {
+                    loadObjTasks.add(() -> {
+                        log.debug("Loading tessellator model " + name.getKey());
+                        ObjModelRenderer model = ObjModelRenderer.loadObjModel(name.getKey(), name.getValue());
+                        if (model != null) {
+                            MODELS.put(name.getKey().getModelPath(), model);
+                        } else {
+                            MODELS.put(name.getKey().getModelPath(), MISSING_MODEL);
+                        }
+                        return null;
+                    });
                 }
-            }
+                long start = System.currentTimeMillis();
+                modelLoader.invokeAll((List) loadObjTasks);
+                log.info("Took " + (System.currentTimeMillis() - start) + " ms to load " + loadObjTasks.size() + " obj models");
 
-            long time = System.currentTimeMillis();
-            while (Minecraft.getMinecraft().getTextureManager() == null) { //Don't listen idea, it can be null
-                try {
-                    Thread.sleep(250);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                /* == Wait for Mc's texture manager == */
+                long time = System.currentTimeMillis();
+                while (Minecraft.getMinecraft().getTextureManager() == null) { //Don't listen idea, it can be null
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-            DynamXMain.log.debug("Tex manager wait took " + (System.currentTimeMillis() - time) + " ms");
+                DynamXMain.log.debug("Tex manager wait took " + (System.currentTimeMillis() - time) + " ms");
 
-            OBJLoader.getMaterialLibs().forEach(MTLLoader::loadTextures);
+                /* == Load textures == */
+                List<Callable<?>> loadTexturesTasks = new ArrayList<>();
+                OBJLoader.getMtlLoaders().forEach(mtlLoader -> loadTexturesTasks.add(() -> {
+                    mtlLoader.loadTextures();
+                    return null;
+                }));
+                start = System.currentTimeMillis();
+                modelLoader.invokeAll((List) loadTexturesTasks);
+                log.info("Took " + (System.currentTimeMillis() - start) + " ms to load " + loadTexturesTasks.size() + " obj materials");
+                modelLoader.shutdown();
+
+                /* == Init armors == */
+                for (ArmorObject<?> info : DynamXObjectLoaders.ARMORS.getInfos().values()) {
+                    ObjModelRenderer model = getModel(info.getModel());
+                    info.getObjArmor().init(model);
+                }
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }, () -> {
-            ProgressManager.ProgressBar bar = ProgressManager.push("Loading obj models", 3);
-            log.info("Loading model textures and compiling display lists...");
+            ProgressManager.ProgressBar bar = ProgressManager.push("Loading obj models", 1);
+            log.info("Loading model textures...");
             //Loads all textures of models, cannot be done before because the TextureManager is not initialized
             bar.step("Uploading textures");
-            OBJLoader.getMaterialLibs().forEach(MTLLoader::uploadTextures);
-            bar.step("Compiling models");
-            MODELS.forEach((s, t) -> t.setupModel());
-            bar.step("Compiling armors");
-            for (ArmorObject<?> info : DynamXObjectLoaders.ARMORS.getInfos().values()) {
-                ObjModelRenderer model = getModel(info.getModel());
-                info.getObjArmor().init(model);
-            }
+            OBJLoader.getMtlLoaders().forEach(MTLLoader::uploadTextures);
+            OBJLoader.getMtlLoaders().clear();
             ProgressManager.pop(bar);
             DynamXLoadingTasks.endTask(DynamXLoadingTasks.MODEL);
         });
     }
 
-    @Override
-    public IObjItemModelRenderer getItemRenderer() {
+    /**
+     * @return The obj item renderer
+     */
+    public ObjItemModelLoader getItemRenderer() {
         return OBJ_ITEM_MODEL_LOADER;
     }
 
-    @Override
+    /**
+     * @return The number of loaded models
+     */
     public int getLoadedModelCount() {
         return MODELS_REGISTRY.size();
     }
@@ -184,7 +227,7 @@ public class DynamXModelRegistry implements IObjModelRegistry {
             for (INamedObject namedObject : infoLoader.getInfos().values()) {
                 if (namedObject instanceof IObjPackObject && ((IObjPackObject) namedObject).shouldRegisterModel()) {
                     ObjModelPath modelPath = DynamXUtils.getModelPath(namedObject.getPackName(), ((IObjPackObject) namedObject).getModel());
-                    if(REGISTRY_CLOSED) {
+                    if (REGISTRY_CLOSED) {
                         // override old variants supplier
                         MODELS_REGISTRY.put(modelPath, (IModelTextureVariantsSupplier) namedObject);
                     } else {

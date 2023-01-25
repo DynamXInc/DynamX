@@ -1,7 +1,6 @@
 package fr.dynamx.common.entities;
 
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.entities.modules.IMovableModuleContainer;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.objects.PropObject;
@@ -16,7 +15,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PropsEntity<T extends PackEntityPhysicsHandler<PropObject<?>, ?>> extends PackPhysicsEntity<T, PropObject<?>> implements IMovableModuleContainer {
+public class PropsEntity<T extends PackEntityPhysicsHandler<PropObject<?>, ?>> extends PackPhysicsEntity<T, PropObject<?>> {
     private final List<MutableBoundingBox> unrotatedBoxes = new ArrayList<>();
 
     public PropsEntity(World worldIn) {

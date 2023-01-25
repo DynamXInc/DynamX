@@ -3,7 +3,6 @@ package fr.dynamx.common.physics.joints;
 import com.jme3.bullet.joints.Constraint;
 import fr.aym.acslib.utils.nbtserializer.NBTSerializer;
 import fr.dynamx.api.entities.modules.AttachModule;
-import fr.dynamx.api.entities.modules.IEntityJoints;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.network.EnumPacketTarget;
 import fr.dynamx.api.network.sync.SimulationHolder;
@@ -26,12 +25,15 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Base implementation of {@link IEntityJoints}
+ * Handles creation, synchronisation and destruction of {@link EntityJoint}, via a {@link JointHandler} <br>
+ * A joint is a {@link Constraint} between two entities, for example a car and a trailer <br>
+ * If you want to put joints on your entity, you should return this in the getJointsHandler function of you {@link PhysicsEntity} <br>
+ * NOTE : if you want to override something, first check your {@link JointHandler} if you can do it there
  *
+ * @see EntityJointsHandler EntityJointsHandler for the default implementation
  * @see AttachModule
- * @see JointHandler
  */
-public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysicsHandler<?, ?>>, IEntityJoints, IPhysicsModule.IEntityUpdateListener {
+public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysicsHandler<?, ?>>, IPhysicsModule.IEntityUpdateListener {
     private final PhysicsEntity<?> entity;
     private final List<EntityJoint<?>> joints = new ArrayList<>();
     private List<EntityJoint.CachedJoint> queuedRestorations;
@@ -44,7 +46,7 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
     }
 
     /**
-     * @return All the active joints of this entity
+     * @return All joints linked to this entity
      */
     public List<EntityJoint<?>> getJoints() {
         return joints;
@@ -69,7 +71,20 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
         }
     }
 
-    @Override //done in physics thread
+    /**
+     * <strong>This method is fired by the default {@link JointHandler} implementation, in most case you don't have to call this.</strong> <br><br>
+     * Creates a joint between this two entities <br>
+     * The joint will be saved an re-created until you remove it, one entity dies, or the joint breaks <br>
+     * Should be fired on server side
+     *
+     * @param type        The joint handler of the joint
+     * @param joint       The physical {@link Constraint} associated with the joint
+     * @param jointId     The local id of the joint, useful if you have multiple joints on this JointHandler <br> Should be unique for each joint
+     * @param otherEntity The entity linked to the entity owning *this* {@link EntityJointsHandler} (the other entity must have another EntityJointsHandler, but you don't need to call this function on it) <br>
+     *                    Can be the same entity (the entity owning this joints handler)
+     * @param <C>         The type of the {@link Constraint}
+     */
+    //done in physics thread
     public <C extends Constraint> void addJoint(JointHandler<?, ?, ?> type, C joint, byte id, PhysicsEntity<?> otherEntity) {
         if (otherEntity.getJointsHandler() == null)
             throw new IllegalArgumentException("Entity " + otherEntity + " does not accept joints !");
@@ -78,7 +93,7 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
         //  return -1;
         addJointInternal(otherEntity, j);
         if (otherEntity != entity)
-            ((EntityJointsHandler) otherEntity.getJointsHandler()).addJointInternal(entity, j);
+            otherEntity.getJointsHandler().addJointInternal(entity, j);
 
         if (otherEntity != entity) {
             if (type.isJointOwner(j, entity))
@@ -103,15 +118,28 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
             queuedRestorations = new ArrayList<>();
         }
         queuedRestorations.add(toAdd);
-        restoreCooldown = 1;
+        restoreCooldown = 20;
     }
 
-    @Override
+    /**
+     * Removes the joint with this entity, if it exists <br>
+     * Should be fired on server side
+     *
+     * @param jointType The type of the joint (name of the {@link JointHandler})
+     * @param jointId   The local id of the joint, the same as when the joint was created
+     */
     public void removeJointWithMe(ResourceLocation jointType, byte jointId) {
         removeJointWith(entity, jointType, jointId);
     }
 
-    @Override
+    /**
+     * Removes the joint with otherEntity, if it exists <br>
+     * Should be fired on server side
+     *
+     * @param otherEntity The other entity linked to this joint
+     * @param jointType   The type of the joint (name of the {@link JointHandler})
+     * @param jointId     The local id of the joint, the same as when the joint was created
+     */
     public void removeJointWith(PhysicsEntity<?> otherEntity, ResourceLocation jointType, byte jointId) {
         DynamXMain.proxy.scheduleTask(entity.world, () -> {
             EntityJoint<?> temp = null;
@@ -131,7 +159,6 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
         });
     }
 
-    @Override
     public void removeJointsOfType(ResourceLocation jointType, byte jointId) {
         DynamXMain.proxy.scheduleTask(entity.world, () -> {
             EntityJoint<?> temp = null;
@@ -153,7 +180,6 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
     /**
      * Internal function remove a joint on entity death or from a packet
      */
-    @Override
     public void onRemoveJoint(EntityJoint<?> joint) {
         onRemoveJointInternal(joint, joint.getOtherEntity(entity));
     }
@@ -175,8 +201,8 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
         if (entity != otherEntity && otherEntity.getJointsHandler() != null) {
             handler.onDestroy(joint, otherEntity);
             //common use
-            ((EntityJointsHandler) otherEntity.getJointsHandler()).getJoints().remove(joint);
-            ((EntityJointsHandler) otherEntity.getJointsHandler()).setDirty(true);
+            otherEntity.getJointsHandler().getJoints().remove(joint);
+            otherEntity.getJointsHandler().setDirty(true);
         }
         if (joint.getJoint() != null) {
             DynamXContext.getPhysicsWorld(entity.world).removeJoint(joint.getJoint());
@@ -301,7 +327,9 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
         joints.clear();
     }
 
-    @Override
+    /**
+     * Updates the {@link SimulationHolder} of all linked entity, if we own the joint
+     */
     public void setSimulationHolderOnJointedEntities(SimulationHolder holder, EntityPlayer simulationPlayerHolder) {
         for (EntityJoint<?> j : joints) {
             if (j.getHandler().isJointOwner(j, entity) && j.getEntity1() != j.getEntity2()) {
@@ -311,7 +339,10 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
         }
     }
 
-    @Override
+    /**
+     * Sends all the joints to the target client <br>
+     * Used for player connection
+     */
     public void sync(EntityPlayerMP target) {
         if (!getJoints().isEmpty())
             DynamXContext.getNetwork().sendToClient(new MessageJoints(entity, computeCachedJoints()), EnumPacketTarget.PLAYER, target);

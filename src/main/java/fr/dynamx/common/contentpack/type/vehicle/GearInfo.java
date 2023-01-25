@@ -7,10 +7,10 @@ import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 
 /**
- * Automatic gear of an {@link EngineInfo}
+ * Automatic gear of an {@link CarEngineInfo}
  */
 @RegisteredSubInfoType(name = "gear", registries = SubInfoTypeRegistries.ENGINES, strictName = false)
-public class GearInfo extends SubInfoType<EngineInfo> {
+public class GearInfo extends SubInfoType<CarEngineInfo> {
     private byte id;
     private final String gearName;
 
@@ -19,7 +19,7 @@ public class GearInfo extends SubInfoType<EngineInfo> {
     @PackFileProperty(configNames = "RPMRange")
     private int[] rpmRange = new int[2];
 
-    public GearInfo(ISubInfoTypeOwner<EngineInfo> owner, String name) {
+    public GearInfo(ISubInfoTypeOwner<CarEngineInfo> owner, String name) {
         super(owner);
         this.gearName = name;
     }
@@ -33,7 +33,7 @@ public class GearInfo extends SubInfoType<EngineInfo> {
     }
 
     @Override
-    public void appendTo(EngineInfo owner) {
+    public void appendTo(CarEngineInfo owner) {
         owner.addGear(this);
     }
 

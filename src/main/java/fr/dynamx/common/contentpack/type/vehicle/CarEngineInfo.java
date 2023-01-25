@@ -8,7 +8,7 @@ import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.entities.modules.EngineModule;
+import fr.dynamx.common.entities.modules.CarEngineModule;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * Engine contained in an engine file
  */
-public class EngineInfo extends SubInfoTypeOwner<EngineInfo> implements ISubInfoType<ModularVehicleInfo>, INamedObject {
+public class CarEngineInfo extends SubInfoTypeOwner<CarEngineInfo> implements ISubInfoType<ModularVehicleInfo>, INamedObject {
     private final String packName;
     private final String engineName;
 
@@ -40,7 +40,7 @@ public class EngineInfo extends SubInfoTypeOwner<EngineInfo> implements ISubInfo
     public String startingSoundInterior;
     public String startingSoundExterior;
 
-    public EngineInfo(String packName, String name) {
+    public CarEngineInfo(String packName, String name) {
         this.packName = packName;
         this.engineName = name;
     }
@@ -141,7 +141,7 @@ public class EngineInfo extends SubInfoTypeOwner<EngineInfo> implements ISubInfo
 
     @Override
     public void addModules(BaseVehicleEntity<?> entity, ModuleListBuilder modules) {
-        modules.add(new EngineModule(entity, this));
+        modules.add(new CarEngineModule(entity, this));
     }
 }
 

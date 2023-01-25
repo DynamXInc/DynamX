@@ -1,7 +1,7 @@
 package fr.dynamx.client.handlers.hud;
 
 import fr.dynamx.api.entities.VehicleEntityProperties;
-import fr.dynamx.common.contentpack.type.vehicle.EngineInfo;
+import fr.dynamx.common.contentpack.type.vehicle.CarEngineInfo;
 import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.util.ResourceLocation;
 
@@ -18,6 +18,6 @@ public class SpeedometerPanel extends CircleCounterPanel {
         super.tick();
         prevValue = value;
         //Don't use modified maxRpm here
-        value = carController.engine.getEngineProperty(VehicleEntityProperties.EnumEngineProperties.REVS) * carController.entity.getPackInfo().getSubPropertyByType(EngineInfo.class).getMaxRevs();
+        value = carController.engine.getEngineProperty(VehicleEntityProperties.EnumEngineProperties.REVS) * carController.entity.getPackInfo().getSubPropertyByType(CarEngineInfo.class).getMaxRevs();
     }
 }

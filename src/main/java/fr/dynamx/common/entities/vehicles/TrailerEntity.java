@@ -2,11 +2,7 @@ package fr.dynamx.common.entities.vehicles;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.IModuleContainer;
-import fr.dynamx.api.entities.modules.IMovableModuleContainer;
-import fr.dynamx.api.entities.modules.IPropulsionModule;
-import fr.dynamx.api.entities.modules.ISeatsModule;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
-import fr.dynamx.api.physics.entities.IPropulsionHandler;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
@@ -14,15 +10,15 @@ import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.common.entities.modules.SeatsModule;
 import fr.dynamx.common.entities.modules.WheelsModule;
 import fr.dynamx.common.physics.entities.BaseWheeledVehiclePhysicsHandler;
+import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
 import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
 
-public class TrailerEntity<T extends TrailerEntity.TrailerPhysicsHandler<?>> extends BaseVehicleEntity<T> implements
-        IModuleContainer.IPropulsionContainer<IPropulsionModule<BaseWheeledVehiclePhysicsHandler<?>>>, IModuleContainer.IDoorContainer, IMovableModuleContainer, IModuleContainer.ISeatsContainer {
-    private IPropulsionModule<BaseWheeledVehiclePhysicsHandler<?>> wheels;
+public class TrailerEntity<T extends TrailerEntity.TrailerPhysicsHandler<?>> extends BaseVehicleEntity<T> implements IModuleContainer.IDoorContainer, IModuleContainer.ISeatsContainer {
+    private WheelsModule wheels;
     private DoorsModule doors;
-    private ISeatsModule seats;
+    private SeatsModule seats;
 
     public TrailerEntity(World world) {
         super(world);
@@ -46,8 +42,7 @@ public class TrailerEntity<T extends TrailerEntity.TrailerPhysicsHandler<?>> ext
     }
 
     @Nonnull
-    @Override
-    public IPropulsionModule<BaseWheeledVehiclePhysicsHandler<?>> getPropulsion() {
+    public WheelsModule getWheels() {
         return wheels;
     }
 
@@ -68,7 +63,7 @@ public class TrailerEntity<T extends TrailerEntity.TrailerPhysicsHandler<?>> ext
 
     @Nonnull
     @Override
-    public ISeatsModule getSeats() {
+    public SeatsModule getSeats() {
         if (seats == null) //We may need seats before modules are created, because of seats sync
             seats = new SeatsModule(this);
         return seats;
@@ -79,9 +74,8 @@ public class TrailerEntity<T extends TrailerEntity.TrailerPhysicsHandler<?>> ext
             super(entity);
         }
 
-        @Override
-        public IPropulsionHandler getPropulsion() {
-            return getHandledEntity().getPropulsion().getPhysicsHandler(); //WHEELS
+        public WheelsPhysicsHandler getWheels() {
+            return getHandledEntity().getWheels().getPhysicsHandler(); //WHEELS
         }
     }
 }

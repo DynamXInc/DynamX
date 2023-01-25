@@ -6,13 +6,11 @@ import fr.dynamx.api.audio.EnumSoundState;
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
-import fr.dynamx.api.entities.modules.IPropulsionModule;
+import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent;
-import fr.dynamx.common.network.sync.variables.EntityFloatArrayVariable;
-import fr.dynamx.common.network.sync.variables.EntityMapVariable;
 import fr.dynamx.api.network.sync.EntityVariable;
 import fr.dynamx.api.network.sync.SynchronizationRules;
-import fr.dynamx.api.physics.entities.IPropulsionHandler;
+import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
 import fr.dynamx.client.sound.SkiddingSound;
 import fr.dynamx.client.sound.VehicleSound;
@@ -22,7 +20,8 @@ import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.parts.PartWheel;
 import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
+import fr.dynamx.common.network.sync.variables.EntityFloatArrayVariable;
+import fr.dynamx.common.network.sync.variables.EntityMapVariable;
 import fr.dynamx.common.physics.entities.BaseWheeledVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.wheel.WheelPhysics;
@@ -47,12 +46,13 @@ import static fr.dynamx.client.ClientProxy.SOUND_HANDLER;
 
 /**
  * Basic wheel implementation <br>
- * Works with an {@link EngineModule} but you can use your own engines
+ * Works with an {@link CarEngineModule} but you can use your own engines
  *
  * @see WheelsPhysicsHandler
  */
 @SynchronizedEntityVariable.SynchronizedPhysicsModule()
-public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysicsHandler<?>>, IPhysicsModule.IEntityUpdateListener, IPhysicsModule.IPhysicsUpdateListener, IPackInfoReloadListener {
+public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHandler<?>>, IPhysicsModule.IEntityUpdateListener, IPhysicsModule.IPhysicsUpdateListener, IPackInfoReloadListener {
+    //TODO CLEAN WHEELS CODE
     @SynchronizedEntityVariable(name = "wheel_infos")
     protected final EntityMapVariable<Map<Byte, PartWheelInfo>, Byte, PartWheelInfo> wheelInfos = new EntityMapVariable<>((variable, value) -> {
         value.forEach(this::setWheelInfo);
@@ -88,9 +88,9 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
                     for (int i = 0; i < value.length; i++) {
                         if (variable.get()[i] != value[i]) {
                             if (value[i] == WheelState.REMOVED)
-                                ((WheelsPhysicsHandler) getPhysicsHandler()).removeWheel((byte) i);
+                                getPhysicsHandler().removeWheel((byte) i);
                             else
-                                ((WheelsPhysicsHandler) getPhysicsHandler()).getWheel(i).setFlattened(value[i] == WheelState.ADDED_FLATTENED);
+                                getPhysicsHandler().getWheel(i).setFlattened(value[i] == WheelState.ADDED_FLATTENED);
                         }
                     }
                 }
@@ -269,8 +269,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
         }
     }
 
-    @Override
-    public IPropulsionHandler getPhysicsHandler() {
+    public WheelsPhysicsHandler getPhysicsHandler() {
         return wheelsPhysics;
     }
 
@@ -278,7 +277,6 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
         return skidInfos.get();
     }
 
-    @Override
     @SideOnly(Side.CLIENT)
     public void spawnPropulsionParticles(RenderPhysicsEntity<?> render, float partialTicks) {
         //Dust particles when the vehicle friction is very low
@@ -312,7 +310,7 @@ public class WheelsModule implements IPropulsionModule<BaseWheeledVehiclePhysics
     @SideOnly(Side.CLIENT)
     public void updateEntity() {
         // if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.UpdateVehicleSoundEntityEvent(entity, this, PhysicsEntityEvent.Phase.PRE))) {
-        if (entity.getPackInfo() != null && false) { //TODO ENABLE & IMPROVE
+        if (false) { //TODO ENABLE & IMPROVE
             //if (engineInfo != null && engineInfo.getEngineSounds() != null) {
             if (sounds.isEmpty()) { //Sounds are not initialized
                 sounds.put(0, new SkiddingSound("skidding", entity, this));

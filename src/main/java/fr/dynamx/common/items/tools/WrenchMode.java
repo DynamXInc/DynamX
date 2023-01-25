@@ -4,7 +4,6 @@ import com.jme3.bullet.joints.JointEnd;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.IModuleContainer;
-import fr.dynamx.api.entities.modules.ISeatsModule;
 import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.EnumBulletShapeType;
 import fr.dynamx.api.physics.IPhysicsWorld;
@@ -366,14 +365,14 @@ public class WrenchMode {
         @Override
         public void onInteractWithEntity(EntityPlayer context, PhysicsEntity<?> physicsEntity, boolean isSneaking) {
             if (physicsEntity instanceof BaseVehicleEntity) {
-                BaseVehicleEntity baseVehicleEntity = (BaseVehicleEntity) physicsEntity;
-                SeatsModule seatsModule = (SeatsModule) baseVehicleEntity.getModuleByType(SeatsModule.class);
+                BaseVehicleEntity<?> baseVehicleEntity = (BaseVehicleEntity<?>) physicsEntity;
+                SeatsModule seatsModule = baseVehicleEntity.getModuleByType(SeatsModule.class);
                 Entity entity = playerEntityHashMap.remove(context);
                 if (entity != null) {
-                    for (Object object : ((ModularVehicleInfo) baseVehicleEntity.getPackInfo()).getPartsByType(PartSeat.class)) {
+                    for (Object object : baseVehicleEntity.getPackInfo().getPartsByType(PartSeat.class)) {
                         PartSeat partSeat = (PartSeat) object;
                         if (!partSeat.isDriver()) {
-                            ISeatsModule seats = ((IModuleContainer.ISeatsContainer) baseVehicleEntity).getSeats();
+                            SeatsModule seats = ((IModuleContainer.ISeatsContainer) baseVehicleEntity).getSeats();
                             Entity seatRider = seats.getSeatToPassengerMap().get(partSeat);
                             if (seatRider == null) {
                                 partSeat.mount(baseVehicleEntity, seatsModule, entity);

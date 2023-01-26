@@ -69,7 +69,6 @@ public class OBJLoader {
             List<IndexedModel.OBJIndex> indices = new ArrayList<>();
             List<String> indicedMaterials = new ArrayList<>();
 
-            //List<Material> materials = new ArrayList<>();
             Map<IndexedModel.OBJIndex, Integer> resultIndexMap = new HashMap<>();
             Map<Integer, Integer> normalIndexMap = new HashMap<>();
             Map<Integer, Integer> indexMap = new HashMap<>();
@@ -78,7 +77,6 @@ public class OBJLoader {
 
             String currentMaterial = null;
             HashMap<ObjObjectData, IndexedModel[]> objects = new HashMap<>();
-            objects.put(new ObjObjectData("main"), new IndexedModel[]{result, normalModel});
             for (int j = 0, linesLength = lines.length; j < linesLength; j++) {
                 try {
                     String line = lines[j];

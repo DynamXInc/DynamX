@@ -32,11 +32,8 @@ public class ModelObjArmor extends ModelBiped {
     private EntityEquipmentSlot activePart;
     private byte activeTextureId;
 
-    public ModelObjArmor(ArmorObject<?> armorObject) {
+    public ModelObjArmor(ArmorObject<?> armorObject, ObjModelRenderer model) {
         this.armorObject = armorObject;
-    }
-
-    public void init(ObjModelRenderer model) {
         if (armorObject.getArmorHead() != null) {
             head = new ArmorRenderer(model, this, armorObject.getArmorHead());
             setBodyPart(head, bipedHead);

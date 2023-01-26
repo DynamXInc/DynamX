@@ -1,9 +1,6 @@
 package fr.dynamx.client.renders.model.texture;
 
 import fr.aym.acslib.impl.services.thrload.ThreadedTexture;
-import fr.dynamx.common.DynamXContext;
-import fr.dynamx.common.objloader.data.Material;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
@@ -21,7 +18,7 @@ public class MaterialTexture {
     @Getter
     private int glTextureId;
 
-    public void loadTexture(Material material, TextureManager man) {
+    public void loadTexture(TextureManager man) {
         ITextureObject obj = man.getTexture(path);
         if (obj == null) {
             //obj = DynamXContext.isOptifineLoaded() ? new OptifineTextureMat(material, path, textureVariantName) : new ThreadedTexture(path);
@@ -32,6 +29,8 @@ public class MaterialTexture {
 
     public void uploadTexture(TextureManager man) {
         ITextureObject obj = man.getTexture(path);
+        if(obj == null) //happens sometimes o_o
+            loadTexture(man);
         if (obj instanceof ThreadedTexture)
             ((ThreadedTexture) obj).uploadTexture(man);
         glTextureId = obj.getGlTextureId();

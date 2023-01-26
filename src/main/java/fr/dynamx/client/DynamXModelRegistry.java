@@ -10,6 +10,7 @@ import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.contentpack.object.render.IObjPackObject;
 import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
 import fr.dynamx.api.obj.ObjModelPath;
+import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.client.renders.model.MissingObjModel;
 import fr.dynamx.client.renders.model.renderer.ObjItemModelLoader;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
@@ -106,6 +107,16 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
      * @throws IllegalArgumentException If the model wasn't registered (should be done before DynamX pre initialization)
      */
     public ObjModelRenderer getModel(ResourceLocation name) {
+        /*for(ObjModelData data : DynamXContext.getObjModelDataCache().values()) {
+            List<String> objs = new ArrayList<>();
+            for(ObjObjectData d : data.getObjObjects()) {
+                if(d.getMesh() != null && d.getMesh().vertices != null)
+                    objs.add(d.getName());
+            }
+            if(!objs.isEmpty()) {
+                System.out.println("ERR " + data.getObjModelPath()+" "+objs);
+            }
+        }*/
         if (!MODELS.containsKey(name)) {
             if (!ERRORED_MODELS.contains(name)) {
                 log.error("Obj model " + name + " isn't registered !");
@@ -185,10 +196,7 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
                 modelLoader.shutdown();
 
                 /* == Init armors == */
-                for (ArmorObject<?> info : DynamXObjectLoaders.ARMORS.getInfos().values()) {
-                    ObjModelRenderer model = getModel(info.getModel());
-                    info.getObjArmor().init(model);
-                }
+                DynamXObjectLoaders.ARMORS.getInfos().values().forEach(ArmorObject::initArmorModel);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -199,9 +207,20 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
             bar.step("Uploading textures");
             OBJLoader.getMtlLoaders().forEach(MTLLoader::uploadTextures);
             OBJLoader.getMtlLoaders().clear();
+
+            if(ClientEventHandler.MC.world != null)
+                uploadVAOs();
+
             ProgressManager.pop(bar);
             DynamXLoadingTasks.endTask(DynamXLoadingTasks.MODEL);
         });
+    }
+
+    public void uploadVAOs() {
+        log.info("Loading model vaos...");
+        long t1 = System.currentTimeMillis();
+        MODELS.values().forEach(ObjModelRenderer::uploadVAOs);
+        DynamXMain.log.info("VAO upload took " + (System.currentTimeMillis() - t1) + "ms");
     }
 
     /**

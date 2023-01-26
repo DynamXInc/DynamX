@@ -27,13 +27,9 @@ import java.util.Map;
 import static fr.dynamx.common.DynamXMain.log;
 
 public class ObjObjectRenderer {
-    // To bypass MC's texture manager (quicker texture bind function)
-    private static int bindTexture;
-
     private final Map<Byte, VariantRenderData> modelRenderData = new HashMap<>();
     @Getter
     private final ObjObjectData objObjectData;
-    private boolean isVAOSetup;
     @Getter
     @Setter
     private Vector4f objectColor = new Vector4f(1, 1, 1, 1);
@@ -42,9 +38,13 @@ public class ObjObjectRenderer {
         this.objObjectData = objObjectData;
     }
 
-    private void setupVAO() {
+    public void uploadVAO() {
         if (modelRenderData.isEmpty()) //Add default render data
             modelRenderData.put((byte) 0, new VariantRenderData(null, null));
+        if (objObjectData.getMesh().materials.isEmpty()) {
+            objObjectData.clearData();
+            return;
+        }
         for (Map.Entry<Byte, VariantRenderData> entry : modelRenderData.entrySet()) {
             if (entry.getValue().vaoId == -1) {
                 int vaoID = DynamXRenderUtils.genVertexArrays();
@@ -60,18 +60,15 @@ public class ObjObjectRenderer {
                 DynamXRenderUtils.bindVertexArray(0);
             }
         }
-        isVAOSetup = true;
+        objObjectData.clearData();
     }
 
     public void clearVAO() {
         if (!modelRenderData.isEmpty()) {
-            if (isVAOSetup) {
-                modelRenderData.forEach((textureID, renderData) -> {
-                    if (renderData.vaoId != -1)
-                        OpenGlHelper.glDeleteBuffers(renderData.vaoId);
-                });
-                isVAOSetup = false;
-            }
+            modelRenderData.forEach((textureID, renderData) -> {
+                if (renderData.vaoId != -1)
+                    OpenGlHelper.glDeleteBuffers(renderData.vaoId);
+            });
             modelRenderData.clear();
         }
     }
@@ -94,10 +91,6 @@ public class ObjObjectRenderer {
     }
 
     public void render(ObjModelRenderer model, byte textureVariantID) {
-        if (objObjectData.getMesh().materials.isEmpty())
-            return;
-        if (!isVAOSetup)
-            setupVAO();
         if (modelRenderData.containsKey(textureVariantID))
             renderVAO(model, modelRenderData.get(textureVariantID));
         else if (modelRenderData.containsKey((byte) 0))
@@ -126,7 +119,8 @@ public class ObjObjectRenderer {
     int i = 0;
 
     private void renderVAO(ObjModelRenderer model, VariantRenderData renderData) {
-        startDrawing();
+        if(renderData.vaoId == -1)
+            return;
         DynamXRenderUtils.bindVertexArray(renderData.vaoId);
         GlStateManager.glEnableClientState(GL11.GL_VERTEX_ARRAY);
         GlStateManager.glEnableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
@@ -166,13 +160,6 @@ public class ObjObjectRenderer {
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, id);
             bindTexture = id;
         }*/
-    }
-
-    /**
-     * Resets memory of last bind texture
-     */
-    private static void startDrawing() {
-        bindTexture = -1;
     }
 
     private void setupIndicesBuffer(int[] indices) {

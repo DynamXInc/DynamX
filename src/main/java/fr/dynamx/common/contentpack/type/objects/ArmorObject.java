@@ -83,8 +83,10 @@ public class ArmorObject<T extends ArmorObject<?>> extends AbstractItemObject<T,
     public ArmorObject(String packName, String fileName) {
         super(packName, fileName);
         this.itemScale = 0.7f; //default value
-        if (FMLCommonHandler.instance().getSide().isClient())
-            objArmor = new ModelObjArmor(this);
+    }
+
+    public void initArmorModel() {
+        objArmor = new ModelObjArmor(this, DynamXContext.getObjModelRegistry().getModel(getModel()));
     }
 
     @SideOnly(Side.CLIENT)
@@ -136,7 +138,7 @@ public class ArmorObject<T extends ArmorObject<?>> extends AbstractItemObject<T,
     @Override
     public boolean postLoad(boolean hot) {
         if (hot && FMLCommonHandler.instance().getSide().isClient())
-            getObjArmor().init(DynamXContext.getObjModelRegistry().getModel(getModel()));
+            initArmorModel();
         if (texturesArray != null)
             new MaterialVariantsInfo(this, texturesArray).appendTo(this);
         return super.postLoad(hot);

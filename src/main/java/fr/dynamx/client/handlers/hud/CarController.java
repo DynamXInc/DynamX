@@ -11,10 +11,9 @@ import fr.aym.acsguis.cssengine.style.EnumCssStyleProperties;
 import fr.aym.acsguis.utils.GuiConstants;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.VehicleEntityProperties;
-import fr.dynamx.api.entities.modules.IVehicleController;
 import fr.dynamx.api.events.VehicleEntityEvent;
-import fr.dynamx.client.camera.CameraSystem;
 import fr.dynamx.client.handlers.ClientDebugSystem;
+import fr.dynamx.client.handlers.KeyHandler;
 import fr.dynamx.common.contentpack.type.vehicle.CarEngineInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.CarEngineModule;
@@ -22,42 +21,28 @@ import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.client.ClientDynamXUtils;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import org.lwjgl.input.Keyboard;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public class CarController implements IVehicleController {
+public class CarController extends BaseController {
     public static final ResourceLocation STYLE = new ResourceLocation(DynamXConstants.ID, "css/vehicle_hud.css");
-    private static final Minecraft MC = Minecraft.getMinecraft();
-
-    public static final KeyBinding car_engineOn = new KeyBinding("key.startEngine", Keyboard.KEY_O, "key.categories." + DynamXConstants.ID);
-    public static final KeyBinding car_brake = new KeyBinding("key.brake", Keyboard.KEY_SPACE, "key.categories." + DynamXConstants.ID);
-    public static final KeyBinding speedLimiter = new KeyBinding("key.speedlimit", Keyboard.KEY_J, "key.categories." + DynamXConstants.ID);
-    public static final KeyBinding toggleLockDoor = new KeyBinding("key.toggleLockDoor", Keyboard.KEY_Y, "key.categories." + DynamXConstants.ID);
-    public static final KeyBinding attachTrailer = new KeyBinding("key.attachTrailer", Keyboard.KEY_H, "key.categories." + DynamXConstants.ID);
 
     //TODO CREATE EVENT TO INIT THIS ?
     @Getter
     @Setter
     private static HudIcons hudIcons;
 
+    public static final KeyBinding attachTrailer = new KeyBinding("key.attachTrailer", Keyboard.KEY_H, "key.categories." + DynamXConstants.ID);
     public static void registerControls() {
-        ClientRegistry.registerKeyBinding(car_brake);
-        ClientRegistry.registerKeyBinding(car_engineOn);
-        ClientRegistry.registerKeyBinding(speedLimiter);
-        ClientRegistry.registerKeyBinding(toggleLockDoor);
         ClientRegistry.registerKeyBinding(attachTrailer);
     }
 
@@ -66,65 +51,23 @@ public class CarController implements IVehicleController {
 
     @Getter
     @Setter
-    private boolean accelerating, handbraking, reversing;
-    @Getter
-    @Setter
-    private boolean turningLeft, turningRight, isEngineStarted;
-    @Getter
-    @Setter
     private float speedLimit;
-    @Getter
-    @Setter
-    private byte onCooldown;
 
     /**
      * @param entity is assumed to implement {@link IModuleContainer.ISeatsContainer}
      */
     public CarController(BaseVehicleEntity<?> entity, CarEngineModule engine) {
-        this.entity = entity;
+        super(entity, engine);
         this.engine = engine;
-
-        isEngineStarted = engine.isEngineStarted();
-        handbraking = engine.isHandBraking();
         speedLimit = engine.getSpeedLimit();
-
-        CameraSystem.setCameraZoom(entity.getPackInfo().getDefaultZoomLevel());
-
-        while (car_brake.isPressed()) ;
-        while (speedLimiter.isPressed()) ;
-        while (car_engineOn.isPressed()) ;
     }
 
     @Override
-    public void update() {
-        if (((IModuleContainer.ISeatsContainer) entity).getSeats().isLocalPlayerDriving() && engine.getEngineProperties() != null) {
-            if (accelerating != MC.gameSettings.keyBindForward.isKeyDown()) {
-                accelerating = MC.gameSettings.keyBindForward.isKeyDown();
-            }
-            if (reversing != MC.gameSettings.keyBindBack.isKeyDown()) {
-                reversing = MC.gameSettings.keyBindBack.isKeyDown();
-            }
-            if (engine.getEngineProperties()[VehicleEntityProperties.EnumEngineProperties.ACTIVE_GEAR.ordinal()] == 0) //point mort
-            {
-                if (car_brake.isPressed()) {
-                    handbraking = !handbraking;
-                }
-            } else if (handbraking != car_brake.isKeyDown()) {
-                handbraking = car_brake.isKeyDown();
-            }
-            if (turningLeft != MC.gameSettings.keyBindLeft.isKeyDown() || turningRight != MC.gameSettings.keyBindRight.isKeyDown()) {
-                turningLeft = MC.gameSettings.keyBindLeft.isKeyDown();
-                turningRight = MC.gameSettings.keyBindRight.isKeyDown();
-            }
-            if (onCooldown > 0)
-                onCooldown--;
-            if (car_engineOn.isPressed()) {
-                if (onCooldown == 0) {
-                    isEngineStarted = !isEngineStarted;
-                    onCooldown = 40;
-                }
-            }
-            if (speedLimiter.isPressed()) {
+    protected void updateControls() {
+        if (engine.getEngineProperties() != null) {
+            if (engine.getEngineProperties()[VehicleEntityProperties.EnumEngineProperties.ACTIVE_GEAR.ordinal()] != 0) // a gear is active
+                handbraking = KeyHandler.KEY_HANDBRAKE.isKeyDown();
+            if (KeyHandler.KEY_SPEED_LIMITIER.isPressed()) {
                 if (speedLimit == Float.MAX_VALUE)
                     speedLimit = Math.abs(engine.getEngineProperties()[0]);
                 else
@@ -164,13 +107,13 @@ public class CarController implements IVehicleController {
         float scale = 90f / 300;
         GuiPanel speed = new SpeedometerPanel(this, scale, maxRpm);
         speed.setCssClass("speed_pane");
+        speed.setCssId("speedometer_texture");
         float[] engineProperties = engine.getEngineProperties();
         speed.add(new UpdatableGuiLabel("%s", s -> String.format(s, engine.isEngineStarted() ? Math.abs((int) engineProperties[VehicleEntityProperties.EnumEngineProperties.SPEED.ordinal()]) : "--", "")).setCssId("engine_speed"));
         // speed.add(new UpdatableGuiLabel("%d", s -> String.format(s, (int) (engineProperties[VehicleEntityProperties.EnumEngineProperties.REVS.ordinal()] * entity.getPackInfo().getSubPropertyByType(EngineInfo.class).getMaxRevs()), "")).setCssId("engine_rpm"));
 
         speed.add(new UpdatableGuiLabel("%s", s -> String.format(s, getGearString((int) engineProperties[VehicleEntityProperties.EnumEngineProperties.ACTIVE_GEAR.ordinal()]))).setCssId("engine_gear"));
         addRpmCounter(speed, scale, maxRpm);
-
         if (hudIcons != null) {
             GuiComponent<?>[] icons = new GuiComponent[hudIcons.iconCount()];
             for (int i = 0; i < icons.length; i++) {
@@ -185,7 +128,6 @@ public class CarController implements IVehicleController {
             }
             speed.addTickListener(() -> hudIcons.tick(icons));
         }
-
         panel.add(speed);
 
         panel.add(new UpdatableGuiLabel("hud.car.speedlimit", s -> {

@@ -2,6 +2,7 @@ package fr.dynamx.utils.client;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.network.packets.MessageAttachTrailer;
 import fr.dynamx.common.network.packets.MessagePlayerToRagdoll;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.maths.DynamXMath;
@@ -69,5 +70,9 @@ public class ClientDynamXUtils {
 
     public static void playerToRagdoll(EntityPlayer player, Vector3f velMult) {
         DynamXContext.getNetwork().sendToServer(new MessagePlayerToRagdoll(new Vector3f((float) player.motionX, (float) player.motionY, (float) player.motionZ).mult(velMult, null)));
+    }
+
+    public static void attachTrailer(EntityPlayer player){
+        DynamXContext.getNetwork().sendToServer(new MessageAttachTrailer());
     }
 }

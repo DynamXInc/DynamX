@@ -18,6 +18,7 @@ import fr.dynamx.common.contentpack.type.vehicle.CarEngineInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.CarEngineModule;
 import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.client.ClientDynamXUtils;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.resources.I18n;
@@ -40,6 +41,12 @@ public class CarController extends BaseController {
     @Setter
     private static HudIcons hudIcons;
 
+    public static final KeyBinding attachTrailer = new KeyBinding("key.attachTrailer", Keyboard.KEY_H, "key.categories." + DynamXConstants.ID);
+    public static void registerControls() {
+        ClientRegistry.registerKeyBinding(attachTrailer);
+    }
+
+    protected final BaseVehicleEntity<?> entity;
     protected final CarEngineModule engine;
 
     @Getter
@@ -65,6 +72,10 @@ public class CarController extends BaseController {
                     speedLimit = Math.abs(engine.getEngineProperties()[0]);
                 else
                     speedLimit = Float.MAX_VALUE;
+            }
+
+            if(attachTrailer.isPressed()){
+                ClientDynamXUtils.attachTrailer(MC.player);
             }
 
             MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.ControllerUpdate<>(entity, this));

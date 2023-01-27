@@ -43,6 +43,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import org.apache.commons.io.output.ByteArrayOutputStream;
@@ -366,16 +367,20 @@ public class DynamXUtils {
             }
             if (trailerIsAttached == null) {
                 if (TrailerAttachModule.HANDLER.createJoint(carEntity, trailer, (byte) 0)) {
-                    player.sendMessage(new TextComponentString(TextFormatting.GREEN + "Attached " + trailer.getPackInfo().getName() + " to " + carEntity.getPackInfo().getName()));
+                    TextComponentTranslation msg = new TextComponentTranslation("trailer.attached", trailer.getPackInfo().getName(), carEntity.getPackInfo().getName());
+                    msg.getStyle().setColor(TextFormatting.GREEN);
+                    player.sendMessage(msg);
                 } else {
-                    player.sendMessage(new TextComponentString(TextFormatting.RED + "Cannot attach " + trailer.getPackInfo().getName() + " to " + carEntity.getPackInfo().getName()));
+                    TextComponentTranslation msg = new TextComponentTranslation("trailer.attach.fail", trailer.getPackInfo().getName(), carEntity.getPackInfo().getName());
+                    msg.getStyle().setColor(TextFormatting.RED);
+                    player.sendMessage(msg);
                 }
             } else {
                 carEntity.getJointsHandler().removeJointWith(trailerIsAttached, TrailerAttachModule.JOINT_NAME, (byte) 0);
-                player.sendMessage(new TextComponentString(TextFormatting.RED + "The trailer has been detached"));
+                player.sendMessage(new TextComponentTranslation("trailer.detached"));
             }
         } else {
-            player.sendMessage(new TextComponentString(TextFormatting.RED + "The attach points are too far away !"));
+            player.sendMessage(new TextComponentTranslation("trailer.attach.toofar"));
         }
         Vector3fPool.closePool();
     }

@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * Engine contained in an engine file
  */
-public class CarEngineInfo extends SubInfoTypeOwner<CarEngineInfo> implements ISubInfoType<ModularVehicleInfo>, INamedObject {
+public class CarEngineInfo extends SubInfoTypeOwner<CarEngineInfo> implements ISubInfoType<ModularVehicleInfo> {
     private final String packName;
     private final String engineName;
 

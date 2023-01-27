@@ -20,7 +20,7 @@ import javax.annotation.Nullable;
 /**
  * Wheel contained in a wheel file
  */
-public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements ISubInfoType<PartWheelInfo>, IObjPackObject, INamedObject {
+public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IObjPackObject {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.WHEELS)
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("WheelRadius".equals(key))
@@ -89,18 +89,8 @@ public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IS
         return getPackName() + "." + getPartName();
     }
 
-    @Override //A sub info types owner is an info type himself (it is THE root owning all properties)
-    public void appendTo(PartWheelInfo owner) {
-    }
-
-    @Nullable
     @Override
-    public PartWheelInfo getOwner() {
-        return null;
-    }
-
-    @Override
-    public void postLoad(PartWheelInfo owner, boolean hot) {
+    public void onComplete(boolean hotReload) {
         if (handBrakeForce == -1)
             handBrakeForce = wheelBrakeForce * 2;
         wheelRadius = getWheelRadius() * getScaleModifier().z;

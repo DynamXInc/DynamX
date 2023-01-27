@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Sounds contained in a sounds file
  */
-public class SoundListInfo implements INamedObject, ISubInfoTypeOwner<SoundListInfo> {
+public class SoundListInfo implements ISubInfoTypeOwner<SoundListInfo> {
     private final String name, packName;
     private final List<EngineSound> soundsIn = new ArrayList<>();
 

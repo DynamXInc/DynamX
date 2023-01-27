@@ -51,7 +51,7 @@ public class StorageModule implements IPhysicsModule<PackEntityPhysicsHandler<?,
     public void readFromNBT(NBTTagCompound tag) {
         if(tag.hasKey("StorageInv", Constants.NBT.TAG_LIST)) {
             NBTTagList list = tag.getTagList("StorageInv", Constants.NBT.TAG_COMPOUND);
-            InventoryBasic inventory = inventories.get(0);
+            InventoryBasic inventory = inventories.get((byte) 0);
             for (int i = 0; i < Math.min(inventory.getSizeInventory(), list.tagCount()); i++) {
                 inventory.setInventorySlotContents(i, new ItemStack(list.getCompoundTagAt(i)));
             }

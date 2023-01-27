@@ -355,7 +355,7 @@ public class DynamXUtils {
             if (carEntity.getJointsHandler() == null) {
                 return;
             }
-            EntityJointsHandler handler = (EntityJointsHandler) carEntity.getJointsHandler();
+            EntityJointsHandler handler = carEntity.getJointsHandler();
             Collection<EntityJoint<?>> curJoints = handler.getJoints();
             TrailerEntity trailerIsAttached = null;
             for (EntityJoint<?> joint : curJoints) {
@@ -366,16 +366,16 @@ public class DynamXUtils {
             }
             if (trailerIsAttached == null) {
                 if (TrailerAttachModule.HANDLER.createJoint(carEntity, trailer, (byte) 0)) {
-                    player.sendMessage(new TextComponentString(TextFormatting.GREEN + "Attached " + ((ModularVehicleInfo) trailer.getPackInfo()).getName() + " to " + ((ModularVehicleInfo) carEntity.getPackInfo()).getName()));
+                    player.sendMessage(new TextComponentString(TextFormatting.GREEN + "Attached " + trailer.getPackInfo().getName() + " to " + carEntity.getPackInfo().getName()));
                 } else {
-                    player.sendMessage(new TextComponentString(TextFormatting.RED + "Cannot attach " + ((ModularVehicleInfo) trailer.getPackInfo()).getName() + " to " + ((ModularVehicleInfo) carEntity.getPackInfo()).getName()));
+                    player.sendMessage(new TextComponentString(TextFormatting.RED + "Cannot attach " + trailer.getPackInfo().getName() + " to " + carEntity.getPackInfo().getName()));
                 }
             } else {
                 carEntity.getJointsHandler().removeJointWith(trailerIsAttached, TrailerAttachModule.JOINT_NAME, (byte) 0);
-                player.sendMessage(new TextComponentString(TextFormatting.RED + "The joint has been removed"));
+                player.sendMessage(new TextComponentString(TextFormatting.RED + "The trailer has been detached"));
             }
         } else {
-            player.sendMessage(new TextComponentString(TextFormatting.RED + "The joint points are too far away !"));
+            player.sendMessage(new TextComponentString(TextFormatting.RED + "The attach points are too far away !"));
         }
         Vector3fPool.closePool();
     }

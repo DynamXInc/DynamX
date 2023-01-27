@@ -118,7 +118,7 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
             queuedRestorations = new ArrayList<>();
         }
         queuedRestorations.add(toAdd);
-        restoreCooldown = 20;
+        restoreCooldown = entity.ticksExisted < 200 ? 20 : 1;
     }
 
     /**

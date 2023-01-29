@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-public class PackInfo extends SubInfoTypeOwner<PackInfo> implements INamedObject {
+public class PackInfo extends SubInfoTypeOwner<PackInfo> {
     private final String originalPackName;
     @PackFileProperty(configNames = "PackName")
     private String packName;

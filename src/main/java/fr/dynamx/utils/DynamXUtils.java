@@ -43,6 +43,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import org.apache.commons.io.output.ByteArrayOutputStream;
@@ -355,7 +356,7 @@ public class DynamXUtils {
             if (carEntity.getJointsHandler() == null) {
                 return;
             }
-            EntityJointsHandler handler = (EntityJointsHandler) carEntity.getJointsHandler();
+            EntityJointsHandler handler = carEntity.getJointsHandler();
             Collection<EntityJoint<?>> curJoints = handler.getJoints();
             TrailerEntity trailerIsAttached = null;
             for (EntityJoint<?> joint : curJoints) {
@@ -366,16 +367,20 @@ public class DynamXUtils {
             }
             if (trailerIsAttached == null) {
                 if (TrailerAttachModule.HANDLER.createJoint(carEntity, trailer, (byte) 0)) {
-                    player.sendMessage(new TextComponentString(TextFormatting.GREEN + "Attached " + ((ModularVehicleInfo) trailer.getPackInfo()).getName() + " to " + ((ModularVehicleInfo) carEntity.getPackInfo()).getName()));
+                    TextComponentTranslation msg = new TextComponentTranslation("trailer.attached", trailer.getPackInfo().getName(), carEntity.getPackInfo().getName());
+                    msg.getStyle().setColor(TextFormatting.GREEN);
+                    player.sendMessage(msg);
                 } else {
-                    player.sendMessage(new TextComponentString(TextFormatting.RED + "Cannot attach " + ((ModularVehicleInfo) trailer.getPackInfo()).getName() + " to " + ((ModularVehicleInfo) carEntity.getPackInfo()).getName()));
+                    TextComponentTranslation msg = new TextComponentTranslation("trailer.attach.fail", trailer.getPackInfo().getName(), carEntity.getPackInfo().getName());
+                    msg.getStyle().setColor(TextFormatting.RED);
+                    player.sendMessage(msg);
                 }
             } else {
                 carEntity.getJointsHandler().removeJointWith(trailerIsAttached, TrailerAttachModule.JOINT_NAME, (byte) 0);
-                player.sendMessage(new TextComponentString(TextFormatting.RED + "The joint has been removed"));
+                player.sendMessage(new TextComponentTranslation("trailer.detached"));
             }
         } else {
-            player.sendMessage(new TextComponentString(TextFormatting.RED + "The joint points are too far away !"));
+            player.sendMessage(new TextComponentTranslation("trailer.attach.toofar"));
         }
         Vector3fPool.closePool();
     }

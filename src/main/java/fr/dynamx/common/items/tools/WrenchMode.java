@@ -29,6 +29,7 @@ import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import fr.dynamx.utils.physics.PhysicsRaycastResult;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -36,6 +37,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
@@ -51,13 +53,13 @@ import java.util.stream.Collectors;
 public class WrenchMode {
     private static final List<WrenchMode> WRENCH_MODES = new ArrayList<>();
 
-    public static final WrenchMode NONE = new WrenchMode("None", TextFormatting.RED + "Wrench disabled");
+    public static final WrenchMode NONE = new WrenchMode("none", TextFormatting.RED);
     public static final WrenchMode CHANGE_TEXTURE = new ChangeTextureWrenchMode();
     public static final WrenchMode ATTACH_TRAILERS = new AttachTrailersWrenchMode();
     public static final WrenchMode ATTACH_OBJECTS = new AttachObjectsWrenchMode();
     public static final WrenchMode REPLACE_ENTITIES = new ReplaceEntitiesWrenchMode();
     public static final WrenchMode ENTITY_SEAT_MODE = new EntitySeatWrenchMode();
-    public static final WrenchMode LAUNCH_ENTITIES = new WrenchMode("Launch Entities", TextFormatting.GOLD + "Wrench mode set to launch entities") {
+    public static final WrenchMode LAUNCH_ENTITIES = new WrenchMode("launch_entities", TextFormatting.GOLD) {
         @Override
         public void onWrenchRightClick(EntityPlayer playerIn, EnumHand handIn) {
             if (!playerIn.world.isRemote) {
@@ -77,22 +79,19 @@ public class WrenchMode {
     };
 
     private final String label;
+    private final TextFormatting color;
     private final String initials;
-    private final String message;
 
-    protected WrenchMode(String label, String message) {
+    protected WrenchMode(String label, TextFormatting color) {
         this.label = label;
-        this.message = message;
+        this.color = color;
 
-        boolean doesLabelContainsColor = label.contains("§");
-        String textColor = doesLabelContainsColor ? label.substring(0, 2) : "";
-        String labelWithoutColor = doesLabelContainsColor ? label.substring(2) : label;
-        this.initials = Arrays.stream(labelWithoutColor.split(" ")).map(s -> s.substring(0, 1) + '.').collect(Collectors.joining("", textColor, "")).toUpperCase();
+        this.initials = Arrays.stream(label.split("_")).map(s -> s.substring(0, 1) + '.').collect(Collectors.joining("", color.toString(), "")).toUpperCase();
         WRENCH_MODES.add(this);
     }
 
     public String getLabel() {
-        return label;
+        return I18n.format("wrench.mode."+label, color);
     }
 
     public String getInitials() {
@@ -100,7 +99,7 @@ public class WrenchMode {
     }
 
     public String getMessage() {
-        return message;
+        return I18n.format("wrench.mode.setto", color, getLabel());
     }
 
     public void onWrenchLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
@@ -139,7 +138,7 @@ public class WrenchMode {
                 return;
             }
         }
-        player.sendMessage(new TextComponentString(WRENCH_MODES.get(l).message));
+        player.sendMessage(new TextComponentString(WRENCH_MODES.get(l).getMessage()));
     }
 
     public static void setMode(EntityPlayer player, ItemStack s, int mode) {
@@ -161,7 +160,7 @@ public class WrenchMode {
                 return;
             }
         }
-        player.sendMessage(new TextComponentString(WRENCH_MODES.get(mode).message));
+        player.sendMessage(new TextComponentString(WRENCH_MODES.get(mode).getMessage()));
     }
 
     public static void sendWrenchMode(WrenchMode mode) {
@@ -189,7 +188,7 @@ public class WrenchMode {
 
     private static class AttachObjectsWrenchMode extends WrenchMode {
         public AttachObjectsWrenchMode() {
-            super("Attach objects", TextFormatting.RED + "Wrench mode set to attach objects");
+            super("attach_objects", TextFormatting.RED);
         }
 
         @Override
@@ -248,28 +247,31 @@ public class WrenchMode {
 
     private static class AttachTrailersWrenchMode extends WrenchMode {
         public AttachTrailersWrenchMode() {
-            super(TextFormatting.GREEN + "Attach trailers", TextFormatting.GREEN + "Wrench mode set to attach trailers");
+            super("attach_trailers", TextFormatting.GREEN);
         }
 
         @Override
-        public void onInteractWithEntity(EntityPlayer context, PhysicsEntity<?> physicsEntity, boolean isSneaking) {
+        public void onInteractWithEntity(EntityPlayer player, PhysicsEntity<?> physicsEntity, boolean isSneaking) {
             if (isSneaking && physicsEntity instanceof BaseVehicleEntity) {
                 BaseVehicleEntity<?> vehicleEntity = (BaseVehicleEntity<?>) physicsEntity;
-                PhysicsEntity<?> physicsEntityTemp = ItemWrench.getEntity(context.getHeldItemMainhand(), context.world);
+                PhysicsEntity<?> physicsEntityTemp = ItemWrench.getEntity(player.getHeldItemMainhand(), player.world);
                 if (physicsEntityTemp instanceof BaseVehicleEntity) {
                     BaseVehicleEntity<?> temp = (BaseVehicleEntity<?>) physicsEntityTemp;
                     BaseVehicleEntity<?> car = vehicleEntity instanceof CarEntity ? vehicleEntity : temp instanceof CarEntity ? temp : null;
                     BaseVehicleEntity<?> trailer = vehicleEntity instanceof TrailerEntity ? vehicleEntity : temp instanceof TrailerEntity ? temp : null;
                     if (car != null && trailer != null && car.getModuleByType(TrailerAttachModule.class) != null && trailer.getModuleByType(TrailerAttachModule.class) != null
                             && car.getModuleByType(TrailerAttachModule.class).getConnectedEntity() == -1 && trailer.getModuleByType(TrailerAttachModule.class).getConnectedEntity() == -1) {
-                        DynamXUtils.attachTrailer(context, car, trailer);
-                    } else
-                        context.sendMessage(new TextComponentString("[old] Cannot attach " + temp.getPackInfo().getName() + " to " + vehicleEntity.getPackInfo().getName() + " !"));
-                    ItemWrench.removeEntity(context.getHeldItemMainhand());
+                        DynamXUtils.attachTrailer(player, car, trailer);
+                    } else {
+                        TextComponentTranslation msg = new TextComponentTranslation("trailer.attach.fail", temp.getPackInfo().getName(), vehicleEntity.getPackInfo().getName());
+                        msg.getStyle().setColor(TextFormatting.RED);
+                        player.sendMessage(msg);
+                    }
+                    ItemWrench.removeEntity(player.getHeldItemMainhand());
                 } else {
                     if (vehicleEntity.getModuleByType(TrailerAttachModule.class) != null && vehicleEntity.getModuleByType(TrailerAttachModule.class).getConnectedEntity() == -1) {
-                        ItemWrench.writeEntity(context.getHeldItemMainhand(), vehicleEntity);
-                        context.sendMessage(new TextComponentString("Now click on the other vehicle"));
+                        ItemWrench.writeEntity(player.getHeldItemMainhand(), vehicleEntity);
+                        player.sendMessage(new TextComponentTranslation("trailer.wrench.first"));
                     }
                 }
             }
@@ -278,13 +280,13 @@ public class WrenchMode {
 
     private static class ReplaceEntitiesWrenchMode extends WrenchMode {
         public ReplaceEntitiesWrenchMode() {
-            super(TextFormatting.GOLD + "Respawn entities", TextFormatting.GOLD + "Wrench mode set to respawn entities");
+            super("respawn_entities", TextFormatting.GOLD);
         }
 
         @Override
         public void onWrenchRightClickClient(EntityPlayer playerIn, EnumHand handIn) {
             super.onWrenchRightClick(playerIn, handIn);
-            ClientDynamXUtils.playerToRagdoll(playerIn, new Vector3f(20, 20, 20));
+            //ClientDynamXUtils.playerToRagdoll(playerIn, new Vector3f(20, 20, 20));
         }
 
         @Override
@@ -316,7 +318,7 @@ public class WrenchMode {
 
     private static class ChangeTextureWrenchMode extends WrenchMode {
         public ChangeTextureWrenchMode() {
-            super(TextFormatting.BLUE + "Change skins", TextFormatting.BLUE + "Wrench mode set to change skins");
+            super("change_skins", TextFormatting.BLUE);
         }
 
         @Override
@@ -335,7 +337,7 @@ public class WrenchMode {
 
     private static class EntitySeatWrenchMode extends WrenchMode {
         public EntitySeatWrenchMode() {
-            super(TextFormatting.LIGHT_PURPLE + "Entity seat", TextFormatting.LIGHT_PURPLE + "Wrench mode set to entity seat set");
+            super("entity_seat", TextFormatting.LIGHT_PURPLE);
         }
 
         HashMap<EntityPlayer, Entity> playerEntityHashMap = new HashMap<>();

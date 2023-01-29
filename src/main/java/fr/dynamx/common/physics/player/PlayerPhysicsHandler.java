@@ -61,7 +61,10 @@ public class PlayerPhysicsHandler {
                 if (playerIn.isSpectator())
                     removeFromWorld(false, world);
                 else if (bodyIn.isInWorld()) {
-                    physicsWorld.schedule(() -> bodyIn.setGravity(Vector3fPool.get()));
+                    physicsWorld.schedule(() -> {
+                        if(bodyIn != null)
+                            bodyIn.setGravity(Vector3fPool.get());
+                    });
                     state = PlayerBodyState.ACTIVATED;
                 }
                 break;

@@ -7,6 +7,7 @@ import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.items.DynamXItemRegistry;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.RegistryNameSetter;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -83,7 +84,7 @@ public class ItemWrench extends Item {
     @Override
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
-        tooltip.add("Mode: " + WrenchMode.getCurrentMode(stack).getLabel());
+        tooltip.add(I18n.format("wrench.mode.mode", WrenchMode.getCurrentMode(stack).getLabel()));
         if (hasEntity(stack)) {
             PhysicsEntity<?> e = getEntity(stack, worldIn);
             if (e instanceof PackPhysicsEntity)

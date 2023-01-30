@@ -19,6 +19,7 @@ import fr.dynamx.common.handlers.DynamXGuiHandler;
 import fr.dynamx.common.items.tools.ItemRagdoll;
 import fr.dynamx.common.items.tools.ItemShockWave;
 import fr.dynamx.common.items.tools.ItemSlopes;
+import fr.dynamx.common.objloader.data.ObjObjectData;
 import fr.dynamx.server.command.DynamXCommands;
 import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.DynamXConstants;
@@ -29,10 +30,7 @@ import fr.dynamx.utils.physics.NativeEngineInstaller;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeVersion;
 import net.minecraftforge.common.capabilities.CapabilityManager;
-import net.minecraftforge.fml.common.Loader;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.ProgressManager;
-import net.minecraftforge.fml.common.SidedProxy;
+import net.minecraftforge.fml.common.*;
 import net.minecraftforge.fml.common.event.*;
 import net.minecraftforge.fml.common.network.NetworkCheckHandler;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
@@ -155,6 +153,10 @@ public class DynamXMain {
             DynamXMain.log.warn("Forge failed to check majs for DynamX !");
         }
         DynamXErrorManager.printErrors(event.getSide(), event.getSide().isServer() ? ErrorLevel.ADVICE : ErrorLevel.HIGH);
+        if (FMLCommonHandler.instance().getMinecraftServerInstance() != null) {
+            log.info("Clearing obj model data cache...");
+            DynamXContext.getObjModelDataCache().values().forEach(model -> model.getObjObjects().forEach(ObjObjectData::clearData));
+        }
     }
 
     @EventHandler

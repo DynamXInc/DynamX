@@ -171,10 +171,16 @@ public class PhysicsEntityEvent extends Event {
          */
         @Getter
         private final float partialTicks;
+        /**
+         * The render pass <br>
+         * 0 for solid objects <br>
+         * 1 for translucent objects <br>
+         * Some types of render event are fired for both
+         */
         @Getter
-        private final ObjModelRenderer objModelRenderer;
+        private final int renderPass;
 
-        public Render(PhysicsEntity<?> physicsEntity, RenderPhysicsEntity<?> renderer, Type renderType, double x, double y, double z, float partialTicks, @Nullable ObjModelRenderer objModelRenderer) {
+        public Render(PhysicsEntity<?> physicsEntity, RenderPhysicsEntity<?> renderer, Type renderType, double x, double y, double z, float partialTicks, int renderPass) {
             super(Side.CLIENT, physicsEntity);
             this.renderer = renderer;
             this.x = x;
@@ -182,7 +188,7 @@ public class PhysicsEntityEvent extends Event {
             this.z = z;
             this.renderType = renderType;
             this.partialTicks = partialTicks;
-            this.objModelRenderer = objModelRenderer;
+            this.renderPass = renderPass;
         }
 
         public enum Type {

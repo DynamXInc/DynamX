@@ -89,10 +89,10 @@ public class MTLLoader {
     public void loadTextures() {
         TextureManager textureManager = Minecraft.getMinecraft().getTextureManager();
         for (Material material : materials) {
-            material.ambientTexture.forEach((textureName, textures) -> textures.loadTexture(material, textureManager));
-            material.diffuseTexture.forEach((textureName, textures) -> textures.loadTexture(material, textureManager));
-            material.specularTexture.forEach((textureName, textures) -> textures.loadTexture(material, textureManager));
-            material.normalTexture.forEach((textureName, textures) -> textures.loadTexture(material, textureManager));
+            material.ambientTexture.forEach((textureName, textures) -> textures.loadTexture(textureManager));
+            material.diffuseTexture.forEach((textureName, textures) -> textures.loadTexture(textureManager));
+            material.specularTexture.forEach((textureName, textures) -> textures.loadTexture(textureManager));
+            material.normalTexture.forEach((textureName, textures) -> textures.loadTexture(textureManager));
         }
     }
 

@@ -5,6 +5,7 @@
   "mixins": [
     "MixinEntity",
     "MixinEntityLivingBase",
+    "MixinEntityPlayerSP",
     "MixinWorld",
     "MixinChunk",
     "MixinNetHandlerPlayServer"

@@ -1,13 +1,18 @@
 package fr.dynamx.common.core.mixin;
 
+import com.jme3.math.Vector3f;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.utils.debug.Profiler;
+import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MoverType;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.Vec3d;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -20,11 +25,20 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(value = Entity.class, priority = 800)
 public abstract class MixinEntity {
 
+    @Shadow public float prevRotationYaw;
+    @Shadow public float prevRotationPitch;
+
     @Shadow
     public abstract void setEntityBoundingBox(AxisAlignedBB bb);
 
     @Shadow
     public abstract AxisAlignedBB getEntityBoundingBox();
+
+    @Shadow private Entity ridingEntity;
+    @Shadow public float rotationPitch;
+    @Shadow public float rotationYaw;
+
+    @Shadow protected abstract Vec3d getVectorForRotation(float pitch, float yaw);
 
     private double x1, y1, z1;
 
@@ -99,5 +113,56 @@ public abstract class MixinEntity {
     @ModifyVariable(method = "move", at = @At("STORE"), ordinal = 0)
     private boolean fixFlag(boolean flag) {
         return flag && !DynamXContext.getCollisionHandler().motionHasChanged();
+    }
+
+    /**
+     * @author Aym'
+     * @reason Fix look when riding a vehicle
+     */
+    @Overwrite
+    public Vec3d getLook(float partialTicks) {
+        if (partialTicks == 1.0F)
+        {
+            return getLookVec();
+        }
+        else
+        {
+            float yaw = rotationYaw;
+            float pitch = rotationPitch;
+            float prevYaw = prevRotationYaw;
+            float prevPitch = prevRotationPitch;
+            if(ridingEntity instanceof BaseVehicleEntity) {
+                yaw += ridingEntity.rotationYaw;
+                pitch += ridingEntity.rotationPitch;
+                yaw = yaw % 360;
+                pitch = pitch % 360;
+
+                prevYaw += ridingEntity.prevRotationYaw;
+                prevPitch += ridingEntity.prevRotationPitch;
+                prevYaw = prevYaw % 360;
+                prevPitch = prevPitch % 360;
+            }
+            float f = prevPitch + (pitch - prevPitch) * partialTicks;
+            float f1 = prevYaw + (yaw - prevYaw) * partialTicks;
+            return this.getVectorForRotation(f, f1);
+        }
+    }
+
+    /**
+     * @author Aym'
+     * @reason Fix look when riding a vehicle
+     */
+    @Overwrite
+    public Vec3d getLookVec()
+    {
+        float yaw = rotationYaw;
+        float pitch = rotationPitch;
+        if(ridingEntity instanceof BaseVehicleEntity) {
+            yaw += ridingEntity.rotationYaw;
+            pitch += ridingEntity.rotationPitch;
+            yaw = yaw % 360;
+            pitch = pitch % 360;
+        }
+        return this.getVectorForRotation(pitch, yaw);
     }
 }

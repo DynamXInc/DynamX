@@ -38,15 +38,14 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.network.play.server.SPacketEntityEquipment;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @SynchronizedEntityVariable.SynchronizedPhysicsModule()
 public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> implements AttachedBodySynchronizer {
@@ -65,7 +64,6 @@ public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> imple
     public static final Vector3f RIGHT_LEG_ATTACH_POINT = new Vector3f(-0.13f, -0.42f, 0);
     public static final Vector3f LEFT_LEG_ATTACH_POINT = new Vector3f(0.13f, -0.42f, 0);
 
-    private final List<MutableBoundingBox> unrotatedBoxes = new ArrayList<>();
     private final HashMap<Byte, SynchronizedRigidBodyTransform> transforms = new HashMap<>();
 
     @SynchronizedEntityVariable(name = "parts_pos")
@@ -190,12 +188,8 @@ public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> imple
     }
 
     @Override
-    public CollisionInfo getCollisionInfo() {
-        unrotatedBoxes.clear();
-        MutableBoundingBox b = new MutableBoundingBox(-.4, -1, -.4, .4, .9, .4);
-        b.offset(physicsPosition);
-        unrotatedBoxes.add(b);
-        return new CollisionInfo(unrotatedBoxes, physicsPosition, physicsRotation);
+    protected List<AxisAlignedBB> computeCollisionBoxes() {
+        return Collections.singletonList(new AxisAlignedBB(-0.4f, -1, -0.4f, 0.4f, 0.9f, 0.4f));
     }
 
     @Override

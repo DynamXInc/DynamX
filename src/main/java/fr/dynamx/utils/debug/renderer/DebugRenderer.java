@@ -1,7 +1,6 @@
 package fr.dynamx.utils.debug.renderer;
 
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
@@ -9,6 +8,7 @@ import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
+import net.minecraft.util.math.AxisAlignedBB;
 
 import java.util.List;
 
@@ -50,15 +50,8 @@ public interface DebugRenderer<T extends PhysicsEntity<?>> {
 
         @Override
         public void render(PhysicsEntity<?> entity, RenderPhysicsEntity<PhysicsEntity<?>> renderer, double x, double y, double z, float partialTicks) {
-            for (IShapeInfo shapeInfo : ((PackPhysicsEntity<?, ?>) entity).getPackInfo().getShapes()) {
-                RenderGlobal.drawBoundingBox(
-                        (shapeInfo.getPosition().x - shapeInfo.getSize().x),
-                        (shapeInfo.getPosition().y - shapeInfo.getSize().y),
-                        (shapeInfo.getPosition().z - shapeInfo.getSize().z),
-                        (shapeInfo.getPosition().x + shapeInfo.getSize().x),
-                        (shapeInfo.getPosition().y + shapeInfo.getSize().y),
-                        (shapeInfo.getPosition().z + shapeInfo.getSize().z),
-                        0, 1, 1, 1);
+            for (AxisAlignedBB shapeInfo : ((PackPhysicsEntity<?, ?>) entity).getPackInfo().getShapes()) {
+                RenderGlobal.drawSelectionBoundingBox(shapeInfo, 0, 1, 1, 1);
             }
         }
     }

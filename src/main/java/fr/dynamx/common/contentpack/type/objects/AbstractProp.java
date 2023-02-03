@@ -25,6 +25,7 @@ import fr.dynamx.utils.physics.ShapeUtils;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import net.minecraft.util.math.AxisAlignedBB;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,7 +62,7 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
     protected String[][] texturesArray;
 
     @Getter
-    private final List<MutableBoundingBox> collisionBoxes = new ArrayList<>();
+    private final List<AxisAlignedBB> collisionBoxes = new ArrayList<>();
     @Getter
     private final List<PartShape<?>> partShapes = new ArrayList<>();
 

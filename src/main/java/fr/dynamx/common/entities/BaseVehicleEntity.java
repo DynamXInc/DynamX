@@ -21,12 +21,14 @@ import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Base implementation for all vehicles <br>
@@ -85,35 +87,6 @@ public abstract class BaseVehicleEntity<T extends BaseVehiclePhysicsHandler<?>> 
         super.onUpdate();
         Vector3fPool.closePool();
         Profiler.get().end(Profiler.Profiles.TICK_ENTITIES);
-    }
-
-    /**
-     * Cache
-     */
-    private final List<MutableBoundingBox> unrotatedBoxes = new ArrayList<>();
-    private CollisionInfo cachedCollisions;
-
-    @Override
-    public CollisionInfo getCollisionInfo() {
-        if (getPackInfo() == null || physicsPosition == null)
-            return new CollisionInfo(new ArrayList<>(0), physicsPosition, physicsRotation);
-        if (unrotatedBoxes.size() != getPackInfo().getPartShapes().size()) {
-            unrotatedBoxes.clear();
-            for (PartShape shape : getPackInfo().getPartShapes()) {
-                MutableBoundingBox b = new MutableBoundingBox(shape.getBoundingBox());
-                b.offset(physicsPosition);
-                unrotatedBoxes.add(b);
-            }
-        } else {
-            for (int i = 0; i < getPackInfo().getPartShapes().size(); i++) {
-                MutableBoundingBox b = unrotatedBoxes.get(i);
-                b.setTo(getPackInfo().getPartShapes().get(i).getBoundingBox());
-                b.offset(physicsPosition);
-                unrotatedBoxes.add(b);
-            }
-        }
-        //FIXME PAS COOL NEW
-        return new CollisionInfo(unrotatedBoxes, physicsPosition, physicsRotation);
     }
 
     @Override

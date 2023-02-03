@@ -21,9 +21,13 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Base implementation for all pack-based entities
@@ -64,7 +68,7 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
 
     @Override
     public boolean initEntityProperties() {
-        packInfo = createInfo(getInfoName());
+        setPackInfo(createInfo(getInfoName()));
         if (packInfo != null && packInfo.getPhysicsCollisionShape() != null)
             return super.initEntityProperties();
         DynamXMain.log.warn("Failed to find info of " + this + ". Should be " + getInfoName());
@@ -156,6 +160,13 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
     }
 
     @Override
+    protected List<AxisAlignedBB> computeCollisionBoxes() {
+        if (getPackInfo() == null)
+            return new ArrayList<>(0);
+        return getPackInfo().getShapes();
+    }
+
+    @Override
     public EntityJointsHandler getJointsHandler() {
         return jointsHandler;
     }
@@ -202,5 +213,6 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
 
     public void setPackInfo(A packInfo) {
         this.packInfo = packInfo;
+        collisionInfo = null; //refresh collision
     }
 }

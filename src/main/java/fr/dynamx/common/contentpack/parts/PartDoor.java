@@ -35,6 +35,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nullable;
@@ -196,19 +197,8 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
      * @return All collision shapes of the object
      */
     @Override
-    public Collection<? extends IShapeInfo> getShapes() {
-        return Collections.singletonList(new IShapeInfo() {
-
-            @Override
-            public Vector3f getPosition() {
-                return PartDoor.this.getPosition();
-            }
-
-            @Override
-            public Vector3f getSize() {
-                return getScale();
-            }
-        });
+    public List<AxisAlignedBB> getShapes() {
+        return Collections.singletonList(new MutableBoundingBox(getScale()).offset(getPosition()).toBB());
     }
 
     @Override

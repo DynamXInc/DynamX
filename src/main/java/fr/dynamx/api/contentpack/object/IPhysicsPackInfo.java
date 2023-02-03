@@ -7,6 +7,7 @@ import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.common.contentpack.type.ObjectInfo;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.AxisAlignedBB;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -24,7 +25,7 @@ public interface IPhysicsPackInfo {
     /**
      * @return All collision shapes of the object
      */
-    Collection<? extends IShapeInfo> getShapes();
+    List<AxisAlignedBB> getShapes();
 
     List<Vector3f> getCollisionShapeDebugBuffer();
 

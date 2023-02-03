@@ -9,6 +9,7 @@ import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.parts.PartDoor;
+import fr.dynamx.common.contentpack.parts.PartShape;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
@@ -24,12 +25,14 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DoorEntity<T extends PackEntityPhysicsHandler<PartDoor, ?>> extends PackPhysicsEntity<T, PartDoor> {
     private static final DataParameter<Integer> VEHICLE_ID = EntityDataManager.createKey(DoorEntity.class, DataSerializers.VARINT);
@@ -120,18 +123,6 @@ public class DoorEntity<T extends PackEntityPhysicsHandler<PartDoor, ?>> extends
     protected void readEntityFromNBT(NBTTagCompound tagCompound) {
         super.readEntityFromNBT(tagCompound);
         setVehicleID(tagCompound.getInteger("carID"));
-    }
-
-    @Override
-    public CollisionInfo getCollisionInfo() {
-        if (getPackInfo() == null || physicsPosition == null)
-            return new CollisionInfo(new ArrayList<>(0), physicsPosition, physicsRotation);
-        List<MutableBoundingBox> list = new ArrayList<>();
-        for (IShapeInfo partShape : getPackInfo().getShapes()) {
-            list.add(new MutableBoundingBox(partShape.getSize()).offset(partShape.getPosition()).offset(physicsPosition));
-        }
-        //FIXME PAS COOL NEW
-        return new CollisionInfo(list, physicsPosition, physicsRotation);
     }
 
     public DoorsModule getDoorAttachModule() {

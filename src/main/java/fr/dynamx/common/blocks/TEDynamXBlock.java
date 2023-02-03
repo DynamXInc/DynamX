@@ -40,11 +40,6 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, ITic
     private int rotation;
     private Vector3f relativeTranslation = new Vector3f(), relativeScale = new Vector3f(), relativeRotation = new Vector3f();
 
-    /**
-     * The cache of the block collisions, with position offset but no rotation
-     */
-    protected final List<MutableBoundingBox> unrotatedCollisionsCache = new ArrayList<>();
-
     private CollisionInfo cachedCollisions;
 
     /**
@@ -183,7 +178,7 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, ITic
         if (boundingBoxCache == null) {
             QuaternionPool.getINSTANCE().openSubPool();
             Vector3fPool.openPool();
-            List<MutableBoundingBox> boxes = getUnrotatedCollisionBoxes(); //Get PartShape boxes
+            List<AxisAlignedBB> boxes = getUnrotatedCollisionBoxes(); //Get PartShape boxes
             if (boxes.isEmpty()) {//If there is no boxes, create a default one
                 boundingBoxCache = new AxisAlignedBB(0, 0, 0, 1, 1, 1);
             } else {
@@ -216,7 +211,7 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, ITic
      * The list is not modified by callers of the function <br>
      * <strong>Note : </strong>The list is cached by the callers of this function, so you need to call markCollisionsDirty() to refresh them.
      */
-    public List<MutableBoundingBox> getUnrotatedCollisionBoxes() {
+    public List<AxisAlignedBB> getUnrotatedCollisionBoxes() {
         if (blockObjectInfo == null) {
             return Collections.EMPTY_LIST;
         }
@@ -237,7 +232,6 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, ITic
     public void markCollisionsDirty() {
         cachedCollisions = null;
         boundingBoxCache = null;
-        unrotatedCollisionsCache.clear();
         if (world != null && DynamXContext.usesPhysicsWorld(world)) {
             DynamXContext.getPhysicsWorld(world).getTerrainManager().onChunkChanged(new VerticalChunkPos(getPos().getX() >> 4, getPos().getY() >> 4, getPos().getZ() >> 4));
         }
@@ -249,23 +243,23 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, ITic
 
     @Override
     public CollisionInfo getCollisionInfo() {
-        if (blockObjectInfo != null && unrotatedCollisionsCache.size() != getUnrotatedCollisionBoxes().size()) {
-            synchronized (unrotatedCollisionsCache) {
-                for (MutableBoundingBox shape : getUnrotatedCollisionBoxes()) {
-                    MutableBoundingBox b = new MutableBoundingBox(shape);
-                    b.scale(relativeScale.x != 0 ? relativeScale.x : 1, relativeScale.y != 0 ? relativeScale.y : 1, relativeScale.z != 0 ? relativeScale.z : 1);
-                    b.offset(pos.getX(), pos.getY(), pos.getZ());
-                    b.offset(relativeTranslation.x, relativeTranslation.y, relativeTranslation.z);
-                    unrotatedCollisionsCache.add(b);
-                }
+        if (blockObjectInfo != null && cachedCollisions == null) {
+            List<AxisAlignedBB> unrotatedCollisionsCache = new ArrayList<>();
+            for (AxisAlignedBB shape : getUnrotatedCollisionBoxes()) {
+                MutableBoundingBox b = new MutableBoundingBox(shape);
+                b.scale(relativeScale.x != 0 ? relativeScale.x : 1, relativeScale.y != 0 ? relativeScale.y : 1, relativeScale.z != 0 ? relativeScale.z : 1);
+                //b.offset(-0.5f, -0.5f, -0.5f);
+                b.offset(relativeTranslation.x, relativeTranslation.y, relativeTranslation.z);
+                unrotatedCollisionsCache.add(b.toBB());
             }
             Quaternion rotation = DynamXGeometry.eulerToQuaternion((blockObjectInfo.getRotation().z - relativeRotation.z),
                     ((blockObjectInfo.getRotation().y - relativeRotation.y + getRotation() * 22.5f) % 360),
                     (blockObjectInfo.getRotation().x + relativeRotation.x));
-            cachedCollisions = new CollisionInfo(unrotatedCollisionsCache, new Vector3f(pos.getX()+0.5f, pos.getY()+0.5f, pos.getZ()+0.5f), rotation);
+            cachedCollisions = new CollisionInfo(unrotatedCollisionsCache, new Vector3f(pos.getX(), pos.getY(), pos.getZ()), rotation);
+            //cachedCollisions = new CollisionInfo(Arrays.asList(new MutableBoundingBox(Block.FULL_BLOCK_AABB).offset(-0.5f, -0.5f, -0.5f)), new Vector3f(pos.getX()+0.5f, pos.getY()+0.5f, pos.getZ()+0.5f), rotation);
         }
-        if(blockObjectInfo == null || true)
-            cachedCollisions = new CollisionInfo(Arrays.asList(new MutableBoundingBox(Block.FULL_BLOCK_AABB).offset(pos.getX(), pos.getY(), pos.getZ())), new Vector3f(pos.getX()+0.5f, pos.getY()+0.5f, pos.getZ()+0.5f), Quaternion.IDENTITY);
+        if(cachedCollisions == null) //IZNOGOOD
+            return new CollisionInfo(Arrays.asList(Block.FULL_BLOCK_AABB.offset(-0.5f, -0.5f, -0.5f)), new Vector3f(pos.getX()+0.5f, pos.getY()+0.5f, pos.getZ()+0.5f), Quaternion.IDENTITY);
         return cachedCollisions;
     }
 

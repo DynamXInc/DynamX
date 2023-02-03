@@ -27,6 +27,7 @@ import fr.dynamx.utils.physics.ShapeUtils;
 import lombok.Getter;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nullable;
@@ -134,10 +135,10 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
             return false;
         if (owner != null) {
             compoundCollisionShape = owner.compoundCollisionShape;
-            for (MutableBoundingBox blockBox : owner.getCollisionBoxes()) {
-                MutableBoundingBox propBox = new MutableBoundingBox(blockBox);
-                propBox.offset(-0.5, -0.5f, -0.5);
-                getCollisionBoxes().add(propBox);
+            for (AxisAlignedBB blockBox : owner.getCollisionBoxes()) {
+                //MutableBoundingBox propBox = new MutableBoundingBox(blockBox);
+                //propBox.offset(-0.5, -0.5f, -0.5);
+                getCollisionBoxes().add(blockBox);
             }
         }
         compoundCollisionShape.setMargin(margin);
@@ -150,7 +151,7 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
     }
 
     @Override
-    public Collection<? extends IShapeInfo> getShapes() {
+    public List<AxisAlignedBB> getShapes() {
         return getCollisionBoxes();
     }
 

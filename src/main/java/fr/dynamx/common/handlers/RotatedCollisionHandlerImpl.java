@@ -67,7 +67,7 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
 
     public static double eps = 0.2f;
 
-    public static float calculateXOffset(MutableBoundingBox against, MutableBoundingBox other, float offsetX) {
+    public static float calculateXOffset(AxisAlignedBB against, MutableBoundingBox other, float offsetX) {
         if (other.maxY > against.minY && other.minY < against.maxY && other.maxZ > against.minZ && other.minZ < against.maxZ) {
             if (offsetX > 0.0D && other.maxX - eps <= against.minX) {
                 float d1 = (float) (against.minX - other.maxX);
@@ -89,7 +89,7 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
         }
     }
 
-    public static float calculateYOffset(MutableBoundingBox against, MutableBoundingBox other, float offsetY) {
+    public static float calculateYOffset(AxisAlignedBB against, MutableBoundingBox other, float offsetY) {
         if (other.maxX > against.minX && other.minX < against.maxX && other.maxZ > against.minZ && other.minZ < against.maxZ) {
             if (offsetY > 0.0D && other.maxY - eps <= against.minY) {
                 float d1 = (float) (against.minY - other.maxY);
@@ -111,7 +111,7 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
         }
     }
 
-    public static float calculateZOffset(MutableBoundingBox against, MutableBoundingBox other, float offsetZ) {
+    public static float calculateZOffset(AxisAlignedBB against, MutableBoundingBox other, float offsetZ) {
         if (other.maxX > against.minX && other.minX < against.maxX && other.maxY > against.minY && other.minY < against.maxY) {
             if (offsetZ > 0.0D && other.maxZ - eps <= against.minZ) {
                 float d1 = (float) (against.minZ - other.maxZ);
@@ -133,7 +133,7 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
         }
     }
 
-    private Vector3f collideWith(Entity entity, ICollidableObject with, float mx, float my, float mz, int step) {
+    /*private Vector3f collideWith(Entity entity, ICollidableObject with, float mx, float my, float mz, int step) {
         if (entity.world.isRemote && ClientDebugSystem.enableDebugDrawing)
             VehicleDebugRenderer.PlayerCollisionsDebug.pos = entity.getPositionVector();
         float oldx = mx, oldy = my, oldz = mz;
@@ -220,18 +220,18 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
 
             /*if(Math.abs(data.x) > Math.abs(oldx))
                 data.x = oldx;
-            else */
+            else *//*
             float eps = 0.1f;
             if (Math.abs(data.x - oldx) < eps / 5)
                 data.x = oldx;
             /*if(Math.abs(data.y) > Math.abs(oldy))
                 data.y = oldy;
-            else */
+            else *//*
             if (Math.abs(data.y - oldy) < eps / 5)
                 data.y = oldy;
             /*if(Math.abs(data.z) > Math.abs(oldz))
                 data.z = oldz;
-            else */
+            else *//*
             if (Math.abs(data.z - oldz) < eps / 5)
                 data.z = oldz;
 
@@ -288,7 +288,7 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
         if (entity.world.isRemote && ClientDebugSystem.enableDebugDrawing)
             VehicleDebugRenderer.PlayerCollisionsDebug.realmotion = Vector3fPool.getPermanentVector(data);
         return data;
-    }
+    }*/
 
     private static double min(double a, double b) {
         if (Math.abs(a) > Math.abs(b))

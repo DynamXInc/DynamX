@@ -3,22 +3,23 @@ package fr.dynamx.common.entities;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
+import fr.dynamx.common.contentpack.parts.PartShape;
 import fr.dynamx.common.contentpack.type.objects.PropObject;
 import fr.dynamx.common.handlers.CollisionInfo;
 import fr.dynamx.common.physics.entities.PackEntityPhysicsHandler;
 import fr.dynamx.common.physics.entities.PropPhysicsHandler;
 import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class PropsEntity<T extends PackEntityPhysicsHandler<PropObject<?>, ?>> extends PackPhysicsEntity<T, PropObject<?>> {
-    private final List<MutableBoundingBox> unrotatedBoxes = new ArrayList<>();
-
     public PropsEntity(World worldIn) {
         super(worldIn);
     }
@@ -64,28 +65,5 @@ public class PropsEntity<T extends PackEntityPhysicsHandler<PropObject<?>, ?>> e
     public boolean isInRangeToRenderDist(double range) {
         //Fix npe due to render before first update
         return getPackInfo() != null && getPackInfo().getRenderDistance() >= range;
-    }
-
-    @Override
-    public CollisionInfo getCollisionInfo() {
-        if (getPackInfo() == null || physicsPosition == null)
-            return new CollisionInfo(new ArrayList<>(0), physicsPosition, physicsRotation);
-        if (unrotatedBoxes.size() != getPackInfo().getCollisionBoxes().size()) {
-            unrotatedBoxes.clear();
-            for (MutableBoundingBox shape : getPackInfo().getCollisionBoxes()) {
-                MutableBoundingBox b = new MutableBoundingBox(shape);
-                b.offset(physicsPosition);
-                unrotatedBoxes.add(b);
-            }
-        } else {
-            for (int i = 0; i < getPackInfo().getCollisionBoxes().size(); i++) {
-                MutableBoundingBox b = unrotatedBoxes.get(i);
-                b.setTo(getPackInfo().getCollisionBoxes().get(i));
-                b.offset(physicsPosition);
-                unrotatedBoxes.add(b);
-            }
-        }
-        //FIXME PAS COOL NEW
-        return new CollisionInfo(unrotatedBoxes, physicsPosition, physicsRotation);
     }
 }

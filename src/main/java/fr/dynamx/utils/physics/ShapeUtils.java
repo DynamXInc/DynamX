@@ -19,6 +19,7 @@ import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.AxisAlignedBB;
 import vhacd.VHACD;
 import vhacd.VHACDHull;
 import vhacd.VHACDParameters;
@@ -227,8 +228,8 @@ public class ShapeUtils {
         return vectors;
     }
 
-    public static MutableBoundingBox getAABB(AbstractProp<?> info, Vector3f min, Vector3f max,
-                                             Vector3f additionalScale, Vector3f additionalTranslation) {
+    public static AxisAlignedBB getAABB(AbstractProp<?> info, Vector3f min, Vector3f max,
+                                        Vector3f additionalScale, Vector3f additionalTranslation) {
         if (additionalScale == null)
             additionalScale = new Vector3f();
         if (additionalTranslation == null)
@@ -243,7 +244,7 @@ public class ShapeUtils {
                     1.5 + info.getTranslation().y + additionalTranslation.y,
                     0.5 + info.getTranslation().z + additionalTranslation.z);
         }
-        return aabb;
+        return aabb.toBB();
     }
 
     public static void generateModelCollisions(AbstractProp<?> abstractProp, ObjModelData objModelData, CompoundCollisionShape compoundCollisionShape) {

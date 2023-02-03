@@ -203,7 +203,7 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IInf
     public AxisAlignedBB getComputedBB(IBlockAccess world, BlockPos pos) {
         TileEntity tileEntity = world.getTileEntity(pos);
         if (tileEntity instanceof TEDynamXBlock) {
-            //return ((TEDynamXBlock) tileEntity).computeBoundingBox();
+            return ((TEDynamXBlock) tileEntity).computeBoundingBox();
         } //FIXME DO FOR NO-OBJ BLOCKS
         return FULL_BLOCK_AABB;
     }

@@ -20,6 +20,7 @@ import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.common.MinecraftForge;
 
 import java.util.ConcurrentModificationException;
@@ -101,16 +102,8 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
             GlStateManager.translate(0.5D, 1.5D, 0.5D);
             GlStateManager.rotate(GlQuaternionPool.get(q));
             GlStateManager.translate(-0.5D, -1.5D, -0.5D);
-            for (IShapeInfo partShape : te.getUnrotatedCollisionBoxes()) {
-                RenderGlobal.drawBoundingBox(
-                        (partShape.getPosition().x - partShape.getSize().x),
-                        (partShape.getPosition().y - partShape.getSize().y),
-                        (partShape.getPosition().z - partShape.getSize().z),
-                        (partShape.getPosition().x + partShape.getSize().x),
-                        (partShape.getPosition().y + partShape.getSize().y),
-                        (partShape.getPosition().z + partShape.getSize().z),
-                        0, 1, 1, 1);
-            }
+            for (AxisAlignedBB partShape : te.getUnrotatedCollisionBoxes())
+                RenderGlobal.drawSelectionBoundingBox(partShape, 0, 1, 1, 1);
             GlStateManager.popMatrix();
             GlQuaternionPool.closePool();
             QuaternionPool.closePool();

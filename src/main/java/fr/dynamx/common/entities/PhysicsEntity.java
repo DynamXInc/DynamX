@@ -13,6 +13,7 @@ import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.api.physics.entities.EntityPhysicsState;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
+import fr.dynamx.common.handlers.CollisionInfo;
 import fr.dynamx.common.items.DynamXItemRegistry;
 import fr.dynamx.common.network.sync.PhysicsEntitySynchronizer;
 import fr.dynamx.common.network.sync.variables.EntityPosVariable;
@@ -44,6 +45,7 @@ import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Base class for all entities using bullet to simulate their physics
@@ -509,6 +511,18 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
             Vector3fPool.closePool();
         }
         return entityBoxCache;
+    }
+
+    protected abstract List<AxisAlignedBB> computeCollisionBoxes();
+    protected CollisionInfo collisionInfo;
+
+    @Override
+    public CollisionInfo getCollisionInfo() {
+        if(collisionInfo == null || true)
+            collisionInfo = new CollisionInfo(computeCollisionBoxes(), physicsPosition, physicsRotation);
+        else
+            collisionInfo.update(physicsPosition, physicsRotation);
+        return collisionInfo;
     }
 
     @Override

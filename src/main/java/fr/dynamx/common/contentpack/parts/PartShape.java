@@ -11,13 +11,14 @@ import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
+import net.minecraft.util.math.AxisAlignedBB;
 
 @RegisteredSubInfoType(name = "shape", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.BLOCKS_AND_PROPS, SubInfoTypeRegistries.HELICOPTER}, strictName = false)
 public class PartShape<T extends ISubInfoTypeOwner<T>> extends BasePart<T> implements IShapeInfo {
     @PackFileProperty(configNames = "Type", type = DefinitionType.DynamXDefinitionTypes.SHAPE_TYPE, description = "common.shape.type", required = false)
     private EnumPartType shapeType = EnumPartType.BOX;
 
-    protected MutableBoundingBox boundingBox;
+    protected AxisAlignedBB boundingBox;
 
     public PartShape(T owner, String partName) {
         super(owner, partName);
@@ -30,7 +31,7 @@ public class PartShape<T extends ISubInfoTypeOwner<T>> extends BasePart<T> imple
         ((IShapeContainer) owner).addCollisionShape(this);
         Vector3f min = getPosition().subtract(getScale());
         Vector3f max = getPosition().add(getScale());
-        this.boundingBox = new MutableBoundingBox(
+        this.boundingBox = new AxisAlignedBB(
                 min.x, min.y, min.z,
                 max.x, max.y, max.z);
     }
@@ -45,7 +46,7 @@ public class PartShape<T extends ISubInfoTypeOwner<T>> extends BasePart<T> imple
         return getScale();
     }
 
-    public MutableBoundingBox getBoundingBox() {
+    public AxisAlignedBB getBoundingBox() {
         return boundingBox;
     }
 

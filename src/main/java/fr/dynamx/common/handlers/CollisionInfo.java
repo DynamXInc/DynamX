@@ -9,9 +9,11 @@ import fr.dynamx.utils.optimization.Vector3fPool;
 import lombok.Getter;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CollisionInfo {
     /**
@@ -19,8 +21,7 @@ public class CollisionInfo {
      * Used for collisions with players and other entities <br>
      * The list is not modified by callers of the function
      */
-    @Getter
-    private final List<MutableBoundingBox> collisionBoxes;
+    private final List<AxisAlignedBB> collisionBoxes;
     /**
      *  The position of the collision boxes
      */
@@ -33,7 +34,7 @@ public class CollisionInfo {
     private final Quaternion rotation;
     private Quaternion inversedRotation;
 
-    public CollisionInfo(List<MutableBoundingBox> collisionBoxes, Vector3f position, Quaternion rotation) {
+    public CollisionInfo(List<AxisAlignedBB> collisionBoxes, Vector3f position, Quaternion rotation) {
         this.collisionBoxes = collisionBoxes;
         this.position = position;
         this.rotation = rotation;
@@ -50,12 +51,16 @@ public class CollisionInfo {
             inversedRotation = Quaternion.IDENTITY;
     }
 
+    public static int mult = 1;
+
     public float collideY(RotatedCollisionHandlerImpl handler, Entity entity, MutableBoundingBox entityBox, float motionY) {
         int k = 0;
+        mult = 1;
         for (int l = collisionBoxes.size(); k < l; ++k) {
             //TODO STORE COMPUTED BOXES
-            MutableBoundingBox rotated = handler.rotateBB(position, new MutableBoundingBox(collisionBoxes.get(k)), rotation);
-            rotated.grow(0f, Math.abs(motionY), 0f);
+            MutableBoundingBox rotated = handler.rotateBB(Vector3fPool.get(), new MutableBoundingBox(collisionBoxes.get(k)), rotation);
+            rotated.offset(position);
+            rotated.grow(0f, Math.abs(motionY)*mult, 0f);
             if (rotated.intersects(entityBox)) {
                 Vector3f motion = doRotatedCollision(handler, entity, Vector3fPool.get(0, motionY, 0));
                 motionY = motion.y;
@@ -68,8 +73,9 @@ public class CollisionInfo {
     public float collideX(RotatedCollisionHandlerImpl handler, Entity entity, MutableBoundingBox entityBox, float motionX) {
         int k = 0;
         for (int l = collisionBoxes.size(); k < l; ++k) {
-            MutableBoundingBox rotated = handler.rotateBB(position, new MutableBoundingBox(collisionBoxes.get(k)), rotation);
-            rotated.grow(Math.abs(motionX), 0f, 0f);
+            MutableBoundingBox rotated = handler.rotateBB(Vector3fPool.get(), new MutableBoundingBox(collisionBoxes.get(k)), rotation);
+            rotated.offset(position);
+            rotated.grow(Math.abs(motionX)*mult, 0f, 0f);
             if (rotated.intersects(entityBox)) {
                 Vector3f motion = doRotatedCollision(handler, entity, Vector3fPool.get(motionX, 0, 0));
                 motionX = motion.x;
@@ -82,8 +88,9 @@ public class CollisionInfo {
     public float collideZ(RotatedCollisionHandlerImpl handler, Entity entity, MutableBoundingBox entityBox, float motionZ) {
         int k = 0;
         for (int l = collisionBoxes.size(); k < l; ++k) {
-            MutableBoundingBox rotated = handler.rotateBB(position, new MutableBoundingBox(collisionBoxes.get(k)), rotation);
-            rotated.grow(0f, 0f, Math.abs(motionZ));
+            MutableBoundingBox rotated = handler.rotateBB(Vector3fPool.get(), new MutableBoundingBox(collisionBoxes.get(k)), rotation);
+            rotated.offset(position);
+            rotated.grow(0f, 0f, Math.abs(motionZ)*mult);
             if (rotated.intersects(entityBox)) {
                 Vector3f motion = doRotatedCollision(handler, entity, Vector3fPool.get(0, 0, motionZ));
                 motionZ = motion.z;
@@ -111,6 +118,8 @@ public class CollisionInfo {
         }
         if (Math.abs(entity.getEntityBoundingBox().minY - tempBB.minY) < 0.05)
             tempBB.minY = entity.getEntityBoundingBox().minY + 0.01f;
+        //place at 0
+        tempBB.offset(Vector3fPool.get(position).multLocal(-1));
         if (motion.y != 0) {
             int k = 0;
             for (int l = collisionBoxes.size(); k < l; ++k) {
@@ -171,5 +180,10 @@ public class CollisionInfo {
         if (entity.world.isRemote && ClientDebugSystem.enableDebugDrawing)
             VehicleDebugRenderer.PlayerCollisionsDebug.realmotion = Vector3fPool.getPermanentVector(motion);
         return motion;
+    }
+
+    public List<MutableBoundingBox> getCollisionBoxes() {
+        //TODO OPTI
+        return collisionBoxes.stream().map(MutableBoundingBox::new).map(b -> b.offset(position)).collect(Collectors.toList());
     }
 }

@@ -455,6 +455,18 @@ public class MutableBoundingBox implements Serializable, IShapeInfo {
         maxZ = Math.max(maxZ, o.maxZ);
     }
 
+    /**
+     * Modifies the box to contain the old box and the box passed in argument
+     */
+    public void growTo(AxisAlignedBB o) {
+        minX = Math.min(minX, o.minX);
+        minY = Math.min(minY, o.minY);
+        minZ = Math.min(minZ, o.minZ);
+        maxX = Math.max(maxX, o.maxX);
+        maxY = Math.max(maxY, o.maxY);
+        maxZ = Math.max(maxZ, o.maxZ);
+    }
+
     public MutableBoundingBox offset(double x, double y, double z) {
         minX += x;
         maxX += x;

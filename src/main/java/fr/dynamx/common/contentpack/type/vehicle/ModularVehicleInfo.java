@@ -44,11 +44,13 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * All information about a vehicle
@@ -304,8 +306,8 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     }
 
     @Override
-    public Collection<? extends IShapeInfo> getShapes() {
-        return partShapes;
+    public List<AxisAlignedBB> getShapes() {
+        return partShapes.stream().map(PartShape::getBoundingBox).collect(Collectors.toList());
     }
 
     @Override

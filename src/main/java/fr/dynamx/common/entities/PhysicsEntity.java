@@ -486,7 +486,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
                 boundingBox.getMax(max);
                 entityBoxCache = new AxisAlignedBB(min.x, min.y, min.z, max.x, max.y, max.z);
             } else {
-                List<MutableBoundingBox> boxes = getCollisionBoxes(); //Get PartShape boxes
+                List<MutableBoundingBox> boxes = getCollisionInfo().getCollisionBoxes(); //Get PartShape boxes
                 if (boxes.isEmpty()) { //If there is no boxes, create a default one
                     entityBoxCache = new AxisAlignedBB(getPositionVector().x - 2, getPositionVector().y - 1, getPositionVector().z - 2,
                             getPositionVector().x + 2, getPositionVector().y + 2, getPositionVector().z + 2);
@@ -585,16 +585,6 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
      */
     public boolean canPlayerStandOnTop() {
         return false;
-    }
-
-    @Override
-    public Quaternion getCollidableRotation() {
-        return physicsRotation;
-    }
-
-    @Override
-    public Vector3f getCollisionOffset() {
-        return Vector3fPool.get();
     }
 
     @Override

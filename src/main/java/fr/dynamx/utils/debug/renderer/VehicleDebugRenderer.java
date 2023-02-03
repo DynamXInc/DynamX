@@ -296,7 +296,7 @@ public class VehicleDebugRenderer {
             GlStateManager.translate(-entity.posX, -entity.posY, -entity.posZ);
 
             try {
-                for (MutableBoundingBox bb : entity.getCollisionBoxes()) {
+                for (MutableBoundingBox bb : entity.getCollisionInfo().getCollisionBoxes()) {
 
                     RenderGlobal.drawBoundingBox(bb.minX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ, 1, 1, 0, 1);
                 }

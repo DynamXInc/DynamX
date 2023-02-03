@@ -9,20 +9,14 @@ import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.blocks.TEDynamXBlock;
-import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
-import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.utils.DynamXUtils;
-import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.debug.renderer.VehicleDebugRenderer;
-import fr.dynamx.utils.maths.DynamXGeometry;
-import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
-import fr.dynamx.utils.physics.DynamXPhysicsHelper;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
@@ -102,7 +96,7 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
         if (DynamXDebugOptions.PLAYER_TO_OBJECT_COLLISION_DEBUG.isActive()) {
             QuaternionPool.openPool();
             GlQuaternionPool.openPool();
-            Quaternion q = te.getCollidableRotation();
+            Quaternion q = te.getCollisionInfo().getRotation();
             GlStateManager.pushMatrix();
             GlStateManager.translate(0.5D, 1.5D, 0.5D);
             GlStateManager.rotate(GlQuaternionPool.get(q));
@@ -126,7 +120,7 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
             GlStateManager.translate(-te.getPos().getX() + 0.5D, -te.getPos().getY() + 1.5D, -te.getPos().getZ() + 0.5D);
 
             try {
-                for (MutableBoundingBox bb : te.getCollisionBoxes()) {
+                for (MutableBoundingBox bb : te.getCollisionInfo().getCollisionBoxes()) {
 
                     RenderGlobal.drawBoundingBox(bb.minX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ, 1, 1, 0, 1);
                 }
@@ -135,7 +129,7 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
             }
 
             if (VehicleDebugRenderer.PlayerCollisionsDebug.lastTemp != null) {
-                RenderGlobal.drawSelectionBoundingBox(VehicleDebugRenderer.PlayerCollisionsDebug.lastTemp, 0, 1, 1, 1);
+                RenderGlobal.drawSelectionBoundingBox(VehicleDebugRenderer.PlayerCollisionsDebug.lastTemp, 1, 0, 1, 1);
             }
             //if(RotatedCollisionHandler.pos != null)
             //GlStateManager.translate(RotatedCollisionHandler.pos.x, RotatedCollisionHandler.pos.y, RotatedCollisionHandler.pos.z);

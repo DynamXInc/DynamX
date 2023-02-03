@@ -69,7 +69,7 @@ public class DynamXBlockTerrainElement implements ITerrainElement {
         }
         PhysicsRigidBody p = new PhysicsRigidBody(((TEDynamXBlock) te).getPhysicsCollision(), 0);
         p.setPhysicsLocation(pos.add(Vector3fPool.get(x + 0.5f, y + 1.5f, z + 0.5f).addLocal(((TEDynamXBlock) te).getBlockObjectInfo().getTranslation())).addLocal(((TEDynamXBlock) te).getRelativeTranslation()));
-        p.setPhysicsRotation(((TEDynamXBlock) te).getCollidableRotation());
+        p.setPhysicsRotation(((TEDynamXBlock) te).getCollisionInfo().getRotation());
         p.setUserObject(new BulletShapeType<>(EnumBulletShapeType.TERRAIN, this));
         body = p;
         return p;

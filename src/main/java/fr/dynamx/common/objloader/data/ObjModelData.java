@@ -5,6 +5,7 @@ import fr.aym.mps.IMpsClassLoader;
 import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.ContentPackLoader;
+import fr.dynamx.common.contentpack.PackInfo;
 import fr.dynamx.common.objloader.OBJLoader;
 import fr.dynamx.utils.DynamXUtils;
 import lombok.Getter;
@@ -14,19 +15,14 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 /**
  * An obj model not able to be rendered, used for collisions generation
@@ -59,27 +55,15 @@ public class ObjModelData {
     }
 
     private InputStream server(ObjModelPath path) throws IOException {
-        if (mpsClassLoader != null) {
-            InputStream protectedd = mpsClassLoader.getResourceAsStream("assets/" + path.getModelPath().getNamespace() + "/" + path.getModelPath().getPath());
-            if (protectedd != null) {
-                return protectedd;
-            }
+        InputStream result = null;
+        for (PackInfo packInfo : path.getPackLocations()) {
+            result = packInfo.readFile(path.getModelPath());
+            if (result != null)
+                break;
         }
-        if (path.getPackName().contains(".zip") || path.getPackName().contains(ContentPackLoader.PACK_FILE_EXTENSION)) {
-            ZipFile root = new ZipFile(DynamXMain.resDir + File.separator + path.getPackName());
-            //System.out.println("Root is "+root);
-            String entry = "assets/" + path.getModelPath().getNamespace() + "/" + path.getModelPath().getPath();
-            //System.out.println("Entry path is "+entry+" "+path);
-            ZipEntry t = root.getEntry(entry);
-            if (t == null) {
-                throw new FileNotFoundException("Not found in zip : " + path + ". Has mps class loader : " + (mpsClassLoader != null));
-            }
-            return root.getInputStream(t);
-        }
-        String fullPath = DynamXMain.resDir + File.separator + path.getPackName() + File.separator + "assets" +
-                File.separator + path.getModelPath().getNamespace() + File.separator + path.getModelPath().getPath().replace("/", File.separator);
-        //System.out.println("Full path is "+fullPath+" "+path);
-        return Files.newInputStream(Paths.get(fullPath));
+        if (result == null)
+            throw new FileNotFoundException("Model not found : " + path + ". Pack : " + path.getPackName());
+        return result;
     }
 
     public ObjModelPath getObjModelPath() {

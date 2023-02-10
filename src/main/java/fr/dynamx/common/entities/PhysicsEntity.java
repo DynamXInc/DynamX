@@ -517,11 +517,22 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
         IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(world);
         if (usesPhysicsWorld && physicsWorld != null) //onRemovedFromWorld may be called before physicsWorld is loaded (in case of failing to load from nbt)
         {
+            if(posY < 0)
+                printReport();
             physicsWorld.removeBulletEntity(this);
             terrainCache.onRemoved(physicsWorld.getTerrainManager());
         }
         if (physicsHandler != null)
             physicsHandler.removePhysicsEntity();
+    }
+
+    public void printReport() {
+        IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(world);
+        if(terrainCache != null && usesPhysicsWorld && physicsWorld != null) {
+            System.out.println("============");
+            System.out.println("TERRAIN REPORT - " + this);
+            terrainCache.printReport(physicsWorld.getTerrainManager());
+        }
     }
 
     @Override

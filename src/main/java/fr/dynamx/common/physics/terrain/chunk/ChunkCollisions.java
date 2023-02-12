@@ -521,7 +521,7 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
 
     @Override
     public String toString() {
-        return "ChunkCollisions[x=" + myPos.x + ";y=" + myPos.y + ";z=" + myPos.z + "]";
+        return "ChunkCollisions[x=" + myPos.x + ";y=" + myPos.y + ";z=" + myPos.z + ";state=" + state+"]";
     }
 
     @Override

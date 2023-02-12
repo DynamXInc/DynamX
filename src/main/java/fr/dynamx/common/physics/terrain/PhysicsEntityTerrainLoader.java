@@ -114,6 +114,29 @@ public class PhysicsEntityTerrainLoader implements IPhysicsTerrainLoader {
         }
     }
 
+    public void printReport(PhysicsWorldTerrain terrainManager) {
+        System.out.println("ToLoad " + toLoad);
+        System.out.println("ToUnload " + toUnLoad);
+        System.out.println(lastChunkX + " " + entityIn.chunkCoordX + " " + lastChunkY + " " + entityIn.chunkCoordY +" " + lastChunkZ + entityIn.chunkCoordZ);
+        StringBuilder strs = new StringBuilder();
+        VerticalChunkPos.Mutable pos = new VerticalChunkPos.Mutable();
+        for (int i = 0; i < radiusY; i++) {
+            for (int j = 0; j < radiusH * radiusH; j++) {
+                int dx = (j % radiusH) - radiusHHalf;
+                int dz = (j / radiusH) - radiusHHalf;
+                pos.setPos(lastChunkX + dx, lastChunkY + i - radiusYHalf, lastChunkZ + dz);
+                strs.append("[").append(i).append("] [").append(j).append("] = ").append(dx).append(", ").append(dz).append(" -> ").append(loadMatrice[i][j]);
+                if (loadMatrice[i][j] != -1) {
+                    ChunkLoadingTicket ticket = terrainManager.getTicket(pos.toImmutable());
+                    strs.append(" CHK IS ").append(ticket);
+                    loadMatrice[i][j] = -1;
+                }
+                strs.append("\n");
+            }
+        }
+        System.out.println(strs.toString());
+    }
+
     protected boolean isSameDir(int d1, float d2) {
         return (d1 >= 0) == (d2 >= 0);
     }

@@ -58,7 +58,7 @@ public class PhysicsWorldOperation<A> {
                     if (dynamicsWorld.getVehicleList().contains(object))
                         DynamXMain.log.fatal("PhysicsVehicle " + object + " is already in the physics world, please report this !");
                 case ADD_OBJECT:
-                    if (!physicsSpaceContains(dynamicsWorld, (PhysicsCollisionObject) object))
+                    if (!dynamicsWorld.contains((PhysicsCollisionObject) object))
                         dynamicsWorld.addCollisionObject((PhysicsCollisionObject) object);
                     else
                         DynamXMain.log.fatal("PhysicsCollisionObject " + object + " is already registered, please report this !");
@@ -67,7 +67,7 @@ public class PhysicsWorldOperation<A> {
                     if (!dynamicsWorld.getVehicleList().contains(object))
                         DynamXMain.log.fatal("PhysicsVehicle " + object + " is not is the physics world, please report this !");
                 case REMOVE_OBJECT:
-                    if (physicsSpaceContains(dynamicsWorld, (PhysicsCollisionObject) object))
+                    if (dynamicsWorld.contains((PhysicsCollisionObject) object))
                         dynamicsWorld.removeCollisionObject((PhysicsCollisionObject) object);
                     break;
                 case ADD_ENTITY:
@@ -114,21 +114,6 @@ public class PhysicsWorldOperation<A> {
                 DynamXMain.log.fatal("Exception while executing callback of " + this + ". Callback: " + callback, e);
             }
         }
-    }
-
-    /**
-     * method to check the PhysicsRigidBody list more performant
-     */
-    private boolean physicsSpaceContains(PhysicsSpace dynamicsWorld, PhysicsCollisionObject object) {
-        try {
-            Field field = PhysicsSpace.class.getDeclaredField("rigidMap");
-            field.setAccessible(true);
-            Map<Long, PhysicsRigidBody> map = (Map<Long, PhysicsRigidBody>) field.get(dynamicsWorld);
-            return map.containsKey(object.nativeId());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
     }
 
     @Override

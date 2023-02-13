@@ -25,6 +25,7 @@ public class CollisionInfo {
      * The list is not modified by callers of the function
      */
     private final List<AxisAlignedBB> collisionBoxes;
+    @Getter
     private List<AxisAlignedBB> rotatedBoxes;
     /**
      *  The position of the collision boxes
@@ -76,6 +77,7 @@ public class CollisionInfo {
     public Vector3f collideAll(RotatedCollisionHandlerImpl handler, Entity entity, MutableBoundingBox entityBox, Vector3f motion) {
         int k = 0;
         entityBox.offset(Vector3fPool.get(position).multLocal(-1));
+        System.out.println("==> INSET " + motion+ " " + entityBox);
         for (int l = collisionBoxes.size(); k < l; ++k) {
             if (entityBox.intersects(rotatedBoxes.get(k))) {
                 motion = doRotatedCollision(handler, entity, entityBox, motion, 0);
@@ -123,7 +125,7 @@ public class CollisionInfo {
         entityBox.offset(Vector3fPool.get(position).multLocal(-1));
         for (int l = collisionBoxes.size(); k < l; ++k) {
             if (entityBox.intersects(rotatedBoxes.get(k))) {
-                Vector3f motion = doRotatedCollision(handler, entity, entityBox, Vector3fPool.get(0, 0, motionZ), 3);
+                Vector3f motion = doRotatedCollision(handler, entity, entityBox, Vector3fPool.get(0, 0, motionZ), 2);
                 //System.out.println("InitMot " + motionZ +" to " + motion.z + " eb " + entityBox +" rt " +rotatedBoxes.get(k));
                 motionZ = motion.z;
                 break;
@@ -166,19 +168,19 @@ public class CollisionInfo {
         if(true)
             return Vector3fPool.get();*/
 
-        //System.out.println("MOVE DIR " + oldx + " " + oldy +" " +oldz +" "+motion);
+        System.out.println("MOVE DIR " + oldx + " " + oldy +" " +oldz +" "+motion);
         List<EnumFacing> collisionFaces = new ArrayList<>();
         MutableBoundingBox tempBB = handler.rotateBB(Vector3fPool.get(), Vector3fPool.get((float) entity.posX, (float) entity.posY, (float) entity.posZ).subtract(position), entityBB.toBB(), inversedRotation);
         if (entity.world.isRemote && ClientDebugSystem.enableDebugDrawing) {
             VehicleDebugRenderer.PlayerCollisionsDebug.lastTemp = tempBB.toBB();
             VehicleDebugRenderer.PlayerCollisionsDebug.rotatedmotion = Vector3fPool.getPermanentVector(motion);
         }
-        tempBB.minX = Math.ceil(tempBB.minX * 1000)/1000;
+        /*tempBB.minX = Math.ceil(tempBB.minX * 1000)/1000;
         tempBB.minY = Math.ceil(tempBB.minY * 1000)/1000;
         tempBB.minZ = Math.ceil(tempBB.minZ * 1000)/1000;
         tempBB.maxX = Math.floor(tempBB.maxX * 1000)/1000;
         tempBB.maxY = Math.floor(tempBB.maxY * 1000)/1000;
-        tempBB.maxZ = Math.floor(tempBB.maxZ * 1000)/1000;
+        tempBB.maxZ = Math.floor(tempBB.maxZ * 1000)/1000;*/
 
         rotatedPlayer[mode] = new MutableBoundingBox(tempBB);
         motioned[mode] = new Vector3f(origin);
@@ -249,8 +251,8 @@ public class CollisionInfo {
         if (!motion.equals(origin)) {
             origin = motion;
             motion = handler.rotate(motion, rotation);
-     //       if(entity.world.isRemote)
-       //         System.out.println("Resulted motion is " + motion+ " "+ origin);
+            if(entity.world.isRemote)
+                System.out.println("Resulted motion is " + motion+ " "+ origin);
             float eps = 0.01f;
             if (Math.abs(motion.x - oldx) < eps / 5)
                 motion.x = oldx;
@@ -262,8 +264,8 @@ public class CollisionInfo {
         } else {
             origin = motion;
             motion = handler.rotate(motion, rotation);
-        //    if(entity.world.isRemote)
-          //      System.out.println("NO CHANGE Resulted motion is " + motion+ " "+ origin);
+            if(entity.world.isRemote)
+                System.out.println("NO CHANGE Resulted motion is " + motion+ " "+ origin);
             motion = Vector3fPool.get(oldx, oldy, oldz);
             motionedAfter[mode] = new Vector3f(motion);
         }

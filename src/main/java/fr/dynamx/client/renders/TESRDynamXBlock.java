@@ -134,7 +134,7 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
             }
             if (CollisionInfo.motioned[axis] != null) {
                 PhysicsDebugRenderer.drawJointLine(Vector3fPool.get(), CollisionInfo.motioned[axis], Color.RED);
-                PhysicsDebugRenderer.drawJointLine(Vector3fPool.get(), CollisionInfo.motionedAfter[axis], Color.ORANGE);
+                PhysicsDebugRenderer.drawJointLine(Vector3fPool.get(), CollisionInfo.motionedAfter[axis], Color.BLUE);
             }
             axis = 2;
             if (CollisionInfo.collisionBoxed[axis] != null) {

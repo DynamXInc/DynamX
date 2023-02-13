@@ -214,7 +214,7 @@ public class PhysicsDebugRenderer {
         GlStateManager.color(lineColor.getRed(), lineColor.getGreen(), lineColor.getBlue(), lineColor.getAlpha());
         GlStateManager.glBegin(GL11.GL_LINE_STRIP);
         GlStateManager.glVertex3f(pivotA.x, pivotA.y, pivotA.z);
-        GlStateManager.glVertex3f(pivotB.x, pivotB.y, pivotB.z);
+        GlStateManager.glVertex3f(pivotB.x*10, pivotB.y*10, pivotB.z*10);
         GlStateManager.glEnd();
         GlStateManager.color(1, 1, 1, 1);
     }

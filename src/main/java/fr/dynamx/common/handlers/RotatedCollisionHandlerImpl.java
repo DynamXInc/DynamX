@@ -3,15 +3,9 @@ package fr.dynamx.common.handlers;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.physics.IRotatedCollisionHandler;
-import fr.dynamx.client.handlers.ClientDebugSystem;
-import fr.dynamx.common.DynamXContext;
-import fr.dynamx.common.contentpack.parts.PartShape;
 import fr.dynamx.common.entities.ICollidableObject;
 import fr.dynamx.common.entities.PhysicsEntity;
-import fr.dynamx.common.entities.PropsEntity;
-import fr.dynamx.common.physics.player.WalkingOnPlayerController;
 import fr.dynamx.utils.DynamXConfig;
-import fr.dynamx.utils.debug.renderer.VehicleDebugRenderer;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.*;
@@ -19,9 +13,10 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 
@@ -68,6 +63,7 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
     public static double eps = 0.2f;
 
     public static float calculateXOffset(AxisAlignedBB against, MutableBoundingBox other, float offsetX) {
+        System.out.println("===========");
         eps = 0.1f;
         if (other.maxY > against.minY && other.minY < against.maxY && other.maxZ > against.minZ && other.minZ < against.maxZ) {
             if (offsetX > 0.0D && other.maxX - eps <= against.minX) {
@@ -75,24 +71,33 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
 
                 if (d1 < offsetX) {
                     offsetX = d1;
-                    //System.out.println("PX Data " + other.minX +" " + eps + " " + against.maxX);
-                }// else
-                   // System.out.println("Pos X NO COL " + d1 +  "  " + offsetX + " " + against +" "+other);
+                    System.out.println("PX Data " + other.minX +" " + eps + " " + against.maxX);
+                } else
+                    System.out.println("Pos X NO COL " + d1 +  "  " + offsetX + " " + against +" "+other);
             } else if (offsetX < 0.0D && other.minX + eps >= against.maxX) {
                 float d0 = (float) (against.maxX - other.minX);
 
                 if (d0 > offsetX) {
                     offsetX = d0;
-                   // System.out.println("NX Data " + other.minX +" " + eps + " " + against.maxX+ " " + d0);
+                    System.out.println("NX Data " + other.minX +" " + eps + " " + against.maxX+ " " + d0);
                 }
                 else {
-                   // System.out.println("Neg X NO COL " + d0 + "  " + offsetX + " " + against + " " + other);
-                    //System.out.println("Data " + other.minX + " " + eps + " " + against.maxX);
+                     System.out.println("Neg X NO COL " + d0 + "  " + offsetX + " " + against + " " + other);
+                    System.out.println("Data " + other.minX + " " + eps + " " + against.maxX);
                 }
             }
+            else if(offsetX > 0 && Math.abs(against.minX - other.maxX) < 0.01f) {
+                offsetX = 0;
+                System.out.println("ROUND TO 0 X +");
+            }
+            else if(offsetX < 0 && Math.abs(against.maxX - other.minX) < 0.01f) {
+                offsetX = 0;
+                System.out.println("ROUND TO 0 X -");
+                System.out.println("Data " + other.minY + " " + eps + " " + against.maxY);
+            }
             else {
-              // System.out.println("Indé X no COL " + offsetX + " " + against + " " + other);
-                //System.out.println("Data " + other.minX +" " + eps + " " + against.maxX);
+                System.out.println("Indé X no COL " + offsetX + " " + against + " " + other);
+                System.out.println("Data " + other.minX +" " + eps + " " + against.maxX);
             }
 
             return offsetX;
@@ -105,27 +110,27 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
     public static float calculateYOffset(AxisAlignedBB against, MutableBoundingBox other, float offsetY) {
         eps = 0.1f;
         if (other.maxX > against.minX && other.minX < against.maxX && other.maxZ > against.minZ && other.minZ < against.maxZ) {
-            if (offsetY > 0.0D && other.maxY - eps <= against.minY) {
+            if (offsetY > 0.0D && (other.maxY - eps <= against.minY || Math.abs(against.minY - other.maxY) < 0.01f)) {
                 float d1 = (float) (against.minY - other.maxY);
 
                 if (d1 < offsetY) {
                     offsetY = d1;
                 }
-            } else if (offsetY < 0.0D && other.minY + eps >= against.maxY) {
+            } else if (offsetY < 0.0D && (other.minY + eps >= against.maxY || Math.abs(against.maxY - other.minY) < 0.01f)) {
                 float d0 = (float) (against.maxY - other.minY);
 
                 if (d0 > offsetY) {
                     offsetY = d0;
-                    //System.out.println("NY Data " + other.minY +" " + eps + " " + against.maxY+ " " + d0);
+                    System.out.println("NY Data " + other.minY +" " + eps + " " + against.maxY+ " " + d0);
                 }
                 else {
-                  //  System.out.println("Neg Y NO COL " + d0 + "  " + offsetY + " " + against + " " + other);
-                    //System.out.println("Data " + other.minY + " " + eps + " " + against.maxY);
+                   System.out.println("Neg Y NO COL " + d0 + "  " + offsetY + " " + against + " " + other);
+                    System.out.println("Data " + other.minY + " " + eps + " " + against.maxY);
                 }
             }
             else {
-               // System.out.println("Indé Y no COL " + offsetY + " " + against + " " + other);
-                //System.out.println("Data " + other.minY +" " + eps + " " + against.maxY);
+                System.out.println("Indé Y no COL " + offsetY + " " + against + " " + other);
+                System.out.println("Data " + other.minY +" " + eps + " " + against.maxY);
             }
 
             return offsetY;
@@ -159,6 +164,14 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
               //   System.out.println("Neg Z NO COL " + d0 + "  " + offsetZ + " " + against + " " + other);
                 // System.out.println("Data " + other.minZ + " " + eps + " " + against.maxZ);
                 }
+            }
+            else if(offsetZ > 0 && Math.abs(against.minZ - other.maxZ) < 0.01f) {
+                offsetZ = 0;
+                System.out.println("ROUND TO 0 Z +");
+            }
+            else if(offsetZ < 0 && Math.abs(against.maxZ - other.minZ) < 0.01f) {
+                offsetZ = 0;
+                System.out.println("ROUND TO 0 Z -");
             }
             else {
            //   System.out.println("Indé Z no COL " + offsetZ + " " + against + " " + other);
@@ -418,9 +431,82 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
             // do collide
             float castx = (float) nx, casty = (float) ny, castz = (float) nz;
             MutableBoundingBox tempBB = new MutableBoundingBox(entity.getEntityBoundingBox());
+
             MutableBoundingBox finalTempBB = tempBB;
+            collisions.sort((c1, c2) -> {
+                if(c1 == c2)
+                    return 0;
+                Vector3f center1 = finalTempBB.getPosition();
+                Vector3f center2 = finalTempBB.getPosition();
+                OptionalDouble dist1 = c1.getRotatedBoxes().stream().mapToDouble(b -> {
+                    b = b.shrink(3);
+                    b = b.offset(c1.getPosition().x, c1.getPosition().y, c1.getPosition().z);
+                    System.out.println(b.getCenter()+" c1 // " + center1+" // " + b.intersects(new Vec3d(center1.x, center1.y, center1.z), b.getCenter()));
+                    RayTraceResult r = b.calculateIntercept(new Vec3d(center1.x, center1.y, center1.z), b.getCenter());
+                    if(r == null) {
+                        System.out.println("Roux " + b);
+                        return Double.MAX_VALUE / 2;
+                    }
+                    else System.out.println("Cool " + b);
+                    return r.hitVec.subtract(center1.x, center1.y, center1.z).lengthSquared();
+                }).min();
+                OptionalDouble dist2 = c2.getRotatedBoxes().stream().mapToDouble(b -> {
+                    b = b.shrink(3);
+                    b = b.offset(c2.getPosition().x, c2.getPosition().y, c2.getPosition().z);
+                    System.out.println(b.getCenter()+" c2 // " + center2+" // " + b.intersects(new Vec3d(center2.x, center2.y, center2.z),b.getCenter()));
+                    RayTraceResult r = b.calculateIntercept(new Vec3d(center2.x, center2.y, center2.z), b.getCenter());
+                    if(r == null) {
+                        System.out.println("Roux 2 " + b);
+                        return Double.MAX_VALUE / 2;
+                    }
+                    else System.out.println("Cool 2 " + b);
+                    return r.hitVec.subtract(center1.x, center1.y, center1.z).lengthSquared();
+                }).min();
+                System.out.println(dist1+" " +dist2);
+                return dist1.orElse(Double.MAX_VALUE) - dist2.orElse(Double.MAX_VALUE) < 0 ? -1 : 1;
+            });
+            for (int i = 0; i < collisions.size(); i++) {
+                CollisionInfo collisionInfo = collisions.get(i);
+                System.out.println(i+" is " + collisionInfo.getPosition());
+                Vector3f collision = collisionInfo.collideAll(this, entity, tempBB, Vector3fPool.get(castx, casty, castz));
+                if (ny != 0) {
+                    float move = collision.y;//collision.collideY(this, entity, tempBB, casty);
+                    if (Math.abs(move) < Math.abs(casty)) {
+                        casty = move;
+                        ny = move;
+                        motionChanged = true;
+                    }
+                    if (ny != 0)
+                        tempBB = tempBB.offset(0, ny, 0);
+                }
+                if (nx != 0) {
+                    float move = collision.x;//collision.collideX(this, entity, tempBB, castx);
+                    if (Math.abs(move) < Math.abs(castx)) {
+                        castx = move;
+                        nx = move;
+                        motionChanged = true;
+                    }
+                    if (nx != 0)
+                        tempBB = tempBB.offset(nx, 0, 0);
+                }
+                if (nz != 0) {
+                    float move = collision.z;//collision.collideZ(this, entity, tempBB, castz);
+                    if (Math.abs(move) < Math.abs(castz)) {
+                        castz = move;
+                        nz = move;
+                        motionChanged = true;
+                    }
+                    if (nz != 0)
+                        tempBB = tempBB.offset(0, 0, nz);
+                }
+            }
+
+
+            /*MutableBoundingBox finalTempBB = tempBB;
             float finalCasty = casty;
-            List<Vector3f> motions = collisions.stream().map(c -> c.collideAll(this, entity, finalTempBB, Vector3fPool.get(0, finalCasty, 0))).collect(Collectors.toList());
+            float finalCastx1 = castx;
+            float finalCastz1 = castz;
+            List<Vector3f> motions = collisions.stream().map(c -> c.collideAll(this, entity, finalTempBB, Vector3fPool.get(finalCastx1, finalCasty, finalCastz1))).collect(Collectors.toList());
             if (ny != 0) {
                 for(Vector3f collision : motions) {
                     float move = collision.y;//collision.collideY(this, entity, tempBB, casty);
@@ -434,8 +520,8 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
                     tempBB = tempBB.offset(0, ny, 0);
             }
             MutableBoundingBox finalTempBB1 = tempBB;
-            float finalCastx = castx;
-            motions = collisions.stream().map(c -> c.collideAll(this, entity, finalTempBB1, Vector3fPool.get(finalCastx, 0, 0))).collect(Collectors.toList());
+            float finalCasty1 = casty;
+            motions = collisions.stream().map(c -> c.collideAll(this, entity, finalTempBB1, Vector3fPool.get(finalCastx1, finalCasty1, finalCastz1))).collect(Collectors.toList());
             if (nx != 0) {
                 for(Vector3f collision : motions) {
                     float move = collision.x;//collision.collideX(this, entity, tempBB, castx);
@@ -449,8 +535,8 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
                     tempBB = tempBB.offset(nx, 0, 0);
             }
             MutableBoundingBox finalTempBB2 = tempBB;
-            float finalCastz = castz;
-            motions = collisions.stream().map(c -> c.collideAll(this, entity, finalTempBB2, Vector3fPool.get(0, 0, finalCastz))).collect(Collectors.toList());
+            float finalCastx2 = castx;
+            motions = collisions.stream().map(c -> c.collideAll(this, entity, finalTempBB2, Vector3fPool.get(finalCastx2, finalCasty1, finalCastz1))).collect(Collectors.toList());
             if (nz != 0) {
                 for(Vector3f collision : motions) {
                     float move = collision.z;//collision.collideZ(this, entity, tempBB, castz);
@@ -462,7 +548,9 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
                 }
                 if (nz != 0)
                     tempBB = tempBB.offset(0, 0, nz);
-            }
+            }*/
+
+
             //if(nx != 0 && entity instanceof EntityPlayer)
               //  System.out.println("FDX IS MOVING " + nx + " " + motionChanged +" "+ castx +" " +collisions);
             //if(nz != 0 && entity instanceof EntityPlayer)

@@ -191,24 +191,7 @@ public class DynamXGeometry {
      * @return The rotated vector, this Vector3f is got from Vector3fPool, so only valid in the current sub-pool (generally this tick)
      */
     public static Vector3f rotateVectorByQuaternion(Vector3f v, Quaternion q) {
-        // Extract the vector part of the quaternion
-        Vector3f u = Vector3fPool.get(q.getX(), q.getY(), q.getZ());
-
-        // Extract the scalar part of the quaternion
-        float s = q.getW();
-
-        // Do the math
-        Vector3f v1 = Vector3fPool.get(u);
-        v1.multLocal(2 * u.dot(v));
-        Vector3f v2 = Vector3fPool.get(v);
-        v2.multLocal(s * s - u.dot(u));
-        v1.addLocal(v2);
-        v2.set(u.cross(v, v2));
-        v1.addLocal(v2.multLocal(2 * s));
-        /*vprime = u.mult(u.dot(v) * 2)
-                + (s*s - dot(u, u)) * v
-                + 2.0f * s * cross(u, v);*/
-        return v1;
+        return q.mult(v, Vector3fPool.get());
     }
 
     /**

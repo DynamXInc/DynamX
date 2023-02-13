@@ -301,6 +301,10 @@ public class MutableBoundingBox implements Serializable, IShapeInfo {
         return this.intersects(other.minX, other.minY, other.minZ, other.maxX, other.maxY, other.maxZ);
     }
 
+    public boolean intersects(AxisAlignedBB other) {
+        return this.intersects(other.minX, other.minY, other.minZ, other.maxX, other.maxY, other.maxZ);
+    }
+
     public boolean intersects(double x1, double y1, double z1, double x2, double y2, double z2) {
         return this.minX < x2 && this.maxX > x1 && this.minY < y2 && this.maxY > y1 && this.minZ < z2 && this.maxZ > z1;
     }

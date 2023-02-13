@@ -9,9 +9,12 @@ import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.blocks.TEDynamXBlock;
+import fr.dynamx.common.handlers.CollisionInfo;
 import fr.dynamx.utils.DynamXUtils;
+import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
+import fr.dynamx.utils.debug.renderer.PhysicsDebugRenderer;
 import fr.dynamx.utils.debug.renderer.VehicleDebugRenderer;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
@@ -23,6 +26,7 @@ import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.common.MinecraftForge;
 
+import java.awt.*;
 import java.util.ConcurrentModificationException;
 
 import static fr.dynamx.utils.debug.renderer.VehicleDebugRenderer.PlayerCollisionsDebug.*;
@@ -112,16 +116,38 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
             /* Start of Aymeric's collision debug */
             GlStateManager.translate(-te.getPos().getX() + 0.5D, -te.getPos().getY() + 1.5D, -te.getPos().getZ() + 0.5D);
 
-            try {
+            /*try {
                 for (MutableBoundingBox bb : te.getCollisionInfo().getCollisionBoxes()) {
 
                     RenderGlobal.drawBoundingBox(bb.minX, bb.minY, bb.minZ, bb.maxX, bb.maxY, bb.maxZ, 1, 1, 0, 1);
                 }
             } catch (ConcurrentModificationException e) {
                 e.printStackTrace();
+            }*/
+
+            GlStateManager.translate(te.getPos().getX(), te.getPos().getY(), te.getPos().getZ());
+            int axis = 0;
+            if (CollisionInfo.collisionBoxed[axis] != null) {
+                RenderGlobal.drawSelectionBoundingBox(CollisionInfo.collisionBoxed[axis], 1, 0, 0, 1);
+                RenderGlobal.drawSelectionBoundingBox(CollisionInfo.rotatedPlayer[axis].toBB(), 1, 0, 0, 1);
+                RenderGlobal.drawSelectionBoundingBox(CollisionInfo.rotatedPlayerAfter[axis].toBB(), 1, 0, 1, 1);
+            }
+            if (CollisionInfo.motioned[axis] != null) {
+                PhysicsDebugRenderer.drawJointLine(Vector3fPool.get(), CollisionInfo.motioned[axis], Color.RED);
+                PhysicsDebugRenderer.drawJointLine(Vector3fPool.get(), CollisionInfo.motionedAfter[axis], Color.ORANGE);
+            }
+            axis = 2;
+            if (CollisionInfo.collisionBoxed[axis] != null) {
+                RenderGlobal.drawSelectionBoundingBox(CollisionInfo.collisionBoxed[axis], 0, 1, 0, 1);
+                RenderGlobal.drawSelectionBoundingBox(CollisionInfo.rotatedPlayer[axis].toBB(), 0, 1, 0, 1);
+                RenderGlobal.drawSelectionBoundingBox(CollisionInfo.rotatedPlayerAfter[axis].toBB(), 0, 1, 1, 1);
+            }
+            if (CollisionInfo.motioned[axis] != null) {
+                PhysicsDebugRenderer.drawJointLine(Vector3fPool.get(), CollisionInfo.motioned[axis], Color.GREEN);
+                PhysicsDebugRenderer.drawJointLine(Vector3fPool.get(), CollisionInfo.motionedAfter[axis], Color.magenta);
             }
 
-            if (VehicleDebugRenderer.PlayerCollisionsDebug.lastTemp != null) {
+            /*if (VehicleDebugRenderer.PlayerCollisionsDebug.lastTemp != null) {
                 RenderGlobal.drawSelectionBoundingBox(VehicleDebugRenderer.PlayerCollisionsDebug.lastTemp, 1, 0, 1, 1);
             }
             //if(RotatedCollisionHandler.pos != null)
@@ -145,21 +171,8 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
                 RenderGlobal.drawBoundingBox(pos.x, pos.y, pos.z,
                         realmotion.x * 10 + pos.x, realmotion.y * 10 + pos.y,
                         realmotion.z * 10 + pos.z, 0, 0, 1, 1);
-            }
+            }*/
 
-                /*BoundingBoxPool.getINSTANCE().openSubPool();
-                DynamXContext.getPlayerToCollision().forEach((player, playerPhysicsHandler) -> {
-                    if (playerPhysicsHandler.getBodyIn() != null) {
-                        BoundingBox bb = playerPhysicsHandler.getBodyIn().boundingBox(BoundingBoxPool.get());
-                        Vector3f min = bb.getMin(Vector3fPool.get());
-                        Vector3f max = bb.getMax(Vector3fPool.get());
-                        RenderGlobal.drawBoundingBox(min.x, min.y, min.z, max.x, max.y, max.z, 0.2f, 0.5f, 0.7f, 1);
-                    }
-                });
-                BoundingBoxPool.getINSTANCE().closeSubPool();*/
-            /*GlStateManager.rotate(-entity.rotationYaw, 0, 1, 0);
-            GlStateManager.rotate(-entity.rotationPitch, 1, 0, 0);
-            GlStateManager.rotate(entity.rotationRoll, 0, 0, 1);*/
             /* End of Aymeric's collision debug*/
         }
         GlStateManager.enableLighting();

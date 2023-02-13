@@ -248,14 +248,15 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, ITic
             for (AxisAlignedBB shape : getUnrotatedCollisionBoxes()) {
                 MutableBoundingBox b = new MutableBoundingBox(shape);
                 b.scale(relativeScale.x != 0 ? relativeScale.x : 1, relativeScale.y != 0 ? relativeScale.y : 1, relativeScale.z != 0 ? relativeScale.z : 1);
-                //b.offset(-0.5f, -0.5f, -0.5f);
+                b.offset(-0.5f, -0.5f, -0.5f);
                 b.offset(relativeTranslation.x, relativeTranslation.y, relativeTranslation.z);
                 unrotatedCollisionsCache.add(b.toBB());
             }
             Quaternion rotation = DynamXGeometry.eulerToQuaternion((blockObjectInfo.getRotation().z - relativeRotation.z),
                     ((blockObjectInfo.getRotation().y - relativeRotation.y + getRotation() * 22.5f) % 360),
                     (blockObjectInfo.getRotation().x + relativeRotation.x));
-            cachedCollisions = new CollisionInfo(unrotatedCollisionsCache, new Vector3f(pos.getX(), pos.getY(), pos.getZ()), rotation);
+            System.out.println("NEW COLL WITH R " + rotation);
+            cachedCollisions = new CollisionInfo(unrotatedCollisionsCache, new Vector3f(pos.getX(), pos.getY(), pos.getZ()).add(0.5f, 0.5f, 0.5f), rotation);
             //cachedCollisions = new CollisionInfo(Arrays.asList(new MutableBoundingBox(Block.FULL_BLOCK_AABB).offset(-0.5f, -0.5f, -0.5f)), new Vector3f(pos.getX()+0.5f, pos.getY()+0.5f, pos.getZ()+0.5f), rotation);
         }
         if(cachedCollisions == null) //IZNOGOOD

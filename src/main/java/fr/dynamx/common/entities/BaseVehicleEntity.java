@@ -10,7 +10,6 @@ import fr.dynamx.client.renders.RenderPhysicsEntity;
 import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.contentpack.parts.PartShape;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
-import fr.dynamx.common.handlers.CollisionInfo;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.DynamXUtils;
@@ -91,12 +90,11 @@ public abstract class BaseVehicleEntity<T extends BaseVehiclePhysicsHandler<?>> 
      * Cache
      */
     private final List<MutableBoundingBox> unrotatedBoxes = new ArrayList<>();
-    private CollisionInfo cachedCollisions;
 
     @Override
-    public CollisionInfo getCollisionInfo() {
+    public List<MutableBoundingBox> getCollisionBoxes() {
         if (getPackInfo() == null || physicsPosition == null)
-            return new CollisionInfo(new ArrayList<>(0), physicsPosition, physicsRotation);
+            return new ArrayList<>(0);
         if (unrotatedBoxes.size() != getPackInfo().getPartShapes().size()) {
             unrotatedBoxes.clear();
             for (PartShape shape : getPackInfo().getPartShapes()) {
@@ -112,8 +110,7 @@ public abstract class BaseVehicleEntity<T extends BaseVehiclePhysicsHandler<?>> 
                 unrotatedBoxes.add(b);
             }
         }
-        //FIXME PAS COOL NEW
-        return new CollisionInfo(unrotatedBoxes, physicsPosition, physicsRotation);
+        return unrotatedBoxes;
     }
 
     @Override

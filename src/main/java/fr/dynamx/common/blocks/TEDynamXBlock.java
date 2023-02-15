@@ -13,13 +13,11 @@ import fr.dynamx.common.capability.DynamXChunkDataProvider;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
 import fr.dynamx.common.entities.ICollidableObject;
-import fr.dynamx.common.handlers.CollisionInfo;
 import fr.dynamx.utils.VerticalChunkPos;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
-import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
@@ -31,7 +29,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -44,9 +41,6 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, ITic
      * The cache of the block collisions, with position offset but no rotation
      */
     protected final List<MutableBoundingBox> unrotatedCollisionsCache = new ArrayList<>();
-
-    private CollisionInfo cachedCollisions;
-
     /**
      * The hitbox for (mouse) interaction with the block
      */
@@ -197,7 +191,7 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, ITic
                     }
                 }
                 //The container box corresponding to an unrotated entity, so rotate it !
-                Quaternion physicsRotation = getCollisionInfo().getRotation();
+                Quaternion physicsRotation = getCollidableRotation();
                 container = DynamXContext.getCollisionHandler().rotateBB(Vector3fPool.get(0.5f, 0, 0.5f), container, physicsRotation);
                 container.grow(0.1, 0.0, 0.1); //Grow it to avoid little glitches on the corners of the car
                 container.scale(getRelativeScale().x != 0 ? getRelativeScale().x : 1, getRelativeScale().y != 0 ? getRelativeScale().y : 1, getRelativeScale().z != 0 ? getRelativeScale().z : 1);
@@ -208,6 +202,22 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, ITic
             QuaternionPool.getINSTANCE().closeSubPool();
         }
         return boundingBoxCache;//.offset(pos);
+    }
+
+    @Override
+    public List<MutableBoundingBox> getCollisionBoxes() {
+        if (blockObjectInfo != null && unrotatedCollisionsCache.size() != getUnrotatedCollisionBoxes().size()) {
+            synchronized (unrotatedCollisionsCache) {
+                for (MutableBoundingBox shape : getUnrotatedCollisionBoxes()) {
+                    MutableBoundingBox b = new MutableBoundingBox(shape);
+                    b.scale(relativeScale.x != 0 ? relativeScale.x : 1, relativeScale.y != 0 ? relativeScale.y : 1, relativeScale.z != 0 ? relativeScale.z : 1);
+                    b.offset(pos.getX() - 0.5, pos.getY(), pos.getZ() - 0.5);
+                    b.offset(relativeTranslation.x, relativeTranslation.y, relativeTranslation.z);
+                    unrotatedCollisionsCache.add(b);
+                }
+            }
+        }
+        return unrotatedCollisionsCache;
     }
 
     /**
@@ -235,7 +245,6 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, ITic
      * Will provoke lag if you call this each tick
      */
     public void markCollisionsDirty() {
-        cachedCollisions = null;
         boundingBoxCache = null;
         unrotatedCollisionsCache.clear();
         if (world != null && DynamXContext.usesPhysicsWorld(world)) {
@@ -248,25 +257,15 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, ITic
     }
 
     @Override
-    public CollisionInfo getCollisionInfo() {
-        if (blockObjectInfo != null && unrotatedCollisionsCache.size() != getUnrotatedCollisionBoxes().size()) {
-            synchronized (unrotatedCollisionsCache) {
-                for (MutableBoundingBox shape : getUnrotatedCollisionBoxes()) {
-                    MutableBoundingBox b = new MutableBoundingBox(shape);
-                    b.scale(relativeScale.x != 0 ? relativeScale.x : 1, relativeScale.y != 0 ? relativeScale.y : 1, relativeScale.z != 0 ? relativeScale.z : 1);
-                    b.offset(pos.getX(), pos.getY(), pos.getZ());
-                    b.offset(relativeTranslation.x, relativeTranslation.y, relativeTranslation.z);
-                    unrotatedCollisionsCache.add(b);
-                }
-            }
-            Quaternion rotation = DynamXGeometry.eulerToQuaternion((blockObjectInfo.getRotation().z - relativeRotation.z),
-                    ((blockObjectInfo.getRotation().y - relativeRotation.y + getRotation() * 22.5f) % 360),
-                    (blockObjectInfo.getRotation().x + relativeRotation.x));
-            cachedCollisions = new CollisionInfo(unrotatedCollisionsCache, new Vector3f(pos.getX()+0.5f, pos.getY()+0.5f, pos.getZ()+0.5f), rotation);
-        }
-        if(blockObjectInfo == null || true)
-            cachedCollisions = new CollisionInfo(Arrays.asList(new MutableBoundingBox(Block.FULL_BLOCK_AABB).offset(pos.getX(), pos.getY(), pos.getZ())), new Vector3f(pos.getX()+0.5f, pos.getY()+0.5f, pos.getZ()+0.5f), Quaternion.IDENTITY);
-        return cachedCollisions;
+    public Quaternion getCollidableRotation() {
+        return blockObjectInfo == null ? QuaternionPool.get(0, 0, 0, 1) : DynamXGeometry.eulerToQuaternion((blockObjectInfo.getRotation().z - relativeRotation.z),
+                ((blockObjectInfo.getRotation().y - relativeRotation.y + getRotation() * 22.5f) % 360),
+                (blockObjectInfo.getRotation().x + relativeRotation.x));
+    }
+
+    @Override
+    public Vector3f getCollisionOffset() {
+        return Vector3fPool.get(-0.5f, 0, -0.5f);
     }
 
     @Override

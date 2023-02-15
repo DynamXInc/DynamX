@@ -9,7 +9,6 @@ import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.network.sync.AttachedBodySynchronizer;
-import fr.dynamx.common.handlers.CollisionInfo;
 import fr.dynamx.common.network.sync.variables.EntityTransformsVariable;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
@@ -190,12 +189,12 @@ public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> imple
     }
 
     @Override
-    public CollisionInfo getCollisionInfo() {
+    public List<MutableBoundingBox> getCollisionBoxes() {
         unrotatedBoxes.clear();
         MutableBoundingBox b = new MutableBoundingBox(-.4, -1, -.4, .4, .9, .4);
         b.offset(physicsPosition);
         unrotatedBoxes.add(b);
-        return new CollisionInfo(unrotatedBoxes, physicsPosition, physicsRotation);
+        return unrotatedBoxes;
     }
 
     @Override

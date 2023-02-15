@@ -13,7 +13,6 @@ import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.common.entities.modules.MovableModule;
-import fr.dynamx.common.handlers.CollisionInfo;
 import fr.dynamx.common.physics.entities.PackEntityPhysicsHandler;
 import fr.dynamx.common.physics.joints.EntityJoint;
 import fr.dynamx.common.physics.joints.EntityJointsHandler;
@@ -123,15 +122,14 @@ public class DoorEntity<T extends PackEntityPhysicsHandler<PartDoor, ?>> extends
     }
 
     @Override
-    public CollisionInfo getCollisionInfo() {
+    public List<MutableBoundingBox> getCollisionBoxes() {
         if (getPackInfo() == null || physicsPosition == null)
-            return new CollisionInfo(new ArrayList<>(0), physicsPosition, physicsRotation);
+            return new ArrayList<>(0);
         List<MutableBoundingBox> list = new ArrayList<>();
         for (IShapeInfo partShape : getPackInfo().getShapes()) {
             list.add(new MutableBoundingBox(partShape.getSize()).offset(partShape.getPosition()).offset(physicsPosition));
         }
-        //FIXME PAS COOL NEW
-        return new CollisionInfo(list, physicsPosition, physicsRotation);
+        return list;
     }
 
     public DoorsModule getDoorAttachModule() {

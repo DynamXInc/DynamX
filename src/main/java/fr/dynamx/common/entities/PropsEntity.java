@@ -4,7 +4,6 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.objects.PropObject;
-import fr.dynamx.common.handlers.CollisionInfo;
 import fr.dynamx.common.physics.entities.PackEntityPhysicsHandler;
 import fr.dynamx.common.physics.entities.PropPhysicsHandler;
 import fr.dynamx.utils.DynamXConfig;
@@ -66,10 +65,13 @@ public class PropsEntity<T extends PackEntityPhysicsHandler<PropObject<?>, ?>> e
         return getPackInfo() != null && getPackInfo().getRenderDistance() >= range;
     }
 
+    /**
+     * Cache
+     */
     @Override
-    public CollisionInfo getCollisionInfo() {
+    public List<MutableBoundingBox> getCollisionBoxes() {
         if (getPackInfo() == null || physicsPosition == null)
-            return new CollisionInfo(new ArrayList<>(0), physicsPosition, physicsRotation);
+            return new ArrayList<>(0);
         if (unrotatedBoxes.size() != getPackInfo().getCollisionBoxes().size()) {
             unrotatedBoxes.clear();
             for (MutableBoundingBox shape : getPackInfo().getCollisionBoxes()) {
@@ -85,7 +87,6 @@ public class PropsEntity<T extends PackEntityPhysicsHandler<PropObject<?>, ?>> e
                 unrotatedBoxes.add(b);
             }
         }
-        //FIXME PAS COOL NEW
-        return new CollisionInfo(unrotatedBoxes, physicsPosition, physicsRotation);
+        return unrotatedBoxes;
     }
 }

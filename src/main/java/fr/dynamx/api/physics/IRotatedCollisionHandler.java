@@ -27,7 +27,7 @@ public interface IRotatedCollisionHandler {
      * @param from   The box to rotate
      * @return A new AxisAlignedBB, an axis aligned box containing the rotated input box and at the same position
      */
-    MutableBoundingBox rotateBB(Vector3f offset, Vector3f pos, AxisAlignedBB from, Quaternion rotation);
+    AxisAlignedBB rotateBB(Vector3f offset, Vector3f pos, AxisAlignedBB from, Quaternion rotation);
 
     /**
      * Rotates a mutable bounding box, creating the biggest axis aligned box containing the rotated input box

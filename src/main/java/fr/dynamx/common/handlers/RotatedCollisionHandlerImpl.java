@@ -25,8 +25,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Provides helper methods for rotated collisions and handles collisions with entities <br>
@@ -42,11 +43,11 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
     }
 
     @Override
-    public MutableBoundingBox rotateBB(Vector3f offset, Vector3f pos, AxisAlignedBB from, Quaternion rotation) {
+    public AxisAlignedBB rotateBB(Vector3f offset, Vector3f pos, AxisAlignedBB from, Quaternion rotation) {
         Vector3f tp = rotate(Vector3fPool.get(pos.x - offset.x, pos.y - offset.y, pos.z - offset.z), rotation); //get rotated offset viewed from the bullet entity with a yaw of 0
         MutableBoundingBox bb = rotateBB(pos, new MutableBoundingBox(from), rotation);
         bb.offset(Vector3fPool.get(offset.x + tp.x - pos.x, offset.y + tp.y - pos.y, offset.z + tp.z - pos.z)); //The player box is symmetric, re-put the player box next to the bullet entity, and remove box offset (pos) added by previous rotateBB call
-        return bb;
+        return bb.toBB();
     }
 
     @Override
@@ -65,9 +66,9 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
         return n;
     }
 
-    public static double eps = 0.2f;
+    public static double eps = 1e-1;
 
-    public static float calculateXOffset(MutableBoundingBox against, MutableBoundingBox other, float offsetX) {
+    public static float calculateXOffset(MutableBoundingBox against, AxisAlignedBB other, float offsetX) {
         if (other.maxY > against.minY && other.minY < against.maxY && other.maxZ > against.minZ && other.minZ < against.maxZ) {
             if (offsetX > 0.0D && other.maxX - eps <= against.minX) {
                 float d1 = (float) (against.minX - other.maxX);
@@ -89,7 +90,7 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
         }
     }
 
-    public static float calculateYOffset(MutableBoundingBox against, MutableBoundingBox other, float offsetY) {
+    public static float calculateYOffset(MutableBoundingBox against, AxisAlignedBB other, float offsetY) {
         if (other.maxX > against.minX && other.minX < against.maxX && other.maxZ > against.minZ && other.minZ < against.maxZ) {
             if (offsetY > 0.0D && other.maxY - eps <= against.minY) {
                 float d1 = (float) (against.minY - other.maxY);
@@ -111,7 +112,7 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
         }
     }
 
-    public static float calculateZOffset(MutableBoundingBox against, MutableBoundingBox other, float offsetZ) {
+    public static float calculateZOffset(MutableBoundingBox against, AxisAlignedBB other, float offsetZ) {
         if (other.maxX > against.minX && other.minX < against.maxX && other.maxY > against.minY && other.minY < against.maxY) {
             if (offsetZ > 0.0D && other.maxZ - eps <= against.minZ) {
                 float d1 = (float) (against.minZ - other.maxZ);
@@ -133,7 +134,7 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
         }
     }
 
-    private Vector3f collideWith(Entity entity, ICollidableObject with, float mx, float my, float mz, int step) {
+    private Vector3f collideWith(Entity entity, ICollidableObject with, Vector3f withPosition, float mx, float my, float mz) {
         if (entity.world.isRemote && ClientDebugSystem.enableDebugDrawing)
             VehicleDebugRenderer.PlayerCollisionsDebug.pos = entity.getPositionVector();
         float oldx = mx, oldy = my, oldz = mz;
@@ -142,7 +143,7 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
         Vector3f data = Vector3fPool.get(mx, my, mz);
         if (entity.world.isRemote && ClientDebugSystem.enableDebugDrawing)
             VehicleDebugRenderer.PlayerCollisionsDebug.motion = Vector3fPool.getPermanentVector(data);
-        Quaternion withRotation = with.getCollisionInfo().getRotation();
+        Quaternion withRotation = with.getCollidableRotation();
         Quaternion inversedWithRotation = withRotation.inverse();
         if (inversedWithRotation == null) //error when loading world
             return Vector3fPool.get(oldx, oldy, oldz);
@@ -153,15 +154,18 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
         float ox = mx, oy = my, oz = mz;
 
         List<EnumFacing> collisionFaces = new ArrayList<>();
-        List<MutableBoundingBox> list1 = with.getCollisionInfo().getCollisionBoxes();
-        MutableBoundingBox tempBB = rotateBB(with.getCollisionInfo().getPosition(), Vector3fPool.get((float) entity.posX, (float) entity.posY, (float) entity.posZ), entity.getEntityBoundingBox(), inversedWithRotation);
+        List<MutableBoundingBox> list1 = with.getCollisionBoxes();
+        AxisAlignedBB tempBB = rotateBB(withPosition, Vector3fPool.get((float) entity.posX, (float) entity.posY, (float) entity.posZ), entity.getEntityBoundingBox(), inversedWithRotation);
+        Vector3f offset = with.getCollisionOffset();
+        offset = DynamXGeometry.rotateVectorByQuaternion(offset, inversedWithRotation);
+        tempBB = tempBB.offset(offset.x, offset.y, offset.z);
+        //      if(!(with instanceof PhysicsEntity)) //idk why this is needed for blocks
+//            tempBB = tempBB.offset(-0.5f, 0, -0.5f);
         if (entity.world.isRemote && ClientDebugSystem.enableDebugDrawing) {
-            VehicleDebugRenderer.PlayerCollisionsDebug.lastTemp = tempBB.toBB();
+            VehicleDebugRenderer.PlayerCollisionsDebug.lastTemp = tempBB.grow(0);
             VehicleDebugRenderer.PlayerCollisionsDebug.rotatedmotion = Vector3fPool.getPermanentVector(data);
         }
-        if(Math.abs(entity.getEntityBoundingBox().minY - tempBB.minY) < 0.1)
-            tempBB.minY = entity.getEntityBoundingBox().minY+0.01f;
-        if (step == 0 || step == 1)
+        //if (my != 0.0D)
         {
             int k = 0;
             for (int l = list1.size(); k < l; ++k) {
@@ -177,7 +181,7 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
             if (my != 0)
                 tempBB = tempBB.offset(0, my, 0);
         }
-        if (step == 0 || step == 2)
+        //if (mx != 0.0D)
         {
             int j5 = 0;
             for (int l5 = list1.size(); j5 < l5; ++j5) {
@@ -193,7 +197,7 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
             if (mx != 0)
                 tempBB = tempBB.offset(mx, 0, 0);
         }
-        if (step == 0 || step == 3)
+        //if (mz != 0.0D)
         {
             int k5 = 0;
             for (int i6 = list1.size(); k5 < i6; ++k5) {
@@ -221,7 +225,6 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
             /*if(Math.abs(data.x) > Math.abs(oldx))
                 data.x = oldx;
             else */
-            float eps = 0.1f;
             if (Math.abs(data.x - oldx) < eps / 5)
                 data.x = oldx;
             /*if(Math.abs(data.y) > Math.abs(oldy))
@@ -264,7 +267,7 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
                                     break;
                                 case UP:
                                     if (collidingWith.canPlayerStandOnTop()) {
-                                        Vector3f offset = Vector3fPool.get((float) (entity.posX - collidingWith.posX + data.x), (float) (entity.posY - collidingWith.posY + data.y), (float) (entity.posZ - collidingWith.posZ + data.z));
+                                        offset = Vector3fPool.get((float) (entity.posX - collidingWith.posX + data.x), (float) (entity.posY - collidingWith.posY + data.y), (float) (entity.posZ - collidingWith.posZ + data.z));
                                         offset = rotate(offset, inversedWithRotation);
                                         offset = Vector3fPool.getPermanentVector(offset); //We don't want an instance from the pool
                                         //System.out.println("Collision point for " + collisionFaces.get(0) + " at " + offsetv);
@@ -297,14 +300,14 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
     }
 
     /**
-     * TODO UPDATE DOC
-     * Gets all the {@link CollisionInfo} of all {@link ICollidableObject} TileEntities in the given bounding box
+     * Gets all the {@link ICollidableObject} TileEntities in the given bounding box
      *
      * @param world The world
      * @param inBox The box where we search the {@link ICollidableObject}
-     * @param result The {@link CollisionInfo} of all {@link ICollidableObject} {@link TileEntity} inside of the box
+     * @return The {@link ICollidableObject} {@link TileEntity} inside of the box
      */
-    private void getCollidableTileEntities(World world, MutableBoundingBox inBox, List<CollisionInfo> result) {
+    private PooledHashMap<Vector3f, ICollidableObject> getCollidableTileEntities(World world, MutableBoundingBox inBox) {
+        PooledHashMap<Vector3f, ICollidableObject> entities = HashMapPool.get();
         BlockPos.MutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain();
         Chunk lastChunk = null;
         Vector3f radius = inBox.getSize().divideLocal(2);
@@ -318,12 +321,13 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
                         lastChunk = world.getChunk(pos);
                         for (Map.Entry<BlockPos, TileEntity> te : lastChunk.getTileEntityMap().entrySet()) {
                             if (te.getValue() instanceof ICollidableObject && inBox.contains(te.getKey()))
-                                result.add(((ICollidableObject) te.getValue()).getCollisionInfo());
+                                entities.put(Vector3fPool.get(te.getKey().getX(), te.getKey().getY(), te.getKey().getZ()), (ICollidableObject) te.getValue());
                         }
                     }
                 }
             }
         }
+        return entities;
     }
 
     private boolean motionChanged;
@@ -333,10 +337,10 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
         return motionChanged;
     }
 
-    private final ThreadLocal<List<CollisionInfo>> collisions = ThreadLocal.withInitial(LinkedList::new);
-
     @Override
     public double[] handleCollisionWithBulletEntities(Entity entity, double mx, double my, double mz) {
+        //if(true)
+        //return new double[] {mx, my, mz};
         double icollidableCheckRadius = entity instanceof EntityPlayer ? DynamXConfig.blockCollisionRadius : 0;
         AxisAlignedBB copy = entity.getEntityBoundingBox().grow(0);
 
@@ -370,63 +374,39 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
         }
 
         motionChanged = false;
-        if (entity instanceof EntityLivingBase)
+        if (entity instanceof EntityLivingBase) // && !(entity instanceof PhysicsEntity))
         {
-            Vector3fPool.openPool();
-            QuaternionPool.openPool();
-            List<CollisionInfo> collisions = this.collisions.get();
-            // get TEs
-            getCollidableTileEntities(entity.world, new MutableBoundingBox(entity.getEntityBoundingBox()).grow(icollidableCheckRadius), collisions);
-            // get entities
-            List<CollisionInfo> entities = entity.world.getEntitiesWithinAABB(PhysicsEntity.class, entity.getEntityBoundingBox().grow(icollidableCheckRadius)).stream().map(ICollidableObject::getCollisionInfo).collect(Collectors.toList());
-            collisions.addAll(entities);
-            // do collide
-            float castx = (float) nx, casty = (float) ny, castz = (float) nz;
-            MutableBoundingBox tempBB = new MutableBoundingBox(entity.getEntityBoundingBox());
-            if (ny != 0) {
-                for(CollisionInfo collision : collisions) {
-                    float move = collision.collideY(this, entity, tempBB, casty);
-                    if(move != casty) {
-                        casty = move;
-                        ny = move;
-                        motionChanged = true;
-                    }
+            PooledHashMap<Vector3f, ICollidableObject> collidableEntities = getCollidableTileEntities(entity.world, new MutableBoundingBox(entity.getEntityBoundingBox()).grow(icollidableCheckRadius));
+            for (Map.Entry<Vector3f, ICollidableObject> e : collidableEntities.entrySet()) {
+                //System.out.println("Input "+mx+" "+my+" "+mz+" "+nx+" "+ny+" "+nz+" "+entity.onGround+" "+entity.collidedVertically+" "+e.physicsPosition);
+                Vector3fPool.openPool();
+                QuaternionPool.openPool();
+                float castx = (float) nx, casty = (float) ny, castz = (float) nz;
+                Vector3f n = collideWith(entity, e.getValue(), e.getKey(), castx, casty, castz);
+                if (castx != n.x) {
+                    nx = n.x;
+                    motionChanged = true;
                 }
-                if (ny != 0)
-                    tempBB = tempBB.offset(0, ny, 0);
-            }
-            if (nx != 0) {
-                for(CollisionInfo collision : collisions) {
-                    float move = collision.collideX(this, entity, tempBB, castx);
-                    if(move != castx) {
-                        castx = move;
-                        nx = move;
-                        motionChanged = true;
-                    }
+                if (casty != n.y) {
+                    motionChanged = true;
+                    ny = n.y;
                 }
-                if (nx != 0)
-                    tempBB = tempBB.offset(nx, 0, 0);
-            }
-            if (nz != 0) {
-                for(CollisionInfo collision : collisions) {
-                    float move = collision.collideZ(this, entity, tempBB, castz);
-                    if(move != castz) {
-                        castz = move;
-                        nz = move;
-                        motionChanged = true;
-                    }
+                if (castz != n.z) {
+                    motionChanged = true;
+                    nz = n.z;
                 }
+                QuaternionPool.closePool();
+                Vector3fPool.closePool();
             }
-            collisions.clear();
-            QuaternionPool.closePool();
-            Vector3fPool.closePool();
-            /*for (PhysicsEntity e : entities) {
+            collidableEntities.release();
+            List<PhysicsEntity> entities = entity.world.getEntitiesWithinAABB(PhysicsEntity.class, entity.getEntityBoundingBox().grow(icollidableCheckRadius));
+            for (PhysicsEntity e : entities) {
                 if (!DynamXContext.getPlayerPickingObjects().containsValue(e.getEntityId())) {
                     //System.out.println("Input "+mx+" "+my+" "+mz+" "+nx+" "+ny+" "+nz+" "+entity.onGround+" "+entity.collidedVertically+" "+e.physicsPosition);
                     Vector3fPool.openPool();
                     QuaternionPool.openPool();
-                    castx = (float) nx; casty = (float) ny; castz = (float) nz;
-                    Vector3f n = collideWith(entity, e, castx, casty, castz, 0);
+                    float castx = (float) nx, casty = (float) ny, castz = (float) nz;
+                    Vector3f n = collideWith(entity, e, e.physicsPosition, castx, casty, castz);
                     if (castx != n.x) {
                         nx = n.x;
                         motionChanged = true;
@@ -442,8 +422,10 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
                     QuaternionPool.closePool();
                     Vector3fPool.closePool();
                 }
-            }*/
+            }
         }
+        //if(entity.world.isRemote && entity instanceof EntityPlayer)
+        //System.out.println("Got motiin "+nx+" "+ny+" "+nz);
         my = ny;
         mx = nx;
         mz = nz;
@@ -453,9 +435,16 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
                 for (int l = list1.size(); k < l; ++k) {
                     my = (list1.get(k)).calculateYOffset(entity.getEntityBoundingBox(), my);
                 }
+                /*if(my != ny)
+                {
+                    mx = 0;
+                    my = 0;
+                    mz = 0;
+                }*/
             }
             if (my != 0) {
                 entity.setEntityBoundingBox(entity.getEntityBoundingBox().offset(0.0D, min(my, ny), 0.0D));
+                //my = min(my, ny);
             }
         }
         if (mx != 0.0D) {
@@ -464,9 +453,15 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
                 for (int l5 = list1.size(); j5 < l5; ++j5) {
                     mx = (list1.get(j5)).calculateXOffset(entity.getEntityBoundingBox(), mx);
                 }
+                /*if(mx != nx)
+                {
+                    mx = 0;
+                    mz = 0;
+                }*/
             }
             if (mx != 0.0D) {
                 entity.setEntityBoundingBox(entity.getEntityBoundingBox().offset(min(mx, nx), 0.0D, 0.0D));
+                //mx = min(mx, nx);
             }
         }
         if (mz != 0.0D) {
@@ -475,9 +470,15 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
                 for (int i6 = list1.size(); k5 < i6; ++k5) {
                     mz = (list1.get(k5)).calculateZOffset(entity.getEntityBoundingBox(), mz);
                 }
+                /*if(mz != nz)
+                {
+                    mx = 0;
+                    mz = 0;
+                }*/
             }
             if (mz != 0.0D) {
                 entity.setEntityBoundingBox(entity.getEntityBoundingBox().offset(0.0D, 0.0D, min(mz, nz)));
+                //mz = min(mz, nz);
             }
         }
         return new double[]{mx, my, mz};

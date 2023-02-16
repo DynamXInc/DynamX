@@ -10,14 +10,13 @@ import lombok.Getter;
 import lombok.Setter;
 import net.minecraftforge.common.MinecraftForge;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Objects;
 
 public class CollisionsHandler {
 
     @Getter
-    private static final List<CollisionInfo> CACHED_COLLISIONS = new ArrayList<>();
+    private static final HashSet<CollisionInfo> CACHED_COLLISIONS = new HashSet<>();
 
     @Getter
     @Setter
@@ -33,8 +32,7 @@ public class CollisionsHandler {
     public static void handleCollision(IPhysicsWorld physicsWorld, PhysicsCollisionEvent collisionEvent, BulletShapeType<?> bodyA, BulletShapeType<?> bodyB) {
         if (bodyA.getType().isEntity() && bodyB.getType().isEntity() || bodyA.getType().isEntity() && bodyB.getType().isTerrain() || bodyA.getType().isTerrain() && bodyB.getType().isEntity()) {
             CollisionInfo info = new CollisionInfo(physicsWorld, bodyA, bodyB, EXPIRATION_TIME, collisionEvent);
-            if (!CACHED_COLLISIONS.contains(info)) {
-                CACHED_COLLISIONS.add(info);
+            if (CACHED_COLLISIONS.add(info)) {
                 info.handleCollision();
             }
         }

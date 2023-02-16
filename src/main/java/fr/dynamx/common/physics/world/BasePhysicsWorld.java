@@ -80,6 +80,7 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
             public void onContactEnded(long manifoldId) {
             }
         };
+        dynamicsWorld.setForceUpdateAllAabbs(false); // only tick the aabbs from the CollisionObjects when it is active
         manager = new PhysicsWorldTerrain(this, mcWorld, isRemoteWorld);
     }
 

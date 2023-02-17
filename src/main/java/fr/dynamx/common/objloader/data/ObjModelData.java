@@ -1,7 +1,7 @@
 package fr.dynamx.common.objloader.data;
 
 import com.jme3.math.Vector3f;
-import fr.aym.mps.IMpsClassLoader;
+import fr.aym.acslib.api.services.mps.IMpsClassLoader;
 import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.ContentPackLoader;

@@ -3,13 +3,15 @@ package fr.dynamx.common.physics.utils;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.bullet.joints.PhysicsJoint;
-import com.jme3.bullet.objects.PhysicsVehicle;
+import com.jme3.bullet.objects.PhysicsRigidBody;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.entities.PhysicsEntity;
 
 import javax.annotation.Nullable;
+import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
@@ -49,14 +51,14 @@ public class PhysicsWorldOperation<A> {
      * @param joints        The cache of added joints
      * @param entities      The cache of added entities
      */
-    public void execute(PhysicsSpace dynamicsWorld,  Set<PhysicsJoint> joints, Collection<PhysicsEntity<?>> entities) {
-        if(object != null) {
+    public void execute(PhysicsSpace dynamicsWorld, Set<PhysicsJoint> joints, Collection<PhysicsEntity<?>> entities) {
+        if (object != null) {
             switch (operation) {
                 case ADD_VEHICLE:
                     if (dynamicsWorld.getVehicleList().contains(object))
                         DynamXMain.log.fatal("PhysicsVehicle " + object + " is already in the physics world, please report this !");
                 case ADD_OBJECT:
-                    if (!dynamicsWorld.getRigidBodyList().contains(object))
+                    if (!dynamicsWorld.contains((PhysicsCollisionObject) object))
                         dynamicsWorld.addCollisionObject((PhysicsCollisionObject) object);
                     else
                         DynamXMain.log.fatal("PhysicsCollisionObject " + object + " is already registered, please report this !");
@@ -65,7 +67,7 @@ public class PhysicsWorldOperation<A> {
                     if (!dynamicsWorld.getVehicleList().contains(object))
                         DynamXMain.log.fatal("PhysicsVehicle " + object + " is not is the physics world, please report this !");
                 case REMOVE_OBJECT:
-                    if (dynamicsWorld.getRigidBodyList().contains(object))
+                    if (dynamicsWorld.contains((PhysicsCollisionObject) object))
                         dynamicsWorld.removeCollisionObject((PhysicsCollisionObject) object);
                     break;
                 case ADD_ENTITY:

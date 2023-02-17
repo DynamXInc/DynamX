@@ -52,14 +52,10 @@ public class PhysicsWorldOperation<A> {
         if (object != null) {
             switch (operation) {
                 case ADD_VEHICLE:
-                    if (dynamicsWorld.getVehicleList().contains(object))
-                        DynamXMain.log.fatal("PhysicsVehicle " + object + " is already in the physics world, please report this !");
                 case ADD_OBJECT:
                     dynamicsWorld.addCollisionObject((PhysicsCollisionObject) object);
                     break;
                 case REMOVE_VEHICLE:
-                    if (!dynamicsWorld.getVehicleList().contains(object))
-                        DynamXMain.log.fatal("PhysicsVehicle " + object + " is not is the physics world, please report this !");
                 case REMOVE_OBJECT:
                     dynamicsWorld.removeCollisionObject((PhysicsCollisionObject) object);
                     break;

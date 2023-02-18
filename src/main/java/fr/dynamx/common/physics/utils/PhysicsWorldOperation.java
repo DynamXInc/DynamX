@@ -7,7 +7,7 @@ import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.entities.PhysicsEntity;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -48,7 +48,7 @@ public class PhysicsWorldOperation<A> {
      * @param joints        The cache of added joints
      * @param entities      The cache of added entities
      */
-    public void execute(PhysicsSpace dynamicsWorld, Set<PhysicsJoint> joints, Collection<PhysicsEntity<?>> entities) {
+    public void execute(PhysicsSpace dynamicsWorld, Set<PhysicsJoint> joints, HashSet<PhysicsEntity<?>> entities) {
         if (object != null) {
             switch (operation) {
                 case ADD_VEHICLE:
@@ -60,23 +60,23 @@ public class PhysicsWorldOperation<A> {
                     dynamicsWorld.removeCollisionObject((PhysicsCollisionObject) object);
                     break;
                 case ADD_ENTITY:
-                    if (entities.contains(object))
+                    if (!entities.add((PhysicsEntity<?>) object)){
                         DynamXMain.log.fatal("Entity " + object + " is already registered, please report this !");
-                    else
-                        entities.add((PhysicsEntity<?>) object);
+                    }
                     ((PhysicsEntity<?>) object).isRegistered = 2;
                     break;
                 case REMOVE_ENTITY:
                     PhysicsEntity<?> et = (PhysicsEntity<?>) object;
                     entities.remove(et);
-                    DynamXMain.proxy.scheduleTask(et.world, () -> {
+                    Runnable task = () -> {
                         List<PhysicsEntity> physicsEntities = et.world.getEntitiesWithinAABB(PhysicsEntity.class, et.getEntityBoundingBox().expand(10, 10, 10));
-                        physicsEntities.forEach(entity -> {
+                        for (PhysicsEntity entity : physicsEntities) {
                             if (entity != et) {
                                 entity.forcePhysicsActivation();
                             }
-                        });
-                    });
+                        }
+                    };
+                    DynamXMain.proxy.scheduleTask(et.world, task);
                     break;
                 case ADD_CONSTRAINT:
                     if (object != null && !joints.contains(object)) {

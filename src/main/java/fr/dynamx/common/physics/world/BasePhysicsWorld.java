@@ -28,9 +28,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Semaphore;
@@ -45,7 +43,7 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
     protected final World mcWorld;
 
     protected final Set<PhysicsJoint> joints = new HashSet<>();
-    protected final List<PhysicsEntity<?>> entities = new ArrayList<>();
+    protected final HashSet<PhysicsEntity<?>> entities = new HashSet<>();
 
     protected final ConcurrentLinkedQueue<Runnable> scheduledTasks = new ConcurrentLinkedQueue<>();
     protected final ConcurrentLinkedQueue<PhysicsWorldOperation<?>> operations = new ConcurrentLinkedQueue<>();

@@ -3,7 +3,6 @@ package fr.dynamx.utils.client;
 import com.google.common.collect.Maps;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
-import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.contentpack.type.ObjectInfo;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
@@ -23,6 +22,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.io.*;
+import java.util.HashMap;
 import java.util.Map;
 
 import static fr.dynamx.common.DynamXMain.log;
@@ -30,6 +30,8 @@ import static fr.dynamx.utils.DynamXConstants.ID;
 
 @SideOnly(Side.CLIENT)
 public class ContentPackUtils {
+    private static final Map<String, String> packToLangFile = new HashMap<>();
+
     /**
      * Creates the json model files for this object, in the corresponding pack, if not already present
      */
@@ -105,49 +107,52 @@ public class ContentPackUtils {
         return false;
     }
 
+    public static File getPackLangFile(File dynxDir, String packName) throws IOException {
+        File langPath = new File(dynxDir, packName + "/assets/" + ID + "/lang/");
+        if (!langPath.exists()) {
+            langPath.mkdirs();
+        }
+        if(packToLangFile.containsKey(packName)) {
+            return new File(langPath, packToLangFile.get(packName));
+        }
+        File mcmetaFile = new File(dynxDir, packName + "/pack.mcmeta");
+        File langUsFile = new File(langPath, "en_us.lang");
+        File langUSFile = new File(langPath, "en_US.lang");
+        if(mcmetaFile.exists()) {
+            packToLangFile.put(packName, "en_us.lang");
+            if(existsCaseSensitive(langPath, "en_US.lang")) {
+                log.info("[AUTO-LANG] Renaming " + langUSFile.getPath() + " to " + langUsFile.getPath());
+                if(!langUSFile.renameTo(langUsFile))
+                    log.warn("[AUTO-LANG] Failed to rename");
+                return langUSFile;
+            } else {
+                langUsFile.createNewFile();
+                return langUsFile;
+            }
+        } else {
+            packToLangFile.put(packName, "en_US.lang");
+            if(existsCaseSensitive(langPath, "en_us.lang")) {
+                log.info("[AUTO-LANG] Renaming " + langUsFile.getPath() + " to " + langUSFile.getPath());
+                if(!langUsFile.renameTo(langUSFile))
+                    log.warn("[AUTO-LANG] Failed to rename");
+                return langUsFile;
+            } else {
+                langUSFile.createNewFile();
+                return langUSFile;
+            }
+        }
+    }
+
     /**
      * Writes the translation of this object in the pack lang file, if not already present in the translation file
      */
     @SuppressWarnings("unchecked")
-    public static <T extends ObjectInfo<?> & ISubInfoTypeOwner<?>> void addMissingLangFile(File dynxDir, IInfoOwner<T> item, int metadata) {
-        ObjectInfo<T> objectInfo = (ObjectInfo<T>) item.getInfo();
-        String translation = objectInfo.getTranslationKey(item, metadata) + ".name";
-        if (!I18n.hasKey(translation)) {
-            File langPath = new File(dynxDir, objectInfo.getPackName() + "/assets/" + ID + "/lang/");
-            if (!langPath.exists()) {
-                langPath.mkdirs();
-            }
+    public static void addMissingLangFile(File dynxDir, String packName, String translationKey, String translationValue) {
+        if (!I18n.hasKey(translationKey)) {
             try {
-                File mcmetaFile = new File(dynxDir, objectInfo.getPackName() + "/pack.mcmeta");
-                File langUsFile = new File(langPath, "en_us.lang");
-                File langUSFile = new File(langPath, "en_US.lang");
-                File currentFile = null;
-
-                if(existsCaseSensitive(langPath, "en_us.lang") || existsCaseSensitive(langPath, "en_US.lang")){
-                    currentFile = existsCaseSensitive(langPath, "en_us.lang") ? langUsFile : langUSFile;
-                }
-                if(currentFile != null){
-                    if(mcmetaFile.exists()){
-                        if(currentFile.getName().equals("en_US.lang")){
-                            currentFile.renameTo(langUsFile);
-                        }
-                    }else{
-                        if(currentFile.getName().equals("en_us.lang")){
-                            currentFile.renameTo(langUSFile);
-                        }
-                    }
-                }else{
-                    if(mcmetaFile.exists()){
-                        currentFile = langUsFile;
-                    }else{
-                        currentFile = langUSFile;
-                    }
-                    currentFile.createNewFile();
-                }
-
-                writeInLangFile(objectInfo, currentFile, item, metadata);
+                writeInLangFile(getPackLangFile(dynxDir, packName), translationKey+"="+translationValue);
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("Failed to add missing translation for " + packName + " : " +  translationKey, e);
             }
         }
     }
@@ -155,10 +160,8 @@ public class ContentPackUtils {
     /**
      * Writes the translation of this object in the given lang file, if not already present in the file
      */
-    public static <T extends ObjectInfo<?> & ISubInfoTypeOwner<?>> void writeInLangFile(ObjectInfo<T> objectInfo, File langFile, IInfoOwner<T> item, int metadata) throws IOException {
+    public static void writeInLangFile(File langFile, String translation) throws IOException {
         BufferedReader inputStream = new BufferedReader(new InputStreamReader(new FileInputStream(langFile)));
-        String translation = objectInfo.getTranslationKey(item, metadata) + ".name=" + objectInfo.getTranslatedName(item, metadata);
-
         if (inputStream.lines().noneMatch(s -> s.contains(translation.substring(0, translation.lastIndexOf("="))))) {
             BufferedWriter out = new BufferedWriter(new FileWriter(langFile, true));
             out.write(translation + "\n");

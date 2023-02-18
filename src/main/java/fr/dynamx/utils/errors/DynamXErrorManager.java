@@ -139,5 +139,6 @@ public class DynamXErrorManager {
         registerErrorFormatter(MODEL_ERRORS, "obj_error", FORMATTER_SINGLE_ERROR);
         registerErrorFormatter(MODEL_ERRORS, "obj_none_material", FORMATTER_MULTIPLE_ERROR_ONE_LI);
         registerErrorFormatter(PACKS__ERRORS, "deprecated_light_format", FORMATTER_MULTIPLE_ERROR);
+        registerErrorFormatter(PACKS__ERRORS, "wheel_invalid_suspaxis", FORMATTER_MULTIPLE_ERROR);
     }
 }

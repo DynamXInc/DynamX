@@ -52,20 +52,12 @@ public class PhysicsWorldOperation<A> {
         if (object != null) {
             switch (operation) {
                 case ADD_VEHICLE:
-                    if (dynamicsWorld.getVehicleList().contains(object))
-                        DynamXMain.log.fatal("PhysicsVehicle " + object + " is already in the physics world, please report this !");
                 case ADD_OBJECT:
-                    if (!dynamicsWorld.contains((PhysicsCollisionObject) object))
-                        dynamicsWorld.addCollisionObject((PhysicsCollisionObject) object);
-                    else
-                        DynamXMain.log.fatal("PhysicsCollisionObject " + object + " is already registered, please report this !");
+                    dynamicsWorld.addCollisionObject((PhysicsCollisionObject) object);
                     break;
                 case REMOVE_VEHICLE:
-                    if (!dynamicsWorld.getVehicleList().contains(object))
-                        DynamXMain.log.fatal("PhysicsVehicle " + object + " is not is the physics world, please report this !");
                 case REMOVE_OBJECT:
-                    if (dynamicsWorld.contains((PhysicsCollisionObject) object))
-                        dynamicsWorld.removeCollisionObject((PhysicsCollisionObject) object);
+                    dynamicsWorld.removeCollisionObject((PhysicsCollisionObject) object);
                     break;
                 case ADD_ENTITY:
                     if (!entities.add((PhysicsEntity<?>) object)){

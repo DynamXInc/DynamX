@@ -15,8 +15,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 
@@ -432,7 +430,27 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
             float castx = (float) nx, casty = (float) ny, castz = (float) nz;
             MutableBoundingBox tempBB = new MutableBoundingBox(entity.getEntityBoundingBox());
 
-            MutableBoundingBox finalTempBB = tempBB;
+            List<OBB> colls = new ArrayList<>();
+            for(CollisionInfo c : collisions) {
+                for(MutableBoundingBox bb : c.getCollisionBoxes()) {
+                    colls.add(new OBB(bb.getPosition(), bb.getSize(), c.getRotation()));
+                }
+            }
+            Vector3f origin = Vector3fPool.get(castx, casty, castz);
+            Vector3f motion = OBB.CollisionDetector.AABBMotionWithOBBs(origin, tempBB.getPosition().subtract(tempBB.getSize()), tempBB.getPosition().add(tempBB.getSize()), colls);//OOBBCollision.calculateNewMotion(Vector3fPool.get(castx, casty, castz), tempBB.getPosition(), tempBB.getSize(), colls);
+            castx = motion.x;
+            casty = motion.y;
+            castz = motion.z;
+            float eps = 0.01f;
+            if (Math.abs(castx - nx) > eps / 5)
+                nx = castx;
+            if (Math.abs(casty - ny) > eps / 5)
+                ny = casty;
+            if (Math.abs(castz - nz) > eps / 5)
+                nz = castz;
+
+            motionChanged = true;
+            /*MutableBoundingBox finalTempBB = tempBB;
             collisions.sort((c1, c2) -> {
                 if(c1 == c2)
                     return 0;
@@ -582,6 +600,8 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
                 }
             }*/
         }
+        if(entity instanceof EntityPlayer && entity.world.isRemote)
+            System.out.println("PRE FINAL " + mx + " " + my + " " + mz+" "+ny);
         my = ny;
         mx = nx;
         mz = nz;
@@ -618,8 +638,8 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
                 entity.setEntityBoundingBox(entity.getEntityBoundingBox().offset(0.0D, 0.0D, min(mz, nz)));
             }
         }
-        //if(entity instanceof EntityPlayer && entity.world.isRemote && (mx != 0 || mz != 0))
-          //  System.out.println("FINAL " + mx + " " + my + " " + mz);
+        if(entity instanceof EntityPlayer && entity.world.isRemote)
+            System.out.println("FINAL " + mx + " " + my + " " + mz);
         return new double[]{mx, my, mz};
     }
 }

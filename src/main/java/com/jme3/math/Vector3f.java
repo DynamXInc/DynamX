@@ -31,6 +31,8 @@
  */
 package com.jme3.math;
 
+import fr.dynamx.utils.optimization.Vector3fPool;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -648,5 +650,10 @@ public final class Vector3f implements Cloneable, java.io.Serializable {
                 return;
         }
         throw new IllegalArgumentException("index must be either 0, 1 or 2");
+    }
+
+    public Vector3f mult(float extent) {
+        //TODO CLEAN :o :o :o
+        return mult(Vector3fPool.get(extent, extent, extent), Vector3fPool.get());
     }
 }

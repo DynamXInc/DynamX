@@ -43,7 +43,10 @@ public class FileTerrainCache implements ITerrainCache {
     protected Set<VerticalChunkPos> dirtyChunks = ConcurrentHashMap.newKeySet();
 
     public FileTerrainCache(World world) {
-        storageDir = new File(world.getSaveHandler().getWorldDirectory(), "DnxChunks");
+        World serverWorld = world.isRemote ? DynamXMain.proxy.getServerWorld() : world;
+        assert serverWorld != null : "Terrain cannot be locally saved";
+        assert serverWorld.getSaveHandler().getWorldDirectory() != null : "World save dir not found";
+        storageDir = new File(serverWorld.getSaveHandler().getWorldDirectory(), "DnxChunks");
         storageDir.mkdirs();
 
         File f = new File(storageDir, "dnxregion_main.dnx");

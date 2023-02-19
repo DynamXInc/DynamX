@@ -29,10 +29,17 @@ public class MaterialTexture {
 
     public void uploadTexture(TextureManager man) {
         ITextureObject obj = man.getTexture(path);
-        if(obj == null) //happens sometimes o_o
+        if (obj == null) { // happens sometimes o_0
             loadTexture(man);
-        if (obj instanceof ThreadedTexture)
-            ((ThreadedTexture) obj).uploadTexture(man);
-        glTextureId = obj.getGlTextureId();
+            obj = man.getTexture(path);
+        }
+        if (obj != null) {
+            if (obj instanceof ThreadedTexture) {
+                ((ThreadedTexture) obj).uploadTexture(man);
+                glTextureId = obj.getGlTextureId();
+            }
+        } else {
+            System.out.println("Texture could not be uploaded because it is null");
+        }
     }
 }

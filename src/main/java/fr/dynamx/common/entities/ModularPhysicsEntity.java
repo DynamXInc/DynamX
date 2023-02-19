@@ -1,7 +1,6 @@
 package fr.dynamx.common.entities;
 
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.callbacks.ModularEntityInitCallback;
 import fr.dynamx.api.entities.callbacks.ModularEntityPhysicsInitCallback;
@@ -158,56 +157,82 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
     @Override
     public void registerSynchronizedVariables() {
         super.registerSynchronizedVariables();
-        for (IPhysicsModule<?> module : moduleList)
-            SynchronizedEntityVariableRegistry.addVarsOf(this.getSynchronizer(), module);
+        int size = moduleList.size();
+        for (int i = 0; i < size; i++) {
+            SynchronizedEntityVariableRegistry.addVarsOf(this.getSynchronizer(), moduleList.get(i));
+        }
     }
 
     @Override
     protected void readEntityFromNBT(NBTTagCompound tagCompound) {
         super.readEntityFromNBT(tagCompound);
         //Load the modules after because they are initialized in the super method
-        moduleList.forEach(m -> m.readFromNBT(tagCompound));
+        int size = moduleList.size();
+        for (int i = 0; i < size; i++) {
+            moduleList.get(i).readFromNBT(tagCompound);
+        }
     }
 
     @Override
     protected void writeEntityToNBT(NBTTagCompound tagCompound) {
-        moduleList.forEach(m -> m.writeToNBT(tagCompound));
+        int size = moduleList.size();
+        for (int i = 0; i < size; i++) {
+            moduleList.get(i).writeToNBT(tagCompound);
+        }
     }
 
     @Override
     public void onUpdate() {
         super.onUpdate();
-        updateEntityListeners.forEach(IPhysicsModule.IEntityUpdateListener::updateEntity);
+        int size = updateEntityListeners.size();
+        for (int i = 0; i < size; i++) {
+            updateEntityListeners.get(i).updateEntity();
+        }
     }
 
     @Override
     public void updateMinecraftPos() {
         super.updateMinecraftPos();
-        updateEntityPosListeners.forEach(IPhysicsModule.IEntityPosUpdateListener::updateEntityPos);
+        int size = updateEntityPosListeners.size();
+        for (int i = 0; i < size; i++) {
+            updateEntityPosListeners.get(i).updateEntityPos();
+        }
     }
 
     @Override
     public void preUpdatePhysics(boolean simulatingPhysics) {
         super.preUpdatePhysics(simulatingPhysics);
-        updatePhysicsListeners.forEach(m -> m.preUpdatePhysics(simulatingPhysics));
+        int size = updatePhysicsListeners.size();
+        for (int i = 0; i < size; i++) {
+            updatePhysicsListeners.get(i).preUpdatePhysics(simulatingPhysics);
+        }
     }
 
     @Override
     public void postUpdatePhysics(boolean simulatingPhysics) {
         super.postUpdatePhysics(simulatingPhysics);
-        updatePhysicsListeners.forEach(m -> m.postUpdatePhysics(simulatingPhysics));
+        int size = updatePhysicsListeners.size();
+        for (int i = 0; i < size; i++) {
+            updatePhysicsListeners.get(i).postUpdatePhysics(simulatingPhysics);
+        }
     }
 
     @Override
     protected void addPassenger(Entity passenger) {
         super.addPassenger(passenger);
-        moduleList.forEach(m -> m.addPassenger(passenger));
+        int size = moduleList.size();
+        for (int i = 0; i < size; i++) {
+            moduleList.get(i).addPassenger(passenger);
+        }
     }
 
     @Override
     protected void removePassenger(Entity passenger) {
         super.removePassenger(passenger);
-        moduleList.forEach(m -> m.removePassenger(passenger));
+        int size = moduleList.size();
+        for (int i = 0; i < size; i++) {
+            moduleList.get(i).removePassenger(passenger);
+        }
     }
 
     @Override

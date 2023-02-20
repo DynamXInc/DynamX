@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Base class for the two DynamX physics worlds
  */
 public abstract class BasePhysicsWorld implements IPhysicsWorld {
-    protected final PhysicsSoftSpace dynamicsWorld;
+    protected PhysicsSoftSpace dynamicsWorld;
     protected final PhysicsWorldTerrain manager;
     protected final World mcWorld;
 
@@ -56,9 +56,15 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
         Vector3fPool.openPool(); //Open a pool for the whole session, the Vector3f created here may be used forever
         TransformPool.getPool().openSubPool();
         BoundingBoxPool.getPool().openSubPool();
-
         this.mcWorld = world;
+        this.manager = new PhysicsWorldTerrain(this, mcWorld, isRemoteWorld);
+    }
 
+    /**
+     * Initializes the bullet physics world <br>
+     * Should be fired by the physics thread
+     */
+    protected void initPhysicsWorld() {
         Vector3f min = new Vector3f(Float.MIN_VALUE, Float.MIN_VALUE, Float.MIN_VALUE);
         Vector3f max = new Vector3f(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
 
@@ -81,7 +87,6 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
             }
         };
         dynamicsWorld.setForceUpdateAllAabbs(false); // only tick the aabbs from the CollisionObjects when it is active
-        manager = new PhysicsWorldTerrain(this, mcWorld, isRemoteWorld);
     }
 
     /**

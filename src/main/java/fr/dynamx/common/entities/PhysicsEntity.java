@@ -20,6 +20,7 @@ import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.joints.EntityJointsHandler;
 import fr.dynamx.common.physics.player.WalkingOnPlayerController;
 import fr.dynamx.common.physics.terrain.PhysicsEntityTerrainLoader;
+import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.PhysicsEntityException;
 import fr.dynamx.utils.debug.Profiler;
@@ -528,7 +529,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
 
     public void printReport() {
         IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(world);
-        if(terrainCache != null && usesPhysicsWorld && physicsWorld != null) {
+        if(terrainCache != null && usesPhysicsWorld && physicsWorld != null && DynamXConfig.enableDebugTerrainManager) {
             System.out.println("============");
             System.out.println("TERRAIN REPORT - " + this);
             terrainCache.printReport(physicsWorld.getTerrainManager());

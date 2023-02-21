@@ -71,6 +71,7 @@ public class BuiltinThreadedPhysicsWorld extends BasePhysicsWorld implements Run
 
     @Override
     public void run() {
+        initPhysicsWorld();
         Profiler profiler = Profiler.get();
         while (alive) {
             if (ticksLate.get() > 0) {

@@ -94,7 +94,7 @@ public class ObjectLoader<T extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C exte
         owners.add((IInfoOwner<T>) owner);
         builtinObjects.add(info);
         if (DynamXObjectLoaders.PACKS.findPackLocations(modName).isEmpty())
-            DynamXObjectLoaders.PACKS.loadItems(new PackInfo(modName, ContentPackType.BUILTIN), false);
+            DynamXObjectLoaders.PACKS.loadItems(PackInfo.forAddon(modName), false);
         return info;
     }
 

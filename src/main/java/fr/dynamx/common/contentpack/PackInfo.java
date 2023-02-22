@@ -3,7 +3,6 @@ package fr.dynamx.common.contentpack;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.aym.acslib.api.services.mps.ModProtectionContainer;
 import fr.dynamx.api.contentpack.ContentPackType;
-import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoTypeOwner;
@@ -14,6 +13,7 @@ import fr.dynamx.common.DynamXMain;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StringUtils;
 import net.minecraftforge.fml.common.versioning.DefaultArtifactVersion;
@@ -29,31 +29,50 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+/**
+ * Holds basic information about a pack <br>
+ * Version, dependencies and path
+ */
 public class PackInfo extends SubInfoTypeOwner<PackInfo> {
-    private final String originalPackName;
+    protected final String originalPackName;
+    /**
+     * The PackName configured in the pack_info.dynx file
+     */
+    @Getter
+    @Setter
     @PackFileProperty(configNames = "PackName")
-    private String packName;
+    protected String fixedPackName;
     @Getter
-    private ContentPackType packType;
+    protected String pathName;
+    @Getter
+    protected ContentPackType packType;
 
-    private final List<RequiredAddonInfo> required = new ArrayList<>();
     @Getter
-    private String pathName;
+    protected final List<RequiredAddonInfo> requiredAddons = new ArrayList<>();
 
     @Getter
     @PackFileProperty(configNames = "PackVersion", required = false)
-    private String packVersion = "<missing>";
-    @PackFileProperty(configNames = "CompatibleWithLoaderVersions", required = false)
+    protected String packVersion = "<missing>";
     @Getter
-    private String compatibleLoaderVersions;
+    @PackFileProperty(configNames = "CompatibleWithLoaderVersions", required = false)
+    protected String compatibleLoaderVersions;
     @Getter
     @PackFileProperty(configNames = "DcFileVersion", defaultValue = DynamXConstants.DC_FILE_VERSION)
-    private String dcFileVersion = DynamXConstants.DC_FILE_VERSION;
+    protected String dcFileVersion = DynamXConstants.DC_FILE_VERSION;
 
-    public PackInfo(String packName, ContentPackType packType) {
-        this.originalPackName = this.packName = packName;
+    protected PackInfo(String packName, ContentPackType packType) {
+        this.originalPackName = this.fixedPackName = packName;
         this.pathName = packName;
         this.packType = packType;
+    }
+
+    /**
+     * Creates a fake pack info for the given addon
+     * @param modId The addon/mod id
+     * @return A PackInfo for the given addon
+     */
+    public static PackInfo forAddon(String modId) {
+        return new PackInfo(modId, ContentPackType.BUILTIN);
     }
 
     public void validateVersions() {
@@ -78,7 +97,7 @@ public class PackInfo extends SubInfoTypeOwner<PackInfo> {
                 DynamXErrorManager.addError(getFixedPackName(), DynamXErrorManager.PACKS__ERRORS, "pack_requirements", ErrorLevel.HIGH, "pack_dc_version", "The model files are compiled for version " + dcFileVersion + " of the DynamX's .dc file loader (currently in version " + DynamXConstants.DC_FILE_VERSION + "). The pack will take more time to load.", null, 600);
             }
         }
-        for (RequiredAddonInfo addonInfo : required) {
+        for (RequiredAddonInfo addonInfo : requiredAddons) {
             if (hasLinkedErrors && !AddonLoader.isAddonLoaded(addonInfo.addonId)) {
                 DynamXMain.log.error("Addon " + addonInfo.addonId + " is missing for content pack " + getFixedPackName());
                 DynamXErrorManager.addError(getFixedPackName(), DynamXErrorManager.PACKS__ERRORS, "pack_requirements", ErrorLevel.FATAL, "pack_addon_dependencies", "This pack requires the addon " + addonInfo.addonId + " in order to be loaded", null, 700);
@@ -126,13 +145,6 @@ public class PackInfo extends SubInfoTypeOwner<PackInfo> {
     @Override
     public String getPackName() {
         return originalPackName;
-    }
-
-    /**
-     * @return The PackName configured in the pack_info.dynx file
-     */
-    public String getFixedPackName() {
-        return packName;
     }
 
     public InputStream readFile(ResourceLocation file) throws IOException {
@@ -186,7 +198,7 @@ public class PackInfo extends SubInfoTypeOwner<PackInfo> {
 
         @Override
         public void appendTo(PackInfo owner) {
-            owner.required.add(this);
+            owner.requiredAddons.add(this);
         }
 
         @Override
@@ -208,9 +220,9 @@ public class PackInfo extends SubInfoTypeOwner<PackInfo> {
     public String toString() {
         return "PackInfo{" +
                 "originalPackName='" + originalPackName + '\'' +
-                ", packName='" + packName + '\'' +
+                ", packName='" + fixedPackName + '\'' +
                 ", packType=" + packType +
-                ", required=" + required +
+                ", required=" + requiredAddons +
                 ", pathName='" + pathName + '\'' +
                 ", packVersion='" + packVersion + '\'' +
                 ", compatibleLoaderVersions='" + compatibleLoaderVersions + '\'' +

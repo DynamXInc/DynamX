@@ -10,13 +10,14 @@ import fr.dynamx.utils.debug.Profiler;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Loads terrain around all {@link PhysicsEntity}, so they don't fall in the ground
  */
 public class PhysicsEntityTerrainLoader implements IPhysicsTerrainLoader {
-    private static final Map<VerticalChunkPos, ChunkLoadingTicket.TicketPriority> toLoad = new HashMap<>();
-    private static final Map<VerticalChunkPos, ChunkLoadingTicket.TicketPriority> toUnLoad = new HashMap<>();
+    private static final Map<VerticalChunkPos, ChunkLoadingTicket.TicketPriority> toLoad = new ConcurrentHashMap<>();
+    private static final Map<VerticalChunkPos, ChunkLoadingTicket.TicketPriority> toUnLoad = new ConcurrentHashMap<>();
     protected int lastChunkX, lastChunkY = Integer.MAX_VALUE, lastChunkZ; //note that this precises coordinates are an edge case where the chunk won't be loaded on entity spawn :O
 
     private static final int radiusY = 3;//3

@@ -23,8 +23,13 @@ public class SlopeBuildingConfig implements ISerializable {
     }
 
     public SlopeBuildingConfig(NBTTagCompound from) {
-        if (!from.isEmpty())
-            NBTSerializer.unserialize(from, this);
+        if (!from.isEmpty()) {
+            try {
+                NBTSerializer.unserialize(from, this);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void setEnableSlabs(boolean enableSlabs) {

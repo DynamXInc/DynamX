@@ -83,7 +83,8 @@ public class SteeringWheelInfo extends SubInfoType<ModularVehicleInfo> implement
         int directingWheel = VehicleEntityProperties.getPropertyIndex(packInfo.getDirectingWheel(), VehicleEntityProperties.EnumVisualProperties.STEERANGLE);
         if (entity != null && entity.hasModuleOfType(WheelsModule.class)) {
             WheelsModule m = entity.getModuleByType(WheelsModule.class);
-            GlStateManager.rotate(-(m.prevVisualProperties[directingWheel] + (m.visualProperties[directingWheel] - m.prevVisualProperties[directingWheel]) * partialTicks), 0F, 0F, 1F);
+            if(m.visualProperties.length > directingWheel)
+                GlStateManager.rotate(-(m.prevVisualProperties[directingWheel] + (m.visualProperties[directingWheel] - m.prevVisualProperties[directingWheel]) * partialTicks), 0F, 0F, 1F);
         }
 
         //Scale it

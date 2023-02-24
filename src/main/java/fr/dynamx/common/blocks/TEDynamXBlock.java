@@ -66,7 +66,7 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, ITic
         this.blockObjectInfo = blockObjectInfo;
         if(world != null)
             world.markBlockRangeForRenderUpdate(pos, pos);
-        if(!blockObjectInfo.getLightSources().isEmpty())
+        if(blockObjectInfo != null && !blockObjectInfo.getLightSources().isEmpty())
             lightsModule = new LightsModule(blockObjectInfo);
         else
             lightsModule = null;

@@ -8,6 +8,7 @@ import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.TrailerAttachModule;
 
 /**
@@ -32,8 +33,8 @@ public class TrailerAttachInfo extends SubInfoType<ModularVehicleInfo> {
     }
 
     @Override
-    public void addModules(BaseVehicleEntity<?> entity, ModuleListBuilder modules) {
-        modules.add(new TrailerAttachModule(entity, this));
+    public void addModules(PackPhysicsEntity<?, ?> entity, ModuleListBuilder modules) {
+        modules.add(new TrailerAttachModule((BaseVehicleEntity<?>) entity, this));
     }
 
     public Vector3f getAttachPoint() {

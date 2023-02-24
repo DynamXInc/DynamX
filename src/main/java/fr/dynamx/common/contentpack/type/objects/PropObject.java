@@ -12,6 +12,7 @@ import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
+import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.CreatePackItemEvent;
 import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
@@ -20,6 +21,7 @@ import fr.dynamx.common.contentpack.loader.PackFilePropertyData;
 import fr.dynamx.common.contentpack.loader.SubInfoTypeAnnotationCache;
 import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
+import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.items.ItemProps;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
@@ -140,7 +142,8 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
                 getCollisionBoxes().add(propBox);
             }
         }
-        compoundCollisionShape.setMargin(margin);
+        if(compoundCollisionShape != null)
+            compoundCollisionShape.setMargin(margin);
         return true;
     }
 
@@ -198,5 +201,12 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
     @Override
     public String toString() {
         return "PropObject named " + getFullName();
+    }
+
+    @Override
+    public void addModules(PackPhysicsEntity<?, ?> entity, ModuleListBuilder modules) {
+        //TODO SUPPORT PARTS WITH MODULES
+        if(getOwner() != null)
+            getOwner().getLightSources().values().forEach(compoundLight -> compoundLight.addModules(entity, modules));
     }
 }

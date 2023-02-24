@@ -27,6 +27,7 @@ import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.loader.ObjectLoader;
+import fr.dynamx.common.contentpack.parts.ILightOwner;
 import fr.dynamx.common.contentpack.parts.PartLightSource;
 import fr.dynamx.common.contentpack.parts.PartShape;
 import fr.dynamx.common.contentpack.parts.PartWheel;
@@ -56,7 +57,7 @@ import java.util.*;
  * @see BaseVehicleEntity
  */
 public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, ModularVehicleInfo> implements IPhysicsPackInfo, IModelTextureVariantsSupplier,
-        ParticleEmitterInfo.IParticleEmitterContainer, IObjPackObject, IPartContainer<ModularVehicleInfo>, IShapeContainer {
+        ParticleEmitterInfo.IParticleEmitterContainer, IObjPackObject, IPartContainer<ModularVehicleInfo>, IShapeContainer, ILightOwner<ModularVehicleInfo> {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("UseHullShape".equals(key))
@@ -334,6 +335,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
         return collisionShapeDebugBuffer;
     }
 
+    @Override
     public PartLightSource getLightSource(String partName) {
         return lightSources.get(partName);
     }
@@ -416,6 +418,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
      *
      * @param source The light source to add
      */
+    @Override
     public void addLightSource(PartLightSource source) {
         lightSources.put(source.getPartName(), source);
         addDrawablePart(source);

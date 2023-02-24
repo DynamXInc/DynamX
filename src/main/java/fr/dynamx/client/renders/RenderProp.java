@@ -1,9 +1,12 @@
 package fr.dynamx.client.renders;
 
+import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.PropsEntity;
+import fr.dynamx.common.entities.modules.LightsModule;
 import fr.dynamx.utils.debug.renderer.DebugRenderer;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraftforge.common.MinecraftForge;
@@ -29,5 +32,13 @@ public class RenderProp<T extends PropsEntity<?>> extends RenderPhysicsEntity<T>
 
     @Override
     public void renderParts(T entity, float partialTicks) {
+        //TODO WIP PARTS ON PROPS
+        /*if (entity.getPackInfo().isModelValid()) {
+            entity.getPackInfo().getDrawableParts().forEach(d -> ((IDrawablePart<T>) d).drawParts(entity, this, entity.getPackInfo(), entity.getEntityTextureID(), partialTicks));
+        }*/
+        if (entity.getPackInfo().isModelValid()) {
+            if(entity.hasModuleOfType(LightsModule.class))
+                entity.getPackInfo().getOwner().getLightSources().values().forEach(d -> d.drawLights(null, entity.ticksExisted, entity.getPackInfo().getModel(), entity.getPackInfo().getScaleModifier(), entity.getModuleByType(LightsModule.class)));
+        }
     }
 }

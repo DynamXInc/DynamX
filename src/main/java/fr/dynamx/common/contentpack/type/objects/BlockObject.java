@@ -10,6 +10,8 @@ import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.events.CreatePackItemEvent;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.contentpack.loader.ObjectLoader;
+import fr.dynamx.common.contentpack.parts.ILightOwner;
+import fr.dynamx.common.contentpack.parts.PartLightSource;
 import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import lombok.Getter;
@@ -18,9 +20,11 @@ import net.minecraft.block.material.Material;
 import net.minecraftforge.common.MinecraftForge;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> implements ParticleEmitterInfo.IParticleEmitterContainer {
+public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> implements ParticleEmitterInfo.IParticleEmitterContainer, ILightOwner<T> {
     /**
      * List of owned {@link ISubInfoType}s
      */
@@ -40,6 +44,12 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
     @Getter
     protected Material material;
 
+    /**
+     * The light sources of this block
+     */
+    @Getter
+    protected final Map<String, PartLightSource> lightSources = new HashMap<>();
+
     private final List<ParticleEmitterInfo<?>> particleEmitters = new ArrayList<>();
 
     public BlockObject(String packName, String fileName) {
@@ -56,6 +66,8 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
     public boolean postLoad(boolean hot) {
         if (texturesArray != null)
             new MaterialVariantsInfo(this, texturesArray).appendTo(this);
+        //Map lights
+        lightSources.values().forEach(PartLightSource::postLoad);
         return super.postLoad(hot);
     }
 
@@ -112,5 +124,15 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
     @Override
     public void addPart(BasePart<T> tBasePart) {
 
+    }
+
+    @Override
+    public void addLightSource(PartLightSource source) {
+        lightSources.put(source.getPartName(), source);
+    }
+
+    @Override
+    public PartLightSource getLightSource(String partName) {
+        return lightSources.get(partName);
     }
 }

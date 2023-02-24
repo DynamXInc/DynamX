@@ -13,11 +13,13 @@ import fr.dynamx.common.capability.DynamXChunkDataProvider;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
 import fr.dynamx.common.entities.ICollidableObject;
+import fr.dynamx.common.entities.modules.LightsModule;
 import fr.dynamx.utils.VerticalChunkPos;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import lombok.Getter;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
@@ -46,11 +48,14 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, ITic
      */
     protected AxisAlignedBB boundingBoxCache;
 
+    @Getter
+    private LightsModule lightsModule;
+
     public TEDynamXBlock() {
     }
 
     public TEDynamXBlock(BlockObject<?> blockObjectInfo) {
-        this.blockObjectInfo = blockObjectInfo;
+        setBlockObjectInfo(blockObjectInfo);
     }
 
     public BlockObject<?> getBlockObjectInfo() {
@@ -59,13 +64,20 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, ITic
 
     public void setBlockObjectInfo(BlockObject<?> blockObjectInfo) {
         this.blockObjectInfo = blockObjectInfo;
-        this.world.markBlockRangeForRenderUpdate(this.pos, this.pos);
+        if(world != null)
+            world.markBlockRangeForRenderUpdate(pos, pos);
+        if(!blockObjectInfo.getLightSources().isEmpty())
+            lightsModule = new LightsModule(blockObjectInfo);
+        else
+            lightsModule = null;
     }
 
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
         if (blockObjectInfo != null)
             compound.setString("BlockInfo", blockObjectInfo.getFullName());
+        if(lightsModule != null)
+            lightsModule.writeToNBT(compound);
         compound.setInteger("Rotation", rotation);
         compound.setFloat("TranslationX", relativeTranslation.x);
         compound.setFloat("TranslationY", relativeTranslation.y);
@@ -84,7 +96,9 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, ITic
     public void readFromNBT(NBTTagCompound compound) {
         super.readFromNBT(compound);
         if (compound.hasKey("BlockInfo"))
-            blockObjectInfo = DynamXObjectLoaders.BLOCKS.findInfo(compound.getString("BlockInfo"));
+            setBlockObjectInfo(DynamXObjectLoaders.BLOCKS.findInfo(compound.getString("BlockInfo")));
+        if(lightsModule != null)
+            lightsModule.readFromNBT(compound);
         rotation = compound.getInteger("Rotation");
         relativeTranslation = new Vector3f(
                 compound.getFloat("TranslationX"),
@@ -281,6 +295,6 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, ITic
 
     @Override
     public void onPackInfosReloaded() {
-        blockObjectInfo = DynamXObjectLoaders.BLOCKS.findInfo(blockObjectInfo.getFullName());
+        setBlockObjectInfo(DynamXObjectLoaders.BLOCKS.findInfo(blockObjectInfo.getFullName()));
     }
 }

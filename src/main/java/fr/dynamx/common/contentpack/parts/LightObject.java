@@ -51,7 +51,7 @@ public class LightObject {
         return lightIdHashed;
     }
 
-    @RegisteredSubInfoType(name = "LightObject", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER}, strictName = false)
+    @RegisteredSubInfoType(name = "LightObject", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER, SubInfoTypeRegistries.BLOCKS_AND_PROPS}, strictName = false)
     public static class SubLightObject extends LightObject implements ISubInfoType<PartLightSource> {
         protected final PartLightSource owner;
 

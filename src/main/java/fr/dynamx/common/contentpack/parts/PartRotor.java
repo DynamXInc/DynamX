@@ -14,7 +14,7 @@ import fr.dynamx.client.renders.vehicle.RenderBaseVehicle;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.entities.modules.HelicopterEngineModule;
+import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.HelicopterPartModule;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
@@ -47,9 +47,9 @@ public class PartRotor extends BasePart<ModularVehicleInfo> implements IDrawable
     }
 
     @Override
-    public void addModules(BaseVehicleEntity<?> entity, ModuleListBuilder modules) {
+    public void addModules(PackPhysicsEntity<?, ?> entity, ModuleListBuilder modules) {
         if(!modules.hasModuleOfClass(HelicopterPartModule.class)) {
-            modules.add(new HelicopterPartModule(entity));
+            modules.add(new HelicopterPartModule((BaseVehicleEntity<?>) entity));
         }
 
     }

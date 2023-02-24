@@ -3,9 +3,8 @@ package fr.dynamx.api.contentpack.object.subinfo;
 import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
-import fr.dynamx.common.contentpack.loader.SubInfoTypesRegistry;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
-import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.PackPhysicsEntity;
 
 import javax.annotation.Nullable;
 
@@ -42,9 +41,10 @@ public interface ISubInfoType<T extends ISubInfoTypeOwner<?>> extends INamedObje
      * Can be used to complete this sub info with other infos (for example, add the 'sounds_' to an engine)
      *
      * @param owner The owner of this sub property
-     * @param hot If it's a hot reloading (info owners already created)
+     * @param hot   If it's a hot reloading (info owners already created)
      */
-    default void postLoad(T owner, boolean hot) {}
+    default void postLoad(T owner, boolean hot) {
+    }
 
     /**
      * Adds the {@link IPhysicsModule}s associated with this sub info type to the given entity
@@ -52,11 +52,12 @@ public interface ISubInfoType<T extends ISubInfoTypeOwner<?>> extends INamedObje
      * @param entity  The entity being initialized
      * @param modules The modules list where you should add your module(s)
      */
-    default void addModules(BaseVehicleEntity<?> entity, ModuleListBuilder modules) {
+    default void addModules(PackPhysicsEntity<?, ?> entity, ModuleListBuilder modules) {
     }
 
     /**
      * Used for error messages
+     *
      * @return The root owner of this sub info type (generally the {@link ModularVehicleInfo} or the {@link fr.dynamx.common.contentpack.type.objects.BlockObject})
      * where this sub info is declared
      */

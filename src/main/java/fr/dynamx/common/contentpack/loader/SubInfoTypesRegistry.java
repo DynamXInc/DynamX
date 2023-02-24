@@ -39,10 +39,10 @@ public class SubInfoTypesRegistry<T extends ISubInfoTypeOwner<?>> {
     }
 
     /**
-     * @return A collection of all registered sub info types
+     * @return All registered sub info types, mapped by key name
      */
-    public Collection<SubInfoTypeEntry<T>> getRegisteredEntries() {
-        return ENTRIES.values();
+    public Map<String, SubInfoTypeEntry<T>> getEntries() {
+        return ENTRIES;
     }
 
     protected void addSubInfoTypePropertiesFixer(Class<? extends INamedObject> subInfoTypeClass, IPackFilePropertyFixer fixer) {

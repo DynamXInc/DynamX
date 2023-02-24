@@ -74,6 +74,7 @@ dynamx.error.deprecated_prop_format=props_ files are deprecated
 dynamx.error.deprecated_light_format=Legacy Light parts are deprecated when using multiple lights on one part. It should now be declared in a 'MultiLight' sub property.
 dynamx.error.missing_prop=Unknown pack file properties
 dynamx.error.unknown_sub_info=Unknown sub properties
+dynamx.error.deprecated_seat_config=Use the convention "Seat_Name" (instead of "NameSeat") to name your seats. In names:
 dynamx.error.sound_error=Invalid sound config
 dynamx.error.config_error=Config error
 dynamx.error.obj_none_material=Object(s) using the 'none' material of BlockBench

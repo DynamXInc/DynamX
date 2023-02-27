@@ -33,8 +33,6 @@ import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.PositionedSoundRecord;
-import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiMainMenu;
@@ -44,12 +42,10 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.renderer.entity.RenderPlayer;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.*;
@@ -67,8 +63,6 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.HashSet;
 import java.util.UUID;
@@ -86,6 +80,13 @@ public class ClientEventHandler {
     private BlockObject<?> blockObjectInfo;
 
     /* World events */
+
+    @SubscribeEvent
+    public void onWorldLoad(WorldEvent.Load event) {
+        if (event.getWorld().isRemote && event.getWorld().provider.getDimension() == 0) {
+            DynamXContext.getObjModelRegistry().uploadVAOs();
+        }
+    }
 
     @SubscribeEvent
     public void onWorldUnloaded(WorldEvent.Unload event) {
@@ -144,10 +145,10 @@ public class ClientEventHandler {
             event.getButtonList().add(new GuiTexturedButton(-54391, event.getGui().width - 25, 5, 20, 20, TextFormatting.GOLD + "DynamX loading errors" + TextFormatting.RESET, new ResourceLocation(DynamXConstants.ID, "textures/mark.png")));
         else if (event.getGui() instanceof GuiMainMenu && DynamXErrorManager.getErrorManager().hasErrors(DynamXErrorManager.UPDATES)) //TODO MAJ INFO BUTTON
             event.getButtonList().add(new GuiButton(-54391, event.getGui().width / 2 - 110, event.getGui().height - 30, 220, 20, TextFormatting.AQUA + "Mise à jour DynamX disponible !" + TextFormatting.RESET));
-        //else if (event.getGui() instanceof GuiWorldSelection || event.getGui() instanceof GuiMultiplayer)
-        //    event.getButtonList().add(new GuiButtonImage(-54392, event.getGui().width - 25, 5, 20, 18, 0, 168, 19, CRAFTING_TABLE_GUI_TEXTURES));
+            //else if (event.getGui() instanceof GuiWorldSelection || event.getGui() instanceof GuiMultiplayer)
+            //    event.getButtonList().add(new GuiButtonImage(-54392, event.getGui().width - 25, 5, 20, 18, 0, 168, 19, CRAFTING_TABLE_GUI_TEXTURES));
         else if (event.getGui() instanceof GuiScreenOptionsSounds) {
-            int i = 1+SoundCategory.values().length;
+            int i = 1 + SoundCategory.values().length;
             event.getButtonList().add(new ButtonSlider(-54393, event.getGui().width / 2 - 155 + i % 2 * 160, event.getGui().height / 6 - 12 + 24 * (i >> 1), false, "DynamX Sounds" + TextFormatting.RESET));
         }
     }
@@ -249,9 +250,10 @@ public class ClientEventHandler {
         if (connectionTime != -1 && !Minecraft.getMinecraft().isSingleplayer()) {
             if ((System.currentTimeMillis() - connectionTime) > 30000) {
                 if (!DynamXContext.getNetwork().isConnected()) {
-                    DynamXMain.log.warn("Failed to establish an TCP/UDP connection : timed out (0x1)");
-                    if (Minecraft.getMinecraft().getConnection() != null)
-                        Minecraft.getMinecraft().getConnection().getNetworkManager().closeChannel(new TextComponentString("DynamX TCP/UDP connection timed out (Auth not started)"));
+                    DynamXMain.log.fatal("Failed to establish an TCP/UDP connection : timed out (0x1)");
+                    connectionTime = -1;
+                    if (Minecraft.getMinecraft().getConnection() != null && DynamXConfig.doUdpTimeOut)
+                        Minecraft.getMinecraft().getConnection().getNetworkManager().closeChannel(new TextComponentString("DynamX UDP connection timed out (Auth not started)"));
                 } else
                     connectionTime = -1;
             }

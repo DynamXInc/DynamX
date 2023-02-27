@@ -14,9 +14,14 @@ import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.PackInfo;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.CarEngineModule;
+import fr.dynamx.common.entities.modules.TrailerAttachModule;
+import fr.dynamx.common.entities.vehicles.TrailerEntity;
+import fr.dynamx.common.physics.joints.EntityJoint;
+import fr.dynamx.common.physics.joints.EntityJointsHandler;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import fr.dynamx.utils.physics.DynamXPhysicsHelper;
@@ -37,8 +42,10 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.lwjgl.BufferUtils;
 
@@ -48,6 +55,7 @@ import java.io.InputStream;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -108,7 +116,7 @@ public class DynamXUtils {
         List<PackInfo> packLocations = DynamXObjectLoaders.PACKS.findPackLocations(packName);
         if (packLocations.isEmpty()) {
             DynamXMain.log.error("Pack info " + packName + " not found. This should not happen.");
-            return new ObjModelPath(new PackInfo(packName, ContentPackType.FOLDER), model);
+            return new ObjModelPath(PackInfo.forAddon(packName).setPackType(ContentPackType.FOLDER), model);
         }
         return new ObjModelPath(packLocations, model);
     }
@@ -339,6 +347,44 @@ public class DynamXUtils {
         }
         return -1;
     }
+
+    public static void attachTrailer(EntityPlayer player, BaseVehicleEntity<?> carEntity, BaseVehicleEntity<?> trailer){
+        Vector3fPool.openPool();
+        Vector3f p1r = DynamXGeometry.rotateVectorByQuaternion(carEntity.getModuleByType(TrailerAttachModule.class).getAttachPoint(), carEntity.physicsRotation);
+        Vector3f p2r = DynamXGeometry.rotateVectorByQuaternion(trailer.getModuleByType(TrailerAttachModule.class).getAttachPoint(), trailer.physicsRotation);
+        if (p1r.addLocal(carEntity.physicsPosition).subtract(p2r.addLocal(trailer.physicsPosition)).lengthSquared() < 60) {
+            if (carEntity.getJointsHandler() == null) {
+                return;
+            }
+            EntityJointsHandler handler = carEntity.getJointsHandler();
+            Collection<EntityJoint<?>> curJoints = handler.getJoints();
+            TrailerEntity trailerIsAttached = null;
+            for (EntityJoint<?> joint : curJoints) {
+                if (joint.getEntity2() instanceof TrailerEntity) {
+                    trailerIsAttached = (TrailerEntity) joint.getEntity2();
+                    break;
+                }
+            }
+            if (trailerIsAttached == null) {
+                if (TrailerAttachModule.HANDLER.createJoint(carEntity, trailer, (byte) 0)) {
+                    TextComponentTranslation msg = new TextComponentTranslation("trailer.attached", trailer.getPackInfo().getName(), carEntity.getPackInfo().getName());
+                    msg.getStyle().setColor(TextFormatting.GREEN);
+                    player.sendMessage(msg);
+                } else {
+                    TextComponentTranslation msg = new TextComponentTranslation("trailer.attach.fail", trailer.getPackInfo().getName(), carEntity.getPackInfo().getName());
+                    msg.getStyle().setColor(TextFormatting.RED);
+                    player.sendMessage(msg);
+                }
+            } else {
+                carEntity.getJointsHandler().removeJointWith(trailerIsAttached, TrailerAttachModule.JOINT_NAME, (byte) 0);
+                player.sendMessage(new TextComponentTranslation("trailer.detached"));
+            }
+        } else {
+            player.sendMessage(new TextComponentTranslation("trailer.attach.toofar"));
+        }
+        Vector3fPool.closePool();
+    }
+
 
     public static void hotswapWorldPackInfos(World w) {
         DynamXMain.log.info("Hot-swapping pack infos in models and spawn entities/tile entities in world " + w);

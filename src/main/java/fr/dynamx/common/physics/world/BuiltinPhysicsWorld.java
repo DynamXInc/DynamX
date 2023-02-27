@@ -19,6 +19,7 @@ public class BuiltinPhysicsWorld extends BasePhysicsWorld {
 
     public BuiltinPhysicsWorld(World world, boolean isRemoteWorld) {
         super(world, isRemoteWorld);
+        initPhysicsWorld();
         this.physicsThread = Thread.currentThread();
 
         DynamXMain.log.info("Loading the physics world for the dimension " + world.provider.getDimension());

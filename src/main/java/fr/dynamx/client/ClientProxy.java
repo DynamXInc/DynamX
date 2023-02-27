@@ -163,9 +163,9 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
     }
 
     @Override
-    public void providePhysicsWorld(World world) {
+    public void initPhysicsWorld(World world) {
         if (DynamXContext.getPhysicsWorldPerDimensionMap().containsKey(world.provider.getDimension()))
-            throw new IllegalStateException("Physics world of " + world + " is already loaded !");
+            throw new IllegalStateException("Physics world of " + world + " is already loaded ! World: " + DynamXContext.getPhysicsWorldPerDimensionMap().get(world.provider.getDimension()));
         DynamXContext.getPhysicsWorldPerDimensionMap().put(world.provider.getDimension(), new BuiltinThreadedPhysicsWorld(world, !ClientEventHandler.MC.isSingleplayer()));
     }
 

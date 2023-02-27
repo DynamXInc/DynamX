@@ -74,8 +74,10 @@ public class UDPClientHandler implements Runnable {
                 }
             }
             if (!client.isAuthenticated() && (System.currentTimeMillis() - startTime) > 30000) {
-                DynamXMain.log.warn("Failed to establish an UDP connection : timed out (0x2)");
-                Minecraft.getMinecraft().getConnection().getNetworkManager().closeChannel(new TextComponentString("DynamX UDP connection timed out (Auth started)"));
+                DynamXMain.log.fatal("Failed to establish an UDP connection : timed out (0x2)");
+                client.stop();
+                if(DynamXConfig.doUdpTimeOut && Minecraft.getMinecraft().getConnection() != null)
+                    Minecraft.getMinecraft().getConnection().getNetworkManager().closeChannel(new TextComponentString("DynamX UDP connection timed out (Auth started)"));
             }
         }
     }

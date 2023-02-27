@@ -1,5 +1,6 @@
 package fr.dynamx.utils.physics;
 
+import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.system.JmeSystem;
 import com.jme3.system.Platform;
 import fr.aym.mps.utils.SSLHelper;
@@ -10,6 +11,7 @@ import net.minecraftforge.fml.common.ProgressManager;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.logging.Level;
 
 public class NativeEngineInstaller {
     /**
@@ -76,6 +78,10 @@ public class NativeEngineInstaller {
             }
             ProgressManager.pop(bar);
         }
+
+
+        PhysicsRigidBody.logger2.setLevel(Level.OFF); // disable logging for physicsrigedbody to avoid spamming the console
+
         return success;
     }
 

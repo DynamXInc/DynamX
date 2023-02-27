@@ -83,6 +83,7 @@ public class DynamXNetwork {
         registerMessage(channel, MessageSlopesConfigGui.class, MessageSlopesConfigGui.class, Side.SERVER);
         registerMessage(channel, MessageDebugRequest.class, MessageDebugRequest.class, Side.SERVER);
         registerMessage(channel, MessagePlayerToRagdoll.class, MessagePlayerToRagdoll.class, Side.SERVER);
+        registerMessage(channel, MessageAttachTrailer.class, MessageAttachTrailer.class, Side.SERVER);
 
         //Packet serializers
         PacketSerializer.addCustomSerializer(new PacketDataSerializer<Vector3f>() {

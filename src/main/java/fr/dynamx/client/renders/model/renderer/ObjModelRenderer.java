@@ -75,7 +75,6 @@ public class ObjModelRenderer {
     public static ObjModelRenderer loadObjModel(ObjModelPath objModelPath, @Nullable IModelTextureVariantsSupplier textureVariants) {
         try {
             List<ObjObjectRenderer> objObjects = new ArrayList<>();
-
             ObjModelData objModelData = DynamXContext.getObjModelDataFromCache(objModelPath);
             objModelData.getObjObjects().forEach(ObjObjectData -> {
                 objObjects.add(new ObjObjectRenderer(ObjObjectData));
@@ -85,6 +84,10 @@ public class ObjModelRenderer {
             DynamXErrorManager.addError(textureVariants != null ? textureVariants.getPackName() : "Non-pack model", DynamXErrorManager.MODEL_ERRORS, "obj_error", ErrorLevel.HIGH, objModelPath.getModelPath().toString(), "", e);
         }
         return null;
+    }
+
+    public void uploadVAOs() {
+        objObjects.forEach(ObjObjectRenderer::uploadVAO);
     }
 
     public void clearVAOs() {

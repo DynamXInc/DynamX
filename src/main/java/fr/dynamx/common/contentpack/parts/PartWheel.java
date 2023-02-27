@@ -2,6 +2,7 @@ package fr.dynamx.common.contentpack.parts;
 
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.contentpack.registry.*;
@@ -21,6 +22,7 @@ import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.wheel.WheelState;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
+import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
@@ -57,7 +59,7 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
     @PackFileProperty(configNames = "RotationPoint", required = false, type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y)
     private Vector3f rotationPoint;
     @PackFileProperty(configNames = "SuspensionAxis", required = false)
-    private Quaternion suspensionAxis = new Quaternion();
+    private Quaternion suspensionAxis;
 
     private PartWheelInfo defaultWheelInfo;
 
@@ -72,6 +74,10 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
             rotationPoint = getPosition();
         else
             getRotationPoint().multLocal(getScaleModifier(owner));
+        if(suspensionAxis != null && suspensionAxis.inverse() == null) {
+            DynamXErrorManager.addPackError(getPackName(), "wheel_invalid_suspaxis", ErrorLevel.LOW, getName(), "The SuspensionAxis should be an invertible Quaternion");
+            suspensionAxis = null;
+        }
     }
 
     @Override
@@ -183,7 +189,7 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
                 GlStateManager.translate(partWheel.getRotationPoint().x, partWheel.getRotationPoint().y, partWheel.getRotationPoint().z);
 
                 /* Apply wheel base rotation */
-                if (baseRotation.getW() != 0)
+                if (baseRotation != null && baseRotation.getW() != 0)
                     GlStateManager.rotate(GlQuaternionPool.get(baseRotation));
 
                 if(wheelsModule != null) {
@@ -207,7 +213,7 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
                 }
 
                 //Remove wheel base rotation
-                if (baseRotation.getW() != 0)
+                if (baseRotation != null && baseRotation.getW() != 0)
                     GlStateManager.rotate(GlQuaternionPool.get(baseRotation.inverse()));
 
                 // Translate to render pos, from rotation pos

@@ -14,6 +14,7 @@ public class DynamXConfig
     public static boolean syncPacks;
 
     public static boolean useUdp = true;
+    public static boolean doUdpTimeOut = true;
     public static int udpPort = 25575;
     public static boolean usingProxy = false, udpDebug = false;
 
@@ -49,6 +50,7 @@ public class DynamXConfig
         syncPacks = cfg.getBoolean("SyncContentPacks", "Multiplayer", false, "If enabled, the server will send all content pack objects to the clients (only where there are differences)");
         allowedWrenchModes = cfg.get("Multiplayer", "AllowedWrenchModes", new int[]{0, 2, 5}).getIntList();
         useUdp = cfg.getBoolean("UseUdpServer", "UDP", true, "True to use (faster) UDP networking, false to use vanilla networking (TCP)");
+        doUdpTimeOut = cfg.getBoolean("DoUdpTimeOut", "UDP", true, "True to automatically disconnect players when the udp connection cannot be established");
         udpPort = cfg.getInt("UdpPort", "UDP", 25575, 2000, 65535, "A port for the udp server, if enabled");
         usingProxy = cfg.getBoolean("HasProxy", "UDP", false, "If you have a proxy in front of your server");
         udpDebug = cfg.getBoolean("PrintUdpDebug", "UDP", false, "True to print debug for UDP connections");

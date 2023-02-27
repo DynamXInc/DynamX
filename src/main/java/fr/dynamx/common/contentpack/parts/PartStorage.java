@@ -8,6 +8,7 @@ import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.StorageModule;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.debug.DynamXDebugOption;
@@ -15,7 +16,7 @@ import fr.dynamx.utils.debug.DynamXDebugOptions;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 
-@RegisteredSubInfoType(name = "storage", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER}, strictName = false)
+@RegisteredSubInfoType(name = "storage", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER, SubInfoTypeRegistries.PROPS}, strictName = false)
 public class PartStorage extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfo>
 {
     @PackFileProperty(configNames = "StorageSize")
@@ -33,7 +34,7 @@ public class PartStorage extends InteractivePart<BaseVehicleEntity<?>, ModularVe
     }
 
     @Override
-    public void addModules(BaseVehicleEntity<?> entity, ModuleListBuilder modules) {
+    public void addModules(PackPhysicsEntity<?, ?> entity, ModuleListBuilder modules) {
         if(!modules.hasModuleOfClass(StorageModule.class))
             modules.add(new StorageModule(entity, this));
         else

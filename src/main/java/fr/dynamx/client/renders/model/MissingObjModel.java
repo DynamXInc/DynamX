@@ -2,10 +2,9 @@ package fr.dynamx.client.renders.model;
 
 import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
 import fr.dynamx.api.obj.ObjModelPath;
-import fr.dynamx.client.DynamXModelRegistry;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
-import fr.dynamx.common.objloader.data.Mesh;
+import fr.dynamx.common.contentpack.PackInfo;
 import fr.dynamx.common.objloader.data.ObjObjectData;
 import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.client.Minecraft;
@@ -22,6 +21,8 @@ import java.util.HashMap;
  * Missing obj model indicating errors
  */
 public class MissingObjModel extends ObjModelRenderer {
+    public static final PackInfo DYNAMX_PACKINFO = PackInfo.forAddon(DynamXConstants.ID);
+
     private static final ObjObjectData emptyPart = new ObjObjectData("empty") {
         @Override
         public String getName() {
@@ -32,7 +33,7 @@ public class MissingObjModel extends ObjModelRenderer {
     private static ObjObjectRenderer emptyPartRenderer;
 
     public MissingObjModel() {
-        super(new ObjModelPath(DynamXModelRegistry.BASE_PACKINFO, new ResourceLocation(DynamXConstants.ID, "obj/missing.obj")), new ArrayList<>(), new HashMap<>(), null);
+        super(new ObjModelPath(DYNAMX_PACKINFO, new ResourceLocation(DynamXConstants.ID, "obj/missing.obj")), new ArrayList<>(), new HashMap<>(), null);
         emptyPart.setCenter(new Vector3f());
         ObjObjectRenderer objObjectRenderer = new ObjObjectRenderer(emptyPart) {
             @Override

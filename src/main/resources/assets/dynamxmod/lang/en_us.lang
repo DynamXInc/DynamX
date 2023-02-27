@@ -16,8 +16,11 @@ key.debug=Debug menu
 key.speedlimit=Speed limiter
 key.startEngine=Engine on/off
 key.pickobject=Pick object
-key.takeoject=Take object
-key.toogleLockDoor=Toogle lock door
+key.takeobject=Take object
+key.toggleLockDoor=Toogle lock door
+key.attachTrailer=Attach trailer
+key.powerup=Power up (helicopter)
+key.powerdown=Power down (helicopter)
 
 slopes.config.title=Config automatic slopes :
 slopes.config.dalls=Ignore slabs
@@ -71,6 +74,7 @@ dynamx.error.deprecated_prop_format=props_ files are deprecated
 dynamx.error.deprecated_light_format=Legacy Light parts are deprecated when using multiple lights on one part. It should now be declared in a 'MultiLight' sub property.
 dynamx.error.missing_prop=Unknown pack file properties
 dynamx.error.unknown_sub_info=Unknown sub properties
+dynamx.error.deprecated_seat_config=Use the convention "Seat_Name" (instead of "NameSeat") to name your seats. In names:
 dynamx.error.sound_error=Invalid sound config
 dynamx.error.config_error=Config error
 dynamx.error.obj_none_material=Object(s) using the 'none' material of BlockBench
@@ -88,5 +92,22 @@ dynamx.error.missing_pack_info=Pack info is missing
 dynamx.error.pack_file_load_error=Cannot load pack file
 dynamx.error.addon_error=Addon loading error
 dynamx.error.obj_error=Obj loading error
+dynamx.error.wheel_invalid_suspaxis=Invalid wheel suspension axis
 
 dynamx.reload.models.errors=§c[DynamX] Some models have errors, use the debug menu to see them
+
+trailer.wrench.first=Now click on the other vehicle
+trailer.attach.fail=Cannot attach %s to %s
+trailer.attached=Attached %s to %s
+trailer.detached=§7The trailer has been detached
+trailer.attach.toofar=§cThe attach points are too far away
+
+wrench.mode.setto=%sWrench mode set to %s
+wrench.mode.mode=Mode: %s
+wrench.mode.attach_objects=%sAttach objects
+wrench.mode.attach_trailers=%sAttach trailer
+wrench.mode.respawn_entities=%sRespawn entity
+wrench.mode.change_skins=%sChange vehicle skin
+wrench.mode.entity_seat=%sPut entity in seat
+wrench.mode.none=%sWrench disabled
+wrench.mode.launch_entities=%sLaunch props

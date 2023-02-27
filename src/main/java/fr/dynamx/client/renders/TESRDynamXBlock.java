@@ -2,13 +2,17 @@ package fr.dynamx.client.renders;
 
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.events.DynamXBlockEvent;
 import fr.dynamx.api.events.EventStage;
+import fr.dynamx.api.events.PhysicsEntityEvent;
+import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.blocks.TEDynamXBlock;
+import fr.dynamx.common.contentpack.parts.ILightOwner;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.utils.DynamXUtils;
@@ -23,6 +27,7 @@ import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import fr.dynamx.utils.physics.DynamXPhysicsHelper;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
@@ -51,11 +56,13 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
 
                 //Rendering the model
                 DynamXContext.getObjModelRegistry().getModel(te.getBlockObjectInfo().getModel()).renderModel((byte) te.getBlockMetadata());
+                if (te.getBlockObjectInfo().isModelValid() && te.getLightsModule() != null) {
+                    te.getBlockObjectInfo().getLightSources().values().forEach(d -> d.drawLights(null, Minecraft.getMinecraft().player.ticksExisted, te.getBlockObjectInfo().getModel(), te.getBlockObjectInfo().getScaleModifier(), te.getLightsModule()));
+                }
                 DynamXRenderUtils.spawnParticles(te.getBlockObjectInfo(), te.getWorld(), pos, rot);
                 MinecraftForge.EVENT_BUS.post(new DynamXBlockEvent.RenderTileEntity((DynamXBlock<?>) te.getBlockType(), getWorld(), te, this, x, y, z, partialTicks, destroyStage, alpha, EventStage.POST));
                 GlStateManager.popMatrix();
             }
-
             if (shouldRenderDebug()) {
                 renderDebug(te, x, y, z);
             }

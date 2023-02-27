@@ -30,16 +30,6 @@ public class SubInfoTypeEntry<T extends ISubInfoTypeOwner<?>> {
     /**
      * Creates a new sub info type registry entry
      *
-     * @param key   should be the name of this sub info in the info file (or contain if not strict as wheels, shapes and seats)
-     * @param clazz the class corresponding to this property, with a constructor having <strong>one parameter of the type of T</strong>
-     */
-    public SubInfoTypeEntry(String key, Class<? extends ISubInfoType<T>> clazz) {
-        this(key, clazz, true);
-    }
-
-    /**
-     * Creates a new sub info type registry entry
-     *
      * @param key    should be the name of this sub info in the info file (or contain if not strict as wheels, shapes and seats)
      * @param clazz  the class corresponding to this property, with a constructor having <strong>one parameter of the type of T</strong>
      * @param strict if strict (default value), it will check if key is equals, else if key is contained in vehicle info field
@@ -60,16 +50,6 @@ public class SubInfoTypeEntry<T extends ISubInfoTypeOwner<?>> {
      *
      * @param key     should be the name of this sub info in the info file (or contain if not strict as wheels, shapes and seats)
      * @param creator a {@link ISubInfoTypeCreator} creating an instance of the sub info type
-     */
-    public SubInfoTypeEntry(String key, ISubInfoTypeCreator<T> creator) {
-        this(key, creator, true);
-    }
-
-    /**
-     * Creates a new sub info type registry entry
-     *
-     * @param key     should be the name of this sub info in the info file (or contain if not strict as wheels, shapes and seats)
-     * @param creator a {@link ISubInfoTypeCreator} creating an instance of the sub info type
      * @param strict  if strict (default value), it will check if key is equals, else if key is contained in vehicle info field
      */
     public SubInfoTypeEntry(String key, ISubInfoTypeCreator<T> creator, boolean strict) {
@@ -82,7 +62,7 @@ public class SubInfoTypeEntry<T extends ISubInfoTypeOwner<?>> {
      * @return True if with is the key of this sub info type (or contains it if not strict as wheels, shapes and seats)
      */
     public boolean matches(String with) {
-        return strict ? key.equalsIgnoreCase(with) : with.toLowerCase().contains(key);
+        return strict ? key.equals(with) : with.startsWith(key);
     }
 
     /**

@@ -77,9 +77,11 @@ public abstract class CommonProxy {
     /**
      * Creates the physics world
      */
-    public void providePhysicsWorld(World world) {
-        if (DynamXContext.getPhysicsWorldPerDimensionMap().containsKey(world.provider.getDimension()))
-            throw new IllegalStateException("Physics world of " + world + " is already loaded !");
+    public void initPhysicsWorld(World world) {
+        if (DynamXContext.getPhysicsWorldPerDimensionMap().containsKey(world.provider.getDimension())) {
+            DynamXMain.log.warn("Physics world of " + world + " is already loaded ! Keeping the previously loaded world.");
+            return;
+        }
         DynamXContext.getPhysicsWorldPerDimensionMap().put(world.provider.getDimension(), new BuiltinPhysicsWorld(world, false));
     }
 

@@ -100,7 +100,7 @@ public class GuiWrenchSelection extends GuiFrame {
         infos.clear();
         WrenchMode wrenchMode = getModeWithMousePos(mouseX, mouseY);
         infos.add(wrenchMode.getLabel());
-        infos.add(wrenchMode.getMessage());
+        //infos.add(wrenchMode.getMessage());
         GuiAPIClientHelper.drawHoveringText(infos, mouseX, mouseY);
 
         if (currentMode != null) {

@@ -7,7 +7,7 @@ public class DynamXConstants
 {
     public static final String NAME = "DynamX";
     public static final String ID = "dynamxmod";
-    public static final String VERSION = "4.0.0-beta-10";
+    public static final String VERSION = "4.0.0-beta-16";
     public static final String VERSION_TYPE = "Beta";
     public static final String RES_DIR_NAME = "DynamX";
 
@@ -15,7 +15,7 @@ public class DynamXConstants
     public static final String DEFAULT_ACSGUIS_VERSION = "1.2.5";
     public static final String ACSLIBS_REQUIRED_VERSION = "[1.2.2,)";
 
-    public static final String LIBBULLET_VERSION = "16.3.0";
+    public static final String LIBBULLET_VERSION = "18.1.0";
     /** .dc file version, only change when an update of libbullet breaks the .dc files, to regenerate them */
     public static final String DC_FILE_VERSION = "12.5.0";
     /**

@@ -16,8 +16,11 @@ key.debug=Menu de debug
 key.speedlimit=Limiteur de vitesse
 key.startEngine=Allumer/éteindre le moteur
 key.pickobject=Déplacer l'objet
-key.takeoject=Prendre l'objet
-key.toogleLockDoor=Ouvrir/fermer la portière
+key.takeobject=Prendre l'objet
+key.toggleLockDoor=Ouvrir/fermer la portière
+key.attachTrailer=Attacher la remorque
+key.powerup=Augmenter la puissance (hélicoptère)
+key.powerdown=Diminuer la puissance (hélicoptère)
 
 slopes.config.title=Configuration des pentes automatiques :
 slopes.config.dalls=Ignorer les demi dalles
@@ -61,3 +64,19 @@ cmd.slopes.auto.success=§a[AUTO] Les pentes ont bien été ajoutées !
 hud.car.speedlimit=Limite de vitesse : %s
 
 dynamx.reload.models.errors=§c[DynamX] Certains modèles ont des problèmes, utilisez le menu de debug pour les voir
+
+trailer.wrench.first=Cliquez maintenant sur l'autre véhicule
+trailer.attach.fail=Impossible d'attacher %s à %s
+trailer.attached=%s attaché à %s
+trailer.detached=§7La remorque a été détachée
+trailer.attach.toofar=§cLes points d'attache sont trop éloignés
+
+wrench.mode.setto=%sLa clé à molette est en mode %s
+wrench.mode.mode=Mode : %s
+wrench.mode.attach_objects=%sAttacher des objets
+wrench.mode.attach_trailers=%sAttacher la remorque
+wrench.mode.respawn_entities=%sFaire réapparaître les entités
+wrench.mode.change_skins=%sChanger le skin des véhicules
+wrench.mode.entity_seat=%sMettre des entités dans les véhicules
+wrench.mode.none=%sClé à molette désactivée
+wrench.mode.launch_entities=%sLancer des props

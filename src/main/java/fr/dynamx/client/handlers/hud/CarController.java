@@ -18,6 +18,7 @@ import fr.dynamx.common.contentpack.type.vehicle.CarEngineInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.CarEngineModule;
 import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.client.ClientDynamXUtils;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.resources.I18n;
@@ -66,7 +67,8 @@ public class CarController extends BaseController {
                 else
                     speedLimit = Float.MAX_VALUE;
             }
-
+            if (KeyHandler.KEY_ATTACH_TRAILER.isPressed())
+                ClientDynamXUtils.attachTrailer();
             MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.ControllerUpdate<>(entity, this));
             int controls = 0;
             if (accelerating)

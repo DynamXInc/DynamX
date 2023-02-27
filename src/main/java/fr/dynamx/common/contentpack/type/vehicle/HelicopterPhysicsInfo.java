@@ -8,6 +8,7 @@ import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.HelicopterEngineModule;
 import lombok.Getter;
 
@@ -68,8 +69,8 @@ public class HelicopterPhysicsInfo extends SubInfoType<ModularVehicleInfo> {
     }
 
     @Override
-    public void addModules(BaseVehicleEntity<?> entity, ModuleListBuilder modules) {
-        modules.add(new HelicopterEngineModule(entity));
+    public void addModules(PackPhysicsEntity<?, ?> entity, ModuleListBuilder modules) {
+        modules.add(new HelicopterEngineModule((BaseVehicleEntity<?>) entity));
     }
 
     @Override

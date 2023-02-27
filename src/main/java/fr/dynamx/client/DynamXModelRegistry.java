@@ -10,13 +10,13 @@ import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.contentpack.object.render.IObjPackObject;
 import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
 import fr.dynamx.api.obj.ObjModelPath;
+import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.client.renders.model.MissingObjModel;
 import fr.dynamx.client.renders.model.renderer.ObjItemModelLoader;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
-import fr.dynamx.common.contentpack.PackInfo;
 import fr.dynamx.common.contentpack.loader.InfoLoader;
 import fr.dynamx.common.contentpack.type.objects.ArmorObject;
 import fr.dynamx.common.objloader.MTLLoader;
@@ -33,7 +33,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static fr.dynamx.common.DynamXMain.log;
 
@@ -63,18 +66,6 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
      */
     public void registerModel(ObjModelPath location) {
         registerModel(location, null);
-    }
-
-    public static final PackInfo BASE_PACKINFO = new PackInfo(DynamXConstants.ID, ContentPackType.BUILTIN);
-
-    @Deprecated
-    public void registerModel(String location) {
-        registerModel(new ObjModelPath(BASE_PACKINFO, new ResourceLocation(DynamXConstants.ID, String.format("models/%s", location))), null);
-    }
-
-    @Deprecated
-    public void registerModel(String location, IModelTextureVariantsSupplier customTextures) {
-        registerModel(new ObjModelPath(BASE_PACKINFO, new ResourceLocation(DynamXConstants.ID, String.format("models/%s", location))), customTextures);
     }
 
     /**
@@ -185,10 +176,7 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
                 modelLoader.shutdown();
 
                 /* == Init armors == */
-                for (ArmorObject<?> info : DynamXObjectLoaders.ARMORS.getInfos().values()) {
-                    ObjModelRenderer model = getModel(info.getModel());
-                    info.getObjArmor().init(model);
-                }
+                DynamXObjectLoaders.ARMORS.getInfos().values().forEach(ArmorObject::initArmorModel);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -199,9 +187,20 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
             bar.step("Uploading textures");
             OBJLoader.getMtlLoaders().forEach(MTLLoader::uploadTextures);
             OBJLoader.getMtlLoaders().clear();
+
+            if(ClientEventHandler.MC.world != null)
+                uploadVAOs();
+
             ProgressManager.pop(bar);
             DynamXLoadingTasks.endTask(DynamXLoadingTasks.MODEL);
         });
+    }
+
+    public void uploadVAOs() {
+        log.info("Loading model vaos...");
+        long t1 = System.currentTimeMillis();
+        MODELS.values().forEach(ObjModelRenderer::uploadVAOs);
+        DynamXMain.log.info("VAO upload took " + (System.currentTimeMillis() - t1) + "ms");
     }
 
     /**
@@ -220,22 +219,19 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
 
     @Override
     public void onPackInfosReloaded() {
-        MODELS_REGISTRY.clear();
+        MODELS_REGISTRY.keySet().removeIf(path -> path.getPackLocations().get(0).getPackType() != ContentPackType.BUILTIN);
+        REGISTRY_CLOSED = false;
         //Registers all models avoiding duplicates
         //This doesn't load them, its done by the MC's resource manager
         for (InfoLoader<?> infoLoader : DynamXObjectLoaders.getLoaders()) {
             for (INamedObject namedObject : infoLoader.getInfos().values()) {
                 if (namedObject instanceof IObjPackObject && ((IObjPackObject) namedObject).shouldRegisterModel()) {
                     ObjModelPath modelPath = DynamXUtils.getModelPath(namedObject.getPackName(), ((IObjPackObject) namedObject).getModel());
-                    if (REGISTRY_CLOSED) {
-                        // override old variants supplier
-                        MODELS_REGISTRY.put(modelPath, (IModelTextureVariantsSupplier) namedObject);
-                    } else {
-                        registerModel(modelPath, (IModelTextureVariantsSupplier) namedObject);
-                    }
+                    registerModel(modelPath, (IModelTextureVariantsSupplier) namedObject);
                 }
             }
         }
+        REGISTRY_CLOSED = true;
         log.info("Registered " + getLoadedModelCount() + " obj models");
     }
 }

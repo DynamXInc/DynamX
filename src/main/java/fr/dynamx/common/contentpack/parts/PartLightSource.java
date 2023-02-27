@@ -21,12 +21,14 @@ import fr.dynamx.client.renders.vehicle.RenderBaseVehicle;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.entities.modules.VehicleLightsModule;
+import fr.dynamx.common.entities.PackPhysicsEntity;
+import fr.dynamx.common.entities.modules.LightsModule;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import lombok.Getter;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nullable;
@@ -35,8 +37,8 @@ import java.util.*;
 /**
  * Contains multiple {@link LightObject}
  */
-@RegisteredSubInfoType(name = "MultiLight", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER}, strictName = false)
-public class PartLightSource extends SubInfoType<ModularVehicleInfo> implements ISubInfoTypeOwner<PartLightSource>, IDrawablePart<BaseVehicleEntity<?>>, IModelTextureVariantsSupplier.IModelTextureVariants {
+@RegisteredSubInfoType(name = "MultiLight", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER, SubInfoTypeRegistries.BLOCKS_AND_PROPS}, strictName = false)
+public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISubInfoTypeOwner<PartLightSource>, IDrawablePart<BaseVehicleEntity<?>>, IModelTextureVariantsSupplier.IModelTextureVariants {
     private final String name;
 
     @Getter
@@ -55,26 +57,26 @@ public class PartLightSource extends SubInfoType<ModularVehicleInfo> implements 
     @PackFileProperty(configNames = "Rotation", required = false, defaultValue = "1 0 0 0")
     protected Quaternion rotation = new Quaternion();
 
-    public PartLightSource(ModularVehicleInfo owner, String name) {
+    public PartLightSource(ISubInfoTypeOwner<ILightOwner<?>> owner, String name) {
         super(owner);
         this.name = name;
     }
 
     @Override
-    public void appendTo(ModularVehicleInfo owner) {
+    public void appendTo(ILightOwner<?> owner) {
         owner.addLightSource(this);
     }
 
     @Nullable
     @Override
-    public ModularVehicleInfo getOwner() {
+    public ILightOwner<?> getOwner() {
         return owner;
     }
 
     @Override
-    public void addModules(BaseVehicleEntity<?> entity, ModuleListBuilder modules) {
-        if (!modules.hasModuleOfClass(VehicleLightsModule.class)) {
-            modules.add(new VehicleLightsModule(entity));
+    public void addModules(PackPhysicsEntity<?, ?> entity, ModuleListBuilder modules) {
+        if (!modules.hasModuleOfClass(LightsModule.class)) {
+            modules.add(new LightsModule(getOwner()));
         }
     }
 
@@ -94,14 +96,20 @@ public class PartLightSource extends SubInfoType<ModularVehicleInfo> implements 
         if (MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.LIGHTS, (RenderBaseVehicle<?>) render, entity, PhysicsEntityEvent.Phase.PRE, partialTicks, null))) {
             return;
         }
-        VehicleLightsModule lights = entity != null ? entity.getModuleByType(VehicleLightsModule.class) : null;
-        ObjModelRenderer vehicleModel = DynamXContext.getObjModelRegistry().getModel(packInfo.getModel());
-        for (PartLightSource lightSource : packInfo.getLightSources().values()) {
+        LightsModule lights = entity != null ? entity.getModuleByType(LightsModule.class) : null;
+        drawLights(entity, entity != null ? entity.ticksExisted : 0, packInfo.getModel(), packInfo.getScaleModifier(), lights);
+        MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.LIGHTS, (RenderBaseVehicle<?>) render, entity, PhysicsEntityEvent.Phase.POST, partialTicks, null));
+    }
+
+    public void drawLights(@Nullable BaseVehicleEntity<?> entity, int tickCounter, ResourceLocation model, Vector3f scale, LightsModule isLightOn) {
+        /* Rendering light sources */
+        ObjModelRenderer vehicleModel = DynamXContext.getObjModelRegistry().getModel(model);
+        for (PartLightSource lightSource : getOwner().getLightSources().values()) {
             LightObject onLightObject = null;
-            if (lights != null) {
+            if (isLightOn != null) {
                 // Find the first light object that is on
                 for (LightObject source : lightSource.getSources()) {
-                    if (lights.isLightOn(source.getLightId())) {
+                    if (isLightOn.isLightOn(source.getLightId())) {
                         onLightObject = source;
                         break;
                     }
@@ -116,7 +124,7 @@ public class PartLightSource extends SubInfoType<ModularVehicleInfo> implements 
             int activeStep = 0;
             if (isOn && onLightObject.getBlinkSequence() != null) {
                 int[] seq = onLightObject.getBlinkSequence();
-                int mod = entity.ticksExisted % seq[seq.length - 1];
+                int mod = tickCounter % seq[seq.length - 1];
                 isOn = false; //Default state
                 for (int i = seq.length - 1; i >= 0; i--) {
                     if (mod > seq[i]) {
@@ -144,16 +152,16 @@ public class PartLightSource extends SubInfoType<ModularVehicleInfo> implements 
             //Render the light
             GlQuaternionPool.openPool();
             GlStateManager.pushMatrix();
-            GlStateManager.scale(packInfo.getScaleModifier().x, packInfo.getScaleModifier().y, packInfo.getScaleModifier().z);
+            GlStateManager.scale(scale.x, scale.y, scale.z);
             if (lightSource.getPosition() != null)
                 DynamXRenderUtils.glTranslate(lightSource.getPosition());
             GlStateManager.rotate(GlQuaternionPool.get(lightSource.getRotation()));
-            if (lights != null && lights.isLightOn(onLightObject.getLightId()) && onLightObject.getRotateDuration() > 0) {
-                float step = ((float) (entity.ticksExisted % onLightObject.getRotateDuration())) / onLightObject.getRotateDuration();
+            if (isLightOn != null && isLightOn.isLightOn(onLightObject.getLightId()) && onLightObject.getRotateDuration() > 0) {
+                float step = ((float) (tickCounter % onLightObject.getRotateDuration())) / onLightObject.getRotateDuration();
                 step = step * 360;
                 GlStateManager.rotate(step, 0, 1, 0);
             }
-            render.renderModelGroup(vehicleModel, lightSource.getPartName(), entity, texId);
+            vehicleModel.renderGroups(lightSource.getPartName(), texId);
             GlStateManager.popMatrix();
             GlQuaternionPool.closePool();
 
@@ -165,7 +173,6 @@ public class PartLightSource extends SubInfoType<ModularVehicleInfo> implements 
                 GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             }
         }
-        MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.LIGHTS, (RenderBaseVehicle<?>) render, entity, PhysicsEntityEvent.Phase.POST, partialTicks, null));
     }
 
     @Override

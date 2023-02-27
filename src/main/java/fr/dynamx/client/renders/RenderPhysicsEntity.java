@@ -24,6 +24,7 @@ import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.MinecraftForge;
 import org.lwjgl.util.vector.Quaternion;
 
@@ -60,27 +61,29 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
         Vector3fPool.openPool();
         GlQuaternionPool.openPool();
         Quaternion appliedRotation = null;
+        int renderPass = MinecraftForgeClient.getRenderPass();
         //Render vehicle
-        if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.ENTITY, x, y, z, partialTicks, null))) {
+        if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.ENTITY, x, y, z, partialTicks, renderPass))) {
             GlStateManager.pushMatrix();
             {
                 appliedRotation = setupRenderTransform(entity, x, y, z, entityYaw, partialTicks);
                 renderMain(entity, partialTicks);
                 renderParts(entity, partialTicks);
-                spawnParticles(entity, appliedRotation, partialTicks);
             }
             GlStateManager.popMatrix();
         }
-
-        //Render players inside the entity
-        if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.RIDDING_PLAYERS, x, y, z, partialTicks, null))) {
-            renderRidingEntities(entity, x, y, z, partialTicks, appliedRotation);
+        if(MinecraftForgeClient.getRenderPass() == 0) {
+            spawnParticles(entity, appliedRotation, partialTicks);
+            //Render players inside the entity
+            if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.RIDDING_PLAYERS, x, y, z, partialTicks, renderPass))) {
+                renderRidingEntities(entity, x, y, z, partialTicks, appliedRotation);
+            }
+            //Render debug
+            if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.DEBUG, x, y, z, partialTicks, renderPass))) {
+                renderDebug(entity, x, y, z, partialTicks);
+            }
         }
-        //Render debug
-        if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.DEBUG, x, y, z, partialTicks, null))) {
-            renderDebug(entity, x, y, z, partialTicks);
-        }
-        MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.POST, x, y, z, partialTicks, null));
+        MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.POST, x, y, z, partialTicks, renderPass));
         Vector3fPool.closePool();
         QuaternionPool.closePool();
         GlQuaternionPool.closePool();

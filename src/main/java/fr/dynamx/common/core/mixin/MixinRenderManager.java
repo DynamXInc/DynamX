@@ -23,7 +23,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * we can make them fail the test in the third and final step
  * @see MixinRenderGlobal for the final step
  */
-@Mixin(value = RenderManager.class, remap = MixinChunk.REMAP)
+@Mixin(value = RenderManager.class)
 public abstract class MixinRenderManager {
 
     @Inject(method = "renderEntity",

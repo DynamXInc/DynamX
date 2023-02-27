@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * In this step we execute the basic things to use our stencil buffer. Then, we make everything pass the stencil test
  * @see MixinRenderManager for the second step
  */
-@Mixin(value = EntityRenderer.class, remap = MixinChunk.REMAP)
+@Mixin(value = EntityRenderer.class)
 public abstract class MixinEntityRenderer {
 
     @Inject(method = "renderWorldPass(IFJ)V",

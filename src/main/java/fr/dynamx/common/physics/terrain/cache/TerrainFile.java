@@ -31,7 +31,7 @@ public class TerrainFile extends VirtualTerrainFile {
 
     public TerrainFile(File container, boolean isSlopes) {
         if (DynamXConfig.enableDebugTerrainManager)
-            DynamXMain.log.info("Chunk debug pos are " + DynamXConfig.chunkDebugPoses);
+            DynamXMain.log.info("Chunk debug pos are " + DynamXConfig.chunkDebugPoses+" // load " + container);
         this.container = container;
         this.version = isSlopes ? SLOPES_VERSION : VERSION;
     }

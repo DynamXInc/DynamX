@@ -16,6 +16,7 @@ import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.common.handlers.TaskScheduler;
 import fr.dynamx.common.physics.utils.RigidBodyTransform;
@@ -181,9 +182,9 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     }
 
     @Override
-    public void addModules(BaseVehicleEntity<?> entity, ModuleListBuilder modules) {
+    public void addModules(PackPhysicsEntity<?, ?> entity, ModuleListBuilder modules) {
         if (!modules.hasModuleOfClass(DoorsModule.class)) {
-            modules.add(new DoorsModule(entity));
+            modules.add(new DoorsModule((BaseVehicleEntity<?>) entity));
         }
     }
 

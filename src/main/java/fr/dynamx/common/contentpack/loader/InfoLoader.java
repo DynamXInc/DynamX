@@ -269,16 +269,20 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
     protected ISubInfoType<T> getClassForPropertyOwner(T obj, String name) {
         if(infoTypesRegistry == null) return null;
         String[] tags = name.split("#");
+        String key = tags[0].toLowerCase();
         //Take strict before, and longer keys before
-        Collection<SubInfoTypeEntry<T>> types = infoTypesRegistry.getRegisteredEntries().stream().sorted((t1, t2) -> t1.isStrict() != t2.isStrict() ? (t1.isStrict() ? -1 : 1) : t2.getKey().length() - t1.getKey().length()).collect(Collectors.toList());
+        Collection<SubInfoTypeEntry<T>> types = infoTypesRegistry.getEntries().values().stream().sorted((t1, t2) -> t1.isStrict() != t2.isStrict() ? (t1.isStrict() ? -1 : 1) : t2.getKey().length() - t1.getKey().length()).collect(Collectors.toList());
         for (SubInfoTypeEntry<T> type : types) {
-            if (type.matches(tags[0]))
+            if (type.matches(key))
                 return type.create(obj, tags[0]);
         }
-        if (tags.length > 1 && optionalDependencyMatcher.test(tags[1]))
-            DynamXMain.log.debug("Ignoring optional block " + name + " in " + obj);
-        else
+        if(key.contains("seat") && infoTypesRegistry.getEntries().containsKey("seat")) {
+            DynamXErrorManager.addPackError(obj.getPackName(), "deprecated_seat_config", ErrorLevel.LOW, obj.getName(), name);
+            return infoTypesRegistry.getEntries().get("seat").create(obj, tags[0]);
+        }
+        if (tags.length == 1 || !optionalDependencyMatcher.test(tags[1]))
             DynamXErrorManager.addPackError(obj.getPackName(), "unknown_sub_info", ErrorLevel.HIGH, obj.getName(), name);
+        // else optional block
         return null;
     }
 

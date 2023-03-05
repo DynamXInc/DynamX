@@ -116,7 +116,10 @@ public class SynchronizedEntityVariableRegistry {
                     EntityVariable<?> v = (EntityVariable<?>) f.get(instance);
                     f.setAccessible(false);
                     v.init(variable, findSerializer(variable));
-                    synchronizer.registerVariable(syncVarRegistry.get(variable), v);
+                    if (syncVarRegistry.containsKey(variable))
+                        synchronizer.registerVariable(syncVarRegistry.get(variable), v);
+                    else
+                        DynamXMain.log.error("SynchronizedVariable " + variable + " not registered !");
                 }
             }
             clazz = clazz.getSuperclass();

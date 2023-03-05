@@ -1,6 +1,7 @@
 package fr.dynamx.client.renders.model.texture;
 
 import fr.aym.acslib.impl.services.thrload.ThreadedTexture;
+import fr.dynamx.common.DynamXMain;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
@@ -29,10 +30,17 @@ public class MaterialTexture {
 
     public void uploadTexture(TextureManager man) {
         ITextureObject obj = man.getTexture(path);
-        if(obj == null) //happens sometimes o_o
+        if (obj == null) { // happens sometimes o_0
             loadTexture(man);
-        if (obj instanceof ThreadedTexture)
-            ((ThreadedTexture) obj).uploadTexture(man);
-        glTextureId = obj.getGlTextureId();
+            obj = man.getTexture(path);
+        }
+        if (obj != null) {
+            if (obj instanceof ThreadedTexture) {
+                ((ThreadedTexture) obj).uploadTexture(man);
+                glTextureId = obj.getGlTextureId();
+            }
+        } else {
+            DynamXMain.log.warn("Texture could not be uploaded because it is null");
+        }
     }
 }

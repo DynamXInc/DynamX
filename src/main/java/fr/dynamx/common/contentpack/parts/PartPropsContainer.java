@@ -8,6 +8,7 @@ import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.PropsContainerModule;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
@@ -32,9 +33,9 @@ public class PartPropsContainer extends BasePart<ModularVehicleInfo> implements 
     }
 
     @Override
-    public void addModules(BaseVehicleEntity<?> entity, ModuleListBuilder modules) {
+    public void addModules(PackPhysicsEntity<?, ?> entity, ModuleListBuilder modules) {
         if (!modules.hasModuleOfClass(PropsContainerModule.class)) {
-            modules.add(new PropsContainerModule(entity));
+            modules.add(new PropsContainerModule((BaseVehicleEntity<?>) entity));
         }
     }
 

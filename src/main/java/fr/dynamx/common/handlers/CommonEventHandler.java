@@ -142,7 +142,7 @@ public class CommonEventHandler {
         World world = event.getWorld();
         world.addEventListener(new DynamXWorldListener());
         if(event.getWorld().isRemote || FMLCommonHandler.instance().getMinecraftServerInstance().isDedicatedServer()) {
-            DynamXMain.proxy.providePhysicsWorld(event.getWorld());
+            DynamXMain.proxy.initPhysicsWorld(event.getWorld());
         }
     }
 

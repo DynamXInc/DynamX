@@ -250,8 +250,9 @@ public class ClientEventHandler {
         if (connectionTime != -1 && !Minecraft.getMinecraft().isSingleplayer() && DynamXConfig.useUdp) {
             if ((System.currentTimeMillis() - connectionTime) > 30000) {
                 if (!DynamXContext.getNetwork().isConnected()) {
-                    DynamXMain.log.warn("Failed to establish an UDP connection : timed out (0x1)");
-                    if (Minecraft.getMinecraft().getConnection() != null)
+                    DynamXMain.log.fatal("Failed to establish an UDP connection : timed out (0x1)");
+                    connectionTime = -1;
+                    if (Minecraft.getMinecraft().getConnection() != null && DynamXConfig.doUdpTimeOut)
                         Minecraft.getMinecraft().getConnection().getNetworkManager().closeChannel(new TextComponentString("DynamX UDP connection timed out (Auth not started)"));
                 } else
                     connectionTime = -1;

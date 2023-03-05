@@ -28,9 +28,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Semaphore;
@@ -40,12 +38,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Base class for the two DynamX physics worlds
  */
 public abstract class BasePhysicsWorld implements IPhysicsWorld {
-    protected final PhysicsSoftSpace dynamicsWorld;
+    protected PhysicsSoftSpace dynamicsWorld;
     protected final PhysicsWorldTerrain manager;
     protected final World mcWorld;
 
     protected final Set<PhysicsJoint> joints = new HashSet<>();
-    protected final List<PhysicsEntity<?>> entities = new ArrayList<>();
+    protected final HashSet<PhysicsEntity<?>> entities = new HashSet<>();
 
     protected final ConcurrentLinkedQueue<Runnable> scheduledTasks = new ConcurrentLinkedQueue<>();
     protected final ConcurrentLinkedQueue<PhysicsWorldOperation<?>> operations = new ConcurrentLinkedQueue<>();
@@ -56,9 +54,15 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
         Vector3fPool.openPool(); //Open a pool for the whole session, the Vector3f created here may be used forever
         TransformPool.getPool().openSubPool();
         BoundingBoxPool.getPool().openSubPool();
-
         this.mcWorld = world;
+        this.manager = new PhysicsWorldTerrain(this, mcWorld, isRemoteWorld);
+    }
 
+    /**
+     * Initializes the bullet physics world <br>
+     * Should be fired by the physics thread
+     */
+    protected void initPhysicsWorld() {
         Vector3f min = new Vector3f(Float.MIN_VALUE, Float.MIN_VALUE, Float.MIN_VALUE);
         Vector3f max = new Vector3f(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
 
@@ -80,7 +84,7 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
             public void onContactEnded(long manifoldId) {
             }
         };
-        manager = new PhysicsWorldTerrain(this, mcWorld, isRemoteWorld);
+        dynamicsWorld.setForceUpdateAllAabbs(false); // only tick the aabbs from the CollisionObjects when it is active
     }
 
     /**

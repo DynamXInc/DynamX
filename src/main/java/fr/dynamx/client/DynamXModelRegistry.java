@@ -17,7 +17,6 @@ import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
-import fr.dynamx.common.contentpack.PackInfo;
 import fr.dynamx.common.contentpack.loader.InfoLoader;
 import fr.dynamx.common.contentpack.type.objects.ArmorObject;
 import fr.dynamx.common.objloader.MTLLoader;
@@ -34,7 +33,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static fr.dynamx.common.DynamXMain.log;
 
@@ -66,18 +68,6 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
         registerModel(location, null);
     }
 
-    public static final PackInfo BASE_PACKINFO = new PackInfo(DynamXConstants.ID, ContentPackType.BUILTIN);
-
-    @Deprecated
-    public void registerModel(String location) {
-        registerModel(new ObjModelPath(BASE_PACKINFO, new ResourceLocation(DynamXConstants.ID, String.format("models/%s", location))), null);
-    }
-
-    @Deprecated
-    public void registerModel(String location, IModelTextureVariantsSupplier customTextures) {
-        registerModel(new ObjModelPath(BASE_PACKINFO, new ResourceLocation(DynamXConstants.ID, String.format("models/%s", location))), customTextures);
-    }
-
     /**
      * Registers a model
      *
@@ -107,16 +97,6 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
      * @throws IllegalArgumentException If the model wasn't registered (should be done before DynamX pre initialization)
      */
     public ObjModelRenderer getModel(ResourceLocation name) {
-        /*for(ObjModelData data : DynamXContext.getObjModelDataCache().values()) {
-            List<String> objs = new ArrayList<>();
-            for(ObjObjectData d : data.getObjObjects()) {
-                if(d.getMesh() != null && d.getMesh().vertices != null)
-                    objs.add(d.getName());
-            }
-            if(!objs.isEmpty()) {
-                System.out.println("ERR " + data.getObjModelPath()+" "+objs);
-            }
-        }*/
         if (!MODELS.containsKey(name)) {
             if (!ERRORED_MODELS.contains(name)) {
                 log.error("Obj model " + name + " isn't registered !");
@@ -239,22 +219,19 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
 
     @Override
     public void onPackInfosReloaded() {
-        MODELS_REGISTRY.clear();
+        MODELS_REGISTRY.keySet().removeIf(path -> path.getPackLocations().get(0).getPackType() != ContentPackType.BUILTIN);
+        REGISTRY_CLOSED = false;
         //Registers all models avoiding duplicates
         //This doesn't load them, its done by the MC's resource manager
         for (InfoLoader<?> infoLoader : DynamXObjectLoaders.getLoaders()) {
             for (INamedObject namedObject : infoLoader.getInfos().values()) {
                 if (namedObject instanceof IObjPackObject && ((IObjPackObject) namedObject).shouldRegisterModel()) {
                     ObjModelPath modelPath = DynamXUtils.getModelPath(namedObject.getPackName(), ((IObjPackObject) namedObject).getModel());
-                    if (REGISTRY_CLOSED) {
-                        // override old variants supplier
-                        MODELS_REGISTRY.put(modelPath, (IModelTextureVariantsSupplier) namedObject);
-                    } else {
-                        registerModel(modelPath, (IModelTextureVariantsSupplier) namedObject);
-                    }
+                    registerModel(modelPath, (IModelTextureVariantsSupplier) namedObject);
                 }
             }
         }
+        REGISTRY_CLOSED = true;
         log.info("Registered " + getLoadedModelCount() + " obj models");
     }
 }

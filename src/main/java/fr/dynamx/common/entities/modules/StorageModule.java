@@ -3,6 +3,8 @@ package fr.dynamx.common.entities.modules;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.common.contentpack.parts.PartStorage;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.ModularPhysicsEntity;
+import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.physics.entities.PackEntityPhysicsHandler;
 import lombok.Getter;
 import net.minecraft.inventory.IInventory;
@@ -21,11 +23,11 @@ public class StorageModule implements IPhysicsModule<PackEntityPhysicsHandler<?,
     @Getter
     private final Map<Byte, InventoryBasic> inventories = new HashMap<>();
 
-    public StorageModule(BaseVehicleEntity<?> entity, PartStorage partStorage) {
+    public StorageModule(PackPhysicsEntity<?, ?> entity, PartStorage partStorage) {
         addInventory(entity, partStorage);
     }
 
-    public void addInventory(BaseVehicleEntity<?> entity, PartStorage partStorage) {
+    public void addInventory(PackPhysicsEntity<?, ?> entity, PartStorage partStorage) {
         inventories.put(partStorage.getId(), new InventoryBasic(entity.getPackInfo().getName(), false, partStorage.getStorageSize()));
     }
 

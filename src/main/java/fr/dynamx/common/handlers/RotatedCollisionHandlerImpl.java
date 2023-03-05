@@ -16,7 +16,6 @@ import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.*;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -308,21 +307,19 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
      */
     private PooledHashMap<Vector3f, ICollidableObject> getCollidableTileEntities(World world, MutableBoundingBox inBox) {
         PooledHashMap<Vector3f, ICollidableObject> entities = HashMapPool.get();
-        BlockPos.MutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain();
-        Chunk lastChunk = null;
-        Vector3f radius = inBox.getSize().divideLocal(2);
+
+        int minChunkX = (int) Math.floor(inBox.minX) >> 4;
+        int maxChunkX = (int) Math.floor(inBox.maxX) >> 4;
+        int minChunkZ = (int) Math.floor(inBox.minZ) >> 4;
+        int maxChunkZ = (int) Math.floor(inBox.maxZ) >> 4;
+
         // Iterate on chunks near to the player
-        for (int x = (int) Math.floor(inBox.minX); x <= inBox.maxX; x += Math.ceil(radius.x)) {
-            for (int y = (int) Math.floor(inBox.minY); y <= inBox.maxY; y += Math.ceil(radius.y)) {
-                for (int z = (int) Math.floor(inBox.minZ); z <= inBox.maxZ; z += Math.ceil(radius.z)) {
-                    pos.setPos(x, y, z);
-                    if (lastChunk == null || lastChunk.x != (x >> 4) || lastChunk.z != (z >> 4)) {
-                        // If it's a new chunk, add all ICollidableObject inside the box
-                        lastChunk = world.getChunk(pos);
-                        for (Map.Entry<BlockPos, TileEntity> te : lastChunk.getTileEntityMap().entrySet()) {
-                            if (te.getValue() instanceof ICollidableObject && inBox.contains(te.getKey()))
-                                entities.put(Vector3fPool.get(te.getKey().getX(), te.getKey().getY(), te.getKey().getZ()), (ICollidableObject) te.getValue());
-                        }
+        for (int chunkX = minChunkX; chunkX <= maxChunkX; chunkX++) {
+            for (int chunkZ = minChunkZ; chunkZ <= maxChunkZ; chunkZ++) {
+                Chunk chunk = world.getChunk(chunkX, chunkZ);
+                for (Map.Entry<BlockPos, TileEntity> te : chunk.getTileEntityMap().entrySet()) {
+                    if (te.getValue() instanceof ICollidableObject && inBox.contains(te.getKey())) {
+                        entities.put(Vector3fPool.get(te.getKey().getX(), te.getKey().getY(), te.getKey().getZ()), (ICollidableObject) te.getValue());
                     }
                 }
             }
@@ -339,9 +336,7 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
 
     @Override
     public double[] handleCollisionWithBulletEntities(Entity entity, double mx, double my, double mz) {
-        //if(true)
-        //return new double[] {mx, my, mz};
-        double icollidableCheckRadius = entity instanceof EntityPlayer ? DynamXConfig.blockCollisionRadius : 0;
+        double icollidableCheckRadius = DynamXConfig.blockCollisionRadius;
         AxisAlignedBB copy = entity.getEntityBoundingBox().grow(0);
 
         int multiplier = entity instanceof EntityPlayer ? 2 : 1;
@@ -374,8 +369,7 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
         }
 
         motionChanged = false;
-        if (entity instanceof EntityLivingBase) // && !(entity instanceof PhysicsEntity))
-        {
+        if (!(entity instanceof PhysicsEntity)) {
             PooledHashMap<Vector3f, ICollidableObject> collidableEntities = getCollidableTileEntities(entity.world, new MutableBoundingBox(entity.getEntityBoundingBox()).grow(icollidableCheckRadius));
             for (Map.Entry<Vector3f, ICollidableObject> e : collidableEntities.entrySet()) {
                 //System.out.println("Input "+mx+" "+my+" "+mz+" "+nx+" "+ny+" "+nz+" "+entity.onGround+" "+entity.collidedVertically+" "+e.physicsPosition);

@@ -1,13 +1,13 @@
 package fr.dynamx.common.contentpack.type.vehicle;
 
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.CarEngineModule;
 
 import javax.annotation.Nullable;
@@ -140,8 +140,8 @@ public class CarEngineInfo extends SubInfoTypeOwner<CarEngineInfo> implements IS
     }
 
     @Override
-    public void addModules(BaseVehicleEntity<?> entity, ModuleListBuilder modules) {
-        modules.add(new CarEngineModule(entity, this));
+    public void addModules(PackPhysicsEntity<?, ?> entity, ModuleListBuilder modules) {
+        modules.add(new CarEngineModule((BaseVehicleEntity<?>) entity, this));
     }
 }
 

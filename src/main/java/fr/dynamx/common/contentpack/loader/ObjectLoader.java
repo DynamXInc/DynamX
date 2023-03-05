@@ -36,7 +36,6 @@ import static fr.dynamx.common.DynamXMain.log;
  *
  * @param <T> The objects class
  * @param <C> The owners class
- * @param <U> The object type if it's an {@link ISubInfoTypeOwner} and you use a {@link SubInfoTypesRegistry}, or {@link fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner.Empty}
  * @see ObjectInfo
  */
 public class ObjectLoader<T extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C extends IInfoOwner<?>> extends InfoLoader<T> {
@@ -95,7 +94,7 @@ public class ObjectLoader<T extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C exte
         owners.add((IInfoOwner<T>) owner);
         builtinObjects.add(info);
         if (DynamXObjectLoaders.PACKS.findPackLocations(modName).isEmpty())
-            DynamXObjectLoaders.PACKS.loadItems(new PackInfo(modName, ContentPackType.BUILTIN), false);
+            DynamXObjectLoaders.PACKS.loadItems(PackInfo.forAddon(modName), false);
         return info;
     }
 
@@ -119,7 +118,7 @@ public class ObjectLoader<T extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C exte
                     String creativeTabName = ((AbstractItemObject<?, ?>) info).getCreativeTabName();
                     if (creativeTabName != null && !creativeTabName.equalsIgnoreCase("None")) {
                         if (DynamXItemRegistry.creativeTabs.stream().noneMatch(p -> DynamXReflection.getCreativeTabName(p).equals(creativeTabName))) {
-                            DynamXItemRegistry.creativeTabs.add(new CreativeTabs(creativeTabName) {
+                            CreativeTabs tab = new CreativeTabs(creativeTabName) {
                                 @Override
                                 public ItemStack createIcon() {
                                     if (tabItem[0] != null) {
@@ -127,7 +126,10 @@ public class ObjectLoader<T extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C exte
                                     }
                                     return new ItemStack(Items.APPLE);
                                 }
-                            });
+                            };
+                            DynamXItemRegistry.creativeTabs.add(tab);
+                            if(client)
+                                ContentPackUtils.addMissingLangFile(DynamXMain.resDir, info.getPackName(), tab.getTranslationKey(), tab.getTabLabel());
                         }
                     }
                 }
@@ -141,7 +143,9 @@ public class ObjectLoader<T extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C exte
                         if (client) {
                             if (ob instanceof IResourcesOwner && ((IResourcesOwner) ob).createTranslation()) {
                                 for (int metadata = 0; metadata < ((IResourcesOwner) ob).getMaxMeta(); metadata++) {
-                                    ContentPackUtils.addMissingLangFile(DynamXMain.resDir, (IInfoOwner<T>) ob, metadata);
+                                    String translationKey = info.getTranslationKey((IInfoOwner) ob, metadata) + ".name";
+                                    String translationValue = info.getTranslatedName((IInfoOwner) ob, metadata);
+                                    ContentPackUtils.addMissingLangFile(DynamXMain.resDir, info.getPackName(), translationKey, translationValue);
                                 }
                             }
                         }

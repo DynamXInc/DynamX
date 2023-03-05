@@ -1,9 +1,11 @@
 package fr.dynamx.common.entities;
 
 import com.jme3.math.Vector3f;
+import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.objects.PropObject;
+import fr.dynamx.common.entities.modules.LightsModule;
 import fr.dynamx.common.physics.entities.PackEntityPhysicsHandler;
 import fr.dynamx.common.physics.entities.PropPhysicsHandler;
 import fr.dynamx.utils.DynamXConfig;
@@ -40,6 +42,8 @@ public class PropsEntity<T extends PackEntityPhysicsHandler<PropObject<?>, ?>> e
                     setDead();
                 }
             }
+            if(getModuleByType(LightsModule.class) != null)
+                getModuleByType(LightsModule.class).setLightOn(3, true);
         }
     }
 
@@ -88,5 +92,11 @@ public class PropsEntity<T extends PackEntityPhysicsHandler<PropObject<?>, ?>> e
             }
         }
         return unrotatedBoxes;
+    }
+
+    @Override
+    protected void createModules(ModuleListBuilder modules) {
+        super.createModules(modules);
+        getPackInfo().addModules(this, modules);
     }
 }

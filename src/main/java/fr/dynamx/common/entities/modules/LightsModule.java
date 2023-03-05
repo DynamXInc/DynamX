@@ -2,9 +2,9 @@ package fr.dynamx.common.entities.modules;
 
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
+import fr.dynamx.common.contentpack.parts.ILightOwner;
 import fr.dynamx.common.contentpack.parts.LightObject;
 import fr.dynamx.common.contentpack.parts.PartLightSource;
-import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -13,18 +13,18 @@ import net.minecraftforge.common.util.Constants;
 import java.util.HashMap;
 import java.util.Map;
 
-public class VehicleLightsModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, IPackInfoReloadListener {
-    private final BaseVehicleEntity<?> entity;
+public class LightsModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, IPackInfoReloadListener {
+    private final ILightOwner<?> lightOwner;
     private final Map<Integer, Boolean> lightStates = new HashMap<>();
 
-    public VehicleLightsModule(BaseVehicleEntity<?> entity) {
-        this.entity = entity;
+    public LightsModule(ILightOwner<?> lightOwner) {
+        this.lightOwner = lightOwner;
         onPackInfosReloaded();
     }
 
     @Override
     public void onPackInfosReloaded() {
-        for (PartLightSource compound : entity.getPackInfo().getLightSources().values()) {
+        for (PartLightSource compound : lightOwner.getLightSources().values()) {
             for (LightObject s : compound.getSources()) {
                 lightStates.put(s.getLightId(), false);
             }

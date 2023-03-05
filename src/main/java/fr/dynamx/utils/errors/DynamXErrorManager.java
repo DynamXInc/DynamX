@@ -127,6 +127,7 @@ public class DynamXErrorManager {
         registerErrorFormatter(PACKS__ERRORS, "deprecated_prop_format", FORMATTER_MULTIPLE_ERROR);
         registerErrorFormatter(PACKS__ERRORS, "missing_prop", FORMATTER_MULTIPLE_ERROR);
         registerErrorFormatter(PACKS__ERRORS, "unknown_sub_info", FORMATTER_MULTIPLE_ERROR_ONE_LI);
+        registerErrorFormatter(PACKS__ERRORS, "deprecated_seat_config", FORMATTER_MULTIPLE_ERROR_ONE_LI);
         registerErrorFormatter(PACKS__ERRORS, "sound_error", FORMATTER_MULTIPLE_ERROR);
         registerErrorFormatter(PACKS__ERRORS, "config_error", FORMATTER_MULTIPLE_ERROR);
         registerErrorFormatter(PACKS__ERRORS, "pack_requirements", FORMATTER_MULTIPLE_ERROR); //FORMAT
@@ -139,5 +140,6 @@ public class DynamXErrorManager {
         registerErrorFormatter(MODEL_ERRORS, "obj_error", FORMATTER_SINGLE_ERROR);
         registerErrorFormatter(MODEL_ERRORS, "obj_none_material", FORMATTER_MULTIPLE_ERROR_ONE_LI);
         registerErrorFormatter(PACKS__ERRORS, "deprecated_light_format", FORMATTER_MULTIPLE_ERROR);
+        registerErrorFormatter(PACKS__ERRORS, "wheel_invalid_suspaxis", FORMATTER_MULTIPLE_ERROR);
     }
 }

@@ -15,7 +15,7 @@ public class DynamXConstants
     public static final String DEFAULT_ACSGUIS_VERSION = "1.2.5";
     public static final String ACSLIBS_REQUIRED_VERSION = "[1.2.2,)";
 
-    public static final String LIBBULLET_VERSION = "16.3.0";
+    public static final String LIBBULLET_VERSION = "18.1.0";
     /** .dc file version, only change when an update of libbullet breaks the .dc files, to regenerate them */
     public static final String DC_FILE_VERSION = "12.5.0";
     /**
@@ -27,4 +27,5 @@ public class DynamXConstants
     public static final String MPS_URL = "https://dynamx.fr/mps/", MPS_AUX_URL = "https://mps2.dynamx.fr/", MPS_KEY = "", MPS_STARTER = null;
 
     public static final String STATS_URL = "https://dynamx.fr/statsbot/statsbotrcv.php", STATS_PRODUCT = "DNX_"+VERSION+"_BETA", STATS_TOKEN = "";
+    public static final boolean REMAP = false;
 }

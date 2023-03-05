@@ -27,4 +27,5 @@ public class DynamXConstants
     public static final String MPS_URL = "https://dynamx.fr/mps/", MPS_AUX_URL = "https://mps2.dynamx.fr/", MPS_KEY = "", MPS_STARTER = null;
 
     public static final String STATS_URL = "https://dynamx.fr/statsbot/statsbotrcv.php", STATS_PRODUCT = "DNX_"+VERSION+"_BETA", STATS_TOKEN = "";
+    public static final boolean REMAP = false;
 }

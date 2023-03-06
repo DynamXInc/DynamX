@@ -49,8 +49,7 @@ public class EnginePhysicsHandler implements IPackInfoReloadListener {
             gearBox.setGear(i, gear.getSpeedRange()[0], gear.getSpeedRange()[1], gear.getRpmRange()[0], gear.getRpmRange()[1]);
         }
         //TODO BOUGER ça
-        if (propulsionHandler instanceof WheelsPhysicsHandler)
-            gearBoxHandler = new AutomaticGearboxHandler(this, gearBox, (WheelsPhysicsHandler) propulsionHandler);// propulsionHandler.createGearBox(module, this);
+        gearBoxHandler = new AutomaticGearboxHandler(this, gearBox, propulsionHandler);// propulsionHandler.createGearBox(module, this);
     }
 
     public void update() {

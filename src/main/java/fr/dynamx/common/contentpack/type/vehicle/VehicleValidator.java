@@ -55,7 +55,10 @@ public interface VehicleValidator {
         public void validate(ModularVehicleInfo info) {
             HelicopterPhysicsInfo physicsInfo = info.getSubPropertyByType(HelicopterPhysicsInfo.class);
             if (physicsInfo == null)
-                throw new IllegalArgumentException("Boat " + info.getFullName() + " has no HelicopterPhysics");
+                throw new IllegalArgumentException("Helicopter " + info.getFullName() + " has no HelicopterPhysics");
+            BaseEngineInfo engine = info.getSubPropertyByType(BaseEngineInfo.class);
+            if (engine == null)
+                throw new IllegalArgumentException("Helicopter " + info.getFullName() + " has no engine");
             List<PartRotor> rotors = info.getPartsByType(PartRotor.class);
             if (rotors.isEmpty())
                 throw new IllegalArgumentException("Helicopter " + info.getFullName() + " has no rotors");

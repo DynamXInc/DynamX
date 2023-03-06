@@ -12,6 +12,7 @@ import fr.dynamx.client.ClientProxy;
 import fr.dynamx.client.handlers.hud.HelicopterController;
 import fr.dynamx.client.sound.EngineSound;
 import fr.dynamx.common.contentpack.parts.PartHandle;
+import fr.dynamx.common.contentpack.type.vehicle.BaseEngineInfo;
 import fr.dynamx.common.contentpack.type.vehicle.HelicopterPhysicsInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.network.sync.variables.EntityFloatArrayVariable;
@@ -48,10 +49,12 @@ public class HelicopterEngineModule extends BasicEngineModule {
     @SynchronizedEntityVariable(name = "power")
     private EntityVariable<Float> power = new EntityVariable<Float>(SynchronizationRules.CONTROLS_TO_SPECTATORS, 0f);
     private HelicopterPhysicsInfo physicsInfo;
+    private BaseEngineInfo engineInfo;
 
     public HelicopterEngineModule(BaseVehicleEntity<? extends BaseVehiclePhysicsHandler<?>> entity) {
         super(entity);
         physicsInfo = entity.getPackInfo().getSubPropertyByType(HelicopterPhysicsInfo.class);
+        engineInfo = entity.getPackInfo().getSubPropertyByType(BaseEngineInfo.class);
     }
 
     public void setPower(float power) {
@@ -98,15 +101,15 @@ public class HelicopterEngineModule extends BasicEngineModule {
     @Override
     @SideOnly(Side.CLIENT)
     protected String getStartingSound(boolean forInterior) {
-        return forInterior ? physicsInfo.startingSoundInterior : physicsInfo.startingSoundExterior;
+        return engineInfo == null ? "null" : forInterior ? engineInfo.startingSoundInterior : engineInfo.startingSoundExterior;
     }
 
     @Override
     @SideOnly(Side.CLIENT)
     protected void updateSounds() {
-        if (physicsInfo != null && physicsInfo.getEngineSounds() != null) {
+        if (engineInfo != null && engineInfo.getEngineSounds() != null) {
             if (sounds.isEmpty()) { //Sounds are not initialized
-                physicsInfo.getEngineSounds().forEach(engineSound -> sounds.put(engineSound.id, new EngineSound(engineSound, entity, this)));
+                engineInfo.getEngineSounds().forEach(engineSound -> sounds.put(engineSound.id, new EngineSound(engineSound, entity, this)));
             }
             if (isEngineStarted()) {
                 boolean forInterior = Minecraft.getMinecraft().gameSettings.thirdPersonView == 0 && entity.isRidingOrBeingRiddenBy(Minecraft.getMinecraft().player);

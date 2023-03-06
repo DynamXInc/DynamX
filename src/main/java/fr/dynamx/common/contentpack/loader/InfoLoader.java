@@ -8,13 +8,13 @@ import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeEntry;
 import fr.dynamx.common.DynamXMain;
+import fr.dynamx.common.contentpack.ContentPackLoader;
+import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.sync.PackSyncHandler;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 
 import javax.annotation.Nullable;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.BiFunction;
@@ -45,7 +45,7 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
     /**
      * A function matching an object packName and name with its object class
      */
-    protected final BiFunction<String, String, T> assetCreator;
+    protected final AssetCreator<T> assetCreator;
     /**
      * SubInfoTypesRegistry for this object
      */
@@ -56,6 +56,16 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
      * @param assetCreator A function matching an object packName and name with its object class
      */
     public InfoLoader(String prefix, BiFunction<String, String, T> assetCreator, @Nullable SubInfoTypesRegistry<T> infoTypesRegistry) {
+        this.prefix = prefix;
+        this.assetCreator = ((pack, name, firstLine) -> assetCreator.apply(pack, name));
+        this.infoTypesRegistry = infoTypesRegistry;
+    }
+
+    /**
+     * @param prefix       The prefix used to detect associated .dnx files
+     * @param assetCreator A function matching an object packName and name with its object class
+     */
+    public InfoLoader(String prefix, AssetCreator<T> assetCreator, @Nullable SubInfoTypesRegistry<T> infoTypesRegistry) {
         this.prefix = prefix;
         this.assetCreator = assetCreator;
         this.infoTypesRegistry = infoTypesRegistry;
@@ -82,19 +92,32 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
      *
      * @param loadingPack The pack owning the object
      * @param configName  The object's name
-     * @param inputStream The object file
+     * @param file The object file
      * @param hot         If it's an hot reload
      * @return True if this InfoLoader has loaded this object
      * @throws IOException If an error occurs while reading the stream
      */
-    public boolean load(String loadingPack, String configName, BufferedReader inputStream, boolean hot) throws IOException {
+    public boolean load(String loadingPack, String configName, ContentPackLoader.PackFile file, boolean hot) throws IOException {
         if (configName.startsWith(prefix)) {
-            T info = assetCreator.apply(loadingPack, configName);
-            if (infos.containsKey(info.getFullName()))
-                throw new IllegalArgumentException("Found a duplicated pack file " + configName + " in pack " + loadingPack + " !");
-            readInfo(inputStream, info);
-            loadItems(info, hot);
-            return true;
+
+            BufferedReader inputStream = null;
+            try {
+                inputStream = new BufferedReader(new InputStreamReader(file.getInputStream()));
+                T info = assetCreator.create(loadingPack, configName, null);
+                if (infos.containsKey(info.getFullName()))
+                    throw new IllegalArgumentException("Found a duplicated pack file " + configName + " in pack " + loadingPack + " !");
+                readInfo(inputStream, info);
+                loadItems(info, hot);
+                return true;
+            } finally {
+                if (inputStream != null) {
+                    try {
+                        inputStream.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
         }
         return false;
     }
@@ -367,6 +390,7 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
      */
     protected void encodeAObject(Map<String, byte[]> into, String objectKey, INamedObject object) {
         StringBuilder sdata = new StringBuilder();
+        sdata.append(object.getClass()).append("\n");
         Map<String, PackFilePropertyData<?>> data = SubInfoTypeAnnotationCache.getOrLoadData(object.getClass());
         data.forEach((n, p) ->
         {
@@ -398,11 +422,14 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
             String pack = of.substring(0, of.indexOf('.'));
             String object = of.substring(of.indexOf('.') + 1);
             if (o.charAt(0) == '*' || o.charAt(0) == '-') {
-                T obj = o.charAt(0) == '*' ? findInfo(of) : assetCreator.apply(pack, object);
+                String[] split = new String(d, StandardCharsets.UTF_8).split("\n");
+                T obj = o.charAt(0) == '*' ? findInfo(of) : assetCreator.create(pack, object, split[0]);
                 if (obj == null)
                     throw new IllegalArgumentException("Object " + o.substring(1) + " not found for pack sync in " + getPrefix());
                 try {
-                    decodeAObject(obj, d);
+                    String[] props = new String[split.length-1];
+                    System.arraycopy(split, 1, props, 0, split.length-1);
+                    decodeAObject(obj, props);
                     loadItems(obj, o.charAt(0) == '*');
                 } catch (UnsupportedEncodingException e) {
                     throw new RuntimeException("Cannot decode  " + of, e);
@@ -424,11 +451,10 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
      * Permits to keep same objects on server and client sides
      *
      * @param obj     The object to override
-     * @param dataStr The object data
+     * @param split The object data
      */
-    protected void decodeAObject(INamedObject obj, byte[] dataStr) throws UnsupportedEncodingException {
+    protected void decodeAObject(INamedObject obj, String[] split) throws UnsupportedEncodingException {
         Map<String, PackFilePropertyData<?>> data = SubInfoTypeAnnotationCache.getOrLoadData(obj.getClass());
-        String[] split = new String(dataStr, StandardCharsets.UTF_8).split("\n");
         int i = 0;
         if (split.length != data.size()) {
             throw new IllegalStateException("Wrong number of properties srv " + split.length + " cli " + data.size());
@@ -458,5 +484,9 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
 
     public boolean hasSubInfoTypesRegistry() {
         return infoTypesRegistry != null;
+    }
+
+    public interface AssetCreator<T extends INamedObject> {
+        T create(String pack, String name, String clazz);
     }
 }

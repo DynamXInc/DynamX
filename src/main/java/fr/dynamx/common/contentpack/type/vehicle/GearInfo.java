@@ -9,7 +9,7 @@ import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 /**
  * Automatic gear of an {@link CarEngineInfo}
  */
-@RegisteredSubInfoType(name = "gear", registries = SubInfoTypeRegistries.ENGINES, strictName = false)
+@RegisteredSubInfoType(name = "gear", registries = SubInfoTypeRegistries.CAR_ENGINES, strictName = false)
 public class GearInfo extends SubInfoType<CarEngineInfo> {
     private byte id;
     private final String gearName;

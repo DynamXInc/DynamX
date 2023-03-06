@@ -11,7 +11,7 @@ import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 /**
  * Power point of the rpm graph of an {@link CarEngineInfo}
  */
-@RegisteredSubInfoType(name = "point", registries = SubInfoTypeRegistries.ENGINES, strictName = false)
+@RegisteredSubInfoType(name = "point", registries = SubInfoTypeRegistries.CAR_ENGINES, strictName = false)
 public class RPMPower extends SubInfoType<CarEngineInfo> {
     @PackFileProperty(configNames = "RPMPower", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_0Z)
     private Vector3f rpmPower; //It's a Vector3f because of the Spline

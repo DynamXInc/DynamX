@@ -12,6 +12,10 @@ public interface VehicleValidator {
 
     void validate(ModularVehicleInfo info);
 
+    default Class<? extends BaseEngineInfo> getEngineClass() {
+        return CarEngineInfo.class;
+    }
+
     VehicleValidator CAR_VALIDATOR = info -> {
         CarEngineInfo engine = info.getSubPropertyByType(CarEngineInfo.class);
         if (engine == null) //This will prevent any crash when spawning the vehicle

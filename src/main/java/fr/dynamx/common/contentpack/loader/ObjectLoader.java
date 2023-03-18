@@ -1,7 +1,6 @@
 package fr.dynamx.common.contentpack.loader;
 
 import fr.aym.acslib.api.services.error.ErrorLevel;
-import fr.dynamx.api.contentpack.ContentPackType;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
@@ -108,7 +107,7 @@ public class ObjectLoader<T extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C exte
                 if (!info.postLoad(hot))
                     continue;
             } catch (Exception e) {
-                DynamXErrorManager.addError(info.getPackName(), DynamXErrorManager.PACKS__ERRORS, "complete_object_error", ErrorLevel.FATAL, info.getName(), null, e);
+                DynamXErrorManager.addError(info.getPackName(), DynamXErrorManager.PACKS_ERRORS, "complete_object_error", ErrorLevel.FATAL, info.getName(), null, e);
                 continue;
             }
             if (!hot) {

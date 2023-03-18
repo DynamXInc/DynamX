@@ -216,7 +216,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
                 }
             }
         } catch (Exception e) {
-            DynamXErrorManager.addError(getPackName(), DynamXErrorManager.PACKS__ERRORS, "collision_shape_error", ErrorLevel.FATAL, getName(), null, e);
+            DynamXErrorManager.addError(getPackName(), DynamXErrorManager.PACKS_ERRORS, "collision_shape_error", ErrorLevel.FATAL, getName(), null, e);
             physicsCollisionShape = null;
             return false;
         }

@@ -48,7 +48,7 @@ public class GuiDnxDebug extends GuiFrame {
                 box.setText("Reloading...");
                 DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.CLIENT, DynamXLoadingTasks.PACK).thenAccept(empty -> {
                     box.setEnabled(true);
-                    if (DynamXErrorManager.getErrorManager().hasErrors(DynamXErrorManager.INIT_ERRORS, DynamXErrorManager.PACKS__ERRORS))
+                    if (DynamXErrorManager.getErrorManager().hasErrors(DynamXErrorManager.INIT_ERRORS, DynamXErrorManager.PACKS_ERRORS))
                         box.setText(TextFormatting.RED + "Some packs have errors");
                     else
                         box.setText("Packs reloaded");
@@ -91,7 +91,7 @@ public class GuiDnxDebug extends GuiFrame {
                 box4.setText("Reloading...");
                 DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.CLIENT, DynamXLoadingTasks.PACK, DynamXLoadingTasks.MODEL, DynamXLoadingTasks.CSS).thenAccept(empty -> {
                     box4.setEnabled(true);
-                    if (DynamXErrorManager.getErrorManager().hasErrors(DynamXErrorManager.INIT_ERRORS, DynamXErrorManager.PACKS__ERRORS, DynamXErrorManager.MODEL_ERRORS, ACsGuiApi.getCssErrorType()))
+                    if (DynamXErrorManager.getErrorManager().hasErrors(DynamXErrorManager.INIT_ERRORS, DynamXErrorManager.PACKS_ERRORS, DynamXErrorManager.MODEL_ERRORS, ACsGuiApi.getCssErrorType()))
                         box4.setText(TextFormatting.RED + "Check the errors menu");
                     else
                         box4.setText("Reloading finished");

@@ -76,7 +76,7 @@ public class PackFilePropertyData<T> {
         try {
             val = parse(value);
         } catch (Exception e) {
-            DynamXErrorManager.addError(on.getPackName(), DynamXErrorManager.PACKS__ERRORS, "property_parse_error", ErrorLevel.HIGH, on.getName(), getConfigFieldName(), e);
+            DynamXErrorManager.addError(on.getPackName(), DynamXErrorManager.PACKS_ERRORS, "property_parse_error", ErrorLevel.HIGH, on.getName(), getConfigFieldName(), e);
             return null; //Error while parsing
         }
         if(Modifier.isFinal(field.getModifiers()))

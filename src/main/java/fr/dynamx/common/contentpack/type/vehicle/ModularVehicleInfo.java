@@ -48,6 +48,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import scala.xml.dtd.impl.Base;
 
 import java.util.*;
 
@@ -244,7 +245,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
         }
         //Attach engine
         if (defaultEngine != null) {
-            CarEngineInfo engine = DynamXObjectLoaders.ENGINES.findInfo(defaultEngine);
+            BaseEngineInfo engine = DynamXObjectLoaders.ENGINES.findOrLoadInfo(defaultEngine, validator.getEngineClass());
             if (engine == null)
                 throw new IllegalArgumentException("Engine " + defaultEngine + " of " + getFullName() + " was not found, check file names and previous loading errors !");
             engine.appendTo(this);

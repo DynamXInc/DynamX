@@ -67,16 +67,15 @@ public class HelicopterPhysicsHandler<A extends HelicopterEntity<?>> extends Bas
             setForceActivation(true);
 
             // Gravity
-            // todo write in english :)
-            // Calcul de l'inclinaison de l'hélicoptère
-            // On prend un plan horizontal et on le rotate
+            // Calculation of the inclination of the helicopter
+            // We take a horizontal plane and rotate it
             Vector3f plane = Vector3fPool.get(1, 0, 1);
             plane = DynamXGeometry.rotateVectorByQuaternion(plane, getRotation());
             plane = plane.normalize();
-            // on récupère la composante verticale qui est proportionnelle à l'inclinaison de l'hélicoptère
-            // et on applique une force de gravité proportionnelle
-            // 0 si on est à l'horizontale et que power >= minPower
-            // minPower + inclinedGravityFactor si on est à 90° à la verticale (décrochage de l'hélico, il tombe)
+            // we get the vertical component which is proportional to the inclination of the helicopter
+            // and we apply a gravity force proportional
+            // 0 if we are horizontal and power >= minPower
+            // minPower + inclinedGravityFactor if we are at 90 ° to the vertical (helicopter stall, it falls)
             float requiredPower = Math.abs(plane.y) * physicsInfo.getInclinedGravityFactor() + physicsInfo.getMinPower();
             float gravFactor = requiredPower - module.getPower();
             if (gravFactor < 0)

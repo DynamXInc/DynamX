@@ -93,7 +93,7 @@ public class DynamXLoadingTasks {
      *
      * @param context The reload context
      * @param items   The resources to reload
-     * @return todo doc
+     * @return A future that will be completed when specified resources have been reloaded
      */
     public static CompletableFuture<Void> reload(TaskContext context, Consumer<TaskContext>... items) {
         CompletableFuture<Void>[] futures = new CompletableFuture[items.length];

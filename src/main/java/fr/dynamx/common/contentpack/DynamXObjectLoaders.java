@@ -15,6 +15,7 @@ import fr.dynamx.common.items.ItemProps;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * All DynamX {@link InfoLoader}s
@@ -33,7 +34,14 @@ public class DynamXObjectLoaders {
     public static ObjectLoader<ArmorObject<?>, DynamXItemArmor<?>> ARMORS = new ObjectLoader<>("armor", ArmorObject::new, new SubInfoTypesRegistry<>());
     public static ObjectLoader<PropObject<?>, ItemProps<?>> PROPS = new ObjectLoader<>("prop", PropObject::new, new SubInfoTypesRegistry<>());
     public static InfoLoader<PartWheelInfo> WHEELS = new InfoLoader<>("wheel", PartWheelInfo::new, new SubInfoTypesRegistry<>());
-    public static InfoLoader<CarEngineInfo> ENGINES = new InfoLoader<>("engine", CarEngineInfo::new, new SubInfoTypesRegistry<>());
+    public static LateInfoLoader<BaseEngineInfo> ENGINES = new LateInfoLoader<>("engine", ((pack, name, clazz) -> {
+        if(Objects.equals(clazz, CarEngineInfo.class.getName()))
+            return new CarEngineInfo(pack, name);
+        else if(Objects.equals(clazz, BaseEngineInfo.class.getName()))
+            return new BaseEngineInfo(pack, name);
+        else
+            throw new IllegalArgumentException("Unknown engine class: " + clazz);
+    }), new SubInfoTypesRegistry<>());
     public static SoundInfoLoader SOUNDS = new SoundInfoLoader("sounds", SoundListInfo::new);
 
     static {

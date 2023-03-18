@@ -78,12 +78,18 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
     }
 
     /**
-     * Copy the current physics state from the collision object state
+     * Called before ticking the physics world (can be in an external thread) <br>
+     * Here we give the "input" to the physics world, i.e. the controls, the forces, etc <br>
+     * Ie : we copy the current entity state to the collision object state
      */
     public void update() {
     }
 
-    //TODO DOC
+    /**
+     * Called after ticking the physics world (can be in an external thread) <br>
+     * Here we get the results of the "input" : the new position, the new rotation, etc <br>
+     * Ie : we copy the current physics state from the collision object state
+     */
     public void postUpdate() {
         isBodyActive = collisionObject.isActive();
 
@@ -170,9 +176,13 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
     }
 
     /**
-     * todo update doc
      * Sets the physics position, the physics rotation and the velocities <br>
      * Used for network sync
+     *
+     * @param pos The position
+     * @param rotation The rotation
+     * @param linearVel The linear velocity
+     * @param rotationalVel The rotational velocity
      */
     public void updatePhysicsState(Vector3f pos, Quaternion rotation, Vector3f linearVel, Vector3f rotationalVel) {
         Vector3f centerOfMass = getCenterOfMass();
@@ -186,12 +196,19 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
     }
 
     /**
-     * Adjusts the physics position and velocity to match the given pos, and sets the physics rotation and velocities
+     * Adjusts the physics position and velocity to match the given pos, and sets the physics rotation and velocities <br>
+     * Used for network sync
+     *
+     * @param pos The position
+     * @param rotation The rotation
+     * @param linearVel The linear velocity
+     * @param rotationalVel The rotational velocity
      */
     public void updatePhysicsStateFromNet(Vector3f pos, Quaternion rotation, Vector3f linearVel, Vector3f rotationalVel) {
-        Vector3f centerOfMass = getCenterOfMass();
+        //Vector3f centerOfMass = getCenterOfMass();
         //if (centerOfMass != null)
           //  pos.addLocal(DynamXGeometry.rotateVectorByQuaternion(centerOfMass, rotation).multLocal(-1));
+        //TODO TEST DIFF BETWEEN TWO METHODS
 
         linearVel.addLocal(pos.subtract(handledEntity.physicsPosition));
         setLinearVelocity(linearVel);
@@ -200,11 +217,16 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
         setAngularVelocity(rotationalVel);
     }
 
-    //TODO DOC
+    /**
+     * @return The position in the physics world
+     */
     public Vector3f getPosition() {
         return handledEntity.physicsPosition;
     }
 
+    /**
+     * @return The rotation in the physics world
+     */
     public Quaternion getRotation() {
         return handledEntity.physicsRotation;
     }

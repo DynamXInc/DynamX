@@ -71,7 +71,7 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
 
     public AbstractProp(String packName, String fileName) {
         super(packName, fileName);
-        itemScale = 0.3f;
+        setItemScale(0.3f);
     }
 
     @Override

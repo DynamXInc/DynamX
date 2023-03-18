@@ -89,7 +89,7 @@ public class ObjectLoader<T extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C exte
     public T addBuiltinObject(C owner, String modName, String objectName) {
         if (ContentPackLoader.isPackLoadingStarted())
             throw new IllegalStateException("You should register your builtin objects before packs loading. Use the addon init callback.");
-        T info = assetCreator.apply(modName, objectName);
+        T info = assetCreator.create(modName, objectName, null);
         owners.add((IInfoOwner<T>) owner);
         builtinObjects.add(info);
         if (DynamXObjectLoaders.PACKS.findPackLocations(modName).isEmpty())

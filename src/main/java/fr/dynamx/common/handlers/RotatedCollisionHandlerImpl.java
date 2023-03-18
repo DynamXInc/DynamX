@@ -16,7 +16,6 @@ import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.*;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -337,9 +336,7 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
 
     @Override
     public double[] handleCollisionWithBulletEntities(Entity entity, double mx, double my, double mz) {
-        //if(true)
-        //return new double[] {mx, my, mz};
-        double icollidableCheckRadius = entity instanceof EntityPlayer ? DynamXConfig.blockCollisionRadius : 0;
+        double icollidableCheckRadius = DynamXConfig.blockCollisionRadius;
         AxisAlignedBB copy = entity.getEntityBoundingBox().grow(0);
 
         int multiplier = entity instanceof EntityPlayer ? 2 : 1;
@@ -372,8 +369,7 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
         }
 
         motionChanged = false;
-        if (entity instanceof EntityLivingBase) // && !(entity instanceof PhysicsEntity))
-        {
+        if (!(entity instanceof PhysicsEntity)) {
             PooledHashMap<Vector3f, ICollidableObject> collidableEntities = getCollidableTileEntities(entity.world, new MutableBoundingBox(entity.getEntityBoundingBox()).grow(icollidableCheckRadius));
             for (Map.Entry<Vector3f, ICollidableObject> e : collidableEntities.entrySet()) {
                 //System.out.println("Input "+mx+" "+my+" "+mz+" "+nx+" "+ny+" "+nz+" "+entity.onGround+" "+entity.collidedVertically+" "+e.physicsPosition);

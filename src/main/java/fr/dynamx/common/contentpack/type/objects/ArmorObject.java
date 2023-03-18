@@ -82,7 +82,7 @@ public class ArmorObject<T extends ArmorObject<?>> extends AbstractItemObject<T,
 
     public ArmorObject(String packName, String fileName) {
         super(packName, fileName);
-        this.itemScale = 0.7f; //default value
+        setItemScale(0.7f); //default value
     }
 
     public void initArmorModel() {

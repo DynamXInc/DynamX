@@ -21,9 +21,7 @@ import java.util.concurrent.ThreadFactory;
  */
 public class UdpServer {
     private static Logger LOGGER;
-    private static final String GROUPS_DEFAULT = null;
     private int port;
-    private String groups;
     private State currentState;
     private final Collection<Listener> listeners;
     private final Event event;
@@ -31,13 +29,12 @@ public class UdpServer {
     private final UdpServer This;
     private ThreadFactory threadFactory;
     private Thread ioThread;
-    private MulticastSocket mSocket;
+    private DatagramSocket mSocket;
     private final DatagramPacket packet;
     private Throwable lastException;
     private String hostname;
 
     public UdpServer(Logger logger2, int port) {
-        this.groups = GROUPS_DEFAULT;
         this.currentState = State.STOPPED;
         this.listeners = new LinkedList<>();
         this.event = new Event(this);
@@ -49,7 +46,6 @@ public class UdpServer {
     }
 
     public UdpServer(Logger logger2, String hostname, int port) {
-        this.groups = GROUPS_DEFAULT;
         this.currentState = State.STOPPED;
         this.listeners = new LinkedList<>();
         this.event = new Event(this);
@@ -85,7 +81,6 @@ public class UdpServer {
 
     public synchronized void fireProperties() {
         this.firePropertyChange("port", null, this.getPort());
-        this.firePropertyChange("groups", null, this.getGroups());
         this.firePropertyChange("state", null, this.getState());
     }
 
@@ -107,10 +102,6 @@ public class UdpServer {
                 this.fireExceptionNotification(e);
             }
         }
-    }
-
-    private synchronized String getGroups() {
-        return this.groups;
     }
 
     public synchronized Throwable getLastException() {
@@ -177,14 +168,14 @@ public class UdpServer {
                     InetAddress var23 = InetAddress.getByName(this.hostname);
                     if (DynamXConfig.udpDebug)
                         DynamXMain.log.info("[UDP-DEBUG] Start UDP on " + var23 + " " + this.hostname + " " + this.getPort());
-                    this.mSocket = new MulticastSocket(new InetSocketAddress(var23, this.getPort()));
+                    this.mSocket = new DatagramSocket(new InetSocketAddress(var23, this.getPort()));
                 } else {
                     if (DynamXConfig.udpDebug)
                         DynamXMain.log.info("[UDP-DEBUG] Start UDP simple " + this.getPort());
-                    this.mSocket = new MulticastSocket(this.getPort());
+                    this.mSocket = new DatagramSocket(this.getPort());
                 }
 
-                LOGGER.info("UDP Server established on port " + this.getPort() + ". Address " + mSocket.getInetAddress() + " " + mSocket.getInterface() + " " + mSocket.getLocalSocketAddress());
+                LOGGER.info("UDP Server established on port " + this.getPort() + ". Address " + mSocket.getInetAddress() + " " + mSocket.getRemoteSocketAddress() + " " + mSocket.getLocalSocketAddress());
 
                 try {
                     this.mSocket.setReceiveBufferSize(this.packet.getData().length);
@@ -193,21 +184,6 @@ public class UdpServer {
                     int size = this.packet.getData().length;
                     int buffSize = this.mSocket.getReceiveBufferSize();
                     LOGGER.warn(String.format("Could not set receive buffer to %d. It is now at %d. Error: %s", size, buffSize, e.getMessage()));
-                }
-
-                String groups = this.getGroups();
-
-                if (groups != null) {
-                    String[] splitted = groups.split("[\\s,]+");
-
-                    for (String p : splitted) {
-                        try {
-                            this.mSocket.joinGroup(InetAddress.getByName(p));
-                            LOGGER.info("UDP Server joined multicast group " + p);
-                        } catch (IOException e) {
-                            LOGGER.warn("Could not join " + p + " as a multicast group: " + e.getMessage());
-                        }
-                    }
                 }
 
                 this.setState(State.STARTED);
@@ -267,16 +243,6 @@ public class UdpServer {
                 DynamXMain.log.info("[UDP-DEBUG] Sending the packet ! Size: " + packet.getLength());
             this.mSocket.send(packet);
         }
-    }
-
-    public synchronized void setGroups(String group) {
-        String oldVal = this.groups;
-        this.groups = group;
-
-        if (this.getState() == State.STARTED) {
-            this.reset();
-        }
-        this.firePropertyChange("groups", oldVal, this.groups);
     }
 
     public synchronized void setPort(int port) {

@@ -67,7 +67,7 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IInf
         RegistryNameSetter.setRegistryName(this, DynamXConstants.ID, blockObjectInfo.getFullName().toLowerCase());
         setTranslationKey(DynamXConstants.ID + "." + blockObjectInfo.getFullName().toLowerCase());
         setCreativeTab(blockObjectInfo.getCreativeTab(DynamXItemRegistry.objectTab));
-        textureNum = blockObjectInfo.getMaxTextureMetadata();
+        textureNum = Math.min(16, blockObjectInfo.getMaxTextureMetadata());
         isObj = blockObjectInfo.isObj();
         setLightLevel(blockObjectInfo.getLightLevel());
 

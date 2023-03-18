@@ -19,7 +19,7 @@ public class DynamXErrorManager {
     /**
      * PACK error type : notifies of pack loading errors
      */
-    public static final ErrorCategory PACKS__ERRORS = errorManager.createErrorCategory(new ResourceLocation(DynamXConstants.ID, "general_errors"), "DynamX errors");
+    public static final ErrorCategory PACKS_ERRORS = errorManager.createErrorCategory(new ResourceLocation(DynamXConstants.ID, "general_errors"), "DynamX errors");
     /**
      * MODEL error type : notifies of model loading errors
      */
@@ -38,7 +38,7 @@ public class DynamXErrorManager {
 
 
     public static void addPackError(String pack, String genericType, ErrorLevel errorLevel, String object, String message) {
-        addError(pack, PACKS__ERRORS, genericType, errorLevel, object, message);
+        addError(pack, PACKS_ERRORS, genericType, errorLevel, object, message);
     }
 
     public static void addError(String pack, ErrorCategory errorCategory, String genericType, ErrorLevel errorLevel, String object, String message) {
@@ -57,9 +57,9 @@ public class DynamXErrorManager {
         if(errorManager.getAllErrors().values().stream().anyMatch(e -> e.getHighestErrorLevel().ordinal() >= minLevel.ordinal())) {
             DynamXMain.log.error("==== DynamX loading errors ====");
             if(side.isClient())
-                errorManager.printErrors(DynamXMain.log, Arrays.asList(INIT_ERRORS, PACKS__ERRORS, MODEL_ERRORS, ACsLib.getPlatform().getACsLibErrorCategory(), ACsGuiApi.getCssErrorType(), ModProtectionSystem.getMpsErrorCategory()), minLevel);
+                errorManager.printErrors(DynamXMain.log, Arrays.asList(INIT_ERRORS, PACKS_ERRORS, MODEL_ERRORS, ACsLib.getPlatform().getACsLibErrorCategory(), ACsGuiApi.getCssErrorType(), ModProtectionSystem.getMpsErrorCategory()), minLevel);
             else
-                errorManager.printErrors(DynamXMain.log, Arrays.asList(INIT_ERRORS, PACKS__ERRORS, MODEL_ERRORS, ACsLib.getPlatform().getACsLibErrorCategory(), ModProtectionSystem.getMpsErrorCategory()), minLevel);
+                errorManager.printErrors(DynamXMain.log, Arrays.asList(INIT_ERRORS, PACKS_ERRORS, MODEL_ERRORS, ACsLib.getPlatform().getACsLibErrorCategory(), ModProtectionSystem.getMpsErrorCategory()), minLevel);
         }
     }
 
@@ -119,27 +119,28 @@ public class DynamXErrorManager {
         registerErrorFormatter(INIT_ERRORS, "addon_error", FORMATTER_SINGLE_ERROR); //FORMAT
         registerErrorFormatter(INIT_ERRORS, "res_pack_load_fail", FORMATTER_SINGLE_ERROR);
         registerErrorFormatter(UPDATES, "updates", FORMATTER_SINGLE_ERROR);
-        registerErrorFormatter(PACKS__ERRORS, "required_property", FORMATTER_MULTIPLE_ERROR_ONE_LI);
-        registerErrorFormatter(PACKS__ERRORS, "obj_duplicated_custom_textures", FORMATTER_MULTIPLE_ERROR);
-        registerErrorFormatter(PACKS__ERRORS, "armor_error", FORMATTER_MULTIPLE_ERROR);
-        registerErrorFormatter(PACKS__ERRORS, "syntax_error", FORMATTER_MULTIPLE_ERROR);
-        registerErrorFormatter(PACKS__ERRORS, "deprecated_prop", FORMATTER_MULTIPLE_ERROR);
-        registerErrorFormatter(PACKS__ERRORS, "deprecated_prop_format", FORMATTER_MULTIPLE_ERROR);
-        registerErrorFormatter(PACKS__ERRORS, "missing_prop", FORMATTER_MULTIPLE_ERROR);
-        registerErrorFormatter(PACKS__ERRORS, "unknown_sub_info", FORMATTER_MULTIPLE_ERROR_ONE_LI);
-        registerErrorFormatter(PACKS__ERRORS, "deprecated_seat_config", FORMATTER_MULTIPLE_ERROR_ONE_LI);
-        registerErrorFormatter(PACKS__ERRORS, "sound_error", FORMATTER_MULTIPLE_ERROR);
-        registerErrorFormatter(PACKS__ERRORS, "config_error", FORMATTER_MULTIPLE_ERROR);
-        registerErrorFormatter(PACKS__ERRORS, "pack_requirements", FORMATTER_MULTIPLE_ERROR); //FORMAT
-        registerErrorFormatter(PACKS__ERRORS, "collision_shape_error", FORMATTER_SINGLE_ERROR);
-        registerErrorFormatter(PACKS__ERRORS, "complete_object_error", FORMATTER_SINGLE_ERROR);
-        registerErrorFormatter(PACKS__ERRORS, "property_parse_error", FORMATTER_MULTIPLE_ERROR); //FORMAT
-        registerErrorFormatter(PACKS__ERRORS, "pack_load_fail", FORMATTER_SINGLE_ERROR);
-        registerErrorFormatter(PACKS__ERRORS, "missing_pack_info", FORMATTER_MULTIPLE_ERROR);  //FORMAT
-        registerErrorFormatter(PACKS__ERRORS, "pack_file_load_error", FORMATTER_SINGLE_ERROR);
+        registerErrorFormatter(PACKS_ERRORS, "required_property", FORMATTER_MULTIPLE_ERROR_ONE_LI);
+        registerErrorFormatter(PACKS_ERRORS, "obj_duplicated_custom_textures", FORMATTER_MULTIPLE_ERROR);
+        registerErrorFormatter(PACKS_ERRORS, "armor_error", FORMATTER_MULTIPLE_ERROR);
+        registerErrorFormatter(PACKS_ERRORS, "syntax_error", FORMATTER_MULTIPLE_ERROR);
+        registerErrorFormatter(PACKS_ERRORS, "deprecated_prop", FORMATTER_MULTIPLE_ERROR);
+        registerErrorFormatter(PACKS_ERRORS, "deprecated_prop_format", FORMATTER_MULTIPLE_ERROR);
+        registerErrorFormatter(PACKS_ERRORS, "missing_prop", FORMATTER_MULTIPLE_ERROR);
+        registerErrorFormatter(PACKS_ERRORS, "unknown_sub_info", FORMATTER_MULTIPLE_ERROR_ONE_LI);
+        registerErrorFormatter(PACKS_ERRORS, "deprecated_seat_config", FORMATTER_MULTIPLE_ERROR_ONE_LI);
+        registerErrorFormatter(PACKS_ERRORS, "sound_error", FORMATTER_MULTIPLE_ERROR);
+        registerErrorFormatter(PACKS_ERRORS, "config_error", FORMATTER_MULTIPLE_ERROR);
+        registerErrorFormatter(PACKS_ERRORS, "pack_requirements", FORMATTER_MULTIPLE_ERROR); //FORMAT
+        registerErrorFormatter(PACKS_ERRORS, "collision_shape_error", FORMATTER_SINGLE_ERROR);
+        registerErrorFormatter(PACKS_ERRORS, "complete_object_error", FORMATTER_SINGLE_ERROR);
+        registerErrorFormatter(PACKS_ERRORS, "property_parse_error", FORMATTER_MULTIPLE_ERROR); //FORMAT
+        registerErrorFormatter(PACKS_ERRORS, "pack_load_fail", FORMATTER_SINGLE_ERROR);
+        registerErrorFormatter(PACKS_ERRORS, "missing_pack_info", FORMATTER_MULTIPLE_ERROR);  //FORMAT
+        registerErrorFormatter(PACKS_ERRORS, "pack_file_load_error", FORMATTER_SINGLE_ERROR);
         registerErrorFormatter(MODEL_ERRORS, "obj_error", FORMATTER_SINGLE_ERROR);
         registerErrorFormatter(MODEL_ERRORS, "obj_none_material", FORMATTER_MULTIPLE_ERROR_ONE_LI);
-        registerErrorFormatter(PACKS__ERRORS, "deprecated_light_format", FORMATTER_MULTIPLE_ERROR);
-        registerErrorFormatter(PACKS__ERRORS, "wheel_invalid_suspaxis", FORMATTER_MULTIPLE_ERROR);
+        registerErrorFormatter(PACKS_ERRORS, "deprecated_light_format", FORMATTER_MULTIPLE_ERROR);
+        registerErrorFormatter(PACKS_ERRORS, "wheel_invalid_suspaxis", FORMATTER_MULTIPLE_ERROR);
+        registerErrorFormatter(PACKS_ERRORS, "too_many_variants", FORMATTER_MULTIPLE_ERROR);
     }
 }

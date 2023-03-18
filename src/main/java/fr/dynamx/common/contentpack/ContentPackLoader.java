@@ -199,7 +199,7 @@ public class ContentPackLoader {
             initialized = true;
         for (InfoLoader<?> loader : DynamXObjectLoaders.LOADERS)
             loader.clear(isHotReloading);
-        DynamXErrorManager.getErrorManager().clear(DynamXErrorManager.PACKS__ERRORS);
+        DynamXErrorManager.getErrorManager().clear(DynamXErrorManager.PACKS_ERRORS);
         DynamXContext.getObjModelDataCache().clear();
         try {
             ProgressManager.ProgressBar bar = ProgressManager.push("Loading content pack system", 1 + DynamXObjectLoaders.LOADERS.size());
@@ -243,7 +243,7 @@ public class ContentPackLoader {
                         //log.error("Content Pack " + loadingPack + " cannot be loaded : ", e);
                         if (!(e instanceof Exception)) //todo clean
                             e = new RuntimeException("encapsulated error", e);
-                        DynamXErrorManager.addError(loadingPack, DynamXErrorManager.PACKS__ERRORS, "pack_load_fail", ErrorLevel.FATAL, "loading folder pack", loadingPack, (Exception) e, 800);
+                        DynamXErrorManager.addError(loadingPack, DynamXErrorManager.PACKS_ERRORS, "pack_load_fail", ErrorLevel.FATAL, "loading folder pack", loadingPack, (Exception) e, 800);
                         errorCount++;
                     }
                 } else if (contentPack.isFile() && (contentPack.getName().endsWith(".zip") || contentPack.getName().endsWith(PACK_FILE_EXTENSION))) {
@@ -270,7 +270,7 @@ public class ContentPackLoader {
                         //log.error("Compressed content Pack " + loadingPack + " cannot be loaded : ", e);
                         if (!(e instanceof Exception)) //todo clean
                             e = new RuntimeException("encapsulated error", e);
-                        DynamXErrorManager.addError(loadingPack, DynamXErrorManager.PACKS__ERRORS, "pack_load_fail", ErrorLevel.FATAL, "loading compressed pack", loadingPack, (Exception) e, 800);
+                        DynamXErrorManager.addError(loadingPack, DynamXErrorManager.PACKS_ERRORS, "pack_load_fail", ErrorLevel.FATAL, "loading compressed pack", loadingPack, (Exception) e, 800);
                         errorCount++;
                     }
                 } else if (!contentPack.getName().endsWith(".dll") && !contentPack.getName().endsWith(".so") && !contentPack.getName().endsWith(".dylib")) { //Bullet library files
@@ -308,7 +308,7 @@ public class ContentPackLoader {
             packVersion = loadedInfo.getPackVersion();
         } else {
             loadedInfo = new PackInfo(loadingPack, packType).setPathName(contentPack.getName()).setPackVersion("dummy_info");
-            DynamXErrorManager.addError(loadingPack, DynamXErrorManager.PACKS__ERRORS, "missing_pack_info", ErrorLevel.HIGH, loadedInfo.getName(), "Add a pack_info.dynx file in the pack !", null, 600);
+            DynamXErrorManager.addError(loadingPack, DynamXErrorManager.PACKS_ERRORS, "missing_pack_info", ErrorLevel.HIGH, loadedInfo.getName(), "Add a pack_info.dynx file in the pack !", null, 600);
             DynamXObjectLoaders.PACKS.loadItems(loadedInfo, isHotReloading);
         }
         DynamXMain.log.info("Loading " + loadingPack + " version " + packVersion + " (in " + contentPack.getName() + ")");
@@ -328,7 +328,7 @@ public class ContentPackLoader {
         } catch (Throwable e) {
             if (!(e instanceof Exception)) //todo clean
                 e = new RuntimeException("encapsulated error", e);
-            DynamXErrorManager.addError(loadingPack, DynamXErrorManager.PACKS__ERRORS, "pack_file_load_error", ErrorLevel.FATAL, file.getName().replace(suffix, ""), null, (Exception) e, 100);
+            DynamXErrorManager.addError(loadingPack, DynamXErrorManager.PACKS_ERRORS, "pack_file_load_error", ErrorLevel.FATAL, file.getName().replace(suffix, ""), null, (Exception) e, 100);
             return null;
         } finally {
             if (inputStream != null) {
@@ -360,7 +360,7 @@ public class ContentPackLoader {
         } catch (Throwable e) {
             if (!(e instanceof Exception)) //todo clean
                 e = new RuntimeException("encapsulated error", e);
-            DynamXErrorManager.addError(loadingPack, DynamXErrorManager.PACKS__ERRORS, "pack_file_load_error", ErrorLevel.FATAL, file.getName().replace(suffix, ""), null, (Exception) e, 100);
+            DynamXErrorManager.addError(loadingPack, DynamXErrorManager.PACKS_ERRORS, "pack_file_load_error", ErrorLevel.FATAL, file.getName().replace(suffix, ""), null, (Exception) e, 100);
         } finally {
             if (inputStream != null) {
                 try {

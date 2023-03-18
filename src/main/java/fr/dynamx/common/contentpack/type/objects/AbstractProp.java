@@ -5,6 +5,7 @@ import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.bullet.collision.shapes.CylinderCollisionShape;
 import com.jme3.bullet.collision.shapes.SphereCollisionShape;
 import com.jme3.math.Vector3f;
+import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.IShapeContainer;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
@@ -14,12 +15,11 @@ import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
 import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.common.DynamXContext;
-import fr.dynamx.common.contentpack.DynamXObjectLoaders;
-import fr.dynamx.common.contentpack.PackInfo;
 import fr.dynamx.common.contentpack.parts.PartShape;
 import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.utils.DynamXUtils;
+import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.physics.ShapeUtils;
 import lombok.Getter;
@@ -28,7 +28,6 @@ import lombok.experimental.Accessors;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractItemObject<T, T> implements IShapeContainer, ParticleEmitterInfo.IParticleEmitterContainer {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.PROPS})
@@ -100,6 +99,9 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
                         break;
                 }
             });
+        }
+        if(hasVaryingTextures() && getMaxTextureMetadata() > 16) {
+            DynamXErrorManager.addError(getPackName(), DynamXErrorManager.PACKS_ERRORS, "too_many_variants", ErrorLevel.HIGH, getName(), "You can't use more than 16 variants on blocks !");
         }
         return super.postLoad(hot);
     }

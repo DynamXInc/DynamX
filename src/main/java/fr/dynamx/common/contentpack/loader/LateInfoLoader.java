@@ -65,7 +65,7 @@ public class LateInfoLoader<T extends ISubInfoTypeOwner<?>> extends InfoLoader<T
         } catch (Throwable e) {
             if (!(e instanceof Exception)) //todo clean
                 e = new RuntimeException("encapsulated error", e);
-            DynamXErrorManager.addError(loadingPack, DynamXErrorManager.PACKS__ERRORS, "pack_file_load_error", ErrorLevel.FATAL, file.getName().replace(prefix, ""), null, (Exception) e, 100);
+            DynamXErrorManager.addError(loadingPack, DynamXErrorManager.PACKS_ERRORS, "pack_file_load_error", ErrorLevel.FATAL, file.getName().replace(prefix, ""), null, (Exception) e, 100);
             return null;
         } finally {
             if (inputStream != null) {

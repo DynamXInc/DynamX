@@ -122,7 +122,7 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
 
     @Override
     public ItemStack getPickedResult(RayTraceResult target) {
-        return packInfo.getPickedResult();
+        return packInfo.getPickedResult(getMetadata());
     }
 
     /**

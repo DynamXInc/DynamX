@@ -48,7 +48,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import scala.xml.dtd.impl.Base;
 
 import java.util.*;
 
@@ -316,8 +315,8 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     }
 
     @Override
-    public ItemStack getPickedResult() {
-        return new ItemStack((Item) getOwners()[0]);
+    public ItemStack getPickedResult(int metadata) {
+        return new ItemStack((Item) getOwners()[0], 1, metadata);
     }
 
     /**

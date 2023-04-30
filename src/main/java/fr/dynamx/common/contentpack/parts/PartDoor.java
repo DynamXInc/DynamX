@@ -218,7 +218,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     }
 
     @Override
-    public ItemStack getPickedResult() {
+    public ItemStack getPickedResult(int metadata) {
         return ItemStack.EMPTY;
     }
 

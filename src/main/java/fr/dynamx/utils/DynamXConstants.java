@@ -24,8 +24,9 @@ public class DynamXConstants
     public static final ArtifactVersion PACK_LOADER_VERSION = new DefaultArtifactVersion("1.0.2");
 
     public static final String DYNAMX_CERT = "certs/lets-encrypt-r3.der", DYNAMX_AUX_CERT = null;
-    public static final String MPS_URL = "https://dynamx.fr/mps/", MPS_AUX_URL = "https://mps2.dynamx.fr/", MPS_KEY = "", MPS_STARTER = null;
 
-    public static final String STATS_URL = "https://dynamx.fr/statsbot/statsbotrcv.php", STATS_PRODUCT = "DNX_"+VERSION+"_BETA", STATS_TOKEN = "";
+    public static final String MPS_URL = "https://dynamx.fr/mps/", MPS_AUX_URL = "https://mps2.dynamx.fr/", MPS_KEY = "VGZQNFY5UEJ1YmVLTlpwWC1BQ1JFLTQ=", MPS_STARTER = null;
+
+    public static final String STATS_URL = "https://dynamx.fr/statsbot/statsbotrcv.php", STATS_PRODUCT = "DNX_"+VERSION+"_BETA", STATS_TOKEN = "ZG54OnN0YWJkOTg=";
     public static final boolean REMAP = false;
 }

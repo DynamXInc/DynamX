@@ -44,38 +44,6 @@ public class CompoundBoxTerrainElement implements ITerrainElement {
 
     @Override
     public String toString() {
-        System.out.println("===============");
-        System.out.println("Box data " + this.hashCode());
-        System.out.println("Collisions " + collisions);
-        System.out.println("--------- Collisions stats: ---------");
-        if (collisions != null) {
-            System.out.println("Count: " + collisions.size());
-            Map<Double, Integer> perHeightMin = new HashMap<>();
-            Map<Double, Integer> perHeightMax = new HashMap<>();
-            for (MutableBoundingBox box : collisions) {
-                perHeightMin.put(box.minY, perHeightMin.getOrDefault(box.minY, 0) + 1);
-                perHeightMax.put(box.maxY, perHeightMax.getOrDefault(box.maxY, 0) + 1);
-            }
-            System.out.println("Min height repartition: " + perHeightMin);
-            System.out.println("Max height repartition: " + perHeightMin);
-        } else {
-            System.out.println("No collisions loaded");
-        }
-        System.out.println("Shape " + shape);
-        if (body != null) {
-            System.out.println("Body transform " + body.getPhysicsLocation(Vector3fPool.get()) + " " + body.getPhysicsRotation(QuaternionPool.get()));
-        } else {
-            System.out.println("Body not initialized");
-        }
-        if (meshes == null) {
-            System.out.println("Meshes null : wtf");
-        } else {
-            System.out.println("Indexed meshes :");
-            for (IndexedMesh m : meshes) {
-                System.out.println(m + " : " + m.countTriangles() + " " + m.countVertices());
-            }
-        }
-        System.out.println("===============");
         return "CompoundBoxTerrainElement{" +
                 "collisions: " + collisions.size() +
                 '}';

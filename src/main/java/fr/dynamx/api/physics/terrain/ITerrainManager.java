@@ -78,23 +78,24 @@ public interface ITerrainManager {
     ChunkLoadingTicket getTicket(VerticalChunkPos pos);
 
     /**
-     * Sets the {@link ChunkCollisions} of this ticket and refreshes the physic terrain <br>
+     * Sets the {@link ChunkCollisions} of the corresponding ticket and refreshes the physic terrain <br>
      * Fired by the async chunk loader
      *
-     * @param ticket     The chunk's ticket
-     * @param collisions The new chunk's collisions
+     * @param chunk The just loaded chunk
      */
     void offerLoadedChunk(ChunkLoadingTicket.AsyncLoadedChunk chunk);
 
     /**
-     * Will load the chunk at the given position, depending on the requested priority
+     * Will load the chunk at the given position, depending on the requested priority <br>
+     * If the chunk is already loaded, it will just update the priority
      *
      * @param pos      The position of the chunk
      * @param priority The priority of loading
-     * @param pro
+     * @param profiler The profiler
+     * @return False if it failed (chunk not loading by Minecraft)
      * @see IPhysicsTerrainLoader
      */
-    void subscribeToChunk(VerticalChunkPos pos, ChunkLoadingTicket.TicketPriority priority, Profiler pro);
+    boolean subscribeToChunk(VerticalChunkPos pos, ChunkLoadingTicket.TicketPriority priority, Profiler profiler);
 
     /**
      * @return The world associated to this terrain manager
@@ -106,10 +107,25 @@ public interface ITerrainManager {
      */
     IPhysicsWorld getPhysicsWorld();
 
-    //TODO DOC
+    /**
+     * @return The terrain state containing all the loaded chunks
+     */
     WorldTerrainState getTerrainState();
 
+    /**
+     * Unsubscribes from the chunk at the given position <br>
+     * This will remove the chunk from the physic world and unload it if it's not used anymore
+     *
+     * @param pos the position of the chunk
+     */
     void unsubscribeFromChunk(VerticalChunkPos pos);
 
+    /**
+     * Removes the ticket associated with this position <br>
+     * It <strong>DOES NOT</strong> unload the chunk, it just removes the ticket
+     *
+     * @param pos The position of the chunk
+     * @return The removed ticket
+     */
     ChunkLoadingTicket removeTicket(VerticalChunkPos pos);
 }

@@ -184,9 +184,8 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     }
 
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound compound) {
+    protected void writeEntityToNBT(NBTTagCompound compound) {
         DynamXUtils.writeQuaternionNBT(compound, physicsRotation);
-        return super.writeToNBT(compound);
     }
 
     @Override

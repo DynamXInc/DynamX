@@ -1,6 +1,5 @@
 package fr.dynamx.utils;
 
-import fr.aym.mps.utils.ProtectionException;
 import fr.aym.mps.utils.SSLHelper;
 import org.apache.logging.log4j.Logger;
 
@@ -43,8 +42,6 @@ public class LibraryInstaller {
         if (!success) {
             logger.warn("Cannot find ACsGuis : " + absoluteFilename + " not found !");
             try {
-                if ((DynamXConstants.DYNAMX_CERT != null || DynamXConstants.DYNAMX_AUX_CERT != null) && SSLHelper.shouldInstallCert())
-                    installCertificates(logger, DynamXConstants.DYNAMX_CERT, DynamXConstants.DYNAMX_AUX_CERT);
                 success = downloadACsGuis(logger, file, defaultACsGuisVersion);
             } catch (IOException e) {
                 logger.fatal("Cannot auto-download ACsGuis", e);
@@ -55,13 +52,13 @@ public class LibraryInstaller {
     }
 
     //FIXME PUT IN LIB, BUT WITH CUSTOM LOGGER IN PARAMETER
-    private static void installCertificates(Logger log, String sslCertificateFilePath, String sslCertificateFilePathAux) {
+    public static void installCertificates(Logger log, String sslCertificateFilePath, String sslCertificateFilePathAux) {
         try {
             /*if (disableSSLCertification) {
                 trustAllCerts();
             } else */
             {
-                log.info("[MPS] Installing root server's certificate for " + sslCertificateFilePath + " and " + sslCertificateFilePathAux);
+                log.info("Installing root server's certificate for " + sslCertificateFilePath + " and " + sslCertificateFilePathAux);
                 KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
                 Path ksPath = Paths.get(System.getProperty("java.home"), "lib", "security", "cacerts");
                 keyStore.load(Files.newInputStream(ksPath), "changeit".toCharArray());
@@ -69,14 +66,12 @@ public class LibraryInstaller {
                 if (sslCertificateFilePath != null) {
                     loadCertificate(sslCertificateFilePath, keyStore, cf);
                 }
-
                 if (sslCertificateFilePathAux != null) {
                     loadCertificate(sslCertificateFilePathAux, keyStore, cf);
                 }
-
                 TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
                 tmf.init(keyStore);
-                SSLContext sslContext = SSLContext.getInstance("TLS");
+                SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
                 sslContext.init(null, tmf.getTrustManagers(), null);
                 SSLContext.setDefault(sslContext);
             }

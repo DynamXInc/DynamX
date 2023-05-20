@@ -46,16 +46,8 @@ public class HelicopterPhysicsInfo extends SubInfoType<ModularVehicleInfo> {
     @PackFileProperty(configNames = "RollForce", defaultValue = "6000", description = "The force of inclination when the player keep the key pressed")
     private float rollForce = 6000;
 
-    private List<EngineSound> soundsEngine;
-    public String startingSoundInterior;
-    public String startingSoundExterior;
-
     public HelicopterPhysicsInfo(ISubInfoTypeOwner<ModularVehicleInfo> owner) {
         super(owner);
-    }
-
-    public List<EngineSound> getEngineSounds() {
-        return soundsEngine;
     }
 
     @Override
@@ -71,32 +63,5 @@ public class HelicopterPhysicsInfo extends SubInfoType<ModularVehicleInfo> {
     @Override
     public void addModules(PackPhysicsEntity<?, ?> entity, ModuleListBuilder modules) {
         modules.add(new HelicopterEngineModule((BaseVehicleEntity<?>) entity));
-    }
-
-    @Override
-    public void postLoad(ModularVehicleInfo owner, boolean hot) {
-        //And sounds
-        if (owner.defaultSounds != null) {
-            SoundListInfo engineSound = DynamXObjectLoaders.SOUNDS.findInfo(owner.defaultSounds);
-            if (engineSound == null)
-                throw new IllegalArgumentException("Engine sounds " + owner.defaultSounds + " of " + owner.getFullName() + " were not found, check file names and previous loading errors !");
-            setSounds(engineSound.getSoundsIn());
-        }
-    }
-
-    public void setSounds(List<EngineSound> sounds) {
-        soundsEngine = new ArrayList<>();
-        for (EngineSound sound : sounds) {
-            if (sound.isSpecialSound()) {
-                if (sound.getRpmRange()[0] == -1) //A starting sound
-                {
-                    if (sound.isInterior())
-                        startingSoundInterior = sound.getSoundName();
-                    else
-                        startingSoundExterior = sound.getSoundName();
-                }
-            } else
-                soundsEngine.add(sound);
-        }
     }
 }

@@ -3,12 +3,12 @@ package fr.dynamx.api.audio;
 import fr.dynamx.client.sound.DynamXSoundHandler;
 
 /**
- * Pattern for DynamXSound, used in {@link IDynamXSoundHandler} <br>
+ * Pattern for DynamXSound, used in {@link DynamXSoundHandler} <br>
  * You don't need any sounds.json to use this system
  */
 public interface IDynamXSound {
     /**
-     * @param handler The {@link IDynamXSoundHandler} owning this sound, use it to stop the sound or change its volume
+     * @param handler The {@link DynamXSoundHandler} owning this sound, use it to stop the sound or change its volume
      */
     void update(DynamXSoundHandler handler);
 
@@ -29,10 +29,8 @@ public interface IDynamXSound {
      */
     boolean tryStop();
 
-    //TODO DOC
     /**
-
-     * @return The volume.
+     * @return The volume of this sound, should be between 0 and 1
      */
     float getVolume();
 }

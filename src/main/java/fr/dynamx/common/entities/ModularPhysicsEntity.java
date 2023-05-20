@@ -175,10 +175,8 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
 
     @Override
     protected void writeEntityToNBT(NBTTagCompound tagCompound) {
-        int size = moduleList.size();
-        for (int i = 0; i < size; i++) {
-            moduleList.get(i).writeToNBT(tagCompound);
-        }
+        super.writeEntityToNBT(tagCompound);
+        moduleList.forEach(m -> m.writeToNBT(tagCompound));
     }
 
     @Override

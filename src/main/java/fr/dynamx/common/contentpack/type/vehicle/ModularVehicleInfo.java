@@ -215,7 +215,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
                 }
             }
         } catch (Exception e) {
-            DynamXErrorManager.addError(getPackName(), DynamXErrorManager.PACKS__ERRORS, "collision_shape_error", ErrorLevel.FATAL, getName(), null, e);
+            DynamXErrorManager.addError(getPackName(), DynamXErrorManager.PACKS_ERRORS, "collision_shape_error", ErrorLevel.FATAL, getName(), null, e);
             physicsCollisionShape = null;
             return false;
         }
@@ -244,7 +244,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
         }
         //Attach engine
         if (defaultEngine != null) {
-            CarEngineInfo engine = DynamXObjectLoaders.ENGINES.findInfo(defaultEngine);
+            BaseEngineInfo engine = DynamXObjectLoaders.ENGINES.findOrLoadInfo(defaultEngine, validator.getEngineClass());
             if (engine == null)
                 throw new IllegalArgumentException("Engine " + defaultEngine + " of " + getFullName() + " was not found, check file names and previous loading errors !");
             engine.appendTo(this);
@@ -315,8 +315,8 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     }
 
     @Override
-    public ItemStack getPickedResult() {
-        return new ItemStack((Item) getOwners()[0]);
+    public ItemStack getPickedResult(int metadata) {
+        return new ItemStack((Item) getOwners()[0], 1, metadata);
     }
 
     /**

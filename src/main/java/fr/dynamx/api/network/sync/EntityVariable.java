@@ -8,6 +8,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
+//TODO NEW SYNC DOC
 public class EntityVariable<T> {
     @Getter
     private final BiConsumer<EntityVariable<T>, T> receiveCallback;

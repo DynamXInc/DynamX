@@ -3,12 +3,12 @@ package fr.dynamx.common.physics.terrain;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.physics.terrain.IPhysicsTerrainLoader;
 import fr.dynamx.api.physics.terrain.ITerrainManager;
+import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.physics.terrain.chunk.ChunkLoadingTicket;
 import fr.dynamx.utils.VerticalChunkPos;
 import fr.dynamx.utils.debug.Profiler;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -19,6 +19,7 @@ public class PhysicsEntityTerrainLoader implements IPhysicsTerrainLoader {
     private static final Map<VerticalChunkPos, ChunkLoadingTicket.TicketPriority> toLoad = new ConcurrentHashMap<>();
     private static final Map<VerticalChunkPos, ChunkLoadingTicket.TicketPriority> toUnLoad = new ConcurrentHashMap<>();
     protected int lastChunkX, lastChunkY = Integer.MAX_VALUE, lastChunkZ; //note that this precises coordinates are an edge case where the chunk won't be loaded on entity spawn :O
+    protected int curChunkX, curChunkY, curChunkZ;
 
     private static final int radiusY = 3;//3
     private static final int radiusYHalf = 1;//1
@@ -44,6 +45,9 @@ public class PhysicsEntityTerrainLoader implements IPhysicsTerrainLoader {
             profiler.start(Profiler.Profiles.DELTA_COMPUTE);
             VerticalChunkPos.Mutable pos = new VerticalChunkPos.Mutable();
             VerticalChunkPos.Mutable prevPos = new VerticalChunkPos.Mutable();
+            int curChunkX = entityIn.chunkCoordX;
+            int curChunkY = entityIn.chunkCoordY;
+            int curChunkZ = entityIn.chunkCoordZ;
             for (int i = 0; i < radiusY; i++) { //TODO DEPENDS ON SPEED ?
                 for (int j = 0; j < squareRadiusH; j++) {
                     int dx = (j % radiusH) - radiusHHalf;
@@ -88,13 +92,22 @@ public class PhysicsEntityTerrainLoader implements IPhysicsTerrainLoader {
             }
             if (!toLoad.isEmpty()) {
                 toLoad.forEach((load, priority) -> {
-                    terrain.subscribeToChunk(load, priority, profiler);
+                    if (!terrain.subscribeToChunk(load, priority, profiler)) {
+                        // failed to load (because the chunk is not laoded into Minecaft), so we mark it as not loaded here
+                        int i = load.y - curChunkY + radiusYHalf;
+                        int j = (load.x - curChunkX + radiusHHalf) + (load.z - curChunkZ + radiusHHalf) * radiusH;
+                        if (i < 0 || i > loadMatrice.length || j < 0 || j > loadMatrice[i].length) {
+                            DynamXMain.log.error("Local chunk pos computation error " + i+" "+j+" "+lastChunkX+" "+lastChunkY+" "+lastChunkZ+" "+curChunkX+" "+curChunkY+" "+curChunkZ+" "+radiusY+" "+radiusYHalf+" "+radiusH+" "+radiusHHalf);
+                            return;
+                        }
+                        loadMatrice[i][j] = -1;
+                    }
                 });
                 toLoad.clear();
             }
-            lastChunkX = entityIn.chunkCoordX;
-            lastChunkY = entityIn.chunkCoordY;
-            lastChunkZ = entityIn.chunkCoordZ;
+            lastChunkX = curChunkX;
+            lastChunkY = curChunkY;
+            lastChunkZ = curChunkZ;
             profiler.end(Profiler.Profiles.DELTA_COMPUTE);
         }
     }
@@ -118,7 +131,7 @@ public class PhysicsEntityTerrainLoader implements IPhysicsTerrainLoader {
     public void printReport(PhysicsWorldTerrain terrainManager) {
         System.out.println("ToLoad " + toLoad);
         System.out.println("ToUnload " + toUnLoad);
-        System.out.println(lastChunkX + " " + entityIn.chunkCoordX + " " + lastChunkY + " " + entityIn.chunkCoordY +" " + lastChunkZ + entityIn.chunkCoordZ);
+        System.out.println(lastChunkX + " " + entityIn.chunkCoordX + " " + lastChunkY + " " + entityIn.chunkCoordY + " " + lastChunkZ + entityIn.chunkCoordZ);
         StringBuilder strs = new StringBuilder();
         VerticalChunkPos.Mutable pos = new VerticalChunkPos.Mutable();
         for (int i = 0; i < radiusY; i++) {

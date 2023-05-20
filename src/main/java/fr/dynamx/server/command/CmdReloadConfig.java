@@ -28,7 +28,7 @@ public class CmdReloadConfig implements ISubCommand {
         DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.SERVER_RUNNING, DynamXLoadingTasks.PACK).thenAccept(empty -> {
             //TODO TRANSLATE
             sender.sendMessage(new TextComponentString("Packs reloaded"));
-            if (DynamXErrorManager.getErrorManager().hasErrors(DynamXErrorManager.INIT_ERRORS, DynamXErrorManager.PACKS__ERRORS))
+            if (DynamXErrorManager.getErrorManager().hasErrors(DynamXErrorManager.INIT_ERRORS, DynamXErrorManager.PACKS_ERRORS))
                 sender.sendMessage(new TextComponentString(TextFormatting.RED + " Some packs have errors, use the debug menu to see them"));
             //sender.sendMessage(new TextComponentString(TextFormatting.RED + " Certains packs ont des erreurs, utilisez le menu de debug pour les voir"));
         });

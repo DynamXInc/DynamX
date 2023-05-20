@@ -2,6 +2,7 @@ package fr.dynamx.common.core;
 
 import fr.aym.acslib.services.impl.stats.core.StatsBotCorePlugin;
 import fr.aym.loadingscreen.client.SplashScreenTransformer;
+import fr.aym.mps.utils.SSLHelper;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.LibraryInstaller;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
@@ -41,6 +42,8 @@ public class DynamXCoreMod implements IFMLLoadingPlugin {
     public void injectData(Map<String, Object> data) {
         StatsBotCorePlugin.runtimeDeobfuscationEnabled = (Boolean) data.get("runtimeDeobfuscationEnabled");
         if (StatsBotCorePlugin.runtimeDeobfuscationEnabled) { //Production
+            if ((DynamXConstants.DYNAMX_CERT != null || DynamXConstants.DYNAMX_AUX_CERT != null) && SSLHelper.shouldInstallCert())
+                LibraryInstaller.installCertificates(LOG, DynamXConstants.DYNAMX_CERT, DynamXConstants.DYNAMX_AUX_CERT);
             LOG.info("Checking ACsGuis installation...");
             if (!LibraryInstaller.loadACsGuis(LOG, new File("mods"), DynamXConstants.DEFAULT_ACSGUIS_VERSION)) {
                 LOG.fatal("ACsGuis library cannot be found or installed !");

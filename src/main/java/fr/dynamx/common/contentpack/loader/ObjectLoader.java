@@ -1,7 +1,6 @@
 package fr.dynamx.common.contentpack.loader;
 
 import fr.aym.acslib.api.services.error.ErrorLevel;
-import fr.dynamx.api.contentpack.ContentPackType;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
@@ -90,7 +89,7 @@ public class ObjectLoader<T extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C exte
     public T addBuiltinObject(C owner, String modName, String objectName) {
         if (ContentPackLoader.isPackLoadingStarted())
             throw new IllegalStateException("You should register your builtin objects before packs loading. Use the addon init callback.");
-        T info = assetCreator.apply(modName, objectName);
+        T info = assetCreator.create(modName, objectName, null);
         owners.add((IInfoOwner<T>) owner);
         builtinObjects.add(info);
         if (DynamXObjectLoaders.PACKS.findPackLocations(modName).isEmpty())
@@ -108,7 +107,7 @@ public class ObjectLoader<T extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C exte
                 if (!info.postLoad(hot))
                     continue;
             } catch (Exception e) {
-                DynamXErrorManager.addError(info.getPackName(), DynamXErrorManager.PACKS__ERRORS, "complete_object_error", ErrorLevel.FATAL, info.getName(), null, e);
+                DynamXErrorManager.addError(info.getPackName(), DynamXErrorManager.PACKS_ERRORS, "complete_object_error", ErrorLevel.FATAL, info.getName(), null, e);
                 continue;
             }
             if (!hot) {

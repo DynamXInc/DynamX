@@ -108,6 +108,13 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IInf
     }
 
     @Override
+    public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
+        ItemStack pickBlock = super.getPickBlock(state, target, world, pos, player);
+        pickBlock.setItemDamage(state.getValue(METADATA));
+        return pickBlock;
+    }
+
+    @Override
     public IBlockState getStateFromMeta(int meta) {
         return this.getDefaultState().withProperty(METADATA, meta);
     }

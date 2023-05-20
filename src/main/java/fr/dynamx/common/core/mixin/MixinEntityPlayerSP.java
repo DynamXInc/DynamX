@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 /**
  * Patches the world raytrace to raytrace on dynamx blocks
  */
-@Mixin(value = EntityPlayerSP.class)
+@Mixin(value = EntityPlayerSP.class, remap = false)
 public abstract class MixinEntityPlayerSP extends AbstractClientPlayer {
     public MixinEntityPlayerSP(World worldIn, GameProfile playerProfile) {
         super(worldIn, playerProfile);

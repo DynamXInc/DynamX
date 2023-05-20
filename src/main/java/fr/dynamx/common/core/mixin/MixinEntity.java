@@ -22,7 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /**
  * Patches the world raytrace to raytrace on dynamx blocks
  */
-@Mixin(value = Entity.class, priority = 800)
+@Mixin(value = Entity.class, priority = 800, remap = false)
 public abstract class MixinEntity {
 
     @Shadow public float prevRotationYaw;

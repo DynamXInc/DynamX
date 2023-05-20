@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 /**
  * Patches the world raytrace to raytrace on dynamx blocks
  */
-@Mixin(value = EntityLivingBase.class)
+@Mixin(value = EntityLivingBase.class, remap = false)
 public abstract class MixinEntityLivingBase extends Entity {
     public MixinEntityLivingBase(World worldIn) {
         super(worldIn);

@@ -22,7 +22,7 @@ import org.spongepowered.asm.mixin.Shadow;
 /**
  * Patches the NetHandlerPlayServer to disable console spam when players walk on moving vehicles
  */
-@Mixin(value = NetHandlerPlayServer.class)
+@Mixin(value = NetHandlerPlayServer.class, remap = false)
 public class MixinNetHandlerPlayServer {
     @Shadow
     private static boolean isMovePlayerPacketInvalid(CPacketPlayer packetIn) {

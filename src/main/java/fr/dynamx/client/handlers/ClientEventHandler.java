@@ -78,6 +78,7 @@ public class ClientEventHandler {
     private BlockPos blockPos;
     private int playerOrientation;
     private BlockObject<?> blockObjectInfo;
+    private int textureNum;
 
     /* World events */
 
@@ -284,6 +285,7 @@ public class ClientEventHandler {
                             target.getBlockPos().getY() + side.getYOffset(),
                             target.getBlockPos().getZ() + side.getZOffset());
 
+                    textureNum = currentItem.getMetadata();
                     blockObjectInfo = block.blockObjectInfo;
                     this.canPlace = itemBlock.canPlaceBlockOnSide(entityPlayer.world, blockPos, side, entityPlayer, currentItem);
                     this.model = DynamXContext.getObjModelRegistry().getModel(block.blockObjectInfo.getModel());
@@ -296,7 +298,7 @@ public class ClientEventHandler {
     public void onDrawBlockHighlight(DrawBlockHighlightEvent event) {
         if (this.model != null) {
             GlStateManager.enableAlpha();
-            model.renderPreview(blockObjectInfo, event.getPlayer(), blockPos, canPlace, playerOrientation, event.getPartialTicks());
+            model.renderPreview(blockObjectInfo, event.getPlayer(), blockPos, canPlace, playerOrientation, event.getPartialTicks(), textureNum);
         }
     }
 

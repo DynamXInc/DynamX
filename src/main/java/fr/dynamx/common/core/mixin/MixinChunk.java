@@ -21,7 +21,7 @@ import javax.annotation.Nullable;
 /**
  * Patches the world raytrace to raytrace on dynamx blocks
  */
-@Mixin(value = Chunk.class, priority = 500)
+@Mixin(value = Chunk.class, priority = 500, remap = false)
 public abstract class MixinChunk {
     @Final
     @Shadow

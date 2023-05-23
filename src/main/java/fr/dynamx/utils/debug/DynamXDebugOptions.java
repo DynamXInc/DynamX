@@ -27,7 +27,7 @@ public class DynamXDebugOptions {
 
     public static final DynamXDebugOption CENTER_OF_MASS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Center of mass").withSubCategory(VehicleDebugTypes.GENERAL.title),
             SEATS_AND_STORAGE = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Seats and storage").withSubCategory(VehicleDebugTypes.GENERAL.title),
-            WHEELS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Wheels").withSubCategory(VehicleDebugTypes.GENERAL.title),
+            WHEELS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Wheels and floats").withSubCategory(VehicleDebugTypes.GENERAL.title),
             ROTORS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Rotors").withSubCategory(VehicleDebugTypes.GENERAL.title),
             HANDLES = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Handles").withSubCategory(VehicleDebugTypes.GENERAL.title),
             FRICTION_POINTS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Force points").withSubCategory(VehicleDebugTypes.GENERAL.title),

@@ -100,6 +100,8 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
         ClientCommandHandler.instance.registerCommand(new CommandNetworkDebug());
 
         ClientRegistry.bindTileEntitySpecialRenderer(TEDynamXBlock.class, new TESRDynamXBlock<>());
+        if(!Minecraft.getMinecraft().getFramebuffer().isStencilEnabled())
+            Minecraft.getMinecraft().getFramebuffer().enableStencil();
     }
 
     @Override

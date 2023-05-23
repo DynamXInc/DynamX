@@ -44,7 +44,7 @@ public class CameraSystem {
      */
     private static void animateCameraRotation(com.jme3.math.Quaternion prevRotation, com.jme3.math.Quaternion rotation, float step, float animLength) {
         DynamXMath.slerp(step, prevRotation, rotation, jmeQuatCache);
-        DynamXGeometry.inverseQuaternion(jmeQuatCache);
+        DynamXGeometry.inverseQuaternion(jmeQuatCache, jmeQuatCache);
         rotationMode.rotator.apply(Minecraft.getMinecraft().gameSettings.thirdPersonView, jmeQuatCache);
 
         jmeQuatCache.normalizeLocal();

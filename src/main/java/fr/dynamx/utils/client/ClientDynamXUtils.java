@@ -44,7 +44,7 @@ public class ClientDynamXUtils {
         com.jme3.math.Quaternion cache = QuaternionPool.get();
         DynamXMath.slerp(step, prevRotation, rotation, cache);
         if (inverse)
-            DynamXGeometry.inverseQuaternion(cache);
+            DynamXGeometry.inverseQuaternion(cache, cache);
         return GlQuaternionPool.get(cache);
     }
 

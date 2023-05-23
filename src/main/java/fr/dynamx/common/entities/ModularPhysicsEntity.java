@@ -70,6 +70,10 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
      * @param physicsInitCallback The new {@link ModularEntityInitCallback}
      */
     public ModularPhysicsEntity<T> setPhysicsInitCallback(ModularEntityPhysicsInitCallback physicsInitCallback) {
+        if(initialized == 2){
+            physicsInitCallback.onPhysicsInit(this, physicsHandler);
+            return this;
+        }
         this.physicsInitCallback = physicsInitCallback;
         return this;
     }

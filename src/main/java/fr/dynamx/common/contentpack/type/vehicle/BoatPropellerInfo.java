@@ -6,32 +6,36 @@ import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
+import lombok.Getter;
 
-@RegisteredSubInfoType(name = "boat_engine", registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
-/**
- * Info of the trailer attach point of a vehicle
- */
-public class BoatEngineInfo extends SubInfoType<ModularVehicleInfo> {
+@RegisteredSubInfoType(name = "BoatPropeller", registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
+public class BoatPropellerInfo extends SubInfoType<ModularVehicleInfo> {
     @PackFileProperty(configNames = "Position", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y)
+    @Getter
     private Vector3f position;
+    @PackFileProperty(configNames = {"AccelerationForce", "ForwardForce"})
+    @Getter
+    private float accelerationForce;
+    @PackFileProperty(configNames = {"BrakeForce", "BackwardForce"})
+    @Getter
+    private float brakeForce;
+    @PackFileProperty(configNames = "SteerForce")
+    @Getter
+    private float steerForce;
 
-    public BoatEngineInfo(ModularVehicleInfo owner) {
+    public BoatPropellerInfo(ModularVehicleInfo owner) {
         super(owner);
     }
 
     @Override
     public void appendTo(ModularVehicleInfo owner) {
         if (getPosition() == null)
-            throw new IllegalArgumentException("AttachPoint not configured ! In trailer of " + owner.toString());
+            throw new IllegalArgumentException("Position not configured ! In boat propeller of " + owner.toString());
         owner.addSubProperty(this);
-    }
-
-    public Vector3f getPosition() {
-        return position;
     }
 
     @Override
     public String getName() {
-        return "BoatEngineInfo";
+        return "BoatPropeller";
     }
 }

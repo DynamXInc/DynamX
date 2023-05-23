@@ -41,7 +41,7 @@ public abstract class EntityPhysicsHandler<T extends PhysicsEntity<?>> extends A
         getCollisionObject().getAngularVelocity(rotationalVel);
 
         //Buoyancy effect W.I.P
-        if (collisionObject.isInWorld()) {
+        /*if (collisionObject.isInWorld()) {
             Vector3f bodyPos = handledEntity.physicsPosition;
             BlockPos pos = new BlockPos(bodyPos.x, bodyPos.y, bodyPos.z);
             IBlockState blockState = handledEntity.world.getBlockState(pos);
@@ -73,7 +73,7 @@ public abstract class EntityPhysicsHandler<T extends PhysicsEntity<?>> extends A
                     appliedBuoy = false;
                 }
             }
-        }
+        }*/
     }
 
     @Override

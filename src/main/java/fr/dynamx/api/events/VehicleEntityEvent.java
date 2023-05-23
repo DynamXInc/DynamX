@@ -259,7 +259,7 @@ public class VehicleEntityEvent extends Event {
         @Getter
         private final PhysicsEntityEvent.Phase eventPhase;
         /**
-         * The {@link fr.dynamx.api.entities.modules.IEngineModule} of the entity, responsible for sounds update
+         * The {@link BasicEngineModule} of the entity, responsible for sounds update
          */
         @Getter
         private final BasicEngineModule module;

@@ -7,7 +7,7 @@ public class DynamXConstants
 {
     public static final String NAME = "DynamX";
     public static final String ID = "dynamxmod";
-    public static final String VERSION = "4.0.0-beta-18";
+    public static final String VERSION = "4.0.0-beta-19";
     public static final String VERSION_TYPE = "Beta";
     public static final String RES_DIR_NAME = "DynamX";
 
@@ -28,5 +28,4 @@ public class DynamXConstants
     public static final String MPS_URL = "https://dynamx.fr/mps/", MPS_AUX_URL = "https://mps2.dynamx.fr/", MPS_KEY = "VGZQNFY5UEJ1YmVLTlpwWC1BQ1JFLTQ=", MPS_STARTER = null;
 
     public static final String STATS_URL = "https://dynamx.fr/statsbot/statsbotrcv.php", STATS_PRODUCT = "DNX_"+VERSION+"_BETA", STATS_TOKEN = "ZG54OnN0YWJkOTg=";
-    public static final boolean REMAP = false;
 }

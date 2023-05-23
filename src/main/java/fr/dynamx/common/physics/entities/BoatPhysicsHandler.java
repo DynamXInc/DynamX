@@ -1,8 +1,9 @@
-package fr.dynamx.common.entities.vehicles;
+package fr.dynamx.common.physics.entities;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.common.contentpack.parts.PartFloat;
+import fr.dynamx.common.entities.vehicles.BoatEntity;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.QuaternionPool;

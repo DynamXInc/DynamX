@@ -9,6 +9,7 @@ import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.BoatPropellerModule;
 import fr.dynamx.common.entities.modules.CarEngineModule;
 import fr.dynamx.common.entities.modules.SeatsModule;
+import fr.dynamx.common.physics.entities.BoatPhysicsHandler;
 import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;

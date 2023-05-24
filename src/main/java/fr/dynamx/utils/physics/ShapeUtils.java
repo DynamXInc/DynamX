@@ -78,6 +78,9 @@ public class ShapeUtils {
 
             float[] pos = lowerCaseObjectName.isEmpty() ? model.getVerticesPos() : model.getVerticesPos(lowerCaseObjectName);
             int[] indices = lowerCaseObjectName.isEmpty() ? model.getAllMeshIndices() : model.getMeshIndices(lowerCaseObjectName);
+            if(pos.length == 0 || indices.length == 0) {
+                throw new IllegalArgumentException("Part '" + objectName + "' of '" + path + "' does not exist or is empty. Check the name of the part in the obj file.");
+            }
 
             long end = System.currentTimeMillis();
             long time = end - start;
@@ -119,6 +122,9 @@ public class ShapeUtils {
         }
         CompoundCollisionShape collisionShape = new CompoundCollisionShape();
         for (float[] hullPoint : shapeGenerator.getHullPoints()) {
+            if(hullPoint.length == 0) {
+                throw new IllegalArgumentException("Empty .dc file for part '" + objectName + "' of '" + path + "'. Please delete it, check your obj model and restart the game.");
+            }
             HullCollisionShape hullShape = new HullCollisionShape(hullPoint);
             hullShape.setScale(scale.subtract(new Vector3f(.1f, .1f, .1f)));
             collisionShape.addChildShape(hullShape, new Vector3f(centerOfMass.x, shapeYOffset + centerOfMass.y, centerOfMass.z));

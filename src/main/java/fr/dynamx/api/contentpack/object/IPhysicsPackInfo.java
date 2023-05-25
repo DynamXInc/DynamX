@@ -40,5 +40,5 @@ public interface IPhysicsPackInfo {
 
     ItemStack getPickedResult(int metadata);
 
-    String getName();
+    String getFullName();
 }

@@ -236,6 +236,11 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     }
 
     @Override
+    public String getFullName() {
+        return super.getFullName();
+    }
+
+    @Override
     public void getBox(MutableBoundingBox out) {
         out.setTo(new MutableBoundingBox(getScale()));
     }

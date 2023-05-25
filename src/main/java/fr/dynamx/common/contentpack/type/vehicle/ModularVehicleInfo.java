@@ -41,6 +41,7 @@ import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.physics.ShapeUtils;
 import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.item.Item;
@@ -67,7 +68,9 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
         return null;
     };
 
-    private final VehicleValidator validator;
+    @Getter
+    @Setter
+    private VehicleValidator validator;
 
     /* == Pack properties == */
 

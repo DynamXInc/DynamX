@@ -181,7 +181,9 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
      * Internal function remove a joint on entity death or from a packet
      */
     public void onRemoveJoint(EntityJoint<?> joint) {
-        onRemoveJointInternal(joint, joint.getOtherEntity(entity));
+        DynamXMain.proxy.scheduleTask(entity.world, () -> {
+            onRemoveJointInternal(joint, joint.getOtherEntity(entity));
+        });
     }
 
     /**

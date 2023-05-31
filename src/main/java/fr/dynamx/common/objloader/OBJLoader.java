@@ -55,7 +55,6 @@ public class OBJLoader {
     public void readAndLoadModel(ResourceLocation location, String objContent) {
         try {
             hasNormals = true;
-            hasTexCoords = true;
             IndexedModel result = new IndexedModel();
             IndexedModel normalModel = new IndexedModel();
             String[] lines = objContent.split("[\n\r]");
@@ -102,8 +101,10 @@ public class OBJLoader {
                                 normals.add(new Vector3f(Float.parseFloat(parts[1]), Float.parseFloat(parts[2]), Float.parseFloat(parts[3])));
                                 break;
                             case TEX_COORDS:
-                                if (location != null)
+                                if (location != null) {
                                     texCoords.add(new Vector2f(Float.parseFloat(parts[1]), Float.parseFloat(parts[2])));
+                                    hasTexCoords = true;
+                                }
                                 break;
                             case NEW_MATERIAL:
                                 if (location != null) {
@@ -231,7 +232,6 @@ public class OBJLoader {
             if (values[1] != null && !values[1].equals("")) {
                 index.texCoordsIndex = Integer.parseInt(values[1]) - 1 - texCoordsOffset;
             }
-            hasTexCoords = true;
             if (values.length > 2) {
                 index.normalIndex = Integer.parseInt(values[2]) - 1 - normalOffset;
                 hasNormals = true;

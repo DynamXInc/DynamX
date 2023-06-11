@@ -2,6 +2,7 @@ package fr.dynamx.common.core.mixin;
 
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.handlers.CommonEventHandler;
+import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -21,7 +22,7 @@ import javax.annotation.Nullable;
 /**
  * Patches the world raytrace to raytrace on dynamx blocks
  */
-@Mixin(value = Chunk.class, priority = 500)
+@Mixin(value = Chunk.class, priority = 500, remap = DynamXConstants.REMAP)
 public abstract class MixinChunk {
     @Final
     @Shadow

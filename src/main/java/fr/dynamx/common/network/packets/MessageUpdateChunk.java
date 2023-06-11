@@ -63,6 +63,8 @@ public class MessageUpdateChunk implements IDnxPacket, IMessageHandler<MessageUp
 
     @Override
     public void handleUDPReceive(EntityPlayer context, Side side) {
+        if(context == null)
+            return; // World is unloaded
         IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(context.world);
         if (physicsWorld != null && DynamXMain.proxy.shouldUseBulletSimulation(context.world)) {
             physicsWorld.schedule(() -> {

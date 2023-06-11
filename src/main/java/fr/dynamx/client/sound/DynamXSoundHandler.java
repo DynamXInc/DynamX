@@ -156,7 +156,7 @@ public class DynamXSoundHandler {
                         trustedSounds.add(soundName);
                     Vec3d soundNormalizedPosition = new Vec3d(soundPosition.x, soundPosition.y, soundPosition.z);
                     String soundTempName = mcSoundSystem.quickPlay(false, soundURL, soundURL.getFile(), false, (float) soundNormalizedPosition.x, (float) soundNormalizedPosition.y, (float) soundNormalizedPosition.z, attenuationType, distOrRoll);
-                    mcSoundSystem.setVolume(soundTempName, volume);
+                    mcSoundSystem.setVolume(soundTempName, MathHelper.clamp(volume * DynamXConfig.getMasterSoundVolume(), 0.0F, 1.0F));
                     mcSoundSystem.setPitch(soundTempName, pitch);
                 }
             } catch (FileNotFoundException e) {

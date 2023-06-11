@@ -24,6 +24,7 @@ import fr.dynamx.common.entities.PropsEntity;
 import fr.dynamx.common.items.DynamXItemSpawner;
 import fr.dynamx.common.items.tools.ItemSlopes;
 import fr.dynamx.common.network.packets.MessageEntityInteract;
+import fr.dynamx.common.physics.player.PlayerPhysicsHandler;
 import fr.dynamx.common.physics.player.WalkingOnPlayerController;
 import fr.dynamx.common.slopes.GuiSlopesConfig;
 import fr.dynamx.utils.DynamXConfig;
@@ -437,6 +438,11 @@ public class ClientEventHandler {
     public void entityRender(RenderLivingEvent.Pre event) {
         if (event.getEntity().getRidingEntity() instanceof BaseVehicleEntity && !renderingEntity.contains(event.getEntity().getUniqueID()) && event.getRenderer().getRenderManager().isRenderShadow()) { //If shadows are disabled, were are in GuiInventory, CAN BREAK OTHER MODS
             //If the entity is on a seat, and GlobalRender isn't rendering entity riding the entity, just cancel the event, and cancel all modifications by other mods (priority = EventPriority.HIGHEST)
+            event.setCanceled(true);
+        }
+
+        // If the entity has a ragdoll, don't render it
+        if (event.getEntity().isInvisible() && DynamXContext.getPlayerToCollision().containsKey(event.getEntity()) && DynamXContext.getPlayerToCollision().get(event.getEntity()).ragdollEntity != null) {
             event.setCanceled(true);
         }
     }

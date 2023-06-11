@@ -1,14 +1,11 @@
 package fr.dynamx.utils.client;
 
-import com.jme3.math.Vector3f;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.network.packets.MessageAttachTrailer;
-import fr.dynamx.common.network.packets.MessagePlayerToRagdoll;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.QuaternionPool;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
@@ -65,11 +62,6 @@ public class ClientDynamXUtils {
             }
         }
         return 0;
-    }
-
-
-    public static void playerToRagdoll(EntityPlayer player, Vector3f velMult) {
-        DynamXContext.getNetwork().sendToServer(new MessagePlayerToRagdoll(new Vector3f((float) player.motionX, (float) player.motionY, (float) player.motionZ).mult(velMult, null)));
     }
 
     public static void attachTrailer(){

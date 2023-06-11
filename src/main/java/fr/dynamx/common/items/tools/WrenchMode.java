@@ -2,7 +2,6 @@ package fr.dynamx.common.items.tools;
 
 import com.jme3.bullet.joints.JointEnd;
 import com.jme3.bullet.objects.PhysicsRigidBody;
-import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.EnumBulletShapeType;
@@ -25,11 +24,9 @@ import fr.dynamx.common.network.packets.MessageDebugRequest;
 import fr.dynamx.common.physics.joints.JointHandlerRegistry;
 import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.DynamXUtils;
-import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import fr.dynamx.utils.physics.PhysicsRaycastResult;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -79,19 +76,16 @@ public class WrenchMode {
     };
 
     private final String label;
-    private final TextFormatting color;
     private final String initials;
 
     protected WrenchMode(String label, TextFormatting color) {
         this.label = label;
-        this.color = color;
-
         this.initials = Arrays.stream(label.split("_")).map(s -> s.substring(0, 1) + '.').collect(Collectors.joining("", color.toString(), "")).toUpperCase();
         WRENCH_MODES.add(this);
     }
 
     public String getLabel() {
-        return I18n.format("wrench.mode."+label, color);
+        return "wrench.mode." + label;
     }
 
     public String getInitials() {
@@ -99,7 +93,7 @@ public class WrenchMode {
     }
 
     public String getMessage() {
-        return I18n.format("wrench.mode.setto", color, getLabel());
+        return "wrench.mode.set." + label;
     }
 
     public void onWrenchLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
@@ -138,7 +132,7 @@ public class WrenchMode {
                 return;
             }
         }
-        player.sendMessage(new TextComponentString(WRENCH_MODES.get(l).getMessage()));
+        player.sendMessage(new TextComponentTranslation(WRENCH_MODES.get(l).getMessage()));
     }
 
     public static void setMode(EntityPlayer player, ItemStack s, int mode) {
@@ -160,7 +154,7 @@ public class WrenchMode {
                 return;
             }
         }
-        player.sendMessage(new TextComponentString(WRENCH_MODES.get(mode).getMessage()));
+        player.sendMessage(new TextComponentTranslation(WRENCH_MODES.get(mode).getMessage()));
     }
 
     public static void sendWrenchMode(WrenchMode mode) {
@@ -281,12 +275,6 @@ public class WrenchMode {
     private static class ReplaceEntitiesWrenchMode extends WrenchMode {
         public ReplaceEntitiesWrenchMode() {
             super("respawn_entities", TextFormatting.GOLD);
-        }
-
-        @Override
-        public void onWrenchRightClickClient(EntityPlayer playerIn, EnumHand handIn) {
-            super.onWrenchRightClick(playerIn, handIn);
-            //ClientDynamXUtils.playerToRagdoll(playerIn, new Vector3f(20, 20, 20));
         }
 
         @Override

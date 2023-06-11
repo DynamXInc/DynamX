@@ -9,11 +9,11 @@ import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.network.sync.AttachedBodySynchronizer;
-import fr.dynamx.common.network.sync.variables.EntityTransformsVariable;
+import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.entities.modules.MovableModule;
-import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
+import fr.dynamx.common.network.sync.variables.EntityTransformsVariable;
 import fr.dynamx.common.physics.entities.EntityPhysicsHandler;
 import fr.dynamx.common.physics.entities.EnumRagdollBodyPart;
 import fr.dynamx.common.physics.entities.RagdollPhysics;
@@ -223,7 +223,8 @@ public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> imple
         if (handledPlayer != null) {
             handledPlayer.eyeHeight = handledPlayer.getDefaultEyeHeight();
             handledPlayer.setInvisible(false);
-            if (handledPlayer.getRidingEntity() == null && !DynamXContext.getWalkingPlayers().containsKey(handledPlayer))
+            if (handledPlayer.getRidingEntity() == null && !DynamXContext.getWalkingPlayers().containsKey(handledPlayer)
+                    && DynamXContext.getPlayerToCollision().containsKey(handledPlayer))
                 DynamXContext.getPlayerToCollision().get(handledPlayer).addToWorld();
         }
         handler.onRemovedFromWorld();

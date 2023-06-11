@@ -9,6 +9,7 @@ import fr.dynamx.common.items.tools.WrenchMode;
 import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
@@ -99,13 +100,13 @@ public class GuiWrenchSelection extends GuiFrame {
 
         infos.clear();
         WrenchMode wrenchMode = getModeWithMousePos(mouseX, mouseY);
-        infos.add(wrenchMode.getLabel());
-        //infos.add(wrenchMode.getMessage());
+        infos.add(I18n.format(wrenchMode.getLabel()));
         GuiAPIClientHelper.drawHoveringText(infos, mouseX, mouseY);
 
         if (currentMode != null) {
             GlStateManager.scale(0.7f, 0.7f, 0);
-            mc.fontRenderer.drawString("Current Mode : " + currentMode.getLabel(), (int) (getWidth() / (2 * 0.7f) - (mc.fontRenderer.getStringWidth("Current Mode : " + currentMode.getLabel()) / 2)), (int) (getHeight() / (2 * 0.7f) - (mc.fontRenderer.FONT_HEIGHT / 2)), Color.WHITE.getRGB());
+            String cur = I18n.format(currentMode.getLabel());
+            mc.fontRenderer.drawString("Current Mode : " + cur, (int) (getWidth() / (2 * 0.7f) - (mc.fontRenderer.getStringWidth("Current Mode : " + cur) / 2)), (int) (getHeight() / (2 * 0.7f) - (mc.fontRenderer.FONT_HEIGHT / 2)), Color.WHITE.getRGB());
         }
 
     }

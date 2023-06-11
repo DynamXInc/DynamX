@@ -170,8 +170,8 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
     }
 
     @Override
-    public ItemStack getPickedResult() {
-        return new ItemStack((Item) getOwners()[0]);
+    public ItemStack getPickedResult(int metadata) {
+        return new ItemStack((Item) getOwners()[0], 1, metadata);
     }
 
     @Override

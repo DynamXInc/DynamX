@@ -218,7 +218,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     }
 
     @Override
-    public ItemStack getPickedResult() {
+    public ItemStack getPickedResult(int metadata) {
         return ItemStack.EMPTY;
     }
 
@@ -233,6 +233,11 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     @Override
     public String getName() {
         return "PartDoor named " + getPartName();
+    }
+
+    @Override
+    public String getFullName() {
+        return super.getFullName();
     }
 
     @Override

@@ -41,6 +41,7 @@ import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.physics.ShapeUtils;
 import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.item.Item;
@@ -48,7 +49,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import scala.xml.dtd.impl.Base;
 
 import java.util.*;
 
@@ -68,7 +68,9 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
         return null;
     };
 
-    private final VehicleValidator validator;
+    @Getter
+    @Setter
+    private VehicleValidator validator;
 
     /* == Pack properties == */
 
@@ -316,8 +318,8 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     }
 
     @Override
-    public ItemStack getPickedResult() {
-        return new ItemStack((Item) getOwners()[0]);
+    public ItemStack getPickedResult(int metadata) {
+        return new ItemStack((Item) getOwners()[0], 1, metadata);
     }
 
     /**

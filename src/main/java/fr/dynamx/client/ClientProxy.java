@@ -6,6 +6,7 @@ import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.contentpack.object.render.IObjPackObject;
 import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
 import fr.dynamx.api.obj.ObjModelPath;
+import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.client.handlers.KeyHandler;
 import fr.dynamx.client.network.ClientPhysicsEntitySynchronizer;
@@ -99,6 +100,8 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
         ClientCommandHandler.instance.registerCommand(new CommandNetworkDebug());
 
         ClientRegistry.bindTileEntitySpecialRenderer(TEDynamXBlock.class, new TESRDynamXBlock<>());
+        if(!Minecraft.getMinecraft().getFramebuffer().isStencilEnabled())
+            Minecraft.getMinecraft().getFramebuffer().enableStencil();
     }
 
     @Override
@@ -162,8 +165,20 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
 
     @Override
     public void initPhysicsWorld(World world) {
-        if (DynamXContext.getPhysicsWorldPerDimensionMap().containsKey(world.provider.getDimension()))
+        if (DynamXContext.getPhysicsWorldPerDimensionMap().containsKey(world.provider.getDimension())) {
+            // connecting to another server (e.g. with bungeecoord) : unload the previous world
+            /*System.out.println("Duplicate world load detected. Unloading old.");
+            IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(world);
+            System.out.println("Found: " + physicsWorld);
+            if (physicsWorld != null && physicsWorld.ownsWorld(world)) {
+                System.out.println("Owned. Clearing.");
+                physicsWorld.clearAll();
+                DynamXContext.getPlayerToCollision().clear();
+            } else {
+                System.out.println("Not owned. Wtf. Cannot clear.");
+            }*/
             throw new IllegalStateException("Physics world of " + world + " is already loaded ! World: " + DynamXContext.getPhysicsWorldPerDimensionMap().get(world.provider.getDimension()));
+        }
         DynamXContext.getPhysicsWorldPerDimensionMap().put(world.provider.getDimension(), new BuiltinThreadedPhysicsWorld(world, !ClientEventHandler.MC.isSingleplayer()));
     }
 

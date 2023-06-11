@@ -38,7 +38,7 @@ public interface IPhysicsPackInfo {
         return Collections.emptyList();
     }
 
-    ItemStack getPickedResult();
+    ItemStack getPickedResult(int metadata);
 
-    String getName();
+    String getFullName();
 }

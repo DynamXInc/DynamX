@@ -46,7 +46,7 @@ public class ObjModelRenderer {
     private final IModelTextureVariantsSupplier textureVariants;
     @Getter
     @Setter
-    private Vector4f modelColor = new Vector4f(1,1,1,1);
+    private Vector4f modelColor = new Vector4f(1, 1, 1, 1);
 
     protected ObjModelRenderer(ObjModelPath location, List<ObjObjectRenderer> objObjects, Map<String, Material> materials, @Nullable IModelTextureVariantsSupplier textureVariants) {
         this.location = location;
@@ -172,7 +172,7 @@ public class ObjModelRenderer {
     }
 
 
-    public void renderPreview(BlockObject<?> blockObjectInfo, EntityPlayer player, BlockPos blockPos, boolean canPlace, float orientation, float partialTicks) {
+    public void renderPreview(BlockObject<?> blockObjectInfo, EntityPlayer player, BlockPos blockPos, boolean canPlace, float orientation, float partialTicks, int textureNum) {
         double px = player.lastTickPosX + (player.posX - player.lastTickPosX) * partialTicks;
         double py = player.lastTickPosY + (player.posY - player.lastTickPosY) * partialTicks;
         double pz = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * partialTicks;
@@ -194,7 +194,7 @@ public class ObjModelRenderer {
         GlStateManager.disableBlend();
 
         setModelColor(new Vector4f(canPlace ? 0 : 1, canPlace ? 1 : 0, 0, 0.7f));
-        renderModel();
+        renderModel((byte) textureNum);
         GlStateManager.enableBlend();
         GlStateManager.popMatrix();
     }

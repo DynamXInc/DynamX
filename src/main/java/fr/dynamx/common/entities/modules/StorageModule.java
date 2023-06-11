@@ -28,7 +28,7 @@ public class StorageModule implements IPhysicsModule<PackEntityPhysicsHandler<?,
     }
 
     public void addInventory(PackPhysicsEntity<?, ?> entity, PartStorage partStorage) {
-        inventories.put(partStorage.getId(), new InventoryBasic(entity.getPackInfo().getName(), false, partStorage.getStorageSize()));
+        inventories.put(partStorage.getId(), new InventoryBasic("part.storage"+entity.getPackInfo().getFullName(), false, partStorage.getStorageSize()));
     }
 
     public IInventory getInventory(byte id) {

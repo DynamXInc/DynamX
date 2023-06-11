@@ -91,10 +91,11 @@ public interface ITerrainManager {
      *
      * @param pos      The position of the chunk
      * @param priority The priority of loading
-     * @param profiler   The profiler
+     * @param profiler The profiler
+     * @return False if it failed (chunk not loading by Minecraft)
      * @see IPhysicsTerrainLoader
      */
-    void subscribeToChunk(VerticalChunkPos pos, ChunkLoadingTicket.TicketPriority priority, Profiler profiler);
+    boolean subscribeToChunk(VerticalChunkPos pos, ChunkLoadingTicket.TicketPriority priority, Profiler profiler);
 
     /**
      * @return The world associated to this terrain manager

@@ -70,6 +70,10 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
      * @param physicsInitCallback The new {@link ModularEntityInitCallback}
      */
     public ModularPhysicsEntity<T> setPhysicsInitCallback(ModularEntityPhysicsInitCallback physicsInitCallback) {
+        if(initialized == 2){
+            physicsInitCallback.onPhysicsInit(this, physicsHandler);
+            return this;
+        }
         this.physicsInitCallback = physicsInitCallback;
         return this;
     }
@@ -175,10 +179,8 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
 
     @Override
     protected void writeEntityToNBT(NBTTagCompound tagCompound) {
-        int size = moduleList.size();
-        for (int i = 0; i < size; i++) {
-            moduleList.get(i).writeToNBT(tagCompound);
-        }
+        super.writeEntityToNBT(tagCompound);
+        moduleList.forEach(m -> m.writeToNBT(tagCompound));
     }
 
     @Override

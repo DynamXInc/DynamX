@@ -30,7 +30,8 @@ public class EnginePhysicsHandler implements IPackInfoReloadListener {
     private AutomaticGearboxHandler gearBoxHandler;
     @Getter
     private float accelerationForce;
-    private float steeringForce = 0;
+    @Getter
+    private float steeringForce ;
 
     public EnginePhysicsHandler(CarEngineModule module, BaseVehiclePhysicsHandler<?> handler, WheelsPhysicsHandler propulsionHandler) {
         this.module = module;

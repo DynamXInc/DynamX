@@ -79,6 +79,7 @@ public class ClientEventHandler {
     private BlockPos blockPos;
     private int playerOrientation;
     private BlockObject<?> blockObjectInfo;
+    private int textureNum;
 
     /* World events */
 
@@ -248,10 +249,10 @@ public class ClientEventHandler {
     public void onClientTick(TickEvent.ClientTickEvent event) {
         ClientProxy.SOUND_HANDLER.tick();
 
-        if (connectionTime != -1 && !Minecraft.getMinecraft().isSingleplayer() && DynamXConfig.useUdp) {
+        if (connectionTime != -1 && !Minecraft.getMinecraft().isSingleplayer()) {
             if ((System.currentTimeMillis() - connectionTime) > 30000) {
                 if (!DynamXContext.getNetwork().isConnected()) {
-                    DynamXMain.log.fatal("Failed to establish an UDP connection : timed out (0x1)");
+                    DynamXMain.log.fatal("Failed to establish an TCP/UDP connection : timed out (0x1)");
                     connectionTime = -1;
                     if (Minecraft.getMinecraft().getConnection() != null && DynamXConfig.doUdpTimeOut)
                         Minecraft.getMinecraft().getConnection().getNetworkManager().closeChannel(new TextComponentString("DynamX UDP connection timed out (Auth not started)"));
@@ -285,6 +286,7 @@ public class ClientEventHandler {
                             target.getBlockPos().getY() + side.getYOffset(),
                             target.getBlockPos().getZ() + side.getZOffset());
 
+                    textureNum = currentItem.getMetadata();
                     blockObjectInfo = block.blockObjectInfo;
                     this.canPlace = itemBlock.canPlaceBlockOnSide(entityPlayer.world, blockPos, side, entityPlayer, currentItem);
                     this.model = DynamXContext.getObjModelRegistry().getModel(block.blockObjectInfo.getModel());
@@ -297,7 +299,7 @@ public class ClientEventHandler {
     public void onDrawBlockHighlight(DrawBlockHighlightEvent event) {
         if (this.model != null) {
             GlStateManager.enableAlpha();
-            model.renderPreview(blockObjectInfo, event.getPlayer(), blockPos, canPlace, playerOrientation, event.getPartialTicks());
+            model.renderPreview(blockObjectInfo, event.getPlayer(), blockPos, canPlace, playerOrientation, event.getPartialTicks(), textureNum);
         }
     }
 

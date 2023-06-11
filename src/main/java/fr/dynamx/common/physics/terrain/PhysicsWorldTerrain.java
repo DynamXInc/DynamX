@@ -9,7 +9,6 @@ import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.handlers.TaskScheduler;
 import fr.dynamx.common.physics.terrain.cache.FileTerrainCache;
 import fr.dynamx.common.physics.terrain.cache.RemoteTerrainCache;
-import fr.dynamx.common.physics.terrain.cache.TerrainFile;
 import fr.dynamx.common.physics.terrain.chunk.ChunkCollisions;
 import fr.dynamx.common.physics.terrain.chunk.ChunkLoadingTicket;
 import fr.dynamx.common.physics.terrain.chunk.ChunkState;
@@ -99,11 +98,12 @@ public class PhysicsWorldTerrain implements ITerrainManager {
     }
 
     @Override
-    public void subscribeToChunk(VerticalChunkPos pos, ChunkLoadingTicket.TicketPriority priority, Profiler profiler) {
+    public boolean subscribeToChunk(VerticalChunkPos pos, ChunkLoadingTicket.TicketPriority priority, Profiler profiler) {
+        assert priority != ChunkLoadingTicket.TicketPriority.NONE;
         profiler.start(GET_T0);
-        if (priority == ChunkLoadingTicket.TicketPriority.NONE || !isChunkLoaded(world, pos.x, pos.z)) {
+        if (!isChunkLoaded(world, pos.x, pos.z)) {
             profiler.end(GET_T0);
-            return; //Not loaded in minecraft ? don't load
+            return false; //Not loaded in minecraft ? don't load
         }
         profiler.end(GET_T0);
         profiler.start(GET_T1);
@@ -178,6 +178,7 @@ public class PhysicsWorldTerrain implements ITerrainManager {
             receiveAsyncLoadedChunks();
             profiler.end(RCV_ASYNC);
         }
+        return true;
     }
 
     @Override

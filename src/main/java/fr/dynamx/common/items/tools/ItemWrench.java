@@ -84,7 +84,7 @@ public class ItemWrench extends Item {
     @Override
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
-        tooltip.add(I18n.format("wrench.mode.mode", WrenchMode.getCurrentMode(stack).getLabel()));
+        tooltip.add(I18n.format("wrench.mode.mode", I18n.format(WrenchMode.getCurrentMode(stack).getLabel())));
         if (hasEntity(stack)) {
             PhysicsEntity<?> e = getEntity(stack, worldIn);
             if (e instanceof PackPhysicsEntity)

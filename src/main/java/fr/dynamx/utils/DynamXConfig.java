@@ -95,5 +95,7 @@ public class DynamXConfig
         masterSoundVolume = volume;
         cfg.get("Sounds", "Volume", 1f, "The volume of DynamX sounds (engines...)").set(volume);
         cfg.save();
+
+        System.out.println("CONFIG IS " + useUdp + " " + udpDebug);
     }
 }

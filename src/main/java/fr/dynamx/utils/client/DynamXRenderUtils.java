@@ -1,22 +1,11 @@
 package fr.dynamx.utils.client;
 
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.contentpack.object.part.IDrawablePart;
-import fr.dynamx.api.events.PhysicsEntityEvent;
-import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.client.handlers.ClientEventHandler;
-import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.client.renders.vehicle.RenderBaseVehicle;
-import fr.dynamx.common.DynamXContext;
-import fr.dynamx.common.contentpack.parts.PartRotor;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
-import fr.dynamx.common.contentpack.parts.PartDoor;
-import fr.dynamx.common.contentpack.parts.PartLightSource;
-import fr.dynamx.common.contentpack.parts.PartWheel;
-import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
-import fr.dynamx.common.contentpack.type.vehicle.SteeringWheelInfo;
-import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
+import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
@@ -29,7 +18,6 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
-import net.minecraftforge.common.MinecraftForge;
 import org.lwjgl.opengl.APPLEVertexArrayObject;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
@@ -63,7 +51,7 @@ public class DynamXRenderUtils {
     private static RenderBaseVehicle<?> renderBaseVehicle;
 
     public static void renderCar(ModularVehicleInfo car, byte textureId) {
-        if(renderBaseVehicle == null)
+        if (renderBaseVehicle == null)
             renderBaseVehicle = new RenderBaseVehicle<>(ClientEventHandler.MC.getRenderManager());
         Vector3fPool.openPool();
         GlQuaternionPool.openPool();
@@ -116,6 +104,40 @@ public class DynamXRenderUtils {
         GlStateManager.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
         Vector3fPool.closePool();
     }
+
+    public static void drawNameplate(FontRenderer fontRendererIn, String str, float x, float y, float z, PhysicsEntity<?> entity, int verticalShift, float viewerYaw, float viewerPitch, boolean isThirdPersonFrontal) {
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(x, y, z);
+        GlStateManager.rotate(-entity.rotationYaw, 0, 1, 0);
+        GlStateManager.rotate(-entity.rotationPitch, 1, 0, 0);
+        GlStateManager.rotate(-viewerYaw, 0.0F, 1.0F, 0.0F);
+        GlStateManager.rotate((float) (isThirdPersonFrontal ? -1 : 1) * viewerPitch, 1.0F, 0.0F, 0.0F);
+        GlStateManager.scale(-0.025F, -0.025F, 0.025F);
+        GlStateManager.disableLighting();
+        GlStateManager.depthMask(false);
+
+        GlStateManager.enableBlend();
+        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        int i = fontRendererIn.getStringWidth(str) / 2;
+        GlStateManager.disableTexture2D();
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_COLOR);
+        bufferbuilder.pos(-i - 1, -1 + verticalShift, 0.0D).color(0.0F, 0.0F, 0.0F, 0.25F).endVertex();
+        bufferbuilder.pos(-i - 1, 8 + verticalShift, 0.0D).color(0.0F, 0.0F, 0.0F, 0.25F).endVertex();
+        bufferbuilder.pos(i + 1, 8 + verticalShift, 0.0D).color(0.0F, 0.0F, 0.0F, 0.25F).endVertex();
+        bufferbuilder.pos(i + 1, -1 + verticalShift, 0.0D).color(0.0F, 0.0F, 0.0F, 0.25F).endVertex();
+        tessellator.draw();
+        GlStateManager.enableTexture2D();
+
+        GlStateManager.depthMask(true);
+        fontRendererIn.drawString(str, -fontRendererIn.getStringWidth(str) / 2, verticalShift, -1);
+        GlStateManager.enableLighting();
+        GlStateManager.disableBlend();
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager.popMatrix();
+    }
+
 
     public static void drawNameplate(FontRenderer fontRendererIn, String str, float x, float y, float z, Quaternion rotation, int verticalShift, float viewerYaw, float viewerPitch, boolean isThirdPersonFrontal) {
         GlStateManager.pushMatrix();

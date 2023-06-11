@@ -284,12 +284,6 @@ public class WrenchMode {
         }
 
         @Override
-        public void onWrenchRightClickClient(EntityPlayer playerIn, EnumHand handIn) {
-            super.onWrenchRightClick(playerIn, handIn);
-            //ClientDynamXUtils.playerToRagdoll(playerIn, new Vector3f(20, 20, 20));
-        }
-
-        @Override
         public void onInteractWithEntity(EntityPlayer context, PhysicsEntity<?> physicsEntity, boolean isSneaking) {
             if (isSneaking) {
                 NBTTagCompound tag = new NBTTagCompound();

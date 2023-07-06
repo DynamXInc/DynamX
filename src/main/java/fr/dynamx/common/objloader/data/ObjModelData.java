@@ -1,8 +1,9 @@
 package fr.dynamx.common.objloader.data;
 
 import com.jme3.math.Vector3f;
+import de.javagl.jgltf.model.NodeModel;
 import fr.aym.acslib.api.services.mps.IMpsClassLoader;
-import fr.dynamx.api.obj.ObjModelPath;
+import fr.dynamx.api.dxmodel.DxModelPath;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.contentpack.PackInfo;
@@ -27,17 +28,15 @@ import java.util.Map;
 /**
  * An obj model not able to be rendered, used for collisions generation
  */
-public class ObjModelData {
+public class ObjModelData extends DxModelData {
     @Getter
     private final List<ObjObjectData> objObjects = new ArrayList<>();
     @Getter
     private final Map<String, Material> materials = new HashMap<>();
-    private final ObjModelPath objModelPath;
-    private final IMpsClassLoader mpsClassLoader;
 
-    public ObjModelData(ObjModelPath path) {
-        this.mpsClassLoader = ContentPackLoader.getProtectedResources().getOrDefault(path.getPackName(), DynamXMain.container).getSecureLoader();
-        this.objModelPath = path;
+
+    public ObjModelData(DxModelPath path) {
+        super(path);
         try {
             String content = new String(DynamXUtils.readInputStream(FMLCommonHandler.instance().getSide().isClient() ? client(path) : server(path)), StandardCharsets.UTF_8);
             ResourceLocation location = path.getModelPath();
@@ -49,27 +48,7 @@ public class ObjModelData {
         }
     }
 
-    @SideOnly(Side.CLIENT)
-    private InputStream client(ObjModelPath path) throws IOException {
-        return Minecraft.getMinecraft().getResourceManager().getResource(path.getModelPath()).getInputStream();
-    }
-
-    private InputStream server(ObjModelPath path) throws IOException {
-        InputStream result = null;
-        for (PackInfo packInfo : path.getPackLocations()) {
-            result = packInfo.readFile(path.getModelPath());
-            if (result != null)
-                break;
-        }
-        if (result == null)
-            throw new FileNotFoundException("Model not found : " + path + ". Pack : " + path.getPackName());
-        return result;
-    }
-
-    public ObjModelPath getObjModelPath() {
-        return objModelPath;
-    }
-
+    @Override
     public float[] getVerticesPos() {
         List<float[]> posList = new ArrayList<>();
         int size = 0;
@@ -90,6 +69,7 @@ public class ObjModelData {
     public Vector3f[] getVectorVerticesPos() {
         List<Vector3f[]> posList = new ArrayList<>();
         int size = 0;
+
         for (ObjObjectData objObject : objObjects) {
             if (!objObject.getName().toLowerCase().contains("main")) {
                 Vector3f[] pos = getVectorVerticesPos(objObject.getName().toLowerCase());
@@ -104,6 +84,7 @@ public class ObjModelData {
         return pos;
     }
 
+    @Override
     public float[] getVerticesPos(String objectName) {
         float[] pos = new float[0];
         for (ObjObjectData objObject : objObjects) {
@@ -119,6 +100,7 @@ public class ObjModelData {
         return pos;
     }
 
+    @Override
     public Vector3f[] getVectorVerticesPos(String objectName) {
         Vector3f[] pos = new Vector3f[0];
         for (ObjObjectData objObject : objObjects) {
@@ -134,6 +116,7 @@ public class ObjModelData {
         return pos;
     }
 
+    @Override
     public int[] getAllMeshIndices() {
         List<int[]> indicesList = new ArrayList<>();
         int size = 0;
@@ -151,6 +134,17 @@ public class ObjModelData {
         return indices;
     }
 
+    @Override
+    public Vector3f getMinOfMesh(String name) {
+        return Vector3f.ZERO;
+    }
+
+    @Override
+    public Vector3f getMaxOfMesh(String name) {
+        return Vector3f.ZERO;
+    }
+
+    @Override
     public int[] getMeshIndices(String objectName) {
         int[] indices = new int[0];
         for (ObjObjectData objObject : objObjects) {
@@ -170,6 +164,7 @@ public class ObjModelData {
         return null;
     }
 
+    @Override
     public Vector3f getMinOfModel() {
         Vector3f firstMin = objObjects.get(0).getMesh().min();
         float minX = firstMin.x;
@@ -183,30 +178,28 @@ public class ObjModelData {
         return new Vector3f(minX, minY, minZ);
     }
 
+    @Override
     public Vector3f getMaxOfModel() {
         Vector3f firstMax = objObjects.get(0).getMesh().max();
         float maxX = firstMax.x;
         float maxY = firstMax.y;
         float maxZ = firstMax.z;
         for (ObjObjectData objObject : objObjects) {
-
-            if (objObject.getMesh().max().x > maxX) maxX = objObject.getMesh().max().x;
-            if (objObject.getMesh().max().y > maxY) maxY = objObject.getMesh().max().y;
-            if (objObject.getMesh().max().z > maxZ) maxZ = objObject.getMesh().max().z;
-
-            /*maxX = Math.max(objObject.getMesh().max().x, maxX);
+            maxX = Math.max(objObject.getMesh().max().x, maxX);
             maxY = Math.max(objObject.getMesh().max().x, maxY);
-            maxZ = Math.max(objObject.getMesh().max().x, maxZ);*/
+            maxZ = Math.max(objObject.getMesh().max().x, maxZ);
         }
         return new Vector3f(maxX, maxY, maxZ);
     }
 
+    @Override
     public Vector3f getDimension() {
         Vector3f max = getMaxOfModel();
         Vector3f min = getMinOfModel();
         return new Vector3f(max.x - min.x, max.y - min.y, max.z - min.z);
     }
 
+    @Override
     public Vector3f getCenter() {
         Vector3f max = getMaxOfModel();
         Vector3f min = getMinOfModel();

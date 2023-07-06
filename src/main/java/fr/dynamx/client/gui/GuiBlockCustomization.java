@@ -6,6 +6,7 @@ import fr.aym.acsguis.component.panel.GuiFrame;
 import fr.aym.acsguis.component.panel.GuiPanel;
 import fr.aym.acsguis.component.textarea.GuiFloatField;
 import fr.aym.acsguis.component.textarea.GuiLabel;
+import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.blocks.TEDynamXBlock;
@@ -26,7 +27,7 @@ public class GuiBlockCustomization extends GuiFrame
 {
     public static final ResourceLocation STYLE = new ResourceLocation(DynamXConstants.ID, "css/block_custom.css");
 
-    private static ObjModelRenderer model;
+    private static DxModelRenderer model;
     private static TEDynamXBlock teBlock;
     private final GuiPanel preview = new GuiPanel();
 
@@ -46,7 +47,7 @@ public class GuiBlockCustomization extends GuiFrame
     public GuiBlockCustomization(TEDynamXBlock te) {
         super(new GuiScaler.Identity());
         teBlock = te;
-        model = DynamXContext.getObjModelRegistry().getModel(te.getBlockObjectInfo().getModel());
+        model = DynamXContext.getDxModelRegistry().getModel(te.getBlockObjectInfo().getModel());
         setCssClass("root");
 
         preview.setCssClass("preview");
@@ -123,7 +124,7 @@ public class GuiBlockCustomization extends GuiFrame
         drawModelOnScreen(x / 1.2f - 30, y / 1.2f - 30, 20, mouseX, mouseY, model);
     }
 
-    public void drawModelOnScreen(float posX, float posY, float scale, float mouseX, float mouseY, ObjModelRenderer model) {
+    public void drawModelOnScreen(float posX, float posY, float scale, float mouseX, float mouseY, DxModelRenderer model) {
         unbindLayerBounds();
 
         BlockRendererDispatcher blockRenderer = Minecraft.getMinecraft().getBlockRendererDispatcher();

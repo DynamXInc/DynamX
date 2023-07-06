@@ -6,19 +6,17 @@ import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.contentpack.registry.*;
-import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
-import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
+import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
 import fr.dynamx.client.renders.vehicle.RenderBaseVehicle;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.WheelsModule;
-import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.wheel.WheelState;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
@@ -208,7 +206,7 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
                     GlStateManager.pushMatrix();
                     GlStateManager.translate(0, 0.2, 0);
                     GlStateManager.scale(packInfo.getScaleModifier().x, packInfo.getScaleModifier().y, packInfo.getScaleModifier().z);
-                    DynamXContext.getObjModelRegistry().getModel(packInfo.getModel()).renderGroups(partWheel.getMudGuardPartName(), textureId);
+                    DynamXContext.getDxModelRegistry().getModel(packInfo.getModel()).renderGroups(partWheel.getMudGuardPartName(), textureId);
                     GlStateManager.popMatrix();
                 }
 
@@ -238,7 +236,7 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
                     }
                 }
                 /*Rendering the wheels */
-                ObjModelRenderer model = DynamXContext.getObjModelRegistry().getModel(info.getModel());
+                DxModelRenderer model = DynamXContext.getDxModelRegistry().getModel(info.getModel());
                 //Scale
                 GlStateManager.scale(info.getScaleModifier().x, info.getScaleModifier().y, info.getScaleModifier().z);
                 //If the wheel is not flattened, or the model does not supports flattening

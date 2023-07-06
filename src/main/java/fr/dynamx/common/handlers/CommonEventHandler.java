@@ -272,7 +272,7 @@ public class CommonEventHandler {
                 blocks.register((Block) block);
 
                 if (FMLCommonHandler.instance().getSide().isClient()) {
-                    if (block.getInfo().isObj()) {
+                    if (block.getInfo().isDxModel()) {
                         ContentPackUtils.registerBlockWithNoModel((Block) block);
                     } else {
                         ContentPackUtils.registerDynamXBlockStateMapper(block);

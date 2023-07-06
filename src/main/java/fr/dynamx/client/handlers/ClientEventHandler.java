@@ -4,6 +4,7 @@ import fr.aym.acsguis.api.ACsGuiApi;
 import fr.aym.acslib.ACsLib;
 import fr.aym.mps.ModProtectionSystem;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
+import fr.dynamx.api.dxmodel.DxModelPath;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.client.ClientProxy;
@@ -13,6 +14,7 @@ import fr.dynamx.client.gui.GuiLoadingErrors;
 import fr.dynamx.client.gui.GuiTexturedButton;
 import fr.dynamx.client.gui.VehicleHud;
 import fr.dynamx.client.renders.RenderMovableLine;
+import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
@@ -24,7 +26,6 @@ import fr.dynamx.common.entities.PropsEntity;
 import fr.dynamx.common.items.DynamXItemSpawner;
 import fr.dynamx.common.items.tools.ItemSlopes;
 import fr.dynamx.common.network.packets.MessageEntityInteract;
-import fr.dynamx.common.physics.player.PlayerPhysicsHandler;
 import fr.dynamx.common.physics.player.WalkingOnPlayerController;
 import fr.dynamx.common.slopes.GuiSlopesConfig;
 import fr.dynamx.utils.DynamXConfig;
@@ -74,7 +75,7 @@ public class ClientEventHandler {
     public static RenderPlayer renderPlayer;
 
     /* Placing block */
-    private ObjModelRenderer model;
+    private DxModelRenderer model;
     private boolean canPlace;
     private BlockPos blockPos;
     private int playerOrientation;
@@ -86,7 +87,7 @@ public class ClientEventHandler {
     @SubscribeEvent
     public void onWorldLoad(WorldEvent.Load event) {
         if (event.getWorld().isRemote && event.getWorld().provider.getDimension() == 0) {
-            DynamXContext.getObjModelRegistry().uploadVAOs();
+            DynamXContext.getDxModelRegistry().uploadVAOs();
         }
     }
 
@@ -289,7 +290,7 @@ public class ClientEventHandler {
                     textureNum = currentItem.getMetadata();
                     blockObjectInfo = block.blockObjectInfo;
                     this.canPlace = itemBlock.canPlaceBlockOnSide(entityPlayer.world, blockPos, side, entityPlayer, currentItem);
-                    this.model = DynamXContext.getObjModelRegistry().getModel(block.blockObjectInfo.getModel());
+                    this.model = DynamXContext.getDxModelRegistry().getModel(block.blockObjectInfo.getModel());
                 }
             }
         }

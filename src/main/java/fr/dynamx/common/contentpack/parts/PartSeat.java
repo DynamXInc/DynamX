@@ -18,6 +18,7 @@ import fr.dynamx.utils.EnumSeatPlayerPosition;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -29,27 +30,33 @@ import javax.annotation.Nullable;
 @RegisteredSubInfoType(name = "seat", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER}, strictName = false)
 public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfo> {
     @PackFileProperty(configNames = "Driver")
+    @Setter
     private boolean isDriver;
 
     @PackFileProperty(configNames = "ShouldLimitFieldOfView", required = false, defaultValue = "true")
     @Accessors(fluent = true)
     @Getter
+    @Setter
     private boolean shouldLimitFieldOfView = true;
 
     @PackFileProperty(configNames = "MaxYaw", required = false, defaultValue = "-105")
     @Getter
+    @Setter
     private float maxYaw = -105.0f;
 
     @PackFileProperty(configNames = "MinYaw", required = false, defaultValue = "105")
     @Getter
+    @Setter
     private float minYaw = 105.0f;
 
     @PackFileProperty(configNames = "MaxPitch", required = false, defaultValue = "-105")
     @Getter
+    @Setter
     private float maxPitch = -105.0f;
 
     @PackFileProperty(configNames = "MinPitch", required = false, defaultValue = "105")
     @Getter
+    @Setter
     private float minPitch = 105.0f;
 
     @PackFileProperty(configNames = "LinkedDoorPart", required = false)
@@ -58,6 +65,7 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     private Quaternion rotation;
 
     @PackFileProperty(configNames = "PlayerPosition", required = false, defaultValue = "SIT")
+    @Setter
     private EnumSeatPlayerPosition playerPosition;
 
     @PackFileProperty(configNames = "CameraRotation", required = false, defaultValue = "0")

@@ -1,26 +1,22 @@
 package fr.dynamx.common.contentpack.type.vehicle;
 
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.contentpack.object.INamedObject;
-import fr.dynamx.api.contentpack.object.render.IObjPackObject;
-import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
+import fr.dynamx.api.contentpack.object.render.IModelPackObject;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
-import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
+import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ResourceLocation;
 
-import javax.annotation.Nullable;
-
 /**
  * Wheel contained in a wheel file
  */
-public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IObjPackObject {
+public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IModelPackObject {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.WHEELS)
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("WheelRadius".equals(key))

@@ -12,12 +12,14 @@ import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
+import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.client.renders.vehicle.RenderBaseVehicle;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.WheelsModule;
+import fr.dynamx.common.objloader.data.DxModelData;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraftforge.common.MinecraftForge;
@@ -65,10 +67,9 @@ public class SteeringWheelInfo extends SubInfoType<ModularVehicleInfo> implement
 
     @Override
     public void drawParts(@Nullable BaseVehicleEntity<?> entity, RenderPhysicsEntity<?> render, ModularVehicleInfo packInfo, byte textureId, float partialTicks) {
-        ObjModelRenderer vehicleModel = DynamXContext.getObjModelRegistry().getModel(packInfo.getModel());
+        DxModelRenderer vehicleModel = DynamXContext.getDxModelRegistry().getModel(packInfo.getModel());
         /* Rendering the steering wheel */
-        ObjObjectRenderer steeringWheel = vehicleModel.getObjObjectRenderer(getPartName());
-        if (steeringWheel == null || MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.STEERING_WHEEL, (RenderBaseVehicle<?>) render, entity, PhysicsEntityEvent.Phase.PRE, partialTicks, vehicleModel))) {
+        if (!vehicleModel.containsObjectOrNode(getPartName()) || MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.STEERING_WHEEL, (RenderBaseVehicle<?>) render, entity, PhysicsEntityEvent.Phase.PRE, partialTicks, vehicleModel))) {
             return;
         }
         GlStateManager.pushMatrix();
@@ -90,7 +91,7 @@ public class SteeringWheelInfo extends SubInfoType<ModularVehicleInfo> implement
         //Scale it
         GlStateManager.scale(packInfo.getScaleModifier().x, packInfo.getScaleModifier().y, packInfo.getScaleModifier().z);
         //Render it
-        vehicleModel.renderGroup(steeringWheel, textureId);
+        vehicleModel.renderGroup(getPartName(), textureId);
         GlStateManager.popMatrix();
         MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.STEERING_WHEEL, (RenderBaseVehicle<?>) render, entity, PhysicsEntityEvent.Phase.POST, partialTicks, vehicleModel));
     }

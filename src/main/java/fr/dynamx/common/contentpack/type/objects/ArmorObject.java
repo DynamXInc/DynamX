@@ -7,7 +7,7 @@ import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
-import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
+import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
 import fr.dynamx.client.renders.model.ModelObjArmor;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.common.DynamXContext;
@@ -86,7 +86,7 @@ public class ArmorObject<T extends ArmorObject<?>> extends AbstractItemObject<T,
     }
 
     public void initArmorModel() {
-        objArmor = new ModelObjArmor(this, DynamXContext.getObjModelRegistry().getModel(getModel()));
+        objArmor = new ModelObjArmor(this, DynamXContext.getDxModelRegistry().getModel(getModel()));
     }
 
     @SideOnly(Side.CLIENT)

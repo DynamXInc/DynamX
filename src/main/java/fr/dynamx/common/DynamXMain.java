@@ -6,6 +6,7 @@ import fr.aym.acslib.api.services.ThreadedLoadingService;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.aym.acslib.api.services.mps.ModProtectionContainer;
 import fr.aym.acslib.api.services.mps.ModProtectionService;
+import fr.dynamx.api.dxmodel.EnumDxModelFormats;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariableRegistry;
 import fr.dynamx.common.capability.DynamXChunkData;
 import fr.dynamx.common.capability.DynamXChunkDataStorage;
@@ -19,12 +20,12 @@ import fr.dynamx.common.handlers.DynamXGuiHandler;
 import fr.dynamx.common.items.tools.ItemRagdoll;
 import fr.dynamx.common.items.tools.ItemShockWave;
 import fr.dynamx.common.items.tools.ItemSlopes;
+import fr.dynamx.common.objloader.data.ObjModelData;
 import fr.dynamx.common.objloader.data.ObjObjectData;
 import fr.dynamx.server.command.DynamXCommands;
 import fr.dynamx.utils.*;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.physics.NativeEngineInstaller;
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeVersion;
 import net.minecraftforge.common.capabilities.CapabilityManager;
@@ -153,7 +154,11 @@ public class DynamXMain {
         DynamXErrorManager.printErrors(event.getSide(), event.getSide().isServer() ? ErrorLevel.ADVICE : ErrorLevel.HIGH);
         if (FMLCommonHandler.instance().getMinecraftServerInstance() != null) {
             log.info("Clearing obj model data cache...");
-            DynamXContext.getObjModelDataCache().values().forEach(model -> model.getObjObjects().forEach(ObjObjectData::clearData));
+            DynamXContext.getDxModelDataCache().values()
+                    .stream()
+                    .filter(dxModelData -> dxModelData.getFormat().equals(EnumDxModelFormats.OBJ))
+                    .map(dxModelData -> (ObjModelData) dxModelData)
+                    .forEach(model -> model.getObjObjects().forEach(ObjObjectData::clearData));
         }
     }
 

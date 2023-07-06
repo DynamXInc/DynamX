@@ -2,36 +2,28 @@ package fr.dynamx.client.renders;
 
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.events.DynamXBlockEvent;
 import fr.dynamx.api.events.EventStage;
-import fr.dynamx.api.events.PhysicsEntityEvent;
-import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.blocks.TEDynamXBlock;
-import fr.dynamx.common.contentpack.parts.ILightOwner;
-import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
-import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.utils.DynamXUtils;
-import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.debug.renderer.VehicleDebugRenderer;
-import fr.dynamx.utils.maths.DynamXGeometry;
-import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
-import fr.dynamx.utils.physics.DynamXPhysicsHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraftforge.common.MinecraftForge;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
 
 import java.util.ConcurrentModificationException;
 
@@ -40,6 +32,14 @@ import static fr.dynamx.utils.debug.renderer.VehicleDebugRenderer.PlayerCollisio
 public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialRenderer<T> {
     @Override
     public void render(T te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
+
+        GL11.glPushMatrix();
+        GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
+        GL11.glShadeModel(GL11.GL_SMOOTH);
+        GL11.glEnable(GL12.GL_RESCALE_NORMAL);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
         if (te.getBlockObjectInfo() != null && te.getBlockType() instanceof DynamXBlock) { //the instanceof fixes a crash
             Vector3fPool.openPool();
             if (!MinecraftForge.EVENT_BUS.post(new DynamXBlockEvent.RenderTileEntity((DynamXBlock<?>) te.getBlockType(), getWorld(), te, this, x, y, z, partialTicks, destroyStage, alpha, EventStage.PRE))) {
@@ -55,7 +55,7 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
                         .add(0, te.getRotation() * 22.5f, 0);
 
                 //Rendering the model
-                DynamXContext.getObjModelRegistry().getModel(te.getBlockObjectInfo().getModel()).renderModel((byte) te.getBlockMetadata());
+                DynamXContext.getDxModelRegistry().getModel(te.getBlockObjectInfo().getModel()).renderModel((byte) te.getBlockMetadata());
                 if (te.getBlockObjectInfo().isModelValid() && te.getLightsModule() != null) {
                     te.getBlockObjectInfo().getLightSources().values().forEach(d -> d.drawLights(null, Minecraft.getMinecraft().player.ticksExisted, te.getBlockObjectInfo().getModel(), te.getBlockObjectInfo().getScaleModifier(), te.getLightsModule()));
                 }
@@ -68,6 +68,9 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
             }
             Vector3fPool.closePool();
         }
+
+        GL11.glPopAttrib();
+        GL11.glPopMatrix();
     }
 
 

@@ -9,6 +9,7 @@ import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
+import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.client.renders.vehicle.RenderBaseVehicle;
@@ -50,7 +51,7 @@ public class PartHandle extends BasePart<ModularVehicleInfo> implements IDrawabl
 
     @Override
     public void drawParts(@Nullable BaseVehicleEntity<?> entity, RenderPhysicsEntity<?> render, ModularVehicleInfo packInfo, byte textureId, float partialTicks) {
-        ObjModelRenderer vehicleModel = DynamXContext.getObjModelRegistry().getModel(packInfo.getModel());
+        DxModelRenderer vehicleModel = DynamXContext.getDxModelRegistry().getModel(packInfo.getModel());
         if (MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.PROPULSION, (RenderBaseVehicle<?>) render, entity, PhysicsEntityEvent.Phase.PRE, partialTicks, vehicleModel)))
             return;
         packInfo.getPartsByType(PartHandle.class).forEach(partHandle ->
@@ -65,8 +66,11 @@ public class PartHandle extends BasePart<ModularVehicleInfo> implements IDrawabl
     }
 
     @SideOnly(Side.CLIENT)
-    private void renderHandle(RenderPhysicsEntity<?> render, PartHandle partHandle, float partialTicks, BaseVehicleEntity<?> carEntity, ModularVehicleInfo packInfo, byte textureId, ObjModelRenderer vehicleModel) {
-        ObjObjectRenderer handle = vehicleModel.getObjObjectRenderer(partHandle.getPartName());
+    private void renderHandle(RenderPhysicsEntity<?> render, PartHandle partHandle, float partialTicks, BaseVehicleEntity<?> carEntity, ModularVehicleInfo packInfo, byte textureId, DxModelRenderer vehicleModel) {
+        if (!(vehicleModel instanceof ObjModelRenderer)) {
+            return;
+        }
+        ObjObjectRenderer handle = ((ObjModelRenderer)vehicleModel).getObjObjectRenderer(partHandle.getPartName());
         if (handle == null || MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.HANDLE, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks, vehicleModel)))
             return;
         GlStateManager.pushMatrix();
@@ -84,7 +88,7 @@ public class PartHandle extends BasePart<ModularVehicleInfo> implements IDrawabl
         //Scale it
         GlStateManager.scale(packInfo.getScaleModifier().x, packInfo.getScaleModifier().y, packInfo.getScaleModifier().z);
         //Render it
-        vehicleModel.renderGroup(handle, textureId);
+        ((ObjModelRenderer)vehicleModel).renderGroup(handle, textureId);
         GlStateManager.popMatrix();
         MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.HANDLE, (RenderBaseVehicle<?>) render, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks, vehicleModel));
     }

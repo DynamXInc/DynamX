@@ -10,9 +10,9 @@ import fr.dynamx.api.contentpack.registry.*;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.VehicleEntityEvent;
-import fr.dynamx.api.obj.ObjModelPath;
+import fr.dynamx.api.dxmodel.DxModelPath;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
-import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
+import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
@@ -177,7 +177,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     @Override
     public void appendTo(ModularVehicleInfo owner) {
         super.appendTo(owner);
-        ObjModelPath carModelPath = DynamXUtils.getModelPath(getPackName(), owner.getModel());
+        DxModelPath carModelPath = DynamXUtils.getModelPath(getPackName(), owner.getModel());
         physicsCollisionShape = ShapeUtils.generateComplexModelCollisions(carModelPath, getPartName(), new Vector3f(1, 1, 1), new Vector3f(), 0);
     }
 
@@ -270,7 +270,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
                 GlStateManager.translate(pos.x, pos.y, pos.z);
                 GlStateManager.rotate(ClientDynamXUtils.computeInterpolatedGlQuaternion(prev.getRotation(), transform.getRotation(), partialTicks));
             }
-            ObjModelRenderer vehicleModel = DynamXContext.getObjModelRegistry().getModel(packInfo.getModel());
+            DxModelRenderer vehicleModel = DynamXContext.getDxModelRegistry().getModel(packInfo.getModel());
             GlStateManager.scale(packInfo.getScaleModifier().x, packInfo.getScaleModifier().y, packInfo.getScaleModifier().z);
             render.renderModelGroup(vehicleModel, door.getPartName(), entity, textureId);
             GlStateManager.scale(1 / packInfo.getScaleModifier().x, 1 / packInfo.getScaleModifier().y, 1 / packInfo.getScaleModifier().z);

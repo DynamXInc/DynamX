@@ -13,20 +13,25 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ArmorRenderer extends ModelRenderer {
     private final ModelObjArmor model;
-    private final ObjModelRenderer objModel;
+    private final DxModelRenderer objModel;
     private ObjObjectRenderer objObjectRenderer;
 
-    public ArmorRenderer(ObjModelRenderer objModel, ModelObjArmor model, String partName) {
+    public ArmorRenderer(DxModelRenderer objModel, ModelObjArmor model, String partName) {
         super(model, partName);
         this.model = model;
         this.objModel = objModel;
         if (objModel != DynamXModelRegistry.MISSING_MODEL) {
-            for (ObjObjectRenderer objObjectRenderer1 : objModel.getObjObjects()) {
-                if (objObjectRenderer1.getObjObjectData().getName().equalsIgnoreCase(partName)) {
-                    objObjectRenderer = objObjectRenderer1;
+            switch (objModel.getFormat()) {
+                case OBJ:
+                    for (ObjObjectRenderer objObjectRenderer1 : ((ObjModelRenderer)objModel).getObjObjects()) {
+                        if (objObjectRenderer1.getObjObjectData().getName().equalsIgnoreCase(partName)) {
+                            objObjectRenderer = objObjectRenderer1;
+                            break;
+                        }
+                    }
                     break;
-                }
             }
+
         }
         if (objObjectRenderer == null) {
             objObjectRenderer = MissingObjModel.getEmptyPart();
@@ -45,7 +50,11 @@ public class ArmorRenderer extends ModelRenderer {
                 GlStateManager.rotate(180, 1, 0, 0);
                 rotateXYZ(false);
                 GlStateManager.translate(-this.offsetX, this.offsetY, -this.offsetZ);
-                objModel.renderGroup(objObjectRenderer, model.getActiveTextureId());
+                switch (objModel.getFormat()){
+                    case OBJ:
+                        ((ObjModelRenderer)objModel).renderGroup(objObjectRenderer, model.getActiveTextureId());
+                        break;
+                }
                 GlStateManager.popMatrix();
             }
         }
@@ -62,7 +71,11 @@ public class ArmorRenderer extends ModelRenderer {
                 GlStateManager.pushMatrix();
                 GlStateManager.translate(this.rotationPointX * scale, this.rotationPointY * scale, this.rotationPointZ * scale);
                 rotateXYZ(true);
-                objModel.renderGroup(objObjectRenderer, model.getActiveTextureId());
+                switch (objModel.getFormat()) {
+                    case OBJ:
+                        ((ObjModelRenderer)objModel).renderGroup(objObjectRenderer, model.getActiveTextureId());
+                        break;
+                }
                 GlStateManager.popMatrix();
             }
         }

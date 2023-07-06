@@ -1,7 +1,6 @@
 package fr.dynamx.client.renders.vehicle;
 
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent;
@@ -43,7 +42,7 @@ public class RenderCaterpillar<T extends CaterpillarEntity<?>> extends RenderBas
                 /* Translate with the same values but negative to move it to it normal position*/
                 GlStateManager.translate(-0.5, -1.1, -1);
                 /* Rendering the steering wheel */
-                DynamXContext.getObjModelRegistry().getModel(carEntity.getPackInfo().getModel()).renderGroups("SteeringWheel", carEntity.getEntityTextureID());
+                DynamXContext.getDxModelRegistry().getModel(carEntity.getPackInfo().getModel()).renderGroups("SteeringWheel", carEntity.getEntityTextureID());
             }
             GlStateManager.popMatrix();
 
@@ -70,7 +69,7 @@ public class RenderCaterpillar<T extends CaterpillarEntity<?>> extends RenderBas
                     Vector4f a = getAdvancement(p + carEntity.trackProgress, info.caterpillarLeftBuffer);
                     GL11.glTranslated(a.x, a.y, a.z);
                     GL11.glRotated(-Math.toDegrees(a.w), 1, 0, 0);
-                    DynamXContext.getObjModelRegistry().getModel(carEntity.getPackInfo().getPartsByType(PartWheel.class).get(0).getDefaultWheelInfo().getModel()).renderModel(module.getWheelsTextureId(0));
+                    DynamXContext.getDxModelRegistry().getModel(carEntity.getPackInfo().getPartsByType(PartWheel.class).get(0).getDefaultWheelInfo().getModel()).renderModel(module.getWheelsTextureId(0));
                     GL11.glPopMatrix();
                     p += info.caterpillarWidth;
                 }
@@ -80,7 +79,7 @@ public class RenderCaterpillar<T extends CaterpillarEntity<?>> extends RenderBas
                     Vector4f a = getAdvancement(p + carEntity.trackProgress, info.caterpillarRightBuffer);
                     GL11.glTranslated(a.x, a.y, a.z);
                     GL11.glRotated(-Math.toDegrees(a.w), 1, 0, 0);
-                    DynamXContext.getObjModelRegistry().getModel(carEntity.getPackInfo().getPartsByType(PartWheel.class).get(carEntity.getPackInfo().getPartsByType(PartWheel.class).size() - 1).getDefaultWheelInfo().getModel()).renderModel(module.getWheelsTextureId(0));
+                    DynamXContext.getDxModelRegistry().getModel(carEntity.getPackInfo().getPartsByType(PartWheel.class).get(carEntity.getPackInfo().getPartsByType(PartWheel.class).size() - 1).getDefaultWheelInfo().getModel()).renderModel(module.getWheelsTextureId(0));
                     GL11.glPopMatrix();
                     p += info.caterpillarWidth;
                 }

@@ -200,7 +200,7 @@ public class ContentPackLoader {
         for (InfoLoader<?> loader : DynamXObjectLoaders.LOADERS)
             loader.clear(isHotReloading);
         DynamXErrorManager.getErrorManager().clear(DynamXErrorManager.PACKS_ERRORS);
-        DynamXContext.getObjModelDataCache().clear();
+        DynamXContext.getDxModelDataCache().clear();
         try {
             ProgressManager.ProgressBar bar = ProgressManager.push("Loading content pack system", 1 + DynamXObjectLoaders.LOADERS.size());
             bar.step("Discover assets");

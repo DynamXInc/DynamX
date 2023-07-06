@@ -1,7 +1,7 @@
 package fr.dynamx.client.renders.model.renderer;
 
 import fr.aym.acslib.api.services.error.ErrorLevel;
-import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
+import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
 import fr.dynamx.client.renders.model.texture.MaterialTexture;
 import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import fr.dynamx.common.objloader.data.Material;

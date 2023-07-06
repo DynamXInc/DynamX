@@ -2,11 +2,6 @@ package fr.dynamx.client;
 
 import fr.aym.acslib.ACsLib;
 import fr.aym.acslib.api.services.ThreadedLoadingService;
-import fr.dynamx.api.contentpack.object.INamedObject;
-import fr.dynamx.api.contentpack.object.render.IObjPackObject;
-import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
-import fr.dynamx.api.obj.ObjModelPath;
-import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.client.handlers.KeyHandler;
 import fr.dynamx.client.network.ClientPhysicsEntitySynchronizer;
@@ -20,8 +15,6 @@ import fr.dynamx.client.sound.DynamXSoundHandler;
 import fr.dynamx.common.CommonProxy;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.blocks.TEDynamXBlock;
-import fr.dynamx.common.contentpack.DynamXObjectLoaders;
-import fr.dynamx.common.contentpack.loader.InfoLoader;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.entities.PropsEntity;
 import fr.dynamx.common.entities.RagdollEntity;
@@ -32,7 +25,6 @@ import fr.dynamx.common.network.udp.CommandUdp;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.world.BuiltinThreadedPhysicsWorld;
 import fr.dynamx.utils.DynamXLoadingTasks;
-import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.client.CommandNetworkDebug;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.optimization.Vector3fPool;
@@ -55,13 +47,11 @@ import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.function.Predicate;
 
-import static fr.dynamx.common.DynamXMain.log;
-
 public class ClientProxy extends CommonProxy implements ISelectiveResourceReloadListener {
     public static DynamXSoundHandler SOUND_HANDLER = new DynamXSoundHandler();
 
     public ClientProxy() {
-        ModelLoaderRegistry.registerLoader(DynamXContext.getObjModelRegistry().getItemRenderer());
+        ModelLoaderRegistry.registerLoader(DynamXContext.getDxModelRegistry().getItemRenderer());
     }
 
     @Override
@@ -77,7 +67,7 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
     public void preInit() {
         super.preInit();
 
-        DynamXContext.getObjModelRegistry().onPackInfosReloaded();
+        DynamXContext.getDxModelRegistry().onPackInfosReloaded();
 
         RenderingRegistry.registerEntityRenderingHandler(CaterpillarEntity.class, RenderCaterpillar::new);
         RenderingRegistry.registerEntityRenderingHandler(CarEntity.class, RenderBaseVehicle.RenderCar::new);

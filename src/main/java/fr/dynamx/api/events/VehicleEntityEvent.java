@@ -4,6 +4,7 @@ import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.entities.modules.IVehicleController;
 import fr.dynamx.client.gui.VehicleHud;
 import fr.dynamx.client.handlers.hud.CarController;
+import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.client.renders.vehicle.RenderBaseVehicle;
 import fr.dynamx.client.sound.EngineSound;
@@ -184,7 +185,7 @@ public class VehicleEntityEvent extends Event {
         @Getter
         private final float partialTicks;
         @Getter
-        private final ObjModelRenderer objModelRenderer;
+        private final DxModelRenderer objModelRenderer;
 
         /**
          * @param type              the type of the render
@@ -193,7 +194,7 @@ public class VehicleEntityEvent extends Event {
          * @param phase             the phase of the render (Post or Pre)
          * @param partialTicks      the partial render ticks
          */
-        public Render(Type type, RenderBaseVehicle<?> renderBaseVehicle, @Nullable BaseVehicleEntity<?> carEntity, PhysicsEntityEvent.Phase phase, float partialTicks, @Nullable ObjModelRenderer objModelRenderer) {
+        public Render(Type type, RenderBaseVehicle<?> renderBaseVehicle, @Nullable BaseVehicleEntity<?> carEntity, PhysicsEntityEvent.Phase phase, float partialTicks, @Nullable DxModelRenderer objModelRenderer) {
             super(Side.CLIENT, carEntity);
             this.type = type;
             this.renderBaseVehicle = renderBaseVehicle;

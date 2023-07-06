@@ -1,5 +1,6 @@
 package fr.dynamx.common.core.mixin;
 
+import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.BaseVehicleEntity;
@@ -36,7 +37,7 @@ public abstract class MixinRenderManager {
                 GlQuaternionPool.openPool();
                 QuaternionPool.openPool();
                 BaseVehicleEntity<?> physicsEntity = (BaseVehicleEntity<?>) entityIn;
-                ObjModelRenderer model = DynamXContext.getObjModelRegistry().getModel(physicsEntity.getPackInfo().getModel());
+                DxModelRenderer model = DynamXContext.getDxModelRegistry().getModel(physicsEntity.getPackInfo().getModel());
                 //Applies a color mask to mask the following meshes
                 GL11.glColorMask(false, false, false, false);
                 //We want our meshes bits to replace the already contained stencil bits

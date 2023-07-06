@@ -61,7 +61,7 @@ public class RenderMovableLine {
 
                 GlStateManager.glBegin(GL11.GL_LINE_STRIP);
                 GlStateManager.glVertex3f(target.x, target.y, target.z);
-                System.out.println(physicsLocation);
+                //System.out.println(physicsLocation);
                 GlStateManager.glVertex3f(pivot.x, pivot.y, pivot.z);
                 GlStateManager.glEnd();
 

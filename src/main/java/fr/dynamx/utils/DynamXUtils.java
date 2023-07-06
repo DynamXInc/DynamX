@@ -8,13 +8,12 @@ import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.entities.VehicleEntityProperties;
-import fr.dynamx.api.obj.ObjModelPath;
+import fr.dynamx.api.dxmodel.DxModelPath;
 import fr.dynamx.api.physics.EnumBulletShapeType;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.PackInfo;
-import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.CarEngineModule;
@@ -42,7 +41,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
@@ -110,15 +108,15 @@ public class DynamXUtils {
     }
 
     /**
-     * @return A new {@link ObjModelPath} for this model
+     * @return A new {@link DxModelPath} for this model
      */
-    public static ObjModelPath getModelPath(String packName, ResourceLocation model) {
+    public static DxModelPath getModelPath(String packName, ResourceLocation model) {
         List<PackInfo> packLocations = DynamXObjectLoaders.PACKS.findPackLocations(packName);
         if (packLocations.isEmpty()) {
             DynamXMain.log.error("Pack info " + packName + " not found. This should not happen.");
-            return new ObjModelPath(PackInfo.forAddon(packName).setPackType(ContentPackType.FOLDER), model);
+            return new DxModelPath(PackInfo.forAddon(packName).setPackType(ContentPackType.FOLDER), model);
         }
-        return new ObjModelPath(packLocations, model);
+        return new DxModelPath(packLocations, model);
     }
 
     public static byte[] readInputStream(InputStream resource) throws IOException {
@@ -397,6 +395,6 @@ public class DynamXUtils {
                 ((IPackInfoReloadListener) te).onPackInfosReloaded();
         }
         if(w.isRemote)
-            DynamXContext.getObjModelRegistry().onPackInfosReloaded();
+            DynamXContext.getDxModelRegistry().onPackInfosReloaded();
     }
 }

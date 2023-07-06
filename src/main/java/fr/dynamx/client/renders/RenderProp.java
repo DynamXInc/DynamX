@@ -1,12 +1,10 @@
 package fr.dynamx.client.renders;
 
-import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.PropsEntity;
 import fr.dynamx.common.entities.modules.LightsModule;
 import fr.dynamx.utils.debug.renderer.DebugRenderer;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraftforge.common.MinecraftForge;
@@ -26,7 +24,7 @@ public class RenderProp<T extends PropsEntity<?>> extends RenderPhysicsEntity<T>
         // Scale to the config scale value
         GlStateManager.scale(entity.getPackInfo().getScaleModifier().x, entity.getPackInfo().getScaleModifier().y, entity.getPackInfo().getScaleModifier().z);
         //Render the model
-        renderModel(DynamXContext.getObjModelRegistry().getModel(entity.getPackInfo().getModel()), entity, (byte) entity.getMetadata());
+        renderModel(DynamXContext.getDxModelRegistry().getModel(entity.getPackInfo().getModel()), entity, (byte) entity.getMetadata());
         //GlStateManager.popMatrix();
     }
 

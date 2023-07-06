@@ -7,6 +7,7 @@ import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
+import fr.dynamx.api.dxmodel.EnumDxModelFormats;
 import fr.dynamx.api.events.CreatePackItemEvent;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.contentpack.loader.ObjectLoader;
@@ -117,8 +118,8 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
         return "BlockObject named " + getFullName();
     }
 
-    public boolean isObj() {
-        return getModel().getPath().endsWith(".obj");
+    public boolean isDxModel() {
+        return EnumDxModelFormats.isValidFormat(getModel().getPath());
     }
 
     @Override

@@ -11,8 +11,8 @@ import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
-import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
-import fr.dynamx.api.obj.ObjModelPath;
+import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
+import fr.dynamx.api.dxmodel.DxModelPath;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.parts.PartShape;
@@ -78,11 +78,11 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
     public boolean postLoad(boolean hot) {
         compoundCollisionShape = new CompoundCollisionShape();
         if (getPartShapes().isEmpty()) {
-            ObjModelPath modelPath = DynamXUtils.getModelPath(getPackName(), model);
+            DxModelPath modelPath = DynamXUtils.getModelPath(getPackName(), model);
             if (useHullShape) {
                 compoundCollisionShape = ShapeUtils.generateComplexModelCollisions(modelPath, "", scaleModifier, new Vector3f(), 0);
             } else {
-                ShapeUtils.generateModelCollisions(this, DynamXContext.getObjModelDataFromCache(modelPath), compoundCollisionShape);
+                ShapeUtils.generateModelCollisions(this, DynamXContext.getDxModelDataFromCache(modelPath), compoundCollisionShape);
             }
         } else {
             getPartShapes().forEach(shape -> {

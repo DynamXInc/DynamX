@@ -276,18 +276,13 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     public void onMove(double x, double y, double z) {
         //if (x != 0 || y != 0 || z != 0)
         entityBoxCache = null; //The entity box has changed, mark it as dirty
-        //WIP
+        //TODO WIP
         for (Map.Entry<EntityPlayer, WalkingOnPlayerController> e : walkingOnPlayers.entrySet()) {
-            //List<EnumFacing> collisionFaces = e.getValue();
             EntityPlayer entity = e.getKey();
-            //for (EnumFacing f : collisionFaces) {
-            //if (!collisionFaces.contains(f.getOpposite())) //If not stuck between 2 aabb
             EnumFacing f = e.getValue().face;
             {
                 Vector3f vh = DynamXContext.getCollisionHandler().rotate(Vector3fPool.get((float) motionX, (float) motionY, (float) motionZ), physicsRotation);
                 float projVehicMotion = Vector3fPool.get(vh.x, vh.y, vh.z).dot(Vector3fPool.get(f.getDirectionVec().getX(), f.getDirectionVec().getY(), f.getDirectionVec().getZ()));
-                //if (projVehicMotion != 0)
-                //  System.out.println("Collide on face " + f + " " + projVehicMotion);
                 if (projVehicMotion != 0) //We push the player
                 {
                     e.getValue().applyOffset();

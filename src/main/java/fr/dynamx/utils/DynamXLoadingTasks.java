@@ -33,7 +33,7 @@ public class DynamXLoadingTasks {
             ContentPackLoader.reload(DynamXMain.resDir, taskContext != TaskContext.CLIENT || taskContext.isSinglePlayer());
             if (taskContext.isClient()) //Dedicated server
             {
-                DynamXContext.getObjModelRegistry().getItemRenderer().refreshItemInfos();
+                DynamXContext.getDxModelRegistry().getItemRenderer().refreshItemInfos();
                 if (taskContext == TaskContext.CLIENT && !taskContext.isSinglePlayer() && DynamXConfig.syncPacks) {
                     DynamXMain.log.debug("Requesting pack sync...");
                     DynamXContext.getNetwork().sendToServer(new MessagePacksHashs(PackSyncHandler.getObjects()));
@@ -58,7 +58,7 @@ public class DynamXLoadingTasks {
     public static Consumer<TaskContext> MODEL = new Consumer<TaskContext>() {
         @Override
         public void accept(TaskContext taskContext) {
-            DynamXContext.getObjModelRegistry().reloadModels();
+            DynamXContext.getDxModelRegistry().reloadModels();
         }
 
         @Override

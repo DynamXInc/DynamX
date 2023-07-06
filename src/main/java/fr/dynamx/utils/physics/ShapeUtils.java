@@ -6,13 +6,15 @@ import com.jme3.bullet.collision.shapes.HullCollisionShape;
 import com.jme3.bullet.collision.shapes.infos.ChildCollisionShape;
 import com.jme3.bullet.util.DebugShapeFactory;
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.obj.ObjModelPath;
+import fr.dynamx.api.dxmodel.DxModelPath;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.contentpack.PackInfo;
 import fr.dynamx.common.contentpack.type.objects.AbstractProp;
 import fr.dynamx.common.contentpack.type.objects.PropObject;
+import fr.dynamx.common.objloader.data.DxModelData;
+import fr.dynamx.common.objloader.data.GltfModelData;
 import fr.dynamx.common.objloader.data.ObjModelData;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXUtils;
@@ -34,7 +36,7 @@ import static fr.dynamx.common.DynamXMain.log;
 
 public class ShapeUtils {
     // Shape generation
-    public static CompoundCollisionShape generateComplexModelCollisions(ObjModelPath path, String objectName, Vector3f scale, Vector3f centerOfMass, float shapeYOffset) {
+    public static CompoundCollisionShape generateComplexModelCollisions(DxModelPath path, String objectName, Vector3f scale, Vector3f centerOfMass, float shapeYOffset) {
         String lowerCaseObjectName = objectName.toLowerCase();
         ResourceLocation dcFileLocation = new ResourceLocation(path.getModelPath().toString().replace(".obj", "_" +lowerCaseObjectName+"_"+ DynamXConstants.DC_FILE_VERSION + ".dc"));
         InputStream dcInputStream = null;
@@ -70,7 +72,7 @@ public class ShapeUtils {
             }
         }
         if (shapeGenerator == null) {
-            ObjModelData model = DynamXContext.getObjModelDataFromCache(path);
+            DxModelData model = DynamXContext.getDxModelDataFromCache(path);
             String modelPath = DynamXMain.resDir + File.separator + path.getPackName() + File.separator + "assets" + //todo prevents from saving in zip files : we use the pack name
                     File.separator + path.getModelPath().getNamespace() + File.separator + path.getModelPath().getPath().replace("/", File.separator);
             String modelName = modelPath.substring(modelPath.lastIndexOf(File.separator) + 1);
@@ -252,11 +254,23 @@ public class ShapeUtils {
         return aabb;
     }
 
-    public static void generateModelCollisions(AbstractProp<?> abstractProp, ObjModelData objModelData, CompoundCollisionShape compoundCollisionShape) {
-        objModelData.getObjObjects().forEach(objObject -> {
-            abstractProp.getCollisionBoxes().add(ShapeUtils.getAABB(abstractProp, objObject.getMesh().min(), objObject.getMesh().max(), new Vector3f(), new Vector3f()));
-            objObject.getMesh().addCollisionShape(compoundCollisionShape, abstractProp.getScaleModifier());
-        });
+    public static void generateModelCollisions(AbstractProp<?> abstractProp, DxModelData dxModelData, CompoundCollisionShape compoundCollisionShape) {
+        switch (dxModelData.getFormat()) {
+            case OBJ:
+                ((ObjModelData)dxModelData).getObjObjects().forEach(objObject -> {
+                    abstractProp.getCollisionBoxes().add(ShapeUtils.getAABB(abstractProp,
+                            objObject.getMesh().min(), objObject.getMesh().max(), new Vector3f(), new Vector3f()));
+                    dxModelData.addCollisionShape(compoundCollisionShape, abstractProp.getScaleModifier());
+                });
+                break;
+            case GLTF:
+                ((GltfModelData)dxModelData).getNodeModels().forEach(nodeModel -> {
+                    abstractProp.getCollisionBoxes().add(ShapeUtils.getAABB(abstractProp,
+                            dxModelData.getMinOfMesh(nodeModel.getName()), dxModelData.getMaxOfMesh(nodeModel.getName()), new Vector3f(), new Vector3f()));
+                    dxModelData.addCollisionShape(compoundCollisionShape, abstractProp.getScaleModifier());
+                });
+                break;
+        }
     }
 
     public static class ShapeGenerator implements Serializable {

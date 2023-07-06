@@ -8,6 +8,7 @@ import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
+import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.client.renders.vehicle.RenderBaseVehicle;
@@ -70,7 +71,7 @@ public class PartRotor extends BasePart<ModularVehicleInfo> implements IDrawable
     
     @Override
     public void drawParts(@Nullable BaseVehicleEntity<?> entity, RenderPhysicsEntity<?> render, ModularVehicleInfo packInfo, byte textureId, float partialTicks) {
-        ObjModelRenderer vehicleModel = DynamXContext.getObjModelRegistry().getModel(packInfo.getModel());
+        DxModelRenderer vehicleModel = DynamXContext.getDxModelRegistry().getModel(packInfo.getModel());
         if (MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.PROPULSION, (RenderBaseVehicle<?>) render, entity, PhysicsEntityEvent.Phase.PRE, partialTicks, vehicleModel)))
             return;
         packInfo.getPartsByType(PartRotor.class).forEach(partRotor ->
@@ -85,8 +86,11 @@ public class PartRotor extends BasePart<ModularVehicleInfo> implements IDrawable
     }
     
     @SideOnly(Side.CLIENT)
-    private void renderRotor(RenderPhysicsEntity<?> render, PartRotor partRotor, float partialTicks, BaseVehicleEntity<?> helicopterEntity, ModularVehicleInfo packInfo, byte textureId, ObjModelRenderer vehicleModel) {
-        ObjObjectRenderer rotor = vehicleModel.getObjObjectRenderer(partRotor.getPartName());
+    private void renderRotor(RenderPhysicsEntity<?> render, PartRotor partRotor, float partialTicks, BaseVehicleEntity<?> helicopterEntity, ModularVehicleInfo packInfo, byte textureId, DxModelRenderer vehicleModel) {
+        if (!(vehicleModel instanceof ObjModelRenderer)) {
+            return;
+        }
+        ObjObjectRenderer rotor = ((ObjModelRenderer) vehicleModel).getObjObjectRenderer(partRotor.getPartName());
         if(rotor == null || MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.ROTOR, (RenderBaseVehicle<?>) render, helicopterEntity, PhysicsEntityEvent.Phase.PRE, partialTicks, vehicleModel)))
             return;
         GlStateManager.pushMatrix();
@@ -101,7 +105,7 @@ public class PartRotor extends BasePart<ModularVehicleInfo> implements IDrawable
         //Scale it
         GlStateManager.scale(packInfo.getScaleModifier().x, packInfo.getScaleModifier().y, packInfo.getScaleModifier().z);
         //Render it
-        vehicleModel.renderGroup(rotor, textureId);
+        ((ObjModelRenderer) vehicleModel).renderGroup(rotor, textureId);
         GlStateManager.popMatrix();
         MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.ROTOR, (RenderBaseVehicle<?>) render, helicopterEntity, PhysicsEntityEvent.Phase.POST, partialTicks, vehicleModel));
     }

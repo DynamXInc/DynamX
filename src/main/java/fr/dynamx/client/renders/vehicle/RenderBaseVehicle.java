@@ -1,11 +1,11 @@
 package fr.dynamx.client.renders.vehicle;
 
 import fr.dynamx.api.contentpack.object.part.IDrawablePart;
-import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent.Render;
 import fr.dynamx.api.events.VehicleEntityEvent.Render.Type;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
+import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
@@ -38,7 +38,7 @@ public class RenderBaseVehicle<T extends BaseVehicleEntity<?>> extends RenderPhy
     }
 
     public void renderMain(@Nullable T carEntity, ModularVehicleInfo packInfo, byte textureId, float partialTicks) {
-        ObjModelRenderer vehicleModel = DynamXContext.getObjModelRegistry().getModel(packInfo.getModel());
+        DxModelRenderer vehicleModel = DynamXContext.getDxModelRegistry().getModel(packInfo.getModel());
         if (!MinecraftForge.EVENT_BUS.post(new Render(Type.CHASSIS, this, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks, vehicleModel)) && packInfo.isModelValid()) {
             /* Rendering the chassis */
             GlStateManager.scale(packInfo.getScaleModifier().x, packInfo.getScaleModifier().y, packInfo.getScaleModifier().z);

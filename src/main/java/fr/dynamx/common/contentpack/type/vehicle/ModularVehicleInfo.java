@@ -12,7 +12,7 @@ import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
-import fr.dynamx.api.contentpack.object.render.IObjPackObject;
+import fr.dynamx.api.contentpack.object.render.IModelPackObject;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
@@ -20,9 +20,9 @@ import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.CreatePackItemEvent;
-import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
-import fr.dynamx.api.obj.ObjModelPath;
-import fr.dynamx.client.renders.model.ItemObjModel;
+import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
+import fr.dynamx.api.dxmodel.DxModelPath;
+import fr.dynamx.client.renders.model.ItemDxModel;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
@@ -58,7 +58,7 @@ import java.util.*;
  * @see BaseVehicleEntity
  */
 public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, ModularVehicleInfo> implements IPhysicsPackInfo, IModelTextureVariantsSupplier,
-        ParticleEmitterInfo.IParticleEmitterContainer, IObjPackObject, IPartContainer<ModularVehicleInfo>, IShapeContainer, ILightOwner<ModularVehicleInfo> {
+        ParticleEmitterInfo.IParticleEmitterContainer, IModelPackObject, IPartContainer<ModularVehicleInfo>, IShapeContainer, ILightOwner<ModularVehicleInfo> {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("UseHullShape".equals(key))
@@ -93,10 +93,12 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     private int directingWheel;
 
     @Getter
+    @Setter
     @PackFileProperty(configNames = "PlayerStandOnTop", required = false, defaultValue = "ALWAYS")
     protected EnumPlayerStandOnTop playerStandOnTop;
 
     @Getter
+    @Setter
     @PackFileProperty(configNames = "DefaultZoomLevel", required = false, defaultValue = "4")
     protected int defaultZoomLevel = 4;
 
@@ -106,24 +108,30 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     /* == Physics properties == */
 
     @Getter
+    @Setter
     @PackFileProperty(configNames = "EmptyMass")
-    protected int emptyMass;
+    protected int emptyMass = 0;
     @Getter
-    @PackFileProperty(configNames = "CenterOfGravityOffset", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F)
-    protected Vector3f centerOfMass;
+    @Setter
+    @PackFileProperty(configNames = "CenterOfGravityOffset", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false)
+    protected Vector3f centerOfMass = new Vector3f();
 
     @Getter
-    @PackFileProperty(configNames = "DragCoefficient")
-    protected float dragFactor;
+    @Setter
+    @PackFileProperty(configNames = "DragCoefficient", required = false)
+    protected float dragFactor = 0.0f;
 
     @PackFileProperty(configNames = "LinearDamping", required = false, defaultValue = "0")
     @Getter
-    protected float linearDamping;
+    @Setter
+    protected float linearDamping = 0.0f;
     @PackFileProperty(configNames = "AngularDamping", required = false, defaultValue = "0")
     @Getter
-    protected float angularDamping;
+    @Setter
+    protected float angularDamping = 0.0f;
 
     @Getter
+    @Setter
     @PackFileProperty(configNames = "UseComplexCollisions", required = false, defaultValue = "true", description = "common.UseComplexCollisions")
     protected boolean useHullShape = true;
 
@@ -131,6 +139,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
      * The collision shape of this vehicle, generated either form the partShapes list, or the obj model of the vehicle (hull shape)
      */
     @Getter
+    @Setter
     private CompoundCollisionShape physicsCollisionShape;
 
     /**
@@ -204,7 +213,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
 
     @Override
     public boolean postLoad(boolean hot) {
-        ObjModelPath modelPath = DynamXUtils.getModelPath(getPackName(), model);
+        DxModelPath modelPath = DynamXUtils.getModelPath(getPackName(), model);
         try {
             if (useHullShape)
                 physicsCollisionShape = ShapeUtils.generateComplexModelCollisions(modelPath, "chassis", scaleModifier, centerOfMass, shapeYOffset);
@@ -290,7 +299,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
 
     @Override
     @SideOnly(Side.CLIENT)
-    public void applyItemTransforms(ItemCameraTransforms.TransformType renderType, ItemStack stack, ItemObjModel model) {
+    public void applyItemTransforms(ItemCameraTransforms.TransformType renderType, ItemStack stack, ItemDxModel model) {
         super.applyItemTransforms(renderType, stack, model);
         if (renderType == ItemCameraTransforms.TransformType.GUI)
             GlStateManager.rotate(180, 0, 1, 0);

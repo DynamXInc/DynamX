@@ -13,9 +13,9 @@ import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent;
-import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
+import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
-import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
+import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
 import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import fr.dynamx.client.renders.vehicle.RenderBaseVehicle;
 import fr.dynamx.common.DynamXContext;
@@ -103,7 +103,7 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
 
     public void drawLights(@Nullable BaseVehicleEntity<?> entity, int tickCounter, ResourceLocation model, Vector3f scale, LightsModule isLightOn) {
         /* Rendering light sources */
-        ObjModelRenderer vehicleModel = DynamXContext.getObjModelRegistry().getModel(model);
+        DxModelRenderer vehicleModel = DynamXContext.getDxModelRegistry().getModel(model);
         for (PartLightSource lightSource : getOwner().getLightSources().values()) {
             LightObject onLightObject = null;
             if (isLightOn != null) {

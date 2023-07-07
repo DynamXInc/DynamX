@@ -32,8 +32,9 @@ public class PlayerPhysicsHandler {
         this.playerIn = playerIn;
         Quaternion localQuat = new Quaternion(0.0F, 1.0F, 0.0F, playerIn.rotationYaw);
         Transform localTransform = new Transform(new Vector3f((float) playerIn.posX, (float) playerIn.posY + 0.8f, (float) playerIn.posZ), localQuat);
-        bodyIn = DynamXPhysicsHelper.createRigidBody(60f, localTransform, new BoxCollisionShape(0.35f, 0.8f, 0.35f),
-                new BulletShapeType<>(EnumBulletShapeType.PLAYER, this));
+        BoxCollisionShape shape = new BoxCollisionShape(0.35f, 0.8f, 0.35f);
+        bodyIn = DynamXPhysicsHelper.createRigidBody(60f, localTransform, shape,
+                new BulletShapeType<>(EnumBulletShapeType.PLAYER, this, shape));
         bodyIn.setKinematic(true);
         bodyIn.setEnableSleep(false);
     }

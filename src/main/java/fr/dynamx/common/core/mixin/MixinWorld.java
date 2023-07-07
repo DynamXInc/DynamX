@@ -3,12 +3,12 @@ package fr.dynamx.common.core.mixin;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.capability.DynamXChunkData;
 import fr.dynamx.common.capability.DynamXChunkDataProvider;
+import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.*;
-import net.minecraft.world.IWorldEventListener;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,12 +17,11 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import javax.annotation.Nullable;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Patches the world raytrace to raytrace on dynamx blocks
  */
-@Mixin(value = World.class)
+@Mixin(value = World.class, remap = DynamXConstants.REMAP)
 public abstract class MixinWorld {
     @Shadow
     public abstract World init();

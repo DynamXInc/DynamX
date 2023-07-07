@@ -128,7 +128,7 @@ public class SlopeTerrainElement implements ITerrainElement {
         PhysicsRigidBody pr = new PhysicsRigidBody(shape, 0);
         pr.setPhysicsLocation(pos);
         pr.setFriction(1);
-        pr.setUserObject(new BulletShapeType<>(EnumBulletShapeType.SLOPE, this));
+        pr.setUserObject(new BulletShapeType<>(EnumBulletShapeType.SLOPE, this, pr.getCollisionShape()));
 
         if (poolId != 0) {
             Vector3fPool.getPool(poolId, "ste").closeSubPool();

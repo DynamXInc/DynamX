@@ -1,7 +1,5 @@
 package fr.dynamx.utils.debug;
 
-import lombok.Getter;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,9 +12,9 @@ public class DynamXDebugOptions {
     private static final List<DynamXDebugOption> ALL_OPTIONS = new ArrayList<>();
     public static final DynamXDebugOption DEBUG_RENDER = DynamXDebugOption.newServerDependantOption(DebugCategories.GENERAL, "Debug renderer").withSubCategory("DynamX"),
             PROFILING = DynamXDebugOption.newServerDependantOption(DebugCategories.GENERAL, "Profiling").withDescription("Find why DynamX is lagging - prints timings in the logs. May produce lag").withSubCategory("DynamX"),
-            PHYSICS_DEBUG = DynamXDebugOption.newOption(DebugCategories.GENERAL, "Bullet physics debug").withDescription("Shows complete rigid bodies and joints debug, may produce lag").withSubCategory("Physics"),
-            PLAYER_TO_OBJECT_COLLISION_DEBUG = DynamXDebugOption.newOption(DebugCategories.GENERAL, "Player <-> DynamX Object collision debug").withDescription("Shows the collision boxes used for the player <-> DynamX Objects collisions").withSubCategory("Collisions"),
-            DYNX_OBJECTS_COLLISION_DEBUG = DynamXDebugOption.newOption(DebugCategories.GENERAL, "DynamX Object collision debug").withDescription("Shows the collision boxes used in the physics engine for the Objects <-> Objects and Objects <-> Terrain collisions").withSubCategory("Collisions");
+            PHYSICS_DEBUG = DynamXDebugOption.newOption(DebugCategories.GENERAL, "Bullet shape debug").withDescription("Shows complete rigid bodies and joints debug, may produce lag").withSubCategory("Physics"),
+            RENDER_WIREFRAME = DynamXDebugOption.newOption(DebugCategories.GENERAL, "Should render wireframe").withDescription("Shows the bullet shape debug in wireframe").withSubCategory("Physics").enable(),
+            PLAYER_TO_OBJECT_COLLISION_DEBUG = DynamXDebugOption.newOption(DebugCategories.GENERAL, "Player <-> DynamX Object collision debug").withDescription("Shows the collision boxes used for the player <-> DynamX Objects collisions").withSubCategory("Collisions");
 
     public static final DynamXDebugOption.TerrainDebugOption CHUNK_BOXES = (DynamXDebugOption.TerrainDebugOption) DynamXDebugOption.newTerrainOption("Server chunk boxes", true, 1, 2, 4, 8).withSubCategory("Server/solo"),
             BLOCK_BOXES = (DynamXDebugOption.TerrainDebugOption) DynamXDebugOption.newTerrainOption("Server block boxes", true, 4, 1, 2, 8).withSubCategory("Server/solo"),

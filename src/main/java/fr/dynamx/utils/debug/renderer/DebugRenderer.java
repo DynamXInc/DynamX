@@ -81,21 +81,4 @@ public interface DebugRenderer<T extends PhysicsEntity<?>> {
         }
     }
 
-    class HullDebug implements DebugRenderer<PackPhysicsEntity<?, ?>> {
-        @Override
-        public boolean shouldRender(PackPhysicsEntity<?, ?> entity) {
-            return DynamXDebugOptions.DYNX_OBJECTS_COLLISION_DEBUG.isActive();
-        }
-
-        @Override
-        public void render(PackPhysicsEntity<?, ?> entity, RenderPhysicsEntity<PackPhysicsEntity<?, ?>> renderer, double x, double y, double z, float partialTicks) {
-            List<Vector3f> debugBuffer = entity.getPackInfo().getCollisionShapeDebugBuffer();
-            if (debugBuffer != null) {
-                GlStateManager.pushMatrix();
-                GlStateManager.translate(-entity.getPackInfo().getCenterOfMass().x, -entity.getPackInfo().getCenterOfMass().y, -entity.getPackInfo().getCenterOfMass().z);
-                DynamXRenderUtils.drawConvexHull(debugBuffer);
-                GlStateManager.popMatrix();
-            }
-        }
-    }
 }

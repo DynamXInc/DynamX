@@ -1,5 +1,6 @@
 package fr.dynamx.common.core.mixin;
 
+import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.BlockRenderLayer;
@@ -14,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * In this test we make all the bits inside the stencil buffer fail the test.
  * Then, we disable the test
  */
-@Mixin(value = RenderGlobal.class)
+@Mixin(value = RenderGlobal.class, remap = DynamXConstants.REMAP)
 public abstract class MixinRenderGlobal {
 
     @Inject(method = "renderBlockLayer(Lnet/minecraft/util/BlockRenderLayer;DILnet/minecraft/entity/Entity;)I",

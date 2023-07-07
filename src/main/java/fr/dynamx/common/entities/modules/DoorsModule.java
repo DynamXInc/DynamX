@@ -113,7 +113,7 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
             doorShape = partDoor.getPhysicsCollisionShape();
         PhysicsRigidBody doorBody = DynamXPhysicsHelper.fastCreateRigidBody(vehicleEntity, 40, doorShape, doorPos, vehicleEntity.rotationYaw);
         localVarContainer.setDoorBody(doorBody);
-        doorBody.setUserObject(new BulletShapeType<>(EnumBulletShapeType.BULLET_ENTITY, localVarContainer));
+        doorBody.setUserObject(new BulletShapeType<>(EnumBulletShapeType.BULLET_ENTITY, localVarContainer, doorBody.getCollisionShape()));
         DynamXContext.getPhysicsWorld(vehicleEntity.world).addCollisionObject(doorBody);
 
         attachedDoors.forEach((doorId, doorPhysics) -> {
@@ -127,9 +127,9 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
                 Quaternion.IDENTITY.toRotationMatrix(), Quaternion.IDENTITY.toRotationMatrix(),
                 RotationOrder.XYZ);
         localVarContainer.setJoint(new6Dof);
-        localVarContainer.setJointLimit(DynamXPhysicsHelper.X_ROTATION_DOF, 0, 0);
-        localVarContainer.setJointLimit(DynamXPhysicsHelper.Y_ROTATION_DOF, 0, 0);
-        localVarContainer.setJointLimit(DynamXPhysicsHelper.Z_ROTATION_DOF, 0, 0);
+        localVarContainer.setJointLimit(DynamXPhysicsHelper.EnumPhysicsAxis.X_ROT, 0, 0);
+        localVarContainer.setJointLimit(DynamXPhysicsHelper.EnumPhysicsAxis.Y_ROT, 0, 0);
+        localVarContainer.setJointLimit(DynamXPhysicsHelper.EnumPhysicsAxis.Z_ROT, 0, 0);
         new6Dof.setCollisionBetweenLinkedBodies(false);
 
         attachedBodiesTransform.put(jointId, new SynchronizedRigidBodyTransform(new RigidBodyTransform(doorBody)));
@@ -317,18 +317,18 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
         private New6Dof joint;
 
         public float getJointAngle() {
-            return joint.getAngles(null).get(module.getPartDoor(doorID).getAxisToUse() - 3);
+            return joint.getAngles(null).get(module.getPartDoor(doorID).getAxisToUse().ordinal() - 3);
         }
 
-        public void setJointRotationMotorVelocity(int axis, float targetVelocity, float maxForce) {
+        public void setJointRotationMotorVelocity(DynamXPhysicsHelper.EnumPhysicsAxis axis, float targetVelocity, float maxForce) {
             setJointMotorState(axis, true);
-            joint.set(MotorParam.TargetVelocity, axis, targetVelocity);
-            joint.set(MotorParam.MaxMotorForce, axis, maxForce);
+            joint.set(MotorParam.TargetVelocity, axis.ordinal(), targetVelocity);
+            joint.set(MotorParam.MaxMotorForce, axis.ordinal(), maxForce);
         }
 
-        public void setJointLimit(int axis, float lowerLimit, float upperLimit) {
-            joint.set(MotorParam.LowerLimit, axis, lowerLimit);
-            joint.set(MotorParam.UpperLimit, axis, upperLimit);
+        public void setJointLimit(DynamXPhysicsHelper.EnumPhysicsAxis axis, float lowerLimit, float upperLimit) {
+            joint.set(MotorParam.LowerLimit, axis.ordinal(), lowerLimit);
+            joint.set(MotorParam.UpperLimit, axis.ordinal(), upperLimit);
         }
 
         private float getJointExtremeLimit(float lowerLimit, float upperLimit) {
@@ -339,11 +339,12 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
             }
         }
 
-        public void setJointMotorState(int axis, boolean state) {
-            if (axis < 3) {
-                joint.getTranslationMotor().setMotorEnabled(axis, state);
+        public void setJointMotorState(DynamXPhysicsHelper.EnumPhysicsAxis axis, boolean state) {
+            int axisIndex = axis.ordinal();
+            if (axisIndex < 3) {
+                joint.getTranslationMotor().setMotorEnabled(axisIndex, state);
             } else {
-                joint.getRotationMotor(axis - 3).setMotorEnabled(state);
+                joint.getRotationMotor(axisIndex - 3).setMotorEnabled(state);
             }
         }
     }

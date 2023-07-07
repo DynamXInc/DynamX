@@ -57,7 +57,7 @@ public class MoveObjects extends MovableModule {
 
     public void throwObject(float force) {
         if (picker.get() != null && pickedEntity.get() != null) {
-            ((PhysicsRigidBody) entity.getPhysicsHandler().getCollisionObject()).setGravity(DynamXPhysicsHelper.GRAVITY);
+            ((PhysicsRigidBody) entity.getPhysicsHandler().getCollisionObject()).setGravity(Vector3fPool.get(0,DynamXPhysicsHelper.GRAVITY,0));
             PhysicsRigidBody rigidBody = (PhysicsRigidBody) pickedEntity.get().getPhysicsHandler().getCollisionObject();
             Vector3f playerLookPos = DynamXUtils.toVector3f(picker.get().getLookVec());
             rigidBody.setLinearVelocity(playerLookPos.multLocal(force));
@@ -67,7 +67,7 @@ public class MoveObjects extends MovableModule {
 
     public void unPickObject() {
         if (picker.get() != null) {
-            ((PhysicsRigidBody) entity.getPhysicsHandler().getCollisionObject()).setGravity(Vector3fPool.get(DynamXPhysicsHelper.GRAVITY));
+            ((PhysicsRigidBody) entity.getPhysicsHandler().getCollisionObject()).setGravity(Vector3fPool.get(0,DynamXPhysicsHelper.GRAVITY,0));
             DynamXContext.getPlayerPickingObjects().remove(picker.get().getEntityId());
             isPicked.set(false);
             entity.getSynchronizer().onPlayerStopControlling(picker.get(), false);

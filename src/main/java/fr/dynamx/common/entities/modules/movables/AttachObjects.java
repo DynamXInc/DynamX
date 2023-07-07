@@ -46,12 +46,12 @@ public class AttachObjects extends MovableModule {
                 if (!firstRb.equals(secondRb)) {
                     joint = new New6Dof(firstRb, secondRb, firstAttachPoint, secondAttachPoint, Quaternion.IDENTITY.toRotationMatrix(),
                             Quaternion.IDENTITY.toRotationMatrix(), RotationOrder.XYZ);
-                    joint.set(MotorParam.LowerLimit, X_ROTATION_DOF, 0f);
-                    joint.set(MotorParam.LowerLimit, Z_ROTATION_DOF, 0f);
-                    joint.set(MotorParam.LowerLimit, Y_ROTATION_DOF, 0f);
-                    joint.set(MotorParam.UpperLimit, Y_ROTATION_DOF, 0f);
-                    joint.set(MotorParam.UpperLimit, X_ROTATION_DOF, 0f);
-                    joint.set(MotorParam.UpperLimit, Z_ROTATION_DOF, 0f);
+                    joint.set(MotorParam.LowerLimit, EnumPhysicsAxis.X_ROT.ordinal(), 0f);
+                    joint.set(MotorParam.LowerLimit, EnumPhysicsAxis.Z_ROT.ordinal(), 0f);
+                    joint.set(MotorParam.LowerLimit, EnumPhysicsAxis.Y_ROT.ordinal(), 0f);
+                    joint.set(MotorParam.UpperLimit, EnumPhysicsAxis.Y_ROT.ordinal(), 0f);
+                    joint.set(MotorParam.UpperLimit, EnumPhysicsAxis.X_ROT.ordinal(), 0f);
+                    joint.set(MotorParam.UpperLimit, EnumPhysicsAxis.Z_ROT.ordinal(), 0f);
                 }
             }
         }

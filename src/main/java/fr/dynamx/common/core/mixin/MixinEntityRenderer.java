@@ -1,5 +1,6 @@
 package fr.dynamx.common.core.mixin;
 
+import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraftforge.client.MinecraftForgeClient;
 import org.lwjgl.opengl.GL11;
@@ -13,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * In this step we execute the basic things to use our stencil buffer. Then, we make everything pass the stencil test
  * @see MixinRenderManager for the second step
  */
-@Mixin(value = EntityRenderer.class)
+@Mixin(value = EntityRenderer.class, remap = DynamXConstants.REMAP)
 public abstract class MixinEntityRenderer {
 
     @Inject(method = "renderWorldPass(IFJ)V",

@@ -1,10 +1,9 @@
 package fr.dynamx.common.core.mixin;
 
-import com.jme3.math.Vector3f;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.debug.Profiler;
-import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MoverType;
@@ -22,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /**
  * Patches the world raytrace to raytrace on dynamx blocks
  */
-@Mixin(value = Entity.class, priority = 800)
+@Mixin(value = Entity.class, priority = 800, remap = DynamXConstants.REMAP)
 public abstract class MixinEntity {
 
     @Shadow public float prevRotationYaw;

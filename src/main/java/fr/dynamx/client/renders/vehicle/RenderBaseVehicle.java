@@ -28,7 +28,6 @@ import javax.annotation.Nullable;
 public class RenderBaseVehicle<T extends BaseVehicleEntity<?>> extends RenderPhysicsEntity<T> {
     public RenderBaseVehicle(RenderManager manager) {
         super(manager);
-        addDebugRenderers(new DebugRenderer.HullDebug());
         MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.InitRenderer<>(BaseVehicleEntity.class, this));
     }
 

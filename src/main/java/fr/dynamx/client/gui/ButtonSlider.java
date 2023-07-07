@@ -54,9 +54,8 @@ public class ButtonSlider extends GuiButton {
             displayString = categoryName + ": " + getDisplayString();
             pressed = true;
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override

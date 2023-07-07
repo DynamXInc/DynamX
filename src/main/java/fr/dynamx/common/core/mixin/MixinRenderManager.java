@@ -3,6 +3,7 @@ package fr.dynamx.common.core.mixin;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.QuaternionPool;
@@ -23,7 +24,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * we can make them fail the test in the third and final step
  * @see MixinRenderGlobal for the final step
  */
-@Mixin(value = RenderManager.class)
+@Mixin(value = RenderManager.class, remap = DynamXConstants.REMAP)
 public abstract class MixinRenderManager {
 
     @Inject(method = "renderEntity",

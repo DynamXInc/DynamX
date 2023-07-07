@@ -75,8 +75,8 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     private int attachStrength = 400;
 
     @Getter
-    @PackFileProperty(configNames = "Axis", required = false)
-    private int axisToUse = DynamXPhysicsHelper.Y_ROTATION_DOF;
+    @PackFileProperty(configNames = "Axis", required = false, defaultValue = "Y_ROT")
+    private DynamXPhysicsHelper.EnumPhysicsAxis axisToUse = DynamXPhysicsHelper.EnumPhysicsAxis.Y_ROT;
     @Getter
     @PackFileProperty(configNames = "OpenedDoorAngleLimit", required = false)
     private Vector2f openLimit = new Vector2f();

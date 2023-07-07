@@ -39,11 +39,11 @@ public class BoatDebugRenderer {
             BufferBuilder bufferbuilder = tessellator.getBuffer();
             BoatPhysicsHandler<?> physicsHandler = (BoatPhysicsHandler<?>) entity.physicsHandler;
             for (PartFloat f : physicsHandler.floatList) {
-                for (Vector3f floater : f.childFloatsPos) {
+                for (Vector3f floater : f.childrenPositionList) {
                     DynamXRenderUtils.drawBoundingBox(floater.subtract(f.size/2, f.getScale().y/2, f.size/2),
                             floater.add(f.size/2, f.getScale().y/2, f.size/2), 0, 1, 0, 1);
-                    drawForce(tessellator, bufferbuilder, floater, physicsHandler.buoyForces.get(i), 1,0,0);
-                    drawForce(tessellator, bufferbuilder, floater, physicsHandler.dragForces.get(i), 1,1,0);
+                    drawForce(tessellator, bufferbuilder, floater, physicsHandler.debugBuoyForces.get(i), 1,0,0);
+                    drawForce(tessellator, bufferbuilder, floater, physicsHandler.debugDragForces.get(i), 1,1,0);
                     i++;
                 }
             }

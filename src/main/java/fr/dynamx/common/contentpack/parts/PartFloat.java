@@ -8,6 +8,8 @@ import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
+import fr.dynamx.utils.optimization.Vector3fPool;
+import fr.dynamx.utils.physics.DynamXPhysicsHelper;
 import net.minecraft.util.math.AxisAlignedBB;
 
 import java.util.ArrayList;
@@ -21,14 +23,14 @@ public class PartFloat extends BasePart<ModularVehicleInfo> {
     @PackFileProperty(configNames = "DragCoefficient", required = false)
     public float dragCoefficient = 0.05f;
     @PackFileProperty(configNames = "Axis", required = false)
-    public int axis;
+    public DynamXPhysicsHelper.EnumPhysicsAxis axis;
     @PackFileProperty(configNames = "Offset", required = false)
     public Vector3f offset = new Vector3f();
     @PackFileProperty(configNames = "LineSize", required = false)
     public Vector3f lineSize = new Vector3f();
     @PackFileProperty(configNames = "Spacing", required = false)
     public Vector3f spacing = new Vector3f();
-    public List<Vector3f> childFloatsPos = new ArrayList<>();
+    public List<Vector3f> childrenPositionList = new ArrayList<>();
 
     public PartFloat(ModularVehicleInfo owner, String partName) {
         super(owner, partName);
@@ -43,40 +45,31 @@ public class PartFloat extends BasePart<ModularVehicleInfo> {
                 min.x, min.y, min.z,
                 max.x, max.y, max.z);
 
-        childFloatsPos.clear();
-        AxisAlignedBB floaterBoundingBox = box;
-        Vector3f pos;
+        childrenPositionList.clear();
         switch (axis) {
-            case 0:
+            case X:
                 for (int i = 0; i < lineSize.x; i++) {
-                    pos = new Vector3f().set(getPosition());
-                    float xPos = (float) (floaterBoundingBox.minX + i * (size + spacing.x) + offset.x);
-                    pos.addLocal(xPos + size / 2, 0, 0);
-                    childFloatsPos.add(pos);
+                    float xPos = (float) (box.minX + i * (size + spacing.x) + offset.x);
+                    childrenPositionList.add(Vector3fPool.get(getPosition()).addLocal(xPos + size / 2, 0, 0));
                 }
                 break;
-            case 2:
+            case Y:
                 for (int j = 0; j < lineSize.z; j++) {
-                    pos = new Vector3f().set(getPosition());
-                    float zPos = (float) (floaterBoundingBox.minZ + j * (size + spacing.z) + offset.z);
-                    pos.addLocal(0, 0, -zPos - size / 2);
-                    childFloatsPos.add(pos);
+                    float zPos = (float) (box.minZ + j * (size + spacing.z) + offset.z);
+                    childrenPositionList.add(Vector3fPool.get(getPosition()).addLocal(0, 0, zPos + size / 2));
                 }
                 break;
-            case 3:
+            case Z:
                 for (int i = 0; i < lineSize.x; i++) {
                     for (int j = 0; j < lineSize.z; j++) {
-                        pos = new Vector3f().set(getPosition());
-                        float xPos = (float) (floaterBoundingBox.minX + i * (size + spacing.x) + offset.x);
-                        float zPos = (float) (floaterBoundingBox.minZ + j * (size + spacing.z) + offset.z);
-                        pos.addLocal(xPos + size / 2, 0, zPos + size / 2);
-                        childFloatsPos.add(pos);
+                        float xPos = (float) (box.minX + i * (size + spacing.x) + offset.x);
+                        float zPos = (float) (box.minZ + j * (size + spacing.z) + offset.z);
+                        childrenPositionList.add(Vector3fPool.get(getPosition()).addLocal(xPos + size / 2, 0, zPos + size / 2));
                     }
                 }
                 break;
             default:
-                pos = getPosition();
-                childFloatsPos.add(pos);
+                childrenPositionList.add(getPosition());
                 break;
         }
     }

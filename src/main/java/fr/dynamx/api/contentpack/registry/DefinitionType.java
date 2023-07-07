@@ -8,6 +8,7 @@ import fr.dynamx.common.contentpack.parts.PartShape;
 import fr.dynamx.utils.EnumPlayerStandOnTop;
 import fr.dynamx.utils.EnumSeatPlayerPosition;
 import fr.dynamx.utils.RegistryNameSetter;
+import fr.dynamx.utils.physics.DynamXPhysicsHelper;
 import fr.dynamx.utils.physics.EnumCollisionType;
 import net.minecraft.block.material.Material;
 import net.minecraft.util.EnumParticleTypes;
@@ -234,7 +235,11 @@ public class DefinitionType<T> {
             List<String> names = Arrays.asList("AIR", "GRASS", "GROUND", "WOOD", "ROCK", "IRON", "ANVIL", "WATER", "LAVA", "LEAVES", "PLANTS", "VINE", "SPONGE", "CLOTH", "FIRE", "SAND", "CIRCUITS", "CARPET", "GLASS", "REDSTONE_LIGHT", "TNT", "CORAL", "ICE", "PACKED_ICE", "SNOW", "CRAFTED_SNOW", "CACTUS", "CLAY", "GOURD", "DRAGON_EGG", "PORTAL", "CAKE", "WEB", "PISTON", "BARRIER", "STRUCTURE_VOID");
             Material[] materials = new Material[] {Material.AIR, Material.GRASS, Material.GROUND, Material.WOOD, Material.ROCK, Material.IRON, Material.ANVIL, Material.WATER, Material.LAVA, Material.LEAVES, Material.PLANTS, Material.VINE, Material.SPONGE, Material.CLOTH, Material.FIRE, Material.SAND, Material.CIRCUITS, Material.CARPET, Material.GLASS, Material.REDSTONE_LIGHT, Material.TNT, Material.CORAL, Material.ICE, Material.PACKED_ICE, Material.SNOW, Material.CRAFTED_SNOW, Material.CACTUS, Material.CLAY, Material.GOURD, Material.DRAGON_EGG, Material.PORTAL, Material.CAKE, Material.WEB, Material.PISTON, Material.BARRIER, Material.STRUCTURE_VOID};
             return materials[names.indexOf(s.toUpperCase())];
-        }, "type.material"));
+        }, "type.material")),
+        AXIS(new DefinitionType<>(DynamXPhysicsHelper.EnumPhysicsAxis.class,
+                DynamXPhysicsHelper.EnumPhysicsAxis::fromString, "type.axis"));
+
+
 
         public final DefinitionType<?> type;
 

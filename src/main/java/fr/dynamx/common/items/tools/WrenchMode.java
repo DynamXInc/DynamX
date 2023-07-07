@@ -2,6 +2,7 @@ package fr.dynamx.common.items.tools;
 
 import com.jme3.bullet.joints.JointEnd;
 import com.jme3.bullet.objects.PhysicsRigidBody;
+import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.EnumBulletShapeType;
@@ -24,6 +25,7 @@ import fr.dynamx.common.network.packets.MessageDebugRequest;
 import fr.dynamx.common.physics.joints.JointHandlerRegistry;
 import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.DynamXUtils;
+import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import fr.dynamx.utils.physics.PhysicsRaycastResult;
@@ -280,7 +282,7 @@ public class WrenchMode {
         @Override
         public void onWrenchRightClickClient(EntityPlayer playerIn, EnumHand handIn) {
             super.onWrenchRightClick(playerIn, handIn);
-            //ClientDynamXUtils.playerToRagdoll(playerIn, new Vector3f(20, 20, 20));
+            ClientDynamXUtils.playerToRagdoll(playerIn, new Vector3f(20, 20, 20));
         }
 
         @Override

@@ -278,7 +278,7 @@ public class ClientEventHandler {
                 ItemBlock itemBlock = (ItemBlock) currentItem.getItem();
                 DynamXBlock<?> block = (DynamXBlock<?>) itemBlock.getBlock();
                 RayTraceResult target = Minecraft.getMinecraft().objectMouseOver;
-                if (target != null && target.typeOfHit == RayTraceResult.Type.BLOCK) {
+                if (target != null && target.typeOfHit == RayTraceResult.Type.BLOCK && block.isObj()) {
                     EnumFacing side = target.sideHit;
                     playerOrientation = MathHelper.floor((entityPlayer.rotationYaw * 16.0F / 360.0F) + 0.5D) & 0xF;
                     blockPos = new BlockPos(target.getBlockPos().getX() + side.getXOffset(),

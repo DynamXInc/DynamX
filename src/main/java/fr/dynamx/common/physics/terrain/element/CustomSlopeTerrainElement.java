@@ -47,7 +47,7 @@ public class CustomSlopeTerrainElement implements ITerrainElement.IPersistentTer
         pr.setPhysicsLocation(posFixed);
         body = pr;
         pr.setFriction(1);
-        pr.setUserObject(new BulletShapeType<>(EnumBulletShapeType.SLOPE, this));
+        pr.setUserObject(new BulletShapeType<>(EnumBulletShapeType.SLOPE, this, pr.getCollisionShape()));
 
         Vector3f half = shape.getHalfExtents(Vector3fPool.get());
         maxSize = new int[]{16 + (int) Math.floor(half.x), 16 + (int) Math.floor(half.y), 16 + (int) Math.floor(half.z)};

@@ -78,7 +78,7 @@ public class DynamXPhysicsHelper {
         Quaternion bodyQuaternion = new Quaternion().fromAngleNormalAxis((float) Math.toRadians(-spawnRotation), new Vector3f(0, 1, 0));
         Transform bodyTransform = new Transform(position, bodyQuaternion);
 
-        return createRigidBody(mass, bodyTransform, collisionShape, new BulletShapeType<>(EnumBulletShapeType.BULLET_ENTITY, physicsEntity));
+        return createRigidBody(mass, bodyTransform, collisionShape, new BulletShapeType<>(EnumBulletShapeType.BULLET_ENTITY, physicsEntity, collisionShape));
     }
 
     public static PhysicsRaycastResult castRay(IPhysicsWorld iPhysicsWorld, Vector3f from, Vector3f dir, Predicate<EnumBulletShapeType> ignoredBody) {

@@ -123,10 +123,10 @@ public class GuiBlockCustomization extends GuiFrame
         drawModelOnScreen(x / 1.2f - 30, y / 1.2f - 30, 20, mouseX, mouseY, model);
     }
 
+    BlockRendererDispatcher blockRenderer = Minecraft.getMinecraft().getBlockRendererDispatcher();
     public void drawModelOnScreen(float posX, float posY, float scale, float mouseX, float mouseY, ObjModelRenderer model) {
         unbindLayerBounds();
 
-        BlockRendererDispatcher blockRenderer = Minecraft.getMinecraft().getBlockRendererDispatcher();
         GlStateManager.enableColorMaterial();
         GlStateManager.pushMatrix();
 

@@ -113,7 +113,7 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
             doorShape = partDoor.getPhysicsCollisionShape();
         PhysicsRigidBody doorBody = DynamXPhysicsHelper.fastCreateRigidBody(vehicleEntity, 40, doorShape, doorPos, vehicleEntity.rotationYaw);
         localVarContainer.setDoorBody(doorBody);
-        doorBody.setUserObject(new BulletShapeType<>(EnumBulletShapeType.BULLET_ENTITY, localVarContainer));
+        doorBody.setUserObject(new BulletShapeType<>(EnumBulletShapeType.BULLET_ENTITY, localVarContainer, doorBody.getCollisionShape()));
         DynamXContext.getPhysicsWorld(vehicleEntity.world).addCollisionObject(doorBody);
 
         attachedDoors.forEach((doorId, doorPhysics) -> {

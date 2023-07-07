@@ -13,6 +13,7 @@ import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.common.physics.utils.RigidBodyTransform;
 import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.client.DynamXRenderUtils;
+import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.QuaternionPool;
@@ -89,13 +90,17 @@ public class PhysicsDebugRenderer {
         Vector3f physicsLocation = Vector3fPool.get();
         Quaternion physicsRotation = QuaternionPool.get();
         GlStateManager.pushMatrix();
+        int greenColor = physicsRigidBody.getActivationState() == 2 ? 1 : 0;
+        float blueColor = physicsRigidBody.getActivationState() == 2 ? 0 : 0.8f;
         if (userObject instanceof BulletShapeType) {
             if (curTransform != null) {
-                if (!((BulletShapeType<?>) userObject).getType().isTerrain()) {
+                BulletShapeType<?> shapeType = (BulletShapeType<?>) userObject;
+                if (!(shapeType).getType().isTerrain()) {
                     physicsLocation = curTransform.getPosition();
                     physicsRotation = curTransform.getRotation();
                     if (prevTransform != null) {
-                        GlStateManager.translate(prevTransform.getPosition().x + (physicsLocation.x - prevTransform.getPosition().x) * partialTicks,
+                        GlStateManager.translate(
+                                prevTransform.getPosition().x + (physicsLocation.x - prevTransform.getPosition().x) * partialTicks,
                                 prevTransform.getPosition().y + (physicsLocation.y - prevTransform.getPosition().y) * partialTicks,
                                 prevTransform.getPosition().z + (physicsLocation.z - prevTransform.getPosition().z) * partialTicks);
                         GlStateManager.rotate(ClientDynamXUtils.computeInterpolatedGlQuaternion(prevTransform.getRotation(), physicsRotation, partialTicks));
@@ -103,6 +108,9 @@ public class PhysicsDebugRenderer {
                         GlStateManager.translate(physicsLocation.x, physicsLocation.y, physicsLocation.z);
                         GlStateManager.rotate(GlQuaternionPool.get(physicsRotation));
                     }
+                    GlStateManager.color(1, greenColor, blueColor, 1);
+                    DynamXRenderUtils.drawConvexHull(shapeType.getDebugTriangles(), DynamXDebugOptions.RENDER_WIREFRAME.isActive());
+                    GlStateManager.color(1, 1, 1, 1);
 
                 }
             }
@@ -111,34 +119,26 @@ public class PhysicsDebugRenderer {
             physicsRigidBody.getPhysicsRotation(physicsRotation);
             GlStateManager.translate(physicsLocation.x, physicsLocation.y, physicsLocation.z);
             GlStateManager.rotate(GlQuaternionPool.get(physicsRotation));
-        }
 
+            CollisionShape collisionShape = physicsRigidBody.getCollisionShape();
 
-        CollisionShape collisionShape = physicsRigidBody.getCollisionShape();
-
-        if (collisionShape instanceof BoxCollisionShape) {
-            debugBoxCollisionShape((BoxCollisionShape) collisionShape, 1, physicsRigidBody.getActivationState() == 2 ? 1 : 0, physicsRigidBody.getActivationState() == 2 ? 0 : 0.8f, 1);
-        } else if (collisionShape instanceof SphereCollisionShape) {
-            debugSphereCollisionShape((SphereCollisionShape) collisionShape, 10, 1, physicsRigidBody.getActivationState() == 2 ? 1 : 0, physicsRigidBody.getActivationState() == 2 ? 0 : 0.8f, 1);
-        } else if (collisionShape instanceof HullCollisionShape) {
-            /*List<Vector3f> debugBuffer = DynamXUtils.floatBufferToVec3f(ShapeUtils.getDebugBuffer(collisionShape), Vector3fPool.get());
-            DynamXRenderUtils.drawConvexHull(debugBuffer);*/
-        } else if (collisionShape instanceof CompoundCollisionShape) {
-            for (ChildCollisionShape childCollisionShape : ((CompoundCollisionShape) collisionShape).listChildren()) {
-                if (childCollisionShape.getShape() instanceof BoxCollisionShape) {
-                    DynamXRenderUtils.glTranslate(childCollisionShape.copyOffset(Vector3fPool.get()));
-                    debugBoxCollisionShape((BoxCollisionShape) childCollisionShape.getShape(), 1, physicsRigidBody.getActivationState() == 2 ? 1 : 0, physicsRigidBody.getActivationState() == 2 ? 0 : 0.8f, 1);
-                    DynamXRenderUtils.glTranslate(childCollisionShape.copyOffset(Vector3fPool.get()).multLocal(-1));
-                } else if (childCollisionShape.getShape() instanceof HullCollisionShape) {
-                   /* DynamXRenderUtils.glTranslate(childCollisionShape.copyOffset(Vector3fPool.get()));
-                    if(debugBuffer == null)
-                        debugBuffer = DynamXUtils.floatBufferToVec3f(ShapeUtils.getDebugBuffer(collisionShape), Vector3fPool.get());
-                    GlStateManager.color(1, physicsRigidBody.getActivationState() == 2 ? 1 : 0, physicsRigidBody.getActivationState() == 2 ? 0 : 0.8f, 1);
-                    DynamXRenderUtils.drawConvexHull(debugBuffer);
-                    DynamXRenderUtils.glTranslate(childCollisionShape.copyOffset(Vector3fPool.get()).multLocal(-1));*/
+            if (collisionShape instanceof BoxCollisionShape) {
+                debugBoxCollisionShape((BoxCollisionShape) collisionShape, 1, greenColor, blueColor, 1);
+            } else if (collisionShape instanceof SphereCollisionShape) {
+                debugSphereCollisionShape((SphereCollisionShape) collisionShape, 10, 1, greenColor, blueColor, 1);
+            } else if (collisionShape instanceof CompoundCollisionShape) {
+                for (ChildCollisionShape childCollisionShape : ((CompoundCollisionShape) collisionShape).listChildren()) {
+                    if (childCollisionShape.getShape() instanceof BoxCollisionShape) {
+                        DynamXRenderUtils.glTranslate(childCollisionShape.copyOffset(Vector3fPool.get()));
+                        debugBoxCollisionShape((BoxCollisionShape) childCollisionShape.getShape(), 1, greenColor, blueColor, 1);
+                        DynamXRenderUtils.glTranslate(childCollisionShape.copyOffset(Vector3fPool.get()).multLocal(-1));
+                    }
                 }
             }
         }
+
+
+
         GlStateManager.popMatrix();
     }
 

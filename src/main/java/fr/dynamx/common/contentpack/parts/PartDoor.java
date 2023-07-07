@@ -213,11 +213,6 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     }
 
     @Override
-    public List<Vector3f> getCollisionShapeDebugBuffer() {
-        return new ArrayList<>();
-    }
-
-    @Override
     public ItemStack getPickedResult(int metadata) {
         return ItemStack.EMPTY;
     }

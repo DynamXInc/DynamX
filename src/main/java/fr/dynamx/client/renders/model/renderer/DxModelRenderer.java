@@ -80,7 +80,17 @@ public abstract class DxModelRenderer {
         GlStateManager.disableBlend();
 
         setModelColor(new Vector4f(canPlace ? 0 : 1, canPlace ? 1 : 0, 0, 0.7f));
-        //renderModel((byte) textureNum);
+        switch (getFormat()){
+            case OBJ:
+                renderModel((byte) textureNum);
+                break;
+            case GLTF:
+                GlStateManager.color(canPlace ? 0 : 1, canPlace ? 1 : 0, 0, 0.7f);
+                ((GltfModelRenderer) this).renderModelVanilla((byte) textureNum);
+                GlStateManager.color(1,1,1,1);
+
+                break;
+        }
         GlStateManager.enableBlend();
         GlStateManager.popMatrix();
     }

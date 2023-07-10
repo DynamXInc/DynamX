@@ -53,18 +53,18 @@ public class DxItemModelLoader extends TileEntityItemStackRenderer implements IC
 
     @Override
     public void renderByItem(ItemStack stack, float partialTicks) {
-        /*if (ITEM_TO_MODEL.containsKey(stack.getItem())) {
+        if (ITEM_TO_MODEL.containsKey(stack.getItem())) {
             ItemDxModel model = getModel(stack.getItem(), stack.isItemStackDamageable() ? 0 : (byte) stack.getMetadata());
             if (model == null) {
                 RenderItem renderItem = Minecraft.getMinecraft().getRenderItem();
-                //renderItem.renderItem(stack, renderItem.getItemModelMesher().getModelManager().getMissingModel());
+                renderItem.renderItem(stack, renderItem.getItemModelMesher().getModelManager().getMissingModel());
                 return;
                 //throw new NoSuchElementException("Item " + stack.getItem().getRegistryName() + " is not registered with metadata " + stack.getMetadata() + " into ObjItemModelLoader");
             }
             if (!MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack.getItem(), EventStage.PRE, ItemCameraTransforms.TransformType.NONE))) {
                 if (model.getOwner().get3DItemRenderLocation() == Enum3DRenderLocation.NONE || (renderType == ItemCameraTransforms.TransformType.GUI && model.getOwner().get3DItemRenderLocation() == Enum3DRenderLocation.WORLD)) {
                     GlStateManager.translate(0.5F, 0.5F, 0.5F);
-                    //Minecraft.getMinecraft().getRenderItem().renderItem(stack, model.getGuiBaked());
+                    Minecraft.getMinecraft().getRenderItem().renderItem(stack, model.getGuiBaked());
                 } else {
                     if (!MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack.getItem(), EventStage.PRE, renderType)))
                         model.getOwner().applyItemTransforms(renderType, stack, model);
@@ -76,16 +76,17 @@ public class DxItemModelLoader extends TileEntityItemStackRenderer implements IC
                     GlStateManager.rotate(rotate.x, 1, 0, 0);
                     GlStateManager.rotate(rotate.y, 0, 1, 0);
                     GlStateManager.rotate(rotate.z, 0, 0, 1);
-                    //if (!MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack.getItem(), EventStage.RENDER, ItemCameraTransforms.TransformType.FIXED)))
-                        //model.renderModel(stack, renderType);
+                    if (!MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack.getItem(), EventStage.RENDER, ItemCameraTransforms.TransformType.FIXED))) {
+                        model.renderModel(stack, renderType);
+                    }
                     MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack.getItem(), EventStage.POST, ItemCameraTransforms.TransformType.NONE));
                 }
             }
         } else {
             RenderItem renderItem = Minecraft.getMinecraft().getRenderItem();
-            //renderItem.renderItem(stack, renderItem.getItemModelMesher().getModelManager().getMissingModel());
+            renderItem.renderItem(stack, renderItem.getItemModelMesher().getModelManager().getMissingModel());
             //throw new NoSuchElementException("Item " + stack.getItem() + " is not registered into ObjItemModelLoader");
-        }*/
+        }
     }
 
     /**

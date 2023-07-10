@@ -1,5 +1,6 @@
 package fr.dynamx.client;
 
+import com.modularmods.mcgltf.MCglTF;
 import fr.aym.acslib.ACsLib;
 import fr.aym.acslib.api.services.ThreadedLoadingService;
 import fr.aym.acslib.api.services.error.ErrorLevel;
@@ -8,6 +9,7 @@ import fr.dynamx.api.contentpack.ContentPackType;
 import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.contentpack.object.render.IModelPackObject;
+import fr.dynamx.api.dxmodel.EnumDxModelFormats;
 import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
 import fr.dynamx.api.dxmodel.DxModelPath;
 import fr.dynamx.client.handlers.ClientEventHandler;
@@ -29,6 +31,7 @@ import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.client.SplashProgress;
 import net.minecraftforge.fml.common.ProgressManager;
 
 import java.util.ArrayList;
@@ -120,17 +123,21 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
     public void reloadModels() {
         REGISTRY_CLOSED = true;
         MODELS.values().forEach(DxModelRenderer::clearVAOs);
-        MODELS.clear();
+        MODELS.values().removeIf(dxModelRenderer -> dxModelRenderer.getFormat() == EnumDxModelFormats.OBJ);
         FAULTY_MODELS.clear();
         DynamXContext.getDxModelDataCache().clear();
         DynamXErrorManager.getErrorManager().clear(DynamXErrorManager.MODEL_ERRORS);
 
+        ThreadedLoadingService threadedLoadingService = ACsLib.getPlatform().provideService(ThreadedLoadingService.class);
         ExecutorService modelLoader = Executors.newScheduledThreadPool(LOADER_POOL_SIZE, new DynamXThreadedModLoader.DefaultThreadFactory("DnxModelLoader"));
-        ACsLib.getPlatform().provideService(ThreadedLoadingService.class).addTask(ThreadedLoadingService.ModLoadingSteps.FINISH_LOAD, "model_load", () -> {
+        threadedLoadingService.addTask(ThreadedLoadingService.ModLoadingSteps.FINISH_LOAD, "model_load", () -> {
             try {
                 /* == Load models == */
                 List<Callable<?>> loadObjTasks = new ArrayList<>();
                 for (Map.Entry<DxModelPath, IModelTextureVariantsSupplier> name : MODELS_REGISTRY.entrySet()) {
+                    if(MODELS.containsKey(name.getKey().getModelPath())){
+                        continue;
+                    }
                     loadObjTasks.add(() -> {
                         log.debug("Loading dx model " + name.getKey());
                         DxModelRenderer model = null;
@@ -139,7 +146,7 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
                                 model = ObjModelRenderer.loadObjModel(name.getKey(), name.getValue());
                                 break;
                             case GLTF:
-                                model = GltfModelRenderer.loadGltfModel(name.getKey(), name.getValue());
+                                model = new GltfModelRenderer(name.getKey(), name.getValue());
                                 break;
                         }
                         MODELS.put(name.getKey().getModelPath(), model != null ? model : MISSING_MODEL);
@@ -180,6 +187,15 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
             }
         }, () -> {
             ProgressManager.ProgressBar bar = ProgressManager.push("Loading obj models", 1);
+            log.info("GLTF Models : "+ MODELS.values().stream().filter(modelRenderer -> modelRenderer.getFormat() == EnumDxModelFormats.GLTF).count());
+            if (!threadedLoadingService.mcLoadingFinished()) {
+                SplashProgress.pause();
+                MCglTF.getInstance().createShaderSkinningProgram();
+            }
+            MCglTF.getInstance().reloadModels();
+            if(!threadedLoadingService.mcLoadingFinished())
+                SplashProgress.resume();
+
             log.info("Loading model textures...");
             //Loads all textures of models, cannot be done before because the TextureManager is not initialized
             bar.step("Uploading textures");

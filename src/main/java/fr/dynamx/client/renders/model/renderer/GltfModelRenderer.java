@@ -8,57 +8,42 @@ import com.modularmods.mcgltf.animation.GltfAnimationCreator;
 import com.modularmods.mcgltf.animation.InterpolatedChannel;
 import de.javagl.jgltf.model.AnimationModel;
 import de.javagl.jgltf.model.NodeModel;
-import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.dxmodel.DxModelPath;
 import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
-import fr.dynamx.common.DynamXContext;
-import fr.dynamx.common.objloader.data.ObjModelData;
-import fr.dynamx.utils.errors.DynamXErrorManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.animation.Animation;
 
-import javax.annotation.Nullable;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class GltfModelRenderer extends DxModelRenderer implements IGltfModelReceiver {
 
     private RenderedGltfScene scene;
     private List<NodeModel> nodeModels;
-    protected List<List<InterpolatedChannel>> animations;
+    public Map<String, List<InterpolatedChannel>> animations;
+    public float time;
 
 
     public GltfModelRenderer(DxModelPath location, IModelTextureVariantsSupplier textureVariants) {
         super(location, textureVariants);
-    }
-
-    public static GltfModelRenderer loadGltfModel(DxModelPath objModelPath, @Nullable IModelTextureVariantsSupplier textureVariants) {
-        try {
-            GltfModelRenderer gltfModelRenderer = new GltfModelRenderer(objModelPath, textureVariants);
-            MCglTF.getInstance().addGltfModelReceiver(gltfModelRenderer);
-            return gltfModelRenderer;
-        } catch (Exception e) {
-            DynamXErrorManager.addError(textureVariants != null ? textureVariants.getPackName() : "Non-pack model", DynamXErrorManager.MODEL_ERRORS, "obj_error", ErrorLevel.HIGH, objModelPath.getModelPath().toString(), "", e);
-        }
-        return null;
+        MCglTF.getInstance().addGltfModelReceiver(this);
     }
 
     @Override
     public void renderModel(byte textureDataId) {
-        if(scene == null) return;
-        float time = Animation.getWorldTime(Minecraft.getMinecraft().world, Minecraft.getMinecraft().getRenderPartialTicks());
-        for(List<InterpolatedChannel> animation : animations) {
-            animation.parallelStream().forEach((channel) -> {
-                float[] keys = channel.getKeys();
-                //channel.update(time % keys[keys.length - 1]);
-            });
-        }
-        if(MCglTF.getInstance().isShaderModActive()){
+        if (scene == null) return;
+        if (MCglTF.getInstance().isShaderModActive()) {
             scene.renderForShaderMod();
-        }else{
+        } else {
             scene.renderForVanilla();
         }
+    }
+
+    public void renderModelVanilla(byte textureDataId) {
+        if (scene == null) return;
+        scene.renderForVanilla();
     }
 
     @Override
@@ -96,9 +81,9 @@ public class GltfModelRenderer extends DxModelRenderer implements IGltfModelRece
         scene = renderedModel.renderedGltfScenes.get(0);
         nodeModels = renderedModel.gltfModel.getNodeModels();
         List<AnimationModel> animationModels = renderedModel.gltfModel.getAnimationModels();
-        animations = new ArrayList<>(animationModels.size());
-        for(AnimationModel animationModel : animationModels) {
-            animations.add(GltfAnimationCreator.createGltfAnimation(animationModel));
+        animations = new HashMap<>(animationModels.size());
+        for (AnimationModel animationModel : animationModels) {
+            animations.put(animationModel.getName(), GltfAnimationCreator.createGltfAnimation(animationModel));
         }
 
     }

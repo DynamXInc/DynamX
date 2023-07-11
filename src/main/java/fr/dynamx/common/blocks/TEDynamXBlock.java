@@ -292,7 +292,7 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, ITic
     @Override
     public void update() {
         if(event == null){
-            new DynamXBlockEvent.TickTileEntity(Side.SERVER, (DynamXBlock<?>) this.getBlockType(), getWorld(), this);
+            event = new DynamXBlockEvent.TickTileEntity(Side.SERVER, (DynamXBlock<?>) this.getBlockType(), getWorld(), this);
         }
         MinecraftForge.EVENT_BUS.post(event);
     }

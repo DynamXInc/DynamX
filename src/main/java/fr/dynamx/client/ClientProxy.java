@@ -9,7 +9,6 @@ import fr.dynamx.client.renders.RenderProp;
 import fr.dynamx.client.renders.RenderRagdoll;
 import fr.dynamx.client.renders.TESRDynamXBlock;
 import fr.dynamx.client.renders.vehicle.RenderBaseVehicle;
-import fr.dynamx.client.renders.vehicle.RenderCaterpillar;
 import fr.dynamx.client.renders.vehicle.RenderDoor;
 import fr.dynamx.client.sound.DynamXSoundHandler;
 import fr.dynamx.common.CommonProxy;
@@ -69,7 +68,6 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
 
         DynamXContext.getDxModelRegistry().onPackInfosReloaded();
 
-        RenderingRegistry.registerEntityRenderingHandler(CaterpillarEntity.class, RenderCaterpillar::new);
         RenderingRegistry.registerEntityRenderingHandler(CarEntity.class, RenderBaseVehicle.RenderCar::new);
         RenderingRegistry.registerEntityRenderingHandler(BoatEntity.class, RenderBaseVehicle.RenderBoat::new);
         RenderingRegistry.registerEntityRenderingHandler(TrailerEntity.class, RenderBaseVehicle.RenderTrailer::new);

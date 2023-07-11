@@ -26,8 +26,6 @@ public interface IPhysicsPackInfo {
      */
     Collection<? extends IShapeInfo> getShapes();
 
-    List<Vector3f> getCollisionShapeDebugBuffer();
-
     default <T extends InteractivePart<?, ?>> List<T> getInteractiveParts() {
         return Collections.emptyList();
     }

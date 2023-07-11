@@ -75,9 +75,9 @@ public class DynamXRenderUtils {
         GlStateManager.translate(translation.x, translation.y, translation.z);
     }
 
-    public static void drawConvexHull(List<Vector3f> vectorBuffer) {
+    public static void drawConvexHull(List<Vector3f> vectorBuffer, boolean wireframe) {
         Vector3fPool.openPool();
-        GlStateManager.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
+        GlStateManager.glPolygonMode(GL11.GL_FRONT_AND_BACK, wireframe ? GL11.GL_LINE : GL11.GL_FILL);
         GlStateManager.glBegin(GL11.GL_TRIANGLES);
         int index = 0;
         int size = vectorBuffer.size();
@@ -87,7 +87,6 @@ public class DynamXRenderUtils {
             int i3 = index++;
 
             if (i1 < size && i2 < size && i3 < size) {
-
                 Vector3f v1 = vectorBuffer.get(i1);
                 Vector3f v2 = vectorBuffer.get(i2);
                 Vector3f v3 = vectorBuffer.get(i3);

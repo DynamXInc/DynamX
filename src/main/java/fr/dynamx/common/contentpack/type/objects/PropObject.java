@@ -69,7 +69,6 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
     @PackFileProperty(configNames = "Bounciness", required = false, defaultValue = "0")
     @Getter
     protected float restitutionFactor;
-    private List<Vector3f> debugBuffer;
 
     private List<ParticleEmitterInfo<?>> particleEmitters = new ArrayList<>();
 
@@ -77,7 +76,7 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
         super(packName, fileName);
         DynamXErrorManager.addPackError(getPackName(), "deprecated_prop_format", ErrorLevel.LOW, fileName, "Props should now be declared in the corresponding block_" + getName() + ".dynx file");
         owner = null;
-        this.itemIcon = "Prop";
+        itemIcon = "Prop";
     }
 
     public PropObject(ISubInfoTypeOwner<BlockObject<?>> owner, String fileName) {
@@ -155,13 +154,6 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
     @Override
     public Collection<? extends IShapeInfo> getShapes() {
         return getCollisionBoxes();
-    }
-
-    @Override
-    public List<Vector3f> getCollisionShapeDebugBuffer() {
-        if (debugBuffer == null)
-            debugBuffer = ShapeUtils.getDebugVectorList(compoundCollisionShape, ShapeUtils.getDebugBuffer(compoundCollisionShape));
-        return debugBuffer;
     }
 
     @Override

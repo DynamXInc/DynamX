@@ -213,6 +213,10 @@ public class ShapeUtils {
         return DebugShapeFactory.getDebugTriangles(collisionShape, DebugShapeFactory.highResolution);
     }
 
+    public static List<Vector3f> getDebugVectorList(FloatBuffer[] debugBuffer) {
+        return getDebugVectorList(null, debugBuffer);
+    }
+
     public static List<Vector3f> getDebugVectorList(CompoundCollisionShape compoundShape, FloatBuffer[] debugBuffer) {
         Vector3fPool.openPool();
         List<Vector3f> vectors = new ArrayList<>();

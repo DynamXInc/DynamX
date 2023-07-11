@@ -40,7 +40,7 @@ public abstract class BaseVehiclePhysicsHandler<T extends BaseVehicleEntity<?>> 
         //Don't use this.getPackInfo() : it isn't initialized yet
         PhysicsRigidBody vehicleBody = new PhysicsRigidBody(modularVehicleInfo.getPhysicsCollisionShape(), modularVehicleInfo.getEmptyMass());
         vehicleBody.setPhysicsTransform(transform);
-        vehicleBody.setUserObject(new BulletShapeType<>(EnumBulletShapeType.VEHICLE, getHandledEntity()));
+        vehicleBody.setUserObject(new BulletShapeType<>(EnumBulletShapeType.VEHICLE, getHandledEntity(), vehicleBody.getCollisionShape()));
         vehicleBody.setSleepingThresholds(0.9f, 1.2f);
 
         vehicleBody.setDamping(modularVehicleInfo.getLinearDamping(), modularVehicleInfo.getAngularDamping());

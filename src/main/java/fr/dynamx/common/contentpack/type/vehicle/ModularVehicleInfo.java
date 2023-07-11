@@ -143,11 +143,6 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     private CompoundCollisionShape physicsCollisionShape;
 
     /**
-     * The debug buffer for the hull shape of the vehicle (generated from the obj model)
-     */
-    private List<Vector3f> collisionShapeDebugBuffer;
-
-    /**
      * The shapes of this vehicle, can be used for collisions
      */
     @Getter
@@ -338,13 +333,6 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
      */
     public <A extends BasePart<ModularVehicleInfo>> A getPartByTypeAndId(Class<A> clazz, byte id) {
         return getPartsByType(clazz).stream().filter(t -> t.getId() == id).findFirst().orElse(null);
-    }
-
-    @Override
-    public List<Vector3f> getCollisionShapeDebugBuffer() {
-        if (collisionShapeDebugBuffer == null)
-            collisionShapeDebugBuffer = ShapeUtils.getDebugVectorList(physicsCollisionShape, ShapeUtils.getDebugBuffer(physicsCollisionShape));
-        return collisionShapeDebugBuffer;
     }
 
     @Override

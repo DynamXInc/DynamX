@@ -108,7 +108,7 @@ public class CompoundStairsTerrainElement implements ITerrainElement {
         }
         PhysicsRigidBody p = new PhysicsRigidBody(shape, 0);
         p.setPhysicsLocation(pos);
-        p.setUserObject(new BulletShapeType<>(EnumBulletShapeType.TERRAIN, this));
+        p.setUserObject(new BulletShapeType<>(EnumBulletShapeType.TERRAIN, this, p.getCollisionShape()));
         body = p;
         return p;
     }

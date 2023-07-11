@@ -151,7 +151,7 @@ public class CompoundBoxTerrainElement implements ITerrainElement {
         PhysicsRigidBody rigidBody = new PhysicsRigidBody(shape, 0);
         rigidBody.setPhysicsLocation(pos);
         rigidBody.setRestitution(1);
-        rigidBody.setUserObject(new BulletShapeType<>(EnumBulletShapeType.TERRAIN, this));
+        rigidBody.setUserObject(new BulletShapeType<>(EnumBulletShapeType.TERRAIN, this, rigidBody.getCollisionShape()));
         body = rigidBody;
         return rigidBody;
     }

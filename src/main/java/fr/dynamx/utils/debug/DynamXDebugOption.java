@@ -95,8 +95,9 @@ public class DynamXDebugOption {
         return this;
     }
 
-    public void enable() {
+    public DynamXDebugOption enable() {
         category.setState(category.getState() | mask);
+        return this;
     }
 
     public void disable() {
@@ -151,10 +152,11 @@ public class DynamXDebugOption {
         }
 
         @Override
-        public void enable() {
+        public DynamXDebugOption enable() {
             super.enable();
             for (int incompatibility : incompatibilities)
                 getCategory().setState((Integer.MAX_VALUE - incompatibility) & getCategory().getState());
+            return this;
         }
 
         @Override

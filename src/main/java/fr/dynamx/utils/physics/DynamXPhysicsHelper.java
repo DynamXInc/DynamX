@@ -16,6 +16,7 @@ import fr.dynamx.api.physics.EnumBulletShapeType;
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.PhysicsEntity;
+import fr.dynamx.utils.EnumPlayerStandOnTop;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.QuaternionPool;
@@ -33,12 +34,8 @@ import java.util.function.Predicate;
  * @see DynamXGeometry
  */
 public class DynamXPhysicsHelper {
-    public static final Vector3f GRAVITY = new Vector3f(0.0f, -9.81f, 0.0f);
+    public static float GRAVITY = 9.81f;
     public static final float WATER_DENSITY = 997; //kg/m^3
-
-    public static final int X_ROTATION_DOF = 3 + PhysicsSpace.AXIS_X;
-    public static final int Y_ROTATION_DOF = 3 + PhysicsSpace.AXIS_Y;
-    public static final int Z_ROTATION_DOF = 3 + PhysicsSpace.AXIS_Z;
 
     public static Vector3f getVelocityAtPoint(Vector3f linearVelocity, Vector3f angularVelocity, Vector3f forcePoint) {
         Vector3f velocityAtPoint = new Vector3f();
@@ -78,7 +75,7 @@ public class DynamXPhysicsHelper {
         Quaternion bodyQuaternion = new Quaternion().fromAngleNormalAxis((float) Math.toRadians(-spawnRotation), new Vector3f(0, 1, 0));
         Transform bodyTransform = new Transform(position, bodyQuaternion);
 
-        return createRigidBody(mass, bodyTransform, collisionShape, new BulletShapeType<>(EnumBulletShapeType.BULLET_ENTITY, physicsEntity));
+        return createRigidBody(mass, bodyTransform, collisionShape, new BulletShapeType<>(EnumBulletShapeType.BULLET_ENTITY, physicsEntity, collisionShape));
     }
 
     public static PhysicsRaycastResult castRay(IPhysicsWorld iPhysicsWorld, Vector3f from, Vector3f dir, Predicate<EnumBulletShapeType> ignoredBody) {
@@ -140,43 +137,17 @@ public class DynamXPhysicsHelper {
     }
 
 
-    public static Vector3f calculateConvexCenter(HullCollisionShape shape, Vector3f planePos, Vector3f planeNormal) {
-        Vector3f sum = Vector3fPool.get();
-        float[] copyHullVertices = shape.copyHullVertices();
-        for (int i = 0; i < copyHullVertices.length/3; i++) {
-            Vector3f point = Vector3fPool.get(copyHullVertices[i*3], copyHullVertices[i*3 + 1], copyHullVertices[i*3 + 2]);
-            point.subtractLocal(planePos);
-            if (point.dot(planeNormal) < 0) {
-                sum.addLocal(point);
-            }
-        }
-        sum.divideLocal(shape.countHullVertices());
-        return sum;
-    }
+    public enum EnumPhysicsAxis{
+        X, Y, Z, X_ROT, Y_ROT, Z_ROT;
 
-    public static Vector3f calculateBuoyantCenter(PhysicsRigidBody rigidBody, Vector3f planePos, Vector3f planeNormal) {
-        Vector3f center = Vector3fPool.get();
-
-        Transform rigidBodyTrans = rigidBody.getTransform(TransformPool.get());
-        Vector3f relPlanePos = Vector3fPool.get();
-        relPlanePos = rigidBodyTrans.invert().transformVector(planePos, relPlanePos);
-        Vector3f relPlaneNormal = DynamXGeometry.rotateVectorByQuaternion(planeNormal, rigidBodyTrans.getRotation().inverse());
-
-        CollisionShape collisionShape = rigidBody.getCollisionShape();
-        //COMPOUND_SHAPE_PROXYTYPE = 31, replace this with an instanceof ?
-        if (collisionShape.getShapeType() == 31) {
-            CompoundCollisionShape compoundCollisionShape = (CompoundCollisionShape) collisionShape;
-            for (ChildCollisionShape childCollisionShape : compoundCollisionShape.listChildren()) {
-                //CONVEX_HULL_SHAPE_PROXYTYPE = 4, replace this with an instanceof ?
-                if (childCollisionShape.getShape().getShapeType() == 4) {
-                    center.addLocal(calculateConvexCenter((HullCollisionShape) childCollisionShape.getShape(), relPlanePos, relPlaneNormal));
+        public static EnumPhysicsAxis fromString(String targetName) {
+            for (EnumPhysicsAxis axis : values()) {
+                if (axis.name().equalsIgnoreCase(targetName)) {
+                    return axis;
                 }
             }
-            int numChildren = compoundCollisionShape.countChildren();
-            if (numChildren > 0) {
-                center.divideLocal(numChildren);
-            }
+            throw new IllegalArgumentException("Invalid axis '" + targetName + "'");
         }
-        return center;
     }
+
 }

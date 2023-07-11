@@ -6,7 +6,7 @@ import org.lwjgl.opengl.GL30;
 public class RenderedGltfSceneGL30 extends RenderedGltfScene {
 
 	@Override
-	public void renderForVanilla() {
+	public void renderForVanilla(int index) {
 		vanillaRenderCommands.forEach(Runnable::run);
 		
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
@@ -16,7 +16,7 @@ public class RenderedGltfSceneGL30 extends RenderedGltfScene {
 	}
 
 	@Override
-	public void renderForShaderMod() {
+	public void renderForShaderMod(int index) {
 		shaderModRenderCommands.forEach(Runnable::run);
 		
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);

@@ -35,7 +35,7 @@ public abstract class DxModelData {
         return Minecraft.getMinecraft().getResourceManager().getResource(path.getModelPath()).getInputStream();
     }
 
-    protected InputStream server(DxModelPath path) throws IOException {
+    public static InputStream server(DxModelPath path) throws IOException {
         InputStream result = null;
         for (PackInfo packInfo : path.getPackLocations()) {
             result = packInfo.readFile(path.getModelPath());

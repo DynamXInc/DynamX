@@ -105,7 +105,7 @@ public class ObjModelRenderer extends DxModelRenderer{
      * @return True if successfully drawn something
      */
     @Override
-    public boolean renderGroups(String group, byte textureDataId) {
+    public boolean renderGroups(String group, byte textureDataId, boolean forceVanillaRender) {
         boolean drawn = false;
         for (ObjObjectRenderer object : objObjects) {
             if (object.getObjObjectData().getName().equalsIgnoreCase(group)) {
@@ -117,14 +117,14 @@ public class ObjModelRenderer extends DxModelRenderer{
     }
 
     @Override
-    public void renderGroup(String group, byte textureDataId) {
+    public void renderGroup(String group, byte textureDataId, boolean forceVanillaRender) {
         ObjObjectRenderer objObjectRenderer = getObjObjectRenderer(group);
         if (objObjectRenderer != null) {
             renderGroup(objObjectRenderer, textureDataId);
         }
     }
 
-    public boolean renderDefaultParts(byte textureDataId) {
+    public boolean renderDefaultParts(byte textureDataId, boolean forceVanillaRender) {
         if (getTextureVariants() == null)
             throw new IllegalStateException("Cannot determine the parts to render !");
         if (!MinecraftForge.EVENT_BUS.post(new DynamXModelRenderEvent.RenderMainParts(EventStage.PRE, this, getTextureVariants(), textureDataId))) {
@@ -141,7 +141,7 @@ public class ObjModelRenderer extends DxModelRenderer{
         return true;
     }
 
-    public void renderModel(byte textureDataId) {
+    public void renderModel(byte textureDataId, boolean forceVanillaRender) {
         objObjects.sort((a, b) -> {
             Vec3d v = Minecraft.getMinecraft().getRenderViewEntity() != null ? Minecraft.getMinecraft().getRenderViewEntity().getPositionVector() : new Vec3d(0, 0, 0);
             double aDist = v.distanceTo(new Vec3d(a.getObjObjectData().getCenter().x, a.getObjObjectData().getCenter().y, a.getObjObjectData().getCenter().z));

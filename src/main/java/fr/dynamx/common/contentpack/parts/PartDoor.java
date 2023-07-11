@@ -246,7 +246,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     }
 
     @Override
-    public void drawParts(BaseVehicleEntity<?> entity, RenderPhysicsEntity<?> render, ModularVehicleInfo packInfo, byte textureId, float partialTicks) {
+    public void drawParts(BaseVehicleEntity<?> entity, RenderPhysicsEntity<?> render, ModularVehicleInfo packInfo, byte textureId, float partialTicks, boolean forceVanillaRender) {
         List<PartDoor> doors = packInfo.getPartsByType(PartDoor.class);
         DoorsModule module = entity != null ? entity.getModuleByType(DoorsModule.class) : null;
         for (byte id = 0; id < doors.size(); id++) {
@@ -272,7 +272,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
             }
             DxModelRenderer vehicleModel = DynamXContext.getDxModelRegistry().getModel(packInfo.getModel());
             GlStateManager.scale(packInfo.getScaleModifier().x, packInfo.getScaleModifier().y, packInfo.getScaleModifier().z);
-            render.renderModelGroup(vehicleModel, door.getPartName(), entity, textureId);
+            render.renderModelGroup(vehicleModel, door.getPartName(), entity, textureId, false);
             GlStateManager.scale(1 / packInfo.getScaleModifier().x, 1 / packInfo.getScaleModifier().y, 1 / packInfo.getScaleModifier().z);
             GlStateManager.popMatrix();
         }

@@ -1,7 +1,6 @@
 package fr.dynamx.common.core.mixin;
 
 import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
-import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.utils.DynamXConstants;
@@ -54,8 +53,8 @@ public abstract class MixinRenderManager {
                 Quaternion q = ClientDynamXUtils.computeInterpolatedGlQuaternion(physicsEntity.prevRenderRotation, physicsEntity.renderRotation, partialTicks);
                 GlStateManager.rotate(q);
 
-                model.renderGroups("AntiWater1", (byte) 0);
-                model.renderGroups("AntiWater2", (byte) 0);
+                model.renderGroups("AntiWater1", (byte) 0, false);
+                model.renderGroups("AntiWater2", (byte) 0, false);
 
                 GlStateManager.popMatrix();
                 QuaternionPool.closePool();

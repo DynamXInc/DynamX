@@ -26,9 +26,10 @@ public interface IDrawablePart<T extends ModularPhysicsEntity<?>> {
      * @param packInfo
      * @param textureId
      * @param partialTicks
+     * @param forceVanillaRender
      */
     @SideOnly(Side.CLIENT)
-    void drawParts(@Nullable T entity, RenderPhysicsEntity<?> render, ModularVehicleInfo packInfo, byte textureId, float partialTicks);
+    void drawParts(@Nullable T entity, RenderPhysicsEntity<?> render, ModularVehicleInfo packInfo, byte textureId, float partialTicks, boolean forceVanillaRender);
 
     /**
      * Prevents the added parts from being rendered with the main obj model of the vehicle <br>

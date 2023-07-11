@@ -10,7 +10,7 @@ import org.lwjgl.opengl.GL40;
 public class RenderedGltfSceneGL40 extends RenderedGltfScene {
 
 	@Override
-	public void renderForVanilla() {
+	public void renderForVanilla(int index) {
 		if(!skinningCommands.isEmpty()) {
 			GL20.glUseProgram(MCglTF.getInstance().getGlProgramSkinnig());
 			GL11.glEnable(GL30.GL_RASTERIZER_DISCARD);
@@ -30,7 +30,7 @@ public class RenderedGltfSceneGL40 extends RenderedGltfScene {
 	}
 
 	@Override
-	public void renderForShaderMod() {
+	public void renderForShaderMod(int index) {
 		if(!skinningCommands.isEmpty()) {
 			int currentProgram = GL11.glGetInteger(GL20.GL_CURRENT_PROGRAM);
 			GL20.glUseProgram(MCglTF.getInstance().getGlProgramSkinnig());

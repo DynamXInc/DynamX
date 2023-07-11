@@ -148,14 +148,14 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
     }
 
     @Override
-    public void drawParts(BaseVehicleEntity<?> entity, RenderPhysicsEntity<?> render, ModularVehicleInfo packInfo, byte textureId, float partialTicks) {
+    public void drawParts(BaseVehicleEntity<?> entity, RenderPhysicsEntity<?> render, ModularVehicleInfo packInfo, byte textureId, float partialTicks, boolean forceVanillaRender) {
         if (MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.PROPULSION, (RenderBaseVehicle<?>) render, entity, PhysicsEntityEvent.Phase.PRE, partialTicks, null))) {
             return;
         }
         WheelsModule wheelsModule = entity != null ? entity.getModuleByType(WheelsModule.class) : null;
         packInfo.getPartsByType(PartWheel.class).forEach(partWheel -> {
             if (wheelsModule == null || wheelsModule.getWheelsStates()[partWheel.getId()] != WheelState.REMOVED) {
-                renderWheel(entity, partWheel, render, wheelsModule, packInfo, textureId, partialTicks);
+                renderWheel(entity, partWheel, render, wheelsModule, packInfo, textureId, partialTicks, forceVanillaRender);
             }
         });
         MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.PROPULSION, (RenderBaseVehicle<?>) render, entity, PhysicsEntityEvent.Phase.POST, partialTicks, null));
@@ -176,7 +176,7 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
     }
 
     @SideOnly(Side.CLIENT)
-    protected static void renderWheel(@Nullable BaseVehicleEntity<?> entity, PartWheel partWheel, RenderPhysicsEntity<?> render, @Nullable WheelsModule wheelsModule, ModularVehicleInfo packInfo, byte textureId, float partialTicks) {
+    protected static void renderWheel(@Nullable BaseVehicleEntity<?> entity, PartWheel partWheel, RenderPhysicsEntity<?> render, @Nullable WheelsModule wheelsModule, ModularVehicleInfo packInfo, byte textureId, float partialTicks, boolean forceVanillaRender) {
         int index;
         Quaternion baseRotation = partWheel.getSuspensionAxis();
         PartWheelInfo info = wheelsModule != null ? wheelsModule.getWheelInfo(partWheel.getId()) : partWheel.getDefaultWheelInfo();
@@ -206,7 +206,7 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
                     GlStateManager.pushMatrix();
                     GlStateManager.translate(0, 0.2, 0);
                     GlStateManager.scale(packInfo.getScaleModifier().x, packInfo.getScaleModifier().y, packInfo.getScaleModifier().z);
-                    DynamXContext.getDxModelRegistry().getModel(packInfo.getModel()).renderGroups(partWheel.getMudGuardPartName(), textureId);
+                    DynamXContext.getDxModelRegistry().getModel(packInfo.getModel()).renderGroups(partWheel.getMudGuardPartName(), textureId, forceVanillaRender);
                     GlStateManager.popMatrix();
                 }
 
@@ -240,9 +240,9 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
                 //Scale
                 GlStateManager.scale(info.getScaleModifier().x, info.getScaleModifier().y, info.getScaleModifier().z);
                 //If the wheel is not flattened, or the model does not supports flattening
-                if (wheelsModule == null || wheelsModule.getWheelsStates()[partWheel.getId()] != WheelState.ADDED_FLATTENED || !model.renderGroups("rim", wheelsModule.getWheelsTextureId()[partWheel.getId()])) {
+                if (wheelsModule == null || wheelsModule.getWheelsStates()[partWheel.getId()] != WheelState.ADDED_FLATTENED || !model.renderGroups("rim", wheelsModule.getWheelsTextureId()[partWheel.getId()], false)) {
                     byte wheelTextureId = wheelsModule != null ? wheelsModule.getWheelsTextureId()[partWheel.getId()] : info.getIdForVariant(packInfo.getVariantName(textureId));
-                    render.renderModel(model, entity, wheelTextureId);
+                    render.renderModel(model, entity, wheelTextureId, forceVanillaRender);
                 }
             }
             GlStateManager.popMatrix();

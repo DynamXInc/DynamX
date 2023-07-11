@@ -91,17 +91,17 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
     }
 
     @Override
-    public void drawParts(@Nullable BaseVehicleEntity<?> entity, RenderPhysicsEntity<?> render, ModularVehicleInfo packInfo, byte textureId, float partialTicks) {
+    public void drawParts(@Nullable BaseVehicleEntity<?> entity, RenderPhysicsEntity<?> render, ModularVehicleInfo packInfo, byte textureId, float partialTicks, boolean forceVanillaRender) {
         /* Rendering light sources */
         if (MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.LIGHTS, (RenderBaseVehicle<?>) render, entity, PhysicsEntityEvent.Phase.PRE, partialTicks, null))) {
             return;
         }
         LightsModule lights = entity != null ? entity.getModuleByType(LightsModule.class) : null;
-        drawLights(entity, entity != null ? entity.ticksExisted : 0, packInfo.getModel(), packInfo.getScaleModifier(), lights);
+        drawLights(entity, entity != null ? entity.ticksExisted : 0, packInfo.getModel(), packInfo.getScaleModifier(), lights, forceVanillaRender);
         MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.LIGHTS, (RenderBaseVehicle<?>) render, entity, PhysicsEntityEvent.Phase.POST, partialTicks, null));
     }
 
-    public void drawLights(@Nullable BaseVehicleEntity<?> entity, int tickCounter, ResourceLocation model, Vector3f scale, LightsModule isLightOn) {
+    public void drawLights(@Nullable BaseVehicleEntity<?> entity, int tickCounter, ResourceLocation model, Vector3f scale, LightsModule isLightOn, boolean forceVanillaRender) {
         /* Rendering light sources */
         DxModelRenderer vehicleModel = DynamXContext.getDxModelRegistry().getModel(model);
         for (PartLightSource lightSource : getOwner().getLightSources().values()) {
@@ -161,7 +161,7 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
                 step = step * 360;
                 GlStateManager.rotate(step, 0, 1, 0);
             }
-            vehicleModel.renderGroups(lightSource.getPartName(), texId);
+            vehicleModel.renderGroups(lightSource.getPartName(), texId, forceVanillaRender);
             GlStateManager.popMatrix();
             GlQuaternionPool.closePool();
 

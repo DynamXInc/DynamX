@@ -6,7 +6,6 @@ import fr.dynamx.api.events.VehicleEntityEvent.Render;
 import fr.dynamx.api.events.VehicleEntityEvent.Render.Type;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
 import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
-import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
@@ -34,15 +33,15 @@ public class RenderBaseVehicle<T extends BaseVehicleEntity<?>> extends RenderPhy
 
     @Override
     public void renderMain(T entity, float partialTicks) {
-        renderMain(entity, entity.getPackInfo(), entity.getEntityTextureID(), partialTicks);
+        renderMain(entity, entity.getPackInfo(), entity.getEntityTextureID(), partialTicks, false);
     }
 
-    public void renderMain(@Nullable T carEntity, ModularVehicleInfo packInfo, byte textureId, float partialTicks) {
+    public void renderMain(@Nullable T carEntity, ModularVehicleInfo packInfo, byte textureId, float partialTicks, boolean forceVanillaRender) {
         DxModelRenderer vehicleModel = DynamXContext.getDxModelRegistry().getModel(packInfo.getModel());
         if (!MinecraftForge.EVENT_BUS.post(new Render(Type.CHASSIS, this, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks, vehicleModel)) && packInfo.isModelValid()) {
             /* Rendering the chassis */
             GlStateManager.scale(packInfo.getScaleModifier().x, packInfo.getScaleModifier().y, packInfo.getScaleModifier().z);
-            renderMainModel(vehicleModel, carEntity, textureId);
+            renderMainModel(vehicleModel, carEntity, textureId, forceVanillaRender);
             GlStateManager.scale(1 / packInfo.getScaleModifier().x, 1 / packInfo.getScaleModifier().y, 1 / packInfo.getScaleModifier().z);
         }
         MinecraftForge.EVENT_BUS.post(new Render(Type.CHASSIS, this, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks, vehicleModel));
@@ -50,13 +49,13 @@ public class RenderBaseVehicle<T extends BaseVehicleEntity<?>> extends RenderPhy
 
     @Override
     public void renderParts(T entity, float partialTicks) {
-        renderParts(entity, entity.getPackInfo(), entity.getEntityTextureID(), partialTicks);
+        renderParts(entity, entity.getPackInfo(), entity.getEntityTextureID(), partialTicks, false);
     }
 
-    public void renderParts(@Nullable T carEntity, ModularVehicleInfo packInfo, byte textureId, float partialTicks) {
+    public void renderParts(@Nullable T carEntity, ModularVehicleInfo packInfo, byte textureId, float partialTicks, boolean forceVanillaRender) {
         if (!MinecraftForge.EVENT_BUS.post(new Render(Type.PARTS, this, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks, null))) {
             if (packInfo.isModelValid()) {
-                packInfo.getDrawableParts().forEach(d -> ((IDrawablePart<T>) d).drawParts(carEntity, this, packInfo, textureId, partialTicks));
+                packInfo.getDrawableParts().forEach(d -> ((IDrawablePart<T>) d).drawParts(carEntity, this, packInfo, textureId, partialTicks, forceVanillaRender));
             }
         }
         MinecraftForge.EVENT_BUS.post(new Render(Type.PARTS, this, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks, null));

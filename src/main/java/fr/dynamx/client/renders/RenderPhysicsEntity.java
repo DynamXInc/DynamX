@@ -5,7 +5,6 @@ import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
-import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.entities.PackPhysicsEntity;
@@ -248,9 +247,9 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
      * Called to render this part <br>
      * Will draw a white box over the all entity if model wasn't loaded (not found for example)
      */
-    public void renderModel(DxModelRenderer model, @Nullable Entity entity, byte textureDataId) {
+    public void renderModel(DxModelRenderer model, @Nullable Entity entity, byte textureDataId, boolean forceVanillaRender) {
         if (!model.isEmpty())
-            model.renderModel(textureDataId);
+            model.renderModel(textureDataId, forceVanillaRender);
         else if(entity != null) //Error while loading the model
             renderOffsetAABB(entity.getEntityBoundingBox(), -entity.lastTickPosX, -entity.lastTickPosY, -entity.lastTickPosZ);
     }
@@ -259,8 +258,8 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
      * Called to render the main part of this model with the custom texture <br>
      * Will draw a white box over the all entity if model wasn't loaded (not found for example)
      */
-    public void renderMainModel(DxModelRenderer model, @Nullable Entity entity, byte textureDataId) {
-        boolean drawn = model.renderDefaultParts(textureDataId);
+    public void renderMainModel(DxModelRenderer model, @Nullable Entity entity, byte textureDataId, boolean forceVanillaRender) {
+        boolean drawn = model.renderDefaultParts(textureDataId, forceVanillaRender);
         if (!drawn && entity != null) {
             renderOffsetAABB(entity.getEntityBoundingBox(), -entity.lastTickPosX, -entity.lastTickPosY, -entity.lastTickPosZ);
         }
@@ -270,8 +269,8 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
      * Called to render specific parts with the custom texture <br>
      * Will draw a white box over the all entity if model wasn't loaded (not found for example)
      */
-    public void renderModelGroup(DxModelRenderer model, String group, @Nullable Entity entity, byte textureDataId) {
-        boolean drawn = model.renderGroups(group, textureDataId);
+    public void renderModelGroup(DxModelRenderer model, String group, @Nullable Entity entity, byte textureDataId, boolean forceVanillaRender) {
+        boolean drawn = model.renderGroups(group, textureDataId, forceVanillaRender);
         if (!drawn && entity != null) {
             renderOffsetAABB(entity.getEntityBoundingBox(), -entity.lastTickPosX, -entity.lastTickPosY, -entity.lastTickPosZ);
         }

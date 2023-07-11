@@ -38,13 +38,14 @@ public class ShapeUtils {
     // Shape generation
     public static CompoundCollisionShape generateComplexModelCollisions(DxModelPath path, String objectName, Vector3f scale, Vector3f centerOfMass, float shapeYOffset) {
         String lowerCaseObjectName = objectName.toLowerCase();
-        ResourceLocation dcFileLocation = new ResourceLocation(path.getModelPath().toString().replace(".obj", "_" +lowerCaseObjectName+"_"+ DynamXConstants.DC_FILE_VERSION + ".dc"));
+        String format = "." + path.getFormat().toString().toLowerCase();
+        ResourceLocation dcFileLocation = new ResourceLocation(path.getModelPath().toString().replace(format, "_" + lowerCaseObjectName + "_" + DynamXConstants.DC_FILE_VERSION + ".dc"));
         InputStream dcInputStream = null;
         PackInfo dcFilePackInfo = null;
-        for(PackInfo packInfo : path.getPackLocations()) {
+        for (PackInfo packInfo : path.getPackLocations()) {
             try {
                 dcInputStream = packInfo.readFile(dcFileLocation);
-                if(dcInputStream != null) {
+                if (dcInputStream != null) {
                     dcFilePackInfo = packInfo;
                     break;
                 }
@@ -56,7 +57,7 @@ public class ShapeUtils {
 
         ShapeGenerator shapeGenerator = null;
         long start = System.currentTimeMillis();
-        if(dcInputStream != null) {
+        if (dcInputStream != null) {
             //load file
             try {
                 shapeGenerator = loadFile(dcInputStream);
@@ -76,11 +77,11 @@ public class ShapeUtils {
             String modelPath = DynamXMain.resDir + File.separator + path.getPackName() + File.separator + "assets" + //todo prevents from saving in zip files : we use the pack name
                     File.separator + path.getModelPath().getNamespace() + File.separator + path.getModelPath().getPath().replace("/", File.separator);
             String modelName = modelPath.substring(modelPath.lastIndexOf(File.separator) + 1);
-            File file = new File(modelPath.replace(".obj", "_" +lowerCaseObjectName+"_"+ DynamXConstants.DC_FILE_VERSION + ".dc"));
+            File file = new File(modelPath.replace(format, "_" + lowerCaseObjectName + "_" + DynamXConstants.DC_FILE_VERSION + ".dc"));
 
             float[] pos = lowerCaseObjectName.isEmpty() ? model.getVerticesPos() : model.getVerticesPos(lowerCaseObjectName);
             int[] indices = lowerCaseObjectName.isEmpty() ? model.getAllMeshIndices() : model.getMeshIndices(lowerCaseObjectName);
-            if(pos.length == 0 || indices.length == 0) {
+            if (pos.length == 0 || indices.length == 0) {
                 throw new IllegalArgumentException("Part '" + objectName + "' of '" + path + "' does not exist or is empty. Check the name of the part in the obj file.");
             }
 
@@ -124,7 +125,7 @@ public class ShapeUtils {
         }
         CompoundCollisionShape collisionShape = new CompoundCollisionShape();
         for (float[] hullPoint : shapeGenerator.getHullPoints()) {
-            if(hullPoint.length == 0) {
+            if (hullPoint.length == 0) {
                 throw new IllegalArgumentException("Empty .dc file for part '" + objectName + "' of '" + path + "'. Please delete it, check your obj model and restart the game.");
             }
             HullCollisionShape hullShape = new HullCollisionShape(hullPoint);
@@ -132,14 +133,14 @@ public class ShapeUtils {
             collisionShape.addChildShape(hullShape, new Vector3f(centerOfMass.x, shapeYOffset + centerOfMass.y, centerOfMass.z));
         }
         long time = System.currentTimeMillis() - start;
-        if(time > 10)
+        if (time > 10)
             log.warn("Loaded " + dcFileLocation + " in " + time + " ms");
         return collisionShape;
     }
 
     public static void addFilesToExistingZip(File zipFile, File modelFile, ShapeGenerator shapeGenerator) throws IOException {
         byte[] buf = new byte[1024];
-        File outputZipFile = new File(zipFile.getParentFile(), zipFile.getName()+".temp");
+        File outputZipFile = new File(zipFile.getParentFile(), zipFile.getName() + ".temp");
         ZipInputStream zin = new ZipInputStream(Files.newInputStream(zipFile.toPath()));
         ZipOutputStream out = new ZipOutputStream(Files.newOutputStream(outputZipFile.toPath()));
 
@@ -257,14 +258,14 @@ public class ShapeUtils {
     public static void generateModelCollisions(AbstractProp<?> abstractProp, DxModelData dxModelData, CompoundCollisionShape compoundCollisionShape) {
         switch (dxModelData.getFormat()) {
             case OBJ:
-                ((ObjModelData)dxModelData).getObjObjects().forEach(objObject -> {
+                ((ObjModelData) dxModelData).getObjObjects().forEach(objObject -> {
                     abstractProp.getCollisionBoxes().add(ShapeUtils.getAABB(abstractProp,
                             objObject.getMesh().min(), objObject.getMesh().max(), new Vector3f(), new Vector3f()));
                     dxModelData.addCollisionShape(compoundCollisionShape, abstractProp.getScaleModifier());
                 });
                 break;
             case GLTF:
-                ((GltfModelData)dxModelData).getNodeModels().forEach(nodeModel -> {
+                ((GltfModelData) dxModelData).getNodeModels().forEach(nodeModel -> {
                     abstractProp.getCollisionBoxes().add(ShapeUtils.getAABB(abstractProp,
                             dxModelData.getMinOfMesh(nodeModel.getName()), dxModelData.getMaxOfMesh(nodeModel.getName()), new Vector3f(), new Vector3f()));
                     dxModelData.addCollisionShape(compoundCollisionShape, abstractProp.getScaleModifier());

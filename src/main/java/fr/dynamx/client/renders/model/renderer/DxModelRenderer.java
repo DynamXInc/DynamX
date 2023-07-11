@@ -10,7 +10,6 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 
-import javax.annotation.Nullable;
 import javax.vecmath.Vector4f;
 
 public abstract class DxModelRenderer {
@@ -38,20 +37,20 @@ public abstract class DxModelRenderer {
      * Will draw nothing if the model is not correctly loaded
      */
     public void renderModel() {
-        renderModel((byte) 0);
+        renderModel((byte) 0, false);
     }
 
     /**
      * Called to render this model <br>
      * Will draw nothing if the model is not correctly loaded
      */
-    public abstract void renderModel(byte textureDataId);
+    public abstract void renderModel(byte textureDataId, boolean forceVanillaRender);
 
-    public abstract boolean renderGroups(String group, byte textureDataId);
+    public abstract boolean renderGroups(String group, byte textureDataId, boolean forceVanillaRender);
 
-    public abstract void renderGroup(String group, byte textureDataId);
+    public abstract void renderGroup(String group, byte textureDataId, boolean forceVanillaRender);
 
-    public abstract boolean renderDefaultParts(byte textureDataId);
+    public abstract boolean renderDefaultParts(byte textureDataId, boolean forceVanillaRender);
 
     public void uploadVAOs() {}
 
@@ -80,17 +79,7 @@ public abstract class DxModelRenderer {
         GlStateManager.disableBlend();
 
         setModelColor(new Vector4f(canPlace ? 0 : 1, canPlace ? 1 : 0, 0, 0.7f));
-        switch (getFormat()){
-            case OBJ:
-                renderModel((byte) textureNum);
-                break;
-            case GLTF:
-                GlStateManager.color(canPlace ? 0 : 1, canPlace ? 1 : 0, 0, 0.7f);
-                ((GltfModelRenderer) this).renderModelVanilla((byte) textureNum);
-                GlStateManager.color(1,1,1,1);
-
-                break;
-        }
+        renderModel((byte) textureNum, true);
         GlStateManager.enableBlend();
         GlStateManager.popMatrix();
     }

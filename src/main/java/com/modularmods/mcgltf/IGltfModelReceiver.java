@@ -3,11 +3,12 @@ package com.modularmods.mcgltf;
 import java.util.List;
 
 import de.javagl.jgltf.model.GltfModel;
+import fr.dynamx.api.dxmodel.DxModelPath;
 import net.minecraft.util.ResourceLocation;
 
 public interface IGltfModelReceiver {
 
-	ResourceLocation getModelLocation();
+	DxModelPath getModelLocation();
 	
 	default void onReceiveSharedModel(RenderedGltfModel renderedModel) {}
 	

@@ -3,20 +3,16 @@ package com.modularmods.mcgltf;
 import de.javagl.jgltf.model.GltfModel;
 import de.javagl.jgltf.model.io.Buffers;
 import de.javagl.jgltf.model.io.GltfModelReader;
+import fr.dynamx.api.dxmodel.DxModelPath;
+import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
+import fr.dynamx.common.objloader.data.DxModelData;
+import fr.dynamx.common.objloader.data.GltfModelData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IResource;
-import net.minecraft.client.resources.IResourceManager;
-import net.minecraft.client.resources.SimpleReloadableResourceManager;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.resource.IResourceType;
-import net.minecraftforge.client.resource.ISelectiveResourceReloadListener;
-import net.minecraftforge.client.resource.VanillaResourceType;
 import net.minecraftforge.common.config.Config;
-import net.minecraftforge.fml.client.SplashProgress;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.logging.log4j.LogManager;
@@ -25,9 +21,10 @@ import org.lwjgl.opengl.*;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.*;
-import java.util.function.Predicate;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 @Mod(modid = MCglTF.MODID, clientSideOnly = true, useMetadata = true)
@@ -44,10 +41,10 @@ public class MCglTF {
     private final int defaultColorMap;
     private final int defaultNormalMap;
 
-    private final Map<ResourceLocation, Supplier<ByteBuffer>> loadedBufferResources = new HashMap<ResourceLocation, Supplier<ByteBuffer>>();
-    private final Map<ResourceLocation, Supplier<ByteBuffer>> loadedImageResources = new HashMap<ResourceLocation, Supplier<ByteBuffer>>();
-    private final List<IGltfModelReceiver> gltfModelReceivers = new ArrayList<IGltfModelReceiver>();
-    private final List<Runnable> gltfRenderData = new ArrayList<Runnable>();
+    private final Map<ResourceLocation, Supplier<ByteBuffer>> loadedBufferResources = new HashMap<>();
+    private final Map<ResourceLocation, Supplier<ByteBuffer>> loadedImageResources = new HashMap<>();
+    private final List<IGltfModelReceiver> gltfModelReceivers = new ArrayList<>();
+    private final List<Runnable> gltfRenderData = new ArrayList<>();
 
     public MCglTF() {
         INSTANCE = this;
@@ -238,30 +235,43 @@ public class MCglTF {
         }
     }
 
-    public void reloadModels() {
-        ContextCapabilities capabilities = GLContext.getCapabilities();
+    public static final Map<DxModelPath, MutablePair<GltfModel, List<IGltfModelReceiver>>> lookup = new ConcurrentHashMap<>();
+
+    public void registerModel(DxModelPath path) {
+        MutablePair<GltfModel, List<IGltfModelReceiver>> receivers = lookup.get(path);
+        if (receivers == null) {
+            receivers = MutablePair.of(null, new ArrayList<>());
+            lookup.put(path, receivers);
+        }
+        GltfModelData dataFromCache = (GltfModelData) DynamXContext.getDxModelDataFromCache(path);
+        if (dataFromCache != null) {
+            receivers.setLeft(dataFromCache.getGltfModel());
+        }
+    }
+
+    public void attachReceivers(DxModelPath path, IGltfModelReceiver modelReceiver) {
+        MutablePair<GltfModel, List<IGltfModelReceiver>> receivers = lookup.get(path);
+        receivers.getRight().add(modelReceiver);
+    }
+
+    public GltfModel readModels(DxModelPath path) {
         gltfRenderData.forEach(Runnable::run);
         gltfRenderData.clear();
-        Map<ResourceLocation, MutablePair<GltfModel, List<IGltfModelReceiver>>> lookup = new HashMap<>();
-        gltfModelReceivers.forEach((receiver) -> {
-            ResourceLocation modelLocation = receiver.getModelLocation();
-            MutablePair<GltfModel, List<IGltfModelReceiver>> receivers = lookup.get(modelLocation);
-            if (receivers == null) {
-                receivers = MutablePair.of(null, new ArrayList<>());
-                lookup.put(modelLocation, receivers);
-            }
-            receivers.getRight().add(receiver);
-        });
-        lookup.entrySet().parallelStream().forEach((entry) -> {
-            try (IResource resource = Minecraft.getMinecraft().getResourceManager().getResource(entry.getKey())) {
-                long start = System.currentTimeMillis();
-                DynamXMain.log.info("Loading gltf model " + entry.getKey());
-                entry.getValue().setLeft(new GltfModelReader().readWithoutReferences(new BufferedInputStream(resource.getInputStream()), entry.getKey()));
-                DynamXMain.log.info("Loaded gltf model " + entry.getKey() +" in " + (System.currentTimeMillis() - start) + "ms");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
+
+        GltfModel gltfModel = null;
+        try (InputStream resource = DxModelData.server(path)) {
+            long start = System.currentTimeMillis();
+            DynamXMain.log.info("Reading gltf model " + path);
+            gltfModel = new GltfModelReader().readWithoutReferences(new BufferedInputStream(resource), path.getModelPath());
+            DynamXMain.log.info("Read gltf model " + path + " in " + (System.currentTimeMillis() - start) + "ms");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return gltfModel;
+    }
+
+    public void reloadModels() {
+        ContextCapabilities capabilities = GLContext.getCapabilities();
         lookup.forEach((modelLocation, receivers) -> {
             Iterator<IGltfModelReceiver> iterator = receivers.getRight().iterator();
             do {
@@ -272,7 +282,7 @@ public class MCglTF {
                         renderedModel = new RenderedGltfModel(gltfRenderData, receivers.getLeft());
                     } else if (capabilities.OpenGL40) {
                         renderedModel = new RenderedGltfModelGL40(gltfRenderData, receivers.getLeft());
-                    }  else if (capabilities.OpenGL33) {
+                    } else if (capabilities.OpenGL33) {
                         renderedModel = new RenderedGltfModelGL33(gltfRenderData, receivers.getLeft());
                     } else if (capabilities.OpenGL30) {
                         renderedModel = new RenderedGltfModelGL30(gltfRenderData, receivers.getLeft());

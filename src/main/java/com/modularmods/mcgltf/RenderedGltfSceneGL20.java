@@ -7,7 +7,7 @@ import org.lwjgl.opengl.GL20;
 public class RenderedGltfSceneGL20 extends RenderedGltfScene {
 
 	@Override
-	public void renderForVanilla() {
+	public void renderForVanilla(int index) {
 		vanillaRenderCommands.forEach(Runnable::run);
 		
 		GL11.glDisableClientState(GL11.GL_VERTEX_ARRAY);
@@ -20,7 +20,7 @@ public class RenderedGltfSceneGL20 extends RenderedGltfScene {
 	}
 
 	@Override
-	public void renderForShaderMod() {
+	public void renderForShaderMod(int index) {
 		shaderModRenderCommands.forEach(Runnable::run);
 		
 		GL11.glDisableClientState(GL11.GL_VERTEX_ARRAY);

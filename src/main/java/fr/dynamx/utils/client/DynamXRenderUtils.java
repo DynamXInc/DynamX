@@ -55,8 +55,8 @@ public class DynamXRenderUtils {
             renderBaseVehicle = new RenderBaseVehicle<>(ClientEventHandler.MC.getRenderManager());
         Vector3fPool.openPool();
         GlQuaternionPool.openPool();
-        renderBaseVehicle.renderMain(null, car, textureId, 1);
-        renderBaseVehicle.renderParts(null, car, textureId, 1);
+        renderBaseVehicle.renderMain(null, car, textureId, 1, true);
+        renderBaseVehicle.renderParts(null, car, textureId, 1, true);
         GlQuaternionPool.closePool();
         Vector3fPool.closePool();
     }

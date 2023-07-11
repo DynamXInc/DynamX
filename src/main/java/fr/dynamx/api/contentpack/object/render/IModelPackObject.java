@@ -1,11 +1,9 @@
 package fr.dynamx.api.contentpack.object.render;
 
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.dxmodel.EnumDxModelFormats;
 import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
 import fr.dynamx.client.renders.model.ItemDxModel;
 import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
-import fr.dynamx.client.renders.model.renderer.GltfModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
@@ -19,7 +17,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
-import java.util.Objects;
 
 public interface IModelPackObject extends IModelTextureVariantsSupplier {
     @SideOnly(Side.CLIENT)
@@ -58,19 +55,7 @@ public interface IModelPackObject extends IModelTextureVariantsSupplier {
         GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
         GL11.glShadeModel(GL11.GL_SMOOTH);
         DxModelRenderer model = DynamXContext.getDxModelRegistry().getModel(getModel());
-        if (renderType == ItemCameraTransforms.TransformType.GUI) {
-            switch (model.getFormat()) {
-                case OBJ:
-                    model.renderModel((byte) item.getMetadata());
-                    break;
-                case GLTF:
-                    GL11.glEnable(GL11.GL_LIGHTING);
-                    ((GltfModelRenderer) model).renderModelVanilla((byte) item.getMetadata());
-                    break;
-            }
-        } else {
-            model.renderModel((byte) item.getMetadata());
-        }
+        model.renderModel((byte) item.getMetadata(),renderType == ItemCameraTransforms.TransformType.GUI);
         GL11.glPopAttrib();
     }
 

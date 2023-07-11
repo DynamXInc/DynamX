@@ -46,7 +46,7 @@ public class DxModelPath implements INamedObject {
 
     @Override
     public String toString() {
-        return "Model " + modelPath + " in pack " + getPackName();
+        return modelPath + " in pack " + getPackName();
     }
 
     /**

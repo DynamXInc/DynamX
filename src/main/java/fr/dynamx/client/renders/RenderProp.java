@@ -24,7 +24,7 @@ public class RenderProp<T extends PropsEntity<?>> extends RenderPhysicsEntity<T>
         // Scale to the config scale value
         GlStateManager.scale(entity.getPackInfo().getScaleModifier().x, entity.getPackInfo().getScaleModifier().y, entity.getPackInfo().getScaleModifier().z);
         //Render the model
-        renderModel(DynamXContext.getDxModelRegistry().getModel(entity.getPackInfo().getModel()), entity, (byte) entity.getMetadata());
+        renderModel(DynamXContext.getDxModelRegistry().getModel(entity.getPackInfo().getModel()), entity, (byte) entity.getMetadata(), false);
         //GlStateManager.popMatrix();
     }
 
@@ -36,7 +36,7 @@ public class RenderProp<T extends PropsEntity<?>> extends RenderPhysicsEntity<T>
         }*/
         if (entity.getPackInfo().isModelValid()) {
             if(entity.hasModuleOfType(LightsModule.class))
-                entity.getPackInfo().getOwner().getLightSources().values().forEach(d -> d.drawLights(null, entity.ticksExisted, entity.getPackInfo().getModel(), entity.getPackInfo().getScaleModifier(), entity.getModuleByType(LightsModule.class)));
+                entity.getPackInfo().getOwner().getLightSources().values().forEach(d -> d.drawLights(null, entity.ticksExisted, entity.getPackInfo().getModel(), entity.getPackInfo().getScaleModifier(), entity.getModuleByType(LightsModule.class), false));
         }
     }
 }

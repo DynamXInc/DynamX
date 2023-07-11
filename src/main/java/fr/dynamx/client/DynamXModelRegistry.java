@@ -85,11 +85,17 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
         }
         if (!MODELS_REGISTRY.containsKey(location)) {
             MODELS_REGISTRY.put(location, customTextures);
+            if(location.getFormat() == EnumDxModelFormats.GLTF){
+                MCglTF.getInstance().registerModel(location);
+            }
         } else if (customTextures != null && customTextures.hasVaryingTextures()) {
             IModelTextureVariantsSupplier previousSupplier = MODELS_REGISTRY.get(location);
             if (previousSupplier == null || !previousSupplier.hasVaryingTextures()) {
                 log.debug("Replacing model texture supplier of '" + location + "' from '" + previousSupplier + "' to '" + customTextures + "' : the previous doesn't have custom textures");
                 MODELS_REGISTRY.put(location, customTextures);
+                if(location.getFormat() == EnumDxModelFormats.GLTF){
+                    MCglTF.getInstance().registerModel(location);
+                }
             } else {
                 DynamXErrorManager.addPackError(customTextures.getPackName(), "obj_duplicated_custom_textures", ErrorLevel.HIGH, location.getName(), "Tried to register the model '" + location + "' two times with custom textures '" + previousSupplier + "' and '" + customTextures + "' ! Ignoring " + customTextures);
             }
@@ -125,6 +131,7 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
         MODELS.values().forEach(DxModelRenderer::clearVAOs);
         MODELS.values().removeIf(dxModelRenderer -> dxModelRenderer.getFormat() == EnumDxModelFormats.OBJ);
         FAULTY_MODELS.clear();
+        //MCglTF.lookup.clear();
         DynamXContext.getDxModelDataCache().clear();
         DynamXErrorManager.getErrorManager().clear(DynamXErrorManager.MODEL_ERRORS);
 
@@ -146,7 +153,12 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
                                 model = ObjModelRenderer.loadObjModel(name.getKey(), name.getValue());
                                 break;
                             case GLTF:
-                                model = new GltfModelRenderer(name.getKey(), name.getValue());
+                                try {
+                                    model = new GltfModelRenderer(name.getKey(), name.getValue());
+                                    MCglTF.getInstance().attachReceivers(name.getKey(), (GltfModelRenderer) model);
+                                }catch (Exception e){
+                                    e.printStackTrace();
+                                }
                                 break;
                         }
                         MODELS.put(name.getKey().getModelPath(), model != null ? model : MISSING_MODEL);
@@ -186,16 +198,22 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
                 throw new RuntimeException(e);
             }
         }, () -> {
-            ProgressManager.ProgressBar bar = ProgressManager.push("Loading obj models", 1);
-            log.info("GLTF Models : "+ MODELS.values().stream().filter(modelRenderer -> modelRenderer.getFormat() == EnumDxModelFormats.GLTF).count());
+            ProgressManager.ProgressBar bar = ProgressManager.push("Loading GLTF models", 1);
+            log.info("Loading GLTF models...");
+            long start = System.currentTimeMillis();
             if (!threadedLoadingService.mcLoadingFinished()) {
                 SplashProgress.pause();
                 MCglTF.getInstance().createShaderSkinningProgram();
             }
-            MCglTF.getInstance().reloadModels();
-            if(!threadedLoadingService.mcLoadingFinished())
+            try {
+                MCglTF.getInstance().reloadModels();
+            }catch (Exception e) {
+                e.printStackTrace();
+            }
+            if(!threadedLoadingService.mcLoadingFinished()) {
                 SplashProgress.resume();
-
+            }
+            log.info("MCgLTF took " + (System.currentTimeMillis() - start) + " ms to load " + MCglTF.lookup.size() + " gltf models");
             log.info("Loading model textures...");
             //Loads all textures of models, cannot be done before because the TextureManager is not initialized
             bar.step("Uploading textures");

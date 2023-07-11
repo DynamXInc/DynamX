@@ -10,13 +10,11 @@ import de.javagl.jgltf.model.AnimationModel;
 import de.javagl.jgltf.model.NodeModel;
 import fr.dynamx.api.dxmodel.DxModelPath;
 import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.model.animation.Animation;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 public class GltfModelRenderer extends DxModelRenderer implements IGltfModelReceiver {
 
@@ -32,38 +30,58 @@ public class GltfModelRenderer extends DxModelRenderer implements IGltfModelRece
     }
 
     @Override
-    public void renderModel(byte textureDataId) {
+    public void renderModel(byte textureDataId, boolean forceVanillaRender) {
         if (scene == null) return;
-        if (MCglTF.getInstance().isShaderModActive()) {
-            scene.renderForShaderMod();
-        } else {
-            scene.renderForVanilla();
+        renderVanillaOrShader(-1, forceVanillaRender);
+    }
+
+    @Override
+    public void renderGroup(String group, byte textureDataId, boolean forceVanillaRender) {
+        if (scene == null) return;
+        int nodeModelIndex = getNodeModelIndex(group);
+        renderVanillaOrShader(nodeModelIndex, forceVanillaRender);
+    }
+
+    @Override
+    public boolean renderGroups(String group, byte textureDataId, boolean forceVanillaRender) {
+        if (scene == null) return false;
+        int nodeModelIndex = getNodeModelIndex(group);
+        renderVanillaOrShader(nodeModelIndex, forceVanillaRender);
+        return nodeModelIndex != -1;
+    }
+
+    @Override
+    public boolean renderDefaultParts(byte textureDataId, boolean forceVanillaRender) {
+        boolean drawn = false;
+        for (NodeModel object : nodeModels) {
+            if (getTextureVariants().canRenderPart(object.getName())) {
+                renderGroup(object.getName(), textureDataId, forceVanillaRender);
+                drawn = true;
+            }
         }
+        return drawn;
     }
 
-    public void renderModelVanilla(byte textureDataId) {
-        if (scene == null) return;
-        scene.renderForVanilla();
-    }
+    public void renderVanillaOrShader(int nodeModelIndex, boolean forceVanillaRender) {
 
-    @Override
-    public void renderGroup(String group, byte textureDataId) {
+        if (forceVanillaRender) {
+            scene.renderForVanilla(nodeModelIndex);
+        } else if (MCglTF.getInstance().isShaderModActive()){
+            scene.renderForShaderMod(nodeModelIndex);
+        }
 
-    }
-
-    @Override
-    public boolean renderGroups(String group, byte textureDataId) {
-        return false;
-    }
-
-    @Override
-    public boolean renderDefaultParts(byte textureDataId) {
-        return false;
     }
 
     @Override
     public boolean containsObjectOrNode(String name) {
         return nodeModels.stream().anyMatch(o -> o.getName().equalsIgnoreCase(name));
+    }
+
+    public int getNodeModelIndex(String objectName) {
+        return IntStream.range(0, nodeModels.size())
+                .filter(i -> nodeModels.get(i).getName().equalsIgnoreCase(objectName))
+                .findFirst()
+                .orElse(-1);
     }
 
     @Override
@@ -72,8 +90,8 @@ public class GltfModelRenderer extends DxModelRenderer implements IGltfModelRece
     }
 
     @Override
-    public ResourceLocation getModelLocation() {
-        return location.getModelPath();
+    public DxModelPath getModelLocation() {
+        return location;
     }
 
     @Override

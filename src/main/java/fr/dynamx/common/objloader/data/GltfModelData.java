@@ -1,34 +1,31 @@
 package fr.dynamx.common.objloader.data;
 
-import com.jme3.bullet.collision.shapes.BoxCollisionShape;
-import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.math.Vector3f;
-import de.javagl.jgltf.model.AccessorModel;
-import de.javagl.jgltf.model.MeshModel;
-import de.javagl.jgltf.model.MeshPrimitiveModel;
-import de.javagl.jgltf.model.NodeModel;
+import com.modularmods.mcgltf.MCglTF;
+import de.javagl.jgltf.model.*;
 import fr.dynamx.api.dxmodel.DxModelPath;
 import lombok.Getter;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.nio.ShortBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.IntStream;
 
 public class GltfModelData extends DxModelData {
 
     @Getter
-    private final List<NodeModel> nodeModels = new ArrayList<>();
+    private final GltfModel gltfModel;
 
     public GltfModelData(DxModelPath objModelPath) {
         super(objModelPath);
+        gltfModel = MCglTF.getInstance().readModels(objModelPath);
     }
 
     public float[] getVerticesPos() {
         List<float[]> posList = new ArrayList<>();
         int size = 0;
-        for (NodeModel meshModel : nodeModels) {
+        for (NodeModel meshModel : getNodeModels()) {
             float[] pos = getVerticesPos(meshModel.getName().toLowerCase());
             posList.add(pos);
             size += pos.length;
@@ -41,21 +38,37 @@ public class GltfModelData extends DxModelData {
     }
 
     public float[] getVerticesPos(String objectName) {
-        float[] pos = new float[0];
-        for (NodeModel nodeModel : nodeModels) {
-            if (nodeModel.getName().toLowerCase().contains(objectName.toLowerCase())) {
+        String objectNameLower = objectName.toLowerCase();
+        List<float[]> positionList = new ArrayList<>();
+        int size = 0;
+
+        for (NodeModel nodeModel : getNodeModels()) {
+            if (nodeModel.getName().toLowerCase().contains(objectNameLower)) {
                 for (MeshModel meshModel : nodeModel.getMeshModels()) {
                     for (MeshPrimitiveModel meshPrimitiveModel : meshModel.getMeshPrimitiveModels()) {
                         AccessorModel accessorModel = meshPrimitiveModel.getAttributes().get("POSITION");
                         if (accessorModel.getComponentType() != 5126) {
-                            return pos;
+                            return new float[0];
                         }
-                        FloatBuffer floatBuffer = accessorModel.getBufferViewModel().getBufferModel().getBufferData().asFloatBuffer();
-                        pos = new float[floatBuffer.limit()];
+                        FloatBuffer floatBuffer = accessorModel.getBufferViewModel().getBufferViewData().asFloatBuffer();
+                        float[] pos = new float[floatBuffer.limit()];
+                        size += floatBuffer.limit();
                         floatBuffer.get(pos);
+                        for (int i = 0; i < pos.length; i+=3) {
+                            float temp = pos[i + 1];
+                            pos[i + 1] = -pos[i + 2];
+                            pos[i + 2] = temp;
+                        }
+                        positionList.add(pos);
                     }
                 }
             }
+        }
+        float[] pos = new float[size];
+        int currentPosition = 0;
+        for (float[] posi : positionList) {
+            System.arraycopy(posi, 0, pos, currentPosition, posi.length);
+            currentPosition += posi.length;
         }
         return pos;
     }
@@ -64,36 +77,48 @@ public class GltfModelData extends DxModelData {
         float[] verticesPos = getVerticesPos(objectName);
         Vector3f[] vectorPos = new Vector3f[verticesPos.length / 3];
         for (int i = 0; i < verticesPos.length / 3; i++) {
-            vectorPos[i / 3] = new Vector3f(verticesPos[i / 3], verticesPos[i / 3 + 1], verticesPos[i / 3 + 2]);
+            vectorPos[i] = new Vector3f(verticesPos[i * 3], verticesPos[i * 3 + 1], verticesPos[i * 3 + 2]);
         }
         return vectorPos;
     }
 
     public int[] getMeshIndices(String objectName) {
         String objectNameLower = objectName.toLowerCase();
+        List<int[]> indicesList = new ArrayList<>();
+        int size = 0;
 
-        IntStream indicesStream = nodeModels.stream()
-                .filter(nodeModel -> nodeModel.getName().toLowerCase().contains(objectNameLower))
-                .flatMapToInt(nodeModel -> nodeModel.getMeshModels().stream()
-                        .flatMapToInt(meshModel -> meshModel.getMeshPrimitiveModels().stream()
-                                .flatMapToInt(primitiveModel -> {
-                                    IntBuffer intBuffer = primitiveModel.getIndices().getBufferViewModel()
-                                            .getBufferModel()
-                                            .getBufferData()
-                                            .asIntBuffer();
-                                    int[] meshIndices = new int[intBuffer.limit()];
-                                    intBuffer.get(meshIndices);
-                                    return IntStream.of(meshIndices);
-                                })
-                        )
-                );
-        return indicesStream.toArray();
+        for (NodeModel nodeModel : getNodeModels()) {
+            if (nodeModel.getName().toLowerCase().contains(objectNameLower)) {
+                for (MeshModel meshModel : nodeModel.getMeshModels()) {
+                    for (MeshPrimitiveModel meshPrimitiveModel : meshModel.getMeshPrimitiveModels()) {
+                        AccessorModel accessorModel = meshPrimitiveModel.getIndices();
+                        if (accessorModel.getComponentType() != 5123) {
+                            return new int[0];
+                        }
+                        ShortBuffer shortBuffer = accessorModel.getBufferViewModel().getBufferViewData().asShortBuffer();
+                        int[] indices = new int[shortBuffer.limit()];
+                        size += shortBuffer.limit();
+                        for (int i = 0; i < shortBuffer.limit(); i++) {
+                            indices[i] = shortBuffer.get();
+                        }
+                        indicesList.add(indices);
+                    }
+                }
+            }
+        }
+        int[] indices = new int[size];
+        int currentPosition = 0;
+        for (int[] ints : indicesList) {
+            System.arraycopy(ints, 0, indices, currentPosition, ints.length);
+            currentPosition += ints.length;
+        }
+        return indices;
     }
 
     public int[] getAllMeshIndices() {
         List<int[]> indicesList = new ArrayList<>();
         int size = 0;
-        for (NodeModel nodeModel : nodeModels) {
+        for (NodeModel nodeModel : getNodeModels()) {
             int[] indices = getMeshIndices(nodeModel.getName().toLowerCase());
             indicesList.add(indices);
             size += indices.length;
@@ -153,8 +178,12 @@ public class GltfModelData extends DxModelData {
         return Vector3f.ZERO;
     }
 
+    public List<NodeModel> getNodeModels() {
+        return gltfModel == null ? new ArrayList<>() : gltfModel.getNodeModels();
+    }
+
     public NodeModel getNodeModel(String objectName) {
-        for (NodeModel nodeModel : nodeModels) {
+        for (NodeModel nodeModel : getNodeModels()) {
             if (nodeModel.getName().toLowerCase().contains(objectName.toLowerCase())) {
                 return nodeModel;
             }

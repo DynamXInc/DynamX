@@ -38,7 +38,7 @@ public class MissingObjModel extends ObjModelRenderer {
         ObjObjectRenderer objObjectRenderer = new ObjObjectRenderer(emptyPart) {
             @Override
             public void render(ObjModelRenderer model, byte textureVariantID) {
-                MissingObjModel.this.renderModel(textureVariantID); //take care, MissingObjModel.this != model
+                MissingObjModel.this.renderModel(textureVariantID, false); //take care, MissingObjModel.this != model
             }
         };
         getObjObjects().add(objObjectRenderer);
@@ -56,7 +56,7 @@ public class MissingObjModel extends ObjModelRenderer {
 
     @Override
     public void renderGroup(ObjObjectRenderer group, byte textureDataId) {
-        renderModel(textureDataId);
+        renderModel(textureDataId, false);
     }
 
     @Override
@@ -65,19 +65,19 @@ public class MissingObjModel extends ObjModelRenderer {
     }
 
     @Override
-    public boolean renderGroups(String groupsName, byte textureDataId) {
-        renderModel(textureDataId);
+    public boolean renderGroups(String groupsName, byte textureDataId, boolean forceVanillaRender) {
+        renderModel(textureDataId, false);
         return true;
     }
 
     @Override
-    public boolean renderDefaultParts(byte textureDataId) {
-        renderModel(textureDataId);
+    public boolean renderDefaultParts(byte textureDataId, boolean forceVanillaRender) {
+        renderModel(textureDataId, false);
         return true;
     }
 
     @Override
-    public void renderModel(byte textureDataId) {
+    public void renderModel(byte textureDataId, boolean forceVanillaRender) {
         GlStateManager.color(1, 0, 0, 1);
         GlStateManager.pushMatrix();
         GlStateManager.scale(0.065f, 0.065f, 0.065f);

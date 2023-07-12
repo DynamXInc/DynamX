@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class TEDynamXBlock extends TileEntity implements ICollidableObject, ITickable, IPackInfoReloadListener {
+public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPackInfoReloadListener {
     private BlockObject<?> blockObjectInfo;
     private int rotation;
     private Vector3f relativeTranslation = new Vector3f(), relativeScale = new Vector3f(), relativeRotation = new Vector3f();
@@ -286,15 +286,6 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, ITic
     public void onLoad() {
         DynamXChunkData data = world.getChunk(pos).getCapability(DynamXChunkDataProvider.DYNAM_X_CHUNK_DATA_CAPABILITY, null);
         data.getBlocksAABB().put(pos, computeBoundingBox().offset(pos));
-    }
-
-    private DynamXBlockEvent.TickTileEntity event;
-    @Override
-    public void update() {
-        if(event == null){
-            event = new DynamXBlockEvent.TickTileEntity(Side.SERVER, (DynamXBlock<?>) this.getBlockType(), getWorld(), this);
-        }
-        MinecraftForge.EVENT_BUS.post(event);
     }
 
     @Override

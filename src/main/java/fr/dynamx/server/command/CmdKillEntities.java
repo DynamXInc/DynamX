@@ -48,8 +48,7 @@ public class CmdKillEntities implements ISubCommand {
             } else if (args[1].equalsIgnoreCase("doors")) {
                 entityList = sender.getEntityWorld().getEntities(DoorEntity.class, EntitySelectors.IS_ALIVE);
             } else if (args[1].equalsIgnoreCase("all")) {
-                entityList = new ArrayList<>();
-                entityList.addAll(sender.getEntityWorld().getEntities(PhysicsEntity.class, EntitySelectors.IS_ALIVE));
+                entityList = sender.getEntityWorld().getEntities(PhysicsEntity.class, EntitySelectors.IS_ALIVE);
             } else {
                 throw new WrongUsageException(getUsage());
             }

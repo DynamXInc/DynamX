@@ -85,7 +85,6 @@ public class ObjItemModelLoader extends TileEntityItemStackRenderer implements I
         } else {
             RenderItem renderItem = Minecraft.getMinecraft().getRenderItem();
             renderItem.renderItem(stack, renderItem.getItemModelMesher().getModelManager().getMissingModel());
-            //throw new NoSuchElementException("Item " + stack.getItem() + " is not registered into ObjItemModelLoader");
         }
     }
 

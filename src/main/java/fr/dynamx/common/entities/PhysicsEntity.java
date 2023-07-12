@@ -21,6 +21,7 @@ import fr.dynamx.common.physics.joints.EntityJointsHandler;
 import fr.dynamx.common.physics.player.WalkingOnPlayerController;
 import fr.dynamx.common.physics.terrain.PhysicsEntityTerrainLoader;
 import fr.dynamx.utils.DynamXConfig;
+import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.PhysicsEntityException;
 import fr.dynamx.utils.debug.Profiler;
@@ -51,7 +52,7 @@ import java.util.Map;
  *
  * @param <T> The physics handler type
  */
-@SynchronizedEntityVariable.SynchronizedPhysicsModule()
+@SynchronizedEntityVariable.SynchronizedPhysicsModule(modid = DynamXConstants.ID)
 public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>> extends Entity implements ICollidableObject, IEntityAdditionalSpawnData {
     /**
      * Entity network

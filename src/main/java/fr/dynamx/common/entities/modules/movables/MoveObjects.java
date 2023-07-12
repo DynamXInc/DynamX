@@ -9,6 +9,7 @@ import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.entities.modules.MovableModule;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
+import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import fr.dynamx.utils.physics.DynamXPhysicsHelper;
@@ -17,7 +18,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-@SynchronizedEntityVariable.SynchronizedPhysicsModule()
+@SynchronizedEntityVariable.SynchronizedPhysicsModule(modid = DynamXConstants.ID)
 public class MoveObjects extends MovableModule {
     //TODO PRIVATISER
 

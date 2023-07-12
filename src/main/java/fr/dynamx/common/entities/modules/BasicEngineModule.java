@@ -13,6 +13,7 @@ import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.EnginePhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.engine.AutomaticGearboxHandler;
+import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
@@ -29,7 +30,7 @@ import javax.annotation.Nullable;
  * @see VehicleEntityProperties.EnumEngineProperties
  * @see EnginePhysicsHandler
  */
-@SynchronizedEntityVariable.SynchronizedPhysicsModule()
+@SynchronizedEntityVariable.SynchronizedPhysicsModule(modid = DynamXConstants.ID)
 public abstract class BasicEngineModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, IPhysicsModule.IPhysicsUpdateListener, IPhysicsModule.IEntityUpdateListener {
     //TODO CLEAN ENGINE CODE
     protected final BaseVehicleEntity<? extends BaseVehiclePhysicsHandler<?>> entity;

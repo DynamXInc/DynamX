@@ -26,6 +26,7 @@ import fr.dynamx.common.physics.entities.BaseWheeledVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.wheel.WheelPhysics;
 import fr.dynamx.common.physics.entities.parts.wheel.WheelState;
+import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import lombok.Getter;
@@ -50,7 +51,7 @@ import static fr.dynamx.client.ClientProxy.SOUND_HANDLER;
  *
  * @see WheelsPhysicsHandler
  */
-@SynchronizedEntityVariable.SynchronizedPhysicsModule()
+@SynchronizedEntityVariable.SynchronizedPhysicsModule(modid = DynamXConstants.ID)
 public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHandler<?>>, IPhysicsModule.IEntityUpdateListener, IPhysicsModule.IPhysicsUpdateListener, IPackInfoReloadListener {
     //TODO CLEAN WHEELS CODE
     @SynchronizedEntityVariable(name = "wheel_infos")

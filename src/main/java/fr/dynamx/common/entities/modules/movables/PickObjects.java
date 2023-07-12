@@ -11,12 +11,13 @@ import fr.dynamx.common.entities.modules.MovableModule;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
 import fr.dynamx.common.physics.joints.EntityJoint;
 import fr.dynamx.common.physics.joints.JointHandlerRegistry;
+import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import fr.dynamx.utils.physics.DynamXPhysicsHelper;
 import net.minecraft.entity.player.EntityPlayer;
 
-@SynchronizedEntityVariable.SynchronizedPhysicsModule()
+@SynchronizedEntityVariable.SynchronizedPhysicsModule(modid = DynamXConstants.ID)
 public class PickObjects extends MovableModule {
 
     //TODO PRIVATISER

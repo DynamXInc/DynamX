@@ -3,15 +3,11 @@ package fr.dynamx.common.entities.modules;
 import fr.dynamx.api.audio.EnumSoundState;
 import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.entities.modules.IVehicleController;
-import fr.dynamx.api.events.PhysicsEntityEvent;
-import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.api.network.sync.EntityVariable;
 import fr.dynamx.api.network.sync.SynchronizationRules;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
-import fr.dynamx.client.ClientProxy;
 import fr.dynamx.client.handlers.hud.HelicopterController;
 import fr.dynamx.client.sound.EngineSound;
-import fr.dynamx.common.contentpack.parts.PartHandle;
 import fr.dynamx.common.contentpack.type.vehicle.BaseEngineInfo;
 import fr.dynamx.common.contentpack.type.vehicle.HelicopterPhysicsInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
@@ -19,17 +15,16 @@ import fr.dynamx.common.network.sync.variables.EntityFloatArrayVariable;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.EnginePhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.engine.AutomaticGearboxHandler;
+import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static fr.dynamx.client.ClientProxy.SOUND_HANDLER;
@@ -41,7 +36,7 @@ import static fr.dynamx.client.ClientProxy.SOUND_HANDLER;
  * @see VehicleEntityProperties.EnumEngineProperties
  * @see EnginePhysicsHandler
  */
-@SynchronizedEntityVariable.SynchronizedPhysicsModule
+@SynchronizedEntityVariable.SynchronizedPhysicsModule(modid = DynamXConstants.ID)
 public class HelicopterEngineModule extends BasicEngineModule {
     @Getter
     @SynchronizedEntityVariable(name = "roll_controls")
@@ -83,6 +78,7 @@ public class HelicopterEngineModule extends BasicEngineModule {
         super.readFromNBT(tag);
         power.set(tag.getFloat("power"));
     }
+
     @Override
     public void writeToNBT(NBTTagCompound tag) {
         super.writeToNBT(tag);
@@ -113,7 +109,7 @@ public class HelicopterEngineModule extends BasicEngineModule {
             }
             if (isEngineStarted()) {
                 boolean forInterior = Minecraft.getMinecraft().gameSettings.thirdPersonView == 0 && entity.isRidingOrBeingRiddenBy(Minecraft.getMinecraft().player);
-                float power = this.power.get()*1000;
+                float power = this.power.get() * 1000;
                 lastVehicleSound = currentVehicleSound;
                 if (currentVehicleSound == null || !currentVehicleSound.shouldPlay(power, forInterior)) {
                     sounds.forEach((id, vehicleSound) -> {

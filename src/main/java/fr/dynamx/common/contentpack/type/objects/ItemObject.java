@@ -20,7 +20,7 @@ public class ItemObject<T extends ItemObject<?>> extends AbstractItemObject<T, T
     protected final List<ISubInfoType<T>> subProperties = new ArrayList<>();
 
     @PackFileProperty(configNames = "MaxItemStackSize", required = false, defaultValue = "1")
-    protected int maxItemStackSize;
+    protected int maxItemStackSize = 1;
 
     public ItemObject(String packName, String fileName) {
         super(packName, fileName);
@@ -43,6 +43,7 @@ public class ItemObject<T extends ItemObject<?>> extends AbstractItemObject<T, T
         subProperties.add(property);
     }
 
+    @Override
     public int getMaxItemStackSize() {
         return maxItemStackSize;
     }

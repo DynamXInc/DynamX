@@ -65,5 +65,10 @@ public interface VehicleValidator {
             if (rotors.isEmpty())
                 throw new IllegalArgumentException("Helicopter " + info.getFullName() + " has no rotors");
         }
+
+        @Override
+        public Class<? extends BaseEngineInfo> getEngineClass() {
+            return BaseEngineInfo.class;
+        }
     };
 }

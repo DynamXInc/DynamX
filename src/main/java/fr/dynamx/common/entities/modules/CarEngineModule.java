@@ -14,6 +14,7 @@ import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.EnginePhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.engine.AutomaticGearboxHandler;
+import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.relauncher.Side;
@@ -32,7 +33,7 @@ import static fr.dynamx.client.ClientProxy.SOUND_HANDLER;
  * @see fr.dynamx.api.entities.VehicleEntityProperties.EnumEngineProperties
  * @see EnginePhysicsHandler
  */
-@SynchronizedEntityVariable.SynchronizedPhysicsModule()
+@SynchronizedEntityVariable.SynchronizedPhysicsModule(modid = DynamXConstants.ID)
 public class CarEngineModule extends BasicEngineModule implements IPackInfoReloadListener {
     //TODO CLEAN ENGINE CODE
     protected CarEngineInfo engineInfo;

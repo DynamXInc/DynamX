@@ -36,7 +36,7 @@ public class SimplePartLightSource extends LightObject implements ISubInfoType<I
     @PackFileProperty(configNames = "Position", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y, description = "common.position", required = false)
     protected Vector3f position;
     @Getter
-    @PackFileProperty(configNames = "Rotation", required = false, defaultValue = "1 0 0 0")
+    @PackFileProperty(configNames = "Rotation", required = false, defaultValue = "none")
     protected Quaternion rotation = new Quaternion();
 
     public SimplePartLightSource(ISubInfoTypeOwner<ILightOwner<?>> owner, String name) {

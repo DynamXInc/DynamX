@@ -46,7 +46,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import java.util.HashMap;
 import java.util.Map;
 
-@SynchronizedEntityVariable.SynchronizedPhysicsModule()
+@SynchronizedEntityVariable.SynchronizedPhysicsModule(modid = DynamXConstants.ID)
 public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<?, ?>>, AttachModule.AttachToSelfModule,
         IPhysicsModule.IEntityPosUpdateListener, IPhysicsModule.IPhysicsUpdateListener,
         AttachedBodySynchronizer {

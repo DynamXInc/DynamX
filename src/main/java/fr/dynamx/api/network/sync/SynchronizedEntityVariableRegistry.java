@@ -34,7 +34,8 @@ public class SynchronizedEntityVariableRegistry {
             String name = data.getClassName();
             try {
                 Class<?> classToParse = Class.forName(data.getClassName());
-                classToMod.put(classToParse, data.getCandidate().getContainedMods().get(0).getModId());
+                String modid = data.getAnnotationInfo().get("modid").toString();
+                classToMod.put(classToParse, modid);
                 for (Field f : classToParse.getDeclaredFields()) {
                     if (EntityVariable.class.isAssignableFrom(f.getType()) && f.isAnnotationPresent(SynchronizedEntityVariable.class)) {
                         SynchronizedEntityVariable property = f.getAnnotation(SynchronizedEntityVariable.class);
@@ -47,9 +48,9 @@ public class SynchronizedEntityVariableRegistry {
                     }
                 }
                 if (!baseSyncVarRegistry.containsKey(classToParse))
-                    DynamXMain.log.warn("Failed to detect any synchronized entity variable in " + classToParse);
+                    DynamXMain.log.error("Failed to detect any synchronized entity variable in " + classToParse);
             } catch (Exception e) {
-                throw new RuntimeException("Failed to detect synchronized entity variables in " + name);
+                throw new RuntimeException("Failed to detect synchronized entity variables in " + name, e);
             }
         }
     }

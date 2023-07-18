@@ -34,7 +34,6 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import com.jme3.util.BufferUtils;
-import fr.dynamx.client.shaders.DxShader;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import jme3utilities.Validate;
@@ -511,7 +510,7 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
     }
 
     public void render() {
-        renderUsing(null);
+        renderUsing();
     }
 
     /**
@@ -519,10 +518,7 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
      *
      * @param program the program to use (not null)
      */
-    public void renderUsing(DxShader program) {
-        if(program != null) {
-            program.useShader();
-        }
+    public void renderUsing() {
         enableAttributes();
 
         GL30.glBindVertexArray(vaoId);

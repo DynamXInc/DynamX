@@ -11,24 +11,23 @@ import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.blocks.TEDynamXBlock;
 import fr.dynamx.common.network.packets.MessageSyncBlockCustomization;
 import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.client.DynamXRenderUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockRendererDispatcher;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.init.Blocks;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.input.Mouse;
 
 import java.util.Collections;
 import java.util.List;
 
-public class GuiBlockCustomization extends GuiFrame
-{
+public class GuiBlockCustomization extends GuiFrame {
     public static final ResourceLocation STYLE = new ResourceLocation(DynamXConstants.ID, "css/block_custom.css");
 
     private static ObjModelRenderer model;
     private static TEDynamXBlock teBlock;
-    private final GuiPanel preview = new GuiPanel();
+    private final GuiPanel preview;
 
     private final GuiFloatField translationX = new GuiFloatField(-100, 100);
     private final GuiFloatField translationY = new GuiFloatField(-100, 100);
@@ -40,15 +39,28 @@ public class GuiBlockCustomization extends GuiFrame
     private final GuiFloatField rotationY = new GuiFloatField(-360, 360);
     private final GuiFloatField rotationZ = new GuiFloatField(-360, 360);
 
-    private float angleX, angleY;
+    private float angleX = -27, angleY = 18;
+    private float scale = 20;
     private int scroll = 0;
 
     public GuiBlockCustomization(TEDynamXBlock te) {
         super(new GuiScaler.Identity());
+
         teBlock = te;
-        model = DynamXContext.getObjModelRegistry().getModel(te.getBlockObjectInfo().getModel());
+        model = DynamXContext.getObjModelRegistry().getModel(teBlock.getBlockObjectInfo().getModel());
         setCssClass("root");
 
+        preview = new GuiPanel() {
+            @Override
+            public void drawForeground(int mouseX, int mouseY, float partialTicks) {
+                super.drawForeground(mouseX, mouseY, partialTicks);
+                Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+                int x = preview.getRenderMinX() + preview.getWidth();
+                int y = preview.getRenderMinY() + preview.getHeight();
+                drawModelOnScreen(x / 1.2f - 30, y / 1.2f - 30, mouseX, mouseY, model);
+
+            }
+        };
         preview.setCssClass("preview");
         GuiLabel rotationLabel = new GuiLabel("Rotation :");
         rotationLabel.setCssClass("rotation");
@@ -58,25 +70,25 @@ public class GuiBlockCustomization extends GuiFrame
         translationLabel.setCssClass("translation");
 
         translationX.setCssClass("translationX");
-        translationX.setText(String.valueOf(te.getRelativeTranslation().x));
+        translationX.setText(String.valueOf(teBlock.getRelativeTranslation().x));
         translationY.setCssClass("translationY");
-        translationY.setText(String.valueOf(te.getRelativeTranslation().y));
+        translationY.setText(String.valueOf(teBlock.getRelativeTranslation().y));
         translationZ.setCssClass("translationZ");
-        translationZ.setText(String.valueOf(te.getRelativeTranslation().z));
+        translationZ.setText(String.valueOf(teBlock.getRelativeTranslation().z));
 
         scaleX.setCssClass("scaleX");
-        scaleX.setText(te.getRelativeScale().x != 0 ? String.valueOf(te.getRelativeScale().x) : String.valueOf(1));
+        scaleX.setText(teBlock.getRelativeScale().x != 0 ? String.valueOf(teBlock.getRelativeScale().x) : String.valueOf(1));
         scaleY.setCssClass("scaleY");
-        scaleY.setText(te.getRelativeScale().y != 0 ? String.valueOf(te.getRelativeScale().y) : String.valueOf(1));
+        scaleY.setText(teBlock.getRelativeScale().y != 0 ? String.valueOf(teBlock.getRelativeScale().y) : String.valueOf(1));
         scaleZ.setCssClass("scaleZ");
-        scaleZ.setText(te.getRelativeScale().z != 0 ? String.valueOf(te.getRelativeScale().z) : String.valueOf(1));
+        scaleZ.setText(teBlock.getRelativeScale().z != 0 ? String.valueOf(teBlock.getRelativeScale().z) : String.valueOf(1));
 
         rotationX.setCssClass("rotationX");
-        rotationX.setText(String.valueOf(te.getRelativeRotation().x));
+        rotationX.setText(String.valueOf(teBlock.getRelativeRotation().x));
         rotationY.setCssClass("rotationY");
-        rotationY.setText(String.valueOf(te.getRelativeRotation().y));
+        rotationY.setText(String.valueOf(teBlock.getRelativeRotation().y));
         rotationZ.setCssClass("rotationZ");
-        rotationZ.setText(String.valueOf(te.getRelativeRotation().z));
+        rotationZ.setText(String.valueOf(teBlock.getRelativeRotation().z));
 
         GuiLabel confirm = new GuiLabel("Confirm");
         confirm.setCssClass("confirm");
@@ -85,11 +97,11 @@ public class GuiBlockCustomization extends GuiFrame
             Vector3f relativeTrans = new Vector3f(translationX.getValue(), translationY.getValue(), translationZ.getValue());
             Vector3f relativeScale = new Vector3f(scaleX.getValue(), scaleY.getValue(), scaleZ.getValue());
             Vector3f relativeRotation = new Vector3f(rotationX.getValue(), rotationY.getValue(), rotationZ.getValue());
-            DynamXContext.getNetwork().sendToServer(new MessageSyncBlockCustomization(te.getPos(), relativeTrans, relativeScale, relativeRotation));
-            te.setRelativeTranslation(relativeTrans);
-            te.setRelativeScale(relativeScale);
-            te.setRelativeRotation(relativeRotation);
-            te.markCollisionsDirty();
+            DynamXContext.getNetwork().sendToServer(new MessageSyncBlockCustomization(teBlock.getPos(), relativeTrans, relativeScale, relativeRotation));
+            teBlock.setRelativeTranslation(relativeTrans);
+            teBlock.setRelativeScale(relativeScale);
+            teBlock.setRelativeRotation(relativeRotation);
+            teBlock.markCollisionsDirty();
         });
 
 
@@ -117,20 +129,41 @@ public class GuiBlockCustomization extends GuiFrame
     @Override
     public void drawForeground(int mouseX, int mouseY, float partialTicks) {
         super.drawForeground(mouseX, mouseY, partialTicks);
-        Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-        int x = preview.getRenderMinX() + preview.getWidth();
-        int y = preview.getRenderMinY() + preview.getHeight();
-        drawModelOnScreen(x / 1.2f - 30, y / 1.2f - 30, 20, mouseX, mouseY, model);
     }
 
     BlockRendererDispatcher blockRenderer = Minecraft.getMinecraft().getBlockRendererDispatcher();
-    public void drawModelOnScreen(float posX, float posY, float scale, float mouseX, float mouseY, ObjModelRenderer model) {
-        unbindLayerBounds();
 
-        GlStateManager.enableColorMaterial();
+
+    public void drawModelOnScreen(float posX, float posY, float mouseX, float mouseY, ObjModelRenderer model) {
+        handleScaleAndRotation();
+
         GlStateManager.pushMatrix();
 
-        GlStateManager.translate(posX, posY, 50);
+        GlStateManager.translate(posX, posY + 20, 200);
+
+        GlStateManager.scale(100 + scale, 100 + scale, 100 + scale);
+
+        renderGrid();
+
+        //Wtf negative scale, don't remove it
+        GlStateManager.scale(-1 / 5f, 1 / 5f, 1 / 5f);
+
+        GlStateManager.rotate(180, 1, 0, 0);
+        GlStateManager.rotate(angleX, 0, 1, 0);
+        GlStateManager.rotate(-angleY, 1, 0, 0);
+
+        GlStateManager.translate(-0.5, -1, 0.5);
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+
+        blockRenderer.renderBlockBrightness(teBlock.getWorld().getBlockState(teBlock.getPos().down()), 1.0F);
+
+        renderModel();
+
+        GlStateManager.popMatrix();
+
+    }
+
+    public void handleScaleAndRotation() {
         int i = Mouse.getEventDWheel() / 100;
         if (i != 0) {
             scroll += i;
@@ -138,12 +171,6 @@ public class GuiBlockCustomization extends GuiFrame
             scroll = Math.max(Math.min(scroll, maxScroll), 0);
         }
         scale += scroll / 2f;
-        GlStateManager.scale(-scale, scale, scale);
-        GlStateManager.rotate(180, 1, 0, 0);
-        GlStateManager.rotate(45, 0, 1, 0);
-        GlStateManager.rotate(angleX, 0, 1, 0);
-        GlStateManager.rotate(-angleY, 1, 0, 0);
-
         if (Mouse.isButtonDown(0)) {
             if (mouseX > preview.getRenderMinX() && mouseX < preview.getRenderMaxX()) {
                 if (mouseY > preview.getRenderMinY() && mouseY < preview.getRenderMaxY()) {
@@ -154,20 +181,64 @@ public class GuiBlockCustomization extends GuiFrame
         }
         if (angleX >= 360) angleX = 0;
         if (angleY <= -360) angleY = 0;
-        GlStateManager.translate(-0.5, -1, 0.5);
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1);
-        blockRenderer.renderBlockBrightness(Blocks.GRASS.getDefaultState(), 1.0F);
-        GlStateManager.translate(0.5, 1.5f, 0.5);
+    }
 
-        GlStateManager.rotate(teBlock.getRotation() * 22.5f, 0, -1, 0);
-        GlStateManager.translate(translationX.getValue(), translationY.getValue(), translationZ.getValue());
-        GlStateManager.scale(scaleX.getValue(), scaleY.getValue(), scaleZ.getValue());
-        GlStateManager.rotate(rotationX.getValue(), 1, 0, 0);
-        GlStateManager.rotate(rotationY.getValue(), 0, 1, 0);
-        GlStateManager.rotate(rotationZ.getValue(), 0, 0, 1);
+    public void renderGrid() {
+
+        GlStateManager.pushMatrix();
+        GlStateManager.disableTexture2D();
+
+
+        GlStateManager.rotate(angleX, 0, 1, 0);
+        GlStateManager.rotate(-angleY, 1, 0, 0);
+
+        GlStateManager.color(1, 1, 1, 1);
+
+        GlStateManager.color(1, 0, 0, 1);
+        GlStateManager.glLineWidth(5);
+        DynamXRenderUtils.arrowMeshX.render();
+        GlStateManager.color(0, 1, 0, 1);
+        DynamXRenderUtils.arrowMeshY.render();
+        GlStateManager.color(0, 0, 1, 1);
+        DynamXRenderUtils.arrowMeshZ.render();
+
+        GlStateManager.translate(-1f, 0f, -1f);
+
+        GlStateManager.color(1, 1, 1, 1);
+        GlStateManager.glLineWidth(2);
+        DynamXRenderUtils.gridMesh.render();
+
+
+        GlStateManager.enableTexture2D();
+        GlStateManager.popMatrix();
+
+    }
+
+    public void renderModel() {
+
+
+        GlStateManager.translate(
+                0.5 + teBlock.getBlockObjectInfo().getTranslation().x + translationX.getValue(),
+                2.5D + teBlock.getBlockObjectInfo().getTranslation().y + translationY.getValue(),
+                0.5 + teBlock.getBlockObjectInfo().getTranslation().z + translationZ.getValue());
+        // Scale to the config scale value
+        GlStateManager.scale(
+                teBlock.getBlockObjectInfo().getScaleModifier().x * (scaleX.getValue() != 0 ? scaleX.getValue() : 1),
+                teBlock.getBlockObjectInfo().getScaleModifier().y * (scaleY.getValue() != 0 ? scaleY.getValue() : 1),
+                teBlock.getBlockObjectInfo().getScaleModifier().z * (scaleZ.getValue() != 0 ? scaleZ.getValue() : 1));
+        // Correct rotation of the block
+        GlStateManager.rotate(teBlock.getRotation() * 22.5f, 0.0F, -1.0F, 0.0F);
+        float rotate = rotationX.getValue() + teBlock.getBlockObjectInfo().getRotation().x;
+        if (rotate != 0)
+            GlStateManager.rotate(rotate, 1, 0, 0);
+        rotate = rotationY.getValue() + teBlock.getBlockObjectInfo().getRotation().y;
+        if (rotate != 0)
+            GlStateManager.rotate(rotate, 0, 1, 0);
+        rotate = rotationZ.getValue() + teBlock.getBlockObjectInfo().getRotation().z;
+        if (rotate != 0)
+            GlStateManager.rotate(rotate, 0, 0, 1);
 
         model.renderModel();
-        GlStateManager.popMatrix();
     }
 
     @Override
@@ -182,6 +253,6 @@ public class GuiBlockCustomization extends GuiFrame
 
     @Override
     public boolean needsCssReload() {
-        return true;
+        return false;
     }
 }

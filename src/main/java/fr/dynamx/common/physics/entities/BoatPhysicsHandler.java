@@ -16,7 +16,7 @@ import java.util.List;
 public class BoatPhysicsHandler<T extends BoatEntity<?>> extends BaseVehiclePhysicsHandler<T> {
     public List<PartFloat> floatList;
     public List<Vector3f> debugBuoyForces;
-    public List<Vector3f> debugDragForces ;
+    public List<Vector3f> debugDragForces;
 
     public BoatPhysicsHandler(T entity) {
         super(entity);
@@ -82,7 +82,7 @@ public class BoatPhysicsHandler<T extends BoatEntity<?>> extends BaseVehiclePhys
         float area = partFloat.size * partFloat.size;
         dy = Math.min(dy, partFloat.getScale().y);
 
-        Vector3f buoyForce = Vector3fPool.get(0, dy * area * DynamXPhysicsHelper.WATER_DENSITY * DynamXPhysicsHelper.GRAVITY, 0);
+        Vector3f buoyForce = Vector3fPool.get(0, dy * area * DynamXPhysicsHelper.WATER_DENSITY * DynamXPhysicsHelper.GRAVITY * partFloat.buoyCoefficient, 0);
 
         debugBuoyForces.get(i).set(buoyForce.mult(0.001f));
         collisionObject.applyForce(buoyForce.multLocal(0.05f), rotatedFloatPos);

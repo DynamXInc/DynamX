@@ -20,6 +20,8 @@ public class PartFloat extends BasePart<ModularVehicleInfo> {
     public AxisAlignedBB box;
     public float size = 1;
 
+    @PackFileProperty(configNames = "BuoyCoefficient", required = false)
+    public float buoyCoefficient = 1f;
     @PackFileProperty(configNames = "DragCoefficient", required = false)
     public float dragCoefficient = 0.05f;
     @PackFileProperty(configNames = "Axis", required = false)

@@ -25,6 +25,7 @@ import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.world.BuiltinThreadedPhysicsWorld;
 import fr.dynamx.utils.DynamXLoadingTasks;
 import fr.dynamx.utils.client.CommandNetworkDebug;
+import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
@@ -144,6 +145,7 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
     @Override
     public void onResourceManagerReload(IResourceManager resourceManager, Predicate<IResourceType> resourcePredicate) {
         if (resourcePredicate.test(VanillaResourceType.MODELS)) {
+            DynamXRenderUtils.initGlMeshes();
             DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.CLIENT, DynamXLoadingTasks.MODEL).thenAccept(empty -> {
                 if (Minecraft.getMinecraft().player != null && DynamXErrorManager.getErrorManager().hasErrors(DynamXErrorManager.MODEL_ERRORS))
                     Minecraft.getMinecraft().player.sendMessage(new TextComponentTranslation("dynamx.reload.models.errors"));

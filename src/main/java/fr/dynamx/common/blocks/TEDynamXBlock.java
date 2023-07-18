@@ -8,6 +8,7 @@ import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.events.DynamXBlockEvent;
 import fr.dynamx.client.gui.GuiBlockCustomization;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.capability.DynamXChunkData;
 import fr.dynamx.common.capability.DynamXChunkDataProvider;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
@@ -112,7 +113,13 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
                 compound.getFloat("RotationX"),
                 compound.getFloat("RotationY"),
                 compound.getFloat("RotationZ"));
-        markCollisionsDirty();
+
+        if(blockObjectInfo == null && world != null && !world.isRemote) {
+            DynamXMain.log.warn("Block object info is null for te " + this + " at " + pos+ ". Removing it.");
+            world.setBlockToAir(pos);
+        }
+        else
+            markCollisionsDirty();
     }
 
     @Override
@@ -251,6 +258,9 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
      * @return The collision of this tile entity in the PhysicsWorld, without rotation or custom translation
      */
     public CompoundCollisionShape getPhysicsCollision() {
+        if (blockObjectInfo == null) {
+            throw new IllegalStateException("BlockObjectInfo is null for te " + this + " at " + pos);
+        }
         return blockObjectInfo.getCompoundCollisionShape();
     }
 

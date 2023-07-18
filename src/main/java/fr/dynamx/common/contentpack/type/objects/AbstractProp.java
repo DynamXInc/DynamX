@@ -86,7 +86,7 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
             }
         } else {
             getPartShapes().forEach(shape -> {
-                getCollisionBoxes().add(shape.getBoundingBox().offset(0.5, 0.5, 0.5));
+                getCollisionBoxes().add(new MutableBoundingBox(shape.getBoundingBox()).offset(0.5, -1.5, 0.5).offset(getTranslation()));
                 switch (shape.getShapeType()) {
                     case BOX:
                         compoundCollisionShape.addChildShape(new BoxCollisionShape(shape.getSize()), shape.getPosition());

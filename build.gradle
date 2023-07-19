@@ -136,87 +136,30 @@ task prepareAssets(type: Copy) {
 classes.dependsOn(prepareAssets)
 /** end of shit **/
 
-ext {
-    builtFile = ""
-    builtFileSources = ""
-}
-
-task onBuild(type: Jar) {
-    builtFile = archiveName.replaceAll(".jar", "-all.jar")
-    builtFileSources = archiveName.replaceAll(".jar", "-sources.jar")
-}
-
-task copyBuiltJar(type: Copy, dependsOn: onBuild) {
-    project.logger.lifecycle("Jar normal " + builtFile)
-    from file("$buildDir/libs/${builtFile}")
-    into file("MpsIn")
-}
-
-task copyBuiltJarSources(type: Copy, dependsOn: onBuild) {
-    project.logger.lifecycle("Jar sources " + builtFileSources)
-    from file("$buildDir/libs/${builtFileSources}")
-    into file("MpsIn")
-}
-
-task runMPSJar(type: JavaExec, dependsOn: copyBuiltJar) {
-    // Executable jars can have only _one_ jar on the classpath.
-    classpath = files("MpsExporter.jar")
-
-    // 'main' does not need to be specified
-    main = 'fr.aym.mps.exporter.MpsExporter'
-
-    // arguments to pass to the application
-    args 'export_mod'
-    args "${builtFile}"
-    args "${version}"
-}
-task runMPSJarSources(type: JavaExec, dependsOn: copyBuiltJarSources) {
-    // Executable jars can have only _one_ jar on the classpath.
-    classpath = files("MpsExporter.jar")
-
-    // 'main' does not need to be specified
-    main = 'fr.aym.mps.exporter.MpsExporter'
-
-    // arguments to pass to the application
-    args 'export_mod'
-    args "${builtFileSources}"
-    args "${version}"
-}
-
 tasks.reobfShadowJar.mustRunAfter shadowJar
-tasks.onBuild.mustRunAfter reobfShadowJar
-tasks.runMPSJar.mustRunAfter reobfShadowJar
-//tasks.runMPSJarSources.mustRunAfter runMPSJar
 
 task sourcesJar(type: Jar, dependsOn: classes) {
     from(sourceSets.main.allSource) {
         include 'fr/**/**'
-    }
-    from (sourceSets.main.output){
-        include '**'
     }
     classifier = 'sources'
 }
 
 build {
     dependsOn reobfShadowJar
-    dependsOn runMPSJar
+    dependsOn sourcesJar
 }
 
-runMPSJar {
-    dependsOn copyBuiltJar
-}
 
 artifactoryPublish.dependsOn build
-artifactoryPublish.dependsOn runMPSJar//Sources
 
 publishing {
     publications {
         mavenJava(MavenPublication) {
             artifactId = mavenArtifactId
-            //from components.java
-            artifact source: ("MpsOut/${builtFile}"), extension: 'jar'
-            //artifact source: ("MpsOut/${builtFileSources}"), classifier: "sources", extension: 'jar'
+
+            artifact shadowJar
+            artifact sourcesJar
         }
     }
 }

@@ -24,14 +24,12 @@ import net.minecraft.util.math.Vec3d;
 public abstract class EntityPhysicsHandler<T extends PhysicsEntity<?>> extends AbstractEntityPhysicsHandler<T, PhysicsRigidBody> {
     private final Vector3f linearVel = new Vector3f();
     private final Vector3f rotationalVel = new Vector3f();
-    private boolean appliedBuoy;
 
     protected boolean isInLiquid;
     protected float waterLevel;
 
     public EntityPhysicsHandler(T entity) {
         super(entity);
-        collisionObject.setPhysicsRotation(entity.physicsRotation);
     }
 
     @Override

@@ -303,6 +303,10 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
             DynamXErrorManager.addPackError(obj.getPackName(), "deprecated_seat_config", ErrorLevel.LOW, obj.getName(), name);
             return infoTypesRegistry.getEntries().get("seat").create(obj, tags[0]);
         }
+        if(key.contains("door") && infoTypesRegistry.getEntries().containsKey("door")) {
+            DynamXErrorManager.addPackError(obj.getPackName(), "deprecated_door_config", ErrorLevel.LOW, obj.getName(), name);
+            return infoTypesRegistry.getEntries().get("door").create(obj, tags[0]);
+        }
         if (tags.length == 1 || !optionalDependencyMatcher.test(tags[1]))
             DynamXErrorManager.addPackError(obj.getPackName(), "unknown_sub_info", ErrorLevel.HIGH, obj.getName(), name);
         // else optional block

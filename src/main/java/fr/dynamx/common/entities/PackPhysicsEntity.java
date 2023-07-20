@@ -101,7 +101,6 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
     protected void writeEntityToNBT(NBTTagCompound tagCompound) {
         tagCompound.setString("vehicleName", getInfoName());
         tagCompound.setInteger("Metadata", getMetadata());
-
         super.writeEntityToNBT(tagCompound);
     }
 

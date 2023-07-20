@@ -49,7 +49,7 @@ public class SimplePartLightSource extends LightObject implements ISubInfoType<I
         hashLightId();
         PartLightSource existing = owner.getLightSource(partName);
         if(existing != null)
-            DynamXErrorManager.addPackError(getPackName(), "deprecated_light_format", ErrorLevel.LOW, owner.getFullName(), "Light named " + name);
+            DynamXErrorManager.addPackError(getPackName(), "deprecated_light_format", ErrorLevel.LOW, owner.getName(), "Light named " + name);
         boolean add = false;
         if (existing == null) {
             existing = new PartLightSource((ISubInfoTypeOwner<ILightOwner<?>>) owner, this.name);

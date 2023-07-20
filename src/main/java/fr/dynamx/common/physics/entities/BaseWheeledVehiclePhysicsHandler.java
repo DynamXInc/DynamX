@@ -9,11 +9,14 @@ import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.EnumBulletShapeType;
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.type.vehicle.FrictionPoint;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import jme3utilities.math.MyQuaternion;
 import lombok.Getter;
 
 /**
@@ -32,8 +35,11 @@ public abstract class BaseWheeledVehiclePhysicsHandler<T extends BaseVehicleEnti
 
     @Override
     public PhysicsRigidBody createShape(Vector3f position, Quaternion rotation, float spawnRotation) {
-        Vector3f tmp = Vector3fPool.get(position);
-        Transform transform = new Transform(tmp, QuaternionPool.get(rotation));
+        if (MyQuaternion.isZero(rotation)) {
+            DynamXMain.log.warn("Resetting physics rotation of entity " + handledEntity);
+            rotation = DynamXGeometry.rotationYawToQuaternion(spawnRotation);
+        }
+        Transform transform = new Transform(position, QuaternionPool.get(rotation));
         ModularVehicleInfo modularVehicleInfo = getHandledEntity().getPackInfo();
 
         //Don't use this.getPackInfo() : it isn't initialized yet

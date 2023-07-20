@@ -158,7 +158,9 @@ publishing {
         mavenJava(MavenPublication) {
             artifactId = mavenArtifactId
 
-            artifact shadowJar
+            artifact(shadowJar){
+                classifier = ''
+            }
             artifact sourcesJar
         }
     }

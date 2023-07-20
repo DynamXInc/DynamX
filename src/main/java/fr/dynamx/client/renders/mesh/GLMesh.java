@@ -39,6 +39,8 @@ import fr.dynamx.utils.maths.DynamXGeometry;
 import jme3utilities.Validate;
 import jme3utilities.math.MyMath;
 import jme3utilities.math.MyVector3f;
+import lombok.Getter;
+import net.minecraft.client.renderer.GlStateManager;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 
@@ -104,6 +106,7 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
     /**
      * texture coordinates (2 floats per vertex) or null if none
      */
+    @Getter
     private VertexBuffer textureCoordinates;
     // *************************************************************************
     // constructors
@@ -479,6 +482,11 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
         return this;
     }
 
+    public void setUvs(VertexBuffer uvs){
+        verifyMutable();
+        this.textureCoordinates = new VertexBuffer(uvs.getBuffer(), uvs.fpv, 2);
+    }
+
     /**
      * Access the positions VertexBuffer.
      *
@@ -531,14 +539,12 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
 
         } else {
             indices.drawElements(drawMode);
+            DynamXRenderUtils.checkForOglError();
+
         }
 
-        if(positions != null)
-            positions.unbindVbo();
-        if(normals != null)
-            normals.unbindVbo();
-        if(textureCoordinates != null)
-            textureCoordinates.unbindVbo();
+        disableAttributes();
+        DynamXRenderUtils.checkForOglError();
 
         GL30.glBindVertexArray(0);
 
@@ -702,7 +708,7 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
      *
      * @return a new buffer with a capacity of 2 * vertexCount floats
      */
-    protected VertexBuffer createUvs() {
+    public VertexBuffer createUvs() {
         verifyMutable();
         this.textureCoordinates
                 = new VertexBuffer(vertexCount, 2, 2);
@@ -857,6 +863,16 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
         }
         if (textureCoordinates != null) {
             textureCoordinates.prepareToDraw();
+        }
+    }
+
+    private void disableAttributes(){
+        positions.stopDraw();
+        if (normals != null) {
+            normals.stopDraw();
+        }
+        if (textureCoordinates != null) {
+            textureCoordinates.stopDraw();
         }
     }
 

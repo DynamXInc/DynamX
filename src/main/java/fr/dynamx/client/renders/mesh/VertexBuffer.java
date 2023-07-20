@@ -34,11 +34,15 @@ import fr.dynamx.utils.client.DynamXRenderUtils;
 import jme3utilities.Validate;
 import jme3utilities.math.MyBuffer;
 import jme3utilities.math.MyQuaternion;
+import net.minecraft.client.renderer.GlStateManager;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 
 import java.nio.FloatBuffer;
+
+import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
+import static org.lwjgl.opengl.GL15.glBindBuffer;
 
 /**
  * Wrapper class for a named attribute in a SPORT mesh, including its VBO and
@@ -76,7 +80,7 @@ public class VertexBuffer {
     /**
      * number of floats per vertex (&ge;1, &le;4)
      */
-    final private int fpv;
+    final public int fpv;
     /**
      * expected usage pattern
      */
@@ -95,11 +99,11 @@ public class VertexBuffer {
     /**
      * Instantiate a mutable VertexBuffer with the specified data.
      *
-     * @param data data for initialization (not null, length a multiple of
-     * {@code fpv}, alias created)
-     * @param fpv number of float values per vertex (&ge;1, &le;4)
+     * @param data        data for initialization (not null, length a multiple of
+     *                    {@code fpv}, alias created)
+     * @param fpv         number of float values per vertex (&ge;1, &le;4)
      * @param attribIndex name of the corresponding attrib variable in shaders
-     * (not null, not empty)
+     *                    (not null, not empty)
      */
     VertexBuffer(float[] data, int fpv, int attribIndex) {
         Validate.nonNull(data, "data");
@@ -115,11 +119,11 @@ public class VertexBuffer {
     /**
      * Instantiate a mutable VertexBuffer with the specified data buffer.
      *
-     * @param data data for initialization (not null, capacity a multiple of
-     * {@code fpv}, alias created)
-     * @param fpv number of float values per vertex (&ge;1, &le;4)
+     * @param data        data for initialization (not null, capacity a multiple of
+     *                    {@code fpv}, alias created)
+     * @param fpv         number of float values per vertex (&ge;1, &le;4)
      * @param attribIndex name of the corresponding attrib variable in shaders
-     * (not null, not empty)
+     *                    (not null, not empty)
      */
     VertexBuffer(FloatBuffer data, int fpv, int attribIndex) {
         Validate.nonNull(data, "data");
@@ -137,9 +141,9 @@ public class VertexBuffer {
      * buffer.
      *
      * @param numVertices number of vertices (&ge;0)
-     * @param fpv number of float values per vertex (&ge;1, &le;4)
+     * @param fpv         number of float values per vertex (&ge;1, &le;4)
      * @param attribIndex name of the corresponding attrib variable in shaders
-     * (not null, not empty)
+     *                    (not null, not empty)
      */
     VertexBuffer(int numVertices, int fpv, int attribIndex) {
         Validate.nonNegative(numVertices, "number of vertices");
@@ -200,8 +204,8 @@ public class VertexBuffer {
      * Read a Vector3f from the specified buffer position. Does not alter the
      * buffer's read/write position.
      *
-     * @param position the position from which to begin reading (&ge;0,
-     * &lt;limit-2)
+     * @param position    the position from which to begin reading (&ge;0,
+     *                    &lt;limit-2)
      * @param storeResult storage for the result (modified if not null)
      * @return the value that was read (either {@code storeResult} or a new
      * vector)
@@ -257,7 +261,6 @@ public class VertexBuffer {
      * If the attribute is active in the specified ShaderProgram, then enable
      * the attribute and prepare it for drawing. This includes generating the
      * VBO, if that hasn't happened yet.
-     *
      */
     void prepareToDraw() {
 
@@ -278,12 +281,48 @@ public class VertexBuffer {
         boolean normalized = false;
         int stride = 0; // tightly packed
         long startOffset = 0L;
-        GL20.glVertexAttribPointer(location, fpv, elementType,
-                normalized, stride, startOffset);
+        switch (location) {
+            case 0:
+                GlStateManager.glEnableClientState(GL11.GL_VERTEX_ARRAY);
+                GL11.glVertexPointer(3, GL11.GL_FLOAT, 0, 0);
+                break;
+            case 1:
+                GlStateManager.glEnableClientState(GL11.GL_NORMAL_ARRAY);
+                GL11.glNormalPointer(GL11.GL_FLOAT, 0, 0L);
+                break;
+            case 2:
+                GlStateManager.glEnableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
+                GL11.glTexCoordPointer(2, GL11.GL_FLOAT, 0, 0);
+                break;
+        }
         DynamXRenderUtils.checkForOglError();
 
-        GL20.glEnableVertexAttribArray(location);
+       /* GL20.glVertexAttribPointer(location, fpv, elementType,
+                normalized, stride, startOffset);*/
         DynamXRenderUtils.checkForOglError();
+
+        //GL20.glEnableVertexAttribArray(location);
+
+        unbindVbo();
+
+    }
+
+    void stopDraw(){
+        int location = attribIndex;
+        if (location == -1) { // attribute not active in the program
+            return;
+        }
+        switch (location) {
+            case 0:
+                GlStateManager.glDisableClientState(GL11.GL_VERTEX_ARRAY);
+                break;
+            case 1:
+                GlStateManager.glDisableClientState(GL11.GL_NORMAL_ARRAY);
+                break;
+            case 2:
+                GlStateManager.glDisableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
+                break;
+        }
     }
 
     /**
@@ -307,7 +346,7 @@ public class VertexBuffer {
      * alter the buffer's read/write position.
      *
      * @param position the position to write to (&ge;0, &lt;limit)
-     * @param fValue the value to write
+     * @param fValue   the value to write
      * @return the (modified) current instance (for chaining)
      */
     public VertexBuffer put(int position, float fValue) {
@@ -324,7 +363,7 @@ public class VertexBuffer {
      * alter the buffer's read/write position.
      *
      * @param position the position to write to (&ge;0, &lt;limit)
-     * @param vector the vector to write (not null, unaffected)
+     * @param vector   the vector to write (not null, unaffected)
      * @return the (modified) current instance (for chaining)
      */
     public VertexBuffer put(int position, Vector3f vector) {

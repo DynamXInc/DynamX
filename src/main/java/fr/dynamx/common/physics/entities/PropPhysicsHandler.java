@@ -6,9 +6,12 @@ import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.EnumBulletShapeType;
+import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.type.objects.PropObject;
 import fr.dynamx.common.entities.PropsEntity;
+import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.QuaternionPool;
+import jme3utilities.math.MyQuaternion;
 
 public class PropPhysicsHandler<T extends PropsEntity<?>> extends PackEntityPhysicsHandler<PropObject<?>, T> {
 
@@ -18,6 +21,10 @@ public class PropPhysicsHandler<T extends PropsEntity<?>> extends PackEntityPhys
 
     @Override
     public PhysicsRigidBody createShape(Vector3f position, Quaternion rotation, float spawnRotation) {
+        if (MyQuaternion.isZero(rotation)) {
+            DynamXMain.log.warn("Resetting physics rotation of entity " + handledEntity);
+            rotation = DynamXGeometry.rotationYawToQuaternion(spawnRotation);
+        }
         Transform transform = new Transform(position, QuaternionPool.get(rotation));
 
         //Don't use this.getPackInfo() : it isn't initialized yet

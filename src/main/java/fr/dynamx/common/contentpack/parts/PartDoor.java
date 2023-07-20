@@ -63,6 +63,9 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
             return new IPackFilePropertyFixer.FixResult("DoorCloseForce", true);
         return null;
     };
+    @Getter
+    @PackFileProperty(configNames = "PartName")
+    private String partName;
 
     @Getter
     @PackFileProperty(configNames = "LocalCarAttachPoint", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y, required = false)

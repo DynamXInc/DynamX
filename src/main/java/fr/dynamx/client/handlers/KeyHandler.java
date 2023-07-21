@@ -47,6 +47,12 @@ public class KeyHandler {
 
     public static final KeyBinding KEY_POWERUP = new KeyBinding("key.powerup", Keyboard.KEY_CAPITAL, "key.categories." + DynamXConstants.ID);
     public static final KeyBinding KEY_POWERDOWN = new KeyBinding("key.powerdown", Keyboard.KEY_LSHIFT, "key.categories." + DynamXConstants.ID);
+    public static final KeyBinding KEY_HELICOPTER_PITCH_FORWARD = new KeyBinding("key.helicopter_pitch_forward", Keyboard.KEY_NUMPAD8, "key.categories." + DynamXConstants.ID);
+    public static final KeyBinding KEY_HELICOPTER_PITCH_BACKWARD = new KeyBinding("key.helicopter_pitch_backward", Keyboard.KEY_NUMPAD5, "key.categories." + DynamXConstants.ID);
+    public static final KeyBinding KEY_HELICOPTER_YAW_LEFT = new KeyBinding("key.helicopter_yaw_left", Keyboard.KEY_NUMPAD4, "key.categories." + DynamXConstants.ID);
+    public static final KeyBinding KEY_HELICOPTER_YAW_RIGHT = new KeyBinding("key.helicopter_yaw_right", Keyboard.KEY_NUMPAD6, "key.categories." + DynamXConstants.ID);
+    public static final KeyBinding KEY_LOCK_ROTATION = new KeyBinding("key.lock_rotation", Keyboard.KEY_NUMPAD1, "key.categories." + DynamXConstants.ID);
+
     public static final KeyBinding KEY_ATTACH_TRAILER = new KeyBinding("key.attachTrailer", Keyboard.KEY_H, "key.categories." + DynamXConstants.ID);
 
 
@@ -72,6 +78,12 @@ public class KeyHandler {
         ClientRegistry.registerKeyBinding(KEY_TAKE_OBJECT);
         ClientRegistry.registerKeyBinding(KEY_POWERUP);
         ClientRegistry.registerKeyBinding(KEY_POWERDOWN);
+
+        ClientRegistry.registerKeyBinding(KEY_HELICOPTER_PITCH_FORWARD);
+        ClientRegistry.registerKeyBinding(KEY_HELICOPTER_PITCH_BACKWARD);
+        ClientRegistry.registerKeyBinding(KEY_HELICOPTER_YAW_LEFT);
+        ClientRegistry.registerKeyBinding(KEY_HELICOPTER_YAW_RIGHT);
+        ClientRegistry.registerKeyBinding(KEY_LOCK_ROTATION);
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)

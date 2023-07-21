@@ -1,13 +1,14 @@
 package fr.dynamx.common.physics.entities;
 
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.type.vehicle.HelicopterPhysicsInfo;
-import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.HelicopterEngineModule;
 import fr.dynamx.common.entities.vehicles.HelicopterEntity;
 import fr.dynamx.utils.maths.DynamXGeometry;
+import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.Vector3fPool;
 
 public class HelicopterPhysicsHandler<A extends HelicopterEntity<?>> extends BaseVehiclePhysicsHandler<A> implements IPackInfoReloadListener {
@@ -56,6 +57,9 @@ public class HelicopterPhysicsHandler<A extends HelicopterEntity<?>> extends Bas
                 roll(-1);
             } else if (module.isTurningRight()) {
                 roll(1);
+            } else if (module.isHandBraking()) {
+                Quaternion targetRotation = DynamXGeometry.rotationYawToQuaternion(getHandledEntity().rotationYaw);
+                setPhysicsRotation(DynamXMath.slerp(0.05f, getRotation(), targetRotation, getRotation()));
             }
         }
 

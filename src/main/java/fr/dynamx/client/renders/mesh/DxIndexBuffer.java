@@ -145,7 +145,7 @@ public class DxIndexBuffer extends jme3utilities.lbj.IndexBuffer {
             updateDataStore();
         }
 
-        bindVbo();
+        //bindVbo();
         long indices = 0L;
         int numIndices = capacity();
         GL11.glDrawElements(drawMode, numIndices, elementType, indices);

@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RegisteredSubInfoType(name = "MaterialVariants", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.WHEELS, SubInfoTypeRegistries.ARMORS, SubInfoTypeRegistries.BLOCKS_AND_PROPS,
-        SubInfoTypeRegistries.HELICOPTER, SubInfoTypeRegistries.BOATS})
+        SubInfoTypeRegistries.HELICOPTER})
 public class MaterialVariantsInfo<T extends ISubInfoTypeOwner<T>> extends SubInfoType<T> implements IModelTextureVariantsSupplier.IModelTextureVariants {
     @PackFileProperty(configNames = "BaseMaterial", required = false)
     private String baseMaterial = "Default";

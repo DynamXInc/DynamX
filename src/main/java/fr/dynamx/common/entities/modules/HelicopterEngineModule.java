@@ -53,7 +53,9 @@ public class HelicopterEngineModule extends BasicEngineModule {
     }
 
     public void setPower(float power) {
-        this.power.set(MathHelper.clamp(power, 0, 1));
+        if(isEngineStarted()){
+            this.power.set(MathHelper.clamp(power, 0, 1));
+        }
     }
 
     public float getPower() {

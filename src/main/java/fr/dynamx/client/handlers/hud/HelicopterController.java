@@ -60,10 +60,14 @@ public class HelicopterController extends BaseController {
         HelicopterEngineModule engine = entity.getModuleByType(HelicopterEngineModule.class);
         if (engine.getEngineProperties() != null && engine != null) {
             if (KeyHandler.KEY_POWERUP.isPressed()) {
-                engine.setPower(engine.getPower() + 0.05f);
+                if(isEngineStarted){
+                    engine.setPower(engine.getPower() + 0.05f);
+                }
             }
             if (KeyHandler.KEY_POWERDOWN.isPressed()) {
-                engine.setPower(engine.getPower() - 0.05f);
+                if(isEngineStarted){
+                    engine.setPower(engine.getPower() - 0.05f);
+                }
             }
             if (KeyHandler.KEY_LOCK_ROTATION.isPressed()) {
                 mouseLocked = !mouseLocked;

@@ -28,7 +28,7 @@ public class HelicopterController extends BaseController {
 
     protected final HelicopterEngineModule engine;
 
-    protected static boolean mouseLocked = true;
+    protected static boolean mouseLocked = false;
 
     /**
      * @param entity is assumed to implement {@link IModuleContainer.ISeatsContainer}

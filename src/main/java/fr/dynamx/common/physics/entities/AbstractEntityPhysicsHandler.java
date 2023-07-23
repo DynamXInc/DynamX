@@ -2,6 +2,9 @@ package fr.dynamx.common.physics.entities;
 
 import com.jme3.bounding.BoundingBox;
 import com.jme3.bullet.collision.PhysicsCollisionObject;
+import com.jme3.bullet.objects.PhysicsGhostObject;
+import com.jme3.bullet.objects.PhysicsRigidBody;
+import com.jme3.bullet.objects.PhysicsSoftBody;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.physics.entities.EntityPhysicsState;
@@ -104,7 +107,12 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
         }
         handledEntity.physicsPosition.set(physicsPosition);
         handledEntity.physicsRotation.set(physicsRotation);
-        collisionObject.getCollisionShape().boundingBox(pos, physicsRotation, boundingBox);
+        if(collisionObject instanceof PhysicsRigidBody) {
+            collisionObject.getCollisionShape().boundingBox(pos, physicsRotation, boundingBox);
+        }else if(collisionObject instanceof PhysicsSoftBody){
+            collisionObject.boundingBox(boundingBox);
+
+        }
 
     }
 

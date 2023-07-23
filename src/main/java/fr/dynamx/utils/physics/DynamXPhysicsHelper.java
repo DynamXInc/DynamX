@@ -1,26 +1,20 @@
 package fr.dynamx.utils.physics;
 
-import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.bullet.collision.PhysicsRayTestResult;
 import com.jme3.bullet.collision.shapes.CollisionShape;
-import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
-import com.jme3.bullet.collision.shapes.HullCollisionShape;
-import com.jme3.bullet.collision.shapes.infos.ChildCollisionShape;
 import com.jme3.bullet.objects.PhysicsRigidBody;
+import com.jme3.bullet.objects.PhysicsSoftBody;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.EnumBulletShapeType;
 import fr.dynamx.api.physics.IPhysicsWorld;
-import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.PhysicsEntity;
-import fr.dynamx.utils.EnumPlayerStandOnTop;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.QuaternionPool;
-import fr.dynamx.utils.optimization.TransformPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.util.math.MathHelper;
 
@@ -81,15 +75,15 @@ public class DynamXPhysicsHelper {
     public static PhysicsRaycastResult castRay(IPhysicsWorld iPhysicsWorld, Vector3f from, Vector3f dir, Predicate<EnumBulletShapeType> ignoredBody) {
         Vector3fPool.openPool();
         List<PhysicsRayTestResult> results = new LinkedList<>();
-        if(iPhysicsWorld != null) {
+        if (iPhysicsWorld != null) {
             iPhysicsWorld.getDynamicsWorld().rayTest(from, dir, results);
         }
 
         for (PhysicsRayTestResult result : results) {
 
-            if (!(result.getCollisionObject() instanceof PhysicsRigidBody))
+            if (!(result.getCollisionObject() instanceof PhysicsRigidBody) && !(result.getCollisionObject() instanceof PhysicsSoftBody))
                 continue;
-            if (!ignoredBody.test(((BulletShapeType<?>) result.getCollisionObject().getUserObject()).getType()))
+            if (ignoredBody != null && !ignoredBody.test(((BulletShapeType<?>) result.getCollisionObject().getUserObject()).getType()))
                 continue;
 
             Vector3f hitPosition = Vector3fPool.get();
@@ -100,7 +94,7 @@ public class DynamXPhysicsHelper {
             Vector3f hitNormalInWorld = Vector3fPool.get();
             result.getHitNormalLocal(hitNormalInWorld);
 
-            PhysicsRigidBody hitBody = (PhysicsRigidBody) result.getCollisionObject();
+            PhysicsCollisionObject hitBody = result.getCollisionObject();
 
             return new PhysicsRaycastResult(from, dir, hitPosition, distance, hitNormalInWorld, hitBody);
         }
@@ -137,7 +131,7 @@ public class DynamXPhysicsHelper {
     }
 
 
-    public enum EnumPhysicsAxis{
+    public enum EnumPhysicsAxis {
         X, Y, Z, X_ROT, Y_ROT, Z_ROT;
 
         public static EnumPhysicsAxis fromString(String targetName) {

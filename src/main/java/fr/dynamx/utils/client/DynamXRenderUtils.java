@@ -2,8 +2,9 @@ package fr.dynamx.utils.client;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.client.handlers.ClientEventHandler;
-import fr.dynamx.client.renders.mesh.shapes.ArrowMesh;
-import fr.dynamx.client.renders.mesh.shapes.GridGLMesh;
+import fr.dynamx.client.renders.mesh.NormalsOption;
+import fr.dynamx.client.renders.mesh.UvsOption;
+import fr.dynamx.client.renders.mesh.shapes.*;
 import fr.dynamx.client.renders.vehicle.RenderBaseVehicle;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
@@ -28,6 +29,7 @@ import org.lwjgl.util.glu.Sphere;
 import org.lwjgl.util.vector.Quaternion;
 
 import javax.annotation.Nullable;
+import javax.vecmath.Vector4f;
 import java.awt.*;
 import java.util.List;
 
@@ -42,6 +44,11 @@ public class DynamXRenderUtils {
     public static ArrowMesh arrowMeshX;
     public static ArrowMesh arrowMeshY;
     public static ArrowMesh arrowMeshZ;
+    public static IcosphereGLMesh icosphereMesh;
+    public static OctasphereMesh octasphereMesh;
+
+    public static IcosphereGLMesh icosphereMeshToRender;
+
 
     private static final Sphere sphere = new Sphere();
 
@@ -50,6 +57,11 @@ public class DynamXRenderUtils {
         arrowMeshX = ArrowMesh.getMesh(0);
         arrowMeshY = ArrowMesh.getMesh(1);
         arrowMeshZ = ArrowMesh.getMesh(2);
+        icosphereMesh = new IcosphereGLMesh(3, true);
+        icosphereMesh.generateUvs(UvsOption.Spherical,
+                new Vector4f(0f, 1f, 0f, 0f), new Vector4f(0f, 0f, 1f, 0f));
+        icosphereMeshToRender = new IcosphereGLMesh(3, true);
+        octasphereMesh = new OctasphereMesh(3, true);
     }
 
     public static void drawBoundingBox(Vector3f halfExtent, float red, float green, float blue, float alpha) {

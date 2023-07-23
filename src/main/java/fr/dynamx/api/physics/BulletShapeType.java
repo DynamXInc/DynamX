@@ -44,7 +44,7 @@ public class BulletShapeType<T> {
         this.type = type;
         this.objectIn = objectIn;
         //Check client side
-        if (FMLCommonHandler.instance().getSide().isClient()) {
+        if (FMLCommonHandler.instance().getSide().isClient() && space != null) {
             generateDebugTriangles(space);
         }
     }

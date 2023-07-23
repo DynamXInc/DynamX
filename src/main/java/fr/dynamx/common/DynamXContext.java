@@ -6,7 +6,9 @@ import fr.dynamx.api.physics.IPhysicsSimulationMode;
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.api.physics.IRotatedCollisionHandler;
 import fr.dynamx.client.DynamXModelRegistry;
+import fr.dynamx.client.renders.mesh.shapes.FacesMesh;
 import fr.dynamx.common.entities.PhysicsEntity;
+import fr.dynamx.common.entities.SoftbodyEntity;
 import fr.dynamx.common.handlers.RotatedCollisionHandlerImpl;
 import fr.dynamx.common.network.DynamXNetwork;
 import fr.dynamx.common.objloader.data.ObjModelData;
@@ -32,6 +34,8 @@ public class DynamXContext {
     private static final IDnxNetworkSystem network;
     @SideOnly(Side.CLIENT)
     private static DynamXModelRegistry objModelRegistry;
+    @SideOnly(Side.CLIENT)
+    private static final Map<SoftbodyEntity, FacesMesh> SOFTBODY_ENTITY_MESH = new HashMap<>();
 
     private static final Map<EntityPlayer, PlayerPhysicsHandler> playerToCollision = new HashMap<>();
     private static final ConcurrentHashMap<EntityPlayer, PhysicsEntity<?>> walkingPlayers = new ConcurrentHashMap<>(0, 0.75f, 2);
@@ -111,6 +115,10 @@ public class DynamXContext {
 
     public static void setPlayerPickingObjects(Map<Integer, Integer> playerPickingObjects) {
         DynamXContext.playerPickingObjects = playerPickingObjects;
+    }
+
+    public static Map<SoftbodyEntity, FacesMesh> getSoftbodyEntityMesh() {
+        return SOFTBODY_ENTITY_MESH;
     }
 
     /**

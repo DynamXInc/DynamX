@@ -41,6 +41,8 @@ import jme3utilities.math.MyMath;
 import jme3utilities.math.MyVector3f;
 import lombok.Getter;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
+import net.minecraft.tileentity.TileEntity;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 
@@ -536,7 +538,6 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
             int startVertex = 0;
             GL11.glDrawArrays(drawMode, startVertex, vertexCount);
             DynamXRenderUtils.checkForOglError();
-
         } else {
             indices.drawElements(drawMode);
             DynamXRenderUtils.checkForOglError();

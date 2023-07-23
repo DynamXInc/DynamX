@@ -7,6 +7,7 @@ import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.aym.acslib.api.services.mps.ModProtectionContainer;
 import fr.aym.acslib.api.services.mps.ModProtectionService;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariableRegistry;
+import fr.dynamx.client.shaders.ShaderManager;
 import fr.dynamx.common.capability.DynamXChunkData;
 import fr.dynamx.common.capability.DynamXChunkDataStorage;
 import fr.dynamx.common.contentpack.AddonInfo;
@@ -14,17 +15,20 @@ import fr.dynamx.common.contentpack.AddonLoader;
 import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.entities.PropsEntity;
 import fr.dynamx.common.entities.RagdollEntity;
+import fr.dynamx.common.entities.SoftbodyEntity;
 import fr.dynamx.common.entities.vehicles.*;
 import fr.dynamx.common.handlers.DynamXGuiHandler;
 import fr.dynamx.common.items.tools.ItemRagdoll;
 import fr.dynamx.common.items.tools.ItemShockWave;
 import fr.dynamx.common.items.tools.ItemSlopes;
+import fr.dynamx.common.items.vehicle.ItemSoftbody;
 import fr.dynamx.common.objloader.data.ObjObjectData;
 import fr.dynamx.server.command.DynamXCommands;
 import fr.dynamx.utils.*;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.physics.NativeEngineInstaller;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.SimpleReloadableResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeVersion;
 import net.minecraftforge.common.capabilities.CapabilityManager;
@@ -94,6 +98,8 @@ public class DynamXMain {
             }
         });
 
+        new ItemSoftbody<>();
+
         bar.step("Init addons");
         //Loading content packs
         AddonLoader.initAddons();
@@ -117,12 +123,12 @@ public class DynamXMain {
         EntityRegistry.registerModEntity(new ResourceLocation(DynamXConstants.ID, "entity_car"), CarEntity.class, "entity_car", 102, this, 200, 4, false);
         EntityRegistry.registerModEntity(new ResourceLocation(DynamXConstants.ID, "entity_trailer"), TrailerEntity.class, "entity_trailer", 105, this, 200, 4, false);
         EntityRegistry.registerModEntity(new ResourceLocation(DynamXConstants.ID, "entity_prop"), PropsEntity.class, "entity_prop", 106, this, 200, 40, false);
-        //EntityRegistry.registerModEntity(new ResourceLocation(DynamXMain.ID, "entity_boat"), BoatEntity.class, "entity_boat", 107, this, 200, 4, false);
         EntityRegistry.registerModEntity(new ResourceLocation(DynamXConstants.ID, "entity_boat"), BoatEntity.class, "entity_boat", 107, this, 200, 4, false);
         EntityRegistry.registerModEntity(new ResourceLocation(DynamXConstants.ID, "entity_ragdoll"), RagdollEntity.class, "entity_ragdoll", 108, this, 200, 4, false);
         EntityRegistry.registerModEntity(new ResourceLocation(DynamXConstants.ID, "entity_boat"), BoatEntity.class, "entity_boat", 107, this, 200, 4, false);
         EntityRegistry.registerModEntity(new ResourceLocation(DynamXConstants.ID, "entity_door"), DoorEntity.class, "entity_door", 109, this, 200, 4, false);
         EntityRegistry.registerModEntity(new ResourceLocation(DynamXConstants.ID, "entity_helico"), HelicopterEntity.class, "entity_helico", 110, this, 200, 4, false);
+        EntityRegistry.registerModEntity(new ResourceLocation(DynamXConstants.ID, "entity_softbody"), SoftbodyEntity.class, "entity_softbody", 111, this, 200, 4, false);
         /* Registering gui handler */
         NetworkRegistry.INSTANCE.registerGuiHandler(instance, new DynamXGuiHandler());
 
@@ -138,6 +144,9 @@ public class DynamXMain {
     public void postInit(FMLPostInitializationEvent event) {
         DynamXReflection.initReflection();
         SynchronizedEntityVariableRegistry.sortRegistry(mod -> true);
+        //TODO MOVE TO CLIENT PROXY
+        ((SimpleReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(new ShaderManager());
+
     }
 
     @EventHandler

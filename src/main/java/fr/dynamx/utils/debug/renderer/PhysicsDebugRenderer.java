@@ -1,6 +1,9 @@
 package fr.dynamx.utils.debug.renderer;
 
-import com.jme3.bullet.collision.shapes.*;
+import com.jme3.bullet.collision.shapes.BoxCollisionShape;
+import com.jme3.bullet.collision.shapes.CollisionShape;
+import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
+import com.jme3.bullet.collision.shapes.SphereCollisionShape;
 import com.jme3.bullet.collision.shapes.infos.ChildCollisionShape;
 import com.jme3.bullet.joints.Constraint;
 import com.jme3.bullet.joints.PhysicsJoint;
@@ -10,6 +13,9 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.client.handlers.ClientDebugSystem;
+import fr.dynamx.client.shaders.DxShader;
+import fr.dynamx.client.shaders.ShaderManager;
+import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.physics.utils.RigidBodyTransform;
 import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.client.DynamXRenderUtils;
@@ -18,12 +24,14 @@ import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import jme3utilities.math.MyBuffer;
 import net.minecraft.client.renderer.GlStateManager;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
 import org.lwjgl.util.glu.Sphere;
 
 import java.awt.*;
+import java.nio.FloatBuffer;
 
 
 public class PhysicsDebugRenderer {
@@ -33,20 +41,26 @@ public class PhysicsDebugRenderer {
         Quaternion physicsRotation = QuaternionPool.get();
         physicsSoftBody.getPhysicsLocation(physicsLocation);
         physicsSoftBody.getPhysicsRotation(physicsRotation);
-        /*BoundingBox bb = new BoundingBox();
-        physicsSoftBody.boundingBox(bb);
-        Vector3f min = new Vector3f();
-        Vector3f max = new Vector3f();
-        bb.getMin(min);
-        bb.getMax(max);
-        DynamXRenderUtils.drawBoundingBox(min, max, 1,0,0,1);*/
-        //GlStateManager.translate(physicsLocation.x, physicsLocation.y, physicsLocation.z);
-        //GlStateManager.rotate(GlQuaternionPool.get(physicsRotation));
+        //DynamXRenderUtils.glTranslate(physicsLocation);
+        ShaderManager.sceneGrid.useShader();
+        //Minecraft.getMinecraft().getTextureManager().bindTexture(new ResourceLocation("dynamxmod", "textures/ball.jpg"));
+        GlStateManager.color(1, 1, 1, 1);
 
-        //DynamXRenderUtils.drawBoundingBox(new Vector3f(1,1,1), 1,0,0,1);
+        DynamXContext.getSoftbodyEntityMesh().entrySet().stream().filter(entry -> entry.getKey().physicsHandler.getCollisionObject()
+                        .equals(physicsSoftBody))
+                .forEach(entry -> {
+                    entry.getValue().render();
+                    entry.getValue().update();
+                });
+        DxShader.stopShader();
+
+        /*Vector3f physicsLocation = Vector3fPool.get();
+        Quaternion physicsRotation = QuaternionPool.get();
+        physicsSoftBody.getPhysicsLocation(physicsLocation);
+        physicsSoftBody.getPhysicsRotation(physicsRotation);
+
         GlStateManager.glBegin(GL11.GL_TRIANGLES);
-        /*System.out.println(physicsSoftBody.countFaces());
-        System.out.println("n "+physicsSoftBody.countNodes());*/
+
         int numFaces = physicsSoftBody.countFaces();
         for (int i = 0; i < numFaces; i++) {
             Vector3f nodePos1 = Vector3fPool.get();
@@ -70,18 +84,13 @@ public class PhysicsDebugRenderer {
 
             Vector3f normal = tpt1.cross(tpt2);
 
-
-            /*GlStateManager.glNormal3f(nodeNormal1.x, nodeNormal1.y, nodeNormal1.z);
-            GlStateManager.glNormal3f(nodeNormal2.x, nodeNormal2.y, nodeNormal2.z);
-            GlStateManager.glNormal3f(nodeNormal3.x, nodeNormal3.y, nodeNormal3.z);*/
-
             GlStateManager.glVertex3f(nodePos1.x, nodePos1.y, nodePos1.z);
             GlStateManager.glVertex3f(nodePos2.x, nodePos2.y, nodePos2.z);
             GlStateManager.glVertex3f(nodePos3.x, nodePos3.y, nodePos3.z);
             GlStateManager.glNormal3f(normal.x, normal.y, normal.z);
 
         }
-        GlStateManager.glEnd();
+        GlStateManager.glEnd();*/
         GlStateManager.popMatrix();
     }
 
@@ -136,7 +145,6 @@ public class PhysicsDebugRenderer {
                 }
             }
         }
-
 
 
         GlStateManager.popMatrix();

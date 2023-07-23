@@ -29,6 +29,7 @@
  */
 package fr.dynamx.client.renders.mesh.shapes;
 
+
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import fr.dynamx.client.renders.mesh.DxIndexBuffer;

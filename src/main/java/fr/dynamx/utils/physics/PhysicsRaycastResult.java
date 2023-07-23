@@ -1,5 +1,6 @@
 package fr.dynamx.utils.physics;
 
+import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Vector3f;
 
@@ -22,7 +23,7 @@ public class PhysicsRaycastResult {
      **/
     public final Vector3f hitPos;
     /**
-     * The distance between the the first position of the raycast and the hit position
+     * The distance between the first position of the raycast and the hit position
      **/
     public final float distance;
     /**
@@ -30,16 +31,28 @@ public class PhysicsRaycastResult {
      */
     public final Vector3f hitNormal;
     /**
-     * The body hit bu the raycast
+     * The body hit by the raycast
      **/
-    public final PhysicsRigidBody hitBody;
+    public final PhysicsCollisionObject hitBody;
 
-    public PhysicsRaycastResult(Vector3f fromVec, Vector3f direction, Vector3f hitPos, float distance, Vector3f hitNormal, PhysicsRigidBody hitBody) {
+    public PhysicsRaycastResult(Vector3f fromVec, Vector3f direction, Vector3f hitPos, float distance, Vector3f hitNormal, PhysicsCollisionObject hitBody) {
         this.fromVec = fromVec;
         this.direction = direction;
         this.hitPos = hitPos;
         this.distance = distance;
         this.hitNormal = hitNormal;
         this.hitBody = hitBody;
+    }
+
+    @Override
+    public String toString() {
+        return "PhysicsRaycastResult{" +
+                "fromVec=" + fromVec +
+                ", direction=" + direction +
+                ", hitPos=" + hitPos +
+                ", distance=" + distance +
+                ", hitNormal=" + hitNormal +
+                ", hitBody=" + hitBody +
+                '}';
     }
 }

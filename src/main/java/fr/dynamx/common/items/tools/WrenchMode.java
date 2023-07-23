@@ -211,7 +211,7 @@ public class WrenchMode {
                 if (!ItemWrench.hasEntity(itemStack)) {
                     if (!shapeType.getType().isTerrain()) {
                         MovableModule movableModule = ((PhysicsEntity<?>) shapeType.getObjectIn()).getModuleByType(MovableModule.class);
-                        movableModule.attachObjects.initObject(result.hitBody, result.hitPos, JointEnd.A);
+                        movableModule.attachObjects.initObject((PhysicsRigidBody) result.hitBody, result.hitPos, JointEnd.A);
                         ItemWrench.writeEntity(itemStack, (PhysicsEntity<?>) shapeType.getObjectIn());
                     } else {
                         player.sendMessage(new TextComponentString("§cYou must first click on an entity"));
@@ -221,7 +221,7 @@ public class WrenchMode {
                     if (containedEntity != null) {
                         AttachObjects attachObjects = containedEntity.getModuleByType(MovableModule.class).attachObjects;
                         if (!shapeType.getType().isTerrain()) {
-                            attachObjects.initObject(result.hitBody, result.hitPos, JointEnd.B);
+                            attachObjects.initObject((PhysicsRigidBody) result.hitBody, result.hitPos, JointEnd.B);
                         } else if (!shouldWeldObjects) {
                             // Single ended joint
                             attachObjects.initObject((PhysicsRigidBody) containedEntity.physicsHandler.getCollisionObject(), result.hitPos, JointEnd.A);

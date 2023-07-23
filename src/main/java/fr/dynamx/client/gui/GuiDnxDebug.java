@@ -10,6 +10,7 @@ import fr.aym.acsguis.component.panel.GuiScrollPane;
 import fr.aym.acsguis.component.panel.GuiTabbedPane;
 import fr.aym.acsguis.component.textarea.GuiLabel;
 import fr.aym.acsguis.utils.GuiCssError;
+import fr.dynamx.client.shaders.ShaderManager;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.DynamXLoadingTasks;
@@ -41,6 +42,14 @@ public class GuiDnxDebug extends GuiFrame {
         //Options :
         {
             GuiPanel pane1 = generateDebugCategory(DynamXDebugOptions.DebugCategories.GENERAL);
+
+            GuiLabel shaderBox = new GuiLabel("Reload shaders");
+            shaderBox.setCssId("reload_shaders").setCssClass("reload_button");
+            shaderBox.addClickListener((x, y, bu) -> {
+                ShaderManager.init(Minecraft.getMinecraft().getResourceManager());
+            });
+            pane1.add(shaderBox);
+
             GuiLabel box = new GuiLabel("Reload packs");
             box.setCssId("reload_packs").setCssClass("reload_button");
             box.addClickListener((x, y, bu) -> {

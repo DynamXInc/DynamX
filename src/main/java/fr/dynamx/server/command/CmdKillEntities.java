@@ -3,6 +3,7 @@ package fr.dynamx.server.command;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.entities.PropsEntity;
 import fr.dynamx.common.entities.RagdollEntity;
+import fr.dynamx.common.entities.SoftbodyEntity;
 import fr.dynamx.common.entities.vehicles.*;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -15,7 +16,6 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.List;
 
 public class CmdKillEntities implements ISubCommand {
@@ -37,9 +37,9 @@ public class CmdKillEntities implements ISubCommand {
                 entityList = sender.getEntityWorld().getEntities(CarEntity.class, EntitySelectors.IS_ALIVE);
             } else if (args[1].equalsIgnoreCase("boats")) {
                 entityList = sender.getEntityWorld().getEntities(BoatEntity.class, EntitySelectors.IS_ALIVE);
-            }else if (args[1].equalsIgnoreCase("helicopters")) {
+            } else if (args[1].equalsIgnoreCase("helicopters")) {
                 entityList = sender.getEntityWorld().getEntities(HelicopterEntity.class, EntitySelectors.IS_ALIVE);
-            }else if (args[1].equalsIgnoreCase("props")) {
+            } else if (args[1].equalsIgnoreCase("props")) {
                 entityList = sender.getEntityWorld().getEntities(PropsEntity.class, EntitySelectors.IS_ALIVE);
             } else if (args[1].equalsIgnoreCase("ragdolls")) {
                 entityList = sender.getEntityWorld().getEntities(RagdollEntity.class, EntitySelectors.IS_ALIVE);
@@ -47,6 +47,8 @@ public class CmdKillEntities implements ISubCommand {
                 entityList = sender.getEntityWorld().getEntities(TrailerEntity.class, EntitySelectors.IS_ALIVE);
             } else if (args[1].equalsIgnoreCase("doors")) {
                 entityList = sender.getEntityWorld().getEntities(DoorEntity.class, EntitySelectors.IS_ALIVE);
+            } else if (args[1].equalsIgnoreCase("softbodies")) {
+                entityList = sender.getEntityWorld().getEntities(SoftbodyEntity.class, EntitySelectors.IS_ALIVE);
             } else if (args[1].equalsIgnoreCase("all")) {
                 entityList = sender.getEntityWorld().getEntities(PhysicsEntity.class, EntitySelectors.IS_ALIVE);
             } else {
@@ -68,6 +70,7 @@ public class CmdKillEntities implements ISubCommand {
             r.add("props");
             r.add("ragdolls");
             r.add("doors");
+            r.add("softbodies");
         }
     }
 
@@ -77,10 +80,15 @@ public class CmdKillEntities implements ISubCommand {
             return;
         }
         entityList.forEach(Entity::setDead);
-        if(name.equals("all")) {
-            sender.sendMessage(new TextComponentString(TextFormatting.GOLD + "" + entityList.size() + " " + TextFormatting.GREEN +  "entities have been killed."));
+        if (name.equals("all")) {
+            String entity = "entities";
+            if (entityList.size() <= 1) {
+                entity = "entity";
+            }
+
+            sender.sendMessage(new TextComponentString(TextFormatting.GOLD + "" + entityList.size() + " " + TextFormatting.GREEN + entity + " killed."));
             return;
         }
-        sender.sendMessage(new TextComponentString(TextFormatting.GOLD + "" + entityList.size() + " " + TextFormatting.GREEN + name + " have been killed."));
+        sender.sendMessage(new TextComponentString(TextFormatting.GOLD + "" + entityList.size() + " " + TextFormatting.GREEN + name + " killed."));
     }
 }

@@ -24,9 +24,7 @@ import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -171,9 +169,24 @@ public class ClientDebugSystem {
                 for (PhysicsRigidBody body : DynamXContext.getPhysicsWorld(MC.world).getDynamicsWorld().getRigidBodyList()) {
                     PhysicsDebugRenderer.debugRigidBody(body, getPrevRigidBodyTransform(body.nativeId()), getCurrentRigidBodyTransform(body.nativeId()), event.getPartialTicks());
                 }
+
+                GlStateManager.disableLighting();
+                GlStateManager.enableTexture2D();
+                GlStateManager.enableAlpha();
+                GlStateManager.enableBlend();
+                GlStateManager.enableDepth();
+
+                //RenderHelper.enableStandardItemLighting();
+
+
                 DynamXContext.getPhysicsWorld(MC.world).getDynamicsWorld().getSoftBodyList().forEach(PhysicsDebugRenderer::debugSoftBody);
                 Vector3fPool.closePool();
                 QuaternionPool.closePool();
+
+                GlStateManager.disableLighting();
+                GlStateManager.disableTexture2D();
+                GlStateManager.enableAlpha();
+                GlStateManager.enableBlend();
 
                 GlStateManager.disableDepth();
                 Vector3fPool.openPool();

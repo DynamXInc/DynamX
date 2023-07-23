@@ -7,6 +7,7 @@ import fr.dynamx.client.handlers.KeyHandler;
 import fr.dynamx.client.network.ClientPhysicsEntitySynchronizer;
 import fr.dynamx.client.renders.RenderProp;
 import fr.dynamx.client.renders.RenderRagdoll;
+import fr.dynamx.client.renders.RenderSoftbody;
 import fr.dynamx.client.renders.TESRDynamXBlock;
 import fr.dynamx.client.renders.vehicle.RenderBaseVehicle;
 import fr.dynamx.client.renders.vehicle.RenderDoor;
@@ -17,6 +18,7 @@ import fr.dynamx.common.blocks.TEDynamXBlock;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.entities.PropsEntity;
 import fr.dynamx.common.entities.RagdollEntity;
+import fr.dynamx.common.entities.SoftbodyEntity;
 import fr.dynamx.common.entities.vehicles.*;
 import fr.dynamx.common.network.sync.PhysicsEntitySynchronizer;
 import fr.dynamx.common.network.sync.SPPhysicsEntitySynchronizer;
@@ -76,6 +78,7 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
         RenderingRegistry.registerEntityRenderingHandler(PropsEntity.class, RenderProp::new);
         RenderingRegistry.registerEntityRenderingHandler(DoorEntity.class, RenderDoor::new);
         RenderingRegistry.registerEntityRenderingHandler(RagdollEntity.class, RenderRagdoll::new);
+        RenderingRegistry.registerEntityRenderingHandler(SoftbodyEntity.class, RenderSoftbody::new);
 
         ((SimpleReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(this);
     }

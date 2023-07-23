@@ -1,5 +1,6 @@
 package fr.dynamx.common.entities.modules.movables;
 
+import com.jme3.bullet.objects.PhysicsRigidBody;
 import fr.dynamx.api.network.EnumPacketTarget;
 import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.EnumBulletShapeType;
@@ -94,8 +95,10 @@ public class PickingObjectHelper {
                     && (!DynamXContext.getWalkingPlayers().containsKey(player)
                     || physicsEntity.getEntityId() != DynamXContext.getWalkingPlayers().get(player).getEntityId())) {
                 movableModule.usingAction = MovableModule.EnumAction.PICK;
-                movableModule.pickObjects.pickObject(player, physicsEntity, result.hitBody, result.hitPos,
-                        result.hitPos.subtract(result.fromVec).length());
+                if(result.hitBody instanceof PhysicsRigidBody) {
+                    movableModule.pickObjects.pickObject(player, physicsEntity, (PhysicsRigidBody) result.hitBody, result.hitPos,
+                            result.hitPos.subtract(result.fromVec).length());
+                }
             }
 
         }

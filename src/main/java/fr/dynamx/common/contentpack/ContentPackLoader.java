@@ -10,6 +10,7 @@ import fr.dynamx.api.network.sync.SynchronizedEntityVariableRegistry;
 import fr.dynamx.client.gui.GuiBlockCustomization;
 import fr.dynamx.client.gui.GuiDnxDebug;
 import fr.dynamx.client.gui.GuiLoadingErrors;
+import fr.dynamx.client.gui.GuiSoftbodyConfig;
 import fr.dynamx.client.handlers.hud.CarController;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
@@ -145,6 +146,7 @@ public class ContentPackLoader {
             ACsGuiApi.registerStyleSheetToPreload(CarController.STYLE);
             ACsGuiApi.registerStyleSheetToPreload(GuiBlockCustomization.STYLE);
             ACsGuiApi.registerStyleSheetToPreload(GuiSlopesConfig.STYLE);
+            ACsGuiApi.registerStyleSheetToPreload(GuiSoftbodyConfig.STYLE);
         }
         return myDir; //return the used path, used when reloading config
     }

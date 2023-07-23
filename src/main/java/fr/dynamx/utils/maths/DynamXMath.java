@@ -7,6 +7,9 @@ import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.util.math.MathHelper;
 
 import javax.vecmath.Quat4f;
+import javax.vecmath.Vector4f;
+import java.nio.FloatBuffer;
+import java.util.Arrays;
 
 /**
  * General math and interpolation methods
@@ -184,6 +187,52 @@ public class DynamXMath {
 
     public static float roundFloat(float f, float precision) {
         return (float) Math.round(f * precision) / precision;
+    }
+
+    private static void invertMat4(float[] matOut, float[] matIn) {
+        matOut[0] = matIn[5] * matIn[10] * matIn[15] - matIn[5] * matIn[11] * matIn[14] - matIn[9] * matIn[6] * matIn[15] + matIn[9] * matIn[7] * matIn[14] + matIn[13] * matIn[6] * matIn[11] - matIn[13] * matIn[7] * matIn[10];
+        matOut[1] = -matIn[1] * matIn[10] * matIn[15] + matIn[1] * matIn[11] * matIn[14] + matIn[9] * matIn[2] * matIn[15] - matIn[9] * matIn[3] * matIn[14] - matIn[13] * matIn[2] * matIn[11] + matIn[13] * matIn[3] * matIn[10];
+        matOut[2] = matIn[1] * matIn[6] * matIn[15] - matIn[1] * matIn[7] * matIn[14] - matIn[5] * matIn[2] * matIn[15] + matIn[5] * matIn[3] * matIn[14] + matIn[13] * matIn[2] * matIn[7] - matIn[13] * matIn[3] * matIn[6];
+        matOut[3] = -matIn[1] * matIn[6] * matIn[11] + matIn[1] * matIn[7] * matIn[10] + matIn[5] * matIn[2] * matIn[11] - matIn[5] * matIn[3] * matIn[10] - matIn[9] * matIn[2] * matIn[7] + matIn[9] * matIn[3] * matIn[6];
+        matOut[4] = -matIn[4] * matIn[10] * matIn[15] + matIn[4] * matIn[11] * matIn[14] + matIn[8] * matIn[6] * matIn[15] - matIn[8] * matIn[7] * matIn[14] - matIn[12] * matIn[6] * matIn[11] + matIn[12] * matIn[7] * matIn[10];
+        matOut[5] = matIn[0] * matIn[10] * matIn[15] - matIn[0] * matIn[11] * matIn[14] - matIn[8] * matIn[2] * matIn[15] + matIn[8] * matIn[3] * matIn[14] + matIn[12] * matIn[2] * matIn[11] - matIn[12] * matIn[3] * matIn[10];
+        matOut[6] = -matIn[0] * matIn[6] * matIn[15] + matIn[0] * matIn[7] * matIn[14] + matIn[4] * matIn[2] * matIn[15] - matIn[4] * matIn[3] * matIn[14] - matIn[12] * matIn[2] * matIn[7] + matIn[12] * matIn[3] * matIn[6];
+        matOut[7] = matIn[0] * matIn[6] * matIn[11] - matIn[0] * matIn[7] * matIn[10] - matIn[4] * matIn[2] * matIn[11] + matIn[4] * matIn[3] * matIn[10] + matIn[8] * matIn[2] * matIn[7] - matIn[8] * matIn[3] * matIn[6];
+        matOut[8] = matIn[4] * matIn[9] * matIn[15] - matIn[4] * matIn[11] * matIn[13] - matIn[8] * matIn[5] * matIn[15] + matIn[8] * matIn[7] * matIn[13] + matIn[12] * matIn[5] * matIn[11] - matIn[12] * matIn[7] * matIn[9];
+        matOut[9] = -matIn[0] * matIn[9] * matIn[15] + matIn[0] * matIn[11] * matIn[13] + matIn[8] * matIn[1] * matIn[15] - matIn[8] * matIn[3] * matIn[13] - matIn[12] * matIn[1] * matIn[11] + matIn[12] * matIn[3] * matIn[9];
+        matOut[10] = matIn[0] * matIn[5] * matIn[15] - matIn[0] * matIn[7] * matIn[13] - matIn[4] * matIn[1] * matIn[15] + matIn[4] * matIn[3] * matIn[13] + matIn[12] * matIn[1] * matIn[7] - matIn[12] * matIn[3] * matIn[5];
+        matOut[11] = -matIn[0] * matIn[5] * matIn[11] + matIn[0] * matIn[7] * matIn[9] + matIn[4] * matIn[1] * matIn[11] - matIn[4] * matIn[3] * matIn[9] - matIn[8] * matIn[1] * matIn[7] + matIn[8] * matIn[3] * matIn[5];
+        matOut[12] = -matIn[4] * matIn[9] * matIn[14] + matIn[4] * matIn[10] * matIn[13] + matIn[8] * matIn[5] * matIn[14] - matIn[8] * matIn[6] * matIn[13] - matIn[12] * matIn[5] * matIn[10] + matIn[12] * matIn[6] * matIn[9];
+        matOut[13] = matIn[0] * matIn[9] * matIn[14] - matIn[0] * matIn[10] * matIn[13] - matIn[8] * matIn[1] * matIn[14] + matIn[8] * matIn[2] * matIn[13] + matIn[12] * matIn[1] * matIn[10] - matIn[12] * matIn[2] * matIn[9];
+        matOut[14] = -matIn[0] * matIn[5] * matIn[14] + matIn[0] * matIn[6] * matIn[13] + matIn[4] * matIn[1] * matIn[14] - matIn[4] * matIn[2] * matIn[13] - matIn[12] * matIn[1] * matIn[6] + matIn[12] * matIn[2] * matIn[5];
+        matOut[15] = matIn[0] * matIn[5] * matIn[10] - matIn[0] * matIn[6] * matIn[9] - matIn[4] * matIn[1] * matIn[10] + matIn[4] * matIn[2] * matIn[9] + matIn[8] * matIn[1] * matIn[6] - matIn[8] * matIn[2] * matIn[5];
+        float det = matIn[0] * matOut[0] + matIn[1] * matOut[4] + matIn[2] * matOut[8] + matIn[3] * matOut[12];
+        if (det != 0.0) {
+            for (int i = 0; i < 16; i++)
+                matOut[i] = matOut[i] / det;
+        } else {
+            Arrays.fill(matOut, 0.0F);
+        }
+    }
+
+    /**
+     *  fbMatIn =  faMat
+     *  faInv = inverse(faMat)
+     *  fbInvOut = faInv
+     */
+    public static void invertMat4(FloatBuffer fbInvOut, FloatBuffer fbMatIn, float[] faInv, float[] faMat) {
+        fbMatIn.get(faMat);
+        invertMat4(faInv, faMat);
+        fbInvOut.put(faInv);
+    }
+
+    public static void multiplyMat4xVec3(Vector4f vecOut, float[] matA, Vector4f vecB) {
+        float x,y,z, w;
+        x = matA[0] * vecB.x + matA[4] * vecB.y + matA[8] * vecB.z + matA[12] * vecB.w;
+        y = matA[1] * vecB.x + matA[5] * vecB.y + matA[9] * vecB.z + matA[13] * vecB.w;
+        z = matA[2] * vecB.x + matA[6] * vecB.y + matA[10] * vecB.z + matA[14] * vecB.w;
+        w = matA[3] * vecB.x + matA[7] * vecB.y + matA[11] * vecB.z + matA[15] * vecB.w;
+        vecOut.set(x,y,z,w);
     }
 
     /**

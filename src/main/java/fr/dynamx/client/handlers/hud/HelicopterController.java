@@ -28,7 +28,7 @@ public class HelicopterController extends BaseController {
 
     protected final HelicopterEngineModule engine;
 
-    protected static boolean mouseLocked = true;
+    protected static boolean mouseLocked = false;
 
     /**
      * @param entity is assumed to implement {@link IModuleContainer.ISeatsContainer}
@@ -59,10 +59,10 @@ public class HelicopterController extends BaseController {
     protected void updateControls() {
         HelicopterEngineModule engine = entity.getModuleByType(HelicopterEngineModule.class);
         if (engine.getEngineProperties() != null && engine != null) {
-            if (KeyHandler.KEY_POWERUP.isPressed()) {
+            if (KeyHandler.KEY_POWERUP.isPressed() && isEngineStarted) {
                 engine.setPower(engine.getPower() + 0.05f);
             }
-            if (KeyHandler.KEY_POWERDOWN.isPressed()) {
+            if (KeyHandler.KEY_POWERDOWN.isPressed() && isEngineStarted) {
                 engine.setPower(engine.getPower() - 0.05f);
             }
             if (KeyHandler.KEY_LOCK_ROTATION.isPressed()) {

@@ -51,11 +51,8 @@ public class CameraSystem {
 
         if (lastCameraQuat == null)
             lastCameraQuat = new com.jme3.math.Quaternion(jmeQuatCache.getX(), jmeQuatCache.getY(), jmeQuatCache.getZ(), jmeQuatCache.getW());
-        //else //FIXME FIX THIS :c
-        //This causes camera stuttering since the input lag fix
-        //  DynamXGeometry.slerp(lastCameraQuat, jmeQuatCache, lastCameraQuat, animLength);
-        lastCameraQuat.set(jmeQuatCache);
-        //jmeQuatCache.set(lastCameraQuat);
+        else
+            DynamXMath.slerp(animLength, lastCameraQuat, jmeQuatCache, lastCameraQuat);
         lastCameraQuat.normalizeLocal();
         glQuatCache.set(lastCameraQuat.getX(), lastCameraQuat.getY(), lastCameraQuat.getZ(), lastCameraQuat.getW());
     }
@@ -70,7 +67,7 @@ public class CameraSystem {
         Entity renderEntity = event.getEntity();
 
         //Compute smoothed vehicle rotation, on axes according to camera mode
-        animateCameraRotation(vehicle.prevRenderRotation, vehicle.renderRotation, (float) event.getRenderPartialTicks(), 1);// /!\ do not use for helicopter 0.1f);
+        animateCameraRotation(vehicle.prevRenderRotation, vehicle.renderRotation, (float) event.getRenderPartialTicks(), 0.1f);
 
         //Apply camera zoom
         if (ClientEventHandler.MC.gameSettings.thirdPersonView > 0) {

@@ -59,6 +59,7 @@ public class DynamXCommands extends CommandBase {
             @Override
             public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
                 if (args.length == 2 && args[1].equalsIgnoreCase("help")) {
+                    sender.sendMessage(new TextComponentString("Usage: /dynamx " + getUsage()));
                     sender.sendMessage(new TextComponentString("Transforms the given 'player' in a ragdoll, during 'life_expectancy' ticks (or -1 for eternity). " +
                             "You can add a velocity to the ragdoll, the default value is 20, 20, 20."));
                     return;
@@ -91,6 +92,13 @@ public class DynamXCommands extends CommandBase {
                 Vector3fPool.closePool();
                 if (player != sender) {
                     sender.sendMessage(new TextComponentString("Ragdoll spawned!"));
+                }
+            }
+
+            @Override
+            public void getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos, List<String> r) {
+                if (args.length == 2) {
+                    r.addAll(CommandBase.getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames()));
                 }
             }
         });

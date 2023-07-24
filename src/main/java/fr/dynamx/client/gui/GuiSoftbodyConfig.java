@@ -16,6 +16,7 @@ import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.maths.DynamXMath;
+import fr.dynamx.utils.optimization.Vector3fPool;
 import fr.dynamx.utils.physics.DynamXPhysicsHelper;
 import fr.dynamx.utils.physics.PhysicsRaycastResult;
 import jme3utilities.math.MyBuffer;
@@ -209,21 +210,37 @@ public class GuiSoftbodyConfig extends GuiFrame {
         //System.out.println((        style.getWidth().getRawValue()) +" " + (        style.getHeight().getRawValue()));
         /*float mouseXPreview = mouseX;
         float mouseYPreview = mouseY;*/
-        float centerX = -(mouseX - (preview.getRenderMinX() + (preview.getWidth() / 2f))) / ((50 + scale) / 5);
-        float centerY = (mouseY - (preview.getRenderMinY() + (preview.getHeight() / 2f))) /((50 + scale) / 5);
-        Vector3f rotatedPoint = DynamXGeometry.getRotatedPoint(new Vector3f(centerX, centerY, 0), angleX, -angleY, 0);
+        //System.out.println(mouseX+" "+preview.getRenderMinX()+" "+preview.getWidth());
+        //angleX = 0;
+        //angleX = 0;
+        //angleY = 45;
+        //angleX = 0;
+
+        //Point où est là souris relativement au centre du dessin (point 0, 0)
+        float centerX = -(mouseX - (preview.getRenderMinX() + (preview.getWidth() / 2f))) / ((20 + scale) / 5f);
+        float centerY = (mouseY - (preview.getRenderMinY() + (preview.getHeight() / 2f))) / ((20 + scale) / 5f);
+        //Vector3f rotatedPoint = DynamXGeometry.getRotatedPoint(new Vector3f(centerX, centerY, 0), 180-angleY, angleX, 0);
         //System.out.println(rotatedPoint);
-        Vector3f rotatedPoint1 = DynamXGeometry.getRotatedPoint(new Vector3f(0, centerY, 0), angleX, -angleY, 0);
-        float mouseXPreview = rotatedPoint.x
-                + (preview.getRenderMinX() + (preview.getWidth() / 2f));
-        float mouseYPreview = (rotatedPoint.y)
-                + (preview.getRenderMinY() + (preview.getHeight() / 2f));
+        //Vector3f rotatedPoint1 = DynamXGeometry.getRotatedPoint(new Vector3f(0, centerY, 0), -angleY, angleX, 0);
+        //float mouseXPreview = rotatedPoint.x;
+                //+ (preview.getRenderMinX() + (preview.getWidth() / 2f));
+        //float mouseYPreview = (rotatedPoint.y);
+                //+ (preview.getRenderMinY() + (preview.getHeight() / 2f));
         //System.out.println(mouseXPreview + " " + mouseYPreview);
-        Vector3f start = getWorldCoordinates(mouseXPreview, mouseYPreview, 0);
-        start.z = 0;
-        Vector3f far = getWorldCoordinates(mouseXPreview, mouseYPreview, 1);
-        Vector3f direction = far.subtract(start);
+
+        //Rotation du point à l'inverse de la rotation du gui (pour se mettre dans le repère du world, rotation 0, 0, 0)
+        //Obligé de le faire en 2 fois pour que les rotations soient faites dans le bon ordre
+        Vector3f p1 = DynamXGeometry.getRotatedPoint(new Vector3f(centerX, centerY, 1), 0, -angleX, 0);
+        Vector3f start = DynamXGeometry.getRotatedPoint(p1, -180+angleY, 0, 0);//Vector3fPool.get(mouseXPreview, mouseYPreview, -100);//getWorldCoordinates(mouseXPreview, mouseYPreview, 0);
+        //System.out.println("Start is " + start);
+        //start.z = 0;
+
+        //Itedem pour la direction du rayon de raycast
+        Vector3f p2 = DynamXGeometry.getRotatedPoint(new Vector3f(0, 0, -1), 0, -angleX, 0);
+        //Vector3f far = DynamXGeometry.getRotatedPoint(new Vector3f(centerX, centerY, 1), -180+angleY, -angleX, 0);;//Vector3fPool.get(mouseXPreview, mouseYPreview, 100);//getWorldCoordinates(mouseXPreview, mouseYPreview, 1);
+        Vector3f direction = DynamXGeometry.getRotatedPoint(p2, -180+angleY, 0, 0);//far.subtract(start);
         MyVector3f.normalizeLocal(direction);
+        //System.out.println("DIRECTION" + direction);
         Vector3f fin$ = start.add(direction.multLocal(500));
 
         //test = start;
@@ -244,10 +261,11 @@ public class GuiSoftbodyConfig extends GuiFrame {
         Vector3f max = softBody.boundingBox(null).getMax(null);
         if(physicsRaycastResult != null && physicsRaycastResult.hitBody instanceof PhysicsSoftBody)
         {
-            System.out.println(physicsRaycastResult);
+            //System.out.println(physicsRaycastResult);
             test = physicsRaycastResult.hitPos;
-
+            //test = DynamXGeometry.getRotatedPoint(test, -180+angleY, -angleX, 0);
         }
+        //test = new Vector3f(start);
         //System.out.println(physicsRaycastResult +" from :" + start +" to:" + fin$ +" bb min:" + min +" max:" +max);
 
         GlStateManager.translate(posX, posY, 400);

@@ -10,6 +10,7 @@ import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import fr.dynamx.utils.physics.DynamXPhysicsHelper;
+import lombok.Getter;
 import net.minecraft.util.math.AxisAlignedBB;
 
 import java.util.ArrayList;
@@ -17,22 +18,31 @@ import java.util.List;
 
 @RegisteredSubInfoType(name = "float", registries = SubInfoTypeRegistries.WHEELED_VEHICLES, strictName = false)
 public class PartFloat extends BasePart<ModularVehicleInfo> {
-    public AxisAlignedBB box;
-    public float size = 1;
+    @Getter
+    protected AxisAlignedBB box;
+    @Getter
+    protected float size = 1;
 
+    @Getter
     @PackFileProperty(configNames = "BuoyCoefficient", required = false)
-    public float buoyCoefficient = 1f;
+    protected float buoyCoefficient = 1f;
+    @Getter
     @PackFileProperty(configNames = "DragCoefficient", required = false)
-    public float dragCoefficient = 0.05f;
+    protected float dragCoefficient = 0.05f;
+    @Getter
     @PackFileProperty(configNames = "Axis", required = false)
-    public DynamXPhysicsHelper.EnumPhysicsAxis axis;
+    protected DynamXPhysicsHelper.EnumPhysicsAxis axis;
+    @Getter
     @PackFileProperty(configNames = "Offset", required = false)
-    public Vector3f offset = new Vector3f();
+    protected Vector3f offset = new Vector3f();
+    @Getter
     @PackFileProperty(configNames = "LineSize", required = false)
-    public Vector3f lineSize = new Vector3f();
+    protected Vector3f lineSize = new Vector3f();
+    @Getter
     @PackFileProperty(configNames = "Spacing", required = false)
-    public Vector3f spacing = new Vector3f();
-    public List<Vector3f> childrenPositionList = new ArrayList<>();
+    protected Vector3f spacing = new Vector3f();
+    @Getter
+    protected List<Vector3f> childrenPositionList = new ArrayList<>();
 
     public PartFloat(ModularVehicleInfo owner, String partName) {
         super(owner, partName);
@@ -52,13 +62,13 @@ public class PartFloat extends BasePart<ModularVehicleInfo> {
             case X:
                 for (int i = 0; i < lineSize.x; i++) {
                     float xPos = (float) (box.minX + i * (size + spacing.x) + offset.x);
-                    childrenPositionList.add(Vector3fPool.get(getPosition()).addLocal(xPos + size / 2, 0, 0));
+                    childrenPositionList.add(Vector3fPool.getPermanentVector(getPosition()).addLocal(xPos + size / 2, 0, 0));
                 }
                 break;
             case Y:
                 for (int j = 0; j < lineSize.z; j++) {
                     float zPos = (float) (box.minZ + j * (size + spacing.z) + offset.z);
-                    childrenPositionList.add(Vector3fPool.get(getPosition()).addLocal(0, 0, zPos + size / 2));
+                    childrenPositionList.add(Vector3fPool.getPermanentVector(getPosition()).addLocal(0, 0, zPos + size / 2));
                 }
                 break;
             case Z:
@@ -66,7 +76,7 @@ public class PartFloat extends BasePart<ModularVehicleInfo> {
                     for (int j = 0; j < lineSize.z; j++) {
                         float xPos = (float) (box.minX + i * (size + spacing.x) + offset.x);
                         float zPos = (float) (box.minZ + j * (size + spacing.z) + offset.z);
-                        childrenPositionList.add(Vector3fPool.get(getPosition()).addLocal(xPos + size / 2, 0, zPos + size / 2));
+                        childrenPositionList.add(Vector3fPool.getPermanentVector(getPosition()).addLocal(xPos + size / 2, 0, zPos + size / 2));
                     }
                 }
                 break;

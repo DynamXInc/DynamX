@@ -4,11 +4,9 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.entities.modules.IVehicleController;
 import fr.dynamx.client.handlers.hud.BoatController;
-import fr.dynamx.client.handlers.hud.CarController;
 import fr.dynamx.common.contentpack.type.vehicle.BoatPropellerInfo;
 import fr.dynamx.common.entities.vehicles.BoatEntity;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
-import fr.dynamx.common.physics.entities.modules.EnginePhysicsHandler;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import lombok.Getter;
@@ -159,7 +157,7 @@ public class BoatPropellerModule extends BasicEngineModule implements IPackInfoR
         }
 
         public void steer(float strength) {
-            Vector3f look = Vector3fPool.get(-1, 0, 0);
+            Vector3f look = Vector3fPool.get(-1, 0, -0.8f);
             look = DynamXGeometry.rotateVectorByQuaternion(look, entity.physicsRotation);
             look.multLocal(getSteerForce() * strength * entity.physicsHandler.getLinearVelocity().length() / 3);
             Vector3f linearFactor = entity.physicsHandler.getCollisionObject().getLinearFactor(Vector3fPool.get());

@@ -22,6 +22,12 @@ public class BoatPropellerInfo extends SubInfoType<ModularVehicleInfo> {
     @PackFileProperty(configNames = "SteerForce")
     @Getter
     private float steerForce;
+    @PackFileProperty(configNames = "LinearDamping", required = false, defaultValue = "0.6")
+    @Getter
+    private float linearDamping = 0.6f;
+    @PackFileProperty(configNames = "AngularDamping", required = false, defaultValue = "0.7")
+    @Getter
+    private float angularDamping = 0.6f;
 
     public BoatPropellerInfo(ModularVehicleInfo owner) {
         super(owner);

@@ -305,6 +305,17 @@ public class MutableBoundingBox implements Serializable, IShapeInfo {
         return this.minX < x2 && this.maxX > x1 && this.minY < y2 && this.maxY > y1 && this.minZ < z2 && this.maxZ > z1;
     }
 
+    public boolean contains(Vector3f vec) {
+        if (vec.x > this.minX && vec.x < this.maxX) {
+            if (vec.y > this.minY && vec.y < this.maxY) {
+                return vec.z > this.minZ && vec.z < this.maxZ;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
     /**
      * Returns if the supplied Vec3D is completely inside the bounding box
      */

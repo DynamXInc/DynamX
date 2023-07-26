@@ -111,6 +111,7 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
             GlQuaternionPool.openPool();
             Quaternion q = te.getCollidableRotation();
             GlStateManager.pushMatrix();
+            DynamXRenderUtils.glTranslate(te.getRelativeTranslation());
             GlStateManager.translate(0.5D, 1.5D, 0.5D);
             GlStateManager.rotate(GlQuaternionPool.get(q));
             GlStateManager.translate(-0.5D, -1.5D, -0.5D);

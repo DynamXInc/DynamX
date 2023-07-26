@@ -1,14 +1,13 @@
 package fr.dynamx.common.entities;
 
 import com.jme3.math.Vector3f;
+import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent;
-import fr.dynamx.api.network.sync.SimulationHolder;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
 import fr.dynamx.common.contentpack.parts.PartSeat;
-import fr.dynamx.common.contentpack.parts.PartShape;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.utils.DynamXConfig;
@@ -19,7 +18,6 @@ import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
@@ -95,19 +93,18 @@ public abstract class BaseVehicleEntity<T extends BaseVehiclePhysicsHandler<?>> 
     public List<MutableBoundingBox> getCollisionBoxes() {
         if (getPackInfo() == null || physicsPosition == null)
             return new ArrayList<>(0);
-        if (unrotatedBoxes.size() != getPackInfo().getPartShapes().size()) {
+        if (unrotatedBoxes.size() != getPackInfo().getCollisionsHelper().getShapes().size()) {
             unrotatedBoxes.clear();
-            for (PartShape shape : getPackInfo().getPartShapes()) {
+            for (IShapeInfo shape : getPackInfo().getCollisionsHelper().getShapes()) {
                 MutableBoundingBox b = new MutableBoundingBox(shape.getBoundingBox());
                 b.offset(physicsPosition);
                 unrotatedBoxes.add(b);
             }
         } else {
-            for (int i = 0; i < getPackInfo().getPartShapes().size(); i++) {
+            for (int i = 0; i < getPackInfo().getCollisionsHelper().getShapes().size(); i++) {
                 MutableBoundingBox b = unrotatedBoxes.get(i);
-                b.setTo(getPackInfo().getPartShapes().get(i).getBoundingBox());
+                b.setTo(getPackInfo().getCollisionsHelper().getShapes().get(i).getBoundingBox());
                 b.offset(physicsPosition);
-                unrotatedBoxes.add(b);
             }
         }
         return unrotatedBoxes;

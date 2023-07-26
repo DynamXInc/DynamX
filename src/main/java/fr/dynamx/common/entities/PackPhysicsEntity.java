@@ -65,7 +65,7 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
     @Override
     public boolean initEntityProperties() {
         packInfo = createInfo(getInfoName());
-        if (packInfo != null && packInfo.getPhysicsCollisionShape() != null)
+        if (packInfo != null && packInfo.getCollisionsHelper().hasPhysicsCollisions())
             return super.initEntityProperties();
         DynamXMain.log.warn("Failed to find info of " + this + ". Should be " + getInfoName());
         return false;

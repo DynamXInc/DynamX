@@ -11,12 +11,9 @@ import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.contentpack.PackInfo;
-import fr.dynamx.common.contentpack.type.objects.AbstractProp;
-import fr.dynamx.common.contentpack.type.objects.PropObject;
 import fr.dynamx.common.objloader.data.ObjModelData;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXUtils;
-import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.util.ResourceLocation;
 import vhacd.VHACD;
@@ -235,32 +232,6 @@ public class ShapeUtils {
         }
         Vector3fPool.closePool();
         return vectors;
-    }
-
-    public static MutableBoundingBox getAABB(AbstractProp<?> info, Vector3f min, Vector3f max,
-                                             Vector3f additionalScale, Vector3f additionalTranslation) {
-        if (additionalScale == null)
-            additionalScale = new Vector3f();
-        if (additionalTranslation == null)
-            additionalTranslation = new Vector3f();
-        MutableBoundingBox aabb = new MutableBoundingBox(min.x, min.y, min.z, max.x, max.y, max.z);
-        aabb.scale(info.getScaleModifier().x + additionalScale.x,
-                info.getScaleModifier().y + additionalScale.y,
-                info.getScaleModifier().z + additionalScale.z);
-        if (!(info instanceof PropObject)) {
-            aabb.offset(
-                    0.5 + info.getTranslation().x + additionalTranslation.x,
-                    1.5 + info.getTranslation().y + additionalTranslation.y,
-                    0.5 + info.getTranslation().z + additionalTranslation.z);
-        }
-        return aabb;
-    }
-
-    public static void generateModelCollisions(AbstractProp<?> abstractProp, ObjModelData objModelData, CompoundCollisionShape compoundCollisionShape) {
-        objModelData.getObjObjects().forEach(objObject -> {
-            abstractProp.getCollisionBoxes().add(ShapeUtils.getAABB(abstractProp, objObject.getMesh().min(), objObject.getMesh().max(), new Vector3f(), new Vector3f()));
-            objObject.getMesh().addCollisionShape(compoundCollisionShape, abstractProp.getScaleModifier());
-        });
     }
 
     public static class ShapeGenerator implements Serializable {

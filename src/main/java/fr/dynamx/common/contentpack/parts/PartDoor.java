@@ -1,6 +1,5 @@
 package fr.dynamx.common.contentpack.parts;
 
-import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
 import fr.dynamx.api.contentpack.object.part.IDrawablePart;
@@ -14,6 +13,7 @@ import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.contentpack.type.ObjectCollisionsHelper;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
@@ -29,7 +29,6 @@ import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import fr.dynamx.utils.physics.DynamXPhysicsHelper;
-import fr.dynamx.utils.physics.ShapeUtils;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.renderer.GlStateManager;
@@ -40,9 +39,6 @@ import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nullable;
 import javax.vecmath.Vector2f;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 @RegisteredSubInfoType(name = "door", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER}, strictName = false)
@@ -112,7 +108,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     public boolean isPlayerMounting;
 
     @Getter
-    private CompoundCollisionShape physicsCollisionShape;
+    private ObjectCollisionsHelper collisionsHelper = new ObjectCollisionsHelper();
 
     public PartDoor(ModularVehicleInfo owner, String partName) {
         super(owner, partName, 0, 0);
@@ -180,8 +176,25 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     @Override
     public void appendTo(ModularVehicleInfo owner) {
         super.appendTo(owner);
+        MutableBoundingBox box = new MutableBoundingBox(getScale()).offset(getPosition());
+        collisionsHelper.addCollisionShape(new IShapeInfo() {
+            @Override
+            public Vector3f getPosition() {
+                return PartDoor.this.getPosition();
+            }
+
+            @Override
+            public Vector3f getSize() {
+                return getScale();
+            }
+
+            @Override
+            public MutableBoundingBox getBoundingBox() {
+                return box;
+            }
+        });
         ObjModelPath carModelPath = DynamXUtils.getModelPath(getPackName(), owner.getModel());
-        physicsCollisionShape = ShapeUtils.generateComplexModelCollisions(carModelPath, getPartName(), new Vector3f(1, 1, 1), new Vector3f(), 0);
+        collisionsHelper.loadCollisions(this, carModelPath, getPartName(), new Vector3f(), owner.getScaleModifier(), ObjectCollisionsHelper.CollisionType.PROP, owner.isUseComplexCollisions());
     }
 
     @Override
@@ -194,25 +207,6 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     @Override
     public Vector3f getCenterOfMass() {
         return new Vector3f();
-    }
-
-    /**
-     * @return All collision shapes of the object
-     */
-    @Override
-    public Collection<? extends IShapeInfo> getShapes() {
-        return Collections.singletonList(new IShapeInfo() {
-
-            @Override
-            public Vector3f getPosition() {
-                return PartDoor.this.getPosition();
-            }
-
-            @Override
-            public Vector3f getSize() {
-                return getScale();
-            }
-        });
     }
 
     @Override
@@ -279,5 +273,10 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     @Override
     public String[] getRenderedParts() {
         return new String[] {getPartName()};
+    }
+
+    @Override
+    public Vector3f getScaleModifier() {
+        return getScaleModifier(owner);
     }
 }

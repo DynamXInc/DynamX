@@ -370,7 +370,7 @@ public class VehicleDebugRenderer {
                     GlStateManager.translate(-entity.posX, -entity.posY, -entity.posZ);
 
                     Vector3f pos = DynamXGeometry.rotateVectorByQuaternion(container.getPosition(), entity.physicsRotation);
-                    MutableBoundingBox rotatedSize = DynamXContext.getCollisionHandler().rotateBB(Vector3fPool.get(0, 0, 0), container.getBox(), entity.physicsRotation);
+                    MutableBoundingBox rotatedSize = DynamXContext.getCollisionHandler().rotateBB(Vector3fPool.get(0, 0, 0), container.getBoundingBox(), entity.physicsRotation);
                     rotatedSize = rotatedSize.offset(pos);
                     rotatedSize = rotatedSize.offset(entity.physicsPosition);
                     DynamXRenderUtils.drawBoundingBox(rotatedSize.toBB(), 1, 0, 0, 1);

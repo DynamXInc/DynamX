@@ -238,7 +238,7 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
                 data.z = oldz;
 
             if (with instanceof PhysicsEntity && entity.world.isRemote && entity instanceof EntityPlayer &&
-                    (!(with instanceof PropsEntity) || ((PropsEntity<?>) with).getPackInfo().getPartShapes().isEmpty() || ((PropsEntity<?>) with).getPackInfo().getPartShapes().get(0).getShapeType() == PartShape.EnumPartType.BOX) &&
+                    (!(with instanceof PropsEntity) || ((PropsEntity<?>) with).getPackInfo().getCollisionsHelper().getShapes().isEmpty() || ((PropsEntity<?>) with).getPackInfo().getCollisionsHelper().getShapes().get(0).getShapeType() == PartShape.EnumPartType.BOX) &&
                     !collisionFaces.isEmpty() && WalkingOnPlayerController.controller == null && ((EntityPlayer) entity).isUser() && !DynamXContext.getPlayerPickingObjects().containsKey(entity.getEntityId())) //WIP
             {
                 PhysicsEntity<?> collidingWith = (PhysicsEntity<?>) with;

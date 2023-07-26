@@ -4,7 +4,7 @@ import com.jme3.math.Vector3f;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.contentpack.object.IPartContainer;
-import fr.dynamx.api.contentpack.object.IShapeContainer;
+import fr.dynamx.api.contentpack.object.ICollisionsContainer;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoType;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
@@ -65,7 +65,7 @@ public abstract class BasePart<T extends ISubInfoTypeOwner<?>> extends SubInfoTy
     }
 
     public Vector3f getScaleModifier(T vehicleInfo) {
-        return ((IShapeContainer) vehicleInfo).getScaleModifier();
+        return ((ICollisionsContainer) vehicleInfo).getScaleModifier();
     }
 
     public DynamXDebugOption getDebugOption() {
@@ -82,5 +82,4 @@ public abstract class BasePart<T extends ISubInfoTypeOwner<?>> extends SubInfoTy
         position.multLocal(getScaleModifier(this.owner));
         scale.multLocal(getScaleModifier(this.owner));
     }
-
 }

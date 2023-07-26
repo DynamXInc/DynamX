@@ -126,8 +126,8 @@ public class DoorEntity<T extends PackEntityPhysicsHandler<PartDoor, ?>> extends
         if (getPackInfo() == null || physicsPosition == null)
             return new ArrayList<>(0);
         List<MutableBoundingBox> list = new ArrayList<>();
-        for (IShapeInfo partShape : getPackInfo().getShapes()) {
-            list.add(new MutableBoundingBox(partShape.getSize()).offset(partShape.getPosition()).offset(physicsPosition));
+        for (IShapeInfo partShape : getPackInfo().getCollisionsHelper().getShapes()) {
+            list.add(new MutableBoundingBox(partShape.getBoundingBox()).offset(physicsPosition));
         }
         return list;
     }

@@ -1,16 +1,12 @@
 package fr.dynamx.common.contentpack.type.vehicle;
 
-import com.jme3.bullet.collision.shapes.BoxCollisionShape;
-import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.math.Vector3f;
-import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
-import fr.dynamx.api.contentpack.object.IShapeContainer;
+import fr.dynamx.api.contentpack.object.ICollisionsContainer;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.object.part.IDrawablePart;
-import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.contentpack.object.render.IObjPackObject;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
@@ -29,17 +25,15 @@ import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.loader.ObjectLoader;
 import fr.dynamx.common.contentpack.parts.ILightOwner;
 import fr.dynamx.common.contentpack.parts.PartLightSource;
-import fr.dynamx.common.contentpack.parts.PartShape;
 import fr.dynamx.common.contentpack.parts.PartWheel;
 import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
+import fr.dynamx.common.contentpack.type.ObjectCollisionsHelper;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.contentpack.type.objects.AbstractItemObject;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.EnumPlayerStandOnTop;
 import fr.dynamx.utils.client.DynamXRenderUtils;
-import fr.dynamx.utils.errors.DynamXErrorManager;
-import fr.dynamx.utils.physics.ShapeUtils;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.renderer.GlStateManager;
@@ -58,7 +52,7 @@ import java.util.*;
  * @see BaseVehicleEntity
  */
 public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, ModularVehicleInfo> implements IPhysicsPackInfo, IModelTextureVariantsSupplier,
-        ParticleEmitterInfo.IParticleEmitterContainer, IObjPackObject, IPartContainer<ModularVehicleInfo>, IShapeContainer, ILightOwner<ModularVehicleInfo> {
+        ParticleEmitterInfo.IParticleEmitterContainer, IObjPackObject, IPartContainer<ModularVehicleInfo>, ICollisionsContainer, ILightOwner<ModularVehicleInfo> {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("UseHullShape".equals(key))
@@ -125,19 +119,9 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
 
     @Getter
     @PackFileProperty(configNames = "UseComplexCollisions", required = false, defaultValue = "true", description = "common.UseComplexCollisions")
-    protected boolean useHullShape = true;
-
-    /**
-     * The collision shape of this vehicle, generated either form the partShapes list, or the obj model of the vehicle (hull shape)
-     */
+    protected boolean useComplexCollisions = true;
     @Getter
-    private CompoundCollisionShape physicsCollisionShape;
-
-    /**
-     * The shapes of this vehicle, can be used for collisions
-     */
-    @Getter
-    protected final List<PartShape<?>> partShapes = new ArrayList<>();
+    protected ObjectCollisionsHelper collisionsHelper = new ObjectCollisionsHelper();
 
     /**
      * The friction points of this vehicle
@@ -200,23 +184,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     @Override
     public boolean postLoad(boolean hot) {
         ObjModelPath modelPath = DynamXUtils.getModelPath(getPackName(), model);
-        try {
-            if (useHullShape)
-                physicsCollisionShape = ShapeUtils.generateComplexModelCollisions(modelPath, "chassis", scaleModifier, centerOfMass, shapeYOffset);
-            else {
-                physicsCollisionShape = new CompoundCollisionShape();
-                List<PartShape> partsByType = getPartsByType(PartShape.class);
-                for (PartShape<?> partShape : partsByType) {
-                    BoxCollisionShape hullShape = new BoxCollisionShape(partShape.getScale());
-                    hullShape.setScale(scaleModifier);
-                    physicsCollisionShape.addChildShape(hullShape, new Vector3f(centerOfMass.x, shapeYOffset + centerOfMass.y, centerOfMass.z).add(partShape.getPosition()));
-                }
-            }
-        } catch (Exception e) {
-            DynamXErrorManager.addError(getPackName(), DynamXErrorManager.PACKS_ERRORS, "collision_shape_error", ErrorLevel.FATAL, getName(), null, e);
-            physicsCollisionShape = null;
-            return false;
-        }
+        collisionsHelper.loadCollisions(this, modelPath, "chassis", centerOfMass, scaleModifier, ObjectCollisionsHelper.CollisionType.VEHICLE, useComplexCollisions);
 
         //Attach wheels and verify handbrake (V. 2.13.5)
         Map<String, PartWheelInfo> wheels = DynamXObjectLoaders.WHEELS.getInfos();
@@ -303,11 +271,6 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     }
 
     @Override
-    public Collection<? extends IShapeInfo> getShapes() {
-        return partShapes;
-    }
-
-    @Override
     public <A extends InteractivePart<?, ?>> List<A> getInteractiveParts() {
         return (List<A>) getPartsByType(InteractivePart.class);
     }
@@ -389,10 +352,6 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     @Override
     public String toString() {
         return "ModularVehicleInfo named " + getFullName();
-    }
-
-    public void addCollisionShape(PartShape partShape) {
-        partShapes.add(partShape);
     }
 
     public void addFrictionPoint(FrictionPoint frictionPoint) {

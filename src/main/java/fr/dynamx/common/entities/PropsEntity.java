@@ -1,6 +1,7 @@
 package fr.dynamx.common.entities;
 
 import com.jme3.math.Vector3f;
+import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
@@ -76,19 +77,19 @@ public class PropsEntity<T extends PackEntityPhysicsHandler<PropObject<?>, ?>> e
     public List<MutableBoundingBox> getCollisionBoxes() {
         if (getPackInfo() == null || physicsPosition == null)
             return new ArrayList<>(0);
-        if (unrotatedBoxes.size() != getPackInfo().getCollisionBoxes().size()) {
+        if (unrotatedBoxes.size() != getPackInfo().getCollisionsHelper().getShapes().size()) {
             unrotatedBoxes.clear();
-            for (MutableBoundingBox shape : getPackInfo().getCollisionBoxes()) {
-                MutableBoundingBox b = new MutableBoundingBox(shape);
+            for (IShapeInfo shape : getPackInfo().getCollisionsHelper().getShapes()) {
+                MutableBoundingBox b = new MutableBoundingBox(shape.getBoundingBox());
                 b.offset(physicsPosition);
                 unrotatedBoxes.add(b);
             }
         } else {
-            for (int i = 0; i < getPackInfo().getCollisionBoxes().size(); i++) {
+            for (int i = 0; i < getPackInfo().getCollisionsHelper().getShapes().size(); i++) {
                 MutableBoundingBox b = unrotatedBoxes.get(i);
-                b.setTo(getPackInfo().getCollisionBoxes().get(i));
+                b.setTo(getPackInfo().getCollisionsHelper().getShapes().get(i).getBoundingBox());
                 b.offset(physicsPosition);
-                unrotatedBoxes.add(b);
+                //unrotatedBoxes.add(b);
             }
         }
         return unrotatedBoxes;

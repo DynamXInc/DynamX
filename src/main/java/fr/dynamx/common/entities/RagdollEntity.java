@@ -222,7 +222,8 @@ public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> imple
     public void onRemovedFromWorld() {
         if (handledPlayer != null) {
             handledPlayer.eyeHeight = handledPlayer.getDefaultEyeHeight();
-            handledPlayer.setInvisible(false);
+            if(!handledPlayer.world.isRemote) //update player visibility depending on its game mode
+                handledPlayer.sendPlayerAbilities();
             if (handledPlayer.getRidingEntity() == null && !DynamXContext.getWalkingPlayers().containsKey(handledPlayer)
                     && DynamXContext.getPlayerToCollision().containsKey(handledPlayer))
                 DynamXContext.getPlayerToCollision().get(handledPlayer).addToWorld();

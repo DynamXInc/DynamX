@@ -70,6 +70,40 @@ public class ObjModelData {
         return objModelPath;
     }
 
+    public float[] getNormals() {
+        List<float[]> normalList = new ArrayList<>();
+        int size = 0;
+        for (ObjObjectData objObject : objObjects) {
+            if (!objObject.getName().toLowerCase().contains("main")) {
+                float[] normalsObject = getNormalsObject(objObject.getName().toLowerCase());
+                normalList.add(normalsObject);
+                size += normalsObject.length;
+            }
+        }
+        float[] normals = new float[size];
+        for (float[] floats : normalList) {
+            System.arraycopy(floats, 0, normals, 0, floats.length);
+        }
+        return normals;
+    }
+
+    public float[] getTexCoords() {
+        List<float[]> texCoordsList = new ArrayList<>();
+        int size = 0;
+        for (ObjObjectData objObject : objObjects) {
+            if (!objObject.getName().toLowerCase().contains("main")) {
+                float[] texCoordsObject = getTexCoordsObject(objObject.getName().toLowerCase());
+                texCoordsList.add(texCoordsObject);
+                size += texCoordsObject.length;
+            }
+        }
+        float[] texCoords = new float[size];
+        for (float[] floats : texCoordsList) {
+            System.arraycopy(floats, 0, texCoords, 0, floats.length);
+        }
+        return texCoords;
+    }
+
     public float[] getVerticesPos() {
         List<float[]> posList = new ArrayList<>();
         int size = 0;
@@ -117,6 +151,35 @@ public class ObjModelData {
             }
         }
         return pos;
+    }
+
+    public float[] getTexCoordsObject(String objectName) {
+        float[] texCoord = new float[0];
+        for (ObjObjectData objObject : objObjects) {
+            if (objObject.getName().toLowerCase().contains(objectName.toLowerCase())) {
+                texCoord = new float[objObject.getMesh().vertices.length * 2];
+                for (int i = 0; i < objObject.getMesh().vertices.length; i++) {
+                    texCoord[i * 2] = objObject.getMesh().vertices[i].getTexCoords().x;
+                    texCoord[i * 2 + 1] = 1 - objObject.getMesh().vertices[i].getTexCoords().y;
+                }
+            }
+        }
+        return texCoord;
+    }
+
+    public float[] getNormalsObject(String objectName) {
+        float[] normals = new float[0];
+        for (ObjObjectData objObject : objObjects) {
+            if (objObject.getName().toLowerCase().contains(objectName.toLowerCase())) {
+                normals = new float[objObject.getMesh().vertices.length * 3];
+                for (int i = 0; i < objObject.getMesh().vertices.length; i++) {
+                    normals[i * 3] = objObject.getMesh().vertices[i].getNormal().x;
+                    normals[i * 3 + 1] = objObject.getMesh().vertices[i].getNormal().y;
+                    normals[i * 3 + 2] = objObject.getMesh().vertices[i].getNormal().z;
+                }
+            }
+        }
+        return normals;
     }
 
     public Vector3f[] getVectorVerticesPos(String objectName) {

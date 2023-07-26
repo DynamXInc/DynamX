@@ -149,6 +149,11 @@ tabbed_pane>button:hover,tabbed_pane>button:active
     border-color: darkgreen;
 }
 
+#reload_shaders
+{
+    top: auto;
+}
+
 #reload_packs
 {
     top: auto;

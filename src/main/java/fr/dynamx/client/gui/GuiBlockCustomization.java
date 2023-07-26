@@ -1,11 +1,13 @@
 package fr.dynamx.client.gui;
 
 import com.jme3.math.Vector3f;
+import fr.aym.acsguis.component.layout.GridLayout;
 import fr.aym.acsguis.component.layout.GuiScaler;
 import fr.aym.acsguis.component.panel.GuiFrame;
 import fr.aym.acsguis.component.panel.GuiPanel;
 import fr.aym.acsguis.component.textarea.GuiFloatField;
 import fr.aym.acsguis.component.textarea.GuiLabel;
+import fr.dynamx.client.renders.mesh.BatchMesh;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.blocks.TEDynamXBlock;
@@ -17,6 +19,7 @@ import net.minecraft.client.renderer.BlockRendererDispatcher;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.util.ResourceLocation;
+import org.apache.commons.io.FileUtils;
 import org.lwjgl.input.Mouse;
 
 import java.util.Collections;
@@ -104,6 +107,46 @@ public class GuiBlockCustomization extends GuiFrame {
             teBlock.markCollisionsDirty();
         });
 
+        GuiPanel panelBatch = new GuiPanel();
+        panelBatch.setCssClass("panelBatch");
+        panelBatch.setLayout(new GridLayout(-1, 25, 0, GridLayout.GridDirection.HORIZONTAL, 1));
+        BatchMesh batchMesh = te.model.getBatchMesh();
+        long count = te.getWorld().loadedTileEntityList.stream()
+                .filter(tileEntity -> tileEntity instanceof TEDynamXBlock && ((TEDynamXBlock) tileEntity).model.equals(te.model))
+                .count();
+
+        String isTooMany = count > 1000 ? "§c" : "";
+        GuiLabel teCount = new GuiLabel(isTooMany + "Tile entities with this model count : " + count);
+        teCount.setCssClass("teCount");
+        int indexSize = (int) (te.model.getObjModelData().getAllMeshIndices().length * Integer.BYTES * count);
+        int vertexSize = (int) (te.model.getObjModelData().getVerticesPos().length * Float.BYTES * count);
+        int normalSize = (int) (te.model.getObjModelData().getNormals().length * Float.BYTES * count);
+        int uvSize = (int) (te.model.getObjModelData().getTexCoords().length * Float.BYTES * count);
+
+        long totalSize = indexSize + vertexSize + normalSize + uvSize;
+
+        GuiLabel batchSize = new GuiLabel("Total batch size : " + FileUtils.byteCountToDisplaySize(totalSize));
+        batchSize.setCssClass("batchSize");
+
+        boolean hasBatch = te.model.getBatchMesh() != null;
+        GuiLabel confirmBatch = new GuiLabel(hasBatch ? "Update Batch ?" : "Batch ?");
+        confirmBatch.addClickListener((mx, my, button) -> {
+            te.createBatch((int) count);
+        });
+        confirmBatch.setCssClass("confirmBatch");
+        panelBatch.add(teCount);
+        panelBatch.add(batchSize);
+        panelBatch.add(confirmBatch);
+
+        if(hasBatch) {
+            GuiLabel deleteBatch = new GuiLabel("A batch already exists. Delete Batch ?");
+            deleteBatch.addClickListener((mx, my, button) -> {
+                te.deleteBatch();
+            });
+            deleteBatch.setCssClass("deleteBatch");
+            panelBatch.add(deleteBatch);
+        }
+
 
         add(rotationLabel);
         add(scaleLabel);
@@ -119,6 +162,7 @@ public class GuiBlockCustomization extends GuiFrame {
         add(scaleZ);
         add(confirm);
         add(preview);
+        add(panelBatch);
     }
 
     @Override
@@ -253,6 +297,6 @@ public class GuiBlockCustomization extends GuiFrame {
 
     @Override
     public boolean needsCssReload() {
-        return false;
+        return true;
     }
 }

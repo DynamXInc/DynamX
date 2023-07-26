@@ -7,6 +7,7 @@ import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.aym.acslib.api.services.mps.ModProtectionContainer;
 import fr.aym.acslib.api.services.mps.ModProtectionService;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariableRegistry;
+import fr.dynamx.client.shaders.ShaderManager;
 import fr.dynamx.common.capability.DynamXChunkData;
 import fr.dynamx.common.capability.DynamXChunkDataStorage;
 import fr.dynamx.common.contentpack.AddonInfo;
@@ -25,6 +26,7 @@ import fr.dynamx.utils.*;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.physics.NativeEngineInstaller;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.SimpleReloadableResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeVersion;
 import net.minecraftforge.common.capabilities.CapabilityManager;
@@ -154,6 +156,8 @@ public class DynamXMain {
             log.info("Clearing obj model data cache...");
             DynamXContext.getObjModelDataCache().values().forEach(model -> model.getObjObjects().forEach(ObjObjectData::clearData));
         }
+
+        ((SimpleReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(new ShaderManager());
     }
 
     @EventHandler

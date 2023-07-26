@@ -103,3 +103,21 @@
 .collision:hover{
     border: 1px white;
 }
+
+.panelBatch{
+    left: 0;
+    width: 300px;
+    height: 300px;
+}
+.confirmBatch{
+    top: auto;
+}
+.batchSize{
+    top: auto;
+}
+.teCount{
+    top: auto;
+}
+.deleteBatch{
+    top: auto;
+}

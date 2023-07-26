@@ -9,6 +9,7 @@ import fr.dynamx.api.events.EventStage;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.client.handlers.ClientDebugSystem;
+import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.blocks.TEDynamXBlock;
@@ -38,6 +39,8 @@ import java.util.ConcurrentModificationException;
 import static fr.dynamx.utils.debug.renderer.VehicleDebugRenderer.PlayerCollisionsDebug.*;
 
 public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialRenderer<T> {
+
+
     @Override
     public void render(T te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
         if (te.getBlockObjectInfo() != null && te.getBlockType() instanceof DynamXBlock) { //the instanceof fixes a crash
@@ -55,7 +58,9 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
                         .add(0, te.getRotation() * 22.5f, 0);
 
                 //Rendering the model
-                DynamXContext.getObjModelRegistry().getModel(te.getBlockObjectInfo().getModel()).renderModel((byte) te.getBlockMetadata());
+                ObjModelRenderer model = DynamXContext.getObjModelRegistry().getModel(te.getBlockObjectInfo().getModel());
+                if(DynamXDebugOptions.DEBUG_RENDER.isActive())
+                    model.renderModel((byte) te.getBlockMetadata());
                 if (te.getBlockObjectInfo().isModelValid() && te.getLightsModule() != null) {
                     te.getBlockObjectInfo().getLightSources().values().forEach(d -> d.drawLights(null, Minecraft.getMinecraft().player.ticksExisted, te.getBlockObjectInfo().getModel(), te.getBlockObjectInfo().getScaleModifier(), te.getLightsModule()));
                 }

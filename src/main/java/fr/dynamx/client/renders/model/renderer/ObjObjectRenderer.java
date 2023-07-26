@@ -34,6 +34,8 @@ public class ObjObjectRenderer {
     @Setter
     private Vector4f objectColor = new Vector4f(1, 1, 1, 1);
 
+    private int indexVBO = -1;
+
     public ObjObjectRenderer(ObjObjectData objObjectData) {
         this.objObjectData = objObjectData;
     }
@@ -125,6 +127,9 @@ public class ObjObjectRenderer {
         GlStateManager.glEnableClientState(GL11.GL_VERTEX_ARRAY);
         GlStateManager.glEnableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
         GlStateManager.glEnableClientState(GL11.GL_NORMAL_ARRAY);
+
+        if(indexVBO != -1)
+            GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, indexVBO);
         for (Map.Entry<String, Material.IndexPair> pair : getObjObjectData().getMesh().materials.entrySet()) {
             Material material = bindMaterial(model, pair.getKey(), renderData.getBaseVariant(), renderData.getVariant());
             if (material == null) {
@@ -145,6 +150,8 @@ public class ObjObjectRenderer {
             objectColor.set(1, 1, 1, 1);
 
         }
+        if(indexVBO != -1)
+            GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, 0);
         GlStateManager.glDisableClientState(GL11.GL_VERTEX_ARRAY);
         GlStateManager.glDisableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
         GlStateManager.glDisableClientState(GL11.GL_NORMAL_ARRAY);
@@ -163,8 +170,8 @@ public class ObjObjectRenderer {
     }
 
     private void setupIndicesBuffer(int[] indices) {
-        int vboId = GL15.glGenBuffers();
-        GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vboId);
+        indexVBO = GL15.glGenBuffers();
+        GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, indexVBO);
         GL15.glBufferData(GL15.GL_ELEMENT_ARRAY_BUFFER, DynamXUtils.createIntBuffer(indices), GL15.GL_STATIC_DRAW);
     }
 

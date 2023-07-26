@@ -226,6 +226,13 @@ public class DynamXRenderUtils {
         }
     }
 
+    public static void checkForOglError(String location) {
+        int errorCode = GL11.glGetError();
+        if (errorCode != GL11.GL_NO_ERROR) {
+            DynamXMain.log.warn("errorCode = " + errorCode +" at = " + location);
+        }
+    }
+
     public static void checkForOglError() {
         int errorCode = GL11.glGetError();
         if (errorCode != GL11.GL_NO_ERROR) {

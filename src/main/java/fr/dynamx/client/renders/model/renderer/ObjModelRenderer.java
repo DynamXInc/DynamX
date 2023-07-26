@@ -5,6 +5,8 @@ import fr.dynamx.api.events.DynamXModelRenderEvent;
 import fr.dynamx.api.events.EventStage;
 import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
 import fr.dynamx.api.obj.ObjModelPath;
+import fr.dynamx.client.renders.mesh.BatchMesh;
+import fr.dynamx.client.renders.model.texture.MaterialTexture;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
 import fr.dynamx.common.objloader.data.Material;
@@ -25,6 +27,7 @@ import javax.vecmath.Vector4f;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * A render-able obj model
@@ -48,12 +51,24 @@ public class ObjModelRenderer {
     @Setter
     private Vector4f modelColor = new Vector4f(1, 1, 1, 1);
 
+    @Getter
+    @Setter
+    @Nullable
+    private BatchMesh batchMesh = null;
+
+    @Getter
+    private ObjModelData objModelData = null;
+
     protected ObjModelRenderer(ObjModelPath location, List<ObjObjectRenderer> objObjects, Map<String, Material> materials, @Nullable IModelTextureVariantsSupplier textureVariants) {
         this.location = location;
         this.objObjects = objObjects;
         this.materials = materials;
         this.textureVariants = textureVariants;
 
+        if(!location.getModelPath().getPath().contains("missing")) {
+            objModelData = DynamXContext.getObjModelDataFromCache(location);
+
+        }
         // Load variants
         hasNoneMaterials = false;
         ObjObjectRenderer loadingObject = null;
@@ -202,4 +217,5 @@ public class ObjModelRenderer {
     public ObjObjectRenderer getObjObjectRenderer(String groupName) {
         return objObjects.stream().filter(o -> o.getObjObjectData().getName().equalsIgnoreCase(groupName)).findFirst().orElse(null);
     }
+
 }

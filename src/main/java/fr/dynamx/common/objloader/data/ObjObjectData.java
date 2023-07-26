@@ -29,8 +29,8 @@ public class ObjObjectData{
      * Releases memory when the vao objects has been compiled, or the server started
      */
     public void clearData() {
-        getMesh().indices = null;
+       /*getMesh().indices = null;
         getMesh().vertices = null;
-        getMesh().materialForEachVertex = null;
+        getMesh().materialForEachVertex = null;*/
     }
 }

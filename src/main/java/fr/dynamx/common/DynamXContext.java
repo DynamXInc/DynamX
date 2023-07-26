@@ -6,6 +6,8 @@ import fr.dynamx.api.physics.IPhysicsSimulationMode;
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.api.physics.IRotatedCollisionHandler;
 import fr.dynamx.client.DynamXModelRegistry;
+import fr.dynamx.client.renders.mesh.BatchMesh;
+import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.handlers.RotatedCollisionHandlerImpl;
 import fr.dynamx.common.network.DynamXNetwork;
@@ -42,6 +44,8 @@ public class DynamXContext {
     private static final Map<ResourceLocation, ObjModelData> OBJ_MODEL_DATA_CACHE = new HashMap<>();
 
     private static final Map<Integer, IPhysicsWorld> PHYSICS_WORLD_PER_DIMENSION = new HashMap<>();
+
+    public static final Map<ObjModelRenderer, BatchMesh> batch = new HashMap<>();
 
 
     /**

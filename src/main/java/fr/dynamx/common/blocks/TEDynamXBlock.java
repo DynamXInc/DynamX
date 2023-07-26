@@ -5,8 +5,10 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.aym.acsguis.api.ACsGuiApi;
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
-import fr.dynamx.api.events.DynamXBlockEvent;
 import fr.dynamx.client.gui.GuiBlockCustomization;
+import fr.dynamx.client.renders.mesh.BatchMesh;
+import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
+import fr.dynamx.client.renders.model.texture.MaterialTexture;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.capability.DynamXChunkData;
@@ -15,6 +17,8 @@ import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
 import fr.dynamx.common.entities.ICollidableObject;
 import fr.dynamx.common.entities.modules.LightsModule;
+import fr.dynamx.common.objloader.data.Material;
+import fr.dynamx.common.objloader.data.ObjModelData;
 import fr.dynamx.utils.VerticalChunkPos;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
@@ -27,15 +31,16 @@ import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import org.lwjgl.util.vector.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
-public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPackInfoReloadListener {
+public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPackInfoReloadListener, ITickable {
     private BlockObject<?> blockObjectInfo;
     private int rotation;
     private Vector3f relativeTranslation = new Vector3f(), relativeScale = new Vector3f(), relativeRotation = new Vector3f();
@@ -52,11 +57,53 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
     @Getter
     private LightsModule lightsModule;
 
+    @Getter
+    private Matrix4f matrixTransform;
+
+    public ObjModelRenderer model;
+
     public TEDynamXBlock() {
     }
 
     public TEDynamXBlock(BlockObject<?> blockObjectInfo) {
         setBlockObjectInfo(blockObjectInfo);
+
+        matrixTransform = new Matrix4f();
+        matrixTransform.setIdentity();
+        model = DynamXContext.getObjModelRegistry().getModel(blockObjectInfo.getModel());
+    }
+
+    public boolean isAdded;
+
+    public void addMesh(ObjModelRenderer model) {
+        //if (!isAdded) {
+        matrixTransform.setIdentity();
+
+        matrixTransform.translate(new org.lwjgl.util.vector.Vector3f(
+                0.5f + getPos().getX() + getBlockObjectInfo().getTranslation().x + getRelativeTranslation().x,
+                1.5f + getPos().getY() + getBlockObjectInfo().getTranslation().y + getRelativeTranslation().y,
+                0.5f + getPos().getZ() + getBlockObjectInfo().getTranslation().z + getRelativeTranslation().z));
+        matrixTransform.scale(new org.lwjgl.util.vector.Vector3f(
+                getBlockObjectInfo().getScaleModifier().x * (getRelativeScale().x != 0 ? getRelativeScale().x : 1),
+                getBlockObjectInfo().getScaleModifier().y * (getRelativeScale().y != 0 ? getRelativeScale().y : 1),
+                getBlockObjectInfo().getScaleModifier().z * (getRelativeScale().z != 0 ? getRelativeScale().z : 1)
+        ));
+        matrixTransform.rotate((float) Math.toRadians(getRotation() * 22.5f), new org.lwjgl.util.vector.Vector3f(0, -1, 0));
+        float rotate = (float) Math.toRadians(getRelativeRotation().x + getBlockObjectInfo().getRotation().x);
+        if (rotate != 0)
+            matrixTransform.rotate(rotate, new org.lwjgl.util.vector.Vector3f(1, 0, 0));
+        rotate = (float) Math.toRadians(getRelativeRotation().y + getBlockObjectInfo().getRotation().y);
+        if (rotate != 0)
+            matrixTransform.rotate(rotate, new org.lwjgl.util.vector.Vector3f(0, 1, 0));
+        rotate = (float) Math.toRadians(getRelativeRotation().z + getBlockObjectInfo().getRotation().z);
+        if (rotate != 0)
+            matrixTransform.rotate(rotate, new org.lwjgl.util.vector.Vector3f(0, 0, 1));
+
+        int i = this.world.getCombinedLight(getPos(), 0);
+
+        model.getBatchMesh().addMesh(model.getObjModelData(), matrixTransform, i);
+        //isAdded = true;
+        // }
     }
 
     public BlockObject<?> getBlockObjectInfo() {
@@ -65,9 +112,9 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
 
     public void setBlockObjectInfo(BlockObject<?> blockObjectInfo) {
         this.blockObjectInfo = blockObjectInfo;
-        if(world != null)
+        if (world != null)
             world.markBlockRangeForRenderUpdate(pos, pos);
-        if(blockObjectInfo != null && !blockObjectInfo.getLightSources().isEmpty())
+        if (blockObjectInfo != null && !blockObjectInfo.getLightSources().isEmpty())
             lightsModule = new LightsModule(blockObjectInfo);
         else
             lightsModule = null;
@@ -77,7 +124,7 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
         if (blockObjectInfo != null)
             compound.setString("BlockInfo", blockObjectInfo.getFullName());
-        if(lightsModule != null)
+        if (lightsModule != null)
             lightsModule.writeToNBT(compound);
         compound.setInteger("Rotation", rotation);
         compound.setFloat("TranslationX", relativeTranslation.x);
@@ -98,7 +145,7 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
         super.readFromNBT(compound);
         if (compound.hasKey("BlockInfo"))
             setBlockObjectInfo(DynamXObjectLoaders.BLOCKS.findInfo(compound.getString("BlockInfo")));
-        if(lightsModule != null)
+        if (lightsModule != null)
             lightsModule.readFromNBT(compound);
         rotation = compound.getInteger("Rotation");
         relativeTranslation = new Vector3f(
@@ -114,11 +161,10 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
                 compound.getFloat("RotationY"),
                 compound.getFloat("RotationZ"));
 
-        if(blockObjectInfo == null && world != null && !world.isRemote) {
-            DynamXMain.log.warn("Block object info is null for te " + this + " at " + pos+ ". Removing it.");
+        if (blockObjectInfo == null && world != null && !world.isRemote) {
+            DynamXMain.log.warn("Block object info is null for te " + this + " at " + pos + ". Removing it.");
             world.setBlockToAir(pos);
-        }
-        else
+        } else
             markCollisionsDirty();
     }
 
@@ -301,5 +347,48 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
     @Override
     public void onPackInfosReloaded() {
         setBlockObjectInfo(DynamXObjectLoaders.BLOCKS.findInfo(blockObjectInfo.getFullName()));
+    }
+
+
+    public boolean shouldUpdateBatch() {
+        return false;
+    }
+
+    public void createBatch(int num) {
+        MaterialTexture texture = null;
+        Optional<Material> material = model.getMaterials().values().stream().findFirst();
+        if (material.isPresent()) {
+            texture = material.get().diffuseTexture.get("default");
+        }
+        ObjModelData objModelData = DynamXContext.getObjModelDataFromCache(model.getLocation());
+        int id = texture != null ? texture.getGlTextureId() : -1;
+        if (model.getBatchMesh() != null) {
+            model.getBatchMesh().delete();
+            model.getBatchMesh().init();
+        } else {
+            model.setBatchMesh(new BatchMesh(objModelData, num, id));
+            model.getBatchMesh().init();
+            DynamXContext.batch.put(model, model.getBatchMesh());
+        }
+        world.loadedTileEntityList.stream()
+                .filter(te -> te instanceof TEDynamXBlock && ((TEDynamXBlock) te).model.equals(model))
+                .forEach(te -> {
+                    ((TEDynamXBlock) te).addMesh(model);
+                });
+
+    }
+
+    public void deleteBatch() {
+        if (model.getBatchMesh() != null) {
+            model.getBatchMesh().delete();
+            model.setBatchMesh(null);
+        }
+        DynamXContext.batch.remove(model);
+
+    }
+
+    @Override
+    public void update() {
+
     }
 }

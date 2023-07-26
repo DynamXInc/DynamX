@@ -21,6 +21,7 @@ public class SynchronizedEntityVariableRegistry {
     private static final Map<Class<?>, List<String>> baseSyncVarRegistry = new HashMap<>();
     private static final Map<Class<?>, String> classToMod = new HashMap<>();
     private static final Map<String, Field> fieldMap = HashBiMap.create();
+    @Getter
     private static final BiMap<String, Integer> syncVarRegistry = HashBiMap.create();
     @Getter
     private static final Map<Integer, EntityVariableSerializer<?>> serializerMap = new HashMap<>();

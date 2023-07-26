@@ -96,7 +96,7 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
         }
         Entity other = getOtherSideEntity();
         if (other instanceof PhysicsEntity) {
-            getReceivedVariables().forEach((key, value) -> ((SynchronizedEntityVariableSnapshot<Object>) value).updateVariable((EntityVariable<Object>) getSynchronizedVariables().get(key)));
+            getReceivedVariables().forEach((key, value) -> ((SynchronizedEntityVariableSnapshot<Object>) value).updateVariable(tryGetVariable(key)));
         }
         entity.prePhysicsUpdateWrapper(profiler, entity.usesPhysicsWorld());
     }

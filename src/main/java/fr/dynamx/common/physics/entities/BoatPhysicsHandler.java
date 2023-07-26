@@ -69,8 +69,8 @@ public class BoatPhysicsHandler<T extends BoatEntity<?>> extends BaseVehiclePhys
         if(floatList == null){
             floatList = packInfo.getPartsByType(PartFloat.class);
         }
-
-        if (!isInLiquid) {
+        float waterLevel = getWaterLevel();
+        if (waterLevel == Float.MIN_VALUE) {
             return;
         }
         int i = 0;

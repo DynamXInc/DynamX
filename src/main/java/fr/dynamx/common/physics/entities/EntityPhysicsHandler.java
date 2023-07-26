@@ -6,14 +6,8 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.entities.PhysicsEntity;
-import fr.dynamx.utils.maths.DynamXMath;
-import fr.dynamx.utils.optimization.Vector3fPool;
-import fr.dynamx.utils.physics.DynamXPhysicsHelper;
-import net.minecraft.block.BlockLiquid;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 
 /**
  * Physics handler of {@link PhysicsEntity} using rigid bodies <br>
@@ -24,9 +18,6 @@ import net.minecraft.util.math.Vec3d;
 public abstract class EntityPhysicsHandler<T extends PhysicsEntity<?>> extends AbstractEntityPhysicsHandler<T, PhysicsRigidBody> {
     private final Vector3f linearVel = new Vector3f();
     private final Vector3f rotationalVel = new Vector3f();
-
-    protected boolean isInLiquid;
-    protected float waterLevel;
 
     public EntityPhysicsHandler(T entity) {
         super(entity);
@@ -41,28 +32,6 @@ public abstract class EntityPhysicsHandler<T extends PhysicsEntity<?>> extends A
         }
         getCollisionObject().getLinearVelocity(linearVel);
         getCollisionObject().getAngularVelocity(rotationalVel);
-
-        isInLiquid = false;
-        int liquidOffset = 0;
-        for (int offset = -1; offset <= 2; offset++) {
-            BlockPos blockPos = new BlockPos(
-                    handledEntity.physicsPosition.x,
-                    handledEntity.physicsPosition.y + offset,
-                    handledEntity.physicsPosition.z);
-            if (handledEntity.getEntityWorld().getBlockState(blockPos).getMaterial().isLiquid()) {
-                liquidOffset = offset;
-                isInLiquid = true;
-            }
-        }
-
-        if (isInLiquid) {
-            BlockPos blockPos = new BlockPos(
-                    handledEntity.physicsPosition.x,
-                    handledEntity.physicsPosition.y + liquidOffset,
-                    handledEntity.physicsPosition.z);
-            AxisAlignedBB boundingBox = handledEntity.getEntityWorld().getBlockState(blockPos).getBoundingBox(handledEntity.getEntityWorld(), blockPos);
-            waterLevel = (float) boundingBox.offset(blockPos).maxY - 0.125F + 0.5f;
-        }
 
         //Buoyancy effect W.I.P
         /*if (collisionObject.isInWorld()) {
@@ -159,5 +128,21 @@ public abstract class EntityPhysicsHandler<T extends PhysicsEntity<?>> extends A
     @Override
     public void setFreezePhysics(boolean freeze) {
         getCollisionObject().setKinematic(freeze);
+    }
+
+    /**
+     * @return The water level at the entity's position, or {@link Float#MIN_VALUE} if the entity is not in water
+     */
+    public float getWaterLevel() {
+        PhysicsEntity<?> entity = getHandledEntity();
+        // search water downwards, two blocks from the entity
+        for (int offset = 2; offset > -2; offset--) {
+            BlockPos blockPos = new BlockPos(entity.physicsPosition.x, entity.physicsPosition.y + offset, entity.physicsPosition.z);
+            if (entity.getEntityWorld().getBlockState(blockPos).getMaterial().isLiquid()) {
+                AxisAlignedBB boundingBox = entity.getEntityWorld().getBlockState(blockPos).getBoundingBox(entity.getEntityWorld(), blockPos);
+                return (float) boundingBox.offset(blockPos).maxY - 0.125F + 0.5f;
+            }
+        }
+        return Float.MIN_VALUE;
     }
 }

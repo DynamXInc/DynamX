@@ -42,8 +42,8 @@ public abstract class EntityPhysicsHandler<T extends PhysicsEntity<?>> extends A
         getCollisionObject().getLinearVelocity(linearVel);
         getCollisionObject().getAngularVelocity(rotationalVel);
 
+        isInLiquid = false;
         int liquidOffset = 0;
-
         for (int offset = -1; offset <= 2; offset++) {
             BlockPos blockPos = new BlockPos(
                     handledEntity.physicsPosition.x,

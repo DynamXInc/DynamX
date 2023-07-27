@@ -8,6 +8,7 @@ import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.client.renders.mesh.BatchMesh;
 import fr.dynamx.client.renders.model.texture.MaterialTexture;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.blocks.TEDynamXBlock;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
 import fr.dynamx.common.objloader.data.Material;
 import fr.dynamx.common.objloader.data.ObjModelData;
@@ -34,7 +35,9 @@ import java.util.Optional;
  *
  * @see ObjModelData
  */
+
 public class ObjModelRenderer {
+
     @Getter
     private final ObjModelPath location;
     @Getter
@@ -53,8 +56,7 @@ public class ObjModelRenderer {
 
     @Getter
     @Setter
-    @Nullable
-    private BatchMesh batchMesh = null;
+    private final Batch batch;
 
     @Getter
     private ObjModelData objModelData = null;
@@ -69,6 +71,7 @@ public class ObjModelRenderer {
             objModelData = DynamXContext.getObjModelDataFromCache(location);
 
         }
+        batch = new Batch(this);
         // Load variants
         hasNoneMaterials = false;
         ObjObjectRenderer loadingObject = null;
@@ -216,6 +219,54 @@ public class ObjModelRenderer {
 
     public ObjObjectRenderer getObjObjectRenderer(String groupName) {
         return objObjects.stream().filter(o -> o.getObjObjectData().getName().equalsIgnoreCase(groupName)).findFirst().orElse(null);
+    }
+
+    public class Batch{
+
+        @Getter
+        @Setter
+        public BatchMesh batchMesh;
+
+
+
+        public ObjModelRenderer model;
+
+
+        public Batch(ObjModelRenderer model) {
+            this.model = model;
+        }
+
+        public void createBatch(int num) {
+            MaterialTexture texture = null;
+            Optional<Material> material = getMaterials().values().stream().findFirst();
+            if (material.isPresent()) {
+                texture = material.get().diffuseTexture.get("default");
+            }
+            ObjModelData objModelData = DynamXContext.getObjModelDataFromCache(getLocation());
+            int id = texture != null ? texture.getGlTextureId() : -1;
+            if (batchMesh != null) {
+                batchMesh.delete();
+                batchMesh.init();
+            } else {
+                batchMesh = new BatchMesh(objModelData, num, id);
+                batchMesh.init();
+                DynamXContext.batch.put(model, batchMesh);
+            }
+            /*world.loadedTileEntityList.stream()
+                    .filter(te -> te instanceof TEDynamXBlock && ((TEDynamXBlock) te).model.equals(model))
+                    .forEach(te -> {
+                        ((TEDynamXBlock) te).addMesh(model);
+                    });*/
+
+        }
+
+        public void deleteBatch() {
+            if (batchMesh != null) {
+                batchMesh.delete();
+                batchMesh = null;
+            }
+            DynamXContext.batch.remove(model);
+        }
     }
 
 }

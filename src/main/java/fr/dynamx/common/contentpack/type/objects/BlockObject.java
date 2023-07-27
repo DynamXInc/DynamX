@@ -44,6 +44,8 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
     @Getter
     protected Material material;
 
+    protected boolean shouldBeBatched;
+
     /**
      * The light sources of this block
      */
@@ -134,5 +136,10 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
     @Override
     public PartLightSource getLightSource(String partName) {
         return lightSources.get(partName);
+    }
+
+    @Override
+    public boolean shouldBeBatched() {
+        return shouldBeBatched;
     }
 }

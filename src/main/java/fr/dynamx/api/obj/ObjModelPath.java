@@ -15,6 +15,7 @@ import java.util.Objects;
 public class ObjModelPath implements INamedObject {
     private final List<PackInfo> packLocations;
     private final ResourceLocation modelPath;
+    public boolean shouldBeBatched;
 
     public ObjModelPath(PackInfo packLocation, ResourceLocation modelPath) {
         this.packLocations = Collections.singletonList(packLocation);

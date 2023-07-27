@@ -77,31 +77,33 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
 
     public void addMesh(ObjModelRenderer model) {
         //if (!isAdded) {
-        matrixTransform.setIdentity();
+        if(model.getBatch().batchMesh != null) {
+            matrixTransform.setIdentity();
 
-        matrixTransform.translate(new org.lwjgl.util.vector.Vector3f(
-                0.5f + getPos().getX() + getBlockObjectInfo().getTranslation().x + getRelativeTranslation().x,
-                1.5f + getPos().getY() + getBlockObjectInfo().getTranslation().y + getRelativeTranslation().y,
-                0.5f + getPos().getZ() + getBlockObjectInfo().getTranslation().z + getRelativeTranslation().z));
-        matrixTransform.scale(new org.lwjgl.util.vector.Vector3f(
-                getBlockObjectInfo().getScaleModifier().x * (getRelativeScale().x != 0 ? getRelativeScale().x : 1),
-                getBlockObjectInfo().getScaleModifier().y * (getRelativeScale().y != 0 ? getRelativeScale().y : 1),
-                getBlockObjectInfo().getScaleModifier().z * (getRelativeScale().z != 0 ? getRelativeScale().z : 1)
-        ));
-        matrixTransform.rotate((float) Math.toRadians(getRotation() * 22.5f), new org.lwjgl.util.vector.Vector3f(0, -1, 0));
-        float rotate = (float) Math.toRadians(getRelativeRotation().x + getBlockObjectInfo().getRotation().x);
-        if (rotate != 0)
-            matrixTransform.rotate(rotate, new org.lwjgl.util.vector.Vector3f(1, 0, 0));
-        rotate = (float) Math.toRadians(getRelativeRotation().y + getBlockObjectInfo().getRotation().y);
-        if (rotate != 0)
-            matrixTransform.rotate(rotate, new org.lwjgl.util.vector.Vector3f(0, 1, 0));
-        rotate = (float) Math.toRadians(getRelativeRotation().z + getBlockObjectInfo().getRotation().z);
-        if (rotate != 0)
-            matrixTransform.rotate(rotate, new org.lwjgl.util.vector.Vector3f(0, 0, 1));
+            matrixTransform.translate(new org.lwjgl.util.vector.Vector3f(
+                    0.5f + getPos().getX() + getBlockObjectInfo().getTranslation().x + getRelativeTranslation().x,
+                    1.5f + getPos().getY() + getBlockObjectInfo().getTranslation().y + getRelativeTranslation().y,
+                    0.5f + getPos().getZ() + getBlockObjectInfo().getTranslation().z + getRelativeTranslation().z));
+            matrixTransform.scale(new org.lwjgl.util.vector.Vector3f(
+                    getBlockObjectInfo().getScaleModifier().x * (getRelativeScale().x != 0 ? getRelativeScale().x : 1),
+                    getBlockObjectInfo().getScaleModifier().y * (getRelativeScale().y != 0 ? getRelativeScale().y : 1),
+                    getBlockObjectInfo().getScaleModifier().z * (getRelativeScale().z != 0 ? getRelativeScale().z : 1)
+            ));
+            matrixTransform.rotate((float) Math.toRadians(getRotation() * 22.5f), new org.lwjgl.util.vector.Vector3f(0, -1, 0));
+            float rotate = (float) Math.toRadians(getRelativeRotation().x + getBlockObjectInfo().getRotation().x);
+            if (rotate != 0)
+                matrixTransform.rotate(rotate, new org.lwjgl.util.vector.Vector3f(1, 0, 0));
+            rotate = (float) Math.toRadians(getRelativeRotation().y + getBlockObjectInfo().getRotation().y);
+            if (rotate != 0)
+                matrixTransform.rotate(rotate, new org.lwjgl.util.vector.Vector3f(0, 1, 0));
+            rotate = (float) Math.toRadians(getRelativeRotation().z + getBlockObjectInfo().getRotation().z);
+            if (rotate != 0)
+                matrixTransform.rotate(rotate, new org.lwjgl.util.vector.Vector3f(0, 0, 1));
 
-        int i = this.world.getCombinedLight(getPos(), 0);
+            int i = this.world.getCombinedLight(getPos(), 0);
 
-        model.getBatchMesh().addMesh(model.getObjModelData(), matrixTransform, i);
+            model.getBatch().batchMesh.addMesh(model.getObjModelData(), matrixTransform, i);
+        }
         //isAdded = true;
         // }
     }
@@ -354,38 +356,6 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
         return false;
     }
 
-    public void createBatch(int num) {
-        MaterialTexture texture = null;
-        Optional<Material> material = model.getMaterials().values().stream().findFirst();
-        if (material.isPresent()) {
-            texture = material.get().diffuseTexture.get("default");
-        }
-        ObjModelData objModelData = DynamXContext.getObjModelDataFromCache(model.getLocation());
-        int id = texture != null ? texture.getGlTextureId() : -1;
-        if (model.getBatchMesh() != null) {
-            model.getBatchMesh().delete();
-            model.getBatchMesh().init();
-        } else {
-            model.setBatchMesh(new BatchMesh(objModelData, num, id));
-            model.getBatchMesh().init();
-            DynamXContext.batch.put(model, model.getBatchMesh());
-        }
-        world.loadedTileEntityList.stream()
-                .filter(te -> te instanceof TEDynamXBlock && ((TEDynamXBlock) te).model.equals(model))
-                .forEach(te -> {
-                    ((TEDynamXBlock) te).addMesh(model);
-                });
-
-    }
-
-    public void deleteBatch() {
-        if (model.getBatchMesh() != null) {
-            model.getBatchMesh().delete();
-            model.setBatchMesh(null);
-        }
-        DynamXContext.batch.remove(model);
-
-    }
 
     @Override
     public void update() {

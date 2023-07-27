@@ -24,6 +24,9 @@ import javax.annotation.Nullable;
 import java.util.Map;
 
 public interface IObjPackObject extends IModelTextureVariantsSupplier {
+
+    boolean shouldBeBatched();
+
     @SideOnly(Side.CLIENT)
     ResourceLocation getModel();
 

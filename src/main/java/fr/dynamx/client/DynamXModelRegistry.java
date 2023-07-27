@@ -25,6 +25,7 @@ import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXLoadingTasks;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.errors.DynamXErrorManager;
+import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.ProgressManager;
@@ -49,6 +50,7 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
 
     private static final ObjItemModelLoader OBJ_ITEM_MODEL_LOADER = new ObjItemModelLoader();
     private static final Map<ObjModelPath, IModelTextureVariantsSupplier> MODELS_REGISTRY = new HashMap<>();
+    @Getter
     private static final Map<ResourceLocation, ObjModelRenderer> MODELS = new ConcurrentHashMap<>();
     private static final List<ResourceLocation> ERRORED_MODELS = new ArrayList<>();
 
@@ -227,6 +229,7 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
             for (INamedObject namedObject : infoLoader.getInfos().values()) {
                 if (namedObject instanceof IObjPackObject && ((IObjPackObject) namedObject).shouldRegisterModel()) {
                     ObjModelPath modelPath = DynamXUtils.getModelPath(namedObject.getPackName(), ((IObjPackObject) namedObject).getModel());
+                    modelPath.shouldBeBatched = ((IObjPackObject) namedObject).shouldBeBatched();
                     registerModel(modelPath, (IModelTextureVariantsSupplier) namedObject);
                 }
             }

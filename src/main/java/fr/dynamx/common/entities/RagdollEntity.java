@@ -225,8 +225,10 @@ public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> imple
             if(!handledPlayer.world.isRemote) //update player visibility depending on its game mode
                 handledPlayer.sendPlayerAbilities();
             if (handledPlayer.getRidingEntity() == null && !DynamXContext.getWalkingPlayers().containsKey(handledPlayer)
-                    && DynamXContext.getPlayerToCollision().containsKey(handledPlayer))
+                    && DynamXContext.getPlayerToCollision().containsKey(handledPlayer) && DynamXContext.usesPhysicsWorld(world)) {
+                DynamXContext.getPlayerToCollision().get(handledPlayer).ragdollEntity = null;
                 DynamXContext.getPlayerToCollision().get(handledPlayer).addToWorld();
+            }
         }
         handler.onRemovedFromWorld();
         super.onRemovedFromWorld();
@@ -286,8 +288,11 @@ public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> imple
         if (world.isRemote) {
             if (handledPlayer == null) {
                 Entity entityByID = world.getEntityByID(getHandledPlayer());
-                if (entityByID instanceof EntityPlayer)
+                if (entityByID instanceof EntityPlayer) {
                     handledPlayer = (EntityPlayer) entityByID;
+                    DynamXContext.getPlayerToCollision().get(handledPlayer).ragdollEntity = this;
+                    DynamXContext.getPlayerToCollision().get(handledPlayer).removeFromWorld(false, world);
+                }
             }
         }
 

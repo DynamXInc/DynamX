@@ -61,7 +61,7 @@ public class DynamXCommands extends CommandBase {
                 if (args.length == 2 && args[1].equalsIgnoreCase("help")) {
                     sender.sendMessage(new TextComponentString("Usage: /dynamx " + getUsage()));
                     sender.sendMessage(new TextComponentString("Transforms the given 'player' in a ragdoll, during 'life_expectancy' ticks (or -1 for eternity). " +
-                            "You can add a velocity to the ragdoll, the default value is 20, 20, 20."));
+                            "You can add a velocity to the ragdoll, the default value is 0, 0, 0."));
                     return;
                 }
                 EntityPlayerMP player;
@@ -77,7 +77,7 @@ public class DynamXCommands extends CommandBase {
                     life = CommandBase.parseInt(args[2]);
                 RagdollEntity ragdollEntity = new RagdollEntity(player.world, DynamXUtils.toVector3f(player.getPositionVector().add(0, player.getDefaultEyeHeight(), 0)),
                         player.rotationYaw + 180, player.getName(), (short) life, player);
-                Vector3f velocity = new Vector3f(20, 20, 20); //should be permanent
+                Vector3f velocity = new Vector3f(0, 0, 0); //should be permanent
                 if (args.length == 6)
                     velocity.set((float) CommandBase.parseDouble(args[3]), (float) CommandBase.parseDouble(args[4]), (float) CommandBase.parseDouble(args[5]));
                 ragdollEntity.setPhysicsInitCallback((a, b) -> {
@@ -87,8 +87,10 @@ public class DynamXCommands extends CommandBase {
                 });
                 player.setInvisible(true);
                 player.world.spawnEntity(ragdollEntity);
-                DynamXContext.getPlayerToCollision().get(player).ragdollEntity = ragdollEntity;
-                DynamXContext.getPlayerToCollision().get(player).removeFromWorld(false, player.world);
+                if(DynamXContext.usesPhysicsWorld(player.world)) {
+                    DynamXContext.getPlayerToCollision().get(player).ragdollEntity = ragdollEntity;
+                    DynamXContext.getPlayerToCollision().get(player).removeFromWorld(false, player.world);
+                }
                 Vector3fPool.closePool();
                 if (player != sender) {
                     sender.sendMessage(new TextComponentString("Ragdoll spawned!"));

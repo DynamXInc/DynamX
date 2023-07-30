@@ -3,6 +3,7 @@ package fr.dynamx.common.entities.vehicles;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
+import fr.dynamx.client.camera.CameraMode;
 import fr.dynamx.client.handlers.hud.HelicopterController;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
@@ -38,19 +39,7 @@ public class HelicopterEntity<T extends HelicopterPhysicsHandler<?>> extends Bas
     @Override
     protected void createModules(ModuleListBuilder modules) {
         //Take care to add seats BEFORE engine (the engine needs to detect dismounts)
-        modules.add(seats = new SeatsModule(this) {
-            @Override
-            public void applyOrientationToEntity(Entity passenger) {
-                if(seats != null && seats.getControllingPassenger() == passenger && HelicopterController.isMouseLocked()) {
-                    passenger.rotationYaw = 0;
-                    passenger.prevRotationYaw = 0;
-                    passenger.rotationPitch = 0;
-                    passenger.prevRotationPitch = 0;
-                } else {
-                    super.applyOrientationToEntity(passenger);
-                }
-            }
-        });
+        modules.add(getSeats());
         //modules.add(wheels = new WheelsModule(this));
         super.createModules(modules);
         doors = getModuleByType(DoorsModule.class);
@@ -70,7 +59,19 @@ public class HelicopterEntity<T extends HelicopterPhysicsHandler<?>> extends Bas
     @Override
     public SeatsModule getSeats() {
         if (seats == null) //We may need seats before modules are created, because of seats sync
-            seats = new SeatsModule(this);
+            seats = new SeatsModule(this, CameraMode.FIXED) {
+                @Override
+                public void applyOrientationToEntity(Entity passenger) {
+                    if(seats != null && seats.getControllingPassenger() == passenger && HelicopterController.isMouseLocked()) {
+                        passenger.rotationYaw = 0;
+                        passenger.prevRotationYaw = 0;
+                        passenger.rotationPitch = 0;
+                        passenger.prevRotationPitch = 0;
+                    } else {
+                        super.applyOrientationToEntity(passenger);
+                    }
+                }
+            };
         return seats;
     }
 

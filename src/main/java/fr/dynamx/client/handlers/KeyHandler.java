@@ -174,6 +174,9 @@ public class KeyHandler {
     }
 
     private void controlCamera() {
+        Entity entity = mc.player.getRidingEntity();
+        if(!(entity instanceof IModuleContainer.ISeatsContainer))
+            return;
         if (KEY_ZOOM_IN.isPressed()) {
             CameraSystem.changeCameraZoom(false);
         }
@@ -181,7 +184,7 @@ public class KeyHandler {
             CameraSystem.changeCameraZoom(true);
         }
         if (KEY_CAMERA_MODE.isPressed()) {
-            mc.ingameGUI.setOverlayMessage("Vehicle camera mode : " + CameraSystem.cycleCameraMode(), true);
+            mc.ingameGUI.setOverlayMessage("Vehicle camera mode : " + CameraSystem.cycleCameraMode((IModuleContainer.ISeatsContainer) entity), true);
         }
         CameraSystem.setWatchingBehind(KEY_WATCH_BEHIND.isKeyDown());
     }

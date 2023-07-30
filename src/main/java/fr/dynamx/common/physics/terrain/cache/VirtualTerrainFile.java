@@ -5,6 +5,7 @@ import fr.dynamx.api.physics.terrain.ITerrainElement;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.physics.terrain.element.TerrainElementsFactory;
 import fr.dynamx.utils.DynamXConfig;
+import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.VerticalChunkPos;
 
 import java.io.*;
@@ -82,7 +83,7 @@ public class VirtualTerrainFile {
                     }
                     trimeshShape = null;
                 } else {
-                    in = new ObjectInputStream(new GZIPInputStream(new ByteArrayInputStream(dt)));
+                    in = DynamXUtils.getTerrainObjectsIS(new GZIPInputStream(new ByteArrayInputStream(dt)));
                     int size = in.readInt();
                     //System.out.println("Read "+size+" elements in stream of size "+in.available());
                     if (debug)

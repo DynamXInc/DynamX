@@ -96,7 +96,7 @@ public class ObjObjectRenderer {
         else if (modelRenderData.containsKey((byte) 0))
             renderVAO(model, modelRenderData.get((byte) 0));
         else
-            throw new IllegalStateException("Default texture variant not loaded");
+            throw new IllegalStateException("Default texture variant not loaded for model " + model.getLocation());
     }
 
     private Material bindMaterial(ObjModelRenderer model, String materialName, @Nullable String baseVariantName, @Nullable String variantName) {

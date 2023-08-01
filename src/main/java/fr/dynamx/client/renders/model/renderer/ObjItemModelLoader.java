@@ -77,7 +77,7 @@ public class ObjItemModelLoader extends TileEntityItemStackRenderer implements I
                     GlStateManager.rotate(rotate.x, 1, 0, 0);
                     GlStateManager.rotate(rotate.y, 0, 1, 0);
                     GlStateManager.rotate(rotate.z, 0, 0, 1);
-                    if (!MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack, EventStage.RENDER, ItemCameraTransforms.TransformType.FIXED)))
+                    if (!MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack, EventStage.RENDER, renderType)))
                         model.renderModel(stack, renderType);
                     MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack, EventStage.POST, renderType));
                 }

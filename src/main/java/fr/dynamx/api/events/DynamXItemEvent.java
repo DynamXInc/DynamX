@@ -22,15 +22,12 @@ public class DynamXItemEvent extends Event {
     @Cancelable
     public static class Render extends DynamXItemEvent {
         @Getter
-        private final ItemStack stack;
-        @Getter
         private final EventStage stage;
         @Getter
         private final ItemCameraTransforms.TransformType transformType;
 
         public Render(ItemStack stack, EventStage stage, ItemCameraTransforms.TransformType transformType) {
             super(Side.CLIENT, stack);
-            this.stack = stack;
             this.stage = stage;
             this.transformType = transformType;
         }

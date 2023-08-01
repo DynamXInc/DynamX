@@ -67,7 +67,7 @@ public class ObjItemModelLoader extends TileEntityItemStackRenderer implements I
                     GlStateManager.translate(0.5F, 0.5F, 0.5F);
                     Minecraft.getMinecraft().getRenderItem().renderItem(stack, model.getGuiBaked());
                 } else {
-                    if (!MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack, EventStage.PRE, renderType)))
+                    if (!MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack, EventStage.TRANSFORM, renderType)))
                         model.getOwner().applyItemTransforms(renderType, stack, model);
                     float scale = model.getOwner().getItemScale();
                     Vector3f translate = model.getOwner().getItemTranslate();

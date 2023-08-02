@@ -30,11 +30,19 @@ import java.util.Map;
  * Handles camera rotation and zoom while in a vehicle
  */
 public class CameraSystem {
-    private static CameraMode rotationMode = CameraMode.AUTO;
+    /**
+     * Maps default entity's camera modes to the ones set by the user
+     */
+    private static Map<CameraMode, CameraMode> preferredCameraMode = new HashMap<>();
+    /**
+     * Current camera mode
+     */
+    private static CameraMode cameraMode = CameraMode.AUTO;
 
     private static int zoomLevel = 4;
     private static float cameraPositionY;
     private static boolean watchingBehind = false;
+
     private static final Quaternion glQuatCache = new Quaternion();
     private static final com.jme3.math.Quaternion jmeQuatCache = new com.jme3.math.Quaternion();
     private static com.jme3.math.Quaternion lastCameraQuat;
@@ -45,7 +53,7 @@ public class CameraSystem {
     private static void animateCameraRotation(com.jme3.math.Quaternion prevRotation, com.jme3.math.Quaternion rotation, float step, float animLength) {
         DynamXMath.slerp(step, prevRotation, rotation, jmeQuatCache);
         DynamXGeometry.inverseQuaternion(jmeQuatCache, jmeQuatCache);
-        rotationMode.rotator.apply(Minecraft.getMinecraft().gameSettings.thirdPersonView, jmeQuatCache);
+        cameraMode.rotator.apply(Minecraft.getMinecraft().gameSettings.thirdPersonView, jmeQuatCache);
 
         jmeQuatCache.normalizeLocal();
 
@@ -259,23 +267,28 @@ public class CameraSystem {
         }
     }
 
-    public static void setCameraZoom(int zoomLevel) {
-        CameraSystem.zoomLevel = zoomLevel;
+    public static void setupCamera(IModuleContainer.ISeatsContainer entity) {
+        zoomLevel = entity.cast().getPackInfo().getDefaultZoomLevel();
+        CameraMode mode = entity.getSeats().getPreferredCameraMode();
+        if(!preferredCameraMode.containsKey(mode))
+            preferredCameraMode.put(mode, mode);
+        cameraMode = preferredCameraMode.get(mode);
     }
 
-    public static CameraMode cycleCameraMode() {
-        switch (rotationMode) {
+    public static CameraMode cycleCameraMode(IModuleContainer.ISeatsContainer entity) {
+        switch (cameraMode) {
             case AUTO:
-                rotationMode = CameraMode.FIXED;
+                cameraMode = CameraMode.FIXED;
                 break;
             case FIXED:
-                rotationMode = CameraMode.FREE;
+                cameraMode = CameraMode.FREE;
                 break;
             case FREE:
-                rotationMode = CameraMode.AUTO;
+                cameraMode = CameraMode.AUTO;
                 break;
         }
-        return rotationMode;
+        preferredCameraMode.put(entity.getSeats().getPreferredCameraMode(), cameraMode);
+        return cameraMode;
     }
 
     public static void setWatchingBehind(boolean watchingBehind) {

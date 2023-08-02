@@ -11,6 +11,7 @@ import fr.dynamx.common.physics.terrain.chunk.ChunkTerrain;
 import fr.dynamx.common.physics.terrain.element.TerrainElementType;
 import fr.dynamx.common.physics.terrain.element.TerrainElementsFactory;
 import fr.dynamx.utils.DynamXConfig;
+import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.VerticalChunkPos;
 import fr.dynamx.utils.debug.ChunkGraph;
 import fr.dynamx.utils.debug.Profiler;
@@ -157,7 +158,7 @@ public class RemoteTerrainCache implements ITerrainCache {
                     long start2;
                     ObjectInputStream in = null;
                     try {
-                        in = new ObjectInputStream(new GZIPInputStream(new ByteArrayInputStream(rawData)));
+                        in = DynamXUtils.getTerrainObjectsIS(new GZIPInputStream(new ByteArrayInputStream(rawData)));
                         int size = in.readInt();
                         for (int i = 0; i < size; i++) { //Read all received elements
                             start2 = System.currentTimeMillis();

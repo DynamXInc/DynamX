@@ -7,6 +7,7 @@ import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.api.network.EnumPacketTarget;
+import fr.dynamx.client.camera.CameraMode;
 import fr.dynamx.common.network.sync.PhysicsEntitySynchronizer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.parts.PartSeat;
@@ -15,6 +16,7 @@ import fr.dynamx.common.network.sync.MessageSeatsSync;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -34,9 +36,16 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
     protected final BaseVehicleEntity<?> entity;
     protected BiMap<PartSeat, Entity> seatToPassenger = HashBiMap.create();
     protected Map<Byte, Boolean> doorsStatus;
+    @Getter
+    protected final CameraMode preferredCameraMode;
 
     public SeatsModule(BaseVehicleEntity<?> entity) {
+        this(entity, CameraMode.AUTO);
+    }
+
+    public SeatsModule(BaseVehicleEntity<?> entity, CameraMode preferredCameraMode) {
         this.entity = entity;
+        this.preferredCameraMode = preferredCameraMode;
     }
 
     @Override

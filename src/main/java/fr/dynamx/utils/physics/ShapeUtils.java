@@ -23,8 +23,7 @@ import vhacd.VHACDParameters;
 import java.io.*;
 import java.nio.FloatBuffer;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.zip.*;
 
 import static fr.dynamx.common.DynamXMain.log;
@@ -186,7 +185,16 @@ public class ShapeUtils {
 
     private static ShapeGenerator loadFile(InputStream file) {
         try {
-            ObjectInputStream in = new ObjectInputStream(new GZIPInputStream(file));
+            Set<String> classesSet = Collections.unmodifiableSet(new HashSet(Arrays.asList(ShapeGenerator.class.getName(), ArrayList.class.getName(), float[].class.getName())));
+            ObjectInputStream in = new ObjectInputStream(new GZIPInputStream(file)) {
+                @Override
+                protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
+                    if (!classesSet.contains(desc.getName())) {
+                        throw new InvalidClassException("Unauthorized deserialization attempt", desc.getName());
+                    }
+                    return super.resolveClass(desc);
+                }
+            };
             return (ShapeGenerator) in.readObject();
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException("Cannot load " + file, e);

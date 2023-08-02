@@ -67,16 +67,17 @@ public class ObjItemModelLoader extends TileEntityItemStackRenderer implements I
                     GlStateManager.translate(0.5F, 0.5F, 0.5F);
                     Minecraft.getMinecraft().getRenderItem().renderItem(stack, model.getGuiBaked());
                 } else {
-                    if (!MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack, EventStage.TRANSFORM, renderType)))
+                    if (!MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack, EventStage.TRANSFORM, renderType))) {
                         model.getOwner().applyItemTransforms(renderType, stack, model);
-                    float scale = model.getOwner().getItemScale();
-                    Vector3f translate = model.getOwner().getItemTranslate();
-                    Vector3f rotate = model.getOwner().getItemRotate();
-                    GlStateManager.translate(translate.x, translate.y, translate.z);
-                    GlStateManager.scale(scale, scale, scale);
-                    GlStateManager.rotate(rotate.x, 1, 0, 0);
-                    GlStateManager.rotate(rotate.y, 0, 1, 0);
-                    GlStateManager.rotate(rotate.z, 0, 0, 1);
+                        float scale = model.getOwner().getItemScale();
+                        Vector3f translate = model.getOwner().getItemTranslate();
+                        Vector3f rotate = model.getOwner().getItemRotate();
+                        GlStateManager.translate(translate.x, translate.y, translate.z);
+                        GlStateManager.scale(scale, scale, scale);
+                        GlStateManager.rotate(rotate.x, 1, 0, 0);
+                        GlStateManager.rotate(rotate.y, 0, 1, 0);
+                        GlStateManager.rotate(rotate.z, 0, 0, 1);
+                    }
                     if (!MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack, EventStage.RENDER, renderType)))
                         model.renderModel(stack, renderType);
                     MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack, EventStage.POST, renderType));

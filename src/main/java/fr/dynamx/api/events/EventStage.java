@@ -4,5 +4,6 @@ public enum EventStage {
 
     PRE(),
     RENDER(),
+    TRANSFORM(),
     POST()
 }

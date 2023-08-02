@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PropsEntity<T extends PackEntityPhysicsHandler<PropObject<?>, ?>> extends PackPhysicsEntity<T, PropObject<?>> {
-    private final List<MutableBoundingBox> unrotatedBoxes = new ArrayList<>();
 
     public PropsEntity(World worldIn) {
         super(worldIn);
@@ -37,14 +36,13 @@ public class PropsEntity<T extends PackEntityPhysicsHandler<PropObject<?>, ?>> e
     @Override
     public void onUpdate() {
         super.onUpdate();
-        if (getPackInfo() != null) {
-            if (getPackInfo().getDespawnTime() != -1) {
-                if ((ticksExisted % getPackInfo().getDespawnTime()) == 0) {
-                    setDead();
-                }
+        if (getPackInfo() == null) {
+            return;
+        }
+        if (getPackInfo().getDespawnTime() != -1) {
+            if ((ticksExisted % getPackInfo().getDespawnTime()) == 0) {
+                setDead();
             }
-            if(getModuleByType(LightsModule.class) != null)
-                getModuleByType(LightsModule.class).setLightOn(3, true);
         }
     }
 
@@ -69,31 +67,7 @@ public class PropsEntity<T extends PackEntityPhysicsHandler<PropObject<?>, ?>> e
         //Fix npe due to render before first update
         return getPackInfo() != null && getPackInfo().getRenderDistance() >= range;
     }
-
-    /**
-     * Cache
-     */
-    @Override
-    public List<MutableBoundingBox> getCollisionBoxes() {
-        if (getPackInfo() == null || physicsPosition == null)
-            return new ArrayList<>(0);
-        if (unrotatedBoxes.size() != getPackInfo().getCollisionsHelper().getShapes().size()) {
-            unrotatedBoxes.clear();
-            for (IShapeInfo shape : getPackInfo().getCollisionsHelper().getShapes()) {
-                MutableBoundingBox b = new MutableBoundingBox(shape.getBoundingBox());
-                b.offset(physicsPosition);
-                unrotatedBoxes.add(b);
-            }
-        } else {
-            for (int i = 0; i < getPackInfo().getCollisionsHelper().getShapes().size(); i++) {
-                MutableBoundingBox b = unrotatedBoxes.get(i);
-                b.setTo(getPackInfo().getCollisionsHelper().getShapes().get(i).getBoundingBox());
-                b.offset(physicsPosition);
-                //unrotatedBoxes.add(b);
-            }
-        }
-        return unrotatedBoxes;
-    }
+    
 
     @Override
     protected void createModules(ModuleListBuilder modules) {

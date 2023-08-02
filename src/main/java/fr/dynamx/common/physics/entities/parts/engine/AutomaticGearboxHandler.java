@@ -51,7 +51,7 @@ public class AutomaticGearboxHandler {
                     }
                 }
                 wheelRotationSpeed /= j;
-                wheelRotationSpeed *= 3.6 * 20 * 0.05f / DynamXContext.getPhysicsSimulationMode(Side.SERVER).getTimeStep();
+                wheelRotationSpeed *= (float) (3.6 * 20 * 0.05f / DynamXContext.getPhysicsSimulationMode(Side.SERVER).getTimeStep());
                 if (gearChanged && oldGear != 0) {
                     revs = vehicle.getEngine().getRevs();
                     targetRPM = gearBox.getRPM(vehicle.getEngine(), wheelRotationSpeed);

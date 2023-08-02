@@ -16,6 +16,7 @@ import fr.dynamx.common.physics.entities.modules.EnginePhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.engine.AutomaticGearboxHandler;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -36,6 +37,7 @@ import static fr.dynamx.client.ClientProxy.SOUND_HANDLER;
 @SynchronizedEntityVariable.SynchronizedPhysicsModule(modid = DynamXConstants.ID)
 public class CarEngineModule extends BasicEngineModule implements IPackInfoReloadListener {
     //TODO CLEAN ENGINE CODE
+    @Getter
     protected CarEngineInfo engineInfo;
     protected EnginePhysicsHandler physicsHandler;
 
@@ -48,10 +50,6 @@ public class CarEngineModule extends BasicEngineModule implements IPackInfoReloa
     public CarEngineModule(BaseVehicleEntity<? extends BaseVehiclePhysicsHandler<?>> entity, CarEngineInfo engineInfo) {
         super(entity);
         this.engineInfo = engineInfo;
-    }
-
-    public CarEngineInfo getEngineInfo() {
-        return engineInfo;
     }
 
     @Override

@@ -18,6 +18,7 @@ import fr.dynamx.common.physics.joints.EntityJoint;
 import fr.dynamx.common.physics.joints.EntityJointsHandler;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.physics.DynamXPhysicsHelper;
+import lombok.Getter;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
@@ -35,6 +36,7 @@ public class DoorEntity<T extends PackEntityPhysicsHandler<PartDoor, ?>> extends
     private static final DataParameter<Byte> DOOR_ID = EntityDataManager.createKey(DoorEntity.class, DataSerializers.BYTE);
     int timer = -1;
     private BaseVehicleEntity<?> vehicleEntity;
+    @Getter
     private DoorsModule doorAttachModule;
 
     public DoorEntity(World world) {
@@ -130,10 +132,6 @@ public class DoorEntity<T extends PackEntityPhysicsHandler<PartDoor, ?>> extends
             list.add(new MutableBoundingBox(partShape.getBoundingBox()).offset(physicsPosition));
         }
         return list;
-    }
-
-    public DoorsModule getDoorAttachModule() {
-        return doorAttachModule;
     }
 
     public BaseVehicleEntity<?> getVehicleEntity(World world) {

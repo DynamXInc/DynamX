@@ -66,10 +66,7 @@ public class ObjectLoader<T extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C exte
         super.clear(hot);
         //DO NOT CLEAR OWNERS, ITEMS ARE REUSED !
         for (T b : builtinObjects) {
-            if (hot) //If it's an hot reload, reload builtin items
-                loadItems(b, true);
-            else //Else add the info in the map, but DO NOT create an object owner, it already exists !
-                super.loadItems(b, false);
+            loadItems(b, hot);
         }
     }
 

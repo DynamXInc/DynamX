@@ -84,31 +84,6 @@ public abstract class BaseVehicleEntity<T extends BaseVehiclePhysicsHandler<?>> 
         Profiler.get().end(Profiler.Profiles.TICK_ENTITIES);
     }
 
-    /**
-     * Cache
-     */
-    private final List<MutableBoundingBox> unrotatedBoxes = new ArrayList<>();
-
-    @Override
-    public List<MutableBoundingBox> getCollisionBoxes() {
-        if (getPackInfo() == null || physicsPosition == null)
-            return new ArrayList<>(0);
-        if (unrotatedBoxes.size() != getPackInfo().getCollisionsHelper().getShapes().size()) {
-            unrotatedBoxes.clear();
-            for (IShapeInfo shape : getPackInfo().getCollisionsHelper().getShapes()) {
-                MutableBoundingBox b = new MutableBoundingBox(shape.getBoundingBox());
-                b.offset(physicsPosition);
-                unrotatedBoxes.add(b);
-            }
-        } else {
-            for (int i = 0; i < getPackInfo().getCollisionsHelper().getShapes().size(); i++) {
-                MutableBoundingBox b = unrotatedBoxes.get(i);
-                b.setTo(getPackInfo().getCollisionsHelper().getShapes().get(i).getBoundingBox());
-                b.offset(physicsPosition);
-            }
-        }
-        return unrotatedBoxes;
-    }
 
     @Override
     protected boolean canFitPassenger(Entity passenger) {

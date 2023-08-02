@@ -4,6 +4,7 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
 import fr.dynamx.api.contentpack.object.part.IDrawablePart;
+import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
@@ -15,6 +16,8 @@ import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -24,6 +27,9 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Base implementation for all pack-based entities
@@ -36,12 +42,30 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
     private static final DataParameter<String> INFO_NAME = EntityDataManager.createKey(PackPhysicsEntity.class, DataSerializers.STRING);
     private static final DataParameter<Integer> METADATA = EntityDataManager.createKey(PackPhysicsEntity.class, DataSerializers.VARINT);
     private int lastMetadata = -1;
+
+    /**
+     * -- GETTER --
+     *  The texture id depends on the entity's metadata <br>
+     *  If -1 is returned, the entity will not be rendered
+     *
+     * @return The texture id to use for drawing chassis
+     */
+    @Getter
     private byte entityTextureID = -1;
 
     protected EntityJointsHandler jointsHandler = new EntityJointsHandler(this);
+
+    @Getter
     private MovableModule movableModule;
 
+    @Getter
+    @Setter
     private A packInfo;
+
+    /**
+     * Cache for collision boxes without rotation
+     */
+    private final List<MutableBoundingBox> rawBoxes = new ArrayList<>();
 
     public PackPhysicsEntity(World worldIn) {
         super(worldIn);
@@ -125,48 +149,61 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
     }
 
     /**
+     * Cache
+     */
+    @Override
+    public List<MutableBoundingBox> getCollisionBoxes() {
+        if (getPackInfo() == null || physicsPosition == null)
+            return new ArrayList<>(0);
+        if (rawBoxes.size() != getPackInfo().getCollisionsHelper().getShapes().size()) {
+            rawBoxes.clear();
+            for (IShapeInfo shape : getPackInfo().getCollisionsHelper().getShapes()) {
+                MutableBoundingBox boundingBox = new MutableBoundingBox(shape.getBoundingBox());
+                boundingBox.offset(physicsPosition);
+                rawBoxes.add(boundingBox);
+            }
+        } else {
+            for (int i = 0; i < getPackInfo().getCollisionsHelper().getShapes().size(); i++) {
+                MutableBoundingBox boundingBox = rawBoxes.get(i);
+                boundingBox.setTo(getPackInfo().getCollisionsHelper().getShapes().get(i).getBoundingBox());
+                boundingBox.offset(physicsPosition);
+            }
+        }
+        return rawBoxes;
+    }
+
+    /**
      * Ray-traces to get hit part when interacting with the entity
      */
     public InteractivePart<?, ?> getHitPart(Entity entity) {
-        if (getPackInfo() != null) {
-            Vec3d lookVec = entity.getLook(1.0F);
-            Vec3d hitVec = entity.getPositionVector().add(0, entity.getEyeHeight(), 0);
-            InteractivePart<?, ?> nearest = null;
-            Vector3f nearestPos = null;
-            Vector3f vehiclePos = physicsPosition;
-            Vector3f playerPos = Vector3fPool.get((float) entity.posX, (float) entity.posY, (float) entity.posZ);
-            MutableBoundingBox box = new MutableBoundingBox();
-            for (float f = 1.0F; f < 4.0F; f += 0.1F) {
-                for (InteractivePart<?, ?> part : getPackInfo().getInteractiveParts()) {
-                    part.getBox(box);
-                    Vector3f partPos = DynamXGeometry.rotateVectorByQuaternion(part.getPosition(), physicsRotation);
-                    partPos.addLocal(vehiclePos);
-                    box.offset(partPos);
-                    if ((nearestPos == null || DynamXGeometry.distanceBetween(partPos, playerPos) < DynamXGeometry.distanceBetween(nearestPos, playerPos)) && box.contains(hitVec)) {
-                        nearest = part;
-                        nearestPos = partPos;
-                    }
-                }
-                hitVec = hitVec.add(lookVec.x * 0.1F, lookVec.y * 0.1F, lookVec.z * 0.1F);
-            }
-            return nearest;
+        if (getPackInfo() == null) {
+            return null;
         }
-        return null;
+        Vec3d lookVec = entity.getLook(1.0F);
+        Vec3d hitVec = entity.getPositionVector().add(0, entity.getEyeHeight(), 0);
+        InteractivePart<?, ?> nearest = null;
+        Vector3f nearestPos = null;
+        Vector3f playerPos = Vector3fPool.get((float) entity.posX, (float) entity.posY, (float) entity.posZ);
+        MutableBoundingBox box = new MutableBoundingBox();
+        for (float f = 1.0F; f < 4.0F; f += 0.1F) {
+            for (InteractivePart<?, ?> part : getPackInfo().getInteractiveParts()) {
+                part.getBox(box);
+                Vector3f partPos = DynamXGeometry.rotateVectorByQuaternion(part.getPosition(), physicsRotation);
+                partPos.addLocal(physicsPosition);
+                box.offset(partPos);
+                if ((nearestPos == null || DynamXGeometry.distanceBetween(partPos, playerPos) < DynamXGeometry.distanceBetween(nearestPos, playerPos)) && box.contains(hitVec)) {
+                    nearest = part;
+                    nearestPos = partPos;
+                }
+            }
+            hitVec = hitVec.add(lookVec.x * 0.1F, lookVec.y * 0.1F, lookVec.z * 0.1F);
+        }
+        return nearest;
     }
 
     @Override
     public EntityJointsHandler getJointsHandler() {
         return jointsHandler;
-    }
-
-    /**
-     * The texture id depends on the entity's metadata <br>
-     * If -1 is returned, the entity will not be rendered
-     *
-     * @return The texture id to use for drawing chassis
-     */
-    public byte getEntityTextureID() {
-        return entityTextureID;
     }
 
     public int getMetadata() {
@@ -195,11 +232,4 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
         this.getDataManager().set(INFO_NAME, name);
     }
 
-    public A getPackInfo() {
-        return packInfo;
-    }
-
-    public void setPackInfo(A packInfo) {
-        this.packInfo = packInfo;
-    }
 }

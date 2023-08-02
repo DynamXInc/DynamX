@@ -80,7 +80,7 @@ public class SteeringWheelInfo extends SubInfoType<ModularVehicleInfo> implement
         if (getSteeringWheelBaseRotation() != null)
             GlStateManager.rotate(GlQuaternionPool.get(getSteeringWheelBaseRotation()));
         //Rotate the steering wheel
-        int directingWheel = VehicleEntityProperties.getPropertyIndex(packInfo.getDirectingWheel(), VehicleEntityProperties.EnumVisualProperties.STEERANGLE);
+        int directingWheel = VehicleEntityProperties.getPropertyIndex(packInfo.getDirectingWheel(), VehicleEntityProperties.EnumVisualProperties.STEER_ANGLE);
         if (entity != null && entity.hasModuleOfType(WheelsModule.class)) {
             WheelsModule m = entity.getModuleByType(WheelsModule.class);
             if(m.visualProperties.length > directingWheel)

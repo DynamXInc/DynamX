@@ -2,17 +2,14 @@ package fr.dynamx.common.entities.modules;
 
 import com.jme3.bullet.objects.VehicleWheel;
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.audio.EnumSoundState;
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
-import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.api.network.sync.EntityVariable;
 import fr.dynamx.api.network.sync.SynchronizationRules;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
-import fr.dynamx.client.sound.SkiddingSound;
 import fr.dynamx.client.sound.VehicleSound;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.ContentPackLoader;
@@ -25,7 +22,6 @@ import fr.dynamx.common.network.sync.variables.EntityMapVariable;
 import fr.dynamx.common.physics.entities.BaseWheeledVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.wheel.WheelPhysics;
-import fr.dynamx.common.physics.entities.parts.wheel.WheelState;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.Vector3fPool;
@@ -42,8 +38,6 @@ import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-
-import static fr.dynamx.client.ClientProxy.SOUND_HANDLER;
 
 /**
  * Basic wheel implementation <br>
@@ -83,16 +77,19 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
 
     public WheelsModule(BaseVehicleEntity<? extends BaseWheeledVehiclePhysicsHandler<?>> entity) {
         this.entity = entity;
-        this.wheelsStates = new EntityVariable<>((variable, value) -> {
-            if (!entity.getSynchronizer().getSimulationHolder().ownsControls(FMLCommonHandler.instance().getEffectiveSide())) {
-                if (DynamXMain.proxy.shouldUseBulletSimulation(entity.world)) {
-                    for (int i = 0; i < value.length; i++) {
-                        if (variable.get()[i] != value[i]) {
-                            if (value[i] == WheelState.REMOVED)
-                                getPhysicsHandler().removeWheel((byte) i);
-                            else
-                                getPhysicsHandler().getWheel(i).setFlattened(value[i] == WheelState.ADDED_FLATTENED);
-                        }
+        wheelsStates = new EntityVariable<>((variable, value) -> {
+            if (entity.getSynchronizer().getSimulationHolder().ownsControls(FMLCommonHandler.instance().getEffectiveSide())) {
+                return;
+            }
+            if (!DynamXMain.proxy.shouldUseBulletSimulation(entity.world)) {
+                return;
+            }
+            for (int i = 0; i < value.length; i++) {
+                if (variable.get()[i] != value[i]) {
+                    if (value[i] == WheelState.REMOVED) {
+                        getPhysicsHandler().removeWheel((byte) i);
+                    } else {
+                        getPhysicsHandler().getWheel(i).setFlattened(value[i] == WheelState.ADDED_FLATTENED);
                     }
                 }
             }
@@ -108,15 +105,17 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
     }
 
     public void setWheelInfo(byte partIndex, PartWheelInfo info) {
-        if (wheelInfos.get().get(partIndex) != info) {
-            VehicleEntityEvent.ChangeWheel event = new VehicleEntityEvent.ChangeWheel(FMLCommonHandler.instance().getEffectiveSide(), entity, this, wheelInfos.get().get(partIndex), info, partIndex);
-            if (!MinecraftForge.EVENT_BUS.post(event)) {
-                wheelInfos.put(partIndex, event.getNewWheel());
-                if (wheelsPhysics != null)
-                    wheelsPhysics.getWheelByPartIndex(partIndex).setWheelInfo(event.getNewWheel());
-                computeWheelsTextureIds();
-            }
+        if (wheelInfos.get().get(partIndex) == info) {
+            return;
         }
+        VehicleEntityEvent.ChangeWheel event = new VehicleEntityEvent.ChangeWheel(FMLCommonHandler.instance().getEffectiveSide(), entity, this, wheelInfos.get().get(partIndex), info, partIndex);
+        if (MinecraftForge.EVENT_BUS.post(event)) {
+            return;
+        }
+        wheelInfos.put(partIndex, event.getNewWheel());
+        if (wheelsPhysics != null)
+            wheelsPhysics.getWheelByPartIndex(partIndex).setWheelInfo(event.getNewWheel());
+        computeWheelsTextureIds();
     }
 
     @SideOnly(Side.CLIENT)
@@ -184,32 +183,35 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
 
     @Override
     public void preUpdatePhysics(boolean simulatePhysics) {
-        if (simulatePhysics) {
-            if (entity.ticksExisted > 10) {
-                for (int i = 0; i < wheelsPhysics.vehicleWheelData.size(); i++) {
-                    WheelPhysics w = wheelsPhysics.vehicleWheelData.get(i);
-                    if (w != null) {
-                        Vector3f pos = Vector3fPool.get();
-                        w.getPhysicsWheel().getCollisionLocation(pos);
-                        BlockPos bp = new BlockPos(pos.x, Math.ceil(pos.y) - 1, pos.z);
-                        IBlockState blockState = entity.world.getBlockState(bp);
-                        float[] floats = ContentPackLoader.getBlockFriction(blockState.getBlock());
-                        if (entity.world.getBiome(bp).canRain() && entity.world.isRaining() && entity.world.canBlockSeeSky(bp))
-                            w.setGrip((w.isFlattened() ? 0.16f : 1) * floats[1]);
-                        else
-                            w.setGrip((w.isFlattened() ? 0.16f : 1) * floats[0]);
-                        if (wheelsStates.get()[i] == WheelState.ADDED && w.isFlattened()) {
-                            wheelsStates.get()[i] = WheelState.ADDED_FLATTENED;
-                            wheelsStates.setChanged(true);
-                        } else if (wheelsStates.get()[i] == WheelState.ADDED_FLATTENED && !w.isFlattened()) {
-                            wheelsStates.get()[i] = WheelState.ADDED;
-                            wheelsStates.setChanged(true);
-                        }
-                    }
+        if (!simulatePhysics) {
+            return;
+        }
+        if (entity.ticksExisted > 10) {
+            for (int i = 0; i < wheelsPhysics.vehicleWheelData.size(); i++) {
+                WheelPhysics w = wheelsPhysics.vehicleWheelData.get(i);
+                if (w == null) {
+                    continue;
+                }
+                Vector3f pos = Vector3fPool.get();
+                w.getPhysicsWheel().getCollisionLocation(pos);
+                BlockPos bp = new BlockPos(pos.x, Math.ceil(pos.y) - 1, pos.z);
+                IBlockState blockState = entity.world.getBlockState(bp);
+                float[] frictionValues = ContentPackLoader.getBlockFriction(blockState.getBlock());
+                boolean isBlockWet = entity.world.getBiome(bp).canRain() && entity.world.isRaining() && entity.world.canBlockSeeSky(bp);
+                float frictionValue = isBlockWet ? frictionValues[1] : frictionValues[0];
+                w.setGrip((w.isFlattened() ? 0.16f : 1) * frictionValue);
+
+                WheelState wheelState = wheelsStates.get()[i];
+                if (wheelState == WheelState.ADDED && w.isFlattened()) {
+                    wheelsStates.get()[i] = WheelState.ADDED_FLATTENED;
+                    wheelsStates.setChanged(true);
+                } else if (wheelState == WheelState.ADDED_FLATTENED && !w.isFlattened()) {
+                    wheelsStates.get()[i] = WheelState.ADDED;
+                    wheelsStates.setChanged(true);
                 }
             }
-            wheelsPhysics.update();
         }
+        wheelsPhysics.update();
     }
 
     @Override
@@ -240,33 +242,34 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
     }
 
     public void updateVisualProperties() {
-        if (wheelsPhysics != null) {
-            byte n = wheelsPhysics.getNumWheels();
+        if (wheelsPhysics == null) {
+            return;
+        }
+        byte numWheels = wheelsPhysics.getNumWheels();
 
-            for (int i = 0; i < n; i++) {
-                VehicleWheel info = wheelsPhysics.getHandler().getPhysicsVehicle().getWheel(i);
-                if (info.isFrontWheel()) {
-                    visualProperties[VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.STEERANGLE)] = (float) Math.toDegrees(info.getSteerAngle());
-                }
-
-                int ind = VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.ROTATIONANGLE);
-                //Update prevRotation, so we have -180<prevRotationYaw-rotationYaw<180 to avoid visual glitch
-                float[] angles = DynamXMath.interpolateAngle((float) (Math.toDegrees(info.getRotationAngle()) % 360), visualProperties[ind], 1);
-                prevVisualProperties[ind] = angles[0];
-                visualProperties[ind] = angles[1];
-
-                visualProperties[VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.SUSPENSIONLENGTH)] = info.getSuspensionLength() + info.getRestLength();
-                Vector3f pos = Vector3fPool.get();
-                info.getCollisionLocation(pos);
-                visualProperties[VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.COLLISIONX)] = pos.x;
-                visualProperties[VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.COLLISIONY)] = pos.y;
-                visualProperties[VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.COLLISIONZ)] = pos.z;
+        for (int i = 0; i < numWheels; i++) {
+            VehicleWheel info = wheelsPhysics.getHandler().getPhysicsVehicle().getWheel(i);
+            if (info.isFrontWheel()) {
+                visualProperties[VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.STEER_ANGLE)] = (float) Math.toDegrees(info.getSteerAngle());
             }
-            for (byte b = 0; b < n; b++) {
-                WheelPhysics w = wheelsPhysics.getWheel(b);
-                if (w != null)
-                    skidInfos.set(b, w.getSkidInfo());
-            }
+
+            int indexRotationAngle = VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.ROTATION_ANGLE);
+            //Update prevRotation, so we have -180<prevRotationYaw-rotationYaw<180 to avoid visual glitch
+            float[] angles = DynamXMath.interpolateAngle((float) (Math.toDegrees(info.getRotationAngle()) % 360), visualProperties[indexRotationAngle], 1);
+            prevVisualProperties[indexRotationAngle] = angles[0];
+            visualProperties[indexRotationAngle] = angles[1];
+
+            visualProperties[VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.SUSPENSION_LENGTH)] = info.getSuspensionLength() + info.getRestLength();
+            Vector3f pos = Vector3fPool.get();
+            info.getCollisionLocation(pos);
+            visualProperties[VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.COLLISION_X)] = pos.x;
+            visualProperties[VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.COLLISION_Y)] = pos.y;
+            visualProperties[VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.COLLISION_Z)] = pos.z;
+        }
+        for (byte b = 0; b < numWheels; b++) {
+            WheelPhysics w = wheelsPhysics.getWheel(b);
+            if (w != null)
+                skidInfos.set(b, w.getSkidInfo());
         }
     }
 
@@ -283,24 +286,21 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
         //Dust particles when the vehicle friction is very low
         entity.getPackInfo().getPartsByType(PartWheel.class).forEach(partWheel -> {
             PartWheelInfo info = getWheelInfo(partWheel.getId());
-            if (info.isModelValid() && info.getSkidParticle() != null) {
-                if (skidInfos.get()[partWheel.getId()] < 0.1f) {
-                    entity.world.spawnParticle(info.getSkidParticle(), visualProperties[VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.COLLISIONX)],
-                            visualProperties[VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.COLLISIONY)],
-                            visualProperties[VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.COLLISIONZ)],
-                            0, 0, 0);
-                }
+            if (!info.isModelValid() || info.getSkidParticle() == null) {
+                return;
             }
+            if (!(skidInfos.get()[partWheel.getId()] < 0.1f)) {
+                return;
+            }
+            entity.world.spawnParticle(info.getSkidParticle(),
+                    visualProperties[VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.COLLISION_X)],
+                    visualProperties[VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.COLLISION_Y)],
+                    visualProperties[VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.COLLISION_Z)],
+                    0, 0, 0);
         });
     }
 
     public final Map<Integer, VehicleSound> sounds = new HashMap<>();
-    private VehicleSound lastVehicleSound;
-    private VehicleSound currentVehicleSound;
-
-    //temporaire
-    private int mySoundId;
-    private int skiddingTime;
 
     @Override
     public boolean listenEntityUpdates(Side side) {
@@ -310,63 +310,12 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
     @Override
     @SideOnly(Side.CLIENT)
     public void updateEntity() {
-        // if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.UpdateVehicleSoundEntityEvent(entity, this, PhysicsEntityEvent.Phase.PRE))) {
-        if (false) { //TODO ENABLE & IMPROVE
-            //if (engineInfo != null && engineInfo.getEngineSounds() != null) {
-            if (sounds.isEmpty()) { //Sounds are not initialized
-                sounds.put(0, new SkiddingSound("skidding", entity, this));
-                mySoundId = 0;
-            }
-            if (true) {
-                        /*if (engineProperties != null) {
-                            boolean forInterior = Minecraft.getMinecraft().gameSettings.thirdPersonView == 0 && entity.isRidingOrBeingRiddenBy(Minecraft.getMinecraft().player);
-                            float rpm = engineProperties[VehicleEntityProperties.EnumEngineProperties.REVS.ordinal()] * engineInfo.getMaxRevs();
-                            lastVehicleSound = currentVehicleSound;
-                            if (currentVehicleSound == null || !currentVehicleSound.shouldPlay(rpm, forInterior)) {
-                                sounds.forEach((id, vehicleSound) -> {
-                                    if (vehicleSound.shouldPlay(rpm, forInterior)) {
-                                        this.currentVehicleSound = vehicleSound;
-                                    }
-                                });
-                            }
-                        }*/
-                int numSkdding = 0;
-                for (int i = 0; i < entity.getPackInfo().getPartsByType(PartWheel.class).size(); i++) {
-                    if (skidInfos.get()[i] < 0.1f)
-                        numSkdding++;
-                }
-                if (numSkdding > 0) {
-                    skiddingTime++;
-                } else {
-                    skiddingTime -= 5;
-                }
-                if (skiddingTime > 10) { //cooldown to start the skidding sound
-                    currentVehicleSound = sounds.get(mySoundId);
-                    skiddingTime = 10;
-                } else if (skiddingTime <= 0) {
-                    currentVehicleSound = null;
-                    skiddingTime = 0;
-                }
-                if (currentVehicleSound != lastVehicleSound) //if playing sound changed
-                {
-                    if (lastVehicleSound != null)
-                        SOUND_HANDLER.stopSound(lastVehicleSound);
-                    if (currentVehicleSound != null) {
-                        if (currentVehicleSound.getState() == EnumSoundState.STOPPING) //already playing
-                            currentVehicleSound.onStarted();
-                        else if (currentVehicleSound.getState() == EnumSoundState.STOPPED)
-                            SOUND_HANDLER.playStreamingSound(Vector3fPool.get(currentVehicleSound.getPosX(), currentVehicleSound.getPosY(), currentVehicleSound.getPosZ()), currentVehicleSound);
-                    }
-                    lastVehicleSound = currentVehicleSound;
-                }
-            } else {
-                if (currentVehicleSound != null)
-                    SOUND_HANDLER.stopSound(currentVehicleSound);
-                currentVehicleSound = lastVehicleSound = null;
-            }
-            //   }
-        }
-        //    MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.UpdateVehicleSoundEntityEvent(entity, this, PhysicsEntityEvent.Phase.POST));
-        //  }
+
+    }
+
+    public enum WheelState {
+        ADDED,
+        ADDED_FLATTENED,
+        REMOVED
     }
 }

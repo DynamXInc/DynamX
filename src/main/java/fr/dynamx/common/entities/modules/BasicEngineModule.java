@@ -32,7 +32,7 @@ import javax.annotation.Nullable;
  */
 @SynchronizedEntityVariable.SynchronizedPhysicsModule(modid = DynamXConstants.ID)
 public abstract class BasicEngineModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, IPhysicsModule.IPhysicsUpdateListener, IPhysicsModule.IEntityUpdateListener {
-    //TODO CLEAN ENGINE CODE
+
     protected final BaseVehicleEntity<? extends BaseVehiclePhysicsHandler<?>> entity;
 
     //Default value is 32 for the handbrake on spawn

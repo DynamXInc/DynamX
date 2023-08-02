@@ -12,6 +12,7 @@ import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.common.entities.modules.SeatsModule;
 import fr.dynamx.common.entities.modules.WheelsModule;
 import fr.dynamx.common.physics.entities.HelicopterPhysicsHandler;
+import lombok.Getter;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
 
@@ -21,6 +22,7 @@ public class HelicopterEntity<T extends HelicopterPhysicsHandler<?>> extends Bas
         IModuleContainer.ISeatsContainer, IModuleContainer.IDoorContainer {
     private SeatsModule seats;
     private DoorsModule doors;
+    @Getter
     private WheelsModule wheels;
 
     public HelicopterEntity(World world) {
@@ -73,10 +75,6 @@ public class HelicopterEntity<T extends HelicopterPhysicsHandler<?>> extends Bas
                 }
             };
         return seats;
-    }
-
-    public WheelsModule getWheels() {
-        return wheels;
     }
 
     @Override

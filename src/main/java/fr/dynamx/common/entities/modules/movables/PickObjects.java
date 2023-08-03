@@ -15,6 +15,7 @@ import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import fr.dynamx.utils.physics.DynamXPhysicsHelper;
+import lombok.Getter;
 import net.minecraft.entity.player.EntityPlayer;
 
 @SynchronizedEntityVariable.SynchronizedPhysicsModule(modid = DynamXConstants.ID)
@@ -27,7 +28,9 @@ public class PickObjects extends MovableModule {
             entity.getSynchronizer().onPlayerStartControlling(value, false);
     }, SynchronizationRules.SERVER_TO_CLIENTS);
     @SynchronizedEntityVariable(name = "pickDistance")
+    @Getter
     private final EntityVariable<Float> pickDistance = new EntityVariable<>(SynchronizationRules.SERVER_TO_CLIENTS, 0f);
+    @Getter
     private PhysicsRigidBody hitBody;
     private float initialMass;
     @SynchronizedEntityVariable(name = "localPickPosition")

@@ -240,7 +240,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
      * Checks if the entity can be rendered, before any rendering and event
      */
     public boolean canRender(T entity) {
-        return entity.initialized == 2;
+        return entity.initialized == PhysicsEntity.EnumEntityInitState.ALL;
     }
 
     /**

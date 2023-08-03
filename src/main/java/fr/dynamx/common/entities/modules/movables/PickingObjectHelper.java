@@ -120,12 +120,12 @@ public class PickingObjectHelper {
             case LENGTH_CHANGE:
                 boolean mouseWheelInc = (boolean) moduleAction.getInfo()[0];
                 int distanceMax = (int) moduleAction.getInfo()[1];
-                movableModule.pickObjects.pickDistance.set(MathHelper.clamp(
-                        movableModule.pickObjects.pickDistance.get() + (mouseWheelInc ? 1 : -1), 1.5f, distanceMax));
+                movableModule.pickObjects.getPickDistance().set(MathHelper.clamp(
+                        movableModule.pickObjects.getPickDistance().get() + (mouseWheelInc ? 1 : -1), 1.5f, distanceMax));
                 break;
             case FREEZE_OBJECT:
-                if (movableModule.pickObjects.hitBody.getMass() > 0)
-                    movableModule.pickObjects.hitBody.setMass(0);
+                if (movableModule.pickObjects.getHitBody().getMass() > 0)
+                    movableModule.pickObjects.getHitBody().setMass(0);
                 break;
         }
     }

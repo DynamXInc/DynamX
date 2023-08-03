@@ -144,9 +144,6 @@ task sourcesJar(type: Jar, dependsOn: classes) {
     from(sourceSets.main.allSource) {
         include 'fr/**/**'
     }
-    from (sourceSets.main.output){
-        include '**'
-    }
     classifier = 'sources'
 }
 

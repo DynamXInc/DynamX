@@ -97,12 +97,12 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     /**
      * Entity initialization state
      */
-    public EnumEntityInitState initialized;
+    public EnumEntityInitState initialized = EnumEntityInitState.NOT_INITIALIZED;
 
     /**
      * State of the entity inside the physics engine
      */
-    public EnumEntityPhysicsRegistryState isRegistered;
+    public EnumEntityPhysicsRegistryState isRegistered = EnumEntityPhysicsRegistryState.NOT_REGISTERED;
 
     /**
      * Map of players walking on the top of this entity

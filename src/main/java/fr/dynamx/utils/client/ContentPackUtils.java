@@ -172,7 +172,7 @@ public class ContentPackUtils {
     }
 
     /**
-     * Registers an block with a {@link IStateMapper}, it permits to ignore some blockstate properties for the render <br>
+     * Registers a block with a {@link IStateMapper}, it permits to ignore some blockstate properties for the render <br>
      * See {@link BlockModelShapes} to see how Minecraft uses this
      *
      * @param block       The block

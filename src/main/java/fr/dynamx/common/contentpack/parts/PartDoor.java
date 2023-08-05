@@ -110,8 +110,11 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     @Getter
     private ObjectCollisionsHelper collisionsHelper = new ObjectCollisionsHelper();
 
+    private String oldPartName;
+
     public PartDoor(ModularVehicleInfo owner, String partName) {
         super(owner, partName, 0, 0);
+        this.oldPartName = partName;
     }
 
     @Override
@@ -176,6 +179,9 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     @Override
     public void appendTo(ModularVehicleInfo owner) {
         super.appendTo(owner);
+        if(partName == null){
+            partName = oldPartName;
+        }
         MutableBoundingBox box = new MutableBoundingBox(getScale()).offset(getPosition());
         collisionsHelper.addCollisionShape(new IShapeInfo() {
             @Override

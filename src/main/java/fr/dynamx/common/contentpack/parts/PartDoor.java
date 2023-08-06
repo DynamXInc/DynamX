@@ -221,6 +221,16 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     }
 
     @Override
+    public float getAngularDamping() {
+        return 0;
+    }
+
+    @Override
+    public float getLinearDamping() {
+        return 0;
+    }
+
+    @Override
     public ResourceLocation getHudCursorTexture() {
         return new ResourceLocation(DynamXConstants.ID, "textures/door.png");
     }

@@ -67,7 +67,7 @@ public abstract class BaseWheeledVehiclePhysicsHandler<T extends BaseVehicleEnti
             for (FrictionPoint f : handledEntity.getPackInfo().getFrictionPoints()) {
                 Vector3f pushDown = new Vector3f(-getLinearVelocity().x, -horizSpeed, -getLinearVelocity().z);
                 pushDown.multLocal(f.getIntensity());
-                applyForce(f.getPosition(), pushDown);
+                applyImpulse(f.getPosition(), pushDown);
             }
         }
     }

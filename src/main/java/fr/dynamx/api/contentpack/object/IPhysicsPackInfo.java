@@ -27,4 +27,7 @@ public interface IPhysicsPackInfo extends ICollisionsContainer {
     }
 
     ItemStack getPickedResult(int metadata);
+
+    float getAngularDamping();
+    float getLinearDamping();
 }

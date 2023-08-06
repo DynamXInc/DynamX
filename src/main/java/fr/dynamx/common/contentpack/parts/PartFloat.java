@@ -2,10 +2,10 @@ package fr.dynamx.common.contentpack.parts;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.part.BasePart;
+import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
-import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.optimization.Vector3fPool;
@@ -16,8 +16,8 @@ import net.minecraft.util.math.AxisAlignedBB;
 import java.util.ArrayList;
 import java.util.List;
 
-@RegisteredSubInfoType(name = "float", registries = SubInfoTypeRegistries.WHEELED_VEHICLES, strictName = false)
-public class PartFloat extends BasePart<ModularVehicleInfo> {
+@RegisteredSubInfoType(name = "float", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.PROPS}, strictName = false)
+public class PartFloat<T extends ISubInfoTypeOwner<T>> extends BasePart<T> {
     @Getter
     protected AxisAlignedBB box;
     @Getter
@@ -44,12 +44,12 @@ public class PartFloat extends BasePart<ModularVehicleInfo> {
     @Getter
     protected List<Vector3f> childrenPositionList = new ArrayList<>();
 
-    public PartFloat(ModularVehicleInfo owner, String partName) {
+    public PartFloat(ISubInfoTypeOwner<T> owner, String partName) {
         super(owner, partName);
     }
 
     @Override
-    public void appendTo(ModularVehicleInfo owner) {
+    public void appendTo(T owner) {
         super.appendTo(owner);
         Vector3f min = getPosition().subtract(getScale());
         Vector3f max = getPosition().add(getScale());

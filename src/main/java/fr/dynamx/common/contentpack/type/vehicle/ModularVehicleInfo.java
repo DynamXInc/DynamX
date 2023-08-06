@@ -111,10 +111,8 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     protected float dragFactor;
 
     @PackFileProperty(configNames = "LinearDamping", required = false, defaultValue = "0")
-    @Getter
     protected float linearDamping;
     @PackFileProperty(configNames = "AngularDamping", required = false, defaultValue = "0")
-    @Getter
     protected float angularDamping;
 
     @Getter
@@ -278,6 +276,16 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     @Override
     public ItemStack getPickedResult(int metadata) {
         return new ItemStack((Item) getOwners()[0], 1, metadata);
+    }
+
+    @Override
+    public float getAngularDamping() {
+        return angularDamping;
+    }
+
+    @Override
+    public float getLinearDamping() {
+        return linearDamping;
     }
 
     /**

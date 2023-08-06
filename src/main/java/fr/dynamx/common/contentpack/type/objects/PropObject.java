@@ -60,9 +60,10 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
     @PackFileProperty(configNames = "DespawnTime", required = false, defaultValue = "\"-1\" (disabled)")
     @Getter
     protected float despawnTime = -1;
-    @PackFileProperty(configNames = "Damping", required = false, defaultValue = "0")
-    @Getter
-    protected float dampingFactor;
+    @PackFileProperty(configNames = "LinearDamping", required = false, defaultValue = "0")
+    protected float linearDamping;
+    @PackFileProperty(configNames = "AngularDamping", required = false, defaultValue = "0")
+    protected float angularDamping;
     @PackFileProperty(configNames = "Bounciness", required = false, defaultValue = "0")
     @Getter
     protected float restitutionFactor;
@@ -142,6 +143,16 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
     @Override
     public ItemStack getPickedResult(int metadata) {
         return new ItemStack((Item) getOwners()[0], 1, metadata);
+    }
+
+    @Override
+    public float getAngularDamping() {
+        return angularDamping;
+    }
+
+    @Override
+    public float getLinearDamping() {
+        return linearDamping;
     }
 
     @Override

@@ -195,7 +195,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
             }
         });
         ObjModelPath carModelPath = DynamXUtils.getModelPath(getPackName(), owner.getModel());
-        collisionsHelper.loadCollisions(this, carModelPath, getPartName(), new Vector3f(), owner.getScaleModifier(), ObjectCollisionsHelper.CollisionType.PROP, owner.isUseComplexCollisions());
+        collisionsHelper.loadCollisions(this, carModelPath, getPartName(), new Vector3f(), 0, owner.isUseComplexCollisions(), owner.getScaleModifier(), ObjectCollisionsHelper.CollisionType.PROP);
     }
 
     @Override

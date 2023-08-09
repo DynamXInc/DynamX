@@ -34,11 +34,11 @@ public class ObjectCollisionsHelper
         shapes.add(partShape);
     }
 
-    public void loadCollisions(INamedObject object, ObjModelPath modelPath, String partName, Vector3f centerOfMass, Vector3f scaleModifier, CollisionType type, boolean useComplexCollisions) {
+    public void loadCollisions(INamedObject object, ObjModelPath modelPath, String partName, Vector3f centerOfMass, float shapeYOffset, boolean useComplexCollisions, Vector3f scaleModifier, CollisionType type) {
         try {
             if (useComplexCollisions) {
                 // Case 1: complex collisions
-                physicsCollisionShape = ShapeUtils.generateComplexModelCollisions(modelPath, partName, scaleModifier, centerOfMass, 0);
+                physicsCollisionShape = ShapeUtils.generateComplexModelCollisions(modelPath, partName, scaleModifier, centerOfMass, shapeYOffset);
             }
             if(getShapes().isEmpty()) {
                 // Case 2: No shapes (doesn't depends on complex collisions)
@@ -100,7 +100,6 @@ public class ObjectCollisionsHelper
                 });
             }
             if(type == CollisionType.BLOCK) {
-                System.out.println("REPLACE COLLISION " + object.getName());
                 getShapes().replaceAll(sh -> new IShapeInfo() {
                     @Override
                     public Vector3f getPosition() {

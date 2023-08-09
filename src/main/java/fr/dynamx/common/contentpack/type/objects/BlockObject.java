@@ -70,7 +70,7 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
             new MaterialVariantsInfo(this, texturesArray).appendTo(this);
         //Map lights
         lightSources.values().forEach(PartLightSource::postLoad);
-        collisionsHelper.loadCollisions(this, DynamXUtils.getModelPath(getPackName(), model), "", translation, scaleModifier, ObjectCollisionsHelper.CollisionType.BLOCK, useComplexCollisions);
+        collisionsHelper.loadCollisions(this, DynamXUtils.getModelPath(getPackName(), model), "", translation, 0, useComplexCollisions, scaleModifier, ObjectCollisionsHelper.CollisionType.BLOCK);
         return super.postLoad(hot);
     }
 

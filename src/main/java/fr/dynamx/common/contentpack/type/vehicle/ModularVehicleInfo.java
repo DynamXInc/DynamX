@@ -182,7 +182,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     @Override
     public boolean postLoad(boolean hot) {
         ObjModelPath modelPath = DynamXUtils.getModelPath(getPackName(), model);
-        collisionsHelper.loadCollisions(this, modelPath, "chassis", centerOfMass, scaleModifier, ObjectCollisionsHelper.CollisionType.VEHICLE, useComplexCollisions);
+        collisionsHelper.loadCollisions(this, modelPath, "chassis", centerOfMass, shapeYOffset, useComplexCollisions, scaleModifier, ObjectCollisionsHelper.CollisionType.VEHICLE);
 
         //Attach wheels and verify handbrake (V. 2.13.5)
         Map<String, PartWheelInfo> wheels = DynamXObjectLoaders.WHEELS.getInfos();

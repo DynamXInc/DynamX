@@ -34,6 +34,9 @@ public abstract class PackEntityPhysicsHandler<A extends IPhysicsPackInfo, T ext
     @Getter
     private List<Vector3f> debugDragForces;
 
+    @Getter
+    private boolean isInWater;
+
     public PackEntityPhysicsHandler(T entity) {
         super(entity);
         onPackInfosReloaded();
@@ -45,10 +48,13 @@ public abstract class PackEntityPhysicsHandler<A extends IPhysicsPackInfo, T ext
         super.update();
         collisionObject.setLinearDamping(packInfo.getLinearDamping());
         collisionObject.setAngularDamping(packInfo.getAngularDamping());
+        isInWater = false;
+
         float waterLevel = getWaterLevel();
         if (waterLevel == Float.MIN_VALUE) {
             return;
         }
+        isInWater = true;
         collisionObject.setLinearDamping(0.6f);
         collisionObject.setAngularDamping(0.6f);
         for (FloatPhysicsHandler floatPhysicsHandler : floatList) {

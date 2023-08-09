@@ -107,7 +107,7 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
 
     @Override
     public boolean postLoad(boolean hot) {
-        collisionsHelper.loadCollisions(this, DynamXUtils.getModelPath(getPackName(), model), "", centerOfMass, scaleModifier, ObjectCollisionsHelper.CollisionType.PROP, useComplexCollisions);
+        collisionsHelper.loadCollisions(this, DynamXUtils.getModelPath(getPackName(), model), "", centerOfMass, 0, useComplexCollisions, scaleModifier, ObjectCollisionsHelper.CollisionType.PROP);
         collisionsHelper.getPhysicsCollisionShape().setMargin(margin);
         return super.postLoad(hot);
     }

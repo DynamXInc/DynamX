@@ -149,12 +149,6 @@ public class DoorEntity<T extends PackEntityPhysicsHandler<PartDoor, ?>> extends
     @Override
     public void preUpdatePhysics(boolean simulatingPhysics) {
         super.preUpdatePhysics(simulatingPhysics);
-        if (simulatingPhysics) {
-        }
-        if (timer != -1) {
-            if (timer >= 0) --timer;
-            else timer = -1;
-        }
     }
 
     @Override

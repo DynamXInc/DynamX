@@ -84,13 +84,6 @@ public class ClientEventHandler {
     /* World events */
 
     @SubscribeEvent
-    public void onWorldLoad(WorldEvent.Load event) {
-        if (event.getWorld().isRemote && event.getWorld().provider.getDimension() == 0) {
-            DynamXContext.getObjModelRegistry().uploadVAOs();
-        }
-    }
-
-    @SubscribeEvent
     public void onWorldUnloaded(WorldEvent.Unload event) {
         if (event.getWorld().isRemote) {
             ClientProxy.SOUND_HANDLER.unload();

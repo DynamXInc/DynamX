@@ -51,10 +51,10 @@ public class ObjObjectRenderer {
                 DynamXRenderUtils.bindVertexArray(vaoID);
                 entry.getValue().vaoId = vaoID;
 
-                setupIndicesBuffer(getObjObjectData().getMesh().indices);
-                setupArraysPointers(EnumGLPointer.VERTEX, getObjObjectData().getMesh().getVerticesPos());
-                setupArraysPointers(EnumGLPointer.TEX_COORDS, getObjObjectData().getMesh().getTextureCoords());
-                setupArraysPointers(EnumGLPointer.NORMAL, getObjObjectData().getMesh().getVerticesNormals());
+                entry.getValue().ebo = setupIndicesBuffer(getObjObjectData().getMesh().indices);
+                entry.getValue().vboPositions = setupArraysPointers(EnumGLPointer.VERTEX, getObjObjectData().getMesh().getVerticesPos());
+                entry.getValue().vboNormals = setupArraysPointers(EnumGLPointer.NORMAL, getObjObjectData().getMesh().getVerticesNormals());
+                entry.getValue().vboTexCoords = setupArraysPointers(EnumGLPointer.TEX_COORDS, getObjObjectData().getMesh().getTextureCoords());
 
                 GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
                 DynamXRenderUtils.bindVertexArray(0);
@@ -68,6 +68,12 @@ public class ObjObjectRenderer {
             modelRenderData.forEach((textureID, renderData) -> {
                 if (renderData.vaoId != -1)
                     OpenGlHelper.glDeleteBuffers(renderData.vaoId);
+                if (renderData.ebo != -1)
+                    OpenGlHelper.glDeleteBuffers(renderData.ebo);
+                if (renderData.vboPositions != -1)
+                    OpenGlHelper.glDeleteBuffers(renderData.vboPositions);
+                if (renderData.vboNormals != -1)
+                    OpenGlHelper.glDeleteBuffers(renderData.vboNormals);
             });
             modelRenderData.clear();
         }
@@ -125,10 +131,19 @@ public class ObjObjectRenderer {
         GlStateManager.glEnableClientState(GL11.GL_VERTEX_ARRAY);
         GlStateManager.glEnableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
         GlStateManager.glEnableClientState(GL11.GL_NORMAL_ARRAY);
+
         for (Map.Entry<String, Material.IndexPair> pair : getObjObjectData().getMesh().materials.entrySet()) {
             Material material = bindMaterial(model, pair.getKey(), renderData.getBaseVariant(), renderData.getVariant());
             if (material == null) {
                 continue;
+            }
+
+            if(renderData.ebo != -1)
+                GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, renderData.ebo);
+
+            if (material.transparency != 1) {
+                GlStateManager.enableBlend();
+                GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
             }
             if (MinecraftForgeClient.getRenderPass() == -1 ||
                     (material.transparency != 1 && MinecraftForgeClient.getRenderPass() == 1) ||
@@ -144,6 +159,9 @@ public class ObjObjectRenderer {
             }
             objectColor.set(1, 1, 1, 1);
 
+            if(renderData.ebo != -1)
+                GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, 0);
+
         }
         GlStateManager.glDisableClientState(GL11.GL_VERTEX_ARRAY);
         GlStateManager.glDisableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
@@ -151,24 +169,18 @@ public class ObjObjectRenderer {
         DynamXRenderUtils.bindVertexArray(0);
     }
 
-    /**
-     * Binds the texture, if not already bound
-     */
-    private static void bindTexture(int id) {
+    private void bindTexture(int id) {
         GlStateManager.bindTexture(id);
-        /*if (id != bindTexture) {
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, id);
-            bindTexture = id;
-        }*/
     }
 
-    private void setupIndicesBuffer(int[] indices) {
+    private int setupIndicesBuffer(int[] indices) {
         int vboId = GL15.glGenBuffers();
         GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vboId);
         GL15.glBufferData(GL15.GL_ELEMENT_ARRAY_BUFFER, DynamXUtils.createIntBuffer(indices), GL15.GL_STATIC_DRAW);
+        return vboId;
     }
 
-    private void setupArraysPointers(EnumGLPointer glPointer, float[] data) {
+    private int setupArraysPointers(EnumGLPointer glPointer, float[] data) {
         int vboId = GL15.glGenBuffers();
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboId);
         GL15.glBufferData(GL15.GL_ARRAY_BUFFER, DynamXUtils.createFloatBuffer(data), GL15.GL_STATIC_DRAW);
@@ -183,6 +195,7 @@ public class ObjObjectRenderer {
                 GL11.glNormalPointer(GL11.GL_FLOAT, 0, 0L);
                 break;
         }
+        return vboId;
     }
 
     private boolean isMaterialValid(ObjModelRenderer model, Material material) {
@@ -216,6 +229,10 @@ public class ObjObjectRenderer {
         private final TextureVariantData baseVariant;
         private final TextureVariantData variant;
         private int vaoId = -1;
+        private int vboPositions = -1;
+        private int vboNormals = -1;
+        private int vboTexCoords = -1;
+        private int ebo = -1;
 
         public String getBaseVariant() {
             return baseVariant != null ? baseVariant.getName() : null;

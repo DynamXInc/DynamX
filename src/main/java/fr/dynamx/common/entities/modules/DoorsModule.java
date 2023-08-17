@@ -279,6 +279,15 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
     }
 
     @Override
+    public void onSetDead() {
+        if (DynamXMain.proxy.shouldUseBulletSimulation(vehicleEntity.world)) {
+            for (DoorPhysics body : attachedDoors.values())
+                DynamXContext.getPhysicsWorld(vehicleEntity.world).removeCollisionObject(body.doorBody);
+            attachedDoors.clear();
+        }
+    }
+
+    @Override
     public void updateEntityPos() {
         attachedBodiesTransform.values().forEach(SynchronizedRigidBodyTransform::updatePos);
     }

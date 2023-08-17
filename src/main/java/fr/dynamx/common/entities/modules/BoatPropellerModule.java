@@ -79,9 +79,9 @@ public class BoatPropellerModule extends BasicEngineModule implements IPackInfoR
 
     public class BoatPropellerHandler {
         @Getter
-        private float accelerationForce;
+        private float physicsAccelerationForce;
         @Getter
-        private float steeringForce ;
+        private float physicsSteeringForce;
 
         public void update() {
             updateTurn0();
@@ -92,28 +92,28 @@ public class BoatPropellerModule extends BasicEngineModule implements IPackInfoR
             float maxSteerForce = 1.0f;
             float turnSpeed = 0.09f;
             if (isTurningLeft()) {
-                steeringForce = Math.min(steeringForce + turnSpeed, maxSteerForce);
+                physicsSteeringForce = Math.min(physicsSteeringForce + turnSpeed, maxSteerForce);
                 // vehicle.getVehicleControl().steer(steeringValue);
-                steer(steeringForce);
+                steer(physicsSteeringForce);
             } else if (isTurningRight()) {
-                steeringForce = Math.max(steeringForce - turnSpeed, -maxSteerForce);
-                steer(steeringForce);
+                physicsSteeringForce = Math.max(physicsSteeringForce - turnSpeed, -maxSteerForce);
+                steer(physicsSteeringForce);
             } else {
                 turnSpeed *= 4;
-                if (steeringForce > 0) {
-                    steeringForce -= turnSpeed;
+                if (physicsSteeringForce > 0) {
+                    physicsSteeringForce -= turnSpeed;
                 }
-                if (steeringForce < 0) {
-                    steeringForce += turnSpeed;
+                if (physicsSteeringForce < 0) {
+                    physicsSteeringForce += turnSpeed;
                 }
-                if (Math.abs(steeringForce) < turnSpeed)
-                    steeringForce = 0;
+                if (Math.abs(physicsSteeringForce) < turnSpeed)
+                    physicsSteeringForce = 0;
             }
-            steer(steeringForce);
+            steer(physicsSteeringForce);
         }
 
         public void updateMovement() {
-            accelerationForce = 0;
+            physicsAccelerationForce = 0;
 
             // do braking first so it doesn't override engineBraking.
             brake(0);

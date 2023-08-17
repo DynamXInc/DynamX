@@ -112,6 +112,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
 
     public PartDoor(ModularVehicleInfo owner, String partName) {
         super(owner, partName, 0, 0);
+        this.partName = partName;
     }
 
     @Override
@@ -194,7 +195,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
             }
         });
         ObjModelPath carModelPath = DynamXUtils.getModelPath(getPackName(), owner.getModel());
-        collisionsHelper.loadCollisions(this, carModelPath, getPartName(), new Vector3f(), owner.getScaleModifier(), ObjectCollisionsHelper.CollisionType.PROP, owner.isUseComplexCollisions());
+        collisionsHelper.loadCollisions(this, carModelPath, getPartName(), new Vector3f(), 0, owner.isUseComplexCollisions(), owner.getScaleModifier(), ObjectCollisionsHelper.CollisionType.PROP);
     }
 
     @Override
@@ -212,6 +213,16 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     @Override
     public ItemStack getPickedResult(int metadata) {
         return ItemStack.EMPTY;
+    }
+
+    @Override
+    public float getAngularDamping() {
+        return 0;
+    }
+
+    @Override
+    public float getLinearDamping() {
+        return 0;
     }
 
     @Override

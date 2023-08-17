@@ -34,7 +34,7 @@ public class PropPhysicsHandler<T extends PropsEntity<?>> extends PackEntityPhys
         rigidBody.setUserObject(new BulletShapeType<>(EnumBulletShapeType.BULLET_ENTITY, getHandledEntity(), rigidBody.getCollisionShape()));
         rigidBody.setFriction(packInfo.getFriction());
         rigidBody.setSleepingThresholds(0.2f, 1);
-        rigidBody.setDamping(packInfo.getDampingFactor(), packInfo.getDampingFactor());
+        rigidBody.setDamping(packInfo.getLinearDamping(), packInfo.getAngularDamping());
         rigidBody.setRestitution(packInfo.getRestitutionFactor());
         if (packInfo.isCCDEnabled()) {
             rigidBody.setCcdMotionThreshold(0.1f);
@@ -45,12 +45,6 @@ public class PropPhysicsHandler<T extends PropsEntity<?>> extends PackEntityPhys
 
     @Override
     public void update() {
-        /*if (!getHandledEntity().isInWater()) {
-            Vector3f dragForce = DynamXPhysicsHelper.getAirDrag(getLinearVelocity(), 0.2f);
-            if (Vector3f.isValidVector(dragForce)) {
-                //applyForce(dragForce, Vector3fPool.get());
-            }
-        }*/
         super.update();
     }
 }

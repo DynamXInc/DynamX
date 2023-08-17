@@ -5,6 +5,7 @@ import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.PropsEntity;
 import fr.dynamx.common.entities.modules.LightsModule;
+import fr.dynamx.utils.debug.renderer.BoatDebugRenderer;
 import fr.dynamx.utils.debug.renderer.DebugRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
@@ -14,6 +15,7 @@ import net.minecraftforge.common.MinecraftForge;
 public class RenderProp<T extends PropsEntity<?>> extends RenderPhysicsEntity<T> {
     public RenderProp(RenderManager manager) {
         super(manager);
+        addDebugRenderers(new BoatDebugRenderer.FloatsDebug());
         MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.InitRenderer<>(PropsEntity.class, this));
     }
 

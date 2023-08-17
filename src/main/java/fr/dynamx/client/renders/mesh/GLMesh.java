@@ -186,7 +186,7 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
             return;
         }
 
-        GL30.glBindVertexArray(vaoId);
+        DynamXRenderUtils.bindVertexArray(vaoId);
         DynamXRenderUtils.checkForOglError();
 
         if (indices != null) {
@@ -529,7 +529,7 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
     public void renderUsing() {
         enableAttributes();
 
-        GL30.glBindVertexArray(vaoId);
+        DynamXRenderUtils.bindVertexArray(vaoId);
         DynamXRenderUtils.checkForOglError();
 
         if (indices == null) {
@@ -546,7 +546,7 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
         disableAttributes();
         DynamXRenderUtils.checkForOglError();
 
-        GL30.glBindVertexArray(0);
+        DynamXRenderUtils.bindVertexArray(0);
 
 
     }
@@ -841,10 +841,10 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
      */
     private void enableAttributes() {
         if (vaoId == null) {
-            this.vaoId = GL30.glGenVertexArrays();
+            this.vaoId = DynamXRenderUtils.genVertexArrays();
             DynamXRenderUtils.checkForOglError();
 
-            GL30.glBindVertexArray(vaoId);
+            DynamXRenderUtils.bindVertexArray(vaoId);
             DynamXRenderUtils.checkForOglError();
 
             this.mutable = false;
@@ -853,7 +853,7 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
             assert !mutable;
 
             // Use the existing VAO.
-            GL30.glBindVertexArray(vaoId);
+            DynamXRenderUtils.bindVertexArray(vaoId);
             DynamXRenderUtils.checkForOglError();
         }
 

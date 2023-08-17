@@ -33,40 +33,6 @@ public abstract class EntityPhysicsHandler<T extends PhysicsEntity<?>> extends A
         getCollisionObject().getLinearVelocity(linearVel);
         getCollisionObject().getAngularVelocity(rotationalVel);
 
-        //Buoyancy effect W.I.P
-        /*if (collisionObject.isInWorld()) {
-            Vector3f bodyPos = handledEntity.physicsPosition;
-            BlockPos pos = new BlockPos(bodyPos.x, bodyPos.y, bodyPos.z);
-            IBlockState blockState = handledEntity.world.getBlockState(pos);
-            if (blockState.getBlock() instanceof BlockLiquid) { //TODO IMPROVE
-                float liquidHeight = BlockLiquid.getBlockLiquidHeight(blockState, handledEntity.world, pos);
-                if (liquidHeight > bodyPos.y % 1.0) {
-                    appliedBuoy = true;
-                    float normalizedMass = DynamXMath.normalizeBetween(collisionObject.getMass(), 0, 1500, 1, 2);
-                    collisionObject.setGravity(Vector3fPool.get(0.0f, 2 - normalizedMass, 0.0f));
-                    Vector3f waterVelocity = Vector3fPool.get(blockState.getBlock().modifyAcceleration(handledEntity.world, pos, null, new Vec3d(0, 0, 0)));
-                    Vector3f bodyVelocity = linearVel;
-                    Vector3f angularVelocity = rotationalVel;
-                    float damping = 0.95f;
-                    float flowStrength = 0.1f;
-                    collisionObject.setLinearVelocity(Vector3fPool.get(
-                            bodyVelocity.x * damping + waterVelocity.x * flowStrength,
-                            bodyVelocity.y * damping + waterVelocity.y * flowStrength,
-                            bodyVelocity.z * damping + waterVelocity.z * flowStrength));
-                    collisionObject.setAngularVelocity(Vector3fPool.get(angularVelocity.x * damping, angularVelocity.y * damping, angularVelocity.z * damping));
-                } else {
-                    if (appliedBuoy) {
-                        collisionObject.setGravity(DynamXPhysicsHelper.GRAVITY);
-                        appliedBuoy = false;
-                    }
-                }
-            } else {
-                if (appliedBuoy) {
-                    collisionObject.setGravity(DynamXPhysicsHelper.GRAVITY);
-                    appliedBuoy = false;
-                }
-            }
-        }*/
     }
 
     @Override
@@ -104,9 +70,9 @@ public abstract class EntityPhysicsHandler<T extends PhysicsEntity<?>> extends A
     }
 
     @Override
-    public void applyForce(Vector3f at, Vector3f force) {
+    public void applyForce(Vector3f force, Vector3f at) {
         //if(getLinearVelocity().length() > 0.005f)
-            getCollisionObject().applyImpulse(force, at);
+            getCollisionObject().applyForce(force, at);
     }
 
     @Override

@@ -49,8 +49,9 @@ public class HelicopterController extends BaseController {
     public static void tickMouse(MouseEvent event) {
         if (mouseLocked && MC.player.getRidingEntity() instanceof HelicopterEntity && ((HelicopterEntity<?>) MC.player.getRidingEntity()).getSeats().isLocalPlayerDriving()) {
             HelicopterEngineModule engineModule = ((HelicopterEntity<?>) MC.player.getRidingEntity()).getModuleByType(HelicopterEngineModule.class);
-            engineModule.getRollControls().set(0, event.getDx());
-            engineModule.getRollControls().set(1, event.getDy());
+            int invert = MC.gameSettings.invertMouse ? -1 : 1;
+            engineModule.getRollControls().set(0, invert * event.getDx());
+            engineModule.getRollControls().set(1, invert * -event.getDy());
         }
     }
 

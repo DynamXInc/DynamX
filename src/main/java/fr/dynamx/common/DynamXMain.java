@@ -142,6 +142,7 @@ public class DynamXMain {
 
     @EventHandler
     public void completeLoad(FMLLoadCompleteEvent event) {
+        proxy.completeInit();
         ForgeVersion.CheckResult result = ForgeVersion.getResult(Loader.instance().activeModContainer());
         if (result.status == ForgeVersion.Status.OUTDATED) {
             //DynamXMain.log.warn("Outdated version found, you should update to " + result.target);

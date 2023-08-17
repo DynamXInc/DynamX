@@ -56,26 +56,27 @@ public class MessageEntityInteract implements IDnxPacket, IMessageHandler<Messag
     public void handleUDPReceive(EntityPlayer context, Side side) {
         PhysicsEntity<?> physicsEntity = (PhysicsEntity<?>) context.world.getEntityByID(vehicleID);
         if (physicsEntity == null || context.getDistance(physicsEntity) > 21) {
-            //Do nothing
-            //((EntityPlayerMP) context).connection.disconnect(new TextComponentString("Invalid vehicle interact packet, too long distance"));
-        } else if (context.getHeldItemMainhand().getItem() instanceof ItemWrench) {
+            return;
+        }
+        if (context.getHeldItemMainhand().getItem() instanceof ItemWrench) {
             ((ItemWrench) context.getHeldItemMainhand().getItem()).interact(context, physicsEntity);
         } else if (!(physicsEntity instanceof IModuleContainer.ISeatsContainer) || !((IModuleContainer.ISeatsContainer) physicsEntity).getSeats().isEntitySitting(context)) {
-            if (physicsEntity instanceof PackPhysicsEntity) {
-                PackPhysicsEntity<?, ?> vehicleEntity = (PackPhysicsEntity<?, ?>) physicsEntity;
-                //If we clicked a part, try to interact with it.
-                Vector3fPool.openPool();
-                InteractivePart hitPart = vehicleEntity.getHitPart(context);
-                if (hitPart != null) {
-                    if ((hitPart instanceof PartSeat && ((PartSeat) hitPart).hasDoor()) && context.isSneaking()) {
-                        return;
-                    }
-                    if (!(vehicleEntity instanceof BaseVehicleEntity) || !MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.PlayerInteract(context, (BaseVehicleEntity<?>) vehicleEntity, hitPart)))
-                        hitPart.interact(vehicleEntity, context);
-                } else if (vehicleEntity instanceof BaseVehicleEntity)
-                    MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.PlayerInteract(context, (BaseVehicleEntity<?>) vehicleEntity, null));
-                Vector3fPool.closePool();
+            if (!(physicsEntity instanceof PackPhysicsEntity)) {
+                return;
             }
+            PackPhysicsEntity<?, ?> vehicleEntity = (PackPhysicsEntity<?, ?>) physicsEntity;
+            //If we clicked a part, try to interact with it.
+            Vector3fPool.openPool();
+            InteractivePart hitPart = vehicleEntity.getHitPart(context);
+            if (hitPart != null) {
+                if ((hitPart instanceof PartSeat && ((PartSeat) hitPart).hasDoor()) && context.isSneaking()) {
+                    return;
+                }
+                if (!(vehicleEntity instanceof BaseVehicleEntity) || !MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.PlayerInteract(context, (BaseVehicleEntity<?>) vehicleEntity, hitPart)))
+                    hitPart.interact(vehicleEntity, context);
+            } else if (vehicleEntity instanceof BaseVehicleEntity)
+                MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.PlayerInteract(context, (BaseVehicleEntity<?>) vehicleEntity, null));
+            Vector3fPool.closePool();
         }
     }
 }

@@ -93,14 +93,14 @@ public class HelicopterPhysicsHandler<A extends HelicopterEntity<?>> extends Bas
             force = DynamXGeometry.rotateVectorByQuaternion(force, getRotation());
             force.addLocal(0, -physicsInfo.getVerticalThrustCompensation(), 0);
             force.multLocal(module.getPower(), (module.getPower() >= 0.01 && module.isAccelerating()) ? module.getPower() : 0, module.getPower());
-            applyForce(Vector3fPool.get(), force);
+            applyImpulse(Vector3fPool.get(), force);
 
             //Brake
             if (module.isReversing()) {
                 activate();
                 force = Vector3fPool.get(0, -physicsInfo.getBrakeForce(), 0);
                 force = DynamXGeometry.rotateVectorByQuaternion(force, getRotation());
-                applyForce(Vector3fPool.get(), force);
+                applyImpulse(Vector3fPool.get(), force);
             }
         } else {
             getCollisionObject().setGravity(gravity);

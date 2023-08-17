@@ -1,0 +1,72 @@
+{
+"groups": [
+    {
+      "name": "head",
+      "parent": "undefined",
+      "origin": [0,24,0]
+    },
+    {
+      "name": "body",
+      "parent": "undefined",
+      "origin": [0,24,0]
+    },
+    {
+      "name": "leftArm",
+      "parent": "undefined",
+      "origin": [5,22,0]
+    },
+    {
+      "name": "rightArm",
+      "parent": "undefined",
+      "origin": [-5,22,0]
+    },
+    {
+      "name": "leftLeg",
+      "parent": "undefined",
+      "origin": [2,12,0]
+    },
+    {
+      "name": "rightLeg",
+      "parent": "undefined",
+      "origin": [-2,12,0]
+    }
+],
+"cubes": [
+    {
+      "name": "obb_head",
+      "parent": "head",
+      "from": [-4.1,23.9,-4.1],
+      "to": [4.1,32.1,4.1]
+    },
+    {
+      "name": "obb_body",
+      "parent": "body",
+      "from": [-4.1,11.9,-2.0999999999999996],
+      "to": [4.1,24.1,2.0999999999999996]
+    },
+    {
+      "name": "obb_leftArm",
+      "parent": "leftArm",
+      "from": [3.9000000000000004,11.9,-2.0999999999999996],
+      "to": [8.1,24.1,2.0999999999999996]
+    },
+    {
+      "name": "obb_rightArm",
+      "parent": "rightArm",
+      "from": [-8.1,11.9,-2.0999999999999996],
+      "to": [-3.9000000000000004,24.1,2.0999999999999996]
+    },
+    {
+      "name": "obb_rightLeg",
+      "parent": "rightLeg",
+      "from": [-4.1,-0.09999999999999964,-2.0999999999999996],
+      "to": [0.09999999999999964,12.1,2.0999999999999996]
+    },
+    {
+      "name": "obb_leftLeg",
+      "parent": "leftLeg",
+      "from": [-0.09999999999999964,-0.09999999999999964,-2.0999999999999996],
+      "to": [4.1,12.1,2.0999999999999996]
+    }
+]
+}

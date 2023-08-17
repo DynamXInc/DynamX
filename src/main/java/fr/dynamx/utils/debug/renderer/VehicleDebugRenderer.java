@@ -330,7 +330,7 @@ public class VehicleDebugRenderer {
                         realmotion.z * 10 + pos.z, 0, 0, 1, 1);
             }
 
-            BoundingBoxPool.getPool().openSubPool();
+            /*BoundingBoxPool.getPool().openSubPool();
             DynamXContext.getPlayerToCollision().forEach((player, playerPhysicsHandler) -> {
                 if (playerPhysicsHandler.getBodyIn() != null) {
                     BoundingBox bb = playerPhysicsHandler.getBodyIn().boundingBox(BoundingBoxPool.get());
@@ -339,7 +339,7 @@ public class VehicleDebugRenderer {
                     RenderGlobal.drawBoundingBox(min.x, min.y, min.z, max.x, max.y, max.z, 0.2f, 0.5f, 0.7f, 1);
                 }
             });
-            BoundingBoxPool.getPool().closeSubPool();
+            BoundingBoxPool.getPool().closeSubPool();*/
             GlStateManager.popMatrix();
             /* End of Aymeric's collision debug*/
         }

@@ -8,6 +8,7 @@ import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.api.network.EnumPacketTarget;
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.api.physics.player.DynamXPhysicsWorldBlacklistApi;
+import fr.dynamx.bb.OBBPlayerManager;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.blocks.DynamXBlock;
@@ -30,6 +31,7 @@ import fr.dynamx.utils.client.ContentPackUtils;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
@@ -40,6 +42,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.ChunkEvent;
@@ -224,19 +227,23 @@ public class CommonEventHandler {
 
     //Walking players :
 
-
+    @SubscribeEvent
+    public void onPlayerUpdate(LivingEvent.LivingUpdateEvent e) {
+       /* if(DynamXContext.getPlayerToCollision().containsKey(Minecraft.getMinecraft().player)) {
+            DynamXContext.getPlayerToCollision().get(Minecraft.getMinecraft().player).update(Minecraft.getMinecraft().player.world);
+        }*/
+    }
     @SubscribeEvent
     public void onPlayerUpdate(TickEvent.PlayerTickEvent e) {
         if (!(e.player.getRidingEntity() instanceof BaseVehicleEntity) && DynamXContext.getPhysicsWorld(e.player.world) != null && !e.player.isDead) {
             if(!DynamXContext.getPlayerToCollision().containsKey(e.player) && DynamXPhysicsWorldBlacklistApi.isBlacklisted(e.player)) return;
             Vector3fPool.openPool();
             QuaternionPool.openPool();
-            if (!DynamXContext.getPlayerToCollision().containsKey(e.player)) {
+            if (!OBBPlayerManager.playerOBBObjectMap.isEmpty() && !DynamXContext.getPlayerToCollision().containsKey(e.player)) {
                 PlayerPhysicsHandler playerPhysicsHandler = new PlayerPhysicsHandler(e.player);
                 DynamXContext.getPlayerToCollision().put(e.player, playerPhysicsHandler);
                 playerPhysicsHandler.addToWorld();
             }
-            DynamXContext.getPlayerToCollision().get(e.player).update(e.player.world);
             Vector3fPool.closePool();
             QuaternionPool.closePool();
         }

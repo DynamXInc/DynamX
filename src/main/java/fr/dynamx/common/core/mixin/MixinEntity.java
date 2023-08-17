@@ -5,6 +5,7 @@ import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.debug.Profiler;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MoverType;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -50,6 +51,9 @@ public abstract class MixinEntity {
                     target = "Lnet/minecraft/entity/Entity;getEntityBoundingBox()Lnet/minecraft/util/math/AxisAlignedBB;",
                     shift = At.Shift.AFTER, ordinal = 5))
     private void move(MoverType type, double x, double y, double z, CallbackInfo ci) {
+        if(DynamXContext.getPlayerToCollision().containsKey(Minecraft.getMinecraft().player)) {
+            DynamXContext.getPlayerToCollision().get(Minecraft.getMinecraft().player).update(Minecraft.getMinecraft().player.world);
+        }
         AxisAlignedBB axisalignedbb = getEntityBoundingBox();
         Vector3fPool.openPool();
         Profiler.get().start(Profiler.Profiles.ENTITY_COLLISION);

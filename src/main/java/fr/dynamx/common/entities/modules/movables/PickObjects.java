@@ -111,7 +111,7 @@ public class PickObjects extends MovableModule {
         if (mover.get() != null) {
             entity.getSynchronizer().onPlayerStopControlling(mover.get(), false);
         }
-        joint = null;
+        this.joint = null;
         if (mover.get() != null) {
             DynamXContext.getPlayerPickingObjects().remove(mover.get().getEntityId());
             mover.set(null);

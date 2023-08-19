@@ -1,22 +1,16 @@
 package fr.dynamx.common.entities;
 
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.objects.PropObject;
-import fr.dynamx.common.entities.modules.LightsModule;
 import fr.dynamx.common.physics.entities.PackEntityPhysicsHandler;
 import fr.dynamx.common.physics.entities.PropPhysicsHandler;
 import fr.dynamx.utils.DynamXConfig;
-import fr.dynamx.utils.optimization.MutableBoundingBox;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class PropsEntity<T extends PackEntityPhysicsHandler<PropObject<?>, ?>> extends PackPhysicsEntity<T, PropObject<?>> {
 

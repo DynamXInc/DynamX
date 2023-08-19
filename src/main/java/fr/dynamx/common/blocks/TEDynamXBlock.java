@@ -14,7 +14,7 @@ import fr.dynamx.common.capability.DynamXChunkDataProvider;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
 import fr.dynamx.common.entities.ICollidableObject;
-import fr.dynamx.common.entities.modules.LightsModule;
+import fr.dynamx.common.entities.modules.AbstractLightsModule;
 import fr.dynamx.utils.VerticalChunkPos;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
@@ -48,7 +48,7 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
     protected AxisAlignedBB boundingBoxCache;
 
     @Getter
-    private LightsModule lightsModule;
+    private AbstractLightsModule lightsModule;
 
     public TEDynamXBlock() {
     }
@@ -66,7 +66,7 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
         if(world != null)
             world.markBlockRangeForRenderUpdate(pos, pos);
         if(blockObjectInfo != null && !blockObjectInfo.getLightSources().isEmpty())
-            lightsModule = new LightsModule(blockObjectInfo);
+            lightsModule = new AbstractLightsModule.LightsModule(blockObjectInfo);
         else
             lightsModule = null;
     }

@@ -21,6 +21,11 @@ key.toggleLockDoor=Toogle lock door
 key.attachTrailer=Attach trailer
 key.powerup=Power up (helicopter)
 key.powerdown=Power down (helicopter)
+key.helicopter_pitch_forward=Pitch forward (helicopter)
+key.helicopter_pitch_backward=Pitch backward (helicopter)
+key.helicopter_yaw_left=Yaw left (helicopter)
+key.helicopter_yaw_right=Yaw right (helicopter)
+key.lock_rotation=Lock camera rotation (helicopter)
 
 slopes.config.title=Config automatic slopes :
 slopes.config.dalls=Ignore slabs

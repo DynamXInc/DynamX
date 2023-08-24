@@ -125,7 +125,7 @@ public class ObjectLoader<T extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C exte
                             };
                             DynamXItemRegistry.creativeTabs.add(tab);
                             if(client)
-                                ContentPackUtils.addMissingLangFile(DynamXMain.resDir, info.getPackName(), tab.getTranslationKey(), tab.getTabLabel());
+                                ContentPackUtils.addMissingLangFile(DynamXMain.resourcesDirectory, info.getPackName(), tab.getTranslationKey(), tab.getTabLabel());
                         }
                     }
                 }
@@ -141,7 +141,7 @@ public class ObjectLoader<T extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C exte
                                 for (int metadata = 0; metadata < ((IResourcesOwner) ob).getMaxMeta(); metadata++) {
                                     String translationKey = info.getTranslationKey((IInfoOwner) ob, metadata) + ".name";
                                     String translationValue = info.getTranslatedName((IInfoOwner) ob, metadata);
-                                    ContentPackUtils.addMissingLangFile(DynamXMain.resDir, info.getPackName(), translationKey, translationValue);
+                                    ContentPackUtils.addMissingLangFile(DynamXMain.resourcesDirectory, info.getPackName(), translationKey, translationValue);
                                 }
                             }
                         }

@@ -21,10 +21,12 @@ import fr.dynamx.common.items.tools.ItemShockWave;
 import fr.dynamx.common.items.tools.ItemSlopes;
 import fr.dynamx.common.objloader.data.ObjObjectData;
 import fr.dynamx.server.command.DynamXCommands;
-import fr.dynamx.utils.*;
+import fr.dynamx.utils.DynamXConfig;
+import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.DynamXMpsConfig;
+import fr.dynamx.utils.DynamXReflection;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.physics.NativeEngineInstaller;
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeVersion;
 import net.minecraftforge.common.capabilities.CapabilityManager;
@@ -48,14 +50,15 @@ import static net.minecraftforge.fml.common.Mod.Instance;
 public class DynamXMain {
     @Instance(value = ID)
     public static DynamXMain instance;
+
     @SidedProxy(clientSide = "fr.dynamx.client.ClientProxy", serverSide = "fr.dynamx.server.ServerProxy")
     public static CommonProxy proxy;
 
-    public static File resDir;
-
     public static final Logger log = LogManager.getLogger("DynamX");
 
-    public static ModProtectionContainer container;
+    public static File resourcesDirectory;
+
+    public static ModProtectionContainer mpsContainer;
 
     @EventHandler
     public void construction(FMLConstructionEvent event) {
@@ -66,15 +69,15 @@ public class DynamXMain {
         ThreadedLoadingService loadingService = ACsLib.getPlatform().provideService(ThreadedLoadingService.class);
         ModProtectionService mps = ACsLib.getPlatform().provideService(ModProtectionService.class);
 
-        container = mps.createNewMpsContainer("DynamX models", new DynamXMpsConfig(), false);
+        mpsContainer = mps.createNewMpsContainer("DynamX models", new DynamXMpsConfig(), false);
 
         //Packs init
-        resDir = ContentPackLoader.init(event, container, DynamXConstants.RES_DIR_NAME, event.getSide());
+        resourcesDirectory = ContentPackLoader.init(event, mpsContainer, DynamXConstants.RES_DIR_NAME, event.getSide());
 
         bar.step("Init bullet");
         // Loading LibBullet
         // Needs to be done before protection setup, because of weird behaviors when downloading bullet and installing https certificates at the same time
-        if (!NativeEngineInstaller.loadLibbulletjme(resDir, LIBBULLET_VERSION, "Release", "Sp", false))
+        if (!NativeEngineInstaller.loadLibbulletjme(resourcesDirectory, LIBBULLET_VERSION, "Release", "Sp", false))
             throw new RuntimeException("Native physics engine cannot be found or installed !");
 
         //Telemetry
@@ -87,7 +90,7 @@ public class DynamXMain {
         // Loading protected files
         loadingService.addTask(mps.getTaskEndHook(), "certs_mps", () -> {
             try {
-                container.setup("DynamXEA");
+                mpsContainer.setup("DynamXEA");
             } catch (Exception e) {
                 DynamXErrorManager.addError("DynamX initialization", DynamXErrorManager.INIT_ERRORS, "mps_error", ErrorLevel.FATAL, "MPS", null, e);
                 e.printStackTrace();

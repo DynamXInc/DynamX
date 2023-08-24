@@ -81,7 +81,7 @@ public class DynamXItemRegistry {
     @SideOnly(Side.CLIENT)
     public static void registerModel(IResourcesOwner item, byte metadata) {
         if (item instanceof IInfoOwner && item.createJson()) {
-            ContentPackUtils.addMissingJSONs(item, ((IInfoOwner<?>) item).getInfo(), DynamXMain.resDir, metadata);
+            ContentPackUtils.addMissingJSONs(item, ((IInfoOwner<?>) item).getInfo(), DynamXMain.resourcesDirectory, metadata);
         }
         String resourceName = DynamXConstants.ID + ":" + item.getJsonName(metadata);
         if (item.getObjModel() != null && item.getObjModel().isModelValid())

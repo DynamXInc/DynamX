@@ -35,6 +35,7 @@ import net.minecraftforge.fml.common.event.FMLConstructionEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import javax.annotation.Nonnull;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -174,6 +175,11 @@ public class ContentPackLoader {
      */
     public static Map<String, ModProtectionContainer> getProtectedResources() {
         return protectedResources;
+    }
+
+    @Nonnull
+    public static ModProtectionContainer getProtectedResources(String packName) {
+        return protectedResources.getOrDefault(packName, DynamXMain.mpsContainer);
     }
 
     /**

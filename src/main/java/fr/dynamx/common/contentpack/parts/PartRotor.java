@@ -18,7 +18,10 @@ import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
+import fr.dynamx.common.entities.modules.BoatPropellerModule;
+import fr.dynamx.common.entities.modules.CarEngineModule;
 import fr.dynamx.common.entities.modules.HelicopterPartModule;
+import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
@@ -45,6 +48,9 @@ public class PartRotor extends BasePart<ModularVehicleInfo> implements IDrawable
     @Getter
     @PackFileProperty(configNames = "PartName")
     protected String partName = "Rotor";
+    @Getter
+    @PackFileProperty(configNames = "Type", required = false, defaultValue = "PROPELLER")
+    protected RotorType type = RotorType.PROPELLER;
 
     @Override
     public void appendTo(ModularVehicleInfo owner) {
@@ -89,9 +95,9 @@ public class PartRotor extends BasePart<ModularVehicleInfo> implements IDrawable
     }
 
     @SideOnly(Side.CLIENT)
-    private void renderRotor(RenderPhysicsEntity<?> render, PartRotor partRotor, float partialTicks, BaseVehicleEntity<?> helicopterEntity, ModularVehicleInfo packInfo, byte textureId, ObjModelRenderer vehicleModel) {
+    private void renderRotor(RenderPhysicsEntity<?> render, PartRotor partRotor, float partialTicks, BaseVehicleEntity<?> vehicleEntity, ModularVehicleInfo packInfo, byte textureId, ObjModelRenderer vehicleModel) {
         ObjObjectRenderer rotor = vehicleModel.getObjObjectRenderer(partRotor.getPartName());
-        if (rotor == null || MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.ROTOR, (RenderBaseVehicle<?>) render, helicopterEntity, PhysicsEntityEvent.Phase.PRE, partialTicks, vehicleModel)))
+        if (rotor == null || MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.ROTOR, (RenderBaseVehicle<?>) render, vehicleEntity, PhysicsEntityEvent.Phase.PRE, partialTicks, vehicleModel)))
             return;
         GlStateManager.pushMatrix();
         Vector3f center = partRotor.getPosition();
@@ -99,16 +105,37 @@ public class PartRotor extends BasePart<ModularVehicleInfo> implements IDrawable
         GlStateManager.translate(center.x, center.y, center.z);
         if (partRotor.getRotation() != null)
             GlStateManager.rotate(GlQuaternionPool.get(partRotor.getRotation()));
-        if (helicopterEntity != null && helicopterEntity.hasModuleOfType(HelicopterPartModule.class)) {
-            HelicopterPartModule partModule = helicopterEntity.getModuleByType(HelicopterPartModule.class);
-            // Rotating the rotor.
-            GlStateManager.rotate((partModule.getCurAngle() + partialTicks * partModule.getCurPower()) * partRotor.getRotationSpeed(), partRotor.getRotationAxis().x, partRotor.getRotationAxis().y, partRotor.getRotationAxis().z);
+        // Rotating the rotor.
+        if(type == RotorType.ALWAYS_ROTATING) {
+            //TODO
+            GlStateManager.rotate(partialTicks * partRotor.getRotationSpeed(), partRotor.getRotationAxis().x, partRotor.getRotationAxis().y, partRotor.getRotationAxis().z);
+        } else if(vehicleEntity != null) {
+            if (type == RotorType.ROTATING_WHEN_STARTED) {
+                //TODO : check if the vehicle is started
+                // THEN ROTATE
+            }
+            if (vehicleEntity.hasModuleOfType(HelicopterPartModule.class)) {
+                HelicopterPartModule partModule = vehicleEntity.getModuleByType(HelicopterPartModule.class);
+                GlStateManager.rotate((partModule.getCurAngle() + partialTicks * partModule.getCurPower()) * partRotor.getRotationSpeed(), partRotor.getRotationAxis().x, partRotor.getRotationAxis().y, partRotor.getRotationAxis().z);
+            } else if(vehicleEntity.hasModuleOfType(CarEngineModule.class)) {
+                CarEngineModule partModule = vehicleEntity.getModuleByType(CarEngineModule.class);
+                float revs = partModule.getPhysicsHandler().getEngine().getRevs();
+               // GlStateManager.rotate((partModule.getCurAngle() + partialTicks * revs) * partRotor.getRotationSpeed(), partRotor.getRotationAxis().x, partRotor.getRotationAxis().y, partRotor.getRotationAxis().z);
+            } else if(vehicleEntity.hasModuleOfType(BoatPropellerModule.class)) {
+                //TODO MOTEUR SUR BATEAUX ET SONS ET RPMS
+            }
         }
         //Scale it
         GlStateManager.scale(packInfo.getScaleModifier().x, packInfo.getScaleModifier().y, packInfo.getScaleModifier().z);
         //Render it
         vehicleModel.renderGroup(rotor, textureId);
         GlStateManager.popMatrix();
-        MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.ROTOR, (RenderBaseVehicle<?>) render, helicopterEntity, PhysicsEntityEvent.Phase.POST, partialTicks, vehicleModel));
+        MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.ROTOR, (RenderBaseVehicle<?>) render, vehicleEntity, PhysicsEntityEvent.Phase.POST, partialTicks, vehicleModel));
+    }
+
+    public enum RotorType {
+        PROPELLER,
+        ALWAYS_ROTATING,
+        ROTATING_WHEN_STARTED
     }
 }

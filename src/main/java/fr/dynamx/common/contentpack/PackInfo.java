@@ -149,15 +149,15 @@ public class PackInfo extends SubInfoTypeOwner<PackInfo> {
 
     public InputStream readFile(ResourceLocation file) throws IOException {
         InputStream result = null;
-        ModProtectionContainer container = ContentPackLoader.getProtectedResources().get(getPathName());
+        ModProtectionContainer container = ContentPackLoader.getProtectedResources(getPathName());
         if (container.getSecureLoader() != null) {
-            InputStream protectedIs = container.getSecureLoader().getResourceAsStream("assets/" + file.getNamespace() + "/" + file.getPath());
-            if (protectedIs != null)
-                return protectedIs;
+            InputStream resourceStream = container.getSecureLoader().getResourceAsStream("assets/" + file.getNamespace() + "/" + file.getPath());
+            if (resourceStream != null)
+                return resourceStream;
         }
         switch (getPackType()) {
             case FOLDER:
-                String fullPath = DynamXMain.resDir + File.separator + getPathName() + File.separator + "assets" +
+                String fullPath = DynamXMain.resourcesDirectory + File.separator + getPathName() + File.separator + "assets" +
                         File.separator + file.getNamespace() + File.separator + file.getPath().replace("/", File.separator);
                 File f = new File(fullPath);
                 if(f.exists())
@@ -165,7 +165,7 @@ public class PackInfo extends SubInfoTypeOwner<PackInfo> {
                 break;
             case DNXPACK:
             case ZIP:
-                ZipFile root = new ZipFile(DynamXMain.resDir + File.separator + getPathName());
+                ZipFile root = new ZipFile(DynamXMain.resourcesDirectory + File.separator + getPathName());
                 ZipEntry e = root.getEntry("assets/" + file.getNamespace() + "/" + file.getPath());
                 if(e != null)
                     result = root.getInputStream(e);
@@ -173,9 +173,7 @@ public class PackInfo extends SubInfoTypeOwner<PackInfo> {
                     root.close();
                 break;
             case BUILTIN:
-                System.out.println("Builtin model " + this);
                 String entry = "/assets/" + file.getNamespace() + "/" + file.getPath();
-                System.out.println("entry " + entry + " " + ContentPackType.class.getResourceAsStream(entry));
                 result = ContentPackType.class.getResourceAsStream(entry);
                 break;
         }

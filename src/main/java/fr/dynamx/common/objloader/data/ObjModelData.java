@@ -36,7 +36,7 @@ public class ObjModelData {
     private final IMpsClassLoader mpsClassLoader;
 
     public ObjModelData(ObjModelPath path) {
-        this.mpsClassLoader = ContentPackLoader.getProtectedResources().getOrDefault(path.getPackName(), DynamXMain.container).getSecureLoader();
+        this.mpsClassLoader = ContentPackLoader.getProtectedResources(path.getPackName()).getSecureLoader();
         this.objModelPath = path;
         try {
             String content = new String(DynamXUtils.readInputStream(FMLCommonHandler.instance().getSide().isClient() ? client(path) : server(path)), StandardCharsets.UTF_8);

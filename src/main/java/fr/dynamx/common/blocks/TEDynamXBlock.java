@@ -231,7 +231,6 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
                     MutableBoundingBox b = new MutableBoundingBox(shape.getBoundingBox());
                     b.scale(relativeScale.x != 0 ? relativeScale.x : 1, relativeScale.y != 0 ? relativeScale.y : 1, relativeScale.z != 0 ? relativeScale.z : 1);
                     b.offset(pos.getX() - 0.5, pos.getY(), pos.getZ() - 0.5);
-                    b.offset(relativeTranslation.x, relativeTranslation.y, relativeTranslation.z);
                     unrotatedCollisionsCache.add(b);
                 }
             }
@@ -290,7 +289,7 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
 
     @Override
     public Vector3f getCollisionOffset() {
-        return Vector3fPool.get(-0.5f, 0, -0.5f);
+        return Vector3fPool.get(0.5f, 0, 0.5f).addLocal(relativeTranslation);
     }
 
     @Override

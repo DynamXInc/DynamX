@@ -70,6 +70,7 @@ public class DynamXMain {
         ModProtectionService mps = ACsLib.getPlatform().provideService(ModProtectionService.class);
 
         mpsContainer = mps.createNewMpsContainer("DynamX models", new DynamXMpsConfig(), false);
+        mps.addCustomContainer(OLD_MPS_URL, mpsContainer); // Enables retro-compatibility with old packs
 
         //Packs init
         resourcesDirectory = ContentPackLoader.init(event, mpsContainer, DynamXConstants.RES_DIR_NAME, event.getSide());

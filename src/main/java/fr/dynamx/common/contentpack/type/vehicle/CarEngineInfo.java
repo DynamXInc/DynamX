@@ -6,6 +6,7 @@ import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.CarEngineModule;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,12 +16,14 @@ import java.util.List;
  */
 public class CarEngineInfo extends BaseEngineInfo {
     @Getter
-    @PackFileProperty(configNames = "SteeringMethod", required = false, defaultValue = "0")
+    @Setter
+    @PackFileProperty(configNames = "SteeringMethod", required = false, defaultValue = "0", description = "The steering method of the vehicle. 0: direct, 1: interpolated, 2: mix of both")
     public int steeringMethod = 0;
 
     @Getter
-    @PackFileProperty(configNames = "TurnSpeed", required = false, defaultValue = "0.09")
-    private float turnSpeed = 0.09f;
+    @Setter
+    @PackFileProperty(configNames = "TurnSpeed", required = false, defaultValue = "0.09", description = "The wheel's rotation speed")
+    public float turnSpeed = 0.09f;
 
     public List<GearInfo> gears = new ArrayList<>();
 

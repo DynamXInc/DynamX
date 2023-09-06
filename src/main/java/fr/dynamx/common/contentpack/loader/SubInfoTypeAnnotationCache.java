@@ -84,8 +84,6 @@ public class SubInfoTypeAnnotationCache {
             Map<String, PackFilePropertyData<?>> dataMap = getOrLoadData(classToParse.getSuperclass());
             packFileProperties.putAll(dataMap);
         }
-        ContentPackDocGenerator.generateDoc(classToParse, classToParse.getSimpleName(), "fr_fr", packFileProperties.values());
-        //System.out.println("Found "+data.size()+" fields in "+toCache.getName());
         cache.put(classToParse, packFileProperties);
     }
 }

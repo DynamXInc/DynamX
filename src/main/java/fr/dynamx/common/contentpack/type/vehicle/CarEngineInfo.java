@@ -17,12 +17,12 @@ import java.util.List;
 public class CarEngineInfo extends BaseEngineInfo {
     @Getter
     @Setter
-    @PackFileProperty(configNames = "SteeringMethod", required = false, defaultValue = "0", description = "The steering method of the vehicle. 0: direct, 1: interpolated, 2: mix of both")
+    @PackFileProperty(configNames = "SteeringMethod", required = false, defaultValue = "0")
     public int steeringMethod = 0;
 
     @Getter
     @Setter
-    @PackFileProperty(configNames = "TurnSpeed", required = false, defaultValue = "0.09", description = "The wheel's rotation speed")
+    @PackFileProperty(configNames = "TurnSpeed", required = false, defaultValue = "0.09")
     public float turnSpeed = 0.09f;
 
     public List<GearInfo> gears = new ArrayList<>();

@@ -13,19 +13,13 @@ import java.util.Scanner;
 import java.util.stream.Collectors;
 
 public class ContentPackDocGenerator {
-    private static final DocLocale locale = new DocLocale();
-    private static boolean hasInit;
+    private static boolean hasInit = false;
 
-    public static void generateDoc(Class<?> forClass, String name, String lang, Collection<PackFilePropertyData<?>> data) {
+    public static void generateDoc(DocLocale locale, File docDir, Class<?> forClass, String name, Collection<PackFilePropertyData<?>> data) {
         if (data.isEmpty()) {
             System.out.println("Ignoring " + name);
             return;
         }
-        if (!hasInit) {
-            System.out.println("Doc locale " + lang);
-            locale.loadLocaleDataFiles("doc_" + lang + ".lang");
-        }
-
         System.out.println("Generating "+name+".md");
         data = data.stream().sorted(Comparator.comparing(PackFilePropertyData::getConfigFieldName)).collect(Collectors.toList());
         StringBuilder builder = new StringBuilder();
@@ -48,7 +42,6 @@ public class ContentPackDocGenerator {
             data.forEach(d -> d.writeDocLine(builder, locale, DocType.OPTIONAL));
         }
         //data.forEach(d -> d.writeDocLine(builder, locale, DocType.DEPRECATED));
-        File docDir = new File("Doc");
         docDir.mkdirs();
         // Write ALL_DOC file
         try {

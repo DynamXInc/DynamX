@@ -221,6 +221,8 @@ common.creativetabname=Crée une nouvelle page dans le menu creatif contenant l'
 common.icontext=Texte dessiné sur l'icône de l'item dans les menus
 AbstractItemObject.ItemTranslate=Modifie la translation de l'item
 AbstractItemObject.ItemRotate=Modifie la rotation de l'item
+ItemObject.MaxStackSize=Stack size maximale de l'item
+info.desc.ItemObject=Item simple
 
 #Blocs et props
 
@@ -285,7 +287,7 @@ type.vector3f.array.blender=Liste de vecteurs au format blender
 type.vector2f=Vecteur comportant 2 axes (X,Y)
 type.item_render_location=Type de rendu de l'item (NONE ou WORLD ou ALL)
 type.sound_event=Type de son
-type.particle=Type de particule
+type.particle=Type de particule (voir la liste des particules sur le wiki de Minecraft)
 type.collision=Type de collisions
 type.resourcelocation=ResourceLocation : chemin vers une ressource au format modid:dossier/ressourse. Par exemple avec `dynamxmod:model1/model1.obj`, le modèle devra être dans `assets/dynamxmod/models/model1/model1.obj`
 type.shapetype=Type de forme (`BOX` : cube, `CYLINDER` : cylindre, `SPHERE` : sphère)
@@ -312,3 +314,33 @@ PartFloat.Offset=Position (décalage par rapport au centre) des flotteurs
 #PartHandle
 
 PartHandle.PartName=TODO
+
+# ParticleEmitterInfo
+
+ParticleEmitterInfo.Position=Position de la source des particules
+ParticleEmitterInfo.Type=Type de particules
+ParticleEmitterInfo.Velocity=Vitesse initiale des particules
+info.desc.ParticleEmitterInfo=Source de particules
+
+# PartRotor
+
+PartRotor.PartName=Nom de la part de l'hélice dans le modèle obj
+PartRotor.Rotation=Rotation de la part sur le véhicule, rotation indiquée dans blender dans le mode "quaternion"
+PartRotor.RotationAxis=Axe de rotation de l'hélice (0, 1, 0 pour une hélice horizontale par exemple, 1, 0, 0 pour une hélice verticale)
+PartRotor.RotationSpeed=Vitesse de rotation de l'hélice à pleine puissance
+info.desc.PartRotor=Hélice
+
+# HelicopterPhysicsInfo
+
+HelicopterPhysicsInfo.BrakeForce=Force appliquée au rotor en freinant/descendant
+HelicopterPhysicsInfo.InclinedGravityFactor=Facteur de gravité quand l'hélicoptère est incliné
+HelicopterPhysicsInfo.MinPower=Puissance minimale du rotor
+HelicopterPhysicsInfo.MousePitchForce=Force appliquée au rotor en tournant - axe X
+HelicopterPhysicsInfo.MouseYawForce=Force appliquée au rotor en tournant - axe Y
+HelicopterPhysicsInfo.MouseRollForce=Force appliquée au rotor en tournant la souris - axe Z
+HelicopterPhysicsInfo.RollForce=Force appliquée au rotor en tournant au clavier - axe Z
+HelicopterPhysicsInfo.ThrustForce=Force appliquée au rotor en accélérant/montant
+HelicopterPhysicsInfo.VerticalThrustCompensation=Compensation de la gravité en montant (force purement verticale)
+
+
+

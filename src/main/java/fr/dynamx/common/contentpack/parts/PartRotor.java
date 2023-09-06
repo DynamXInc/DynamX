@@ -48,9 +48,9 @@ public class PartRotor extends BasePart<ModularVehicleInfo> implements IDrawable
     @Getter
     @PackFileProperty(configNames = "PartName")
     protected String partName = "Rotor";
-    @Getter
+    /*@Getter
     @PackFileProperty(configNames = "Type", required = false, defaultValue = "PROPELLER")
-    protected RotorType type = RotorType.PROPELLER;
+    protected RotorType type = RotorType.PROPELLER;*/
 
     @Override
     public void appendTo(ModularVehicleInfo owner) {
@@ -106,11 +106,11 @@ public class PartRotor extends BasePart<ModularVehicleInfo> implements IDrawable
         if (partRotor.getRotation() != null)
             GlStateManager.rotate(GlQuaternionPool.get(partRotor.getRotation()));
         // Rotating the rotor.
-        if(type == RotorType.ALWAYS_ROTATING) {
+        if(null == RotorType.ALWAYS_ROTATING) {
             //TODO
             GlStateManager.rotate(partialTicks * partRotor.getRotationSpeed(), partRotor.getRotationAxis().x, partRotor.getRotationAxis().y, partRotor.getRotationAxis().z);
         } else if(vehicleEntity != null) {
-            if (type == RotorType.ROTATING_WHEN_STARTED) {
+            if (null == RotorType.ROTATING_WHEN_STARTED) {
                 //TODO : check if the vehicle is started
                 // THEN ROTATE
             }

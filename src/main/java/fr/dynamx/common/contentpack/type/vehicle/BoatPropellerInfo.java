@@ -10,13 +10,13 @@ import lombok.Getter;
 
 @RegisteredSubInfoType(name = "BoatPropeller", registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
 public class BoatPropellerInfo extends SubInfoType<ModularVehicleInfo> {
-    @PackFileProperty(configNames = "Position", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y)
+    @PackFileProperty(configNames = "Position", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y, description = "common.position")
     @Getter
     private Vector3f position;
-    @PackFileProperty(configNames = {"AccelerationForce", "ForwardForce"})
+    @PackFileProperty(configNames = {"AccelerationForce", "ForwardForce"}, description = "BoatPropellerInfo.AccelerationForce")
     @Getter
     private float accelerationForce;
-    @PackFileProperty(configNames = {"BrakeForce", "BackwardForce"})
+    @PackFileProperty(configNames = {"BrakeForce", "BackwardForce"}, description = "BoatPropellerInfo.BrakeForce")
     @Getter
     private float brakeForce;
     @PackFileProperty(configNames = "SteerForce")

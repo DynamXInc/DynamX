@@ -125,17 +125,13 @@ public abstract class BaseVehicleEntity<T extends BaseVehiclePhysicsHandler<?>> 
     @Override
     public boolean canPlayerStandOnTop() {
         EnumPlayerStandOnTop playerStandOnTop = this.getPackInfo().getPlayerStandOnTop();
-        if(playerStandOnTop == null)
-            return true;
-        else {
-            switch (playerStandOnTop) {
-                case NEVER:
-                    return false;
-                case PROGRESSIVE:
-                    return DynamXUtils.getSpeed(this) <= 30;
-                default:
-                    return true;
-            }
+        switch (playerStandOnTop) {
+            case NEVER:
+                return false;
+            case PROGRESSIVE:
+                return DynamXUtils.getSpeed(this) <= 30;
+            default:
+                return true;
         }
     }
 }

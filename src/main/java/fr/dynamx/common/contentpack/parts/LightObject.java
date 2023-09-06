@@ -22,13 +22,13 @@ public class LightObject {
     @PackFileProperty(configNames = "LightId")
     protected String lightId = "";
     @Getter
-    @PackFileProperty(configNames = "Textures")
+    @PackFileProperty(configNames = "Textures", defaultValue = "Textures: Light_On")
     protected String[] textures;
     @Getter
-    @PackFileProperty(configNames = "BlinkSequenceTicks", required = false)
+    @PackFileProperty(configNames = "BlinkSequenceTicks", required = false, defaultValue = "none")
     protected int[] blinkSequence;
     @Getter
-    @PackFileProperty(configNames = "RotateDuration", required = false)
+    @PackFileProperty(configNames = "RotateDuration", required = false, defaultValue = "0")
     protected int rotateDuration;
 
     protected int lightIdHashed;

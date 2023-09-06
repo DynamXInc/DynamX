@@ -18,11 +18,11 @@ public class EngineSound implements INamedObject {
      * RPM range of this sound (array containing the min and the max) <br>
      * OR if it's the starting sound, equals to {-1}
      */
-    @PackFileProperty(configNames = {"RPMRange","PowerRange"})
+    @PackFileProperty(configNames = {"RPMRange","PowerRange"}, description = "EngineSound.RPMRange")
     private int[] rpmRange;
     @PackFileProperty(configNames = "Sound")
     private String soundName;
-    @PackFileProperty(configNames = "PitchRange", required = false)
+    @PackFileProperty(configNames = "PitchRange", required = false, defaultValue = "0.5 2.0")
     private float[] pitchRange = new float[]{0.5f, 2.0f};
 
     private boolean isInterior;

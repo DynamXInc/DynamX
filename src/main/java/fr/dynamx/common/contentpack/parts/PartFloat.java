@@ -24,14 +24,11 @@ public class PartFloat<T extends ISubInfoTypeOwner<T>> extends BasePart<T> {
     protected float size = 1;
 
     @Getter
-    @PackFileProperty(configNames = "BuoyCoefficient", required = false)
+    @PackFileProperty(configNames = "BuoyCoefficient", required = false, defaultValue = "1")
     protected float buoyCoefficient = 1f;
     @Getter
-    @PackFileProperty(configNames = "DragCoefficient", required = false)
+    @PackFileProperty(configNames = "DragCoefficient", required = false, defaultValue = "0.05")
     protected float dragCoefficient = 0.05f;
-    @Getter
-    @PackFileProperty(configNames = "Axis", required = false)
-    protected DynamXPhysicsHelper.EnumPhysicsAxis axis;
     @Getter
     @PackFileProperty(configNames = "Offset", required = false)
     protected Vector3f offset = new Vector3f();
@@ -58,31 +55,14 @@ public class PartFloat<T extends ISubInfoTypeOwner<T>> extends BasePart<T> {
                 max.x, max.y, max.z);
 
         childrenPositionList.clear();
-        switch (axis) {
-            case X:
-                for (int i = 0; i < lineSize.x; i++) {
-                    float xPos = (float) (box.minX + i * (size + spacing.x) + offset.x);
-                    childrenPositionList.add(Vector3fPool.getPermanentVector(getPosition()).addLocal(xPos + size / 2, 0, 0));
-                }
-                break;
-            case Y:
-                for (int j = 0; j < lineSize.z; j++) {
-                    float zPos = (float) (box.minZ + j * (size + spacing.z) + offset.z);
-                    childrenPositionList.add(Vector3fPool.getPermanentVector(getPosition()).addLocal(0, 0, zPos + size / 2));
-                }
-                break;
-            case Z:
-                for (int i = 0; i < lineSize.x; i++) {
-                    for (int j = 0; j < lineSize.z; j++) {
-                        float xPos = (float) (box.minX + i * (size + spacing.x) + offset.x);
-                        float zPos = (float) (box.minZ + j * (size + spacing.z) + offset.z);
-                        childrenPositionList.add(Vector3fPool.getPermanentVector(getPosition()).addLocal(xPos + size / 2, 0, zPos + size / 2));
-                    }
-                }
-                break;
-            default:
-                childrenPositionList.add(getPosition());
-                break;
+        int lSizeX = (int) Math.min(1, lineSize.x);
+        int lSizeZ = (int) Math.min(1, lineSize.z);
+        for (int i = 0; i < lSizeX; i++) {
+            for (int j = 0; j < lSizeZ; j++) {
+                float xPos = (float) (box.minX + i * (size + spacing.x) + offset.x);
+                float zPos = (float) (box.minZ + j * (size + spacing.z) + offset.z);
+                childrenPositionList.add(Vector3fPool.getPermanentVector(getPosition()).addLocal(xPos + size / 2, 0, zPos + size / 2));
+            }
         }
     }
     @Override

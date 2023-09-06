@@ -5,6 +5,7 @@ import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
+import fr.dynamx.utils.doc.ContentPackDocGenerator;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -83,7 +84,7 @@ public class SubInfoTypeAnnotationCache {
             Map<String, PackFilePropertyData<?>> dataMap = getOrLoadData(classToParse.getSuperclass());
             packFileProperties.putAll(dataMap);
         }
-        //ContentPackDocGenerator.generateDoc(toCache.getSimpleName(), "fr_fr", data.values());
+        ContentPackDocGenerator.generateDoc(classToParse, classToParse.getSimpleName(), "fr_fr", packFileProperties.values());
         //System.out.println("Found "+data.size()+" fields in "+toCache.getName());
         cache.put(classToParse, packFileProperties);
     }

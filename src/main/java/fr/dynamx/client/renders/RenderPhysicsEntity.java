@@ -109,7 +109,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
                     PartSeat seat = ((IModuleContainer.ISeatsContainer) entity).getSeats().getRidingSeat(e);
                     if (seat != null) {
                         EnumSeatPlayerPosition position = seat.getPlayerPosition();
-                        shouldRenderPlayerSitting = position == EnumSeatPlayerPosition.SIT || position == null;
+                        shouldRenderPlayerSitting = position == EnumSeatPlayerPosition.SITTING;
 
                         if (seat.getPlayerSize() != null)
                             GlStateManager.scale(seat.getPlayerSize().x, seat.getPlayerSize().y, seat.getPlayerSize().z);

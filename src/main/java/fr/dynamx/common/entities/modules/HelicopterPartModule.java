@@ -10,12 +10,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 
-/**
- * Basic wheel implementation <br>
- * Works with an {@link CarEngineModule} but you can use your own engines
- *
- * @see WheelsPhysicsHandler
- */
 public class HelicopterPartModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, IPhysicsModule.IEntityUpdateListener {
     protected final BaseVehicleEntity<? extends BaseVehiclePhysicsHandler<?>> entity;
     private HelicopterEngineModule engine;

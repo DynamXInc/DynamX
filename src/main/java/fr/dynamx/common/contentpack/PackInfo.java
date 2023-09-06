@@ -51,10 +51,10 @@ public class PackInfo extends SubInfoTypeOwner<PackInfo> {
     protected final List<RequiredAddonInfo> requiredAddons = new ArrayList<>();
 
     @Getter
-    @PackFileProperty(configNames = "PackVersion", required = false)
+    @PackFileProperty(configNames = "PackVersion", required = false, defaultValue = "1.0.0")
     protected String packVersion = "<missing>";
     @Getter
-    @PackFileProperty(configNames = "CompatibleWithLoaderVersions", required = false)
+    @PackFileProperty(configNames = "CompatibleWithLoaderVersions", required = false, defaultValue = "[1.1.0,)")
     protected String compatibleLoaderVersions;
     @Getter
     @PackFileProperty(configNames = "DcFileVersion", defaultValue = DynamXConstants.DC_FILE_VERSION)

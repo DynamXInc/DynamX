@@ -31,7 +31,7 @@ import javax.annotation.Nullable;
 public class SteeringWheelInfo extends SubInfoType<ModularVehicleInfo> implements IDrawablePart<BaseVehicleEntity<?>> {
     @PackFileProperty(configNames = "PartName", required = false, defaultValue = "SteeringWheel")
     private String partName = "SteeringWheel";
-    @PackFileProperty(configNames = {"Rotation", "BaseRotation", "BaseRotationQuat"}, required = false, defaultValue = "none")
+    @PackFileProperty(configNames = {"Rotation", "BaseRotation", "BaseRotationQuat"}, required = false, defaultValue = "none", description = "SteeringWheelInfo.Rotation")
     private Quaternion steeringWheelBaseRotation = null;
     @PackFileProperty(configNames = "Position", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y)
     private Vector3f position = new Vector3f(0.5f, 1.1f, 1);

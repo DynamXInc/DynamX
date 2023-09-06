@@ -21,7 +21,7 @@ public class DynamXConstants
     /**
      * Version of the {@link fr.dynamx.common.contentpack.ContentPackLoader}
      */
-    public static final ArtifactVersion PACK_LOADER_VERSION = new DefaultArtifactVersion("1.0.2");
+    public static final ArtifactVersion PACK_LOADER_VERSION = new DefaultArtifactVersion("1.1.0");
 
     public static final String DYNAMX_CERT = "certs/lets-encrypt-r3.der", DYNAMX_AUX_CERT = null;
 

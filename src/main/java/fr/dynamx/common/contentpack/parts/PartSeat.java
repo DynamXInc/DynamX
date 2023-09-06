@@ -28,47 +28,54 @@ import javax.annotation.Nullable;
 
 @RegisteredSubInfoType(name = "seat", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER}, strictName = false)
 public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfo> {
+    @Getter
     @PackFileProperty(configNames = "Driver")
     private boolean isDriver;
 
-    @PackFileProperty(configNames = "ShouldLimitFieldOfView", required = false, defaultValue = "true")
-    @Accessors(fluent = true)
     @Getter
+    @Accessors(fluent = true)
+    @PackFileProperty(configNames = "ShouldLimitFieldOfView", required = false, defaultValue = "true")
     private boolean shouldLimitFieldOfView = true;
 
-    @PackFileProperty(configNames = "MaxYaw", required = false, defaultValue = "-105")
     @Getter
+    @PackFileProperty(configNames = "MaxYaw", required = false, defaultValue = "-105")
     private float maxYaw = -105.0f;
 
-    @PackFileProperty(configNames = "MinYaw", required = false, defaultValue = "105")
     @Getter
+    @PackFileProperty(configNames = "MinYaw", required = false, defaultValue = "105")
     private float minYaw = 105.0f;
 
-    @PackFileProperty(configNames = "MaxPitch", required = false, defaultValue = "-105")
     @Getter
+    @PackFileProperty(configNames = "MaxPitch", required = false, defaultValue = "-105")
     private float maxPitch = -105.0f;
 
-    @PackFileProperty(configNames = "MinPitch", required = false, defaultValue = "105")
     @Getter
+    @PackFileProperty(configNames = "MinPitch", required = false, defaultValue = "105")
     private float minPitch = 105.0f;
 
+    @Getter
+    @Nullable
     @PackFileProperty(configNames = "LinkedDoorPart", required = false)
     private String linkedDoor;
+
+    @Getter
     @PackFileProperty(configNames = "Rotation", required = false, defaultValue = "1 0 0 0")
     private Quaternion rotation;
 
-    @PackFileProperty(configNames = "PlayerPosition", required = false, defaultValue = "SIT")
-    private EnumSeatPlayerPosition playerPosition;
+    @Getter
+    @PackFileProperty(configNames = "PlayerPosition", required = false, defaultValue = "SITTING")
+    private EnumSeatPlayerPosition playerPosition = EnumSeatPlayerPosition.SITTING;
 
+    @Getter
     @PackFileProperty(configNames = "CameraRotation", required = false, defaultValue = "0")
     private float rotationYaw;
 
-    @PackFileProperty(configNames = "CameraPositionY", required = false, defaultValue = "0")
     @Getter
+    @PackFileProperty(configNames = "CameraPositionY", required = false, defaultValue = "0")
     private float cameraPositionY;
 
-    @PackFileProperty(configNames = "PlayerSize", required = false, defaultValue = "1 1 1")
     @Getter
+    @PackFileProperty(configNames = "PlayerSize", required = false, defaultValue = "1 1 1")
     private Vector3f playerSize;
 
     public PartSeat(ModularVehicleInfo owner, String partName) {
@@ -139,22 +146,6 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
         return getLinkedDoor() != null;
     }
 
-    public boolean isDriver() {
-        return isDriver;
-    }
-
-    public Quaternion getRotation() {
-        return rotation;
-    }
-
-    public EnumSeatPlayerPosition getPlayerPosition() {
-        return playerPosition;
-    }
-
-    public float getRotationYaw() {
-        return rotationYaw;
-    }
-
     @Override
     public ResourceLocation getHudCursorTexture() {
         return new ResourceLocation(DynamXConstants.ID, "textures/seat.png");
@@ -163,11 +154,6 @@ public class PartSeat extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     @Override
     public String getName() {
         return "PartSeat_" + getPartName();
-    }
-
-    @Nullable
-    public String getLinkedDoor() {
-        return linkedDoor;
     }
 
     @Nullable

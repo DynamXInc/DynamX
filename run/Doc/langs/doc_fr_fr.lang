@@ -1,0 +1,314 @@
+#Titles
+
+title.name=Nom
+title.type=Type
+title.description=Description
+title.example=Exemple
+title.default_value=Valeur par défaut
+category.REQUIRED=Propriétés obligatoires
+category.OPTIONAL=Propriétés facultatives
+
+#Common
+
+common.model=Chemin du modèle obj
+common.itemscale=Scale du rendu de l'item
+common.item3D=Voir ci-dessous
+
+common.description=Lore de l'item
+common.name=Nom de l'objet
+
+common.UseComplexCollisions=Permet de désactiver la box de collision prenant la forme du modèle 3D : en le mettant sur false, les boites de collisions avec le joueur seront utilisées pour les collisions avec les entités physiques et le terrain. En laissant sur true, le modèle 3D est utilisé pour les collisions, ce qui est plus coûteux en performances.
+common.shape.type=Type de boîte (cube, cylindre ou sphère)
+
+common.error.deprecated=Déprécié
+common.unused=Inutilisé
+
+#Descs (dans le ALL_DOCS)
+
+info.desc.PackInfo=Informations d'un pack
+info.desc.ObjectInfo=Informations de base d'un objet DynamX
+info.desc.AbstractItemObject=Informations de base d'un item DynamX
+info.desc.ArmorObject=Informations d'une armure DynamX
+info.desc.MaterialVariantsInfo=Variantes de texture d'un objet
+info.desc.AbstractProp=Informations communes aux blocs et props DynamX
+info.desc.BlockObject=Informations d'un blocc DynamX
+info.desc.ModularVehicleInfo=Informations d'un véhicule DynamX
+info.desc.BasePart=Informations communes aux parts
+info.desc.PartShape=Boîtes de collisions
+info.desc.EngineSound=Sons des moteurs
+info.desc.PropObject=Informations d'un props DynamX
+info.desc.SteeringWheelInfo=Volant
+info.desc.FrictionPoint=Point de friction
+info.desc.InteractivePart=Part interactive (siège, porte...)
+info.desc.PartWheel=Roue
+info.desc.PartSeat=Siège
+info.desc.PartDoor=Port
+info.desc.PartLightSource=Part lumineuse
+info.desc.LightObject=Source de lumière
+info.desc.SubLightObject=Source de lumière
+info.desc.SimplePartLightSource=Part lumineuse simple
+info.desc.PartWheelInfo=Informations d'une roue
+info.desc.BoatPropellerInfo=Propulsion d'un bateau
+info.desc.PartFloat=Flotteurs
+info.desc.BaseEngineInfo=Informations de base d'un moteur
+info.desc.CarEngineInfo=Moteur de voiture
+info.desc.RPMPower=Point de puissance d'un moteur
+info.desc.GearInfo=Vitesse d'une boîte de vitesse
+info.desc.TrailerAttachInfo=Configuration d'une remorque
+info.desc.PartPropsContainer=Conteneur à props (pour faire un camion avec une benne contenant des props par exemple)
+info.desc.PartStorage=Permet de stocker des items (comme un coffre)
+info.desc.CaterpillarInfo=Déprécié, non supporté.
+info.desc.HelicopterPhysicsInfo=Physique d'un hélicoptère
+info.desc.PartHandle=Manche d'hélicoptère
+info.desc.RequiredAddonInfo=Addon requis
+
+
+#PackInfo
+PackInfo.PackName=Nom du pack. Utilisé par exemple pour référencer les roues : `PackName.wheel_test`.
+PackInfo.PackVersion=Version du pack. C'est seulement indicatif mais cela permet de s'organiser.
+PackInfo.DcFileVersion=Version du générateur des fichiers .dc. Mettre la valeur donnée en exemple.
+PackInfo.CompatibleWithLoaderVersions=Tranche de compatibilité des packs avec les versions du loader de packs de DynamX. Mettre la valeur donnée en exemple, sauf si vous savez ce que vous faites.
+RequiredAddonInfo.Id=Identifiant de l'addon requis
+RequiredAddonInfo.Versions=Versions supportées
+
+
+#Vehicles
+
+ModularVehicleInfo.Name=Le nom que le véhicule portera en jeu
+ModularVehicleInfo.Description=Lore de l'item du véhicule
+ModularVehicleInfo.EmptyMass=Masse du véhicule (en kg)
+ModularVehicleInfo.DragCoefficient=Coefficient de frottements avec l'air du véhicule
+ModularVehicleInfo.ShapeYOffset=Offset vertical de la boîte de collision de la voiture (influe sur le centre de gravité)
+ModularVehicleInfo.CenterOfGravityOffset=Centre de gravité du véhicule (par défaut : position de l'origine du chassis dans Blender). La position est au format Minecraft.
+ModularVehicleInfo.DefaultEngine=Nom du moteur par défaut, voir plus loin. Si non spécifié, le véhicule sera une remorque (voir "Configuration de la remorque")
+ModularVehicleInfo.DefaultSounds=Nom des sons par défaut, voir plus loin
+ModularVehicleInfo.ScaleModifier=Permet de modifier la taille du modèle, tous les autres paramètres tels que les collisions, la position (mais pas la taille) des roues et du volant seront automatiquement recalculés. La scale de la roue doit être configurée dans la config des roues directement, voir plus bas.
+ModularVehicleInfo.MaxVehicleSpeed=Vitesse maximale atteignable par le véhicule (en km/h)
+ModularVehicleInfo.PlayerStandOnTop=Définit si les joueurs peuvent rester debout sur ce véhicule.
+ModularVehicleInfo.DefaultZoomLevel=Niveau de zoom par défaut en vue à la troisième personne en montant dans le véhicule
+ModularVehicleInfo.LinearDamping=Atténuation de la vélocité linéaire (résistance de l'air), entre 0 et 1.
+ModularVehicleInfo.AngularDamping=Atténuation de la vélocité angulaire (résistance de l'air), entre 0 et 1.
+ModularVehicleInfo.Textures=Déprécié. Voir [configuration du multi-textures](MultiTextures.md).
+
+
+#Steering wheel
+
+SteeringWheelInfo.Position=Position du volant sur le chassis
+SteeringWheelInfo.PartName=Nom de l'objet du volant dans votre modèle
+SteeringWheelInfo.Rotation=Rotation de base du volant, si vous laissez 0 0 0 0, le volant sera dessiné à plat face à vous, rotation indiquée dans blender dans le mode "quaternion"
+
+
+#Base part
+
+common.position=Position de l'objet
+common.scale=Taille de l'objet
+BasePart.Size=Remplacé par Scale
+
+
+#Part wheel
+
+PartWheel.IsRight=Si la roue est à droite (true), ou à gauche (false) (Propritété nommée "isRight" sur les versions avant la 2.11.2 incluse)
+PartWheel.IsSteerable=Si la roue peut tourner avec le volant (true) ou non (false)
+PartWheel.MaxTurn=Valeur maximale de braquage (à quel point vous pouvez tourner la roue)
+PartWheel.DrivingWheel=Si la roue est motrice (true) ou non (false)
+PartWheel.AttachedWheel=Nom de la roue par défaut, voir plus loin
+PartWheel.HandBrakingWheel=Si la roue est freine lorsque le frein à main est activé (true), ou si elle peut tourner librement (false) (facultatif, si aucune roue ne freine, celles non motrices freineront automatiquement)
+PartWheel.MudGuard=	Nom de l'objet correspondant au garde-boue, dans le modèle du véhicule (facultatif)
+PartWheel.RotationPoint=Point de rotation de la roue lorsque l'on tourne le volant (facultatif)
+PartWheel.SuspensionAxis=Rotation de l'axe des suspensions, par rapport à l'axe vertical (facultatif)
+
+
+#Part wheel info
+
+PartWheelInfo.Width=Largeur de la roue. Pour la déterminer, créez un cylindre englobant la roue, c'est la largeur de ce cylindre.
+PartWheelInfo.Radius=Rayon de la roue. Pour le déterminer, créez un cylindre englobant la roue, c'est le rayon de ce cylindre
+PartWheelInfo.RimRadius=Rayon de la jante. Pour le déterminer, créez un cylindre englobant la jante, c'est le rayon de ce cylindre (sert pour le système de crevaison)
+PartWheelInfo.Friction=Adhérence de la roue. Valeur conseillée : 1.5.
+PartWheelInfo.BrakeForce=Puissance de freinage. Valeur conseillée : 1000.
+PartWheelInfo.RollInInfluence=Influence de la suspension sur la rotation autour de l'axe Z (roll) du véhicule. Valeur conseillée : 1, la modifier est hasardeux.
+PartWheelInfo.SuspensionRestLength=Longueur maximale de la suspension (en centimètres). Valeurs conseillées : 0.03 à 0.5 (véhicule bas ou véhicule haut).
+PartWheelInfo.SuspensionStiffness=Dureté de la suspension (influe sur sa longueur au repos). Valeurs conseillées : de 30 à 60.
+PartWheelInfo.SuspensionMaxForce=Force maximale s'exerçant sur la suspension, avant de casser (en Newton). Valeur conseillée : 10000 (une trop petite valeur cassera tout).
+PartWheelInfo.WheelDampingRelaxation=Coefficient de détente, plus la valeur est faible, plus la roue reviendra à sa longueur de repos rapidement, après une compression. Valeur conseillée : 0.45.
+PartWheelInfo.WheelsDampingCompression=Coefficient de compression, plus la valeur est faible, plus la roue reviendra à sa longueur de repos rapidement, après une détente. Valeur conseillée : 0.22.
+PartWheelInfo.HandBrakeForce=Puissance de freinage avec le frein à main
+PartWheelInfo.SkidParticle=Particule émise au niveau de la roue lorsqu'elle glisse, peut être nimporte quelle particule de Minecraft, son nom doit indiqué, la valeur par défaut est smoke
+PartWheelInfo.ScaleModifier=Permet de modifier la taille du modèle de la roue, les autres paramètres tels que le rayon et la largeur seront automatiquement recalculés. La scale du véhicule doit être configurée dans la config du véhicule directement, voir plus haut.
+PartWheelInfo.Textures=Déprécié. Voir [configuration du multi-textures](MultiTextures.md).
+
+#Part seat
+
+PartSeat.Driver=Indique si c'est le siège conducteur (true), ou non (false)
+PartSeat.LinkedDoorPart=Nom de la PartDoor liée à ce siège
+PartSeat.ShouldLimitFieldOfView=Définit si le joueur peut tourner la caméra tout autour de lui ou non
+PartSeat.CameraRotation=Rotation horizontale de la caméra, en degrés
+PartSeat.MinPitch=Rotation verticale minimale de la caméra, en degrés
+PartSeat.MaxPitch=Rotation verticale maximale de la caméra, en degrés
+PartSeat.MinYaw=Rotation horizontale minimale de la caméra, en degrés
+PartSeat.MaxYaw=Rotation horizontale maximale de la caméra, en degrés
+PartSeat.PlayerPosition=Position du joueur sur le siège
+PartSeat.Rotation=Rotation du siège
+PartSeat.CameraPositionY=Position verticale de la caméra à la troisième personne
+PartSeat.PlayerSize=Taille du joueur sur le siège (`1 1 1` correspond à sa taille réelle)
+
+#PartDoor
+
+PartDoor.Enabled=Active le système de porte physique. Si voous mettez false, la porte sera seulement dessinée mais ne s'ouvrira pas.
+PartDoor.PartName=Nom de l'objet de la porte dans votre modèle.
+PartDoor.LocalCarAttachPoint=Point d'attache de la porte par rapport à l'origine de l'objet de la voiture.
+PartDoor.LocalDoorAttachPoint=Point d'attache de la porte, relatif à l'origine de l'objet de la porte, correspondant au point précédent.
+PartDoor.Axis=Axe de rotation de la porte.
+PartDoor.OpenedDoorAngleLimit=Limite minimale, Limite maximale (Angle d'ouverture de la porte).
+PartDoor.ClosedDoorAngleLimit=Limite minimale, Limite maximale (Angle de fermeture de la porte).
+PartDoor.DoorOpenForce=Vélocité (vitesse de l'action d'ouverture), Force maximale (d'ouverture de la porte).
+PartDoor.DoorCloseForce=Vélocité (vitesse de l'action de fermeture), Force maximale (de fermeture de la porte).
+PartDoor.DoorCloseTime=Non utilisé actuellement.
+PartDoor.AttachStrength=Force d'attache de la porte (détermine la force appliquée avant que la porte ne se casse). (Non utilisé pour le moment).
+PartDoor.AutoMountDelay=Délai avant que le joueur ne soit automatiquement installé sur le siège lié à la voiture (clic droit directement sur la porte).
+
+#PartLightSource
+
+PartLightSource.PartName=Nom de l'objet lumineux dans votre modèle
+PartLightSource.BaseMaterial=(Utilisateur avancé) Nom du matériau utilisé sur l'objet lumineux dans l'état par défaut. Cette propriété a le même comportement que la propriété BaseMaterial du multi-textures.
+PartLightSource.Rotation=Rotation de la part sur le véhicule, rotation indiquée dans blender dans le mode "quaternion"
+
+#LightObject
+
+LightObject.LightId=Id de la part lumineuse. Il doit être partagé avec toutes les parts s'allumant en même temps. C'est lui qui sera utilisé dans les addons pour définir quand est-ce que la part doit d'allumer (pour configurer des phares par exemple).
+LightObject.Textures=Texture(s) utilisée(s) sur la part lorsqu'elle est allumée. Voir la page [multi-textures](MultiTextures.md) pour apprendre le fonctionnement du multi-textures sur les modèles. Si vous en mettez plus d'une, elle doivent respect la `BlinkSequenceTicks`.
+LightObject.BlinkSequenceTicks=Séquences de clignotement de la lumière, pour faire des gyrophares par exemple. Avec `BlinkSequenceTicks: -1 10 20`, la part sera allumée 0.5 secondes, puis éteinte 0.5 secondes en alternance (une seconde = 20 ticks). Avec `BlinkSequenceTicks: -1 20` elle sera allumée en continu. Une séquence peut contenir une infinité d'étapes.
+LightObject.RotateDuration=Temps en ticks pour que la part lumineuse fasse un tour sur elle-même
+
+
+#Trailer
+
+TrailerAttachInfo.AttachPoint=Point d'attache de la remorque sur le modèle
+TrailerAttachInfo.AttachStrength=Ne doit être indiqué que dans le configuration de la remorque (et non pas de la voiture), cela défini la force maximale applicable à l'attache avant qu'elle ne casse (1000 est une bonne valeur pour une remorque légère de voiture)
+
+
+#PartStorage
+
+PartStorage.StorageSize=Nombre de slots dans le stockage
+
+
+#Friction points
+
+FrictionPoint.Position=Position du point de friction
+FrictionPoint.Intensity=Facteur de la force (Force = Intensity * |Vitesse du véhicule|, elle est opposée à la vitesse et vers le bas). Je conseille une petite intensité horizontale et une plus forte intensité verticale pour "plaquer" la voiture au sol.
+
+
+#Moteur
+
+BaseEngineInfo.Power=Puissance du moteur
+BaseEngineInfo.MaxRPM=Tours moteurs par minute maximums du moteur
+BaseEngineInfo.Braking=Puissance du frein moteur (quand vous relâchez l'accélération)
+CarEngineInfo.SteeringMethod=Comportement du volant, 0 : direct, 1 : interpolé, 2 : mix entre 0 et 1.
+CarEngineInfo.TurnSpeed=Vitesse à laquelle le volant fait tourner les roues (facultatif)
+
+RPMPower.RPMPower=Ne pas utiliser de tableau pour ça
+
+GearInfo.SpeedRange=Gamme de vitesse (en km/h) où cette vitesse sera passée par la boîte automatique
+GearInfo.RPMRange=Gamme de tours par minutes où cette vitesse sera passée par la boîte automatique
+
+EngineSound.RPMRange=Tableau de deux entiers, rpm_min et rpm_max. Gamme de RPM du son : il est joué entre rpm_min et rpm_max.
+EngineSound.Sound=Chemin du fichier ogg du son (sans le .ogg). Pas besoin de sounds.json !
+EngineSound.PitchRange=Tableau de deux nombres à virgule, pitch_min et pitch_max. Gamme de pitch du son : cela permet de modifier la sonorité du son du moteur (plus ou moins grave). pitch_min correspond à rpm_min, idem pour pitch_max et rpm_max.
+
+#==============
+
+#Items
+common.creativetabname=Crée une nouvelle page dans le menu creatif contenant l'item dans lequel cette propriété a été renseignée, avec le nom défini. `None` cachera l'item du menu créatif.
+common.icontext=Texte dessiné sur l'icône de l'item dans les menus
+AbstractItemObject.ItemTranslate=Modifie la translation de l'item
+AbstractItemObject.ItemRotate=Modifie la rotation de l'item
+
+#Blocs et props
+
+AbstractProp.Translate=Modifie la position du modèle
+AbstractProp.Scale=Modifie la taille du modèle
+AbstractProp.RenderDistanceSquared=Distance maximale à laquelle le block/prop est rendu, peut affecter les performances
+AbstractProp.Textures=Déprécié. Voir [configuration du multi-textures](MultiTextures.md).
+AbstractProp.UseHullShape=Remplacé par UseComplexCollisions
+
+BlockObject.Rotate=Modifie la rotation du bloc (ne marche pas sur les props)
+BlockObject.Material=Matériau Minecraft du bloc
+BlockObject.LightLevel=Luminosité du bloc, entre 0 et 15
+
+PropObject.EmptyMass=Masse du prop (en kg)
+PropObject.CenterOfGravityOffset=Centre de gravité du prop (par défaut : position de l'origine du modèle dans Blender). La position est au format Minecraft. A ajuster à l'aide de l'option de debug associée en jeu.
+PropObject.SpawnOffset=Position à laquelle le prop est placé en utilisant son item
+PropObject.ContinuousCollisionDetection=Active (true) ou non (false) la détection de collsion continue (Très utile pour éviter que les petits objets tombent à travers le sol)
+PropObject.Friction=Modifie la friction de l'objet
+PropObject.Margin=Modifie la marge de détection de collsion d'un objet (Nous vous déconseillons très fortement de modifier cette propriété)
+PropObject.DespawnTime=Définit le temps de disparition de l'objet en question en ticks (Conseillée pour éviter les lags)
+PropObject.LinearDamping=Atténuation de la vélocité linéaire (résistance de l'air), entre 0 et 1.
+PropObject.AngularDamping=Atténuation de la vélocité angulaire (résistance de l'air), entre 0 et 1.
+PropObject.Bounciness=Intensité de l'effet de rebond du props (comme une balle de foot), entre 0 et 1.
+
+
+#Armures
+
+ArmorObject.ArmorHead=Nom de la part de la tête dans le modèle obj, optionnel
+ArmorObject.ArmorBody=Nom de la part du corps dans le modèle obj, optionnel
+ArmorObject.ArmorArms=Nom de la part des bras dans le modèle obj, optionnel
+ArmorObject.ArmorLegs=Nom de la part des jambes dans le modèle obj, optionnel
+ArmorObject.ArmorFoot=Nom de la part des pieds dans le modèle obj, optionnel
+ArmorObject.Durability=Durabilité de l'item
+ArmorObject.Enchantability=Enchantabilité de l'item
+ArmorObject.EquipSound=Nom du son quand on équipe l'armure
+ArmorObject.Toughness=Protection ajoutée à l'armure
+ArmorObject.DamageReduction=Protection des différentes pièces de l'armure, pieds, jambes, corps, tête
+ArmorObject.Textures=Déprécié. Voir [configuration du multi-textures](MultiTextures.md).
+
+#Variants
+MaterialVariantsInfo.BaseMaterial=Matériau de base utilisé pour l'objet du modèle 3D.
+MaterialVariantsInfo.Variants=Noms des variantes de textures/matériaux.
+
+
+#Types
+type.int=Nombre entier
+type.byte=Nombre entier très court (limite de -128 + 127)
+type.float=Nombre décimal
+type.boolean=Valeur pouvant soit activer (True) ou désactiver (False) une propriété
+type.string=Chaine de caractères (Peut être utilisé pour donner un nom ou une description)
+type.string.array=Liste de chaine de caractères (Pour les propriétés acceptant plusieurs valeurs, exemple : Valeur1, Valeur2, Valeur3, ....)
+type.string.array2d=Liste de chaine de caractères acceptants des valeurs en 2 par 2 (Exemple : Valeur1 Valeur2, Valeur3 Valeur4, ...)
+type.int.array=Liste de nombres entiers
+type.float.array=Liste de nombre décimaux
+type.vector3f=Vecteur comportant 3 axes (X,Y,Z)
+type.vector3f.array=Liste de vecteurs
+type.quaternion=Quaternion (X,Y,Z,W)
+type.vector3f_0z=Vecteur avec un Z nul (X,Y)
+type.vector3f.inverse=Vecteur avec les axes Y et Z inversés (X,Z,Y)
+type.vector3f.inverse_Y=Vecteur au format blender (X,Z,Y*-1)
+type.vector3f.array.blender=Liste de vecteurs au format blender
+type.vector2f=Vecteur comportant 2 axes (X,Y)
+type.item_render_location=Type de rendu de l'item (NONE ou WORLD ou ALL)
+type.sound_event=Type de son
+type.particle=Type de particule
+type.collision=Type de collisions
+type.resourcelocation=ResourceLocation : chemin vers une ressource au format modid:dossier/ressourse. Par exemple avec `dynamxmod:model1/model1.obj`, le modèle devra être dans `assets/dynamxmod/models/model1/model1.obj`
+type.shapetype=Type de forme (`BOX` : cube, `CYLINDER` : cylindre, `SPHERE` : sphère)
+type.axis=Axe physique (`X`, `Y`, `Z`, `X_ROT`, `Y_ROT`, `Z_ROT`)
+type.material=Matériau Minecraft (parmis "AIR", "GRASS", "GROUND", "WOOD", "ROCK", "IRON", "ANVIL", "WATER", "LAVA", "LEAVES", "PLANTS", "VINE", "SPONGE", "CLOTH", "FIRE", "SAND", "CIRCUITS", "CARPET", "GLASS", "REDSTONE_LIGHT", "TNT", "CORAL", "ICE", "PACKED_ICE", "SNOW", "CRAFTED_SNOW", "CACTUS", "CLAY", "GOURD", "DRAGON_EGG", "PORTAL", "CAKE", "WEB", "PISTON", "BARRIER", "STRUCTURE_VOID")
+type.player_seat_position=Position du joueur, `LYING` : allongé, `SITTING` = assis, `STANDING` : debout
+type.player_stand_on_top=Indique si le joueur peut rester debout sur un véhicule. `ALWAYS` leur permettra de toujours rester debout (consillé pour les bus et bateaux par exemple), `PROGRESSIVE` leur permettra de rester debout sous 30 km/h (conseillé pour les voitures), et `NEVER` ne les laissera pas rester debouts sur le véhicule.
+
+
+#BoatPropeller
+
+BoatPropellerInfo.AccelerationForce=Force d'accélération du bateau
+BoatPropellerInfo.BrakeForce=Force de freinage du bateau
+BoatPropellerInfo.SteerForce=Force de direction du bateau
+
+#PartFloat
+
+PartFloat.DragCoefficient=Coefficient de frottement avec l'eau, entre 0 et 1
+PartFloat.BuoyCoefficient=Coefficient de flottaison, entre 0 et 1
+PartFloat.LineSize=Nombre de flotteurs dans chaque direction (points où est appliquée la poussée d'Archimède)
+PartFloat.Spacing=Espace vide entre chaque flotteur
+PartFloat.Offset=Position (décalage par rapport au centre) des flotteurs
+
+#PartHandle
+
+PartHandle.PartName=TODO

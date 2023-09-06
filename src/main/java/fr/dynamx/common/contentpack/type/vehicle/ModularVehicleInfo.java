@@ -88,7 +88,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
 
     @Getter
     @PackFileProperty(configNames = "PlayerStandOnTop", required = false, defaultValue = "ALWAYS")
-    protected EnumPlayerStandOnTop playerStandOnTop;
+    protected EnumPlayerStandOnTop playerStandOnTop = EnumPlayerStandOnTop.ALWAYS;
 
     @Getter
     @PackFileProperty(configNames = "DefaultZoomLevel", required = false, defaultValue = "4")
@@ -110,9 +110,11 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     @PackFileProperty(configNames = "DragCoefficient")
     protected float dragFactor;
 
-    @PackFileProperty(configNames = "LinearDamping", required = false, defaultValue = "0")
+    @Getter
+    @PackFileProperty(configNames = "LinearDamping", required = false, defaultValue = "0.5")
     protected float linearDamping;
-    @PackFileProperty(configNames = "AngularDamping", required = false, defaultValue = "0")
+    @Getter
+    @PackFileProperty(configNames = "AngularDamping", required = false, defaultValue = "0.9")
     protected float angularDamping;
 
     @Getter
@@ -276,16 +278,6 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     @Override
     public ItemStack getPickedResult(int metadata) {
         return new ItemStack((Item) getOwners()[0], 1, metadata);
-    }
-
-    @Override
-    public float getAngularDamping() {
-        return angularDamping;
-    }
-
-    @Override
-    public float getLinearDamping() {
-        return linearDamping;
     }
 
     /**

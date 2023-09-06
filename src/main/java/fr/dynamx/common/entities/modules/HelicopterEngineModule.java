@@ -29,13 +29,6 @@ import java.util.Map;
 
 import static fr.dynamx.client.ClientProxy.SOUND_HANDLER;
 
-/**
- * Basic {@link } implementation for cars <br>
- * Works with an {@link AutomaticGearboxHandler} and a {@link WheelsModule}
- *
- * @see VehicleEntityProperties.EnumEngineProperties
- * @see EnginePhysicsHandler
- */
 @SynchronizedEntityVariable.SynchronizedPhysicsModule(modid = DynamXConstants.ID)
 public class HelicopterEngineModule extends BasicEngineModule {
     @Getter

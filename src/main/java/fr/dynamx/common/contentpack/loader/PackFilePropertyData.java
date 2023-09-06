@@ -99,6 +99,6 @@ public class PackFilePropertyData<T> {
         String sep = "|";
         String typeName = locale.format(this.type.getTypeName());
         builder.append(sep).append(configFieldName).append(sep).append(typeName).append(sep)
-                .append(locale.format(docKey)).append(sep).append(defaultValue.isEmpty() ? "   " : defaultValue).append(sep).append("\n");
+                .append(locale.format(docKey)).append(sep).append(defaultValue.isEmpty() ? " - " : defaultValue).append(sep).append("\n");
     }
 }

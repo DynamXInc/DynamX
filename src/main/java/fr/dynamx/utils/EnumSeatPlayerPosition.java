@@ -2,7 +2,7 @@ package fr.dynamx.utils;
 
 public enum EnumSeatPlayerPosition {
     LYING,
-    SIT,
+    SITTING,
     STANDING;
 
     public static EnumSeatPlayerPosition fromString(String targetName) {

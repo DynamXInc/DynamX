@@ -1,0 +1,175 @@
+#Common
+
+common.model=Model path obj
+common.itemscale=Rendering scale of the item
+common.item3D=See below
+
+common.description=Lore of the item
+common.name=Name of the object
+
+common.error.deprecated=Deprecated
+
+#Vehicles
+
+ModularVehicleInfoBuilder.Name=The name the vehicle will have in game
+ModularVehicleInfoBuilder.Description=The description of the vehicle item
+ModularVehicleInfoBuilder.EmptyMass=The mass of the vehicle (in kg)
+ModularVehicleInfoBuilder.DragCoefficient=Drag coefficient of the vehicle
+ModularVehicleInfoBuilder.ShapeYOffset=Vertical offset of the car's collision box (affects the center of gravity)
+ModularVehicleInfoBuilder.CenterOfGravityOffset=Center of gravity of the vehicle (default: position of the chassis origin in Blender). The position is in Minecraft format.
+ModularVehicleInfoBuilder.DefaultEngine=Default engine name, see below. If not specified, the vehicle will be a trailer (see "Trailer configuration")
+ModularVehicleInfoBuilder.DefaultSounds=Default sounds, see below
+ModularVehicleInfoBuilder.ScaleModifier=Allows to modify the size of the model, all other parameters such as collisions, position (but not size) of the wheels and steering wheel will be automatically recalculated. The wheel scale must be configured in the wheel config directly, see below.
+ModularVehicleInfoBuilder.MaxVehicleSpeed=Maximum speed reachable by the vehicle (in km/h)
+ModularVehicleInfoBuilder.UseHullShape=Allows to disable the collision box taking the shape of the 3D model: by setting it to false, the collision boxes with the player will be used for collisions with physical entities and the terrain.
+
+ModularVehicleInfoBuilder.UseComplexCollisions=Allows to activate (true) or not (false) a more precise collision but more costly in performance
+ModularVehicleInfoBuilder.Textures=TODO See below
+
+
+#Steering wheel
+
+SteeringWheelInfo.Position=Position of the steering wheel on the chassis, in Blender format
+SteeringWheelInfo.PartName=Name of the steering wheel object in your model
+SteeringWheelInfo.BaseRotationQuat=Basic rotation of the steering wheel, if you leave 0 0 0 0, the steering wheel will be drawn flat facing you, position indicated in blender in the "quaternion" mode
+SteeringWheelInfo.BaseRotation=Replaced by BaseRotationQuat
+
+
+#Base part
+
+common.position=Position of the object (in blender format)
+common.scale=Size of the object
+BasePart.Size=Replaced by Scale
+
+
+#Part wheel
+
+PartWheel.IsRight=If the wheel is on the right (true), or on the left (false) (Feature named "isRight" on versions before 2.11.2 included)
+PartWheel.IsSteerable=If the wheel is affected by the Steering Wheel (true) or not (false)
+PartWheel.MaxTurn=Maximum turning value (how far you can turn the wheel)
+PartWheel.DrivingWheel=Whether the wheel is driving (true) or not (false)
+PartWheel.AttachedWheel=Default wheel name, see below
+PartWheel.HandBrakingWheel=If the wheel is braked when the handbrake is on (true), or if it can turn freely (false) (optional, if no wheel is braking, the non-driving ones will brake automatically)
+PartWheel.MudGuard= Name of the object corresponding to the mudguard, in the vehicle model (optional)
+PartWheel.RotationPoint=Point of rotation of the wheel when turning the steering wheel (in Blender format) (optional)
+PartWheel.SuspensionAxis=Rotation of the suspension axis, in relation to the vertical axis (optional)
+
+
+#Part wheel info
+
+PartWheelInfo.Width=Width of the wheel. To determine it, create a cylinder enclosing the wheel, this is the width of this cylinder.
+PartWheelInfo.Radius=Radius of the wheel. To determine it, create a cylinder enclosing the wheel, it is the radius of this cylinder
+PartWheelInfo.RimRadius=Radius of the rim. To determine it, create a cylinder that includes the rim, it is the radius of this cylinder (used for the puncture system)
+PartWheelInfo.Friction=Wheel friction. Recommended value: 1.5.
+PartWheelInfo.BrakeForce=Braking power. Recommended value: 1000.
+PartWheelInfo.RollInfluence=Suspension influence on the rotation around the Z axis (roll) of the vehicle. Recommended value: 1, changing it is risky.
+PartWheelInfo.SuspensionRestLength=Maximum length of the suspension (in centimeters). Recommended values: 0.03 to 0.5 (low vehicle or high vehicle).
+PartWheelInfo.SuspensionStiffness=Hardness of the suspension (affects its rest length). Recommended values: 30 to 60.
+PartWheelInfo.SuspensionMaxForce=Maximum force on the suspension before breaking (in Newton). Recommended value: 10000 (too small a value will break everything).
+PartWheelInfo.WheelDampingRelaxation=Relaxation coefficient, the lower the value, the faster the wheel will return to its rest length after compression. Recommended value: 0.45.
+PartWheelInfo.WheelsDampingCompression=Compression coefficient, the lower the value, the faster the wheel will return to its rest length after a rebound. Recommended value: 0.22.
+PartWheelInfo.HandBrakeForce=Braking power with hand brake
+PartWheelInfo.SkidParticle=Particle emitted at the wheel when it slides, can be any Minecraft particle, its name must be indicated, default value is smoke
+PartWheelInfo.ScaleModifier=Allows you to change the size of the wheel model, other parameters such as radius and width will be automatically recalculated. The scale of the vehicle must be configured in the vehicle config directly, see above.
+PartWheelInfo.Textures=List of texture variants compatible with the wheel (configured in the mtl), their names must be the same as the vehicle variants, separated by spaces. Do not put this line if you have no texture variants for this wheel.
+
+
+#Part seat
+
+PartSeat.Driver=Indicates if this is the driver seat (true), or not (false)
+PartSeat.LinkedDoorPart=Name of the PartDoor linked to this seat
+
+
+#Trailer
+
+TrailerAttachInfo.AttachPoint=The attachment point of the trailer on the model, in Blender format
+TrailerAttachInfo.AttachStrength=Should only be specified in the trailer configuration (not the car), this defines the maximum force applicable to the attachment before it breaks (1000 is a good value for a light car trailer)
+
+
+#Friction points
+
+FrictionPoint.Position=Position (in Blender format) of the friction point
+FrictionPoint.Intensity=Force factor (Force = Intensity * |Vehicle speed|, it is opposite to the speed and downward). I recommend a small horizontal intensity and a higher vertical intensity to "tackle" the car to the ground.
+
+
+#Engine
+
+EngineInfo.Power=Power of the engine
+EngineInfo.MaxRPM=Maximum engine revolutions per minute
+EngineInfo.Braking=Engine braking power (when you release the throttle)
+EngineInfo.SteeringMethod=TODO
+EngineInfo.TurnSpeed=Speed at which the steering wheel turns the wheels (optional)
+
+RPMPower.RPMPower=Do not use an array for this
+
+GearInfo.SpeedRange=Speed range (in km/h) where this speed will be passed by the automatic gearbox
+GearInfo.RPMRange=RPM range where this speed will be passed by the automatic transmission
+
+EngineSound.RPMRange=TODO
+EngineSound.Sound=
+EngineSound.PitchRange=
+
+#==============
+
+#Items
+ItemObject.CreativeTabName=Creates a new page in the creative menu containing the item in which this property has been set, with the defined name
+ItemObject.CreativeTab= Like CreativeTabName
+ItemObject.TabName= Like CreativeTabName
+ItemObject.ItemTranslate=Changes the position of item
+ItemObject.ItemRotate=Changes the rotation of the item
+
+#Blocks and props
+
+AbstractProp.Translate=Changes the position of the model
+AbstractProp.Scale=Changes the size of the model
+AbstractProp.RenderDistanceSquared=Maximum distance at which the block/prop is rendered, may affect performance
+AbstractProp.UseComplexCollisions=
+AbstractProp.Textures=
+AbstractProp.UseHullShape=Replaced by UseComplexCollisions
+
+BlockObject.Rotate=Changes the rotation of the block (does not work on props)
+
+PropObject.EmptyMass=Mass of the prop (in kg)
+PropObject.CenterOfGravityOffset=Center of gravity of the prop (default: position of the model origin in Blender). The position is in Minecraft format. To be adjusted using the associated debug option in game.
+PropObject.SpawnOffset=Position at which the prop is placed using its item
+PropObject.ContinuousCollisionDetection=Enable (true) or not (false) the continuous collision detection (Very useful to avoid small objects falling through the ground)
+PropObject.Friction=Modifies the friction of the object
+PropObject.Margin=Modifies the margin of collsion detection of an object (We strongly advise you not to modify this property)
+PropObject.DespawnTime=Defines the time of disappearance of the object in question in ticks (Recommended to avoid lags)
+
+#Armures
+
+ArmorInfo.ArmorHead=TODO, see https://dynamx.fr/wiki/dynamx/DynamXArmors/#configuration-de-larmure
+ArmorInfo.ArmorBody=
+ArmorInfo.ArmorArms=
+ArmorInfo.ArmorLegs=
+ArmorInfo.ArmorFoot=
+ArmorInfo.Durability=Durability of the item
+ArmorInfo.Enchantability=Enchantability of the item
+ArmorInfo.EquipSound=Name of the sound when equipping the armor
+ArmorInfo.Toughness=Protection added to the armor
+ArmorInfo.DamageReduction=Protection of the different parts of the armor, feet, legs, body, head
+ArmorInfo.Textures=List of texture variants compatible with the armor (configured in the mtl), separated by spaces. "Textures: Grey" using the previous example, do not put this line if you do not have any texture variants for this armor.
+
+#Types
+
+type.int=Integer number
+type.byte=Very short integer number (limit of -128 + 127)
+type.float=Decimal number
+type.boolean=Value that can either enable (True) or disable (False) a property
+type.string=Character string (Can be used to give a name or a description)
+type.string.array=List of strings (For properties accepting several values, example: Value1, Value2, Value3, ....)
+type.string.array2d=List of character strings accepting values in 2 by 2 (Example : Value1 Value2, Value3 Value4, ...)
+type.int.array=List of integers
+type.float.array=List of decimal numbers
+type.vector3f=Vector with 3 axes (X,Y,Z)
+type.vector3f.array=List of vectors
+type.quaternion=Quaternion (X,Y,Z,W)
+type.vector3f_0z=Vector with zero Z (X,Y)
+type.vector3f.inverse=Vector with inverted Y and Z axes (X,Z,Y)
+type.vector3f.inverse_Y=Vector in blender format (X,Z,Y*-1)
+type.vector2f=Vector with 2 axes (X,Y)
+type.item_render_location=Render type of the item (NONE or WORLD or ALL)
+type.sound_event=Type of sound
+type.particle=Type of particle
+type.collision=Type of collisions

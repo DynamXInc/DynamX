@@ -77,3 +77,4 @@ Pour modifier le rendu de l'item du bloc/prop, rendez-vous ici : [configuration 
 ### Conclusion 
 
 Voilà, vous avez mis votre bloc et/ou prop en jeu, si vous avez d'autres questions, rendez-vous sur le Discord de DynamX !
+Vous pouvez aussi ajouter des [lumières fonctionnelles](../Lights.md) sur votre bloc.

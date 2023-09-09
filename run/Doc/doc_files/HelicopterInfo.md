@@ -50,14 +50,15 @@ HelicopterPhysics{
 
 Tous ces paramètres sont expliqués ici :
 
-${HelicopterPhysics.md}
+${HelicopterPhysicsInfo.md}
 
 #### Configuration des manettes de pilotage
 
 Coming soon.
 
-{handle.md}
+${PartHandle.md}
 
 ### Conclusion
 
 Bravo, si vous avez tout fait dans l'ordre, vous venez de mettre votre premièr hélicoptère en jeu ! Si vous avez d'autres questions, rendez-vous sur le Discord de DynamX !
+Vous pouvez ensuite lui ajouter des [portes](../Doors.md) ouvrables et des [phares](../Lights.md) fonctionnels.

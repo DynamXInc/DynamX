@@ -43,3 +43,4 @@ ${TrailerAttachInfo.md}
 ### Conclusion
 
 Vous avez de terminé de configurer la voiture, les prochaines étapes seront de configurer [son moteur](EngineInfo.md) (et ses sons) puis [ses roues](WheelInfo.md) !
+Si vous voulez, vous pourrez également lui ajouter des [portes](../Doors.md) ouvrables et des [phares](../Lights.md) fonctionnels.

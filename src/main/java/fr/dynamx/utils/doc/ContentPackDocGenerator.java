@@ -24,7 +24,7 @@ public class ContentPackDocGenerator {
         data = data.stream().sorted(Comparator.comparing(PackFilePropertyData::getConfigFieldName)).collect(Collectors.toList());
         StringBuilder builder = new StringBuilder();
         if(data.stream().anyMatch(PackFilePropertyData::isRequired)) {
-            builder.append('\n').append("##### ").append(locale.format("category.REQUIRED")).append('\n');
+            builder.append('\n').append("###### ").append(locale.format("category.REQUIRED")).append('\n');
             builder.append("|").append(locale.format("title.name")).append("|")
                     .append(locale.format("title.type")).append("|")
                     .append(locale.format("title.description")).append("|")
@@ -33,7 +33,7 @@ public class ContentPackDocGenerator {
             data.forEach(d -> d.writeDocLine(builder, locale, DocType.REQUIRED));
         }
         if (data.stream().anyMatch(d -> !d.isRequired())) {
-            builder.append('\n').append("##### ").append(locale.format("category.OPTIONAL")).append('\n');
+            builder.append('\n').append("###### ").append(locale.format("category.OPTIONAL")).append('\n');
             builder.append("|").append(locale.format("title.name")).append("|")
                     .append(locale.format("title.type")).append("|")
                     .append(locale.format("title.description")).append("|")

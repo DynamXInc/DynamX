@@ -35,3 +35,4 @@ Pour faire une moto, ajoutez deux roues sur les côtés, invisibles en mettant `
 ### Conclusion
 
 Bravo, si vous avez tout fait dans l'ordre, vous venez de mettre votre première voiture en jeu ! Si vous avez d'autres questions, rendez-vous sur le Discord de DynamX !
+Vous pouvez ensuite lui ajouter des [portes](../Doors.md) ouvrables et des [phares](../Lights.md) fonctionnels.

@@ -88,7 +88,7 @@ ModularVehicleInfo.PlayerStandOnTop=Définit si les joueurs peuvent rester debou
 ModularVehicleInfo.DefaultZoomLevel=Niveau de zoom par défaut en vue à la troisième personne en montant dans le véhicule
 ModularVehicleInfo.LinearDamping=Atténuation de la vélocité linéaire (résistance de l'air), entre 0 et 1.
 ModularVehicleInfo.AngularDamping=Atténuation de la vélocité angulaire (résistance de l'air), entre 0 et 1.
-ModularVehicleInfo.Textures=Déprécié. Voir [configuration du multi-textures](MultiTextures.md).
+ModularVehicleInfo.Textures=Déprécié. Voir [configuration du multi-textures](MultiTextures).
 
 
 #Steering wheel
@@ -134,7 +134,7 @@ PartWheelInfo.WheelsDampingCompression=Coefficient de compression, plus la valeu
 PartWheelInfo.HandBrakeForce=Puissance de freinage avec le frein à main
 PartWheelInfo.SkidParticle=Particule émise au niveau de la roue lorsqu'elle glisse, peut être nimporte quelle particule de Minecraft, son nom doit indiqué, la valeur par défaut est smoke
 PartWheelInfo.ScaleModifier=Permet de modifier la taille du modèle de la roue, les autres paramètres tels que le rayon et la largeur seront automatiquement recalculés. La scale du véhicule doit être configurée dans la config du véhicule directement, voir plus haut.
-PartWheelInfo.Textures=Déprécié. Voir [configuration du multi-textures](MultiTextures.md).
+PartWheelInfo.Textures=Déprécié. Voir [configuration du multi-textures](MultiTextures).
 
 #Part seat
 
@@ -175,7 +175,7 @@ PartLightSource.Rotation=Rotation de la part sur le véhicule, rotation indiqué
 #LightObject
 
 LightObject.LightId=Id de la part lumineuse. Il doit être partagé avec toutes les parts s'allumant en même temps. C'est lui qui sera utilisé dans les addons pour définir quand est-ce que la part doit d'allumer (pour configurer des phares par exemple).
-LightObject.Textures=Texture(s) utilisée(s) sur la part lorsqu'elle est allumée. Voir la page [multi-textures](MultiTextures.md) pour apprendre le fonctionnement du multi-textures sur les modèles. Si vous en mettez plus d'une, elle doivent respect la `BlinkSequenceTicks`.
+LightObject.Textures=Texture(s) utilisée(s) sur la part lorsqu'elle est allumée. Voir la page [multi-textures](MultiTextures) pour apprendre le fonctionnement du multi-textures sur les modèles. Si vous en mettez plus d'une, elle doivent respecter la `BlinkSequenceTicks`.
 LightObject.BlinkSequenceTicks=Séquences de clignotement de la lumière, pour faire des gyrophares par exemple. Avec `BlinkSequenceTicks: -1 10 20`, la part sera allumée 0.5 secondes, puis éteinte 0.5 secondes en alternance (une seconde = 20 ticks). Avec `BlinkSequenceTicks: -1 20` elle sera allumée en continu. Une séquence peut contenir une infinité d'étapes.
 LightObject.RotateDuration=Temps en ticks pour que la part lumineuse fasse un tour sur elle-même
 
@@ -229,7 +229,7 @@ info.desc.ItemObject=Item simple
 AbstractProp.Translate=Modifie la position du modèle
 AbstractProp.Scale=Modifie la taille du modèle
 AbstractProp.RenderDistanceSquared=Distance maximale à laquelle le block/prop est rendu, peut affecter les performances
-AbstractProp.Textures=Déprécié. Voir [configuration du multi-textures](MultiTextures.md).
+AbstractProp.Textures=Déprécié. Voir [configuration du multi-textures](MultiTextures).
 AbstractProp.UseHullShape=Remplacé par UseComplexCollisions
 
 BlockObject.Rotate=Modifie la rotation du bloc (ne marche pas sur les props)
@@ -260,7 +260,7 @@ ArmorObject.Enchantability=Enchantabilité de l'item
 ArmorObject.EquipSound=Nom du son quand on équipe l'armure
 ArmorObject.Toughness=Protection ajoutée à l'armure
 ArmorObject.DamageReduction=Protection des différentes pièces de l'armure, pieds, jambes, corps, tête
-ArmorObject.Textures=Déprécié. Voir [configuration du multi-textures](MultiTextures.md).
+ArmorObject.Textures=Déprécié. Voir [configuration du multi-textures](MultiTextures).
 
 #Variants
 MaterialVariantsInfo.BaseMaterial=Matériau de base utilisé pour l'objet du modèle 3D.

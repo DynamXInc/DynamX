@@ -64,3 +64,4 @@ ${BoatPropellerInfo.md}
 ### Conclusion
 
 Vous avez de terminé de configurer votre premier bateau ! Si besoin, vous pouvez continuer en configurant [son moteur](EngineInfo.md) (et ses sons).
+Si vous voulez, vous pourrez également lui ajouter des [portes](../Doors.md) ouvrables et des [phares](../Lights.md) fonctionnels.

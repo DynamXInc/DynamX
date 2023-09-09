@@ -37,9 +37,7 @@ public class MessageCollisionDebugDraw implements IDnxPacket, net.minecraftforge
     @Override
     public IMessage onMessage(MessageCollisionDebugDraw message, MessageContext ctx) {
         Minecraft.getMinecraft().addScheduledTask(() -> {
-            if (DynamXDebugOptions.CHUNK_BOXES.isActive())
-                DynamXDebugOptions.CHUNK_BOXES.setDataIn(message.chunkOrBlockData);
-            else if (DynamXDebugOptions.BLOCK_BOXES.isActive())
+            if (DynamXDebugOptions.BLOCK_BOXES.isActive())
                 DynamXDebugOptions.BLOCK_BOXES.setDataIn(message.chunkOrBlockData);
             if (DynamXDebugOptions.SLOPE_BOXES.isActive())
                 DynamXDebugOptions.SLOPE_BOXES.setDataIn(message.slopeData);

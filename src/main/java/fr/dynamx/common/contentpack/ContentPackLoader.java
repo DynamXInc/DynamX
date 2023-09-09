@@ -10,6 +10,7 @@ import fr.dynamx.api.network.sync.SynchronizedEntityVariableRegistry;
 import fr.dynamx.client.gui.GuiBlockCustomization;
 import fr.dynamx.client.gui.GuiDnxDebug;
 import fr.dynamx.client.gui.GuiLoadingErrors;
+import fr.dynamx.client.gui.NewGuiDnxDebug;
 import fr.dynamx.client.handlers.hud.CarController;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
@@ -142,6 +143,7 @@ public class ContentPackLoader {
         if (side.isClient()) {
             //Add built-in style, before customs by addons
             ACsGuiApi.registerStyleSheetToPreload(GuiDnxDebug.STYLE);
+            ACsGuiApi.registerStyleSheetToPreload(NewGuiDnxDebug.STYLE);
             ACsGuiApi.registerStyleSheetToPreload(GuiLoadingErrors.STYLE);
             ACsGuiApi.registerStyleSheetToPreload(CarController.STYLE);
             ACsGuiApi.registerStyleSheetToPreload(GuiBlockCustomization.STYLE);
@@ -285,7 +287,7 @@ public class ContentPackLoader {
             }
             //Load shapes
             for (InfoLoader<?> loader : DynamXObjectLoaders.LOADERS) {
-                bar.step("Post load : " + loader.getPrefix().substring(0, loader.getPrefix().length()-1));
+                bar.step("Post load : " + loader.getPrefix().substring(0, loader.getPrefix().length() - 1));
                 loader.postLoad(isHotReloading);
             }
             ProgressManager.pop(bar);

@@ -43,7 +43,7 @@ Voici les différentes propriétés à renseigner :
 
 ${ArmorObject.md}
 
-Pour modifier le rendu de l'item, rendez-vous ici : [configuration des items](https://dynamx.fr/wiki/dynamx/DynamXItems/).
+Pour modifier le rendu de l'item, rendez-vous ici : [configuration des items](DynamXItems.md).
 
 Vous avez configuré la base de l'armure, maintenant il faut configurer comment elle sera affichée :
 
@@ -65,7 +65,7 @@ Vous avez configuré la base de l'armure, maintenant il faut configurer comment 
 
 - #### Configuration de variantes de texture
 
-Cette partie est expliquée dans [configuration du multi-textures](../MultiTextures.md).
+Cette partie est expliquée dans [configuration du multi-textures](MultiTextures.md).
 
 !!!info
 	Si vous mettez plusieurs textures sur votre armure, elle ne pourra pas avoir de barre de durabilité.

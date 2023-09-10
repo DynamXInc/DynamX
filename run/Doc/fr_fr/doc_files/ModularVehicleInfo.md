@@ -123,8 +123,8 @@ Ces points sont visibles dans le debug "Friction points", vous verrez aussi les 
 
 #### Autres configurations :
 
-- [Configuration des phares](Lights.md).
-- [Configuration des portes](Doors.md).
+- [Configuration des phares](../Lights.md).
+- [Configuration des portes](../Doors.md).
 
 ### Configuration d'une voiture ou d'une remorque
 

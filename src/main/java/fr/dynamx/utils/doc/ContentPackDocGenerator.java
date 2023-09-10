@@ -15,6 +15,10 @@ import java.util.stream.Collectors;
 public class ContentPackDocGenerator {
     private static boolean hasInit = false;
 
+    public static void reset() {
+        hasInit = false;
+    }
+
     public static void generateDoc(DocLocale locale, File docDir, Class<?> forClass, String name, Collection<PackFilePropertyData<?>> data) {
         if (data.isEmpty()) {
             System.out.println("Ignoring " + name);

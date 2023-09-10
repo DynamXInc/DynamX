@@ -5,7 +5,6 @@ import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
-import fr.dynamx.utils.doc.ContentPackDocGenerator;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -56,7 +55,7 @@ public class SubInfoTypeAnnotationCache {
                     type = DefinitionType.getParserOf(f.getType());
                 if (type != null) {
                     for (String configName : property.configNames()) {
-                        PackFilePropertyData<?> d = new PackFilePropertyData<>(f, configName, type, property.required(), property.description(), property.defaultValue());
+                        PackFilePropertyData<?> d = new PackFilePropertyData<>(f, configName, property.configNames(), type, property.required(), property.description(), property.defaultValue());
                         packFileProperties.put(d.getConfigFieldName(), d);
                     }
                 } else

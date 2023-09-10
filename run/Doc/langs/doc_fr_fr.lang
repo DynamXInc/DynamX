@@ -88,7 +88,7 @@ ModularVehicleInfo.PlayerStandOnTop=Définit si les joueurs peuvent rester debou
 ModularVehicleInfo.DefaultZoomLevel=Niveau de zoom par défaut en vue à la troisième personne en montant dans le véhicule
 ModularVehicleInfo.LinearDamping=Atténuation de la vélocité linéaire (résistance de l'air), entre 0 et 1.
 ModularVehicleInfo.AngularDamping=Atténuation de la vélocité angulaire (résistance de l'air), entre 0 et 1.
-ModularVehicleInfo.Textures=Déprécié. Voir [configuration du multi-textures](MultiTextures).
+ModularVehicleInfo.Textures=Déprécié. Voir [configuration du multi-textures](../MultiTextures.md).
 
 
 #Steering wheel
@@ -113,9 +113,9 @@ PartWheel.MaxTurn=Valeur maximale de braquage (à quel point vous pouvez tourner
 PartWheel.DrivingWheel=Si la roue est motrice (true) ou non (false)
 PartWheel.AttachedWheel=Nom de la roue par défaut, voir plus loin
 PartWheel.HandBrakingWheel=Si la roue est freine lorsque le frein à main est activé (true), ou si elle peut tourner librement (false) (facultatif, si aucune roue ne freine, celles non motrices freineront automatiquement)
-PartWheel.MudGuard=	Nom de l'objet correspondant au garde-boue, dans le modèle du véhicule (facultatif)
-PartWheel.RotationPoint=Point de rotation de la roue lorsque l'on tourne le volant (facultatif)
-PartWheel.SuspensionAxis=Rotation de l'axe des suspensions, par rapport à l'axe vertical (facultatif)
+PartWheel.MudGuard=	Nom de l'objet correspondant au garde-boue, dans le modèle du véhicule
+PartWheel.RotationPoint=Point de rotation de la roue lorsque l'on tourne le volant
+PartWheel.SuspensionAxis=Rotation de l'axe des suspensions, par rapport à l'axe vertical
 
 
 #Part wheel info
@@ -203,7 +203,7 @@ BaseEngineInfo.Power=Puissance du moteur
 BaseEngineInfo.MaxRPM=Tours moteurs par minute maximums du moteur
 BaseEngineInfo.Braking=Puissance du frein moteur (quand vous relâchez l'accélération)
 CarEngineInfo.SteeringMethod=Comportement du volant, 0 : direct, 1 : interpolé, 2 : mix entre 0 et 1.
-CarEngineInfo.TurnSpeed=Vitesse à laquelle le volant fait tourner les roues (facultatif)
+CarEngineInfo.TurnSpeed=Vitesse à laquelle le volant fait tourner les roues
 
 RPMPower.RPMPower=Ne pas utiliser de tableau pour ça
 
@@ -221,7 +221,7 @@ common.creativetabname=Crée une nouvelle page dans le menu creatif contenant l'
 common.icontext=Texte dessiné sur l'icône de l'item dans les menus
 AbstractItemObject.ItemTranslate=Modifie la translation de l'item
 AbstractItemObject.ItemRotate=Modifie la rotation de l'item
-ItemObject.MaxStackSize=Stack size maximale de l'item
+ItemObject.MaxItemStackSize=Stack size maximale de l'item
 info.desc.ItemObject=Item simple
 
 #Blocs et props
@@ -229,7 +229,7 @@ info.desc.ItemObject=Item simple
 AbstractProp.Translate=Modifie la position du modèle
 AbstractProp.Scale=Modifie la taille du modèle
 AbstractProp.RenderDistanceSquared=Distance maximale à laquelle le block/prop est rendu, peut affecter les performances
-AbstractProp.Textures=Déprécié. Voir [configuration du multi-textures](MultiTextures).
+AbstractProp.Textures=Déprécié. Voir [configuration du multi-textures](MultiTextures.md).
 AbstractProp.UseHullShape=Remplacé par UseComplexCollisions
 
 BlockObject.Rotate=Modifie la rotation du bloc (ne marche pas sur les props)
@@ -260,7 +260,7 @@ ArmorObject.Enchantability=Enchantabilité de l'item
 ArmorObject.EquipSound=Nom du son quand on équipe l'armure
 ArmorObject.Toughness=Protection ajoutée à l'armure
 ArmorObject.DamageReduction=Protection des différentes pièces de l'armure, pieds, jambes, corps, tête
-ArmorObject.Textures=Déprécié. Voir [configuration du multi-textures](MultiTextures).
+ArmorObject.Textures=Déprécié. Voir [configuration du multi-textures](MultiTextures.md).
 
 #Variants
 MaterialVariantsInfo.BaseMaterial=Matériau de base utilisé pour l'objet du modèle 3D.
@@ -294,8 +294,7 @@ type.shapetype=Type de forme (`BOX` : cube, `CYLINDER` : cylindre, `SPHERE` : sp
 type.axis=Axe physique (`X`, `Y`, `Z`, `X_ROT`, `Y_ROT`, `Z_ROT`)
 type.material=Matériau Minecraft (parmis "AIR", "GRASS", "GROUND", "WOOD", "ROCK", "IRON", "ANVIL", "WATER", "LAVA", "LEAVES", "PLANTS", "VINE", "SPONGE", "CLOTH", "FIRE", "SAND", "CIRCUITS", "CARPET", "GLASS", "REDSTONE_LIGHT", "TNT", "CORAL", "ICE", "PACKED_ICE", "SNOW", "CRAFTED_SNOW", "CACTUS", "CLAY", "GOURD", "DRAGON_EGG", "PORTAL", "CAKE", "WEB", "PISTON", "BARRIER", "STRUCTURE_VOID")
 type.player_seat_position=Position du joueur, `LYING` : allongé, `SITTING` = assis, `STANDING` : debout
-type.player_stand_on_top=Indique si le joueur peut rester debout sur un véhicule. `ALWAYS` leur permettra de toujours rester debout (consillé pour les bus et bateaux par exemple), `PROGRESSIVE` leur permettra de rester debout sous 30 km/h (conseillé pour les voitures), et `NEVER` ne les laissera pas rester debouts sur le véhicule.
-
+type.player_stand_on_top=Indique si le joueur peut rester debout sur un véhicule. `ALWAYS` leur permettra de toujours rester debout (conseillé pour les bus et bateaux par exemple), `PROGRESSIVE` leur permettra de rester debout sous 30 km/h (conseillé pour les voitures), et `NEVER` ne les laissera pas rester debouts sur le véhicule.
 
 #BoatPropeller
 
@@ -341,6 +340,3 @@ HelicopterPhysicsInfo.MouseRollForce=Force appliquée au rotor en tournant la so
 HelicopterPhysicsInfo.RollForce=Force appliquée au rotor en tournant au clavier - axe Z
 HelicopterPhysicsInfo.ThrustForce=Force appliquée au rotor en accélérant/montant
 HelicopterPhysicsInfo.VerticalThrustCompensation=Compensation de la gravité en montant (force purement verticale)
-
-
-

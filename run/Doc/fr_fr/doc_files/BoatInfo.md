@@ -53,7 +53,6 @@ BoatPropeller{
     AccelerationForce: 9000
     BrakeForce: 7000
     SteerForce: 200
-    AngularDamping: 0.8
 }
 ```
 

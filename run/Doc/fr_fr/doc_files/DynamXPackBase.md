@@ -11,7 +11,7 @@ Créez un dossier `MyPack` portant le nom de votre pack, il contiendra tous les 
 Dans ce pack, vous devrez ensuite créer un fichier `pack_info.dynx` qui va contenir les informations basiques au sujet de votre pack.
 
 !!!warning
-	Nous vous invitons à prendre connaissance de la [syntaxe des packs](../DynamXPackConfigsSyntax/) avant de remplir ce fichier.
+	Nous vous invitons à prendre connaissance de la [syntaxe des packs](../DynamXPackConfigsSyntax.md) avant de remplir ce fichier.
 
 ### Fichier pack_info.dynx
 
@@ -47,4 +47,4 @@ Pour vous aider à créer des packs, DynamX affiche tous les erreurs de chargeme
 
 ### La suite
 
-Vous pouvez maintenant passer à l'étape suivante : (re)voir la syntaxe des fichiers de configuration des packs, et commencer à ajouter du contenu à DynamX ! [C'est ici](../DynamXPackConfigsSyntax/).
+Vous pouvez maintenant passer à l'étape suivante : (re)voir la syntaxe des fichiers de configuration des packs, et commencer à ajouter du contenu à DynamX ! [C'est ici](../DynamXPackConfigsSyntax.md).

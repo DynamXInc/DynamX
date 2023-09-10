@@ -6,9 +6,11 @@ import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.doc.ContentPackDocGenerator;
 import fr.dynamx.utils.doc.DocLocale;
+import lombok.Getter;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 
 /**
  * Represents a configuration field, contains the corresponding field, and the "parser" ({@link DefinitionType}) able to translate the string value of this property into the correct type
@@ -17,24 +19,35 @@ import java.lang.reflect.Modifier;
  * @see fr.dynamx.api.contentpack.registry.PackFileProperty
  */
 public class PackFilePropertyData<T> {
+    @Getter
     private final Field field;
+    /**
+     * The name of this property in the config file
+     */
+    @Getter
     private final String configFieldName;
+    @Getter
+    private final String[] aliases;
+    /**
+     * The parser of this property
+     */
+    @Getter
     private final DefinitionType<T> type;
+    @Getter
     private final boolean required;
+    @Getter
     private final String description;
+    @Getter
     private final String defaultValue;
 
-    public PackFilePropertyData(Field field, String configFieldName, DefinitionType<T> type, boolean required, String description, String defaultValue) {
+    public PackFilePropertyData(Field field, String configFieldName, String[] aliases, DefinitionType<T> type, boolean required, String description, String defaultValue) {
         this.field = field;
         this.configFieldName = configFieldName;
+        this.aliases = aliases;
         this.type = type;
         this.required = required;
         this.description = description;
         this.defaultValue = defaultValue;
-    }
-
-    public boolean isRequired() {
-        return required;
     }
 
     /**
@@ -42,24 +55,6 @@ public class PackFilePropertyData<T> {
      */
     public T parse(String value) {
         return type.getValue(value);
-    }
-
-    public Field getField() {
-        return field;
-    }
-
-    /**
-     * @return The name of this property in the config file
-     */
-    public String getConfigFieldName() {
-        return configFieldName;
-    }
-
-    /**
-     * @return The parser of this property
-     */
-    public DefinitionType<T> getType() {
-        return type;
     }
 
     /**
@@ -95,10 +90,14 @@ public class PackFilePropertyData<T> {
             if (type != ContentPackDocGenerator.DocType.OPTIONAL)
                 return;
         }
+        if(!configFieldName.equals(aliases[0]))
+            return;
         String docKey = description.isEmpty() ? field.getDeclaringClass().getSimpleName() + "." + configFieldName : description;
         String sep = "|";
         String typeName = locale.format(this.type.getTypeName());
-        builder.append(sep).append(configFieldName).append(sep).append(typeName).append(sep)
+        builder.append(sep);
+        builder.append(Arrays.stream(aliases).reduce((s, s2) -> s + ", " + s2).orElse("error"));
+        builder.append(sep).append(typeName).append(sep)
                 .append(locale.format(docKey)).append(sep).append(defaultValue.isEmpty() ? " - " : defaultValue).append(sep).append("\n");
     }
 }

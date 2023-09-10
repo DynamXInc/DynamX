@@ -27,7 +27,7 @@ public class DocGeneratorMain implements INamedObject {
             ReflectionHelper.setPrivateValue(ModCandidate.class, candidate, table, "table");
             ModContainerFactory.modTypes.clear();
             discoverer.discover(candidate, table);
-            System.out.println(table.getAll(PackFileProperty.class.getName()));
+            //System.out.println(table.getAll(PackFileProperty.class.getName()));
             for (ASMDataTable.ASMData asmData : table.getAll(PackFileProperty.class.getName())) {
                 if (!classesToLoad.containsKey(asmData.getClassName()))
                     classesToLoad.put(asmData.getClassName(), Class.forName(asmData.getClassName()));
@@ -35,19 +35,26 @@ public class DocGeneratorMain implements INamedObject {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println("Classes implémentant INamedObject :");
-        System.out.println("======");
+        exportDocInLang(classesToLoad, "en_us");
+        exportDocInLang(classesToLoad, "fr_fr");
+    }
+
+    private static void exportDocInLang(Map<String, Class<?>> classesToLoad , String lang) {
+        System.out.println("=-=-=-=-=-=-=-=-=-=-=-=");
+        System.out.println("Exporting doc in locale " + lang);
+        long start = System.currentTimeMillis();
         DocLocale locale = new DocLocale();
-        String lang = "fr_fr";
-        System.out.println("Doc locale " + lang);
+        ContentPackDocGenerator.reset();
         locale.loadLocaleDataFiles(new File(new File(new File("run", "Doc"), "langs"), "doc_" + lang + ".lang"));
-        File docDir = new File("run", "Doc");
+        File docDir = new File(new File("run", "Doc"), lang);
         for (Class<?> clazz : classesToLoad.values()) {
             System.out.println(clazz.getName());
             Map<String, PackFilePropertyData<?>> packFileProperties = SubInfoTypeAnnotationCache.getOrLoadData(clazz);
             ContentPackDocGenerator.generateDoc(locale, docDir, clazz, clazz.getSimpleName(), packFileProperties.values());
             System.out.println("Found " + packFileProperties.size() + " fields in " + clazz.getName());
         }
+        System.out.println("Finished in " + (System.currentTimeMillis() - start) + "ms");
+        System.out.println("=-=-=-=-=-=-=-=-=-=-=-=");
     }
 
     @Override

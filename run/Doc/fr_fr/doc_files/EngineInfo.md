@@ -17,7 +17,7 @@ Voici les différentes propriétés à renseigner :
 
 ${CarEngineInfo.md}
 
-##### . Configuration de la courbe de puissance :
+##### Configuration de la courbe de puissance :
 
 !!!info
     Cette configuration n'est utile que pour les voitures et bateaux. Elle est inutile pour les hélicoptères.

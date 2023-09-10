@@ -64,36 +64,36 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     private String partName;
 
     @Getter
-    @PackFileProperty(configNames = "LocalCarAttachPoint", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y, required = false)
+    @PackFileProperty(configNames = "LocalCarAttachPoint", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y)
     private Vector3f carAttachPoint = new Vector3f();
     @Getter
-    @PackFileProperty(configNames = "LocalDoorAttachPoint", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y, required = false)
+    @PackFileProperty(configNames = "LocalDoorAttachPoint", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y)
     private Vector3f doorAttachPoint = new Vector3f();
     @Getter
-    @PackFileProperty(configNames = "AttachStrength", required = false)
+    @PackFileProperty(configNames = "AttachStrength", required = false, defaultValue = "400")
     private int attachStrength = 400;
 
     @Getter
     @PackFileProperty(configNames = "Axis", required = false, defaultValue = "Y_ROT")
     private DynamXPhysicsHelper.EnumPhysicsAxis axisToUse = DynamXPhysicsHelper.EnumPhysicsAxis.Y_ROT;
     @Getter
-    @PackFileProperty(configNames = "OpenedDoorAngleLimit", required = false)
+    @PackFileProperty(configNames = "OpenedDoorAngleLimit", required = false, defaultValue = "0 0")
     private Vector2f openLimit = new Vector2f();
     @Getter
-    @PackFileProperty(configNames = "ClosedDoorAngleLimit", required = false)
+    @PackFileProperty(configNames = "ClosedDoorAngleLimit", required = false, defaultValue = "0 0")
     private Vector2f closeLimit = new Vector2f();
     @Getter
-    @PackFileProperty(configNames = "DoorOpenForce", required = false)
+    @PackFileProperty(configNames = "DoorOpenForce", required = false, defaultValue = "1 200")
     private Vector2f openMotor = new Vector2f(1, 200);
     @Getter
-    @PackFileProperty(configNames = "DoorCloseForce", required = false)
+    @PackFileProperty(configNames = "DoorCloseForce", required = false, defaultValue = "-1.5 300")
     private Vector2f closeMotor = new Vector2f(-1.5f, 300);
 
     @Getter
-    @PackFileProperty(configNames = "AutoMountDelay", required = false)
+    @PackFileProperty(configNames = "AutoMountDelay", required = false, defaultValue = "40")
     private byte mountDelay = (byte) 40;
     @Getter
-    @PackFileProperty(configNames = "DoorCloseTime", required = false)
+    @PackFileProperty(configNames = "DoorCloseTime", required = false, defaultValue = "25")
     private byte doorCloseTime = (byte) 25;
 
     @Getter

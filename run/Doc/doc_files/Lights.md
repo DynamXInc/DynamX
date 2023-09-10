@@ -123,7 +123,7 @@ Les blocs `SpotLight_left` et `SpotLight_right` définissent les projecteurs gau
 ${PartLightSource.md}
 
 ##### LightObject
-${SubLightObject.md}
+${LightObject.md}
 
 ##### SpotLightObject (BetterLights)
 Coming soon: ${SpotLightObject.md}

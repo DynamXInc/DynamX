@@ -41,7 +41,7 @@ Les valeurs sont bien sur à adapter selon votre modèle, et le sens dans lequel
 Et voici l'explication de chacune des propriétés :
 ${PartDoor.md}
 
-Pour vous aider à les configurer, vous pouvez utiliser l'option de debug '' :
+Pour vous aider à les configurer, vous pouvez utiliser l'option de debug 'Door attach points' :
 ![image-1](images/debug_doors.png){ width="90%" }
 
 ### Conclusion

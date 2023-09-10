@@ -120,6 +120,12 @@ ${FrictionPoint.md}
 "Nom" peut être remplacé par n'importe quel nom (vous pouvez ainsi avoir plusieurs points de friction).
 Ces points sont visibles dans le debug "Friction points", vous verrez aussi les forces appliquées.
 
+
+#### Autres configurations :
+
+- [Configuration des phares](Lights.md).
+- [Configuration des portes](Doors.md).
+
 ### Configuration d'une voiture ou d'une remorque
 
 Rendez-vous [ici](CarInfo.md) !

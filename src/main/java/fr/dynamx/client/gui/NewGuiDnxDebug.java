@@ -156,7 +156,7 @@ public class NewGuiDnxDebug extends GuiFrame {
 
     @Override
     public boolean needsCssReload() {
-        return true;
+        return false;
     }
 
     protected void setHomePanel() {

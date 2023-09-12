@@ -157,9 +157,9 @@ public class BoatPropellerModule extends BasicEngineModule implements IPackInfoR
         }
 
         public void steer(float strength) {
-            Vector3f look = Vector3fPool.get(-1, 0, -0.8f);
+            Vector3f look = Vector3fPool.get(-1, 0, 0);
             look = DynamXGeometry.rotateVectorByQuaternion(look, entity.physicsRotation);
-            look.multLocal(getSteerForce() * strength * entity.physicsHandler.getLinearVelocity().length() / 3);
+            look.multLocal(getSteerForce() * strength);
             Vector3f linearFactor = entity.physicsHandler.getCollisionObject().getLinearFactor(Vector3fPool.get());
             Vector3f rotatedPos = DynamXGeometry.rotateVectorByQuaternion(info.getPosition(), entity.physicsRotation);
             entity.physicsHandler.getCollisionObject().applyTorque(rotatedPos.cross(look.multLocal(linearFactor)));

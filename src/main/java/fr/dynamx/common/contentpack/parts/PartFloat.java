@@ -55,8 +55,8 @@ public class PartFloat<T extends ISubInfoTypeOwner<T>> extends BasePart<T> {
                 max.x, max.y, max.z);
 
         childrenPositionList.clear();
-        int lSizeX = (int) Math.min(1, lineSize.x);
-        int lSizeZ = (int) Math.min(1, lineSize.z);
+        int lSizeX = (int) Math.max(1, lineSize.x);
+        int lSizeZ = (int) Math.max(1, lineSize.z);
         for (int i = 0; i < lSizeX; i++) {
             for (int j = 0; j < lSizeZ; j++) {
                 float xPos = (float) (box.minX + i * (size + spacing.x) + offset.x);

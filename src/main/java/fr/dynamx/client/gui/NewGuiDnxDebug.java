@@ -34,7 +34,7 @@ public class NewGuiDnxDebug extends GuiFrame {
     private final GuiScrollPane debugPanel;
     private final GuiLabel debugButton;
 
-    private Panel activePanel = Panel.NONE;
+    private static Panel activePanel = Panel.NONE;
 
     public static final ResourceLocation STYLE = new ResourceLocation(DynamXConstants.ID, "css/new_dnx_debug.css");
 
@@ -139,7 +139,17 @@ public class NewGuiDnxDebug extends GuiFrame {
         generateDebugCategory(debugPanel, DynamXDebugOptions.DebugCategories.VEHICLES);
         generateDebugCategory(debugPanel, DynamXDebugOptions.DebugCategories.TERRAIN);
 
-        setHomePanel();
+        //Restore the last displayed panel
+        switch (activePanel) {
+            case DEBUG:
+                activePanel = Panel.NONE;
+                setDebugPanel();
+                break;
+            case HOME:
+                activePanel = Panel.NONE;
+            default:
+                setHomePanel();
+        }
 
         setEnableDebugPanel(true);
     }
@@ -228,7 +238,7 @@ public class NewGuiDnxDebug extends GuiFrame {
                         //terrainLabels.get(noption).setText("Debug " + noption.getDisplayName() + " : " + (nactive ? "Enabled" : "Disabled"));
                     }
                 }));
-                if(option.serverRequestMask() == 0) {
+                if (option.serverRequestMask() == 0) {
                     b1.addMoveListener(new IMouseMoveListener() {
                         @Override
                         public void onMouseMoved(int i, int i1) {
@@ -237,14 +247,14 @@ public class NewGuiDnxDebug extends GuiFrame {
 
                         @Override
                         public void onMouseHover(int i, int i1) {
-                            if(!b1.isChecked())
+                            if (!b1.isChecked())
                                 option.enable();
                             else option.disable();
                         }
 
                         @Override
                         public void onMouseUnhover(int i, int i1) {
-                            if(!b1.isChecked())
+                            if (!b1.isChecked())
                                 option.disable();
                             else option.enable();
                         }

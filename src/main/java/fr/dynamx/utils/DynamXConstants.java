@@ -12,7 +12,7 @@ public class DynamXConstants
     public static final String RES_DIR_NAME = "DynamX";
 
     public static final String ACS_GUIS_BASE_URL = "https://maven.dynamx.fr/artifactory/ACsGuisRepo/fr/aym/acsguis/ACsGuis/%1$s/ACsGuis-%1$s.jar";
-    public static final String DEFAULT_ACSGUIS_VERSION = "1.2.11";
+    public static final String DEFAULT_ACSGUIS_VERSION = "1.2.11-dev2";
     public static final String ACSLIBS_REQUIRED_VERSION = "[1.2.4,)";
 
     public static final String LIBBULLET_VERSION = "18.1.0";

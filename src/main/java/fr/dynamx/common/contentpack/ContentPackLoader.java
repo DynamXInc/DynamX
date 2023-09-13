@@ -10,7 +10,6 @@ import fr.dynamx.api.network.sync.SynchronizedEntityVariableRegistry;
 import fr.dynamx.client.gui.GuiBlockCustomization;
 import fr.dynamx.client.gui.GuiDnxDebug;
 import fr.dynamx.client.gui.GuiLoadingErrors;
-import fr.dynamx.client.gui.GuiSoftbodyConfig;
 import fr.dynamx.client.handlers.hud.CarController;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
@@ -142,6 +141,7 @@ public class ContentPackLoader {
         if (side.isClient()) {
             //Add built-in style, before customs by addons
             ACsGuiApi.registerStyleSheetToPreload(GuiDnxDebug.STYLE);
+            ACsGuiApi.registerStyleSheetToPreload(NewGuiDnxDebug.STYLE);
             ACsGuiApi.registerStyleSheetToPreload(GuiLoadingErrors.STYLE);
             ACsGuiApi.registerStyleSheetToPreload(CarController.STYLE);
             ACsGuiApi.registerStyleSheetToPreload(GuiBlockCustomization.STYLE);
@@ -176,6 +176,11 @@ public class ContentPackLoader {
      */
     public static Map<String, ModProtectionContainer> getProtectedResources() {
         return protectedResources;
+    }
+
+    @Nonnull
+    public static ModProtectionContainer getProtectedResources(String packName) {
+        return protectedResources.getOrDefault(packName, DynamXMain.mpsContainer);
     }
 
     /**

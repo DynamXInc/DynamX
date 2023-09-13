@@ -42,6 +42,7 @@ import net.minecraftforge.client.resource.ISelectiveResourceReloadListener;
 import net.minecraftforge.client.resource.VanillaResourceType;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.client.SplashProgress;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -94,6 +95,17 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
         ClientRegistry.bindTileEntitySpecialRenderer(TEDynamXBlock.class, new TESRDynamXBlock<>());
         if(!Minecraft.getMinecraft().getFramebuffer().isStencilEnabled())
             Minecraft.getMinecraft().getFramebuffer().enableStencil();
+    }
+
+    @Override
+    public void completeInit() {
+        super.completeInit();
+        SplashProgress.pause();
+        try {
+            DynamXContext.getObjModelRegistry().uploadVAOs();
+        }finally {
+            SplashProgress.resume();
+        }
     }
 
     @Override

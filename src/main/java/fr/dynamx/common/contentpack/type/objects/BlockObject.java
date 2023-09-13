@@ -1,6 +1,5 @@
 package fr.dynamx.common.contentpack.type.objects;
 
-import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.part.BasePart;
@@ -13,7 +12,9 @@ import fr.dynamx.common.contentpack.loader.ObjectLoader;
 import fr.dynamx.common.contentpack.parts.ILightOwner;
 import fr.dynamx.common.contentpack.parts.PartLightSource;
 import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
+import fr.dynamx.common.contentpack.type.ObjectCollisionsHelper;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
+import fr.dynamx.utils.DynamXUtils;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.block.material.Material;
@@ -54,7 +55,8 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
 
     public BlockObject(String packName, String fileName) {
         super(packName, fileName);
-        this.itemIcon = "Block";
+        itemIcon = "Block";
+        collisionsHelper = new ObjectCollisionsHelper();
     }
 
     @Override
@@ -68,6 +70,7 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
             new MaterialVariantsInfo(this, texturesArray).appendTo(this);
         //Map lights
         lightSources.values().forEach(PartLightSource::postLoad);
+        collisionsHelper.loadCollisions(this, DynamXUtils.getModelPath(getPackName(), model), "", translation, 0, useComplexCollisions, scaleModifier, ObjectCollisionsHelper.CollisionType.BLOCK);
         return super.postLoad(hot);
     }
 
@@ -96,10 +99,6 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
     @Override
     public List<ISubInfoType<T>> getSubProperties() {
         return subProperties;
-    }
-
-    public CompoundCollisionShape getCompoundCollisionShape() {
-        return compoundCollisionShape;
     }
 
     @Override

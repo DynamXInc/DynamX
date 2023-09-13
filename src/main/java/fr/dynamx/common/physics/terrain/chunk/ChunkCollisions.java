@@ -253,15 +253,11 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
         {
             Vector3fPool.openPool();
             BoundingBoxPool.getPool().openSubPool();
-
             elements.forEach(body -> {
                 physicsWorld.removeCollisionObject(body.getBody());
                 body.removeDebugFromWorld(mcWorld);
             });
-
-            (mcWorld.isRemote ? DynamXDebugOptions.CLIENT_CHUNK_BOXES : DynamXDebugOptions.CHUNK_BOXES).getDataIn().remove(new BlockPos(myPos.x, myPos.y, myPos.z));
             updateNearEntities();
-
             BoundingBoxPool.getPool().closeSubPool();
             Vector3fPool.closePool();
         }

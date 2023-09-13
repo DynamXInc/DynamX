@@ -29,12 +29,12 @@ public class GuiBlockCustomization extends GuiFrame {
     private static TEDynamXBlock teBlock;
     private final GuiPanel preview;
 
-    private final GuiFloatField translationX = new GuiFloatField(-100, 100);
-    private final GuiFloatField translationY = new GuiFloatField(-100, 100);
-    private final GuiFloatField translationZ = new GuiFloatField(-100, 100);
-    private final GuiFloatField scaleX = new GuiFloatField(0, 100);
-    private final GuiFloatField scaleY = new GuiFloatField(0, 100);
-    private final GuiFloatField scaleZ = new GuiFloatField(0, 100);
+    private final GuiFloatField translationX = new GuiFloatField(-10, 10);
+    private final GuiFloatField translationY = new GuiFloatField(-10, 10);
+    private final GuiFloatField translationZ = new GuiFloatField(-10, 10);
+    private final GuiFloatField scaleX = new GuiFloatField(0.001f, 100);
+    private final GuiFloatField scaleY = new GuiFloatField(0.001f, 100);
+    private final GuiFloatField scaleZ = new GuiFloatField(0.001f, 100);
     private final GuiFloatField rotationX = new GuiFloatField(-360, 360);
     private final GuiFloatField rotationY = new GuiFloatField(-360, 360);
     private final GuiFloatField rotationZ = new GuiFloatField(-360, 360);

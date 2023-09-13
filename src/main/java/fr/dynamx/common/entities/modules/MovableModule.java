@@ -13,6 +13,7 @@ import fr.dynamx.common.physics.joints.EntityJoint;
 import fr.dynamx.common.physics.joints.JointHandler;
 import fr.dynamx.common.physics.joints.JointHandlerRegistry;
 import fr.dynamx.utils.DynamXConstants;
+import lombok.Getter;
 import net.minecraft.util.ResourceLocation;
 
 import java.util.Arrays;
@@ -77,6 +78,7 @@ public class MovableModule implements IPhysicsModule<AbstractEntityPhysicsHandle
     }
 
     public static class Action {
+        @Getter
         private Object[] info;
         private EnumAction enumAction;
 
@@ -90,10 +92,6 @@ public class MovableModule implements IPhysicsModule<AbstractEntityPhysicsHandle
 
         public void setEnumAction(EnumAction enumAction) {
             this.enumAction = enumAction;
-        }
-
-        public Object[] getInfo() {
-            return info;
         }
 
         public void setInfo(Object[] info) {

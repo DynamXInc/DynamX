@@ -214,7 +214,7 @@ public class GuiLoadingErrors extends GuiFrame {
             if (displayed != null) {
                 goBack();
             } else if (mc.world != null)
-                mc.displayGuiScreen(new GuiDnxDebug().getGuiScreen());
+                mc.displayGuiScreen(new NewGuiDnxDebug().getGuiScreen());
             else
                 mc.displayGuiScreen(null);
         } else

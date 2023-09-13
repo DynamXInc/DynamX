@@ -33,19 +33,12 @@ public class CmdChunkControl implements ISubCommand {
 
     @Override
     public String getUsage() {
-        return getName() + " <entity_report|getelements|getslopes|clearslopes|graph|getgraph|resetstate|fullinfo> [pos|mode]";
+        return getName() + " <getelements|getslopes|clearslopes|graph|getgraph|resetstate|fullinfo> [pos|mode]";
     }
 
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-        if(args.length == 2 && args[1].equalsIgnoreCase("entity_report")) {
-            if(sender instanceof EntityPlayer && ((EntityPlayer) sender).getRidingEntity() instanceof PhysicsEntity) {
-                ((PhysicsEntity<?>) ((EntityPlayer) sender).getRidingEntity()).printReport();
-                sender.sendMessage(new TextComponentString("Report wrote in log"));
-            }
-            else throw new WrongUsageException("You must ride a physics entity");
-        }
-        else if (args.length >= 3) {
+        if (args.length >= 3) {
             IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(sender.getEntityWorld());
             if (args[1].equalsIgnoreCase("graph") && args.length == 3) {
                 int mode = CommandBase.parseInt(args[2]);

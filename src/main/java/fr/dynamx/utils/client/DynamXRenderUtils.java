@@ -2,9 +2,8 @@ package fr.dynamx.utils.client;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.client.handlers.ClientEventHandler;
-import fr.dynamx.client.renders.mesh.NormalsOption;
-import fr.dynamx.client.renders.mesh.UvsOption;
-import fr.dynamx.client.renders.mesh.shapes.*;
+import fr.dynamx.client.renders.mesh.shapes.ArrowMesh;
+import fr.dynamx.client.renders.mesh.shapes.GridGLMesh;
 import fr.dynamx.client.renders.vehicle.RenderBaseVehicle;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
@@ -29,7 +28,6 @@ import org.lwjgl.util.glu.Sphere;
 import org.lwjgl.util.vector.Quaternion;
 
 import javax.annotation.Nullable;
-import javax.vecmath.Vector4f;
 import java.awt.*;
 import java.util.List;
 
@@ -45,7 +43,7 @@ public class DynamXRenderUtils {
     public static ArrowMesh arrowMeshY;
     public static ArrowMesh arrowMeshZ;
     public static IcosphereGLMesh icosphereMesh;
-    public static OctasphereMesh octasphereMesh;
+    public static OctasphereMesh sphereMesh;
 
     public static IcosphereGLMesh icosphereMeshToRender;
 
@@ -61,7 +59,7 @@ public class DynamXRenderUtils {
         icosphereMesh.generateUvs(UvsOption.Spherical,
                 new Vector4f(0f, 1f, 0f, 0f), new Vector4f(0f, 0f, 1f, 0f));
         icosphereMeshToRender = new IcosphereGLMesh(3, true);
-        octasphereMesh = new OctasphereMesh(3, true);
+        sphereMesh = new OctasphereMesh(3, true);
     }
 
     public static void drawBoundingBox(Vector3f halfExtent, float red, float green, float blue, float alpha) {
@@ -89,11 +87,13 @@ public class DynamXRenderUtils {
         Vector3fPool.closePool();
     }
 
-    public static void drawSphere(Vector3f translation, float radius, int resolution, @Nullable Color sphereColor) {
+    public static void drawSphere(Vector3f translation, float radius, @Nullable Color sphereColor) {
         if (sphereColor != null)
-            GlStateManager.color(sphereColor.getRed(), sphereColor.getGreen(), sphereColor.getBlue(), sphereColor.getAlpha());
+            GlStateManager.color(sphereColor.getRed()/255f, sphereColor.getGreen()/255f, sphereColor.getBlue()/255f, sphereColor.getAlpha()/255f);
         GlStateManager.translate(translation.x, translation.y, translation.z);
-        sphere.draw(radius, resolution, resolution);
+        GlStateManager.scale(radius, radius, radius);
+        sphereMesh.render();
+        GlStateManager.scale(1/radius, 1/radius, 1/radius);
         GlStateManager.translate(-translation.x, -translation.y, -translation.z);
         if (sphereColor != null)
             GlStateManager.color(1, 1, 1, 1);

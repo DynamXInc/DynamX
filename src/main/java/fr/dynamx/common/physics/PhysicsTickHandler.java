@@ -149,13 +149,9 @@ public class PhysicsTickHandler {
             profiling = false;
             boolean networkDebug = false, wheelData = false;
             for (Map.Entry<EntityPlayer, Integer> e : requestedDebugInfo.entrySet()) {
-                if (DynamXMain.proxy.getServerWorld().getMinecraftServer().getTickCounter() % 10 == 0) //Don't spam of debug packets
-                {
-                    if (DynamXDebugOptions.BLOCK_BOXES.matchesNetMask(e.getValue())) {
-                        DynamXContext.getNetwork().sendToClient(new MessageCollisionDebugDraw(DynamXDebugOptions.BLOCK_BOXES.getDataIn(), DynamXDebugOptions.SLOPE_BOXES.getDataIn()), EnumPacketTarget.PLAYER, (EntityPlayerMP) e.getKey());
-                    } else if (DynamXDebugOptions.CHUNK_BOXES.matchesNetMask(e.getValue()) || DynamXDebugOptions.SLOPE_BOXES.matchesNetMask(e.getValue())) {
-                        DynamXContext.getNetwork().sendToClient(new MessageCollisionDebugDraw(DynamXDebugOptions.CHUNK_BOXES.getDataIn(), DynamXDebugOptions.SLOPE_BOXES.getDataIn()), EnumPacketTarget.PLAYER, (EntityPlayerMP) e.getKey());
-                    }
+                //Don't spam of debug packets
+                if (DynamXMain.proxy.getServerWorld().getMinecraftServer().getTickCounter() % 10 == 0 && (DynamXDebugOptions.BLOCK_BOXES.matchesNetMask(e.getValue()) || DynamXDebugOptions.SLOPE_BOXES.matchesNetMask(e.getValue()))) {
+                    DynamXContext.getNetwork().sendToClient(new MessageCollisionDebugDraw(DynamXDebugOptions.BLOCK_BOXES.getDataIn(), DynamXDebugOptions.SLOPE_BOXES.getDataIn()), EnumPacketTarget.PLAYER, (EntityPlayerMP) e.getKey());
                 }
                 if (DynamXDebugOptions.PROFILING.matchesNetMask(e.getValue())) {
                     profiling = true;

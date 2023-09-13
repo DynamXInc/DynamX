@@ -22,7 +22,8 @@ import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
-import fr.dynamx.common.entities.modules.LightsModule;
+import fr.dynamx.common.entities.modules.AbstractLightsModule;
+import fr.dynamx.common.entities.vehicles.TrailerEntity;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import lombok.Getter;
@@ -75,8 +76,11 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
 
     @Override
     public void addModules(PackPhysicsEntity<?, ?> entity, ModuleListBuilder modules) {
-        if (!modules.hasModuleOfClass(LightsModule.class)) {
-            modules.add(new LightsModule(getOwner()));
+        if (!modules.hasModuleOfClass(AbstractLightsModule.class)) {
+            if (entity instanceof TrailerEntity)
+                modules.add(new AbstractLightsModule.TrailerLightsModule(getOwner(), entity));
+            else
+                modules.add(new AbstractLightsModule.LightsModule(getOwner()));
         }
     }
 
@@ -96,12 +100,12 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
         if (MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.LIGHTS, (RenderBaseVehicle<?>) render, entity, PhysicsEntityEvent.Phase.PRE, partialTicks, null))) {
             return;
         }
-        LightsModule lights = entity != null ? entity.getModuleByType(LightsModule.class) : null;
+        AbstractLightsModule lights = entity != null ? entity.getModuleByType(AbstractLightsModule.class) : null;
         drawLights(entity, entity != null ? entity.ticksExisted : 0, packInfo.getModel(), packInfo.getScaleModifier(), lights);
         MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.LIGHTS, (RenderBaseVehicle<?>) render, entity, PhysicsEntityEvent.Phase.POST, partialTicks, null));
     }
 
-    public void drawLights(@Nullable BaseVehicleEntity<?> entity, int tickCounter, ResourceLocation model, Vector3f scale, LightsModule isLightOn) {
+    public void drawLights(@Nullable BaseVehicleEntity<?> entity, int tickCounter, ResourceLocation model, Vector3f scale, AbstractLightsModule isLightOn) {
         /* Rendering light sources */
         ObjModelRenderer vehicleModel = DynamXContext.getObjModelRegistry().getModel(model);
         for (PartLightSource lightSource : getOwner().getLightSources().values()) {

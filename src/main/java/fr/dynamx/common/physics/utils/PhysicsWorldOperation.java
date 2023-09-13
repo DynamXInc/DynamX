@@ -63,7 +63,7 @@ public class PhysicsWorldOperation<A> {
                     if (!entities.add((PhysicsEntity<?>) object)){
                         DynamXMain.log.fatal("Entity " + object + " is already registered, please report this !");
                     }
-                    ((PhysicsEntity<?>) object).isRegistered = 2;
+                    ((PhysicsEntity<?>) object).isRegistered = PhysicsEntity.EnumEntityPhysicsRegistryState.REGISTERED;
                     break;
                 case REMOVE_ENTITY:
                     PhysicsEntity<?> et = (PhysicsEntity<?>) object;

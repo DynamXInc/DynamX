@@ -92,6 +92,8 @@ public abstract class PhysicsEntityMessage<T extends PhysicsEntityMessage> imple
 
     @SideOnly(Side.CLIENT)
     protected void clientSchedule(Runnable task) {
+        if(getClientPlayer() == null)
+            return;
         IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(getClientPlayer().world);
         if (getPreferredNetwork() != EnumNetworkType.VANILLA_TCP && physicsWorld != null) { //If initialized, and not a "vanilla packet" (vanilla packet does not always concern physics, like seats)
             physicsWorld.schedule(task);

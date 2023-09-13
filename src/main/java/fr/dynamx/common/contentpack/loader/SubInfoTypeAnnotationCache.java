@@ -55,7 +55,7 @@ public class SubInfoTypeAnnotationCache {
                     type = DefinitionType.getParserOf(f.getType());
                 if (type != null) {
                     for (String configName : property.configNames()) {
-                        PackFilePropertyData<?> d = new PackFilePropertyData<>(f, configName, type, property.required(), property.description(), property.defaultValue());
+                        PackFilePropertyData<?> d = new PackFilePropertyData<>(f, configName, property.configNames(), type, property.required(), property.description(), property.defaultValue());
                         packFileProperties.put(d.getConfigFieldName(), d);
                     }
                 } else
@@ -83,8 +83,6 @@ public class SubInfoTypeAnnotationCache {
             Map<String, PackFilePropertyData<?>> dataMap = getOrLoadData(classToParse.getSuperclass());
             packFileProperties.putAll(dataMap);
         }
-        //ContentPackDocGenerator.generateDoc(toCache.getSimpleName(), "fr_fr", data.values());
-        //System.out.println("Found "+data.size()+" fields in "+toCache.getName());
         cache.put(classToParse, packFileProperties);
     }
 }

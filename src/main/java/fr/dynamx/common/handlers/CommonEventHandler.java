@@ -277,7 +277,7 @@ public class CommonEventHandler {
                     } else {
                         ContentPackUtils.registerDynamXBlockStateMapper(block);
                         if (((DynamXBlock<?>) block).createJson()) {
-                            ContentPackUtils.createBlockJson((IResourcesOwner) block, block.getInfo(), DynamXMain.resDir);
+                            ContentPackUtils.createBlockJson((IResourcesOwner) block, block.getInfo(), DynamXMain.resourcesDirectory);
                         }
                     }
                 }

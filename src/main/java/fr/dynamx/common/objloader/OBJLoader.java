@@ -83,6 +83,8 @@ public class OBJLoader {
                         String[] parts = trim(line.split(" "));
                         if (parts.length == 0)
                             continue;
+                        if (parts[0] != COMMENT && parts.length == 1)
+                            throw new IllegalArgumentException("Error at line " + j + ": '" + line + "' has no value(s)");
                         switch (parts[0]) {
                             case COMMENT:
                                 continue;

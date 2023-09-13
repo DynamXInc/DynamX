@@ -195,8 +195,8 @@ public class PhysicsDebugRenderer {
 
         drawJointLine(bodyPos, translatedPosA, lineColor);
 
-        DynamXRenderUtils.drawSphere(bodyPos, 0.01f, 10, endA);
-        DynamXRenderUtils.drawSphere(translatedPosA, 0.01f, 10, endB);
+        DynamXRenderUtils.drawSphere(bodyPos, 0.05f, endA);
+        DynamXRenderUtils.drawSphere(translatedPosA, 0.05f, endB);
 
     }
 
@@ -214,8 +214,8 @@ public class PhysicsDebugRenderer {
 
         drawJointLine(translatedPosA, translatedPosB, lineColor);
 
-        DynamXRenderUtils.drawSphere(translatedPosA, 0.01f, 10, lineColor);
-        DynamXRenderUtils.drawSphere(translatedPosB, 0.01f, 10, lineColor);
+        DynamXRenderUtils.drawSphere(translatedPosA, 0.05f, lineColor);
+        DynamXRenderUtils.drawSphere(translatedPosB, 0.05f, lineColor);
     }
 
     public static void drawJointLine(Vector3f pivotA, Vector3f pivotB, Color lineColor) {

@@ -18,6 +18,7 @@ import fr.dynamx.common.physics.joints.EntityJoint;
 import fr.dynamx.common.physics.joints.EntityJointsHandler;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.physics.DynamXPhysicsHelper;
+import lombok.Getter;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
@@ -35,6 +36,7 @@ public class DoorEntity<T extends PackEntityPhysicsHandler<PartDoor, ?>> extends
     private static final DataParameter<Byte> DOOR_ID = EntityDataManager.createKey(DoorEntity.class, DataSerializers.BYTE);
     int timer = -1;
     private BaseVehicleEntity<?> vehicleEntity;
+    @Getter
     private DoorsModule doorAttachModule;
 
     public DoorEntity(World world) {
@@ -126,14 +128,10 @@ public class DoorEntity<T extends PackEntityPhysicsHandler<PartDoor, ?>> extends
         if (getPackInfo() == null || physicsPosition == null)
             return new ArrayList<>(0);
         List<MutableBoundingBox> list = new ArrayList<>();
-        for (IShapeInfo partShape : getPackInfo().getShapes()) {
-            list.add(new MutableBoundingBox(partShape.getSize()).offset(partShape.getPosition()).offset(physicsPosition));
+        for (IShapeInfo partShape : getPackInfo().getCollisionsHelper().getShapes()) {
+            list.add(new MutableBoundingBox(partShape.getBoundingBox()).offset(physicsPosition));
         }
         return list;
-    }
-
-    public DoorsModule getDoorAttachModule() {
-        return doorAttachModule;
     }
 
     public BaseVehicleEntity<?> getVehicleEntity(World world) {
@@ -151,12 +149,6 @@ public class DoorEntity<T extends PackEntityPhysicsHandler<PartDoor, ?>> extends
     @Override
     public void preUpdatePhysics(boolean simulatingPhysics) {
         super.preUpdatePhysics(simulatingPhysics);
-        if (simulatingPhysics) {
-        }
-        if (timer != -1) {
-            if (timer >= 0) --timer;
-            else timer = -1;
-        }
     }
 
     @Override

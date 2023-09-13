@@ -17,6 +17,7 @@ import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.util.math.MathHelper;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -134,7 +135,14 @@ public class DynamXPhysicsHelper {
     public enum EnumPhysicsAxis {
         X, Y, Z, X_ROT, Y_ROT, Z_ROT;
 
+        public static EnumPhysicsAxis fromInteger(int target) {
+            if(target >= 0 && target < values().length)
+                return values()[target];
+            throw new IllegalArgumentException("Invalid axis '" + target + "'");
+        }
         public static EnumPhysicsAxis fromString(String targetName) {
+            if(NumberUtils.isCreatable(targetName))
+                return fromInteger(Integer.parseInt(targetName));
             for (EnumPhysicsAxis axis : values()) {
                 if (axis.name().equalsIgnoreCase(targetName)) {
                     return axis;

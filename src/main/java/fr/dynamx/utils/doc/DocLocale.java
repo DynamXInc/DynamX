@@ -30,10 +30,8 @@ public class DocLocale {
     /**
      * For each domain $D and language $L, attempts to load the resource $D:lang/$L.lang
      */
-    public synchronized void loadLocaleDataFiles(String localeName) {
+    public synchronized void loadLocaleDataFiles(File f) {
         this.properties.clear();
-
-        File f = new File(new File("Doc", "langs"), localeName);
         System.out.println("Loading " + f);
         try {
             loadLocaleData(new FileInputStream(f));

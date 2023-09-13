@@ -13,9 +13,8 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.modules.AttachModule;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.network.sync.AttachedBodySynchronizer;
-import fr.dynamx.common.network.sync.variables.EntityMapVariable;
-import fr.dynamx.common.network.sync.variables.EntityTransformsVariable;
 import fr.dynamx.api.network.sync.SynchronizationRules;
+import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
 import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.EnumBulletShapeType;
 import fr.dynamx.client.ClientProxy;
@@ -25,7 +24,8 @@ import fr.dynamx.common.contentpack.parts.PartDoor;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.network.packets.MessageChangeDoorState;
-import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
+import fr.dynamx.common.network.sync.variables.EntityMapVariable;
+import fr.dynamx.common.network.sync.variables.EntityTransformsVariable;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.joints.EntityJoint;
 import fr.dynamx.common.physics.joints.JointHandler;
@@ -109,8 +109,8 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
         Quaternion doorRotation = QuaternionPool.get(vehicleEntity.physicsRotation);
         Vector3f doorPos = DynamXGeometry.rotateVectorByQuaternion(p1.subtract(p2).addLocal(vehicleEntity.getPackInfo().getCenterOfMass()), doorRotation).addLocal(vehicleEntity.physicsPosition);
         CollisionShape doorShape = new BoxCollisionShape(partDoor.getScale());
-        if (partDoor.getPhysicsCollisionShape() != null)
-            doorShape = partDoor.getPhysicsCollisionShape();
+        if (partDoor.getCollisionsHelper().hasPhysicsCollisions())
+            doorShape = partDoor.getCollisionsHelper().getPhysicsCollisionShape();
         PhysicsRigidBody doorBody = DynamXPhysicsHelper.fastCreateRigidBody(vehicleEntity, 40, doorShape, doorPos, vehicleEntity.rotationYaw);
         localVarContainer.setDoorBody(doorBody);
         doorBody.setUserObject(new BulletShapeType<>(EnumBulletShapeType.BULLET_ENTITY, localVarContainer, doorBody.getCollisionShape()));
@@ -275,6 +275,15 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
             attachedBodiesTransform.get(jointId).getPhysicTransform().set(transform);
             attachedDoors.get(jointId).doorBody.setPhysicsLocation(transform.getPosition());
             attachedDoors.get(jointId).doorBody.setPhysicsRotation(transform.getRotation());
+        }
+    }
+
+    @Override
+    public void onSetDead() {
+        if (DynamXMain.proxy.shouldUseBulletSimulation(vehicleEntity.world)) {
+            for (DoorPhysics body : attachedDoors.values())
+                DynamXContext.getPhysicsWorld(vehicleEntity.world).removeCollisionObject(body.doorBody);
+            attachedDoors.clear();
         }
     }
 

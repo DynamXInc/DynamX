@@ -46,7 +46,7 @@ public class VehicleHud extends GuiFrame {
             }
             //add(new GuiLabel("DynamX " + DynamXConstants.VERSION_TYPE + " V." + DynamXConstants.VERSION).setCssId("hud_ea_warning"));
         }
-        CameraSystem.setCameraZoom(entity.cast().getPackInfo().getDefaultZoomLevel());
+        CameraSystem.setupCamera(entity);
     }
 
     @Override

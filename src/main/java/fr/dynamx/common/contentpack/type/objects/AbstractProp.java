@@ -1,27 +1,18 @@
 package fr.dynamx.common.contentpack.type.objects;
 
-import com.jme3.bullet.collision.shapes.BoxCollisionShape;
-import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
-import com.jme3.bullet.collision.shapes.CylinderCollisionShape;
-import com.jme3.bullet.collision.shapes.SphereCollisionShape;
 import com.jme3.math.Vector3f;
 import fr.aym.acslib.api.services.error.ErrorLevel;
-import fr.dynamx.api.contentpack.object.IShapeContainer;
+import fr.dynamx.api.contentpack.object.ICollisionsContainer;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
-import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
-import fr.dynamx.common.DynamXContext;
-import fr.dynamx.common.contentpack.parts.PartShape;
 import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
+import fr.dynamx.common.contentpack.type.ObjectCollisionsHelper;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
-import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.errors.DynamXErrorManager;
-import fr.dynamx.utils.optimization.MutableBoundingBox;
-import fr.dynamx.utils.physics.ShapeUtils;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -29,7 +20,7 @@ import lombok.experimental.Accessors;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractItemObject<T, T> implements IShapeContainer, ParticleEmitterInfo.IParticleEmitterContainer {
+public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractItemObject<T, T> implements ICollisionsContainer, ParticleEmitterInfo.IParticleEmitterContainer {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.PROPS})
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("UseHullShape".equals(key))
@@ -51,23 +42,19 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
     @Getter
     @Setter
     protected float renderDistance = 4096;
+
     @PackFileProperty(configNames = "UseComplexCollisions", required = false, defaultValue = "false", description = "common.UseComplexCollisions")
     @Accessors(fluent = true)
     @Getter
-    protected boolean useHullShape = false;
+    protected boolean useComplexCollisions = false;
+    @Getter
+    protected ObjectCollisionsHelper collisionsHelper;
+
     @Deprecated
     @PackFileProperty(configNames = "Textures", required = false, type = DefinitionType.DynamXDefinitionTypes.STRING_ARRAY_2D)
     protected String[][] texturesArray;
 
-    @Getter
-    private final List<MutableBoundingBox> collisionBoxes = new ArrayList<>();
-    @Getter
-    private final List<PartShape<?>> partShapes = new ArrayList<>();
-
     private final List<ParticleEmitterInfo<?>> particleEmitters = new ArrayList<>();
-
-    @Getter
-    protected CompoundCollisionShape compoundCollisionShape;
 
     public AbstractProp(String packName, String fileName) {
         super(packName, fileName);
@@ -76,30 +63,6 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
 
     @Override
     public boolean postLoad(boolean hot) {
-        compoundCollisionShape = new CompoundCollisionShape();
-        if (getPartShapes().isEmpty()) {
-            ObjModelPath modelPath = DynamXUtils.getModelPath(getPackName(), model);
-            if (useHullShape) {
-                compoundCollisionShape = ShapeUtils.generateComplexModelCollisions(modelPath, "", scaleModifier, new Vector3f(), 0);
-            } else {
-                ShapeUtils.generateModelCollisions(this, DynamXContext.getObjModelDataFromCache(modelPath), compoundCollisionShape);
-            }
-        } else {
-            getPartShapes().forEach(shape -> {
-                getCollisionBoxes().add(new MutableBoundingBox(shape.getBoundingBox()).offset(0.5, -1.5, 0.5).offset(getTranslation()));
-                switch (shape.getShapeType()) {
-                    case BOX:
-                        compoundCollisionShape.addChildShape(new BoxCollisionShape(shape.getSize()), shape.getPosition());
-                        break;
-                    case CYLINDER:
-                        compoundCollisionShape.addChildShape(new CylinderCollisionShape(shape.getSize(), 0), shape.getPosition());
-                        break;
-                    case SPHERE:
-                        compoundCollisionShape.addChildShape(new SphereCollisionShape(shape.getSize().x), shape.getPosition());
-                        break;
-                }
-            });
-        }
         if(hasVaryingTextures() && getMaxTextureMetadata() > 16) {
             DynamXErrorManager.addError(getPackName(), DynamXErrorManager.PACKS_ERRORS, "too_many_variants", ErrorLevel.HIGH, getName(), "You can't use more than 16 variants on blocks !");
         }
@@ -120,12 +83,6 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
 
     public int getMaxTextureMetadata() {
         return hasVaryingTextures() ? getVariants().getVariantsMap().size() : 1;
-    }
-
-
-    @Override
-    public void addCollisionShape(PartShape<?> partShape) {
-        partShapes.add(partShape);
     }
 
     @Override

@@ -43,7 +43,7 @@ public abstract class BaseWheeledVehiclePhysicsHandler<T extends BaseVehicleEnti
         ModularVehicleInfo modularVehicleInfo = getHandledEntity().getPackInfo();
 
         //Don't use this.getPackInfo() : it isn't initialized yet
-        physicsVehicle = new PhysicsVehicle(modularVehicleInfo.getPhysicsCollisionShape(), modularVehicleInfo.getEmptyMass());
+        physicsVehicle = new PhysicsVehicle(modularVehicleInfo.getCollisionsHelper().getPhysicsCollisionShape(), modularVehicleInfo.getEmptyMass());
         physicsVehicle.setPhysicsTransform(transform);
         physicsVehicle.setUserObject(new BulletShapeType<>(EnumBulletShapeType.VEHICLE, getHandledEntity(), physicsVehicle.getCollisionShape()));
         physicsVehicle.setSleepingThresholds(0.3f, 1);
@@ -67,7 +67,7 @@ public abstract class BaseWheeledVehiclePhysicsHandler<T extends BaseVehicleEnti
             for (FrictionPoint f : handledEntity.getPackInfo().getFrictionPoints()) {
                 Vector3f pushDown = new Vector3f(-getLinearVelocity().x, -horizSpeed, -getLinearVelocity().z);
                 pushDown.multLocal(f.getIntensity());
-                applyForce(f.getPosition(), pushDown);
+                applyImpulse(f.getPosition(), pushDown);
             }
         }
     }

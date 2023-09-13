@@ -21,6 +21,11 @@ key.toggleLockDoor=Ouvrir/fermer la portière
 key.attachTrailer=Attacher la remorque
 key.powerup=Augmenter la puissance (hélicoptère)
 key.powerdown=Diminuer la puissance (hélicoptère)
+key.helicopter_pitch_forward=Incliner vers l'avant (hélicoptère)
+key.helicopter_pitch_backward=Incliner vers l'arrière (hélicoptère)
+key.helicopter_yaw_left=Incliner vers la gauche (hélicoptère)
+key.helicopter_yaw_right=Incliner vers la droite (hélicoptère)
+key.lock_rotation=Verrouiller la caméra (hélicoptère)
 
 slopes.config.title=Configuration des pentes automatiques :
 slopes.config.dalls=Ignorer les demi dalles

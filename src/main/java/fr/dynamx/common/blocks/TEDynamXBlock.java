@@ -5,7 +5,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.aym.acsguis.api.ACsGuiApi;
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
-import fr.dynamx.api.events.DynamXBlockEvent;
+import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.client.gui.GuiBlockCustomization;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
@@ -14,7 +14,7 @@ import fr.dynamx.common.capability.DynamXChunkDataProvider;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
 import fr.dynamx.common.entities.ICollidableObject;
-import fr.dynamx.common.entities.modules.LightsModule;
+import fr.dynamx.common.entities.modules.AbstractLightsModule;
 import fr.dynamx.utils.VerticalChunkPos;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
@@ -25,9 +25,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -50,7 +48,7 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
     protected AxisAlignedBB boundingBoxCache;
 
     @Getter
-    private LightsModule lightsModule;
+    private AbstractLightsModule lightsModule;
 
     public TEDynamXBlock() {
     }
@@ -68,7 +66,7 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
         if(world != null)
             world.markBlockRangeForRenderUpdate(pos, pos);
         if(blockObjectInfo != null && !blockObjectInfo.getLightSources().isEmpty())
-            lightsModule = new LightsModule(blockObjectInfo);
+            lightsModule = new AbstractLightsModule.LightsModule(blockObjectInfo);
         else
             lightsModule = null;
     }
@@ -198,17 +196,17 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
         if (boundingBoxCache == null) {
             QuaternionPool.getINSTANCE().openSubPool();
             Vector3fPool.openPool();
-            List<MutableBoundingBox> boxes = getUnrotatedCollisionBoxes(); //Get PartShape boxes
+            List<IShapeInfo> boxes = getUnrotatedCollisionBoxes(); //Get PartShape boxes
             if (boxes.isEmpty()) {//If there is no boxes, create a default one
                 boundingBoxCache = new AxisAlignedBB(0, 0, 0, 1, 1, 1);
             } else {
                 MutableBoundingBox container;
                 if (boxes.size() == 1) //If there is one, no more calculus to do !
-                    container = new MutableBoundingBox(boxes.get(0));
+                    container = new MutableBoundingBox(boxes.get(0).getBoundingBox());
                 else {
-                    container = new MutableBoundingBox(boxes.get(0));
+                    container = new MutableBoundingBox(boxes.get(0).getBoundingBox());
                     for (int i = 1; i < boxes.size(); i++) { //Else create a bigger box containing all of the boxes
-                        container.growTo(boxes.get(i));
+                        container.growTo(boxes.get(i).getBoundingBox());
                     }
                 }
                 //The container box corresponding to an unrotated entity, so rotate it !
@@ -229,11 +227,10 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
     public List<MutableBoundingBox> getCollisionBoxes() {
         if (blockObjectInfo != null && unrotatedCollisionsCache.size() != getUnrotatedCollisionBoxes().size()) {
             synchronized (unrotatedCollisionsCache) {
-                for (MutableBoundingBox shape : getUnrotatedCollisionBoxes()) {
-                    MutableBoundingBox b = new MutableBoundingBox(shape);
+                for (IShapeInfo shape : getUnrotatedCollisionBoxes()) {
+                    MutableBoundingBox b = new MutableBoundingBox(shape.getBoundingBox());
                     b.scale(relativeScale.x != 0 ? relativeScale.x : 1, relativeScale.y != 0 ? relativeScale.y : 1, relativeScale.z != 0 ? relativeScale.z : 1);
                     b.offset(pos.getX() - 0.5, pos.getY(), pos.getZ() - 0.5);
-                    b.offset(relativeTranslation.x, relativeTranslation.y, relativeTranslation.z);
                     unrotatedCollisionsCache.add(b);
                 }
             }
@@ -247,11 +244,11 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
      * The list is not modified by callers of the function <br>
      * <strong>Note : </strong>The list is cached by the callers of this function, so you need to call markCollisionsDirty() to refresh them.
      */
-    public List<MutableBoundingBox> getUnrotatedCollisionBoxes() {
+    public List<IShapeInfo> getUnrotatedCollisionBoxes() {
         if (blockObjectInfo == null) {
             return Collections.EMPTY_LIST;
         }
-        return blockObjectInfo.getCollisionBoxes();
+        return blockObjectInfo.getCollisionsHelper().getShapes();
     }
 
     /**
@@ -261,7 +258,10 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
         if (blockObjectInfo == null) {
             throw new IllegalStateException("BlockObjectInfo is null for te " + this + " at " + pos);
         }
-        return blockObjectInfo.getCompoundCollisionShape();
+        if (!blockObjectInfo.getCollisionsHelper().hasPhysicsCollisions()) {
+            throw new IllegalStateException("BlockObjectInfo " + blockObjectInfo.getFullName() + " has no physics collisions");
+        }
+        return blockObjectInfo.getCollisionsHelper().getPhysicsCollisionShape();
     }
 
     /**
@@ -289,7 +289,7 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
 
     @Override
     public Vector3f getCollisionOffset() {
-        return Vector3fPool.get(-0.5f, 0, -0.5f);
+        return Vector3fPool.get(0.5f, 0, 0.5f).addLocal(relativeTranslation);
     }
 
     @Override

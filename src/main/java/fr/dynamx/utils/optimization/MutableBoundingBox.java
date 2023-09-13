@@ -1,14 +1,13 @@
 package fr.dynamx.utils.optimization;
 
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.*;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
 
-public class MutableBoundingBox implements Serializable, IShapeInfo {
+public class MutableBoundingBox implements Serializable {
     //For terrain save, don't touch !
     private static final long serialVersionUID = -9207351705409830894L;
 
@@ -476,12 +475,10 @@ public class MutableBoundingBox implements Serializable, IShapeInfo {
         return this;
     }
 
-    @Override
     public Vector3f getPosition() {
         return Vector3fPool.get((float) (minX + maxX) / 2, (float) (minY + maxY) / 2, (float) (minZ + maxZ) / 2);
     }
 
-    @Override
     public Vector3f getSize() {
         return Vector3fPool.get((float) (maxX - minX) / 2, (float) (maxY - minY) / 2, (float) (maxZ - minZ) / 2);
     }

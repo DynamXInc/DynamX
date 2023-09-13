@@ -70,7 +70,7 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
      * @param physicsInitCallback The new {@link ModularEntityInitCallback}
      */
     public ModularPhysicsEntity<T> setPhysicsInitCallback(ModularEntityPhysicsInitCallback physicsInitCallback) {
-        if(initialized == 2){
+        if(initialized == EnumEntityInitState.ALL){
             physicsInitCallback.onPhysicsInit(this, physicsHandler);
             return this;
         }
@@ -103,13 +103,13 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
     }
 
     @Override
-    public <Y extends IPhysicsModule<?>> Y getModuleByType(Class<Y> clazz) {
-        return (Y) moduleList.stream().filter(m -> m.getClass() == clazz).findFirst().orElse(null);
+    public <Y extends IPhysicsModule<?>> Y getModuleByType(Class<Y> moduleClass) {
+        return (Y) moduleList.stream().filter(m -> moduleClass.isAssignableFrom(m.getClass())).findFirst().orElse(null);
     }
 
     @Override
     public boolean hasModuleOfType(Class<? extends IPhysicsModule<?>> moduleClass) {
-        return moduleList.stream().anyMatch(m -> m.getClass() == moduleClass);
+        return moduleList.stream().anyMatch(m -> moduleClass.isAssignableFrom(m.getClass()));
     }
 
     @Override

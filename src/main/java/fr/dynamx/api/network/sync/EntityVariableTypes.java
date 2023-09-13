@@ -6,8 +6,8 @@ import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
+import fr.dynamx.common.entities.modules.WheelsModule;
 import fr.dynamx.common.network.sync.variables.EntityPosVariable;
-import fr.dynamx.common.physics.entities.parts.wheel.WheelState;
 import fr.dynamx.common.physics.utils.RigidBodyTransform;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.optimization.HashMapPool;
@@ -218,20 +218,20 @@ public enum EntityVariableTypes {
             return result;
         }
     }),
-    WHEELS_STATES(WheelState[].class, new EntityVariableSerializer<WheelState[]>() {
+    WHEELS_STATES(WheelsModule.WheelState[].class, new EntityVariableSerializer<WheelsModule.WheelState[]>() {
         @Override
-        public void writeObject(ByteBuf buf, WheelState[] object) {
+        public void writeObject(ByteBuf buf, WheelsModule.WheelState[] object) {
             buf.writeInt(object.length);
-            for (WheelState f : object) {
+            for (WheelsModule.WheelState f : object) {
                 buf.writeByte(f.ordinal());
             }
         }
 
         @Override
-        public WheelState[] readObject(ByteBuf buf) {
-            WheelState[] currentValue = new WheelState[buf.readInt()];
+        public WheelsModule.WheelState[] readObject(ByteBuf buf) {
+            WheelsModule.WheelState[] currentValue = new WheelsModule.WheelState[buf.readInt()];
             for (byte i = 0; i < currentValue.length; i++) {
-                currentValue[i] = WheelState.values()[buf.readByte()];
+                currentValue[i] = WheelsModule.WheelState.values()[buf.readByte()];
             }
             return currentValue;
         }

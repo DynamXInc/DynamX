@@ -22,19 +22,11 @@ public class CommandNetworkDebug extends CommandBase {
 
     @Override
     public String getUsage(ICommandSender sender) {
-        return "/dnxnetdebug entity_report|pause|resume|set|get|next|prev|set_entity";
+        return "/dnxnetdebug pause|resume|set|get|next|prev|set_entity";
     }
 
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-        if(args.length == 1 && args[0].equalsIgnoreCase("entity_report")) {
-            if(sender instanceof EntityPlayer && ((EntityPlayer) sender).getRidingEntity() instanceof PhysicsEntity) {
-                ((PhysicsEntity<?>) ((EntityPlayer) sender).getRidingEntity()).printReport();
-                sender.sendMessage(new TextComponentString("Report wrote in log"));
-                return;
-            }
-            else throw new WrongUsageException("You must ride a physics entity");
-        }
         switch (args[0]) {
             case "pause":
                 NetworkActivityTracker.pause();

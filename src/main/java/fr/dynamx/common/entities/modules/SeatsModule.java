@@ -7,6 +7,7 @@ import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.api.network.EnumPacketTarget;
+import fr.dynamx.client.camera.CameraMode;
 import fr.dynamx.common.network.sync.PhysicsEntitySynchronizer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.parts.PartSeat;
@@ -15,6 +16,7 @@ import fr.dynamx.common.network.sync.MessageSeatsSync;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -34,9 +36,19 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
     protected final BaseVehicleEntity<?> entity;
     protected BiMap<PartSeat, Entity> seatToPassenger = HashBiMap.create();
     protected Map<Byte, Boolean> doorsStatus;
+    @Getter
+    protected final CameraMode preferredCameraMode;
+    @Getter
+    private PartSeat lastRiddenSeat;
+
 
     public SeatsModule(BaseVehicleEntity<?> entity) {
+        this(entity, CameraMode.AUTO);
+    }
+
+    public SeatsModule(BaseVehicleEntity<?> entity, CameraMode preferredCameraMode) {
         this.entity = entity;
+        this.preferredCameraMode = preferredCameraMode;
     }
 
     @Override
@@ -64,9 +76,6 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
         return seat != null && seat.isDriver();
     }
 
-    public PartSeat getLastRiddenSeat() {
-        return lastSeat;
-    }
 
     public BiMap<PartSeat, Entity> getSeatToPassengerMap() {
         return seatToPassenger;
@@ -96,13 +105,13 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
 
     public void updatePassenger(Entity passenger) {
         PartSeat seat = getRidingSeat(passenger);
-        //System.out.println("Update passenger : "+passenger+" on "+seat);
-        if (seat != null) {
-            Vector3fPool.openPool();
-            Vector3f posVec = DynamXGeometry.rotateVectorByQuaternion(seat.getPosition(), entity.renderRotation);//PhysicsHelper.getRotatedPoint(seat.getPosition(), -this.rotationPitch, this.rotationYaw, this.rotationRoll);
-            passenger.setPosition(entity.posX + posVec.x, entity.posY + posVec.y, entity.posZ + posVec.z);
-            Vector3fPool.closePool();
+        if (seat == null) {
+            return;
         }
+        Vector3fPool.openPool();
+        Vector3f posVec = DynamXGeometry.rotateVectorByQuaternion(seat.getPosition(), entity.renderRotation);//PhysicsHelper.getRotatedPoint(seat.getPosition(), -this.rotationPitch, this.rotationYaw, this.rotationRoll);
+        passenger.setPosition(entity.posX + posVec.x, entity.posY + posVec.y, entity.posZ + posVec.z);
+        Vector3fPool.closePool();
     }
 
     /**
@@ -129,37 +138,35 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
 
     @Override
     public void addPassenger(Entity passenger) {
-        if (!entity.world.isRemote) {
-            PartSeat hitPart = seatToPassenger.inverse().get(passenger);
-            if (hitPart != null) {
-                if (hitPart.isDriver() && passenger instanceof EntityPlayer) {
-                    entity.getSynchronizer().onPlayerStartControlling((EntityPlayer) passenger, true);
-                }
-                MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.PlayerMount(Side.SERVER, passenger, entity, this, hitPart));
-                //System.out.println("Send seat sync : add passenger "+entity+" "+passenger);
-                DynamXContext.getNetwork().sendToClient(new MessageSeatsSync((IModuleContainer.ISeatsContainer) entity), EnumPacketTarget.ALL_TRACKING_ENTITY, entity);
-            } else {
-                log.error("Cannot add passenger : " + passenger + " : seat not found !");
+        if (entity.world.isRemote) {
+            return;
+        }
+        PartSeat hitPart = seatToPassenger.inverse().get(passenger);
+        if (hitPart != null) {
+            if (hitPart.isDriver() && passenger instanceof EntityPlayer) {
+                entity.getSynchronizer().onPlayerStartControlling((EntityPlayer) passenger, true);
             }
+            MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.PlayerMount(Side.SERVER, passenger, entity, this, hitPart));
+            DynamXContext.getNetwork().sendToClient(new MessageSeatsSync((IModuleContainer.ISeatsContainer) entity), EnumPacketTarget.ALL_TRACKING_ENTITY, entity);
+        } else {
+            log.error("Cannot add passenger : " + passenger + " : seat not found !");
         }
         //Client side is managed by updateSeats
     }
 
-    public PartSeat lastSeat;
-
     @Override
     public void removePassenger(Entity passenger) {
         PartSeat seat = getRidingSeat(passenger);
-        if (!entity.world.isRemote && seat != null) {
-            lastSeat = seat;
-            seatToPassenger.remove(seat);
-            if (seat.isDriver() && passenger instanceof EntityPlayer) {
-                entity.getSynchronizer().onPlayerStopControlling((EntityPlayer) passenger, true);
-            }
-            //System.out.println("Send seat sync : remove passenger "+entity+" "+passenger);
-            DynamXContext.getNetwork().sendToClient(new MessageSeatsSync((IModuleContainer.ISeatsContainer) entity), EnumPacketTarget.ALL_TRACKING_ENTITY, entity);
-            MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.EntityDismount(entity.world.isRemote ? Side.CLIENT : Side.SERVER, passenger, entity, this, seat));
+        if (entity.world.isRemote || seat == null) {
+            return;
         }
+        lastRiddenSeat = seat;
+        seatToPassenger.remove(seat);
+        if (seat.isDriver() && passenger instanceof EntityPlayer) {
+            entity.getSynchronizer().onPlayerStopControlling((EntityPlayer) passenger, true);
+        }
+        DynamXContext.getNetwork().sendToClient(new MessageSeatsSync((IModuleContainer.ISeatsContainer) entity), EnumPacketTarget.ALL_TRACKING_ENTITY, entity);
+        MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.EntityDismount(entity.world.isRemote ? Side.CLIENT : Side.SERVER, passenger, entity, this, seat));
         //Client side is managed by updateSeats
     }
 
@@ -167,15 +174,15 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
         BaseVehicleEntity<?> vehicleEntity = entity;
         List<PartSeat> remove = new ArrayList<>(0);
         //Search for players who dismounted the entity
-        for (Map.Entry<PartSeat, Entity> e : seatToPassenger.entrySet()) {
-            if (!msg.getSeatToEntity().containsValue(e.getValue().getEntityId())) {
-                //System.out.println("Removing "+e.getValue()+" from seat "+e.getKey()+" of "+entity);
-                remove.add(e.getKey());
-                if (e.getKey().isDriver() && e.getValue() instanceof EntityPlayer) {
-                    netHandler.onPlayerStopControlling((EntityPlayer) e.getValue(), true);
-                }
-                MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.EntityDismount(Side.CLIENT, e.getValue(), vehicleEntity, this, e.getKey()));
+        for (Map.Entry<PartSeat, Entity> entity : seatToPassenger.entrySet()) {
+            if (msg.getSeatToEntity().containsValue(entity.getValue().getEntityId())) {
+                continue;
             }
+            remove.add(entity.getKey());
+            if (entity.getKey().isDriver() && entity.getValue() instanceof EntityPlayer) {
+                netHandler.onPlayerStopControlling((EntityPlayer) entity.getValue(), true);
+            }
+            MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.EntityDismount(Side.CLIENT, entity.getValue(), vehicleEntity, this, entity.getKey()));
         }
         //And remove them
         if (!remove.isEmpty())
@@ -192,7 +199,6 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
             if (seat != null) {
                 Entity passengerEntity = entity.world.getEntityByID(e.getValue());
                 if (passengerEntity != null) {
-                    //System.out.println("Try set "+player+" in "+seat+" of "+entity+" cur "+seatToPassenger);
                     if (seatToPassenger.get(seat) != passengerEntity) { //And add them
                         seatToPassenger.put(seat, passengerEntity);
                         if (seat.isDriver() && passengerEntity instanceof EntityPlayer) {
@@ -200,7 +206,6 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
                         }
                         MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.PlayerMount(Side.CLIENT, passengerEntity, vehicleEntity, this, seat));
                     }
-                    //System.out.println("Success to seat-sync " + player + " !");
                 } else {
                     log.warn("Entity with id " + e.getValue() + " not found for seat in " + entity);
                 }

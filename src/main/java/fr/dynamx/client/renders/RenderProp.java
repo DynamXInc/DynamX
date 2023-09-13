@@ -1,12 +1,10 @@
 package fr.dynamx.client.renders;
 
-import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.PropsEntity;
-import fr.dynamx.common.entities.modules.LightsModule;
-import fr.dynamx.utils.debug.renderer.DebugRenderer;
-import net.minecraft.client.Minecraft;
+import fr.dynamx.common.entities.modules.AbstractLightsModule;
+import fr.dynamx.utils.debug.renderer.BoatDebugRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraftforge.common.MinecraftForge;
@@ -14,6 +12,7 @@ import net.minecraftforge.common.MinecraftForge;
 public class RenderProp<T extends PropsEntity<?>> extends RenderPhysicsEntity<T> {
     public RenderProp(RenderManager manager) {
         super(manager);
+        addDebugRenderers(new BoatDebugRenderer.FloatsDebug());
         MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.InitRenderer<>(PropsEntity.class, this));
     }
 
@@ -36,8 +35,8 @@ public class RenderProp<T extends PropsEntity<?>> extends RenderPhysicsEntity<T>
             entity.getPackInfo().getDrawableParts().forEach(d -> ((IDrawablePart<T>) d).drawParts(entity, this, entity.getPackInfo(), entity.getEntityTextureID(), partialTicks));
         }*/
         if (entity.getPackInfo().isModelValid()) {
-            if(entity.hasModuleOfType(LightsModule.class))
-                entity.getPackInfo().getOwner().getLightSources().values().forEach(d -> d.drawLights(null, entity.ticksExisted, entity.getPackInfo().getModel(), entity.getPackInfo().getScaleModifier(), entity.getModuleByType(LightsModule.class)));
+            if(entity.hasModuleOfType(AbstractLightsModule.class))
+                entity.getPackInfo().getOwner().getLightSources().values().forEach(d -> d.drawLights(null, entity.ticksExisted, entity.getPackInfo().getModel(), entity.getPackInfo().getScaleModifier(), entity.getModuleByType(AbstractLightsModule.class)));
         }
     }
 }

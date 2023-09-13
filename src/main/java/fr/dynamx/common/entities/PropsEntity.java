@@ -5,20 +5,14 @@ import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.objects.PropObject;
-import fr.dynamx.common.entities.modules.LightsModule;
 import fr.dynamx.common.physics.entities.PackEntityPhysicsHandler;
 import fr.dynamx.common.physics.entities.PropPhysicsHandler;
 import fr.dynamx.utils.DynamXConfig;
-import fr.dynamx.utils.optimization.MutableBoundingBox;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class PropsEntity<T extends PackEntityPhysicsHandler<PropObject<?>, ?>> extends PackPhysicsEntity<T, PropObject<?>> {
-    private final List<MutableBoundingBox> unrotatedBoxes = new ArrayList<>();
 
     public PropsEntity(World worldIn) {
         super(worldIn);
@@ -36,14 +30,13 @@ public class PropsEntity<T extends PackEntityPhysicsHandler<PropObject<?>, ?>> e
     @Override
     public void onUpdate() {
         super.onUpdate();
-        if (getPackInfo() != null) {
-            if (getPackInfo().getDespawnTime() != -1) {
-                if ((ticksExisted % getPackInfo().getDespawnTime()) == 0) {
-                    setDead();
-                }
+        if (getPackInfo() == null) {
+            return;
+        }
+        if (getPackInfo().getDespawnTime() != -1) {
+            if ((ticksExisted % getPackInfo().getDespawnTime()) == 0) {
+                setDead();
             }
-            if(getModuleByType(LightsModule.class) != null)
-                getModuleByType(LightsModule.class).setLightOn(3, true);
         }
     }
 
@@ -68,31 +61,7 @@ public class PropsEntity<T extends PackEntityPhysicsHandler<PropObject<?>, ?>> e
         //Fix npe due to render before first update
         return getPackInfo() != null && getPackInfo().getRenderDistance() >= range;
     }
-
-    /**
-     * Cache
-     */
-    @Override
-    public List<MutableBoundingBox> getCollisionBoxes() {
-        if (getPackInfo() == null || physicsPosition == null)
-            return new ArrayList<>(0);
-        if (unrotatedBoxes.size() != getPackInfo().getCollisionBoxes().size()) {
-            unrotatedBoxes.clear();
-            for (MutableBoundingBox shape : getPackInfo().getCollisionBoxes()) {
-                MutableBoundingBox b = new MutableBoundingBox(shape);
-                b.offset(physicsPosition);
-                unrotatedBoxes.add(b);
-            }
-        } else {
-            for (int i = 0; i < getPackInfo().getCollisionBoxes().size(); i++) {
-                MutableBoundingBox b = unrotatedBoxes.get(i);
-                b.setTo(getPackInfo().getCollisionBoxes().get(i));
-                b.offset(physicsPosition);
-                unrotatedBoxes.add(b);
-            }
-        }
-        return unrotatedBoxes;
-    }
+    
 
     @Override
     protected void createModules(ModuleListBuilder modules) {

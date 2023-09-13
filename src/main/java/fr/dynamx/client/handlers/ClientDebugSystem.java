@@ -157,9 +157,6 @@ public class ClientDebugSystem {
             drawDebug(DynamXDebugOptions.CLIENT_BLOCK_BOXES);
             drawDebug(DynamXDebugOptions.SLOPE_BOXES);
             drawDebug(DynamXDebugOptions.CLIENT_SLOPE_BOXES);
-            //Draw chunks after slopes, else slope are not visible because we do not cull
-            drawDebug(DynamXDebugOptions.CHUNK_BOXES);
-            drawDebug(DynamXDebugOptions.CLIENT_CHUNK_BOXES);
 
             if (DynamXDebugOptions.PHYSICS_DEBUG.isActive()) {
                 Vector3fPool.openPool();

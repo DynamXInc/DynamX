@@ -102,6 +102,8 @@ public class SubInfoTypesRegistry<T extends ISubInfoTypeOwner<?>> {
                         }
                     }, an.strictName()));
                 }
+                //Also register all PackFilePropertyData, if we are generating the docs
+                SubInfoTypeAnnotationCache.getOrLoadData(object);
             } catch (Exception e) {
                 //log.error("Cannot load @RegisteredSubInfoType annotation in class " + name + " !", e);
                 DynamXErrorManager.addError("DynamX initialization", DynamXErrorManager.INIT_ERRORS, "addon_error", ErrorLevel.FATAL, name, "Cannot load @RegisteredSubInfoType annotation in class " + data.getClassName(), e, 900);

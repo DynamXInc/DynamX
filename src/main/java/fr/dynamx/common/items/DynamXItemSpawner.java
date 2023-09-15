@@ -20,6 +20,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public abstract class DynamXItemSpawner<T extends AbstractItemObject<T, ?>> extends DynamXItem<T> {
     public DynamXItemSpawner(T itemInfo) {
@@ -69,5 +70,5 @@ public abstract class DynamXItemSpawner<T extends AbstractItemObject<T, ?>> exte
         return true;
     }
 
-    public abstract PackPhysicsEntity<?, ?> getSpawnEntity(World worldIn, EntityPlayer playerIn, Vector3f pos, float spawnRotation, int metadata);
+    public abstract PackPhysicsEntity<?, ?> getSpawnEntity(World worldIn, @Nullable EntityPlayer playerIn, Vector3f pos, float spawnRotation, int metadata);
 }

@@ -54,6 +54,12 @@ public class HelicopterEngineModule extends BasicEngineModule {
     }
 
     @Override
+    public void resetControls() {
+        super.resetControls();
+        power.set(0f);
+    }
+
+    @Override
     public void onEngineSwitchedOff() {
         super.onEngineSwitchedOff();
         power.set(0f);

@@ -28,7 +28,7 @@ public class HelicopterController extends BaseController {
 
     protected final HelicopterEngineModule engine;
 
-    protected static boolean mouseLocked = false;
+    protected static boolean mouseLocked = true;
 
     /**
      * @param entity is assumed to implement {@link IModuleContainer.ISeatsContainer}
@@ -51,7 +51,7 @@ public class HelicopterController extends BaseController {
             HelicopterEngineModule engineModule = ((HelicopterEntity<?>) MC.player.getRidingEntity()).getModuleByType(HelicopterEngineModule.class);
             int invert = MC.gameSettings.invertMouse ? -1 : 1;
             engineModule.getRollControls().set(0, invert * event.getDx());
-            engineModule.getRollControls().set(1, invert * -event.getDy());
+            engineModule.getRollControls().set(1, invert * event.getDy());
         }
     }
 

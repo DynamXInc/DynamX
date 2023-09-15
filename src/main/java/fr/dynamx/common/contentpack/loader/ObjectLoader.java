@@ -165,6 +165,7 @@ public class ObjectLoader<T extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C exte
     }
 
     /**
+     * FIXME USE THIS INSTEAD OF CREATE OWNER ... METHODS
      * @return Maps a built info with the right item
      */
     public C getItem(T from) {

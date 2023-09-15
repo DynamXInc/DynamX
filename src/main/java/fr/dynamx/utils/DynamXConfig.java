@@ -40,7 +40,9 @@ public class DynamXConfig
     public static boolean disableSSLCertification;
 
     @Getter
-    private static float masterSoundVolume;
+    private static float masterSoundVolume = 0.8f;
+    @Getter
+    private static int maxSounds = 8;
 
     private static Configuration cfg;
 
@@ -87,7 +89,8 @@ public class DynamXConfig
         ignoreDangerousTerrainErrors = cfg.get("Debug", "IgnoreDangerousTerrainErrors", false, "Will try to prevent the game from crashing when there is a weird error in the terrain. Only enable this if you want server stability.").getBoolean();
         disableSSLCertification = cfg.get("Debug", "DisableSSLVerification", false, "Disables ssl certificates for dynamx.fr, may be a security breach for your computer, DO NOT disable it if you don't know what you are doing").getBoolean();
 
-        masterSoundVolume = (float) cfg.get("Sounds", "Volume", 1f, "The volume of DynamX sounds (engines...)").getDouble();
+        masterSoundVolume = (float) cfg.get("Sounds", "Volume", 0.8f, "The volume of DynamX sounds (engines...)").getDouble();
+        maxSounds = cfg.get("Sounds", "MaxSounds", 8, "The maximum amount of sounds DynamX can play at the same time").getInt();
         cfg.save();
     }
 

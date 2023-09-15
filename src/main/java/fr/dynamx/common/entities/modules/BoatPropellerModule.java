@@ -79,13 +79,16 @@ public class BoatPropellerModule extends BasicEngineModule implements IPackInfoR
 
     public class BoatPropellerHandler {
         @Getter
-        private float physicsAccelerationForce;
-        @Getter
         private float physicsSteeringForce;
 
         public void update() {
-            updateTurn0();
-            updateMovement();
+            if(entity.isInWater()) {
+                updateTurn0();
+                updateMovement();
+            } else {
+                physicsSteeringForce = 0;
+                brake(0.5f);
+            }
         }
 
         public void updateTurn0() {
@@ -113,8 +116,6 @@ public class BoatPropellerModule extends BasicEngineModule implements IPackInfoR
         }
 
         public void updateMovement() {
-            physicsAccelerationForce = 0;
-
             // do braking first so it doesn't override engineBraking.
             brake(0);
 

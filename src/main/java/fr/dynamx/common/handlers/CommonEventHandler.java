@@ -17,6 +17,7 @@ import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
+import fr.dynamx.common.entities.modules.movables.PickingObjectHelper;
 import fr.dynamx.common.items.DynamXItemRegistry;
 import fr.dynamx.common.items.tools.ItemSlopes;
 import fr.dynamx.common.network.packets.MessageHandleExplosion;
@@ -72,9 +73,13 @@ public class CommonEventHandler {
 
     @SubscribeEvent
     public void onDisconnect(net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedOutEvent event) {
+        EntityPlayer player = event.player;
         if (FMLCommonHandler.instance().getSide().isServer()) {
-            ServerPhysicsSyncManager.onDisconnect(event.player);
+            ServerPhysicsSyncManager.onDisconnect(player);
+            DynamXContext.getWalkingPlayers().remove(player);
         }
+        if(DynamXContext.getPlayerPickingObjects().containsKey(player.getEntityId()))
+            PickingObjectHelper.handlePlayerDisconnection(player);
     }
 
     @SubscribeEvent

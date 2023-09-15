@@ -82,7 +82,7 @@ public class DynamXMain {
             throw new RuntimeException("Native physics engine cannot be found or installed !");
 
         //Telemetry
-        if (event.getSide().isClient()) {
+        if (false && event.getSide().isClient()) {
             loadingService.addTask(ThreadedLoadingService.ModLoadingSteps.FINISH_LOAD,
                     "statsbot", () -> ACsLib.getPlatform().provideService(StatsReportingService.class).init(StatsReportingService.ReportLevel.ALL, STATS_URL, STATS_PRODUCT, STATS_TOKEN));
         }

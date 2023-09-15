@@ -107,6 +107,7 @@ public class KeyHandler {
                     }
                 }
             } else {
+                //FIXME THIS MAY FIRED WHILE TAKING OBJECT
                 if (DynamXContext.getPlayerPickingObjects().containsKey(MC.player.getEntityId())) {
                     if (MC.isSingleplayer()) {
                         PickingObjectHelper.handlePickingControl(new MovableModule.Action(MovableModule.EnumAction.UNPICK), MC.player);

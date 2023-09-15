@@ -211,21 +211,9 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
                 }
                 //The container box corresponding to an unrotated entity, so rotate it !
                 Quaternion physicsRotation = getCollidableRotation();
-                /* test code
-                container = DynamXContext.getCollisionHandler().rotateBB(Vector3fPool.get(0.5f, 0, 0.5f).add(blockObjectInfo.getTranslation().mult(-0)), container, physicsRotation);
-                container.grow(0.1, 0.0, 0.1); //Grow it to avoid little glitches on the corners of the car
-                container.offset(blockObjectInfo.getTranslation().mult(1));
-                container.offset(0.5, 1.5, 0.5);
                 container.scale(getRelativeScale().x != 0 ? getRelativeScale().x : 1, getRelativeScale().y != 0 ? getRelativeScale().y : 1, getRelativeScale().z != 0 ? getRelativeScale().z : 1);
-                //container.offset(blockObjectInfo.getTranslation().mult(1));
-                container.offset(-0.5, -0.5, -0.5);
-                 */
+                container.grow(0.1, 0.0, 0.1); //Grow it to avoid little glitches on the corners of the car
                 container = DynamXContext.getCollisionHandler().rotateBB(Vector3fPool.get(0.5f, 0, 0.5f), container, physicsRotation);
-                container.grow(0.1, 0.0, 0.1); //Grow it to avoid little glitches on the corners of the car
-                container.offset(blockObjectInfo.getTranslation());
-                container.offset(0.5, 1.5, 0.5);
-                container.scale(getRelativeScale().x != 0 ? getRelativeScale().x : 1, getRelativeScale().y != 0 ? getRelativeScale().y : 1, getRelativeScale().z != 0 ? getRelativeScale().z : 1);
-                container.offset(-0.5, 0, -0.5);
                 container.offset(getRelativeTranslation().x, getRelativeTranslation().y, getRelativeTranslation().z);
                 boundingBoxCache = container.toBB();
             }

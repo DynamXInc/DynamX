@@ -24,13 +24,13 @@ import fr.dynamx.common.entities.PropsEntity;
 import fr.dynamx.common.items.DynamXItemSpawner;
 import fr.dynamx.common.items.tools.ItemSlopes;
 import fr.dynamx.common.network.packets.MessageEntityInteract;
-import fr.dynamx.common.physics.player.PlayerPhysicsHandler;
 import fr.dynamx.common.physics.player.WalkingOnPlayerController;
 import fr.dynamx.common.slopes.GuiSlopesConfig;
 import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.errors.DynamXErrorManager;
+import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
@@ -292,7 +292,11 @@ public class ClientEventHandler {
     public void onDrawBlockHighlight(DrawBlockHighlightEvent event) {
         if (this.model != null) {
             GlStateManager.enableAlpha();
+            GlQuaternionPool.openPool();
+            QuaternionPool.openPool();
             model.renderPreview(blockObjectInfo, event.getPlayer(), blockPos, canPlace, playerOrientation, event.getPartialTicks(), textureNum);
+            QuaternionPool.closePool();
+            GlQuaternionPool.closePool();
         }
     }
 

@@ -10,6 +10,7 @@ import fr.aym.acsguis.component.textarea.GuiFloatField;
 import fr.aym.acsguis.component.textarea.GuiLabel;
 import fr.dynamx.client.renders.mesh.shapes.FacesMesh;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.items.vehicle.ItemSoftbody;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.maths.DynamXGeometry;
@@ -52,9 +53,9 @@ public class GuiSoftbodyConfig extends GuiFrame {
     private float scale = 20;
     private int scroll = 0;
 
-    private List<Node> nodes = new ArrayList<>();
+    private final List<Node> nodes = new ArrayList<>();
 
-    public GuiSoftbodyConfig(FacesMesh mesh, PhysicsSoftBody te) {
+    public GuiSoftbodyConfig(ItemSoftbody<?> itemSoftbody, FacesMesh mesh, PhysicsSoftBody te) {
         super(new GuiScaler.Identity());
 
         softBody = te;
@@ -74,7 +75,7 @@ public class GuiSoftbodyConfig extends GuiFrame {
             MyBuffer.get(nodeLocations, 3 * vi2, nodePos2);
             MyBuffer.get(nodeLocations, 3 * vi3, nodePos3);
             Vector3f[] x = new Vector3f[]{nodePos1, nodePos2, nodePos3};
-            Vector3f c = x[0].add(x[1]).add(x[2]).divideLocal(3);
+            Vector3f c = x[0].addLocal(x[1]).addLocal(x[2]).divideLocal(3);
 
             Node node = new Node(c, i, 0.03f);
             nodes.add(node);
@@ -133,6 +134,10 @@ public class GuiSoftbodyConfig extends GuiFrame {
             //DynamXContext.getNetwork().sendToServer(new MessageSyncBlockCustomization(softBody.getPos(), relativeTrans, relativeScale, relativeRotation));
             Transform transform1 = new Transform(relativeTrans, DynamXGeometry.eulerToQuaternion(relativeRotation.x, relativeRotation.y, relativeRotation.z), relativeScale);
             softBody.applyTransform(transform1);
+
+            itemSoftbody.softBody = softBody;
+            itemSoftbody.changed = true;
+
         });
 
 

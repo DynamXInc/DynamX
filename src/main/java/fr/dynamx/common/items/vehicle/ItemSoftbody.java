@@ -26,9 +26,11 @@ import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
@@ -39,9 +41,10 @@ import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nonnull;
 
-public class ItemSoftbody <T extends AbstractItemObject<T, ?>> extends DynamXItem<T> {
+public class ItemSoftbody<T extends AbstractItemObject<T, ?>> extends DynamXItem<T> {
 
-    PhysicsSoftBody softBody;
+    public PhysicsSoftBody softBody;
+    public boolean changed;
 
     public ItemSoftbody() {
         super(DynamXConstants.ID, "softbody", new ResourceLocation(DynamXConstants.ID, "softbody"));
@@ -64,55 +67,62 @@ public class ItemSoftbody <T extends AbstractItemObject<T, ?>> extends DynamXIte
     @Nonnull
     public ActionResult<ItemStack> onItemRightClick(@Nonnull World worldIn, EntityPlayer playerIn, @Nonnull EnumHand hand) {
         ItemStack itemstack = playerIn.getHeldItem(hand);
-        if(hand.equals(EnumHand.OFF_HAND)) return new ActionResult<>(EnumActionResult.FAIL, itemstack);
-        if(playerIn.isSneaking()) {
-            softBody = new PhysicsSoftBody();
-            softBody.setUserObject(new BulletShapeType<>(EnumBulletShapeType.BULLET_ENTITY, null, softBody.getCollisionShape()));
-            NativeSoftBodyUtil.appendFromTriMesh(DynamXRenderUtils.icosphereMesh, softBody);
-            FacesMesh facesMesh = new FacesMesh(softBody);
+        if (hand.equals(EnumHand.OFF_HAND)) return new ActionResult<>(EnumActionResult.FAIL, itemstack);
+        if (playerIn.isSneaking()) {
+            if (worldIn.isRemote) {
+                softBody = new PhysicsSoftBody();
+                softBody.setUserObject(new BulletShapeType<>(EnumBulletShapeType.BULLET_ENTITY, null, softBody.getCollisionShape()));
+                NativeSoftBodyUtil.appendFromTriMesh(DynamXRenderUtils.icosphereMesh, softBody);
+                FacesMesh facesMesh = new FacesMesh(softBody);
 
-            softBody.setPose(false, true);
-            SoftBodyConfig config = softBody.getSoftConfig();
-            config.set(Sbcp.PoseMatching, 0.05f);
-            softBody.setPhysicsLocation(new Vector3f(0,0,0));
-            //softBody.applyScale(new Vector3f(10,10,10));
-            softBody.setCcdSweptSphereRadius(0.7f);
-            softBody.setCcdMotionThreshold(0.7f);
-            softBody.setMargin(0.1f);
-            for (int i = 0; i < softBody.countNodes(); i++) {
-                softBody.setNodeMass(i, 0);
+                softBody.setPose(false, true);
+                SoftBodyConfig config = softBody.getSoftConfig();
+                config.set(Sbcp.PoseMatching, 0.05f);
+                softBody.setPhysicsLocation(new Vector3f(0, 0, 0));
+                //softBody.applyScale(new Vector3f(10,10,10));
+                softBody.setCcdSweptSphereRadius(0.7f);
+                softBody.setCcdMotionThreshold(0.7f);
+                softBody.setMargin(0.1f);
+                for (int i = 0; i < softBody.countNodes(); i++) {
+                    softBody.setNodeMass(i, 0);
+                }
+                DynamXContext.getPhysicsWorld(worldIn).addCollisionObject(softBody);
+                ACsGuiApi.asyncLoadThenShowGui("Block Customization", () -> new GuiSoftbodyConfig(this, facesMesh, softBody));
+
+            } else {
+                SoftbodyEntity entity = new SoftbodyEntity(worldIn, Vector3fPool.get(), 0);
+                //if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Spawn(worldIn, entity, playerIn, this, blockPos)))
+                worldIn.spawnEntity(entity);
+
+                if (itemstack.hasTagCompound()) {
+                    itemstack.getTagCompound().setInteger("entityId", entity.getEntityId());
+                }else {
+                    itemstack.setTagCompound(new NBTTagCompound());
+                    itemstack.getTagCompound().setInteger("entityId", entity.getEntityId());
+
+                }
             }
-            DynamXContext.getPhysicsWorld(worldIn).addCollisionObject(softBody);
-            ACsGuiApi.asyncLoadThenShowGui("Block Customization", () -> new GuiSoftbodyConfig(facesMesh, softBody));
+
         }
-        /*if (hand == EnumHand.MAIN_HAND) {
-            RayTraceResult raytraceresult = DynamXUtils.rayTraceEntitySpawn(worldIn, playerIn, hand);
-            if (raytraceresult == null) {
-                return new ActionResult<>(EnumActionResult.PASS, itemstack);
-            }
-            if (raytraceresult.typeOfHit == RayTraceResult.Type.BLOCK || raytraceresult.typeOfHit == RayTraceResult.Type.ENTITY) {
-                BlockPos blockpos = raytraceresult.getBlockPos();
-                if (raytraceresult.typeOfHit == RayTraceResult.Type.ENTITY) {
-                    blockpos = raytraceresult.entityHit.getPosition();
-                }
 
-                if (worldIn.getBlockState(blockpos).getBlock() == Blocks.SNOW_LAYER) {
-                    blockpos = blockpos.down();
-                }
-
-                if (!spawnEntity(itemstack, worldIn, playerIn, raytraceresult.hitVec)) {
-                    return new ActionResult<>(EnumActionResult.FAIL, itemstack);
-                }
-
-                if (!playerIn.capabilities.isCreativeMode) {
-                    itemstack.grow(-1);
-                }
-
-                playerIn.addStat(StatList.getObjectUseStats(this));
-            }
-            return new ActionResult<>(EnumActionResult.SUCCESS, itemstack);
-        }*/
         return new ActionResult<>(EnumActionResult.FAIL, itemstack);
+    }
+
+    @Override
+    public void onUpdate(ItemStack stack, World worldIn, Entity entityIn, int itemSlot, boolean isSelected) {
+        super.onUpdate(stack, worldIn, entityIn, itemSlot, isSelected);
+        if(worldIn.isRemote && stack.hasTagCompound()){
+            if(stack.getTagCompound().hasKey("entityId")){
+                Entity entity = worldIn.getEntityByID(stack.getTagCompound().getInteger("entityId"));
+                if(entity instanceof SoftbodyEntity){
+                    SoftbodyEntity softbodyEntity = (SoftbodyEntity) entity;
+                    if(softBody != null && changed){
+                        softbodyEntity.softBody = softBody;
+                        softbodyEntity.changed = true;
+                    }
+                }
+            }
+        }
     }
 
     public boolean spawnEntity(ItemStack itemStackIn, World worldIn, EntityPlayer playerIn, Vec3d blockPos) {

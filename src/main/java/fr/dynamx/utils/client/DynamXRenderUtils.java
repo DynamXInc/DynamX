@@ -2,8 +2,11 @@ package fr.dynamx.utils.client;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.client.handlers.ClientEventHandler;
+import fr.dynamx.client.renders.mesh.UvsOption;
 import fr.dynamx.client.renders.mesh.shapes.ArrowMesh;
 import fr.dynamx.client.renders.mesh.shapes.GridGLMesh;
+import fr.dynamx.client.renders.mesh.shapes.IcosphereGLMesh;
+import fr.dynamx.client.renders.mesh.shapes.OctasphereMesh;
 import fr.dynamx.client.renders.vehicle.RenderBaseVehicle;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
@@ -28,6 +31,7 @@ import org.lwjgl.util.glu.Sphere;
 import org.lwjgl.util.vector.Quaternion;
 
 import javax.annotation.Nullable;
+import javax.vecmath.Vector4f;
 import java.awt.*;
 import java.util.List;
 

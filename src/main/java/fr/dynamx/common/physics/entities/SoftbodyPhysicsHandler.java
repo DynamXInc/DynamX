@@ -13,8 +13,13 @@ import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.SoftbodyEntity;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.client.DynamXRenderUtils;
+import jme3utilities.lbj.IndexBuffer;
+import org.lwjgl.BufferUtils;
 
-public class SoftbodyPhysicsHandler<T extends SoftbodyEntity> extends AbstractEntityPhysicsHandler<T, PhysicsSoftBody>{
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+
+public class SoftbodyPhysicsHandler<T extends SoftbodyEntity> extends AbstractEntityPhysicsHandler<T, PhysicsSoftBody> {
 
     private final Vector3f linearVel = new Vector3f();
     private final Vector3f rotationalVel = new Vector3f();
@@ -33,7 +38,7 @@ public class SoftbodyPhysicsHandler<T extends SoftbodyEntity> extends AbstractEn
         SoftBodyConfig config = softBody.getSoftConfig();
         config.set(Sbcp.PoseMatching, 0.05f);
 
-        softBody.setPhysicsLocation(position);
+        // softBody.setPhysicsLocation(position);
         FacesMesh facesMesh = new FacesMesh(softBody);
         DynamXContext.getSoftbodyEntityMesh().put(handledEntity, facesMesh);
         //softBody.setUserObject(facesMesh);
@@ -41,8 +46,42 @@ public class SoftbodyPhysicsHandler<T extends SoftbodyEntity> extends AbstractEn
         softBody.setCcdSweptSphereRadius(0.7f);
         softBody.setCcdMotionThreshold(0.7f);
         softBody.setMargin(0.1f);
-        softBody.setNodeMass(0, 0);
+        for (int i = 0; i < softBody.countNodes(); i++) {
+            softBody.setNodeMass(i, 0);
+        }
+        /*softBody.setCcdSweptSphereRadius(0.7f);
+        softBody.setCcdMotionThreshold(0.7f);
+        softBody.setMargin(0.1f);*/
+
+        //softBody.setPose(false, true);
         return softBody;
+    }
+
+    @Override
+    public void update() {
+        super.update();
+        if (handledEntity.softBody != null && getCollisionObject() != null &&
+                handledEntity.changed) {
+            FloatBuffer nodes = BufferUtils.createFloatBuffer(handledEntity.softBody.countNodes() * 3);
+            handledEntity.softBody.copyLocations(nodes);
+            //getCollisionObject().appendNodes(nodes);
+
+            IntBuffer faces = BufferUtils.createIntBuffer(handledEntity.softBody.countFaces() * 3);
+            handledEntity.softBody.copyFaces(faces);
+            //getCollisionObject().appendFaces(IndexBuffer.wrapIndexBuffer(faces));
+
+            IntBuffer links = BufferUtils.createIntBuffer(handledEntity.softBody.countLinks() * 2);
+            handledEntity.softBody.copyLinks(links);
+            //getCollisionObject().appendLinks(IndexBuffer.wrapIndexBuffer(links));
+
+            FloatBuffer masses = BufferUtils.createFloatBuffer(handledEntity.softBody.countNodes());
+            handledEntity.softBody.copyMasses(masses);
+            getCollisionObject().setMasses(masses);
+
+            //getCollisionObject().getSoftConfig().copyAll(handledEntity.softBody.getSoftConfig());
+            handledEntity.changed = false;
+
+        }
     }
 
     @Override

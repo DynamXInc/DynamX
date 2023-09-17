@@ -1,5 +1,6 @@
 package fr.dynamx.common.entities;
 
+import com.jme3.bullet.objects.PhysicsSoftBody;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
@@ -15,6 +16,9 @@ import java.util.Collections;
 import java.util.List;
 
 public class SoftbodyEntity extends ModularPhysicsEntity<SoftbodyPhysicsHandler<?>>{
+
+    public PhysicsSoftBody softBody;
+    public boolean changed;
 
     public SoftbodyEntity(World world) {
         super(world);

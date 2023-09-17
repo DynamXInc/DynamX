@@ -87,7 +87,7 @@ public class BoatPropellerModule extends BasicEngineModule implements IPackInfoR
                 updateMovement();
             } else {
                 physicsSteeringForce = 0;
-                brake(0.5f);
+                accelerate(0);
             }
         }
 

@@ -1,7 +1,6 @@
 package fr.dynamx.common.entities.modules;
 
 import fr.dynamx.api.audio.EnumSoundState;
-import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.entities.modules.IVehicleController;
 import fr.dynamx.api.network.sync.EntityVariable;
 import fr.dynamx.api.network.sync.SynchronizationRules;
@@ -13,12 +12,12 @@ import fr.dynamx.common.contentpack.type.vehicle.HelicopterPhysicsInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.network.sync.variables.EntityFloatArrayVariable;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
-import fr.dynamx.common.physics.entities.modules.EnginePhysicsHandler;
-import fr.dynamx.common.physics.entities.parts.engine.AutomaticGearboxHandler;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
@@ -54,9 +53,11 @@ public class HelicopterEngineModule extends BasicEngineModule {
     }
 
     @Override
-    public void resetControls() {
-        super.resetControls();
-        power.set(0f);
+    public void removePassenger(Entity passenger) {
+        super.removePassenger(passenger);
+        if (entity.getControllingPassenger() == null && passenger instanceof EntityPlayer && !((EntityPlayer) passenger).capabilities.isCreativeMode) {
+            power.set(0f);
+        }
     }
 
     @Override

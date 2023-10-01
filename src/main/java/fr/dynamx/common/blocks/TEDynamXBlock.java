@@ -12,6 +12,7 @@ import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.capability.DynamXChunkData;
 import fr.dynamx.common.capability.DynamXChunkDataProvider;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
+import fr.dynamx.common.contentpack.type.ObjectCollisionsHelper;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
 import fr.dynamx.common.entities.ICollidableObject;
 import fr.dynamx.common.entities.modules.AbstractLightsModule;
@@ -259,7 +260,7 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
             throw new IllegalStateException("BlockObjectInfo is null for te " + this + " at " + pos);
         }
         if (!blockObjectInfo.getCollisionsHelper().hasPhysicsCollisions()) {
-            throw new IllegalStateException("BlockObjectInfo " + blockObjectInfo.getFullName() + " has no physics collisions");
+            return ObjectCollisionsHelper.EMPTY_COLLISION_SHAPE;
         }
         return blockObjectInfo.getCollisionsHelper().getPhysicsCollisionShape();
     }

@@ -165,7 +165,8 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
                 if (wheelsModule != null) {
                     /* Suspension translation */
                     index = VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.SUSPENSION_LENGTH);
-                    GlStateManager.translate(0, -(wheelsModule.prevVisualProperties[index] + (wheelsModule.visualProperties[index] - wheelsModule.prevVisualProperties[index]) * partialTicks), 0);
+                    GlStateManager.translate(0, -(wheelsModule.prevVisualProperties[index] + (wheelsModule.visualProperties[index] - wheelsModule.prevVisualProperties[index]) * partialTicks)
+                            - info.getSuspensionRestLength(), 0);
 
                     /* Steering rotation*/
                     if (partWheel.isWheelIsSteerable()) {

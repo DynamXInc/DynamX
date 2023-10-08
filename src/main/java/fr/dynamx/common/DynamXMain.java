@@ -91,7 +91,7 @@ public class DynamXMain {
         // Loading protected files
         loadingService.addTask(mps.getTaskEndHook(), "certs_mps", () -> {
             try {
-                mpsContainer.setup("DynamXEA");
+                mpsContainer.setup("DynamX");
             } catch (Exception e) {
                 DynamXErrorManager.addError("DynamX initialization", DynamXErrorManager.INIT_ERRORS, "mps_error", ErrorLevel.FATAL, "MPS", null, e);
                 e.printStackTrace();

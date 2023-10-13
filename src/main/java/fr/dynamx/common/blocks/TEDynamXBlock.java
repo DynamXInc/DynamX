@@ -260,7 +260,7 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
             throw new IllegalStateException("BlockObjectInfo is null for te " + this + " at " + pos);
         }
         if (!blockObjectInfo.getCollisionsHelper().hasPhysicsCollisions()) {
-            return ObjectCollisionsHelper.EMPTY_COLLISION_SHAPE;
+            return ObjectCollisionsHelper.getEmptyCollisionShape();
         }
         return blockObjectInfo.getCollisionsHelper().getPhysicsCollisionShape();
     }

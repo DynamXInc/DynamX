@@ -18,7 +18,7 @@ import java.util.List;
 
 public class ObjectCollisionsHelper
 {
-    public static final CompoundCollisionShape EMPTY_COLLISION_SHAPE = new CompoundCollisionShape();
+    private static CompoundCollisionShape EMPTY_COLLISION_SHAPE;
 
     /**
      * The collision shape of this object, generated either form the partShapes list, or the obj model of the object (hull shape/complex collisions)
@@ -139,5 +139,11 @@ public class ObjectCollisionsHelper
         VEHICLE,
         BLOCK,
         PROP
+    }
+
+    public static CompoundCollisionShape getEmptyCollisionShape() {
+        if(EMPTY_COLLISION_SHAPE == null)
+            EMPTY_COLLISION_SHAPE = new CompoundCollisionShape();
+        return EMPTY_COLLISION_SHAPE;
     }
 }

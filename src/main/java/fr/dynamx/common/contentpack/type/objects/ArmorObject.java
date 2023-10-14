@@ -11,7 +11,7 @@ import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
 import fr.dynamx.client.renders.model.ModelObjArmor;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.common.DynamXContext;
-import fr.dynamx.common.contentpack.loader.ObjectLoader;
+import fr.dynamx.common.contentpack.loader.InfoList;
 import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
 import fr.dynamx.common.items.DynamXItemArmor;
 import fr.dynamx.utils.errors.DynamXErrorManager;
@@ -113,12 +113,12 @@ public class ArmorObject<T extends ArmorObject<?>> extends AbstractItemObject<T,
     }
 
     @Override
-    protected IInfoOwner<T> createOwner(ObjectLoader<T, ?> loader) {
+    protected IInfoOwner<T> createOwner(InfoList<T> loader) {
         throw new IllegalArgumentException("Call createOwners !");
     }
 
     @Override
-    public IInfoOwner<T>[] createOwners(ObjectLoader<T, ?> loader) {
+    public IInfoOwner<T>[] createOwners(InfoList<T> loader) {
         ItemArmor.ArmorMaterial material = EnumHelper.addArmorMaterial(getFullName(), "", durability, reductionAmount, enchantibility, sound, toughness);
         List<IInfoOwner<T>> owners = new ArrayList<>();
         if (getArmorHead() != null)

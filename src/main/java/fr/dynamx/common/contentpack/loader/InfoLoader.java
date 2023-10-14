@@ -1,7 +1,6 @@
 package fr.dynamx.common.contentpack.loader;
 
 import fr.aym.acslib.api.services.error.ErrorLevel;
-import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
@@ -9,14 +8,20 @@ import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeEntry;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.ContentPackLoader;
-import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.sync.PackSyncHandler;
 import fr.dynamx.utils.errors.DynamXErrorManager;
+import lombok.Getter;
 
 import javax.annotation.Nullable;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -28,37 +33,31 @@ import java.util.stream.Collectors;
  * @see INamedObject
  * @see ObjectLoader
  */
-public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
+public class InfoLoader<T extends ISubInfoTypeOwner<?>> extends InfoList<T> {
     /**
      * Optional dependency matcher : <br>
      * Optional blocks are blocks depending on addons that don't throw errors and that are ignored when their dependency isn't loaded.
      */
     public static final Predicate<String> optionalDependencyMatcher = s -> s.equals("Op") || s.equals("OptionalDependency");
     /**
-     * Loaded objects, identified by their full name
-     */
-    protected final Map<String, T> infos = new HashMap<>();
-    /**
      * The prefix used to detect associated .dnx files
+     * -- GETTER --
+     *
+     * @return The prefix used to detect associated .dnx files
      */
+    @Getter
     protected final String prefix;
     /**
      * A function matching an object packName and name with its object class
      */
     protected final AssetCreator<T> assetCreator;
-    /**
-     * SubInfoTypesRegistry for this object
-     */
-    protected final SubInfoTypesRegistry<T> infoTypesRegistry;
 
     /**
      * @param prefix       The prefix used to detect associated .dnx files
      * @param assetCreator A function matching an object packName and name with its object class
      */
     public InfoLoader(String prefix, BiFunction<String, String, T> assetCreator, @Nullable SubInfoTypesRegistry<T> infoTypesRegistry) {
-        this.prefix = prefix;
-        this.assetCreator = ((pack, name, firstLine) -> assetCreator.apply(pack, name));
-        this.infoTypesRegistry = infoTypesRegistry;
+        this(prefix, ((pack, name, firstLine) -> assetCreator.apply(pack, name)), infoTypesRegistry);
     }
 
     /**
@@ -66,25 +65,14 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
      * @param assetCreator A function matching an object packName and name with its object class
      */
     public InfoLoader(String prefix, AssetCreator<T> assetCreator, @Nullable SubInfoTypesRegistry<T> infoTypesRegistry) {
+        super(infoTypesRegistry);
         this.prefix = prefix;
         this.assetCreator = assetCreator;
-        this.infoTypesRegistry = infoTypesRegistry;
     }
 
-    /**
-     * @return The prefix used to detect associated .dnx files
-     */
-    public String getPrefix() {
-        return prefix;
-    }
-
-    /**
-     * Clears infos, used for hot reload
-     *
-     * @param hot If it's an hot reload
-     */
-    public void clear(boolean hot) {
-        infos.clear();
+    @Override
+    public String getName() {
+        return getPrefix().substring(0, getPrefix().length() - 1);
     }
 
     /**
@@ -92,7 +80,7 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
      *
      * @param loadingPack The pack owning the object
      * @param configName  The object's name
-     * @param file The object file
+     * @param file        The object file
      * @param hot         If it's an hot reload
      * @return True if this InfoLoader has loaded this object
      * @throws IOException If an error occurs while reading the stream
@@ -233,7 +221,7 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
             int index = line.indexOf(':');
             String key = line.substring(0, index).trim();
             String value = line.substring(index + 1).trim();
-            IPackFilePropertyFixer propertyFixer = infoTypesRegistry.getSubInfoTypePropertiesFixer(obj.getClass());
+            IPackFilePropertyFixer propertyFixer = subInfoTypesRegistry.getSubInfoTypePropertiesFixer(obj.getClass());
             if (propertyFixer != null) {
                 IPackFilePropertyFixer.FixResult fixResult = propertyFixer.fixInputField(obj, key, value);
                 if (fixResult != null) {
@@ -243,7 +231,7 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
                             parent = ((ISubInfoType<?>) parent).getRootOwner();
                         DynamXErrorManager.addPackError(obj.getPackName(), "deprecated_prop", ErrorLevel.LOW, parent.getName(), "Deprecated config key found " + key + " in " + obj.getName() + ". You should now use " + fixResult.newKey());
                     }
-                    if(!fixResult.isKeepOldKey())
+                    if (!fixResult.isKeepOldKey())
                         key = fixResult.newKey();
                     value = fixResult.newValue(value);
                 }
@@ -290,22 +278,22 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
      */
     @Nullable
     protected ISubInfoType<T> getClassForPropertyOwner(T obj, String name) {
-        if(infoTypesRegistry == null) return null;
+        if (subInfoTypesRegistry == null) return null;
         String[] tags = name.split("#");
         String key = tags[0].toLowerCase();
         //Take strict before, and longer keys before
-        Collection<SubInfoTypeEntry<T>> types = infoTypesRegistry.getEntries().values().stream().sorted((t1, t2) -> t1.isStrict() != t2.isStrict() ? (t1.isStrict() ? -1 : 1) : t2.getKey().length() - t1.getKey().length()).collect(Collectors.toList());
+        Collection<SubInfoTypeEntry<T>> types = subInfoTypesRegistry.getEntries().values().stream().sorted((t1, t2) -> t1.isStrict() != t2.isStrict() ? (t1.isStrict() ? -1 : 1) : t2.getKey().length() - t1.getKey().length()).collect(Collectors.toList());
         for (SubInfoTypeEntry<T> type : types) {
             if (type.matches(key))
                 return type.create(obj, tags[0]);
         }
-        if(key.contains("seat") && infoTypesRegistry.getEntries().containsKey("seat")) {
+        if (key.contains("seat") && subInfoTypesRegistry.getEntries().containsKey("seat")) {
             DynamXErrorManager.addPackError(obj.getPackName(), "deprecated_seat_config", ErrorLevel.LOW, obj.getName(), name);
-            return infoTypesRegistry.getEntries().get("seat").create(obj, tags[0]);
+            return subInfoTypesRegistry.getEntries().get("seat").create(obj, tags[0]);
         }
-        if(key.contains("door") && infoTypesRegistry.getEntries().containsKey("door")) {
+        if (key.contains("door") && subInfoTypesRegistry.getEntries().containsKey("door")) {
             DynamXErrorManager.addPackError(obj.getPackName(), "deprecated_door_config", ErrorLevel.LOW, obj.getName(), name);
-            return infoTypesRegistry.getEntries().get("door").create(obj, tags[0]);
+            return subInfoTypesRegistry.getEntries().get("door").create(obj, tags[0]);
         }
         if (tags.length == 1 || !optionalDependencyMatcher.test(tags[1]))
             DynamXErrorManager.addPackError(obj.getPackName(), "unknown_sub_info", ErrorLevel.HIGH, obj.getName(), name);
@@ -313,41 +301,8 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
         return null;
     }
 
-    /**
-     * Puts the info into infos map, and updates other references to this objects (in {@link IInfoOwner}s for example)
-     */
-    public void loadItems(T info, boolean hot) {
-        info.onComplete(hot);
-        infos.put(info.getFullName(), info);
-    }
-
-    /**
-     * Post-loads the objects (shape generation...), and creates the IInfoOwners
-     *
-     * @param hot True if it's a hot reload
-     */
-    public void postLoad(boolean hot) {}
-
-    /**
-     * @return The info from the info's full name, or null
-     */
-    @Nullable
-    public T findInfo(String infoFullName) {
-        return infos.get(infoFullName);
-    }
-
-    /**
-     * @return Returns all owned infos
-     */
-    public Map<String, T> getInfos() {
-        return infos;
-    }
-
-    /**
-     * @return True if no info is registered
-     */
-    public boolean isEmpty() {
-        return infos.isEmpty();
+    @Override
+    public void postLoad(boolean hot) {
     }
 
     /**
@@ -431,8 +386,8 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
                 if (obj == null)
                     throw new IllegalArgumentException("Object " + o.substring(1) + " not found for pack sync in " + getPrefix());
                 try {
-                    String[] props = new String[split.length-1];
-                    System.arraycopy(split, 1, props, 0, split.length-1);
+                    String[] props = new String[split.length - 1];
+                    System.arraycopy(split, 1, props, 0, split.length - 1);
                     decodeAObject(obj, props);
                     loadItems(obj, o.charAt(0) == '*');
                 } catch (UnsupportedEncodingException e) {
@@ -454,7 +409,7 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
      * Overrides the object wih new delta <br>
      * Permits to keep same objects on server and client sides
      *
-     * @param obj     The object to override
+     * @param obj   The object to override
      * @param split The object data
      */
     protected void decodeAObject(INamedObject obj, String[] split) throws UnsupportedEncodingException {
@@ -468,26 +423,6 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
             setFieldValue(obj, n, split[i]);
             i++;
         }
-    }
-
-    @Nullable
-    public SubInfoTypesRegistry<T> getSubInfoTypesRegistry() {
-        return infoTypesRegistry;
-    }
-
-    /**
-     * @throws IllegalArgumentException If this object does not support sub info types or if this {@link SubInfoTypeEntry} is duplicated
-     * @deprecated Use {@link fr.dynamx.api.contentpack.registry.RegisteredSubInfoType} annotation
-     */
-    @Deprecated
-    public void addSubInfoType(SubInfoTypeEntry<T> entry) {
-        if (infoTypesRegistry == null)
-            throw new IllegalArgumentException("This object does not support sub info types !");
-        infoTypesRegistry.addSubInfoType(entry);
-    }
-
-    public boolean hasSubInfoTypesRegistry() {
-        return infoTypesRegistry != null;
     }
 
     public interface AssetCreator<T extends INamedObject> {

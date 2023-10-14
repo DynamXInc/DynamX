@@ -78,7 +78,6 @@ public class MessagePacksHashs implements IDnxPacket {
             if (DynamXConfig.syncPacks) {
                 try {
                     Map<String, List<String>> delta = PackSyncHandler.getFullDelta(message.objects);
-                    //System.out.println("Full delta with "+ctx.getServerHandler().player+" is "+delta);
                     if (delta.values().stream().anyMatch(l -> !l.isEmpty())) {
                         Map<String, Map<String, byte[]>> fullData = new HashMap<>();
                         int size = 0;
@@ -87,7 +86,7 @@ public class MessagePacksHashs implements IDnxPacket {
                             List<String> l = entry.getValue();
                             fullData.put(s, new HashMap<>());
                             size += s.getBytes(StandardCharsets.UTF_8).length;
-                            InfoLoader<?> loader = DynamXObjectLoaders.getLoaders().stream().filter(i -> i.getPrefix().equals(s)).findFirst().get();
+                            InfoLoader<?> loader = DynamXObjectLoaders.getInfoLoaders().stream().filter(i -> i.getPrefix().equals(s)).findFirst().get();
                             loader.encodeObjects(l, fullData.get(s));
                             for (Map.Entry<String, byte[]> e : fullData.get(s).entrySet()) {
                                 String a = e.getKey();
@@ -95,7 +94,6 @@ public class MessagePacksHashs implements IDnxPacket {
                                 size += a.getBytes(StandardCharsets.UTF_8).length + b.length;
                             }
                         }
-                        //System.out.println("Send data "+fullData+" with byte size "+size);
                         DynamXContext.getNetwork().sendToClientFromOtherThread(new MessagePacksHashs(fullData), EnumPacketTarget.PLAYER, ctx.getServerHandler().player);
                     }
                     //else
@@ -114,12 +112,12 @@ public class MessagePacksHashs implements IDnxPacket {
         public IMessage onMessage(MessagePacksHashs message, MessageContext ctx) {
             Minecraft.getMinecraft().ingameGUI.setOverlayMessage("Synchronizing DynamX packs...", false);
             Minecraft.getMinecraft().addScheduledTask(() -> {
-                //System.out.println("Receive override data "+message.objects);
                 try {
                     for (Map.Entry<String, Map<String, byte[]>> entry : message.objects.entrySet()) {
                         String s = entry.getKey();
                         Map<String, byte[]> l = entry.getValue();
-                        InfoLoader<?> loader = DynamXObjectLoaders.getLoaders().stream().filter(i -> i.getPrefix().equals(s)).findFirst().get();
+                        InfoLoader<?> loader = DynamXObjectLoaders.getInfoLoaders().stream().
+                         filter(i -> i.getPrefix().equals(s)).findFirst().get();
                         loader.receiveObjects(l);
                     }
                 } catch (Exception e) {

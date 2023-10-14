@@ -8,7 +8,7 @@ import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.events.CreatePackItemEvent;
 import fr.dynamx.common.blocks.DynamXBlock;
-import fr.dynamx.common.contentpack.loader.ObjectLoader;
+import fr.dynamx.common.contentpack.loader.InfoList;
 import fr.dynamx.common.contentpack.parts.ILightOwner;
 import fr.dynamx.common.contentpack.parts.PartLightSource;
 import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
@@ -29,7 +29,11 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
     /**
      * List of owned {@link ISubInfoType}s
      */
+    @Getter
     protected final List<ISubInfoType<T>> subProperties = new ArrayList<>();
+
+    @Getter
+    @Setter
     protected PropObject<?> propObject;
 
     @PackFileProperty(configNames = "Rotate", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false, defaultValue = "0 0 0")
@@ -43,7 +47,7 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
 
     @PackFileProperty(configNames = "Material", required = false, defaultValue = "ROCK")
     @Getter
-    protected Material material;
+    protected Material material = Material.ROCK;
 
     /**
      * The light sources of this block
@@ -76,13 +80,13 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
 
     @Override
     @SuppressWarnings("unchecked")
-    public IInfoOwner<T> createOwner(ObjectLoader<T, ?> loader) {
+    public IInfoOwner<T> createOwner(InfoList<T> loader) {
         CreatePackItemEvent.SimpleBlock<T, ?> event = new CreatePackItemEvent.SimpleBlock(loader, this);
         MinecraftForge.EVENT_BUS.post(event);
         if (event.isOverridden()) {
-            return (IInfoOwner<T>) event.getObjectItem();
+            return event.getObjectItem();
         } else {
-            return new DynamXBlock<>((T) this, material != null ? material : Material.ROCK);
+            return new DynamXBlock<>((T) this);
         }
     }
 
@@ -94,11 +98,6 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
     @Override
     public void addSubProperty(ISubInfoType<T> property) {
         subProperties.add(property);
-    }
-
-    @Override
-    public List<ISubInfoType<T>> getSubProperties() {
-        return subProperties;
     }
 
     @Override

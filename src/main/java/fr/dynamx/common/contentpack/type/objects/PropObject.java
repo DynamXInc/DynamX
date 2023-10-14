@@ -1,7 +1,6 @@
 package fr.dynamx.common.contentpack.type.objects;
 
 import com.jme3.math.Vector3f;
-import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
@@ -14,7 +13,7 @@ import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.CreatePackItemEvent;
 import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
-import fr.dynamx.common.contentpack.loader.ObjectLoader;
+import fr.dynamx.common.contentpack.loader.InfoList;
 import fr.dynamx.common.contentpack.loader.PackFilePropertyData;
 import fr.dynamx.common.contentpack.loader.SubInfoTypeAnnotationCache;
 import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
@@ -23,8 +22,8 @@ import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.items.ItemProps;
 import fr.dynamx.utils.DynamXUtils;
-import fr.dynamx.utils.errors.DynamXErrorManager;
 import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
@@ -41,42 +40,46 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
     private final BlockObject<?> owner;
     @PackFileProperty(configNames = "EmptyMass")
     @Getter
+    @Setter
     protected int emptyMass;
     @PackFileProperty(configNames = "CenterOfGravityOffset", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F)
     @Getter
+    @Setter
     protected Vector3f centerOfMass;
     @PackFileProperty(configNames = "SpawnOffset", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false, defaultValue = "0 0.65 0")
     @Getter
+    @Setter
     protected Vector3f spawnOffset = new Vector3f(0, 0.65f, 0);
     @PackFileProperty(configNames = "ContinuousCollisionDetection", required = false, defaultValue = "false")
     @Getter
+    @Setter
     protected boolean isCCDEnabled;
     @PackFileProperty(configNames = "Friction", required = false, defaultValue = "0.5")
     @Getter
+    @Setter
     protected float friction = 0.5f;
     @PackFileProperty(configNames = "Margin", required = false, defaultValue = "0.04")
     @Getter
+    @Setter
     protected float margin = 0.04f;
     @PackFileProperty(configNames = "DespawnTime", required = false, defaultValue = "\"-1\" (disabled)")
     @Getter
+    @Setter
     protected float despawnTime = -1;
     @PackFileProperty(configNames = "LinearDamping", required = false, defaultValue = "0")
+    @Getter
+    @Setter
     protected float linearDamping;
     @PackFileProperty(configNames = "AngularDamping", required = false, defaultValue = "0")
+    @Getter
+    @Setter
     protected float angularDamping;
     @PackFileProperty(configNames = "Bounciness", required = false, defaultValue = "0")
     @Getter
+    @Setter
     protected float restitutionFactor;
 
     private List<ParticleEmitterInfo<?>> particleEmitters = new ArrayList<>();
-
-    public PropObject(String packName, String fileName) {
-        super(packName, fileName);
-        DynamXErrorManager.addPackError(getPackName(), "deprecated_prop_format", ErrorLevel.LOW, fileName, "Props should now be declared in the corresponding block_" + getName() + ".dynx file");
-        owner = null;
-        itemIcon = "Prop";
-        collisionsHelper = new ObjectCollisionsHelper();
-    }
 
     public PropObject(ISubInfoTypeOwner<BlockObject<?>> owner, String fileName) {
         super(owner.getPackName(), fileName);
@@ -125,11 +128,11 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
     }
 
     @Override
-    public IInfoOwner<T> createOwner(ObjectLoader<T, ?> loader) {
+    public IInfoOwner<T> createOwner(InfoList<T> loader) {
         CreatePackItemEvent.PropsItem<T, ?> event = new CreatePackItemEvent.PropsItem(loader, this);
         MinecraftForge.EVENT_BUS.post(event);
         if (event.isOverridden()) {
-            return (IInfoOwner<T>) event.getObjectItem();
+            return event.getObjectItem();
         } else {
             return new ItemProps(this);
         }
@@ -143,16 +146,6 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
     @Override
     public ItemStack getPickedResult(int metadata) {
         return new ItemStack((Item) getOwners()[0], 1, metadata);
-    }
-
-    @Override
-    public float getAngularDamping() {
-        return angularDamping;
-    }
-
-    @Override
-    public float getLinearDamping() {
-        return linearDamping;
     }
 
     @Override
@@ -187,7 +180,7 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
     @Override
     public void addModules(PackPhysicsEntity<?, ?> entity, ModuleListBuilder modules) {
         //TODO SUPPORT PARTS WITH MODULES
-        if(getOwner() != null)
+        if (getOwner() != null)
             getOwner().getLightSources().values().forEach(compoundLight -> compoundLight.addModules(entity, modules));
     }
 }

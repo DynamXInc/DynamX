@@ -14,6 +14,7 @@ import fr.dynamx.client.gui.NewGuiDnxDebug;
 import fr.dynamx.client.handlers.hud.CarController;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
+import fr.dynamx.common.contentpack.loader.InfoList;
 import fr.dynamx.common.contentpack.loader.InfoLoader;
 import fr.dynamx.common.contentpack.loader.SubInfoTypesRegistry;
 import fr.dynamx.common.contentpack.sync.PackSyncHandler;
@@ -205,12 +206,12 @@ public class ContentPackLoader {
         isHotReloading = initialized;
         if (!isHotReloading)
             initialized = true;
-        for (InfoLoader<?> loader : DynamXObjectLoaders.LOADERS)
+        for (InfoList<?> loader : DynamXObjectLoaders.getInfoLists())
             loader.clear(isHotReloading);
         DynamXErrorManager.getErrorManager().clear(DynamXErrorManager.PACKS_ERRORS);
         DynamXContext.getObjModelDataCache().clear();
         try {
-            ProgressManager.ProgressBar bar = ProgressManager.push("Loading content pack system", 1 + DynamXObjectLoaders.LOADERS.size());
+            ProgressManager.ProgressBar bar = ProgressManager.push("Loading content pack system", 1 + DynamXObjectLoaders.getInfoLists().size());
             bar.step("Discover assets");
 
             MinecraftForge.EVENT_BUS.post(new ContentPackSystemEvent.Load(PhysicsEntityEvent.Phase.PRE));
@@ -286,8 +287,8 @@ public class ContentPackLoader {
                 }
             }
             //Load shapes
-            for (InfoLoader<?> loader : DynamXObjectLoaders.LOADERS) {
-                bar.step("Post load : " + loader.getPrefix().substring(0, loader.getPrefix().length() - 1));
+            for (InfoList<?> loader : DynamXObjectLoaders.getInfoLists()) {
+                bar.step("Post load : " + loader.getName());
                 loader.postLoad(isHotReloading);
             }
             ProgressManager.pop(bar);
@@ -343,7 +344,7 @@ public class ContentPackLoader {
         try {
             String configName = file.getName().substring(0, file.getName().length() - suffix.length()).toLowerCase();
             boolean loaded = false;
-            for (InfoLoader<?> loader : DynamXObjectLoaders.LOADERS) {
+            for (InfoLoader<?> loader : DynamXObjectLoaders.getInfoLoaders()) {
                 if (loader.load(loadingPack, configName, file, isHotReloading)) {
                     loaded = true;
                     break;

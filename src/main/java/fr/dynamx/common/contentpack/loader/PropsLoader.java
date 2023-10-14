@@ -3,14 +3,15 @@ package fr.dynamx.common.contentpack.loader;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
-import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.PackInfo;
 import fr.dynamx.common.contentpack.type.ObjectInfo;
 import fr.dynamx.common.contentpack.type.objects.AbstractItemObject;
+import fr.dynamx.common.contentpack.type.objects.PropObject;
 import fr.dynamx.common.items.DynamXItemRegistry;
+import fr.dynamx.common.items.ItemProps;
 import fr.dynamx.utils.DynamXReflection;
 import fr.dynamx.utils.client.ContentPackUtils;
 import fr.dynamx.utils.errors.DynamXErrorManager;
@@ -25,19 +26,17 @@ import net.minecraftforge.fml.common.ProgressManager;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static fr.dynamx.common.DynamXMain.log;
 
 /**
- * Automatic loader of specific info objects
+ * Loader of props. This loader is different from {@link ObjectLoader} because props aren't loaded from files, but from their block owner.
  *
  * @param <T> The objects class
- * @param <C> The owners class
  * @see ObjectInfo
  */
-public class ObjectLoader<T extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C extends IInfoOwner<?>> extends InfoLoader<T> {
+public class PropsLoader<T extends PropObject<?>> extends InfoList<T> {
     /**
      * All {@link IInfoOwner}s associated with our objects
      */
@@ -46,19 +45,20 @@ public class ObjectLoader<T extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C exte
      * Builtin java objects added by mods, register once and remembered for hot reloads
      */
     protected final List<T> builtinObjects = new ArrayList<>();
-    private final Function<T, C> itemCreator;
+    private final Function<T, ItemProps<?>> itemCreator;
 
-    /**
-     * @param prefix       The prefix used to detect associated .dnx files
-     * @param assetCreator A function matching an object packName and name with its object class
-     */
-    public ObjectLoader(String prefix, BiFunction<String, String, T> assetCreator, @Nullable SubInfoTypesRegistry<T> infoTypesRegistry) {
-        this(prefix, assetCreator, null, infoTypesRegistry);
+    public PropsLoader(@Nullable SubInfoTypesRegistry<T> infoTypesRegistry) {
+        this(null, infoTypesRegistry);
     }
 
-    public ObjectLoader(String prefix, BiFunction<String, String, T> assetCreator, Function<T, C> itemCreator, @Nullable SubInfoTypesRegistry<T> infoTypesRegistry) {
-        super(prefix, assetCreator, infoTypesRegistry);
+    public PropsLoader(Function<T, ItemProps<?>> itemCreator, @Nullable SubInfoTypesRegistry<T> infoTypesRegistry) {
+        super(infoTypesRegistry);
         this.itemCreator = itemCreator;
+    }
+
+    @Override
+    public String getName() {
+        return "props";
     }
 
     @Override
@@ -76,28 +76,24 @@ public class ObjectLoader<T extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C exte
      * and it is automatically reused when packs are reloaded <br> <br>
      * NOTE : Should be called during addons initialization
      *
-     * @param modName    The name of the mod adding this object
-     * @param objectName The name of the object
-     * @return The object, to use in classes extending DynamX ones (example : {@link fr.dynamx.common.blocks.DynamXBlock})
+     * @param modName The name of the mod adding this object
+     * @param object  The builtin object to add
      * @throws IllegalStateException If you call this after the start of packs loading (see ContentPackLoader.isPackLoadingStarted)
      * @see fr.dynamx.api.contentpack.DynamXAddon
      */
-    @SuppressWarnings("unchecked")
-    public T addBuiltinObject(C owner, String modName, String objectName) {
+    public void addBuiltinObject(String modName, T object) {
         if (ContentPackLoader.isPackLoadingStarted())
             throw new IllegalStateException("You should register your builtin objects before packs loading. Use the addon init callback.");
-        T info = assetCreator.create(modName, objectName, null);
-        owners.add((IInfoOwner<T>) owner);
-        builtinObjects.add(info);
+        builtinObjects.add(object);
         if (DynamXObjectLoaders.PACKS.findPackLocations(modName).isEmpty())
             DynamXObjectLoaders.PACKS.loadItems(PackInfo.forAddon(modName), false);
-        return info;
     }
 
     @Override
     public void postLoad(boolean hot) {
-        super.postLoad(hot);
-        ProgressManager.ProgressBar bar1 = ProgressManager.push("Post-loading " + getPrefix(), infos.size());
+        //TODO SIMPLIFY AND PUT IN COMMON WITH OBJECT LOADER ?
+        ProgressManager.ProgressBar bar1 = ProgressManager.push("Post-loading props", infos.size());
+        System.out.println("Registry: props: " + getInfos());
         for (T info : infos.values()) {
             bar1.step(info.getFullName());
             try {
@@ -129,25 +125,24 @@ public class ObjectLoader<T extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C exte
                         }
                     }
                 }
-                if (!builtinObjects.contains(info)) {
-                    C[] obj = (C[]) ((ObjectInfo<T>) info).createOwners(this);
-                    if (obj.length > 0) {
-                        tabItem[0] = obj[0];
-                    }
-                    for (C ob : obj) {
-                        owners.add((IInfoOwner<T>) ob);
-                        if (client) {
-                            if (ob instanceof IResourcesOwner && ((IResourcesOwner) ob).createTranslation()) {
-                                for (int metadata = 0; metadata < ((IResourcesOwner) ob).getMaxMeta(); metadata++) {
-                                    String translationKey = info.getTranslationKey((IInfoOwner) ob, metadata) + ".name";
-                                    String translationValue = info.getTranslatedName((IInfoOwner) ob, metadata);
-                                    ContentPackUtils.addMissingLangFile(DynamXMain.resourcesDirectory, info.getPackName(), translationKey, translationValue);
-                                }
+                System.out.println("Test:" + info + " // " + builtinObjects);
+                IInfoOwner<?>[] obj = ((ObjectInfo<T>) info).createOwners(this);
+                if (obj.length > 0) {
+                    tabItem[0] = obj[0];
+                }
+                for (IInfoOwner<?> ob : obj) {
+                    owners.add((IInfoOwner<T>) ob);
+                    if (client) {
+                        if (ob != null && ((ItemProps<?>) ob).createTranslation()) {
+                            for (int metadata = 0; metadata < ((IResourcesOwner) ob).getMaxMeta(); metadata++) {
+                                String translationKey = info.getTranslationKey((IInfoOwner) ob, metadata) + ".name";
+                                String translationValue = info.getTranslatedName((IInfoOwner) ob, metadata);
+                                ContentPackUtils.addMissingLangFile(DynamXMain.resourcesDirectory, info.getPackName(), translationKey, translationValue);
                             }
                         }
                     }
                 }
-            } else if (!builtinObjects.contains(info)) { //Refresh infos objects contained in created info owners
+            } else { //Refresh infos objects contained in created info owners
                 boolean found = false;
                 for (IInfoOwner<T> owner : owners) {
                     if (owner.getInfo().getFullName().equalsIgnoreCase(info.getFullName())) {
@@ -169,7 +164,7 @@ public class ObjectLoader<T extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C exte
      *
      * @return Maps a built info with the right item
      */
-    public C getItem(T from) {
+    public ItemProps<?> getItem(T from) {
         return itemCreator.apply(from);
     }
 }

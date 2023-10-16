@@ -1,7 +1,7 @@
 package fr.dynamx.common.contentpack.type.objects;
 
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.contentpack.object.IInfoOwner;
+import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
@@ -128,7 +128,7 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
     }
 
     @Override
-    public IInfoOwner<T> createOwner(InfoList<T> loader) {
+    public IDynamXItem<T> createItem(InfoList<T> loader) {
         CreatePackItemEvent.PropsItem<T, ?> event = new CreatePackItemEvent.PropsItem(loader, this);
         MinecraftForge.EVENT_BUS.post(event);
         if (event.isOverridden()) {
@@ -145,7 +145,7 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
 
     @Override
     public ItemStack getPickedResult(int metadata) {
-        return new ItemStack((Item) getOwners()[0], 1, metadata);
+        return new ItemStack((Item) getItems()[0], 1, metadata);
     }
 
     @Override

@@ -1,10 +1,9 @@
 package fr.dynamx.api.events;
 
-import fr.dynamx.api.contentpack.object.IInfoOwner;
+import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.common.contentpack.loader.InfoList;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
-import fr.dynamx.common.contentpack.loader.ObjectLoader;
 import fr.dynamx.common.contentpack.type.ObjectInfo;
 import fr.dynamx.common.contentpack.type.objects.AbstractItemObject;
 import fr.dynamx.common.contentpack.type.objects.PropObject;
@@ -18,7 +17,7 @@ import javax.annotation.Nullable;
 /**
  * @see CreatePackItemEvent
  */
-public abstract class CreatePackItemEvent<B extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C extends IInfoOwner<B>> extends Event {
+public abstract class CreatePackItemEvent<B extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C extends IDynamXItem<B>> extends Event {
     /**
      *  The loader of this object, depends on the type of the object (item, block, armor, trailer, wheeled vehicle, moto...)
      */
@@ -55,7 +54,7 @@ public abstract class CreatePackItemEvent<B extends ObjectInfo<?> & ISubInfoType
      * You can cancel the event to avoid other addons to modify your behavior
      */
     @Cancelable
-    public static class VehicleItem<B extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C extends IInfoOwner<B>> extends CreatePackItemEvent<B,C> {
+    public static class VehicleItem<B extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C extends IDynamXItem<B>> extends CreatePackItemEvent<B,C> {
         public VehicleItem(InfoList<B> loader, B objectInfo) {
             super(loader, objectInfo);
         }
@@ -67,7 +66,7 @@ public abstract class CreatePackItemEvent<B extends ObjectInfo<?> & ISubInfoType
      * You can cancel the event to avoid other addons to modify your behavior
      */
     @Cancelable
-    public static class SimpleItem<B extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C extends IInfoOwner<B>> extends CreatePackItemEvent<B,C> {
+    public static class SimpleItem<B extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C extends IDynamXItem<B>> extends CreatePackItemEvent<B,C> {
         public SimpleItem(InfoList<B> loader, B objectInfo) {
             super(loader, objectInfo);
         }
@@ -79,7 +78,7 @@ public abstract class CreatePackItemEvent<B extends ObjectInfo<?> & ISubInfoType
      * You can cancel the event to avoid other addons to modify your behavior
      */
     @Cancelable
-    public static class SimpleBlock<B extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C extends IInfoOwner<B>> extends CreatePackItemEvent<B, C> {
+    public static class SimpleBlock<B extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C extends IDynamXItem<B>> extends CreatePackItemEvent<B, C> {
         public SimpleBlock(InfoList<B> loader, B objectInfo) {
             super(loader, objectInfo);
         }
@@ -91,7 +90,7 @@ public abstract class CreatePackItemEvent<B extends ObjectInfo<?> & ISubInfoType
      * You can cancel the event to avoid other addons to modify your behavior
      */
     @Cancelable
-    public static class PropsItem<B extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C extends IInfoOwner<B>> extends CreatePackItemEvent<B,C> {
+    public static class PropsItem<B extends ObjectInfo<?> & ISubInfoTypeOwner<?>, C extends IDynamXItem<B>> extends CreatePackItemEvent<B,C> {
 
         public PropsItem(InfoList<B> loader, B objectInfo) {
             super(loader, objectInfo);

@@ -1,10 +1,12 @@
 package fr.dynamx.common.contentpack.type;
 
-import fr.dynamx.api.contentpack.object.IInfoOwner;
+import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.common.contentpack.loader.InfoList;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.annotation.Nullable;
 
@@ -20,7 +22,12 @@ public abstract class ObjectInfo<T extends ObjectInfo<?> & ISubInfoTypeOwner<?>>
     private String description;
     @PackFileProperty(configNames = "Name", description = "common.name")
     private String defaultName;
-    protected IInfoOwner<T>[] owners;
+    /**
+     * IDynamXItem are the objects using this info. It is, for example, a block or an item, or all item armors of an ArmorInfo. <br>
+     * Null before postLoad step.
+     */
+    @Getter
+    protected IDynamXItem<T>[] items;
 
     /**
      * @param packName The name of the pack owning the object
@@ -66,28 +73,28 @@ public abstract class ObjectInfo<T extends ObjectInfo<?> & ISubInfoTypeOwner<?>>
     }
 
     /**
-     * InfoOwners are the objects using this info, can be for example a block or an item, or all armors of an ArmorInfo <br>
-     * Called by createOwners() default implementation <br>
+     * IDynamXItems are the objects using this info, can be for example a block or an item, or all armors of an ArmorInfo. <br>
+     * Called by createItems() default implementation. <br>
      *
-     * @return An InfoOwner for this object. Null if the object has failed to load
+     * @return An IDynamXItems for this object. Null if the object has failed to load
      */
     @Nullable
-    protected abstract IInfoOwner<T> createOwner(InfoList<T> loader);
+    protected abstract IDynamXItem<T> createItem(InfoList<T> loader);
 
     /**
-     * Inits the infos owners for this object <br>
-     * InfoOwners are the objects using this info, can be for example a block or an item, or all armors of an ArmorInfo
+     * Inits the items for this object. <br>
+     * IDynamXItems are the objects using this info. It is, for example, a block or an item, or all armors of an ArmorInfo.
      *
      * @param loader The loader of this object
-     * @return All InfoOwners for this object
+     * @return All IDynamXItems for this object
      */
     @SuppressWarnings("unchecked")
-    public IInfoOwner<T>[] createOwners(InfoList<T> loader) {
-        IInfoOwner<T> owner = createOwner(loader);
+    public IDynamXItem<T>[] createItems(InfoList<T> loader) {
+        IDynamXItem<T> owner = createItem(loader);
         if (owner == null)
-            return new IInfoOwner[0];
-        owners = new IInfoOwner[]{owner};
-        return owners;
+            return new IDynamXItem[0];
+        items = new IDynamXItem[]{owner};
+        return items;
     }
 
     /**
@@ -102,25 +109,16 @@ public abstract class ObjectInfo<T extends ObjectInfo<?> & ISubInfoTypeOwner<?>>
     }
 
     /**
-     * InfoOwners are the objects using this info, can be for example a block or an item, or all item armors of an ArmorInfo
-     *
-     * @return All InfoOwners for this object, null before object initialization end
-     */
-    public IInfoOwner<T>[] getOwners() {
-        return owners;
-    }
-
-    /**
      * @return The translation key for the given item, used for auto-translation
      */
-    public String getTranslationKey(IInfoOwner<T> item, int itemMeta) {
+    public String getTranslationKey(IDynamXItem<T> item, int itemMeta) {
         return getFullName().toLowerCase();
     }
 
     /**
      * @return The default translation name for the given item, used for auto-translation
      */
-    public String getTranslatedName(IInfoOwner<T> item, int itemMeta) {
+    public String getTranslatedName(IDynamXItem<T> item, int itemMeta) {
         return (getDefaultName() == null ? getName() : getDefaultName());
     }
 
@@ -134,5 +132,10 @@ public abstract class ObjectInfo<T extends ObjectInfo<?> & ISubInfoTypeOwner<?>>
 
     public void setDefaultName(String defaultName) {
         this.defaultName = defaultName;
+    }
+
+    public void setItems(IDynamXItem<?>[] items) {
+        // @Setter annotation cannot be used because of generic types
+        this.items = (IDynamXItem<T>[]) items;
     }
 }

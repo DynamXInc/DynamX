@@ -1,7 +1,7 @@
 package fr.dynamx.common.handlers;
 
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.contentpack.object.IInfoOwner;
+import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.events.VehicleEntityEvent;
@@ -273,7 +273,7 @@ public class CommonEventHandler {
         @SubscribeEvent
         public static void registerBlocks(RegistryEvent.Register<Block> event) {
             IForgeRegistry<Block> blocks = event.getRegistry();
-            for (IInfoOwner<BlockObject<?>> block : DynamXObjectLoaders.BLOCKS.owners) {
+            for (IDynamXItem<BlockObject<?>> block : DynamXObjectLoaders.BLOCKS.owners) {
                 blocks.register((Block) block);
 
                 if (FMLCommonHandler.instance().getSide().isClient()) {

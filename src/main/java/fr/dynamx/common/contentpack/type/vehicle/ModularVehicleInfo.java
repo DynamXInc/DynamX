@@ -2,7 +2,7 @@ package fr.dynamx.common.contentpack.type.vehicle;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.ICollisionsContainer;
-import fr.dynamx.api.contentpack.object.IInfoOwner;
+import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
 import fr.dynamx.api.contentpack.object.part.BasePart;
@@ -23,7 +23,6 @@ import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.loader.InfoList;
-import fr.dynamx.common.contentpack.loader.ObjectLoader;
 import fr.dynamx.common.contentpack.parts.ILightOwner;
 import fr.dynamx.common.contentpack.parts.PartLightSource;
 import fr.dynamx.common.contentpack.parts.PartWheel;
@@ -236,13 +235,13 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
 
     @Override
     @SuppressWarnings({"unchecked"})
-    public IInfoOwner<ModularVehicleInfo> createOwner(InfoList<ModularVehicleInfo> loader) {
+    public IDynamXItem<ModularVehicleInfo> createItem(InfoList<ModularVehicleInfo> loader) {
         CreatePackItemEvent.VehicleItem<ModularVehicleInfo, ?> event = new CreatePackItemEvent.VehicleItem(loader, this);
         MinecraftForge.EVENT_BUS.post(event);
         if (event.isOverridden()) {
             return event.getObjectItem();
         } else {
-            return (IInfoOwner<ModularVehicleInfo>) ((ObjectLoader<ModularVehicleInfo, ?>) loader).getItem(this);
+            return validator.getSpawnItem(this);
         }
     }
 
@@ -278,7 +277,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
 
     @Override
     public ItemStack getPickedResult(int metadata) {
-        return new ItemStack((Item) getOwners()[0], 1, metadata);
+        return new ItemStack((Item) getItems()[0], 1, metadata);
     }
 
     /**
@@ -335,7 +334,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     }
 
     @Override
-    public String getTranslationKey(IInfoOwner<ModularVehicleInfo> item, int itemMeta) {
+    public String getTranslationKey(IDynamXItem<ModularVehicleInfo> item, int itemMeta) {
         if (itemMeta == 0)
             return super.getTranslationKey(item, itemMeta);
         TextureVariantData textureInfo = variants.getVariantsMap().get((byte) itemMeta);
@@ -343,7 +342,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     }
 
     @Override
-    public String getTranslatedName(IInfoOwner<ModularVehicleInfo> item, int itemMeta) {
+    public String getTranslatedName(IDynamXItem<ModularVehicleInfo> item, int itemMeta) {
         if (itemMeta == 0)
             return super.getTranslatedName(item, itemMeta);
         TextureVariantData textureInfo = variants.getVariantsMap().get((byte) itemMeta);

@@ -1,7 +1,7 @@
 package fr.dynamx.common.blocks;
 
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.contentpack.object.IInfoOwner;
+import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
 import fr.dynamx.api.contentpack.object.render.IObjPackObject;
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
@@ -43,7 +43,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class DynamXBlock<T extends BlockObject<?>> extends Block implements IInfoOwner<T>, IResourcesOwner {
+public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDynamXItem<T>, IResourcesOwner {
 
     public static final PropertyInteger METADATA = PropertyInteger.create("metadata", 0, 15);
 

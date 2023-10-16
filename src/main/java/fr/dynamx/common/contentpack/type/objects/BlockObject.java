@@ -1,7 +1,7 @@
 package fr.dynamx.common.contentpack.type.objects;
 
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.contentpack.object.IInfoOwner;
+import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
@@ -80,7 +80,7 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
 
     @Override
     @SuppressWarnings("unchecked")
-    public IInfoOwner<T> createOwner(InfoList<T> loader) {
+    public IDynamXItem<T> createItem(InfoList<T> loader) {
         CreatePackItemEvent.SimpleBlock<T, ?> event = new CreatePackItemEvent.SimpleBlock(loader, this);
         MinecraftForge.EVENT_BUS.post(event);
         if (event.isOverridden()) {
@@ -91,7 +91,7 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
     }
 
     @Override
-    public String getTranslationKey(IInfoOwner<T> item, int itemMeta) {
+    public String getTranslationKey(IDynamXItem<T> item, int itemMeta) {
         return super.getTranslationKey(item, itemMeta).replace("item", "tile");
     }
 

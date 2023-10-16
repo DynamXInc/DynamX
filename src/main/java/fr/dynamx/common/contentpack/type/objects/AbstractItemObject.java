@@ -1,7 +1,7 @@
 package fr.dynamx.common.contentpack.type.objects;
 
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.contentpack.object.IInfoOwner;
+import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
@@ -95,7 +95,7 @@ public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A e
     }
 
     @Override
-    public String getTranslationKey(IInfoOwner<T> item, int itemMeta) {
+    public String getTranslationKey(IDynamXItem<T> item, int itemMeta) {
         return "item." + DynamXConstants.ID + "." + super.getTranslationKey(item, itemMeta);
     }
 

@@ -1,7 +1,7 @@
 package fr.dynamx.common.contentpack.type.objects;
 
 import fr.aym.acslib.api.services.error.ErrorLevel;
-import fr.dynamx.api.contentpack.object.IInfoOwner;
+import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
@@ -113,14 +113,14 @@ public class ArmorObject<T extends ArmorObject<?>> extends AbstractItemObject<T,
     }
 
     @Override
-    protected IInfoOwner<T> createOwner(InfoList<T> loader) {
+    protected IDynamXItem<T> createItem(InfoList<T> loader) {
         throw new IllegalArgumentException("Call createOwners !");
     }
 
     @Override
-    public IInfoOwner<T>[] createOwners(InfoList<T> loader) {
+    public IDynamXItem<T>[] createItems(InfoList<T> loader) {
         ItemArmor.ArmorMaterial material = EnumHelper.addArmorMaterial(getFullName(), "", durability, reductionAmount, enchantibility, sound, toughness);
-        List<IInfoOwner<T>> owners = new ArrayList<>();
+        List<IDynamXItem<T>> owners = new ArrayList<>();
         if (getArmorHead() != null)
             owners.add(new DynamXItemArmor(this, material, EntityEquipmentSlot.HEAD));
         if (getArmorBody() != null || getArmorArms() != null)
@@ -131,8 +131,8 @@ public class ArmorObject<T extends ArmorObject<?>> extends AbstractItemObject<T,
             owners.add(new DynamXItemArmor(this, material, EntityEquipmentSlot.FEET));
         if (owners.isEmpty())
             DynamXErrorManager.addPackError(getPackName(), "armor_error", ErrorLevel.FATAL, getName(), "No configured items for this armor");
-        this.owners = owners.toArray(new IInfoOwner[0]);
-        return this.owners;
+        this.items = owners.toArray(new IDynamXItem[0]);
+        return this.items;
     }
 
     @Override
@@ -172,7 +172,7 @@ public class ArmorObject<T extends ArmorObject<?>> extends AbstractItemObject<T,
     }
 
     @Override
-    public String getTranslationKey(IInfoOwner<T> item, int itemMeta) {
+    public String getTranslationKey(IDynamXItem<T> item, int itemMeta) {
         EntityEquipmentSlot slot = ((DynamXItemArmor<T>) item).armorType;
         if (itemMeta == 0 || getVariants() == null)
             return super.getTranslationKey(item, itemMeta) + "_" + slot.getName();
@@ -180,7 +180,7 @@ public class ArmorObject<T extends ArmorObject<?>> extends AbstractItemObject<T,
     }
 
     @Override
-    public String getTranslatedName(IInfoOwner<T> item, int itemMeta) {
+    public String getTranslatedName(IDynamXItem<T> item, int itemMeta) {
         String prefix = "";
         EntityEquipmentSlot slot = ((DynamXItemArmor<T>) item).armorType;
         switch (slot) {

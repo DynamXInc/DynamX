@@ -1,6 +1,6 @@
 package fr.dynamx.common.items;
 
-import fr.dynamx.api.contentpack.object.IInfoOwner;
+import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
 import fr.dynamx.common.contentpack.parts.PartWheel;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
@@ -16,7 +16,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public abstract class ItemModularEntity extends DynamXItemSpawner<ModularVehicleInfo> implements IInfoOwner<ModularVehicleInfo> {
+public abstract class ItemModularEntity extends DynamXItemSpawner<ModularVehicleInfo> implements IDynamXItem<ModularVehicleInfo> {
     private final int textureNum;
 
     public ItemModularEntity(ModularVehicleInfo modulableVehicleInfo) {

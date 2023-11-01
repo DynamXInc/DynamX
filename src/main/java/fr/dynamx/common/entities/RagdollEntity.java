@@ -289,7 +289,7 @@ public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> imple
         if (world.isRemote) {
             if (handledPlayer == null) {
                 Entity entityByID = world.getEntityByID(getHandledPlayer());
-                if (entityByID instanceof EntityPlayer) {
+                if (entityByID instanceof EntityPlayer && DynamXContext.getPlayerToCollision().containsKey(entityByID)) {
                     handledPlayer = (EntityPlayer) entityByID;
                     DynamXContext.getPlayerToCollision().get(handledPlayer).ragdollEntity = this;
                     DynamXContext.getPlayerToCollision().get(handledPlayer).removeFromWorld(false, world);

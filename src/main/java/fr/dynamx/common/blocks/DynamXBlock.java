@@ -10,8 +10,11 @@ import fr.dynamx.api.events.DynamXBlockEvent;
 import fr.dynamx.common.capability.DynamXChunkData;
 import fr.dynamx.common.capability.DynamXChunkDataProvider;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
+import fr.dynamx.common.contentpack.parts.PartBlockSeat;
+import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
 import fr.dynamx.common.contentpack.type.objects.PropObject;
+import fr.dynamx.common.entities.SeatEntity;
 import fr.dynamx.common.items.DynamXItemRegistry;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.RegistryNameSetter;
@@ -178,6 +181,12 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
                 return true;
             }
         }
+        if(!worldIn.isRemote) {
+            //TODO RAYCAST
+            TileEntity te = worldIn.getTileEntity(pos);
+            if(te instanceof TEDynamXBlock && ((TEDynamXBlock) te).getSeatEntities() != null)
+                playerIn.startRiding(((TEDynamXBlock) te).getSeatEntities().get(0));
+        }
         return false;
     }
 
@@ -213,6 +222,9 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
 
     @Override
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
+        TileEntity te = worldIn.getTileEntity(pos);
+        if(te instanceof TEDynamXBlock && ((TEDynamXBlock) te).getSeatEntities() != null)
+            ((TEDynamXBlock) te).getSeatEntities().forEach(Entity::setDead);
         super.breakBlock(worldIn, pos, state);
         DynamXChunkData data = worldIn.getChunk(pos).getCapability(DynamXChunkDataProvider.DYNAM_X_CHUNK_DATA_CAPABILITY, null);
         data.getBlocksAABB().remove(pos);

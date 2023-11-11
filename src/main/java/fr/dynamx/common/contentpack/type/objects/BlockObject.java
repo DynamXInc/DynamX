@@ -17,6 +17,8 @@ import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.utils.DynamXUtils;
 import lombok.Getter;
 import lombok.Setter;
+import fr.dynamx.common.contentpack.loader.ObjectLoader;
+import fr.dynamx.common.contentpack.parts.PartBlockSeat;
 import net.minecraft.block.material.Material;
 import net.minecraftforge.common.MinecraftForge;
 
@@ -132,5 +134,11 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
     @Override
     public PartLightSource getLightSource(String partName) {
         return lightSources.get(partName);
+    }
+
+    private byte seatID;
+
+    public void arrangeSeatID(PartBlockSeat seat) {
+        seat.setId(seatID++);
     }
 }

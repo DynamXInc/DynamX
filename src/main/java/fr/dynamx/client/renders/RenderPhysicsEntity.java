@@ -107,7 +107,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
                 //Apply seat rotation
                 if (entity instanceof IModuleContainer.ISeatsContainer) {
                     PartSeat seat = ((IModuleContainer.ISeatsContainer) entity).getSeats().getRidingSeat(e);
-                    if (seat != null) {
+                    /*if (seat != null) {
                         EnumSeatPlayerPosition position = seat.getPlayerPosition();
                         shouldRenderPlayerSitting = position == EnumSeatPlayerPosition.SITTING;
 
@@ -117,7 +117,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
                             GlStateManager.rotate(GlQuaternionPool.get(seat.getRotation()));
                         if (position == EnumSeatPlayerPosition.LYING)
                             GlStateManager.rotate(90, -1, 0, 0);
-                    }
+                    }*/
                 }
 
                 //Remove player's yaw offset rotation, to avoid stiff neck

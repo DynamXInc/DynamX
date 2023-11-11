@@ -13,20 +13,25 @@ import fr.dynamx.common.capability.DynamXChunkData;
 import fr.dynamx.common.capability.DynamXChunkDataProvider;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.ObjectCollisionsHelper;
+import fr.dynamx.common.contentpack.parts.PartBlockSeat;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
 import fr.dynamx.common.entities.ICollidableObject;
 import fr.dynamx.common.entities.modules.AbstractLightsModule;
+import fr.dynamx.common.entities.SeatEntity;
 import fr.dynamx.utils.VerticalChunkPos;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import lombok.Getter;
+import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -34,10 +39,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPackInfoReloadListener {
+public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPackInfoReloadListener, ITickable {
     private BlockObject<?> blockObjectInfo;
     private int rotation;
     private Vector3f relativeTranslation = new Vector3f(), relativeScale = new Vector3f(), relativeRotation = new Vector3f();
+
+    private boolean hasSeats;
+    private List<SeatEntity> seatEntities;
 
     /**
      * The cache of the block collisions, with position offset but no rotation
@@ -56,6 +64,7 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
 
     public TEDynamXBlock(BlockObject<?> blockObjectInfo) {
         setBlockObjectInfo(blockObjectInfo);
+        this.hasSeats = !blockObjectInfo.getPartsByType(PartBlockSeat.class).isEmpty();
     }
 
     public BlockObject<?> getBlockObjectInfo() {
@@ -70,6 +79,11 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
             lightsModule = new AbstractLightsModule.LightsModule(blockObjectInfo);
         else
             lightsModule = null;
+        this.hasSeats = !blockObjectInfo.getPartsByType(PartBlockSeat.class).isEmpty();
+        if(!hasSeats && seatEntities != null) {
+            seatEntities.forEach(Entity::setDead);
+            seatEntities = null;
+        }
     }
 
     @Override
@@ -95,8 +109,10 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
     @Override
     public void readFromNBT(NBTTagCompound compound) {
         super.readFromNBT(compound);
-        if (compound.hasKey("BlockInfo"))
-            setBlockObjectInfo(DynamXObjectLoaders.BLOCKS.findInfo(compound.getString("BlockInfo")));
+        if (compound.hasKey("BlockInfo")) {
+            blockObjectInfo = DynamXObjectLoaders.BLOCKS.findInfo(compound.getString("BlockInfo"));
+            this.hasSeats = blockObjectInfo != null && !blockObjectInfo.getPartsByType(PartBlockSeat.class).isEmpty();
+        }
         if(lightsModule != null)
             lightsModule.readFromNBT(compound);
         rotation = compound.getInteger("Rotation");
@@ -302,5 +318,27 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
     @Override
     public void onPackInfosReloaded() {
         setBlockObjectInfo(DynamXObjectLoaders.BLOCKS.findInfo(blockObjectInfo.getFullName()));
+    }
+
+    @Override
+    public void update() {
+        if (hasSeats && (seatEntities == null || seatEntities.stream().anyMatch(e -> e.isDead))) {
+            if(seatEntities != null) {
+                seatEntities.forEach(Entity::setDead);
+                seatEntities.clear();
+            } else
+                seatEntities = new ArrayList<>();
+            List<PartBlockSeat> seats = blockObjectInfo.getPartsByType(PartBlockSeat.class);
+            for(PartBlockSeat seat : seats) {
+                SeatEntity entity = new SeatEntity(world, seat.getId());
+                entity.setPosition(pos.getX() + 0.5f, pos.getY(), pos.getZ() + 0.5f);
+                world.spawnEntity(entity);
+                seatEntities.add(entity);
+            }
+        }
+    }
+
+    public List<SeatEntity> getSeatEntities() {
+        return seatEntities;
     }
 }

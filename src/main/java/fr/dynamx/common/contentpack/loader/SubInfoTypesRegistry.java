@@ -93,7 +93,7 @@ public class SubInfoTypesRegistry<T extends ISubInfoTypeOwner<?>> {
                 for (SubInfoTypeRegistries registry : an.registries()) {
                     if (!registry.getInfoList().hasSubInfoTypesRegistry())
                         throw new IllegalArgumentException("No sub info type registry on registry " + registry);
-                    registry.getInfoList().getSubInfoTypesRegistry().addSubInfoType(new SubInfoTypeEntry<>(an.name(), (obj, objName) -> {
+                    registry.getInfoList().getDefaultSubInfoTypesRegistry().addSubInfoType(new SubInfoTypeEntry<>(an.name(), (obj, objName) -> {
                         try {
                             return (ISubInfoType) (finalConstructor.getParameterTypes().length == 1 ? finalConstructor.newInstance(obj) : finalConstructor.newInstance(obj, objName));
                         } catch (InstantiationException | IllegalAccessException |

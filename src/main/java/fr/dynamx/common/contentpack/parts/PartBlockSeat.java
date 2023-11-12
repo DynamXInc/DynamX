@@ -11,7 +11,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.TextComponentString;
 
-@RegisteredSubInfoType(name = "seat", registries = {SubInfoTypeRegistries.BLOCKS_AND_PROPS}, strictName = false)
+@RegisteredSubInfoType(name = "seat", registries = {SubInfoTypeRegistries.BLOCKS, SubInfoTypeRegistries.PROPS}, strictName = false)
 public class PartBlockSeat<T extends ISubInfoTypeOwner<T>> extends BasePartSeat<Entity, T> {
     public PartBlockSeat(T owner, String partName) {
         super(owner, partName);

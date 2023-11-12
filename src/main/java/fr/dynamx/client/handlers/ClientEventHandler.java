@@ -173,7 +173,7 @@ public class ClientEventHandler {
             if (gamesettings.thirdPersonView == 0 && MC.player.getRidingEntity() == null && MC.objectMouseOver != null) {
                 ResourceLocation loc = null;
                 if (MC.objectMouseOver.entityHit instanceof PackPhysicsEntity) {
-                    InteractivePart<?, ?> part = ((BaseVehicleEntity<?>) MC.objectMouseOver.entityHit).getHitPart(MC.player);
+                    InteractivePart<?, ?> part = ((PackPhysicsEntity<?, ?>) MC.objectMouseOver.entityHit).getHitPart(MC.player);
                     if (part != null) {
                         loc = part.getHudCursorTexture();
                     } else if(MC.objectMouseOver.entityHit instanceof PropsEntity) {

@@ -20,7 +20,7 @@ import lombok.Setter;
  * @param <T> Should implement ISubInfoTypeOwner<T> and IShapedObject
  */
 public abstract class BasePart<T extends ISubInfoTypeOwner<?>> extends SubInfoType<T> {
-    @IPackFilePropertyFixer.PackFilePropertyFixer(registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.BLOCKS_AND_PROPS})
+    @IPackFilePropertyFixer.PackFilePropertyFixer(registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.BLOCKS, SubInfoTypeRegistries.PROPS})
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         switch (key) {
             case "ShapePosition":

@@ -1,32 +1,21 @@
 package fr.dynamx.client.renders;
 
-import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.events.DynamXBlockEvent;
 import fr.dynamx.api.events.EventStage;
-import fr.dynamx.api.events.PhysicsEntityEvent;
-import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.blocks.TEDynamXBlock;
-import fr.dynamx.common.contentpack.parts.ILightOwner;
-import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
-import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.utils.DynamXUtils;
-import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.debug.renderer.VehicleDebugRenderer;
-import fr.dynamx.utils.maths.DynamXGeometry;
-import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
-import fr.dynamx.utils.physics.DynamXPhysicsHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
@@ -40,7 +29,7 @@ import static fr.dynamx.utils.debug.renderer.VehicleDebugRenderer.PlayerCollisio
 public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialRenderer<T> {
     @Override
     public void render(T te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
-        if (te.getBlockObjectInfo() != null && te.getBlockType() instanceof DynamXBlock) { //the instanceof fixes a crash
+        if (te.getPackInfo() != null && te.getBlockType() instanceof DynamXBlock) { //the instanceof fixes a crash
             Vector3fPool.openPool();
             QuaternionPool.openPool();
             GlQuaternionPool.openPool();
@@ -49,19 +38,19 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
                 applyTransform(te, x, y, z);
 
                 Vector3f pos = DynamXUtils.toVector3f(te.getPos())
-                        .add(te.getBlockObjectInfo().getTranslation().add(te.getRelativeTranslation()))
+                        .add(te.getPackInfo().getTranslation().add(te.getRelativeTranslation()))
                         .add(0.5f, 1.5f, 0.5f);
 
                 Vector3f rot = te.getRelativeRotation()
-                        .add(te.getBlockObjectInfo().getRotation())
+                        .add(te.getPackInfo().getRotation())
                         .add(0, te.getRotation() * 22.5f, 0);
 
                 //Rendering the model
-                DynamXContext.getObjModelRegistry().getModel(te.getBlockObjectInfo().getModel()).renderModel((byte) te.getBlockMetadata());
-                if (te.getBlockObjectInfo().isModelValid() && te.getLightsModule() != null) {
-                    te.getBlockObjectInfo().getLightSources().values().forEach(d -> d.drawLights(null, Minecraft.getMinecraft().player.ticksExisted, te.getBlockObjectInfo().getModel(), te.getBlockObjectInfo().getScaleModifier(), te.getLightsModule()));
+                DynamXContext.getObjModelRegistry().getModel(te.getPackInfo().getModel()).renderModel((byte) te.getBlockMetadata());
+                if (te.getPackInfo().isModelValid() && te.getLightsModule() != null) {
+                    te.getPackInfo().getLightSources().values().forEach(d -> d.drawLights(null, Minecraft.getMinecraft().player.ticksExisted, te.getPackInfo().getModel(), te.getPackInfo().getScaleModifier(), te.getLightsModule()));
                 }
-                DynamXRenderUtils.spawnParticles(te.getBlockObjectInfo(), te.getWorld(), pos, rot);
+                DynamXRenderUtils.spawnParticles(te.getPackInfo(), te.getWorld(), pos, rot);
                 MinecraftForge.EVENT_BUS.post(new DynamXBlockEvent.RenderTileEntity((DynamXBlock<?>) te.getBlockType(), getWorld(), te, this, x, y, z, partialTicks, destroyStage, alpha, EventStage.POST));
                 GlStateManager.popMatrix();
             }
@@ -91,16 +80,16 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
                     (te.getRelativeScale().x != 0 ? te.getRelativeScale().x : 1),
                     (te.getRelativeScale().y != 0 ? te.getRelativeScale().y : 1),
                     (te.getRelativeScale().z != 0 ? te.getRelativeScale().z : 1));
-            DynamXRenderUtils.glTranslate(te.getBlockObjectInfo().getTranslation());
+            DynamXRenderUtils.glTranslate(te.getPackInfo().getTranslation());
             GlStateManager.translate(0.5D, 1.5D, 0.5D);
         }
         else
-            DynamXRenderUtils.glTranslate(te.getBlockObjectInfo().getTranslation());
+            DynamXRenderUtils.glTranslate(te.getPackInfo().getTranslation());
         // Scale of the block object info scale modifier
         GlStateManager.scale(
-                te.getBlockObjectInfo().getScaleModifier().x,
-                te.getBlockObjectInfo().getScaleModifier().y,
-                te.getBlockObjectInfo().getScaleModifier().z);
+                te.getPackInfo().getScaleModifier().x,
+                te.getPackInfo().getScaleModifier().y,
+                te.getPackInfo().getScaleModifier().z);
     }
 
     public boolean shouldRenderDebug() {
@@ -153,8 +142,6 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
             if (VehicleDebugRenderer.PlayerCollisionsDebug.lastTemp != null) {
                 RenderGlobal.drawSelectionBoundingBox(VehicleDebugRenderer.PlayerCollisionsDebug.lastTemp, 0, 1, 1, 1);
             }
-            //if(RotatedCollisionHandler.pos != null)
-            //GlStateManager.translate(RotatedCollisionHandler.pos.x, RotatedCollisionHandler.pos.y, RotatedCollisionHandler.pos.z);
             if (motion != null) {
                 RenderGlobal.drawBoundingBox(pos.x, pos.y, pos.z,
                         motion.x * 10 + pos.x, motion.y * 10 + pos.y,
@@ -175,20 +162,6 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
                         realmotion.x * 10 + pos.x, realmotion.y * 10 + pos.y,
                         realmotion.z * 10 + pos.z, 0, 0, 1, 1);
             }
-
-                /*BoundingBoxPool.getINSTANCE().openSubPool();
-                DynamXContext.getPlayerToCollision().forEach((player, playerPhysicsHandler) -> {
-                    if (playerPhysicsHandler.getBodyIn() != null) {
-                        BoundingBox bb = playerPhysicsHandler.getBodyIn().boundingBox(BoundingBoxPool.get());
-                        Vector3f min = bb.getMin(Vector3fPool.get());
-                        Vector3f max = bb.getMax(Vector3fPool.get());
-                        RenderGlobal.drawBoundingBox(min.x, min.y, min.z, max.x, max.y, max.z, 0.2f, 0.5f, 0.7f, 1);
-                    }
-                });
-                BoundingBoxPool.getINSTANCE().closeSubPool();*/
-            /*GlStateManager.rotate(-entity.rotationYaw, 0, 1, 0);
-            GlStateManager.rotate(-entity.rotationPitch, 1, 0, 0);
-            GlStateManager.rotate(entity.rotationRoll, 0, 0, 1);*/
             /* End of Aymeric's collision debug*/
         }
         GlStateManager.enableLighting();

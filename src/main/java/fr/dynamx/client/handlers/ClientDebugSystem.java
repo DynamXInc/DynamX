@@ -5,12 +5,12 @@ import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.part.BasePart;
-import fr.dynamx.common.network.sync.variables.NetworkActivityTracker;
 import fr.dynamx.client.camera.CameraSystem;
 import fr.dynamx.common.DynamXContext;
-import fr.dynamx.common.contentpack.parts.PartSeat;
+import fr.dynamx.common.contentpack.parts.BasePartSeat;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.network.packets.MessageDebugRequest;
+import fr.dynamx.common.network.sync.variables.NetworkActivityTracker;
 import fr.dynamx.common.physics.utils.RigidBodyTransform;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXUtils;
@@ -127,7 +127,7 @@ public class ClientDebugSystem {
             } else if (!physicsTicks.isEmpty())
                 physicsTicks.clear();
 
-            if(DynamXDebugOptions.FULL_NETWORK_DEBUG.isActive())
+            if (DynamXDebugOptions.FULL_NETWORK_DEBUG.isActive())
                 NetworkActivityTracker.drawNetworkActivity(MC.fontRenderer, 10);
         }
     }
@@ -218,7 +218,7 @@ public class ClientDebugSystem {
                                 && dynamXDebugOption.isActive()).findFirst();
                 if (dynamXDebugOptions.isPresent()) {
                     wantedShape = basePart -> {
-                        if(basePart.getDebugOption() != null) {
+                        if (basePart.getDebugOption() != null) {
                             return basePart.getDebugOption().equals(dynamXDebugOptions.get());
                         }
                         return false;
@@ -244,7 +244,7 @@ public class ClientDebugSystem {
                 GlStateManager.translate(entityX, entityY, entityZ);
                 GlStateManager.rotate(rot);
                 float yOffset = 0;
-                if (basePart instanceof PartSeat)
+                if (basePart instanceof BasePartSeat)
                     yOffset = 0.9f;
                 DynamXRenderUtils.drawNameplate(MC.fontRenderer, basePart.getPartName(),
                         basePart.getPosition().x,
@@ -451,7 +451,7 @@ public class ClientDebugSystem {
         }
     }
 
-    public static Vector3f getInterpolatedTranslation(PhysicsRigidBody rigidBody, float partialTicks){
+    public static Vector3f getInterpolatedTranslation(PhysicsRigidBody rigidBody, float partialTicks) {
         RigidBodyTransform prevTransform = ClientDebugSystem.getPrevRigidBodyTransform(rigidBody.nativeId());
         RigidBodyTransform curTransform = ClientDebugSystem.getCurrentRigidBodyTransform(rigidBody.nativeId());
         if (prevTransform == null || curTransform == null) {
@@ -460,7 +460,7 @@ public class ClientDebugSystem {
         return DynamXMath.interpolateLinear(partialTicks, prevTransform.getPosition(), curTransform.getPosition());
     }
 
-    public static com.jme3.math.Quaternion getInterpolatedRotation(PhysicsRigidBody rigidBody, float partialTicks){
+    public static com.jme3.math.Quaternion getInterpolatedRotation(PhysicsRigidBody rigidBody, float partialTicks) {
         RigidBodyTransform prevTransform = ClientDebugSystem.getPrevRigidBodyTransform(rigidBody.nativeId());
         RigidBodyTransform curTransform = ClientDebugSystem.getCurrentRigidBodyTransform(rigidBody.nativeId());
         if (prevTransform == null || curTransform == null) {
@@ -469,10 +469,11 @@ public class ClientDebugSystem {
         return DynamXMath.slerp(partialTicks, prevTransform.getRotation(), curTransform.getRotation());
     }
 
-    public static RigidBodyTransform getCurrentRigidBodyTransform(long nativeBodyId){
+    public static RigidBodyTransform getCurrentRigidBodyTransform(long nativeBodyId) {
         return ClientDebugSystem.prevRigidBodyStates[ClientDebugSystem.curRigidBodyStatesIndex].get(nativeBodyId);
     }
-    public static RigidBodyTransform getPrevRigidBodyTransform(long nativeBodyId){
+
+    public static RigidBodyTransform getPrevRigidBodyTransform(long nativeBodyId) {
         return ClientDebugSystem.prevRigidBodyStates[ClientDebugSystem.prevRigidBodyStatesIndex].get(nativeBodyId);
     }
 }

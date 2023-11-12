@@ -2,6 +2,7 @@ package fr.dynamx.common.blocks;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IDynamXItem;
+import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
 import fr.dynamx.api.contentpack.object.render.IObjPackObject;
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
@@ -10,11 +11,8 @@ import fr.dynamx.api.events.DynamXBlockEvent;
 import fr.dynamx.common.capability.DynamXChunkData;
 import fr.dynamx.common.capability.DynamXChunkDataProvider;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
-import fr.dynamx.common.contentpack.parts.PartBlockSeat;
-import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
 import fr.dynamx.common.contentpack.type.objects.PropObject;
-import fr.dynamx.common.entities.SeatEntity;
 import fr.dynamx.common.items.DynamXItemRegistry;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.RegistryNameSetter;
@@ -77,7 +75,7 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
         setTranslationKey(DynamXConstants.ID + "." + blockObjectInfo.getFullName().toLowerCase());
     }
 
-        /**
+    /**
      * Use this constructor to create a custom block having the same functionalities as pack blocks. A second constructor allows you to also add a prop with this blocks. <br>
      * You can customise block properties using this.blockObjectInfo. <br> <br>
      * NOTE : Registry name and translation key are automatically set and the block is automatically registered into Forge by DynamX,
@@ -124,7 +122,7 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
         initBlock(modid);
         setTranslationKey(blockObjectInfo.getFullName().toLowerCase());
 
-        if(propsName != null) {
+        if (propsName != null) {
             PropObject<?> prop = new PropObject<>((ISubInfoTypeOwner<BlockObject<?>>) getInfo(), propsName);
             prop.setEmptyMass(10);
             prop.setCenterOfMass(new Vector3f(0, 0, 0));
@@ -173,19 +171,25 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
 
     @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-        if (worldIn.isRemote && isObj) {
-            if (playerIn.isSneaking() && playerIn.capabilities.isCreativeMode) {
-                TileEntity te = worldIn.getTileEntity(pos);
-                if (te != null)
-                    ((TEDynamXBlock) te).openConfigGui();
-                return true;
-            }
-        }
-        if(!worldIn.isRemote) {
-            //TODO RAYCAST
+        if (playerIn.isSneaking() && playerIn.capabilities.isCreativeMode) {
             TileEntity te = worldIn.getTileEntity(pos);
-            if(te instanceof TEDynamXBlock && ((TEDynamXBlock) te).getSeatEntities() != null)
-                playerIn.startRiding(((TEDynamXBlock) te).getSeatEntities().get(0));
+            if (te != null && worldIn.isRemote)
+                ((TEDynamXBlock) te).openConfigGui();
+            return true;
+        }
+        if (!worldIn.isRemote) {
+            TileEntity te = worldIn.getTileEntity(pos);
+            if (te instanceof TEDynamXBlock && ((TEDynamXBlock) te).getSeatEntities() != null && !((TEDynamXBlock) te).getSeatEntities().isEmpty()) {
+                //If we clicked a part, try to interact with it.
+                InteractivePart hitPart = ((TEDynamXBlock) te).getHitPart(playerIn);
+                if (hitPart != null) {
+                    // TODO if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.PlayerInteract(context, (BaseVehicleEntity<?>) vehicleEntity, hitPart)))
+                    byte idx = hitPart.getId();
+                    if (idx >= ((TEDynamXBlock) te).getSeatEntities().size())
+                        idx = 0;
+                    hitPart.interact(((TEDynamXBlock) te).getSeatEntities().get(idx), playerIn);
+                }
+            }
         }
         return false;
     }
@@ -223,7 +227,7 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
     @Override
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
         TileEntity te = worldIn.getTileEntity(pos);
-        if(te instanceof TEDynamXBlock && ((TEDynamXBlock) te).getSeatEntities() != null)
+        if (te instanceof TEDynamXBlock && ((TEDynamXBlock) te).getSeatEntities() != null)
             ((TEDynamXBlock) te).getSeatEntities().forEach(Entity::setDead);
         super.breakBlock(worldIn, pos, state);
         DynamXChunkData data = worldIn.getChunk(pos).getCapability(DynamXChunkDataProvider.DYNAM_X_CHUNK_DATA_CAPABILITY, null);

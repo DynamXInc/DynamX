@@ -3,6 +3,7 @@ package fr.dynamx.common.contentpack.type.objects;
 import com.jme3.math.Vector3f;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.ICollisionsContainer;
+import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
@@ -95,4 +96,7 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
         return particleEmitters;
     }
 
+    public <A extends InteractivePart<?, ?>> List<A> getInteractiveParts() {
+        return (List<A>) getPartsByType(InteractivePart.class);
+    }
 }

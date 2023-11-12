@@ -4,8 +4,10 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.client.handlers.ClientEventHandler;
-import fr.dynamx.common.contentpack.parts.PartSeat;
+import fr.dynamx.common.contentpack.parts.BasePartSeat;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.maths.DynamXGeometry;
@@ -71,7 +73,7 @@ public class CameraSystem {
      */
     public static void rotateVehicleCamera(EntityViewRenderEvent.CameraSetup event) {
         Vector3fPool.openPool();
-        BaseVehicleEntity<?> vehicle = (BaseVehicleEntity<?>) event.getEntity().getRidingEntity();
+        PhysicsEntity<?> vehicle = (PhysicsEntity<?>) event.getEntity().getRidingEntity();
         Entity renderEntity = event.getEntity();
 
         //Compute smoothed vehicle rotation, on axes according to camera mode
@@ -86,17 +88,14 @@ public class CameraSystem {
         GlStateManager.rotate(event.getRoll(), 0.0F, 0.0F, 1.0F);
         GlStateManager.rotate(event.getPitch(), 1.0F, 0.0F, 0.0F);
         if (vehicle instanceof IModuleContainer.ISeatsContainer) {
-            PartSeat seat = ((IModuleContainer.ISeatsContainer) vehicle).getSeats().getRidingSeat(renderEntity);
-
+            BasePartSeat seat = ((IModuleContainer.ISeatsContainer) vehicle).getSeats().getRidingSeat(renderEntity);
             if(seat == null) {
                 return;
             }
-
             if(ClientEventHandler.MC.gameSettings.thirdPersonView > 0 && seat.getCameraPositionY() != 0) {
                 cameraPositionY = seat.getCameraPositionY();
                 GlStateManager.translate(0, -cameraPositionY, 0);
             }
-
             if (seat.getRotation() != null) {
                 GlStateManager.rotate(event.getYaw() + (watchingBehind ? 180 : 0) + seat.getRotationYaw(), 0.0F, 1.0F, 0.0F);
             } else {
@@ -268,7 +267,7 @@ public class CameraSystem {
     }
 
     public static void setupCamera(IModuleContainer.ISeatsContainer entity) {
-        zoomLevel = entity.cast().getPackInfo().getDefaultZoomLevel();
+        zoomLevel = entity.cast().getPackInfo() instanceof ModularVehicleInfo ? ((ModularVehicleInfo) entity.cast().getPackInfo()).getDefaultZoomLevel() : 4;
         CameraMode mode = entity.getSeats().getPreferredCameraMode();
         if(!preferredCameraMode.containsKey(mode))
             preferredCameraMode.put(mode, mode);

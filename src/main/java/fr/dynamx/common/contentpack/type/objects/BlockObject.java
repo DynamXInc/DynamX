@@ -122,11 +122,6 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
     }
 
     @Override
-    public void addPart(BasePart<T> tBasePart) {
-
-    }
-
-    @Override
     public void addLightSource(PartLightSource source) {
         lightSources.put(source.getPartName(), source);
     }
@@ -134,11 +129,5 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
     @Override
     public PartLightSource getLightSource(String partName) {
         return lightSources.get(partName);
-    }
-
-    private byte seatID;
-
-    public void arrangeSeatID(PartBlockSeat seat) {
-        seat.setId(seatID++);
     }
 }

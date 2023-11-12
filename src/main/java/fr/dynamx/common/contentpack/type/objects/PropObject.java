@@ -3,6 +3,7 @@ package fr.dynamx.common.contentpack.type.objects;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
+import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
@@ -182,5 +183,10 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
         //TODO SUPPORT PARTS WITH MODULES
         if (getOwner() != null)
             getOwner().getLightSources().values().forEach(compoundLight -> compoundLight.addModules(entity, modules));
+    }
+
+    @Override
+    public <A extends InteractivePart<?, ?>> List<A> getInteractiveParts() {
+        return (List<A>) getPartsByType(InteractivePart.class);
     }
 }

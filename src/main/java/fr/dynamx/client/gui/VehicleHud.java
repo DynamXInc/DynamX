@@ -12,6 +12,7 @@ import fr.dynamx.client.camera.CameraSystem;
 import fr.dynamx.client.network.ClientPhysicsEntitySynchronizer;
 import fr.dynamx.client.network.ClientPhysicsSyncManager;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.PackPhysicsEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 
@@ -19,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class VehicleHud extends GuiFrame {
-    private final BaseVehicleEntity<?> riddenEntity;
+    private final PackPhysicsEntity<?, ?> riddenEntity;
     private GuiLabel netWarning;
     private final List<ResourceLocation> styleSheets = new ArrayList<>();
 

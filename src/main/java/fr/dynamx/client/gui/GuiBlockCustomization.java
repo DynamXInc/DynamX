@@ -47,7 +47,7 @@ public class GuiBlockCustomization extends GuiFrame {
         super(new GuiScaler.Identity());
 
         teBlock = te;
-        model = DynamXContext.getObjModelRegistry().getModel(teBlock.getBlockObjectInfo().getModel());
+        model = DynamXContext.getObjModelRegistry().getModel(teBlock.getPackInfo().getModel());
         setCssClass("root");
 
         preview = new GuiPanel() {
@@ -218,23 +218,23 @@ public class GuiBlockCustomization extends GuiFrame {
 
 
         GlStateManager.translate(
-                0.5 + teBlock.getBlockObjectInfo().getTranslation().x + translationX.getValue(),
-                2.5D + teBlock.getBlockObjectInfo().getTranslation().y + translationY.getValue(),
-                0.5 + teBlock.getBlockObjectInfo().getTranslation().z + translationZ.getValue());
+                0.5 + teBlock.getPackInfo().getTranslation().x + translationX.getValue(),
+                2.5D + teBlock.getPackInfo().getTranslation().y + translationY.getValue(),
+                0.5 + teBlock.getPackInfo().getTranslation().z + translationZ.getValue());
         // Scale to the config scale value
         GlStateManager.scale(
-                teBlock.getBlockObjectInfo().getScaleModifier().x * (scaleX.getValue() != 0 ? scaleX.getValue() : 1),
-                teBlock.getBlockObjectInfo().getScaleModifier().y * (scaleY.getValue() != 0 ? scaleY.getValue() : 1),
-                teBlock.getBlockObjectInfo().getScaleModifier().z * (scaleZ.getValue() != 0 ? scaleZ.getValue() : 1));
+                teBlock.getPackInfo().getScaleModifier().x * (scaleX.getValue() != 0 ? scaleX.getValue() : 1),
+                teBlock.getPackInfo().getScaleModifier().y * (scaleY.getValue() != 0 ? scaleY.getValue() : 1),
+                teBlock.getPackInfo().getScaleModifier().z * (scaleZ.getValue() != 0 ? scaleZ.getValue() : 1));
         // Correct rotation of the block
         GlStateManager.rotate(teBlock.getRotation() * 22.5f, 0.0F, -1.0F, 0.0F);
-        float rotate = rotationX.getValue() + teBlock.getBlockObjectInfo().getRotation().x;
+        float rotate = rotationX.getValue() + teBlock.getPackInfo().getRotation().x;
         if (rotate != 0)
             GlStateManager.rotate(rotate, 1, 0, 0);
-        rotate = rotationY.getValue() + teBlock.getBlockObjectInfo().getRotation().y;
+        rotate = rotationY.getValue() + teBlock.getPackInfo().getRotation().y;
         if (rotate != 0)
             GlStateManager.rotate(rotate, 0, 1, 0);
-        rotate = rotationZ.getValue() + teBlock.getBlockObjectInfo().getRotation().z;
+        rotate = rotationZ.getValue() + teBlock.getPackInfo().getRotation().z;
         if (rotate != 0)
             GlStateManager.rotate(rotate, 0, 0, 1);
 

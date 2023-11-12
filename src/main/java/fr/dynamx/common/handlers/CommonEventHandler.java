@@ -15,7 +15,6 @@ import fr.dynamx.common.capability.DynamXChunkDataProvider;
 import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
-import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.entities.modules.movables.PickingObjectHelper;
 import fr.dynamx.common.items.DynamXItemRegistry;
@@ -232,7 +231,7 @@ public class CommonEventHandler {
 
     @SubscribeEvent
     public void onPlayerUpdate(TickEvent.PlayerTickEvent e) {
-        if (!(e.player.getRidingEntity() instanceof BaseVehicleEntity) && DynamXContext.getPhysicsWorld(e.player.world) != null && !e.player.isDead) {
+        if (!(e.player.getRidingEntity() instanceof PhysicsEntity<?>) && DynamXContext.getPhysicsWorld(e.player.world) != null && !e.player.isDead) {
             if(!DynamXContext.getPlayerToCollision().containsKey(e.player) && DynamXPhysicsWorldBlacklistApi.isBlacklisted(e.player)) return;
             Vector3fPool.openPool();
             QuaternionPool.openPool();
@@ -248,7 +247,7 @@ public class CommonEventHandler {
     }
 
     @SubscribeEvent
-    public void onVehicleMount(VehicleEntityEvent.PlayerMount e) {
+    public void onVehicleMount(VehicleEntityEvent.EntityMount e) {
         if (DynamXContext.getPlayerToCollision().containsKey(e.getEntityMounted())) {
             DynamXContext.getPlayerToCollision().get(e.getEntityMounted()).removeFromWorld(false, e.getEntityMounted().world);
         }

@@ -6,6 +6,7 @@ import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.BoatPropellerModule;
 import fr.dynamx.common.entities.modules.CarEngineModule;
 import fr.dynamx.common.entities.modules.SeatsModule;
@@ -61,7 +62,7 @@ public class BoatEntity<T extends BoatPhysicsHandler<?>> extends BaseVehicleEnti
     }
 
     @Override
-    public BaseVehicleEntity<?> cast() {
+    public PackPhysicsEntity<?, ?> cast() {
         return this;
     }
 

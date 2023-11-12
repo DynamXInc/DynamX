@@ -1,60 +1,39 @@
 package fr.dynamx.common.contentpack.parts;
 
-import com.jme3.math.Quaternion;
-import fr.dynamx.api.contentpack.object.part.InteractivePart;
-import fr.dynamx.api.contentpack.registry.PackFileProperty;
+import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
-import fr.dynamx.common.contentpack.type.objects.BlockObject;
+import fr.dynamx.api.entities.IModuleContainer;
+import fr.dynamx.common.entities.PropsEntity;
 import fr.dynamx.common.entities.SeatEntity;
-import fr.dynamx.utils.DynamXConstants;
-import fr.dynamx.utils.debug.DynamXDebugOption;
-import fr.dynamx.utils.debug.DynamXDebugOptions;
+import fr.dynamx.common.entities.modules.SeatsModule;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.TextComponentString;
 
-@RegisteredSubInfoType(name = "seat", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER}, strictName = false)
-public class PartBlockSeat<T extends BlockObject<T>> extends InteractivePart<SeatEntity, T> {
-    @PackFileProperty(configNames = "Rotation", required = false, defaultValue = "1 0 0 0")
-    private Quaternion rotation;
-    @PackFileProperty(configNames = "CameraRotation", required = false, defaultValue = "0")
-    private float rotationYaw;
-
+@RegisteredSubInfoType(name = "seat", registries = {SubInfoTypeRegistries.BLOCKS_AND_PROPS}, strictName = false)
+public class PartBlockSeat<T extends ISubInfoTypeOwner<T>> extends BasePartSeat<Entity, T> {
     public PartBlockSeat(T owner, String partName) {
-        super(owner, partName, 0.4f, 1.8f);
+        super(owner, partName);
     }
 
     @Override
-    public DynamXDebugOption getDebugOption() {
-        return DynamXDebugOptions.SEATS_AND_STORAGE;
-    }
-
-    @Override
-    public void appendTo(T modulableVehicleInfo) {
-        super.appendTo(modulableVehicleInfo);
-        modulableVehicleInfo.arrangeSeatID(this);
-    }
-
-    public Quaternion getRotation() {
-        return rotation;
-    }
-
-    public float getRotationYaw() {
-        return rotationYaw;
-    }
-
-    @Override
-    public ResourceLocation getHudCursorTexture() {
-        return new ResourceLocation(DynamXConstants.ID, "textures/seat.png");
-    }
-
-    @Override
-    public boolean interact(SeatEntity entity, EntityPlayer with) {
-        return with.startRiding(entity);
-    }
-
-    @Override
-    public String getName() {
-        return "PartBlockSeat named " + getPartName() + " in " + getOwner().getName();
+    public boolean interact(Entity entity, EntityPlayer with) {
+        if (entity instanceof SeatEntity)
+            return with.startRiding(entity);
+        else if (entity instanceof PropsEntity) {
+            PropsEntity<?> vehicleEntity = (PropsEntity<?>) entity;
+            SeatsModule seats = ((IModuleContainer.ISeatsContainer) vehicleEntity).getSeats();
+            Entity seatRider = seats.getSeatToPassengerMap().get(this);
+            if (seatRider != null) {
+                if (seatRider != with) {
+                    with.sendMessage(new TextComponentString("The seat is already taken"));
+                    return false;
+                }
+            }
+            return mount(vehicleEntity, seats, with);
+        } else {
+            return false;
+        }
     }
 }

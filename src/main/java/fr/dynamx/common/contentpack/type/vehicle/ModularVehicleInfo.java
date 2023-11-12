@@ -280,15 +280,6 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
         return new ItemStack((Item) getItems()[0], 1, metadata);
     }
 
-    /**
-     * @param clazz The class of the part to return
-     * @param <A>   The type of the part to return
-     * @return The part with the given type and the given id (wheel index for example), or null
-     */
-    public <A extends BasePart<ModularVehicleInfo>> A getPartByTypeAndId(Class<A> clazz, byte id) {
-        return getPartsByType(clazz).stream().filter(t -> t.getId() == id).findFirst().orElse(null);
-    }
-
     @Override
     public PartLightSource getLightSource(String partName) {
         return lightSources.get(partName);

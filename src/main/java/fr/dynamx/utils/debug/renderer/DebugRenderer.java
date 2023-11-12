@@ -1,11 +1,18 @@
 package fr.dynamx.utils.debug.renderer;
 
+import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
+import fr.dynamx.common.contentpack.parts.BasePartSeat;
+import fr.dynamx.common.contentpack.parts.PartFloat;
+import fr.dynamx.common.contentpack.parts.PartStorage;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
+import fr.dynamx.utils.optimization.MutableBoundingBox;
 import net.minecraft.client.renderer.RenderGlobal;
+
+import java.util.List;
 
 /**
  * A debug renderer for a {@link fr.dynamx.client.renders.RenderPhysicsEntity}
@@ -76,4 +83,34 @@ public interface DebugRenderer<T extends PhysicsEntity<?>> {
         }
     }
 
+    /**
+     * Renders seats
+     */
+    class SeatDebug implements DebugRenderer<PackPhysicsEntity<?, ?>> {
+        @Override
+        public boolean shouldRender(PackPhysicsEntity<?, ?> entity) {
+            return DynamXDebugOptions.SEATS_AND_STORAGE.isActive();
+        }
+
+        @Override
+        public void render(PackPhysicsEntity<?, ?> entity, RenderPhysicsEntity<PackPhysicsEntity<?, ?>> renderer, double x, double y, double z, float partialTicks) {
+            MutableBoundingBox box = new MutableBoundingBox();
+            for (BasePartSeat seat : (List<BasePartSeat>) entity.getPackInfo().getPartsByType(BasePartSeat.class)) {
+                seat.getBox(box);
+                box.offset(seat.getPosition());
+                if (!seat.isDriver())
+                    RenderGlobal.drawBoundingBox(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ,
+                            1, 0, 0, 1);
+                else
+                    RenderGlobal.drawBoundingBox(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ,
+                            0, 1, 0, 1);
+            }
+            for (PartStorage storage : (List<PartStorage>) entity.getPackInfo().getPartsByType(PartStorage.class)) {
+                storage.getBox(box);
+                box.offset(storage.getPosition());
+                RenderGlobal.drawBoundingBox(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ,
+                        1, 0.7f, 0, 1);
+            }
+        }
+    }
 }

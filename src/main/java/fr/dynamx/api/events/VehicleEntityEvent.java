@@ -6,10 +6,10 @@ import fr.dynamx.client.gui.VehicleHud;
 import fr.dynamx.client.handlers.hud.CarController;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.client.renders.vehicle.RenderBaseVehicle;
-import fr.dynamx.client.sound.EngineSound;
-import fr.dynamx.common.contentpack.parts.PartSeat;
+import fr.dynamx.common.contentpack.parts.BasePartSeat;
 import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.BasicEngineModule;
 import fr.dynamx.common.entities.modules.SeatsModule;
 import fr.dynamx.common.entities.modules.WheelsModule;
@@ -31,9 +31,9 @@ public class VehicleEntityEvent extends Event {
     private final Side side;
 
     @Getter()
-    private final BaseVehicleEntity<?> entity;
+    private final PackPhysicsEntity<?, ?> entity;
 
-    public VehicleEntityEvent(Side side, BaseVehicleEntity<?> vehicleEntity) {
+    public VehicleEntityEvent(Side side, PackPhysicsEntity<?, ?> vehicleEntity) {
         this.entity = vehicleEntity;
         this.side = side;
     }
@@ -62,7 +62,7 @@ public class VehicleEntityEvent extends Event {
          * @param vehicleEntity the vehicle that the player interacted with
          * @param part          the part that the player interacted with (null if the player interacted with the vehicle itself)
          */
-        public PlayerInteract(EntityPlayer player, BaseVehicleEntity<?> vehicleEntity, @Nullable InteractivePart<?, ?> part) {
+        public PlayerInteract(EntityPlayer player, PackPhysicsEntity<?, ?> vehicleEntity, @Nullable InteractivePart<?, ?> part) {
             super(Side.SERVER, vehicleEntity);
             this.player = player;
             this.part = part;
@@ -92,21 +92,21 @@ public class VehicleEntityEvent extends Event {
      * Called on client and server sides when a entity has mounted on an entity <br>
      * On client side, also called when the vehicle entity starts to be tracked by the local player
      */
-    public static class PlayerMount extends VehicleEntityEvent {
+    public static class EntityMount extends VehicleEntityEvent {
         @Getter
         private final Entity entityMounted;
         @Getter
         private final SeatsModule module;
         @Getter
-        private final PartSeat seat;
+        private final BasePartSeat seat;
 
         /**
-         * @param entityMounted the player who mounted the vehicle
+         * @param entityMounted the entity who mounted the vehicle
          * @param vehicleEntity the vehicle that the player mounted
          * @param module        the seats module, calling this event
          * @param seat          the seat that the player mounted
          */
-        public PlayerMount(Side side, Entity entityMounted, BaseVehicleEntity<?> vehicleEntity, SeatsModule module, PartSeat seat) {
+        public EntityMount(Side side, Entity entityMounted, PackPhysicsEntity<?, ?> vehicleEntity, SeatsModule module, BasePartSeat seat) {
             super(side, vehicleEntity);
             this.entityMounted = entityMounted;
             this.module = module;
@@ -123,7 +123,7 @@ public class VehicleEntityEvent extends Event {
         @Getter
         private final SeatsModule module;
         @Getter
-        private final PartSeat seat;
+        private final BasePartSeat seat;
 
         /**
          * @param entityDismounted the entity who dismounted the vehicle
@@ -131,7 +131,7 @@ public class VehicleEntityEvent extends Event {
          * @param module           the seats module, calling this event
          * @param seat             the seat that the player dismounted
          */
-        public EntityDismount(Side side, Entity entityDismounted, BaseVehicleEntity<?> vehicleEntity, SeatsModule module, PartSeat seat) {
+        public EntityDismount(Side side, Entity entityDismounted, PackPhysicsEntity<?, ?> vehicleEntity, SeatsModule module, BasePartSeat seat) {
             super(side, vehicleEntity);
             this.entityDismounted = entityDismounted;
             this.module = module;
@@ -204,7 +204,7 @@ public class VehicleEntityEvent extends Event {
         }
 
         public enum Type {
-            CHASSIS, PROPULSION, PARTS, PARTICLES, LIGHTS, STEERING_WHEEL,ROTOR,HANDLE
+            CHASSIS, PROPULSION, PARTS, PARTICLES, LIGHTS, STEERING_WHEEL, ROTOR, HANDLE
         }
     }
 
@@ -242,7 +242,7 @@ public class VehicleEntityEvent extends Event {
          * @param vehicleEntity   the vehicle
          * @param controllers     the vehicle controllers displayed on the HUD
          */
-        public CreateHud(VehicleHud vehicleHUD, List<ResourceLocation> styleSheets, boolean isPlayerDriving, BaseVehicleEntity<?> vehicleEntity, List<IVehicleController> controllers) {
+        public CreateHud(VehicleHud vehicleHUD, List<ResourceLocation> styleSheets, boolean isPlayerDriving, PackPhysicsEntity<?, ?> vehicleEntity, List<IVehicleController> controllers) {
             super(Side.CLIENT, vehicleEntity);
             this.vehicleHud = vehicleHUD;
             this.styleSheets = styleSheets;

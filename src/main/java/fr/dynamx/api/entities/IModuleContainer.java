@@ -5,7 +5,6 @@ import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.common.entities.modules.SeatsModule;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
@@ -21,8 +20,12 @@ public interface IModuleContainer {
     PackPhysicsEntity<?, ?> cast();
 
     interface ISeatsContainer extends IModuleContainer {
-        @Nonnull
+        @Nullable
         SeatsModule getSeats();
+
+        default boolean hasSeats() {
+            return getSeats() != null;
+        }
     }
 
     interface IDoorContainer extends IModuleContainer {

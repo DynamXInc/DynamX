@@ -70,16 +70,13 @@ public class PropsEntity<T extends PackEntityPhysicsHandler<PropObject<?>, ?>> e
 
     @Override
     protected void createModules(ModuleListBuilder modules) {
-        modules.add(seats = new SeatsModule(this));
         super.createModules(modules);
-        getPackInfo().addModules(this, modules);
+        seats = getModuleByType(SeatsModule.class);
     }
 
     @Nonnull
     @Override
     public SeatsModule getSeats() {
-        if (seats == null) //We may need seats before modules are created, because of seats sync
-            seats = new SeatsModule(this);
         return seats;
     }
 

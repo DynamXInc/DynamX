@@ -162,7 +162,7 @@ public abstract class PhysicsEntitySynchronizer<T extends PhysicsEntity<?>> {
     public void resyncEntity(EntityPlayerMP target) {
         //Force tcp for first sync and resyncs
         DynamXContext.getNetwork().getVanillaNetwork().sendPacket(new MessagePhysicsEntitySync(entity, ServerPhysicsSyncManager.getTime(target), synchronizedVariables, false), EnumPacketTarget.PLAYER, target);
-        if (entity instanceof IModuleContainer.ISeatsContainer)
+        if (entity instanceof IModuleContainer.ISeatsContainer && ((IModuleContainer.ISeatsContainer) entity).hasSeats())
             DynamXContext.getNetwork().sendToClient(new MessageSeatsSync((IModuleContainer.ISeatsContainer) entity), EnumPacketTarget.PLAYER, target);
         if (entity.getJointsHandler() != null)
             entity.getJointsHandler().sync(target);

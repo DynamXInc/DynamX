@@ -59,7 +59,7 @@ public class MessageEntityInteract implements IDnxPacket, IMessageHandler<Messag
         }
         if (context.getHeldItemMainhand().getItem() instanceof ItemWrench) {
             ((ItemWrench) context.getHeldItemMainhand().getItem()).interact(context, physicsEntity);
-        } else if (!(physicsEntity instanceof IModuleContainer.ISeatsContainer) || !((IModuleContainer.ISeatsContainer) physicsEntity).getSeats().isEntitySitting(context)) {
+        } else if (!(physicsEntity instanceof IModuleContainer.ISeatsContainer) || !((IModuleContainer.ISeatsContainer) physicsEntity).hasSeats() || !((IModuleContainer.ISeatsContainer) physicsEntity).getSeats().isEntitySitting(context)) {
             if (!(physicsEntity instanceof PackPhysicsEntity)) {
                 return;
             }

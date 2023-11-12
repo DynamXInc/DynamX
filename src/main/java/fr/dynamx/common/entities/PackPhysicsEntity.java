@@ -115,6 +115,7 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
         moduleList.add(jointsHandler);
         moduleList.add(movableModule = new MovableModule(this));
         movableModule.initSubModules(modules, this);
+        getPackInfo().addModules(this, modules);
     }
 
     @Override

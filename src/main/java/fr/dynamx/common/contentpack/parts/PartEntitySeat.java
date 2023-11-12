@@ -4,12 +4,15 @@ import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.entities.IModuleContainer;
+import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.common.entities.modules.SeatsModule;
 import fr.dynamx.common.entities.vehicles.CarEntity;
+import fr.dynamx.common.entities.vehicles.HelicopterEntity;
 import lombok.Getter;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -64,7 +67,7 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
                             }
                         }
                     } //else
-                        //DynamXMain.log.error("Cannot mount : player mounting : " + linkedDoor);
+                    //DynamXMain.log.error("Cannot mount : player mounting : " + linkedDoor);
                 } else
                     DynamXMain.log.error("Cannot mount : part door not found : " + linkedDoor);
             }
@@ -82,5 +85,15 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
     public PartDoor getLinkedPartDoor(BaseVehicleEntity<?> vehicleEntity) {
         return getLinkedDoor() == null ? null : vehicleEntity.getPackInfo().getPartsByType(PartDoor.class).stream().filter(partDoor -> partDoor.getPartName().equals(getLinkedDoor()))
                 .findFirst().orElse(null);
+    }
+
+    @Override
+    public void addModules(PackPhysicsEntity<?, ?> entity, ModuleListBuilder modules) {
+        if (!(entity instanceof IModuleContainer.ISeatsContainer))
+            throw new IllegalStateException("The entity " + entity + " has PartSeats, but does not implement IHaveSeats !");
+        if (entity instanceof HelicopterEntity)
+            return; //Helicopters have their own SeatsModule
+        if (!modules.hasModuleOfClass(SeatsModule.class))
+            modules.add(new SeatsModule(entity));
     }
 }

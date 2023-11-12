@@ -37,7 +37,7 @@ public class MessageSeatsSync extends PhysicsEntityMessage<MessageSeatsSync> {
 
     @Override
     protected void processMessageClient(PhysicsEntityMessage<?> message, PhysicsEntity<?> entity, EntityPlayer player) {
-        if (entity instanceof IModuleContainer.ISeatsContainer)
+        if (entity instanceof IModuleContainer.ISeatsContainer && ((IModuleContainer.ISeatsContainer) entity).hasSeats())
             ((IModuleContainer.ISeatsContainer) entity).getSeats().updateSeats((MessageSeatsSync) message, entity.getSynchronizer());
         else
             log.fatal("Received seats packet for an entity that have no seats !");

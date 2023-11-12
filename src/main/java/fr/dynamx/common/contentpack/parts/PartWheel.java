@@ -7,6 +7,7 @@ import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.contentpack.registry.*;
 import fr.dynamx.api.entities.VehicleEntityProperties;
+import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
@@ -16,7 +17,9 @@ import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.WheelsModule;
+import fr.dynamx.common.physics.entities.BaseWheeledVehiclePhysicsHandler;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.errors.DynamXErrorManager;
@@ -220,5 +223,13 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
             }
             GlStateManager.popMatrix();
         }
+    }
+
+    @Override
+    public void addModules(PackPhysicsEntity<?, ?> entity, ModuleListBuilder modules) {
+        if (!(entity instanceof BaseVehicleEntity))
+            throw new IllegalStateException("The entity " + entity + " has PartSeats, but isn't a vehicle !");
+        if (!modules.hasModuleOfClass(WheelsModule.class))
+            modules.add(new WheelsModule((BaseVehicleEntity<? extends BaseWheeledVehiclePhysicsHandler<?>>) entity));
     }
 }

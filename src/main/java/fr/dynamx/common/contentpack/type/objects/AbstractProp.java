@@ -96,6 +96,7 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
         return particleEmitters;
     }
 
+    @Override
     public <A extends InteractivePart<?, ?>> List<A> getInteractiveParts() {
         return (List<A>) getPartsByType(InteractivePart.class);
     }

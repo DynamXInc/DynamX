@@ -1,9 +1,10 @@
 package fr.dynamx.api.contentpack.object;
 
 import fr.dynamx.api.contentpack.object.part.BasePart;
+import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
-import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,4 +35,7 @@ public interface IPartContainer<T extends ISubInfoTypeOwner<?>> extends ISubInfo
      */
     void addPart(BasePart<T> tBasePart);
 
+    default <T extends InteractivePart<?, ?>> List<T> getInteractiveParts() {
+        return Collections.emptyList();
+    }
 }

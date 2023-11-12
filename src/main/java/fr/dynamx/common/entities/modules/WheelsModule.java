@@ -46,7 +46,7 @@ import java.util.Objects;
  * @see WheelsPhysicsHandler
  */
 @SynchronizedEntityVariable.SynchronizedPhysicsModule(modid = DynamXConstants.ID)
-public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHandler<?>>, IPhysicsModule.IEntityUpdateListener, IPhysicsModule.IPhysicsUpdateListener, IPackInfoReloadListener {
+public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHandler<?>>, IPhysicsModule.IPhysicsUpdateListener, IPackInfoReloadListener {
     //TODO CLEAN WHEELS CODE
     @SynchronizedEntityVariable(name = "wheel_infos")
     protected final EntityMapVariable<Map<Byte, PartWheelInfo>, Byte, PartWheelInfo> wheelInfos = new EntityMapVariable<>((variable, value) -> {
@@ -300,18 +300,12 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
         });
     }
 
+    @Override
+    public byte getInitPriority() {
+        return 10;
+    }
+
     public final Map<Integer, VehicleSound> sounds = new HashMap<>();
-
-    @Override
-    public boolean listenEntityUpdates(Side side) {
-        return side.isClient();
-    }
-
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void updateEntity() {
-
-    }
 
     public enum WheelState {
         ADDED,

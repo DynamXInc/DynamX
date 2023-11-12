@@ -16,7 +16,6 @@ import net.minecraft.world.World;
 import javax.annotation.Nonnull;
 
 public class BoatEntity<T extends BoatPhysicsHandler<?>> extends BaseVehicleEntity<T> implements IModuleContainer.ISeatsContainer {
-    private CarEngineModule engine;
     private SeatsModule seats;
     private BoatPropellerModule propeller;
 
@@ -35,17 +34,9 @@ public class BoatEntity<T extends BoatPhysicsHandler<?>> extends BaseVehicleEnti
 
     @Override
     public void createModules(ModuleListBuilder modules) {
-        //Take care to add seats BEFORE engine (the engine needs to detect dismounts)
-        modules.add(seats = new SeatsModule(this));
-        //Take care to add propulsion BEFORE engine (the engine needs a propulsion)
-        modules.add(propeller = new BoatPropellerModule(this));
-
         super.createModules(modules);
-    }
-
-    @Nonnull
-    public CarEngineModule getEngine() {
-        return engine;
+        seats = getModuleByType(SeatsModule.class);
+        propeller = getModuleByType(BoatPropellerModule.class);
     }
 
     @Nonnull
@@ -56,8 +47,6 @@ public class BoatEntity<T extends BoatPhysicsHandler<?>> extends BaseVehicleEnti
     @Nonnull
     @Override
     public SeatsModule getSeats() {
-        if (seats == null) //We may need seats before modules are created, because of seats sync
-            seats = new SeatsModule(this);
         return seats;
     }
 

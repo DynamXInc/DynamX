@@ -181,14 +181,10 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
 
     @Override
     public void addModules(PackPhysicsEntity<?, ?> entity, ModuleListBuilder modules) {
-        //TODO SUPPORT PARTS WITH MODULES
+        getSubProperties().forEach(sub -> sub.addModules(entity, modules));
+        getAllParts().forEach(sub -> sub.addModules(entity, modules));
         if (getOwner() != null)
             getOwner().getLightSources().values().forEach(compoundLight -> compoundLight.addModules(entity, modules));
-    }
-
-    @Override
-    public <A extends InteractivePart<?, ?>> List<A> getInteractiveParts() {
-        return (List<A>) getPartsByType(InteractivePart.class);
     }
 
     @Override

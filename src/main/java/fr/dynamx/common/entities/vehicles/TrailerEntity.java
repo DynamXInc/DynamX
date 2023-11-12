@@ -36,9 +36,9 @@ public class TrailerEntity<T extends TrailerEntity.TrailerPhysicsHandler<?>> ext
 
     @Override
     public void createModules(ModuleListBuilder modules) {
-        modules.add(seats = new SeatsModule(this));
-        modules.add(wheels = new WheelsModule(this));
         super.createModules(modules);
+        seats = getModuleByType(SeatsModule.class);
+        wheels = getModuleByType(WheelsModule.class);
         doors = getModuleByType(DoorsModule.class);
     }
 
@@ -65,8 +65,6 @@ public class TrailerEntity<T extends TrailerEntity.TrailerPhysicsHandler<?>> ext
     @Nonnull
     @Override
     public SeatsModule getSeats() {
-        if (seats == null) //We may need seats before modules are created, because of seats sync
-            seats = new SeatsModule(this);
         return seats;
     }
 

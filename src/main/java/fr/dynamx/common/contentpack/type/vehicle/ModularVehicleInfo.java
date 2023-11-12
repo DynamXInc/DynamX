@@ -31,6 +31,7 @@ import fr.dynamx.common.contentpack.type.ObjectCollisionsHelper;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.contentpack.type.objects.AbstractItemObject;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.EnumPlayerStandOnTop;
 import fr.dynamx.utils.client.DynamXRenderUtils;
@@ -245,7 +246,8 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
         }
     }
 
-    public void addModules(BaseVehicleEntity<?> entity, ModuleListBuilder modules) {
+    @Override
+    public void addModules(PackPhysicsEntity<?, ?> entity, ModuleListBuilder modules) {
         getSubProperties().forEach(sub -> sub.addModules(entity, modules));
         getAllParts().forEach(sub -> sub.addModules(entity, modules));
         getLightSources().values().forEach(compoundLight -> compoundLight.addModules(entity, modules));

@@ -4,9 +4,12 @@ import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.entities.IModuleContainer;
+import fr.dynamx.api.entities.modules.ModuleListBuilder;
+import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.PropsEntity;
 import fr.dynamx.common.entities.SeatEntity;
 import fr.dynamx.common.entities.modules.SeatsModule;
+import fr.dynamx.common.entities.vehicles.HelicopterEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.TextComponentString;
@@ -35,5 +38,13 @@ public class PartBlockSeat<T extends ISubInfoTypeOwner<T>> extends BasePartSeat<
         } else {
             return false;
         }
+    }
+
+    @Override
+    public void addModules(PackPhysicsEntity<?, ?> entity, ModuleListBuilder modules) {
+        if (!(entity instanceof IModuleContainer.ISeatsContainer))
+            throw new IllegalStateException("The entity " + entity + " has PartSeats, but does not implement IHaveSeats !");
+        if (!modules.hasModuleOfClass(SeatsModule.class))
+            modules.add(new SeatsModule(entity));
     }
 }

@@ -37,11 +37,9 @@ public class CarEntity<T extends CarEntity.CarPhysicsHandler<?>> extends BaseVeh
 
     @Override
     public void createModules(ModuleListBuilder modules) {
-        //Take care to add seats BEFORE engine (the engine needs to detect dismounts)
-        modules.add(seats = new SeatsModule(this));
-        //Take care to add propulsion BEFORE engine (the engine needs a propulsion) (engine is added by its SubInfoType)
-        modules.add(wheels = new WheelsModule(this));
         super.createModules(modules);
+        seats = getModuleByType(SeatsModule.class);
+        wheels = getModuleByType(WheelsModule.class);
         doors = getModuleByType(DoorsModule.class);
     }
 
@@ -63,8 +61,6 @@ public class CarEntity<T extends CarEntity.CarPhysicsHandler<?>> extends BaseVeh
     @Nonnull
     @Override
     public SeatsModule getSeats() {
-        if (seats == null) //We may need seats before modules are created, because of seats sync
-            seats = new SeatsModule(this);
         return seats;
     }
 

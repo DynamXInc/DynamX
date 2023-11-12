@@ -6,6 +6,7 @@ import fr.dynamx.api.entities.modules.IVehicleController;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.api.network.sync.EntityVariable;
+import fr.dynamx.api.network.sync.SimulationHolder;
 import fr.dynamx.api.network.sync.SynchronizationRules;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
 import fr.dynamx.client.ClientProxy;
@@ -15,7 +16,7 @@ import fr.dynamx.common.physics.entities.modules.EnginePhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.engine.AutomaticGearboxHandler;
 import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
@@ -96,7 +97,7 @@ public abstract class BasicEngineModule implements IPhysicsModule<BaseVehiclePhy
      * @param started engine on/off state
      */
     public void setEngineStarted(boolean started) {
-        setControls(started ? getControls() | 1 : getControls() &~ 1);
+        setControls(started ? getControls() | 1 : getControls() & ~1);
     }
 
     public int getControls() {
@@ -111,7 +112,7 @@ public abstract class BasicEngineModule implements IPhysicsModule<BaseVehiclePhy
     public void setControls(int controls) {
         if (!this.isEngineStarted() && (controls & 1) == 1)
             onEngineSwitchedOn();
-        else if(isEngineStarted() && (controls & 1) != 1)
+        else if (isEngineStarted() && (controls & 1) != 1)
             onEngineSwitchedOff();
         this.controls.set(controls);
     }
@@ -156,8 +157,8 @@ public abstract class BasicEngineModule implements IPhysicsModule<BaseVehiclePhy
     }
 
     @Override
-    public void removePassenger(Entity passenger) {
-        if (entity.getControllingPassenger() == null) {
+    public void onSetSimulationHolder(SimulationHolder simulationHolder, EntityPlayer simulationPlayerHolder, SimulationHolder.UpdateContext changeContext) {
+        if (simulationPlayerHolder == null) {
             resetControls();
         }
     }

@@ -302,6 +302,7 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
 
     @Override
     public byte getInitPriority() {
+        //Take care to add wheels module BEFORE engine module (an engine needs a propulsion)
         return 10;
     }
 

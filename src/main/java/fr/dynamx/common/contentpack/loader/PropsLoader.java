@@ -1,32 +1,15 @@
 package fr.dynamx.common.contentpack.loader;
 
-import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.IDynamXItem;
-import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
-import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.PackInfo;
 import fr.dynamx.common.contentpack.type.ObjectInfo;
-import fr.dynamx.common.contentpack.type.objects.AbstractItemObject;
 import fr.dynamx.common.contentpack.type.objects.PropObject;
-import fr.dynamx.common.items.DynamXItemRegistry;
 import fr.dynamx.common.items.ItemProps;
-import fr.dynamx.utils.DynamXReflection;
-import fr.dynamx.utils.client.ContentPackUtils;
-import fr.dynamx.utils.errors.DynamXErrorManager;
-import net.minecraft.block.Block;
-import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.init.Items;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.ProgressManager;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static fr.dynamx.common.DynamXMain.log;
 
 /**
  * Loader of props. This loader is different from {@link ObjectLoader} because props aren't loaded from files, but from their block owner.

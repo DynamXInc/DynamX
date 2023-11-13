@@ -3,7 +3,9 @@ package fr.dynamx.api.contentpack.object;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
+import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.common.contentpack.type.ObjectInfo;
+import fr.dynamx.common.entities.PackPhysicsEntity;
 import net.minecraft.item.ItemStack;
 
 import java.util.Collections;
@@ -18,9 +20,7 @@ public interface IPhysicsPackInfo extends ICollisionsContainer {
      */
     Vector3f getCenterOfMass();
 
-    default <T extends InteractivePart<?, ?>> List<T> getInteractiveParts() {
-        return Collections.emptyList();
-    }
+    void addModules(PackPhysicsEntity<?, ?> entity, ModuleListBuilder modules);
 
     default List<IDrawablePart<?>> getDrawableParts() {
         return Collections.emptyList();

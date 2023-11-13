@@ -57,7 +57,7 @@ public class LateInfoLoader<T extends ISubInfoTypeOwner<?>> extends InfoLoader<T
             T info = assetCreator.create(loadingPack, configName, clazz.getName());
             if (infos.containsKey(info.getFullName()))
                 throw new IllegalArgumentException("Found a duplicated pack file " + configName + " in pack " + loadingPack + " !");
-            readInfo(inputStream, info);
+            readInfo(getDefaultSubInfoTypesRegistry(), inputStream, info);
             loadItems(info, ContentPackLoader.isHotReloading);
             return info;
         } catch (FileNotFoundException e) {

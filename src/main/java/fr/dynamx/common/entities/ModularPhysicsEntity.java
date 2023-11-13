@@ -16,6 +16,7 @@ import net.minecraftforge.fml.relauncher.Side;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -116,6 +117,7 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
     public boolean initEntityProperties() {
         createModules(new ModuleListBuilder(moduleList));
         fireCreateModulesEvent(world.isRemote ? Side.CLIENT : Side.SERVER);
+        moduleList.sort(Comparator.comparingInt(m -> -m.getInitPriority()));
         moduleList.forEach(IPhysicsModule::initEntityProperties);
         if (initCallback != null) {
             initCallback.onEntityInit(this, moduleList);

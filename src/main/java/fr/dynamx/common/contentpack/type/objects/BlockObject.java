@@ -17,6 +17,8 @@ import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.utils.DynamXUtils;
 import lombok.Getter;
 import lombok.Setter;
+import fr.dynamx.common.contentpack.loader.ObjectLoader;
+import fr.dynamx.common.contentpack.parts.PartBlockSeat;
 import net.minecraft.block.material.Material;
 import net.minecraftforge.common.MinecraftForge;
 
@@ -117,11 +119,6 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
 
     public boolean isObj() {
         return getModel().getPath().endsWith(".obj");
-    }
-
-    @Override
-    public void addPart(BasePart<T> tBasePart) {
-
     }
 
     @Override

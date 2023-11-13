@@ -42,8 +42,10 @@ public interface ISubInfoTypeOwner<T extends ISubInfoTypeOwner<?>> extends IName
     }
 
     /**
-     * Use this when you don't want a {@link SubInfoTypesRegistry} on your object
+     * If null, the object loader will use the last used registry (usually the default one) <br>
+     * @return The sub info types registry for this object
      */
-    interface Empty extends ISubInfoTypeOwner<Empty> {
+    default SubInfoTypesRegistry<T> getSubInfoTypesRegistry() {
+        return null;
     }
 }

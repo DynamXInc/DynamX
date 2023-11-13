@@ -8,6 +8,7 @@ import fr.dynamx.client.handlers.hud.HelicopterController;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.common.entities.modules.SeatsModule;
 import fr.dynamx.common.entities.modules.WheelsModule;
@@ -78,7 +79,7 @@ public class HelicopterEntity<T extends HelicopterPhysicsHandler<?>> extends Bas
     }
 
     @Override
-    public BaseVehicleEntity<?> cast() {
+    public PackPhysicsEntity<?, ?> cast() {
         return this;
     }
 }

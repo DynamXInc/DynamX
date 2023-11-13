@@ -3,6 +3,7 @@ package fr.dynamx.common.contentpack.type.objects;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
+import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
@@ -16,6 +17,7 @@ import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.loader.InfoList;
 import fr.dynamx.common.contentpack.loader.PackFilePropertyData;
 import fr.dynamx.common.contentpack.loader.SubInfoTypeAnnotationCache;
+import fr.dynamx.common.contentpack.loader.SubInfoTypesRegistry;
 import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
 import fr.dynamx.common.contentpack.type.ObjectCollisionsHelper;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
@@ -34,7 +36,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@RegisteredSubInfoType(name = "prop", registries = SubInfoTypeRegistries.BLOCKS_AND_PROPS, strictName = false)
+@RegisteredSubInfoType(name = "prop", registries = SubInfoTypeRegistries.BLOCKS, strictName = false)
 public class PropObject<T extends PropObject<?>> extends AbstractProp<T> implements IPhysicsPackInfo,
         ISubInfoType<BlockObject<?>>, ParticleEmitterInfo.IParticleEmitterContainer {
     private final BlockObject<?> owner;
@@ -179,8 +181,14 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
 
     @Override
     public void addModules(PackPhysicsEntity<?, ?> entity, ModuleListBuilder modules) {
-        //TODO SUPPORT PARTS WITH MODULES
+        getSubProperties().forEach(sub -> sub.addModules(entity, modules));
+        getAllParts().forEach(sub -> sub.addModules(entity, modules));
         if (getOwner() != null)
             getOwner().getLightSources().values().forEach(compoundLight -> compoundLight.addModules(entity, modules));
+    }
+
+    @Override
+    public SubInfoTypesRegistry<T> getSubInfoTypesRegistry() {
+        return (SubInfoTypesRegistry<T>) SubInfoTypeRegistries.PROPS.getInfoList().getDefaultSubInfoTypesRegistry();
     }
 }

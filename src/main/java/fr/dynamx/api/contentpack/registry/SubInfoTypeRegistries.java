@@ -22,7 +22,7 @@ public enum SubInfoTypeRegistries {
     HELICOPTER(DynamXObjectLoaders.HELICOPTERS, ModularVehicleInfo.class),
     ITEMS(DynamXObjectLoaders.ITEMS, ItemObject.class),
     ARMORS(DynamXObjectLoaders.ARMORS, ArmorObject.class),
-    BLOCKS_AND_PROPS(DynamXObjectLoaders.BLOCKS, BlockObject.class),
+    BLOCKS(DynamXObjectLoaders.BLOCKS, BlockObject.class),
     PROPS(DynamXObjectLoaders.PROPS, PropObject.class),
     WHEELS(DynamXObjectLoaders.WHEELS, PartWheelInfo.class),
     CAR_ENGINES(DynamXObjectLoaders.ENGINES, CarEngineInfo.class),

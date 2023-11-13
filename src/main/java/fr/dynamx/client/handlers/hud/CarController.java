@@ -83,6 +83,7 @@ public class CarController extends BaseController {
                 controls = controls | 16;
             if (isEngineStarted)
                 controls = controls | 1;
+            System.out.println("Update controls " + controls);
             engine.setControls(controls);
             engine.setSpeedLimit(speedLimit);
         }

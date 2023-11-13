@@ -52,7 +52,7 @@ public class PacksInfoLoader extends InfoLoader<PackInfo> {
             info.setPackType(packType);
             if (infos.containsKey(info.getFullName()))
                 throw new IllegalArgumentException("Found a duplicated pack file " + configName + " in pack " + loadingPack + " !");
-            readInfo(inputStream, info);
+            readInfo(getDefaultSubInfoTypesRegistry(), inputStream, info);
             loadItems(info, hot);
             return info;
         } finally {

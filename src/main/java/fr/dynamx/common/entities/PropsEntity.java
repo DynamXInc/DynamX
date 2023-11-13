@@ -1,10 +1,12 @@
 package fr.dynamx.common.entities;
 
 import com.jme3.math.Vector3f;
+import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.objects.PropObject;
+import fr.dynamx.common.entities.modules.SeatsModule;
 import fr.dynamx.common.physics.entities.PackEntityPhysicsHandler;
 import fr.dynamx.common.physics.entities.PropPhysicsHandler;
 import fr.dynamx.utils.DynamXConfig;
@@ -12,7 +14,10 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
 
-public class PropsEntity<T extends PackEntityPhysicsHandler<PropObject<?>, ?>> extends PackPhysicsEntity<T, PropObject<?>> {
+import javax.annotation.Nonnull;
+
+public class PropsEntity<T extends PackEntityPhysicsHandler<PropObject<?>, ?>> extends PackPhysicsEntity<T, PropObject<?>> implements IModuleContainer.ISeatsContainer {
+    private SeatsModule seats;
 
     public PropsEntity(World worldIn) {
         super(worldIn);
@@ -66,6 +71,17 @@ public class PropsEntity<T extends PackEntityPhysicsHandler<PropObject<?>, ?>> e
     @Override
     protected void createModules(ModuleListBuilder modules) {
         super.createModules(modules);
-        getPackInfo().addModules(this, modules);
+        seats = getModuleByType(SeatsModule.class);
+    }
+
+    @Nonnull
+    @Override
+    public SeatsModule getSeats() {
+        return seats;
+    }
+
+    @Override
+    public PackPhysicsEntity<?, ?> cast() {
+        return this;
     }
 }

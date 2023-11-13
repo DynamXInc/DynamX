@@ -44,13 +44,13 @@ public abstract class InfoList<T extends ISubInfoTypeOwner<?>> {
     /**
      * SubInfoTypesRegistry for this object
      */
-    protected final SubInfoTypesRegistry<T> subInfoTypesRegistry;
+    protected final SubInfoTypesRegistry<T> defaultSubInfoTypesRegistry;
 
     /**
-     * @param subInfoTypesRegistry
+     * @param defaultSubInfoTypesRegistry
      */
-    public InfoList(@Nullable SubInfoTypesRegistry<T> subInfoTypesRegistry) {
-        this.subInfoTypesRegistry = subInfoTypesRegistry;
+    public InfoList(@Nullable SubInfoTypesRegistry<T> defaultSubInfoTypesRegistry) {
+        this.defaultSubInfoTypesRegistry = defaultSubInfoTypesRegistry;
     }
 
     /**
@@ -91,7 +91,7 @@ public abstract class InfoList<T extends ISubInfoTypeOwner<?>> {
     }
 
     public boolean hasSubInfoTypesRegistry() {
-        return subInfoTypesRegistry != null;
+        return defaultSubInfoTypesRegistry != null;
     }
 
     /**

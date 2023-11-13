@@ -1,7 +1,7 @@
 package fr.dynamx.common.network.sync;
 
 import fr.dynamx.api.entities.IModuleContainer;
-import fr.dynamx.common.contentpack.parts.PartSeat;
+import fr.dynamx.common.contentpack.parts.BasePartSeat;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.network.packets.PhysicsEntityMessage;
 import io.netty.buffer.ByteBuf;
@@ -22,7 +22,7 @@ public class MessageSeatsSync extends PhysicsEntityMessage<MessageSeatsSync> {
 
     public MessageSeatsSync(IModuleContainer.ISeatsContainer vehicleEntity) {
         super(vehicleEntity.cast());
-        for (Map.Entry<PartSeat, Entity> e : vehicleEntity.getSeats().getSeatToPassengerMap().entrySet()) {
+        for (Map.Entry<BasePartSeat, Entity> e : vehicleEntity.getSeats().getSeatToPassengerMap().entrySet()) {
             seatToEntity.put(e.getKey().getId(), e.getValue().getEntityId());
         }
     }
@@ -37,7 +37,7 @@ public class MessageSeatsSync extends PhysicsEntityMessage<MessageSeatsSync> {
 
     @Override
     protected void processMessageClient(PhysicsEntityMessage<?> message, PhysicsEntity<?> entity, EntityPlayer player) {
-        if (entity instanceof IModuleContainer.ISeatsContainer)
+        if (entity instanceof IModuleContainer.ISeatsContainer && ((IModuleContainer.ISeatsContainer) entity).hasSeats())
             ((IModuleContainer.ISeatsContainer) entity).getSeats().updateSeats((MessageSeatsSync) message, entity.getSynchronizer());
         else
             log.fatal("Received seats packet for an entity that have no seats !");

@@ -1,10 +1,13 @@
 package fr.dynamx.common.contentpack.parts;
 
 import com.jme3.math.Vector3f;
+import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
+import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
+import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.registry.*;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
@@ -39,10 +42,11 @@ import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nullable;
 import javax.vecmath.Vector2f;
+import java.util.Collections;
 import java.util.List;
 
 @RegisteredSubInfoType(name = "door", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER}, strictName = false)
-public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfo> implements IPhysicsPackInfo, IDrawablePart<BaseVehicleEntity<?>> {
+public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfo> implements IPhysicsPackInfo, IDrawablePart<BaseVehicleEntity<?>>, IPartContainer<PartDoor> {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("CarAttachPoint".equals(key))
@@ -130,7 +134,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
                 doors.spawnDoor(this);
             }
         } else if(!isPlayerMounting()) {
-            PartSeat seat = getLinkedSeat(entity);
+            PartEntitySeat seat = getLinkedSeat(entity);
             if (player.isSneaking() || seat == null) {
                 doors.switchDoorState(getId());
             } else {
@@ -158,7 +162,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
         return true;
     }
 
-    public void mount(BaseVehicleEntity<?> vehicleEntity, PartSeat seat, EntityPlayer context) {
+    public void mount(BaseVehicleEntity<?> vehicleEntity, PartEntitySeat seat, EntityPlayer context) {
         Vector3fPool.openPool();
         if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.PlayerInteract(context, vehicleEntity, seat))) {
             seat.interact(vehicleEntity, context);
@@ -167,8 +171,8 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     }
 
     @Nullable
-    public PartSeat getLinkedSeat(BaseVehicleEntity<?> vehicleEntity) {
-        return vehicleEntity.getPackInfo().getPartsByType(PartSeat.class).stream()
+    public PartEntitySeat getLinkedSeat(BaseVehicleEntity<?> vehicleEntity) {
+        return vehicleEntity.getPackInfo().getPartsByType(PartEntitySeat.class).stream()
                 .filter(seat -> seat.getLinkedDoor() != null && seat.getLinkedDoor().equalsIgnoreCase(getPartName()))
                 .findFirst()
                 .orElse(null);
@@ -289,5 +293,25 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     @Override
     public Vector3f getScaleModifier() {
         return getScaleModifier(owner);
+    }
+
+    @Override
+    public List<BasePart<PartDoor>> getAllParts() {
+        return Collections.EMPTY_LIST;
+    }
+
+    @Override
+    public void addPart(BasePart<PartDoor> partDoorBasePart) {
+        throw new IllegalStateException("Cannot add part to a door");
+    }
+
+    @Override
+    public void addSubProperty(ISubInfoType<PartDoor> property) {
+        throw new IllegalStateException("Cannot add sub property to a door");
+    }
+
+    @Override
+    public List<ISubInfoType<PartDoor>> getSubProperties() {
+        return Collections.EMPTY_LIST;
     }
 }

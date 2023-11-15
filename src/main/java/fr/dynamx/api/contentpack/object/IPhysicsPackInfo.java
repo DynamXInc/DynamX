@@ -30,4 +30,6 @@ public interface IPhysicsPackInfo extends ICollisionsContainer {
 
     float getAngularDamping();
     float getLinearDamping();
+
+    float getRenderDistance();
 }

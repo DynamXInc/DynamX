@@ -230,6 +230,11 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     }
 
     @Override
+    public float getRenderDistance() {
+        return owner.getRenderDistance();
+    }
+
+    @Override
     public ResourceLocation getHudCursorTexture() {
         return new ResourceLocation(DynamXConstants.ID, "textures/door.png");
     }

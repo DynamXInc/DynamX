@@ -31,22 +31,22 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
         return null;
     };
 
+    @Getter
+    @Setter
     @PackFileProperty(configNames = "Translate", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false, defaultValue = "0 0 0")
-    @Getter
-    @Setter
     protected Vector3f translation = new Vector3f(0, 0, 0);
+    @Getter
+    @Setter
     @PackFileProperty(configNames = "Scale", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false, defaultValue = "1 1 1")
-    @Getter
-    @Setter
     protected Vector3f scaleModifier = new Vector3f(1, 1, 1);
-    @PackFileProperty(configNames = "RenderDistanceSquared", required = false, defaultValue = "4096")
     @Getter
     @Setter
+    @PackFileProperty(configNames = "RenderDistanceSquared", required = false, defaultValue = "4096")
     protected float renderDistance = 4096;
 
-    @PackFileProperty(configNames = "UseComplexCollisions", required = false, defaultValue = "false", description = "common.UseComplexCollisions")
-    @Accessors(fluent = true)
     @Getter
+    @Accessors(fluent = true)
+    @PackFileProperty(configNames = "UseComplexCollisions", required = false, defaultValue = "false", description = "common.UseComplexCollisions")
     protected boolean useComplexCollisions = false;
     @Getter
     protected ObjectCollisionsHelper collisionsHelper;

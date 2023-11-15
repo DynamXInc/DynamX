@@ -141,6 +141,11 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
             defaultValue = "1 1 1")
     protected Vector3f scaleModifier = new Vector3f(1, 1, 1);
 
+    @Getter
+    @Setter
+    @PackFileProperty(configNames = "RenderDistanceSquared", required = false, defaultValue = "4096")
+    protected float renderDistance = 4096;
+
     /**
      * The particle emitters of this vehicle
      */

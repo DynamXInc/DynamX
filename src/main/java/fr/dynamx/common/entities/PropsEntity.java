@@ -62,13 +62,6 @@ public class PropsEntity<T extends PackEntityPhysicsHandler<PropObject<?>, ?>> e
     }
 
     @Override
-    public boolean isInRangeToRenderDist(double range) {
-        //Fix npe due to render before first update
-        return getPackInfo() != null && getPackInfo().getRenderDistance() >= range;
-    }
-    
-
-    @Override
     protected void createModules(ModuleListBuilder modules) {
         super.createModules(modules);
         seats = getModuleByType(SeatsModule.class);

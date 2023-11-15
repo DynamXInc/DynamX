@@ -16,8 +16,8 @@ import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.PackInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
-import fr.dynamx.common.entities.modules.engines.CarEngineModule;
 import fr.dynamx.common.entities.modules.TrailerAttachModule;
+import fr.dynamx.common.entities.modules.engines.BasicEngineModule;
 import fr.dynamx.common.entities.vehicles.TrailerEntity;
 import fr.dynamx.common.physics.joints.EntityJoint;
 import fr.dynamx.common.physics.joints.EntityJointsHandler;
@@ -160,7 +160,7 @@ public class DynamXUtils {
         eyeLook.multLocal(distanceMax);
         lookAt.addLocal(eyeLook);
 
-        return DynamXPhysicsHelper.castRay( DynamXContext.getPhysicsWorld(entity.world), eyePos, lookAt, ignoredPredicate);
+        return DynamXPhysicsHelper.castRay(DynamXContext.getPhysicsWorld(entity.world), eyePos, lookAt, ignoredPredicate);
     }
 
     public static NBTTagList newDoubleNBTList(double... numbers) {
@@ -337,7 +337,7 @@ public class DynamXUtils {
 
     //DUPLICATE (function is already in the BasicsAddon)
     public static int getSpeed(BaseVehicleEntity<?> entity) {
-        CarEngineModule engine = entity.getModuleByType(CarEngineModule.class);
+        BasicEngineModule engine = entity.getModuleByType(BasicEngineModule.class);
         if (engine != null) {
             float[] ab = engine.getEngineProperties();
             if (ab == null) return 0;
@@ -346,7 +346,7 @@ public class DynamXUtils {
         return -1;
     }
 
-    public static void attachTrailer(EntityPlayer player, BaseVehicleEntity<?> carEntity, BaseVehicleEntity<?> trailer){
+    public static void attachTrailer(EntityPlayer player, BaseVehicleEntity<?> carEntity, BaseVehicleEntity<?> trailer) {
         Vector3fPool.openPool();
         Vector3f p1r = DynamXGeometry.rotateVectorByQuaternion(carEntity.getModuleByType(TrailerAttachModule.class).getAttachPoint(), carEntity.physicsRotation);
         Vector3f p2r = DynamXGeometry.rotateVectorByQuaternion(trailer.getModuleByType(TrailerAttachModule.class).getAttachPoint(), trailer.physicsRotation);
@@ -386,15 +386,15 @@ public class DynamXUtils {
 
     public static void hotswapWorldPackInfos(World w) {
         DynamXMain.log.info("Hot-swapping pack infos in models and spawn entities/tile entities in world " + w);
-        for(Entity e : w.loadedEntityList) {
-            if(e instanceof IPackInfoReloadListener)
+        for (Entity e : w.loadedEntityList) {
+            if (e instanceof IPackInfoReloadListener)
                 ((IPackInfoReloadListener) e).onPackInfosReloaded();
         }
-        for(TileEntity te : w.loadedTileEntityList) {
-            if(te instanceof IPackInfoReloadListener)
+        for (TileEntity te : w.loadedTileEntityList) {
+            if (te instanceof IPackInfoReloadListener)
                 ((IPackInfoReloadListener) te).onPackInfosReloaded();
         }
-        if(w.isRemote)
+        if (w.isRemote)
             DynamXContext.getObjModelRegistry().onPackInfosReloaded();
     }
 

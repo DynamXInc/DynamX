@@ -28,8 +28,15 @@ public interface IPhysicsPackInfo extends ICollisionsContainer {
 
     ItemStack getPickedResult(int metadata);
 
-    float getAngularDamping();
     float getLinearDamping();
+    float getAngularDamping();
+
+    default float getInWaterLinearDamping() {
+        return 0.6f;
+    }
+    default float getInWaterAngularDamping() {
+        return 0.6f;
+    }
 
     float getRenderDistance();
 }

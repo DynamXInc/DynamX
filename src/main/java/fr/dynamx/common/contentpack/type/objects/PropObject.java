@@ -52,6 +52,7 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
     @Getter
     @Setter
     protected Vector3f spawnOffset = new Vector3f(0, 0.65f, 0);
+
     @PackFileProperty(configNames = "ContinuousCollisionDetection", required = false, defaultValue = "false")
     @Getter
     @Setter
@@ -64,11 +65,18 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
     @Getter
     @Setter
     protected float margin = 0.04f;
+    @Getter
+    @Setter
+    @PackFileProperty(configNames = "Bounciness", required = false, defaultValue = "0")
+    protected float restitutionFactor;
+
     @PackFileProperty(configNames = "DespawnTime", required = false, defaultValue = "\"-1\" (disabled)")
     @Getter
     @Setter
     protected float despawnTime = -1;
+
     @PackFileProperty(configNames = "LinearDamping", required = false, defaultValue = "0")
+
     @Getter
     @Setter
     protected float linearDamping;
@@ -76,10 +84,13 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
     @Getter
     @Setter
     protected float angularDamping;
-    @PackFileProperty(configNames = "Bounciness", required = false, defaultValue = "0")
+
     @Getter
-    @Setter
-    protected float restitutionFactor;
+    @PackFileProperty(configNames = "InWaterLinearDamping", required = false, defaultValue = "0.6")
+    protected float inWaterLinearDamping = 0.6f;
+    @Getter
+    @PackFileProperty(configNames = "InWaterAngularDamping", required = false, defaultValue = "0.6")
+    protected float inWaterAngularDamping = 0.6f;
 
     private List<ParticleEmitterInfo<?>> particleEmitters = new ArrayList<>();
 

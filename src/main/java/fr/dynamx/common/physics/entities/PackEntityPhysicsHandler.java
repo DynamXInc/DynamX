@@ -44,22 +44,24 @@ public abstract class PackEntityPhysicsHandler<A extends IPhysicsPackInfo & IPar
     @Override
     public void update() {
         super.update();
-        collisionObject.setLinearDamping(packInfo.getLinearDamping());
-        collisionObject.setAngularDamping(packInfo.getAngularDamping());
-        isInWater = false;
-
         float waterLevel = getWaterLevel();
         if (waterLevel == Float.MIN_VALUE) {
+            if (!isInWater)
+                return;
+            isInWater = false;
+            collisionObject.setLinearDamping(packInfo.getLinearDamping());
+            collisionObject.setAngularDamping(packInfo.getAngularDamping());
             return;
         }
-        isInWater = true;
-        collisionObject.setLinearDamping(0.6f);
-        collisionObject.setAngularDamping(0.6f);
+        if(!isInWater) {
+            isInWater = true;
+            collisionObject.setLinearDamping(packInfo.getInWaterLinearDamping());
+            collisionObject.setAngularDamping(packInfo.getInWaterAngularDamping());
+        }
         for (FloatPhysicsHandler floatPhysicsHandler : floatList) {
             floatPhysicsHandler.handleBuoyancy(waterLevel);
         }
     }
-
 
     @Nullable
     @Override
@@ -73,6 +75,7 @@ public abstract class PackEntityPhysicsHandler<A extends IPhysicsPackInfo & IPar
         if (getCollisionObject() != null) {
             getCollisionObject().setAngularDamping(packInfo.getAngularDamping());
             getCollisionObject().setLinearDamping(packInfo.getLinearDamping());
+            isInWater = false;
         }
 
         //Debug, to clean

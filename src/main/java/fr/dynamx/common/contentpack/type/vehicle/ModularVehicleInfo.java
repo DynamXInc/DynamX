@@ -112,11 +112,18 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     protected float dragFactor;
 
     @Getter
-    @PackFileProperty(configNames = "LinearDamping", required = false, defaultValue = "0.5")
+    @PackFileProperty(configNames = "LinearDamping", required = false, defaultValue = "0.5 for helicopters, 0 for others")
     protected float linearDamping;
     @Getter
-    @PackFileProperty(configNames = "AngularDamping", required = false, defaultValue = "0.9")
+    @PackFileProperty(configNames = "AngularDamping", required = false, defaultValue = "0.9 for helicopters, 0.5 for boats, 0 for others")
     protected float angularDamping;
+
+    @Getter
+    @PackFileProperty(configNames = "InWaterLinearDamping", required = false, defaultValue = "0.6")
+    protected float inWaterLinearDamping = 0.6f;
+    @Getter
+    @PackFileProperty(configNames = "InWaterAngularDamping", required = false, defaultValue = "0.9 for helicopters, 0.6 for others")
+    protected float inWaterAngularDamping = 0.6f;
 
     @Getter
     @PackFileProperty(configNames = "UseComplexCollisions", required = false, defaultValue = "true", description = "common.UseComplexCollisions")

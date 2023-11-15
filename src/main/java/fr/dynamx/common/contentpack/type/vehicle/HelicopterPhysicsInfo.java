@@ -6,14 +6,10 @@ import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
-import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
-import fr.dynamx.common.entities.modules.HelicopterEngineModule;
+import fr.dynamx.common.entities.modules.engines.HelicopterEngineModule;
 import lombok.Getter;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @RegisteredSubInfoType(name = "HelicopterPhysics", registries = {SubInfoTypeRegistries.HELICOPTER})
 public class HelicopterPhysicsInfo extends SubInfoType<ModularVehicleInfo> {

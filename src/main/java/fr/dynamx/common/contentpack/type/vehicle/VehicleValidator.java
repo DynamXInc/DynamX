@@ -13,7 +13,8 @@ import fr.dynamx.utils.errors.DynamXErrorManager;
 import java.util.List;
 
 public interface VehicleValidator {
-    default void initProperties(ModularVehicleInfo info) {}
+    default void initProperties(ModularVehicleInfo info) {
+    }
 
     DynamXItemSpawner<ModularVehicleInfo> getSpawnItem(ModularVehicleInfo info);
 
@@ -67,11 +68,17 @@ public interface VehicleValidator {
 
         @Override
         public void validate(ModularVehicleInfo info) {
-            CarEngineInfo engine = info.getSubPropertyByType(CarEngineInfo.class);
-            if (engine != null)
-                throw new IllegalArgumentException("Boat " + info.getFullName() + " has a car engine !");
+            BoatEngineInfo engine = info.getSubPropertyByType(BoatEngineInfo.class);
+            if (engine != null && engine.getEngineSounds() == null) {
+                DynamXErrorManager.addPackError(info.getPackName(), "config_error", ErrorLevel.FATAL, info.getName(), "The boat engine has no sounds !");
+            }
             if (info.getSubPropertyByType(BoatPropellerInfo.class) == null)
                 throw new IllegalArgumentException("Boat " + info.getFullName() + " has no propeller");
+        }
+
+        @Override
+        public Class<? extends BaseEngineInfo> getEngineClass() {
+            return BoatEngineInfo.class;
         }
     };
     VehicleValidator HELICOPTER_VALIDATOR = new VehicleValidator() {
@@ -79,6 +86,7 @@ public interface VehicleValidator {
         public void initProperties(ModularVehicleInfo info) {
             info.linearDamping = 0.5f;
             info.angularDamping = 0.9f;
+            info.inWaterAngularDamping = 0.9f;
         }
 
         @Override

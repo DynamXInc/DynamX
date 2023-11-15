@@ -2,8 +2,8 @@ package fr.dynamx.common.entities.modules;
 
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.modules.engines.HelicopterEngineModule;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
-import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
 import lombok.Getter;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;

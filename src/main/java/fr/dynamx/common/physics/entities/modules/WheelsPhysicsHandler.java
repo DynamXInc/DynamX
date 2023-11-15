@@ -7,7 +7,7 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.common.contentpack.parts.PartWheel;
 import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.entities.modules.CarEngineModule;
+import fr.dynamx.common.entities.modules.engines.CarEngineModule;
 import fr.dynamx.common.entities.modules.WheelsModule;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.BaseWheeledVehiclePhysicsHandler;
@@ -154,5 +154,4 @@ public class WheelsPhysicsHandler {
                 wheelPhysics.brake(0, 0, engine.getPhysicsHandler().getEngine().getBraking());
         }
     }
-
 }

@@ -4,7 +4,7 @@ import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.modules.IVehicleController;
 import fr.dynamx.client.handlers.KeyHandler;
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.entities.modules.BasicEngineModule;
+import fr.dynamx.common.entities.modules.engines.BasicEngineModule;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.Minecraft;

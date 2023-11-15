@@ -10,7 +10,7 @@ import fr.dynamx.common.contentpack.parts.BasePartSeat;
 import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
-import fr.dynamx.common.entities.modules.BasicEngineModule;
+import fr.dynamx.common.entities.modules.engines.BasicEngineModule;
 import fr.dynamx.common.entities.modules.SeatsModule;
 import fr.dynamx.common.entities.modules.WheelsModule;
 import lombok.Getter;

@@ -8,7 +8,7 @@ import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.common.entities.PackPhysicsEntity;
-import fr.dynamx.common.entities.modules.BoatPropellerModule;
+import fr.dynamx.common.entities.modules.engines.BoatPropellerModule;
 import fr.dynamx.common.entities.vehicles.BoatEntity;
 import lombok.Getter;
 

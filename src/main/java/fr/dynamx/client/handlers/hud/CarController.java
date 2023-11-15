@@ -16,7 +16,7 @@ import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.client.handlers.KeyHandler;
 import fr.dynamx.common.contentpack.type.vehicle.CarEngineInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.entities.modules.CarEngineModule;
+import fr.dynamx.common.entities.modules.engines.CarEngineModule;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.client.ClientDynamXUtils;
 import lombok.Getter;

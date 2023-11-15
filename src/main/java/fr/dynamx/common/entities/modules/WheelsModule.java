@@ -17,6 +17,7 @@ import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.parts.PartWheel;
 import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.modules.engines.CarEngineModule;
 import fr.dynamx.common.network.sync.variables.EntityFloatArrayVariable;
 import fr.dynamx.common.network.sync.variables.EntityMapVariable;
 import fr.dynamx.common.physics.entities.BaseWheeledVehiclePhysicsHandler;

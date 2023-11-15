@@ -4,7 +4,7 @@ import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
-import fr.dynamx.common.entities.modules.CarEngineModule;
+import fr.dynamx.common.entities.modules.engines.CarEngineModule;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -33,7 +33,8 @@ public class CarEngineInfo extends BaseEngineInfo {
         super(packName, name);
     }
 
-    void addGear(GearInfo gear) {
+    @Override
+    public void addGear(GearInfo gear) {
         gear.setId(i);
         gears.add(i, gear);
         i++;

@@ -8,7 +8,7 @@ import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.client.handlers.KeyHandler;
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.entities.modules.HelicopterEngineModule;
+import fr.dynamx.common.entities.modules.engines.HelicopterEngineModule;
 import fr.dynamx.common.entities.vehicles.HelicopterEntity;
 import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.util.ResourceLocation;

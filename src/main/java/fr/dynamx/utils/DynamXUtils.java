@@ -16,7 +16,7 @@ import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.PackInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
-import fr.dynamx.common.entities.modules.CarEngineModule;
+import fr.dynamx.common.entities.modules.engines.CarEngineModule;
 import fr.dynamx.common.entities.modules.TrailerAttachModule;
 import fr.dynamx.common.entities.vehicles.TrailerEntity;
 import fr.dynamx.common.physics.joints.EntityJoint;

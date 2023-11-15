@@ -39,6 +39,8 @@ public class DynamXObjectLoaders {
             return new CarEngineInfo(pack, name);
         else if(Objects.equals(clazz, BaseEngineInfo.class.getName()))
             return new BaseEngineInfo(pack, name);
+        else if(Objects.equals(clazz, BoatEngineInfo.class.getName()))
+            return new BoatEngineInfo(pack, name);
         else
             throw new IllegalArgumentException("Unknown engine class: " + clazz);
     }), new SubInfoTypesRegistry<>());

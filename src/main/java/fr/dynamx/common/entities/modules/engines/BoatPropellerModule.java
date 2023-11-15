@@ -18,6 +18,8 @@ import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import lombok.Getter;
 import lombok.Setter;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -29,6 +31,8 @@ public class BoatPropellerModule extends BasicEngineModule implements IPackInfoR
     protected BoatPropellerInfo info;
     protected BoatPropellerHandler propellerPhysicsHandler;
     protected BoatPhysicsHandler<?> boatPhysicsHandler;
+    @Getter
+    protected float bladeAngle;
 
     public BoatPropellerModule(BoatEntity<?> entityEntity) {
         super(entityEntity);
@@ -85,6 +89,21 @@ public class BoatPropellerModule extends BasicEngineModule implements IPackInfoR
 
     public boolean hasEngine() {
         return engineInfo != null;
+    }
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void updateEntity() {
+        super.updateEntity();
+        if (hasEngine()) {
+            //float targetPower = this.getEngineProperties()[VehicleEntityProperties.EnumEngineProperties.REVS.ordinal()];
+            //curPower = curPower + (targetPower - curPower) / 60; //3-seconds interpolation
+            bladeAngle += getRevs();
+        }
+    }
+
+    public float getRevs() {
+        return !hasEngine() ? 0 : this.getEngineProperties()[VehicleEntityProperties.EnumEngineProperties.REVS.ordinal()];
     }
 
     public class BoatPropellerHandler implements IPackInfoReloadListener {

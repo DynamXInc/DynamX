@@ -18,9 +18,10 @@ import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
+import fr.dynamx.common.entities.modules.HelicopterRotorModule;
 import fr.dynamx.common.entities.modules.engines.BoatPropellerModule;
 import fr.dynamx.common.entities.modules.engines.CarEngineModule;
-import fr.dynamx.common.entities.modules.HelicopterPartModule;
+import fr.dynamx.common.entities.vehicles.HelicopterEntity;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
@@ -33,7 +34,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import javax.annotation.Nullable;
 
 
-@RegisteredSubInfoType(name = "rotor", registries = {SubInfoTypeRegistries.HELICOPTER}, strictName = false)
+@RegisteredSubInfoType(name = "rotor", registries = {SubInfoTypeRegistries.HELICOPTER, SubInfoTypeRegistries.BOATS}, strictName = false)
 public class PartRotor extends BasePart<ModularVehicleInfo> implements IDrawablePart<BaseVehicleEntity<?>> {
     @Getter
     @PackFileProperty(configNames = "Rotation", required = false, defaultValue = "none")
@@ -58,8 +59,8 @@ public class PartRotor extends BasePart<ModularVehicleInfo> implements IDrawable
 
     @Override
     public void addModules(PackPhysicsEntity<?, ?> entity, ModuleListBuilder modules) {
-        if (!modules.hasModuleOfClass(HelicopterPartModule.class)) {
-            modules.add(new HelicopterPartModule((BaseVehicleEntity<?>) entity));
+        if (!modules.hasModuleOfClass(HelicopterRotorModule.class) && entity instanceof HelicopterEntity) {
+            modules.add(new HelicopterRotorModule((BaseVehicleEntity<?>) entity));
         }
     }
 
@@ -105,23 +106,26 @@ public class PartRotor extends BasePart<ModularVehicleInfo> implements IDrawable
         if (partRotor.getRotation() != null)
             GlStateManager.rotate(GlQuaternionPool.get(partRotor.getRotation()));
         // Rotating the rotor.
-        if(null == RotorType.ALWAYS_ROTATING) {
+        if (null == RotorType.ALWAYS_ROTATING) {
             //TODO
             GlStateManager.rotate(partialTicks * partRotor.getRotationSpeed(), partRotor.getRotationAxis().x, partRotor.getRotationAxis().y, partRotor.getRotationAxis().z);
-        } else if(vehicleEntity != null) {
+        } else if (vehicleEntity != null) {
             if (null == RotorType.ROTATING_WHEN_STARTED) {
                 //TODO : check if the vehicle is started
                 // THEN ROTATE
             }
-            if (vehicleEntity.hasModuleOfType(HelicopterPartModule.class)) {
-                HelicopterPartModule partModule = vehicleEntity.getModuleByType(HelicopterPartModule.class);
+            if (vehicleEntity.hasModuleOfType(HelicopterRotorModule.class)) {
+                HelicopterRotorModule partModule = vehicleEntity.getModuleByType(HelicopterRotorModule.class);
                 GlStateManager.rotate((partModule.getCurAngle() + partialTicks * partModule.getCurPower()) * partRotor.getRotationSpeed(), partRotor.getRotationAxis().x, partRotor.getRotationAxis().y, partRotor.getRotationAxis().z);
-            } else if(vehicleEntity.hasModuleOfType(CarEngineModule.class)) {
+            } else if (vehicleEntity.hasModuleOfType(CarEngineModule.class)) {
                 CarEngineModule partModule = vehicleEntity.getModuleByType(CarEngineModule.class);
                 float revs = partModule.getPhysicsHandler().getEngine().getRevs();
-               // GlStateManager.rotate((partModule.getCurAngle() + partialTicks * revs) * partRotor.getRotationSpeed(), partRotor.getRotationAxis().x, partRotor.getRotationAxis().y, partRotor.getRotationAxis().z);
-            } else if(vehicleEntity.hasModuleOfType(BoatPropellerModule.class)) {
-                //TODO MOTEUR SUR BATEAUX ET SONS ET RPMS
+                // GlStateManager.rotate((partModule.getCurAngle() + partialTicks * revs) * partRotor.getRotationSpeed(), partRotor.getRotationAxis().x, partRotor.getRotationAxis().y, partRotor.getRotationAxis().z);
+            } else if (vehicleEntity.hasModuleOfType(BoatPropellerModule.class)) {
+                BoatPropellerModule partModule = vehicleEntity.getModuleByType(BoatPropellerModule.class);
+                GlStateManager.translate(0, -0.56152, -2.6077);
+                GlStateManager.rotate((partModule.getBladeAngle() + partialTicks * partModule.getRevs()) * partRotor.getRotationSpeed(), partRotor.getRotationAxis().x, partRotor.getRotationAxis().y, partRotor.getRotationAxis().z);
+                GlStateManager.translate(0, 0.56152, 2.6077);
             }
         }
         //Scale it

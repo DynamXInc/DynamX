@@ -10,14 +10,14 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 
-public class HelicopterPartModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, IPhysicsModule.IEntityUpdateListener {
+public class HelicopterRotorModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, IPhysicsModule.IEntityUpdateListener {
     protected final BaseVehicleEntity<? extends BaseVehiclePhysicsHandler<?>> entity;
     private HelicopterEngineModule engine;
 
     @Getter
     private float curPower, curAngle;
 
-    public HelicopterPartModule(BaseVehicleEntity<? extends BaseVehiclePhysicsHandler<?>> entity) {
+    public HelicopterRotorModule(BaseVehicleEntity<? extends BaseVehiclePhysicsHandler<?>> entity) {
         this.entity = entity;
     }
 
@@ -46,8 +46,8 @@ public class HelicopterPartModule implements IPhysicsModule<BaseVehiclePhysicsHa
         }
     }
 
-    private void renderParticles(BaseVehicleEntity<?> carEntity, int height) {
-        World world = carEntity.world;
+    private void renderParticles(BaseVehicleEntity<?> entity, int height) {
+        World world = entity.world;
         for (int i = 0; i < 360; i += 2) {
             int power = (int) (engine.getPower() * 10);
 
@@ -58,12 +58,12 @@ public class HelicopterPartModule implements IPhysicsModule<BaseVehiclePhysicsHa
                 double x = Math.cos(Math.toRadians(i)) * (minRadius + radius);
                 double z = Math.sin(Math.toRadians(i)) * (minRadius + radius);
 
-                double y = world.getHeight((int) (carEntity.getPosition().getX() + x), (int) (carEntity.getPosition().getZ() + z));
+                double y = world.getHeight((int) (entity.getPosition().getX() + x), (int) (entity.getPosition().getZ() + z));
                 double zSpeed = Math.sin(Math.toRadians(i)) * 0.9;
                 double xSpeed = Math.cos(Math.toRadians(i)) * 0.9;
 
-                if (world.isAirBlock(new BlockPos((int) (carEntity.getPosition().getX() + x), (int) (carEntity.getPosition().getY() + y), (int) (carEntity.getPosition().getZ() + z)))) {
-                    world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, carEntity.posX + x, y, carEntity.posZ + z, xSpeed, 0, zSpeed);
+                if (world.isAirBlock(new BlockPos((int) (entity.getPosition().getX() + x), (int) (entity.getPosition().getY() + y), (int) (entity.getPosition().getZ() + z)))) {
+                    world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, entity.posX + x, y, entity.posZ + z, xSpeed, 0, zSpeed);
                 }
             }
         }

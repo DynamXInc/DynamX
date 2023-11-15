@@ -2,7 +2,6 @@ package fr.dynamx.common.physics.entities.parts.engine;
 
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.modules.engines.BoatPropellerModule;
-import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.BoatPhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.EnginePhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
@@ -40,6 +39,10 @@ public abstract class AutomaticGearboxHandler {
             {
                 gearBox.setActiveGearNum(currentAcceleration > 0 ? 1 : -1);
                 gearChanged = false;
+            } else if (setNeutralWhenNotAccelerating() && currentAcceleration == 0 && gearBox.getActiveGearNum() != 0) //On accélère pas : on passe au point mort
+            {
+                gearBox.setActiveGearNum(0);
+                gearChanged = true;
             }
             if (gearBox.getActiveGearNum() != 0) //une vitesse est passée, on get les rpm correspondant à la vitesse, dans la gamme de rpm "autorisés"
             {
@@ -75,6 +78,10 @@ public abstract class AutomaticGearboxHandler {
             gearBox.setActiveGearNum(0);
             engine.setRevs(0);
         }
+    }
+
+    protected boolean setNeutralWhenNotAccelerating() {
+        return false;
     }
 
     /**
@@ -120,6 +127,11 @@ public abstract class AutomaticGearboxHandler {
         @Override
         protected float getVehicleSpeed() {
             return vehicle.getSpeedOnZAxisInBoatSpace();
+        }
+
+        @Override
+        protected boolean setNeutralWhenNotAccelerating() {
+            return true;
         }
     }
 }

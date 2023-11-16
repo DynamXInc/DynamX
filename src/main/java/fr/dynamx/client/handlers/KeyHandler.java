@@ -3,8 +3,8 @@ package fr.dynamx.client.handlers;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.client.camera.CameraSystem;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.contentpack.parts.BasePartSeat;
 import fr.dynamx.common.contentpack.parts.PartDoor;
-import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.common.entities.modules.MovableModule;
@@ -47,6 +47,12 @@ public class KeyHandler {
 
     public static final KeyBinding KEY_POWERUP = new KeyBinding("key.powerup", Keyboard.KEY_CAPITAL, "key.categories." + DynamXConstants.ID);
     public static final KeyBinding KEY_POWERDOWN = new KeyBinding("key.powerdown", Keyboard.KEY_LSHIFT, "key.categories." + DynamXConstants.ID);
+    public static final KeyBinding KEY_HELICOPTER_PITCH_FORWARD = new KeyBinding("key.helicopter_pitch_forward", Keyboard.KEY_NUMPAD8, "key.categories." + DynamXConstants.ID);
+    public static final KeyBinding KEY_HELICOPTER_PITCH_BACKWARD = new KeyBinding("key.helicopter_pitch_backward", Keyboard.KEY_NUMPAD5, "key.categories." + DynamXConstants.ID);
+    public static final KeyBinding KEY_HELICOPTER_YAW_LEFT = new KeyBinding("key.helicopter_yaw_left", Keyboard.KEY_NUMPAD4, "key.categories." + DynamXConstants.ID);
+    public static final KeyBinding KEY_HELICOPTER_YAW_RIGHT = new KeyBinding("key.helicopter_yaw_right", Keyboard.KEY_NUMPAD6, "key.categories." + DynamXConstants.ID);
+    public static final KeyBinding KEY_LOCK_ROTATION = new KeyBinding("key.lock_rotation", Keyboard.KEY_NUMPAD1, "key.categories." + DynamXConstants.ID);
+
     public static final KeyBinding KEY_ATTACH_TRAILER = new KeyBinding("key.attachTrailer", Keyboard.KEY_H, "key.categories." + DynamXConstants.ID);
 
 
@@ -72,6 +78,12 @@ public class KeyHandler {
         ClientRegistry.registerKeyBinding(KEY_TAKE_OBJECT);
         ClientRegistry.registerKeyBinding(KEY_POWERUP);
         ClientRegistry.registerKeyBinding(KEY_POWERDOWN);
+
+        ClientRegistry.registerKeyBinding(KEY_HELICOPTER_PITCH_FORWARD);
+        ClientRegistry.registerKeyBinding(KEY_HELICOPTER_PITCH_BACKWARD);
+        ClientRegistry.registerKeyBinding(KEY_HELICOPTER_YAW_LEFT);
+        ClientRegistry.registerKeyBinding(KEY_HELICOPTER_YAW_RIGHT);
+        ClientRegistry.registerKeyBinding(KEY_LOCK_ROTATION);
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -95,6 +107,7 @@ public class KeyHandler {
                     }
                 }
             } else {
+                //FIXME THIS MAY FIRED WHILE TAKING OBJECT
                 if (DynamXContext.getPlayerPickingObjects().containsKey(MC.player.getEntityId())) {
                     if (MC.isSingleplayer()) {
                         PickingObjectHelper.handlePickingControl(new MovableModule.Action(MovableModule.EnumAction.UNPICK), MC.player);
@@ -107,7 +120,7 @@ public class KeyHandler {
             if (KEY_LOCK_DOOR.isPressed()) {
                 Entity entity = mc.player.getRidingEntity();
                 if (entity instanceof BaseVehicleEntity && entity instanceof IModuleContainer.IDoorContainer && ((IModuleContainer.IDoorContainer) entity).getDoors() != null) {
-                    PartSeat seat = ((IModuleContainer.ISeatsContainer) entity).getSeats().getRidingSeat(MC.player);
+                    BasePartSeat seat = ((IModuleContainer.ISeatsContainer) entity).getSeats().getRidingSeat(MC.player);
                     DoorsModule doors = ((IModuleContainer.IDoorContainer) entity).getDoors();
                     PartDoor door = seat.getLinkedPartDoor((BaseVehicleEntity<?>) entity);
                     if (door == null)
@@ -162,6 +175,9 @@ public class KeyHandler {
     }
 
     private void controlCamera() {
+        Entity entity = mc.player.getRidingEntity();
+        if (!(entity instanceof IModuleContainer.ISeatsContainer))
+            return;
         if (KEY_ZOOM_IN.isPressed()) {
             CameraSystem.changeCameraZoom(false);
         }
@@ -169,7 +185,7 @@ public class KeyHandler {
             CameraSystem.changeCameraZoom(true);
         }
         if (KEY_CAMERA_MODE.isPressed()) {
-            mc.ingameGUI.setOverlayMessage("Vehicle camera mode : " + CameraSystem.cycleCameraMode(), true);
+            mc.ingameGUI.setOverlayMessage("Vehicle camera mode : " + CameraSystem.cycleCameraMode((IModuleContainer.ISeatsContainer) entity), true);
         }
         CameraSystem.setWatchingBehind(KEY_WATCH_BEHIND.isKeyDown());
     }
@@ -190,31 +206,6 @@ public class KeyHandler {
                     event.setCanceled(true);
                 }
             }
-            //Door interact
-            /*if (Mouse.isButtonDown(1)) {
-                if (!justPressed) {
-                    justPressed = true;
-                    Predicate<EnumBulletShapeType> predicateShape = p -> !p.isTerrain() && !p.isPlayer() && p != EnumBulletShapeType.VEHICLE;
-                    PhysicsRaycastResult raycastResult = DynamXUtils.castRayFromEntity(mc.player, 2, predicateShape);
-                    if (raycastResult == null)
-                        return;
-                    if (raycastResult.hitBody == null)
-                        return;
-                    Object userObject = raycastResult.hitBody.getUserObject();
-                    if (!(userObject instanceof BulletShapeType)) {
-                        return;
-                    }
-                    if (!(((BulletShapeType<?>) userObject).getObjectIn() instanceof DoorsModule.DoorVarContainer)) {
-                        return;
-                    }
-                    DoorsModule.DoorVarContainer doorContainer = (DoorsModule.DoorVarContainer) ((BulletShapeType<?>) userObject).getObjectIn();
-                    byte doorID = doorContainer.getDoorID();
-                    DoorsModule doorsModule = doorContainer.getModule();
-                    DynamXContext.getNetwork().sendToServer(new MessagePlayerMountVehicle(doorsModule.vehicleEntity.getEntityId(), doorID));
-                }
-            } else {
-                justPressed = false;
-            }*/
         }
     }
 }

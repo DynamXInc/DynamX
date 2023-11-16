@@ -1,0 +1,346 @@
+# Titles
+
+title.name=Name
+title.type=Type
+title.description=Description
+title.example=Example
+title.default_value=Default Value
+category.REQUIRED=Required Properties
+category.OPTIONAL=Optional Properties
+
+# Common
+
+common.model=Model Path OBJ
+common.itemscale=Item Rendering Scale
+common.item3D=See Below
+
+common.description=Item Lore
+common.name=Item Name
+
+common.UseComplexCollisions=Disables the collision box taking the shape of the 3D model: setting it to false uses player collision boxes for collisions with physical entities and terrain. Leaving it true uses the 3D model for collisions, which is more performance-intensive.
+common.shape.type=Box Type (cube, cylinder, or sphere)
+
+common.error.deprecated=Deprecated
+common.unused=Unused
+
+# Descriptions (in the ALL_DOCS)
+
+info.desc.PackInfo=Pack Information
+info.desc.ObjectInfo=Basic DynamX Object Information
+info.desc.AbstractItemObject=Basic DynamX Item Information
+info.desc.ArmorObject=DynamX Armor Information
+info.desc.MaterialVariantsInfo=Object Texture Variants
+info.desc.AbstractProp=Common Information for Blocks and Props in DynamX
+info.desc.BlockObject=DynamX Block Information
+info.desc.ModularVehicleInfo=DynamX Vehicle Information
+info.desc.BasePart=Common Part Information
+info.desc.PartShape=Collision Boxes
+info.desc.EngineSound=Engine Sounds
+info.desc.PropObject=DynamX Prop Information
+info.desc.SteeringWheelInfo=Steering Wheel
+info.desc.FrictionPoint=Friction Point
+info.desc.InteractivePart=Interactive Part (seat, door...)
+info.desc.PartWheel=Wheel
+info.desc.PartSeat=Seat
+info.desc.PartDoor=Door
+info.desc.PartLightSource=Light Source Part
+info.desc.LightObject=Light Source
+info.desc.SubLightObject=Sub Light Source
+info.desc.SimplePartLightSource=Simple Light Source Part
+info.desc.PartWheelInfo=Wheel Information
+info.desc.BoatPropellerInfo=Boat Propulsion
+info.desc.PartFloat=Floaters
+info.desc.BaseEngineInfo=Basic Engine Information
+info.desc.CarEngineInfo=Car Engine
+info.desc.RPMPower=Engine RPM Power Point
+info.desc.GearInfo=Gearbox Speed
+info.desc.TrailerAttachInfo=Trailer Configuration
+info.desc.PartPropsContainer=Props Container (for making a truck with a container holding props, for example)
+info.desc.PartStorage=Allows storing items (like a chest)
+info.desc.CaterpillarInfo=Deprecated, not supported.
+info.desc.HelicopterPhysicsInfo=Helicopter Physics
+info.desc.PartHandle=Helicopter Handle
+info.desc.RequiredAddonInfo=Required Addon Identifier
+
+# PackInfo
+PackInfo.PackName=Pack Name. Used, for example, to reference wheels: `PackName.wheel_test`.
+PackInfo.PackVersion=Pack Version. It's only indicative but helps with organization.
+PackInfo.DcFileVersion=.dc File Generator Version. Use the value provided in the example.
+PackInfo.CompatibleWithLoaderVersions=Pack Compatibility Range with DynamX Loader Versions. Use the value given in the example, unless you know what you're doing.
+RequiredAddonInfo.Id=Required Addon Identifier
+RequiredAddonInfo.Versions=Supported Versions
+
+# Vehicles
+
+ModularVehicleInfo.Name=The name the vehicle will have in the game
+ModularVehicleInfo.Description=Item Vehicle Lore
+ModularVehicleInfo.EmptyMass=Vehicle Mass (in kg)
+ModularVehicleInfo.DragCoefficient=Vehicle Air Friction Coefficient
+ModularVehicleInfo.ShapeYOffset=Vertical Offset of the car's collision box (affects the center of gravity)
+ModularVehicleInfo.CenterOfGravityOffset=Vehicle's Center of Gravity (default: origin position of the chassis in Blender). The position is in Minecraft format.
+ModularVehicleInfo.DefaultEngine=Default Engine Name, see below. If not specified, the vehicle will be a trailer (see "Trailer Configuration")
+ModularVehicleInfo.DefaultSounds=Default Sound Names, see below
+ModularVehicleInfo.ScaleModifier=Allows modifying the model's size, all other parameters such as collisions, position (but not size) of wheels and steering wheel will be automatically recalculated. The wheel scale should be configured in the wheel config directly, see below.
+ModularVehicleInfo.MaxVehicleSpeed=Maximum Speed the vehicle can reach (in km/h)
+ModularVehicleInfo.PlayerStandOnTop=Defines if players can stand on this vehicle.
+ModularVehicleInfo.DefaultZoomLevel=Default Third-Person View Zoom Level when getting into the vehicle
+ModularVehicleInfo.LinearDamping=Linear Velocity Damping (air resistance), between 0 and 1.
+ModularVehicleInfo.AngularDamping=Angular Velocity Damping (air resistance), between 0 and 1.
+ModularVehicleInfo.Textures=Deprecated. See [multi-texture configuration](../MultiTextures.md).
+
+# Steering wheel
+
+SteeringWheelInfo.Position=Position of the steering wheel on the chassis
+SteeringWheelInfo.PartName=Name of the steering wheel object in your model
+SteeringWheelInfo.Rotation=Basic rotation of the steering wheel, if you leave it as 0 0 0 0, the steering wheel will be flat facing you, rotation indicated in Blender in "quaternion" mode
+
+# Base part
+
+common.position=Object Position
+common.scale=Object Size
+BasePart.Size=Replaced by Scale
+
+# Part wheel
+
+PartWheel.IsRight=If the wheel is on the right (true) or left (false) (Property named "isRight" on versions before 2.11.2 included)
+PartWheel.IsSteerable=If the wheel can turn with the steering wheel (true) or not (false)
+PartWheel.MaxTurn=Maximum turning value (how much you can turn the wheel)
+PartWheel.DrivingWheel=If the wheel is a driving wheel (true) or not (false)
+PartWheel.AttachedWheel=Default wheel name, see below
+PartWheel.HandBrakingWheel=If the wheel is braked when the handbrake is engaged (true), or if it can turn freely (false) (optional, if no wheel brakes, non-driving wheels will brake automatically)
+PartWheel.MudGuard=Name of the object corresponding to the mudguard, in the vehicle model
+PartWheel.RotationPoint=Wheel rotation point when turning the steering wheel
+PartWheel.SuspensionAxis=Suspension axis rotation relative to the vertical axis
+
+# Part wheel info
+
+PartWheelInfo.Width=Wheel Width. To determine it, create a cylinder that encloses the wheel; this is the width of that cylinder.
+PartWheelInfo.Radius=Wheel Radius. To determine it, create a cylinder that encloses the wheel; this is the radius of that cylinder
+PartWheelInfo.RimRadius=Rim Radius. To determine it, create a cylinder that encloses the rim; this is the radius of that cylinder (used for the puncture system)
+PartWheelInfo.Friction=Wheel Grip. Recommended value: 1.5.
+PartWheelInfo.BrakeForce=Braking Power. Recommended value: 1000.
+PartWheelInfo.RollInInfluence=Suspension Influence on Z-axis rotation (roll) of the vehicle. Recommended value: 1, modifying it is tricky.
+PartWheelInfo.RollOutInfluence=Suspension Influence on Z-axis rotation (roll) of the vehicle. Recommended value: 1, modifying it is tricky.
+PartWheelInfo.SuspensionStiffness=Suspension Stiffness. Recommended value: 150.
+PartWheelInfo.SuspensionCompression=Suspension Compression. Recommended value: 1000.
+PartWheelInfo.SuspensionRelaxation=Suspension Relaxation. Recommended value: 500.
+PartWheelInfo.SuspensionLength=Suspension Maximum Length (wheel position) - 20 will work most of the time
+PartWheelInfo.SuspensionForce=Suspension Power. Recommended value: 3000.
+PartWheelInfo.Damping=Suspension Damping. Recommended value: 0.5.
+
+#Part wheel info
+
+PartWheelInfo.Width=Wheel Width. To determine it, create a cylinder that encloses the wheel; this is the width of that cylinder.
+PartWheelInfo.Radius=Wheel Radius. To determine it, create a cylinder that encloses the wheel; this is the radius of that cylinder
+PartWheelInfo.RimRadius=Rim Radius. To determine it, create a cylinder that encloses the rim; this is the radius of that cylinder (used for the puncture system)
+PartWheelInfo.Friction=Wheel Grip. Recommended value: 1.5.
+PartWheelInfo.BrakeForce=Braking Power. Recommended value: 1000.
+PartWheelInfo.RollInInfluence=Influence of the suspension on the rotation around the Z-axis (roll) of the vehicle. Recommended value: 1, modifying it is tricky.
+PartWheelInfo.SuspensionRestLength=Suspension Maximum Length (in centimeters). Recommended values: 0.03 to 0.5 (low or high vehicle).
+PartWheelInfo.SuspensionStiffness=Suspension Stiffness (affects its rest length). Recommended values: from 30 to 60.
+PartWheelInfo.SuspensionMaxForce=Maximum force applied to the suspension before it breaks (in Newtons). Recommended value: 10000 (too small a value will break everything).
+PartWheelInfo.WheelDampingRelaxation=Relaxation coefficient, the lower the value, the faster the wheel returns to its rest length after compression. Recommended value: 0.45.
+PartWheelInfo.WheelsDampingCompression=Compression coefficient, the lower the value, the faster the wheel returns to its rest length after rebound. Recommended value: 0.22.
+PartWheelInfo.HandBrakeForce=Handbrake braking power
+PartWheelInfo.SkidParticle=Particle emitted at the wheel when it slides, can be any Minecraft particle, its name must be specified, the default value is smoke
+PartWheelInfo.ScaleModifier=Allows modifying the size of the wheel model, other parameters such as radius and width will be automatically recalculated. The vehicle's scale should be configured in the vehicle config directly, see above.
+PartWheelInfo.Textures=Deprecated. See [multi-texture configuration](MultiTextures).
+
+#Part seat
+
+PartSeat.Driver=Indicates if it's the driver's seat (true) or not (false)
+PartSeat.LinkedDoorPart=Name of the linked PartDoor
+PartSeat.ShouldLimitFieldOfView=Defines if the player can rotate the camera all around them or not
+PartSeat.CameraRotation=Horizontal rotation of the camera, in degrees
+PartSeat.MinPitch=Minimum vertical rotation of the camera, in degrees
+PartSeat.MaxPitch=Maximum vertical rotation of the camera, in degrees
+PartSeat.MinYaw=Minimum horizontal rotation of the camera, in degrees
+PartSeat.MaxYaw=Maximum horizontal rotation of the camera, in degrees
+PartSeat.PlayerPosition=Player's position on the seat
+PartSeat.Rotation=Seat rotation
+PartSeat.CameraPositionY=Vertical position of the third-person camera
+PartSeat.PlayerSize=Player size on the seat (`1 1 1` corresponds to their actual size)
+
+#PartDoor
+
+PartDoor.Enabled=Enables the physical door system. If you set it to false, the door will only be drawn but won't open.
+PartDoor.PartName=Name of the door object in your model.
+PartDoor.LocalCarAttachPoint=Door attachment point relative to the origin of the car object.
+PartDoor.LocalDoorAttachPoint=Door attachment point relative to the origin of the door object, corresponding to the previous point.
+PartDoor.Axis=Door rotation axis.
+PartDoor.OpenedDoorAngleLimit=Minimum Limit, Maximum Limit (Door opening angle).
+PartDoor.ClosedDoorAngleLimit=Minimum Limit, Maximum Limit (Door closing angle).
+PartDoor.DoorOpenForce=Velocity (opening action speed), Maximum Force (door opening).
+PartDoor.DoorCloseForce=Velocity (closing action speed), Maximum Force (door closing).
+PartDoor.DoorCloseTime=Currently not used.
+PartDoor.AttachStrength=Door attachment strength (determines the force applied before the door breaks). (Not used for now).
+PartDoor.AutoMountDelay=Delay before the player is automatically mounted on the seat linked to the car (right-click directly on the door).
+
+#PartLightSource
+
+PartLightSource.PartName=Name of the light object in your model
+PartLightSource.BaseMaterial=(Advanced user) Name of the material used on the light object in the default state. This property behaves the same as the BaseMaterial property of multi-textures.
+PartLightSource.Rotation=Part rotation on the vehicle, rotation indicated in Blender in "quaternion" mode
+
+#LightObject
+
+LightObject.LightId=ID of the light part. It must be shared with all parts that turn on at the same time. This ID will be used in addons to determine when the part should be turned on (for configuring headlights, for example).
+LightObject.Textures=Texture(s) used on the part when it is turned on. See the [multi-textures](MultiTextures) page to learn how multi-textures work on models. If you use more than one texture, they must adhere to the `BlinkSequenceTicks`.
+LightObject.BlinkSequenceTicks=Blinking sequences for the light, for making strobe lights, for example. With `BlinkSequenceTicks: -1 10 20`, the part will be on for 0.5 seconds, then off for 0.5 seconds in alternation (one second = 20 ticks). With `BlinkSequenceTicks: -1 20`, it will be continuously on. A sequence can contain an infinite number of steps.
+LightObject.RotateDuration=Time in ticks for the light part to rotate fully.
+
+#Trailer
+
+TrailerAttachInfo.AttachPoint=Attachment point of the trailer on the model
+TrailerAttachInfo.AttachStrength=Should only be specified in the trailer configuration (not the car's) and defines the maximum force that can be applied to the attachment before it breaks (1000 is a good value for a lightweight car trailer)
+
+#PartStorage
+
+PartStorage.StorageSize=Number of slots in the storage
+
+#Friction points
+
+FrictionPoint.Position=Position of the friction point
+FrictionPoint.Intensity=Force factor (Force = Intensity * |Vehicle Speed|, opposes speed and points downward). I recommend a low horizontal intensity and higher vertical intensity to "stick" the car to the ground.
+
+#Engine
+
+BaseEngineInfo.Power=Engine power
+BaseEngineInfo.MaxRPM=Maximum engine revolutions per minute
+BaseEngineInfo.Braking=Engine braking power (when you release the accelerator)
+CarEngineInfo.SteeringMethod=Steering behavior, 0: direct, 1: interpolated, 2: a mix between 0 and 1.
+CarEngineInfo.TurnSpeed=Speed at which the steering wheel turns the wheels
+
+RPMPower.RPMPower=Do not use an array for this
+
+GearInfo.SpeedRange=Speed range (in km/h) at which this speed will be shifted by the automatic transmission
+GearInfo.RPMRange=RPM range at which this speed will be shifted by the automatic transmission
+
+EngineSound.RPMRange=Array of two integers, rpm_min and rpm_max. RPM range of the sound: it is played between rpm_min and rpm_max.
+EngineSound.Sound=Path to the sound file in ogg format (without .ogg). No need for sounds.json!
+EngineSound.PitchRange=Array of two floating-point numbers, pitch_min and pitch_max. Pitch range of the sound: this allows modifying the engine sound's pitch (higher or lower). pitch_min corresponds to rpm_min, and the same for pitch_max and rpm_max.
+
+#==============
+
+#Items
+common.creativetabname=Creates a new page in the creative menu containing the item where this property is specified, with the defined name. `None` will hide the item from the creative menu.
+common.icontext=Text drawn on the item's icon in menus
+AbstractItemObject.ItemTranslate=Modifies the translation of the item
+AbstractItemObject.ItemRotate=Modifies the rotation of the item
+ItemObject.MaxItemStackSize=Maximum stack size of the item
+info.desc.ItemObject=Simple item
+
+#Blocks and Props
+
+AbstractProp.Translate=Modifies the position of the model
+AbstractProp.Scale=Modifies the size of the model
+AbstractProp.RenderDistanceSquared=Maximum distance at which the block/prop is rendered, can affect performance
+AbstractProp.Textures=Deprecated. See [multi-texture configuration](MultiTextures.md).
+AbstractProp.UseHullShape=Replaced by UseComplexCollisions
+
+BlockObject.Rotate=Modifies the rotation of the block (does not work on props)
+BlockObject.Material=Minecraft material of the block
+BlockObject.LightLevel=Block brightness, between 0 and 15
+
+PropObject.EmptyMass=Mass of the prop (in kg)
+PropObject.CenterOfGravityOffset=Center of gravity of the prop (default: position of the model's origin in Blender). The position is in Minecraft format. Adjust using the associated debug option in the game.
+PropObject.SpawnOffset=Position at which the prop is placed using its item
+PropObject.ContinuousCollisionDetection=Enables (true) or disables (false) continuous collision detection (very useful to prevent small objects from falling through the ground)
+PropObject.Friction=Modifies the friction of the object
+PropObject.Margin=Modifies the collision detection margin of an object (we strongly discourage modifying this property)
+PropObject.DespawnTime=Sets the time in ticks for the object to despawn (recommended to avoid lag)
+PropObject.LinearDamping=Linear velocity damping (air resistance), between 0 and 1.
+PropObject.AngularDamping=Angular velocity damping (air resistance), between 0 and 1.
+PropObject.Bounciness=Intensity of the prop's bounce effect (like a soccer ball), between 0 and 1.
+
+#Armors
+
+ArmorObject.ArmorHead=Name of the head part in the OBJ model, optional
+ArmorObject.ArmorBody=Name of the body part in the OBJ model, optional
+ArmorObject.ArmorArms=Name of the arms part in the OBJ model, optional
+ArmorObject.ArmorLegs=Name of the legs part in the OBJ model, optional
+ArmorObject.ArmorFoot=Name of the foot part in the OBJ model, optional
+ArmorObject.Durability=Item durability
+ArmorObject.Enchantability=Item enchantability
+ArmorObject.EquipSound=Sound name when equipping the armor
+ArmorObject.Toughness=Additional armor protection
+ArmorObject.DamageReduction=Protection of different armor pieces: feet, legs, body, head
+ArmorObject.Textures=Deprecated. See [multi-texture configuration](MultiTextures.md).
+
+#Variants
+MaterialVariantsInfo.BaseMaterial=Base material used for the 3D model object.
+MaterialVariantsInfo.Variants=Names of texture/material variants.
+
+#Types
+type.int=Integer
+type.byte=Very short integer (range of -128 to +127)
+type.float=Decimal number
+type.boolean=Value that can either enable (True) or disable (False) a property
+type.string=String (can be used for naming or describing)
+type.string.array=List of strings (for properties accepting multiple values, e.g., Value1, Value2, Value3, ...)
+type.string.array2d=List of strings accepting values in pairs (e.g., Value1 Value2, Value3 Value4, ...)
+type.int.array=List of integers
+type.float.array=List of decimal numbers
+type.vector3f=Vector with 3 axes (X, Y, Z)
+type.vector3f.array=List of vectors
+type.quaternion=Quaternion (X, Y, Z, W)
+type.vector3f_0z=Vector with a zero Z-axis (X, Y)
+type.vector3f.inverse=Vector with inverted Y and Z axes (X, Z, Y)
+type.vector3f.inverse_Y=Vector in Blender format (X, Z, Y*-1)
+type.vector3f.array.blender=List of vectors in Blender format
+type.vector2f=Vector with 2 axes (X, Y)
+type.item_render_location=Item rendering type (NONE or WORLD or ALL)
+type.sound_event=Sound type
+type.particle=Particle type (see the list of particles on the Minecraft wiki)
+type.collision=Collision type
+type.resourcelocation=ResourceLocation: path to a resource in the format modid:folder/resource. For example, with `dynamxmod:model1/model1.obj`, the model should be in `assets/dynamxmod/models/model1/model1.obj`
+type.shapetype=Shape type (`BOX`: cube, `CYLINDER`: cylinder, `SPHERE`: sphere)
+type.axis=Physical axis (`X`, `Y`, `Z`, `X_ROT`, `Y_ROT`, `Z_ROT`)
+type.material=Minecraft material (among "AIR", "GRASS", "GROUND", "WOOD", "ROCK", "IRON", "ANVIL", "WATER", "LAVA", "LEAVES", "PLANTS", "VINE", "SPONGE", "CLOTH", "FIRE", "SAND", "CIRCUITS", "CARPET", "GLASS", "REDSTONE_LIGHT", "TNT", "CORAL", "ICE", "PACKED_ICE", "SNOW", "CRAFTED_SNOW", "CACTUS", "CLAY", "GOURD", "DRAGON_EGG", "PORTAL", "CAKE", "WEB", "PISTON", "BARRIER", "STRUCTURE_VOID")
+type.player_seat_position=Player position, `LYING`: lying down, `SITTING` = sitting, `STANDING`: standing
+type.player_stand_on_top=Indicates if the player can stand on a vehicle. `ALWAYS` will allow them to always stand (recommended for buses and boats, for example), `PROGRESSIVE` will allow them to stand at speeds below 30 km/h (recommended for cars), and `NEVER` will not allow them to stand on the vehicle.
+
+# Boat Propeller
+
+BoatPropellerInfo.AccelerationForce=Boat acceleration force
+BoatPropellerInfo.BrakeForce=Boat braking force
+BoatPropellerInfo.SteerForce=Boat steering force
+
+# Part Float
+
+PartFloat.DragCoefficient=Friction coefficient with water, between 0 and 1
+PartFloat.BuoyCoefficient=Buoyancy coefficient, between 0 and 1
+PartFloat.LineSize=Number of floats in each direction (points where Archimedes' thrust is applied)
+PartFloat.Spacing=Empty space between each float
+PartFloat.Offset=Position (offset from the center) of the floats
+
+# Part Handle
+
+PartHandle.PartName=TODO
+
+# Particle Emitter Info
+
+ParticleEmitterInfo.Position=Particle source position
+ParticleEmitterInfo.Type=Particle type
+ParticleEmitterInfo.Velocity=Initial velocity of particles
+info.desc.ParticleEmitterInfo=Particle source
+
+# Part Rotor
+
+PartRotor.PartName=Name of the rotor part in the OBJ model
+PartRotor.Rotation=Rotation of the part on the vehicle, rotation indicated in Blender in "quaternion" mode
+PartRotor.RotationAxis=Rotation axis of the rotor (0, 1, 0 for a horizontal rotor, for example, 1, 0, 0 for a vertical rotor)
+PartRotor.RotationSpeed=Rotation speed of the rotor at full power
+info.desc.PartRotor=Rotor
+
+# Helicopter Physics Info
+
+HelicopterPhysicsInfo.BrakeForce=Force applied to the rotor when braking/descending
+HelicopterPhysicsInfo.InclinedGravityFactor=Gravity factor when the helicopter is inclined
+HelicopterPhysicsInfo.MinPower=Minimum rotor power
+HelicopterPhysicsInfo.MousePitchForce=Force applied to the rotor when turning - X axis
+HelicopterPhysicsInfo.MouseYawForce=Force applied to the rotor when turning - Y axis
+HelicopterPhysicsInfo.MouseRollForce=Force applied to the rotor when turning the mouse - Z axis
+HelicopterPhysicsInfo.RollForce=Force applied to the rotor when turning with the keyboard - Z axis
+HelicopterPhysicsInfo.ThrustForce=Force applied to the rotor when accelerating/climbing
+HelicopterPhysicsInfo.VerticalThrustCompensation=Gravity compensation when climbing (purely vertical force)

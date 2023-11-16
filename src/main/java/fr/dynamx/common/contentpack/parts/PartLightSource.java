@@ -22,7 +22,8 @@ import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
-import fr.dynamx.common.entities.modules.LightsModule;
+import fr.dynamx.common.entities.modules.AbstractLightsModule;
+import fr.dynamx.common.entities.vehicles.TrailerEntity;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import lombok.Getter;
@@ -37,7 +38,7 @@ import java.util.*;
 /**
  * Contains multiple {@link LightObject}
  */
-@RegisteredSubInfoType(name = "MultiLight", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER, SubInfoTypeRegistries.BLOCKS_AND_PROPS}, strictName = false)
+@RegisteredSubInfoType(name = "MultiLight", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER, SubInfoTypeRegistries.BLOCKS, SubInfoTypeRegistries.PROPS}, strictName = false)
 public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISubInfoTypeOwner<PartLightSource>, IDrawablePart<BaseVehicleEntity<?>>, IModelTextureVariantsSupplier.IModelTextureVariants {
     private final String name;
 
@@ -54,7 +55,7 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
     @PackFileProperty(configNames = "Position", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y, description = "common.position", required = false)
     protected Vector3f position;
     @Getter
-    @PackFileProperty(configNames = "Rotation", required = false, defaultValue = "1 0 0 0")
+    @PackFileProperty(configNames = "Rotation", required = false, defaultValue = "none")
     protected Quaternion rotation = new Quaternion();
 
     public PartLightSource(ISubInfoTypeOwner<ILightOwner<?>> owner, String name) {
@@ -75,8 +76,11 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
 
     @Override
     public void addModules(PackPhysicsEntity<?, ?> entity, ModuleListBuilder modules) {
-        if (!modules.hasModuleOfClass(LightsModule.class)) {
-            modules.add(new LightsModule(getOwner()));
+        if (!modules.hasModuleOfClass(AbstractLightsModule.class)) {
+            if (entity instanceof TrailerEntity)
+                modules.add(new AbstractLightsModule.TrailerLightsModule(getOwner(), entity));
+            else
+                modules.add(new AbstractLightsModule.LightsModule(getOwner()));
         }
     }
 
@@ -96,12 +100,12 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
         if (MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.LIGHTS, (RenderBaseVehicle<?>) render, entity, PhysicsEntityEvent.Phase.PRE, partialTicks, null))) {
             return;
         }
-        LightsModule lights = entity != null ? entity.getModuleByType(LightsModule.class) : null;
+        AbstractLightsModule lights = entity != null ? entity.getModuleByType(AbstractLightsModule.class) : null;
         drawLights(entity, entity != null ? entity.ticksExisted : 0, packInfo.getModel(), packInfo.getScaleModifier(), lights, forceVanillaRender);
         MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.LIGHTS, (RenderBaseVehicle<?>) render, entity, PhysicsEntityEvent.Phase.POST, partialTicks, null));
     }
 
-    public void drawLights(@Nullable BaseVehicleEntity<?> entity, int tickCounter, ResourceLocation model, Vector3f scale, LightsModule isLightOn, boolean forceVanillaRender) {
+    public void drawLights(@Nullable BaseVehicleEntity<?> entity, int tickCounter, ResourceLocation model, Vector3f scale, AbstractLightsModule isLightOn, boolean forceVanillaRender) {
         /* Rendering light sources */
         DxModelRenderer vehicleModel = DynamXContext.getDxModelRegistry().getModel(model);
         for (PartLightSource lightSource : getOwner().getLightSources().values()) {

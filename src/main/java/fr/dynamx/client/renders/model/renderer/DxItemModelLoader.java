@@ -61,31 +61,30 @@ public class DxItemModelLoader extends TileEntityItemStackRenderer implements IC
                 return;
                 //throw new NoSuchElementException("Item " + stack.getItem().getRegistryName() + " is not registered with metadata " + stack.getMetadata() + " into ObjItemModelLoader");
             }
-            if (!MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack.getItem(), EventStage.PRE, ItemCameraTransforms.TransformType.NONE))) {
+            if (!MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack, EventStage.PRE, renderType))) {
                 if (model.getOwner().get3DItemRenderLocation() == Enum3DRenderLocation.NONE || (renderType == ItemCameraTransforms.TransformType.GUI && model.getOwner().get3DItemRenderLocation() == Enum3DRenderLocation.WORLD)) {
                     GlStateManager.translate(0.5F, 0.5F, 0.5F);
                     Minecraft.getMinecraft().getRenderItem().renderItem(stack, model.getGuiBaked());
                 } else {
-                    if (!MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack.getItem(), EventStage.PRE, renderType)))
+                    if (!MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack, EventStage.TRANSFORM, renderType))) {
                         model.getOwner().applyItemTransforms(renderType, stack, model);
-                    float scale = model.getOwner().getItemScale();
-                    Vector3f translate = model.getOwner().getItemTranslate();
-                    Vector3f rotate = model.getOwner().getItemRotate();
-                    GlStateManager.translate(translate.x, translate.y, translate.z);
-                    GlStateManager.scale(scale, scale, scale);
-                    GlStateManager.rotate(rotate.x, 1, 0, 0);
-                    GlStateManager.rotate(rotate.y, 0, 1, 0);
-                    GlStateManager.rotate(rotate.z, 0, 0, 1);
-                    if (!MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack.getItem(), EventStage.RENDER, ItemCameraTransforms.TransformType.FIXED))) {
-                        model.renderModel(stack, renderType);
+                        float scale = model.getOwner().getItemScale();
+                        Vector3f translate = model.getOwner().getItemTranslate();
+                        Vector3f rotate = model.getOwner().getItemRotate();
+                        GlStateManager.translate(translate.x, translate.y, translate.z);
+                        GlStateManager.scale(scale, scale, scale);
+                        GlStateManager.rotate(rotate.x, 1, 0, 0);
+                        GlStateManager.rotate(rotate.y, 0, 1, 0);
+                        GlStateManager.rotate(rotate.z, 0, 0, 1);
                     }
-                    MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack.getItem(), EventStage.POST, ItemCameraTransforms.TransformType.NONE));
+                    if (!MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack, EventStage.RENDER, renderType)))
+                        model.renderModel(stack, renderType);
+                    MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack, EventStage.POST, renderType));
                 }
             }
         } else {
             RenderItem renderItem = Minecraft.getMinecraft().getRenderItem();
             renderItem.renderItem(stack, renderItem.getItemModelMesher().getModelManager().getMissingModel());
-            //throw new NoSuchElementException("Item " + stack.getItem() + " is not registered into ObjItemModelLoader");
         }
     }
 

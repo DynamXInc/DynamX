@@ -1,0 +1,132 @@
+#home {
+    background-color: rgba(0, 0, 0, 180);
+    top: 5px;
+    left: 5px;
+    width: 240px;
+    min-width: 100px;
+    height: 320px;
+    min-height: 250px;
+}
+
+#header {
+    width: 100%;
+    height: 20px;
+}
+
+#header>label {
+    top: auto;
+    left: auto;
+    width: auto;
+    height: auto;
+    color: lightgray;
+    border: 1px lightgray;
+    border-position: internal;
+    text-align: center;
+}
+
+#header>label:hover {
+    border-color: #a23e00;
+    color: #a23e00;
+}
+
+.header_selected {
+    border-color: #c25008;
+    color: #c25008;
+}
+
+.debug_menu_panel {
+    width: 100%;
+    height: 290px;
+    top: 30px;
+    background-color: translucent;
+}
+
+.debug_menu_panel>label {
+    top: auto;
+    left: 10px;
+    width: auto;
+    height: auto;
+}
+
+.reload_button
+{
+    width: 35%;
+    min-width: 160px;
+    text-align: center;
+    border: 1px gray;
+    border-position: internal;
+    color: lightgray;
+    background-color: rgba(0, 0, 0, 180);
+}
+.reload_button:hover
+{
+    border-color: #a23e00;
+    color: #a23e00;
+}
+.reload_button:disabled
+{
+    border-color: darkgreen;
+}
+
+.switch-button-chk-active, .switch-button-chk-inactive {
+    /*width: 11px;*/
+    width: 100%;
+    height: 12px;
+    left: 10px;
+    top: auto;
+    background-color: translucent;
+}
+
+.switch-button-chk-active:hover>label, .switch-button-chk-inactive:hover>label {
+    color: #a23e00;
+}
+
+.switch-button-chk-active:hover>button, .switch-button-chk-inactive:hover>button {
+    border-color: #a23e00;
+}
+
+.switch-button-chk-inactive>button {
+    background-color: black;
+}
+
+.switch-button-chk-active>button {
+    background-color: #c25008;
+}
+
+.option-desc
+{
+    width: 100%;
+    top: auto;
+    height: 12px;
+}
+.option-desc>label
+{
+    left: 30px;
+    text-shadow: disable;
+    width: 200px;
+    padding-top: -4px;
+    padding-bottom: 2px;
+    text-align-vertical: center;
+}
+
+.option-subcategory
+{
+    left: 10px;
+    font-family: "dnx:test_font";
+    text-shadow: disable;
+    font-size: 2px;
+    width: 80%;
+    padding: 0px;
+    top:auto;
+}
+
+checkbox {
+    color: rgba(255, 255, 255, 0);
+    text-shadow: disable;
+}
+
+checkbox>label
+{
+    left: 16px;
+    width: 220px;
+}

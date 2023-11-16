@@ -1,5 +1,6 @@
 package fr.dynamx.utils.doc;
 
+import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.loader.PackFilePropertyData;
 
@@ -7,42 +8,46 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class ContentPackDocGenerator {
-    private static final DocLocale locale = new DocLocale();
-    private static boolean hasInit;
+    private static boolean hasInit = false;
 
-    public static void generateDoc(String name, String lang, Collection<PackFilePropertyData<?>> data) {
+    public static void reset() {
+        hasInit = false;
+    }
+
+    public static void generateDoc(DocLocale locale, File docDir, Class<?> forClass, String name, Collection<PackFilePropertyData<?>> data) {
         if (data.isEmpty()) {
             System.out.println("Ignoring " + name);
             return;
         }
-        if (!hasInit) {
-            System.out.println("Doc locale " + lang);
-            locale.loadLocaleDataFiles("doc_" + lang + ".lang");
-        }
-
         System.out.println("Generating "+name+".md");
+        data = data.stream().sorted(Comparator.comparing(PackFilePropertyData::getConfigFieldName)).collect(Collectors.toList());
         StringBuilder builder = new StringBuilder();
-        builder.append('\n').append("##### ").append(locale.format("category.REQUIRED"));
-        builder.append("|").append(locale.format("title.name")).append("|")
-                .append(locale.format("title.type")).append("|")
-                .append(locale.format("title.description")).append("|")
-                .append(locale.format("title.example")).append("|").append("\n");
-        builder.append("| -------- | ------------- | ------------------ | ---------------------------- | ---------------- |\n");
-        data.forEach(d -> d.writeDocLine(builder, locale, DocType.REQUIRED));
-
-        builder.append('\n').append("##### ").append(locale.format("category.OPTIONAL"));
-        builder.append("|").append(locale.format("title.name")).append("|")
-                .append(locale.format("title.type")).append("|")
-                .append(locale.format("title.description")).append("|")
-                .append(locale.format("title.default_value")).append("|").append("\n");
-        builder.append("| -------- | ------------- | ------------------ | ---------------------------- | ---------------- |\n");
-        data.forEach(d -> d.writeDocLine(builder, locale, DocType.OPTIONAL));
+        if(data.stream().anyMatch(PackFilePropertyData::isRequired)) {
+            builder.append('\n').append("###### ").append(locale.format("category.REQUIRED")).append('\n');
+            builder.append("|").append(locale.format("title.name")).append("|")
+                    .append(locale.format("title.type")).append("|")
+                    .append(locale.format("title.description")).append("|")
+                    .append(locale.format("title.example")).append("|").append("\n");
+            builder.append("| -------- | ------------- | ------------------ | ---------------------------- | \n");
+            data.forEach(d -> d.writeDocLine(builder, locale, DocType.REQUIRED));
+        }
+        if (data.stream().anyMatch(d -> !d.isRequired())) {
+            builder.append('\n').append("###### ").append(locale.format("category.OPTIONAL")).append('\n');
+            builder.append("|").append(locale.format("title.name")).append("|")
+                    .append(locale.format("title.type")).append("|")
+                    .append(locale.format("title.description")).append("|")
+                    .append(locale.format("title.default_value")).append("|").append("\n");
+            builder.append("| -------- | ------------- | ------------------ | ---------------------------- | \n");
+            data.forEach(d -> d.writeDocLine(builder, locale, DocType.OPTIONAL));
+        }
         //data.forEach(d -> d.writeDocLine(builder, locale, DocType.DEPRECATED));
-        File docDir = new File("Doc");
         docDir.mkdirs();
+        // Write ALL_DOC file
         try {
             File file = new File(docDir, "ALL_DOC.md");
             if (!hasInit) {
@@ -57,6 +62,11 @@ public class ContentPackDocGenerator {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        // Write Parts_Reference file
+        if(forClass.isAssignableFrom(ISubInfoType.class)) {
+            System.out.println(">> Is SubInfo " + name);
+        }
+        // Generate the other files
         docDir = new File(docDir, "doc_files");
         docDir.mkdirs();
         File generated = new File(docDir, "generated");

@@ -1,7 +1,7 @@
 package fr.dynamx.common.handlers;
 
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.contentpack.object.IInfoOwner;
+import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.events.VehicleEntityEvent;
@@ -15,8 +15,8 @@ import fr.dynamx.common.capability.DynamXChunkDataProvider;
 import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
-import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
+import fr.dynamx.common.entities.modules.movables.PickingObjectHelper;
 import fr.dynamx.common.items.DynamXItemRegistry;
 import fr.dynamx.common.items.tools.ItemSlopes;
 import fr.dynamx.common.network.packets.MessageHandleExplosion;
@@ -72,9 +72,13 @@ public class CommonEventHandler {
 
     @SubscribeEvent
     public void onDisconnect(net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedOutEvent event) {
+        EntityPlayer player = event.player;
         if (FMLCommonHandler.instance().getSide().isServer()) {
-            ServerPhysicsSyncManager.onDisconnect(event.player);
+            ServerPhysicsSyncManager.onDisconnect(player);
+            DynamXContext.getWalkingPlayers().remove(player);
         }
+        if(DynamXContext.getPlayerPickingObjects().containsKey(player.getEntityId()))
+            PickingObjectHelper.handlePlayerDisconnection(player);
     }
 
     @SubscribeEvent
@@ -86,8 +90,7 @@ public class CommonEventHandler {
                 schedule(new TaskScheduler.ResyncItem((PhysicsEntity<?>) event.getTarget(), (EntityPlayerMP) event.getEntityPlayer()));
             } else if (event.getTarget().ticksExisted <= 20) //If we were riding a vehicle, when we span we need to receive our seat : we do that here
             {
-                if (event.getTarget() instanceof IModuleContainer.ISeatsContainer) {
-                    //System.out.println("Send seat sync : just spawned " + event.getTarget() + " for " + event.getEntityPlayer());
+                if (event.getTarget() instanceof IModuleContainer.ISeatsContainer && ((IModuleContainer.ISeatsContainer) event.getTarget()).hasSeats()) {
                     schedule(new TaskScheduler.ScheduledTask((short) 10) {
                         @Override
                         public void run() {
@@ -97,13 +100,12 @@ public class CommonEventHandler {
                 }
             }
         } else if (event.getTarget() instanceof EntityPlayer) {
-            if (event.getTarget().getRidingEntity() instanceof IModuleContainer.ISeatsContainer) {
-                //System.out.println("Send seat sync of entity " + event.getTarget().getRidingEntity() + " ridden by " + event.getTarget());
+            if (event.getTarget().getRidingEntity() instanceof IModuleContainer.ISeatsContainer && ((IModuleContainer.ISeatsContainer) event.getTarget().getRidingEntity()).hasSeats()) {
                 schedule(new TaskScheduler.ScheduledTask((short) 10) {
                     @Override
                     public void run() {
                         //The player can dismount in between the 20 ticks delay
-                        if (event.getTarget().getRidingEntity() instanceof IModuleContainer.ISeatsContainer) {
+                        if (event.getTarget().getRidingEntity() instanceof IModuleContainer.ISeatsContainer && ((IModuleContainer.ISeatsContainer) event.getTarget().getRidingEntity()).hasSeats()) {
                             DynamXContext.getNetwork().sendToClient(new MessageSeatsSync((IModuleContainer.ISeatsContainer) event.getTarget().getRidingEntity()), EnumPacketTarget.PLAYER, (EntityPlayerMP) event.getEntityPlayer());
                         }
                     }
@@ -146,18 +148,6 @@ public class CommonEventHandler {
         }
     }
 
-    /*@SubscribeEvent
-    public void onChunkLoad(ChunkEvent.Load event) {
-        ChunkAABB capability = event.getChunk().getCapability(CapaProvider.CHUNK_AABB_CAPABILITY, null);
-        DynamXMain.proxy.scheduleTask(event.getWorld(), () -> {
-            event.getChunk().getTileEntityMap().forEach((blockPos, tileEntity) -> {
-                if(tileEntity instanceof TEDynamXBlock) {
-                    DynamXContext.getNetwork().sendToClient(new MessageSetBlockAABB(blockPos, ((TEDynamXBlock) tileEntity).computeBoundingBox().offset(blockPos)), EnumPacketTarget.PLAYER);
-                }
-            });
-        });
-    }*/
-
     @SubscribeEvent
     public void onChunkUnload(ChunkEvent.Unload e) {
         if (DynamXMain.proxy.shouldUseBulletSimulation(e.getWorld())) {
@@ -190,8 +180,6 @@ public class CommonEventHandler {
                     Vector3fPool.openPool();
                     i.clickedWith(event.getWorld(), event.getEntityPlayer(), event.getHand(), ItemSlopes.fixPos(event.getWorld(), post));
                     Vector3fPool.closePool();
-                } else {
-                    //i.clearMemory(event.getWorld(), event.getEntityPlayer(), event.getItemStack());
                 }
             }
         }
@@ -227,7 +215,7 @@ public class CommonEventHandler {
 
     @SubscribeEvent
     public void onPlayerUpdate(TickEvent.PlayerTickEvent e) {
-        if (!(e.player.getRidingEntity() instanceof BaseVehicleEntity) && DynamXContext.getPhysicsWorld(e.player.world) != null && !e.player.isDead) {
+        if (!(e.player.getRidingEntity() instanceof PhysicsEntity<?>) && DynamXContext.getPhysicsWorld(e.player.world) != null && !e.player.isDead) {
             if(!DynamXContext.getPlayerToCollision().containsKey(e.player) && DynamXPhysicsWorldBlacklistApi.isBlacklisted(e.player)) return;
             Vector3fPool.openPool();
             QuaternionPool.openPool();
@@ -243,7 +231,7 @@ public class CommonEventHandler {
     }
 
     @SubscribeEvent
-    public void onVehicleMount(VehicleEntityEvent.PlayerMount e) {
+    public void onVehicleMount(VehicleEntityEvent.EntityMount e) {
         if (DynamXContext.getPlayerToCollision().containsKey(e.getEntityMounted())) {
             DynamXContext.getPlayerToCollision().get(e.getEntityMounted()).removeFromWorld(false, e.getEntityMounted().world);
         }
@@ -268,7 +256,7 @@ public class CommonEventHandler {
         @SubscribeEvent
         public static void registerBlocks(RegistryEvent.Register<Block> event) {
             IForgeRegistry<Block> blocks = event.getRegistry();
-            for (IInfoOwner<BlockObject<?>> block : DynamXObjectLoaders.BLOCKS.owners) {
+            for (IDynamXItem<BlockObject<?>> block : DynamXObjectLoaders.BLOCKS.owners) {
                 blocks.register((Block) block);
 
                 if (FMLCommonHandler.instance().getSide().isClient()) {
@@ -277,7 +265,7 @@ public class CommonEventHandler {
                     } else {
                         ContentPackUtils.registerDynamXBlockStateMapper(block);
                         if (((DynamXBlock<?>) block).createJson()) {
-                            ContentPackUtils.createBlockJson((IResourcesOwner) block, block.getInfo(), DynamXMain.resDir);
+                            ContentPackUtils.createBlockJson((IResourcesOwner) block, block.getInfo(), DynamXMain.resourcesDirectory);
                         }
                     }
                 }

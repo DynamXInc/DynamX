@@ -11,6 +11,7 @@ import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.entities.modules.MovableModule;
 import fr.dynamx.common.physics.joints.EntityJoint;
 import fr.dynamx.utils.physics.DynamXPhysicsHelper;
+import lombok.Getter;
 
 import static fr.dynamx.utils.physics.DynamXPhysicsHelper.*;
 
@@ -92,20 +93,5 @@ public class AttachObjects extends MovableModule {
         secondAttachPointInWorld = null;
     }
 
-    public Vector3f getFirstAttachPoint() {
-        return firstAttachPoint;
-    }
-
-    public Vector3f getSecondAttachPoint() {
-        return secondAttachPoint;
-    }
-
-    public PhysicsRigidBody getFirstRb() {
-        return firstRb;
-    }
-
-    public PhysicsRigidBody getSecondRb() {
-        return secondRb;
-    }
 
 }

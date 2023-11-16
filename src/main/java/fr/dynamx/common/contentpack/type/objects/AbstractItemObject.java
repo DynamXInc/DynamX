@@ -1,7 +1,7 @@
 package fr.dynamx.common.contentpack.type.objects;
 
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.contentpack.object.IInfoOwner;
+import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
@@ -14,6 +14,7 @@ import fr.dynamx.common.contentpack.type.ObjectInfo;
 import fr.dynamx.common.items.DynamXItemRegistry;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXReflection;
+import lombok.Setter;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.util.ResourceLocation;
 
@@ -24,6 +25,7 @@ import java.util.List;
 public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A extends ISubInfoTypeOwner<?>> extends ObjectInfo<T>
         implements IModelPackObject, IPartContainer<A> {
 
+    @Setter
     @PackFileProperty(configNames = {"CreativeTabName", "CreativeTab", "TabName"}, required = false, defaultValue = "CreativeTab of DynamX", description = "common.creativetabname")
     protected String creativeTabName;
     @PackFileProperty(configNames = "Model", type = DefinitionType.DynamXDefinitionTypes.DYNX_RESOURCE_LOCATION, description = "common.model", defaultValue = "obj/name_of_vehicle/name_of_model.obj")
@@ -93,7 +95,7 @@ public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A e
     }
 
     @Override
-    public String getTranslationKey(IInfoOwner<T> item, int itemMeta) {
+    public String getTranslationKey(IDynamXItem<T> item, int itemMeta) {
         return "item." + DynamXConstants.ID + "." + super.getTranslationKey(item, itemMeta);
     }
 

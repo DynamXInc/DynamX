@@ -9,11 +9,14 @@ import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.EnumBulletShapeType;
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.type.vehicle.FrictionPoint;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import jme3utilities.math.MyQuaternion;
 import lombok.Getter;
 
 /**
@@ -32,12 +35,15 @@ public abstract class BaseWheeledVehiclePhysicsHandler<T extends BaseVehicleEnti
 
     @Override
     public PhysicsRigidBody createShape(Vector3f position, Quaternion rotation, float spawnRotation) {
-        Vector3f tmp = Vector3fPool.get(position);
-        Transform transform = new Transform(tmp, QuaternionPool.get(rotation));
+        if (MyQuaternion.isZero(rotation)) {
+            DynamXMain.log.warn("Resetting physics rotation of entity " + handledEntity);
+            rotation = DynamXGeometry.rotationYawToQuaternion(spawnRotation);
+        }
+        Transform transform = new Transform(position, QuaternionPool.get(rotation));
         ModularVehicleInfo modularVehicleInfo = getHandledEntity().getPackInfo();
 
         //Don't use this.getPackInfo() : it isn't initialized yet
-        physicsVehicle = new PhysicsVehicle(modularVehicleInfo.getPhysicsCollisionShape(), modularVehicleInfo.getEmptyMass());
+        physicsVehicle = new PhysicsVehicle(modularVehicleInfo.getCollisionsHelper().getPhysicsCollisionShape(), modularVehicleInfo.getEmptyMass());
         physicsVehicle.setPhysicsTransform(transform);
         physicsVehicle.setUserObject(new BulletShapeType<>(EnumBulletShapeType.VEHICLE, getHandledEntity(), physicsVehicle.getCollisionShape()));
         physicsVehicle.setSleepingThresholds(0.3f, 1);
@@ -61,7 +67,7 @@ public abstract class BaseWheeledVehiclePhysicsHandler<T extends BaseVehicleEnti
             for (FrictionPoint f : handledEntity.getPackInfo().getFrictionPoints()) {
                 Vector3f pushDown = new Vector3f(-getLinearVelocity().x, -horizSpeed, -getLinearVelocity().z);
                 pushDown.multLocal(f.getIntensity());
-                applyForce(f.getPosition(), pushDown);
+                applyImpulse(f.getPosition(), pushDown);
             }
         }
     }

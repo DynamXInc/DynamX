@@ -55,7 +55,7 @@ public class SubInfoTypeAnnotationCache {
                     type = DefinitionType.getParserOf(f.getType());
                 if (type != null) {
                     for (String configName : property.configNames()) {
-                        PackFilePropertyData<?> d = new PackFilePropertyData<>(f, configName, type, property.required(), property.description(), property.defaultValue());
+                        PackFilePropertyData<?> d = new PackFilePropertyData<>(f, configName, property.configNames(), type, property.required(), property.description(), property.defaultValue());
                         packFileProperties.put(d.getConfigFieldName(), d);
                     }
                 } else
@@ -70,9 +70,9 @@ public class SubInfoTypeAnnotationCache {
                         throw new IllegalArgumentException("@PackFilePropertyFixer should annotate a static IPackFilePropertyFixer field. Errored class: " + classToParse);
                     //System.out.println("Detect in " + classToParse + " " + Arrays.toString(f.getAnnotation(IPackFilePropertyFixer.PackFilePropertyFixer.class).registries()));
                     for (SubInfoTypeRegistries registry : f.getAnnotation(IPackFilePropertyFixer.PackFilePropertyFixer.class).registries()) {
-                        if (!registry.getInfoLoader().hasSubInfoTypesRegistry())
+                        if (!registry.getInfoList().hasSubInfoTypesRegistry())
                             throw new IllegalArgumentException("No sub info type registry on registry " + registry);
-                        registry.getInfoLoader().getSubInfoTypesRegistry().addSubInfoTypePropertiesFixer((Class<? extends INamedObject>) classToParse, (IPackFilePropertyFixer) value);
+                        registry.getInfoList().getDefaultSubInfoTypesRegistry().addSubInfoTypePropertiesFixer((Class<? extends INamedObject>) classToParse, (IPackFilePropertyFixer) value);
                     }
                 } catch (IllegalAccessException e) {
                     throw new RuntimeException(e);
@@ -83,8 +83,6 @@ public class SubInfoTypeAnnotationCache {
             Map<String, PackFilePropertyData<?>> dataMap = getOrLoadData(classToParse.getSuperclass());
             packFileProperties.putAll(dataMap);
         }
-        //ContentPackDocGenerator.generateDoc(toCache.getSimpleName(), "fr_fr", data.values());
-        //System.out.println("Found "+data.size()+" fields in "+toCache.getName());
         cache.put(classToParse, packFileProperties);
     }
 }

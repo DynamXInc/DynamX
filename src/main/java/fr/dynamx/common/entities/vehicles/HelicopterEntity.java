@@ -3,12 +3,17 @@ package fr.dynamx.common.entities.vehicles;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
+import fr.dynamx.client.camera.CameraMode;
+import fr.dynamx.client.handlers.hud.HelicopterController;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.entities.modules.*;
-import fr.dynamx.common.physics.entities.BaseWheeledVehiclePhysicsHandler;
+import fr.dynamx.common.entities.PackPhysicsEntity;
+import fr.dynamx.common.entities.modules.DoorsModule;
+import fr.dynamx.common.entities.modules.SeatsModule;
+import fr.dynamx.common.entities.modules.WheelsModule;
 import fr.dynamx.common.physics.entities.HelicopterPhysicsHandler;
+import lombok.Getter;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
 
@@ -18,6 +23,7 @@ public class HelicopterEntity<T extends HelicopterPhysicsHandler<?>> extends Bas
         IModuleContainer.ISeatsContainer, IModuleContainer.IDoorContainer {
     private SeatsModule seats;
     private DoorsModule doors;
+    @Getter
     private WheelsModule wheels;
 
     public HelicopterEntity(World world) {
@@ -32,28 +38,14 @@ public class HelicopterEntity<T extends HelicopterPhysicsHandler<?>> extends Bas
     public T createPhysicsHandler() {
         return (T) new HelicopterPhysicsHandler(this);
     }
-    //TODO siege conducteur  et cam  et effect fumé et rotation vitesse en fonction de la vitesse
+
     @Override
     protected void createModules(ModuleListBuilder modules) {
         //Take care to add seats BEFORE engine (the engine needs to detect dismounts)
-        modules.add(seats = new SeatsModule(this) {
-            @Override
-            public void applyOrientationToEntity(Entity passenger) {
-                if(seats != null && seats.getControllingPassenger() == passenger) {
-                    //TODO ADD FREE CAMERA MODE
-                    passenger.rotationYaw = 0;
-                    passenger.prevRotationYaw = 0;
-                    passenger.rotationPitch = 0;
-                    passenger.prevRotationPitch = 0;
-                } else {
-                    super.applyOrientationToEntity(passenger);
-                }
-            }
-        });
+        modules.add(getSeats());
         //modules.add(wheels = new WheelsModule(this));
         super.createModules(modules);
         doors = getModuleByType(DoorsModule.class);
-
     }
 
     @Override
@@ -70,16 +62,24 @@ public class HelicopterEntity<T extends HelicopterPhysicsHandler<?>> extends Bas
     @Override
     public SeatsModule getSeats() {
         if (seats == null) //We may need seats before modules are created, because of seats sync
-            seats = new SeatsModule(this);
+            seats = new SeatsModule(this, CameraMode.FIXED) {
+                @Override
+                public void applyOrientationToEntity(Entity passenger) {
+                    if(seats != null && seats.getControllingPassenger() == passenger && HelicopterController.isMouseLocked()) {
+                        passenger.rotationYaw = 0;
+                        passenger.prevRotationYaw = 0;
+                        passenger.rotationPitch = 0;
+                        passenger.prevRotationPitch = 0;
+                    } else {
+                        super.applyOrientationToEntity(passenger);
+                    }
+                }
+            };
         return seats;
     }
 
-    public WheelsModule getWheels() {
-        return wheels;
-    }
-
     @Override
-    public BaseVehicleEntity<?> cast() {
+    public PackPhysicsEntity<?, ?> cast() {
         return this;
     }
 }

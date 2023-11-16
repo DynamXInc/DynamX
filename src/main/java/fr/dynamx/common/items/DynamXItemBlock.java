@@ -1,7 +1,7 @@
 package fr.dynamx.common.items;
 
-import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.render.IModelPackObject;
+import fr.dynamx.api.contentpack.object.IDynamXItem;=
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.blocks.TEDynamXBlock;
@@ -22,7 +22,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
-public class DynamXItemBlock extends ItemBlock implements IResourcesOwner, IInfoOwner<BlockObject<?>> {
+public class DynamXItemBlock extends ItemBlock implements IResourcesOwner, IDynamXItem<BlockObject<?>> {
 
     private final DynamXBlock<BlockObject<?>> dynamxMainBlock;
 

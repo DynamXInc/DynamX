@@ -6,7 +6,7 @@ import java.util.List;
  * Helper class to build a {@link IPhysicsModule} list
  */
 public class ModuleListBuilder {
-    private final List<IPhysicsModule<?>> list;
+    private final List<IPhysicsModule<?>> moduleList;
 
     /**
      * The modules will be added to the given list <br>
@@ -15,7 +15,7 @@ public class ModuleListBuilder {
      * @param moduleList The module list
      */
     public ModuleListBuilder(List<IPhysicsModule<?>> moduleList) {
-        this.list = moduleList;
+        this.moduleList = moduleList;
     }
 
     /**
@@ -24,7 +24,7 @@ public class ModuleListBuilder {
      * @param module The module
      */
     public void add(IPhysicsModule<?> module) {
-        list.add(module);
+        moduleList.add(module);
     }
 
     /**
@@ -32,7 +32,7 @@ public class ModuleListBuilder {
      * @return True if there is already a module of this type
      */
     public boolean hasModuleOfClass(Class<? extends IPhysicsModule<?>> clazz) {
-        return getByClass(clazz) != null;
+        return moduleList.stream().anyMatch(m -> clazz.isAssignableFrom(m.getClass()));
     }
 
     /**
@@ -41,13 +41,13 @@ public class ModuleListBuilder {
      * @return The module of the given type, or null
      */
     public <Y extends IPhysicsModule<?>> Y getByClass(Class<Y> clazz) {
-        return (Y) list.stream().filter(m -> m.getClass() == clazz).findFirst().orElse(null);
+        return (Y) moduleList.stream().filter(m -> clazz.isAssignableFrom(m.getClass())).findFirst().orElse(null);
     }
 
     /**
      * @return The current modules list
      */
-    public List<IPhysicsModule<?>> getList() {
-        return list;
+    public List<IPhysicsModule<?>> getModuleList() {
+        return moduleList;
     }
 }

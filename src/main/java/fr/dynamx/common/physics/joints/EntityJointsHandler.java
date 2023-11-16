@@ -97,9 +97,9 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
 
         if (otherEntity != entity) {
             if (type.isJointOwner(j, entity))
-                otherEntity.getSynchronizer().setSimulationHolder(entity.getSynchronizer().getSimulationHolder(), null, SimulationHolder.UpdateContext.ATTACHED_ENTITIES);
+                otherEntity.getSynchronizer().setSimulationHolder(entity.getSynchronizer().getSimulationHolder(), entity.getSynchronizer().getSimulationPlayerHolder(), SimulationHolder.UpdateContext.ATTACHED_ENTITIES);
             else
-                entity.getSynchronizer().setSimulationHolder(otherEntity.getSynchronizer().getSimulationHolder(), null, SimulationHolder.UpdateContext.ATTACHED_ENTITIES);
+                entity.getSynchronizer().setSimulationHolder(otherEntity.getSynchronizer().getSimulationHolder(), entity.getSynchronizer().getSimulationPlayerHolder(), SimulationHolder.UpdateContext.ATTACHED_ENTITIES);
         }
 
         if (j.getJoint() != null) {
@@ -118,7 +118,7 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
             queuedRestorations = new ArrayList<>();
         }
         queuedRestorations.add(toAdd);
-        restoreCooldown = entity.ticksExisted < 200 ? 20 : 1;
+        restoreCooldown = entity.ticksExisted < 200 ? 40 : 1;
     }
 
     /**
@@ -235,7 +235,7 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
                 NBTSerializer.unserialize(jointst.getCompoundTagAt(i), j);
                 queuedRestorations.add(j);
             }
-            restoreCooldown = 20;
+            restoreCooldown = 40;
             setDirty(true);
         }
     }

@@ -22,22 +22,19 @@ public class LightObject {
     @PackFileProperty(configNames = "LightId")
     protected String lightId = "";
     @Getter
-    @PackFileProperty(configNames = "Textures")
+    @PackFileProperty(configNames = "Textures", defaultValue = "Textures: Light_On")
     protected String[] textures;
     @Getter
-    @PackFileProperty(configNames = "BlinkSequenceTicks", required = false)
+    @PackFileProperty(configNames = "BlinkSequenceTicks", required = false, defaultValue = "none")
     protected int[] blinkSequence;
     @Getter
-    @PackFileProperty(configNames = "RotateDuration", required = false)
+    @PackFileProperty(configNames = "RotateDuration", required = false, defaultValue = "0")
     protected int rotateDuration;
 
     protected int lightIdHashed;
 
+    @Getter
     private final List<TextureVariantData> blinkTextures = new ArrayList<>();
-
-    public List<TextureVariantData> getBlinkTextures() {
-        return blinkTextures;
-    }
 
     protected void hashLightId() {
         try {
@@ -51,7 +48,7 @@ public class LightObject {
         return lightIdHashed;
     }
 
-    @RegisteredSubInfoType(name = "LightObject", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER, SubInfoTypeRegistries.BLOCKS_AND_PROPS}, strictName = false)
+    @RegisteredSubInfoType(name = "LightObject", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER, SubInfoTypeRegistries.BLOCKS, SubInfoTypeRegistries.PROPS}, strictName = false)
     public static class SubLightObject extends LightObject implements ISubInfoType<PartLightSource> {
         protected final PartLightSource owner;
 

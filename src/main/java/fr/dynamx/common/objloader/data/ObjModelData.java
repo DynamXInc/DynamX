@@ -34,9 +34,12 @@ public class ObjModelData extends DxModelData {
     @Getter
     private final Map<String, Material> materials = new HashMap<>();
 
+    //private final IMpsClassLoader mpsClassLoader; //FIXME DELETED ?
 
     public ObjModelData(DxModelPath path) {
         super(path);
+        this.mpsClassLoader = ContentPackLoader.getProtectedResources(path.getPackName()).getSecureLoader();
+        //fixme this.objModelPath = path;
         try {
             String content = new String(DynamXUtils.readInputStream(FMLCommonHandler.instance().getSide().isClient() ? client(path) : server(path)), StandardCharsets.UTF_8);
             ResourceLocation location = path.getModelPath();

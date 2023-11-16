@@ -14,7 +14,7 @@ import javax.annotation.Nullable;
 /**
  * Shortand to create a {@link PartLightSource} with only one {@link LightObject}
  */
-@RegisteredSubInfoType(name = "light", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER, SubInfoTypeRegistries.BLOCKS_AND_PROPS}, strictName = false)
+@RegisteredSubInfoType(name = "light", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER, SubInfoTypeRegistries.BLOCKS, SubInfoTypeRegistries.PROPS}, strictName = false)
 public class SimplePartLightSource extends LightObject implements ISubInfoType<ILightOwner<?>> {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
@@ -27,16 +27,16 @@ public class SimplePartLightSource extends LightObject implements ISubInfoType<I
     private final String name;
 
     @Getter
-    @PackFileProperty(configNames = "PartName")
+    @PackFileProperty(configNames = "PartName", description = "PartLightSource.PartName")
     protected String partName;
     @Getter
-    @PackFileProperty(configNames = "BaseMaterial", required = false)
+    @PackFileProperty(configNames = "BaseMaterial", required = false, description = "PartLightSource.BaseMaterial")
     protected String baseMaterial = "default";
     @Getter
     @PackFileProperty(configNames = "Position", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y, description = "common.position", required = false)
     protected Vector3f position;
     @Getter
-    @PackFileProperty(configNames = "Rotation", required = false, defaultValue = "1 0 0 0")
+    @PackFileProperty(configNames = "Rotation", required = false, defaultValue = "none", description = "PartLightSource.Rotation")
     protected Quaternion rotation = new Quaternion();
 
     public SimplePartLightSource(ISubInfoTypeOwner<ILightOwner<?>> owner, String name) {
@@ -49,7 +49,7 @@ public class SimplePartLightSource extends LightObject implements ISubInfoType<I
         hashLightId();
         PartLightSource existing = owner.getLightSource(partName);
         if(existing != null)
-            DynamXErrorManager.addPackError(getPackName(), "deprecated_light_format", ErrorLevel.LOW, owner.getFullName(), "Light named " + name);
+            DynamXErrorManager.addPackError(getPackName(), "deprecated_light_format", ErrorLevel.LOW, owner.getName(), "Light named " + name);
         boolean add = false;
         if (existing == null) {
             existing = new PartLightSource((ISubInfoTypeOwner<ILightOwner<?>>) owner, this.name);

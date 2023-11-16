@@ -2,12 +2,16 @@ package fr.dynamx.common.physics.entities.parts.engine;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.common.contentpack.ContentPackLoader;
+import fr.dynamx.common.contentpack.type.vehicle.BaseEngineInfo;
 import fr.dynamx.common.contentpack.type.vehicle.CarEngineInfo;
 import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.maths.LinearSpline;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * A simple engine with a power, a power graph, revs, and engine braking.
+ */
 public class Engine {
 
     /**
@@ -49,7 +53,7 @@ public class Engine {
      *
      * @param engineInfo The engine info, loaded from the {@link ContentPackLoader}
      */
-    public Engine(CarEngineInfo engineInfo) {
+    public Engine(BaseEngineInfo engineInfo) {
         power = engineInfo.getPower();
         maxRevs = engineInfo.getMaxRevs();
         braking = engineInfo.getBraking();
@@ -68,12 +72,12 @@ public class Engine {
             return 0;
         }
         float revs = getRevs() * getMaxRevs();
+       // System.out.println("Revs: " +revs + " MaxRevs: " + getMaxRevs()+" "+evaluateSpline(powerGraph, getRevs() * getMaxRevs()));
         revs = DynamXMath.clamp(revs, 0, getMaxRevs() - 0.01f);
         float power = evaluateSpline(powerGraph, revs);
         return power * getPower();
 
     }
-
 
     /**
      * Evaluate the power graph

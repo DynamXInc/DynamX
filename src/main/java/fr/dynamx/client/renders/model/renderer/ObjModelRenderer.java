@@ -9,7 +9,10 @@ import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.objloader.data.Material;
 import fr.dynamx.common.objloader.data.ObjModelData;
 import fr.dynamx.common.objloader.data.ObjObjectData;
+import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.errors.DynamXErrorManager;
+import fr.dynamx.utils.maths.DynamXGeometry;
+import fr.dynamx.utils.optimization.GlQuaternionPool;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.Vec3d;
@@ -130,12 +133,12 @@ public class ObjModelRenderer extends DxModelRenderer{
         if (!MinecraftForge.EVENT_BUS.post(new DynamXModelRenderEvent.RenderMainParts(EventStage.PRE, this, getTextureVariants(), textureDataId))) {
             boolean drawn = false;
             for (ObjObjectRenderer object : objObjects) {
-                if (getTextureVariants().canRenderPart(object.getObjObjectData().getName())) {
+                if (textureVariants.canRenderPart(object.getObjObjectData().getName())) {
                     renderGroup(object, textureDataId);
                     drawn = true;
                 }
             }
-            MinecraftForge.EVENT_BUS.post(new DynamXModelRenderEvent.RenderMainParts(EventStage.POST, this, getTextureVariants(), textureDataId));
+            MinecraftForge.EVENT_BUS.post(new DynamXModelRenderEvent.RenderMainParts(EventStage.POST, this,textureVariants, textureDataId));
             return drawn;
         }
         return true;
@@ -155,6 +158,25 @@ public class ObjModelRenderer extends DxModelRenderer{
             });
             MinecraftForge.EVENT_BUS.post(new DynamXModelRenderEvent.RenderFullModel(EventStage.POST, this, getTextureVariants(), textureDataId));
         }
+    }
+
+    //FIXME SUPPRIME D'ICI, TROUVER OU C'EST MTN ET METTRE A JOUR
+    public void renderPreview(BlockObject<?> blockObjectInfo, EntityPlayer player, BlockPos blockPos, boolean canPlace, float orientation, float partialTicks, int textureNum) {
+        double px = player.lastTickPosX + (player.posX - player.lastTickPosX) * partialTicks;
+        double py = player.lastTickPosY + (player.posY - player.lastTickPosY) * partialTicks;
+        double pz = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * partialTicks;
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(-px + blockPos.getX() + 0.5, -py + blockPos.getY() + 1.5, -pz + blockPos.getZ() + 0.5);
+        GlStateManager.rotate(GlQuaternionPool.get(DynamXGeometry.eulerToQuaternion((blockObjectInfo.getRotation().z),
+                ((blockObjectInfo.getRotation().y + orientation * 22.5f) % 360),
+                (blockObjectInfo.getRotation().x))));
+        DynamXRenderUtils.glTranslate(blockObjectInfo.getTranslation());
+        GlStateManager.scale(blockObjectInfo.getScaleModifier().x, blockObjectInfo.getScaleModifier().y, blockObjectInfo.getScaleModifier().z);
+        GlStateManager.disableBlend();
+        setModelColor(new Vector4f(canPlace ? 0 : 1, canPlace ? 1 : 0, 0, 0.7f));
+        renderModel((byte) textureNum);
+        GlStateManager.enableBlend();
+        GlStateManager.popMatrix();
     }
 
     public ObjObjectRenderer getObjObjectRenderer(String groupName) {

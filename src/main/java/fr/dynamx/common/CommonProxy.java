@@ -28,6 +28,8 @@ public abstract class CommonProxy {
         MinecraftForge.EVENT_BUS.register(new CommonEventHandler());
     }
 
+    public void completeInit(){}
+
     /**
      * @return The client world, if loader
      */

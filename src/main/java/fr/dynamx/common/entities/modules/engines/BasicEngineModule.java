@@ -1,26 +1,38 @@
-package fr.dynamx.common.entities.modules;
+package fr.dynamx.common.entities.modules.engines;
 
+import fr.dynamx.api.audio.EnumSoundState;
+import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.IVehicleController;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.api.network.sync.EntityVariable;
+import fr.dynamx.api.network.sync.SimulationHolder;
 import fr.dynamx.api.network.sync.SynchronizationRules;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
-import fr.dynamx.client.ClientProxy;
+import fr.dynamx.client.sound.EngineSound;
+import fr.dynamx.common.contentpack.type.vehicle.BaseEngineInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.modules.WheelsModule;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.EnginePhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.engine.AutomaticGearboxHandler;
+import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.optimization.Vector3fPool;
+import lombok.Getter;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.Map;
+
+import static fr.dynamx.client.ClientProxy.SOUND_HANDLER;
 
 /**
  * Basic {@link } implementation for cars <br>
@@ -29,9 +41,9 @@ import javax.annotation.Nullable;
  * @see VehicleEntityProperties.EnumEngineProperties
  * @see EnginePhysicsHandler
  */
-@SynchronizedEntityVariable.SynchronizedPhysicsModule()
-public abstract class BasicEngineModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, IPhysicsModule.IPhysicsUpdateListener, IPhysicsModule.IEntityUpdateListener {
-    //TODO CLEAN ENGINE CODE
+@SynchronizedEntityVariable.SynchronizedPhysicsModule(modid = DynamXConstants.ID)
+public abstract class BasicEngineModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, IPhysicsModule.IPhysicsUpdateListener, IPhysicsModule.IEntityUpdateListener, IPackInfoReloadListener {
+
     protected final BaseVehicleEntity<? extends BaseVehiclePhysicsHandler<?>> entity;
 
     //Default value is 32 for the handbrake on spawn
@@ -43,6 +55,11 @@ public abstract class BasicEngineModule implements IPhysicsModule<BaseVehiclePhy
      */
     @SynchronizedEntityVariable(name = "engine_props") //TOD THINK OF IT
     private final EntityVariable<float[]> engineProperties = new EntityVariable<>(SynchronizationRules.PHYSICS_TO_SPECTATORS, new float[VehicleEntityProperties.EnumEngineProperties.values().length]);
+
+    protected final Map<Integer, EngineSound> engineSounds = new HashMap<>();
+    @Getter
+    protected EngineSound currentEngineSound;
+    protected EngineSound lastEngineSound;
 
     public BasicEngineModule(BaseVehicleEntity<? extends BaseVehiclePhysicsHandler<?>> entity) {
         this.entity = entity;
@@ -95,7 +112,7 @@ public abstract class BasicEngineModule implements IPhysicsModule<BaseVehiclePhy
      * @param started engine on/off state
      */
     public void setEngineStarted(boolean started) {
-        setControls(started ? getControls() | 1 : getControls() &~ 1);
+        setControls(started ? getControls() | 1 : getControls() & ~1);
     }
 
     public int getControls() {
@@ -110,7 +127,7 @@ public abstract class BasicEngineModule implements IPhysicsModule<BaseVehiclePhy
     public void setControls(int controls) {
         if (!this.isEngineStarted() && (controls & 1) == 1)
             onEngineSwitchedOn();
-        else if(isEngineStarted() && (controls & 1) != 1)
+        else if (isEngineStarted() && (controls & 1) != 1)
             onEngineSwitchedOff();
         this.controls.set(controls);
     }
@@ -155,8 +172,8 @@ public abstract class BasicEngineModule implements IPhysicsModule<BaseVehiclePhy
     }
 
     @Override
-    public void removePassenger(Entity passenger) {
-        if (entity.getControllingPassenger() == null) {
+    public void onSetSimulationHolder(SimulationHolder simulationHolder, EntityPlayer simulationPlayerHolder, SimulationHolder.UpdateContext changeContext) {
+        if (simulationPlayerHolder == null) {
             resetControls();
         }
     }
@@ -166,17 +183,13 @@ public abstract class BasicEngineModule implements IPhysicsModule<BaseVehiclePhy
     @SideOnly(Side.CLIENT)
     protected void playStartingSound() {
         boolean forInterior = Minecraft.getMinecraft().gameSettings.thirdPersonView == 0 && entity.isRidingOrBeingRiddenBy(Minecraft.getMinecraft().player);
-        ClientProxy.SOUND_HANDLER.playSingleSound(entity.physicsPosition, getStartingSound(forInterior), 1, 1);
+        String sound = getStartingSound(forInterior);
+        if (sound != null)
+            SOUND_HANDLER.playSingleSound(entity.physicsPosition, sound, 1, 1);
     }
 
     @SideOnly(Side.CLIENT)
-    protected abstract String getStartingSound(boolean forInterior);
-
-    @SideOnly(Side.CLIENT)
-    protected abstract void updateSounds();
-
-    @SideOnly(Side.CLIENT)
-    public abstract float getSoundPitch();
+    public abstract BaseEngineInfo getEngineInfo();
 
     @Override
     public boolean listenEntityUpdates(Side side) {
@@ -194,4 +207,56 @@ public abstract class BasicEngineModule implements IPhysicsModule<BaseVehiclePhy
         }
     }
 
+    @Override
+    public void onPackInfosReloaded() {
+        engineSounds.clear();
+    }
+
+    @SideOnly(Side.CLIENT)
+    public String getStartingSound(boolean forInterior) {
+        if (getEngineInfo() == null)
+            return null;
+        return forInterior ? getEngineInfo().startingSoundInterior : getEngineInfo().startingSoundExterior;
+    }
+
+    @SideOnly(Side.CLIENT)
+    public void updateSounds() {
+        BaseEngineInfo engineInfo = getEngineInfo();
+        if (engineInfo != null && engineInfo.getEngineSounds() != null) {
+            if (engineSounds.isEmpty()) { //Sounds are not initialized
+                engineInfo.getEngineSounds().forEach(engineSound -> engineSounds.put(engineSound.id, new EngineSound(engineSound, entity, this)));
+            }
+            if (isEngineStarted()) {
+                boolean forInterior = Minecraft.getMinecraft().gameSettings.thirdPersonView == 0 && entity.isRidingOrBeingRiddenBy(Minecraft.getMinecraft().player);
+                float rpm = getEngineProperty(VehicleEntityProperties.EnumEngineProperties.REVS) * engineInfo.getMaxRevs();
+                lastEngineSound = currentEngineSound;
+                if (currentEngineSound == null || !currentEngineSound.shouldPlay(rpm, forInterior)) {
+                    engineSounds.forEach((id, vehicleSound) -> {
+                        if (vehicleSound.shouldPlay(rpm, forInterior)) {
+                            this.currentEngineSound = vehicleSound;
+                        }
+                    });
+                }
+                if (currentEngineSound != lastEngineSound) //if playing sound changed
+                {
+                    if (lastEngineSound != null)
+                        SOUND_HANDLER.stopSound(lastEngineSound);
+                    if (currentEngineSound != null) {
+                        if (currentEngineSound.getState() == EnumSoundState.STOPPING) //already playing
+                            currentEngineSound.onStarted();
+                        else
+                            SOUND_HANDLER.playStreamingSound(Vector3fPool.get(currentEngineSound.getPosX(), currentEngineSound.getPosY(), currentEngineSound.getPosZ()), currentEngineSound);
+                    }
+                }
+            } else {
+                if (currentEngineSound != null)
+                    SOUND_HANDLER.stopSound(currentEngineSound);
+                currentEngineSound = lastEngineSound = null;
+            }
+        }
+    }
+
+    public float getSoundPitch() {
+        return getEngineProperty(VehicleEntityProperties.EnumEngineProperties.REVS);
+    }
 }

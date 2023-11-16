@@ -5,8 +5,7 @@ import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.api.network.EnumNetworkType;
 import fr.dynamx.api.network.IDnxPacket;
-import fr.dynamx.common.contentpack.parts.PartSeat;
-import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.contentpack.parts.PartEntitySeat;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.items.tools.ItemWrench;
@@ -56,26 +55,27 @@ public class MessageEntityInteract implements IDnxPacket, IMessageHandler<Messag
     public void handleUDPReceive(EntityPlayer context, Side side) {
         PhysicsEntity<?> physicsEntity = (PhysicsEntity<?>) context.world.getEntityByID(vehicleID);
         if (physicsEntity == null || context.getDistance(physicsEntity) > 21) {
-            //Do nothing
-            //((EntityPlayerMP) context).connection.disconnect(new TextComponentString("Invalid vehicle interact packet, too long distance"));
-        } else if (context.getHeldItemMainhand().getItem() instanceof ItemWrench) {
+            return;
+        }
+        if (context.getHeldItemMainhand().getItem() instanceof ItemWrench) {
             ((ItemWrench) context.getHeldItemMainhand().getItem()).interact(context, physicsEntity);
-        } else if (!(physicsEntity instanceof IModuleContainer.ISeatsContainer) || !((IModuleContainer.ISeatsContainer) physicsEntity).getSeats().isEntitySitting(context)) {
-            if (physicsEntity instanceof PackPhysicsEntity) {
-                PackPhysicsEntity<?, ?> vehicleEntity = (PackPhysicsEntity<?, ?>) physicsEntity;
-                //If we clicked a part, try to interact with it.
-                Vector3fPool.openPool();
-                InteractivePart hitPart = vehicleEntity.getHitPart(context);
-                if (hitPart != null) {
-                    if ((hitPart instanceof PartSeat && ((PartSeat) hitPart).hasDoor()) && context.isSneaking()) {
-                        return;
-                    }
-                    if (!(vehicleEntity instanceof BaseVehicleEntity) || !MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.PlayerInteract(context, (BaseVehicleEntity<?>) vehicleEntity, hitPart)))
-                        hitPart.interact(vehicleEntity, context);
-                } else if (vehicleEntity instanceof BaseVehicleEntity)
-                    MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.PlayerInteract(context, (BaseVehicleEntity<?>) vehicleEntity, null));
-                Vector3fPool.closePool();
+        } else if (!(physicsEntity instanceof IModuleContainer.ISeatsContainer) || !((IModuleContainer.ISeatsContainer) physicsEntity).hasSeats() || !((IModuleContainer.ISeatsContainer) physicsEntity).getSeats().isEntitySitting(context)) {
+            if (!(physicsEntity instanceof PackPhysicsEntity)) {
+                return;
             }
+            PackPhysicsEntity<?, ?> targetEntity = (PackPhysicsEntity<?, ?>) physicsEntity;
+            //If we clicked a part, try to interact with it.
+            Vector3fPool.openPool();
+            InteractivePart hitPart = targetEntity.getHitPart(context);
+            if (hitPart != null) {
+                if ((hitPart instanceof PartEntitySeat && ((PartEntitySeat) hitPart).hasDoor()) && context.isSneaking()) {
+                    return;
+                }
+                if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.PlayerInteract(context, targetEntity, hitPart)))
+                    hitPart.interact(targetEntity, context);
+            } else
+                MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.PlayerInteract(context, targetEntity, null));
+            Vector3fPool.closePool();
         }
     }
 }

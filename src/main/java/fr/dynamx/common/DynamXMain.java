@@ -13,6 +13,7 @@ import fr.dynamx.common.capability.DynamXChunkDataStorage;
 import fr.dynamx.common.contentpack.AddonInfo;
 import fr.dynamx.common.contentpack.AddonLoader;
 import fr.dynamx.common.contentpack.ContentPackLoader;
+import fr.dynamx.common.entities.SeatEntity;
 import fr.dynamx.common.entities.PropsEntity;
 import fr.dynamx.common.entities.RagdollEntity;
 import fr.dynamx.common.entities.vehicles.*;
@@ -23,7 +24,10 @@ import fr.dynamx.common.items.tools.ItemSlopes;
 import fr.dynamx.common.objloader.data.ObjModelData;
 import fr.dynamx.common.objloader.data.ObjObjectData;
 import fr.dynamx.server.command.DynamXCommands;
-import fr.dynamx.utils.*;
+import fr.dynamx.utils.DynamXConfig;
+import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.DynamXMpsConfig;
+import fr.dynamx.utils.DynamXReflection;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.physics.NativeEngineInstaller;
 import net.minecraft.util.ResourceLocation;
@@ -49,14 +53,15 @@ import static net.minecraftforge.fml.common.Mod.Instance;
 public class DynamXMain {
     @Instance(value = ID)
     public static DynamXMain instance;
+
     @SidedProxy(clientSide = "fr.dynamx.client.ClientProxy", serverSide = "fr.dynamx.server.ServerProxy")
     public static CommonProxy proxy;
 
-    public static File resDir;
-
     public static final Logger log = LogManager.getLogger("DynamX");
 
-    public static ModProtectionContainer container;
+    public static File resourcesDirectory;
+
+    public static ModProtectionContainer mpsContainer;
 
     @EventHandler
     public void construction(FMLConstructionEvent event) {
@@ -67,19 +72,20 @@ public class DynamXMain {
         ThreadedLoadingService loadingService = ACsLib.getPlatform().provideService(ThreadedLoadingService.class);
         ModProtectionService mps = ACsLib.getPlatform().provideService(ModProtectionService.class);
 
-        container = mps.createNewMpsContainer("DynamX models", new DynamXMpsConfig(), false);
+        mpsContainer = mps.createNewMpsContainer("DynamX models", new DynamXMpsConfig(), false);
+        mps.addCustomContainer(OLD_MPS_URL, mpsContainer); // Enables retro-compatibility with old packs
 
         //Packs init
-        resDir = ContentPackLoader.init(event, container, DynamXConstants.RES_DIR_NAME, event.getSide());
+        resourcesDirectory = ContentPackLoader.init(event, mpsContainer, DynamXConstants.RES_DIR_NAME, event.getSide());
 
         bar.step("Init bullet");
         // Loading LibBullet
         // Needs to be done before protection setup, because of weird behaviors when downloading bullet and installing https certificates at the same time
-        if (!NativeEngineInstaller.loadLibbulletjme(resDir, LIBBULLET_VERSION, "Release", "Sp", false))
+        if (!NativeEngineInstaller.loadLibbulletjme(resourcesDirectory, LIBBULLET_VERSION, "Release", "Sp", false))
             throw new RuntimeException("Native physics engine cannot be found or installed !");
 
         //Telemetry
-        if (event.getSide().isClient()) {
+        if (false && event.getSide().isClient()) {
             loadingService.addTask(ThreadedLoadingService.ModLoadingSteps.FINISH_LOAD,
                     "statsbot", () -> ACsLib.getPlatform().provideService(StatsReportingService.class).init(StatsReportingService.ReportLevel.ALL, STATS_URL, STATS_PRODUCT, STATS_TOKEN));
         }
@@ -88,7 +94,7 @@ public class DynamXMain {
         // Loading protected files
         loadingService.addTask(mps.getTaskEndHook(), "certs_mps", () -> {
             try {
-                container.setup("DynamXEA");
+                mpsContainer.setup("DynamX");
             } catch (Exception e) {
                 DynamXErrorManager.addError("DynamX initialization", DynamXErrorManager.INIT_ERRORS, "mps_error", ErrorLevel.FATAL, "MPS", null, e);
                 e.printStackTrace();
@@ -118,12 +124,12 @@ public class DynamXMain {
         EntityRegistry.registerModEntity(new ResourceLocation(DynamXConstants.ID, "entity_car"), CarEntity.class, "entity_car", 102, this, 200, 4, false);
         EntityRegistry.registerModEntity(new ResourceLocation(DynamXConstants.ID, "entity_trailer"), TrailerEntity.class, "entity_trailer", 105, this, 200, 4, false);
         EntityRegistry.registerModEntity(new ResourceLocation(DynamXConstants.ID, "entity_prop"), PropsEntity.class, "entity_prop", 106, this, 200, 40, false);
-        //EntityRegistry.registerModEntity(new ResourceLocation(DynamXMain.ID, "entity_boat"), BoatEntity.class, "entity_boat", 107, this, 200, 4, false);
         EntityRegistry.registerModEntity(new ResourceLocation(DynamXConstants.ID, "entity_boat"), BoatEntity.class, "entity_boat", 107, this, 200, 4, false);
         EntityRegistry.registerModEntity(new ResourceLocation(DynamXConstants.ID, "entity_ragdoll"), RagdollEntity.class, "entity_ragdoll", 108, this, 200, 4, false);
-        EntityRegistry.registerModEntity(new ResourceLocation(DynamXConstants.ID, "entity_boat"), BoatEntity.class, "entity_boat", 107, this, 200, 4, false);
         EntityRegistry.registerModEntity(new ResourceLocation(DynamXConstants.ID, "entity_door"), DoorEntity.class, "entity_door", 109, this, 200, 4, false);
         EntityRegistry.registerModEntity(new ResourceLocation(DynamXConstants.ID, "entity_helico"), HelicopterEntity.class, "entity_helico", 110, this, 200, 4, false);
+        //TODO TEST UPDATE FREQUENCY
+        EntityRegistry.registerModEntity(new ResourceLocation(DynamXConstants.ID, "entity_seat"), SeatEntity.class, "entity_seat", 111, this, 164, 80, false);
         /* Registering gui handler */
         NetworkRegistry.INSTANCE.registerGuiHandler(instance, new DynamXGuiHandler());
 
@@ -143,6 +149,7 @@ public class DynamXMain {
 
     @EventHandler
     public void completeLoad(FMLLoadCompleteEvent event) {
+        proxy.completeInit();
         ForgeVersion.CheckResult result = ForgeVersion.getResult(Loader.instance().activeModContainer());
         if (result.status == ForgeVersion.Status.OUTDATED) {
             //DynamXMain.log.warn("Outdated version found, you should update to " + result.target);

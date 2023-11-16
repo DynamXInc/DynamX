@@ -12,7 +12,8 @@ import lombok.Getter;
 import java.util.HashMap;
 import java.util.Map;
 
-@RegisteredSubInfoType(name = "MaterialVariants", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.WHEELS, SubInfoTypeRegistries.ARMORS, SubInfoTypeRegistries.BLOCKS_AND_PROPS})
+@RegisteredSubInfoType(name = "MaterialVariants", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.WHEELS, SubInfoTypeRegistries.ARMORS, SubInfoTypeRegistries.BLOCKS,
+        SubInfoTypeRegistries.HELICOPTER, SubInfoTypeRegistries.PROPS})
 public class MaterialVariantsInfo<T extends ISubInfoTypeOwner<T>> extends SubInfoType<T> implements IModelTextureVariantsSupplier.IModelTextureVariants {
     @PackFileProperty(configNames = "BaseMaterial", required = false)
     private String baseMaterial = "Default";

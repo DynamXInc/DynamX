@@ -8,7 +8,7 @@ import fr.dynamx.api.physics.EnumBulletShapeType;
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
-import fr.dynamx.common.contentpack.parts.PartSeat;
+import fr.dynamx.common.contentpack.parts.BasePartSeat;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.entities.PropsEntity;
@@ -27,6 +27,7 @@ import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import fr.dynamx.utils.physics.PhysicsRaycastResult;
+import lombok.Getter;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -76,6 +77,7 @@ public class WrenchMode {
     };
 
     private final String label;
+    @Getter
     private final String initials;
 
     protected WrenchMode(String label, TextFormatting color) {
@@ -86,10 +88,6 @@ public class WrenchMode {
 
     public String getLabel() {
         return "wrench.mode." + label;
-    }
-
-    public String getInitials() {
-        return initials;
     }
 
     public String getMessage() {
@@ -347,8 +345,8 @@ public class WrenchMode {
                 SeatsModule seatsModule = baseVehicleEntity.getModuleByType(SeatsModule.class);
                 Entity entity = playerEntityHashMap.remove(context);
                 if (entity != null) {
-                    for (Object object : baseVehicleEntity.getPackInfo().getPartsByType(PartSeat.class)) {
-                        PartSeat partSeat = (PartSeat) object;
+                    for (Object object : baseVehicleEntity.getPackInfo().getPartsByType(BasePartSeat.class)) {
+                        BasePartSeat partSeat = (BasePartSeat) object;
                         if (!partSeat.isDriver()) {
                             SeatsModule seats = ((IModuleContainer.ISeatsContainer) baseVehicleEntity).getSeats();
                             Entity seatRider = seats.getSeatToPassengerMap().get(partSeat);

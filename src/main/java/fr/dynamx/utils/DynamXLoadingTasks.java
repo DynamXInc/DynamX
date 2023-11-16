@@ -30,7 +30,7 @@ public class DynamXLoadingTasks {
     public static Consumer<TaskContext> PACK = new Consumer<TaskContext>() {
         @Override
         public void accept(TaskContext taskContext) {
-            ContentPackLoader.reload(DynamXMain.resDir, taskContext != TaskContext.CLIENT || taskContext.isSinglePlayer());
+            ContentPackLoader.reload(DynamXMain.resourcesDirectory, taskContext != TaskContext.CLIENT || taskContext.isSinglePlayer());
             if (taskContext.isClient()) //Dedicated server
             {
                 DynamXContext.getDxModelRegistry().getItemRenderer().refreshItemInfos();

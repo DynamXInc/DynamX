@@ -1,11 +1,9 @@
 package fr.dynamx.common.contentpack.type.objects;
 
-import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.math.Vector3f;
-import fr.aym.acslib.api.services.error.ErrorLevel;
-import fr.dynamx.api.contentpack.object.IInfoOwner;
+import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
-import fr.dynamx.api.contentpack.object.part.IShapeInfo;
+import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
@@ -16,68 +14,85 @@ import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.CreatePackItemEvent;
 import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
-import fr.dynamx.common.contentpack.loader.ObjectLoader;
+import fr.dynamx.common.contentpack.loader.InfoList;
 import fr.dynamx.common.contentpack.loader.PackFilePropertyData;
 import fr.dynamx.common.contentpack.loader.SubInfoTypeAnnotationCache;
+import fr.dynamx.common.contentpack.loader.SubInfoTypesRegistry;
 import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
+import fr.dynamx.common.contentpack.type.ObjectCollisionsHelper;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.items.ItemProps;
-import fr.dynamx.utils.errors.DynamXErrorManager;
-import fr.dynamx.utils.optimization.MutableBoundingBox;
-import fr.dynamx.utils.physics.ShapeUtils;
+import fr.dynamx.utils.DynamXUtils;
 import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@RegisteredSubInfoType(name = "prop", registries = SubInfoTypeRegistries.BLOCKS_AND_PROPS, strictName = false)
+@RegisteredSubInfoType(name = "prop", registries = SubInfoTypeRegistries.BLOCKS, strictName = false)
 public class PropObject<T extends PropObject<?>> extends AbstractProp<T> implements IPhysicsPackInfo,
         ISubInfoType<BlockObject<?>>, ParticleEmitterInfo.IParticleEmitterContainer {
     private final BlockObject<?> owner;
     @PackFileProperty(configNames = "EmptyMass")
     @Getter
+    @Setter
     protected int emptyMass;
     @PackFileProperty(configNames = "CenterOfGravityOffset", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F)
     @Getter
+    @Setter
     protected Vector3f centerOfMass;
     @PackFileProperty(configNames = "SpawnOffset", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false, defaultValue = "0 0.65 0")
     @Getter
+    @Setter
     protected Vector3f spawnOffset = new Vector3f(0, 0.65f, 0);
+
     @PackFileProperty(configNames = "ContinuousCollisionDetection", required = false, defaultValue = "false")
     @Getter
+    @Setter
     protected boolean isCCDEnabled;
     @PackFileProperty(configNames = "Friction", required = false, defaultValue = "0.5")
     @Getter
+    @Setter
     protected float friction = 0.5f;
     @PackFileProperty(configNames = "Margin", required = false, defaultValue = "0.04")
     @Getter
+    @Setter
     protected float margin = 0.04f;
-    @PackFileProperty(configNames = "DespawnTime", required = false, defaultValue = "\"-1\" (disabled)")
     @Getter
-    protected float despawnTime = -1;
-    @PackFileProperty(configNames = "Damping", required = false, defaultValue = "0")
-    @Getter
-    protected float dampingFactor;
+    @Setter
     @PackFileProperty(configNames = "Bounciness", required = false, defaultValue = "0")
-    @Getter
     protected float restitutionFactor;
 
-    private List<ParticleEmitterInfo<?>> particleEmitters = new ArrayList<>();
+    @PackFileProperty(configNames = "DespawnTime", required = false, defaultValue = "\"-1\" (disabled)")
+    @Getter
+    @Setter
+    protected float despawnTime = -1;
 
-    public PropObject(String packName, String fileName) {
-        super(packName, fileName);
-        DynamXErrorManager.addPackError(getPackName(), "deprecated_prop_format", ErrorLevel.LOW, fileName, "Props should now be declared in the corresponding block_" + getName() + ".dynx file");
-        owner = null;
-        itemIcon = "Prop";
-    }
+    @PackFileProperty(configNames = "LinearDamping", required = false, defaultValue = "0")
+
+    @Getter
+    @Setter
+    protected float linearDamping;
+    @PackFileProperty(configNames = "AngularDamping", required = false, defaultValue = "0")
+    @Getter
+    @Setter
+    protected float angularDamping;
+
+    @Getter
+    @PackFileProperty(configNames = "InWaterLinearDamping", required = false, defaultValue = "0.6")
+    protected float inWaterLinearDamping = 0.6f;
+    @Getter
+    @PackFileProperty(configNames = "InWaterAngularDamping", required = false, defaultValue = "0.6")
+    protected float inWaterAngularDamping = 0.6f;
+
+    private List<ParticleEmitterInfo<?>> particleEmitters = new ArrayList<>();
 
     public PropObject(ISubInfoTypeOwner<BlockObject<?>> owner, String fileName) {
         super(owner.getPackName(), fileName);
@@ -95,15 +110,22 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
         this.scaleModifier = block.getScaleModifier();
         this.renderDistance = block.getRenderDistance();
         this.creativeTabName = block.getCreativeTabName();
-        this.useHullShape = block.useHullShape();
+        this.useComplexCollisions = block.useComplexCollisions();
         this.particleEmitters = block.getParticleEmitters();
-        getPartShapes().addAll(block.getPartShapes());
+        this.collisionsHelper = block.getCollisionsHelper().copy();
     }
 
     @Override
     public List<PackFilePropertyData<?>> getInitiallyConfiguredProperties() {
         //Don't require properties of the block
         return SubInfoTypeAnnotationCache.getOrLoadData(BlockObject.class).values().stream().filter(PackFilePropertyData::isRequired).collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean postLoad(boolean hot) {
+        collisionsHelper.loadCollisions(this, DynamXUtils.getModelPath(getPackName(), model), "", centerOfMass, 0, useComplexCollisions, scaleModifier, ObjectCollisionsHelper.CollisionType.PROP);
+        collisionsHelper.getPhysicsCollisionShape().setMargin(margin);
+        return super.postLoad(hot);
     }
 
     @Override
@@ -119,31 +141,14 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
     }
 
     @Override
-    public IInfoOwner<T> createOwner(ObjectLoader<T, ?> loader) {
+    public IDynamXItem<T> createItem(InfoList<T> loader) {
         CreatePackItemEvent.PropsItem<T, ?> event = new CreatePackItemEvent.PropsItem(loader, this);
         MinecraftForge.EVENT_BUS.post(event);
         if (event.isOverridden()) {
-            return (IInfoOwner<T>) event.getObjectItem();
+            return event.getObjectItem();
         } else {
             return new ItemProps(this);
         }
-    }
-
-    @Override
-    public boolean postLoad(boolean hot) {
-        if (!super.postLoad(hot))
-            return false;
-        if (owner != null) {
-            compoundCollisionShape = owner.compoundCollisionShape;
-            for (MutableBoundingBox blockBox : owner.getCollisionBoxes()) {
-                MutableBoundingBox propBox = new MutableBoundingBox(blockBox);
-                propBox.offset(-0.5, -0.5f, -0.5);
-                getCollisionBoxes().add(propBox);
-            }
-        }
-        if(compoundCollisionShape != null)
-            compoundCollisionShape.setMargin(margin);
-        return true;
     }
 
     @Override
@@ -152,18 +157,8 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
     }
 
     @Override
-    public Collection<? extends IShapeInfo> getShapes() {
-        return getCollisionBoxes();
-    }
-
-    @Override
-    public CompoundCollisionShape getPhysicsCollisionShape() {
-        return compoundCollisionShape;
-    }
-
-    @Override
     public ItemStack getPickedResult(int metadata) {
-        return new ItemStack((Item) getOwners()[0], 1, metadata);
+        return new ItemStack((Item) getItems()[0], 1, metadata);
     }
 
     @Override
@@ -197,8 +192,14 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
 
     @Override
     public void addModules(PackPhysicsEntity<?, ?> entity, ModuleListBuilder modules) {
-        //TODO SUPPORT PARTS WITH MODULES
-        if(getOwner() != null)
+        getSubProperties().forEach(sub -> sub.addModules(entity, modules));
+        getAllParts().forEach(sub -> sub.addModules(entity, modules));
+        if (getOwner() != null)
             getOwner().getLightSources().values().forEach(compoundLight -> compoundLight.addModules(entity, modules));
+    }
+
+    @Override
+    public SubInfoTypesRegistry<T> getSubInfoTypesRegistry() {
+        return (SubInfoTypesRegistry<T>) SubInfoTypeRegistries.PROPS.getInfoList().getDefaultSubInfoTypesRegistry();
     }
 }

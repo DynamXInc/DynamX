@@ -2,6 +2,7 @@ package fr.dynamx.common.physics.terrain.cache;
 
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.utils.DynamXConfig;
+import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.VerticalChunkPos;
 
 import java.io.*;
@@ -54,7 +55,7 @@ public class TerrainFile extends VirtualTerrainFile {
         ioLoading = true;
         try {
             if (container.exists()) {
-                ObjectInputStream in = new ObjectInputStream(new GZIPInputStream(new FileInputStream(container)));
+                ObjectInputStream in = DynamXUtils.getTerrainObjectsIS(new GZIPInputStream(new FileInputStream(container)));
                 short version = in.readShort();
                 if (version >= this.getVersion()) {
                     int size = in.readInt();

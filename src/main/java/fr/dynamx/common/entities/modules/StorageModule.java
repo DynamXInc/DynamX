@@ -7,6 +7,7 @@ import fr.dynamx.common.entities.ModularPhysicsEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.physics.entities.PackEntityPhysicsHandler;
 import lombok.Getter;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.item.ItemStack;
@@ -28,7 +29,12 @@ public class StorageModule implements IPhysicsModule<PackEntityPhysicsHandler<?,
     }
 
     public void addInventory(PackPhysicsEntity<?, ?> entity, PartStorage partStorage) {
-        inventories.put(partStorage.getId(), new InventoryBasic("part.storage"+entity.getPackInfo().getFullName(), false, partStorage.getStorageSize()));
+        inventories.put(partStorage.getId(), new InventoryBasic("part.storage"+entity.getPackInfo().getFullName(), false, partStorage.getStorageSize()) {
+            @Override
+            public boolean isUsableByPlayer(EntityPlayer player) {
+                return !entity.isDead && entity.getDistanceSq(player) <= 256;
+            }
+        });
     }
 
     public IInventory getInventory(byte id) {

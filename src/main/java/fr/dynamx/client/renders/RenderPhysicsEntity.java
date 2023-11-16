@@ -2,10 +2,11 @@ package fr.dynamx.client.renders;
 
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.events.PhysicsEntityEvent;
+import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
 import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
-import fr.dynamx.common.contentpack.parts.PartSeat;
+import fr.dynamx.common.contentpack.parts.BasePartSeat;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
@@ -72,7 +73,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
             }
             GlStateManager.popMatrix();
         }
-        if(MinecraftForgeClient.getRenderPass() == 0) {
+        if (MinecraftForgeClient.getRenderPass() == 0) {
             spawnParticles(entity, appliedRotation, partialTicks);
             //Render players inside the entity
             if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.RIDDING_PLAYERS, x, y, z, partialTicks, renderPass))) {
@@ -105,23 +106,20 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
                 if (appliedRotation != null)
                     GlStateManager.rotate(appliedRotation);
                 //Apply seat rotation
-                if (entity instanceof IModuleContainer.ISeatsContainer) {
-                    PartSeat seat = ((IModuleContainer.ISeatsContainer) entity).getSeats().getRidingSeat(e);
-                    if (seat != null) {
-                        EnumSeatPlayerPosition position = seat.getPlayerPosition();
-                        shouldRenderPlayerSitting = position == EnumSeatPlayerPosition.SIT || position == null;
+                BasePartSeat seat = ((IModuleContainer.ISeatsContainer) entity).getSeats().getRidingSeat(e);
+                if (seat != null) {
+                    EnumSeatPlayerPosition position = seat.getPlayerPosition();
+                    shouldRenderPlayerSitting = position == EnumSeatPlayerPosition.SITTING;
 
-                        if (seat.getPlayerSize() != null)
-                            GlStateManager.scale(seat.getPlayerSize().x, seat.getPlayerSize().y, seat.getPlayerSize().z);
-                        if (seat.getRotation() != null)
-                            GlStateManager.rotate(GlQuaternionPool.get(seat.getRotation()));
-                        if (position == EnumSeatPlayerPosition.LYING)
-                            GlStateManager.rotate(90, -1, 0, 0);
-                    }
+                    if (seat.getPlayerSize() != null)
+                        GlStateManager.scale(seat.getPlayerSize().x, seat.getPlayerSize().y, seat.getPlayerSize().z);
+                    if (seat.getRotation() != null)
+                        GlStateManager.rotate(GlQuaternionPool.get(seat.getRotation()));
+                    if (position == EnumSeatPlayerPosition.LYING)
+                        GlStateManager.rotate(90, -1, 0, 0);
                 }
 
                 //Remove player's yaw offset rotation, to avoid stiff neck
-                PartSeat seat = ((IModuleContainer.ISeatsContainer) entity).getSeats().getRidingSeat(e);
                 if (seat != null && seat.shouldLimitFieldOfView()) {
                     if (e instanceof AbstractClientPlayer) {
                         ((AbstractClientPlayer) e).renderYawOffset = ((AbstractClientPlayer) e).prevRenderYawOffset = 0;
@@ -130,7 +128,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
 
                 //The render the player, e.rotationYaw is the name plate rotation
                 if (e instanceof AbstractClientPlayer) {
-                    if(ClientEventHandler.renderPlayer != null){
+                    if (ClientEventHandler.renderPlayer != null) {
                         ClientEventHandler.renderPlayer.doRender((AbstractClientPlayer) e, 0, 0, 0, e.rotationYaw, partialTicks);
                     }
                 } else {
@@ -240,7 +238,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
      * Checks if the entity can be rendered, before any rendering and event
      */
     public boolean canRender(T entity) {
-        return entity.initialized == 2;
+        return entity.initialized == PhysicsEntity.EnumEntityInitState.ALL;
     }
 
     /**
@@ -250,7 +248,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
     public void renderModel(DxModelRenderer model, @Nullable Entity entity, byte textureDataId, boolean forceVanillaRender) {
         if (!model.isEmpty())
             model.renderModel(textureDataId, forceVanillaRender);
-        else if(entity != null) //Error while loading the model
+        else if (entity != null) //Error while loading the model
             renderOffsetAABB(entity.getEntityBoundingBox(), -entity.lastTickPosX, -entity.lastTickPosY, -entity.lastTickPosZ);
     }
 

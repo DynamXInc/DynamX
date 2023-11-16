@@ -52,6 +52,7 @@ public class PhysicsEntityEvent extends Event {
         @Getter
         private final World world;
         @Getter
+        @Nullable
         private final EntityPlayer player;
         @Getter
         private final DynamXItemSpawner<?> itemSpawner;
@@ -61,7 +62,7 @@ public class PhysicsEntityEvent extends Event {
         /**
          * @param world         the physics world where the physics entity will be added
          * @param physicsEntity the physics entity being spawned
-         * @param player        the player who is spawning the entity
+         * @param player        the player who is spawning the entity, can be null in case of a command for example
          * @param item          item used to spawn the entity
          * @param pos           block pos of the raycast
          */

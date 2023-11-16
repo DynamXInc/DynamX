@@ -57,7 +57,7 @@ public class VehicleDebugRenderer {
                 new PropsContainerDebug(),
                 new RotorDebug());
         if (hasSeats)
-            to.addDebugRenderers(new SeatDebug());
+            to.addDebugRenderers(new DebugRenderer.SeatDebug());
     }
 
     /**
@@ -370,7 +370,7 @@ public class VehicleDebugRenderer {
                     GlStateManager.translate(-entity.posX, -entity.posY, -entity.posZ);
 
                     Vector3f pos = DynamXGeometry.rotateVectorByQuaternion(container.getPosition(), entity.physicsRotation);
-                    MutableBoundingBox rotatedSize = DynamXContext.getCollisionHandler().rotateBB(Vector3fPool.get(0, 0, 0), container.getBox(), entity.physicsRotation);
+                    MutableBoundingBox rotatedSize = DynamXContext.getCollisionHandler().rotateBB(Vector3fPool.get(0, 0, 0), container.getBoundingBox(), entity.physicsRotation);
                     rotatedSize = rotatedSize.offset(pos);
                     rotatedSize = rotatedSize.offset(entity.physicsPosition);
                     DynamXRenderUtils.drawBoundingBox(rotatedSize.toBB(), 1, 0, 0, 1);
@@ -414,37 +414,6 @@ public class VehicleDebugRenderer {
             }
             GlStateManager.popMatrix();
             /* End of Aymeric's network debug*/
-        }
-    }
-
-    /**
-     * Renders seats
-     */
-    public static class SeatDebug implements DebugRenderer<BaseVehicleEntity<?>> {
-        @Override
-        public boolean shouldRender(BaseVehicleEntity<?> entity) {
-            return DynamXDebugOptions.SEATS_AND_STORAGE.isActive();
-        }
-
-        @Override
-        public void render(BaseVehicleEntity<?> entity, RenderPhysicsEntity<BaseVehicleEntity<?>> renderer, double x, double y, double z, float partialTicks) {
-            MutableBoundingBox box = new MutableBoundingBox();
-            for (PartSeat seat : entity.getPackInfo().getPartsByType(PartSeat.class)) {
-                seat.getBox(box);
-                box.offset(seat.getPosition());
-                if (!seat.isDriver())
-                    RenderGlobal.drawBoundingBox(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ,
-                            1, 0, 0, 1);
-                else
-                    RenderGlobal.drawBoundingBox(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ,
-                            0, 1, 0, 1);
-            }
-            for (PartStorage storage : entity.getPackInfo().getPartsByType(PartStorage.class)) {
-                storage.getBox(box);
-                box.offset(storage.getPosition());
-                RenderGlobal.drawBoundingBox(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ,
-                        1, 0.7f, 0, 1);
-            }
         }
     }
 }

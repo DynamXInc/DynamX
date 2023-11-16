@@ -17,6 +17,7 @@ import fr.dynamx.common.physics.joints.JointHandler;
 import fr.dynamx.common.physics.joints.JointHandlerRegistry;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import lombok.Getter;
 import net.minecraft.util.ResourceLocation;
 
 public class TrailerAttachModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, AttachModule.AttachToOtherModule<TrailerEntity<?>>, IPackInfoReloadListener {
@@ -29,6 +30,7 @@ public class TrailerAttachModule implements IPhysicsModule<BaseVehiclePhysicsHan
 
     private final BaseVehicleEntity<?> entity;
     private TrailerAttachInfo info;
+    @Getter
     private int connectedEntity = -1;
 
     public TrailerAttachModule(BaseVehicleEntity<?> entity, TrailerAttachInfo info) {
@@ -43,10 +45,6 @@ public class TrailerAttachModule implements IPhysicsModule<BaseVehiclePhysicsHan
 
     public Vector3f getAttachPoint() {
         return info.getAttachPoint();
-    }
-
-    public int getConnectedEntity() {
-        return connectedEntity;
     }
 
     @Override

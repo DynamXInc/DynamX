@@ -10,18 +10,16 @@ import java.util.List;
 public class DynamXDebugOptions {
 
     private static final List<DynamXDebugOption> ALL_OPTIONS = new ArrayList<>();
-    public static final DynamXDebugOption DEBUG_RENDER = DynamXDebugOption.newServerDependantOption(DebugCategories.GENERAL, "Debug renderer").withSubCategory("DynamX"),
-            PROFILING = DynamXDebugOption.newServerDependantOption(DebugCategories.GENERAL, "Profiling").withDescription("Find why DynamX is lagging - prints timings in the logs. May produce lag").withSubCategory("DynamX"),
-            PHYSICS_DEBUG = DynamXDebugOption.newOption(DebugCategories.GENERAL, "Bullet shape debug").withDescription("Shows complete rigid bodies and joints debug, may produce lag").withSubCategory("Physics"),
-            RENDER_WIREFRAME = DynamXDebugOption.newOption(DebugCategories.GENERAL, "Should render wireframe").withDescription("Shows the bullet shape debug in wireframe").withSubCategory("Physics").enable(),
-            PLAYER_TO_OBJECT_COLLISION_DEBUG = DynamXDebugOption.newOption(DebugCategories.GENERAL, "Player <-> DynamX Object collision debug").withDescription("Shows the collision boxes used for the player <-> DynamX Objects collisions").withSubCategory("Collisions");
+    public static final DynamXDebugOption DEBUG_RENDER = DynamXDebugOption.newServerDependantOption(DebugCategories.GENERAL, "Enable debug renderer").withSubCategory("DynamX"),
+            PROFILING = DynamXDebugOption.newServerDependantOption(DebugCategories.HOME, "Profiling").withDescription("Find why DynamX is lagging - prints timings in the logs. May produce lag.").withSubCategory("DynamX debug"),
+            PHYSICS_DEBUG = DynamXDebugOption.newOption(DebugCategories.GENERAL, "Bullet shape debug").withDescription("Shows complete rigid bodies and joints debug, may produce lag.").withSubCategory("Physics"),
+            RENDER_WIREFRAME = DynamXDebugOption.newOption(DebugCategories.GENERAL, "Should render wireframe").withDescription("Shows the bullet shape debug in wireframe.").withSubCategory("Physics").enable(),
+            PLAYER_TO_OBJECT_COLLISION_DEBUG = DynamXDebugOption.newOption(DebugCategories.GENERAL, "Player <-> DynamX collisions").withDescription("Shows the collision boxes used for the player <-> DynamX objects collisions.").withSubCategory("Collisions");
 
-    public static final DynamXDebugOption.TerrainDebugOption CHUNK_BOXES = (DynamXDebugOption.TerrainDebugOption) DynamXDebugOption.newTerrainOption("Server chunk boxes", true, 1, 2, 4, 8).withSubCategory("Server/solo"),
-            BLOCK_BOXES = (DynamXDebugOption.TerrainDebugOption) DynamXDebugOption.newTerrainOption("Server block boxes", true, 4, 1, 2, 8).withSubCategory("Server/solo"),
-            SLOPE_BOXES = (DynamXDebugOption.TerrainDebugOption) DynamXDebugOption.newTerrainOption("Server slopes", true, 16, 32).withSubCategory("Server/solo"),
-            CLIENT_CHUNK_BOXES = (DynamXDebugOption.TerrainDebugOption) DynamXDebugOption.newTerrainOption("Client chunk boxes", true, 2, 1, 4, 8).withDescription("Not available in solo").withSubCategory("Client"),
-            CLIENT_BLOCK_BOXES = (DynamXDebugOption.TerrainDebugOption) DynamXDebugOption.newTerrainOption("Client block boxes", true, 8, 1, 2, 4).withDescription("Not available in solo").withSubCategory("Client"),
-            CLIENT_SLOPE_BOXES = (DynamXDebugOption.TerrainDebugOption) DynamXDebugOption.newTerrainOption("Client slopes", true, 32, 16).withDescription("Not available in solo").withSubCategory("Client");
+    public static final DynamXDebugOption.TerrainDebugOption BLOCK_BOXES = (DynamXDebugOption.TerrainDebugOption) DynamXDebugOption.newTerrainOption("Server block boxes", true, 4, 1, 2, 8).withDescription("Not available in solo").withSubCategory("Server"),
+            SLOPE_BOXES = (DynamXDebugOption.TerrainDebugOption) DynamXDebugOption.newTerrainOption("Server slopes", true, 16, 32).withDescription("Not available in solo").withSubCategory("Server"),
+            CLIENT_BLOCK_BOXES = (DynamXDebugOption.TerrainDebugOption) DynamXDebugOption.newTerrainOption("Client block boxes", true, 8, 1, 2, 4).withSubCategory("Client"),
+            CLIENT_SLOPE_BOXES = (DynamXDebugOption.TerrainDebugOption) DynamXDebugOption.newTerrainOption("Client slopes", true, 32, 16).withSubCategory("Client");
 
     public static final DynamXDebugOption CENTER_OF_MASS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Center of mass").withSubCategory(VehicleDebugTypes.GENERAL.title),
             SEATS_AND_STORAGE = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Seats and storage").withSubCategory(VehicleDebugTypes.GENERAL.title),
@@ -29,11 +27,11 @@ public class DynamXDebugOptions {
             ROTORS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Rotors").withSubCategory(VehicleDebugTypes.GENERAL.title),
             HANDLES = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Handles").withSubCategory(VehicleDebugTypes.GENERAL.title),
             FRICTION_POINTS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Force points").withSubCategory(VehicleDebugTypes.GENERAL.title),
-            PLAYER_COLLISIONS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Player collisions").withDescription("Debug for collisions between players and vehicles").withSubCategory(VehicleDebugTypes.COLLISIONS.title),
+            PLAYER_COLLISIONS = DynamXDebugOption.newOption(DebugCategories.GENERAL, "Advanced player collisions").withDescription("Debug for collisions between players and vehicles").withSubCategory(VehicleDebugTypes.COLLISIONS.title),
             TRAILER_ATTACH_POINTS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Trailer attach points").withSubCategory(VehicleDebugTypes.ATTACH_POINTS.title),
-            PROPS_CONTAINERS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Props container boxes").withSubCategory(VehicleDebugTypes.OTHER.title),
             DOOR_ATTACH_POINTS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Door attach points").withSubCategory(VehicleDebugTypes.ATTACH_POINTS.title),
             //LATE_NETWORK = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Network sync").withDescription("Renders past server and client positions of the vehicle. Requires Full network debug.").withSubCategory(VehicleDebugTypes.OTHER.title),
+            PROPS_CONTAINERS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Props container boxes").withSubCategory(VehicleDebugTypes.OTHER.title),
             CAMERA_RAYCAST = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Camera").withDescription("Debug for the camera raycast").withSubCategory(VehicleDebugTypes.OTHER.title),
             FULL_NETWORK_DEBUG = DynamXDebugOption.newServerDependantOption(DebugCategories.VEHICLES, "Full network debug").withDescription("Enables network debug functions, may produce lag").withSubCategory(VehicleDebugTypes.OTHER.title),
             WHEEL_ADVANCED_DATA = DynamXDebugOption.newServerDependantOption(DebugCategories.VEHICLES, "Sync wheel advanced data").withDescription("WIP - Has no effects except more network usage").withSubCategory(VehicleDebugTypes.OTHER.title);
@@ -47,7 +45,7 @@ public class DynamXDebugOptions {
      * DynamX debug categories
      */
     public enum DebugCategories {
-        GENERAL, TERRAIN, VEHICLES;
+        HOME, GENERAL, TERRAIN, VEHICLES;
 
         private int state;
         private final List<DynamXDebugOption> options = new ArrayList<>();
@@ -76,7 +74,7 @@ public class DynamXDebugOptions {
     }
 
     public enum VehicleDebugTypes {
-        GENERAL("Main"), COLLISIONS("Collisions"), ATTACH_POINTS("Attach points"), OTHER("Other");
+        GENERAL("Vehicles"), COLLISIONS("Collisions"), ATTACH_POINTS("Attach points"), OTHER("Other");
 
         public final String title;
 

@@ -1,11 +1,13 @@
 package fr.dynamx.common.contentpack.parts;
 
-import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.math.Vector3f;
+import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
+import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
+import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.registry.*;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
@@ -14,6 +16,7 @@ import fr.dynamx.api.dxmodel.DxModelPath;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
 import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.contentpack.type.ObjectCollisionsHelper;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
@@ -29,7 +32,6 @@ import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import fr.dynamx.utils.physics.DynamXPhysicsHelper;
-import fr.dynamx.utils.physics.ShapeUtils;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.renderer.GlStateManager;
@@ -40,13 +42,11 @@ import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nullable;
 import javax.vecmath.Vector2f;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 @RegisteredSubInfoType(name = "door", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER}, strictName = false)
-public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfo> implements IPhysicsPackInfo, IDrawablePart<BaseVehicleEntity<?>> {
+public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfo> implements IPhysicsPackInfo, IDrawablePart<BaseVehicleEntity<?>>, IPartContainer<PartDoor> {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("CarAttachPoint".equals(key))
@@ -63,38 +63,41 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
             return new IPackFilePropertyFixer.FixResult("DoorCloseForce", true);
         return null;
     };
+    @Getter
+    @PackFileProperty(configNames = "PartName")
+    private String partName;
 
     @Getter
-    @PackFileProperty(configNames = "LocalCarAttachPoint", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y, required = false)
+    @PackFileProperty(configNames = "LocalCarAttachPoint", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y)
     private Vector3f carAttachPoint = new Vector3f();
     @Getter
-    @PackFileProperty(configNames = "LocalDoorAttachPoint", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y, required = false)
+    @PackFileProperty(configNames = "LocalDoorAttachPoint", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y)
     private Vector3f doorAttachPoint = new Vector3f();
     @Getter
-    @PackFileProperty(configNames = "AttachStrength", required = false)
+    @PackFileProperty(configNames = "AttachStrength", required = false, defaultValue = "400")
     private int attachStrength = 400;
 
     @Getter
     @PackFileProperty(configNames = "Axis", required = false, defaultValue = "Y_ROT")
     private DynamXPhysicsHelper.EnumPhysicsAxis axisToUse = DynamXPhysicsHelper.EnumPhysicsAxis.Y_ROT;
     @Getter
-    @PackFileProperty(configNames = "OpenedDoorAngleLimit", required = false)
+    @PackFileProperty(configNames = "OpenedDoorAngleLimit", required = false, defaultValue = "0 0")
     private Vector2f openLimit = new Vector2f();
     @Getter
-    @PackFileProperty(configNames = "ClosedDoorAngleLimit", required = false)
+    @PackFileProperty(configNames = "ClosedDoorAngleLimit", required = false, defaultValue = "0 0")
     private Vector2f closeLimit = new Vector2f();
     @Getter
-    @PackFileProperty(configNames = "DoorOpenForce", required = false)
+    @PackFileProperty(configNames = "DoorOpenForce", required = false, defaultValue = "1 200")
     private Vector2f openMotor = new Vector2f(1, 200);
     @Getter
-    @PackFileProperty(configNames = "DoorCloseForce", required = false)
+    @PackFileProperty(configNames = "DoorCloseForce", required = false, defaultValue = "-1.5 300")
     private Vector2f closeMotor = new Vector2f(-1.5f, 300);
 
     @Getter
-    @PackFileProperty(configNames = "AutoMountDelay", required = false)
+    @PackFileProperty(configNames = "AutoMountDelay", required = false, defaultValue = "40")
     private byte mountDelay = (byte) 40;
     @Getter
-    @PackFileProperty(configNames = "DoorCloseTime", required = false)
+    @PackFileProperty(configNames = "DoorCloseTime", required = false, defaultValue = "25")
     private byte doorCloseTime = (byte) 25;
 
     @Getter
@@ -109,10 +112,11 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     public boolean isPlayerMounting;
 
     @Getter
-    private CompoundCollisionShape physicsCollisionShape;
+    private ObjectCollisionsHelper collisionsHelper = new ObjectCollisionsHelper();
 
     public PartDoor(ModularVehicleInfo owner, String partName) {
         super(owner, partName, 0, 0);
+        this.partName = partName;
     }
 
     @Override
@@ -130,7 +134,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
                 doors.spawnDoor(this);
             }
         } else if(!isPlayerMounting()) {
-            PartSeat seat = getLinkedSeat(entity);
+            PartEntitySeat seat = getLinkedSeat(entity);
             if (player.isSneaking() || seat == null) {
                 doors.switchDoorState(getId());
             } else {
@@ -158,7 +162,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
         return true;
     }
 
-    public void mount(BaseVehicleEntity<?> vehicleEntity, PartSeat seat, EntityPlayer context) {
+    public void mount(BaseVehicleEntity<?> vehicleEntity, PartEntitySeat seat, EntityPlayer context) {
         Vector3fPool.openPool();
         if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.PlayerInteract(context, vehicleEntity, seat))) {
             seat.interact(vehicleEntity, context);
@@ -167,8 +171,8 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     }
 
     @Nullable
-    public PartSeat getLinkedSeat(BaseVehicleEntity<?> vehicleEntity) {
-        return vehicleEntity.getPackInfo().getPartsByType(PartSeat.class).stream()
+    public PartEntitySeat getLinkedSeat(BaseVehicleEntity<?> vehicleEntity) {
+        return vehicleEntity.getPackInfo().getPartsByType(PartEntitySeat.class).stream()
                 .filter(seat -> seat.getLinkedDoor() != null && seat.getLinkedDoor().equalsIgnoreCase(getPartName()))
                 .findFirst()
                 .orElse(null);
@@ -177,8 +181,25 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     @Override
     public void appendTo(ModularVehicleInfo owner) {
         super.appendTo(owner);
+        MutableBoundingBox box = new MutableBoundingBox(getScale()).offset(getPosition());
+        collisionsHelper.addCollisionShape(new IShapeInfo() {
+            @Override
+            public Vector3f getPosition() {
+                return PartDoor.this.getPosition();
+            }
+
+            @Override
+            public Vector3f getSize() {
+                return getScale();
+            }
+
+            @Override
+            public MutableBoundingBox getBoundingBox() {
+                return box;
+            }
+        });
         DxModelPath carModelPath = DynamXUtils.getModelPath(getPackName(), owner.getModel());
-        physicsCollisionShape = ShapeUtils.generateComplexModelCollisions(carModelPath, getPartName(), new Vector3f(1, 1, 1), new Vector3f(), 0);
+        collisionsHelper.loadCollisions(this, carModelPath, getPartName(), new Vector3f(), 0, owner.isUseComplexCollisions(), owner.getScaleModifier(), ObjectCollisionsHelper.CollisionType.PROP);
     }
 
     @Override
@@ -193,28 +214,24 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
         return new Vector3f();
     }
 
-    /**
-     * @return All collision shapes of the object
-     */
-    @Override
-    public Collection<? extends IShapeInfo> getShapes() {
-        return Collections.singletonList(new IShapeInfo() {
-
-            @Override
-            public Vector3f getPosition() {
-                return PartDoor.this.getPosition();
-            }
-
-            @Override
-            public Vector3f getSize() {
-                return getScale();
-            }
-        });
-    }
-
     @Override
     public ItemStack getPickedResult(int metadata) {
         return ItemStack.EMPTY;
+    }
+
+    @Override
+    public float getAngularDamping() {
+        return 0;
+    }
+
+    @Override
+    public float getLinearDamping() {
+        return 0;
+    }
+
+    @Override
+    public float getRenderDistance() {
+        return owner.getRenderDistance();
     }
 
     @Override
@@ -276,5 +293,30 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     @Override
     public String[] getRenderedParts() {
         return new String[] {getPartName()};
+    }
+
+    @Override
+    public Vector3f getScaleModifier() {
+        return getScaleModifier(owner);
+    }
+
+    @Override
+    public List<BasePart<PartDoor>> getAllParts() {
+        return Collections.EMPTY_LIST;
+    }
+
+    @Override
+    public void addPart(BasePart<PartDoor> partDoorBasePart) {
+        throw new IllegalStateException("Cannot add part to a door");
+    }
+
+    @Override
+    public void addSubProperty(ISubInfoType<PartDoor> property) {
+        throw new IllegalStateException("Cannot add sub property to a door");
+    }
+
+    @Override
+    public List<ISubInfoType<PartDoor>> getSubProperties() {
+        return Collections.EMPTY_LIST;
     }
 }

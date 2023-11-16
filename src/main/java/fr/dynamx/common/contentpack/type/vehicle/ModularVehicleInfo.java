@@ -135,7 +135,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     @Getter
     @Setter
     @PackFileProperty(configNames = "UseComplexCollisions", required = false, defaultValue = "true", description = "common.UseComplexCollisions")
-    protected boolean useHullShape = true;
+    protected boolean useComplexCollisions = true;
 
     /**
      * The shapes of this vehicle, can be used for collisions

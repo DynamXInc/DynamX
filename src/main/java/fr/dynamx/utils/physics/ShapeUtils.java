@@ -247,26 +247,6 @@ public class ShapeUtils {
         return vectors;
     }
 
-    //FIXME THIS WAS MOVED IN HELPER
-        public static void generateModelCollisions(AbstractProp<?> abstractProp, DxModelData dxModelData, CompoundCollisionShape compoundCollisionShape) {
-        switch (dxModelData.getFormat()) {
-            case OBJ:
-                ((ObjModelData) dxModelData).getObjObjects().forEach(objObject -> {
-                    abstractProp.getCollisionBoxes().add(ShapeUtils.getAABB(abstractProp,
-                            objObject.getMesh().min(), objObject.getMesh().max(), new Vector3f(), new Vector3f()));
-                    dxModelData.addCollisionShape(compoundCollisionShape, abstractProp.getScaleModifier());
-                });
-                break;
-            case GLTF:
-                ((GltfModelData) dxModelData).getNodeModels().forEach(nodeModel -> {
-                    abstractProp.getCollisionBoxes().add(ShapeUtils.getAABB(abstractProp,
-                            dxModelData.getMinOfMesh(nodeModel.getName()), dxModelData.getMaxOfMesh(nodeModel.getName()), new Vector3f(), new Vector3f()));
-                    dxModelData.addCollisionShape(compoundCollisionShape, abstractProp.getScaleModifier());
-                });
-                break;
-        }
-    }
-
     public static class ShapeGenerator implements Serializable {
 
         public List<float[]> points = new ArrayList<>();

@@ -27,7 +27,6 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
     @Getter
     @Setter
     @PackFileProperty(configNames = "Driver")
-    @Setter
     private boolean isDriver;
 
     @Getter

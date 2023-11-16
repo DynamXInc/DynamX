@@ -2,7 +2,6 @@ package fr.dynamx.client.renders;
 
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.events.PhysicsEntityEvent;
-import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
 import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.client.renders.model.renderer.DxModelRenderer;

@@ -102,7 +102,7 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
         super.completeInit();
         SplashProgress.pause();
         try {
-            DynamXContext.getObjModelRegistry().uploadVAOs();
+            DynamXContext.getDxModelRegistry().uploadVAOs();
         } finally {
             SplashProgress.resume();
         }

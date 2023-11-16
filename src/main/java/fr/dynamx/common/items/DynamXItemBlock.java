@@ -1,7 +1,7 @@
 package fr.dynamx.common.items;
 
 import fr.dynamx.api.contentpack.object.render.IModelPackObject;
-import fr.dynamx.api.contentpack.object.IDynamXItem;=
+import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.blocks.TEDynamXBlock;

@@ -158,6 +158,7 @@ public class GltfModelData extends DxModelData {
         return new Vector3f(maxX, maxY, maxZ);
     }
 
+    //TODO YANIS: implement
     @Override
     public Vector3f getMinOfModel() {
         return Vector3f.ZERO;

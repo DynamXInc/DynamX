@@ -89,14 +89,6 @@ public class ClientEventHandler {
     /* World events */
 
     @SubscribeEvent
-    public void onWorldLoad(WorldEvent.Load event) {
-        if (event.getWorld().isRemote && event.getWorld().provider.getDimension() == 0) {
-            DynamXContext.getDxModelRegistry().uploadVAOs();
-            //FIXME CHECK SI PAS APPELLE AUTRE PART MTN
-        }
-    }
-
-    @SubscribeEvent
     public void onWorldUnloaded(WorldEvent.Unload event) {
         if (event.getWorld().isRemote) {
             ClientProxy.SOUND_HANDLER.unload();
@@ -295,7 +287,7 @@ public class ClientEventHandler {
                 ItemBlock itemBlock = (ItemBlock) currentItem.getItem();
                 DynamXBlock<?> block = (DynamXBlock<?>) itemBlock.getBlock();
                 RayTraceResult target = Minecraft.getMinecraft().objectMouseOver;
-                if (target != null && target.typeOfHit == RayTraceResult.Type.BLOCK && block.isObj()) {
+                if (target != null && target.typeOfHit == RayTraceResult.Type.BLOCK && block.isDxModel()) {
                     EnumFacing side = target.sideHit;
                     playerOrientation = MathHelper.floor((entityPlayer.rotationYaw * 16.0F / 360.0F) + 0.5D) & 0xF;
                     blockPos = new BlockPos(target.getBlockPos().getX() + side.getXOffset(),

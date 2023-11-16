@@ -28,9 +28,9 @@ import javax.annotation.Nullable;
  */
 @SynchronizedEntityVariable.SynchronizedPhysicsModule(modid = DynamXConstants.ID)
 public class CarEngineModule extends BasicEngineModule implements IPackInfoReloadListener {
-    //TODO CLEAN ENGINE CODE
     @Getter
     protected CarEngineInfo engineInfo;
+    @Getter
     protected EnginePhysicsHandler physicsHandler;
 
     /**
@@ -50,10 +50,6 @@ public class CarEngineModule extends BasicEngineModule implements IPackInfoReloa
         if (physicsHandler != null)
             physicsHandler.onPackInfosReloaded();
         super.onPackInfosReloaded();
-    }
-
-    public EnginePhysicsHandler getPhysicsHandler() {
-        return physicsHandler;
     }
 
     @Override

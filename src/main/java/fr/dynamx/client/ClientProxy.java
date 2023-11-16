@@ -52,6 +52,7 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
     public static DynamXSoundHandler SOUND_HANDLER = new DynamXSoundHandler();
 
     public ClientProxy() {
+        DynamXContext.initObjModelRegistry();
         ModelLoaderRegistry.registerLoader(DynamXContext.getObjModelRegistry().getItemRenderer());
     }
 

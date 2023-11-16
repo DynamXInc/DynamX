@@ -42,7 +42,6 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
     @Getter
     private BasePartSeat lastRiddenSeat;
 
-
     public SeatsModule(PackPhysicsEntity<?, ? extends IPartContainer<?>> entity) {
         this(entity, CameraMode.AUTO);
     }

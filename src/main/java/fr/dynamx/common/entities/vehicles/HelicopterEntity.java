@@ -42,9 +42,16 @@ public class HelicopterEntity<T extends HelicopterPhysicsHandler<?>> extends Bas
     @Override
     protected void createModules(ModuleListBuilder modules) {
         //Take care to add seats BEFORE engine (the engine needs to detect dismounts)
+        //Helicopter is a special case and PartSeats don't add the module
         modules.add(getSeats());
         //modules.add(wheels = new WheelsModule(this));
         super.createModules(modules);
+    }
+
+    @Override
+    protected void sortModules() {
+        super.sortModules();
+        seats = getModuleByType(SeatsModule.class);
         doors = getModuleByType(DoorsModule.class);
     }
 

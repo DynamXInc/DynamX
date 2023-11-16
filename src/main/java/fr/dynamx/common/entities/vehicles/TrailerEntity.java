@@ -35,8 +35,8 @@ public class TrailerEntity<T extends TrailerEntity.TrailerPhysicsHandler<?>> ext
     }
 
     @Override
-    public void createModules(ModuleListBuilder modules) {
-        super.createModules(modules);
+    protected void sortModules() {
+        super.sortModules();
         seats = getModuleByType(SeatsModule.class);
         wheels = getModuleByType(WheelsModule.class);
         doors = getModuleByType(DoorsModule.class);

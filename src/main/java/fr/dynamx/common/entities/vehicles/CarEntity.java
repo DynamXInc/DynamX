@@ -36,8 +36,8 @@ public class CarEntity<T extends CarEntity.CarPhysicsHandler<?>> extends BaseVeh
     }
 
     @Override
-    public void createModules(ModuleListBuilder modules) {
-        super.createModules(modules);
+    protected void sortModules() {
+        super.sortModules();
         seats = getModuleByType(SeatsModule.class);
         wheels = getModuleByType(WheelsModule.class);
         doors = getModuleByType(DoorsModule.class);

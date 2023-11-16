@@ -2,6 +2,7 @@ package fr.dynamx.client.renders;
 
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.events.PhysicsEntityEvent;
+import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
 import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
@@ -255,8 +256,8 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
      * Called to render the main part of this model with the custom texture <br>
      * Will draw a white box over the all entity if model wasn't loaded (not found for example)
      */
-    public void renderMainModel(ObjModelRenderer model, @Nullable Entity entity, byte textureDataId) {
-        boolean drawn = model.renderDefaultParts(textureDataId);
+    public void renderMainModel(ObjModelRenderer model, IModelTextureVariantsSupplier textureVariants, @Nullable Entity entity, byte textureDataId) {
+        boolean drawn = model.renderDefaultParts(textureVariants, textureDataId);
         if (!drawn && entity != null) {
             renderOffsetAABB(entity.getEntityBoundingBox(), -entity.lastTickPosX, -entity.lastTickPosY, -entity.lastTickPosZ);
         }

@@ -129,18 +129,20 @@ public class ObjModelRenderer {
         return drawn;
     }
 
-    public boolean renderDefaultParts(byte textureDataId) {
-        if (getTextureVariants() == null)
-            throw new IllegalStateException("Cannot determine the parts to render !");
-        if (!MinecraftForge.EVENT_BUS.post(new DynamXModelRenderEvent.RenderMainParts(EventStage.PRE, this, getTextureVariants(), textureDataId))) {
+    public boolean renderDefaultParts(IModelTextureVariantsSupplier textureVariants, byte textureDataId) {
+        // Hotfix: added "textureVariants" parameter (this solve conflicts when one model of one pack info gets overriden by one model with the same name (but not the same textures, same rendered parts etc)
+        // This will be improved with the new model loader and gltf support, so this is just a temporary fix
+        //if (getTextureVariants() == null)
+         //   throw new IllegalStateException("Cannot determine the parts to render !");
+        if (!MinecraftForge.EVENT_BUS.post(new DynamXModelRenderEvent.RenderMainParts(EventStage.PRE, this, textureVariants, textureDataId))) {
             boolean drawn = false;
             for (ObjObjectRenderer object : objObjects) {
-                if (getTextureVariants().canRenderPart(object.getObjObjectData().getName())) {
+                if (textureVariants.canRenderPart(object.getObjObjectData().getName())) {
                     renderGroup(object, textureDataId);
                     drawn = true;
                 }
             }
-            MinecraftForge.EVENT_BUS.post(new DynamXModelRenderEvent.RenderMainParts(EventStage.POST, this, getTextureVariants(), textureDataId));
+            MinecraftForge.EVENT_BUS.post(new DynamXModelRenderEvent.RenderMainParts(EventStage.POST, this,textureVariants, textureDataId));
             return drawn;
         }
         return true;

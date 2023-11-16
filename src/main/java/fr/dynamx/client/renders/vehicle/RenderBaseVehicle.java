@@ -42,7 +42,7 @@ public class RenderBaseVehicle<T extends BaseVehicleEntity<?>> extends RenderPhy
         if (!MinecraftForge.EVENT_BUS.post(new Render(Type.CHASSIS, this, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks, vehicleModel)) && packInfo.isModelValid()) {
             /* Rendering the chassis */
             GlStateManager.scale(packInfo.getScaleModifier().x, packInfo.getScaleModifier().y, packInfo.getScaleModifier().z);
-            renderMainModel(vehicleModel, carEntity, textureId);
+            renderMainModel(vehicleModel, packInfo, carEntity, textureId);
             GlStateManager.scale(1 / packInfo.getScaleModifier().x, 1 / packInfo.getScaleModifier().y, 1 / packInfo.getScaleModifier().z);
         }
         MinecraftForge.EVENT_BUS.post(new Render(Type.CHASSIS, this, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks, vehicleModel));

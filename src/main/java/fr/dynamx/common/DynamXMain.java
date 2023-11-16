@@ -114,6 +114,7 @@ public class DynamXMain {
     public void preInit(FMLPreInitializationEvent event) {
         /* Loading configuration file */
         DynamXConfig.load(event.getSuggestedConfigurationFile());
+        DynamXContext.initNetwork();
 
         new ItemShockWave();
         new ItemSlopes();

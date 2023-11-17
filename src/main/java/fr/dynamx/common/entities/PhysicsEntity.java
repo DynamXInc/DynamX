@@ -20,7 +20,6 @@ import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.joints.EntityJointsHandler;
 import fr.dynamx.common.physics.player.WalkingOnPlayerController;
 import fr.dynamx.common.physics.terrain.PhysicsEntityTerrainLoader;
-import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.PhysicsEntityException;
@@ -129,6 +128,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
 
     /**
      * -- GETTER --
+     *
      * @return The terrain loader of this entity
      */
     @Getter
@@ -250,7 +250,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
 
         //Post the update event
         PhysicsEntityEvent.Update update;
-        if(world.isRemote) {
+        if (world.isRemote) {
             update = new PhysicsEntityEvent.ClientUpdate(this,
                     PhysicsEntityEvent.UpdateType.POST_ENTITY_UPDATE,
                     isRegistered == EnumEntityPhysicsRegistryState.REGISTERED && usesPhysicsWorld);
@@ -570,7 +570,8 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     /**
      * Method called when the entity's rigidbody enter in collision with something else
      */
-    public void onCollisionEnter(PhysicsCollisionEvent collisionEvent, BulletShapeType<?> entityA, BulletShapeType<?> entityB) {}
+    public void onCollisionEnter(PhysicsCollisionEvent collisionEvent, BulletShapeType<?> entityA, BulletShapeType<?> entityB) {
+    }
 
     /**
      * @return True if the player should have the motion of this entity when walking on the top of any collision box

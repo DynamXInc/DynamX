@@ -64,7 +64,7 @@ public class LightObject {
 
         @Override
         public String getName() {
-            return "LightObject in " + owner.getName();
+            return "LightObject in " + owner.getPartName();
         }
 
         @Override

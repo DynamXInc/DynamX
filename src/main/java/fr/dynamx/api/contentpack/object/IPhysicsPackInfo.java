@@ -2,8 +2,8 @@ package fr.dynamx.api.contentpack.object;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.part.IDrawablePart;
-import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
+import fr.dynamx.client.renders.scene.SceneGraph;
 import fr.dynamx.common.contentpack.type.ObjectInfo;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import net.minecraft.item.ItemStack;
@@ -22,7 +22,7 @@ public interface IPhysicsPackInfo extends ICollisionsContainer {
 
     void addModules(PackPhysicsEntity<?, ?> entity, ModuleListBuilder modules);
 
-    default List<IDrawablePart<?>> getDrawableParts() {
+    default List<IDrawablePart<?, ?>> getDrawableParts() {
         return Collections.emptyList();
     }
 
@@ -39,4 +39,6 @@ public interface IPhysicsPackInfo extends ICollisionsContainer {
     }
 
     float getRenderDistance();
+
+    SceneGraph<?,?> getSceneGraph();
 }

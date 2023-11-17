@@ -6,7 +6,6 @@ import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.vehicles.DoorEntity;
-import fr.dynamx.utils.debug.renderer.DebugRenderer;
 import fr.dynamx.utils.debug.renderer.VehicleDebugRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderManager;
@@ -21,19 +20,17 @@ public class RenderDoor<T extends DoorEntity<?>> extends RenderPhysicsEntity<T> 
     }
 
     @Override
-    public void renderMain(T entity, float partialsTicks) {
+    public void renderEntity(T entity, double x, double y, double z, float partialTicks, boolean useVanillaRender) {
         BaseVehicleEntity<?> carEntity = entity.getVehicleEntity(entity.world);
+        //TODO USE SCENE GRAPH
         if (carEntity != null) {
+            GlStateManager.pushMatrix();
+            setupRenderTransform(entity, x, y, z, partialTicks);
             DxModelRenderer vehicleModel = DynamXContext.getDxModelRegistry().getModel(carEntity.getPackInfo().getModel());
             GlStateManager.scale(carEntity.getPackInfo().getScaleModifier().x, carEntity.getPackInfo().getScaleModifier().y, carEntity.getPackInfo().getScaleModifier().z);
-            renderModelGroup(vehicleModel, entity.getPackInfo().getPartName(), carEntity, carEntity.getEntityTextureID(), false);
+            renderModelGroup(vehicleModel, entity.getPackInfo().getObjectName(), carEntity, carEntity.getEntityTextureID(), false);
             GlStateManager.scale(1 / carEntity.getPackInfo().getScaleModifier().x, 1 / carEntity.getPackInfo().getScaleModifier().y, 1 / carEntity.getPackInfo().getScaleModifier().z);
+            GlStateManager.popMatrix();
         }
     }
-
-    @Override
-    public void renderParts(T entity, float partialTicks) {
-
-    }
-
 }

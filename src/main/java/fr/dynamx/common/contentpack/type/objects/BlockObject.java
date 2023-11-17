@@ -2,8 +2,6 @@ package fr.dynamx.common.contentpack.type.objects;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IDynamXItem;
-import fr.dynamx.api.contentpack.object.part.BasePart;
-import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.dxmodel.EnumDxModelFormats;
@@ -18,8 +16,6 @@ import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.utils.DynamXUtils;
 import lombok.Getter;
 import lombok.Setter;
-import fr.dynamx.common.contentpack.loader.ObjectLoader;
-import fr.dynamx.common.contentpack.parts.PartBlockSeat;
 import net.minecraft.block.material.Material;
 import net.minecraftforge.common.MinecraftForge;
 
@@ -29,12 +25,6 @@ import java.util.List;
 import java.util.Map;
 
 public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> implements ParticleEmitterInfo.IParticleEmitterContainer, ILightOwner<T> {
-    /**
-     * List of owned {@link ISubInfoType}s
-     */
-    @Getter
-    protected final List<ISubInfoType<T>> subProperties = new ArrayList<>();
-
     @Getter
     @Setter
     protected PropObject<?> propObject;
@@ -99,11 +89,6 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
     }
 
     @Override
-    public void addSubProperty(ISubInfoType<T> property) {
-        subProperties.add(property);
-    }
-
-    @Override
     public void addParticleEmitter(ParticleEmitterInfo<?> emitterInfo) {
         particleEmitters.add(emitterInfo);
     }
@@ -124,11 +109,11 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
 
     @Override
     public void addLightSource(PartLightSource source) {
-        lightSources.put(source.getPartName(), source);
+        lightSources.put(source.getObjectName(), source);
     }
 
     @Override
-    public PartLightSource getLightSource(String partName) {
-        return lightSources.get(partName);
+    public PartLightSource getLightSource(String objectName) {
+        return lightSources.get(objectName);
     }
 }

@@ -16,7 +16,6 @@ import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
@@ -57,9 +56,11 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
 
                 //Rendering the model
                 DynamXContext.getDxModelRegistry().getModel(te.getPackInfo().getModel()).renderModel((byte) te.getBlockMetadata(), false);
+                /*
+                TODO USE SCENE GRAPH
                 if (te.getPackInfo().isModelValid() && te.getLightsModule() != null) {
                     te.getPackInfo().getLightSources().values().forEach(d -> d.drawLights(null, Minecraft.getMinecraft().player.ticksExisted, te.getPackInfo().getModel(), te.getPackInfo().getScaleModifier(), te.getLightsModule(), false));
-                }
+                }*/
                 DynamXRenderUtils.spawnParticles(te.getPackInfo(), te.getWorld(), pos, rot);
                 MinecraftForge.EVENT_BUS.post(new DynamXBlockEvent.RenderTileEntity((DynamXBlock<?>) te.getBlockType(), getWorld(), te, this, x, y, z, partialTicks, destroyStage, alpha, EventStage.POST));
                 GlStateManager.popMatrix();

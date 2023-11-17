@@ -14,13 +14,15 @@ import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
+import fr.dynamx.api.dxmodel.DxModelPath;
+import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.CreatePackItemEvent;
-import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
-import fr.dynamx.api.dxmodel.DxModelPath;
 import fr.dynamx.client.renders.model.ItemDxModel;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.client.renders.model.texture.TextureVariantData;
+import fr.dynamx.client.renders.scene.SceneBuilder;
+import fr.dynamx.client.renders.scene.SceneGraph;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.loader.InfoList;
 import fr.dynamx.common.contentpack.parts.ILightOwner;
@@ -42,6 +44,7 @@ import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -96,9 +99,6 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     @Setter
     @PackFileProperty(configNames = "DefaultZoomLevel", required = false, defaultValue = "4")
     protected int defaultZoomLevel = 4;
-
-    @Getter
-    private final Map<Class<? extends BasePart<?>>, Byte> partIds = new HashMap<>();
 
     /* == Physics properties == */
 
@@ -185,7 +185,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     @Getter
     private final List<String> renderedParts = new ArrayList<>();
     @Getter
-    private final List<IDrawablePart<?>> drawableParts = new ArrayList<>();
+    private final List<IDrawablePart<?, ?>> drawableParts = new ArrayList<>();
 
     /**
      * Maps the metadata to the texture data
@@ -255,6 +255,13 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
             return false;
         //Validate vehicle type
         validator.validate(this);
+
+        if (FMLClientHandler.instance().getSide().isClient()) {
+            //TODO MOVE
+            System.out.println("Gen scene graph: " + getFullName());
+            getSceneGraph();
+        }
+
         return true;
     }
 
@@ -306,9 +313,22 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
         return new ItemStack((Item) getItems()[0], 1, metadata);
     }
 
+    private SceneGraph<?, ?> sceneGraph;
+
     @Override
-    public PartLightSource getLightSource(String partName) {
-        return lightSources.get(partName);
+    public SceneGraph<?, ?> getSceneGraph() {
+        if (sceneGraph == null) {
+            if (isModelValid())
+                sceneGraph = new SceneBuilder<>().buildEntitySceneGraph(this, (List) drawableParts, getScaleModifier());
+            else
+                sceneGraph = new SceneGraph.EntityNode<>(Collections.EMPTY_LIST, Collections.EMPTY_LIST);
+        }
+        return sceneGraph;
+    }
+
+    @Override
+    public PartLightSource getLightSource(String objectName) {
+        return lightSources.get(objectName);
     }
 
     public byte getIdForVariant(String variantName) {
@@ -387,32 +407,28 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
      */
     @Override
     public void addLightSource(PartLightSource source) {
-        lightSources.put(source.getPartName(), source);
+        lightSources.put(source.getObjectName(), source);
         addDrawablePart(source);
     }
 
     @Override
     public void addPart(BasePart<ModularVehicleInfo> part) {
-        byte id = (byte) (partIds.getOrDefault(part.getClass(), (byte) -1) + 1);
-        part.setId(id);
-        partIds.put((Class<? extends BasePart<?>>) part.getClass(), id);
         super.addPart(part);
         if (part instanceof IDrawablePart)
-            addDrawablePart((IDrawablePart<?>) part);
+            addDrawablePart((IDrawablePart<?, ?>) part);
     }
 
     @Override
     public void addSubProperty(ISubInfoType<ModularVehicleInfo> property) {
         super.addSubProperty(property);
         if (property instanceof IDrawablePart)
-            addDrawablePart((IDrawablePart<?>) property);
+            addDrawablePart((IDrawablePart<?, ?>) property);
     }
 
-    protected void addDrawablePart(IDrawablePart<?> part) {
+    protected void addDrawablePart(IDrawablePart<?, ?> part) {
         String[] names = part.getRenderedParts();
         if (names.length > 0)
             renderedParts.addAll(Arrays.asList(names));
-        if (drawableParts.stream().noneMatch(p -> p.getClass() == part.getClass()))
-            drawableParts.add(part);
+        drawableParts.add(part);
     }
 }

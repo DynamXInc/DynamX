@@ -8,7 +8,7 @@ public interface ILightOwner<T extends ISubInfoTypeOwner<?>> extends ISubInfoTyp
 {
     void addLightSource(PartLightSource partLightSource);
 
-    PartLightSource getLightSource(String partName);
+    PartLightSource getLightSource(String objectName);
 
     Map<String, PartLightSource> getLightSources();
 }

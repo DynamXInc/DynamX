@@ -1,11 +1,12 @@
 package fr.dynamx.client.renders.vehicle;
 
-import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent.Render;
 import fr.dynamx.api.events.VehicleEntityEvent.Render.Type;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
 import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
+import fr.dynamx.client.renders.scene.EntityRenderContext;
+import fr.dynamx.client.renders.scene.SceneGraph;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
@@ -15,14 +16,9 @@ import fr.dynamx.common.entities.vehicles.CarEntity;
 import fr.dynamx.common.entities.vehicles.HelicopterEntity;
 import fr.dynamx.common.entities.vehicles.TrailerEntity;
 import fr.dynamx.utils.debug.renderer.BoatDebugRenderer;
-import fr.dynamx.utils.debug.renderer.DebugRenderer;
 import fr.dynamx.utils.debug.renderer.VehicleDebugRenderer;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraftforge.common.MinecraftForge;
-import org.lwjgl.util.vector.Quaternion;
-
-import javax.annotation.Nullable;
 
 public class RenderBaseVehicle<T extends BaseVehicleEntity<?>> extends RenderPhysicsEntity<T> {
     public RenderBaseVehicle(RenderManager manager) {
@@ -32,38 +28,8 @@ public class RenderBaseVehicle<T extends BaseVehicleEntity<?>> extends RenderPhy
     }
 
     @Override
-    public void renderMain(T entity, float partialTicks) {
-        renderMain(entity, entity.getPackInfo(), entity.getEntityTextureID(), partialTicks, false);
-    }
-
-    public void renderMain(@Nullable T carEntity, ModularVehicleInfo packInfo, byte textureId, float partialTicks, boolean forceVanillaRender) {
-        DxModelRenderer vehicleModel = DynamXContext.getDxModelRegistry().getModel(packInfo.getModel());
-        if (!MinecraftForge.EVENT_BUS.post(new Render(Type.CHASSIS, this, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks, vehicleModel)) && packInfo.isModelValid()) {
-            /* Rendering the chassis */
-            GlStateManager.scale(packInfo.getScaleModifier().x, packInfo.getScaleModifier().y, packInfo.getScaleModifier().z);
-            renderMainModel(vehicleModel, carEntity, textureId, forceVanillaRender);
-            GlStateManager.scale(1 / packInfo.getScaleModifier().x, 1 / packInfo.getScaleModifier().y, 1 / packInfo.getScaleModifier().z);
-        }
-        MinecraftForge.EVENT_BUS.post(new Render(Type.CHASSIS, this, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks, vehicleModel));
-    }
-
-    @Override
-    public void renderParts(T entity, float partialTicks) {
-        renderParts(entity, entity.getPackInfo(), entity.getEntityTextureID(), partialTicks, false);
-    }
-
-    public void renderParts(@Nullable T carEntity, ModularVehicleInfo packInfo, byte textureId, float partialTicks, boolean forceVanillaRender) {
-        if (!MinecraftForge.EVENT_BUS.post(new Render(Type.PARTS, this, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks, null))) {
-            if (packInfo.isModelValid()) {
-                packInfo.getDrawableParts().forEach(d -> ((IDrawablePart<T>) d).drawParts(carEntity, this, packInfo, textureId, partialTicks, forceVanillaRender));
-            }
-        }
-        MinecraftForge.EVENT_BUS.post(new Render(Type.PARTS, this, carEntity, PhysicsEntityEvent.Phase.POST, partialTicks, null));
-    }
-
-    @Override
-    public void spawnParticles(T carEntity, Quaternion rotation, float partialTicks) {
-        super.spawnParticles(carEntity, rotation, partialTicks);
+    public void spawnParticles(T carEntity, float partialTicks) {
+        super.spawnParticles(carEntity, partialTicks);
         if (!MinecraftForge.EVENT_BUS.post(new Render(Type.PARTICLES, this, carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks, null))) {
             if (carEntity.hasModuleOfType(WheelsModule.class)) {
                 //TODO GENERALIZE
@@ -76,6 +42,30 @@ public class RenderBaseVehicle<T extends BaseVehicleEntity<?>> extends RenderPhy
     @Override
     public boolean canRender(T entity) {
         return super.canRender(entity) && entity.getEntityTextureID() != -1;
+    }
+
+    @Override
+    public void renderEntity(T entity, double x, double y, double z, float partialTicks, boolean useVanillaRender) {
+        if (entity.getPackInfo() == null) {
+            renderOffsetAABB(entity.getEntityBoundingBox(), x - entity.lastTickPosX, y - entity.lastTickPosY, z - entity.lastTickPosZ);
+            return;
+        }
+        DxModelRenderer modelRenderer = DynamXContext.getDxModelRegistry().getModel(entity.getPackInfo().getModel());
+        if (modelRenderer == null) {
+            renderOffsetAABB(entity.getEntityBoundingBox(), x - entity.lastTickPosX, y - entity.lastTickPosY, z - entity.lastTickPosZ);
+            return;
+        }
+        EntityRenderContext context = new EntityRenderContext(this, modelRenderer, entity.getEntityTextureID(), x, y, z, partialTicks, useVanillaRender);
+        ((SceneGraph<T, ModularVehicleInfo>) entity.getPackInfo().getSceneGraph()).render(entity, context, entity.getPackInfo());
+    }
+
+    public void renderMain(ModularVehicleInfo packInfo, byte textureId, boolean useVanillaRender) {
+        DxModelRenderer modelRenderer = DynamXContext.getDxModelRegistry().getModel(packInfo.getModel());
+        if (modelRenderer == null) {
+            return;
+        }
+        EntityRenderContext context = new EntityRenderContext(this, modelRenderer, textureId, 0, 0, 0, 1, useVanillaRender);
+        ((SceneGraph<T, ModularVehicleInfo>) packInfo.getSceneGraph()).render(null, context, packInfo);
     }
 
     public static class RenderCar<T extends CarEntity<?>> extends RenderBaseVehicle<T> {

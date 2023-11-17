@@ -1,24 +1,17 @@
 package fr.dynamx.client.renders;
 
-import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.client.handlers.ClientDebugSystem;
-import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
-import fr.dynamx.common.contentpack.parts.BasePartSeat;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
-import fr.dynamx.utils.DynamXUtils;
-import fr.dynamx.utils.EnumSeatPlayerPosition;
 import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.debug.renderer.DebugRenderer;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
@@ -45,7 +38,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
     /**
      * Setups render translation and rotation before rendering the entity
      */
-    protected Quaternion setupRenderTransform(T entity, double x, double y, double z, float entityYaw, float partialTicks) {
+    public Quaternion setupRenderTransform(T entity, double x, double y, double z, float partialTicks) {
         GlStateManager.translate((float) x, (float) y, (float) z);
         Quaternion q = ClientDynamXUtils.computeInterpolatedGlQuaternion(entity.prevRenderRotation, entity.renderRotation, partialTicks);
         GlStateManager.rotate(q);
@@ -60,24 +53,13 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
         QuaternionPool.openPool();
         Vector3fPool.openPool();
         GlQuaternionPool.openPool();
-        Quaternion appliedRotation = null;
         int renderPass = MinecraftForgeClient.getRenderPass();
         //Render vehicle
         if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.ENTITY, x, y, z, partialTicks, renderPass))) {
-            GlStateManager.pushMatrix();
-            {
-                appliedRotation = setupRenderTransform(entity, x, y, z, entityYaw, partialTicks);
-                renderMain(entity, partialTicks);
-                renderParts(entity, partialTicks);
-            }
-            GlStateManager.popMatrix();
+            renderEntity(entity, x, y, z, partialTicks, false);
         }
-        if (MinecraftForgeClient.getRenderPass() == 0) {
-            spawnParticles(entity, appliedRotation, partialTicks);
-            //Render players inside the entity
-            if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.RIDDING_PLAYERS, x, y, z, partialTicks, renderPass))) {
-                renderRidingEntities(entity, x, y, z, partialTicks, appliedRotation);
-            }
+        if (renderPass == 0) {
+            spawnParticles(entity, partialTicks);
             //Render debug
             if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.DEBUG, x, y, z, partialTicks, renderPass))) {
                 renderDebug(entity, x, y, z, partialTicks);
@@ -89,65 +71,15 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
         GlQuaternionPool.closePool();
     }
 
-    protected void renderRidingEntities(T entity, double x, double y, double z, float partialTicks, Quaternion appliedRotation) {
-        for (Entity e : entity.getPassengers()) {
-            ClientEventHandler.renderingEntity.add(e.getUniqueID());
-            if ((e != Minecraft.getMinecraft().player || Minecraft.getMinecraft().gameSettings.thirdPersonView != 0)) {
-                GlStateManager.pushMatrix();
-                //Apply vehicle's transform
-                GlStateManager.translate((float) x, (float) y, (float) z);
-                //Translate to the seat, interpolating it's position
-                GlStateManager.translate(
-                        e.prevPosX - entity.prevPosX + (e.posX - entity.posX - e.prevPosX + entity.prevPosX) * partialTicks,
-                        e.prevPosY - entity.prevPosY + (e.posY - entity.posY - e.prevPosY + entity.prevPosY) * partialTicks,
-                        e.prevPosZ - entity.prevPosZ + (e.posZ - entity.posZ - e.prevPosZ + entity.prevPosZ) * partialTicks);
-                //Apply vehicle's rotation
-                if (appliedRotation != null)
-                    GlStateManager.rotate(appliedRotation);
-                //Apply seat rotation
-                BasePartSeat seat = ((IModuleContainer.ISeatsContainer) entity).getSeats().getRidingSeat(e);
-                if (seat != null) {
-                    EnumSeatPlayerPosition position = seat.getPlayerPosition();
-                    shouldRenderPlayerSitting = position == EnumSeatPlayerPosition.SITTING;
-
-                    if (seat.getPlayerSize() != null)
-                        GlStateManager.scale(seat.getPlayerSize().x, seat.getPlayerSize().y, seat.getPlayerSize().z);
-                    if (seat.getRotation() != null)
-                        GlStateManager.rotate(GlQuaternionPool.get(seat.getRotation()));
-                    if (position == EnumSeatPlayerPosition.LYING)
-                        GlStateManager.rotate(90, -1, 0, 0);
-                }
-
-                //Remove player's yaw offset rotation, to avoid stiff neck
-                if (seat != null && seat.shouldLimitFieldOfView()) {
-                    if (e instanceof AbstractClientPlayer) {
-                        ((AbstractClientPlayer) e).renderYawOffset = ((AbstractClientPlayer) e).prevRenderYawOffset = 0;
-                    }
-                }
-
-                //The render the player, e.rotationYaw is the name plate rotation
-                if (e instanceof AbstractClientPlayer) {
-                    if (ClientEventHandler.renderPlayer != null) {
-                        ClientEventHandler.renderPlayer.doRender((AbstractClientPlayer) e, 0, 0, 0, e.rotationYaw, partialTicks);
-                    }
-                } else {
-                    Minecraft.getMinecraft().getRenderManager().renderEntity(e, 0, 0, 0, e.rotationYaw, partialTicks, false);
-                }
-                GlStateManager.popMatrix();
-            }
-            ClientEventHandler.renderingEntity.remove(e.getUniqueID());
-        }
-    }
-
-    public void spawnParticles(T physicsEntity, Quaternion rotation, float partialTicks) {
+    public void spawnParticles(T physicsEntity, float partialTicks) {
         if (physicsEntity instanceof PackPhysicsEntity) {
             PackPhysicsEntity<?, ?> packPhysicsEntity = (PackPhysicsEntity<?, ?>) physicsEntity;
             if (packPhysicsEntity.getPackInfo() instanceof ParticleEmitterInfo.IParticleEmitterContainer) {
                 DynamXRenderUtils.spawnParticles(
                         (ParticleEmitterInfo.IParticleEmitterContainer) packPhysicsEntity.getPackInfo(),
                         physicsEntity.world,
-                        DynamXUtils.toVector3f(physicsEntity.getPositionVector()),
-                        new com.jme3.math.Quaternion(rotation.x, rotation.y, rotation.z, rotation.w));
+                        physicsEntity.physicsPosition,
+                        physicsEntity.physicsRotation);
             }
         }
     }
@@ -170,14 +102,9 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
     }
 
     /**
-     * Renders parts like wheels, doors, lights...
+     * Renders the entity
      */
-    public abstract void renderParts(T entity, float partialTicks);
-
-    /**
-     * Renders the core of the entity, like a car chassis
-     */
-    public abstract void renderMain(T entity, float partialsTicks);
+    public abstract void renderEntity(T entity, double x, double y, double z, float partialTicks, boolean useVanillaRender);
 
     /**
      * Renders active {@link DebugRenderer}s <br>

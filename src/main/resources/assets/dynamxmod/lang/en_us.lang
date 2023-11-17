@@ -100,6 +100,7 @@ dynamx.error.addon_error=Addon loading error
 dynamx.error.obj_error=Obj loading error
 dynamx.error.wheel_invalid_suspaxis=Invalid wheel suspension axis
 dynamx.error.too_many_variants=Too many material variants
+dynamx.error.missing_depends_on_node=A node depends on a node in order to be renderer, but it doesn't exist:
 
 dynamx.reload.models.errors=§c[DynamX] Some models have errors, use the debug menu to see them
 

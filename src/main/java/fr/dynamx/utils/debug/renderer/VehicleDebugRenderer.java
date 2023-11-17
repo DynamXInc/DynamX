@@ -8,7 +8,10 @@ import fr.dynamx.api.physics.IRotatedCollisionHandler;
 import fr.dynamx.client.network.ClientPhysicsEntitySynchronizer;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
 import fr.dynamx.common.DynamXContext;
-import fr.dynamx.common.contentpack.parts.*;
+import fr.dynamx.common.contentpack.parts.PartDoor;
+import fr.dynamx.common.contentpack.parts.PartPropsContainer;
+import fr.dynamx.common.contentpack.parts.PartRotor;
+import fr.dynamx.common.contentpack.parts.PartWheel;
 import fr.dynamx.common.contentpack.type.vehicle.FrictionPoint;
 import fr.dynamx.common.contentpack.type.vehicle.SteeringWheelInfo;
 import fr.dynamx.common.contentpack.type.vehicle.TrailerAttachInfo;
@@ -29,7 +32,6 @@ import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.vector.Quaternion;
 
 import java.util.ConcurrentModificationException;
 import java.util.List;
@@ -188,7 +190,7 @@ public class VehicleDebugRenderer {
             /* Rendering the steering wheel debug */
             SteeringWheelInfo info = entity.getPackInfo().getSubPropertyByType(SteeringWheelInfo.class);
             GlStateManager.pushMatrix();
-            Vector3f center = info.getSteeringWheelPosition();
+            Vector3f center = info.getPosition();
             //Translation to the steering wheel rotation point (and render pos)
             GlStateManager.translate(center.x, center.y, center.z);
 
@@ -403,12 +405,8 @@ public class VehicleDebugRenderer {
                 Vector3f pos = entity.physicsPosition;
                 Vector3f serverPos = ((ClientPhysicsEntitySynchronizer)entity.getSynchronizer()).getServerPos();
                 if(serverPos != null) {
-                    GlStateManager.translate(- pos.x + serverPos.x, - pos.y + serverPos.y, - pos.z + serverPos.z);
-                    Quaternion q = GlQuaternionPool.get(((ClientPhysicsEntitySynchronizer<? extends PhysicsEntity<?>>) entity.getSynchronizer()).getServerRotation());
-                    GlStateManager.rotate(q);
                     GlStateManager.color(entity.getSynchronizer().getSimulationHolder() == SimulationHolder.DRIVER ? 0.9f : 0.1f, 0.1f, 0.8f, 0.3f);
-                    renderer.renderMain(entity, partialTicks);
-                    renderer.renderParts(entity, partialTicks);
+                    renderer.renderEntity(entity, - pos.x + serverPos.x, - pos.y + serverPos.y, - pos.z + serverPos.z, partialTicks, true);
                     GlStateManager.color(1, 1, 1, 1);
                 }
             }

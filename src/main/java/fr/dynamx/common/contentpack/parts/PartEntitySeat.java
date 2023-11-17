@@ -15,25 +15,25 @@ import fr.dynamx.common.entities.vehicles.CarEntity;
 import fr.dynamx.common.entities.vehicles.HelicopterEntity;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.experimental.Accessors;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.TextComponentString;
 
 import javax.annotation.Nullable;
 
+/**
+ * A seat that can be used on vehicles
+ */
+@Getter
+@Setter
 @RegisteredSubInfoType(name = "seat", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER}, strictName = false)
 public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVehicleInfo> {
-    @Getter
-    @Setter
     @PackFileProperty(configNames = "Driver")
-    private boolean isDriver;
+    protected boolean isDriver;
 
-    @Getter
-    @Setter
     @Nullable
     @PackFileProperty(configNames = "LinkedDoorPart", required = false)
-    private String linkedDoor;
+    protected String linkedDoor;
 
     public PartEntitySeat(ModularVehicleInfo owner, String partName) {
         super(owner, partName);

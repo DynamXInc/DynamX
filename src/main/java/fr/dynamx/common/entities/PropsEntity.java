@@ -62,8 +62,8 @@ public class PropsEntity<T extends PackEntityPhysicsHandler<PropObject<?>, ?>> e
     }
 
     @Override
-    protected void createModules(ModuleListBuilder modules) {
-        super.createModules(modules);
+    protected void sortModules() {
+        super.sortModules();
         seats = getModuleByType(SeatsModule.class);
     }
 

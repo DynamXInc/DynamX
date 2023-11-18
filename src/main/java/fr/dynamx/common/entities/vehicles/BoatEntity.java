@@ -32,8 +32,8 @@ public class BoatEntity<T extends BoatPhysicsHandler<?>> extends BaseVehicleEnti
     }
 
     @Override
-    public void createModules(ModuleListBuilder modules) {
-        super.createModules(modules);
+    protected void sortModules() {
+        super.sortModules();
         seats = getModuleByType(SeatsModule.class);
         propeller = getModuleByType(BoatPropellerModule.class);
     }

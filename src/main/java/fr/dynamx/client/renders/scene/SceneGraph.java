@@ -97,8 +97,7 @@ public interface SceneGraph<T extends PhysicsEntity<?>, A extends IPhysicsPackIn
     @RequiredArgsConstructor
     abstract class Node<T extends ModularPhysicsEntity<?>, A extends IPhysicsPackInfo> implements SceneGraph<T, A> {
         /**
-         * The translation of the node, relative to the root node (not the previous node, for the moment)
-         * TODO MAKE RELATIVE TO PREVIOUS NODE
+         * The translation of the node, relative to the previous node
          */
         @Nullable
         protected final Vector3f translation;
@@ -139,8 +138,6 @@ public interface SceneGraph<T extends PhysicsEntity<?>, A extends IPhysicsPackIn
          */
         protected void renderChildren(@Nullable T entity, EntityRenderContext context, A packInfo) {
             if (linkedChildren != null) {
-                if (translation != null)
-                    GlStateManager.translate(-translation.x, -translation.y, -translation.z);
                 GlStateManager.scale(1 / scale.x, 1 / scale.y, 1 / scale.z);
                 linkedChildren.forEach(c -> c.render(entity, context, packInfo));
             }

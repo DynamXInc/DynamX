@@ -3,7 +3,6 @@ package fr.dynamx.server.command;
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.api.physics.terrain.ITerrainElement;
 import fr.dynamx.common.DynamXContext;
-import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.physics.terrain.chunk.ChunkCollisions;
 import fr.dynamx.common.physics.terrain.chunk.ChunkLoadingTicket;
 import fr.dynamx.common.physics.terrain.computing.TerrainCollisionsCalculator;
@@ -15,7 +14,6 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
@@ -139,7 +137,6 @@ public class CmdChunkControl implements ISubCommand {
             props.add("getgraph");
             props.add("resetstate");
             props.add("fullinfo");
-            props.add("entity_report");
             r.addAll(CommandBase.getListOfStringsMatchingLastWord(args, props));
         }
     }

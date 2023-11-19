@@ -3,6 +3,10 @@ package fr.dynamx.common.physics.utils;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.bullet.joints.PhysicsJoint;
+import com.jme3.bullet.objects.PhysicsRigidBody;
+import fr.dynamx.api.physics.BulletShapeType;
+import fr.dynamx.api.physics.IPhysicsWorld;
+import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.entities.PhysicsEntity;
 
@@ -44,23 +48,30 @@ public class PhysicsWorldOperation<A> {
     /**
      * Modifies the PhysicsWorld, executing this operation
      *
+     * @param physicsWorld  The DynamX PhysicsWorld
      * @param dynamicsWorld The bullet PhysicsSpace
      * @param joints        The cache of added joints
      * @param entities      The cache of added entities
      */
-    public void execute(PhysicsSpace dynamicsWorld, Set<PhysicsJoint> joints, HashSet<PhysicsEntity<?>> entities) {
+    public void execute(IPhysicsWorld physicsWorld, PhysicsSpace dynamicsWorld, Set<PhysicsJoint> joints, HashSet<PhysicsEntity<?>> entities) {
         if (object != null) {
             switch (operation) {
                 case ADD_VEHICLE:
                 case ADD_OBJECT:
                     dynamicsWorld.addCollisionObject((PhysicsCollisionObject) object);
+                    if (physicsWorld.getWorld().isRemote && object instanceof PhysicsRigidBody && ((PhysicsRigidBody) object).getUserObject() instanceof BulletShapeType && !((BulletShapeType<?>) ((PhysicsRigidBody) object).getUserObject()).getType().isTerrain()) {
+                        ClientDebugSystem.trackedRigidBodies.put(((PhysicsCollisionObject) object).nativeId(), (PhysicsRigidBody) object);
+                    }
                     break;
                 case REMOVE_VEHICLE:
                 case REMOVE_OBJECT:
                     dynamicsWorld.removeCollisionObject((PhysicsCollisionObject) object);
+                    if (physicsWorld.getWorld().isRemote && object instanceof PhysicsRigidBody && ((PhysicsRigidBody) object).getUserObject() instanceof BulletShapeType && !((BulletShapeType<?>) ((PhysicsRigidBody) object).getUserObject()).getType().isTerrain()) {
+                        ClientDebugSystem.trackedRigidBodies.remove(((PhysicsCollisionObject) object).nativeId());
+                    }
                     break;
                 case ADD_ENTITY:
-                    if (!entities.add((PhysicsEntity<?>) object)){
+                    if (!entities.add((PhysicsEntity<?>) object)) {
                         DynamXMain.log.fatal("Entity " + object + " is already registered, please report this !");
                     }
                     ((PhysicsEntity<?>) object).isRegistered = PhysicsEntity.EnumEntityPhysicsRegistryState.REGISTERED;
@@ -98,7 +109,7 @@ public class PhysicsWorldOperation<A> {
             try {
                 operation = callback.call();
                 if (operation != null)
-                    operation.execute(dynamicsWorld, joints, entities);
+                    operation.execute(physicsWorld, dynamicsWorld, joints, entities);
             } catch (Exception e) {
                 DynamXMain.log.fatal("Exception while executing callback of " + this + ". Callback: " + callback, e);
             }

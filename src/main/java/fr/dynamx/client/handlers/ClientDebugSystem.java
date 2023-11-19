@@ -49,6 +49,7 @@ public class ClientDebugSystem {
     public static boolean enableDebugDrawing;
     public static int MOVE_DEBUG;
 
+    public static final Map<Long, PhysicsRigidBody> trackedRigidBodies = new HashMap<>();
     public static final Map<Long, RigidBodyTransform>[] prevRigidBodyStates = new Map[]{new HashMap<>(), new HashMap<>()};
 
     private static byte curRigidBodyStatesIndex;
@@ -83,9 +84,14 @@ public class ClientDebugSystem {
                 if (curRigidBodyStatesIndex > 1) {
                     curRigidBodyStatesIndex = 0;
                 }
-                prevRigidBodyStates[curRigidBodyStatesIndex].clear();
-                for (PhysicsRigidBody body : DynamXContext.getPhysicsWorld(MC.world).getDynamicsWorld().getRigidBodyList()) {
-                    prevRigidBodyStates[curRigidBodyStatesIndex].put(body.nativeId(), new RigidBodyTransform(body));
+                prevRigidBodyStates[curRigidBodyStatesIndex].keySet().removeIf(aLong -> !trackedRigidBodies.containsKey(aLong));
+                for (Map.Entry<Long, PhysicsRigidBody> e : trackedRigidBodies.entrySet()) {
+                    prevRigidBodyStates[curRigidBodyStatesIndex].compute(e.getKey(), (k, v) -> {
+                        if (v == null)
+                            return new RigidBodyTransform(e.getValue());
+                        v.set(e.getValue());
+                        return v;
+                    });
                 }
                 Vector3fPool.closePool();
                 QuaternionPool.closePool();

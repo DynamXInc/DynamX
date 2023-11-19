@@ -10,6 +10,7 @@ import fr.dynamx.api.events.PhysicsEvent;
 import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.api.physics.entities.EntityPhysicsState;
+import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.client.network.ClientPhysicsSyncManager;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
@@ -111,7 +112,7 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
                 throw e;
             }
             while (!operations.isEmpty()) {
-                operations.remove().execute(dynamicsWorld, joints, entities);
+                operations.remove().execute(this, dynamicsWorld, joints, entities);
             }
         }
         profiler.end(Profiler.Profiles.ADD_REMOVE_BODIES);
@@ -240,8 +241,8 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
     }
 
     @Override
-    public boolean ownsWorld(World mcWorld) {
-        return mcWorld.equals(this.mcWorld);
+    public World getWorld() {
+        return mcWorld;
     }
 
     @Override
@@ -274,5 +275,8 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
         joints.clear();
         getTerrainManager().onWorldUnload();
         DynamXContext.getPhysicsWorldPerDimensionMap().remove(mcWorld.provider.getDimension());
+        if(mcWorld.isRemote) {
+            ClientDebugSystem.trackedRigidBodies.clear();
+        }
     }
 }

@@ -143,9 +143,9 @@ public interface IPhysicsWorld {
     PhysicsWorldTerrain getTerrainManager();
 
     /**
-     * @return True if this {@link IPhysicsWorld} is simulating this minecraft world
+     * @return The minecraft world simulated by this physics world
      */
-    boolean ownsWorld(World mcWorld);
+    World getWorld();
 
     /**
      * Called on minecraft tick start

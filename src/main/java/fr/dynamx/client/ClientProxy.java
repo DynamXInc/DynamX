@@ -92,6 +92,7 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
         MinecraftForge.EVENT_BUS.register(new KeyHandler(FMLClientHandler.instance().getClient()));
         ClientCommandHandler.instance.registerCommand(new CommandUdp());
         ClientCommandHandler.instance.registerCommand(new CommandNetworkDebug());
+        //TODO /dynamxclient command
 
         ClientRegistry.bindTileEntitySpecialRenderer(TEDynamXBlock.class, new TESRDynamXBlock<>());
         if (!Minecraft.getMinecraft().getFramebuffer().isStencilEnabled())

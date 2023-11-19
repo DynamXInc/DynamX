@@ -5,12 +5,12 @@ import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.part.BasePart;
-import fr.dynamx.common.network.sync.variables.NetworkActivityTracker;
 import fr.dynamx.client.camera.CameraSystem;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.network.packets.MessageDebugRequest;
+import fr.dynamx.common.network.sync.variables.NetworkActivityTracker;
 import fr.dynamx.common.physics.utils.RigidBodyTransform;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXUtils;
@@ -49,6 +49,7 @@ public class ClientDebugSystem {
     public static boolean enableDebugDrawing;
     public static int MOVE_DEBUG;
 
+    public static final Map<Long, PhysicsRigidBody> trackedRigidBodies = new HashMap<>();
     public static final Map<Long, RigidBodyTransform>[] prevRigidBodyStates = new Map[]{new HashMap<>(), new HashMap<>()};
 
     private static byte curRigidBodyStatesIndex;
@@ -83,9 +84,14 @@ public class ClientDebugSystem {
                 if (curRigidBodyStatesIndex > 1) {
                     curRigidBodyStatesIndex = 0;
                 }
-                prevRigidBodyStates[curRigidBodyStatesIndex].clear();
-                for (PhysicsRigidBody body : DynamXContext.getPhysicsWorld(MC.world).getDynamicsWorld().getRigidBodyList()) {
-                    prevRigidBodyStates[curRigidBodyStatesIndex].put(body.nativeId(), new RigidBodyTransform(body));
+                prevRigidBodyStates[curRigidBodyStatesIndex].keySet().removeIf(aLong -> !trackedRigidBodies.containsKey(aLong));
+                for (Map.Entry<Long, PhysicsRigidBody> e : trackedRigidBodies.entrySet()) {
+                    prevRigidBodyStates[curRigidBodyStatesIndex].compute(e.getKey(), (k, v) -> {
+                        if (v == null)
+                            return new RigidBodyTransform(e.getValue());
+                        v.set(e.getValue());
+                        return v;
+                    });
                 }
                 Vector3fPool.closePool();
                 QuaternionPool.closePool();
@@ -127,7 +133,7 @@ public class ClientDebugSystem {
             } else if (!physicsTicks.isEmpty())
                 physicsTicks.clear();
 
-            if(DynamXDebugOptions.FULL_NETWORK_DEBUG.isActive())
+            if (DynamXDebugOptions.FULL_NETWORK_DEBUG.isActive())
                 NetworkActivityTracker.drawNetworkActivity(MC.fontRenderer, 10);
         }
     }
@@ -218,7 +224,7 @@ public class ClientDebugSystem {
                                 && dynamXDebugOption.isActive()).findFirst();
                 if (dynamXDebugOptions.isPresent()) {
                     wantedShape = basePart -> {
-                        if(basePart.getDebugOption() != null) {
+                        if (basePart.getDebugOption() != null) {
                             return basePart.getDebugOption().equals(dynamXDebugOptions.get());
                         }
                         return false;
@@ -451,7 +457,7 @@ public class ClientDebugSystem {
         }
     }
 
-    public static Vector3f getInterpolatedTranslation(PhysicsRigidBody rigidBody, float partialTicks){
+    public static Vector3f getInterpolatedTranslation(PhysicsRigidBody rigidBody, float partialTicks) {
         RigidBodyTransform prevTransform = ClientDebugSystem.getPrevRigidBodyTransform(rigidBody.nativeId());
         RigidBodyTransform curTransform = ClientDebugSystem.getCurrentRigidBodyTransform(rigidBody.nativeId());
         if (prevTransform == null || curTransform == null) {
@@ -460,7 +466,7 @@ public class ClientDebugSystem {
         return DynamXMath.interpolateLinear(partialTicks, prevTransform.getPosition(), curTransform.getPosition());
     }
 
-    public static com.jme3.math.Quaternion getInterpolatedRotation(PhysicsRigidBody rigidBody, float partialTicks){
+    public static com.jme3.math.Quaternion getInterpolatedRotation(PhysicsRigidBody rigidBody, float partialTicks) {
         RigidBodyTransform prevTransform = ClientDebugSystem.getPrevRigidBodyTransform(rigidBody.nativeId());
         RigidBodyTransform curTransform = ClientDebugSystem.getCurrentRigidBodyTransform(rigidBody.nativeId());
         if (prevTransform == null || curTransform == null) {
@@ -469,10 +475,11 @@ public class ClientDebugSystem {
         return DynamXMath.slerp(partialTicks, prevTransform.getRotation(), curTransform.getRotation());
     }
 
-    public static RigidBodyTransform getCurrentRigidBodyTransform(long nativeBodyId){
+    public static RigidBodyTransform getCurrentRigidBodyTransform(long nativeBodyId) {
         return ClientDebugSystem.prevRigidBodyStates[ClientDebugSystem.curRigidBodyStatesIndex].get(nativeBodyId);
     }
-    public static RigidBodyTransform getPrevRigidBodyTransform(long nativeBodyId){
+
+    public static RigidBodyTransform getPrevRigidBodyTransform(long nativeBodyId) {
         return ClientDebugSystem.prevRigidBodyStates[ClientDebugSystem.prevRigidBodyStatesIndex].get(nativeBodyId);
     }
 }

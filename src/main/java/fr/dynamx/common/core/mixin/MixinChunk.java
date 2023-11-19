@@ -1,6 +1,5 @@
 package fr.dynamx.common.core.mixin;
 
-import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.handlers.CommonEventHandler;
 import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.block.Block;
@@ -142,19 +141,10 @@ public abstract class MixinChunk {
                         tileentity1.updateContainingBlockInfo();
                     }
                 }
-
-                updatePhysicChunk(iblockstate, state, pos);
-
+                CommonEventHandler.onBlockChange(world, pos, iblockstate, state);
                 dirty = true;
                 return iblockstate;
             }
-        }
-    }
-
-    private void updatePhysicChunk(IBlockState oldState, IBlockState newState, BlockPos pos) {
-        if (/*flags != 4 &&*/DynamXContext.usesPhysicsWorld(world)) { // 4 is random leaves update
-            if (!(oldState.isFullCube() && newState.isFullCube()) && (oldState.getMaterial().blocksMovement() || newState.getMaterial().blocksMovement()))
-                CommonEventHandler.onBlockChange(world, pos);
         }
     }
 }

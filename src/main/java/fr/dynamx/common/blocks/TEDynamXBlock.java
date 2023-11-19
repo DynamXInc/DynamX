@@ -16,7 +16,10 @@ import fr.dynamx.common.contentpack.type.ObjectCollisionsHelper;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
 import fr.dynamx.common.entities.ICollidableObject;
 import fr.dynamx.common.entities.modules.AbstractLightsModule;
+import fr.dynamx.common.physics.terrain.chunk.ChunkLoadingTicket;
+import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.VerticalChunkPos;
+import fr.dynamx.utils.debug.ChunkGraph;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.QuaternionPool;
@@ -64,9 +67,9 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
 
     public void setBlockObjectInfo(BlockObject<?> blockObjectInfo) {
         this.blockObjectInfo = blockObjectInfo;
-        if(world != null)
+        if (world != null)
             world.markBlockRangeForRenderUpdate(pos, pos);
-        if(blockObjectInfo != null && !blockObjectInfo.getLightSources().isEmpty())
+        if (blockObjectInfo != null && !blockObjectInfo.getLightSources().isEmpty())
             lightsModule = new AbstractLightsModule.LightsModule(blockObjectInfo);
         else
             lightsModule = null;
@@ -76,7 +79,7 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
         if (blockObjectInfo != null)
             compound.setString("BlockInfo", blockObjectInfo.getFullName());
-        if(lightsModule != null)
+        if (lightsModule != null)
             lightsModule.writeToNBT(compound);
         compound.setInteger("Rotation", rotation);
         compound.setFloat("TranslationX", relativeTranslation.x);
@@ -97,7 +100,7 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
         super.readFromNBT(compound);
         if (compound.hasKey("BlockInfo"))
             setBlockObjectInfo(DynamXObjectLoaders.BLOCKS.findInfo(compound.getString("BlockInfo")));
-        if(lightsModule != null)
+        if (lightsModule != null)
             lightsModule.readFromNBT(compound);
         rotation = compound.getInteger("Rotation");
         relativeTranslation = new Vector3f(
@@ -113,11 +116,10 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
                 compound.getFloat("RotationY"),
                 compound.getFloat("RotationZ"));
 
-        if(blockObjectInfo == null && world != null && !world.isRemote) {
-            DynamXMain.log.warn("Block object info is null for te " + this + " at " + pos+ ". Removing it.");
+        if (blockObjectInfo == null && world != null && !world.isRemote) {
+            DynamXMain.log.warn("Block object info is null for te " + this + " at " + pos + ". Removing it.");
             world.setBlockToAir(pos);
-        }
-        else
+        } else
             markCollisionsDirty();
     }
 
@@ -273,7 +275,13 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
         boundingBoxCache = null;
         unrotatedCollisionsCache.clear();
         if (world != null && DynamXContext.usesPhysicsWorld(world)) {
-            DynamXContext.getPhysicsWorld(world).getTerrainManager().onChunkChanged(new VerticalChunkPos(getPos().getX() >> 4, getPos().getY() >> 4, getPos().getZ() >> 4));
+            VerticalChunkPos pos1 = new VerticalChunkPos(getPos().getX() >> 4, getPos().getY() >> 4, getPos().getZ() >> 4);
+            if (DynamXConfig.enableDebugTerrainManager) {
+                ChunkLoadingTicket ticket = DynamXContext.getPhysicsWorld(world).getTerrainManager().getTicket(pos1);
+                if (ticket != null)
+                    ChunkGraph.addToGrah(pos1, ChunkGraph.ChunkActions.CHK_UPDATE, ChunkGraph.ActionLocation.MAIN, ticket.getCollisions(), "Chunk changed from DynamX TE markDirty opf " + getBlockObjectInfo() + " at " + getPos() + ". Ticket " + ticket);
+            }
+            DynamXContext.getPhysicsWorld(world).getTerrainManager().onChunkChanged(pos1);
         }
         if (world != null) {
             DynamXChunkData data = world.getChunk(pos).getCapability(DynamXChunkDataProvider.DYNAM_X_CHUNK_DATA_CAPABILITY, null);

@@ -8,6 +8,8 @@ import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.api.network.EnumPacketTarget;
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.api.physics.player.DynamXPhysicsWorldBlacklistApi;
+import fr.dynamx.api.physics.terrain.DynamXTerrainApi;
+import fr.dynamx.api.physics.terrain.ITerrainUpdateBehavior;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.blocks.DynamXBlock;
@@ -31,6 +33,7 @@ import fr.dynamx.utils.client.ContentPackUtils;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
@@ -78,7 +81,7 @@ public class CommonEventHandler {
             ServerPhysicsSyncManager.onDisconnect(player);
             DynamXContext.getWalkingPlayers().remove(player);
         }
-        if(DynamXContext.getPlayerPickingObjects().containsKey(player.getEntityId()))
+        if (DynamXContext.getPlayerPickingObjects().containsKey(player.getEntityId()))
             PickingObjectHelper.handlePlayerDisconnection(player);
     }
 
@@ -121,17 +124,22 @@ public class CommonEventHandler {
 
     /**
      * Marks the physics terrain dirty and schedule a new computation <br>
-     * Don't abuse as it may create some lag
+     * Don't abuse as it may create some lag <br>
+     * The updates are filtered by the {@link ITerrainUpdateBehavior}s
      *
      * @param world The world
-     * @param pos   The modified position. The corresponding chunk will be reloaded
+     * @param pos   The modified position. The corresponding chunk will be reloaded if allowed by the terrain update behaviors.
      */
-    public static void onBlockChange(World world, BlockPos pos) {
-        if ((!world.isRemote || FMLCommonHandler.instance().getMinecraftServerInstance() != null)) {
-            IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(world);
-            if(physicsWorld != null)
-                physicsWorld.getTerrainManager().onBlockChange(world, pos);
+    public static void onBlockChange(World world, BlockPos pos, IBlockState oldState, IBlockState newState) {
+        if (FMLCommonHandler.instance().getMinecraftServerInstance() == null || !DynamXContext.usesPhysicsWorld(world) // If we are on the client, we don't need to update the terrain (the server will notify changes)
+                || DynamXTerrainApi.getTerrainUpdateBehavior(world, pos, oldState, newState) == ITerrainUpdateBehavior.Result.IGNORE) {
+            return;
         }
+        IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(world);
+        if (physicsWorld == null) {
+            return;
+        }
+        physicsWorld.getTerrainManager().onBlockChange(world, pos);
     }
 
     @SubscribeEvent
@@ -146,7 +154,7 @@ public class CommonEventHandler {
     public void onWorldLoad(WorldEvent.Load event) {
         World world = event.getWorld();
         world.addEventListener(new DynamXWorldListener());
-        if(event.getWorld().isRemote || FMLCommonHandler.instance().getMinecraftServerInstance().isDedicatedServer()) {
+        if (event.getWorld().isRemote || FMLCommonHandler.instance().getMinecraftServerInstance().isDedicatedServer()) {
             DynamXMain.proxy.initPhysicsWorld(event.getWorld());
         }
     }
@@ -233,7 +241,8 @@ public class CommonEventHandler {
     @SubscribeEvent
     public void onPlayerUpdate(TickEvent.PlayerTickEvent e) {
         if (!(e.player.getRidingEntity() instanceof BaseVehicleEntity) && DynamXContext.getPhysicsWorld(e.player.world) != null && !e.player.isDead) {
-            if(!DynamXContext.getPlayerToCollision().containsKey(e.player) && DynamXPhysicsWorldBlacklistApi.isBlacklisted(e.player)) return;
+            if (!DynamXContext.getPlayerToCollision().containsKey(e.player) && DynamXPhysicsWorldBlacklistApi.isBlacklisted(e.player))
+                return;
             Vector3fPool.openPool();
             QuaternionPool.openPool();
             if (!DynamXContext.getPlayerToCollision().containsKey(e.player)) {

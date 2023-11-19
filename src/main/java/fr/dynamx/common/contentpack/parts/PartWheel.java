@@ -151,9 +151,6 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
 
         @Override
         public void render(@Nullable T entity, EntityRenderContext context, A packInfo) {
-        /*if (MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.PROPULSION, (RenderBaseVehicle<?>) render, entity, PhysicsEntityEvent.Phase.PRE, partialTicks, null))) {
-            return;
-        }*/
             WheelsModule wheelsModule = entity != null ? entity.getModuleByType(WheelsModule.class) : null;
             if (wheelsModule != null && wheelsModule.getWheelsStates()[getId()] == WheelsModule.WheelState.REMOVED)
                 return;
@@ -229,7 +226,6 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
             }
             renderChildren(entity, context, packInfo);
             GlStateManager.popMatrix();
-            //MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.PROPULSION, (RenderBaseVehicle<?>) render, entity, PhysicsEntityEvent.Phase.POST, partialTicks, null));
         }
     }
 }

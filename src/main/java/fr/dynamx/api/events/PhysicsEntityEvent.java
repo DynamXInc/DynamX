@@ -2,7 +2,6 @@ package fr.dynamx.api.events;
 
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
-import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.entities.ModularPhysicsEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.items.DynamXItemSpawner;
@@ -144,56 +143,6 @@ public class PhysicsEntityEvent extends Event {
             super(side, physicsEntity);
             this.type = type;
             this.simulatePhysics = simulatePhysics;
-        }
-    }
-
-    /**
-     * Fired when rendering a physics entity, before and after the render, with <strong>no</strong> pos and rotations transformations applied <br>
-     * All phases are cancellable, except POST
-     */
-    public static class Render extends PhysicsEntityEvent {
-        /**
-         * The renderer of the entity
-         */
-        @Getter
-        private final RenderPhysicsEntity<?> renderer;
-        /**
-         * The render type
-         */
-        @Getter
-        private final Type renderType;
-        /**
-         * Render x, y and z pos
-         */
-        @Getter
-        private final double x, y, z;
-        /**
-         * Partials render ticks
-         */
-        @Getter
-        private final float partialTicks;
-        /**
-         * The render pass <br>
-         * 0 for solid objects <br>
-         * 1 for translucent objects <br>
-         * Some types of render event are fired for both
-         */
-        @Getter
-        private final int renderPass;
-
-        public Render(PhysicsEntity<?> physicsEntity, RenderPhysicsEntity<?> renderer, Type renderType, double x, double y, double z, float partialTicks, int renderPass) {
-            super(Side.CLIENT, physicsEntity);
-            this.renderer = renderer;
-            this.x = x;
-            this.y = y;
-            this.z = z;
-            this.renderType = renderType;
-            this.partialTicks = partialTicks;
-            this.renderPass = renderPass;
-        }
-
-        public enum Type {
-            ENTITY, RIDDING_PLAYERS, DEBUG, POST
         }
     }
 

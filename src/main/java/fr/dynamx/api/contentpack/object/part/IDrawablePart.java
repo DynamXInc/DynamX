@@ -34,19 +34,20 @@ public interface IDrawablePart<T extends ModularPhysicsEntity<?>, A extends IPhy
      */
     @SideOnly(Side.CLIENT)
     default String[] getRenderedParts() {
-        return new String[] {getObjectName()};
+        String objectName = getObjectName();
+        return objectName == null ? new String[0] : new String[]{objectName};
     }
 
     /**
      * Adds this part to the scene graph. <br>
      * Override this if you want to change the path (hierarchy) of the part in the scene graph. By default, the part is added to the root of the scene graph.
      *
-     * @param packInfo The pack info of the entity (owner of the part)
+     * @param packInfo     The pack info of the entity (owner of the part)
      * @param sceneBuilder The scene builder
      */
     @SideOnly(Side.CLIENT)
     default void addToSceneGraph(A packInfo, SceneBuilder<T, A> sceneBuilder) {
-        sceneBuilder.addNode(this, getNodeName());
+        sceneBuilder.addNode(packInfo, this);
     }
 
     /**

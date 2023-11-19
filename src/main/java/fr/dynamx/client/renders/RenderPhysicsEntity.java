@@ -1,8 +1,9 @@
 package fr.dynamx.client.renders;
 
-import fr.dynamx.api.events.PhysicsEntityEvent;
+import fr.dynamx.api.events.DynamXEntityRenderEvents;
 import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
+import fr.dynamx.client.renders.scene.EntityRenderContext;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
@@ -54,24 +55,30 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
         Vector3fPool.openPool();
         GlQuaternionPool.openPool();
         int renderPass = MinecraftForgeClient.getRenderPass();
+        EntityRenderContext context = getRenderContext(entity);
+        if(context == null) {
+            renderOffsetAABB(entity.getEntityBoundingBox(), x - entity.lastTickPosX, y - entity.lastTickPosY, z - entity.lastTickPosZ);
+            return;
+        }
+        context.setRenderParams(x, y, z, partialTicks, false);
         //Render vehicle
-        if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.ENTITY, x, y, z, partialTicks, renderPass))) {
-            renderEntity(entity, x, y, z, partialTicks, false);
+        if (!MinecraftForge.EVENT_BUS.post(new DynamXEntityRenderEvents.Render(entity, context, DynamXEntityRenderEvents.Render.Type.ENTITY, renderPass))) {
+            renderEntity(entity, context);
         }
         if (renderPass == 0) {
-            spawnParticles(entity, partialTicks);
+            spawnParticles(entity, context);
             //Render debug
-            if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.DEBUG, x, y, z, partialTicks, renderPass))) {
+            if (!MinecraftForge.EVENT_BUS.post(new DynamXEntityRenderEvents.Render(entity, context, DynamXEntityRenderEvents.Render.Type.DEBUG, renderPass))) {
                 renderDebug(entity, x, y, z, partialTicks);
             }
         }
-        MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.POST, x, y, z, partialTicks, renderPass));
+        MinecraftForge.EVENT_BUS.post(new DynamXEntityRenderEvents.Render(entity, context, DynamXEntityRenderEvents.Render.Type.POST, renderPass));
         Vector3fPool.closePool();
         QuaternionPool.closePool();
         GlQuaternionPool.closePool();
     }
 
-    public void spawnParticles(T physicsEntity, float partialTicks) {
+    public void spawnParticles(T physicsEntity, EntityRenderContext context) {
         if (physicsEntity instanceof PackPhysicsEntity) {
             PackPhysicsEntity<?, ?> packPhysicsEntity = (PackPhysicsEntity<?, ?>) physicsEntity;
             if (packPhysicsEntity.getPackInfo() instanceof ParticleEmitterInfo.IParticleEmitterContainer) {
@@ -102,9 +109,21 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
     }
 
     /**
-     * Renders the entity
+     * Renders the entity in the world
      */
-    public abstract void renderEntity(T entity, double x, double y, double z, float partialTicks, boolean useVanillaRender);
+    public abstract void renderEntity(T entity, EntityRenderContext context);
+
+    /**
+     * Should return an EntityRenderContext with the entity parameters set <br>
+     * The render parameters are automatically set <br>
+     * Returning null will cancel the render and render a vanilla white box instead <br>
+     * The returned context must be as complete as possible, as it is given in render events fired before the call to renderEntity
+     *
+     * @param entity The entity to render
+     * @return A render context with the entity parameters set
+     */
+    @Nullable
+    public abstract EntityRenderContext getRenderContext(T entity);
 
     /**
      * Renders active {@link DebugRenderer}s <br>

@@ -2,15 +2,18 @@ package fr.dynamx.client.renders.scene;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
+import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.common.entities.ModularPhysicsEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.utils.client.ClientDynamXUtils;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.client.renderer.GlStateManager;
 import org.lwjgl.util.vector.Quaternion;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -34,11 +37,17 @@ public interface SceneGraph<T extends PhysicsEntity<?>, A extends IPhysicsPackIn
     void render(@Nullable T entity, EntityRenderContext context, A packInfo);
 
     /**
+     * @return The children of the scene graph (attached parts)
+     */
+    List<SceneGraph<T, A>> getLinkedChildren();
+
+    /**
      * A type of root node, corresponding to an entity
      *
      * @param <T> The type of the entity that is rendered
      * @param <A> The type of the pack info (the owner of the scene graph)
      */
+    @Getter
     @RequiredArgsConstructor
     class EntityNode<T extends PhysicsEntity<?>, A extends IPhysicsPackInfo> implements SceneGraph<T, A> {
         /**
@@ -49,12 +58,6 @@ public interface SceneGraph<T extends PhysicsEntity<?>, A extends IPhysicsPackIn
          * The children that are not linked to the entity (ie that will be rendered with the world transformations)
          */
         private final List<SceneGraph<T, A>> unlinkedChildren;
-
-        /* TODO EVENTS
-        if (!MinecraftForge.EVENT_BUS.post(new Render(VehicleEntityEvent.Render.Type.PARTS, this,carEntity, PhysicsEntityEvent.Phase.PRE, partialTicks, null))) {
-        }
-        MinecraftForge.EVENT_BUS.post(new Render(VehicleEntityEvent.Render.Type.PARTS, this,carEntity, PhysicsEntityEvent.Phase.POST, partialTicks, null));
-        */
 
         @Override
         public void render(@Nullable T entity, EntityRenderContext context, A packInfo) {
@@ -114,6 +117,7 @@ public interface SceneGraph<T extends PhysicsEntity<?>, A extends IPhysicsPackIn
         /**
          * The children of this node
          */
+        @Getter
         @Nullable
         protected final List<SceneGraph<T, A>> linkedChildren;
 
@@ -142,5 +146,74 @@ public interface SceneGraph<T extends PhysicsEntity<?>, A extends IPhysicsPackIn
                 linkedChildren.forEach(c -> c.render(entity, context, packInfo));
             }
         }
+    }
+
+    /**
+     * A node encapsulating another scene graph, that can be used to listen and cancel the rendering of the encapsulated scene graph
+     *
+     * @param <T> The type of the entity that is rendered
+     * @param <A> The type of the pack info (the owner of the scene graph)
+     */
+    @Getter
+    @RequiredArgsConstructor
+    class SceneContainer<T extends ModularPhysicsEntity<?>, A extends IPhysicsPackInfo> implements SceneGraph<T, A> {
+        /**
+         * The listener that will be called before and after the encapsulated scene graph is rendered
+         */
+        private final SceneRenderListener<T, A> listener;
+        /**
+         * The part that will be rendered (corresponding to the encapsulated scene graph)
+         */
+        private final IDrawablePart<T, A> part;
+        /**
+         * The encapsulated scene graph
+         */
+        private final SceneGraph<T, A> encapsulatedScene;
+
+        @Override
+        public void render(@Nullable T entity, EntityRenderContext context, A packInfo) {
+            if (listener.beforeRender(encapsulatedScene, part, entity, context, packInfo)) {
+                encapsulatedScene.render(entity, context, packInfo);
+                listener.afterRender(encapsulatedScene, part, entity, context, packInfo);
+            }
+        }
+
+        @Override
+        public List<SceneGraph<T, A>> getLinkedChildren() {
+            return Collections.singletonList(encapsulatedScene);
+        }
+    }
+
+    /**
+     * A scene listeners allows to listen and cancel when a scene graph is rendered
+     *
+     * @param <T> The type of the entity that is rendered
+     * @param <A> The type of the pack info (the owner of the scene graph)
+     */
+    interface SceneRenderListener<T extends ModularPhysicsEntity<?>, A extends IPhysicsPackInfo> {
+        /**
+         * Called before the scene graph is rendered <br>
+         * Return false to cancel the rendering
+         *
+         * @param renderedScene The scene graph that will be rendered (corresponding to the renderPart)
+         * @param renderPart    The part that will be rendered
+         * @param entity        The entity that is rendered, can be null if we are rendering a static scene graph (like in the inventory)
+         * @param context       The render context
+         * @param packInfo      The pack info of the entity (the owner of the scene graph)
+         * @return True to render the scene graph, false to cancel the rendering
+         */
+        boolean beforeRender(SceneGraph<T, A> renderedScene, IDrawablePart<T, A> renderPart, @Nullable T entity, EntityRenderContext context, A packInfo);
+
+        /**
+         * Called after the scene graph is rendered (and after the children are rendered) <br>
+         * Not called if the rendering was cancelled before
+         *
+         * @param renderedScene The scene graph that was rendered (corresponding to the renderPart)
+         * @param renderPart    The part that was rendered
+         * @param entity        The entity that is rendered, can be null if we are rendering a static scene graph (like in the inventory)
+         * @param context       The render context
+         * @param packInfo      The pack info of the entity (the owner of the scene graph)
+         */
+        void afterRender(SceneGraph<T, A> renderedScene, IDrawablePart<T, A> renderPart, @Nullable T entity, EntityRenderContext context, A packInfo);
     }
 }

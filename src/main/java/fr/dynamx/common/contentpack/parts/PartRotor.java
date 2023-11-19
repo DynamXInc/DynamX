@@ -9,12 +9,9 @@ import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
-import fr.dynamx.api.events.PhysicsEntityEvent;
-import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
 import fr.dynamx.client.renders.scene.EntityRenderContext;
 import fr.dynamx.client.renders.scene.SceneGraph;
-import fr.dynamx.client.renders.vehicle.RenderBaseVehicle;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
@@ -28,7 +25,6 @@ import fr.dynamx.utils.optimization.GlQuaternionPool;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -106,7 +102,7 @@ public class PartRotor extends BasePart<ModularVehicleInfo> implements IDrawable
         @Override
         public void render(@Nullable T entity, EntityRenderContext context, A packInfo) {
             DxModelRenderer vehicleModel = context.getModel();
-            if (!vehicleModel.containsObjectOrNode(getObjectName()) || MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.ROTOR, (RenderBaseVehicle<?>) context.getRender(), entity, PhysicsEntityEvent.Phase.PRE, context.getPartialTicks(), vehicleModel)))
+            if (!vehicleModel.containsObjectOrNode(getObjectName()))
                 return;
             GlStateManager.pushMatrix();
             transform();
@@ -138,7 +134,6 @@ public class PartRotor extends BasePart<ModularVehicleInfo> implements IDrawable
             //Render it
             vehicleModel.renderGroup(getObjectName(), context.getTextureId(), context.isUseVanillaRender());
             GlStateManager.popMatrix();
-            MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.ROTOR, (RenderBaseVehicle<?>) context.getRender(), entity, PhysicsEntityEvent.Phase.POST, context.getPartialTicks(), vehicleModel));
         }
     }
 }

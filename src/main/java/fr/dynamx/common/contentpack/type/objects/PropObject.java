@@ -13,6 +13,7 @@ import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.CreatePackItemEvent;
+import fr.dynamx.api.events.DynamXEntityRenderEvents;
 import fr.dynamx.client.renders.scene.SceneBuilder;
 import fr.dynamx.client.renders.scene.SceneGraph;
 import fr.dynamx.common.contentpack.ContentPackLoader;
@@ -231,9 +232,10 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
     @Override
     public SceneGraph<?, ?> getSceneGraph() {
         if (sceneGraph == null) {
-            if (isModelValid())
-                sceneGraph = new SceneBuilder<>().buildEntitySceneGraph(this, (List) drawableParts, getScaleModifier());
-            else
+            if (isModelValid()) {
+                DynamXEntityRenderEvents.BuildSceneGraph buildSceneGraphEvent = new DynamXEntityRenderEvents.BuildSceneGraph(new SceneBuilder<>(), this, drawableParts, getScaleModifier());
+                sceneGraph = buildSceneGraphEvent.getSceneGraphResult();
+            } else
                 sceneGraph = new SceneGraph.EntityNode<>(Collections.EMPTY_LIST, Collections.EMPTY_LIST);
         }
         return sceneGraph;

@@ -4,16 +4,13 @@ import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.entities.modules.IVehicleController;
 import fr.dynamx.client.gui.VehicleHud;
 import fr.dynamx.client.handlers.hud.CarController;
-import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
-import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
-import fr.dynamx.client.renders.vehicle.RenderBaseVehicle;
 import fr.dynamx.common.contentpack.parts.BasePartSeat;
 import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
-import fr.dynamx.common.entities.modules.engines.BasicEngineModule;
 import fr.dynamx.common.entities.modules.SeatsModule;
 import fr.dynamx.common.entities.modules.WheelsModule;
+import fr.dynamx.common.entities.modules.engines.BasicEngineModule;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.entity.Entity;
@@ -163,49 +160,6 @@ public class VehicleEntityEvent extends Event {
         public SaveToNBT(NBTTagCompound nbtTagCompound, BaseVehicleEntity<?> vehicleEntity) {
             super(vehicleEntity.world.isRemote ? Side.CLIENT : Side.SERVER, vehicleEntity);
             this.nbtTagCompound = nbtTagCompound;
-        }
-    }
-
-    /**
-     * Fired for each car entity render step, before and after the step, with pos and rotations transformations applied <br>
-     * Pre phase is cancellable <br>
-     * The debug render has not Pre phase
-     */
-    @Cancelable
-    public static class Render extends VehicleEntityEvent {
-        @Getter
-        private final RenderBaseVehicle<?> renderBaseVehicle;
-        @Getter
-        @Nullable
-        private final BaseVehicleEntity<?> carEntity;
-        @Getter
-        private final Type type;
-        @Getter
-        private final PhysicsEntityEvent.Phase eventPase;
-        @Getter
-        private final float partialTicks;
-        @Getter
-        private final DxModelRenderer objModelRenderer;
-
-        /**
-         * @param type              the type of the render
-         * @param renderBaseVehicle the class the render of the car
-         * @param carEntity         the rendered car, null if it's an item
-         * @param phase             the phase of the render (Post or Pre)
-         * @param partialTicks      the partial render ticks
-         */
-        public Render(Type type, RenderBaseVehicle<?> renderBaseVehicle, @Nullable BaseVehicleEntity<?> carEntity, PhysicsEntityEvent.Phase phase, float partialTicks, @Nullable DxModelRenderer objModelRenderer) {
-            super(Side.CLIENT, carEntity);
-            this.type = type;
-            this.renderBaseVehicle = renderBaseVehicle;
-            this.carEntity = carEntity;
-            this.eventPase = phase;
-            this.partialTicks = partialTicks;
-            this.objModelRenderer = objModelRenderer;
-        }
-
-        public enum Type {
-            CHASSIS, PROPULSION, PARTS, PARTICLES, LIGHTS, STEERING_WHEEL, ROTOR, HANDLE
         }
     }
 

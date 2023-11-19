@@ -4,6 +4,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.client.renders.model.ModelObjArmor;
+import fr.dynamx.client.renders.scene.EntityRenderContext;
 import fr.dynamx.common.entities.RagdollEntity;
 import fr.dynamx.common.items.DynamXItemArmor;
 import fr.dynamx.common.physics.entities.EnumRagdollBodyPart;
@@ -20,7 +21,11 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 
+import javax.annotation.Nullable;
+
 public class RenderRagdoll<T extends RagdollEntity> extends RenderPhysicsEntity<T> {
+    protected final EntityRenderContext context = new EntityRenderContext(this);
+
     private final ModelPlayer modelFat = new ModelPlayer(0, false);
     private final ModelPlayer modelLight = new ModelPlayer(0, true);
 
@@ -30,9 +35,16 @@ public class RenderRagdoll<T extends RagdollEntity> extends RenderPhysicsEntity<
     }
 
     @Override
-    public void renderEntity(T entity, double x, double y, double z, float partialTicks, boolean useVanillaRender) {
+    @Nullable
+    public EntityRenderContext getRenderContext(T entity) {
+        return context;
+    }
+
+    @Override
+    public void renderEntity(T entity, EntityRenderContext context) {
         if (entity.isInvisible())
             return;
+        float partialTicks = context.getPartialTicks();
         BoundingBoxPool.getPool().openSubPool();
 
         String useSkin = entity.getSkin();
@@ -51,9 +63,9 @@ public class RenderRagdoll<T extends RagdollEntity> extends RenderPhysicsEntity<
         bindTexture(texture);
 
         GlStateManager.pushMatrix();
-        GlStateManager.translate((float) x - (entity.prevPosX + (entity.posX - entity.prevPosX) * partialTicks),
-                (float) y - (entity.prevPosY + (entity.posY - entity.prevPosY) * partialTicks),
-                (float) z - (entity.prevPosZ + (entity.posZ - entity.prevPosZ) * partialTicks));
+        GlStateManager.translate((float) context.getX() - (entity.prevPosX + (entity.posX - entity.prevPosX) * partialTicks),
+                (float) context.getY() - (entity.prevPosY + (entity.posY - entity.prevPosY) * partialTicks),
+                (float) context.getZ() - (entity.prevPosZ + (entity.posZ - entity.prevPosZ) * partialTicks));
         // GlStateManager.disableLighting();
 
         //Chest

@@ -8,18 +8,33 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 /**
- * The context of a render call of {@link SceneGraph#render(PhysicsEntity, EntityRenderContext, IPhysicsPackInfo)}
+ * The context of a render call of {@link SceneGraph#render(PhysicsEntity, EntityRenderContext, IPhysicsPackInfo)} <br>
+ * Reused to avoid creating a new object each time.
  */
 @Getter
 @RequiredArgsConstructor
 public class EntityRenderContext {
-    //TODO CONTEXT FOR ON-GUI AND IN-HAND RENDER
     private final RenderPhysicsEntity<?> render;
-    private final DxModelRenderer model;
-    private final byte textureId;
-    private final double x;
-    private final double y;
-    private final double z;
-    private final float partialTicks;
-    private final boolean useVanillaRender;
+    private DxModelRenderer model;
+    private byte textureId;
+    private double x;
+    private double y;
+    private double z;
+    private float partialTicks;
+    private boolean useVanillaRender;
+
+    public EntityRenderContext setEntityParams(DxModelRenderer model, byte textureId) {
+        this.model = model;
+        this.textureId = textureId;
+        return this;
+    }
+
+    public EntityRenderContext setRenderParams(double x, double y, double z, float partialTicks, boolean useVanillaRender) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.partialTicks = partialTicks;
+        this.useVanillaRender = useVanillaRender;
+        return this;
+    }
 }

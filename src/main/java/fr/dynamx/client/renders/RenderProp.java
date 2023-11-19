@@ -12,7 +12,11 @@ import fr.dynamx.utils.debug.renderer.DebugRenderer;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraftforge.common.MinecraftForge;
 
+import javax.annotation.Nullable;
+
 public class RenderProp<T extends PropsEntity<?>> extends RenderPhysicsEntity<T> {
+    protected final EntityRenderContext context = new EntityRenderContext(this);
+
     public RenderProp(RenderManager manager) {
         super(manager);
         addDebugRenderers(new BoatDebugRenderer.FloatsDebug(), new DebugRenderer.SeatDebug());
@@ -20,17 +24,20 @@ public class RenderProp<T extends PropsEntity<?>> extends RenderPhysicsEntity<T>
     }
 
     @Override
-    public void renderEntity(T entity, double x, double y, double z, float partialTicks, boolean useVanillaRender) {
+    @Nullable
+    public EntityRenderContext getRenderContext(T entity) {
         if (entity.getPackInfo() == null) {
-            renderOffsetAABB(entity.getEntityBoundingBox(), x - entity.lastTickPosX, y - entity.lastTickPosY, z - entity.lastTickPosZ);
-            return;
+            return null;
         }
         DxModelRenderer modelRenderer = DynamXContext.getDxModelRegistry().getModel(entity.getPackInfo().getModel());
         if (modelRenderer == null) {
-            renderOffsetAABB(entity.getEntityBoundingBox(), x - entity.lastTickPosX, y - entity.lastTickPosY, z - entity.lastTickPosZ);
-            return;
+            return null;
         }
-        EntityRenderContext context = new EntityRenderContext(this, modelRenderer, entity.getEntityTextureID(), x, y, z, partialTicks, useVanillaRender);
+        return context.setEntityParams(modelRenderer, entity.getEntityTextureID());
+    }
+
+    @Override
+    public void renderEntity(T entity, EntityRenderContext context) {
         ((SceneGraph<T, PropObject<?>>) entity.getPackInfo().getSceneGraph()).render(entity, context, entity.getPackInfo());
     }
 }

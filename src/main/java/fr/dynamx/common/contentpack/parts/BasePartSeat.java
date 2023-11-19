@@ -132,11 +132,6 @@ public abstract class BasePartSeat<A extends Entity, T extends ISubInfoTypeOwner
     }
 
     @Override
-    public String[] getRenderedParts() {
-        return new String[0];
-    }
-
-    @Override
     public String getObjectName() {
         return null;
     }
@@ -148,9 +143,6 @@ public abstract class BasePartSeat<A extends Entity, T extends ISubInfoTypeOwner
 
         @Override
         public void render(@Nullable T entity, EntityRenderContext context, A packInfo) {
-            /*if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.RIDDING_PLAYERS, x, y, z, partialTicks, renderPass))) {
-
-            }*/
             if (MinecraftForgeClient.getRenderPass() != 0 || !(entity instanceof IModuleContainer.ISeatsContainer))
                 return;
             SeatsModule seats = ((IModuleContainer.ISeatsContainer) entity).getSeats();

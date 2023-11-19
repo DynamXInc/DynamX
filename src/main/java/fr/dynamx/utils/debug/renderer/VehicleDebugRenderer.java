@@ -7,6 +7,7 @@ import fr.dynamx.api.network.sync.SimulationHolder;
 import fr.dynamx.api.physics.IRotatedCollisionHandler;
 import fr.dynamx.client.network.ClientPhysicsEntitySynchronizer;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
+import fr.dynamx.client.renders.scene.EntityRenderContext;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.parts.PartDoor;
 import fr.dynamx.common.contentpack.parts.PartPropsContainer;
@@ -406,7 +407,9 @@ public class VehicleDebugRenderer {
                 Vector3f serverPos = ((ClientPhysicsEntitySynchronizer)entity.getSynchronizer()).getServerPos();
                 if(serverPos != null) {
                     GlStateManager.color(entity.getSynchronizer().getSimulationHolder() == SimulationHolder.DRIVER ? 0.9f : 0.1f, 0.1f, 0.8f, 0.3f);
-                    renderer.renderEntity(entity, - pos.x + serverPos.x, - pos.y + serverPos.y, - pos.z + serverPos.z, partialTicks, true);
+                    EntityRenderContext context = renderer.getRenderContext(entity);
+                    if(context != null)
+                        renderer.renderEntity(entity, context.setRenderParams(- pos.x + serverPos.x, - pos.y + serverPos.y, - pos.z + serverPos.z, partialTicks, true));
                     GlStateManager.color(1, 1, 1, 1);
                 }
             }

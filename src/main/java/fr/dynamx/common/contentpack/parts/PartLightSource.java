@@ -99,9 +99,9 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
     @Override
     public void addToSceneGraph(IPhysicsPackInfo packInfo, SceneBuilder<PackPhysicsEntity<?, ?>, IPhysicsPackInfo> sceneBuilder) {
         if (nodeDependingOnName != null) {
-            sceneBuilder.addNode(this, nodeDependingOnName, getNodeName());
+            sceneBuilder.addNode(packInfo, this, nodeDependingOnName);
         } else {
-            sceneBuilder.addNode(this, getNodeName());
+            sceneBuilder.addNode(packInfo, this);
         }
     }
 
@@ -178,9 +178,6 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
         @Override
         public void render(@Nullable T entity, EntityRenderContext context, A packInfo) {
             /* Rendering light sources */
-            /*if (MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.LIGHTS, (RenderBaseVehicle<?>) render, entity, PhysicsEntityEvent.Phase.PRE, partialTicks, null))) {
-                return;
-            }*/
             AbstractLightsModule lights = entity != null ? entity.getModuleByType(AbstractLightsModule.class) : null;
             GlStateManager.pushMatrix();
             transform();
@@ -242,10 +239,8 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
                 OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float) j, (float) k);
                 GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             }
-            //}
             renderChildren(entity, context, packInfo);
             GlStateManager.popMatrix();
-            //MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.LIGHTS, (RenderBaseVehicle<?>) render, entity, PhysicsEntityEvent.Phase.POST, partialTicks, null));
         }
     }
 }

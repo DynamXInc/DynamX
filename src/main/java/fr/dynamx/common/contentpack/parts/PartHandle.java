@@ -7,12 +7,8 @@ import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
-import fr.dynamx.api.events.PhysicsEntityEvent;
-import fr.dynamx.api.events.VehicleEntityEvent;
-import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
 import fr.dynamx.client.renders.scene.EntityRenderContext;
 import fr.dynamx.client.renders.scene.SceneGraph;
-import fr.dynamx.client.renders.vehicle.RenderBaseVehicle;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.engines.HelicopterEngineModule;
@@ -21,7 +17,6 @@ import fr.dynamx.utils.debug.DynamXDebugOptions;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -72,8 +67,7 @@ public class PartHandle extends BasePart<ModularVehicleInfo> implements IDrawabl
 
         @Override
         public void render(@Nullable T entity, EntityRenderContext context, A packInfo) {
-            DxModelRenderer vehicleModel = context.getModel();
-            if (!vehicleModel.containsObjectOrNode(getObjectName()) || MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.HANDLE, (RenderBaseVehicle<?>) context.getRender(), entity, PhysicsEntityEvent.Phase.PRE, context.getPartialTicks(), vehicleModel)))
+            if (!context.getModel().containsObjectOrNode(getObjectName()))
                 return;
             GlStateManager.pushMatrix();
             transform();
@@ -85,10 +79,9 @@ public class PartHandle extends BasePart<ModularVehicleInfo> implements IDrawabl
                 GlStateManager.rotate(dx, 0, 0, dx > 0 ? 0.5f : -0.5f);
                 GlStateManager.rotate(dy, dy > 0 ? 0.5f : -0.5f, 0, 0);
             }
-            vehicleModel.renderGroup(getObjectName(), context.getTextureId(), context.isUseVanillaRender());
+            context.getModel().renderGroup(getObjectName(), context.getTextureId(), context.isUseVanillaRender());
             renderChildren(entity, context, packInfo);
             GlStateManager.popMatrix();
-            MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.HANDLE, (RenderBaseVehicle<?>) context.getRender(), entity, PhysicsEntityEvent.Phase.POST, context.getPartialTicks(), vehicleModel));
         }
     }
 }

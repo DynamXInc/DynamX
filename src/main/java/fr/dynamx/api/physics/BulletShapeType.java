@@ -1,16 +1,13 @@
 package fr.dynamx.api.physics;
 
-import com.jme3.bullet.CollisionSpace;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
-import com.jme3.bullet.util.DebugShapeFactory;
 import com.jme3.math.Vector3f;
 import fr.dynamx.utils.physics.ShapeUtils;
 import lombok.Getter;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 
 import java.nio.FloatBuffer;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -44,7 +41,8 @@ public class BulletShapeType<T> {
         this.type = type;
         this.objectIn = objectIn;
         //Check client side
-        if (FMLCommonHandler.instance().getSide().isClient()) {
+        //Fix: don't generate debug triangles for terrain, it isn't used and VERY slow
+        if (FMLCommonHandler.instance().getSide().isClient() && !type.isTerrain()) {
             generateDebugTriangles(space);
         }
     }

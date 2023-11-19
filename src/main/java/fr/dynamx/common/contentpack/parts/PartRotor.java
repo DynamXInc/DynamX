@@ -25,6 +25,7 @@ import fr.dynamx.utils.optimization.GlQuaternionPool;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderGlobal;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -36,7 +37,7 @@ public class PartRotor extends BasePart<ModularVehicleInfo> implements IDrawable
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = {SubInfoTypeRegistries.BOATS, SubInfoTypeRegistries.HELICOPTER})
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("PartName".equals(key))
-            return new IPackFilePropertyFixer.FixResult("ObjectName", true);
+            return new IPackFilePropertyFixer.FixResult("ObjectName", false);
         return null;
     };
 
@@ -134,6 +135,18 @@ public class PartRotor extends BasePart<ModularVehicleInfo> implements IDrawable
             //Render it
             vehicleModel.renderGroup(getObjectName(), context.getTextureId(), context.isUseVanillaRender());
             GlStateManager.popMatrix();
+        }
+
+        @Override
+        public void renderDebug(@Nullable T entity, EntityRenderContext context, A packInfo) {
+            if (DynamXDebugOptions.ROTORS.isActive()) {
+                GlStateManager.pushMatrix();
+                transformForDebug();
+                RenderGlobal.drawBoundingBox(-0.5, -0.5, -0.5, 0.5, 0.5, 0.5,
+                        204F / 255, 123F / 255, 0, 1);
+                GlStateManager.popMatrix();
+            }
+            super.renderDebug(entity, context, packInfo);
         }
     }
 }

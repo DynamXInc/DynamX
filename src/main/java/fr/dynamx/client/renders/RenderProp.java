@@ -19,7 +19,7 @@ public class RenderProp<T extends PropsEntity<?>> extends RenderPhysicsEntity<T>
 
     public RenderProp(RenderManager manager) {
         super(manager);
-        addDebugRenderers(new BoatDebugRenderer.FloatsDebug(), new DebugRenderer.SeatDebug());
+        addDebugRenderers(new BoatDebugRenderer.FloatsDebug(), new DebugRenderer.StoragesDebug());
         MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.InitRenderer<>(PropsEntity.class, this));
     }
 
@@ -39,5 +39,10 @@ public class RenderProp<T extends PropsEntity<?>> extends RenderPhysicsEntity<T>
     @Override
     public void renderEntity(T entity, EntityRenderContext context) {
         ((SceneGraph<T, PropObject<?>>) entity.getPackInfo().getSceneGraph()).render(entity, context, entity.getPackInfo());
+    }
+
+    @Override
+    public void renderEntityDebug(T entity, EntityRenderContext context) {
+        ((SceneGraph<T, PropObject<?>>) entity.getPackInfo().getSceneGraph()).renderDebug(entity, context, entity.getPackInfo());
     }
 }

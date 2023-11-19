@@ -26,6 +26,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.AxisAlignedBB;
 
@@ -128,7 +129,7 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
 
     @Override
     public SceneGraph<BaseVehicleEntity<?>, ModularVehicleInfo> createSceneGraph(Vector3f modelScale, List<SceneGraph<BaseVehicleEntity<?>, ModularVehicleInfo>> childGraph) {
-        return new PartWheelNode<>(modelScale, childGraph);
+        return new PartWheelNode<>(this, modelScale, childGraph);
     }
 
     @Override
@@ -145,8 +146,8 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
     }
 
     class PartWheelNode<T extends BaseVehicleEntity<?>, A extends ModularVehicleInfo> extends SceneGraph.Node<T, A> {
-        public PartWheelNode(Vector3f scale, List<SceneGraph<T, A>> linkedChilds) {
-            super(null, null, scale, linkedChilds);
+        public PartWheelNode(PartWheel wheel, Vector3f scale, List<SceneGraph<T, A>> linkedChilds) {
+            super(wheel.getPosition(), null, scale, linkedChilds);
         }
 
         @Override
@@ -226,6 +227,19 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
             }
             renderChildren(entity, context, packInfo);
             GlStateManager.popMatrix();
+        }
+
+        @Override
+        public void renderDebug(@Nullable T entity, EntityRenderContext context, A packInfo) {
+            if (DynamXDebugOptions.WHEELS.isActive()) {
+                GlStateManager.pushMatrix();
+                transformForDebug();
+                AxisAlignedBB box = getBox();
+                RenderGlobal.drawBoundingBox(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ,
+                        isDrivingWheel() ? 0 : 1, isDrivingWheel() ? 1 : 0, 0, 1);
+                GlStateManager.popMatrix();
+            }
+            super.renderDebug(entity, context, packInfo);
         }
     }
 }

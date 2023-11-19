@@ -59,6 +59,11 @@ public class RenderBaseVehicle<T extends BaseVehicleEntity<?>> extends RenderPhy
         ((SceneGraph<T, ModularVehicleInfo>) entity.getPackInfo().getSceneGraph()).render(entity, context, entity.getPackInfo());
     }
 
+    @Override
+    public void renderEntityDebug(T entity, EntityRenderContext context) {
+        ((SceneGraph<T, ModularVehicleInfo>) entity.getPackInfo().getSceneGraph()).renderDebug(entity, context, entity.getPackInfo());
+    }
+
     /**
      * Renders the entity with the given texture id
      *

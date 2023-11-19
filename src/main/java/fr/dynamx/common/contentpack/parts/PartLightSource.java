@@ -34,7 +34,7 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER})
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("PartName".equals(key))
-            return new IPackFilePropertyFixer.FixResult("ObjectName", true);
+            return new IPackFilePropertyFixer.FixResult("ObjectName", false);
         return null;
     };
 

@@ -176,4 +176,8 @@ public class RenderRagdoll<T extends RagdollEntity> extends RenderPhysicsEntity<
 
         GlStateManager.popMatrix();
     }
+
+    @Override
+    public void renderEntityDebug(T entity, EntityRenderContext context) {
+    }
 }

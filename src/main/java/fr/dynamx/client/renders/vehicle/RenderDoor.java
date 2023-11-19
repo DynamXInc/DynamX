@@ -5,9 +5,10 @@ import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
 import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
 import fr.dynamx.client.renders.scene.EntityRenderContext;
+import fr.dynamx.client.renders.scene.SceneGraph;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.contentpack.parts.PartDoor;
 import fr.dynamx.common.entities.vehicles.DoorEntity;
-import fr.dynamx.utils.debug.renderer.VehicleDebugRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraftforge.common.MinecraftForge;
@@ -19,7 +20,6 @@ public class RenderDoor<T extends DoorEntity<?>> extends RenderPhysicsEntity<T> 
 
     public RenderDoor(RenderManager manager) {
         super(manager);
-        addDebugRenderers(new VehicleDebugRenderer.DoorPointsDebug());
         MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.InitRenderer<>(DoorEntity.class, this));
     }
 
@@ -45,5 +45,10 @@ public class RenderDoor<T extends DoorEntity<?>> extends RenderPhysicsEntity<T> 
         GlStateManager.scale(scale.x, scale.y, scale.z);
         renderModelGroup(context.getModel(), entity.getPackInfo().getObjectName(), entity, context.getTextureId(), false);
         GlStateManager.popMatrix();
+    }
+
+    @Override
+    public void renderEntityDebug(T entity, EntityRenderContext context) {
+        ((SceneGraph<T, PartDoor>) entity.getPackInfo().getSceneGraph()).renderDebug(entity, context, entity.getPackInfo());
     }
 }

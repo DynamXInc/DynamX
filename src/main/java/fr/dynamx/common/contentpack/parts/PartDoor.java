@@ -34,6 +34,7 @@ import fr.dynamx.utils.physics.DynamXPhysicsHelper;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -61,7 +62,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
         if ("CloseMotor".equals(key))
             return new IPackFilePropertyFixer.FixResult("DoorCloseForce", true);
         if ("PartName".equals(key))
-            return new IPackFilePropertyFixer.FixResult("ObjectName", true);
+            return new IPackFilePropertyFixer.FixResult("ObjectName", false);
         return null;
     };
     @Getter
@@ -334,6 +335,36 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
             context.getRender().renderModelGroup(context.getModel(), getObjectName(), entity, context.getTextureId(), false);
             renderChildren(entity, context, packInfo);
             GlStateManager.popMatrix();
+        }
+
+
+        @Override
+        public void renderDebug(@Nullable T entity, EntityRenderContext context, A packInfo) {
+            if (DynamXDebugOptions.DOOR_ATTACH_POINTS.isActive()) {
+                //if (entity instanceof BaseVehicleEntity) {
+                GlStateManager.pushMatrix();
+                GlStateManager.rotate(ClientDynamXUtils.computeInterpolatedGlQuaternion(entity.prevRenderRotation, entity.renderRotation, context.getPartialTicks()));
+                Vector3f point = getCarAttachPoint();
+                RenderGlobal.drawBoundingBox(point.x - 0, point.y - 0.05f,
+                        point.z - 0.05f, point.x + 0.05f, point.y + 0.05f, point.z + 0.05f,
+                        1f, 1, 1, 1);
+                transformForDebug();
+                MutableBoundingBox box = new MutableBoundingBox();//collisionsHelper.getShapes().get(0).getBoundingBox();//getBox();
+                getBox(box);
+                //box = DynamXContext.getCollisionHandler().rotateBB(Vector3fPool.get(), box, entity.physicsRotation);
+                RenderGlobal.drawBoundingBox(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ,
+                        0, 0, 1, 1);
+                GlStateManager.popMatrix();
+                /*} else if (entity instanceof DoorEntity) {
+                    if (((DoorEntity<?>) entity).getPackInfo() != null) {
+                        point = ((DoorEntity<?>) entity).getPackInfo().getDoorAttachPoint();
+                    }
+                    RenderGlobal.drawBoundingBox(point.x - 0, point.y - 0.05f,
+                            point.z - 0.05f, point.x + 0.05f, point.y + 0.05f, point.z + 0.05f,
+                            0.5f, 0, 1, 1);
+                }*/
+            }
+            super.renderDebug(entity, context, packInfo);
         }
     }
 }

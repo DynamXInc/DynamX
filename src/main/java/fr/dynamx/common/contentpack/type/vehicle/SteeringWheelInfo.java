@@ -11,10 +11,12 @@ import fr.dynamx.client.renders.scene.EntityRenderContext;
 import fr.dynamx.client.renders.scene.SceneGraph;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.WheelsModule;
+import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderGlobal;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -29,7 +31,7 @@ public class SteeringWheelInfo extends SubInfoType<ModularVehicleInfo> implement
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("PartName".equals(key))
-            return new IPackFilePropertyFixer.FixResult("ObjectName", true);
+            return new IPackFilePropertyFixer.FixResult("ObjectName", false);
         return null;
     };
 
@@ -87,6 +89,19 @@ public class SteeringWheelInfo extends SubInfoType<ModularVehicleInfo> implement
             vehicleModel.renderGroup(getObjectName(), context.getTextureId(), context.isUseVanillaRender());
             renderChildren(entity, context, packInfo);
             GlStateManager.popMatrix();
+        }
+
+        @Override
+        public void renderDebug(@Nullable T entity, EntityRenderContext context, A packInfo) {
+            if (DynamXDebugOptions.WHEELS.isActive()) {
+                /* Rendering the steering wheel debug */
+                GlStateManager.pushMatrix();
+                transformForDebug();
+                RenderGlobal.drawBoundingBox(-0.25f, -0.25f, -0.1f, 0.25f, 0.25f, 0.1f,
+                        0.5f, 1, 0.5f, 1);
+                GlStateManager.popMatrix();
+            }
+            super.renderDebug(entity, context, packInfo);
         }
     }
 }

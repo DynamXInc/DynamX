@@ -149,12 +149,14 @@ public class PhysicsEntityEvent extends Event {
     /**
      * Called when the renderer on an entity is created <br>
      * You can add debug renderers for your addon, depending on the type of the entity <br>
-     * You can select for which entities you want to receive this event, supported generic types are "{@link fr.dynamx.common.entities.BaseVehicleEntity}", "{@link fr.dynamx.common.entities.PropsEntity}", "{@link fr.dynamx.common.entities.RagdollEntity}" and "{@link fr.dynamx.common.entities.vehicles.DoorEntity}"
+     * You can select for which entities you want to receive this event, supported generic types are "{@link fr.dynamx.common.entities.BaseVehicleEntity}", "{@link fr.dynamx.common.entities.PropsEntity}", "{@link fr.dynamx.common.entities.RagdollEntity}" and "{@link fr.dynamx.common.entities.vehicles.DoorEntity}" <br>
+     * <strong>Note:</strong> don't add parameters to PhysicsEntity : this would break the event on the fml side.
      *
      * @see DebugRenderer
      * @see RenderPhysicsEntity
+     * @deprecated The debug should be rendered using the new {@link fr.dynamx.client.renders.scene.SceneGraph}s system
      */
-    //Note : don't add parameters to PhysicsEntity : this would break the event on the fml side
+    @Deprecated
     public static class InitRenderer<T extends PhysicsEntity> extends GenericEvent<T> {
         /**
          * The renderer for this type of entity
@@ -169,7 +171,10 @@ public class PhysicsEntityEvent extends Event {
 
         /**
          * Adds the debug renders to the list of the entity renderer
+         *
+         * @deprecated The debug should be rendered using the new {@link fr.dynamx.client.renders.scene.SceneGraph}s system
          */
+        @Deprecated
         public void addDebugRenderers(DebugRenderer<?>... renderers) {
             this.renderer.addDebugRenderers(renderers);
         }

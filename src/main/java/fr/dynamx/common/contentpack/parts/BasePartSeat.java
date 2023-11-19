@@ -26,8 +26,10 @@ import lombok.experimental.Accessors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.client.MinecraftForgeClient;
 
 import javax.annotation.Nullable;
@@ -179,6 +181,20 @@ public abstract class BasePartSeat<A extends Entity, T extends ISubInfoTypeOwner
                 GlStateManager.popMatrix();
             }
             ClientEventHandler.renderingEntity = null;
+        }
+
+
+        @Override
+        public void renderDebug(@Nullable T entity, EntityRenderContext context, A packInfo) {
+            if (DynamXDebugOptions.SEATS_AND_STORAGE.isActive()) {
+                GlStateManager.pushMatrix();
+                transformForDebug();
+                AxisAlignedBB box = getBox();
+                RenderGlobal.drawBoundingBox(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ,
+                        isDriver() ? 0 : 1, isDriver() ? 1 : 0, 0, 1);
+                GlStateManager.popMatrix();
+            }
+            super.renderDebug(entity, context, packInfo);
         }
     }
 

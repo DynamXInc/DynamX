@@ -33,7 +33,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
 
     public RenderPhysicsEntity(RenderManager manager) {
         super(manager);
-        addDebugRenderers(new DebugRenderer.ShapesDebug(), new DebugRenderer.CenterOfMassDebug());
+        addDebugRenderers(new DebugRenderer.ShapesDebug());
     }
 
     /**
@@ -56,7 +56,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
         GlQuaternionPool.openPool();
         int renderPass = MinecraftForgeClient.getRenderPass();
         EntityRenderContext context = getRenderContext(entity);
-        if(context == null) {
+        if (context == null) {
             renderOffsetAABB(entity.getEntityBoundingBox(), x - entity.lastTickPosX, y - entity.lastTickPosY, z - entity.lastTickPosZ);
             return;
         }
@@ -69,7 +69,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
             spawnParticles(entity, context);
             //Render debug
             if (!MinecraftForge.EVENT_BUS.post(new DynamXEntityRenderEvents.Render(entity, context, DynamXEntityRenderEvents.Render.Type.DEBUG, renderPass))) {
-                renderDebug(entity, x, y, z, partialTicks);
+                renderDebug(entity, context);
             }
         }
         MinecraftForge.EVENT_BUS.post(new DynamXEntityRenderEvents.Render(entity, context, DynamXEntityRenderEvents.Render.Type.POST, renderPass));
@@ -100,7 +100,10 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
 
     /**
      * Adds the debug renders to the list
+     *
+     * @deprecated The debug should be rendered using the new {@link fr.dynamx.client.renders.scene.SceneGraph}s system
      */
+    @Deprecated
     @SuppressWarnings("unchecked")
     public void addDebugRenderers(DebugRenderer<?>... renderers) {
         for (DebugRenderer<?> renderer : renderers) {
@@ -112,6 +115,11 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
      * Renders the entity in the world
      */
     public abstract void renderEntity(T entity, EntityRenderContext context);
+
+    /**
+     * Renders the entity debug in the world
+     */
+    public abstract void renderEntityDebug(T entity, EntityRenderContext context);
 
     /**
      * Should return an EntityRenderContext with the entity parameters set <br>
@@ -127,47 +135,49 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
 
     /**
      * Renders active {@link DebugRenderer}s <br>
-     * Shouldn't be overridden : use {@link DebugRenderer}s to render your debug <br>
+     * Shouldn't be overridden : use {@link RenderPhysicsEntity#renderEntityDebug(PhysicsEntity, EntityRenderContext)} to render your debug <br>
      * Can be cancelled via the dedicated event
      */
-    public final void renderDebug(T entity, double x, double y, double z, float partialTicks) {
+    public final void renderDebug(T entity, EntityRenderContext context) {
         if (ClientDebugSystem.enableDebugDrawing) {
             List<DebugRenderer<T>> validRotatedRenders = debugRenderers.stream().filter(r -> r.shouldRender(entity) && r.hasEntityRotation(entity)).collect(Collectors.toList());
             List<DebugRenderer<T>> validPureRenders = debugRenderers.stream().filter(r -> r.shouldRender(entity) && !r.hasEntityRotation(entity)).collect(Collectors.toList());
-            if (!validRotatedRenders.isEmpty() || !validPureRenders.isEmpty()) {
-                QuaternionPool.openPool();
-                Vector3fPool.openPool();
+            QuaternionPool.openPool();
+            Vector3fPool.openPool();
+
+            GlStateManager.pushMatrix();
+            {
+                GlStateManager.disableLighting();
+                GlStateManager.disableDepth();
+                GlStateManager.disableTexture2D();
+
+                renderEntityDebug(entity, context);
+
+                double x = context.getX(), y = context.getY(), z = context.getZ();
+                float partialTicks = context.getPartialTicks();
+                GlStateManager.translate((float) x, (float) y, (float) z);
 
                 GlStateManager.pushMatrix();
                 {
-                    GlStateManager.disableLighting();
-                    GlStateManager.disableDepth();
-                    GlStateManager.disableTexture2D();
-
-                    GlStateManager.translate((float) x, (float) y, (float) z);
-
-                    GlStateManager.pushMatrix();
-                    {
-                        Quaternion rotQuat = ClientDynamXUtils.computeInterpolatedGlQuaternion(
-                                entity.prevRenderRotation,
-                                entity.renderRotation,
-                                partialTicks);
-                        GlStateManager.rotate(rotQuat);
-                        validRotatedRenders.forEach(renderer -> renderer.render(entity, this, x, y, z, partialTicks));
-                    }
-                    GlStateManager.popMatrix();
-
-                    validPureRenders.forEach(renderer -> renderer.render(entity, this, x, y, z, partialTicks));
-
-                    GlStateManager.enableLighting();
-                    GlStateManager.enableTexture2D();
-                    GlStateManager.enableDepth();
+                    Quaternion rotQuat = ClientDynamXUtils.computeInterpolatedGlQuaternion(
+                            entity.prevRenderRotation,
+                            entity.renderRotation,
+                            partialTicks);
+                    GlStateManager.rotate(rotQuat);
+                    validRotatedRenders.forEach(renderer -> renderer.render(entity, this, x, y, z, partialTicks));
                 }
                 GlStateManager.popMatrix();
 
-                Vector3fPool.closePool();
-                QuaternionPool.closePool();
+                validPureRenders.forEach(renderer -> renderer.render(entity, this, x, y, z, partialTicks));
+
+                GlStateManager.enableLighting();
+                GlStateManager.enableTexture2D();
+                GlStateManager.enableDepth();
             }
+            GlStateManager.popMatrix();
+
+            Vector3fPool.closePool();
+            QuaternionPool.closePool();
         }
     }
 

@@ -23,7 +23,7 @@ public class SimplePartLightSource extends LightObject implements ISubInfoType<I
         if ("ShapePosition".equals(key))
             return new IPackFilePropertyFixer.FixResult("Position", true);
         if (key.equals("PartName"))
-            return new IPackFilePropertyFixer.FixResult("ObjectName", true);
+            return new IPackFilePropertyFixer.FixResult("ObjectName", false);
         return null;
     };
 

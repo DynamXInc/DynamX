@@ -4,11 +4,14 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
 import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.common.entities.ModularPhysicsEntity;
+import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.utils.client.ClientDynamXUtils;
+import fr.dynamx.utils.debug.DynamXDebugOptions;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderGlobal;
 import org.lwjgl.util.vector.Quaternion;
 
 import javax.annotation.Nonnull;
@@ -35,6 +38,8 @@ public interface SceneGraph<T extends PhysicsEntity<?>, A extends IPhysicsPackIn
      * @param packInfo The pack info of the entity (the owner of the scene graph)
      */
     void render(@Nullable T entity, EntityRenderContext context, A packInfo);
+
+    void renderDebug(@Nullable T entity, EntityRenderContext context, A packInfo);
 
     /**
      * @return The children of the scene graph (attached parts)
@@ -88,6 +93,30 @@ public interface SceneGraph<T extends PhysicsEntity<?>, A extends IPhysicsPackIn
                 GlStateManager.popMatrix();
             }
         }
+
+        @Override
+        public void renderDebug(@Nullable T entity, EntityRenderContext context, A packInfo) {
+            GlStateManager.pushMatrix();
+            GlStateManager.translate(context.getX(), context.getY(), context.getZ());
+            GlStateManager.pushMatrix();
+            {
+                Quaternion rotQuat = ClientDynamXUtils.computeInterpolatedGlQuaternion(
+                        entity.prevRenderRotation,
+                        entity.renderRotation,
+                        context.getPartialTicks());
+                GlStateManager.rotate(rotQuat);
+                if (DynamXDebugOptions.CENTER_OF_MASS.isActive()) {
+                    RenderGlobal.drawBoundingBox(-((PackPhysicsEntity<?, ?>) entity).getPackInfo().getCenterOfMass().x - 0.05f, -((PackPhysicsEntity<?, ?>) entity).getPackInfo().getCenterOfMass().y - 0.05f,
+                            -((PackPhysicsEntity<?, ?>) entity).getPackInfo().getCenterOfMass().z - 0.05f, -((PackPhysicsEntity<?, ?>) entity).getPackInfo().getCenterOfMass().x + 0.05f,
+                            -((PackPhysicsEntity<?, ?>) entity).getPackInfo().getCenterOfMass().y + 0.05f, -((PackPhysicsEntity<?, ?>) entity).getPackInfo().getCenterOfMass().z + 0.05f,
+                            1, 0, 1, 1);
+                }
+                linkedChildren.forEach(c -> c.renderDebug(entity, context, packInfo));
+            }
+            GlStateManager.popMatrix();
+            unlinkedChildren.forEach(c -> c.renderDebug(entity, context, packInfo));
+            GlStateManager.popMatrix();
+        }
     }
 
     /**
@@ -133,6 +162,16 @@ public interface SceneGraph<T extends PhysicsEntity<?>, A extends IPhysicsPackIn
         }
 
         /**
+         * Applies the transformations of this node without the scale
+         */
+        protected void transformForDebug() {
+            if (translation != null)
+                GlStateManager.translate(translation.x, translation.y, translation.z);
+            if (rotation != null)
+                GlStateManager.rotate(rotation);
+        }
+
+        /**
          * Renders the children of this node (if any). <br>
          * This doesn't render the node itself, only the children. This should be called after the node transformations.
          *
@@ -144,6 +183,13 @@ public interface SceneGraph<T extends PhysicsEntity<?>, A extends IPhysicsPackIn
             if (linkedChildren != null) {
                 GlStateManager.scale(1 / scale.x, 1 / scale.y, 1 / scale.z);
                 linkedChildren.forEach(c -> c.render(entity, context, packInfo));
+            }
+        }
+
+        @Override
+        public void renderDebug(@Nullable T entity, EntityRenderContext context, A packInfo) {
+            if (linkedChildren != null) {
+                linkedChildren.forEach(c -> c.renderDebug(entity, context, packInfo));
             }
         }
     }
@@ -176,6 +222,11 @@ public interface SceneGraph<T extends PhysicsEntity<?>, A extends IPhysicsPackIn
                 encapsulatedScene.render(entity, context, packInfo);
                 listener.afterRender(encapsulatedScene, part, entity, context, packInfo);
             }
+        }
+
+        @Override
+        public void renderDebug(@Nullable T entity, EntityRenderContext context, A packInfo) {
+
         }
 
         @Override

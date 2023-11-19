@@ -5,8 +5,10 @@ import fr.dynamx.api.network.IDnxPacket;
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
+import fr.dynamx.common.physics.terrain.chunk.ChunkLoadingTicket;
 import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.VerticalChunkPos;
+import fr.dynamx.utils.debug.ChunkGraph;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
@@ -63,13 +65,18 @@ public class MessageUpdateChunk implements IDnxPacket, IMessageHandler<MessageUp
 
     @Override
     public void handleUDPReceive(EntityPlayer context, Side side) {
-        if(context == null)
+        if (context == null)
             return; // World is unloaded
         IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(context.world);
         if (physicsWorld != null && DynamXMain.proxy.shouldUseBulletSimulation(context.world)) {
             physicsWorld.schedule(() -> {
                 Vector3fPool.openPool();
                 for (VerticalChunkPos pos : chunksToUpdate) {
+                    if (DynamXConfig.enableDebugTerrainManager) {
+                        ChunkLoadingTicket ticket = physicsWorld.getTerrainManager().getTicket(pos);
+                        if (ticket != null)
+                            ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.CHK_UPDATE, ChunkGraph.ActionLocation.UNKNOWN, ticket.getCollisions(), "Chunk changed from handleUDPReceive. Ticket " + ticket);
+                    }
                     physicsWorld.getTerrainManager().onChunkChanged(pos);
                 }
                 Vector3fPool.closePool();

@@ -114,7 +114,8 @@ public class ChunkGraph {
         }
 
         public String pretty() {
-            return "At " + stamp + " => " + action + " in " + location + (info == null ? "" : " // info => " + info) + (chunkInstance == null ? "" : " // instance => " + chunkInstance);
+            String time = String.format("%1$TH:%1$TM:%1$TS", stamp);
+            return "At " + time + " => " + action + " in " + location + (info == null ? "" : " // info => " + info) + (chunkInstance == null ? "" : " // instance => " + chunkInstance);
         }
     }
 }

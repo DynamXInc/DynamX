@@ -86,8 +86,10 @@ public class DynamXEntityRenderEvents extends Event {
          */
         private final Vector3f modelScale;
         /**
-         * The children of the part
+         * The children of the part <br>
+         * Can be null if the node doesn't have any children
          */
+        @Nullable
         private final List<SceneGraph<?, ?>> childGraph;
         /**
          * The scene graph that will be used to render the part. Can be overridden. <br>

@@ -31,7 +31,7 @@ public interface SceneGraph<T extends PhysicsEntity<?>, A extends IPhysicsPackIn
     //TODO PUT DEBUG RENDERING HERE !
 
     /**
-     * Renders this subtree of the scene graph
+     * Renders this subtree of the scene graph.
      *
      * @param entity   The entity that is rendered, can be null if we are rendering a static scene graph (like in the inventory)
      * @param context  The render context
@@ -39,6 +39,14 @@ public interface SceneGraph<T extends PhysicsEntity<?>, A extends IPhysicsPackIn
      */
     void render(@Nullable T entity, EntityRenderContext context, A packInfo);
 
+    /**
+     * Renders the debug of this subtree of the scene graph. <br>
+     * <strong>Note:</strong> unlike {@link SceneGraph#render(PhysicsEntity, EntityRenderContext, IPhysicsPackInfo)}, the transformations of the parent nodes are not applied.
+     *
+     * @param entity   The entity that is rendered, can be null if we are rendering a static scene graph (like in the inventory)
+     * @param context  The render context
+     * @param packInfo The pack info of the entity (the owner of the scene graph)
+     */
     void renderDebug(@Nullable T entity, EntityRenderContext context, A packInfo);
 
     /**
@@ -226,7 +234,7 @@ public interface SceneGraph<T extends PhysicsEntity<?>, A extends IPhysicsPackIn
 
         @Override
         public void renderDebug(@Nullable T entity, EntityRenderContext context, A packInfo) {
-
+            encapsulatedScene.renderDebug(entity, context, packInfo);
         }
 
         @Override

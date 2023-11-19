@@ -18,10 +18,13 @@ import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.WheelsModule;
 import fr.dynamx.common.physics.entities.BaseWheeledVehiclePhysicsHandler;
+import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.errors.DynamXErrorManager;
+import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
+import fr.dynamx.utils.optimization.Vector3fPool;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -31,6 +34,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.AxisAlignedBB;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -77,7 +81,7 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
             rotationPoint = getPosition();
         else
             getRotationPoint().multLocal(getScaleModifier(owner));
-        if (suspensionAxis != null && suspensionAxis.inverse() == null) {
+        if (suspensionAxis != null && (suspensionAxis.inverse() == null || suspensionAxis.getW() == 0)) {
             DynamXErrorManager.addPackError(getPackName(), "wheel_invalid_suspaxis", ErrorLevel.LOW, getName(), "The SuspensionAxis should be an invertible Quaternion");
             suspensionAxis = null;
         }
@@ -129,7 +133,14 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
 
     @Override
     public SceneGraph<BaseVehicleEntity<?>, ModularVehicleInfo> createSceneGraph(Vector3f modelScale, List<SceneGraph<BaseVehicleEntity<?>, ModularVehicleInfo>> childGraph) {
-        return new PartWheelNode<>(this, modelScale, childGraph);
+        if (getMudGuardObjectName() != null) {
+            PartAttachedWheelNode<BaseVehicleEntity<?>, ModularVehicleInfo> wheelNode = new PartAttachedWheelNode<>(this, modelScale, childGraph);
+            if (childGraph == null)
+                childGraph = new ArrayList<>();
+            childGraph.add(wheelNode);
+            return new PartBaseWheelNode<>(this, modelScale, childGraph, true);
+        }
+        return new PartBaseWheelNode<>(this, modelScale, childGraph, false);
     }
 
     @Override
@@ -145,35 +156,65 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
             modules.add(new WheelsModule((BaseVehicleEntity<? extends BaseWheeledVehiclePhysicsHandler<?>>) entity));
     }
 
-    class PartWheelNode<T extends BaseVehicleEntity<?>, A extends ModularVehicleInfo> extends SceneGraph.Node<T, A> {
-        public PartWheelNode(PartWheel wheel, Vector3f scale, List<SceneGraph<T, A>> linkedChilds) {
-            super(wheel.getPosition(), null, scale, linkedChilds);
+    protected void renderWheel(@Nullable BaseVehicleEntity<?> entity, EntityRenderContext context, ModularVehicleInfo entityInfo, PartWheelInfo wheelInfo, boolean hasWheelsModule, WheelsModule wheelsModule) {
+        if (hasWheelsModule) {
+            int index = VehicleEntityProperties.getPropertyIndex(getId(), VehicleEntityProperties.EnumVisualProperties.ROTATION_ANGLE);
+            //Fix sign problems for wheel rotation
+            float prev = wheelsModule.prevVisualProperties[index];
+            if (prev - wheelsModule.visualProperties[index] > 180)
+                prev -= 360;
+            if (prev - wheelsModule.visualProperties[index] < -180)
+                prev += 360;
+            //Then render
+            if (isRight()) {
+                /* Wheel rotation (Right-Side)*/
+                GlStateManager.rotate(180, 0, 1, 0);
+                GlStateManager.rotate((prev + (wheelsModule.visualProperties[index] - prev) * context.getPartialTicks()), -1.0F, 0.0F, 0.0F);
+            } else {
+                /* Wheel rotation (Left-Side)*/
+                GlStateManager.rotate(-(prev + (wheelsModule.visualProperties[index] - prev) * context.getPartialTicks()), -1.0F, 0.0F, 0.0F);
+            }
+        }
+        /*Rendering the wheels */
+        DxModelRenderer model = DynamXContext.getDxModelRegistry().getModel(wheelInfo.getModel());
+        //If the wheel is not flattened, or the model does not supports flattening
+        if (wheelsModule == null || wheelsModule.getWheelsStates()[getId()] != WheelsModule.WheelState.ADDED_FLATTENED || !model.renderGroups("rim", wheelsModule.getWheelsTextureId()[getId()], context.isUseVanillaRender())) {
+            byte wheelTextureId = wheelsModule != null ? wheelsModule.getWheelsTextureId()[getId()] : wheelInfo.getIdForVariant(entityInfo.getVariantName(context.getTextureId()));
+            context.getRender().renderModel(model, entity, wheelTextureId, context.isUseVanillaRender());
+        }
+    }
+
+    /**
+     * If the wheel has a mudguard, it will be rendered, and the wheel will be a child of this node (in a {@link PartAttachedWheelNode}). <br>
+     * Otherwise, the wheel will be rendered in this node.
+     */
+    class PartBaseWheelNode<T extends BaseVehicleEntity<?>, A extends ModularVehicleInfo> extends SceneGraph.Node<T, A> {
+        private final boolean isMudGuard;
+
+        public PartBaseWheelNode(PartWheel wheel, Vector3f scale, List<SceneGraph<T, A>> linkedChilds, boolean isMudGuard) {
+            super(isMudGuard ? wheel.getRotationPoint() : wheel.getPosition(), GlQuaternionPool.newGlQuaternion(wheel.getSuspensionAxis()), scale, linkedChilds);
+            this.isMudGuard = isMudGuard;
         }
 
         @Override
         public void render(@Nullable T entity, EntityRenderContext context, A packInfo) {
             WheelsModule wheelsModule = entity != null ? entity.getModuleByType(WheelsModule.class) : null;
-            if (wheelsModule != null && wheelsModule.getWheelsStates()[getId()] == WheelsModule.WheelState.REMOVED)
+            boolean hasWheelsModule = wheelsModule != null;
+            if (!isMudGuard && hasWheelsModule && wheelsModule.getWheelsStates()[getId()] == WheelsModule.WheelState.REMOVED)
                 return;
-            PartWheelInfo info = wheelsModule != null ? wheelsModule.getWheelInfo(getId()) : getDefaultWheelInfo();
+            PartWheelInfo info = hasWheelsModule ? wheelsModule.getWheelInfo(getId()) : getDefaultWheelInfo();
             if (!info.isModelValid())
                 return;
             GlStateManager.pushMatrix();
-            /* Translation to the wheel rotation point */
-            GlStateManager.translate(getRotationPoint().x, getRotationPoint().y, getRotationPoint().z);
-
-            /* Apply wheel base rotation */
-            com.jme3.math.Quaternion baseRotation = getSuspensionAxis();
-            if (baseRotation != null && baseRotation.getW() != 0)
-                GlStateManager.rotate(GlQuaternionPool.get(baseRotation));
-
             int index;
-            if (wheelsModule != null) {
-                /* Suspension translation */
+            if (!isMudGuard && hasWheelsModule) {
+                /* Suspension translation, before applying base rotation and scale */
                 index = VehicleEntityProperties.getPropertyIndex(getId(), VehicleEntityProperties.EnumVisualProperties.SUSPENSION_LENGTH);
                 GlStateManager.translate(0, -(wheelsModule.prevVisualProperties[index] + (wheelsModule.visualProperties[index] - wheelsModule.prevVisualProperties[index]) * context.getPartialTicks())
                         - info.getSuspensionRestLength(), 0);
-
+            }
+            transform();
+            if (hasWheelsModule) {
                 /* Steering rotation*/
                 if (isWheelIsSteerable()) {
                     index = VehicleEntityProperties.getPropertyIndex(getId(), VehicleEntityProperties.EnumVisualProperties.STEER_ANGLE);
@@ -181,50 +222,49 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
                 }
             }
             /* Render mudguard */
-            if (getMudGuardObjectName() != null) {
-                //TODO MUDGUARD MUST HAVE IS SCENE, CONTAINING THE WHEEL
-                GlStateManager.pushMatrix();
-                GlStateManager.translate(0, 0.2, 0);
-                GlStateManager.scale(packInfo.getScaleModifier().x, packInfo.getScaleModifier().y, packInfo.getScaleModifier().z);
+            if (isMudGuard) {
                 context.getModel().renderGroups(getMudGuardObjectName(), context.getTextureId(), context.isUseVanillaRender());
-                GlStateManager.popMatrix();
+                renderChildren(entity, context, packInfo);
+                return;
             }
+            renderWheel(entity, context, packInfo, info, hasWheelsModule, wheelsModule);
+            renderChildren(entity, context, packInfo);
+            GlStateManager.popMatrix();
+        }
+    }
 
-            //Remove wheel base rotation
-            if (baseRotation != null && baseRotation.getW() != 0)
-                GlStateManager.rotate(GlQuaternionPool.get(baseRotation.inverse()));
+    /**
+     * Wheel rendered as a child of {@link PartBaseWheelNode}
+     */
+    class PartAttachedWheelNode<T extends BaseVehicleEntity<?>, A extends ModularVehicleInfo> extends SceneGraph.Node<T, A> {
+        public PartAttachedWheelNode(PartWheel wheel, Vector3f scale, List<SceneGraph<T, A>> linkedChilds) {
+            super(new Vector3f(), null, scale, linkedChilds);
+            if (wheel.getSuspensionAxis() != null) //Note that we have the mudguard translation and rotation applied, so the translation must "anticipate" this rotation.
+                //Formula: translation = (wheelPos - mudGuardPos) * inverse(suspensionRotation) where mudGuardPos and suspensionRotation are applied in the previous node
+                translation.set(DynamXGeometry.rotateVectorByQuaternion(Vector3fPool.get(wheel.getPosition()).subtractLocal(wheel.getRotationPoint()), wheel.getSuspensionAxis().inverse()));
+        }
 
-            // Translate to render pos, from rotation pos
-            GlStateManager.translate(getPosition().x - getRotationPoint().x, getPosition().y - getRotationPoint().y, getPosition().z - getRotationPoint().z);
-
-            if (wheelsModule != null) {
-                index = VehicleEntityProperties.getPropertyIndex(getId(), VehicleEntityProperties.EnumVisualProperties.ROTATION_ANGLE);
-                //Fix sign problems for wheel rotation
-                float prev = wheelsModule.prevVisualProperties[index];
-                if (prev - wheelsModule.visualProperties[index] > 180)
-                    prev -= 360;
-                if (prev - wheelsModule.visualProperties[index] < -180)
-                    prev += 360;
-                //Then render
-                if (isRight()) {
-                    /* Wheel rotation (Right-Side)*/
-                    GlStateManager.rotate(180, 0, 1, 0);
-                    GlStateManager.rotate((prev + (wheelsModule.visualProperties[index] - prev) * context.getPartialTicks()), -1.0F, 0.0F, 0.0F);
-                } else {
-                    /* Wheel rotation (Left-Side)*/
-                    GlStateManager.rotate(-(prev + (wheelsModule.visualProperties[index] - prev) * context.getPartialTicks()), -1.0F, 0.0F, 0.0F);
-                }
+        @Override
+        public void render(@Nullable T entity, EntityRenderContext context, A packInfo) {
+            WheelsModule wheelsModule = entity != null ? entity.getModuleByType(WheelsModule.class) : null;
+            boolean hasWheelsModule = wheelsModule != null;
+            if (hasWheelsModule && wheelsModule.getWheelsStates()[getId()] == WheelsModule.WheelState.REMOVED)
+                return;
+            PartWheelInfo info = hasWheelsModule ? wheelsModule.getWheelInfo(getId()) : getDefaultWheelInfo();
+            if (!info.isModelValid())
+                return;
+            GlStateManager.pushMatrix();
+            if (hasWheelsModule) {
+                /* Suspension translation, before applying scale. Note that we have the mudguard rotation applied, so the translation must "anticipate" this rotation. */
+                int index = VehicleEntityProperties.getPropertyIndex(getId(), VehicleEntityProperties.EnumVisualProperties.SUSPENSION_LENGTH);
+                Vector3f suspensionTranslation = Vector3fPool.get(0, -(wheelsModule.prevVisualProperties[index] + (wheelsModule.visualProperties[index] - wheelsModule.prevVisualProperties[index]) * context.getPartialTicks())
+                        - info.getSuspensionRestLength(), 0).multLocal(getScale());
+                if (getSuspensionAxis() != null)
+                    suspensionTranslation = DynamXGeometry.rotateVectorByQuaternion(suspensionTranslation, getSuspensionAxis().inverse());
+                GlStateManager.translate(suspensionTranslation.x, suspensionTranslation.y, suspensionTranslation.z);
             }
-            /*Rendering the wheels */
-            DxModelRenderer model = DynamXContext.getDxModelRegistry().getModel(info.getModel());
-            //Scale
-            scale.set(info.getScaleModifier());
-            GlStateManager.scale(scale.x, scale.y, scale.z);
-            //If the wheel is not flattened, or the model does not supports flattening
-            if (wheelsModule == null || wheelsModule.getWheelsStates()[getId()] != WheelsModule.WheelState.ADDED_FLATTENED || !model.renderGroups("rim", wheelsModule.getWheelsTextureId()[getId()], context.isUseVanillaRender())) {
-                byte wheelTextureId = wheelsModule != null ? wheelsModule.getWheelsTextureId()[getId()] : info.getIdForVariant(packInfo.getVariantName(context.getTextureId()));
-                context.getRender().renderModel(model, entity, wheelTextureId, context.isUseVanillaRender());
-            }
+            transform();
+            renderWheel(entity, context, packInfo, info, hasWheelsModule, wheelsModule);
             renderChildren(entity, context, packInfo);
             GlStateManager.popMatrix();
         }
@@ -233,7 +273,7 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
         public void renderDebug(@Nullable T entity, EntityRenderContext context, A packInfo) {
             if (DynamXDebugOptions.WHEELS.isActive()) {
                 GlStateManager.pushMatrix();
-                transformForDebug();
+                DynamXRenderUtils.glTranslate(getPosition());
                 AxisAlignedBB box = getBox();
                 RenderGlobal.drawBoundingBox(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ,
                         isDrivingWheel() ? 0 : 1, isDrivingWheel() ? 1 : 0, 0, 1);

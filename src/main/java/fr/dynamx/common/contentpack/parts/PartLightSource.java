@@ -18,10 +18,12 @@ import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.AbstractLightsModule;
 import fr.dynamx.common.entities.vehicles.TrailerEntity;
+import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import lombok.Getter;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.renderer.RenderGlobal;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -241,6 +243,18 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
             }
             renderChildren(entity, context, packInfo);
             GlStateManager.popMatrix();
+        }
+
+        @Override
+        public void renderDebug(@Nullable T entity, EntityRenderContext context, A packInfo) {
+            if(DynamXDebugOptions.LIGHTS.isActive()) {
+                GlStateManager.pushMatrix();
+                transformForDebug();
+                RenderGlobal.drawBoundingBox(-0.05f, -0.05f, -0.05f, 0.05f, 0.05f, 0.05f,
+                        1, 1, 0, 1);
+                GlStateManager.popMatrix();
+            }
+            super.renderDebug(entity, context, packInfo);
         }
     }
 }

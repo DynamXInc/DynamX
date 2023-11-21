@@ -23,7 +23,7 @@ public class ArmorRenderer extends ModelRenderer {
         if (objModel != DynamXModelRegistry.MISSING_MODEL) {
             switch (objModel.getFormat()) {
                 case OBJ:
-                    for (ObjObjectRenderer objObjectRenderer1 : ((ObjModelRenderer)objModel).getObjObjects()) {
+                    for (ObjObjectRenderer objObjectRenderer1 : ((ObjModelRenderer) objModel).getObjObjects()) {
                         if (objObjectRenderer1.getObjObjectData().getName().equalsIgnoreCase(partName)) {
                             objObjectRenderer = objObjectRenderer1;
                             break;
@@ -50,10 +50,11 @@ public class ArmorRenderer extends ModelRenderer {
                 GlStateManager.rotate(180, 1, 0, 0);
                 rotateXYZ(false);
                 GlStateManager.translate(-this.offsetX, this.offsetY, -this.offsetZ);
-                switch (objModel.getFormat()){
+                switch (objModel.getFormat()) {
                     case OBJ:
-                        ((ObjModelRenderer)objModel).renderGroup(objObjectRenderer, model.getActiveTextureId());
+                        ((ObjModelRenderer) objModel).renderGroup(objObjectRenderer, model.getActiveTextureId());
                         break;
+                    //TODO YANIS: GLTF
                 }
                 GlStateManager.popMatrix();
             }
@@ -73,8 +74,9 @@ public class ArmorRenderer extends ModelRenderer {
                 rotateXYZ(true);
                 switch (objModel.getFormat()) {
                     case OBJ:
-                        ((ObjModelRenderer)objModel).renderGroup(objObjectRenderer, model.getActiveTextureId());
+                        ((ObjModelRenderer) objModel).renderGroup(objObjectRenderer, model.getActiveTextureId());
                         break;
+                    //TODO YANIS: GLTF
                 }
                 GlStateManager.popMatrix();
             }

@@ -1,7 +1,6 @@
 package fr.dynamx.api.entities.modules;
 
 import fr.dynamx.api.network.sync.SimulationHolder;
-import fr.dynamx.client.renders.RenderPhysicsEntity;
 import fr.dynamx.common.entities.ModularPhysicsEntity;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import net.minecraft.entity.Entity;
@@ -95,6 +94,10 @@ public interface IPhysicsModule<P extends AbstractEntityPhysicsHandler<?, ?>> {
      * @param changeContext    The context of this update
      */
     default void onSetSimulationHolder(SimulationHolder simulationHolder, EntityPlayer simulationPlayerHolder, SimulationHolder.UpdateContext changeContext) {
+    }
+
+    default byte getInitPriority() {
+        return 0;
     }
 
     /**

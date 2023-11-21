@@ -91,12 +91,12 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
 
     @Override
     public void onPrePhysicsTick(Profiler profiler) {
-        if (entity.world.isRemote && entity.initialized == 2 && isLocalPlayerDriving()) {
+        if (entity.world.isRemote && entity.initialized == PhysicsEntity.EnumEntityInitState.ALL && isLocalPlayerDriving()) {
             controllers.forEach(IVehicleController::update);
         }
         Entity other = getOtherSideEntity();
         if (other instanceof PhysicsEntity) {
-            getReceivedVariables().forEach((key, value) -> ((SynchronizedEntityVariableSnapshot<Object>) value).updateVariable((EntityVariable<Object>) getSynchronizedVariables().get(key)));
+            getReceivedVariables().forEach((key, value) -> ((SynchronizedEntityVariableSnapshot<Object>) value).updateVariable(tryGetVariable(key)));
         }
         entity.prePhysicsUpdateWrapper(profiler, entity.usesPhysicsWorld());
     }
@@ -106,7 +106,7 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
         entity.postUpdatePhysicsWrapper(profiler, entity.usesPhysicsWorld());
 
         Entity other = getOtherSideEntity();
-        if (other instanceof PhysicsEntity && ((PhysicsEntity<?>) other).initialized != 0) {
+        if (other instanceof PhysicsEntity && ((PhysicsEntity<?>) other).initialized != PhysicsEntity.EnumEntityInitState.NOT_INITIALIZED) {
             if (!mySide.isServer()) {
                 sendMyVars((SPPhysicsEntitySynchronizer<T>) ((T) other).getSynchronizer(), SyncTarget.SERVER);
             } else {

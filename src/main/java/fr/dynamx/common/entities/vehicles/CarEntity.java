@@ -6,6 +6,7 @@ import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.common.entities.modules.SeatsModule;
 import fr.dynamx.common.entities.modules.WheelsModule;
@@ -35,12 +36,10 @@ public class CarEntity<T extends CarEntity.CarPhysicsHandler<?>> extends BaseVeh
     }
 
     @Override
-    public void createModules(ModuleListBuilder modules) {
-        //Take care to add seats BEFORE engine (the engine needs to detect dismounts)
-        modules.add(seats = new SeatsModule(this));
-        //Take care to add propulsion BEFORE engine (the engine needs a propulsion) (engine is added by its SubInfoType)
-        modules.add(wheels = new WheelsModule(this));
-        super.createModules(modules);
+    protected void sortModules() {
+        super.sortModules();
+        seats = getModuleByType(SeatsModule.class);
+        wheels = getModuleByType(WheelsModule.class);
         doors = getModuleByType(DoorsModule.class);
     }
 
@@ -62,13 +61,11 @@ public class CarEntity<T extends CarEntity.CarPhysicsHandler<?>> extends BaseVeh
     @Nonnull
     @Override
     public SeatsModule getSeats() {
-        if (seats == null) //We may need seats before modules are created, because of seats sync
-            seats = new SeatsModule(this);
         return seats;
     }
 
     @Override
-    public BaseVehicleEntity<?> cast() {
+    public PackPhysicsEntity<?, ?> cast() {
         return this;
     }
 

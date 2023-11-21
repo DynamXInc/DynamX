@@ -1,6 +1,6 @@
 package fr.dynamx.common.items;
 
-import fr.dynamx.api.contentpack.object.IInfoOwner;
+import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
 import fr.dynamx.api.contentpack.object.render.IModelPackObject;
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
@@ -25,7 +25,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class DynamXItemArmor<T extends ArmorObject<?>> extends ItemArmor implements IInfoOwner<T>, IResourcesOwner {
+public class DynamXItemArmor<T extends ArmorObject<?>> extends ItemArmor implements IDynamXItem<T>, IResourcesOwner {
     protected final int textureNum;
     protected T armorInfo;
 

@@ -1,41 +1,48 @@
 package fr.dynamx.client.renders;
 
 import fr.dynamx.api.events.PhysicsEntityEvent;
+import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
+import fr.dynamx.client.renders.scene.EntityRenderContext;
+import fr.dynamx.client.renders.scene.SceneGraph;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.contentpack.type.objects.PropObject;
 import fr.dynamx.common.entities.PropsEntity;
-import fr.dynamx.common.entities.modules.LightsModule;
+import fr.dynamx.utils.debug.renderer.BoatDebugRenderer;
 import fr.dynamx.utils.debug.renderer.DebugRenderer;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraftforge.common.MinecraftForge;
 
+import javax.annotation.Nullable;
+
 public class RenderProp<T extends PropsEntity<?>> extends RenderPhysicsEntity<T> {
+    protected final EntityRenderContext context = new EntityRenderContext(this);
+
     public RenderProp(RenderManager manager) {
         super(manager);
+        addDebugRenderers(new BoatDebugRenderer.FloatsDebug(), new DebugRenderer.StoragesDebug());
         MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.InitRenderer<>(PropsEntity.class, this));
     }
 
     @Override
-    public void renderMain(T entity, float partialsTicks) {
-        //GlStateManager.pushMatrix();
-        // Translate to block render pos and add the config translate value
-        //GlStateManager.translate( entity.getPackInfo().translate[0],  entity.getPackInfo().translate[1], entity.getPackInfo().translate[2]);
-        // Scale to the config scale value
-        GlStateManager.scale(entity.getPackInfo().getScaleModifier().x, entity.getPackInfo().getScaleModifier().y, entity.getPackInfo().getScaleModifier().z);
-        //Render the model
-        renderModel(DynamXContext.getDxModelRegistry().getModel(entity.getPackInfo().getModel()), entity, (byte) entity.getMetadata(), false);
-        //GlStateManager.popMatrix();
+    @Nullable
+    public EntityRenderContext getRenderContext(T entity) {
+        if (entity.getPackInfo() == null) {
+            return null;
+        }
+        DxModelRenderer modelRenderer = DynamXContext.getDxModelRegistry().getModel(entity.getPackInfo().getModel());
+        if (modelRenderer == null) {
+            return null;
+        }
+        return context.setEntityParams(modelRenderer, entity.getEntityTextureID());
     }
 
     @Override
-    public void renderParts(T entity, float partialTicks) {
-        //TODO WIP PARTS ON PROPS
-        /*if (entity.getPackInfo().isModelValid()) {
-            entity.getPackInfo().getDrawableParts().forEach(d -> ((IDrawablePart<T>) d).drawParts(entity, this, entity.getPackInfo(), entity.getEntityTextureID(), partialTicks));
-        }*/
-        if (entity.getPackInfo().isModelValid()) {
-            if(entity.hasModuleOfType(LightsModule.class))
-                entity.getPackInfo().getOwner().getLightSources().values().forEach(d -> d.drawLights(null, entity.ticksExisted, entity.getPackInfo().getModel(), entity.getPackInfo().getScaleModifier(), entity.getModuleByType(LightsModule.class), false));
-        }
+    public void renderEntity(T entity, EntityRenderContext context) {
+        ((SceneGraph<T, PropObject<?>>) entity.getPackInfo().getSceneGraph()).render(entity, context, entity.getPackInfo());
+    }
+
+    @Override
+    public void renderEntityDebug(T entity, EntityRenderContext context) {
+        ((SceneGraph<T, PropObject<?>>) entity.getPackInfo().getSceneGraph()).renderDebug(entity, context, entity.getPackInfo());
     }
 }

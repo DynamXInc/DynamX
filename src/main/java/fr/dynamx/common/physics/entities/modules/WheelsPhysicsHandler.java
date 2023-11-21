@@ -7,13 +7,12 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.common.contentpack.parts.PartWheel;
 import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.entities.modules.CarEngineModule;
+import fr.dynamx.common.entities.modules.engines.CarEngineModule;
 import fr.dynamx.common.entities.modules.WheelsModule;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.BaseWheeledVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.wheel.PacejkaMagicFormula;
 import fr.dynamx.common.physics.entities.parts.wheel.WheelPhysics;
-import fr.dynamx.common.physics.entities.parts.wheel.WheelState;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -23,15 +22,16 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @see IPropulsionHandler
  * @see WheelsModule
  */
 @RequiredArgsConstructor
 public class WheelsPhysicsHandler {
     private final WheelsModule module;
+    @Getter
     private final BaseWheeledVehiclePhysicsHandler<? extends BaseVehicleEntity<?>> handler;
 
     public BiMap<Byte, Byte> wheelIDByPartID = HashBiMap.create();
+    @Getter
     public List<WheelPhysics> vehicleWheelData = new ArrayList<>();
 
     public PacejkaMagicFormula pacejkaMagicFormula;
@@ -41,10 +41,6 @@ public class WheelsPhysicsHandler {
 
     @Getter
     private boolean isAccelerating;
-
-    public BaseWheeledVehiclePhysicsHandler<? extends BaseVehicleEntity<?>> getHandler() {
-        return handler;
-    }
 
     public byte getNumWheels() {
         return (byte) vehicleWheelData.size();
@@ -82,46 +78,45 @@ public class WheelsPhysicsHandler {
     }
 
     public void removeWheel(byte partID) {
-        if (getNumWheels() > 0) {
-            if (wheelIDByPartID.get(partID) != null) {
-                byte wheelID = wheelIDByPartID.get(partID);
-                for (WheelPhysics wheelPhysics : vehicleWheelData) {
-                    if (wheelPhysics.getWheelIndex() > wheelID)
-                        wheelPhysics.setWheelIndex((byte) (wheelPhysics.getWheelIndex() - 1));
-                }
-                for (PartWheel partWheel : handler.getPackInfo().getPartsByType(PartWheel.class)) {
-                    if (partID == partWheel.getId()) {
-                        module.getWheelsStates()[partID] = WheelState.REMOVED; //removed state
-                        handler.getPhysicsVehicle().removeWheel(wheelID);
-                        wheelIDByPartID.remove(partID, wheelID);
-                        vehicleWheelData.remove(wheelID);
-                    }
-                }
-                for (Map.Entry<Byte, Byte> entry : wheelIDByPartID.entrySet()) {
-                    byte newWheelID = entry.getValue();
-                    if (newWheelID > wheelID)
-                        entry.setValue(--newWheelID);
-                }
+        if (getNumWheels() <= 0) {
+            return;
+        }
+        if (wheelIDByPartID.get(partID) == null) {
+            return;
+        }
+        byte wheelID = wheelIDByPartID.get(partID);
+        for (WheelPhysics wheelPhysics : vehicleWheelData) {
+            if (wheelPhysics.getWheelIndex() > wheelID)
+                wheelPhysics.setWheelIndex((byte) (wheelPhysics.getWheelIndex() - 1));
+        }
+        for (PartWheel partWheel : handler.getPackInfo().getPartsByType(PartWheel.class)) {
+            if (partID == partWheel.getId()) {
+                module.getWheelsStates()[partID] = WheelsModule.WheelState.REMOVED; //removed state
+                handler.getPhysicsVehicle().removeWheel(wheelID);
+                wheelIDByPartID.remove(partID, wheelID);
+                vehicleWheelData.remove(wheelID);
             }
+        }
+        for (Map.Entry<Byte, Byte> entry : wheelIDByPartID.entrySet()) {
+            byte newWheelID = entry.getValue();
+            if (newWheelID > wheelID)
+                entry.setValue(--newWheelID);
         }
     }
 
     public void accelerate(CarEngineModule engine, float strength, float speedLimit) {
         EnginePhysicsHandler module = engine.getPhysicsHandler();
-        if (module.getEngine().isStarted()) {
-            for (WheelPhysics wheelPhysics : vehicleWheelData) {
-                if (wheelPhysics.isDrivingWheel()) {
-                    if (strength != 0 && module.isEngaged() && Math.abs(handler.getSpeed(BaseVehiclePhysicsHandler.SpeedUnit.KMH)) < speedLimit) {
-                        float power = (module.getEngine().getPowerOutputAtRevs());
-                        wheelPhysics.accelerate(power * strength * 2);
-                        isAccelerating = true;
-                    } else
-                        wheelPhysics.accelerate(0);
-                } else {
-                    // we always set this because the wheel could be "broken down" over time.
-                    wheelPhysics.accelerate(0);
-                }
+        if (!module.getEngine().isStarted()) {
+            return;
+        }
+        for (WheelPhysics wheelPhysics : vehicleWheelData) {
+            if (!wheelPhysics.isDrivingWheel() || strength == 0 || !module.isEngaged() || !(Math.abs(handler.getSpeed(BaseVehiclePhysicsHandler.SpeedUnit.KMH)) < speedLimit)) {
+                wheelPhysics.accelerate(0);
+                continue;
             }
+            float power = (module.getEngine().getPowerOutputAtRevs());
+            wheelPhysics.accelerate(power * strength * 2);
+            isAccelerating = true;
         }
     }
 
@@ -158,9 +153,5 @@ public class WheelsPhysicsHandler {
             if (wheelPhysics.isDrivingWheel())
                 wheelPhysics.brake(0, 0, engine.getPhysicsHandler().getEngine().getBraking());
         }
-    }
-
-    public List<WheelPhysics> getWheels() {
-        return vehicleWheelData;
     }
 }

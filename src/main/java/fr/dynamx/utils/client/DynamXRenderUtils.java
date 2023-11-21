@@ -2,7 +2,11 @@ package fr.dynamx.utils.client;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.client.handlers.ClientEventHandler;
+import fr.dynamx.client.renders.mesh.shapes.ArrowMesh;
+import fr.dynamx.client.renders.mesh.shapes.GridGLMesh;
+import fr.dynamx.client.renders.mesh.shapes.OctasphereMesh;
 import fr.dynamx.client.renders.vehicle.RenderBaseVehicle;
+import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.PhysicsEntity;
@@ -21,7 +25,6 @@ import net.minecraft.world.World;
 import org.lwjgl.opengl.APPLEVertexArrayObject;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
-import org.lwjgl.util.glu.Sphere;
 import org.lwjgl.util.vector.Quaternion;
 
 import javax.annotation.Nullable;
@@ -34,7 +37,20 @@ import java.util.List;
  * @see ClientDynamXUtils
  */
 public class DynamXRenderUtils {
-    private static final Sphere sphere = new Sphere();
+
+    public static GridGLMesh gridMesh;
+    public static ArrowMesh arrowMeshX;
+    public static ArrowMesh arrowMeshY;
+    public static ArrowMesh arrowMeshZ;
+    public static OctasphereMesh sphereMesh;
+
+    public static void initGlMeshes() {
+        gridMesh = new GridGLMesh(10, 10, 0.2f);
+        arrowMeshX = ArrowMesh.getMesh(0);
+        arrowMeshY = ArrowMesh.getMesh(1);
+        arrowMeshZ = ArrowMesh.getMesh(2);
+        sphereMesh = new OctasphereMesh(2);
+    }
 
     public static void drawBoundingBox(Vector3f halfExtent, float red, float green, float blue, float alpha) {
         RenderGlobal.drawBoundingBox(-halfExtent.x, -halfExtent.y, -halfExtent.z, halfExtent.x, halfExtent.y, halfExtent.z, red, green, blue, alpha);
@@ -55,17 +71,18 @@ public class DynamXRenderUtils {
             renderBaseVehicle = new RenderBaseVehicle<>(ClientEventHandler.MC.getRenderManager());
         Vector3fPool.openPool();
         GlQuaternionPool.openPool();
-        renderBaseVehicle.renderMain(null, car, textureId, 1, true);
-        renderBaseVehicle.renderParts(null, car, textureId, 1, true);
+        renderBaseVehicle.renderEntity(car, textureId);
         GlQuaternionPool.closePool();
         Vector3fPool.closePool();
     }
 
-    public static void drawSphere(Vector3f translation, float radius, int resolution, @Nullable Color sphereColor) {
+    public static void drawSphere(Vector3f translation, float radius, @Nullable Color sphereColor) {
         if (sphereColor != null)
-            GlStateManager.color(sphereColor.getRed(), sphereColor.getGreen(), sphereColor.getBlue(), sphereColor.getAlpha());
+            GlStateManager.color(sphereColor.getRed() / 255f, sphereColor.getGreen() / 255f, sphereColor.getBlue() / 255f, sphereColor.getAlpha() / 255f);
         GlStateManager.translate(translation.x, translation.y, translation.z);
-        sphere.draw(radius, resolution, resolution);
+        GlStateManager.scale(radius, radius, radius);
+        sphereMesh.render();
+        GlStateManager.scale(1 / radius, 1 / radius, 1 / radius);
         GlStateManager.translate(-translation.x, -translation.y, -translation.z);
         if (sphereColor != null)
             GlStateManager.color(1, 1, 1, 1);
@@ -207,6 +224,13 @@ public class DynamXRenderUtils {
             APPLEVertexArrayObject.glBindVertexArrayAPPLE(vaoID);
         } else {
             GL30.glBindVertexArray(vaoID);
+        }
+    }
+
+    public static void checkForOglError() {
+        int errorCode = GL11.glGetError();
+        if (errorCode != GL11.GL_NO_ERROR) {
+            DynamXMain.log.warn("errorCode = " + errorCode);
         }
     }
 }

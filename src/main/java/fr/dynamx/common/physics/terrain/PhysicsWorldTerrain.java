@@ -19,6 +19,7 @@ import fr.dynamx.utils.VerticalChunkPos;
 import fr.dynamx.utils.debug.ChunkGraph;
 import fr.dynamx.utils.debug.Profiler;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.ChunkProviderServer;
@@ -462,6 +463,13 @@ public class PhysicsWorldTerrain implements ITerrainManager {
      * @param pos   The modified position. The corresponding chunk will be reloaded
      */
     public void onBlockChange(World world, BlockPos pos) {
-        scheduledChunkReload.put(new VerticalChunkPos(pos.getX() >> 4, pos.getY() >> 4, pos.getZ() >> 4), (byte) 10);
+        VerticalChunkPos pos1 = new VerticalChunkPos(pos.getX() >> 4, pos.getY() >> 4, pos.getZ() >> 4);
+        if (DynamXConfig.enableDebugTerrainManager) {
+            IBlockState state = world.getBlockState(pos);
+            ChunkLoadingTicket ticket = DynamXContext.getPhysicsWorld(world).getTerrainManager().getTicket(pos1);
+            if (ticket != null)
+                ChunkGraph.addToGrah(pos1, ChunkGraph.ChunkActions.CHK_UPDATE, ChunkGraph.ActionLocation.MAIN, ticket.getCollisions(), "Chunk changed from world change of " + state + " at " + pos + " (" + state.getBlock() + "). Ticket " + ticket);
+        }
+        scheduledChunkReload.put(pos1, (byte) 10);
     }
 }

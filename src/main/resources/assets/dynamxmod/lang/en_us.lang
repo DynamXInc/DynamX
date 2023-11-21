@@ -21,6 +21,11 @@ key.toggleLockDoor=Toogle lock door
 key.attachTrailer=Attach trailer
 key.powerup=Power up (helicopter)
 key.powerdown=Power down (helicopter)
+key.helicopter_pitch_forward=Pitch forward (helicopter)
+key.helicopter_pitch_backward=Pitch backward (helicopter)
+key.helicopter_yaw_left=Yaw left (helicopter)
+key.helicopter_yaw_right=Yaw right (helicopter)
+key.lock_rotation=Lock camera rotation (helicopter)
 
 slopes.config.title=Config automatic slopes :
 slopes.config.dalls=Ignore slabs
@@ -75,6 +80,7 @@ dynamx.error.deprecated_light_format=Legacy Light parts are deprecated when usin
 dynamx.error.missing_prop=Unknown pack file properties
 dynamx.error.unknown_sub_info=Unknown sub properties
 dynamx.error.deprecated_seat_config=Use the convention "Seat_Name" (instead of "NameSeat") to name your seats. In names:
+dynamx.error.deprecated_door_config=Use the convention "Door_Name" (instead of "NameDoor") to name your doors. In names:
 dynamx.error.sound_error=Invalid sound config
 dynamx.error.config_error=Config error
 dynamx.error.obj_none_material=Object(s) using the 'none' material of BlockBench
@@ -94,6 +100,7 @@ dynamx.error.addon_error=Addon loading error
 dynamx.error.obj_error=Obj loading error
 dynamx.error.wheel_invalid_suspaxis=Invalid wheel suspension axis
 dynamx.error.too_many_variants=Too many material variants
+dynamx.error.missing_depends_on_node=A node depends on a node in order to be renderer, but it doesn't exist:
 
 dynamx.reload.models.errors=§c[DynamX] Some models have errors, use the debug menu to see them
 

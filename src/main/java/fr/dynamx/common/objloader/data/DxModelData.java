@@ -27,7 +27,7 @@ public abstract class DxModelData {
 
     public DxModelData(DxModelPath path) {
         this.objModelPath = path;
-        this.mpsClassLoader = ContentPackLoader.getProtectedResources().getOrDefault(path.getPackName(), DynamXMain.container).getSecureLoader();
+        this.mpsClassLoader = ContentPackLoader.getProtectedResources(path.getPackName()).getSecureLoader();
     }
 
     @SideOnly(Side.CLIENT)

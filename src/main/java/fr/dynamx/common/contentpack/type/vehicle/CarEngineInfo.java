@@ -4,8 +4,9 @@ import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
-import fr.dynamx.common.entities.modules.CarEngineModule;
+import fr.dynamx.common.entities.modules.engines.CarEngineModule;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,12 +16,14 @@ import java.util.List;
  */
 public class CarEngineInfo extends BaseEngineInfo {
     @Getter
+    @Setter
     @PackFileProperty(configNames = "SteeringMethod", required = false, defaultValue = "0")
     public int steeringMethod = 0;
 
     @Getter
+    @Setter
     @PackFileProperty(configNames = "TurnSpeed", required = false, defaultValue = "0.09")
-    private float turnSpeed = 0.09f;
+    public float turnSpeed = 0.09f;
 
     public List<GearInfo> gears = new ArrayList<>();
 
@@ -30,7 +33,8 @@ public class CarEngineInfo extends BaseEngineInfo {
         super(packName, name);
     }
 
-    void addGear(GearInfo gear) {
+    @Override
+    public void addGear(GearInfo gear) {
         gear.setId(i);
         gears.add(i, gear);
         i++;

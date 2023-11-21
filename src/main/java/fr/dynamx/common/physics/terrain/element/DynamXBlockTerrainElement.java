@@ -68,7 +68,7 @@ public class DynamXBlockTerrainElement implements ITerrainElement {
             throw new IllegalStateException("DynamX block TE failed to load at " + pos);
         }
         PhysicsRigidBody p = new PhysicsRigidBody(((TEDynamXBlock) te).getPhysicsCollision(), 0);
-        p.setPhysicsLocation(pos.add(Vector3fPool.get(x + 0.5f, y + 1.5f, z + 0.5f).addLocal(((TEDynamXBlock) te).getBlockObjectInfo().getTranslation())).addLocal(((TEDynamXBlock) te).getRelativeTranslation()));
+        p.setPhysicsLocation(pos.add(Vector3fPool.get(x + 0.5f, y + 1.5f, z + 0.5f)).addLocal(((TEDynamXBlock) te).getRelativeTranslation()));
         p.setPhysicsRotation(((TEDynamXBlock) te).getCollidableRotation());
         p.setUserObject(new BulletShapeType<>(EnumBulletShapeType.TERRAIN, this, p.getCollisionShape()));
         body = p;

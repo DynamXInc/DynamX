@@ -72,7 +72,7 @@ public class MissingObjModel extends ObjModelRenderer {
 
     @Override
     public boolean renderDefaultParts(byte textureDataId, boolean forceVanillaRender) {
-        renderModel(textureDataId, false);
+        renderModel(textureDataId, forceVanillaRender);
         return true;
     }
 

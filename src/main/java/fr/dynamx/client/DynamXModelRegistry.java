@@ -21,7 +21,7 @@ import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
-import fr.dynamx.common.contentpack.loader.InfoLoader;
+import fr.dynamx.common.contentpack.loader.InfoList;
 import fr.dynamx.common.contentpack.type.objects.ArmorObject;
 import fr.dynamx.common.objloader.MTLLoader;
 import fr.dynamx.common.objloader.OBJLoader;
@@ -222,7 +222,7 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
             OBJLoader.getMtlLoaders().forEach(MTLLoader::uploadTextures);
             OBJLoader.getMtlLoaders().clear();
 
-            if(ClientEventHandler.MC.world != null)
+            if (ClientEventHandler.MC.world != null)
                 uploadVAOs();
 
             ProgressManager.pop(bar);
@@ -257,7 +257,7 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
         REGISTRY_CLOSED = false;
         //Registers all models avoiding duplicates
         //This doesn't load them, its done by the MC's resource manager
-        for (InfoLoader<?> infoLoader : DynamXObjectLoaders.getLoaders()) {
+        for (InfoList<?> infoLoader : DynamXObjectLoaders.getInfoLists()) {
             for (INamedObject namedObject : infoLoader.getInfos().values()) {
                 if (namedObject instanceof IModelPackObject && ((IModelPackObject) namedObject).shouldRegisterModel()) {
                     DxModelPath modelPath = DynamXUtils.getModelPath(namedObject.getPackName(), ((IModelPackObject) namedObject).getModel());

@@ -157,7 +157,7 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
         AxisAlignedBB tempBB = rotateBB(withPosition, Vector3fPool.get((float) entity.posX, (float) entity.posY, (float) entity.posZ), entity.getEntityBoundingBox(), inversedWithRotation);
         Vector3f offset = with.getCollisionOffset();
         offset = DynamXGeometry.rotateVectorByQuaternion(offset, inversedWithRotation);
-        tempBB = tempBB.offset(offset.x, offset.y, offset.z);
+        tempBB = tempBB.offset(-offset.x, -offset.y, -offset.z);
         //      if(!(with instanceof PhysicsEntity)) //idk why this is needed for blocks
 //            tempBB = tempBB.offset(-0.5f, 0, -0.5f);
         if (entity.world.isRemote && ClientDebugSystem.enableDebugDrawing) {
@@ -238,7 +238,7 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
                 data.z = oldz;
 
             if (with instanceof PhysicsEntity && entity.world.isRemote && entity instanceof EntityPlayer &&
-                    (!(with instanceof PropsEntity) || ((PropsEntity<?>) with).getPackInfo().getPartShapes().isEmpty() || ((PropsEntity<?>) with).getPackInfo().getPartShapes().get(0).getShapeType() == PartShape.EnumPartType.BOX) &&
+                    (!(with instanceof PropsEntity) || ((PropsEntity<?>) with).getPackInfo().getCollisionsHelper().getShapes().isEmpty() || ((PropsEntity<?>) with).getPackInfo().getCollisionsHelper().getShapes().get(0).getShapeType() == PartShape.EnumPartType.BOX) &&
                     !collisionFaces.isEmpty() && WalkingOnPlayerController.controller == null && ((EntityPlayer) entity).isUser() && !DynamXContext.getPlayerPickingObjects().containsKey(entity.getEntityId())) //WIP
             {
                 PhysicsEntity<?> collidingWith = (PhysicsEntity<?>) with;

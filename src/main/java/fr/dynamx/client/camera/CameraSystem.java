@@ -4,8 +4,10 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.client.handlers.ClientEventHandler;
-import fr.dynamx.common.contentpack.parts.PartSeat;
+import fr.dynamx.common.contentpack.parts.BasePartSeat;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.maths.DynamXGeometry;
@@ -30,11 +32,19 @@ import java.util.Map;
  * Handles camera rotation and zoom while in a vehicle
  */
 public class CameraSystem {
-    private static CameraMode rotationMode = CameraMode.AUTO;
+    /**
+     * Maps default entity's camera modes to the ones set by the user
+     */
+    private static Map<CameraMode, CameraMode> preferredCameraMode = new HashMap<>();
+    /**
+     * Current camera mode
+     */
+    private static CameraMode cameraMode = CameraMode.AUTO;
 
     private static int zoomLevel = 4;
     private static float cameraPositionY;
     private static boolean watchingBehind = false;
+
     private static final Quaternion glQuatCache = new Quaternion();
     private static final com.jme3.math.Quaternion jmeQuatCache = new com.jme3.math.Quaternion();
     private static com.jme3.math.Quaternion lastCameraQuat;
@@ -45,17 +55,14 @@ public class CameraSystem {
     private static void animateCameraRotation(com.jme3.math.Quaternion prevRotation, com.jme3.math.Quaternion rotation, float step, float animLength) {
         DynamXMath.slerp(step, prevRotation, rotation, jmeQuatCache);
         DynamXGeometry.inverseQuaternion(jmeQuatCache, jmeQuatCache);
-        rotationMode.rotator.apply(Minecraft.getMinecraft().gameSettings.thirdPersonView, jmeQuatCache);
+        cameraMode.rotator.apply(Minecraft.getMinecraft().gameSettings.thirdPersonView, jmeQuatCache);
 
         jmeQuatCache.normalizeLocal();
 
         if (lastCameraQuat == null)
             lastCameraQuat = new com.jme3.math.Quaternion(jmeQuatCache.getX(), jmeQuatCache.getY(), jmeQuatCache.getZ(), jmeQuatCache.getW());
-        //else //FIXME FIX THIS :c
-        //This causes camera stuttering since the input lag fix
-        //  DynamXGeometry.slerp(lastCameraQuat, jmeQuatCache, lastCameraQuat, animLength);
-        lastCameraQuat.set(jmeQuatCache);
-        //jmeQuatCache.set(lastCameraQuat);
+        else
+            DynamXMath.slerp(animLength, lastCameraQuat, jmeQuatCache, lastCameraQuat);
         lastCameraQuat.normalizeLocal();
         glQuatCache.set(lastCameraQuat.getX(), lastCameraQuat.getY(), lastCameraQuat.getZ(), lastCameraQuat.getW());
     }
@@ -66,11 +73,11 @@ public class CameraSystem {
      */
     public static void rotateVehicleCamera(EntityViewRenderEvent.CameraSetup event) {
         Vector3fPool.openPool();
-        BaseVehicleEntity<?> vehicle = (BaseVehicleEntity<?>) event.getEntity().getRidingEntity();
+        PhysicsEntity<?> vehicle = (PhysicsEntity<?>) event.getEntity().getRidingEntity();
         Entity renderEntity = event.getEntity();
 
         //Compute smoothed vehicle rotation, on axes according to camera mode
-        animateCameraRotation(vehicle.prevRenderRotation, vehicle.renderRotation, (float) event.getRenderPartialTicks(), 1);// /!\ do not use for helicopter 0.1f);
+        animateCameraRotation(vehicle.prevRenderRotation, vehicle.renderRotation, (float) event.getRenderPartialTicks(), 0.1f);
 
         //Apply camera zoom
         if (ClientEventHandler.MC.gameSettings.thirdPersonView > 0) {
@@ -81,17 +88,14 @@ public class CameraSystem {
         GlStateManager.rotate(event.getRoll(), 0.0F, 0.0F, 1.0F);
         GlStateManager.rotate(event.getPitch(), 1.0F, 0.0F, 0.0F);
         if (vehicle instanceof IModuleContainer.ISeatsContainer) {
-            PartSeat seat = ((IModuleContainer.ISeatsContainer) vehicle).getSeats().getRidingSeat(renderEntity);
-
+            BasePartSeat seat = ((IModuleContainer.ISeatsContainer) vehicle).getSeats().getRidingSeat(renderEntity);
             if(seat == null) {
                 return;
             }
-
             if(ClientEventHandler.MC.gameSettings.thirdPersonView > 0 && seat.getCameraPositionY() != 0) {
                 cameraPositionY = seat.getCameraPositionY();
                 GlStateManager.translate(0, -cameraPositionY, 0);
             }
-
             if (seat.getRotation() != null) {
                 GlStateManager.rotate(event.getYaw() + (watchingBehind ? 180 : 0) + seat.getRotationYaw(), 0.0F, 1.0F, 0.0F);
             } else {
@@ -262,23 +266,28 @@ public class CameraSystem {
         }
     }
 
-    public static void setCameraZoom(int zoomLevel) {
-        CameraSystem.zoomLevel = zoomLevel;
+    public static void setupCamera(IModuleContainer.ISeatsContainer entity) {
+        zoomLevel = entity.cast().getPackInfo() instanceof ModularVehicleInfo ? ((ModularVehicleInfo) entity.cast().getPackInfo()).getDefaultZoomLevel() : 4;
+        CameraMode mode = entity.getSeats().getPreferredCameraMode();
+        if(!preferredCameraMode.containsKey(mode))
+            preferredCameraMode.put(mode, mode);
+        cameraMode = preferredCameraMode.get(mode);
     }
 
-    public static CameraMode cycleCameraMode() {
-        switch (rotationMode) {
+    public static CameraMode cycleCameraMode(IModuleContainer.ISeatsContainer entity) {
+        switch (cameraMode) {
             case AUTO:
-                rotationMode = CameraMode.FIXED;
+                cameraMode = CameraMode.FIXED;
                 break;
             case FIXED:
-                rotationMode = CameraMode.FREE;
+                cameraMode = CameraMode.FREE;
                 break;
             case FREE:
-                rotationMode = CameraMode.AUTO;
+                cameraMode = CameraMode.AUTO;
                 break;
         }
-        return rotationMode;
+        preferredCameraMode.put(entity.getSeats().getPreferredCameraMode(), cameraMode);
+        return cameraMode;
     }
 
     public static void setWatchingBehind(boolean watchingBehind) {

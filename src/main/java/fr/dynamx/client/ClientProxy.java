@@ -7,6 +7,7 @@ import fr.dynamx.client.handlers.KeyHandler;
 import fr.dynamx.client.network.ClientPhysicsEntitySynchronizer;
 import fr.dynamx.client.renders.RenderProp;
 import fr.dynamx.client.renders.RenderRagdoll;
+import fr.dynamx.client.renders.RenderSeatEntity;
 import fr.dynamx.client.renders.TESRDynamXBlock;
 import fr.dynamx.client.renders.vehicle.RenderBaseVehicle;
 import fr.dynamx.client.renders.vehicle.RenderDoor;
@@ -17,6 +18,7 @@ import fr.dynamx.common.blocks.TEDynamXBlock;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.entities.PropsEntity;
 import fr.dynamx.common.entities.RagdollEntity;
+import fr.dynamx.common.entities.SeatEntity;
 import fr.dynamx.common.entities.vehicles.*;
 import fr.dynamx.common.network.sync.PhysicsEntitySynchronizer;
 import fr.dynamx.common.network.sync.SPPhysicsEntitySynchronizer;
@@ -25,6 +27,7 @@ import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.world.BuiltinThreadedPhysicsWorld;
 import fr.dynamx.utils.DynamXLoadingTasks;
 import fr.dynamx.utils.client.CommandNetworkDebug;
+import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
@@ -39,6 +42,7 @@ import net.minecraftforge.client.resource.ISelectiveResourceReloadListener;
 import net.minecraftforge.client.resource.VanillaResourceType;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.client.SplashProgress;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -50,6 +54,7 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
     public static DynamXSoundHandler SOUND_HANDLER = new DynamXSoundHandler();
 
     public ClientProxy() {
+        DynamXContext.initObjModelRegistry();
         ModelLoaderRegistry.registerLoader(DynamXContext.getDxModelRegistry().getItemRenderer());
     }
 
@@ -75,6 +80,7 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
         RenderingRegistry.registerEntityRenderingHandler(PropsEntity.class, RenderProp::new);
         RenderingRegistry.registerEntityRenderingHandler(DoorEntity.class, RenderDoor::new);
         RenderingRegistry.registerEntityRenderingHandler(RagdollEntity.class, RenderRagdoll::new);
+        RenderingRegistry.registerEntityRenderingHandler(SeatEntity.class, RenderSeatEntity::new);
 
         ((SimpleReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(this);
     }
@@ -86,10 +92,22 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
         MinecraftForge.EVENT_BUS.register(new KeyHandler(FMLClientHandler.instance().getClient()));
         ClientCommandHandler.instance.registerCommand(new CommandUdp());
         ClientCommandHandler.instance.registerCommand(new CommandNetworkDebug());
+        //TODO /dynamxclient command
 
         ClientRegistry.bindTileEntitySpecialRenderer(TEDynamXBlock.class, new TESRDynamXBlock<>());
-        if(!Minecraft.getMinecraft().getFramebuffer().isStencilEnabled())
+        if (!Minecraft.getMinecraft().getFramebuffer().isStencilEnabled())
             Minecraft.getMinecraft().getFramebuffer().enableStencil();
+    }
+
+    @Override
+    public void completeInit() {
+        super.completeInit();
+        SplashProgress.pause();
+        try {
+            DynamXContext.getDxModelRegistry().uploadVAOs();
+        } finally {
+            SplashProgress.resume();
+        }
     }
 
     @Override
@@ -144,6 +162,7 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
     @Override
     public void onResourceManagerReload(IResourceManager resourceManager, Predicate<IResourceType> resourcePredicate) {
         if (resourcePredicate.test(VanillaResourceType.MODELS)) {
+            DynamXRenderUtils.initGlMeshes();
             DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.CLIENT, DynamXLoadingTasks.MODEL).thenAccept(empty -> {
                 if (Minecraft.getMinecraft().player != null && DynamXErrorManager.getErrorManager().hasErrors(DynamXErrorManager.MODEL_ERRORS))
                     Minecraft.getMinecraft().player.sendMessage(new TextComponentTranslation("dynamx.reload.models.errors"));

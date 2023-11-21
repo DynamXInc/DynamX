@@ -1,7 +1,7 @@
 package fr.dynamx.api.entities;
 
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.entities.modules.CarEngineModule;
+import fr.dynamx.common.entities.modules.engines.CarEngineModule;
 import net.minecraftforge.common.util.EnumHelper;
 
 /**
@@ -13,12 +13,12 @@ public class VehicleEntityProperties {
      * One wheel has all of these properties
      */
     public enum EnumVisualProperties {
-        STEERANGLE(1),
-        ROTATIONANGLE(1),
-        SUSPENSIONLENGTH(0),
-        COLLISIONX(0),
-        COLLISIONY(0),
-        COLLISIONZ(0);
+        STEER_ANGLE(1),
+        ROTATION_ANGLE(1),
+        SUSPENSION_LENGTH(0),
+        COLLISION_X(0),
+        COLLISION_Y(0),
+        COLLISION_Z(0);
 
         /**
          * Determines the interpolation type when synced <br>

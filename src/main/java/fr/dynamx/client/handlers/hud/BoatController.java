@@ -2,34 +2,20 @@ package fr.dynamx.client.handlers.hud;
 
 import fr.aym.acsguis.component.GuiComponent;
 import fr.aym.acsguis.component.panel.GuiPanel;
-import fr.aym.acsguis.component.style.AutoStyleHandler;
-import fr.aym.acsguis.component.style.ComponentStyleManager;
-import fr.aym.acsguis.component.textarea.GuiLabel;
 import fr.aym.acsguis.component.textarea.UpdatableGuiLabel;
-import fr.aym.acsguis.cssengine.selectors.EnumSelectorContext;
-import fr.aym.acsguis.cssengine.style.EnumCssStyleProperties;
-import fr.aym.acsguis.utils.GuiConstants;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.events.VehicleEntityEvent;
-import fr.dynamx.client.handlers.ClientDebugSystem;
-import fr.dynamx.client.handlers.KeyHandler;
-import fr.dynamx.common.contentpack.type.vehicle.CarEngineInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.entities.modules.BoatPropellerModule;
-import fr.dynamx.common.entities.modules.CarEngineModule;
+import fr.dynamx.common.entities.modules.engines.BoatPropellerModule;
 import fr.dynamx.utils.DynamXConstants;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 

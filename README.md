@@ -1,58 +1,67 @@
-# [![](http://cf.way2muchnoise.eu/full_dynamx_downloads.svg)](https://www.curseforge.com/minecraft/mc-mods/dynamx) [![](https://cf.way2muchnoise.eu/versions/dynamx.svg)](https://www.curseforge.com/minecraft/mc-mods/dynamx)
-![](https://dynamx.fr/banner_dynamx_2.png)
+<p align="center">
+    <img src="https://files.dynamx.fr/img/banner_dynamx_2_crop.png" alt="DynamX Banner" width="60%">
+    <br>
+    <a href="https://www.curseforge.com/minecraft/mc-mods/dynamx">
+        <img src="https://cf.way2muchnoise.eu/full_dynamx_downloads.svg" alt="Downloads">
+        <img src="https://cf.way2muchnoise.eu/versions/dynamx.svg" alt="Versions">
+    </a>
+</p>
 
-## Official Repository of DynamX
+<h1 align="center">DynamX - Realistic Physics for Minecraft</h1>
 
-DynamX is a mod for adding objects with realistic physics such as vehicles, props and ragdolls to Minecraft. DynamX also allows you to add blocks and armor, using highly detailed models.
+<p align="center">
+    Welcome to the official repository of DynamX, a Minecraft mod that adds realistic physics into the game. With DynamX, you can add vehicles, props, ragdolls, blocks, and armor into your game, all of which follow the laws of physics and come with highly detailed models.
+</p>
 
-## Setup workspace to create an addon
+## 🛠 Creating an Add-on
 
-You can find a full explanation on how to make addons there : https://dynamx.fr/wiki/installation/devsetup/
+Interested in creating an add-on for DynamX? You can find a step-by-step guide on how to make add-ons [here](https://dynamx.fr/wiki/installation/devsetup/).
 
-In Forge, add the following to your `build.gradle`
+Include the following in your `build.gradle` to set up your workspace:
 
 ```gradle
 repositories {
     maven {
-        url 'http://maven.dynamx.fr/artifactory/DynamXRepo'
+        url 'https://maven.dynamx.fr/artifactory/DynamXRepo'
     }
     maven {
-        url 'https://maven.dynamx.fr/artifactory/' + 'ACsGuisRepo'
+        url 'https://maven.dynamx.fr/artifactory/ACsGuisRepo'
     }
 }
 
 dependencies {
-    deobfCompile "fr.dynamx:DynamX:[VERSION]"
-    compile "fr.aym.acsguis:ACsGuis:1.2.3-2"
+    implementation "fr.dynamx:DynamX:[VERSION]"
+    implementation "fr.aym.acsguis:ACsGuis:1.2.9"
 }
 ```
 
-## Contribution
+After this, add DynamX to your `mods` folder.
 
-In order to setup DynamX workspace you just need to run
-```gradle
-gradlew setupDecompWorkspace
-```
-and add to the VM options of the run configuration in your IDE
+## 🌟 Contributing to DynamX
+
+To contribute to DynamX, reload the Gradle project to set up the workspace. To run your game with the DynamX core mod, add the following line to the VM options of the run configuration in your IDE:
+
 ```
 -Dfml.coreMods.load=fr.dynamx.common.core.DynamXCoreMod
 ```
 
-DynamX is distributed under Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 license.
+## 📄 License
 
-## Acknowledgments
+DynamX is licensed under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 License.
 
-The whole team of DynamX is grateful to :
+## 🙏 Acknowledgments
 
-+ Stephen Gold, the creator of [Libbulletjme](https://github.com/stephengold/Libbulletjme) (the library used by DynamX to handle the physics). For his sympathy and his help
-+ GreenPeople, for the 3d models he provided for DynamX
-+ [DrawLife](https://discord.gg/tEWfWmASn6) and [StateMC](https://www.statemc.de/), for all the bug report, and their countless tests
-+ Blacknite, Ertinox and MK, for their intensive use of DynamX and their helpful suggestions
-+ All the content creators (addons & content packs) for using DynamX and making wonderful things with it <3
+The DynamX team would like to express our heartfelt gratitude to:
 
++ Stephen Gold, the creator of [Libbulletjme](https://github.com/stephengold/Libbulletjme), our physics engine, for his unwavering support and kindness.
++ Sylano, for supplying us with 3D models for DynamX.
++ [DrawLife](https://discord.gg/tEWfWmASn6) and [StateMC](https://www.statemc.de/) for their diligent bug reports and extensive testing.
++ Blacknite, Ertinox, and MK for their extensive use of DynamX and their valuable suggestions.
++ All the content creators (addons & content packs) for using DynamX and creating amazing content with it. We appreciate your support! ❤️
 
-## Links
-Website: https://dynamx.fr  
-Wiki: https://dynamx.fr/wiki/   
-CurseForge: https://www.curseforge.com/minecraft/mc-mods/dynamx     
-Discord: https://discord.gg/y53KGzD 
+## 🔗 Links
+
++ **Website:** [DynamX](https://dynamx.fr)
++ **Wiki:** [DynamX Wiki](https://dynamx.fr/wiki/)
++ **CurseForge:** [DynamX on CurseForge](https://www.curseforge.com/minecraft/mc-mods/dynamx)
++ **Discord:** [Join us on Discord](https://discord.gg/y53KGzD)

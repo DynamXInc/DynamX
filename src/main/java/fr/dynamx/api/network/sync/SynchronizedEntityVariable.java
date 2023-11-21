@@ -12,5 +12,7 @@ public @interface SynchronizedEntityVariable
     String name();
 
     @Retention(RetentionPolicy.RUNTIME)
-    @interface SynchronizedPhysicsModule {}
+    @interface SynchronizedPhysicsModule {
+        String modid();
+    }
 }

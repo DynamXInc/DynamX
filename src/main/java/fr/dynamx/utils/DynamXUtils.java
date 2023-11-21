@@ -16,12 +16,14 @@ import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.PackInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
-import fr.dynamx.common.entities.modules.CarEngineModule;
 import fr.dynamx.common.entities.modules.TrailerAttachModule;
+import fr.dynamx.common.entities.modules.engines.BasicEngineModule;
 import fr.dynamx.common.entities.vehicles.TrailerEntity;
 import fr.dynamx.common.physics.joints.EntityJoint;
 import fr.dynamx.common.physics.joints.EntityJointsHandler;
+import fr.dynamx.common.physics.utils.StairsBox;
 import fr.dynamx.utils.maths.DynamXGeometry;
+import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import fr.dynamx.utils.physics.DynamXPhysicsHelper;
 import fr.dynamx.utils.physics.PhysicsRaycastResult;
@@ -35,6 +37,7 @@ import net.minecraft.nbt.NBTTagFloat;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EntitySelectors;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -48,13 +51,10 @@ import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.lwjgl.BufferUtils;
 
 import javax.annotation.Nullable;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.function.Predicate;
 
 /**
@@ -160,7 +160,7 @@ public class DynamXUtils {
         eyeLook.multLocal(distanceMax);
         lookAt.addLocal(eyeLook);
 
-        return DynamXPhysicsHelper.castRay( DynamXContext.getPhysicsWorld(entity.world), eyePos, lookAt, ignoredPredicate);
+        return DynamXPhysicsHelper.castRay(DynamXContext.getPhysicsWorld(entity.world), eyePos, lookAt, ignoredPredicate);
     }
 
     public static NBTTagList newDoubleNBTList(double... numbers) {
@@ -337,7 +337,7 @@ public class DynamXUtils {
 
     //DUPLICATE (function is already in the BasicsAddon)
     public static int getSpeed(BaseVehicleEntity<?> entity) {
-        CarEngineModule engine = entity.getModuleByType(CarEngineModule.class);
+        BasicEngineModule engine = entity.getModuleByType(BasicEngineModule.class);
         if (engine != null) {
             float[] ab = engine.getEngineProperties();
             if (ab == null) return 0;
@@ -346,7 +346,7 @@ public class DynamXUtils {
         return -1;
     }
 
-    public static void attachTrailer(EntityPlayer player, BaseVehicleEntity<?> carEntity, BaseVehicleEntity<?> trailer){
+    public static void attachTrailer(EntityPlayer player, BaseVehicleEntity<?> carEntity, BaseVehicleEntity<?> trailer) {
         Vector3fPool.openPool();
         Vector3f p1r = DynamXGeometry.rotateVectorByQuaternion(carEntity.getModuleByType(TrailerAttachModule.class).getAttachPoint(), carEntity.physicsRotation);
         Vector3f p2r = DynamXGeometry.rotateVectorByQuaternion(trailer.getModuleByType(TrailerAttachModule.class).getAttachPoint(), trailer.physicsRotation);
@@ -386,15 +386,35 @@ public class DynamXUtils {
 
     public static void hotswapWorldPackInfos(World w) {
         DynamXMain.log.info("Hot-swapping pack infos in models and spawn entities/tile entities in world " + w);
-        for(Entity e : w.loadedEntityList) {
-            if(e instanceof IPackInfoReloadListener)
+        for (Entity e : w.loadedEntityList) {
+            if (e instanceof IPackInfoReloadListener)
                 ((IPackInfoReloadListener) e).onPackInfosReloaded();
         }
-        for(TileEntity te : w.loadedTileEntityList) {
-            if(te instanceof IPackInfoReloadListener)
+        for (TileEntity te : w.loadedTileEntityList) {
+            if (te instanceof IPackInfoReloadListener)
                 ((IPackInfoReloadListener) te).onPackInfosReloaded();
         }
-        if(w.isRemote)
+        if (w.isRemote)
             DynamXContext.getDxModelRegistry().onPackInfosReloaded();
+    }
+
+    /**
+     * Shorthand to get a secured input stream able to read terrain data
+     *
+     * @param is The input stream to read
+     * @return An ObjectInputStream that can only read primitives and terrain elements
+     * @throws IOException If an I/O error occurs
+     */
+    public static ObjectInputStream getTerrainObjectsIS(InputStream is) throws IOException {
+        Set<String> classesSet = Collections.unmodifiableSet(new HashSet(Arrays.asList(byte[].class.getName(), MutableBoundingBox.class.getName(), StairsBox.class.getName(), EnumFacing.class.getName(), Enum.class.getName())));
+        return new ObjectInputStream(is) {
+            @Override
+            protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
+                if (!classesSet.contains(desc.getName())) {
+                    throw new InvalidClassException("Unauthorized deserialization attempt", desc.getName());
+                }
+                return super.resolveClass(desc);
+            }
+        };
     }
 }

@@ -1,24 +1,18 @@
 package fr.dynamx.client.renders;
 
-import fr.dynamx.api.entities.IModuleContainer;
-import fr.dynamx.api.events.PhysicsEntityEvent;
+import fr.dynamx.api.events.DynamXEntityRenderEvents;
 import fr.dynamx.client.handlers.ClientDebugSystem;
-import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
-import fr.dynamx.common.contentpack.parts.PartSeat;
+import fr.dynamx.client.renders.scene.EntityRenderContext;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
-import fr.dynamx.utils.DynamXUtils;
-import fr.dynamx.utils.EnumSeatPlayerPosition;
 import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.debug.renderer.DebugRenderer;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
@@ -39,13 +33,13 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
 
     public RenderPhysicsEntity(RenderManager manager) {
         super(manager);
-        addDebugRenderers(new DebugRenderer.ShapesDebug(), new DebugRenderer.CenterOfMassDebug());
+        addDebugRenderers(new DebugRenderer.ShapesDebug());
     }
 
     /**
      * Setups render translation and rotation before rendering the entity
      */
-    protected Quaternion setupRenderTransform(T entity, double x, double y, double z, float entityYaw, float partialTicks) {
+    public Quaternion setupRenderTransform(T entity, double x, double y, double z, float partialTicks) {
         GlStateManager.translate((float) x, (float) y, (float) z);
         Quaternion q = ClientDynamXUtils.computeInterpolatedGlQuaternion(entity.prevRenderRotation, entity.renderRotation, partialTicks);
         GlStateManager.rotate(q);
@@ -60,97 +54,39 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
         QuaternionPool.openPool();
         Vector3fPool.openPool();
         GlQuaternionPool.openPool();
-        Quaternion appliedRotation = null;
         int renderPass = MinecraftForgeClient.getRenderPass();
+        EntityRenderContext context = getRenderContext(entity);
+        if (context == null) {
+            renderOffsetAABB(entity.getEntityBoundingBox(), x - entity.lastTickPosX, y - entity.lastTickPosY, z - entity.lastTickPosZ);
+            return;
+        }
+        context.setRenderParams(x, y, z, partialTicks, false);
         //Render vehicle
-        if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.ENTITY, x, y, z, partialTicks, renderPass))) {
-            GlStateManager.pushMatrix();
-            {
-                appliedRotation = setupRenderTransform(entity, x, y, z, entityYaw, partialTicks);
-                renderMain(entity, partialTicks);
-                renderParts(entity, partialTicks);
-            }
-            GlStateManager.popMatrix();
+        if (!MinecraftForge.EVENT_BUS.post(new DynamXEntityRenderEvents.Render(entity, context, DynamXEntityRenderEvents.Render.Type.ENTITY, renderPass))) {
+            renderEntity(entity, context);
         }
-        if(MinecraftForgeClient.getRenderPass() == 0) {
-            spawnParticles(entity, appliedRotation, partialTicks);
-            //Render players inside the entity
-            if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.RIDDING_PLAYERS, x, y, z, partialTicks, renderPass))) {
-                renderRidingEntities(entity, x, y, z, partialTicks, appliedRotation);
-            }
+        if (renderPass == 0) {
+            spawnParticles(entity, context);
             //Render debug
-            if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.DEBUG, x, y, z, partialTicks, renderPass))) {
-                renderDebug(entity, x, y, z, partialTicks);
+            if (!MinecraftForge.EVENT_BUS.post(new DynamXEntityRenderEvents.Render(entity, context, DynamXEntityRenderEvents.Render.Type.DEBUG, renderPass))) {
+                renderDebug(entity, context);
             }
         }
-        MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Render(entity, this, PhysicsEntityEvent.Render.Type.POST, x, y, z, partialTicks, renderPass));
+        MinecraftForge.EVENT_BUS.post(new DynamXEntityRenderEvents.Render(entity, context, DynamXEntityRenderEvents.Render.Type.POST, renderPass));
         Vector3fPool.closePool();
         QuaternionPool.closePool();
         GlQuaternionPool.closePool();
     }
 
-    protected void renderRidingEntities(T entity, double x, double y, double z, float partialTicks, Quaternion appliedRotation) {
-        for (Entity e : entity.getPassengers()) {
-            ClientEventHandler.renderingEntity.add(e.getUniqueID());
-            if ((e != Minecraft.getMinecraft().player || Minecraft.getMinecraft().gameSettings.thirdPersonView != 0)) {
-                GlStateManager.pushMatrix();
-                //Apply vehicle's transform
-                GlStateManager.translate((float) x, (float) y, (float) z);
-                //Translate to the seat, interpolating it's position
-                GlStateManager.translate(
-                        e.prevPosX - entity.prevPosX + (e.posX - entity.posX - e.prevPosX + entity.prevPosX) * partialTicks,
-                        e.prevPosY - entity.prevPosY + (e.posY - entity.posY - e.prevPosY + entity.prevPosY) * partialTicks,
-                        e.prevPosZ - entity.prevPosZ + (e.posZ - entity.posZ - e.prevPosZ + entity.prevPosZ) * partialTicks);
-                //Apply vehicle's rotation
-                if (appliedRotation != null)
-                    GlStateManager.rotate(appliedRotation);
-                //Apply seat rotation
-                if (entity instanceof IModuleContainer.ISeatsContainer) {
-                    PartSeat seat = ((IModuleContainer.ISeatsContainer) entity).getSeats().getRidingSeat(e);
-                    if (seat != null) {
-                        EnumSeatPlayerPosition position = seat.getPlayerPosition();
-                        shouldRenderPlayerSitting = position == EnumSeatPlayerPosition.SIT || position == null;
-
-                        if (seat.getPlayerSize() != null)
-                            GlStateManager.scale(seat.getPlayerSize().x, seat.getPlayerSize().y, seat.getPlayerSize().z);
-                        if (seat.getRotation() != null)
-                            GlStateManager.rotate(GlQuaternionPool.get(seat.getRotation()));
-                        if (position == EnumSeatPlayerPosition.LYING)
-                            GlStateManager.rotate(90, -1, 0, 0);
-                    }
-                }
-
-                //Remove player's yaw offset rotation, to avoid stiff neck
-                PartSeat seat = ((IModuleContainer.ISeatsContainer) entity).getSeats().getRidingSeat(e);
-                if (seat != null && seat.shouldLimitFieldOfView()) {
-                    if (e instanceof AbstractClientPlayer) {
-                        ((AbstractClientPlayer) e).renderYawOffset = ((AbstractClientPlayer) e).prevRenderYawOffset = 0;
-                    }
-                }
-
-                //The render the player, e.rotationYaw is the name plate rotation
-                if (e instanceof AbstractClientPlayer) {
-                    if(ClientEventHandler.renderPlayer != null){
-                        ClientEventHandler.renderPlayer.doRender((AbstractClientPlayer) e, 0, 0, 0, e.rotationYaw, partialTicks);
-                    }
-                } else {
-                    Minecraft.getMinecraft().getRenderManager().renderEntity(e, 0, 0, 0, e.rotationYaw, partialTicks, false);
-                }
-                GlStateManager.popMatrix();
-            }
-            ClientEventHandler.renderingEntity.remove(e.getUniqueID());
-        }
-    }
-
-    public void spawnParticles(T physicsEntity, Quaternion rotation, float partialTicks) {
+    public void spawnParticles(T physicsEntity, EntityRenderContext context) {
         if (physicsEntity instanceof PackPhysicsEntity) {
             PackPhysicsEntity<?, ?> packPhysicsEntity = (PackPhysicsEntity<?, ?>) physicsEntity;
             if (packPhysicsEntity.getPackInfo() instanceof ParticleEmitterInfo.IParticleEmitterContainer) {
                 DynamXRenderUtils.spawnParticles(
                         (ParticleEmitterInfo.IParticleEmitterContainer) packPhysicsEntity.getPackInfo(),
                         physicsEntity.world,
-                        DynamXUtils.toVector3f(physicsEntity.getPositionVector()),
-                        new com.jme3.math.Quaternion(rotation.x, rotation.y, rotation.z, rotation.w));
+                        physicsEntity.physicsPosition,
+                        physicsEntity.physicsRotation);
             }
         }
     }
@@ -164,7 +100,10 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
 
     /**
      * Adds the debug renders to the list
+     *
+     * @deprecated The debug should be rendered using the new {@link fr.dynamx.client.renders.scene.SceneGraph}s system
      */
+    @Deprecated
     @SuppressWarnings("unchecked")
     public void addDebugRenderers(DebugRenderer<?>... renderers) {
         for (DebugRenderer<?> renderer : renderers) {
@@ -173,58 +112,72 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
     }
 
     /**
-     * Renders parts like wheels, doors, lights...
+     * Renders the entity in the world
      */
-    public abstract void renderParts(T entity, float partialTicks);
+    public abstract void renderEntity(T entity, EntityRenderContext context);
 
     /**
-     * Renders the core of the entity, like a car chassis
+     * Renders the entity debug in the world
      */
-    public abstract void renderMain(T entity, float partialsTicks);
+    public abstract void renderEntityDebug(T entity, EntityRenderContext context);
+
+    /**
+     * Should return an EntityRenderContext with the entity parameters set <br>
+     * The render parameters are automatically set <br>
+     * Returning null will cancel the render and render a vanilla white box instead <br>
+     * The returned context must be as complete as possible, as it is given in render events fired before the call to renderEntity
+     *
+     * @param entity The entity to render
+     * @return A render context with the entity parameters set
+     */
+    @Nullable
+    public abstract EntityRenderContext getRenderContext(T entity);
 
     /**
      * Renders active {@link DebugRenderer}s <br>
-     * Shouldn't be overridden : use {@link DebugRenderer}s to render your debug <br>
+     * Shouldn't be overridden : use {@link RenderPhysicsEntity#renderEntityDebug(PhysicsEntity, EntityRenderContext)} to render your debug <br>
      * Can be cancelled via the dedicated event
      */
-    public final void renderDebug(T entity, double x, double y, double z, float partialTicks) {
+    public final void renderDebug(T entity, EntityRenderContext context) {
         if (ClientDebugSystem.enableDebugDrawing) {
             List<DebugRenderer<T>> validRotatedRenders = debugRenderers.stream().filter(r -> r.shouldRender(entity) && r.hasEntityRotation(entity)).collect(Collectors.toList());
             List<DebugRenderer<T>> validPureRenders = debugRenderers.stream().filter(r -> r.shouldRender(entity) && !r.hasEntityRotation(entity)).collect(Collectors.toList());
-            if (!validRotatedRenders.isEmpty() || !validPureRenders.isEmpty()) {
-                QuaternionPool.openPool();
-                Vector3fPool.openPool();
+            QuaternionPool.openPool();
+            Vector3fPool.openPool();
+
+            GlStateManager.pushMatrix();
+            {
+                GlStateManager.disableLighting();
+                GlStateManager.disableDepth();
+                GlStateManager.disableTexture2D();
+
+                renderEntityDebug(entity, context);
+
+                double x = context.getX(), y = context.getY(), z = context.getZ();
+                float partialTicks = context.getPartialTicks();
+                GlStateManager.translate((float) x, (float) y, (float) z);
 
                 GlStateManager.pushMatrix();
                 {
-                    GlStateManager.disableLighting();
-                    GlStateManager.disableDepth();
-                    GlStateManager.disableTexture2D();
-
-                    GlStateManager.translate((float) x, (float) y, (float) z);
-
-                    GlStateManager.pushMatrix();
-                    {
-                        Quaternion rotQuat = ClientDynamXUtils.computeInterpolatedGlQuaternion(
-                                entity.prevRenderRotation,
-                                entity.renderRotation,
-                                partialTicks);
-                        GlStateManager.rotate(rotQuat);
-                        validRotatedRenders.forEach(renderer -> renderer.render(entity, this, x, y, z, partialTicks));
-                    }
-                    GlStateManager.popMatrix();
-
-                    validPureRenders.forEach(renderer -> renderer.render(entity, this, x, y, z, partialTicks));
-
-                    GlStateManager.enableLighting();
-                    GlStateManager.enableTexture2D();
-                    GlStateManager.enableDepth();
+                    Quaternion rotQuat = ClientDynamXUtils.computeInterpolatedGlQuaternion(
+                            entity.prevRenderRotation,
+                            entity.renderRotation,
+                            partialTicks);
+                    GlStateManager.rotate(rotQuat);
+                    validRotatedRenders.forEach(renderer -> renderer.render(entity, this, x, y, z, partialTicks));
                 }
                 GlStateManager.popMatrix();
 
-                Vector3fPool.closePool();
-                QuaternionPool.closePool();
+                validPureRenders.forEach(renderer -> renderer.render(entity, this, x, y, z, partialTicks));
+
+                GlStateManager.enableLighting();
+                GlStateManager.enableTexture2D();
+                GlStateManager.enableDepth();
             }
+            GlStateManager.popMatrix();
+
+            Vector3fPool.closePool();
+            QuaternionPool.closePool();
         }
     }
 
@@ -240,7 +193,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
      * Checks if the entity can be rendered, before any rendering and event
      */
     public boolean canRender(T entity) {
-        return entity.initialized == 2;
+        return entity.initialized == PhysicsEntity.EnumEntityInitState.ALL;
     }
 
     /**
@@ -250,7 +203,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
     public void renderModel(DxModelRenderer model, @Nullable Entity entity, byte textureDataId, boolean forceVanillaRender) {
         if (!model.isEmpty())
             model.renderModel(textureDataId, forceVanillaRender);
-        else if(entity != null) //Error while loading the model
+        else if (entity != null) //Error while loading the model
             renderOffsetAABB(entity.getEntityBoundingBox(), -entity.lastTickPosX, -entity.lastTickPosY, -entity.lastTickPosZ);
     }
 

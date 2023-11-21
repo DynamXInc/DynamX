@@ -139,4 +139,14 @@ public abstract class VehicleSound implements IDynamXSound {
     protected float getCurrentPitch() {
         return 1.0F;
     }
+
+    @Override
+    public float getDistanceToPlayer() {
+        return playerPos.distance(sourcePos);
+    }
+
+    @Override
+    public void onMuted() {
+
+    }
 }

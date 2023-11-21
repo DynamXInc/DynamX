@@ -49,7 +49,8 @@ public class PartPropsContainer extends BasePart<ModularVehicleInfo> implements 
         return getScale();
     }
 
-    public MutableBoundingBox getBox() {
+    @Override
+    public MutableBoundingBox getBoundingBox() {
         return box;
     }
 

@@ -10,9 +10,11 @@ import fr.dynamx.api.network.sync.SynchronizedEntityVariableRegistry;
 import fr.dynamx.client.gui.GuiBlockCustomization;
 import fr.dynamx.client.gui.GuiDnxDebug;
 import fr.dynamx.client.gui.GuiLoadingErrors;
+import fr.dynamx.client.gui.NewGuiDnxDebug;
 import fr.dynamx.client.handlers.hud.CarController;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
+import fr.dynamx.common.contentpack.loader.InfoList;
 import fr.dynamx.common.contentpack.loader.InfoLoader;
 import fr.dynamx.common.contentpack.loader.SubInfoTypesRegistry;
 import fr.dynamx.common.contentpack.sync.PackSyncHandler;
@@ -35,6 +37,7 @@ import net.minecraftforge.fml.common.event.FMLConstructionEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import javax.annotation.Nonnull;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -141,6 +144,7 @@ public class ContentPackLoader {
         if (side.isClient()) {
             //Add built-in style, before customs by addons
             ACsGuiApi.registerStyleSheetToPreload(GuiDnxDebug.STYLE);
+            ACsGuiApi.registerStyleSheetToPreload(NewGuiDnxDebug.STYLE);
             ACsGuiApi.registerStyleSheetToPreload(GuiLoadingErrors.STYLE);
             ACsGuiApi.registerStyleSheetToPreload(CarController.STYLE);
             ACsGuiApi.registerStyleSheetToPreload(GuiBlockCustomization.STYLE);
@@ -176,6 +180,11 @@ public class ContentPackLoader {
         return protectedResources;
     }
 
+    @Nonnull
+    public static ModProtectionContainer getProtectedResources(String packName) {
+        return protectedResources.getOrDefault(packName, DynamXMain.mpsContainer);
+    }
+
     /**
      * All builtin addon objects ({@link fr.dynamx.api.contentpack.object.subinfo.ISubInfoType}s, blocks, items...) should have been registered before packs loading <br> <br>
      * Use the addons init callback to avoid problems
@@ -197,12 +206,12 @@ public class ContentPackLoader {
         isHotReloading = initialized;
         if (!isHotReloading)
             initialized = true;
-        for (InfoLoader<?> loader : DynamXObjectLoaders.LOADERS)
+        for (InfoList<?> loader : DynamXObjectLoaders.getInfoLists())
             loader.clear(isHotReloading);
         DynamXErrorManager.getErrorManager().clear(DynamXErrorManager.PACKS_ERRORS);
         DynamXContext.getDxModelDataCache().clear();
         try {
-            ProgressManager.ProgressBar bar = ProgressManager.push("Loading content pack system", 1 + DynamXObjectLoaders.LOADERS.size());
+            ProgressManager.ProgressBar bar = ProgressManager.push("Loading content pack system", 1 + DynamXObjectLoaders.getInfoLists().size());
             bar.step("Discover assets");
 
             MinecraftForge.EVENT_BUS.post(new ContentPackSystemEvent.Load(PhysicsEntityEvent.Phase.PRE));
@@ -278,8 +287,8 @@ public class ContentPackLoader {
                 }
             }
             //Load shapes
-            for (InfoLoader<?> loader : DynamXObjectLoaders.LOADERS) {
-                bar.step("Post load : " + loader.getPrefix().substring(0, loader.getPrefix().length()-1));
+            for (InfoList<?> loader : DynamXObjectLoaders.getInfoLists()) {
+                bar.step("Post load : " + loader.getName());
                 loader.postLoad(isHotReloading);
             }
             ProgressManager.pop(bar);
@@ -335,7 +344,7 @@ public class ContentPackLoader {
         try {
             String configName = file.getName().substring(0, file.getName().length() - suffix.length()).toLowerCase();
             boolean loaded = false;
-            for (InfoLoader<?> loader : DynamXObjectLoaders.LOADERS) {
+            for (InfoLoader<?> loader : DynamXObjectLoaders.getInfoLoaders()) {
                 if (loader.load(loadingPack, configName, file, isHotReloading)) {
                     loaded = true;
                     break;

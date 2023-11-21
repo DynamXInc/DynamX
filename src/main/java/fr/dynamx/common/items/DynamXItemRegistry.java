@@ -1,6 +1,6 @@
 package fr.dynamx.common.items;
 
-import fr.dynamx.api.contentpack.object.IInfoOwner;
+import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
@@ -39,15 +39,15 @@ public class DynamXItemRegistry {
     public static CreativeTabs vehicleTab = new CreativeTabs(DynamXConstants.ID + "_vehicle") {
         @Override
         public ItemStack createIcon() {
-            Optional<IInfoOwner<ModularVehicleInfo>> item = DynamXObjectLoaders.WHEELED_VEHICLES.owners.stream().filter(blockObjectIInfoOwner -> blockObjectIInfoOwner.getInfo().getCreativeTab(null) == null).findFirst();
+            Optional<IDynamXItem<ModularVehicleInfo>> item = DynamXObjectLoaders.WHEELED_VEHICLES.owners.stream().filter(blockObjectIInfoOwner -> blockObjectIInfoOwner.getInfo().getCreativeTab(null) == null).findFirst();
             return item.map(blockObjectIInfoOwner -> new ItemStack((Item) blockObjectIInfoOwner)).orElseGet(() -> new ItemStack(Items.CARROT));
         }
     };
     public static CreativeTabs objectTab = new CreativeTabs(DynamXConstants.ID + "_object") {
         @Override
         public ItemStack createIcon() {
-            Optional<IInfoOwner<ItemObject<?>>> item = DynamXObjectLoaders.ITEMS.owners.stream().filter(blockObjectIInfoOwner -> blockObjectIInfoOwner.getInfo().getCreativeTab(null) == null).findFirst();
-            Optional<IInfoOwner<BlockObject<?>>> block = DynamXObjectLoaders.BLOCKS.owners.stream().filter(blockObjectIInfoOwner -> blockObjectIInfoOwner.getInfo().getCreativeTab(null) == null).findFirst();
+            Optional<IDynamXItem<ItemObject<?>>> item = DynamXObjectLoaders.ITEMS.owners.stream().filter(blockObjectIInfoOwner -> blockObjectIInfoOwner.getInfo().getCreativeTab(null) == null).findFirst();
+            Optional<IDynamXItem<BlockObject<?>>> block = DynamXObjectLoaders.BLOCKS.owners.stream().filter(blockObjectIInfoOwner -> blockObjectIInfoOwner.getInfo().getCreativeTab(null) == null).findFirst();
             return item.map(blockObjectIInfoOwner -> new ItemStack((Item) blockObjectIInfoOwner)).orElseGet(() -> block.map(blockOwner -> new ItemStack((Block) blockOwner)).orElseGet(() -> new ItemStack(Items.CARROT)));
         }
     };
@@ -80,8 +80,8 @@ public class DynamXItemRegistry {
 
     @SideOnly(Side.CLIENT)
     public static void registerModel(IResourcesOwner item, byte metadata) {
-        if (item instanceof IInfoOwner && item.createJson()) {
-            ContentPackUtils.addMissingJSONs(item, ((IInfoOwner<?>) item).getInfo(), DynamXMain.resDir, metadata);
+        if (item instanceof IDynamXItem && item.createJson()) {
+            ContentPackUtils.addMissingJSONs(item, ((IDynamXItem<?>) item).getInfo(), DynamXMain.resourcesDirectory, metadata);
         }
         String resourceName = DynamXConstants.ID + ":" + item.getJsonName(metadata);
         if (item.getDxModel() != null && item.getDxModel().isModelValid())

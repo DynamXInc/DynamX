@@ -10,19 +10,16 @@ import fr.dynamx.api.physics.terrain.ITerrainManager;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.entities.PhysicsEntity;
-import fr.dynamx.common.physics.terrain.cache.TerrainFile;
 import fr.dynamx.common.physics.terrain.computing.TerrainCollisionsCalculator;
 import fr.dynamx.common.physics.terrain.element.TerrainElementType;
 import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.DynamXReflection;
 import fr.dynamx.utils.VerticalChunkPos;
 import fr.dynamx.utils.debug.ChunkGraph;
-import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.debug.Profiler;
 import fr.dynamx.utils.optimization.BoundingBoxPool;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 
@@ -253,15 +250,11 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
         {
             Vector3fPool.openPool();
             BoundingBoxPool.getPool().openSubPool();
-
             elements.forEach(body -> {
                 physicsWorld.removeCollisionObject(body.getBody());
                 body.removeDebugFromWorld(mcWorld);
             });
-
-            (mcWorld.isRemote ? DynamXDebugOptions.CLIENT_CHUNK_BOXES : DynamXDebugOptions.CHUNK_BOXES).getDataIn().remove(new BlockPos(myPos.x, myPos.y, myPos.z));
             updateNearEntities();
-
             BoundingBoxPool.getPool().closeSubPool();
             Vector3fPool.closePool();
         }
@@ -521,7 +514,7 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
 
     @Override
     public String toString() {
-        return "ChunkCollisions[x=" + myPos.x + ";y=" + myPos.y + ";z=" + myPos.z + ";state=" + state+"]";
+        return "ChunkCollisions[x=" + myPos.x + ";y=" + myPos.y + ";z=" + myPos.z + ";state=" + state + "]";
     }
 
     @Override

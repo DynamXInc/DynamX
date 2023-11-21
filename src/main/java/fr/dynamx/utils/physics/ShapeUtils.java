@@ -18,7 +18,6 @@ import fr.dynamx.common.objloader.data.GltfModelData;
 import fr.dynamx.common.objloader.data.ObjModelData;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXUtils;
-import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.util.ResourceLocation;
 import vhacd.VHACD;
@@ -28,8 +27,7 @@ import vhacd.VHACDParameters;
 import java.io.*;
 import java.nio.FloatBuffer;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.zip.*;
 
 import static fr.dynamx.common.DynamXMain.log;
@@ -74,7 +72,7 @@ public class ShapeUtils {
         }
         if (shapeGenerator == null) {
             DxModelData model = DynamXContext.getDxModelDataFromCache(path);
-            String modelPath = DynamXMain.resDir + File.separator + path.getPackName() + File.separator + "assets" + //todo prevents from saving in zip files : we use the pack name
+            String modelPath = DynamXMain.resourcesDirectory + File.separator + path.getPackName() + File.separator + "assets" + //todo prevents from saving in zip files : we use the pack name
                     File.separator + path.getModelPath().getNamespace() + File.separator + path.getModelPath().getPath().replace("/", File.separator);
             String modelName = modelPath.substring(modelPath.lastIndexOf(File.separator) + 1);
             File file = new File(modelPath.replace(format, "_" + lowerCaseObjectName + "_" + DynamXConstants.DC_FILE_VERSION + ".dc"));
@@ -192,7 +190,16 @@ public class ShapeUtils {
 
     private static ShapeGenerator loadFile(InputStream file) {
         try {
-            ObjectInputStream in = new ObjectInputStream(new GZIPInputStream(file));
+            Set<String> classesSet = Collections.unmodifiableSet(new HashSet(Arrays.asList(ShapeGenerator.class.getName(), ArrayList.class.getName(), float[].class.getName())));
+            ObjectInputStream in = new ObjectInputStream(new GZIPInputStream(file)) {
+                @Override
+                protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
+                    if (!classesSet.contains(desc.getName())) {
+                        throw new InvalidClassException("Unauthorized deserialization attempt", desc.getName());
+                    }
+                    return super.resolveClass(desc);
+                }
+            };
             return (ShapeGenerator) in.readObject();
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException("Cannot load " + file, e);
@@ -238,44 +245,6 @@ public class ShapeUtils {
         }
         Vector3fPool.closePool();
         return vectors;
-    }
-
-    public static MutableBoundingBox getAABB(AbstractProp<?> info, Vector3f min, Vector3f max,
-                                             Vector3f additionalScale, Vector3f additionalTranslation) {
-        if (additionalScale == null)
-            additionalScale = new Vector3f();
-        if (additionalTranslation == null)
-            additionalTranslation = new Vector3f();
-        MutableBoundingBox aabb = new MutableBoundingBox(min.x, min.y, min.z, max.x, max.y, max.z);
-        aabb.scale(info.getScaleModifier().x + additionalScale.x,
-                info.getScaleModifier().y + additionalScale.y,
-                info.getScaleModifier().z + additionalScale.z);
-        if (!(info instanceof PropObject)) {
-            aabb.offset(
-                    0.5 + info.getTranslation().x + additionalTranslation.x,
-                    1.5 + info.getTranslation().y + additionalTranslation.y,
-                    0.5 + info.getTranslation().z + additionalTranslation.z);
-        }
-        return aabb;
-    }
-
-    public static void generateModelCollisions(AbstractProp<?> abstractProp, DxModelData dxModelData, CompoundCollisionShape compoundCollisionShape) {
-        switch (dxModelData.getFormat()) {
-            case OBJ:
-                ((ObjModelData) dxModelData).getObjObjects().forEach(objObject -> {
-                    abstractProp.getCollisionBoxes().add(ShapeUtils.getAABB(abstractProp,
-                            objObject.getMesh().min(), objObject.getMesh().max(), new Vector3f(), new Vector3f()));
-                    dxModelData.addCollisionShape(compoundCollisionShape, abstractProp.getScaleModifier());
-                });
-                break;
-            case GLTF:
-                ((GltfModelData) dxModelData).getNodeModels().forEach(nodeModel -> {
-                    abstractProp.getCollisionBoxes().add(ShapeUtils.getAABB(abstractProp,
-                            dxModelData.getMinOfMesh(nodeModel.getName()), dxModelData.getMaxOfMesh(nodeModel.getName()), new Vector3f(), new Vector3f()));
-                    dxModelData.addCollisionShape(compoundCollisionShape, abstractProp.getScaleModifier());
-                });
-                break;
-        }
     }
 
     public static class ShapeGenerator implements Serializable {

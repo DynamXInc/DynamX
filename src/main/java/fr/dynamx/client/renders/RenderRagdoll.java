@@ -4,12 +4,12 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.client.renders.model.ModelObjArmor;
+import fr.dynamx.client.renders.scene.EntityRenderContext;
 import fr.dynamx.common.entities.RagdollEntity;
 import fr.dynamx.common.items.DynamXItemArmor;
 import fr.dynamx.common.physics.entities.EnumRagdollBodyPart;
 import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.optimization.BoundingBoxPool;
-import fr.dynamx.utils.optimization.GlQuaternionPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.model.ModelPlayer;
@@ -21,7 +21,11 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 
+import javax.annotation.Nullable;
+
 public class RenderRagdoll<T extends RagdollEntity> extends RenderPhysicsEntity<T> {
+    protected final EntityRenderContext context = new EntityRenderContext(this);
+
     private final ModelPlayer modelFat = new ModelPlayer(0, false);
     private final ModelPlayer modelLight = new ModelPlayer(0, true);
 
@@ -31,18 +35,16 @@ public class RenderRagdoll<T extends RagdollEntity> extends RenderPhysicsEntity<
     }
 
     @Override
-    protected org.lwjgl.util.vector.Quaternion setupRenderTransform(T entity, double x, double y, double z, float entityYaw, float partialTicks) {
-        GlStateManager.translate((float) x - (entity.prevPosX + (entity.posX - entity.prevPosX) * partialTicks),
-                (float) y - (entity.prevPosY + (entity.posY - entity.prevPosY) * partialTicks),
-                (float) z - (entity.prevPosZ + (entity.posZ - entity.prevPosZ) * partialTicks));
-        // GlStateManager.rotate(rotation);
-        return GlQuaternionPool.get();
+    @Nullable
+    public EntityRenderContext getRenderContext(T entity) {
+        return context;
     }
 
     @Override
-    public void renderMain(T entity, float partialsTicks) {
+    public void renderEntity(T entity, EntityRenderContext context) {
         if (entity.isInvisible())
             return;
+        float partialTicks = context.getPartialTicks();
         BoundingBoxPool.getPool().openSubPool();
 
         String useSkin = entity.getSkin();
@@ -61,20 +63,23 @@ public class RenderRagdoll<T extends RagdollEntity> extends RenderPhysicsEntity<
         bindTexture(texture);
 
         GlStateManager.pushMatrix();
+        GlStateManager.translate((float) context.getX() - (entity.prevPosX + (entity.posX - entity.prevPosX) * partialTicks),
+                (float) context.getY() - (entity.prevPosY + (entity.posY - entity.prevPosY) * partialTicks),
+                (float) context.getZ() - (entity.prevPosZ + (entity.posZ - entity.prevPosZ) * partialTicks));
         // GlStateManager.disableLighting();
 
         //Chest
-        renderBodyPart(entity, EnumRagdollBodyPart.CHEST, model.bipedBody, partialsTicks, texture);
+        renderBodyPart(entity, EnumRagdollBodyPart.CHEST, model.bipedBody, partialTicks, texture);
         //Right arm
-        renderBodyPart(entity, EnumRagdollBodyPart.RIGHT_ARM, model.bipedRightArm, partialsTicks, texture);
+        renderBodyPart(entity, EnumRagdollBodyPart.RIGHT_ARM, model.bipedRightArm, partialTicks, texture);
         //Left Arm
-        renderBodyPart(entity, EnumRagdollBodyPart.LEFT_ARM, model.bipedLeftArm, partialsTicks, texture);
+        renderBodyPart(entity, EnumRagdollBodyPart.LEFT_ARM, model.bipedLeftArm, partialTicks, texture);
         //Head
-        renderBodyPart(entity, EnumRagdollBodyPart.HEAD, model.bipedHead, partialsTicks, texture);
+        renderBodyPart(entity, EnumRagdollBodyPart.HEAD, model.bipedHead, partialTicks, texture);
         //Right Leg
-        renderBodyPart(entity, EnumRagdollBodyPart.RIGHT_LEG, model.bipedRightLeg, partialsTicks, texture);
+        renderBodyPart(entity, EnumRagdollBodyPart.RIGHT_LEG, model.bipedRightLeg, partialTicks, texture);
         //Left Leg
-        renderBodyPart(entity, EnumRagdollBodyPart.LEFT_LEG, model.bipedLeftLeg, partialsTicks, texture);
+        renderBodyPart(entity, EnumRagdollBodyPart.LEFT_LEG, model.bipedLeftLeg, partialTicks, texture);
 
         // GlStateManager.enableLighting();
         GlStateManager.popMatrix();
@@ -173,7 +178,6 @@ public class RenderRagdoll<T extends RagdollEntity> extends RenderPhysicsEntity<
     }
 
     @Override
-    public void renderParts(T entity, float partialTicks) {
+    public void renderEntityDebug(T entity, EntityRenderContext context) {
     }
-
 }

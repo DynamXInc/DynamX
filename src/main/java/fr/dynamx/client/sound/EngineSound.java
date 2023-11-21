@@ -2,7 +2,7 @@ package fr.dynamx.client.sound;
 
 import fr.dynamx.api.audio.EnumSoundState;
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.entities.modules.BasicEngineModule;
+import fr.dynamx.common.entities.modules.engines.BasicEngineModule;
 
 public class EngineSound extends VehicleSound {
     private final BasicEngineModule engine;

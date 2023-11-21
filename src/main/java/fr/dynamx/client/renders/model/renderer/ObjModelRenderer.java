@@ -1,15 +1,18 @@
 package fr.dynamx.client.renders.model.renderer;
 
 import fr.aym.acslib.api.services.error.ErrorLevel;
+import fr.dynamx.api.dxmodel.DxModelPath;
+import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
 import fr.dynamx.api.events.DynamXModelRenderEvent;
 import fr.dynamx.api.events.EventStage;
-import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
-import fr.dynamx.api.dxmodel.DxModelPath;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.objloader.data.Material;
 import fr.dynamx.common.objloader.data.ObjModelData;
 import fr.dynamx.common.objloader.data.ObjObjectData;
+import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.errors.DynamXErrorManager;
+import fr.dynamx.utils.maths.DynamXGeometry;
+import fr.dynamx.utils.optimization.GlQuaternionPool;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.Vec3d;
@@ -25,7 +28,7 @@ import java.util.Map;
  *
  * @see ObjModelData
  */
-public class ObjModelRenderer extends DxModelRenderer{
+public class ObjModelRenderer extends DxModelRenderer {
 
     @Getter
     private final List<ObjObjectRenderer> objObjects;
@@ -130,12 +133,12 @@ public class ObjModelRenderer extends DxModelRenderer{
         if (!MinecraftForge.EVENT_BUS.post(new DynamXModelRenderEvent.RenderMainParts(EventStage.PRE, this, getTextureVariants(), textureDataId))) {
             boolean drawn = false;
             for (ObjObjectRenderer object : objObjects) {
-                if (getTextureVariants().canRenderPart(object.getObjObjectData().getName())) {
+                if (textureVariants.canRenderPart(object.getObjObjectData().getName())) {
                     renderGroup(object, textureDataId);
                     drawn = true;
                 }
             }
-            MinecraftForge.EVENT_BUS.post(new DynamXModelRenderEvent.RenderMainParts(EventStage.POST, this, getTextureVariants(), textureDataId));
+            MinecraftForge.EVENT_BUS.post(new DynamXModelRenderEvent.RenderMainParts(EventStage.POST, this, textureVariants, textureDataId));
             return drawn;
         }
         return true;

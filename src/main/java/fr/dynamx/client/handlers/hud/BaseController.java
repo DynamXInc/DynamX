@@ -1,19 +1,13 @@
 package fr.dynamx.client.handlers.hud;
 
 import fr.dynamx.api.entities.IModuleContainer;
-import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.entities.modules.IVehicleController;
-import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.client.handlers.KeyHandler;
-import fr.dynamx.common.DynamXContext;
-import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.entities.modules.BasicEngineModule;
-import fr.dynamx.common.entities.modules.DoorsModule;
+import fr.dynamx.common.entities.modules.engines.BasicEngineModule;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.common.MinecraftForge;
 
 public abstract class BaseController implements IVehicleController {
     protected static final Minecraft MC = Minecraft.getMinecraft();

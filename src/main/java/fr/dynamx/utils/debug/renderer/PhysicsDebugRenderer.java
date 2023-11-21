@@ -1,6 +1,9 @@
 package fr.dynamx.utils.debug.renderer;
 
-import com.jme3.bullet.collision.shapes.*;
+import com.jme3.bullet.collision.shapes.BoxCollisionShape;
+import com.jme3.bullet.collision.shapes.CollisionShape;
+import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
+import com.jme3.bullet.collision.shapes.SphereCollisionShape;
 import com.jme3.bullet.collision.shapes.infos.ChildCollisionShape;
 import com.jme3.bullet.joints.Constraint;
 import com.jme3.bullet.joints.PhysicsJoint;
@@ -111,7 +114,6 @@ public class PhysicsDebugRenderer {
                     GlStateManager.color(1, greenColor, blueColor, 1);
                     DynamXRenderUtils.drawConvexHull(shapeType.getDebugTriangles(), DynamXDebugOptions.RENDER_WIREFRAME.isActive());
                     GlStateManager.color(1, 1, 1, 1);
-
                 }
             }
         } else {
@@ -187,8 +189,8 @@ public class PhysicsDebugRenderer {
 
         drawJointLine(bodyPos, translatedPosA, lineColor);
 
-        DynamXRenderUtils.drawSphere(bodyPos, 0.01f, 10, endA);
-        DynamXRenderUtils.drawSphere(translatedPosA, 0.01f, 10, endB);
+        DynamXRenderUtils.drawSphere(bodyPos, 0.05f, endA);
+        DynamXRenderUtils.drawSphere(translatedPosA, 0.05f, endB);
 
     }
 
@@ -206,8 +208,8 @@ public class PhysicsDebugRenderer {
 
         drawJointLine(translatedPosA, translatedPosB, lineColor);
 
-        DynamXRenderUtils.drawSphere(translatedPosA, 0.01f, 10, lineColor);
-        DynamXRenderUtils.drawSphere(translatedPosB, 0.01f, 10, lineColor);
+        DynamXRenderUtils.drawSphere(translatedPosA, 0.05f, lineColor);
+        DynamXRenderUtils.drawSphere(translatedPosB, 0.05f, lineColor);
     }
 
     public static void drawJointLine(Vector3f pivotA, Vector3f pivotB, Color lineColor) {

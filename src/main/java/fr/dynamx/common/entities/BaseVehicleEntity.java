@@ -5,27 +5,17 @@ import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.events.VehicleEntityEvent;
-import fr.dynamx.api.network.sync.SimulationHolder;
-import fr.dynamx.client.renders.RenderPhysicsEntity;
-import fr.dynamx.common.contentpack.parts.PartSeat;
-import fr.dynamx.common.contentpack.parts.PartShape;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.EnumPlayerStandOnTop;
 import fr.dynamx.utils.debug.Profiler;
-import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.Vector3fPool;
-import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Base implementation for all vehicles <br>
@@ -47,12 +37,6 @@ public abstract class BaseVehicleEntity<T extends BaseVehiclePhysicsHandler<?>> 
     @Override
     protected void entityInit() {
         super.entityInit();
-    }
-
-    @Override
-    protected void createModules(ModuleListBuilder modules) {
-        super.createModules(modules);
-        getPackInfo().addModules(this, modules);
     }
 
     @Override
@@ -86,48 +70,6 @@ public abstract class BaseVehicleEntity<T extends BaseVehiclePhysicsHandler<?>> 
         Profiler.get().end(Profiler.Profiles.TICK_ENTITIES);
     }
 
-    /**
-     * Cache
-     */
-    private final List<MutableBoundingBox> unrotatedBoxes = new ArrayList<>();
-
-    @Override
-    public List<MutableBoundingBox> getCollisionBoxes() {
-        if (getPackInfo() == null || physicsPosition == null)
-            return new ArrayList<>(0);
-        if (unrotatedBoxes.size() != getPackInfo().getPartShapes().size()) {
-            unrotatedBoxes.clear();
-            for (PartShape shape : getPackInfo().getPartShapes()) {
-                MutableBoundingBox b = new MutableBoundingBox(shape.getBoundingBox());
-                b.offset(physicsPosition);
-                unrotatedBoxes.add(b);
-            }
-        } else {
-            for (int i = 0; i < getPackInfo().getPartShapes().size(); i++) {
-                MutableBoundingBox b = unrotatedBoxes.get(i);
-                b.setTo(getPackInfo().getPartShapes().get(i).getBoundingBox());
-                b.offset(physicsPosition);
-                unrotatedBoxes.add(b);
-            }
-        }
-        return unrotatedBoxes;
-    }
-
-    @Override
-    protected boolean canFitPassenger(Entity passenger) {
-        return this.getPassengers().size() < getPackInfo().getPartsByType(PartSeat.class).size();
-    }
-
-    @Override
-    public boolean shouldRiderSit() {
-        return RenderPhysicsEntity.shouldRenderPlayerSitting;
-    }
-
-    @Override
-    public boolean canPassengerSteer() {
-        return false;
-    }
-
     @Override
     public void setDead() {
         super.setDead();
@@ -153,17 +95,13 @@ public abstract class BaseVehicleEntity<T extends BaseVehiclePhysicsHandler<?>> 
     @Override
     public boolean canPlayerStandOnTop() {
         EnumPlayerStandOnTop playerStandOnTop = this.getPackInfo().getPlayerStandOnTop();
-        if(playerStandOnTop == null)
-            return true;
-        else {
-            switch (playerStandOnTop) {
-                case NEVER:
-                    return false;
-                case PROGRESSIVE:
-                    return DynamXUtils.getSpeed(this) <= 30;
-                default:
-                    return true;
-            }
+        switch (playerStandOnTop) {
+            case NEVER:
+                return false;
+            case PROGRESSIVE:
+                return DynamXUtils.getSpeed(this) <= 30;
+            default:
+                return true;
         }
     }
 }

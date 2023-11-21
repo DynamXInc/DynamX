@@ -4,7 +4,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:3.+'
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
         classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.4'
         classpath 'org.spongepowered:mixingradle:0.7.+'
     }
@@ -67,19 +67,19 @@ minecraft {
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2860'
+    implementation ("net.minecraftforge:mergetool:0.2.3.3") { force = true }
 
     implementation 'com.github.stephengold:Libbulletjme:' + libbulletjme_version
-    implementation "fr.aym.acsguis:ACsGuis:1.2.8"
-    //implementation "curse.maven:mcgltf-591547:4367036"
-    implementation ":ModProtectionLib:1.3.1"
-    implementation('org.spongepowered:mixin:0.8.3-SNAPSHOT') {
+    implementation "fr.aym.acsguis:ACsGuis:1.2.11-dev2"
+    implementation ":ModProtectionLib:1.3.4"
+    implementation('org.spongepowered:mixin:0.8.5') {
         exclude module: 'guava'
         exclude module: 'commons-io'
         exclude module: 'gson'
     }
     compileOnly 'org.projectlombok:lombok:1.18.24'
 
-    shadow('org.spongepowered:mixin:0.8.3-SNAPSHOT') {
+    shadow('org.spongepowered:mixin:0.8.5') {
         exclude module: 'guava'
         exclude module: 'commons-io'
         exclude module: 'gson'
@@ -89,12 +89,13 @@ dependencies {
     shadow fileTree(dir: 'libs', include: '*.jar')
 
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
-    annotationProcessor 'org.spongepowered:mixin:0.8.3-SNAPSHOT:processor'
-    testAnnotationProcessor 'org.spongepowered:mixin:0.8.3-SNAPSHOT:processor'
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    testAnnotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }
 
 mixin {
     add sourceSets.main, "refmap.dynamxmod.json"
+    config 'mixins.dynamxmod.json'
 }
 
 jar {
@@ -141,92 +142,32 @@ task prepareAssets(type: Copy) {
 classes.dependsOn(prepareAssets)
 /** end of shit **/
 
-ext {
-    builtFile = ""
-    builtFileSources = ""
-}
-
-task onBuild(type: Jar) {
-    builtFile = archiveName.replaceAll(".jar", "-all.jar")
-    builtFileSources = archiveName.replaceAll(".jar", "-sources.jar")
-}
-
-task copyBuiltJar(type: Copy, dependsOn: onBuild) {
-    project.logger.lifecycle("Jar normal " + builtFile)
-    from file("$buildDir/libs/${builtFile}")
-    into file("MpsIn")
-}
-
-task copyBuiltJarSources(type: Copy, dependsOn: onBuild) {
-    project.logger.lifecycle("Jar sources " + builtFileSources)
-    from file("$buildDir/libs/${builtFileSources}")
-    into file("MpsIn")
-}
-
-task runMPSJar(type: JavaExec, dependsOn: copyBuiltJar) {
-    // Executable jars can have only _one_ jar on the classpath.
-    classpath = files("MpsExporter.jar")
-
-    // 'main' does not need to be specified
-    main = 'fr.aym.mps.exporter.MpsExporter'
-
-    // arguments to pass to the application
-    args 'export_mod'
-    args "${builtFile}"
-    args "${version}"
-}
-task runMPSJarSources(type: JavaExec, dependsOn: copyBuiltJarSources) {
-    // Executable jars can have only _one_ jar on the classpath.
-    classpath = files("MpsExporter.jar")
-
-    // 'main' does not need to be specified
-    main = 'fr.aym.mps.exporter.MpsExporter'
-
-    // arguments to pass to the application
-    args 'export_mod'
-    args "${builtFileSources}"
-    args "${version}"
-}
-
 tasks.reobfShadowJar.mustRunAfter shadowJar
-tasks.onBuild.mustRunAfter reobfShadowJar
-tasks.runMPSJar.mustRunAfter reobfShadowJar
-tasks.runMPSJarSources.mustRunAfter runMPSJar
 
 task sourcesJar(type: Jar, dependsOn: classes) {
     from(sourceSets.main.allSource) {
         include 'fr/**/**'
-    }
-    from (sourceSets.main.output){
-        include '**'
     }
     classifier = 'sources'
 }
 
 build {
     dependsOn reobfShadowJar
-    dependsOn runMPSJar
     dependsOn sourcesJar
 }
 
-artifacts {
-    archives sourcesJar
-}
-
-runMPSJar {
-    dependsOn copyBuiltJar
-}
 
 artifactoryPublish.dependsOn build
-artifactoryPublish.dependsOn runMPSJar//Sources
 
 publishing {
     publications {
         mavenJava(MavenPublication) {
             artifactId = mavenArtifactId
-            //from components.java
-            artifact source: ("MpsOut/${builtFile}"), extension: 'jar'
-            //artifact source: ("MpsOut/${builtFileSources}"), classifier: "sources", extension: 'jar'
+
+            artifact(shadowJar){
+                classifier = ''
+            }
+            artifact sourcesJar
         }
     }
 }

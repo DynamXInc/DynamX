@@ -1,18 +1,19 @@
 package fr.dynamx.common.contentpack.parts;
 
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.contentpack.object.IShapeContainer;
+import fr.dynamx.api.contentpack.object.ICollisionsContainer;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
-import fr.dynamx.api.contentpack.registry.*;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
+import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
+import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 
-@RegisteredSubInfoType(name = "shape", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.BLOCKS_AND_PROPS, SubInfoTypeRegistries.HELICOPTER}, strictName = false)
+@RegisteredSubInfoType(name = "shape", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.BLOCKS, SubInfoTypeRegistries.HELICOPTER, SubInfoTypeRegistries.PROPS}, strictName = false)
 public class PartShape<T extends ISubInfoTypeOwner<T>> extends BasePart<T> implements IShapeInfo {
     @PackFileProperty(configNames = "Type", type = DefinitionType.DynamXDefinitionTypes.SHAPE_TYPE, description = "common.shape.type", required = false)
     private EnumPartType shapeType = EnumPartType.BOX;
@@ -27,7 +28,7 @@ public class PartShape<T extends ISubInfoTypeOwner<T>> extends BasePart<T> imple
     @Override
     public void appendTo(T owner) {
         super.appendTo(owner);
-        ((IShapeContainer) owner).addCollisionShape(this);
+        ((ICollisionsContainer) owner).getCollisionsHelper().addCollisionShape(this);
         Vector3f min = getPosition().subtract(getScale());
         Vector3f max = getPosition().add(getScale());
         this.boundingBox = new MutableBoundingBox(
@@ -45,13 +46,16 @@ public class PartShape<T extends ISubInfoTypeOwner<T>> extends BasePart<T> imple
         return getScale();
     }
 
+    @Override
     public MutableBoundingBox getBoundingBox() {
         return boundingBox;
     }
 
+    @Override
     public EnumPartType getShapeType() {
         return shapeType;
     }
+
     @Override
     public DynamXDebugOption getDebugOption() {
         return DynamXDebugOptions.PLAYER_TO_OBJECT_COLLISION_DEBUG;

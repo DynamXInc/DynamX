@@ -19,12 +19,10 @@ public class PackSyncHandler {
     public static void computeAll() {
         //objects.clear();
         if (DynamXConfig.syncPacks) {
-            DynamXObjectLoaders.getLoaders().forEach((i) -> {
+            DynamXObjectLoaders.getInfoLoaders().forEach((i) -> {
                 Map<String, byte[]> objs = new HashMap<>();
                 PackSyncHandler hacheur = new PackSyncHandler();
                 i.hashObjects(hacheur, objs);
-                //if (objects.containsKey(i.getPrefix()))
-                //  System.out.println("On " + i.getPrefix() + " :" + getDelta(objects.get(i.getPrefix()), objs));
                 objects.put(i.getPrefix(), objs);
             });
         }

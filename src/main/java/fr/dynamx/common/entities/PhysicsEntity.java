@@ -20,7 +20,7 @@ import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.joints.EntityJointsHandler;
 import fr.dynamx.common.physics.player.WalkingOnPlayerController;
 import fr.dynamx.common.physics.terrain.PhysicsEntityTerrainLoader;
-import fr.dynamx.utils.DynamXConfig;
+import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.PhysicsEntityException;
 import fr.dynamx.utils.debug.Profiler;
@@ -29,6 +29,7 @@ import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import io.netty.buffer.ByteBuf;
+import lombok.Getter;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -51,77 +52,93 @@ import java.util.Map;
  *
  * @param <T> The physics handler type
  */
-@SynchronizedEntityVariable.SynchronizedPhysicsModule()
+@SynchronizedEntityVariable.SynchronizedPhysicsModule(modid = DynamXConstants.ID)
 public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>> extends Entity implements ICollidableObject, IEntityAdditionalSpawnData {
+
     /**
      * Entity network
+     * -- GETTER --
+     *
+     * @return The entity network
      */
-    //private final PhysicsEntityNetHandler<? extends PhysicsEntity<T>> network;
+    @Getter
     private final PhysicsEntitySynchronizer<? extends PhysicsEntity<T>> synchronizer;
+
     /**
      * The entity physics handler
      */
+    @Nullable
+    @Getter
     public T physicsHandler;
+
     /**
      * The entity physics position
      */
     public final Vector3f physicsPosition = new Vector3f();
+
     /**
      * The entity physics rotation <br>
      * <strong>If you are rendering something, use renderRotation !</strong>
      */
     public final Quaternion physicsRotation = new Quaternion();
+
     /**
      * Rotation for render <br>
      * <strong>If you are not rendering something, use physicsRotation !</strong>
      */
     public final Quaternion renderRotation = new Quaternion();
+
     /**
      * Prev render rotation
      */
     public final Quaternion prevRenderRotation = new Quaternion();
+
     /**
      * Entity initialization state
-     * <p>
-     * 0 = not initialized
-     * 1 = only entity properties
-     * 2 = all (physics included)
      */
-    public byte initialized;
+    public EnumEntityInitState initialized = EnumEntityInitState.NOT_INITIALIZED;
+
     /**
-     * State of the entity inside of the physics engine
-     * 0 = not registered
-     * 1 = registering
-     * 2 = registered
+     * State of the entity inside the physics engine
      */
-    public byte isRegistered;
+    public EnumEntityPhysicsRegistryState isRegistered = EnumEntityPhysicsRegistryState.NOT_REGISTERED;
+
     /**
      * Map of players walking on the top of this entity
      *
      * @see WalkingOnPlayerController
      */
     public final Map<EntityPlayer, WalkingOnPlayerController> walkingOnPlayers = new HashMap<>();
+
     /**
      * Permits the render of large entities that you are riding
      */
     public boolean wasRendered = false;
+
     /**
      * Cache to avoid many heavy calculus of the entity box
      */
     private AxisAlignedBB entityBoxCache;
+
     /**
      * True if the entity uses the physics world <br>
      * I.e. it's physics handler should not be null
      */
     private final boolean usesPhysicsWorld;
 
+    /**
+     * -- GETTER --
+     *
+     * @return The terrain loader of this entity
+     */
+    @Getter
     private final PhysicsEntityTerrainLoader terrainCache = new PhysicsEntityTerrainLoader(this);
 
     public PhysicsEntity(World world) {
         super(world);
 
-        this.noClip = true;
-        this.preventEntitySpawning = true;
+        noClip = true;
+        preventEntitySpawning = true;
 
         // Network Init
         synchronizer = DynamXMain.proxy.getNetHandlerForEntity(this);
@@ -154,8 +171,8 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
      * Checks if the entity has been initialized and initializes it if required
      */
     protected void checkEntityInit() {
-        if (initialized != 2) {
-            if (initialized == 0) {
+        switch (initialized) {
+            case NOT_INITIALIZED:
                 physicsPosition.set((float) posX, (float) posY, (float) posZ);
                 if (physicsRotation.equals(Quaternion.IDENTITY)) {
                     physicsRotation.set(DynamXGeometry.rotationYawToQuaternion(rotationYaw));
@@ -164,12 +181,13 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
                     setDead();
                     return;
                 }
-            }
-            initPhysicsEntity(usesPhysicsWorld);
-            getSynchronizer().setSimulationHolder(getSynchronizer().getDefaultSimulationHolder(), null);
-            registerSynchronizedVariables();
-            MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Init(world.isRemote ? Side.CLIENT : Side.SERVER, this, usesPhysicsWorld));
-            initialized = 2;
+            case ONLY_ENTITY_PROPERTIES:
+                initPhysicsEntity(usesPhysicsWorld);
+                getSynchronizer().setSimulationHolder(getSynchronizer().getDefaultSimulationHolder(), null);
+                registerSynchronizedVariables();
+                MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Init(world.isRemote ? Side.CLIENT : Side.SERVER, this, usesPhysicsWorld));
+                initialized = EnumEntityInitState.ALL;
+                break;
         }
     }
 
@@ -199,7 +217,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
             setDead();
             return;
         }
-        initialized = 1;
+        initialized = EnumEntityInitState.ONLY_ENTITY_PROPERTIES;
     }
 
     /**
@@ -216,16 +234,14 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
             } else {
                 this.physicsHandler.setPhysicsState(EntityPhysicsState.ENABLE);
             }
-            if (isRegistered == 0) {
+            if (isRegistered == EnumEntityPhysicsRegistryState.NOT_REGISTERED) {
                 DynamXContext.getPhysicsWorld(world).addBulletEntity(this);
             }
         }
 
         //Tick physics if we don't use a physics world
         if (!usesPhysicsWorld) {
-            //getNetwork().onPrePhysicsTick(Profiler.get());
             getSynchronizer().onPrePhysicsTick(Profiler.get());
-            //getNetwork().onPostPhysicsTick(Profiler.get());
             getSynchronizer().onPostPhysicsTick(Profiler.get());
         }
 
@@ -233,37 +249,44 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
         updateMinecraftPos();
 
         //Post the update event
-        MinecraftForge.EVENT_BUS.post(world.isRemote ? new PhysicsEntityEvent.ClientUpdate(this, PhysicsEntityEvent.UpdateType.POST_ENTITY_UPDATE, isRegistered == 2 && usesPhysicsWorld) :
-                new PhysicsEntityEvent.ServerUpdate(this, PhysicsEntityEvent.UpdateType.POST_ENTITY_UPDATE, isRegistered == 2 && usesPhysicsWorld));
+        PhysicsEntityEvent.Update update;
+        if (world.isRemote) {
+            update = new PhysicsEntityEvent.ClientUpdate(this,
+                    PhysicsEntityEvent.UpdateType.POST_ENTITY_UPDATE,
+                    isRegistered == EnumEntityPhysicsRegistryState.REGISTERED && usesPhysicsWorld);
+        } else {
+            update = new PhysicsEntityEvent.ServerUpdate(this, PhysicsEntityEvent.UpdateType.POST_ENTITY_UPDATE,
+                    isRegistered == EnumEntityPhysicsRegistryState.REGISTERED && usesPhysicsWorld);
+        }
+        MinecraftForge.EVENT_BUS.post(update);
     }
 
     /**
      * Called in minecraft thread to update vanilla position and rotation fields, also used for render and updating "prev" fields
      */
     protected void updateMinecraftPos() {
-        this.prevPosX = this.posX;
-        this.prevPosY = this.posY;
-        this.prevPosZ = this.posZ;
+        prevPosX = posX;
+        prevPosY = posY;
+        prevPosZ = posZ;
 
-        this.posX = this.physicsPosition.x;
-        this.posY = this.physicsPosition.y;
-        this.posZ = this.physicsPosition.z;
+        posX = physicsPosition.x;
+        posY = physicsPosition.y;
+        posZ = physicsPosition.z;
 
-        this.motionX = (this.posX - this.prevPosX);
-        this.motionY = (this.posY - this.prevPosY);
-        this.motionZ = (this.posZ - this.prevPosZ);
+        motionX = (posX - prevPosX);
+        motionY = (posY - prevPosY);
+        motionZ = (posZ - prevPosZ);
 
-        onMove(this.motionX, this.motionY, this.motionZ);
+        onMove(motionX, motionY, motionZ);
         setPosition(posX, posY, posZ);
 
         prevRenderRotation.set(renderRotation);
         renderRotation.set(physicsRotation);
 
-        this.prevRotationYaw = this.rotationYaw;
-        this.prevRotationPitch = this.rotationPitch;
+        prevRotationYaw = rotationYaw;
+        prevRotationPitch = rotationPitch;
 
-        alignRotation(this.renderRotation);
-        //System.out.println("From origin quat " + renderRotation + " get " + rotationYaw);
+        alignRotation(renderRotation);
     }
 
     /**
@@ -302,7 +325,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     public final void prePhysicsUpdateWrapper(Profiler profiler, boolean simulatePhysics) {
         profiler.start(Profiler.Profiles.PHY2);
 
-        simulatePhysics = simulatePhysics && isRegistered == 2;
+        simulatePhysics = simulatePhysics && isRegistered == EnumEntityPhysicsRegistryState.REGISTERED;
         preUpdatePhysics(simulatePhysics);
 
         MinecraftForge.EVENT_BUS.post(world.isRemote ? new PhysicsEntityEvent.ClientUpdate(this, PhysicsEntityEvent.UpdateType.PRE_PHYSICS_UPDATE, simulatePhysics) :
@@ -333,7 +356,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     public final void postUpdatePhysicsWrapper(Profiler profiler, boolean simulatePhysics) {
         profiler.start(Profiler.Profiles.PHY2P);
 
-        simulatePhysics = simulatePhysics && isRegistered == 2;
+        simulatePhysics = simulatePhysics && isRegistered == EnumEntityPhysicsRegistryState.REGISTERED;
         postUpdatePhysics(simulatePhysics);
 
         MinecraftForge.EVENT_BUS.post(world.isRemote ? new PhysicsEntityEvent.ClientUpdate(this, PhysicsEntityEvent.UpdateType.POST_PHYSICS_UPDATE, simulatePhysics) :
@@ -368,23 +391,6 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
      * @param usePhysics True if the entity is registered in a running physics world
      */
     public abstract void initPhysicsEntity(boolean usePhysics);
-
-    /**
-     * @return The entity network
-     */
-    /*public PhysicsEntityNetHandler<? extends PhysicsEntity<T>> getNetwork() {
-        return network;
-    }*/
-    public PhysicsEntitySynchronizer<? extends PhysicsEntity<T>> getSynchronizer() {
-        return synchronizer;
-    }
-
-    /**
-     * @return The terrain loader of this entity
-     */
-    public PhysicsEntityTerrainLoader getTerrainCache() {
-        return terrainCache;
-    }
 
     /**
      * Computes yaw and pitch from the given quaternion
@@ -424,18 +430,18 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     //Vanilla functions
 
     /**
-     * Minecraft entity update
+     * Minecraft's entity update
      */
     @Override
     public void onUpdate() {
         Vector3fPool.openPool();
-        double d1 = this.prevPosX;
-        double d2 = this.prevPosY;
-        double d3 = this.prevPosZ;
+        double d1 = prevPosX;
+        double d2 = prevPosY;
+        double d3 = prevPosZ;
         super.onUpdate();
-        this.prevPosX = d1;
-        this.prevPosY = d2;
-        this.prevPosZ = d3;
+        prevPosX = d1;
+        prevPosY = d2;
+        prevPosZ = d3;
         try {
             mcThreadUpdate();
         } catch (Exception ex) {
@@ -461,8 +467,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
 
     @Override
     public boolean isInRangeToRenderDist(double range) {
-        double d = getEntityBoundingBox().getAverageEdgeLength() * 4.0D;
-        d *= 64.0D;
+        double d = getEntityBoundingBox().getAverageEdgeLength() * 4.0D * 64.0D;
         return range < d * d;
     }
 
@@ -470,7 +475,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     public AxisAlignedBB getEntityBoundingBox() {
         if (entityBoxCache == null) {
             if (physicsPosition.length() == 0) {
-                physicsPosition.set(new Vector3f((float) posX, (float) posY, (float) posZ));
+                physicsPosition.set(Vector3fPool.get((float) posX, (float) posY, (float) posZ));
             }
             Vector3fPool.openPool();
             if (physicsHandler != null) {
@@ -483,15 +488,16 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
             } else {
                 List<MutableBoundingBox> boxes = getCollisionBoxes(); //Get PartShape boxes
                 if (boxes.isEmpty()) { //If there is no boxes, create a default one
-                    entityBoxCache = new AxisAlignedBB(getPositionVector().x - 2, getPositionVector().y - 1, getPositionVector().z - 2,
-                            getPositionVector().x + 2, getPositionVector().y + 2, getPositionVector().z + 2);
+                    Vector3f min = Vector3fPool.get(getPositionVector()).subtractLocal(2, 1, 2);
+                    Vector3f max = Vector3fPool.get(getPositionVector()).addLocal(2, 2, 2);
+                    entityBoxCache = new AxisAlignedBB(min.x, min.y, min.z, max.x, max.y, max.z);
                 } else {
                     MutableBoundingBox container;
                     if (boxes.size() == 1) { //If there is one, no more calculus to do !
                         container = boxes.get(0);
                     } else {
                         container = new MutableBoundingBox(boxes.get(0));
-                        for (int i = 1; i < boxes.size(); i++) { //Else create a bigger box containing all of the boxes
+                        for (int i = 1; i < boxes.size(); i++) { //Else create a bigger box containing all the boxes
                             container.growTo(boxes.get(i));
                         }
                     }
@@ -512,22 +518,11 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
         IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(world);
         if (usesPhysicsWorld && physicsWorld != null) //onRemovedFromWorld may be called before physicsWorld is loaded (in case of failing to load from nbt)
         {
-            if(posY < 0)
-                printReport();
             physicsWorld.removeBulletEntity(this);
             terrainCache.onRemoved(physicsWorld.getTerrainManager());
         }
         if (physicsHandler != null)
             physicsHandler.removePhysicsEntity();
-    }
-
-    public void printReport() {
-        IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(world);
-        if(terrainCache != null && usesPhysicsWorld && physicsWorld != null && DynamXConfig.enableDebugTerrainManager) {
-            System.out.println("============");
-            System.out.println("TERRAIN REPORT - " + this);
-            terrainCache.printReport(physicsWorld.getTerrainManager());
-        }
     }
 
     @Override
@@ -537,25 +532,19 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
 
     @Override
     public boolean attackEntityFrom(DamageSource damageSource, float amount) {
-        if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Attacked(this, damageSource.getTrueSource(), damageSource))) {
-            if (damageSource.isExplosion()) {
-                return false;
-            }
-            if (!this.world.isRemote && !this.isDead && damageSource.getImmediateSource() instanceof EntityPlayer && damageSource.getTrueSource().getRidingEntity() != this
-                    && (((EntityPlayer) damageSource.getImmediateSource()).capabilities.isCreativeMode
-                    || ((EntityPlayer) damageSource.getImmediateSource()).getHeldItemMainhand().getItem().equals(DynamXItemRegistry.ITEM_WRENCH))) {
-                setDead();
-                return true;
-            }
+        if (MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Attacked(this, damageSource.getTrueSource(), damageSource))) {
+            return false;
+        }
+        if (damageSource.isExplosion()) {
+            return false;
+        }
+        if (!this.world.isRemote && !this.isDead && damageSource.getImmediateSource() instanceof EntityPlayer && damageSource.getTrueSource().getRidingEntity() != this
+                && (((EntityPlayer) damageSource.getImmediateSource()).capabilities.isCreativeMode
+                || ((EntityPlayer) damageSource.getImmediateSource()).getHeldItemMainhand().getItem().equals(DynamXItemRegistry.ITEM_WRENCH))) {
+            setDead();
+            return true;
         }
         return false;
-    }
-
-    /**
-     * @return Entity physics handler
-     */
-    public T getPhysicsHandler() {
-        return physicsHandler;
     }
 
     /**
@@ -582,7 +571,6 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
      * Method called when the entity's rigidbody enter in collision with something else
      */
     public void onCollisionEnter(PhysicsCollisionEvent collisionEvent, BulletShapeType<?> entityA, BulletShapeType<?> entityB) {
-
     }
 
     /**
@@ -609,5 +597,13 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
         physicsRotation.set(DynamXGeometry.rotationYawToQuaternion(yaw));
         QuaternionPool.closePool();
         super.setLocationAndAngles(x, y, z, yaw, pitch);
+    }
+
+    public enum EnumEntityInitState {
+        NOT_INITIALIZED, ONLY_ENTITY_PROPERTIES, ALL
+    }
+
+    public enum EnumEntityPhysicsRegistryState {
+        NOT_REGISTERED, REGISTERING, REGISTERED
     }
 }

@@ -34,7 +34,6 @@ public class ObjModelData extends DxModelData {
     @Getter
     private final Map<String, Material> materials = new HashMap<>();
 
-
     public ObjModelData(DxModelPath path) {
         super(path);
         try {

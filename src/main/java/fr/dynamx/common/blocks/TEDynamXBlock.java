@@ -7,6 +7,7 @@ import fr.aym.acsguis.api.ACsGuiApi;
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.events.DynamXBlockEvent;
 import fr.dynamx.client.gui.GuiBlockCustomization;
+import fr.dynamx.client.renders.animations.DxAnimator;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.capability.DynamXChunkData;
 import fr.dynamx.common.capability.DynamXChunkDataProvider;
@@ -51,11 +52,16 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, ITic
     @Getter
     private LightsModule lightsModule;
 
+    @Getter
+    private final DxAnimator animator;
+
     public TEDynamXBlock() {
+        animator = new DxAnimator();
     }
 
     public TEDynamXBlock(BlockObject<?> blockObjectInfo) {
         setBlockObjectInfo(blockObjectInfo);
+        animator = new DxAnimator();
     }
 
     public BlockObject<?> getBlockObjectInfo() {
@@ -288,6 +294,8 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, ITic
         data.getBlocksAABB().put(pos, computeBoundingBox().offset(pos));
     }
 
+    public boolean isPlaying;
+    public float currentTime;
     private DynamXBlockEvent.TickTileEntity event;
     @Override
     public void update() {
@@ -295,6 +303,8 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, ITic
             event = new DynamXBlockEvent.TickTileEntity(Side.SERVER, (DynamXBlock<?>) this.getBlockType(), getWorld(), this);
         }
         MinecraftForge.EVENT_BUS.post(event);
+
+        //System.out.println(pos + " " + animator.getAnimationQueue());
     }
 
     @Override

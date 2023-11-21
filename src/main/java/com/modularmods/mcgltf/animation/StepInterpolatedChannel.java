@@ -1,5 +1,7 @@
 package com.modularmods.mcgltf.animation;
 
+import de.javagl.jgltf.model.NodeModel;
+
 public abstract class StepInterpolatedChannel extends InterpolatedChannel {
 
 	/**
@@ -8,15 +10,16 @@ public abstract class StepInterpolatedChannel extends InterpolatedChannel {
 	 */
 	protected final float[][] values;
 	
-	public StepInterpolatedChannel(float[] timesS, float[][] values) {
-		super(timesS);
+	public StepInterpolatedChannel(float[] timesS, float[][] values, NodeModel nodeModel) {
+		super(timesS, nodeModel);
 		this.values = values;
 	}
 	
 	@Override
-	public void update(float timeS) {
-		float[] output = getListener();
+	public TransformType update(float timeS) {
+		float[] output = getListener().copiedValues;
 		System.arraycopy(values[computeIndex(timeS, timesS)], 0, output, 0, output.length);
+		return getListener();
 	}
 
 }

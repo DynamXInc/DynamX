@@ -5,15 +5,17 @@ import de.javagl.jgltf.model.*;
 import de.javagl.jgltf.model.AnimationModel.Channel;
 import de.javagl.jgltf.model.AnimationModel.Interpolation;
 import de.javagl.jgltf.model.AnimationModel.Sampler;
+import fr.dynamx.client.renders.model.renderer.GltfModelRenderer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public final class GltfAnimationCreator {
 
     public static List<InterpolatedChannel> createGltfAnimation(AnimationModel animationModel) {
         List<Channel> channels = animationModel.getChannels();
-        List<InterpolatedChannel> interpolatedChannels = new ArrayList<InterpolatedChannel>(channels.size());
+        List<InterpolatedChannel> interpolatedChannels = new ArrayList<>(channels.size());
         for (Channel channel : channels) {
             Sampler sampler = channel.getSampler();
 
@@ -48,6 +50,10 @@ public final class GltfAnimationCreator {
 
             NodeModel nodeModel = channel.getNodeModel();
 
+            float[] copyTranslate = nodeModel.getTranslation() != null ? Arrays.copyOf(nodeModel.getTranslation(), nodeModel.getTranslation().length) : null;
+            float[] copyScale = nodeModel.getScale() != null ? Arrays.copyOf(nodeModel.getScale(), nodeModel.getScale().length) : null;
+            float[] copyRotation = nodeModel.getRotation() != null ? Arrays.copyOf(nodeModel.getRotation(), nodeModel.getRotation().length) : null;
+
             String path = channel.getPath();
             Interpolation interpolation;
             switch (path) {
@@ -63,16 +69,11 @@ public final class GltfAnimationCreator {
                                     components[c] = outputFloatData.get(globalIndex++);
                                 }
                             }
-                            interpolatedChannels.add(new StepInterpolatedChannel(keys, values) {
+                            interpolatedChannels.add(new StepInterpolatedChannel(keys, values, nodeModel) {
 
                                 @Override
-                                protected float[] getListener() {
-                                    float[] translation = nodeModel.getTranslation();
-                                    if (translation == null) {
-                                        translation = new float[numComponentsPerElement];
-                                        nodeModel.setTranslation(translation);
-                                    }
-                                    return translation;
+                                protected TransformType getListener() {
+                                    return getTranslation(nodeModel, numComponentsPerElement, copyTranslate);
                                 }
 
                             });
@@ -85,16 +86,11 @@ public final class GltfAnimationCreator {
                                     components[c] = outputFloatData.get(globalIndex++);
                                 }
                             }
-                            interpolatedChannels.add(new LinearInterpolatedChannel(keys, values) {
+                            interpolatedChannels.add(new LinearInterpolatedChannel(keys, values, nodeModel) {
 
                                 @Override
-                                protected float[] getListener() {
-                                    float[] translation = nodeModel.getTranslation();
-                                    if (translation == null) {
-                                        translation = new float[numComponentsPerElement];
-                                        nodeModel.setTranslation(translation);
-                                    }
-                                    return translation;
+                                protected TransformType getListener() {
+                                    return getTranslation(nodeModel, numComponentsPerElement, copyTranslate);
                                 }
 
                             });
@@ -110,16 +106,11 @@ public final class GltfAnimationCreator {
                                     }
                                 }
                             }
-                            interpolatedChannels.add(new CubicSplineInterpolatedChannel(keys, valuesCubic) {
+                            interpolatedChannels.add(new CubicSplineInterpolatedChannel(keys, valuesCubic, nodeModel) {
 
                                 @Override
-                                protected float[] getListener() {
-                                    float[] translation = nodeModel.getTranslation();
-                                    if (translation == null) {
-                                        translation = new float[numComponentsPerElement];
-                                        nodeModel.setTranslation(translation);
-                                    }
-                                    return translation;
+                                protected TransformType getListener() {
+                                    return getTranslation(nodeModel, numComponentsPerElement, copyTranslate);
                                 }
 
                             });
@@ -141,16 +132,11 @@ public final class GltfAnimationCreator {
                                     components[c] = outputFloatData.get(globalIndex++);
                                 }
                             }
-                            interpolatedChannels.add(new StepInterpolatedChannel(keys, values) {
+                            interpolatedChannels.add(new StepInterpolatedChannel(keys, values, nodeModel) {
 
                                 @Override
-                                protected float[] getListener() {
-                                    float[] rotation = nodeModel.getRotation();
-                                    if (rotation == null) {
-                                        rotation = new float[numComponentsPerElement];
-                                        nodeModel.setRotation(rotation);
-                                    }
-                                    return rotation;
+                                protected TransformType getListener() {
+                                    return getRotation(nodeModel, numComponentsPerElement, copyRotation);
                                 }
 
                             });
@@ -163,16 +149,11 @@ public final class GltfAnimationCreator {
                                     components[c] = outputFloatData.get(globalIndex++);
                                 }
                             }
-                            interpolatedChannels.add(new SphericalLinearInterpolatedChannel(keys, values) {
+                            interpolatedChannels.add(new SphericalLinearInterpolatedChannel(keys, values, nodeModel) {
 
                                 @Override
-                                protected float[] getListener() {
-                                    float[] rotation = nodeModel.getRotation();
-                                    if (rotation == null) {
-                                        rotation = new float[numComponentsPerElement];
-                                        nodeModel.setRotation(rotation);
-                                    }
-                                    return rotation;
+                                protected TransformType getListener() {
+                                    return getRotation(nodeModel, numComponentsPerElement, copyRotation);
                                 }
 
                             });
@@ -188,16 +169,11 @@ public final class GltfAnimationCreator {
                                     }
                                 }
                             }
-                            interpolatedChannels.add(new CubicSplineInterpolatedChannel(keys, valuesCubic) {
+                            interpolatedChannels.add(new CubicSplineInterpolatedChannel(keys, valuesCubic, nodeModel) {
 
                                 @Override
-                                protected float[] getListener() {
-                                    float[] rotation = nodeModel.getRotation();
-                                    if (rotation == null) {
-                                        rotation = new float[numComponentsPerElement];
-                                        nodeModel.setRotation(rotation);
-                                    }
-                                    return rotation;
+                                protected TransformType getListener() {
+                                    return getRotation(nodeModel, numComponentsPerElement, copyRotation);
                                 }
 
                             });
@@ -219,16 +195,11 @@ public final class GltfAnimationCreator {
                                     components[c] = outputFloatData.get(globalIndex++);
                                 }
                             }
-                            interpolatedChannels.add(new StepInterpolatedChannel(keys, values) {
+                            interpolatedChannels.add(new StepInterpolatedChannel(keys, values, nodeModel) {
 
                                 @Override
-                                protected float[] getListener() {
-                                    float[] scale = nodeModel.getScale();
-                                    if (scale == null) {
-                                        scale = new float[numComponentsPerElement];
-                                        nodeModel.setScale(scale);
-                                    }
-                                    return scale;
+                                protected TransformType getListener() {
+                                    return getScale(nodeModel, numComponentsPerElement, copyScale);
                                 }
 
                             });
@@ -241,16 +212,11 @@ public final class GltfAnimationCreator {
                                     components[c] = outputFloatData.get(globalIndex++);
                                 }
                             }
-                            interpolatedChannels.add(new LinearInterpolatedChannel(keys, values) {
+                            interpolatedChannels.add(new LinearInterpolatedChannel(keys, values, nodeModel) {
 
                                 @Override
-                                protected float[] getListener() {
-                                    float[] scale = nodeModel.getScale();
-                                    if (scale == null) {
-                                        scale = new float[numComponentsPerElement];
-                                        nodeModel.setScale(scale);
-                                    }
-                                    return scale;
+                                protected TransformType getListener() {
+                                    return getScale(nodeModel, numComponentsPerElement, copyScale);
                                 }
 
                             });
@@ -266,16 +232,11 @@ public final class GltfAnimationCreator {
                                     }
                                 }
                             }
-                            interpolatedChannels.add(new CubicSplineInterpolatedChannel(keys, valuesCubic) {
+                            interpolatedChannels.add(new CubicSplineInterpolatedChannel(keys, valuesCubic, nodeModel) {
 
                                 @Override
-                                protected float[] getListener() {
-                                    float[] scale = nodeModel.getScale();
-                                    if (scale == null) {
-                                        scale = new float[numComponentsPerElement];
-                                        nodeModel.setScale(scale);
-                                    }
-                                    return scale;
+                                protected TransformType getListener() {
+                                    return getScale(nodeModel, numComponentsPerElement, copyScale);
                                 }
 
                             });
@@ -297,16 +258,11 @@ public final class GltfAnimationCreator {
                                     components[c] = outputFloatData.get(globalIndex++);
                                 }
                             }
-                            interpolatedChannels.add(new StepInterpolatedChannel(keys, values) {
+                            interpolatedChannels.add(new StepInterpolatedChannel(keys, values, nodeModel) {
 
                                 @Override
-                                protected float[] getListener() {
-                                    float[] weights = nodeModel.getWeights();
-                                    if (weights == null) {
-                                        weights = new float[numComponentsPerElement];
-                                        nodeModel.setWeights(weights);
-                                    }
-                                    return weights;
+                                protected TransformType getListener() {
+                                    return getWeights(nodeModel, numComponentsPerElement);
                                 }
 
                             });
@@ -320,16 +276,11 @@ public final class GltfAnimationCreator {
                                     components[c] = outputFloatData.get(globalIndex++);
                                 }
                             }
-                            interpolatedChannels.add(new LinearInterpolatedChannel(keys, values) {
+                            interpolatedChannels.add(new LinearInterpolatedChannel(keys, values, nodeModel) {
 
                                 @Override
-                                protected float[] getListener() {
-                                    float[] weights = nodeModel.getWeights();
-                                    if (weights == null) {
-                                        weights = new float[numComponentsPerElement];
-                                        nodeModel.setWeights(weights);
-                                    }
-                                    return weights;
+                                protected TransformType getListener() {
+                                    return getWeights(nodeModel, numComponentsPerElement);
                                 }
 
                             });
@@ -346,16 +297,11 @@ public final class GltfAnimationCreator {
                                     }
                                 }
                             }
-                            interpolatedChannels.add(new CubicSplineInterpolatedChannel(keys, valuesCubic) {
+                            interpolatedChannels.add(new CubicSplineInterpolatedChannel(keys, valuesCubic, nodeModel) {
 
                                 @Override
-                                protected float[] getListener() {
-                                    float[] weights = nodeModel.getWeights();
-                                    if (weights == null) {
-                                        weights = new float[numComponentsPerElement];
-                                        nodeModel.setWeights(weights);
-                                    }
-                                    return weights;
+                                protected TransformType getListener() {
+                                    return getWeights(nodeModel, numComponentsPerElement);
                                 }
 
                             });
@@ -373,5 +319,41 @@ public final class GltfAnimationCreator {
             }
         }
         return interpolatedChannels;
+    }
+
+    private static InterpolatedChannel.TransformType getTranslation(NodeModel nodeModel, int numComponentsPerElement, float[] copyTranslate) {
+        float[] translation = copyTranslate;
+        if (translation == null) {
+            translation = new float[numComponentsPerElement];
+            nodeModel.setTranslation(translation);
+        }
+        return new InterpolatedChannel.TransformType(translation, copyTranslate, GltfModelRenderer.EnumTransformType.TRANSLATION);
+    }
+
+    private static InterpolatedChannel.TransformType getRotation(NodeModel nodeModel, int numComponentsPerElement, float[] copyRotation) {
+        float[] rotation = copyRotation;
+        if (rotation == null) {
+            rotation = new float[numComponentsPerElement];
+            nodeModel.setRotation(rotation);
+        }
+        return new InterpolatedChannel.TransformType(rotation, copyRotation, GltfModelRenderer.EnumTransformType.ROTATION);
+    }
+
+    private static InterpolatedChannel.TransformType getScale(NodeModel nodeModel, int numComponentsPerElement, float[] copyScale) {
+        float[] scale = copyScale;
+        if (scale == null) {
+            scale = new float[]{1,1,1};
+            nodeModel.setScale(scale);
+        }
+        return new InterpolatedChannel.TransformType(scale, scale.clone(), GltfModelRenderer.EnumTransformType.SCALE);
+    }
+
+    private static InterpolatedChannel.TransformType getWeights(NodeModel nodeModel, int numComponentsPerElement) {
+        float[] weights = nodeModel.getWeights();
+        if (weights == null) {
+            weights = new float[numComponentsPerElement];
+            nodeModel.setWeights(weights);
+        }
+        return new InterpolatedChannel.TransformType(weights, weights.clone(), GltfModelRenderer.EnumTransformType.WEIGHTS);
     }
 }

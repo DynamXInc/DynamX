@@ -1,5 +1,7 @@
 package com.modularmods.mcgltf.animation;
 
+import de.javagl.jgltf.model.NodeModel;
+
 public abstract class LinearInterpolatedChannel extends InterpolatedChannel {
 
 	/**
@@ -8,14 +10,14 @@ public abstract class LinearInterpolatedChannel extends InterpolatedChannel {
 	 */
 	protected final float[][] values;
 	
-	public LinearInterpolatedChannel(float[] timesS, float[][] values) {
-		super(timesS);
+	public LinearInterpolatedChannel(float[] timesS, float[][] values, NodeModel nodeModel) {
+		super(timesS, nodeModel);
 		this.values = values;
 	}
 	
 	@Override
-	public void update(float timeS) {
-		float[] output = getListener();
+	public TransformType update(float timeS) {
+		float[] output = getListener().copiedValues;
 		if(timeS <= timesS[0]) {
 			System.arraycopy(values[0], 0, output, 0, output.length);
 		}
@@ -29,20 +31,21 @@ public abstract class LinearInterpolatedChannel extends InterpolatedChannel {
 			if(nextIndex >= timesS.length) {
 				nextIndex = timesS.length - 1;
 			}
-			
+
 			float local = timeS - timesS[previousIndex];
 			float delta = timesS[nextIndex] - timesS[previousIndex];
 			float alpha = local / delta;
-			
+
 			float[] previousPoint = values[previousIndex];
 			float[] nextPoint = values[nextIndex];
-			
+
 			for(int i = 0; i < output.length; i++) {
 				float p = previousPoint[i];
 				float n = nextPoint[i];
 				output[i] = p + alpha * (n - p);
 			}
 		}
+		return getListener();
 	}
 
 }

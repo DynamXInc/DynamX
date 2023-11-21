@@ -2,10 +2,13 @@ package fr.dynamx.client.renders;
 
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import com.modularmods.mcgltf.animation.InterpolatedChannel;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.events.DynamXBlockEvent;
 import fr.dynamx.api.events.EventStage;
 import fr.dynamx.client.handlers.ClientDebugSystem;
+import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
+import fr.dynamx.client.renders.model.renderer.GltfModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.blocks.TEDynamXBlock;
@@ -21,18 +24,22 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.MinecraftForge;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
 import java.util.ConcurrentModificationException;
+import java.util.HashMap;
+import java.util.List;
 
 import static fr.dynamx.utils.debug.renderer.VehicleDebugRenderer.PlayerCollisionsDebug.*;
 
 public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialRenderer<T> {
+
     @Override
     public void render(T te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
-
+        //System.out.println(te +" " + te.getAnimator() +" " + te.getAnimator().modelAnimations);
         GL11.glPushMatrix();
         GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
         GL11.glShadeModel(GL11.GL_SMOOTH);
@@ -54,8 +61,14 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
                         .add(te.getBlockObjectInfo().getRotation())
                         .add(0, te.getRotation() * 22.5f, 0);
 
+                DxModelRenderer model = DynamXContext.getDxModelRegistry().getModel(te.getBlockObjectInfo().getModel());
+                if(model instanceof GltfModelRenderer){
+                    te.getAnimator().update((GltfModelRenderer) model, partialTicks);
+
+                        te.getAnimator().setModelAnimations(((GltfModelRenderer) model).animations);
+                }
                 //Rendering the model
-                DynamXContext.getDxModelRegistry().getModel(te.getBlockObjectInfo().getModel()).renderModel((byte) te.getBlockMetadata(), false);
+                model.renderModel((byte) te.getBlockMetadata(), false);
                 if (te.getBlockObjectInfo().isModelValid() && te.getLightsModule() != null) {
                     te.getBlockObjectInfo().getLightSources().values().forEach(d -> d.drawLights(null, Minecraft.getMinecraft().player.ticksExisted, te.getBlockObjectInfo().getModel(), te.getBlockObjectInfo().getScaleModifier(), te.getLightsModule(), false));
                 }

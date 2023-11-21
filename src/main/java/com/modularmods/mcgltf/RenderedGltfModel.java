@@ -127,7 +127,7 @@ public class RenderedGltfModel {
 	public RenderedGltfModel(List<Runnable> gltfRenderData, GltfModel gltfModel) {
 		this.gltfModel = gltfModel;
 		List<SceneModel> sceneModels = gltfModel.getSceneModels();
-		renderedGltfScenes = new ArrayList<RenderedGltfScene>(sceneModels.size());
+		renderedGltfScenes = new ArrayList<>(sceneModels.size());
 		processSceneModels(gltfRenderData, sceneModels);
 	}
 	

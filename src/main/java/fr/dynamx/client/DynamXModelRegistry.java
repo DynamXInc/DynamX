@@ -209,9 +209,11 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
                 MCglTF.getInstance().reloadModels();
             }catch (Exception e) {
                 e.printStackTrace();
-            }
-            if(!threadedLoadingService.mcLoadingFinished()) {
-                SplashProgress.resume();
+            }finally {
+                if(!threadedLoadingService.mcLoadingFinished()) {
+                    SplashProgress.resume();
+                }
+
             }
             log.info("MCgLTF took " + (System.currentTimeMillis() - start) + " ms to load " + MCglTF.lookup.size() + " gltf models");
             log.info("Loading model textures...");

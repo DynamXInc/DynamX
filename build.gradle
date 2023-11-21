@@ -191,7 +191,7 @@ task runMPSJarSources(type: JavaExec, dependsOn: copyBuiltJarSources) {
 tasks.reobfShadowJar.mustRunAfter shadowJar
 tasks.onBuild.mustRunAfter reobfShadowJar
 tasks.runMPSJar.mustRunAfter reobfShadowJar
-//tasks.runMPSJarSources.mustRunAfter runMPSJar
+tasks.runMPSJarSources.mustRunAfter runMPSJar
 
 task sourcesJar(type: Jar, dependsOn: classes) {
     from(sourceSets.main.allSource) {
@@ -206,6 +206,11 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 build {
     dependsOn reobfShadowJar
     dependsOn runMPSJar
+    dependsOn sourcesJar
+}
+
+artifacts {
+    archives sourcesJar
 }
 
 runMPSJar {

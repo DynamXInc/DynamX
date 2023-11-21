@@ -5,6 +5,13 @@ import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
 import fr.dynamx.api.contentpack.object.render.IModelPackObject;
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.api.events.DynamXBlockEvent;
+import fr.dynamx.client.DynamXModelRegistry;
+import fr.dynamx.client.renders.animations.DxAnimation;
+import fr.dynamx.client.renders.animations.DxAnimator;
+import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
+import fr.dynamx.client.renders.model.renderer.GltfModelRenderer;
+import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
+import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.capability.DynamXChunkData;
 import fr.dynamx.common.capability.DynamXChunkDataProvider;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
@@ -141,11 +148,21 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IInf
     @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         if (worldIn.isRemote && isDxModel) {
-            if (playerIn.isSneaking() && playerIn.capabilities.isCreativeMode) {
-                TileEntity te = worldIn.getTileEntity(pos);
+            TEDynamXBlock te = (TEDynamXBlock) worldIn.getTileEntity(pos);
+            /*if (playerIn.isSneaking() && playerIn.capabilities.isCreativeMode) {
                 if (te != null)
-                    ((TEDynamXBlock) te).openConfigGui();
+                    te.openConfigGui();
                 return true;
+            }*/
+            if (te != null && hand.equals(EnumHand.MAIN_HAND)) {
+                if(playerIn.isSneaking()){
+                    DxModelRenderer model = DynamXContext.getDxModelRegistry().getModel(blockObjectInfo.getModel());
+                    te.getAnimator().playNextAnimation();
+                    //te.getAnimator().addAnimation("Reset");
+                    return true;
+                }
+                te.getAnimator().setBlendPose(DxAnimator.EnumBlendPose.START_END);
+                te.getAnimator().addAnimation("Run1", DxAnimation.EnumAnimType.START_END);
             }
         }
         return false;

@@ -1,5 +1,7 @@
 package com.modularmods.mcgltf.animation;
 
+import de.javagl.jgltf.model.NodeModel;
+
 public abstract class SphericalLinearInterpolatedChannel extends InterpolatedChannel {
 
     /**
@@ -8,14 +10,15 @@ public abstract class SphericalLinearInterpolatedChannel extends InterpolatedCha
      */
     protected final float[][] values;
 
-    public SphericalLinearInterpolatedChannel(float[] timesS, float[][] values) {
-        super(timesS);
+    public SphericalLinearInterpolatedChannel(float[] timesS, float[][] values, NodeModel nodeModel) {
+        super(timesS, nodeModel);
         this.values = values;
     }
 
     @Override
-    public void update(float timeS) {
-        float[] output = getListener();
+    public TransformType update(float timeS) {
+        float[] output = getListener().copiedValues;
+
         if (timeS <= timesS[0]) {
             System.arraycopy(values[0], 0, output, 0, output.length);
         } else if (timeS >= timesS[timesS.length - 1]) {
@@ -74,6 +77,8 @@ public abstract class SphericalLinearInterpolatedChannel extends InterpolatedCha
             output[2] = rz;
             output[3] = rw;
         }
+
+        return getListener();
     }
 
 }

@@ -59,7 +59,7 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
 
                 //Rendering the model
                 //DynamXContext.getDxModelRegistry().getModel(te.getPackInfo().getModel()).renderModel((byte) te.getBlockMetadata(), false);
-                DxModelRenderer model = DynamXContext.getDxModelRegistry().getModel(te.getBlockObjectInfo().getModel());
+                DxModelRenderer model = DynamXContext.getDxModelRegistry().getModel(te.getPackInfo().getModel());
                 if(model instanceof GltfModelRenderer){
                     te.getAnimator().update((GltfModelRenderer) model, partialTicks);
 
@@ -67,9 +67,9 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
                 }
                 //Rendering the model
                 model.renderModel((byte) te.getBlockMetadata(), false);
-                if (te.getBlockObjectInfo().isModelValid() && te.getLightsModule() != null) {
-                    te.getBlockObjectInfo().getLightSources().values().forEach(d -> d.drawLights(null, Minecraft.getMinecraft().player.ticksExisted, te.getBlockObjectInfo().getModel(), te.getBlockObjectInfo().getScaleModifier(), te.getLightsModule(), false));
-                }
+                /*if (te.getPackInfo().isModelValid() && te.getLightsModule() != null) {
+                    te.getPackInfo().getLightSources().values().forEach(d -> d.drawLights(null, Minecraft.getMinecraft().player.ticksExisted, te.getBlockObjectInfo().getModel(), te.getBlockObjectInfo().getScaleModifier(), te.getLightsModule(), false));
+                }*/
 
                 /*
                 TODO USE SCENE GRAPH

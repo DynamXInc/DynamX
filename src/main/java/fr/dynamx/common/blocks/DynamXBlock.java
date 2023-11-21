@@ -1,9 +1,12 @@
 package fr.dynamx.common.blocks;
 
-import fr.dynamx.api.contentpack.object.IInfoOwner;
+import com.jme3.math.Vector3f;
+import fr.dynamx.api.contentpack.object.IDynamXItem;
+import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
 import fr.dynamx.api.contentpack.object.render.IModelPackObject;
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
+import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.events.DynamXBlockEvent;
 import fr.dynamx.client.renders.animations.DxAnimation;
 import fr.dynamx.client.renders.animations.DxAnimator;
@@ -13,6 +16,7 @@ import fr.dynamx.common.capability.DynamXChunkData;
 import fr.dynamx.common.capability.DynamXChunkDataProvider;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
+import fr.dynamx.common.contentpack.type.objects.PropObject;
 import fr.dynamx.common.items.DynamXItemRegistry;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.RegistryNameSetter;
@@ -177,14 +181,16 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
                 ((TEDynamXBlock) te).openConfigGui();
             return isDxModel;*/
             if (te instanceof TEDynamXBlock && hand.equals(EnumHand.MAIN_HAND)) {
+                DxAnimator animator = ((TEDynamXBlock) te).getAnimator();
                 if(playerIn.isSneaking()){
                     DxModelRenderer model = DynamXContext.getDxModelRegistry().getModel(blockObjectInfo.getModel());
-                    te.getAnimator().playNextAnimation();
+                    animator.playNextAnimation();
                     //te.getAnimator().addAnimation("Reset");
                     return true;
                 }
-                te.getAnimator().setBlendPose(DxAnimator.EnumBlendPose.START_END);
-                te.getAnimator().addAnimation("Run1", DxAnimation.EnumAnimType.START_END);
+                //TODO
+                animator.setBlendPose(DxAnimator.EnumBlendPose.START_END);
+                animator.addAnimation("Run1", DxAnimation.EnumAnimType.START_END);
             }
         }
         if (!worldIn.isRemote) {

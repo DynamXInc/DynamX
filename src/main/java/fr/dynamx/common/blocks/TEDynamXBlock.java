@@ -84,7 +84,8 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
     }
 
     public TEDynamXBlock(BlockObject<?> packInfo) {
-        setPackInfo(packInfo);.
+        this();
+        setPackInfo(packInfo);
         this.hasSeats = !packInfo.getPartsByType(PartBlockSeat.class).isEmpty();
     }
 
@@ -281,7 +282,7 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
             if (DynamXConfig.enableDebugTerrainManager) {
                 ChunkLoadingTicket ticket = DynamXContext.getPhysicsWorld(world).getTerrainManager().getTicket(pos1);
                 if (ticket != null)
-                    ChunkGraph.addToGrah(pos1, ChunkGraph.ChunkActions.CHK_UPDATE, ChunkGraph.ActionLocation.MAIN, ticket.getCollisions(), "Chunk changed from DynamX TE markDirty opf " + getBlockObjectInfo() + " at " + getPos() + ". Ticket " + ticket);
+                    ChunkGraph.addToGrah(pos1, ChunkGraph.ChunkActions.CHK_UPDATE, ChunkGraph.ActionLocation.MAIN, ticket.getCollisions(), "Chunk changed from DynamX TE markDirty opf " + getPackInfo() + " at " + getPos() + ". Ticket " + ticket);
             }
             DynamXContext.getPhysicsWorld(world).getTerrainManager().onChunkChanged(pos1);
         }

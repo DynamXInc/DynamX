@@ -182,7 +182,7 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
             if (te instanceof TEDynamXBlock && ((TEDynamXBlock) te).getSeatEntities() != null && !((TEDynamXBlock) te).getSeatEntities().isEmpty()) {
                 //If we clicked a part, try to interact with it.
                 InteractivePart hitPart = ((TEDynamXBlock) te).getHitPart(playerIn);
-                if (hitPart != null) {
+                if (hitPart != null && hitPart.canInteract(((TEDynamXBlock) te).getSeatEntities().get(0), playerIn)) {
                     // TODO if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.PlayerInteract(context, (BaseVehicleEntity<?>) vehicleEntity, hitPart)))
                     byte idx = hitPart.getId();
                     if (idx >= ((TEDynamXBlock) te).getSeatEntities().size())

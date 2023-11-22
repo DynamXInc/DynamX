@@ -19,7 +19,6 @@ import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.blocks.TEDynamXBlock;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
-import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.entities.PropsEntity;
@@ -173,8 +172,8 @@ public class ClientEventHandler {
             if (gamesettings.thirdPersonView == 0 && MC.player.getRidingEntity() == null && MC.objectMouseOver != null) {
                 ResourceLocation loc = null;
                 if (MC.objectMouseOver.entityHit instanceof PackPhysicsEntity) {
-                    InteractivePart<?, ?> part = ((PackPhysicsEntity<?, ?>) MC.objectMouseOver.entityHit).getHitPart(MC.player);
-                    if (part != null) {
+                    InteractivePart part = ((PackPhysicsEntity<?, ?>) MC.objectMouseOver.entityHit).getHitPart(MC.player);
+                    if (part != null && part.canInteract(MC.objectMouseOver.entityHit, MC.player)) {
                         loc = part.getHudCursorTexture();
                     } else if(MC.objectMouseOver.entityHit instanceof PropsEntity) {
                         loc = new ResourceLocation(DynamXConstants.ID, "textures/focus.png");
@@ -182,8 +181,8 @@ public class ClientEventHandler {
                 } else if (MC.objectMouseOver.typeOfHit == RayTraceResult.Type.BLOCK) {
                     TileEntity te = MC.world.getTileEntity(MC.objectMouseOver.getBlockPos());
                     if (te instanceof TEDynamXBlock) {
-                        InteractivePart<?, ?> part = ((TEDynamXBlock) te).getHitPart(MC.player);
-                        if (part != null) {
+                        InteractivePart part = ((TEDynamXBlock) te).getHitPart(MC.player);
+                        if (part != null && part.canInteract(null, MC.player)) {
                             loc = part.getHudCursorTexture();
                         }
                     }

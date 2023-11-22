@@ -67,7 +67,7 @@ public class MessageEntityInteract implements IDnxPacket, IMessageHandler<Messag
             //If we clicked a part, try to interact with it.
             Vector3fPool.openPool();
             InteractivePart hitPart = targetEntity.getHitPart(context);
-            if (hitPart != null) {
+            if (hitPart != null && hitPart.canInteract(targetEntity, context)) {
                 if ((hitPart instanceof PartEntitySeat && ((PartEntitySeat) hitPart).hasDoor()) && context.isSneaking()) {
                     return;
                 }

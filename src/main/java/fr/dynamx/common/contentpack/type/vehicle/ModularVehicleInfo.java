@@ -52,6 +52,7 @@ import java.util.*;
  *
  * @see BaseVehicleEntity
  */
+@Getter
 public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, ModularVehicleInfo> implements IPhysicsPackInfo, IModelTextureVariantsSupplier,
         ParticleEmitterInfo.IParticleEmitterContainer, IObjPackObject, IPartContainer<ModularVehicleInfo>, ICollisionsContainer, ILightOwner<ModularVehicleInfo> {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
@@ -63,20 +64,16 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
         return null;
     };
 
-    @Getter
     @Setter
     private VehicleValidator validator;
 
     /* == Pack properties == */
 
-    @Getter
     @PackFileProperty(configNames = "DefaultEngine", required = false)
     protected String defaultEngine;
-    @Getter
     @PackFileProperty(configNames = "DefaultSounds", required = false)
     protected String defaultSounds;
 
-    @Getter
     @PackFileProperty(configNames = "MaxVehicleSpeed", required = false, defaultValue = "infinite")
     protected float vehicleMaxSpeed = Integer.MAX_VALUE;
 
@@ -84,71 +81,54 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
      * The directing wheel id <br>
      * Used to render the steering wheel
      */
-    @Getter
     private int directingWheel;
 
-    @Getter
     @PackFileProperty(configNames = "PlayerStandOnTop", required = false, defaultValue = "ALWAYS")
     protected EnumPlayerStandOnTop playerStandOnTop = EnumPlayerStandOnTop.ALWAYS;
 
-    @Getter
     @PackFileProperty(configNames = "DefaultZoomLevel", required = false, defaultValue = "4")
     protected int defaultZoomLevel = 4;
 
-    @Getter
     private final Map<Class<? extends BasePart<?>>, Byte> partIds = new HashMap<>();
 
     /* == Physics properties == */
 
-    @Getter
     @PackFileProperty(configNames = "EmptyMass")
     protected int emptyMass;
-    @Getter
     @PackFileProperty(configNames = "CenterOfGravityOffset", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F)
     protected Vector3f centerOfMass;
 
-    @Getter
     @PackFileProperty(configNames = "DragCoefficient")
     protected float dragFactor;
 
-    @Getter
     @PackFileProperty(configNames = "LinearDamping", required = false, defaultValue = "0.5 for helicopters, 0 for others")
     protected float linearDamping;
-    @Getter
     @PackFileProperty(configNames = "AngularDamping", required = false, defaultValue = "0.9 for helicopters, 0.5 for boats, 0 for others")
     protected float angularDamping;
 
-    @Getter
     @PackFileProperty(configNames = "InWaterLinearDamping", required = false, defaultValue = "0.6")
     protected float inWaterLinearDamping = 0.6f;
-    @Getter
     @PackFileProperty(configNames = "InWaterAngularDamping", required = false, defaultValue = "0.9 for helicopters, 0.6 for others")
     protected float inWaterAngularDamping = 0.6f;
 
-    @Getter
     @PackFileProperty(configNames = "UseComplexCollisions", required = false, defaultValue = "true", description = "common.UseComplexCollisions")
     protected boolean useComplexCollisions = true;
-    @Getter
     protected ObjectCollisionsHelper collisionsHelper = new ObjectCollisionsHelper();
 
     /**
      * The friction points of this vehicle
      */
-    @Getter
     protected final List<FrictionPoint> frictionPoints = new ArrayList<>();
 
     /* == Render properties == */
 
-    @Getter
     @PackFileProperty(configNames = "ShapeYOffset", required = false)
     protected float shapeYOffset;
 
-    @Getter
     @PackFileProperty(configNames = "ScaleModifier", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false,
             defaultValue = "1 1 1")
     protected Vector3f scaleModifier = new Vector3f(1, 1, 1);
 
-    @Getter
     @Setter
     @PackFileProperty(configNames = "RenderDistanceSquared", required = false, defaultValue = "4096")
     protected float renderDistance = 4096;
@@ -156,13 +136,11 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     /**
      * The particle emitters of this vehicle
      */
-    @Getter
     protected final List<ParticleEmitterInfo<?>> particleEmitters = new ArrayList<>();
 
     /**
      * The light sources of this vehicle
      */
-    @Getter
     protected final Map<String, PartLightSource> lightSources = new HashMap<>();
 
     /**
@@ -170,18 +148,14 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
      * A rendered part will not be rendered with the main part of the obj model <br>
      * The {@link fr.dynamx.api.entities.modules.IPhysicsModule} using this part is responsible to render the part at the right location
      */
-    @Getter
     private final List<String> renderedParts = new ArrayList<>();
-    @Getter
     private final List<IDrawablePart<?>> drawableParts = new ArrayList<>();
 
     /**
      * Maps the metadata to the texture data
      */
-    @Getter
     private MaterialVariantsInfo<ModularVehicleInfo> variants;
 
-    @Getter
     @Deprecated
     @PackFileProperty(configNames = "Textures", required = false, type = DefinitionType.DynamXDefinitionTypes.STRING_ARRAY_2D)
     private String[][] texturesArray;

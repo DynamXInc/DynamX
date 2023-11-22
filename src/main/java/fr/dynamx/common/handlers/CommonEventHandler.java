@@ -167,7 +167,7 @@ public class CommonEventHandler {
     public void onWorldUnload(WorldEvent.Unload e) {
         try {
             IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(e.getWorld());
-            if (physicsWorld != null && physicsWorld.ownsWorld(e.getWorld())) {
+            if (physicsWorld != null && physicsWorld.getWorld().equals(e.getWorld())) {
                 physicsWorld.clearAll();
                 DynamXContext.getPlayerToCollision().clear();
             }

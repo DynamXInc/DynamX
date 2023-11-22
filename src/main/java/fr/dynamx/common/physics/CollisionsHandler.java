@@ -49,12 +49,13 @@ public class CollisionsHandler {
         @Getter
         private final PhysicsCollisionEvent collisionEvent;
 
-
         public boolean tick() {
             return time-- <= 0;
         }
 
         public void handleCollision() {
+            if (entityA.getType().isPlayer() && entityB.getType().isTerrain())
+                return;
             MinecraftForge.EVENT_BUS.post(new PhysicsEvent.PhysicsCollision(physicsWorld, entityA, entityB, this));
             if (entityA.getObjectIn() instanceof PhysicsEntity && entityB.getObjectIn() instanceof PhysicsEntity) {
                 if (entityA.getType().isBulletEntity()) {

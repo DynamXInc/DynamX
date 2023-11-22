@@ -368,6 +368,8 @@ public class DynamXUtils {
                     TextComponentTranslation msg = new TextComponentTranslation("trailer.attached", trailer.getPackInfo().getName(), carEntity.getPackInfo().getName());
                     msg.getStyle().setColor(TextFormatting.GREEN);
                     player.sendMessage(msg);
+                    if(trailer instanceof TrailerEntity)
+                        ((TrailerEntity<?>) trailer).playAttachSound();
                 } else {
                     TextComponentTranslation msg = new TextComponentTranslation("trailer.attach.fail", trailer.getPackInfo().getName(), carEntity.getPackInfo().getName());
                     msg.getStyle().setColor(TextFormatting.RED);

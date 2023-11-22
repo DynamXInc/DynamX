@@ -1,5 +1,6 @@
 package fr.dynamx.common.entities.modules.engines;
 
+import fr.dynamx.api.audio.EnumSoundState;
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.entities.modules.IVehicleController;
@@ -7,20 +8,26 @@ import fr.dynamx.api.network.sync.EntityVariable;
 import fr.dynamx.api.network.sync.SynchronizationRules;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
 import fr.dynamx.client.handlers.hud.CarController;
+import fr.dynamx.client.sound.ReversingSound;
 import fr.dynamx.common.contentpack.type.vehicle.CarEngineInfo;
+import fr.dynamx.common.contentpack.type.vehicle.CarInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.EnginePhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.engine.AutomaticGearboxHandler;
 import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.optimization.Vector3fPool;
 import lombok.Getter;
+import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 
+import static fr.dynamx.client.ClientProxy.SOUND_HANDLER;
+
 /**
- * Basic {@link IEngineModule} implementation for cars <br>
+ * {@link BasicEngineModule} implementation for cars <br>
  * Works with an {@link AutomaticGearboxHandler} and a {@link fr.dynamx.common.entities.modules.WheelsModule}
  *
  * @see fr.dynamx.api.entities.VehicleEntityProperties.EnumEngineProperties
@@ -31,7 +38,10 @@ public class CarEngineModule extends BasicEngineModule implements IPackInfoReloa
     //TODO CLEAN ENGINE CODE
     @Getter
     protected CarEngineInfo engineInfo;
+    @Getter
     protected EnginePhysicsHandler physicsHandler;
+
+    protected ReversingSound reversingSound;
 
     /**
      * The active speed limit, or Float.MAX_VALUE
@@ -50,10 +60,6 @@ public class CarEngineModule extends BasicEngineModule implements IPackInfoReloa
         if (physicsHandler != null)
             physicsHandler.onPackInfosReloaded();
         super.onPackInfosReloaded();
-    }
-
-    public EnginePhysicsHandler getPhysicsHandler() {
-        return physicsHandler;
     }
 
     @Override
@@ -101,5 +107,48 @@ public class CarEngineModule extends BasicEngineModule implements IPackInfoReloa
 
     public void setSpeedLimit(float speedLimit) {
         this.speedLimit.set(speedLimit);
+    }
+
+    @Override
+    public void setControls(int controls) {
+        if (entity.world.isRemote && entity.ticksExisted > 60 && entity.getPackInfo() instanceof CarInfo) {
+            if (!this.isHandBraking() && (controls & 32) == 32)
+                playHandbrakeSound(true);
+            else if (this.isHandBraking() && (controls & 32) != 32)
+                playHandbrakeSound(false);
+        }
+        super.setControls(controls);
+    }
+
+    @Override
+    public void updateSounds() {
+        super.updateSounds();
+        if (isReversing() && getEngineProperty(VehicleEntityProperties.EnumEngineProperties.ACTIVE_GEAR) == -1) {
+            playReversingSound();
+        }
+    }
+
+    @SideOnly(Side.CLIENT)
+    protected void playHandbrakeSound(boolean on) {
+        String sound = on ? ((CarInfo) entity.getPackInfo()).getHandbrakeSoundOn() : ((CarInfo) entity.getPackInfo()).getHandbrakeSoundOff(); // It is assumed that entity is a CarEntity, and that it has a CarInfo
+        if (sound != null)
+            SOUND_HANDLER.playSingleSound(entity.physicsPosition, sound, 1, 1);
+    }
+
+    @SideOnly(Side.CLIENT)
+    protected void playReversingSound() {
+        if (getEngineInfo() == null)
+            return;
+        String sound = ((CarInfo) entity.getPackInfo()).getReversingSound(); // It is assumed that entity is a CarEntity, and that it has a CarInfo
+        if (sound == null)
+            return;
+        boolean forInterior = Minecraft.getMinecraft().gameSettings.thirdPersonView == 0 && entity.isRidingOrBeingRiddenBy(Minecraft.getMinecraft().player);
+        if (reversingSound != null && reversingSound.getState() == EnumSoundState.PLAYING) {
+            if (forInterior == reversingSound.isInterior())
+                return;
+            SOUND_HANDLER.stopSound(reversingSound);
+        }
+        reversingSound = new ReversingSound(sound, entity, this, forInterior);
+        SOUND_HANDLER.playStreamingSound(Vector3fPool.get(reversingSound.getPosX(), reversingSound.getPosY(), reversingSound.getPosZ()), reversingSound);
     }
 }

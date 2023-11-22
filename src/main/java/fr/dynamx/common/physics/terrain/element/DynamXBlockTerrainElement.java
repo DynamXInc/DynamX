@@ -65,7 +65,7 @@ public class DynamXBlockTerrainElement implements ITerrainElement {
     public PhysicsRigidBody build(World world, Vector3f pos) {
         TileEntity te = world.getTileEntity(this.pos);
         if (!(te instanceof TEDynamXBlock)) { //Not generated, should not happen because this should be removed from chunk
-            throw new IllegalStateException("DynamX block TE failed to load at " + pos);
+            throw new IllegalStateException("DynamX block TE failed to load at " + this.pos);
         }
         PhysicsRigidBody p = new PhysicsRigidBody(((TEDynamXBlock) te).getPhysicsCollision(), 0);
         p.setPhysicsLocation(pos.add(Vector3fPool.get(x + 0.5f, y + 1.5f, z + 0.5f)).addLocal(((TEDynamXBlock) te).getRelativeTranslation()));

@@ -218,7 +218,7 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
         doorsState.put(doorId, doorState);
         switch (doorState) {
             case OPENING:
-                playDoorSound(DoorState.OPENED);
+                playDoorSound(door, DoorState.OPENED);
                 if (usePhysics) {
                     doorPhysics.setJointLimit(door.getAxisToUse(), door.getOpenLimit().x, door.getOpenLimit().y);
                     doorPhysics.setJointRotationMotorVelocity(door.getAxisToUse(), door.getOpenMotor().x, door.getOpenMotor().y);
@@ -233,7 +233,7 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
                     doorPhysics.setJointRotationMotorVelocity(door.getAxisToUse(), door.getCloseMotor().x, door.getCloseMotor().y);
                 break;
             case CLOSED:
-                playDoorSound(DoorState.CLOSED);
+                playDoorSound(door, DoorState.CLOSED);
                 if (usePhysics) {
                     doorPhysics.setJointMotorState(door.getAxisToUse(), false);
                     doorPhysics.setJointLimit(door.getAxisToUse(), door.getCloseLimit().x, door.getCloseLimit().y);
@@ -254,9 +254,9 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
         return roundedExtreme >= 0 ? roundedCurrentAngle >= roundedExtreme : roundedCurrentAngle <= roundedExtreme;
     }
 
-    public void playDoorSound(DoorState doorState) {
+    public void playDoorSound(PartDoor door, DoorState doorState) {
         if (vehicleEntity.world.isRemote) {
-            ClientProxy.SOUND_HANDLER.playSingleSound(vehicleEntity.physicsPosition, doorState == DoorState.CLOSED ? "door_close" : "door_open", 1, 1);
+            ClientProxy.SOUND_HANDLER.playSingleSound(vehicleEntity.physicsPosition, doorState == DoorState.CLOSED ? door.getDoorCloseSound() : door.getDoorOpenSound(), 1, 1);
         }
     }
 

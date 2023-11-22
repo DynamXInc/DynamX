@@ -45,6 +45,7 @@ import javax.vecmath.Vector2f;
 import java.util.Collections;
 import java.util.List;
 
+@Getter
 @RegisteredSubInfoType(name = "door", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER}, strictName = false)
 public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfo> implements IPhysicsPackInfo, IDrawablePart<BaseVehicleEntity<?>>, IPartContainer<PartDoor> {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
@@ -63,56 +64,48 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
             return new IPackFilePropertyFixer.FixResult("DoorCloseForce", true);
         return null;
     };
-    @Getter
     @PackFileProperty(configNames = "PartName")
-    private String partName;
+    protected String partName;
 
-    @Getter
     @PackFileProperty(configNames = "LocalCarAttachPoint", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y)
-    private Vector3f carAttachPoint = new Vector3f();
-    @Getter
+    protected Vector3f carAttachPoint = new Vector3f();
     @PackFileProperty(configNames = "LocalDoorAttachPoint", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y)
-    private Vector3f doorAttachPoint = new Vector3f();
-    @Getter
+    protected Vector3f doorAttachPoint = new Vector3f();
     @PackFileProperty(configNames = "AttachStrength", required = false, defaultValue = "400")
-    private int attachStrength = 400;
+    protected int attachStrength = 400;
 
-    @Getter
     @PackFileProperty(configNames = "Axis", required = false, defaultValue = "Y_ROT")
-    private DynamXPhysicsHelper.EnumPhysicsAxis axisToUse = DynamXPhysicsHelper.EnumPhysicsAxis.Y_ROT;
-    @Getter
+    protected DynamXPhysicsHelper.EnumPhysicsAxis axisToUse = DynamXPhysicsHelper.EnumPhysicsAxis.Y_ROT;
     @PackFileProperty(configNames = "OpenedDoorAngleLimit", required = false, defaultValue = "0 0")
-    private Vector2f openLimit = new Vector2f();
-    @Getter
+    protected Vector2f openLimit = new Vector2f();
     @PackFileProperty(configNames = "ClosedDoorAngleLimit", required = false, defaultValue = "0 0")
-    private Vector2f closeLimit = new Vector2f();
-    @Getter
+    protected Vector2f closeLimit = new Vector2f();
     @PackFileProperty(configNames = "DoorOpenForce", required = false, defaultValue = "1 200")
-    private Vector2f openMotor = new Vector2f(1, 200);
-    @Getter
+    protected Vector2f openMotor = new Vector2f(1, 200);
     @PackFileProperty(configNames = "DoorCloseForce", required = false, defaultValue = "-1.5 300")
-    private Vector2f closeMotor = new Vector2f(-1.5f, 300);
+    protected Vector2f closeMotor = new Vector2f(-1.5f, 300);
 
-    @Getter
     @PackFileProperty(configNames = "AutoMountDelay", required = false, defaultValue = "40")
-    private byte mountDelay = (byte) 40;
-    @Getter
+    protected byte mountDelay = (byte) 40;
     @PackFileProperty(configNames = "DoorCloseTime", required = false, defaultValue = "25")
-    private byte doorCloseTime = (byte) 25;
+    protected byte doorCloseTime = (byte) 25;
 
-    @Getter
     @PackFileProperty(configNames = "Enabled", required = false, defaultValue = "true")
-    private boolean enabled = true;
+    protected boolean enabled = true;
+
+    @PackFileProperty(configNames = "DoorOpenSound", required = false)
+    protected String doorOpenSound;
+
+    @PackFileProperty(configNames = "DoorCloseSound", required = false)
+    protected String doorCloseSound;
 
     /**
      * True if the mounting animation is playing, use to prevent other interactions in the same time
      */
-    @Getter
     @Setter
-    public boolean isPlayerMounting;
+    protected boolean isPlayerMounting;
 
-    @Getter
-    private ObjectCollisionsHelper collisionsHelper = new ObjectCollisionsHelper();
+    protected ObjectCollisionsHelper collisionsHelper = new ObjectCollisionsHelper();
 
     public PartDoor(ModularVehicleInfo owner, String partName) {
         super(owner, partName, 0, 0);

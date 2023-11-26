@@ -66,7 +66,8 @@ public abstract class PackEntityPhysicsHandler<A extends IPhysicsPackInfo & IPar
     @Nullable
     @Override
     public Vector3f getCenterOfMass() {
-        return getPackInfo().getCenterOfMass();
+        // Note: This method is called by the super constructor, before packInfo is initialized
+        return handledEntity.getPackInfo().getCenterOfMass();
     }
 
     @Override

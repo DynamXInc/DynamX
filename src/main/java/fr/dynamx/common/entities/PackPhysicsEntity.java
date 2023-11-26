@@ -108,6 +108,7 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
             if (module instanceof IPackInfoReloadListener)
                 ((IPackInfoReloadListener) module).onPackInfosReloaded();
         }
+        rawBoxes.clear(); //Clear collisions cache
     }
 
     @Override

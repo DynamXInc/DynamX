@@ -1,8 +1,8 @@
 package fr.dynamx.common.contentpack.type.objects;
 
 import com.jme3.math.Vector3f;
+import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.IDynamXItem;
-import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
@@ -15,10 +15,9 @@ import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
 import fr.dynamx.common.contentpack.type.ObjectCollisionsHelper;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.utils.DynamXUtils;
+import fr.dynamx.utils.errors.DynamXErrorManager;
 import lombok.Getter;
 import lombok.Setter;
-import fr.dynamx.common.contentpack.loader.ObjectLoader;
-import fr.dynamx.common.contentpack.parts.PartBlockSeat;
 import net.minecraft.block.material.Material;
 import net.minecraftforge.common.MinecraftForge;
 
@@ -77,6 +76,9 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
         //Map lights
         lightSources.values().forEach(PartLightSource::postLoad);
         collisionsHelper.loadCollisions(this, DynamXUtils.getModelPath(getPackName(), model), "", translation, 0, useComplexCollisions, scaleModifier, ObjectCollisionsHelper.CollisionType.BLOCK);
+        if(hasVaryingTextures() && getMaxTextureMetadata() > 16 && (getCreativeTabName() == null || !getCreativeTabName().equalsIgnoreCase("None"))) {
+            DynamXErrorManager.addError(getPackName(), DynamXErrorManager.PACKS_ERRORS, "too_many_variants", ErrorLevel.HIGH, getName(), "You can't use more than 16 variants on blocks !");
+        }
         return super.postLoad(hot);
     }
 

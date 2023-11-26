@@ -1,7 +1,6 @@
 package fr.dynamx.common.contentpack.type.objects;
 
 import com.jme3.math.Vector3f;
-import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.ICollisionsContainer;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
@@ -13,7 +12,6 @@ import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
 import fr.dynamx.common.contentpack.type.ObjectCollisionsHelper;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
-import fr.dynamx.utils.errors.DynamXErrorManager;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -60,14 +58,6 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
     public AbstractProp(String packName, String fileName) {
         super(packName, fileName);
         setItemScale(0.3f);
-    }
-
-    @Override
-    public boolean postLoad(boolean hot) {
-        if(hasVaryingTextures() && getMaxTextureMetadata() > 16) {
-            DynamXErrorManager.addError(getPackName(), DynamXErrorManager.PACKS_ERRORS, "too_many_variants", ErrorLevel.HIGH, getName(), "You can't use more than 16 variants on blocks !");
-        }
-        return super.postLoad(hot);
     }
 
     abstract MaterialVariantsInfo<?> getVariants();

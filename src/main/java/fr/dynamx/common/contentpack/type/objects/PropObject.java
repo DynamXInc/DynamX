@@ -162,15 +162,6 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
     }
 
     @Override
-    public void addSubProperty(ISubInfoType<T> property) {
-    }
-
-    @Override
-    public List<ISubInfoType<T>> getSubProperties() {
-        return Collections.emptyList();
-    }
-
-    @Override
     public boolean shouldRegisterModel() {
         return owner == null || !model.equals(owner.getModel()); //Don't register the model twice if there is a block owning this prop
     }

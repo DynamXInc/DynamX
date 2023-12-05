@@ -7,8 +7,6 @@ import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.common.DynamXMain;
-import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
-import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.StorageModule;
 import fr.dynamx.utils.DynamXConstants;
@@ -17,7 +15,7 @@ import fr.dynamx.utils.debug.DynamXDebugOptions;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 
-@RegisteredSubInfoType(name = "storage", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER, SubInfoTypeRegistries.PROPS}, strictName = false)
+@RegisteredSubInfoType(name = "storage", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER, SubInfoTypeRegistries.BLOCKS, SubInfoTypeRegistries.PROPS}, strictName = false)
 public class PartStorage<T extends ISubInfoTypeOwner<T>> extends InteractivePart<PackPhysicsEntity<?, ?>, T>
 {
     @PackFileProperty(configNames = "StorageSize")
@@ -49,11 +47,8 @@ public class PartStorage<T extends ISubInfoTypeOwner<T>> extends InteractivePart
 
     @Override
     public boolean interact(PackPhysicsEntity<?, ?> vehicleEntity, EntityPlayer player) {
-        if (player.isSneaking()) {
-            player.openGui(DynamXMain.instance, 1, player.world, vehicleEntity.getEntityId(), getId(), 0);
-            return true;
-        }
-        return false;
+        player.openGui(DynamXMain.instance, 1, player.world, vehicleEntity.getEntityId(), getId(), 0);
+        return true;
     }
 
     public int getStorageSize() {

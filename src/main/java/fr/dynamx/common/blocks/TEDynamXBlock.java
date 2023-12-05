@@ -14,11 +14,13 @@ import fr.dynamx.common.capability.DynamXChunkData;
 import fr.dynamx.common.capability.DynamXChunkDataProvider;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.parts.PartBlockSeat;
+import fr.dynamx.common.contentpack.parts.PartStorage;
 import fr.dynamx.common.contentpack.type.ObjectCollisionsHelper;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
 import fr.dynamx.common.entities.ICollidableObject;
 import fr.dynamx.common.entities.SeatEntity;
 import fr.dynamx.common.entities.modules.AbstractLightsModule;
+import fr.dynamx.common.entities.modules.StorageModule;
 import fr.dynamx.common.physics.terrain.chunk.ChunkLoadingTicket;
 import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.VerticalChunkPos;
@@ -63,6 +65,9 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
     @Getter
     private List<SeatEntity> seatEntities;
 
+    @Getter
+    private StorageModule storageModule;
+
     /**
      * The cache of the block collisions, with position offset but no rotation
      */
@@ -96,6 +101,17 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
             seatEntities.forEach(Entity::setDead);
             seatEntities = null;
         }
+        List<PartStorage> storages = packInfo.getPartsByType(PartStorage.class);
+        if(storages.isEmpty())
+            return;
+        if(storageModule != null && storages.size() == storageModule.getInventories().size())
+            return;
+        for (PartStorage storage : storages) {
+            if(storageModule == null)
+                storageModule = new StorageModule(this, pos, storage);
+            else
+                storageModule.addInventory(this, pos, storage);
+        }
     }
 
     @Override
@@ -104,6 +120,8 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
             compound.setString("BlockInfo", packInfo.getFullName());
         if (lightsModule != null)
             lightsModule.writeToNBT(compound);
+        if (storageModule != null)
+            storageModule.writeToNBT(compound);
         compound.setInteger("Rotation", rotation);
         compound.setFloat("TranslationX", relativeTranslation.x);
         compound.setFloat("TranslationY", relativeTranslation.y);
@@ -122,11 +140,13 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
     public void readFromNBT(NBTTagCompound compound) {
         super.readFromNBT(compound);
         if (compound.hasKey("BlockInfo")) {
-            packInfo = DynamXObjectLoaders.BLOCKS.findInfo(compound.getString("BlockInfo"));
+            setPackInfo(DynamXObjectLoaders.BLOCKS.findInfo(compound.getString("BlockInfo")));
             this.hasSeats = packInfo != null && !packInfo.getPartsByType(PartBlockSeat.class).isEmpty();
         }
         if (lightsModule != null)
             lightsModule.readFromNBT(compound);
+        if (storageModule != null)
+            storageModule.readFromNBT(compound);
         rotation = compound.getInteger("Rotation");
         relativeTranslation = new Vector3f(
                 compound.getFloat("TranslationX"),

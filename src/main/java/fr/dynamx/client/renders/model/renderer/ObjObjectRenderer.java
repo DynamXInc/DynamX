@@ -41,7 +41,7 @@ public class ObjObjectRenderer {
     public void uploadVAO() {
         if (modelRenderData.isEmpty()) //Add default render data
             modelRenderData.put((byte) 0, new VariantRenderData(null, null));
-        if (objObjectData.getMesh().materials.isEmpty()) {
+        if (objObjectData.getMaterials().isEmpty()) {
             objObjectData.clearData();
             return;
         }
@@ -51,10 +51,10 @@ public class ObjObjectRenderer {
                 DynamXRenderUtils.bindVertexArray(vaoID);
                 entry.getValue().vaoId = vaoID;
 
-                entry.getValue().ebo = setupIndicesBuffer(getObjObjectData().getMesh().indices);
-                entry.getValue().vboPositions = setupArraysPointers(EnumGLPointer.VERTEX, getObjObjectData().getMesh().getVerticesPos());
-                entry.getValue().vboNormals = setupArraysPointers(EnumGLPointer.NORMAL, getObjObjectData().getMesh().getVerticesNormals());
-                entry.getValue().vboTexCoords = setupArraysPointers(EnumGLPointer.TEX_COORDS, getObjObjectData().getMesh().getTextureCoords());
+                entry.getValue().ebo = setupIndicesBuffer(getObjObjectData().getIndices());
+                entry.getValue().vboPositions = setupArraysPointers(EnumGLPointer.VERTEX, getObjObjectData().getVerticesPos());
+                entry.getValue().vboNormals = setupArraysPointers(EnumGLPointer.NORMAL, getObjObjectData().getVerticesNormals());
+                entry.getValue().vboTexCoords = setupArraysPointers(EnumGLPointer.TEX_COORDS, getObjObjectData().getTextureCoords());
 
                 GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
                 DynamXRenderUtils.bindVertexArray(0);
@@ -83,7 +83,7 @@ public class ObjObjectRenderer {
         for (TextureVariantData variant : variants.getTextureVariants().values()) {
             boolean usesVariant = variant.getId() == 0 || model.getMaterials().containsKey(variant.getName());
             if (!usesVariant) { //search variant in used textures
-                for (String materialName : objObjectData.getMesh().materialForEachVertex) {
+                for (String materialName : objObjectData.getMaterialForEachVertex()) {
                     Material material = model.getMaterials().get(materialName);
                     if (material != null && material.diffuseTexture.containsKey(variant.getName())) {
                         usesVariant = true;
@@ -132,7 +132,7 @@ public class ObjObjectRenderer {
         GlStateManager.glEnableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
         GlStateManager.glEnableClientState(GL11.GL_NORMAL_ARRAY);
 
-        for (Map.Entry<String, Material.IndexPair> pair : getObjObjectData().getMesh().materials.entrySet()) {
+        for (Map.Entry<String, Material.IndexPair> pair : getObjObjectData().getMaterials().entrySet()) {
             Material material = bindMaterial(model, pair.getKey(), renderData.getBaseVariant(), renderData.getVariant());
             if (material == null) {
                 continue;

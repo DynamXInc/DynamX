@@ -9,10 +9,7 @@ import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.objloader.data.Material;
 import fr.dynamx.common.objloader.data.ObjModelData;
 import fr.dynamx.common.objloader.data.ObjObjectData;
-import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.errors.DynamXErrorManager;
-import fr.dynamx.utils.maths.DynamXGeometry;
-import fr.dynamx.utils.optimization.GlQuaternionPool;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.Vec3d;
@@ -51,7 +48,7 @@ public class ObjModelRenderer extends DxModelRenderer {
             for (ObjObjectRenderer object : objObjects) {
                 loadingObject = object;
                 object.clearVAO();
-                if (object.getObjObjectData().getMesh().materials.isEmpty() || getTextureVariants() == null)
+                if (object.getObjObjectData().getMaterials().isEmpty() || getTextureVariants() == null)
                     continue;
                 IModelTextureVariantsSupplier.IModelTextureVariants variants = this.getTextureVariants().getTextureVariantsFor(object);
                 if (variants != null)

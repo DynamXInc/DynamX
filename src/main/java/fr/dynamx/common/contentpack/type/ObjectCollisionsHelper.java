@@ -7,9 +7,7 @@ import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.dxmodel.DxModelPath;
 import fr.dynamx.common.DynamXContext;
-import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.objloader.data.DxModelData;
-import fr.dynamx.common.objloader.data.ObjModelData;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.physics.ShapeUtils;
@@ -54,86 +52,34 @@ public class ObjectCollisionsHelper {
                 }
 
                 // else Case 2.2: No shapes and complex collisions: generate part shapes from the obj model
-                switch (dxModelData.getFormat()) {
-                    case OBJ:
-                        ((ObjModelData) dxModelData).getObjObjects().forEach(objObject -> {
-                            if (!partName.isEmpty() && !objObject.getName().toLowerCase().contains(partName.toLowerCase()))
-                                return;
-                            if (!useComplexCollisions) {
-                                Vector3f half = objObject.getMesh().getDimension().multLocal(scaleModifier);
-                                if (half.x != 0 || half.y != 0 || half.z != 0) {
-                                    physicsCollisionShape.addChildShape(new BoxCollisionShape(half), objObject.getMesh().getCenter().addLocal(centerOfMass));
-                                }
-                            }
-                            MutableBoundingBox box = new MutableBoundingBox(objObject.getMesh().getDimension().mult(scaleModifier)).offset(objObject.getMesh().getCenter());
-                            shapes.add(new IShapeInfo() {
-                                @Override
-                                public Vector3f getPosition() {
-                                    return objObject.getMesh().getCenter();
-                                }
+                dxModelData.getMeshNames().forEach(meshName -> {
+                    if (!partName.isEmpty() && !meshName.contains(partName.toLowerCase()))
+                        return;
+                    Vector3f dimension = dxModelData.getMeshDimension(meshName, new Vector3f()).multLocal(scaleModifier);
+                    if (dimension.x == 0 && dimension.y == 0 && dimension.z == 0)
+                        return;
+                    Vector3f center = dxModelData.getMeshCenter(meshName, new Vector3f());
+                    if (!useComplexCollisions) {
+                        physicsCollisionShape.addChildShape(new BoxCollisionShape(dimension), center.add(centerOfMass));
+                    }
+                    MutableBoundingBox box = new MutableBoundingBox(dimension).offset(center);
+                    shapes.add(new IShapeInfo() {
+                        @Override
+                        public Vector3f getPosition() {
+                            return center;
+                        }
 
-                                @Override
-                                public Vector3f getSize() {
-                                    return objObject.getMesh().getDimension().multLocal(scaleModifier);
-                                }
+                        @Override
+                        public Vector3f getSize() {
+                            return dimension;
+                        }
 
-                                @Override
-                                public MutableBoundingBox getBoundingBox() {
-                                    return box;
-                                }
-                            });
-                        });
-                        break;
-                    case GLTF:
-                        DynamXMain.log.fatal("Cannot generate part shapes from a gltf model " + modelPath + " (still do implement)");
-                        /* FIXME DO GTLF SHAPES GEN
-                            ((GltfModelData) dxModelData).getNodeModels().forEach(objObject -> {
-                            if(!partName.isEmpty() && !objObject.getName().toLowerCase().contains(partName.toLowerCase()))
-                                return;
-                            if(!useComplexCollisions) {
-                                Vector3f half = objObject.getMesh().getDimension().multLocal(scaleModifier);
-                                if (half.x != 0 || half.y != 0 || half.z != 0) {
-                                    physicsCollisionShape.addChildShape(new BoxCollisionShape(half), objObject.getMesh().getCenter().addLocal(centerOfMass));
-                                }
-                            }
-                            MutableBoundingBox box = new MutableBoundingBox(objObject.getMesh().getDimension().mult(scaleModifier)).offset(objObject.getMesh().getCenter());
-                            shapes.add(new IShapeInfo() {
-                                @Override
-                                public Vector3f getPosition() {
-                                    return objObject.getMesh().getCenter();
-                                }
-
-                                @Override
-                                public Vector3f getSize() {
-                                    return objObject.getMesh().getDimension().multLocal(scaleModifier);
-                                }
-
-                                @Override
-                                public MutableBoundingBox getBoundingBox() {
-                                    return box;
-                                }
-                            });
-                        });*/
-                        break;
-                }
-
-                /* "Old" version:
-                switch (dxModelData.getFormat()) {
-                    case OBJ:
-                        ((ObjModelData) dxModelData).getObjObjects().forEach(objObject -> {
-                            abstractProp.getCollisionBoxes().add(ShapeUtils.getAABB(abstractProp,
-                                    objObject.getMesh().min(), objObject.getMesh().max(), new Vector3f(), new Vector3f()));
-                            dxModelData.addCollisionShape(compoundCollisionShape, abstractProp.getScaleModifier());
-                        });
-                        break;
-                    case GLTF:
-                        ((GltfModelData) dxModelData).getNodeModels().forEach(nodeModel -> {
-                            abstractProp.getCollisionBoxes().add(ShapeUtils.getAABB(abstractProp,
-                                    dxModelData.getMinOfMesh(nodeModel.getName()), dxModelData.getMaxOfMesh(nodeModel.getName()), new Vector3f(), new Vector3f()));
-                            dxModelData.addCollisionShape(compoundCollisionShape, abstractProp.getScaleModifier());
-                        });
-                        break;
-                }*/
+                        @Override
+                        public MutableBoundingBox getBoundingBox() {
+                            return box;
+                        }
+                    });
+                });
             } else if (!useComplexCollisions) {
                 // Case 3: no complex collisions and shapes
                 // nb: the scale modifier is already applied to the part shapes

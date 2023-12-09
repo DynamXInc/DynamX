@@ -16,11 +16,11 @@ public interface IResourcesOwner {
     }
 
     default boolean createJson() {
-        return getObjModel() == null;
+        return getDxModel() == null;
     }
 
     @Nullable
-    IObjPackObject getObjModel();
+    IModelPackObject getDxModel();
 
     default Item getItem() {
         return this instanceof Item ? (Item) this : null;
@@ -53,7 +53,7 @@ public interface IResourcesOwner {
         }
 
         @Override
-        public IObjPackObject getObjModel() {
+        public IModelPackObject getDxModel() {
             return null;
         }
 

@@ -1,43 +1,32 @@
 package fr.dynamx.common.objloader.data;
 
 import com.jme3.math.Vector3f;
-import fr.aym.acslib.api.services.mps.IMpsClassLoader;
-import fr.dynamx.api.obj.ObjModelPath;
-import fr.dynamx.common.DynamXMain;
-import fr.dynamx.common.contentpack.ContentPackLoader;
-import fr.dynamx.common.contentpack.PackInfo;
+import fr.dynamx.api.dxmodel.DxModelPath;
 import fr.dynamx.common.objloader.OBJLoader;
 import fr.dynamx.utils.DynamXUtils;
 import lombok.Getter;
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import javax.annotation.Nullable;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * An obj model not able to be rendered, used for collisions generation
  */
-public class ObjModelData {
+public class ObjModelData extends DxModelData {
     @Getter
     private final List<ObjObjectData> objObjects = new ArrayList<>();
     @Getter
     private final Map<String, Material> materials = new HashMap<>();
-    private final ObjModelPath objModelPath;
-    private final IMpsClassLoader mpsClassLoader;
 
-    public ObjModelData(ObjModelPath path) {
-        this.mpsClassLoader = ContentPackLoader.getProtectedResources(path.getPackName()).getSecureLoader();
-        this.objModelPath = path;
+    public ObjModelData(DxModelPath path) {
+        super(path);
         try {
             String content = new String(DynamXUtils.readInputStream(FMLCommonHandler.instance().getSide().isClient() ? client(path) : server(path)), StandardCharsets.UTF_8);
             ResourceLocation location = path.getModelPath();
@@ -49,167 +38,80 @@ public class ObjModelData {
         }
     }
 
-    @SideOnly(Side.CLIENT)
-    private InputStream client(ObjModelPath path) throws IOException {
-        return Minecraft.getMinecraft().getResourceManager().getResource(path.getModelPath()).getInputStream();
-    }
-
-    private InputStream server(ObjModelPath path) throws IOException {
-        InputStream result = null;
-        for (PackInfo packInfo : path.getPackLocations()) {
-            result = packInfo.readFile(path.getModelPath());
-            if (result != null)
-                break;
-        }
-        if (result == null)
-            throw new FileNotFoundException("Model not found : " + path + ". Pack : " + path.getPackName());
-        return result;
-    }
-
-    public ObjModelPath getObjModelPath() {
-        return objModelPath;
-    }
-
-    public float[] getVerticesPos() {
-        List<float[]> posList = new ArrayList<>();
-        int size = 0;
-        for (ObjObjectData objObject : objObjects) {
-            if (!objObject.getName().toLowerCase().contains("main")) {
-                float[] pos = getVerticesPos(objObject.getName().toLowerCase());
-                posList.add(pos);
-                size += pos.length;
-            }
-        }
-        float[] pos = new float[size];
-        for (float[] floats : posList) {
-            System.arraycopy(floats, 0, pos, 0, floats.length);
-        }
-        return pos;
-    }
-
-    public Vector3f[] getVectorVerticesPos() {
-        List<Vector3f[]> posList = new ArrayList<>();
-        int size = 0;
-        for (ObjObjectData objObject : objObjects) {
-            if (!objObject.getName().toLowerCase().contains("main")) {
-                Vector3f[] pos = getVectorVerticesPos(objObject.getName().toLowerCase());
-                posList.add(pos);
-                size += pos.length;
-            }
-        }
-        Vector3f[] pos = new Vector3f[size];
-        for (Vector3f[] floats : posList) {
-            System.arraycopy(floats, 0, pos, 0, floats.length);
-        }
-        return pos;
-    }
-
+    @Override
     public float[] getVerticesPos(String objectName) {
         float[] pos = new float[0];
         for (ObjObjectData objObject : objObjects) {
-            if (objObject.getName().toLowerCase().contains(objectName.toLowerCase())) {
-                pos = new float[objObject.getMesh().vertices.length * 3];
-                for (int i = 0; i < objObject.getMesh().vertices.length; i++) {
-                    pos[i * 3] = objObject.getMesh().vertices[i].getPos().x;
-                    pos[i * 3 + 1] = objObject.getMesh().vertices[i].getPos().y;
-                    pos[i * 3 + 2] = objObject.getMesh().vertices[i].getPos().z;
-                }
+            if (!objObject.getName().toLowerCase().contains(objectName.toLowerCase())) {
+                continue;
+            }
+            pos = new float[objObject.getVertices().length * 3];
+            for (int i = 0; i < objObject.getVertices().length; i++) {
+                pos[i * 3] = objObject.getVertices()[i].getPos().x;
+                pos[i * 3 + 1] = objObject.getVertices()[i].getPos().y;
+                pos[i * 3 + 2] = objObject.getVertices()[i].getPos().z;
             }
         }
         return pos;
     }
 
-    public Vector3f[] getVectorVerticesPos(String objectName) {
-        Vector3f[] pos = new Vector3f[0];
-        for (ObjObjectData objObject : objObjects) {
-            if (objObject.getName().toLowerCase().contains(objectName.toLowerCase())) {
-                pos = new Vector3f[objObject.getMesh().vertices.length];
-                for (int i = 0; i < objObject.getMesh().vertices.length; i++) {
-                    pos[i] = new Vector3f(objObject.getMesh().vertices[i].getPos().x,
-                            objObject.getMesh().vertices[i].getPos().y,
-                            objObject.getMesh().vertices[i].getPos().z);
-                }
-            }
-        }
-        return pos;
-    }
-
-    public int[] getAllMeshIndices() {
-        List<int[]> indicesList = new ArrayList<>();
-        int size = 0;
-        for (ObjObjectData objObject : objObjects) {
-            if (!objObject.getName().toLowerCase().contains("main")) {
-                int[] indices = getMeshIndices(objObject.getName().toLowerCase());
-                indicesList.add(indices);
-                size += indices.length;
-            }
-        }
-        int[] indices = new int[size];
-        for (int[] ints : indicesList) {
-            System.arraycopy(ints, 0, indices, 0, ints.length);
-        }
-        return indices;
-    }
-
+    @Override
     public int[] getMeshIndices(String objectName) {
-        int[] indices = new int[0];
-        for (ObjObjectData objObject : objObjects) {
-            if (objObject.getName().toLowerCase().contains(objectName.toLowerCase())) {
-                indices = objObject.getMesh().indices;
-            }
-        }
-        return indices;
+        return getObjObject(objectName).getIndices();
     }
 
-    public ObjObjectData getObjObject(String objectName) {
-        for (ObjObjectData objObject : objObjects) {
-            if (objObject.getName().toLowerCase().contains(objectName.toLowerCase())) {
-                return objObject;
-            }
-        }
-        return null;
+    @Override
+    public Vector3f getMeshMin(String name, @Nullable Vector3f result) {
+        ObjObjectData objObject = getObjObject(name);
+        return objObject == null ? null : objObject.min(result);
     }
 
-    public Vector3f getMinOfModel() {
-        Vector3f firstMin = objObjects.get(0).getMesh().min();
+    @Override
+    public Vector3f getMeshMax(String name, @Nullable Vector3f result) {
+        ObjObjectData objObject = getObjObject(name);
+        return objObject == null ? null : objObject.max(result);
+    }
+
+    @Override
+    public Vector3f getMinOfModel(@Nullable Vector3f result) {
+        Vector3f firstMin = objObjects.get(0).min(result);
         float minX = firstMin.x;
         float minY = firstMin.y;
         float minZ = firstMin.z;
-        for (ObjObjectData objObject : objObjects) {
-            if (objObject.getMesh().min().x < minX) minX = objObject.getMesh().min().x;
-            if (objObject.getMesh().min().y < minY) minY = objObject.getMesh().min().y;
-            if (objObject.getMesh().min().z < minZ) minZ = objObject.getMesh().min().z;
+        for (int i = 1; i < objObjects.size(); i++) {
+            Vector3f min = objObjects.get(i).min(result);
+            if (min.x < minX) minX = min.x;
+            if (min.y < minY) minY = min.y;
+            if (min.z < minZ) minZ = min.z;
         }
-        return new Vector3f(minX, minY, minZ);
+        if(result == null)
+            return new Vector3f(minX, minY, minZ);
+        return result.set(minX, minY, minZ);
     }
 
-    public Vector3f getMaxOfModel() {
-        Vector3f firstMax = objObjects.get(0).getMesh().max();
+    @Override
+    public Vector3f getMaxOfModel(@Nullable Vector3f result) {
+        Vector3f firstMax = objObjects.get(0).max(result);
         float maxX = firstMax.x;
         float maxY = firstMax.y;
         float maxZ = firstMax.z;
-        for (ObjObjectData objObject : objObjects) {
-
-            if (objObject.getMesh().max().x > maxX) maxX = objObject.getMesh().max().x;
-            if (objObject.getMesh().max().y > maxY) maxY = objObject.getMesh().max().y;
-            if (objObject.getMesh().max().z > maxZ) maxZ = objObject.getMesh().max().z;
-
-            /*maxX = Math.max(objObject.getMesh().max().x, maxX);
-            maxY = Math.max(objObject.getMesh().max().x, maxY);
-            maxZ = Math.max(objObject.getMesh().max().x, maxZ);*/
+        for (int i = 1; i < objObjects.size(); i++) {
+            Vector3f max = objObjects.get(i).max(result);
+            if (max.x > maxX) maxX = max.x;
+            if (max.y > maxY) maxY = max.y;
+            if (max.z > maxZ) maxZ = max.z;
         }
-        return new Vector3f(maxX, maxY, maxZ);
+        if(result == null)
+            return new Vector3f(maxX, maxY, maxZ);
+        return result.set(maxX, maxY, maxZ);
     }
 
-    public Vector3f getDimension() {
-        Vector3f max = getMaxOfModel();
-        Vector3f min = getMinOfModel();
-        return new Vector3f(max.x - min.x, max.y - min.y, max.z - min.z);
+    public ObjObjectData getObjObject(String objectName) {
+        return objObjects.stream().filter(objObject -> objObject.getName().equalsIgnoreCase(objectName)).findFirst().orElse(null);
     }
 
-    public Vector3f getCenter() {
-        Vector3f max = getMaxOfModel();
-        Vector3f min = getMinOfModel();
-        return new Vector3f((max.x + min.x) / 2f, (max.y + min.y) / 2f, (max.z + min.z) / 2f);
+    @Override
+    public List<String> getMeshNames() {
+        return objObjects.stream().map(o -> o.getName().toLowerCase()).collect(Collectors.toList());
     }
 }

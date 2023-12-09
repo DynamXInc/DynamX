@@ -1,6 +1,7 @@
 package fr.dynamx.api.events;
 
 import fr.dynamx.client.renders.model.ModelObjArmor;
+import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import lombok.Getter;
@@ -13,7 +14,7 @@ public class ArmorEvent extends Event {
         @Getter
         private final ModelObjArmor armorModel;
         @Getter
-        private final ObjModelRenderer objModel;
+        private final DxModelRenderer objModel;
         @Getter
         private final ObjObjectRenderer objObjectRenderer;
         @Getter
@@ -21,7 +22,7 @@ public class ArmorEvent extends Event {
         @Getter
         private final Type renderType;
 
-        public Render(ModelObjArmor armorModel, ObjModelRenderer objModel, ObjObjectRenderer objObject, PhysicsEntityEvent.Phase phase, Type renderType) {
+        public Render(ModelObjArmor armorModel, DxModelRenderer objModel, ObjObjectRenderer objObject, PhysicsEntityEvent.Phase phase, Type renderType) {
             this.armorModel = armorModel;
             this.objModel = objModel;
             this.objObjectRenderer = objObject;

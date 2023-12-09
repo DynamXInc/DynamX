@@ -1,7 +1,7 @@
 package fr.dynamx.client.renders.model;
 
-import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
-import fr.dynamx.api.obj.ObjModelPath;
+import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
+import fr.dynamx.api.dxmodel.DxModelPath;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.common.contentpack.PackInfo;
@@ -33,12 +33,12 @@ public class MissingObjModel extends ObjModelRenderer {
     private static ObjObjectRenderer emptyPartRenderer;
 
     public MissingObjModel() {
-        super(new ObjModelPath(DYNAMX_PACKINFO, new ResourceLocation(DynamXConstants.ID, "obj/missing.obj")), new ArrayList<>(), new HashMap<>(), null);
+        super(new DxModelPath(DYNAMX_PACKINFO, new ResourceLocation(DynamXConstants.ID, "obj/missing.obj")), new ArrayList<>(), new HashMap<>(), null);
         emptyPart.setCenter(new Vector3f());
         ObjObjectRenderer objObjectRenderer = new ObjObjectRenderer(emptyPart) {
             @Override
             public void render(ObjModelRenderer model, byte textureVariantID) {
-                MissingObjModel.this.renderModel(textureVariantID); //take care, MissingObjModel.this != model
+                MissingObjModel.this.renderModel(textureVariantID, false); //take care, MissingObjModel.this != model
             }
         };
         getObjObjects().add(objObjectRenderer);
@@ -56,7 +56,7 @@ public class MissingObjModel extends ObjModelRenderer {
 
     @Override
     public void renderGroup(ObjObjectRenderer group, byte textureDataId) {
-        renderModel(textureDataId);
+        renderModel(textureDataId, false);
     }
 
     @Override
@@ -65,19 +65,19 @@ public class MissingObjModel extends ObjModelRenderer {
     }
 
     @Override
-    public boolean renderGroups(String groupsName, byte textureDataId) {
-        renderModel(textureDataId);
+    public boolean renderGroups(String groupsName, byte textureDataId, boolean forceVanillaRender) {
+        renderModel(textureDataId, false);
         return true;
     }
 
     @Override
-    public boolean renderDefaultParts(IModelTextureVariantsSupplier textureVariants, byte textureDataId) {
-        renderModel(textureDataId);
+    public boolean renderDefaultParts(byte textureDataId, boolean forceVanillaRender) {
+        renderModel(textureDataId, forceVanillaRender);
         return true;
     }
 
     @Override
-    public void renderModel(byte textureDataId) {
+    public void renderModel(byte textureDataId, boolean forceVanillaRender) {
         GlStateManager.color(1, 0, 0, 1);
         GlStateManager.pushMatrix();
         GlStateManager.scale(0.065f, 0.065f, 0.065f);

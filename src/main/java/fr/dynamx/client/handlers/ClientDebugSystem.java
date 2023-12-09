@@ -167,13 +167,19 @@ public class ClientDebugSystem {
             drawDebug(DynamXDebugOptions.CLIENT_SLOPE_BOXES);
 
             if (DynamXDebugOptions.PHYSICS_DEBUG.isActive()) {
+
+                for (PhysicsRigidBody body : DynamXContext.getPhysicsWorld(MC.world).getDynamicsWorld().getRigidBodyList()) {
+                    Vector3fPool.openPool();
+                    QuaternionPool.openPool();
+                    GlQuaternionPool.openPool();
+                    PhysicsDebugRenderer.debugRigidBody(body, getPrevRigidBodyTransform(body.nativeId()), getCurrentRigidBodyTransform(body.nativeId()), event.getPartialTicks());
+                    GlQuaternionPool.closePool();
+                    Vector3fPool.closePool();
+                    QuaternionPool.closePool();
+                }
                 Vector3fPool.openPool();
                 QuaternionPool.openPool();
                 GlQuaternionPool.openPool();
-
-                for (PhysicsRigidBody body : DynamXContext.getPhysicsWorld(MC.world).getDynamicsWorld().getRigidBodyList()) {
-                    PhysicsDebugRenderer.debugRigidBody(body, getPrevRigidBodyTransform(body.nativeId()), getCurrentRigidBodyTransform(body.nativeId()), event.getPartialTicks());
-                }
                 DynamXContext.getPhysicsWorld(MC.world).getDynamicsWorld().getSoftBodyList().forEach(PhysicsDebugRenderer::debugSoftBody);
                 Vector3fPool.closePool();
                 QuaternionPool.closePool();
@@ -188,7 +194,6 @@ public class ClientDebugSystem {
                 Vector3fPool.closePool();
                 QuaternionPool.closePool();
                 GlStateManager.enableDepth();
-
             }
 
 

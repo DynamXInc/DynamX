@@ -2,7 +2,7 @@ package fr.dynamx.common.items;
 
 import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
-import fr.dynamx.api.contentpack.object.render.IObjPackObject;
+import fr.dynamx.api.contentpack.object.render.IModelPackObject;
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.objects.AbstractItemObject;
@@ -75,7 +75,7 @@ public class DynamXItem<T extends AbstractItemObject<?, ?>> extends Item impleme
     }
 
     @Override
-    public IObjPackObject getObjModel() {
+    public IModelPackObject getDxModel() {
         return getInfo();
     }
 

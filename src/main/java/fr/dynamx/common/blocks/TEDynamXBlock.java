@@ -8,6 +8,7 @@ import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.client.gui.GuiBlockCustomization;
+import fr.dynamx.client.renders.animations.DxAnimator;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.capability.DynamXChunkData;
@@ -75,10 +76,15 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
     @Getter
     private AbstractLightsModule lightsModule;
 
+    @Getter
+    private final DxAnimator animator;
+
     public TEDynamXBlock() {
+        animator = new DxAnimator();
     }
 
     public TEDynamXBlock(BlockObject<?> packInfo) {
+        this();
         setPackInfo(packInfo);
         this.hasSeats = !packInfo.getPartsByType(PartBlockSeat.class).isEmpty();
     }

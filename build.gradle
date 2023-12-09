@@ -23,6 +23,10 @@ repositories {
     }
     maven { url = 'https://repo.spongepowered.org/maven' }
 
+    maven {
+        url "https://cursemaven.com"
+    }
+
     flatDir {
         dir 'libs'
     }

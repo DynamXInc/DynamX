@@ -4,10 +4,14 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
-import fr.dynamx.api.contentpack.object.render.IObjPackObject;
+import fr.dynamx.api.contentpack.object.render.IModelPackObject;
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.events.DynamXBlockEvent;
+import fr.dynamx.client.renders.animations.DxAnimation;
+import fr.dynamx.client.renders.animations.DxAnimator;
+import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
+import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.capability.DynamXChunkData;
 import fr.dynamx.common.capability.DynamXChunkDataProvider;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
@@ -55,7 +59,7 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
 
     public final int textureNum;
 
-    private final boolean isObj;
+    private final boolean isDxModel;
 
     /**
      * Internally used by DynamX, don't use this constructor <br>
@@ -68,7 +72,7 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
         this.blockObjectInfo = blockObjectInfo;
         setCreativeTab(blockObjectInfo.getCreativeTab(DynamXItemRegistry.objectTab));
         textureNum = Math.min(16, blockObjectInfo.getMaxTextureMetadata());
-        isObj = blockObjectInfo.isObj();
+        isDxModel = blockObjectInfo.isDxModel();
         setLightLevel(blockObjectInfo.getLightLevel());
 
         initBlock(DynamXConstants.ID);
@@ -117,7 +121,7 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
         blockObjectInfo.setModel(model);
         blockObjectInfo.setDescription("Builtin " + modid + "'s block");
         textureNum = 1;
-        isObj = blockObjectInfo.isObj();
+        isDxModel = blockObjectInfo.isDxModel();
 
         initBlock(modid);
         setTranslationKey(blockObjectInfo.getFullName().toLowerCase());
@@ -173,9 +177,21 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         if (playerIn.isSneaking() && playerIn.capabilities.isCreativeMode) {
             TileEntity te = worldIn.getTileEntity(pos);
-            if (te != null && worldIn.isRemote)
+            /*if (te != null && worldIn.isRemote && isDxModel)
                 ((TEDynamXBlock) te).openConfigGui();
-            return true;
+            return isDxModel;*/
+            if (te instanceof TEDynamXBlock && hand.equals(EnumHand.MAIN_HAND)) {
+                DxAnimator animator = ((TEDynamXBlock) te).getAnimator();
+                if(playerIn.isSneaking()){
+                    DxModelRenderer model = DynamXContext.getDxModelRegistry().getModel(blockObjectInfo.getModel());
+                    animator.playNextAnimation();
+                    //te.getAnimator().addAnimation("Reset");
+                    return true;
+                }
+                //TODO
+                animator.setBlendPose(DxAnimator.EnumBlendPose.START_END);
+                animator.addAnimation("Run1", DxAnimation.EnumAnimType.START_END);
+            }
         }
         if (!worldIn.isRemote) {
             TileEntity te = worldIn.getTileEntity(pos);
@@ -196,13 +212,13 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
 
     @Override
     public boolean hasTileEntity(IBlockState state) {
-        return isObj;
+        return isDxModel;
     }
 
     @Nullable
     @Override
     public TileEntity createTileEntity(World world, IBlockState state) {
-        if (isObj) {
+        if (isDxModel) {
             DynamXBlockEvent.CreateTileEntity event = new DynamXBlockEvent.CreateTileEntity(world.isRemote ? Side.CLIENT : Side.SERVER, this, world, new TEDynamXBlock(blockObjectInfo));
             MinecraftForge.EVENT_BUS.post(event);
             return event.getTileEntity();
@@ -226,9 +242,6 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
 
     @Override
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
-        TileEntity te = worldIn.getTileEntity(pos);
-        if (te instanceof TEDynamXBlock && ((TEDynamXBlock) te).getSeatEntities() != null)
-            ((TEDynamXBlock) te).getSeatEntities().forEach(Entity::setDead);
         super.breakBlock(worldIn, pos, state);
         DynamXChunkData data = worldIn.getChunk(pos).getCapability(DynamXChunkDataProvider.DYNAM_X_CHUNK_DATA_CAPABILITY, null);
         data.getBlocksAABB().remove(pos);
@@ -282,8 +295,8 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
     }
 
     @Override
-    public IObjPackObject getObjModel() {
-        return isObj ? getInfo() : null;
+    public IModelPackObject getDxModel() {
+        return isDxModel ? getInfo() : null;
     }
 
     @Override
@@ -294,7 +307,7 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
     @Override
     @Nonnull
     public EnumBlockRenderType getRenderType(@Nonnull final IBlockState state) {
-        return isObj ? EnumBlockRenderType.INVISIBLE : EnumBlockRenderType.MODEL;
+        return isDxModel ? EnumBlockRenderType.INVISIBLE : EnumBlockRenderType.MODEL;
     }
 
     @Override
@@ -317,7 +330,7 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
         return false;
     }
 
-    public boolean isObj() {
-        return isObj;
+    public boolean isDxModel() {
+        return isDxModel;
     }
 }

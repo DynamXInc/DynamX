@@ -5,7 +5,7 @@ import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
-import fr.dynamx.api.contentpack.object.render.IObjPackObject;
+import fr.dynamx.api.contentpack.object.render.IModelPackObject;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
@@ -14,42 +14,57 @@ import fr.dynamx.common.contentpack.type.ObjectInfo;
 import fr.dynamx.common.items.DynamXItemRegistry;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXReflection;
+import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.util.ResourceLocation;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A extends ISubInfoTypeOwner<?>> extends ObjectInfo<T>
-        implements IObjPackObject, IPartContainer<A> {
+        implements IModelPackObject, IPartContainer<A> {
 
+    @Getter
     @Setter
     @PackFileProperty(configNames = {"CreativeTabName", "CreativeTab", "TabName"}, required = false, defaultValue = "CreativeTab of DynamX", description = "common.creativetabname")
     protected String creativeTabName;
+    @Getter
+    @Setter
     @PackFileProperty(configNames = "Model", type = DefinitionType.DynamXDefinitionTypes.DYNX_RESOURCE_LOCATION, description = "common.model", defaultValue = "obj/name_of_vehicle/name_of_model.obj")
     protected ResourceLocation model;
+    @Getter
+    @Setter
     @PackFileProperty(configNames = "ItemScale", required = false, description = "common.itemscale", defaultValue = "0.9")
     protected float itemScale = 0.9f;
+    @Getter
     @PackFileProperty(configNames = "ItemTranslate", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false, defaultValue = "0 0 0")
     protected Vector3f itemTranslate = new Vector3f(0, 0, 0);
+    @Getter
     @PackFileProperty(configNames = "ItemRotate", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false, defaultValue = "0 0 0")
     protected Vector3f itemRotate = new Vector3f(0, 0, 0);
+    @Getter
+    @Setter
     @PackFileProperty(configNames = "Item3DRenderLocation", required = false, description = "common.item3D", defaultValue = "all")
     protected Enum3DRenderLocation item3DRenderLocation = Enum3DRenderLocation.ALL;
+    @Getter
+    @Setter
     @PackFileProperty(configNames = "IconText", required = false, description = "common.icontext", defaultValue = "Block for blocks, Prop for props")
     protected String itemIcon;
 
+    @Getter
+    private final Map<Class<?>, Byte> partIds = new HashMap<>();
     private final List<BasePart<A>> parts = new ArrayList<>();
+    /**
+     * List of owned {@link ISubInfoType}s
+     */
+    @Getter
     private final List<ISubInfoType<A>> subProperties = new ArrayList<>();
 
     public AbstractItemObject(String packName, String fileName) {
         super(packName, fileName);
-    }
-
-    public String getCreativeTabName() {
-        return creativeTabName;
     }
 
     public CreativeTabs getCreativeTab(CreativeTabs defaultCreativeTab) {
@@ -60,53 +75,8 @@ public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A e
     }
 
     @Override
-    public ResourceLocation getModel() {
-        return model;
-    }
-
-    public void setModel(ResourceLocation model) {
-        this.model = model;
-    }
-
-    public Vector3f getItemTranslate() {
-        return itemTranslate;
-    }
-
-    public Vector3f getItemRotate() {
-        return itemRotate;
-    }
-
-    @Override
-    public float getItemScale() {
-        return itemScale;
-    }
-
-    public void setItemScale(float itemScale) {
-        this.itemScale = itemScale;
-    }
-
-    @Override
-    public Enum3DRenderLocation get3DItemRenderLocation() {
-        return item3DRenderLocation;
-    }
-
-    public void setItem3DRenderLocation(Enum3DRenderLocation item3DRenderLocation) {
-        this.item3DRenderLocation = item3DRenderLocation;
-    }
-
-    @Override
     public String getTranslationKey(IDynamXItem<T> item, int itemMeta) {
         return "item." + DynamXConstants.ID + "." + super.getTranslationKey(item, itemMeta);
-    }
-
-    public void setItemIcon(String itemIcon) {
-        this.itemIcon = itemIcon;
-    }
-
-    @Nullable
-    @Override
-    public String getItemIcon() {
-        return itemIcon;
     }
 
     public int getMaxItemStackSize() {
@@ -119,18 +89,16 @@ public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A e
     }
 
     @Override
-    public void addPart(BasePart<A> tBasePart) {
-        parts.add(tBasePart);
+    public void addPart(BasePart<A> part) {
+        byte id = (byte) (partIds.getOrDefault(part.getIdClass(), (byte) -1) + 1);
+        part.setId(id);
+        partIds.put(part.getIdClass(), id);
+        parts.add(part);
     }
 
     @Override
     public void addSubProperty(ISubInfoType<A> property) {
         subProperties.add(property);
-    }
-
-    @Override
-    public List<ISubInfoType<A>> getSubProperties() {
-        return subProperties;
     }
 
     @Override

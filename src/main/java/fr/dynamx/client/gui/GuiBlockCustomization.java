@@ -6,6 +6,7 @@ import fr.aym.acsguis.component.panel.GuiFrame;
 import fr.aym.acsguis.component.panel.GuiPanel;
 import fr.aym.acsguis.component.textarea.GuiFloatField;
 import fr.aym.acsguis.component.textarea.GuiLabel;
+import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.blocks.TEDynamXBlock;
@@ -25,7 +26,7 @@ import java.util.List;
 public class GuiBlockCustomization extends GuiFrame {
     public static final ResourceLocation STYLE = new ResourceLocation(DynamXConstants.ID, "css/block_custom.css");
 
-    private static ObjModelRenderer model;
+    private static DxModelRenderer model;
     private static TEDynamXBlock teBlock;
     private final GuiPanel preview;
 
@@ -47,7 +48,7 @@ public class GuiBlockCustomization extends GuiFrame {
         super(new GuiScaler.Identity());
 
         teBlock = te;
-        model = DynamXContext.getObjModelRegistry().getModel(teBlock.getPackInfo().getModel());
+        model = DynamXContext.getDxModelRegistry().getModel(te.getPackInfo().getModel());
         setCssClass("root");
 
         preview = new GuiPanel() {
@@ -134,7 +135,7 @@ public class GuiBlockCustomization extends GuiFrame {
     BlockRendererDispatcher blockRenderer = Minecraft.getMinecraft().getBlockRendererDispatcher();
 
 
-    public void drawModelOnScreen(float posX, float posY, float mouseX, float mouseY, ObjModelRenderer model) {
+    public void drawModelOnScreen(float posX, float posY, float mouseX, float mouseY, DxModelRenderer model) {
         handleScaleAndRotation();
 
         GlStateManager.pushMatrix();
@@ -160,10 +161,10 @@ public class GuiBlockCustomization extends GuiFrame {
         renderModel();
 
         GlStateManager.popMatrix();
-
     }
 
     public void handleScaleAndRotation() {
+        //TODO FIX SCROLLING
         int i = Mouse.getEventDWheel() / 100;
         if (i != 0) {
             scroll += i;
@@ -184,10 +185,8 @@ public class GuiBlockCustomization extends GuiFrame {
     }
 
     public void renderGrid() {
-
         GlStateManager.pushMatrix();
         GlStateManager.disableTexture2D();
-
 
         GlStateManager.rotate(angleX, 0, 1, 0);
         GlStateManager.rotate(-angleY, 1, 0, 0);
@@ -208,15 +207,11 @@ public class GuiBlockCustomization extends GuiFrame {
         GlStateManager.glLineWidth(2);
         DynamXRenderUtils.gridMesh.render();
 
-
         GlStateManager.enableTexture2D();
         GlStateManager.popMatrix();
-
     }
 
     public void renderModel() {
-
-
         GlStateManager.translate(
                 0.5 + teBlock.getPackInfo().getTranslation().x + translationX.getValue(),
                 2.5D + teBlock.getPackInfo().getTranslation().y + translationY.getValue(),
@@ -237,8 +232,7 @@ public class GuiBlockCustomization extends GuiFrame {
         rotate = rotationZ.getValue() + teBlock.getPackInfo().getRotation().z;
         if (rotate != 0)
             GlStateManager.rotate(rotate, 0, 0, 1);
-
-        model.renderModel();
+        model.renderModel(true);
     }
 
     @Override

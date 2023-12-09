@@ -145,7 +145,7 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
         {
             lastMetadata = getMetadata();
             entityTextureID = (byte) getMetadata();
-            packInfo.getDrawableParts().forEach(m -> ((IDrawablePart<PackPhysicsEntity<?, ?>>) m).onTexturesChange(this));
+            packInfo.getDrawableParts().forEach(m -> ((IDrawablePart<PackPhysicsEntity<?, ?>, A>) m).onTexturesChange(this));
         }
     }
 
@@ -258,5 +258,4 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
     private void setInfoName(String name) {
         this.getDataManager().set(INFO_NAME, name);
     }
-
 }

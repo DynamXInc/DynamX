@@ -1,7 +1,7 @@
 package fr.dynamx.common;
 
+import fr.dynamx.api.dxmodel.DxModelPath;
 import fr.dynamx.api.network.IDnxNetworkSystem;
-import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.api.physics.IPhysicsSimulationMode;
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.api.physics.IRotatedCollisionHandler;
@@ -9,6 +9,8 @@ import fr.dynamx.client.DynamXModelRegistry;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.handlers.RotatedCollisionHandlerImpl;
 import fr.dynamx.common.network.DynamXNetwork;
+import fr.dynamx.common.objloader.data.DxModelData;
+import fr.dynamx.common.objloader.data.GltfModelData;
 import fr.dynamx.common.objloader.data.ObjModelData;
 import fr.dynamx.common.physics.player.PlayerPhysicsHandler;
 import fr.dynamx.common.physics.world.PhysicsSimulationModes;
@@ -44,7 +46,7 @@ public class DynamXContext {
     @Getter
     private static IDnxNetworkSystem network;
     @SideOnly(Side.CLIENT)
-    private static DynamXModelRegistry objModelRegistry;
+    private static DynamXModelRegistry dxModelRegistry;
 
     /**
      * -- GETTER --
@@ -70,7 +72,7 @@ public class DynamXContext {
 
     private static final IPhysicsSimulationMode[] physicsSimulationModes = new IPhysicsSimulationMode[]{new PhysicsSimulationModes.FullPhysics(), new PhysicsSimulationModes.FullPhysics()};
 
-    private static final Map<ResourceLocation, ObjModelData> OBJ_MODEL_DATA_CACHE = new HashMap<>();
+    private static final Map<ResourceLocation, DxModelData> DX_MODEL_DATA_CACHE = new HashMap<>();
 
     private static final Map<Integer, IPhysicsWorld> PHYSICS_WORLD_PER_DIMENSION = new HashMap<>();
 
@@ -80,7 +82,7 @@ public class DynamXContext {
 
     @SideOnly(Side.CLIENT)
     public static void initObjModelRegistry() {
-        objModelRegistry = new DynamXModelRegistry();
+        dxModelRegistry = new DynamXModelRegistry();
     }
 
     /**
@@ -105,8 +107,8 @@ public class DynamXContext {
      * @return The obj model loader
      */
     @SideOnly(Side.CLIENT)
-    public static DynamXModelRegistry getObjModelRegistry() {
-        return objModelRegistry;
+    public static DynamXModelRegistry getDxModelRegistry() {
+        return dxModelRegistry;
     }
 
     public static Map<Integer, IPhysicsWorld> getPhysicsWorldPerDimensionMap() {
@@ -135,17 +137,25 @@ public class DynamXContext {
         DynamXContext.physicsSimulationModes[side.ordinal()] = physicsSimulationMode;
     }
 
-    public static ObjModelData getObjModelDataFromCache(ObjModelPath objModelPath) {
-        if (OBJ_MODEL_DATA_CACHE.containsKey(objModelPath.getModelPath())) {
-            return OBJ_MODEL_DATA_CACHE.get(objModelPath.getModelPath());
+    public static DxModelData getDxModelDataFromCache(DxModelPath objModelPath) {
+        if (DX_MODEL_DATA_CACHE.containsKey(objModelPath.getModelPath())) {
+            return DX_MODEL_DATA_CACHE.get(objModelPath.getModelPath());
         } else {
-            ObjModelData objModelData = new ObjModelData(DynamXUtils.getModelPath(objModelPath.getPackName(), objModelPath.getModelPath()));
-            OBJ_MODEL_DATA_CACHE.put(objModelPath.getModelPath(), objModelData);
+            DxModelData objModelData = null;
+            switch (objModelPath.getFormat()) {
+                case OBJ:
+                    objModelData = new ObjModelData(DynamXUtils.getModelPath(objModelPath.getPackName(), objModelPath.getModelPath()));
+                    break;
+                case GLTF:
+                    objModelData = new GltfModelData(DynamXUtils.getModelPath(objModelPath.getPackName(), objModelPath.getModelPath()));
+                    break;
+            }
+            DX_MODEL_DATA_CACHE.put(objModelPath.getModelPath(), objModelData);
             return objModelData;
         }
     }
 
-    public static Map<ResourceLocation, ObjModelData> getObjModelDataCache() {
-        return OBJ_MODEL_DATA_CACHE;
+    public static Map<ResourceLocation, DxModelData> getDxModelDataCache() {
+        return DX_MODEL_DATA_CACHE;
     }
 }

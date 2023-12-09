@@ -35,7 +35,6 @@ import static fr.dynamx.client.ClientProxy.SOUND_HANDLER;
  */
 @SynchronizedEntityVariable.SynchronizedPhysicsModule(modid = DynamXConstants.ID)
 public class CarEngineModule extends BasicEngineModule implements IPackInfoReloadListener {
-    //TODO CLEAN ENGINE CODE
     @Getter
     protected CarEngineInfo engineInfo;
     @Getter

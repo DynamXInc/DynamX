@@ -9,11 +9,13 @@ import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.PropsEntity;
 import fr.dynamx.common.entities.SeatEntity;
 import fr.dynamx.common.entities.modules.SeatsModule;
-import fr.dynamx.common.entities.vehicles.HelicopterEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.TextComponentString;
 
+/**
+ * A seat that can be used on block and props
+ */
 @RegisteredSubInfoType(name = "seat", registries = {SubInfoTypeRegistries.BLOCKS, SubInfoTypeRegistries.PROPS}, strictName = false)
 public class PartBlockSeat<T extends ISubInfoTypeOwner<T>> extends BasePartSeat<Entity, T> {
     public PartBlockSeat(T owner, String partName) {

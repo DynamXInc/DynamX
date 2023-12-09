@@ -5,6 +5,8 @@ import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.events.DynamXBlockEvent;
 import fr.dynamx.api.events.EventStage;
 import fr.dynamx.client.handlers.ClientDebugSystem;
+import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
+import fr.dynamx.client.renders.model.renderer.GltfModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.blocks.TEDynamXBlock;
@@ -21,6 +23,8 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraftforge.common.MinecraftForge;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
 
 import java.util.ConcurrentModificationException;
 
@@ -29,6 +33,14 @@ import static fr.dynamx.utils.debug.renderer.VehicleDebugRenderer.PlayerCollisio
 public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialRenderer<T> {
     @Override
     public void render(T te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
+
+        GL11.glPushMatrix();
+        GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
+        GL11.glShadeModel(GL11.GL_SMOOTH);
+        GL11.glEnable(GL12.GL_RESCALE_NORMAL);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
         if (te.getPackInfo() != null && te.getBlockType() instanceof DynamXBlock) { //the instanceof fixes a crash
             Vector3fPool.openPool();
             QuaternionPool.openPool();
@@ -46,10 +58,24 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
                         .add(0, te.getRotation() * 22.5f, 0);
 
                 //Rendering the model
-                DynamXContext.getObjModelRegistry().getModel(te.getPackInfo().getModel()).renderModel((byte) te.getBlockMetadata());
-                if (te.getPackInfo().isModelValid() && te.getLightsModule() != null) {
-                    te.getPackInfo().getLightSources().values().forEach(d -> d.drawLights(null, Minecraft.getMinecraft().player.ticksExisted, te.getPackInfo().getModel(), te.getPackInfo().getScaleModifier(), te.getLightsModule()));
+                //DynamXContext.getDxModelRegistry().getModel(te.getPackInfo().getModel()).renderModel((byte) te.getBlockMetadata(), false);
+                DxModelRenderer model = DynamXContext.getDxModelRegistry().getModel(te.getPackInfo().getModel());
+                if(model instanceof GltfModelRenderer){
+                    te.getAnimator().update((GltfModelRenderer) model, partialTicks);
+
+                    te.getAnimator().setModelAnimations(((GltfModelRenderer) model).animations);
                 }
+                //Rendering the model
+                model.renderModel((byte) te.getBlockMetadata(), false);
+                /*if (te.getPackInfo().isModelValid() && te.getLightsModule() != null) {
+                    te.getPackInfo().getLightSources().values().forEach(d -> d.drawLights(null, Minecraft.getMinecraft().player.ticksExisted, te.getBlockObjectInfo().getModel(), te.getBlockObjectInfo().getScaleModifier(), te.getLightsModule(), false));
+                }*/
+
+                /*
+                TODO USE SCENE GRAPH
+                if (te.getPackInfo().isModelValid() && te.getLightsModule() != null) {
+                    te.getPackInfo().getLightSources().values().forEach(d -> d.drawLights(null, Minecraft.getMinecraft().player.ticksExisted, te.getPackInfo().getModel(), te.getPackInfo().getScaleModifier(), te.getLightsModule(), false));
+                }*/
                 DynamXRenderUtils.spawnParticles(te.getPackInfo(), te.getWorld(), pos, rot);
                 MinecraftForge.EVENT_BUS.post(new DynamXBlockEvent.RenderTileEntity((DynamXBlock<?>) te.getBlockType(), getWorld(), te, this, x, y, z, partialTicks, destroyStage, alpha, EventStage.POST));
                 GlStateManager.popMatrix();
@@ -61,6 +87,9 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
             QuaternionPool.closePool();
             Vector3fPool.closePool();
         }
+
+        GL11.glPopAttrib();
+        GL11.glPopMatrix();
     }
 
 

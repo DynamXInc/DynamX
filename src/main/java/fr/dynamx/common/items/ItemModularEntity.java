@@ -36,7 +36,7 @@ public abstract class ItemModularEntity extends DynamXItemSpawner<ModularVehicle
 
     @Override
     public boolean createJson() {
-        return getObjModel().get3DItemRenderLocation() != Enum3DRenderLocation.ALL;
+        return getDxModel().get3DItemRenderLocation() != Enum3DRenderLocation.ALL;
     }
 
     @Override

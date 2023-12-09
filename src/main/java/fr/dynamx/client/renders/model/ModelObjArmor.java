@@ -3,6 +3,7 @@ package fr.dynamx.client.renders.model;
 import fr.aym.acslib.api.services.ErrorTrackingService;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.client.renders.model.renderer.ArmorRenderer;
+import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
@@ -32,7 +33,7 @@ public class ModelObjArmor extends ModelBiped {
     private EntityEquipmentSlot activePart;
     private byte activeTextureId;
 
-    public ModelObjArmor(ArmorObject<?> armorObject, ObjModelRenderer model) {
+    public ModelObjArmor(ArmorObject<?> armorObject, DxModelRenderer model) {
         this.armorObject = armorObject;
         if (armorObject.getArmorHead() != null) {
             head = new ArmorRenderer(model, this, armorObject.getArmorHead());

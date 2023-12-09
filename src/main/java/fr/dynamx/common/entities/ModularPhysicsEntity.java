@@ -225,18 +225,14 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
     protected void addPassenger(Entity passenger) {
         super.addPassenger(passenger);
         int size = moduleList.size();
-        for (int i = 0; i < size; i++) {
-            moduleList.get(i).addPassenger(passenger);
-        }
+        moduleList.forEach(iPhysicsModule -> iPhysicsModule.addPassenger(passenger));
     }
 
     @Override
     protected void removePassenger(Entity passenger) {
         super.removePassenger(passenger);
         int size = moduleList.size();
-        for (int i = 0; i < size; i++) {
-            moduleList.get(i).removePassenger(passenger);
-        }
+        moduleList.forEach(iPhysicsModule -> iPhysicsModule.removePassenger(passenger));
     }
 
     @Override

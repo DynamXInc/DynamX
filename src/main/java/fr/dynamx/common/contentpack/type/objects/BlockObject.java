@@ -3,9 +3,9 @@ package fr.dynamx.common.contentpack.type.objects;
 import com.jme3.math.Vector3f;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.IDynamXItem;
-import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
+import fr.dynamx.api.dxmodel.EnumDxModelFormats;
 import fr.dynamx.api.events.CreatePackItemEvent;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.contentpack.loader.InfoList;
@@ -27,12 +27,6 @@ import java.util.List;
 import java.util.Map;
 
 public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> implements ParticleEmitterInfo.IParticleEmitterContainer, ILightOwner<T> {
-    /**
-     * List of owned {@link ISubInfoType}s
-     */
-    @Getter
-    protected final List<ISubInfoType<T>> subProperties = new ArrayList<>();
-
     @Getter
     @Setter
     protected PropObject<?> propObject;
@@ -76,7 +70,7 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
         //Map lights
         lightSources.values().forEach(PartLightSource::postLoad);
         collisionsHelper.loadCollisions(this, DynamXUtils.getModelPath(getPackName(), model), "", translation, 0, useComplexCollisions, scaleModifier, ObjectCollisionsHelper.CollisionType.BLOCK);
-        if(hasVaryingTextures() && getMaxTextureMetadata() > 16 && (getCreativeTabName() == null || !getCreativeTabName().equalsIgnoreCase("None"))) {
+        if (hasVaryingTextures() && getMaxTextureMetadata() > 16 && (getCreativeTabName() == null || !getCreativeTabName().equalsIgnoreCase("None"))) {
             DynamXErrorManager.addError(getPackName(), DynamXErrorManager.PACKS_ERRORS, "too_many_variants", ErrorLevel.HIGH, getName(), "You can't use more than 16 variants on blocks !");
         }
         return super.postLoad(hot);
@@ -100,11 +94,6 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
     }
 
     @Override
-    public void addSubProperty(ISubInfoType<T> property) {
-        subProperties.add(property);
-    }
-
-    @Override
     public void addParticleEmitter(ParticleEmitterInfo<?> emitterInfo) {
         particleEmitters.add(emitterInfo);
     }
@@ -119,17 +108,17 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
         return "BlockObject named " + getFullName();
     }
 
-    public boolean isObj() {
-        return getModel().getPath().endsWith(".obj");
+    public boolean isDxModel() {
+        return EnumDxModelFormats.isValidFormat(getModel().getPath());
     }
 
     @Override
     public void addLightSource(PartLightSource source) {
-        lightSources.put(source.getPartName(), source);
+        lightSources.put(source.getObjectName(), source);
     }
 
     @Override
-    public PartLightSource getLightSource(String partName) {
-        return lightSources.get(partName);
+    public PartLightSource getLightSource(String objectName) {
+        return lightSources.get(objectName);
     }
 }

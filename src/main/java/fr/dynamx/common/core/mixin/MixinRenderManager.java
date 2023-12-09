@@ -1,6 +1,6 @@
 package fr.dynamx.common.core.mixin;
 
-import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
+import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.utils.DynamXConstants;
@@ -36,7 +36,7 @@ public abstract class MixinRenderManager {
                 GlQuaternionPool.openPool();
                 QuaternionPool.openPool();
                 BaseVehicleEntity<?> physicsEntity = (BaseVehicleEntity<?>) entityIn;
-                ObjModelRenderer model = DynamXContext.getObjModelRegistry().getModel(physicsEntity.getPackInfo().getModel());
+                DxModelRenderer model = DynamXContext.getDxModelRegistry().getModel(physicsEntity.getPackInfo().getModel());
                 //Applies a color mask to mask the following meshes
                 GL11.glColorMask(false, false, false, false);
                 //We want our meshes bits to replace the already contained stencil bits
@@ -53,8 +53,8 @@ public abstract class MixinRenderManager {
                 Quaternion q = ClientDynamXUtils.computeInterpolatedGlQuaternion(physicsEntity.prevRenderRotation, physicsEntity.renderRotation, partialTicks);
                 GlStateManager.rotate(q);
 
-                model.renderGroups("AntiWater1", (byte) 0);
-                model.renderGroups("AntiWater2", (byte) 0);
+                model.renderGroups("AntiWater1", (byte) 0, false);
+                model.renderGroups("AntiWater2", (byte) 0, false);
 
                 GlStateManager.popMatrix();
                 QuaternionPool.closePool();

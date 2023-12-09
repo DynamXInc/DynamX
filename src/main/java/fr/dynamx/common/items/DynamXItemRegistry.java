@@ -84,8 +84,8 @@ public class DynamXItemRegistry {
             ContentPackUtils.addMissingJSONs(item, ((IDynamXItem<?>) item).getInfo(), DynamXMain.resourcesDirectory, metadata);
         }
         String resourceName = DynamXConstants.ID + ":" + item.getJsonName(metadata);
-        if (item.getObjModel() != null && item.getObjModel().isModelValid())
-            DynamXContext.getObjModelRegistry().getItemRenderer().registerItemModel(item, metadata, new ResourceLocation(resourceName));
+        if (item.getDxModel() != null && item.getDxModel().isModelValid())
+            DynamXContext.getDxModelRegistry().getItemRenderer().registerItemModel(item, metadata, new ResourceLocation(resourceName));
         else
             ModelLoader.setCustomModelResourceLocation(item.getItem(), metadata, new ModelResourceLocation(resourceName, "inventory"));
     }

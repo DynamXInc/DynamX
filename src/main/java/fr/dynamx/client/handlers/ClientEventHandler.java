@@ -13,7 +13,7 @@ import fr.dynamx.client.gui.GuiLoadingErrors;
 import fr.dynamx.client.gui.GuiTexturedButton;
 import fr.dynamx.client.gui.VehicleHud;
 import fr.dynamx.client.renders.RenderMovableLine;
-import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
+import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.blocks.DynamXBlock;
@@ -67,16 +67,15 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 
-import java.util.HashSet;
 import java.util.UUID;
 
 public class ClientEventHandler {
     public static final Minecraft MC = Minecraft.getMinecraft();
-    public static HashSet<UUID> renderingEntity = new HashSet<>();
+    public static UUID renderingEntity;
     public static RenderPlayer renderPlayer;
 
     /* Placing block */
-    private ObjModelRenderer model;
+    private DxModelRenderer model;
     private boolean canPlace;
     private BlockPos blockPos;
     private int playerOrientation;
@@ -284,7 +283,7 @@ public class ClientEventHandler {
                 ItemBlock itemBlock = (ItemBlock) currentItem.getItem();
                 DynamXBlock<?> block = (DynamXBlock<?>) itemBlock.getBlock();
                 RayTraceResult target = Minecraft.getMinecraft().objectMouseOver;
-                if (target != null && target.typeOfHit == RayTraceResult.Type.BLOCK && block.isObj()) {
+                if (target != null && target.typeOfHit == RayTraceResult.Type.BLOCK && block.isDxModel()) {
                     EnumFacing side = target.sideHit;
                     playerOrientation = MathHelper.floor((entityPlayer.rotationYaw * 16.0F / 360.0F) + 0.5D) & 0xF;
                     blockPos = new BlockPos(target.getBlockPos().getX() + side.getXOffset(),
@@ -294,7 +293,7 @@ public class ClientEventHandler {
                     textureNum = currentItem.getMetadata();
                     blockObjectInfo = block.blockObjectInfo;
                     this.canPlace = itemBlock.canPlaceBlockOnSide(entityPlayer.world, blockPos, side, entityPlayer, currentItem);
-                    this.model = DynamXContext.getObjModelRegistry().getModel(block.blockObjectInfo.getModel());
+                    this.model = DynamXContext.getDxModelRegistry().getModel(block.blockObjectInfo.getModel());
                 }
             }
         }
@@ -439,7 +438,7 @@ public class ClientEventHandler {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void playerRender(RenderPlayerEvent.Pre event) {
         renderPlayer = event.getRenderer();
-        if (event.getEntityPlayer().getRidingEntity() instanceof PhysicsEntity && !renderingEntity.contains(event.getEntity().getUniqueID()) && event.getRenderer().getRenderManager().isRenderShadow()) { //If shadows are disabled, were are in GuiInventory, CAN BREAK OTHER MODS
+        if (event.getEntityPlayer().getRidingEntity() instanceof PhysicsEntity && event.getEntity().getUniqueID() != renderingEntity && event.getRenderer().getRenderManager().isRenderShadow()) { //If shadows are disabled, were are in GuiInventory, CAN BREAK OTHER MODS
             //If the player is on a seat, and GlobalRender isn't rendering players riding the entity, just cancel the event, and cancel all modifications by other mods (priority = EventPriority.HIGHEST)
             event.setCanceled(true);
         }
@@ -447,7 +446,7 @@ public class ClientEventHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void entityRender(RenderLivingEvent.Pre event) {
-        if (event.getEntity().getRidingEntity() instanceof PhysicsEntity && !renderingEntity.contains(event.getEntity().getUniqueID()) && event.getRenderer().getRenderManager().isRenderShadow()) { //If shadows are disabled, were are in GuiInventory, CAN BREAK OTHER MODS
+        if (event.getEntity().getRidingEntity() instanceof PhysicsEntity && event.getEntity().getUniqueID() != renderingEntity && event.getRenderer().getRenderManager().isRenderShadow()) { //If shadows are disabled, were are in GuiInventory, CAN BREAK OTHER MODS
             //If the entity is on a seat, and GlobalRender isn't rendering entity riding the entity, just cancel the event, and cancel all modifications by other mods (priority = EventPriority.HIGHEST)
             event.setCanceled(true);
         }

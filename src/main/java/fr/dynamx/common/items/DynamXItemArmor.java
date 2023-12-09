@@ -2,7 +2,7 @@ package fr.dynamx.common.items;
 
 import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
-import fr.dynamx.api.contentpack.object.render.IObjPackObject;
+import fr.dynamx.api.contentpack.object.render.IModelPackObject;
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.objects.ArmorObject;
@@ -90,7 +90,7 @@ public class DynamXItemArmor<T extends ArmorObject<?>> extends ItemArmor impleme
 
     @Override
     public boolean createJson() {
-        return getObjModel().get3DItemRenderLocation() != Enum3DRenderLocation.ALL;
+        return getDxModel().get3DItemRenderLocation() != Enum3DRenderLocation.ALL;
     }
 
     @Override
@@ -141,7 +141,7 @@ public class DynamXItemArmor<T extends ArmorObject<?>> extends ItemArmor impleme
     }
 
     @Override
-    public IObjPackObject getObjModel() {
+    public IModelPackObject getDxModel() {
         return getInfo();
     }
 }

@@ -55,7 +55,7 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
 
     public ClientProxy() {
         DynamXContext.initObjModelRegistry();
-        ModelLoaderRegistry.registerLoader(DynamXContext.getObjModelRegistry().getItemRenderer());
+        ModelLoaderRegistry.registerLoader(DynamXContext.getDxModelRegistry().getItemRenderer());
     }
 
     @Override
@@ -71,7 +71,7 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
     public void preInit() {
         super.preInit();
 
-        DynamXContext.getObjModelRegistry().onPackInfosReloaded();
+        DynamXContext.getDxModelRegistry().onPackInfosReloaded();
 
         RenderingRegistry.registerEntityRenderingHandler(CarEntity.class, RenderBaseVehicle.RenderCar::new);
         RenderingRegistry.registerEntityRenderingHandler(BoatEntity.class, RenderBaseVehicle.RenderBoat::new);
@@ -104,7 +104,7 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
         super.completeInit();
         SplashProgress.pause();
         try {
-            DynamXContext.getObjModelRegistry().uploadVAOs();
+            DynamXContext.getDxModelRegistry().uploadVAOs();
         } finally {
             SplashProgress.resume();
         }

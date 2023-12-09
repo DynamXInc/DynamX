@@ -76,6 +76,12 @@ public abstract class PhysicsEntitySynchronizer<T extends PhysicsEntity<?>> {
         receivedVariables.put(id, new SynchronizedEntityVariableSnapshot(variable.getSerializer(), variable.get()));
     }
 
+    public void removeSynchronizedVariable(EntityVariable<?> variable) {
+        if (!synchronizedVariables.containsValue(variable))
+            throw new IllegalArgumentException("Variable isn't registered " + variable);
+        synchronizedVariables.remove(SynchronizedEntityVariableRegistry.getSyncVarRegistry().get(variable.getName()));
+    }
+
     /**
      * Called before ticking the physics world (can be in an external thread)
      *

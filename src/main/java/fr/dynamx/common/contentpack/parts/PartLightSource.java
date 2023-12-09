@@ -2,35 +2,28 @@ package fr.dynamx.common.contentpack.parts;
 
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
 import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoType;
-import fr.dynamx.api.contentpack.registry.DefinitionType;
-import fr.dynamx.api.contentpack.registry.PackFileProperty;
-import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
-import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
+import fr.dynamx.api.contentpack.registry.*;
+import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
-import fr.dynamx.api.events.PhysicsEntityEvent;
-import fr.dynamx.api.events.VehicleEntityEvent;
-import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
-import fr.dynamx.client.renders.RenderPhysicsEntity;
-import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.client.renders.model.texture.TextureVariantData;
-import fr.dynamx.client.renders.vehicle.RenderBaseVehicle;
-import fr.dynamx.common.DynamXContext;
-import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
+import fr.dynamx.client.renders.scene.EntityRenderContext;
+import fr.dynamx.client.renders.scene.SceneBuilder;
+import fr.dynamx.client.renders.scene.SceneGraph;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.AbstractLightsModule;
 import fr.dynamx.common.entities.vehicles.TrailerEntity;
-import fr.dynamx.utils.client.DynamXRenderUtils;
+import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import lombok.Getter;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.MinecraftForge;
+import net.minecraft.client.renderer.RenderGlobal;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -39,15 +32,23 @@ import java.util.*;
  * Contains multiple {@link LightObject}
  */
 @RegisteredSubInfoType(name = "MultiLight", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER, SubInfoTypeRegistries.BLOCKS, SubInfoTypeRegistries.PROPS}, strictName = false)
-public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISubInfoTypeOwner<PartLightSource>, IDrawablePart<BaseVehicleEntity<?>>, IModelTextureVariantsSupplier.IModelTextureVariants {
-    private final String name;
+public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISubInfoTypeOwner<PartLightSource>, IDrawablePart<PackPhysicsEntity<?, ?>, IPhysicsPackInfo>, IModelTextureVariantsSupplier.IModelTextureVariants {
+    @IPackFilePropertyFixer.PackFilePropertyFixer(registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER})
+    public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
+        if ("PartName".equals(key))
+            return new IPackFilePropertyFixer.FixResult("ObjectName", false);
+        return null;
+    };
+
+    @Getter
+    private final String partName;
 
     @Getter
     private final List<LightObject> sources = new ArrayList<>();
 
     @Getter
-    @PackFileProperty(configNames = "PartName")
-    protected String partName;
+    @PackFileProperty(configNames = "ObjectName")
+    protected String objectName;
     @Getter
     @PackFileProperty(configNames = "BaseMaterial", required = false)
     protected String baseMaterial = "default";
@@ -57,10 +58,13 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
     @Getter
     @PackFileProperty(configNames = "Rotation", required = false, defaultValue = "none")
     protected Quaternion rotation = new Quaternion();
+    @Getter
+    @PackFileProperty(configNames = "DependsOnNode", required = false, description = "PartLightSource.DependsOnNode")
+    protected String nodeDependingOnName;
 
-    public PartLightSource(ISubInfoTypeOwner<ILightOwner<?>> owner, String name) {
+    public PartLightSource(ISubInfoTypeOwner<ILightOwner<?>> owner, String partName) {
         super(owner);
-        this.name = name;
+        this.partName = partName;
     }
 
     @Override
@@ -86,102 +90,26 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
 
     @Override
     public String getName() {
-        return name;
+        return "PartLightSource with name " + getPartName();
     }
 
     @Override
-    public String getPackName() {
-        return owner.getPackName();
+    public String getNodeName() {
+        return getPartName();
     }
 
     @Override
-    public void drawParts(@Nullable BaseVehicleEntity<?> entity, RenderPhysicsEntity<?> render, ModularVehicleInfo packInfo, byte textureId, float partialTicks) {
-        /* Rendering light sources */
-        if (MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.LIGHTS, (RenderBaseVehicle<?>) render, entity, PhysicsEntityEvent.Phase.PRE, partialTicks, null))) {
-            return;
-        }
-        AbstractLightsModule lights = entity != null ? entity.getModuleByType(AbstractLightsModule.class) : null;
-        drawLights(entity, entity != null ? entity.ticksExisted : 0, packInfo.getModel(), packInfo.getScaleModifier(), lights);
-        MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.Render(VehicleEntityEvent.Render.Type.LIGHTS, (RenderBaseVehicle<?>) render, entity, PhysicsEntityEvent.Phase.POST, partialTicks, null));
-    }
-
-    public void drawLights(@Nullable BaseVehicleEntity<?> entity, int tickCounter, ResourceLocation model, Vector3f scale, AbstractLightsModule isLightOn) {
-        /* Rendering light sources */
-        ObjModelRenderer vehicleModel = DynamXContext.getObjModelRegistry().getModel(model);
-        for (PartLightSource lightSource : getOwner().getLightSources().values()) {
-            LightObject onLightObject = null;
-            if (isLightOn != null) {
-                // Find the first light object that is on
-                for (LightObject source : lightSource.getSources()) {
-                    if (isLightOn.isLightOn(source.getLightId())) {
-                        onLightObject = source;
-                        break;
-                    }
-                }
-            }
-            boolean isOn = true;
-            if (onLightObject == null) {
-                isOn = false;
-                onLightObject = lightSource.getSources().get(0);
-            }
-            // Do blinking
-            int activeStep = 0;
-            if (isOn && onLightObject.getBlinkSequence() != null) {
-                int[] seq = onLightObject.getBlinkSequence();
-                int mod = tickCounter % seq[seq.length - 1];
-                isOn = false; //Default state
-                for (int i = seq.length - 1; i >= 0; i--) {
-                    if (mod > seq[i]) {
-                        isOn = i % 2 == 0;
-                        activeStep = (byte) (i + 1);
-                        break;
-                    }
-                }
-            }
-            byte texId = 0;
-            if (isOn && !onLightObject.getBlinkTextures().isEmpty()) {
-                activeStep = activeStep % onLightObject.getBlinkTextures().size();
-                texId = onLightObject.getBlinkTextures().get(activeStep).getId();
-            }
-
-            //Set luminescent
-            if (isOn) {
-                int i = 15728880;
-                int j = i % 65536;
-                int k = i / 65536;
-                OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float) j, (float) k);
-                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            }
-
-            //Render the light
-            GlQuaternionPool.openPool();
-            GlStateManager.pushMatrix();
-            GlStateManager.scale(scale.x, scale.y, scale.z);
-            if (lightSource.getPosition() != null)
-                DynamXRenderUtils.glTranslate(lightSource.getPosition());
-            GlStateManager.rotate(GlQuaternionPool.get(lightSource.getRotation()));
-            if (isLightOn != null && isLightOn.isLightOn(onLightObject.getLightId()) && onLightObject.getRotateDuration() > 0) {
-                float step = ((float) (tickCounter % onLightObject.getRotateDuration())) / onLightObject.getRotateDuration();
-                step = step * 360;
-                GlStateManager.rotate(step, 0, 1, 0);
-            }
-            vehicleModel.renderGroups(lightSource.getPartName(), texId);
-            GlStateManager.popMatrix();
-            GlQuaternionPool.closePool();
-
-            if (entity != null) {
-                int i = entity.getBrightnessForRender();
-                int j = i % 65536;
-                int k = i / 65536;
-                OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float) j, (float) k);
-                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            }
+    public void addToSceneGraph(IPhysicsPackInfo packInfo, SceneBuilder<PackPhysicsEntity<?, ?>, IPhysicsPackInfo> sceneBuilder) {
+        if (nodeDependingOnName != null) {
+            sceneBuilder.addNode(packInfo, this, nodeDependingOnName);
+        } else {
+            sceneBuilder.addNode(packInfo, this);
         }
     }
 
     @Override
-    public String[] getRenderedParts() {
-        return new String[]{getPartName()};
+    public SceneGraph<PackPhysicsEntity<?, ?>, IPhysicsPackInfo> createSceneGraph(Vector3f modelScale, List<SceneGraph<PackPhysicsEntity<?, ?>, IPhysicsPackInfo>> childGraph) {
+        return new PartLightNode<>(this, modelScale, (List) childGraph);
     }
 
     private final Map<Byte, TextureVariantData> variantsMap = new HashMap<>();
@@ -236,10 +164,97 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
 
     @Override
     public void addSubProperty(ISubInfoType<PartLightSource> property) {
+        throw new IllegalStateException("Cannot add sub property to a light");
     }
 
     @Override
     public List<ISubInfoType<PartLightSource>> getSubProperties() {
         return Collections.emptyList();
+    }
+
+    class PartLightNode<T extends BaseVehicleEntity<?>, A extends IPhysicsPackInfo> extends SceneGraph.Node<T, A> {
+        public PartLightNode(PartLightSource lightSource, Vector3f scale, List<SceneGraph<T, A>> linkedChilds) {
+            super(lightSource.getPosition(), GlQuaternionPool.newGlQuaternion(lightSource.getRotation()), scale, linkedChilds);
+        }
+
+        @Override
+        public void render(@Nullable T entity, EntityRenderContext context, A packInfo) {
+            /* Rendering light sources */
+            AbstractLightsModule lights = entity != null ? entity.getModuleByType(AbstractLightsModule.class) : null;
+            GlStateManager.pushMatrix();
+            transform();
+            /* Rendering light source */
+            LightObject onLightObject = null;
+            if (lights != null) {
+                // Find the first light object that is on
+                for (LightObject source : getSources()) {
+                    if (lights.isLightOn(source.getLightId())) {
+                        onLightObject = source;
+                        break;
+                    }
+                }
+            }
+            boolean isOn = true;
+            if (onLightObject == null) {
+                isOn = false;
+                onLightObject = getSources().get(0);
+            }
+            // Do blinking
+            int activeStep = 0;
+            if (isOn && onLightObject.getBlinkSequence() != null) {
+                int[] seq = onLightObject.getBlinkSequence();
+                int mod = entity.ticksExisted % seq[seq.length - 1];
+                isOn = false; //Default state
+                for (int i = seq.length - 1; i >= 0; i--) {
+                    if (mod > seq[i]) {
+                        isOn = i % 2 == 0;
+                        activeStep = (byte) (i + 1);
+                        break;
+                    }
+                }
+            }
+            //for testing only isOn = onLightObject != null;
+            byte texId = 0;
+            if (isOn && !onLightObject.getBlinkTextures().isEmpty()) {
+                activeStep = activeStep % onLightObject.getBlinkTextures().size();
+                texId = onLightObject.getBlinkTextures().get(activeStep).getId();
+            }
+            //Set luminescent
+            if (isOn) {
+                int i = 15728880;
+                int j = i % 65536;
+                int k = i / 65536;
+                OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float) j, (float) k);
+                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+            }
+            //Render the light
+            if (lights != null && lights.isLightOn(onLightObject.getLightId()) && onLightObject.getRotateDuration() > 0) {
+                float step = ((float) (entity.ticksExisted % onLightObject.getRotateDuration())) / onLightObject.getRotateDuration();
+                step = step * 360;
+                GlStateManager.rotate(step, 0, 1, 0);
+            }
+            context.getModel().renderGroups(getObjectName(), texId, context.isUseVanillaRender());
+            if (entity != null && isOn) {
+                int i = entity.getBrightnessForRender();
+                int j = i % 65536;
+                int k = i / 65536;
+                OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float) j, (float) k);
+                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+            }
+            renderChildren(entity, context, packInfo);
+            GlStateManager.popMatrix();
+        }
+
+        @Override
+        public void renderDebug(@Nullable T entity, EntityRenderContext context, A packInfo) {
+            if(DynamXDebugOptions.LIGHTS.isActive()) {
+                GlStateManager.pushMatrix();
+                transformForDebug();
+                RenderGlobal.drawBoundingBox(-0.05f, -0.05f, -0.05f, 0.05f, 0.05f, 0.05f,
+                        1, 1, 0, 1);
+                GlStateManager.popMatrix();
+            }
+            super.renderDebug(entity, context, packInfo);
+        }
     }
 }

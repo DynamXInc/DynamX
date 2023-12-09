@@ -7,8 +7,8 @@ import fr.dynamx.api.contentpack.ContentPackType;
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.part.BasePart;
-import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.dxmodel.DxModelPath;
+import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.physics.EnumBulletShapeType;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
@@ -368,7 +368,7 @@ public class DynamXUtils {
                     TextComponentTranslation msg = new TextComponentTranslation("trailer.attached", trailer.getPackInfo().getName(), carEntity.getPackInfo().getName());
                     msg.getStyle().setColor(TextFormatting.GREEN);
                     player.sendMessage(msg);
-                    if(trailer instanceof TrailerEntity)
+                    if(player.world.isRemote && trailer instanceof TrailerEntity)
                         ((TrailerEntity<?>) trailer).playAttachSound();
                 } else {
                     TextComponentTranslation msg = new TextComponentTranslation("trailer.attach.fail", trailer.getPackInfo().getName(), carEntity.getPackInfo().getName());

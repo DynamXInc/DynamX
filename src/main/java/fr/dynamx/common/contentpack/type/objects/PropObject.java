@@ -34,7 +34,7 @@ import lombok.Setter;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -112,7 +112,7 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
         this.itemScale = block.getItemScale();
         this.itemTranslate = block.getItemTranslate();
         this.itemRotate = block.getItemRotate();
-        this.item3DRenderLocation = block.get3DItemRenderLocation();
+        this.item3DRenderLocation = block.getItem3DRenderLocation();
         this.translation = block.getTranslation();
         this.scaleModifier = block.getScaleModifier();
         this.renderDistance = block.getRenderDistance();
@@ -131,7 +131,8 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
     @Override
     public boolean postLoad(boolean hot) {
         collisionsHelper.loadCollisions(this, DynamXUtils.getModelPath(getPackName(), model), "", centerOfMass, 0, useComplexCollisions, scaleModifier, ObjectCollisionsHelper.CollisionType.PROP);
-        collisionsHelper.getPhysicsCollisionShape().setMargin(margin);
+        if(collisionsHelper.hasPhysicsCollisions())
+            collisionsHelper.getPhysicsCollisionShape().setMargin(margin);
 
         if (!super.postLoad(hot))
             return false;
@@ -139,7 +140,7 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
         for (PartLightSource s : getOwner().lightSources.values()) {
             addDrawablePart(s);
         }
-        if (FMLClientHandler.instance().getSide().isClient()) {
+        if (FMLCommonHandler.instance().getSide().isClient()) {
             //TODO MOVE
             System.out.println("Gen scene graph: " + getFullName());
             getSceneGraph();

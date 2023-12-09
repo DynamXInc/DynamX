@@ -9,6 +9,7 @@ import fr.dynamx.common.contentpack.PackInfo;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.Tuple;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -33,11 +34,11 @@ public abstract class DxModelData {
     }
 
     @SideOnly(Side.CLIENT)
-    protected InputStream client(DxModelPath path) throws IOException {
+    protected InputStream getClientInputStream(DxModelPath path) throws IOException {
         return Minecraft.getMinecraft().getResourceManager().getResource(path.getModelPath()).getInputStream();
     }
 
-    public static InputStream server(DxModelPath path) throws IOException {
+    protected InputStream getServerInputStream(DxModelPath path) throws IOException {
         InputStream result = null;
         for (PackInfo packInfo : path.getPackLocations()) {
             result = packInfo.readFile(path.getModelPath());
@@ -47,6 +48,23 @@ public abstract class DxModelData {
         if (result == null)
             throw new FileNotFoundException("Model not found : " + path + ". Pack : " + path.getPackName());
         return result;
+    }
+
+    /**
+     * Search for the model file in the packs and return the first found
+     *
+     * @param path The model path
+     * @return A tuple containing the pack info of the pack containing this model, and the model file input stream
+     * @throws IOException If the model file cannot be found
+     */
+    public static Tuple<PackInfo, InputStream> getModelFile(DxModelPath path) throws IOException {
+        InputStream result;
+        for (PackInfo packInfo : path.getPackLocations()) {
+            result = packInfo.readFile(path.getModelPath());
+            if (result != null)
+                return new Tuple<>(packInfo, result);
+        }
+        throw new FileNotFoundException("Model not found : " + path + ". Pack : " + path.getPackName());
     }
 
     public abstract float[] getVerticesPos(String objectName);

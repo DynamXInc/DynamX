@@ -237,7 +237,7 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
 
     @Override
     public void applyOrientationToEntity(Entity passenger) {
-        if (this instanceof IModuleContainer.ISeatsContainer) {
+        if (this instanceof IModuleContainer.ISeatsContainer && ((IModuleContainer.ISeatsContainer) this).getSeats() != null) {
             ((IModuleContainer.ISeatsContainer) this).getSeats().applyOrientationToEntity(passenger);
         } else {
             super.applyOrientationToEntity(passenger);

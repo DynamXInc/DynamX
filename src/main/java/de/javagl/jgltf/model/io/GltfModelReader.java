@@ -26,17 +26,18 @@
  */
 package de.javagl.jgltf.model.io;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.nio.file.Path;
-
 import de.javagl.jgltf.model.GltfModel;
 import de.javagl.jgltf.model.io.v1.GltfAssetV1;
 import de.javagl.jgltf.model.io.v2.GltfAssetV2;
 import de.javagl.jgltf.model.v1.GltfModelV1;
 import de.javagl.jgltf.model.v2.GltfModelCreatorV2;
+import fr.dynamx.common.contentpack.PackInfo;
 import net.minecraft.util.ResourceLocation;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.nio.file.Path;
 
 /**
  * A class for reading a {@link GltfModel} from a URI.
@@ -58,11 +59,11 @@ public final class GltfModelReader
      * @return The {@link GltfModel}
      * @throws IOException If an IO error occurs
      */
-    public GltfModel read(URI uri, ResourceLocation location) throws IOException
+    public GltfModel read(URI uri, PackInfo info, ResourceLocation location) throws IOException
     {
         GltfAssetReader gltfAssetReader = new GltfAssetReader();
         GltfAsset gltfAsset = gltfAssetReader.read(uri);
-        return createModel(gltfAsset, location);
+        return createModel(gltfAsset, info, location);
     }
 
     /**
@@ -72,11 +73,11 @@ public final class GltfModelReader
      * @return The {@link GltfModel}
      * @throws IOException If an IO error occurs
      */
-    public GltfModel read(Path path, ResourceLocation location) throws IOException
+    public GltfModel read(Path path, PackInfo info, ResourceLocation location) throws IOException
     {
         GltfAssetReader gltfAssetReader = new GltfAssetReader();
         GltfAsset gltfAsset = gltfAssetReader.read(path);
-        return createModel(gltfAsset, location);
+        return createModel(gltfAsset, info, location);
     }
 
     /**
@@ -91,18 +92,18 @@ public final class GltfModelReader
      * @return The {@link GltfModel}
      * @throws IOException If an IO error occurs
      */
-    public GltfModel readWithoutReferences(URI uri, ResourceLocation location) throws IOException
+    public GltfModel readWithoutReferences(URI uri, PackInfo info, ResourceLocation location) throws IOException
     {
         try (InputStream inputStream = uri.toURL().openStream())
         {
-            GltfModel gltfModel = readWithoutReferences(inputStream, location);
+            GltfModel gltfModel = readWithoutReferences(inputStream, info, location);
             return gltfModel;
         }
     }
     
     /**
      * Read the {@link GltfModel} from the given input stream. In contrast
-     * to the {@link #read(URI)} method, this method will not resolve any 
+     * to the {@link #read(URI)} method, this method will not resolve any
      * references that are contained in the {@link GltfAsset}. <br>
      * <br>
      * This is mainly intended for binary- or embedded glTF assets that do not
@@ -112,13 +113,13 @@ public final class GltfModelReader
      * @return The {@link GltfModel}
      * @throws IOException If an IO error occurs
      */
-    public GltfModel readWithoutReferences(InputStream inputStream, ResourceLocation location)
+    public GltfModel readWithoutReferences(InputStream inputStream, PackInfo info, ResourceLocation location)
         throws IOException
     {
         GltfAssetReader gltfAssetReader = new GltfAssetReader();
         GltfAsset gltfAsset = 
             gltfAssetReader.readWithoutReferences(inputStream);
-        return createModel(gltfAsset, location);
+        return createModel(gltfAsset, info, location);
     }
     
     /**
@@ -128,17 +129,17 @@ public final class GltfModelReader
      * @return The {@link GltfModel}
      * @throws IOException If the given asset has an unknown version
      */
-    private static GltfModel createModel(GltfAsset gltfAsset, ResourceLocation location) throws IOException
+    private static GltfModel createModel(GltfAsset gltfAsset, PackInfo info, ResourceLocation location) throws IOException
     {
         if (gltfAsset instanceof GltfAssetV1)
         {
             GltfAssetV1 gltfAssetV1 = (GltfAssetV1)gltfAsset;
-            return new GltfModelV1(gltfAssetV1, location);
+            return new GltfModelV1(gltfAssetV1, info, location);
         }
         if (gltfAsset instanceof GltfAssetV2)
         {
             GltfAssetV2 gltfAssetV2 = (GltfAssetV2)gltfAsset;
-            return GltfModelCreatorV2.create(gltfAssetV2, location);
+            return GltfModelCreatorV2.create(gltfAssetV2, info, location);
         }
         throw new IOException(
             "The glTF asset has an unknown version: " + gltfAsset);

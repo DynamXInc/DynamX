@@ -45,7 +45,7 @@ import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -242,7 +242,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
         //Validate vehicle type
         validator.validate(this);
 
-        if (FMLClientHandler.instance().getSide().isClient()) {
+        if (FMLCommonHandler.instance().getSide().isClient()) {
             //TODO MOVE
             System.out.println("Gen scene graph: " + getFullName());
             getSceneGraph();

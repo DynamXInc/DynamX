@@ -20,7 +20,7 @@ public class GltfModelData extends DxModelData {
 
     public GltfModelData(DxModelPath objModelPath) {
         super(objModelPath);
-        gltfModel = MCglTF.getInstance().readModels(objModelPath);
+        gltfModel = MCglTF.readModel(objModelPath);
     }
 
     @Override
@@ -109,7 +109,7 @@ public class GltfModelData extends DxModelData {
             if (verticesPos[i * 3 + 1] < minY) minY = verticesPos[i * 3 + 1];
             if (verticesPos[i * 3 + 2] < minZ) minZ = verticesPos[i * 3 + 2];
         }
-        if(result == null)
+        if (result == null)
             return new Vector3f(minX, minY, minZ);
         return result.set(minX, minY, minZ);
     }
@@ -130,7 +130,7 @@ public class GltfModelData extends DxModelData {
             if (verticesPos[i * 3 + 1] > maxY) maxY = verticesPos[i * 3 + 1];
             if (verticesPos[i * 3 + 2] > maxZ) maxZ = verticesPos[i * 3 + 2];
         }
-        if(result == null)
+        if (result == null)
             return new Vector3f(maxX, maxY, maxZ);
         return result.set(maxX, maxY, maxZ);
     }
@@ -148,7 +148,7 @@ public class GltfModelData extends DxModelData {
             if (min.y < minY) minY = min.y;
             if (min.z < minZ) minZ = min.z;
         }
-        if(result == null)
+        if (result == null)
             return new Vector3f(minX, minY, minZ);
         return result.set(minX, minY, minZ);
     }
@@ -166,7 +166,7 @@ public class GltfModelData extends DxModelData {
             if (max.y > maxY) maxY = max.y;
             if (max.z > maxZ) maxZ = max.z;
         }
-        if(result == null)
+        if (result == null)
             return new Vector3f(maxX, maxY, maxZ);
         return result.set(maxX, maxY, maxZ);
     }
@@ -186,6 +186,11 @@ public class GltfModelData extends DxModelData {
 
     @Override
     public List<String> getMeshNames() {
-        return getNodeModels().stream().map(n -> n.getName().toLowerCase()).collect(Collectors.toList());
+        System.out.println(">> GET MESH NAMES " + gltfModel + "+ " + getNodeModels());
+        return getNodeModels().stream().map(n -> {
+            System.out.println(">> GET MESH NAMES " + gltfModel + " " + n);
+            System.out.println("N name " + n.getName());
+            return n.getName().toLowerCase();
+        }).collect(Collectors.toList());
     }
 }

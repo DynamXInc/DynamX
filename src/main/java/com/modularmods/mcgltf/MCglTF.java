@@ -6,11 +6,13 @@ import de.javagl.jgltf.model.io.GltfModelReader;
 import fr.dynamx.api.dxmodel.DxModelPath;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
+import fr.dynamx.common.contentpack.PackInfo;
 import fr.dynamx.common.objloader.data.DxModelData;
 import fr.dynamx.common.objloader.data.GltfModelData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IResource;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Tuple;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.fml.common.Mod;
 import org.apache.commons.io.IOUtils;
@@ -41,7 +43,7 @@ public class MCglTF {
     private final int defaultColorMap;
     private final int defaultNormalMap;
 
-    private final Map<ResourceLocation, Supplier<ByteBuffer>> loadedBufferResources = new HashMap<>();
+    private static final Map<ResourceLocation, Supplier<ByteBuffer>> loadedBufferResources = new HashMap<>();
     private final Map<ResourceLocation, Supplier<ByteBuffer>> loadedImageResources = new HashMap<>();
     private final List<IGltfModelReceiver> gltfModelReceivers = new ArrayList<>();
     private final List<Runnable> gltfRenderData = new ArrayList<>();
@@ -82,7 +84,7 @@ public class MCglTF {
         return 0;
     }
 
-    public ByteBuffer getBufferResource(ResourceLocation location) {
+    public static ByteBuffer getBufferResource(PackInfo packInfo, ResourceLocation location) {
         Supplier<ByteBuffer> supplier;
         synchronized (loadedBufferResources) {
             supplier = loadedBufferResources.get(location);
@@ -93,8 +95,8 @@ public class MCglTF {
                     @Override
                     public synchronized ByteBuffer get() {
                         if (bufferData == null) {
-                            try (IResource resource = Minecraft.getMinecraft().getResourceManager().getResource(location)) {
-                                bufferData = Buffers.create(IOUtils.toByteArray(new BufferedInputStream(resource.getInputStream())));
+                            try (InputStream resource = packInfo.readFile(location)) {
+                                bufferData = Buffers.create(IOUtils.toByteArray(new BufferedInputStream(resource)));
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -254,18 +256,20 @@ public class MCglTF {
         receivers.getRight().add(modelReceiver);
     }
 
-    public GltfModel readModels(DxModelPath path) {
-        gltfRenderData.forEach(Runnable::run);
-        gltfRenderData.clear();
-
+    public static GltfModel readModel(DxModelPath path) {
+        if (INSTANCE != null) {
+            INSTANCE.gltfRenderData.forEach(Runnable::run);
+            INSTANCE.gltfRenderData.clear();
+        }
         GltfModel gltfModel = null;
-        try (InputStream resource = DxModelData.server(path)) {
+        try {
+            Tuple<PackInfo, InputStream> resource = DxModelData.getModelFile(path);
             long start = System.currentTimeMillis();
             DynamXMain.log.info("Reading gltf model " + path);
-            gltfModel = new GltfModelReader().readWithoutReferences(new BufferedInputStream(resource), path.getModelPath());
+            gltfModel = new GltfModelReader().readWithoutReferences(new BufferedInputStream(resource.getSecond()), resource.getFirst(), path.getModelPath());
             DynamXMain.log.info("Read gltf model " + path + " in " + (System.currentTimeMillis() - start) + "ms");
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Failed to load gtltf model " + path, e);
         }
         return gltfModel;
     }

@@ -106,4 +106,9 @@ public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A e
         subProperties.forEach(subInfoType -> subInfoType.postLoad((A) this, hot));
         return super.postLoad(hot);
     }
+
+    @Override
+    public Enum3DRenderLocation get3DItemRenderLocation() {
+        return item3DRenderLocation;
+    }
 }

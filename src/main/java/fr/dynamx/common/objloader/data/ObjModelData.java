@@ -28,7 +28,7 @@ public class ObjModelData extends DxModelData {
     public ObjModelData(DxModelPath path) {
         super(path);
         try {
-            String content = new String(DynamXUtils.readInputStream(FMLCommonHandler.instance().getSide().isClient() ? client(path) : server(path)), StandardCharsets.UTF_8);
+            String content = new String(DynamXUtils.readInputStream(FMLCommonHandler.instance().getSide().isClient() ? getClientInputStream(path) : getServerInputStream(path)), StandardCharsets.UTF_8);
             ResourceLocation location = path.getModelPath();
             ResourceLocation startPath = new ResourceLocation(location.getNamespace(), location.getPath().substring(0, location.getPath().lastIndexOf("/") + 1));
             new OBJLoader(objObjects, materials).readAndLoadModel(FMLCommonHandler.instance().getSide().isClient() ? startPath : null, content);

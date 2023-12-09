@@ -32,7 +32,6 @@ public interface IDrawablePart<T extends ModularPhysicsEntity<?>, A extends IPhy
      *
      * @return The parts to hide when rendering the main obj model
      */
-    @SideOnly(Side.CLIENT)
     default String[] getRenderedParts() {
         String objectName = getObjectName();
         return objectName == null ? new String[0] : new String[]{objectName};
@@ -77,6 +76,5 @@ public interface IDrawablePart<T extends ModularPhysicsEntity<?>, A extends IPhy
     /**
      * @return The name of the object in the 3D model. This is NOT the name of the part and this is NOT the node name.
      */
-    @SideOnly(Side.CLIENT)
     String getObjectName();
 }

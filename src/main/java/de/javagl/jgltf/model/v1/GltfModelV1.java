@@ -26,12 +26,6 @@
  */
 package de.javagl.jgltf.model.v1;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-
 import de.javagl.jgltf.impl.v1.GlTF;
 import de.javagl.jgltf.impl.v1.Program;
 import de.javagl.jgltf.impl.v1.Shader;
@@ -45,13 +39,15 @@ import de.javagl.jgltf.model.gl.impl.DefaultShaderModel;
 import de.javagl.jgltf.model.gl.impl.DefaultTechniqueModel;
 import de.javagl.jgltf.model.impl.DefaultGltfModel;
 import de.javagl.jgltf.model.io.v1.GltfAssetV1;
+import fr.dynamx.common.contentpack.PackInfo;
 import net.minecraft.util.ResourceLocation;
+
+import java.util.*;
 
 /**
  * Implementation of a {@link GltfModel}, based on a {@link GlTF glTF 1.0}.<br>
  */
-public final class GltfModelV1 extends DefaultGltfModel implements GltfModel
-{
+public final class GltfModelV1 extends DefaultGltfModel implements GltfModel {
     /**
      * The {@link ShaderModel} instances that have been created from
      * the {@link Shader} instances
@@ -63,7 +59,7 @@ public final class GltfModelV1 extends DefaultGltfModel implements GltfModel
      * the {@link Program} instances
      */
     private final List<DefaultProgramModel> programModels;
-    
+
     /**
      * The {@link TechniqueModel} instances that have been created from
      * the {@link Technique} instances
@@ -74,65 +70,59 @@ public final class GltfModelV1 extends DefaultGltfModel implements GltfModel
 
     /**
      * Creates a new model for the given glTF
-     * 
+     *
      * @param gltfAsset The {@link GltfAssetV1}
      */
-    public GltfModelV1(GltfAssetV1 gltfAsset, ResourceLocation resourceLocation)
-    {
-        Objects.requireNonNull(gltfAsset, 
-            "The gltfAsset may not be null");
+    public GltfModelV1(GltfAssetV1 gltfAsset, PackInfo info, ResourceLocation resourceLocation) {
+        Objects.requireNonNull(gltfAsset,
+                "The gltfAsset may not be null");
 
         this.shaderModels = new ArrayList<DefaultShaderModel>();
         this.programModels = new ArrayList<DefaultProgramModel>();
         this.techniqueModels = new ArrayList<DefaultTechniqueModel>();
         this.resourceLocation = resourceLocation;
-        
-        GltfModelCreatorV1 gltfModelCreatorV1 = 
-            new GltfModelCreatorV1(gltfAsset, this);
-        gltfModelCreatorV1.create();
+
+        GltfModelCreatorV1 gltfModelCreatorV1 =
+                new GltfModelCreatorV1(gltfAsset, this);
+        gltfModelCreatorV1.create(info);
     }
-    
+
     /**
      * Creates a new, empty model
      */
-    public GltfModelV1()
-    {
+    public GltfModelV1() {
         this.shaderModels = new ArrayList<DefaultShaderModel>();
         this.programModels = new ArrayList<DefaultProgramModel>();
         this.techniqueModels = new ArrayList<DefaultTechniqueModel>();
         this.resourceLocation = null;
     }
-    
+
     /**
      * Add the given {@link ShaderModel} to this model
-     * 
+     *
      * @param shaderModel The instance to add
      */
-    public void addShaderModel(DefaultShaderModel shaderModel)
-    {
+    public void addShaderModel(DefaultShaderModel shaderModel) {
         shaderModels.add(shaderModel);
     }
 
     /**
      * Remove the given {@link ShaderModel} from this model
-     * 
+     *
      * @param shaderModel The instance to remove
      */
-    public void removeShaderModel(DefaultShaderModel shaderModel)
-    {
+    public void removeShaderModel(DefaultShaderModel shaderModel) {
         shaderModels.remove(shaderModel);
     }
 
     /**
      * Add the given {@link ShaderModel} instances to this model
-     * 
+     *
      * @param shaderModels The instances to add
      */
     public void addShaderModels(
-        Collection<? extends DefaultShaderModel> shaderModels)
-    {
-        for (DefaultShaderModel shaderModel : shaderModels)
-        {
+            Collection<? extends DefaultShaderModel> shaderModels) {
+        for (DefaultShaderModel shaderModel : shaderModels) {
             addShaderModel(shaderModel);
         }
     }
@@ -143,60 +133,53 @@ public final class GltfModelV1 extends DefaultGltfModel implements GltfModel
      * @param index The index
      * @return The {@link ShaderModel}
      */
-    public DefaultShaderModel getShaderModel(int index)
-    {
+    public DefaultShaderModel getShaderModel(int index) {
         return shaderModels.get(index);
     }
 
     /**
      * Remove all {@link ShaderModel} instances
      */
-    public void clearShaderModels()
-    {
+    public void clearShaderModels() {
         shaderModels.clear();
     }
-    
+
     /**
-     * Returns an unmodifiable view on the list of {@link ShaderModel} 
+     * Returns an unmodifiable view on the list of {@link ShaderModel}
      * instances that have been created for the glTF.
-     * 
+     *
      * @return The {@link ShaderModel} instances
      */
-    public List<ShaderModel> getShaderModels()
-    {
+    public List<ShaderModel> getShaderModels() {
         return Collections.unmodifiableList(shaderModels);
     }
 
     /**
      * Add the given {@link ProgramModel} to this model
-     * 
+     *
      * @param programModel The instance to add
      */
-    public void addProgramModel(DefaultProgramModel programModel)
-    {
+    public void addProgramModel(DefaultProgramModel programModel) {
         programModels.add(programModel);
     }
 
     /**
      * Remove the given {@link ProgramModel} from this model
-     * 
+     *
      * @param programModel The instance to remove
      */
-    public void removeProgramModel(DefaultProgramModel programModel)
-    {
+    public void removeProgramModel(DefaultProgramModel programModel) {
         programModels.remove(programModel);
     }
 
     /**
      * Add the given {@link ProgramModel} instances to this model
-     * 
+     *
      * @param programModels The instances to add
      */
     public void addProgramModels(
-        Collection<? extends DefaultProgramModel> programModels)
-    {
-        for (DefaultProgramModel programModel : programModels)
-        {
+            Collection<? extends DefaultProgramModel> programModels) {
+        for (DefaultProgramModel programModel : programModels) {
             addProgramModel(programModel);
         }
     }
@@ -207,61 +190,54 @@ public final class GltfModelV1 extends DefaultGltfModel implements GltfModel
      * @param index The index
      * @return The {@link ProgramModel}
      */
-    public DefaultProgramModel getProgramModel(int index)
-    {
+    public DefaultProgramModel getProgramModel(int index) {
         return programModels.get(index);
     }
 
     /**
      * Remove all {@link ProgramModel} instances
      */
-    public void clearProgramModels()
-    {
+    public void clearProgramModels() {
         programModels.clear();
     }
-    
+
     /**
-     * Returns an unmodifiable view on the list of {@link ProgramModel} 
+     * Returns an unmodifiable view on the list of {@link ProgramModel}
      * instances that have been created for the glTF.
-     * 
+     *
      * @return The {@link ProgramModel} instances
      */
-    public List<ProgramModel> getProgramModels()
-    {
+    public List<ProgramModel> getProgramModels() {
         return Collections.unmodifiableList(programModels);
     }
-    
-    
+
+
     /**
      * Add the given {@link TechniqueModel} to this model
-     * 
+     *
      * @param techniqueModel The instance to add
      */
-    public void addTechniqueModel(DefaultTechniqueModel techniqueModel)
-    {
+    public void addTechniqueModel(DefaultTechniqueModel techniqueModel) {
         techniqueModels.add(techniqueModel);
     }
 
     /**
      * Remove the given {@link TechniqueModel} from this model
-     * 
+     *
      * @param techniqueModel The instance to remove
      */
-    public void removeTechniqueModel(DefaultTechniqueModel techniqueModel)
-    {
+    public void removeTechniqueModel(DefaultTechniqueModel techniqueModel) {
         techniqueModels.remove(techniqueModel);
     }
 
     /**
      * Add the given {@link TechniqueModel} instances to this model
-     * 
+     *
      * @param techniqueModels The instances to add
      */
     public void addTechniqueModels(
-        Collection<? extends DefaultTechniqueModel> techniqueModels)
-    {
-        for (DefaultTechniqueModel techniqueModel : techniqueModels)
-        {
+            Collection<? extends DefaultTechniqueModel> techniqueModels) {
+        for (DefaultTechniqueModel techniqueModel : techniqueModels) {
             addTechniqueModel(techniqueModel);
         }
     }
@@ -272,28 +248,25 @@ public final class GltfModelV1 extends DefaultGltfModel implements GltfModel
      * @param index The index
      * @return The {@link TechniqueModel}
      */
-    public DefaultTechniqueModel getTechniqueModel(int index)
-    {
+    public DefaultTechniqueModel getTechniqueModel(int index) {
         return techniqueModels.get(index);
     }
 
     /**
      * Remove all {@link TechniqueModel} instances
      */
-    public void clearTechniqueModels()
-    {
+    public void clearTechniqueModels() {
         techniqueModels.clear();
     }
-    
+
     /**
-     * Returns an unmodifiable view on the list of {@link TechniqueModel} 
+     * Returns an unmodifiable view on the list of {@link TechniqueModel}
      * instances that have been created for the glTF.
-     * 
+     *
      * @return The {@link TechniqueModel} instances
      */
-    public List<TechniqueModel> getTechniqueModels()
-    {
+    public List<TechniqueModel> getTechniqueModels() {
         return Collections.unmodifiableList(techniqueModels);
     }
-    
+
 }

@@ -31,6 +31,7 @@ import de.javagl.jgltf.model.io.v1.GltfAssetV1;
 import de.javagl.jgltf.model.io.v2.GltfAssetV2;
 import de.javagl.jgltf.model.v1.GltfModelV1;
 import de.javagl.jgltf.model.v2.GltfModelCreatorV2;
+import fr.dynamx.common.contentpack.PackInfo;
 import net.minecraft.util.ResourceLocation;
 
 /**
@@ -46,17 +47,17 @@ public class GltfModels
      * @throws IllegalArgumentException If the given asset has an 
      * unknown version
      */
-    public static GltfModel create(GltfAsset gltfAsset, ResourceLocation location)
+    public static GltfModel create(GltfAsset gltfAsset, PackInfo info, ResourceLocation location)
     {
         if (gltfAsset instanceof GltfAssetV1)
         {
             GltfAssetV1 gltfAssetV1 = (GltfAssetV1)gltfAsset;
-            return new GltfModelV1(gltfAssetV1, location);
+            return new GltfModelV1(gltfAssetV1, info, location);
         }
         if (gltfAsset instanceof GltfAssetV2)
         {
             GltfAssetV2 gltfAssetV2 = (GltfAssetV2)gltfAsset;
-            return GltfModelCreatorV2.create(gltfAssetV2, location);
+            return GltfModelCreatorV2.create(gltfAssetV2, info, location);
         }
         throw new IllegalArgumentException(
             "The glTF asset has an unknown version: " + gltfAsset);

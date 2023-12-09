@@ -26,102 +26,31 @@
  */
 package de.javagl.jgltf.model.v2;
 
-import java.io.FileNotFoundException;
-import java.nio.ByteBuffer;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.function.Consumer;
-import java.util.logging.Logger;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.modularmods.mcgltf.MCglTF;
-
-import de.javagl.jgltf.impl.v2.GlTFChildOfRootProperty;
-import de.javagl.jgltf.impl.v2.GlTFProperty;
-import de.javagl.jgltf.impl.v2.Asset;
-import de.javagl.jgltf.impl.v2.Accessor;
-import de.javagl.jgltf.impl.v2.AccessorSparse;
-import de.javagl.jgltf.impl.v2.AccessorSparseIndices;
-import de.javagl.jgltf.impl.v2.AccessorSparseValues;
-import de.javagl.jgltf.impl.v2.Animation;
-import de.javagl.jgltf.impl.v2.AnimationChannel;
-import de.javagl.jgltf.impl.v2.AnimationChannelTarget;
-import de.javagl.jgltf.impl.v2.AnimationSampler;
-import de.javagl.jgltf.impl.v2.Buffer;
-import de.javagl.jgltf.impl.v2.BufferView;
-import de.javagl.jgltf.impl.v2.Camera;
-import de.javagl.jgltf.impl.v2.CameraOrthographic;
-import de.javagl.jgltf.impl.v2.CameraPerspective;
-import de.javagl.jgltf.impl.v2.GlTF;
-import de.javagl.jgltf.impl.v2.Image;
-import de.javagl.jgltf.impl.v2.Material;
-import de.javagl.jgltf.impl.v2.MaterialNormalTextureInfo;
-import de.javagl.jgltf.impl.v2.MaterialOcclusionTextureInfo;
-import de.javagl.jgltf.impl.v2.MaterialPbrMetallicRoughness;
-import de.javagl.jgltf.impl.v2.Mesh;
-import de.javagl.jgltf.impl.v2.MeshPrimitive;
-import de.javagl.jgltf.impl.v2.Node;
-import de.javagl.jgltf.impl.v2.Sampler;
-import de.javagl.jgltf.impl.v2.Scene;
-import de.javagl.jgltf.impl.v2.Skin;
-import de.javagl.jgltf.impl.v2.Texture;
-import de.javagl.jgltf.impl.v2.TextureInfo;
-import de.javagl.jgltf.model.AccessorData;
-import de.javagl.jgltf.model.AccessorDatas;
-import de.javagl.jgltf.model.AccessorModel;
-import de.javagl.jgltf.model.AnimationModel;
-import de.javagl.jgltf.model.AssetModel;
+import de.javagl.jgltf.impl.v2.*;
+import de.javagl.jgltf.model.*;
 import de.javagl.jgltf.model.AnimationModel.Channel;
 import de.javagl.jgltf.model.AnimationModel.Interpolation;
-import de.javagl.jgltf.model.BufferModel;
-import de.javagl.jgltf.model.BufferViewModel;
-import de.javagl.jgltf.model.CameraModel;
-import de.javagl.jgltf.model.ElementType;
-import de.javagl.jgltf.model.ExtensionsModel;
-import de.javagl.jgltf.model.GltfConstants;
-import de.javagl.jgltf.model.GltfModel;
-import de.javagl.jgltf.model.ImageModel;
-import de.javagl.jgltf.model.MaterialModel;
-import de.javagl.jgltf.model.MeshModel;
-import de.javagl.jgltf.model.MeshPrimitiveModel;
-import de.javagl.jgltf.model.NodeModel;
-import de.javagl.jgltf.model.Optionals;
-import de.javagl.jgltf.model.SceneModel;
-import de.javagl.jgltf.model.SkinModel;
-import de.javagl.jgltf.model.TextureModel;
-import de.javagl.jgltf.model.impl.AbstractModelElement;
-import de.javagl.jgltf.model.impl.AbstractNamedModelElement;
-import de.javagl.jgltf.model.impl.DefaultAccessorModel;
-import de.javagl.jgltf.model.impl.DefaultAnimationModel;
-import de.javagl.jgltf.model.impl.DefaultAssetModel;
+import de.javagl.jgltf.model.impl.*;
 import de.javagl.jgltf.model.impl.DefaultAnimationModel.DefaultChannel;
 import de.javagl.jgltf.model.impl.DefaultAnimationModel.DefaultSampler;
-import de.javagl.jgltf.model.impl.DefaultBufferModel;
-import de.javagl.jgltf.model.impl.DefaultBufferViewModel;
-import de.javagl.jgltf.model.impl.DefaultCameraModel;
-import de.javagl.jgltf.model.impl.DefaultCameraOrthographicModel;
-import de.javagl.jgltf.model.impl.DefaultCameraPerspectiveModel;
-import de.javagl.jgltf.model.impl.DefaultExtensionsModel;
-import de.javagl.jgltf.model.impl.DefaultGltfModel;
-import de.javagl.jgltf.model.impl.DefaultImageModel;
-import de.javagl.jgltf.model.impl.DefaultMeshModel;
-import de.javagl.jgltf.model.impl.DefaultMeshPrimitiveModel;
-import de.javagl.jgltf.model.impl.DefaultNodeModel;
-import de.javagl.jgltf.model.impl.DefaultSceneModel;
-import de.javagl.jgltf.model.impl.DefaultSkinModel;
-import de.javagl.jgltf.model.impl.DefaultTextureModel;
 import de.javagl.jgltf.model.io.Buffers;
 import de.javagl.jgltf.model.io.GltfAsset;
 import de.javagl.jgltf.model.io.IO;
 import de.javagl.jgltf.model.io.v2.GltfAssetV2;
 import de.javagl.jgltf.model.v2.MaterialModelV2.AlphaMode;
 import de.javagl.jgltf.model.v2.gl.Materials;
+import fr.dynamx.common.contentpack.PackInfo;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+
+import java.nio.ByteBuffer;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.function.Consumer;
+import java.util.logging.Logger;
 
 /**
  * A class that is responsible for filling a {@link DefaultGltfModel} with
@@ -142,14 +71,14 @@ public class GltfModelCreatorV2
      * @param gltfAsset The {@link GltfAssetV2}
      * @return The {@link GltfModel}
      */
-    public static DefaultGltfModel create(GltfAssetV2 gltfAsset, ResourceLocation location)
+    public static DefaultGltfModel create(GltfAssetV2 gltfAsset, PackInfo info, ResourceLocation location)
     {
         DefaultGltfModel gltfModel = new DefaultGltfModel();
         GltfModelCreatorV2 creator = 
             new GltfModelCreatorV2(gltfAsset, gltfModel);
         creator.location = location;
         try {
-            creator.create();
+            creator.create(info);
         }catch (Exception e) {
             e.printStackTrace();
         }
@@ -189,7 +118,7 @@ public class GltfModelCreatorV2
     /**
      * Create and initialize all models
      */
-    void create() {
+    void create(PackInfo info) {
         transferGltfPropertyElements(gltf, gltfModel);
 
         createAccessorModels();
@@ -205,12 +134,13 @@ public class GltfModelCreatorV2
         createSkinModels();
         createTextureModels();
 
-        initBufferModels();
+        initBufferModels(info);
         initBufferViewModels();
         
         initAccessorModels();
         initAnimationModels();
-        initImageModels();
+        if(FMLCommonHandler.instance().getSide().isClient())
+            initImageModels();
         initMeshModels();
         initNodeModels();
         initSceneModels();
@@ -816,7 +746,7 @@ public class GltfModelCreatorV2
     /**
      * Initialize the {@link BufferModel} instances
      */
-    private void initBufferModels() {
+    private void initBufferModels(PackInfo packInfo) {
         List<Buffer> buffers = Optionals.of(gltf.getBuffers());
 
         ByteBuffer binaryData = null;
@@ -842,13 +772,13 @@ public class GltfModelCreatorV2
         	if(extras != null) {
         		JsonElement extra = new Gson().toJsonTree(extras).getAsJsonObject().get(MCglTF.RESOURCE_LOCATION);
         		if(extra != null) {
-        			bufferModel.setBufferData(MCglTF.getInstance().getBufferResource(new ResourceLocation(extra.getAsString())));
+        			bufferModel.setBufferData(MCglTF.getBufferResource(packInfo, new ResourceLocation(extra.getAsString())));
         			continue;
         		}
         	}else{
                 ResourceLocation startPath = new ResourceLocation(location.getNamespace(),
                         location.getPath().substring(0, location.getPath().lastIndexOf("/") + 1)+ buffer.getUri());
-                ByteBuffer bufferResource = MCglTF.getInstance().getBufferResource(startPath);
+                ByteBuffer bufferResource = MCglTF.getBufferResource(packInfo, startPath);
                 bufferModel.setBufferData(bufferResource);
                 continue;
             }

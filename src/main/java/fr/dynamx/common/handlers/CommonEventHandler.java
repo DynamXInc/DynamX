@@ -88,9 +88,12 @@ public class CommonEventHandler {
     public void onStartTracking(PlayerEvent.StartTracking event) {
         if (event.getTarget() instanceof PhysicsEntity)// && event.getTarget().ticksExisted > 20 && event.getEntityPlayer().getServer().isDedicatedServer()) //If the entity was just spawned, the total sync is done by its net handler, only if we are in multiplayer
         {
-            if (event.getTarget().ticksExisted > 20 && event.getEntityPlayer().getServer().isDedicatedServer()) //If the entity was just spawned, the total sync is done by its net handler, only if we are in multiplayer)
+            if (event.getTarget().ticksExisted > 20) //If the entity was just spawned, the total sync is done by its net handler, only if we are in multiplayer)
             {
-                schedule(new TaskScheduler.ResyncItem((PhysicsEntity<?>) event.getTarget(), (EntityPlayerMP) event.getEntityPlayer()));
+                if (event.getEntityPlayer().getServer().isDedicatedServer())
+                    schedule(new TaskScheduler.ResyncItem((PhysicsEntity<?>) event.getTarget(), (EntityPlayerMP) event.getEntityPlayer()));
+                else if (((PhysicsEntity<?>) event.getTarget()).getJointsHandler() != null) // Resync joints when the entity was unloaded on the client side, but not server side, in singleplayer
+                    ((PhysicsEntity<?>) event.getTarget()).getJointsHandler().sync((EntityPlayerMP) event.getEntityPlayer());
             } else if (event.getTarget().ticksExisted <= 20) //If we were riding a vehicle, when we span we need to receive our seat : we do that here
             {
                 if (event.getTarget() instanceof IModuleContainer.ISeatsContainer && ((IModuleContainer.ISeatsContainer) event.getTarget()).hasSeats()) {
@@ -98,6 +101,8 @@ public class CommonEventHandler {
                         @Override
                         public void run() {
                             DynamXContext.getNetwork().sendToClient(new MessageSeatsSync((IModuleContainer.ISeatsContainer) event.getTarget()), EnumPacketTarget.PLAYER, (EntityPlayerMP) event.getEntityPlayer());
+                            if (((PhysicsEntity<?>) event.getTarget()).getJointsHandler() != null)
+                                ((PhysicsEntity<?>) event.getTarget()).getJointsHandler().sync((EntityPlayerMP) event.getEntityPlayer());
                         }
                     });
                 }

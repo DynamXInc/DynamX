@@ -31,7 +31,7 @@ public class PropPhysicsHandler<T extends PropsEntity<?>> extends PackEntityPhys
         PropObject<?> packInfo = getHandledEntity().getPackInfo();
         PhysicsRigidBody rigidBody = new PhysicsRigidBody(packInfo.getCollisionsHelper().getPhysicsCollisionShape(), packInfo.getEmptyMass());
         rigidBody.setPhysicsTransform(transform);
-        rigidBody.setUserObject(new BulletShapeType<>(EnumBulletShapeType.BULLET_ENTITY, getHandledEntity(), rigidBody.getCollisionShape()));
+        rigidBody.setUserObject(new BulletShapeType<>(EnumBulletShapeType.BULLET_ENTITY, getHandledEntity()));
         rigidBody.setFriction(packInfo.getFriction());
         rigidBody.setSleepingThresholds(0.2f, 1);
         rigidBody.setDamping(packInfo.getLinearDamping(), packInfo.getAngularDamping());

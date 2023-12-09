@@ -34,7 +34,7 @@ public class PlayerPhysicsHandler {
         Transform localTransform = new Transform(new Vector3f((float) playerIn.posX, (float) playerIn.posY + 0.8f, (float) playerIn.posZ), localQuat);
         BoxCollisionShape shape = new BoxCollisionShape(0.35f, 0.8f, 0.35f);
         bodyIn = DynamXPhysicsHelper.createRigidBody(60f, localTransform, shape,
-                new BulletShapeType<>(EnumBulletShapeType.PLAYER, this, shape));
+                new BulletShapeType<>(EnumBulletShapeType.PLAYER, this));
         bodyIn.setKinematic(true);
         bodyIn.setEnableSleep(false);
     }

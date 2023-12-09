@@ -45,7 +45,7 @@ public abstract class BaseWheeledVehiclePhysicsHandler<T extends BaseVehicleEnti
         //Don't use this.getPackInfo() : it isn't initialized yet
         physicsVehicle = new PhysicsVehicle(modularVehicleInfo.getCollisionsHelper().getPhysicsCollisionShape(), modularVehicleInfo.getEmptyMass());
         physicsVehicle.setPhysicsTransform(transform);
-        physicsVehicle.setUserObject(new BulletShapeType<>(EnumBulletShapeType.VEHICLE, getHandledEntity(), physicsVehicle.getCollisionShape()));
+        physicsVehicle.setUserObject(new BulletShapeType<>(EnumBulletShapeType.VEHICLE, getHandledEntity()));
         physicsVehicle.setSleepingThresholds(0.3f, 1);
         return physicsVehicle;
     }

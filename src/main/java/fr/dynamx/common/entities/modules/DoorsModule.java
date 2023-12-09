@@ -113,7 +113,7 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
             doorShape = partDoor.getCollisionsHelper().getPhysicsCollisionShape();
         PhysicsRigidBody doorBody = DynamXPhysicsHelper.fastCreateRigidBody(vehicleEntity, 40, doorShape, doorPos, vehicleEntity.rotationYaw);
         localVarContainer.setDoorBody(doorBody);
-        doorBody.setUserObject(new BulletShapeType<>(EnumBulletShapeType.BULLET_ENTITY, localVarContainer, doorBody.getCollisionShape()));
+        doorBody.setUserObject(new BulletShapeType<>(EnumBulletShapeType.BULLET_ENTITY, localVarContainer));
         DynamXContext.getPhysicsWorld(vehicleEntity.world).addCollisionObject(doorBody);
 
         attachedDoors.forEach((doorId, doorPhysics) -> {
@@ -197,7 +197,6 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
             }
         }
     }
-
 
     public boolean isDoorOpened(byte doorID) {
         if (doorsState == null)

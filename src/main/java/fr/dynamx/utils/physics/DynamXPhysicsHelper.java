@@ -1,12 +1,8 @@
 package fr.dynamx.utils.physics;
 
-import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.bullet.collision.PhysicsRayTestResult;
 import com.jme3.bullet.collision.shapes.CollisionShape;
-import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
-import com.jme3.bullet.collision.shapes.HullCollisionShape;
-import com.jme3.bullet.collision.shapes.infos.ChildCollisionShape;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
@@ -14,13 +10,10 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.EnumBulletShapeType;
 import fr.dynamx.api.physics.IPhysicsWorld;
-import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.PhysicsEntity;
-import fr.dynamx.utils.EnumPlayerStandOnTop;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.QuaternionPool;
-import fr.dynamx.utils.optimization.TransformPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.util.math.MathHelper;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -55,7 +48,6 @@ public class DynamXPhysicsHelper {
      * @param type      The {@link BulletShapeType} of this rigid body
      */
     public static PhysicsRigidBody createRigidBody(float mass, Transform transform, CollisionShape colShape, BulletShapeType<?> type) {
-
         PhysicsRigidBody rigidBody = new PhysicsRigidBody(colShape, mass);
         rigidBody.setPhysicsTransform(transform);
         rigidBody.setUserObject(type);
@@ -76,7 +68,7 @@ public class DynamXPhysicsHelper {
         Quaternion bodyQuaternion = new Quaternion().fromAngleNormalAxis((float) Math.toRadians(-spawnRotation), new Vector3f(0, 1, 0));
         Transform bodyTransform = new Transform(position, bodyQuaternion);
 
-        return createRigidBody(mass, bodyTransform, collisionShape, new BulletShapeType<>(EnumBulletShapeType.BULLET_ENTITY, physicsEntity, collisionShape));
+        return createRigidBody(mass, bodyTransform, collisionShape, new BulletShapeType<>(EnumBulletShapeType.BULLET_ENTITY, physicsEntity));
     }
 
     public static PhysicsRaycastResult castRay(IPhysicsWorld iPhysicsWorld, Vector3f from, Vector3f dir, Predicate<EnumBulletShapeType> ignoredBody) {

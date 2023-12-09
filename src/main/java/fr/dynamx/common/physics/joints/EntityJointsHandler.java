@@ -12,6 +12,7 @@ import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.network.packets.MessageJoints;
 import fr.dynamx.common.network.sync.SPPhysicsEntitySynchronizer;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
+import lombok.Getter;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -34,6 +35,12 @@ import java.util.Optional;
  * @see AttachModule
  */
 public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysicsHandler<?, ?>>, IPhysicsModule.IEntityUpdateListener {
+    /**
+     * -- GETTER --
+     *
+     * @return The entity owning this joints
+     */
+    @Getter
     private final PhysicsEntity<?> entity;
     private final List<EntityJoint<?>> joints = new ArrayList<>();
     private List<EntityJoint.CachedJoint> queuedRestorations;
@@ -92,16 +99,13 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
         //if(joints.contains(j) || otherEntity.getJointsHandler().getJoints().contains(j))
         //  return -1;
         addJointInternal(otherEntity, j);
-        if (otherEntity != entity)
-            otherEntity.getJointsHandler().addJointInternal(entity, j);
-
         if (otherEntity != entity) {
+            otherEntity.getJointsHandler().addJointInternal(entity, j);
             if (type.isJointOwner(j, entity))
                 otherEntity.getSynchronizer().setSimulationHolder(entity.getSynchronizer().getSimulationHolder(), entity.getSynchronizer().getSimulationPlayerHolder(), SimulationHolder.UpdateContext.ATTACHED_ENTITIES);
             else
                 entity.getSynchronizer().setSimulationHolder(otherEntity.getSynchronizer().getSimulationHolder(), entity.getSynchronizer().getSimulationPlayerHolder(), SimulationHolder.UpdateContext.ATTACHED_ENTITIES);
         }
-
         if (j.getJoint() != null) {
             DynamXContext.getPhysicsWorld(entity.world).addJoint(j.getJoint());
             entity.physicsHandler.activate();
@@ -118,7 +122,7 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
             queuedRestorations = new ArrayList<>();
         }
         queuedRestorations.add(toAdd);
-        restoreCooldown = entity.ticksExisted < 200 ? 40 : 1;
+        restoreCooldown = entity.ticksExisted < 20 ? 1 : 5;
     }
 
     /**
@@ -235,7 +239,7 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
                 NBTSerializer.unserialize(jointst.getCompoundTagAt(i), j);
                 queuedRestorations.add(j);
             }
-            restoreCooldown = 40;
+            restoreCooldown = 20;
             setDirty(true);
         }
     }
@@ -348,13 +352,6 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
     public void sync(EntityPlayerMP target) {
         if (!getJoints().isEmpty())
             DynamXContext.getNetwork().sendToClient(new MessageJoints(entity, computeCachedJoints()), EnumPacketTarget.PLAYER, target);
-    }
-
-    /**
-     * @return The entity owning this joints
-     */
-    public PhysicsEntity<?> getEntity() {
-        return entity;
     }
 
     protected boolean isDirty() {

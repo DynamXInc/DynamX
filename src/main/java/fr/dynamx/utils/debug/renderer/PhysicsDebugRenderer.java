@@ -112,7 +112,7 @@ public class PhysicsDebugRenderer {
                         GlStateManager.rotate(GlQuaternionPool.get(physicsRotation));
                     }
                     GlStateManager.color(1, greenColor, blueColor, 1);
-                    DynamXRenderUtils.drawConvexHull(shapeType.getDebugTriangles(), DynamXDebugOptions.RENDER_WIREFRAME.isActive());
+                    DynamXRenderUtils.drawConvexHull(shapeType.getDebugTriangles(physicsRigidBody.getCollisionShape()), DynamXDebugOptions.RENDER_WIREFRAME.isActive());
                     GlStateManager.color(1, 1, 1, 1);
                 }
             }

@@ -12,9 +12,12 @@ import fr.dynamx.client.renders.animations.DxAnimation;
 import fr.dynamx.client.renders.animations.DxAnimator;
 import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.capability.DynamXChunkData;
 import fr.dynamx.common.capability.DynamXChunkDataProvider;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
+import fr.dynamx.common.contentpack.parts.PartBlockSeat;
+import fr.dynamx.common.contentpack.parts.PartStorage;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
 import fr.dynamx.common.contentpack.type.objects.PropObject;
 import fr.dynamx.common.items.DynamXItemRegistry;
@@ -182,7 +185,7 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
             return isDxModel;*/
             if (te instanceof TEDynamXBlock && hand.equals(EnumHand.MAIN_HAND)) {
                 DxAnimator animator = ((TEDynamXBlock) te).getAnimator();
-                if(playerIn.isSneaking()){
+                if (playerIn.isSneaking()) {
                     DxModelRenderer model = DynamXContext.getDxModelRegistry().getModel(blockObjectInfo.getModel());
                     animator.playNextAnimation();
                     //te.getAnimator().addAnimation("Reset");
@@ -195,15 +198,20 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
         }
         if (!worldIn.isRemote) {
             TileEntity te = worldIn.getTileEntity(pos);
-            if (te instanceof TEDynamXBlock && ((TEDynamXBlock) te).getSeatEntities() != null && !((TEDynamXBlock) te).getSeatEntities().isEmpty()) {
+            if (te instanceof TEDynamXBlock) {
                 //If we clicked a part, try to interact with it.
                 InteractivePart hitPart = ((TEDynamXBlock) te).getHitPart(playerIn);
-                if (hitPart != null && hitPart.canInteract(((TEDynamXBlock) te).getSeatEntities().get(0), playerIn)) {
+                if (hitPart instanceof PartStorage) {
+                    playerIn.openGui(DynamXMain.instance, hitPart.getId() + 2, worldIn, pos.getX(), pos.getY(), pos.getZ());
+                    return true;
+                }
+                if (hitPart instanceof PartBlockSeat && hitPart.canInteract(((TEDynamXBlock) te).getSeatEntities().get(0), playerIn)) {
                     // TODO if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.PlayerInteract(context, (BaseVehicleEntity<?>) vehicleEntity, hitPart)))
                     byte idx = hitPart.getId();
                     if (idx >= ((TEDynamXBlock) te).getSeatEntities().size())
                         idx = 0;
                     hitPart.interact(((TEDynamXBlock) te).getSeatEntities().get(idx), playerIn);
+                    return true;
                 }
             }
         }

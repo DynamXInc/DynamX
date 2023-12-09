@@ -24,6 +24,7 @@ import lombok.Setter;
  *
  * @param <T> The owner of this part. Should implement ISubInfoTypeOwner<?>.
  */
+@Getter
 public abstract class BasePart<T extends ISubInfoTypeOwner<?>> extends SubInfoType<T> {
     /**
      * Deprecated properties of BasePart: <br>
@@ -49,30 +50,27 @@ public abstract class BasePart<T extends ISubInfoTypeOwner<?>> extends SubInfoTy
      *
      * @see BasePart#getIdClass()
      */
-    @Getter
     @Setter
     private byte id;
     /**
      * The name of this part, given when creating it in the pack. <br>
      * This is <strong>NOT</strong> the object name used by some part to design the corresponding object in the 3D model.
      */
-    @Getter
     private final String partName;
 
     /**
      * The position of this part, relative to the 3D model.
      */
-    @Getter
     @Setter
     @PackFileProperty(configNames = "Position", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y, description = "common.position")
-    private Vector3f position = new Vector3f();
+    protected Vector3f position = new Vector3f();
     /**
      * The scale (size) of this part, relative to the 3D model.
      */
-    @Getter
-    @Setter
-    @PackFileProperty(configNames = "Scale", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED, required = false, description = "common.scale", defaultValue = "1 1 1")
-    private Vector3f scale = new Vector3f();
+    @PackFileProperty(configNames = "Scale", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED, required = false, description = "common.scale", defaultValue = "0.5 1 0.5")
+    protected Vector3f scale = new Vector3f(0.5f, 1, 0.5f);
+    @PackFileProperty(configNames = "DependsOn", required = false, description = "common.unused")
+    protected String partDependingOnName;
 
     /**
      * Creates a new part

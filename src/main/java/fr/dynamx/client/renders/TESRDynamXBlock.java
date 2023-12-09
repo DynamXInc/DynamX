@@ -10,6 +10,7 @@ import fr.dynamx.client.renders.model.renderer.GltfModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.blocks.TEDynamXBlock;
+import fr.dynamx.common.contentpack.parts.PartStorage;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
@@ -27,6 +28,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
 import java.util.ConcurrentModificationException;
+import java.util.List;
 
 import static fr.dynamx.utils.debug.renderer.VehicleDebugRenderer.PlayerCollisionsDebug.*;
 
@@ -122,7 +124,8 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
     }
 
     public boolean shouldRenderDebug() {
-        return ClientDebugSystem.enableDebugDrawing && (DynamXDebugOptions.PLAYER_TO_OBJECT_COLLISION_DEBUG.isActive() || DynamXDebugOptions.PLAYER_COLLISIONS.isActive());
+        return ClientDebugSystem.enableDebugDrawing && (DynamXDebugOptions.PLAYER_TO_OBJECT_COLLISION_DEBUG.isActive()
+                || DynamXDebugOptions.SEATS_AND_STORAGE.isActive() || DynamXDebugOptions.PLAYER_COLLISIONS.isActive());
     }
 
     public void renderDebug(TEDynamXBlock te, double x, double y, double z) {
@@ -150,6 +153,26 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
                         (partShape.getPosition().y + partShape.getSize().y),
                         (partShape.getPosition().z + partShape.getSize().z),
                         0, 1, 1, 1);
+            }
+            GlStateManager.popMatrix();
+            GlQuaternionPool.closePool();
+            QuaternionPool.closePool();
+        }
+        MutableBoundingBox box = new MutableBoundingBox();
+        if(DynamXDebugOptions.SEATS_AND_STORAGE.isActive()) {
+            QuaternionPool.openPool();
+            GlQuaternionPool.openPool();
+            GlStateManager.pushMatrix();
+            DynamXRenderUtils.glTranslate(te.getRelativeTranslation());
+            GlStateManager.translate(0.5D, 1.5D, 0.5D);
+            GlStateManager.rotate(GlQuaternionPool.get(te.getCollidableRotation()));
+            GlStateManager.translate(0D, -1.5D, 0D);
+            GlStateManager.scale((te.getRelativeScale().x != 0 ? te.getRelativeScale().x : 1), (te.getRelativeScale().y != 0 ? te.getRelativeScale().y : 1), (te.getRelativeScale().z != 0 ? te.getRelativeScale().z : 1));
+            for (PartStorage storage : (List<PartStorage>) te.getPackInfo().getPartsByType(PartStorage.class)) {
+                storage.getBox(box);
+                box.offset(storage.getPosition());
+                RenderGlobal.drawBoundingBox(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ,
+                        1, 0.7f, 0, 1);
             }
             GlStateManager.popMatrix();
             GlQuaternionPool.closePool();

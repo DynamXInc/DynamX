@@ -19,7 +19,7 @@ import net.minecraft.util.ResourceLocation;
 
 @Getter
 @Setter
-@RegisteredSubInfoType(name = "storage", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER, SubInfoTypeRegistries.PROPS}, strictName = false)
+@RegisteredSubInfoType(name = "storage", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER, SubInfoTypeRegistries.BLOCKS, SubInfoTypeRegistries.PROPS}, strictName = false)
 public class PartStorage<T extends ISubInfoTypeOwner<T>> extends InteractivePart<PackPhysicsEntity<?, ?>, T> {
     @PackFileProperty(configNames = "StorageSize")
     protected int storageSize;
@@ -50,11 +50,8 @@ public class PartStorage<T extends ISubInfoTypeOwner<T>> extends InteractivePart
 
     @Override
     public boolean interact(PackPhysicsEntity<?, ?> vehicleEntity, EntityPlayer player) {
-        if (player.isSneaking()) {
-            player.openGui(DynamXMain.instance, 1, player.world, vehicleEntity.getEntityId(), getId(), 0);
-            return true;
-        }
-        return false;
+        player.openGui(DynamXMain.instance, 1, player.world, vehicleEntity.getEntityId(), getId(), 0);
+        return true;
     }
 
     @Override

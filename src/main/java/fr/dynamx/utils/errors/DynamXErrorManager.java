@@ -144,5 +144,6 @@ public class DynamXErrorManager {
         registerErrorFormatter(PACKS_ERRORS, "wheel_invalid_suspaxis", FORMATTER_MULTIPLE_ERROR);
         registerErrorFormatter(PACKS_ERRORS, "too_many_variants", FORMATTER_MULTIPLE_ERROR);
         registerErrorFormatter(PACKS_ERRORS, "missing_depends_on_node", FORMATTER_MULTIPLE_ERROR_ONE_LI);
+        registerErrorFormatter(PACKS_ERRORS, "duplicate_scene", FORMATTER_MULTIPLE_ERROR_ONE_LI);
     }
 }

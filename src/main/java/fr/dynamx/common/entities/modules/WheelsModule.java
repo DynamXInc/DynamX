@@ -287,7 +287,7 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
         //Dust particles when the vehicle friction is very low
         entity.getPackInfo().getPartsByType(PartWheel.class).forEach(partWheel -> {
             PartWheelInfo info = getWheelInfo(partWheel.getId());
-            if (!info.isModelValid() || info.getSkidParticle() == null) {
+            if (info == null || !info.isModelValid() || info.getSkidParticle() == null) {
                 return;
             }
             if (!(skidInfos.get()[partWheel.getId()] < 0.1f)) {

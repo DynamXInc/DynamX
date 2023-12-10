@@ -186,11 +186,6 @@ public class GltfModelData extends DxModelData {
 
     @Override
     public List<String> getMeshNames() {
-        System.out.println(">> GET MESH NAMES " + gltfModel + "+ " + getNodeModels());
-        return getNodeModels().stream().map(n -> {
-            System.out.println(">> GET MESH NAMES " + gltfModel + " " + n);
-            System.out.println("N name " + n.getName());
-            return n.getName().toLowerCase();
-        }).collect(Collectors.toList());
+        return getNodeModels().stream().map(n -> n.getName().toLowerCase()).collect(Collectors.toList());
     }
 }

@@ -97,6 +97,10 @@ public class ObjObjectRenderer {
     }
 
     public void render(ObjModelRenderer model, byte textureVariantID) {
+        if (modelRenderData.isEmpty()) {
+            log.error("Default texture variant not loaded for model " + model.getLocation() + ". Trying to upload the vaos now.");
+            uploadVAO();
+        }
         if (modelRenderData.containsKey(textureVariantID))
             renderVAO(model, modelRenderData.get(textureVariantID));
         else if (modelRenderData.containsKey((byte) 0))
@@ -125,7 +129,7 @@ public class ObjObjectRenderer {
     int i = 0;
 
     private void renderVAO(ObjModelRenderer model, VariantRenderData renderData) {
-        if(renderData.vaoId == -1)
+        if (renderData.vaoId == -1)
             return;
         DynamXRenderUtils.bindVertexArray(renderData.vaoId);
         GlStateManager.glEnableClientState(GL11.GL_VERTEX_ARRAY);
@@ -138,7 +142,7 @@ public class ObjObjectRenderer {
                 continue;
             }
 
-            if(renderData.ebo != -1)
+            if (renderData.ebo != -1)
                 GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, renderData.ebo);
 
             if (material.transparency != 1) {
@@ -159,7 +163,7 @@ public class ObjObjectRenderer {
             }
             objectColor.set(1, 1, 1, 1);
 
-            if(renderData.ebo != -1)
+            if (renderData.ebo != -1)
                 GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, 0);
 
         }

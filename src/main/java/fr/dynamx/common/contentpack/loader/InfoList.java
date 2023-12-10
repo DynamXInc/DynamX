@@ -42,12 +42,12 @@ public abstract class InfoList<T extends ISubInfoTypeOwner<?>> {
      */
     protected final Map<String, T> infos = new HashMap<>();
     /**
-     * SubInfoTypesRegistry for this object
+     * The default SubInfoTypesRegistry for this object (can be overridden by ISubInfoTypeOwners)
      */
     protected final SubInfoTypesRegistry<T> defaultSubInfoTypesRegistry;
 
     /**
-     * @param defaultSubInfoTypesRegistry
+     * @param defaultSubInfoTypesRegistry The default SubInfoTypesRegistry for this object (can be overridden by ISubInfoTypeOwners)
      */
     public InfoList(@Nullable SubInfoTypesRegistry<T> defaultSubInfoTypesRegistry) {
         this.defaultSubInfoTypesRegistry = defaultSubInfoTypesRegistry;

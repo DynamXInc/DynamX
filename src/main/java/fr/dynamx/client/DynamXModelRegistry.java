@@ -9,9 +9,9 @@ import fr.dynamx.api.contentpack.ContentPackType;
 import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.contentpack.object.render.IModelPackObject;
+import fr.dynamx.api.dxmodel.DxModelPath;
 import fr.dynamx.api.dxmodel.EnumDxModelFormats;
 import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
-import fr.dynamx.api.dxmodel.DxModelPath;
 import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.client.renders.model.MissingObjModel;
 import fr.dynamx.client.renders.model.renderer.DxItemModelLoader;
@@ -167,7 +167,7 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
                 }
                 long start = System.currentTimeMillis();
                 modelLoader.invokeAll((List) loadObjTasks);
-                log.info("Took " + (System.currentTimeMillis() - start) + " ms to load " + loadObjTasks.size() + " dx models");
+                log.info("Took " + (System.currentTimeMillis() - start) + " ms to load " + loadObjTasks.size() + " obj models");
 
                 /* == Wait for Mc's texture manager == */
                 long time = System.currentTimeMillis();

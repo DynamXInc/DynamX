@@ -257,10 +257,6 @@ public class MCglTF {
     }
 
     public static GltfModel readModel(DxModelPath path) {
-        if (INSTANCE != null) {
-            INSTANCE.gltfRenderData.forEach(Runnable::run);
-            INSTANCE.gltfRenderData.clear();
-        }
         GltfModel gltfModel = null;
         try {
             Tuple<PackInfo, InputStream> resource = DxModelData.getModelFile(path);
@@ -269,7 +265,7 @@ public class MCglTF {
             gltfModel = new GltfModelReader().readWithoutReferences(new BufferedInputStream(resource.getSecond()), resource.getFirst(), path.getModelPath());
             DynamXMain.log.info("Read gltf model " + path + " in " + (System.currentTimeMillis() - start) + "ms");
         } catch (IOException e) {
-            throw new RuntimeException("Failed to load gtltf model " + path, e);
+            throw new RuntimeException("Failed to load gltf model " + path, e);
         }
         return gltfModel;
     }

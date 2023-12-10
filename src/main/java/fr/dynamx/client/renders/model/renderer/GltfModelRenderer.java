@@ -15,7 +15,6 @@ import fr.dynamx.client.renders.animations.DxAnimation;
 import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.QuaternionPool;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,7 +71,6 @@ public class GltfModelRenderer extends DxModelRenderer implements IGltfModelRece
     }
 
     public void renderVanillaOrShader(int nodeModelIndex, boolean forceVanillaRender) {
-
         if (forceVanillaRender) {
             scene.renderForVanilla(nodeModelIndex);
         } else if (MCglTF.getInstance().isShaderModActive()) {
@@ -118,7 +116,7 @@ public class GltfModelRenderer extends DxModelRenderer implements IGltfModelRece
         float x, y, z, w;
         switch (type) {
             case TRANSLATION:
-                if(nodeModel.getTranslation() == null) break;
+                if (nodeModel.getTranslation() == null) break;
                 x = DynamXMath.interpolateLinear(partialTicks, nodeModel.getTranslation()[0], animation[0]);
                 y = DynamXMath.interpolateLinear(partialTicks, nodeModel.getTranslation()[1], animation[1]);
                 z = DynamXMath.interpolateLinear(partialTicks, nodeModel.getTranslation()[2], animation[2]);
@@ -127,8 +125,7 @@ public class GltfModelRenderer extends DxModelRenderer implements IGltfModelRece
                 nodeModel.getTranslation()[2] = z;
                 break;
             case ROTATION:
-                if(nodeModel.getRotation() == null) break;
-
+                if (nodeModel.getRotation() == null) break;
                 x = animation[0];
                 y = animation[1];
                 z = animation[2];
@@ -143,8 +140,7 @@ public class GltfModelRenderer extends DxModelRenderer implements IGltfModelRece
                 nodeModel.getRotation()[3] = quaternion.getW();
                 break;
             case SCALE:
-                if(nodeModel.getScale() == null) break;
-
+                if (nodeModel.getScale() == null) break;
                 x = DynamXMath.interpolateLinear(partialTicks, nodeModel.getScale()[0], animation[0]);
                 y = DynamXMath.interpolateLinear(partialTicks, nodeModel.getScale()[1], animation[1]);
                 z = DynamXMath.interpolateLinear(partialTicks, nodeModel.getScale()[2], animation[2]);
@@ -153,8 +149,7 @@ public class GltfModelRenderer extends DxModelRenderer implements IGltfModelRece
                 nodeModel.getScale()[2] = z;
                 break;
             case WEIGHTS:
-                if(nodeModel.getWeights() == null) break;
-
+                if (nodeModel.getWeights() == null) break;
                 for (int i = 0; i < nodeModel.getWeights().length; i++) {
                     nodeModel.getWeights()[i] = DynamXMath.interpolateLinear(partialTicks, nodeModel.getWeights()[i], animation[i]);
                 }

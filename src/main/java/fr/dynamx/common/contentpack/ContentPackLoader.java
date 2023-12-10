@@ -22,6 +22,7 @@ import fr.dynamx.common.slopes.GuiSlopesConfig;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXLoadingTasks;
 import fr.dynamx.utils.errors.DynamXErrorManager;
+import lombok.Getter;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.launchwrapper.LaunchClassLoader;
@@ -79,7 +80,12 @@ public class ContentPackLoader {
 
     /**
      * Protected resources of protected packs
+     * -- GETTER --
+     *
+     * @return Protected resources containers for each protected pack
+
      */
+    @Getter
     private static final Map<String, ModProtectionContainer> protectedResources = new HashMap<>();
 
     /**
@@ -171,13 +177,6 @@ public class ContentPackLoader {
             DynamXErrorManager.addError(file.getName(), DynamXErrorManager.INIT_ERRORS, "res_pack_load_fail", ErrorLevel.FATAL, "assets", "Failed to register as resource pack", (Exception) e, 700);
             return false;
         }
-    }
-
-    /**
-     * @return Protected resources containers for each protected pack
-     */
-    public static Map<String, ModProtectionContainer> getProtectedResources() {
-        return protectedResources;
     }
 
     @Nonnull
@@ -312,11 +311,11 @@ public class ContentPackLoader {
         //Search for real pack name in the pack info
         String packVersion = "<missing pack info>";
         PackInfo loadedInfo = packInfo != null ? loadPackInfoFile(loadingPack, suffix, packInfo, contentPack.getName(), packType) : null;
-        if (loadedInfo != null) {
+        if (loadedInfo != null) { // Pack info exists
             loadingPack = loadedInfo.getFixedPackName();
             packVersion = loadedInfo.getPackVersion();
-        } else {
-            loadedInfo = new PackInfo(loadingPack, packType).setPathName(contentPack.getName()).setPackVersion("dummy_info");
+        } else { // Pack info doesn't exist: create a dummy one
+            loadedInfo = new PackInfo(loadingPack, contentPack.getName(), packType).setPackVersion("dummy_info");
             DynamXErrorManager.addError(loadingPack, DynamXErrorManager.PACKS_ERRORS, "missing_pack_info", ErrorLevel.HIGH, loadedInfo.getName(), "Add a pack_info.dynx file in the pack !", null, 600);
             DynamXObjectLoaders.PACKS.loadItems(loadedInfo, isHotReloading);
         }
@@ -328,8 +327,7 @@ public class ContentPackLoader {
 
     private static PackInfo loadPackInfoFile(String loadingPack, String suffix, PackFile file, String pathName, ContentPackType packType) {
         try {
-            String configName = file.getName().substring(0, file.getName().length() - suffix.length()).toLowerCase();
-            return DynamXObjectLoaders.PACKS.load(loadingPack, configName, file, isHotReloading, pathName, packType);
+            return DynamXObjectLoaders.PACKS.load(loadingPack, file, isHotReloading, pathName, packType);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         } catch (Throwable e) {
@@ -424,6 +422,10 @@ public class ContentPackLoader {
         return BLOCKS_GRIP;
     }
 
+    /**
+     * A DynamX file found in a pack
+     */
+    @Getter
     public static class PackFile {
         private final String name;
         private final InputStream inputStream;
@@ -431,14 +433,6 @@ public class ContentPackLoader {
         private PackFile(String name, InputStream inputStream) {
             this.name = name;
             this.inputStream = inputStream;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public InputStream getInputStream() {
-            return inputStream;
         }
 
         @Override

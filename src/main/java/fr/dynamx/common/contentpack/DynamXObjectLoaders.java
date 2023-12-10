@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 public class DynamXObjectLoaders {
     private static final List<InfoList<?>> INFO_LISTS = new ArrayList<>();
 
-    public static PacksInfoLoader PACKS = new PacksInfoLoader("pack_info", (p, n) -> new PackInfo(p, ContentPackType.NOTSET), new SubInfoTypesRegistry<>());
+    public static PacksInfoLoader PACKS = new PacksInfoLoader("pack_info", (p, n) -> new PackInfo(p, n, ContentPackType.NOTSET), new SubInfoTypesRegistry<>());
 
     public static ObjectLoader<ModularVehicleInfo, ItemCar> WHEELED_VEHICLES = new ObjectLoader<>("vehicle_", CarInfo::new, new SubInfoTypesRegistry<>());
     public static ObjectLoader<ModularVehicleInfo, ItemTrailer> TRAILERS = new ObjectLoader<>("trailer_", (packName, fileName) -> new ModularVehicleInfo(packName, fileName, VehicleValidator.TRAILER_VALIDATOR), WHEELED_VEHICLES.getDefaultSubInfoTypesRegistry());

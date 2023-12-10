@@ -53,19 +53,21 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> extends InfoList<T> {
     protected final AssetCreator<T> assetCreator;
 
     /**
-     * @param prefix       The prefix used to detect associated .dnx files
-     * @param assetCreator A function matching an object packName and name with its object class
+     * @param prefix                      The prefix used to detect associated .dnx files
+     * @param assetCreator                A function matching an object packName and name with its object
+     * @param defaultSubInfoTypesRegistry The default SubInfoTypesRegistry for this object (can be overridden by ISubInfoTypeOwners)
      */
-    public InfoLoader(String prefix, BiFunction<String, String, T> assetCreator, @Nullable SubInfoTypesRegistry<T> infoTypesRegistry) {
-        this(prefix, ((pack, name, firstLine) -> assetCreator.apply(pack, name)), infoTypesRegistry);
+    public InfoLoader(String prefix, BiFunction<String, String, T> assetCreator, @Nullable SubInfoTypesRegistry<T> defaultSubInfoTypesRegistry) {
+        this(prefix, ((pack, name, firstLine) -> assetCreator.apply(pack, name)), defaultSubInfoTypesRegistry);
     }
 
     /**
-     * @param prefix       The prefix used to detect associated .dnx files
-     * @param assetCreator A function matching an object packName and name with its object class
+     * @param prefix                      The prefix used to detect associated .dnx files
+     * @param assetCreator                A function matching an object packName and name with its object
+     * @param defaultSubInfoTypesRegistry The default SubInfoTypesRegistry for this object (can be overridden by ISubInfoTypeOwners)
      */
-    public InfoLoader(String prefix, AssetCreator<T> assetCreator, @Nullable SubInfoTypesRegistry<T> infoTypesRegistry) {
-        super(infoTypesRegistry);
+    public InfoLoader(String prefix, AssetCreator<T> assetCreator, @Nullable SubInfoTypesRegistry<T> defaultSubInfoTypesRegistry) {
+        super(defaultSubInfoTypesRegistry);
         this.prefix = prefix;
         this.assetCreator = assetCreator;
     }
@@ -81,7 +83,7 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> extends InfoList<T> {
      * @param loadingPack The pack owning the object
      * @param configName  The object's name
      * @param file        The object file
-     * @param hot         If it's an hot reload
+     * @param hot         If it's a hot reload
      * @return True if this InfoLoader has loaded this object
      * @throws IOException If an error occurs while reading the stream
      */

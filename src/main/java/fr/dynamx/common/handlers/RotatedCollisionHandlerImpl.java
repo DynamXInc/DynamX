@@ -400,7 +400,8 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
                     Vector3fPool.openPool();
                     QuaternionPool.openPool();
                     float castx = (float) nx, casty = (float) ny, castz = (float) nz;
-                    Vector3f n = collideWith(entity, e, e.physicsPosition, castx, casty, castz);
+                    Vector3f withPos = Vector3fPool.get((float) e.posX, (float) e.posY, (float) e.posZ);
+                    Vector3f n = collideWith(entity, e, withPos, castx, casty, castz);
                     if (castx != n.x) {
                         nx = n.x;
                         motionChanged = true;

@@ -241,13 +241,9 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
             return false;
         //Validate vehicle type
         validator.validate(this);
-
         if (FMLCommonHandler.instance().getSide().isClient()) {
-            //TODO MOVE
-            System.out.println("Gen scene graph: " + getFullName());
             getSceneGraph();
         }
-
         return true;
     }
 

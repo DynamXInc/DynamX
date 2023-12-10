@@ -141,8 +141,6 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
             addDrawablePart(s);
         }
         if (FMLCommonHandler.instance().getSide().isClient()) {
-            //TODO MOVE
-            System.out.println("Gen scene graph: " + getFullName());
             getSceneGraph();
         }
         return true;

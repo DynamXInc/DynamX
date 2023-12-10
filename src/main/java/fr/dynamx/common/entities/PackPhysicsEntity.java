@@ -166,18 +166,19 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
     public List<MutableBoundingBox> getCollisionBoxes() {
         if (getPackInfo() == null || physicsPosition == null)
             return new ArrayList<>(0);
+        Vector3f pos = Vector3fPool.get(posX, posY, posZ);
         if (rawBoxes.size() != getPackInfo().getCollisionsHelper().getShapes().size()) {
             rawBoxes.clear();
             for (IShapeInfo shape : getPackInfo().getCollisionsHelper().getShapes()) {
                 MutableBoundingBox boundingBox = new MutableBoundingBox(shape.getBoundingBox());
-                boundingBox.offset(physicsPosition);
+                boundingBox.offset(pos);
                 rawBoxes.add(boundingBox);
             }
         } else {
             for (int i = 0; i < getPackInfo().getCollisionsHelper().getShapes().size(); i++) {
                 MutableBoundingBox boundingBox = rawBoxes.get(i);
                 boundingBox.setTo(getPackInfo().getCollisionsHelper().getShapes().get(i).getBoundingBox());
-                boundingBox.offset(physicsPosition);
+                boundingBox.offset(pos);
             }
         }
         return rawBoxes;

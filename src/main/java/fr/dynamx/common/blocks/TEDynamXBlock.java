@@ -108,12 +108,12 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
             seatEntities = null;
         }
         List<PartStorage> storages = packInfo.getPartsByType(PartStorage.class);
-        if(storages.isEmpty())
+        if (storages.isEmpty())
             return;
-        if(storageModule != null && storages.size() == storageModule.getInventories().size())
+        if (storageModule != null && storages.size() == storageModule.getInventories().size())
             return;
         for (PartStorage storage : storages) {
-            if(storageModule == null)
+            if (storageModule == null)
                 storageModule = new StorageModule(this, pos, storage);
             else
                 storageModule.addInventory(this, pos, storage);
@@ -145,10 +145,18 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
     @Override
     public void readFromNBT(NBTTagCompound compound) {
         super.readFromNBT(compound);
-        if (compound.hasKey("BlockInfo")) {
-            setPackInfo(DynamXObjectLoaders.BLOCKS.findInfo(compound.getString("BlockInfo")));
-            this.hasSeats = packInfo != null && !packInfo.getPartsByType(PartBlockSeat.class).isEmpty();
+        if (!compound.hasKey("BlockInfo")) {
+            DynamXMain.log.error("TEDynamXBlock at " + pos + " has no BlockInfo tag. Ignoring it.");
+            return;
         }
+        String info = compound.getString("BlockInfo");
+        BlockObject<?> packInfo = DynamXObjectLoaders.BLOCKS.findInfo(info);
+        if (packInfo == null) {
+            DynamXMain.log.error("Block object info is null for te " + this + " at " + pos + " : " + info + " not found. Ignoring it.");
+            return;
+        }
+        setPackInfo(DynamXObjectLoaders.BLOCKS.findInfo(compound.getString("BlockInfo")));
+        this.hasSeats = packInfo != null && !packInfo.getPartsByType(PartBlockSeat.class).isEmpty();
         if (lightsModule != null)
             lightsModule.readFromNBT(compound);
         if (storageModule != null)
@@ -350,6 +358,11 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
                 world.spawnEntity(entity);
                 seatEntities.add(entity);
             }
+        }
+        if(packInfo == null && !world.isRemote)
+        {
+            DynamXMain.log.error("Block info is null for te " + this + " at " + pos + ". Removing it.");
+            world.setBlockToAir(pos);
         }
     }
 

@@ -289,11 +289,6 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     }
 
     @Override
-    public boolean isLinkedToEntity() {
-        return false;
-    }
-
-    @Override
     public String getNodeName() {
         return getPartName();
     }
@@ -312,7 +307,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
         public void render(@Nullable T entity, EntityRenderContext context, A packInfo) {
             GlStateManager.pushMatrix();
             DoorsModule module = entity != null ? entity.getModuleByType(DoorsModule.class) : null;
-            if (!isEnabled() || module == null) {
+            if (!isEnabled() || module == null || module.getCurrentState(getId()) == DoorsModule.DoorState.CLOSED) {
                 Vector3f pos = Vector3fPool.get().addLocal(getCarAttachPoint());
                 pos.subtract(getDoorAttachPoint(), pos);
                 GlStateManager.translate(pos.x, pos.y, pos.z);
@@ -322,7 +317,11 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
                 RigidBodyTransform transform = sync.getTransform();
                 RigidBodyTransform prev = sync.getPrevTransform();
                 Vector3f pos = Vector3fPool.get(prev.getPosition()).addLocal(transform.getPosition().subtract(prev.getPosition(), Vector3fPool.get()).multLocal(partialTicks));
-                GlStateManager.translate(pos.x, pos.y, pos.z);
+                GlStateManager.rotate(ClientDynamXUtils.computeInterpolatedGlQuaternion(entity.prevRenderRotation, entity.renderRotation, context.getPartialTicks(), true));
+                GlStateManager.translate(
+                        pos.x -(entity.prevPosX + (entity.posX - entity.prevPosX) * context.getPartialTicks()),
+                        pos.y -(entity.prevPosY + (entity.posY - entity.prevPosY) * context.getPartialTicks()),
+                        pos.z -(entity.prevPosZ + (entity.posZ - entity.prevPosZ) * context.getPartialTicks()));
                 GlStateManager.rotate(ClientDynamXUtils.computeInterpolatedGlQuaternion(prev.getRotation(), transform.getRotation(), partialTicks));
             }
             GlStateManager.scale(scale.x, scale.y, scale.z);

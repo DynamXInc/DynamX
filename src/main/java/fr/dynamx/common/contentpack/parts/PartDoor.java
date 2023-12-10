@@ -67,7 +67,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
         return null;
     };
     @Getter
-    @PackFileProperty(configNames = "ObjectName", required = false, description = "PartDoor.object_name", defaultValue = "Suffix after 'Door_' in part name")
+    @PackFileProperty(configNames = "ObjectName", required = false, defaultValue = "Suffix after 'Door_' in part name")
     protected String objectName;
 
     @PackFileProperty(configNames = "LocalCarAttachPoint", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y)

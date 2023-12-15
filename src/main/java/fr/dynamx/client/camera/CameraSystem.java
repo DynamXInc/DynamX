@@ -6,7 +6,6 @@ import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.common.contentpack.parts.BasePartSeat;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
-import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
@@ -87,7 +86,7 @@ public class CameraSystem {
         //Rotate the camera
         GlStateManager.rotate(event.getRoll(), 0.0F, 0.0F, 1.0F);
         GlStateManager.rotate(event.getPitch(), 1.0F, 0.0F, 0.0F);
-        if (vehicle instanceof IModuleContainer.ISeatsContainer) {
+        if (vehicle instanceof IModuleContainer.ISeatsContainer && ((IModuleContainer.ISeatsContainer) vehicle).hasSeats()) {
             BasePartSeat seat = ((IModuleContainer.ISeatsContainer) vehicle).getSeats().getRidingSeat(renderEntity);
             if(seat == null) {
                 return;

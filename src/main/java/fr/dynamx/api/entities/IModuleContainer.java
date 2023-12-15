@@ -23,6 +23,10 @@ public interface IModuleContainer {
         @Nullable
         SeatsModule getSeats();
 
+        /**
+         * Can be false if the seats aren't yet loaded
+         * @return true if the vehicle has seats and they are loaded
+         */
         default boolean hasSeats() {
             return getSeats() != null;
         }

@@ -280,6 +280,7 @@ public class WrenchMode {
             if (isSneaking) {
                 NBTTagCompound tag = new NBTTagCompound();
                 context.sendMessage(new TextComponentString("Respawning !"));
+                physicsEntity.removePassengers();
                 physicsEntity.writeToNBT(tag);
                 tag.setTag("Pos", DynamXUtils.newDoubleNBTList(physicsEntity.posX, physicsEntity.posY + 3, physicsEntity.posZ));
                 tag.setTag("Rotation", DynamXUtils.newFloatNBTList(physicsEntity.rotationYaw, 0));

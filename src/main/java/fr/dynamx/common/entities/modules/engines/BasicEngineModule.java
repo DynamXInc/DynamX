@@ -48,7 +48,9 @@ public abstract class BasicEngineModule implements IPhysicsModule<BaseVehiclePhy
 
     //Default value is 32 for the handbrake on spawn
     @SynchronizedEntityVariable(name = "controls")
-    private final EntityVariable<Integer> controls = new EntityVariable<>(SynchronizationRules.CONTROLS_TO_SPECTATORS, 32);
+    private final EntityVariable<Integer> controls = new EntityVariable<>((var, value) -> {
+        setControls(value); //This will call the change listeners like onEngineSwitchedOn
+    }, SynchronizationRules.CONTROLS_TO_SPECTATORS, 32);
 
     /**
      * @see VehicleEntityProperties.EnumEngineProperties

@@ -81,7 +81,7 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
                 PhysicsCollisionEvent event = new PhysicsCollisionEvent(pcoA, pcoB, contactPointId);
                 float impulse = event.getAppliedImpulse();
                 MinecraftForge.EVENT_BUS.post(new PhysicsEvent.PhysicsCollision.Pre(physicsWorld, event));
-                CollisionsHandler.handleCollision(physicsWorld, event, (BulletShapeType<?>) pcoA.getUserObject(), (BulletShapeType<?>) pcoB.getUserObject(), impulse);
+                CollisionsHandler.handleCollision(physicsWorld, event, (BulletShapeType<?>) pcoA.getUserObject(), (BulletShapeType<?>) pcoB.getUserObject());
             }
 
             @Override

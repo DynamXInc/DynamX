@@ -78,7 +78,10 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
             @Override
             public void onContactProcessed(PhysicsCollisionObject pcoA, PhysicsCollisionObject pcoB, long contactPointId) {
                 // memory leak fix : don't call super method : bullets stores all collision events in a queue
-                CollisionsHandler.handleCollision(physicsWorld, new PhysicsCollisionEvent(pcoA, pcoB, contactPointId), (BulletShapeType<?>) pcoA.getUserObject(), (BulletShapeType<?>) pcoB.getUserObject());
+                PhysicsCollisionEvent event = new PhysicsCollisionEvent(pcoA, pcoB, contactPointId);
+                float impulse = event.getAppliedImpulse();
+                MinecraftForge.EVENT_BUS.post(new PhysicsEvent.PhysicsCollision.Pre(physicsWorld, event));
+                CollisionsHandler.handleCollision(physicsWorld, event, (BulletShapeType<?>) pcoA.getUserObject(), (BulletShapeType<?>) pcoB.getUserObject(), impulse);
             }
 
             @Override

@@ -29,8 +29,8 @@ public class CollisionsHandler {
     /**
      * Handles collision between two bodies <br>
      */
-    public static void handleCollision(IPhysicsWorld physicsWorld, PhysicsCollisionEvent collisionEvent, BulletShapeType<?> bodyA, BulletShapeType<?> bodyB) {
-        if (bodyA.getType().isEntity() && bodyB.getType().isEntity() || bodyA.getType().isEntity() && bodyB.getType().isTerrain() || bodyA.getType().isTerrain() && bodyB.getType().isEntity()) {
+    public static void handleCollision(IPhysicsWorld physicsWorld, PhysicsCollisionEvent collisionEvent, BulletShapeType<?> bodyA, BulletShapeType<?> bodyB, float impulse) {
+        if ((bodyA.getType().isEntity() && bodyB.getType().isEntity()) || (bodyA.getType().isEntity() && bodyB.getType().isTerrain()) || (bodyA.getType().isTerrain() && bodyB.getType().isEntity())) {
             CollisionInfo info = new CollisionInfo(physicsWorld, bodyA, bodyB, EXPIRATION_TIME, collisionEvent);
             if (CACHED_COLLISIONS.add(info)) {
                 info.handleCollision();

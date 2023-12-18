@@ -16,6 +16,7 @@ import fr.dynamx.common.contentpack.parts.BasePartSeat;
 import fr.dynamx.common.entities.modules.MovableModule;
 import fr.dynamx.common.physics.entities.PackEntityPhysicsHandler;
 import fr.dynamx.common.physics.joints.EntityJointsHandler;
+import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
@@ -151,6 +152,7 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
 
     @Override
     public boolean isInRangeToRenderDist(double range) {
+        if(!DynamXConfig.usePackRenderDistances) return super.isInRangeToRenderDist(range);
         return getPackInfo() != null && getPackInfo().getRenderDistance() >= range;
     }
 

@@ -39,6 +39,8 @@ public class DynamXConfig
 
     public static boolean disableSSLCertification;
 
+    public static boolean usePackRenderDistances;
+
     @Getter
     private static float masterSoundVolume = 0.8f;
     @Getter
@@ -91,6 +93,7 @@ public class DynamXConfig
 
         masterSoundVolume = (float) cfg.get("Sounds", "Volume", 0.8f, "The volume of DynamX sounds (engines...)").getDouble();
         maxSounds = cfg.get("Sounds", "MaxSounds", 8, "The maximum amount of sounds DynamX can play at the same time").getInt();
+        usePackRenderDistances = cfg.get("Multiplayer", "UsePackRenderDistances", true, "Use Pack Render Distances from the vehicle/prop config").getBoolean();
         cfg.save();
     }
 

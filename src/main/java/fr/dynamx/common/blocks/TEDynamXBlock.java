@@ -191,7 +191,7 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
     @Override
     @SideOnly(Side.CLIENT)
     public double getMaxRenderDistanceSquared() {
-        return packInfo == null ? super.getMaxRenderDistanceSquared() : packInfo.getRenderDistance();
+        return packInfo == null || packInfo.getRenderDistance() == -1 ? super.getMaxRenderDistanceSquared() : packInfo.getRenderDistance();
     }
 
     @Override

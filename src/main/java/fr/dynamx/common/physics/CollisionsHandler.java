@@ -30,6 +30,7 @@ public class CollisionsHandler {
      * Handles collision between two bodies <br>
      */
     public static void handleCollision(IPhysicsWorld physicsWorld, PhysicsCollisionEvent collisionEvent, BulletShapeType<?> bodyA, BulletShapeType<?> bodyB) {
+        MinecraftForge.EVENT_BUS.post(new PhysicsEvent.PhysicsCollision.Pre(physicsWorld, bodyA, bodyB, new CollisionInfo(physicsWorld, bodyA, bodyB, EXPIRATION_TIME, collisionEvent)));
         if ((bodyA.getType().isEntity() && bodyB.getType().isEntity()) || (bodyA.getType().isEntity() && bodyB.getType().isTerrain()) || (bodyA.getType().isTerrain() && bodyB.getType().isEntity())) {
             CollisionInfo info = new CollisionInfo(physicsWorld, bodyA, bodyB, EXPIRATION_TIME, collisionEvent);
             if (CACHED_COLLISIONS.add(info)) {

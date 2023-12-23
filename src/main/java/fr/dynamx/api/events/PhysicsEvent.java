@@ -102,18 +102,15 @@ public class PhysicsEvent extends Event {
         }
 
 
-        public static class Pre extends PhysicsEvent {
-
-            @Getter
-            private final PhysicsCollisionEvent physicsEvent;
+        public static class Pre extends PhysicsCollision {
 
             /**
              * @param world   The physics world owning this chunk
-             * @param event Physics Collision Event provided from jme bullet lib
+             * @param object1 First collision object colliding with the second
+             * @param object2 Second collision object colliding with the first
              */
-            public Pre(IPhysicsWorld world, PhysicsCollisionEvent event) {
-                super(world);
-                this.physicsEvent = event;
+            public Pre(IPhysicsWorld world, BulletShapeType<?> object1, BulletShapeType<?> object2, CollisionsHandler.CollisionInfo collisionInfo) {
+                super(world, object1, object2, collisionInfo);
             }
         }
 

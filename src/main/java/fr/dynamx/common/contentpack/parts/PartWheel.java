@@ -222,12 +222,10 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
                 }
             }
             /* Render mudguard */
-            if (isMudGuard) {
+            if (isMudGuard)
                 context.getModel().renderGroups(getMudGuardObjectName(), context.getTextureId(), context.isUseVanillaRender());
-                renderChildren(entity, context, packInfo);
-                return;
-            }
-            renderWheel(entity, context, packInfo, info, hasWheelsModule, wheelsModule);
+            else
+                renderWheel(entity, context, packInfo, info, hasWheelsModule, wheelsModule);
             renderChildren(entity, context, packInfo);
             GlStateManager.popMatrix();
         }

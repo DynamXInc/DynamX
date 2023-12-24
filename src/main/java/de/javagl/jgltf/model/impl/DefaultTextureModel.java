@@ -147,4 +147,17 @@ public class DefaultTextureModel extends AbstractNamedModelElement
     {
         return imageModel;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof DefaultTextureModel)) {
+            return false;
+        }
+        return getImageModel().getUri().equals(((DefaultTextureModel) obj).getImageModel().getUri());
+    }
+
+    @Override
+    public int hashCode() {
+        return getImageModel().getUri().hashCode();
+    }
 }

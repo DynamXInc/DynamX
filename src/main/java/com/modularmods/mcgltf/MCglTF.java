@@ -98,7 +98,7 @@ public class MCglTF {
                             try (InputStream resource = packInfo.readFile(location)) {
                                 bufferData = Buffers.create(IOUtils.toByteArray(new BufferedInputStream(resource)));
                             } catch (IOException e) {
-                                e.printStackTrace();
+                                throw new RuntimeException("Failed to load gltf resource " + location, e);
                             }
                         }
                         return bufferData;
@@ -271,6 +271,8 @@ public class MCglTF {
     }
 
     public void reloadModels() {
+        // Free all resources
+        gltfRenderData.forEach(Runnable::run);
         ContextCapabilities capabilities = GLContext.getCapabilities();
         lookup.forEach((modelLocation, receivers) -> {
             Iterator<IGltfModelReceiver> iterator = receivers.getRight().iterator();

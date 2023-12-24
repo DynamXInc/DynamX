@@ -77,11 +77,7 @@ public class GltfModelCreatorV2
         GltfModelCreatorV2 creator = 
             new GltfModelCreatorV2(gltfAsset, gltfModel);
         creator.location = location;
-        try {
-            creator.create(info);
-        }catch (Exception e) {
-            e.printStackTrace();
-        }
+        creator.create(info);
         return gltfModel;
     }
     

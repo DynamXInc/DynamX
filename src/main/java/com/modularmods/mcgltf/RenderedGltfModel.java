@@ -1,48 +1,21 @@
 package com.modularmods.mcgltf;
 
-import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
-import java.util.*;
-
+import com.google.gson.Gson;
+import com.jme3.util.mikktspace.MikkTSpaceContext;
+import com.jme3.util.mikktspace.MikktspaceTangentGenerator;
+import de.javagl.jgltf.model.*;
+import de.javagl.jgltf.model.image.PixelData;
+import de.javagl.jgltf.model.image.PixelDatas;
+import de.javagl.jgltf.model.impl.DefaultNodeModel;
 import de.javagl.jgltf.model.v2.MaterialModelV2;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
-import org.lwjgl.opengl.GL13;
-import org.lwjgl.opengl.GL15;
-import org.lwjgl.opengl.GL20;
-import org.lwjgl.opengl.GL30;
-import org.lwjgl.opengl.GL40;
-import org.lwjgl.opengl.GL43;
+import org.lwjgl.opengl.*;
 
-import com.google.gson.Gson;
-import com.jme3.util.mikktspace.MikkTSpaceContext;
-import com.jme3.util.mikktspace.MikktspaceTangentGenerator;
-
-import de.javagl.jgltf.model.AccessorByteData;
-import de.javagl.jgltf.model.AccessorData;
-import de.javagl.jgltf.model.AccessorDatas;
-import de.javagl.jgltf.model.AccessorFloatData;
-import de.javagl.jgltf.model.AccessorIntData;
-import de.javagl.jgltf.model.AccessorModel;
-import de.javagl.jgltf.model.AccessorShortData;
-import de.javagl.jgltf.model.BufferViewModel;
-import de.javagl.jgltf.model.ElementType;
-import de.javagl.jgltf.model.GltfModel;
-import de.javagl.jgltf.model.MaterialModel;
-import de.javagl.jgltf.model.MathUtils;
-import de.javagl.jgltf.model.MeshModel;
-import de.javagl.jgltf.model.MeshPrimitiveModel;
-import de.javagl.jgltf.model.NodeModel;
-import de.javagl.jgltf.model.Optionals;
-import de.javagl.jgltf.model.SceneModel;
-import de.javagl.jgltf.model.SkinModel;
-import de.javagl.jgltf.model.TextureModel;
-import de.javagl.jgltf.model.image.PixelData;
-import de.javagl.jgltf.model.image.PixelDatas;
-import de.javagl.jgltf.model.impl.DefaultNodeModel;
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
+import java.util.*;
 
 public class RenderedGltfModel {
 
@@ -112,7 +85,7 @@ public class RenderedGltfModel {
 	protected final Map<MeshPrimitiveModel, AccessorModel> meshPrimitiveModelToTangentsAccessorModel = new IdentityHashMap<MeshPrimitiveModel, AccessorModel>();
 	protected final Map<MeshPrimitiveModel, Pair<Map<String, AccessorModel>, List<Map<String, AccessorModel>>>> meshPrimitiveModelToUnindexed = new IdentityHashMap<MeshPrimitiveModel, Pair<Map<String, AccessorModel>, List<Map<String, AccessorModel>>>>();
 	protected final Map<BufferViewModel, Integer> bufferViewModelToGlBufferView = new IdentityHashMap<BufferViewModel, Integer>();
-	protected final Map<TextureModel, Integer> textureModelToGlTexture = new IdentityHashMap<TextureModel, Integer>();
+	protected static final Map<TextureModel, Integer> textureModelToGlTexture = new IdentityHashMap<TextureModel, Integer>();
 	protected final Map<String, Material> extrasToMaterial = new IdentityHashMap<>();
 	
 	public final GltfModel gltfModel;
@@ -3177,7 +3150,10 @@ public class RenderedGltfModel {
 			}
 			
 			Integer glTextureNew = GL11.glGenTextures();
-			gltfRenderData.add(() -> GL11.glDeleteTextures(glTextureNew));
+			gltfRenderData.add(() -> {
+				GL11.glDeleteTextures(glTextureNew);
+				textureModelToGlTexture.remove(textureModel);
+			});
 			GL11.glBindTexture(GL11.GL_TEXTURE_2D, glTextureNew);
 			GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA, pixelData.getWidth(), pixelData.getHeight(), 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, pixelData.getPixelsRGBA());
 			

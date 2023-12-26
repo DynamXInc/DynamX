@@ -55,6 +55,9 @@ public class PartRotor extends BasePart<ModularVehicleInfo> implements IDrawable
 
     @Override
     public void appendTo(ModularVehicleInfo owner) {
+        Quaternion rot = readPositionFromModel(owner.getModel(), getObjectName(), true, rotation == null);
+        if(rot != null)
+            rotation = rot;
         super.appendTo(owner);
     }
 
@@ -97,7 +100,7 @@ public class PartRotor extends BasePart<ModularVehicleInfo> implements IDrawable
 
     class PartRotorNode<T extends BaseVehicleEntity<?>, A extends ModularVehicleInfo> extends SceneGraph.Node<T, A> {
         public PartRotorNode(PartRotor part, Vector3f scale, List<SceneGraph<T, A>> linkedChilds) {
-            super(part.getPosition(), GlQuaternionPool.newGlQuaternion(part.getRotation()), scale, linkedChilds);
+            super(part.getPosition(), GlQuaternionPool.newGlQuaternion(part.getRotation()), PartRotor.this.isAutomaticPosition, scale, linkedChilds);
         }
 
         @Override
@@ -106,7 +109,7 @@ public class PartRotor extends BasePart<ModularVehicleInfo> implements IDrawable
             if (!vehicleModel.containsObjectOrNode(getObjectName()))
                 return;
             GlStateManager.pushMatrix();
-            transform();
+            transformToRotationPoint();
             // Rotating the rotor.
             if (null == RotorType.ALWAYS_ROTATING) {
                 //TODO

@@ -7,7 +7,10 @@ import fr.dynamx.common.entities.ModularPhysicsEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.utils.client.ClientDynamXUtils;
+import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
+import fr.dynamx.utils.optimization.GlQuaternionPool;
+import fr.dynamx.utils.optimization.QuaternionPool;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.client.renderer.GlStateManager;
@@ -75,6 +78,7 @@ public interface SceneGraph<T extends PhysicsEntity<?>, A extends IPhysicsPackIn
         @Override
         public void render(@Nullable T entity, EntityRenderContext context, A packInfo) {
             GlStateManager.pushMatrix();
+            QuaternionPool.openPool();
             if (entity != null) {
                 GlStateManager.translate(context.getX(), context.getY(), context.getZ());
                 GlStateManager.rotate(ClientDynamXUtils.computeInterpolatedGlQuaternion(entity.prevRenderRotation, entity.renderRotation, context.getPartialTicks()));
@@ -100,6 +104,8 @@ public interface SceneGraph<T extends PhysicsEntity<?>, A extends IPhysicsPackIn
                 unlinkedChildren.forEach(c -> c.render(entity, context, packInfo));
                 GlStateManager.popMatrix();
             }
+            QuaternionPool.closePool();
+            DynamXRenderUtils.popGlAllAttribBits();
         }
 
         @Override
@@ -134,7 +140,6 @@ public interface SceneGraph<T extends PhysicsEntity<?>, A extends IPhysicsPackIn
      * @param <T> The type of the entity that is rendered
      * @param <A> The type of the pack info (the owner of the scene graph)
      */
-    @RequiredArgsConstructor
     abstract class Node<T extends ModularPhysicsEntity<?>, A extends IPhysicsPackInfo> implements SceneGraph<T, A> {
         /**
          * The translation of the node, relative to the previous node
@@ -146,6 +151,11 @@ public interface SceneGraph<T extends PhysicsEntity<?>, A extends IPhysicsPackIn
          */
         @Nullable
         protected final Quaternion rotation;
+        /**
+         * Indicates if the position was read from the 3D model (true), or set by the user (false). <br>
+         * Changes the behavior of the rendering in order to render the node at the right position with the right transformations.
+         */
+        protected final boolean isAutomaticPosition;
         /**
          * The scale of the node, absolute
          */
@@ -159,14 +169,59 @@ public interface SceneGraph<T extends PhysicsEntity<?>, A extends IPhysicsPackIn
         protected final List<SceneGraph<T, A>> linkedChildren;
 
         /**
-         * Applies the transformations of this node
+         * Creates a new node with the given manual transformations
+         *
+         * @param translation    The translation of the node, relative to the previous node, can be null
+         * @param rotation       The rotation of the node, relative to the previous node, can be null
+         * @param scale          The scale of the node, absolute, can't be null
+         * @param linkedChildren The children of this node, can be null
          */
-        protected void transform() {
+        public Node(@Nullable Vector3f translation, @Nullable Quaternion rotation, @Nonnull Vector3f scale, @Nullable List<SceneGraph<T, A>> linkedChildren) {
+            this(translation, rotation, false, scale, linkedChildren);
+        }
+
+        /**
+         * Creates a new node with the given transformations. You can tell if the position is automatic (read from the 3D model) or not.
+         *
+         * @param translation         The translation of the node, relative to the previous node, can be null
+         * @param rotation            The rotation of the node, relative to the previous node, can be null
+         * @param isAutomaticPosition Indicates if the position was read from the 3D model (true), or set by the user (false). <br>
+         *                            Changes the behavior of the rendering in order to render the node at the right position with the right transformations.
+         * @param scale               The scale of the node, absolute, can't be null
+         * @param linkedChildren      The children of this node, can be null
+         */
+        public Node(@Nullable Vector3f translation, @Nullable Quaternion rotation, boolean isAutomaticPosition, @Nonnull Vector3f scale, @Nullable List<SceneGraph<T, A>> linkedChildren) {
+            this.translation = translation;
+            this.rotation = rotation;
+            this.isAutomaticPosition = isAutomaticPosition;
+            this.scale = scale;
+            this.linkedChildren = linkedChildren;
+        }
+
+        /**
+         * Applies the rotation point transformations of this node <br>
+         * This should be called before applying "dynamic" transformations to the node (like the rotation of a wheel), and before transformToPartPos()
+         */
+        protected void transformToRotationPoint() {
             if (translation != null)
                 GlStateManager.translate(translation.x, translation.y, translation.z);
             if (rotation != null)
                 GlStateManager.rotate(rotation);
             GlStateManager.scale(scale.x, scale.y, scale.z);
+        }
+
+        /**
+         * Applies the rendering transformations of this node <br>
+         * If the position is automatic, this should be called after applying the "dynamic" transformations, and before rendering the node <br>
+         * If the position isn't automatic, this doesn't need to be called.
+         */
+        protected void transformToPartPos() {
+            if (isAutomaticPosition) {
+                if (rotation != null)
+                    GlStateManager.rotate(ClientDynamXUtils.inverseGlQuaternion(rotation, GlQuaternionPool.get()));
+                if (translation != null)
+                    GlStateManager.translate(-translation.x, -translation.y, -translation.z);
+            }
         }
 
         /**

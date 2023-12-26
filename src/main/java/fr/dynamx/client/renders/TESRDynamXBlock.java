@@ -19,13 +19,11 @@ import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraftforge.common.MinecraftForge;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
 
 import java.util.ConcurrentModificationException;
 import java.util.List;
@@ -35,14 +33,7 @@ import static fr.dynamx.utils.debug.renderer.VehicleDebugRenderer.PlayerCollisio
 public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialRenderer<T> {
     @Override
     public void render(T te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
-
         GL11.glPushMatrix();
-        GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
-        GL11.glShadeModel(GL11.GL_SMOOTH);
-        GL11.glEnable(GL12.GL_RESCALE_NORMAL);
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-
         if (te.getPackInfo() != null && te.getBlockType() instanceof DynamXBlock) { //the instanceof fixes a crash
             Vector3fPool.openPool();
             QuaternionPool.openPool();
@@ -62,7 +53,7 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
                 //Rendering the model
                 //DynamXContext.getDxModelRegistry().getModel(te.getPackInfo().getModel()).renderModel((byte) te.getBlockMetadata(), false);
                 DxModelRenderer model = DynamXContext.getDxModelRegistry().getModel(te.getPackInfo().getModel());
-                if(model instanceof GltfModelRenderer){
+                if (model instanceof GltfModelRenderer) {
                     te.getAnimator().update((GltfModelRenderer) model, partialTicks);
 
                     te.getAnimator().setModelAnimations(((GltfModelRenderer) model).animations);
@@ -89,8 +80,7 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
             QuaternionPool.closePool();
             Vector3fPool.closePool();
         }
-
-        GL11.glPopAttrib();
+        DynamXRenderUtils.popGlAllAttribBits();
         GL11.glPopMatrix();
     }
 
@@ -113,8 +103,7 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
                     (te.getRelativeScale().z != 0 ? te.getRelativeScale().z : 1));
             DynamXRenderUtils.glTranslate(te.getPackInfo().getTranslation());
             GlStateManager.translate(0.5D, 1.5D, 0.5D);
-        }
-        else
+        } else
             DynamXRenderUtils.glTranslate(te.getPackInfo().getTranslation());
         // Scale of the block object info scale modifier
         GlStateManager.scale(
@@ -159,7 +148,7 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
             QuaternionPool.closePool();
         }
         MutableBoundingBox box = new MutableBoundingBox();
-        if(DynamXDebugOptions.SEATS_AND_STORAGE.isActive()) {
+        if (DynamXDebugOptions.SEATS_AND_STORAGE.isActive()) {
             QuaternionPool.openPool();
             GlQuaternionPool.openPool();
             GlStateManager.pushMatrix();

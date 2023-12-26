@@ -41,6 +41,12 @@ public class PartHandle extends BasePart<ModularVehicleInfo> implements IDrawabl
     }
 
     @Override
+    public void appendTo(ModularVehicleInfo owner) {
+        readPositionFromModel(owner.getModel(), getObjectName(), false, false);
+        super.appendTo(owner);
+    }
+
+    @Override
     public DynamXDebugOption getDebugOption() {
         return DynamXDebugOptions.HANDLES;
     }
@@ -62,7 +68,7 @@ public class PartHandle extends BasePart<ModularVehicleInfo> implements IDrawabl
 
     class PartHandleNode<T extends BaseVehicleEntity<?>, A extends ModularVehicleInfo> extends SceneGraph.Node<T, A> {
         public PartHandleNode(PartHandle part, Vector3f scale, List<SceneGraph<T, A>> linkedChilds) {
-            super(part.getPosition(), null, scale, linkedChilds);
+            super(part.getPosition(), null, PartHandle.this.isAutomaticPosition, scale, linkedChilds);
         }
 
         @Override
@@ -70,7 +76,7 @@ public class PartHandle extends BasePart<ModularVehicleInfo> implements IDrawabl
             if (!context.getModel().containsObjectOrNode(getObjectName()))
                 return;
             GlStateManager.pushMatrix();
-            transform();
+            transformToRotationPoint();
             if (entity != null && entity.hasModuleOfType(HelicopterEngineModule.class)) {
                 HelicopterEngineModule engine = entity.getModuleByType(HelicopterEngineModule.class);
                 // Rotating the handle with Dx and Dy

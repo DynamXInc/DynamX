@@ -1,22 +1,8 @@
 package fr.dynamx.common.core.mixin;
 
-import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
-import fr.dynamx.common.DynamXContext;
-import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.utils.DynamXConstants;
-import fr.dynamx.utils.client.ClientDynamXUtils;
-import fr.dynamx.utils.optimization.GlQuaternionPool;
-import fr.dynamx.utils.optimization.QuaternionPool;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.entity.Entity;
-import net.minecraftforge.client.MinecraftForgeClient;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.vector.Quaternion;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * Second step for our stencil test
@@ -27,10 +13,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(value = RenderManager.class, remap = DynamXConstants.REMAP)
 public abstract class MixinRenderManager {
 
+        /* todo Yanis
     @Inject(method = "renderEntity",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/Render;doRender(Lnet/minecraft/entity/Entity;DDDFF)V",
                     shift = At.Shift.AFTER))
     private void postDoRenderEntities(Entity entityIn, double x, double y, double z, float yaw, float partialTicks, boolean p_188391_10_, CallbackInfo ci) {
+
         if (MinecraftForgeClient.getRenderPass() == 0) {
             if (entityIn instanceof BaseVehicleEntity && ((BaseVehicleEntity<?>) entityIn).getPackInfo() != null) {
                 GlQuaternionPool.openPool();
@@ -72,5 +60,5 @@ public abstract class MixinRenderManager {
                 GL11.glStencilMask(0x00);
             }
         }
-    }
+    }*/
 }

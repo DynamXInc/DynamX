@@ -17,6 +17,7 @@ import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.SeatsModule;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.EnumSeatPlayerPosition;
+import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
@@ -154,9 +155,10 @@ public abstract class BasePartSeat<A extends Entity, T extends ISubInfoTypeOwner
                 return;
             ClientEventHandler.renderingEntity = seatRider.getUniqueID();
             if ((seatRider != Minecraft.getMinecraft().player || Minecraft.getMinecraft().gameSettings.thirdPersonView != 0)) {
+                DynamXRenderUtils.popGlAllAttribBits();
                 float partialTicks = context.getPartialTicks();
                 GlStateManager.pushMatrix();
-                transform();
+                transformToRotationPoint();
 
                 //Transform the player to match the seat rotation and size
                 EnumSeatPlayerPosition position = getPlayerPosition();

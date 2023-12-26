@@ -1,12 +1,13 @@
 package fr.dynamx.client.renders.model;
 
-import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
 import fr.dynamx.api.dxmodel.DxModelPath;
+import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.common.contentpack.PackInfo;
 import fr.dynamx.common.objloader.data.ObjObjectData;
 import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.client.DynamXRenderUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.Render;
@@ -65,8 +66,8 @@ public class MissingObjModel extends ObjModelRenderer {
     }
 
     @Override
-    public boolean renderGroups(String groupsName, byte textureDataId, boolean forceVanillaRender) {
-        renderModel(textureDataId, false);
+    public boolean renderGroup(String groupsName, byte textureDataId, boolean forceVanillaRender) {
+        renderModel(textureDataId, forceVanillaRender);
         return true;
     }
 
@@ -78,6 +79,7 @@ public class MissingObjModel extends ObjModelRenderer {
 
     @Override
     public void renderModel(byte textureDataId, boolean forceVanillaRender) {
+        DynamXRenderUtils.popGlAllAttribBits();
         GlStateManager.color(1, 0, 0, 1);
         GlStateManager.pushMatrix();
         GlStateManager.scale(0.065f, 0.065f, 0.065f);

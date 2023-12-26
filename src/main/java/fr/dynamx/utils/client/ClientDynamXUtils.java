@@ -67,4 +67,13 @@ public class ClientDynamXUtils {
     public static void attachTrailer(){
         DynamXContext.getNetwork().sendToServer(new MessageAttachTrailer());
     }
+
+    public static Quaternion inverseGlQuaternion(Quaternion quat, Quaternion result) {
+        float norm = quat.length();
+        if (norm > 0.0) {
+            float invNorm = 1.0f / norm;
+            result.set(-quat.getX() * invNorm, -quat.getY() * invNorm, -quat.getZ() * invNorm, quat.getW() * invNorm);
+        }
+        return result;
+    }
 }

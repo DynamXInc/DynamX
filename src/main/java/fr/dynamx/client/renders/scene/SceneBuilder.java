@@ -259,7 +259,7 @@ public class SceneBuilder<T extends ModularPhysicsEntity<?>, A extends IPhysicsP
                         @Override
                         public void render(@Nullable T entity, EntityRenderContext context, A packInfo) {
                             GlStateManager.pushMatrix();
-                            transform();
+                            transformToRotationPoint();
                             renderChildren(entity, context, packInfo);
                             GlStateManager.popMatrix();
                         }

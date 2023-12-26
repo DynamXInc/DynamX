@@ -102,6 +102,8 @@ dynamx.error.wheel_invalid_suspaxis=Invalid wheel suspension axis
 dynamx.error.too_many_variants=Too many material variants
 dynamx.error.missing_depends_on_node=A node depends on a node in order to be renderer, but it doesn't exist:
 dynamx.error.duplicate_scene=Duplicate part(s) for rendering:
+dynamx.error.wheel_no_model=Wheel(s) has no separate 3D model, and no specified "Rim" object name to render.
+dynamx.error.position_not_found_in_model=Cannot determine the position of the part from the 3D model and it is not set in the part config.
 
 dynamx.reload.models.errors=§c[DynamX] Some models have errors, use the debug menu to see them
 

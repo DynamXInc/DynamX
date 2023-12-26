@@ -9,6 +9,7 @@ import fr.dynamx.client.renders.scene.SceneGraph;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.parts.PartDoor;
 import fr.dynamx.common.entities.vehicles.DoorEntity;
+import fr.dynamx.utils.client.DynamXRenderUtils;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraftforge.common.MinecraftForge;
@@ -44,6 +45,7 @@ public class RenderDoor<T extends DoorEntity<?>> extends RenderPhysicsEntity<T> 
         setupRenderTransform(entity, context.getX(), context.getY(), context.getZ(), context.getPartialTicks());
         GlStateManager.scale(scale.x, scale.y, scale.z);
         renderModelGroup(context.getModel(), entity.getPackInfo().getObjectName(), entity, context.getTextureId(), false);
+        DynamXRenderUtils.popGlAllAttribBits();
         GlStateManager.popMatrix();
     }
 

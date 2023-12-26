@@ -1,6 +1,7 @@
 package fr.dynamx.common.contentpack.parts;
 
 import com.jme3.math.Vector3f;
+import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
 import fr.dynamx.api.contentpack.object.part.BasePart;
@@ -15,12 +16,14 @@ import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.client.renders.scene.EntityRenderContext;
 import fr.dynamx.client.renders.scene.SceneGraph;
+import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.type.ObjectCollisionsHelper;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.common.handlers.TaskScheduler;
+import fr.dynamx.common.objloader.data.DxModelData;
 import fr.dynamx.common.physics.utils.RigidBodyTransform;
 import fr.dynamx.common.physics.utils.SynchronizedRigidBodyTransform;
 import fr.dynamx.utils.DynamXConstants;
@@ -28,6 +31,7 @@ import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
+import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import fr.dynamx.utils.physics.DynamXPhysicsHelper;
@@ -70,9 +74,9 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     @PackFileProperty(configNames = "ObjectName", required = false, defaultValue = "Suffix after 'Door_' in part name")
     protected String objectName;
 
-    @PackFileProperty(configNames = "LocalCarAttachPoint", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y)
-    protected Vector3f carAttachPoint = new Vector3f();
-    @PackFileProperty(configNames = "LocalDoorAttachPoint", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y)
+    @PackFileProperty(configNames = "LocalCarAttachPoint", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y, required = false)
+    protected Vector3f carAttachPoint;
+    @PackFileProperty(configNames = "LocalDoorAttachPoint", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y, required = false)
     protected Vector3f doorAttachPoint = new Vector3f();
     @PackFileProperty(configNames = "AttachStrength", required = false, defaultValue = "400")
     protected int attachStrength = 400;
@@ -174,8 +178,38 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
                 .orElse(null);
     }
 
+    protected void readPosition(ResourceLocation model) {
+        DxModelData modelData = DynamXContext.getDxModelDataFromCache(DynamXUtils.getModelPath(getPackName(), model));
+        if (modelData != null) {
+            if (getPosition() == null) {
+                position = DynamXUtils.readPartPosition(modelData, getObjectName(), true, true);
+            }
+            if (getCarAttachPoint() == null) {
+                carAttachPoint = DynamXUtils.readPartPosition(modelData, getObjectName(), false);
+                isAutomaticPosition = getCarAttachPoint() != null;
+                position.addLocal(getCarAttachPoint());
+            }
+            if (getScale().lengthSquared() == 0) {// If scale equals default value
+                scale = DynamXUtils.readPartScale(modelData, getObjectName());
+            }
+        }
+        if (getPosition() == null) {
+            DynamXErrorManager.addPackError(getPackName(), "position_not_found_in_model", ErrorLevel.HIGH, owner.getFullName(), "3D object '" + getObjectName() + "' of part " + getName() + " (for property 'Position')");
+            position = new Vector3f();
+        }
+        if (getCarAttachPoint() == null) {
+            DynamXErrorManager.addPackError(getPackName(), "position_not_found_in_model", ErrorLevel.HIGH, owner.getFullName(), "3D object '" + getObjectName() + "' of part " + getName() + " (for property 'LocalCarAttachPoint')");
+            carAttachPoint = new Vector3f();
+        }
+        if (getScale().lengthSquared() == 0) { // If scale equals default value
+            DynamXErrorManager.addPackError(getPackName(), "position_not_found_in_model", ErrorLevel.HIGH, owner.getFullName(), "3D object '" + getObjectName() + "' of part " + getName() + " (for property 'Scale')");
+            scale.set(0.5f, 0.7f, 0.5f);
+        }
+    }
+
     @Override
     public void appendTo(ModularVehicleInfo owner) {
+        readPosition(owner.getModel());
         super.appendTo(owner);
         MutableBoundingBox box = new MutableBoundingBox(getScale()).offset(getPosition());
         collisionsHelper.addCollisionShape(new IShapeInfo() {
@@ -240,7 +274,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
      */
     @Override
     public String getName() {
-        return "PartDoor named " + getPartName();
+        return getPartName();
     }
 
     @Override
@@ -300,7 +334,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
 
     class PartDoorNode<T extends BaseVehicleEntity<?>, A extends IPhysicsPackInfo> extends SceneGraph.Node<T, A> {
         public PartDoorNode(PartDoor door, Vector3f scale, List<SceneGraph<T, A>> linkedChilds) {
-            super(door.getPosition(), null, scale, linkedChilds);
+            super(door.getCarAttachPoint(), null, PartDoor.this.isAutomaticPosition, scale, linkedChilds);
         }
 
         @Override
@@ -308,7 +342,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
             GlStateManager.pushMatrix();
             DoorsModule module = entity != null ? entity.getModuleByType(DoorsModule.class) : null;
             if (!isEnabled() || module == null || module.getCurrentState(getId()) == DoorsModule.DoorState.CLOSED) {
-                Vector3f pos = Vector3fPool.get().addLocal(getCarAttachPoint());
+                Vector3f pos = Vector3fPool.get().addLocal(translation);
                 pos.subtract(getDoorAttachPoint(), pos);
                 GlStateManager.translate(pos.x, pos.y, pos.z);
             } else if (module.getTransforms().containsKey(getId())) {
@@ -319,29 +353,30 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
                 Vector3f pos = Vector3fPool.get(prev.getPosition()).addLocal(transform.getPosition().subtract(prev.getPosition(), Vector3fPool.get()).multLocal(partialTicks));
                 GlStateManager.rotate(ClientDynamXUtils.computeInterpolatedGlQuaternion(entity.prevRenderRotation, entity.renderRotation, context.getPartialTicks(), true));
                 GlStateManager.translate(
-                        pos.x -(entity.prevPosX + (entity.posX - entity.prevPosX) * context.getPartialTicks()),
-                        pos.y -(entity.prevPosY + (entity.posY - entity.prevPosY) * context.getPartialTicks()),
-                        pos.z -(entity.prevPosZ + (entity.posZ - entity.prevPosZ) * context.getPartialTicks()));
+                        pos.x - (entity.prevPosX + (entity.posX - entity.prevPosX) * context.getPartialTicks()),
+                        pos.y - (entity.prevPosY + (entity.posY - entity.prevPosY) * context.getPartialTicks()),
+                        pos.z - (entity.prevPosZ + (entity.posZ - entity.prevPosZ) * context.getPartialTicks()));
                 GlStateManager.rotate(ClientDynamXUtils.computeInterpolatedGlQuaternion(prev.getRotation(), transform.getRotation(), partialTicks));
             }
+            transformToPartPos();
             GlStateManager.scale(scale.x, scale.y, scale.z);
             context.getRender().renderModelGroup(context.getModel(), getObjectName(), entity, context.getTextureId(), false);
             renderChildren(entity, context, packInfo);
             GlStateManager.popMatrix();
         }
 
-
         @Override
         public void renderDebug(@Nullable T entity, EntityRenderContext context, A packInfo) {
             if (DynamXDebugOptions.DOOR_ATTACH_POINTS.isActive()) {
                 //if (entity instanceof BaseVehicleEntity) {
                 GlStateManager.pushMatrix();
-                GlStateManager.rotate(ClientDynamXUtils.computeInterpolatedGlQuaternion(entity.prevRenderRotation, entity.renderRotation, context.getPartialTicks()));
+                //GlStateManager.rotate(ClientDynamXUtils.computeInterpolatedGlQuaternion(entity.prevRenderRotation, entity.renderRotation, context.getPartialTicks(), true));
                 Vector3f point = getCarAttachPoint();
                 RenderGlobal.drawBoundingBox(point.x - 0, point.y - 0.05f,
                         point.z - 0.05f, point.x + 0.05f, point.y + 0.05f, point.z + 0.05f,
                         1f, 1, 1, 1);
-                transformForDebug();
+                Vector3f translation = getPosition();
+                GlStateManager.translate(translation.x, translation.y, translation.z);
                 MutableBoundingBox box = new MutableBoundingBox();//collisionsHelper.getShapes().get(0).getBoundingBox();//getBox();
                 getBox(box);
                 //box = DynamXContext.getCollisionHandler().rotateBB(Vector3fPool.get(), box, entity.physicsRotation);

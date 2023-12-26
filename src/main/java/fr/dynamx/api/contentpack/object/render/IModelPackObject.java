@@ -5,6 +5,7 @@ import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
 import fr.dynamx.client.renders.model.ItemDxModel;
 import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
@@ -14,7 +15,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StringUtils;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
 
@@ -52,11 +52,9 @@ public interface IModelPackObject extends IModelTextureVariantsSupplier {
 
     @SideOnly(Side.CLIENT)
     default void renderItem3D(ItemStack item, ItemCameraTransforms.TransformType renderType) {
-        GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
-        GL11.glShadeModel(GL11.GL_SMOOTH);
         DxModelRenderer model = DynamXContext.getDxModelRegistry().getModel(getModel());
         model.renderModel((byte) item.getMetadata(),renderType == ItemCameraTransforms.TransformType.GUI);
-        GL11.glPopAttrib();
+        DynamXRenderUtils.popGlAllAttribBits();
     }
 
     @Nullable

@@ -3,11 +3,13 @@ package fr.dynamx.utils;
 import com.google.common.base.Predicates;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import de.javagl.jgltf.model.NodeModel;
 import fr.dynamx.api.contentpack.ContentPackType;
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.dxmodel.DxModelPath;
+import fr.dynamx.api.dxmodel.EnumDxModelFormats;
 import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.physics.EnumBulletShapeType;
 import fr.dynamx.common.DynamXContext;
@@ -19,6 +21,8 @@ import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.TrailerAttachModule;
 import fr.dynamx.common.entities.modules.engines.BasicEngineModule;
 import fr.dynamx.common.entities.vehicles.TrailerEntity;
+import fr.dynamx.common.objloader.data.DxModelData;
+import fr.dynamx.common.objloader.data.GltfModelData;
 import fr.dynamx.common.physics.joints.EntityJoint;
 import fr.dynamx.common.physics.joints.EntityJointsHandler;
 import fr.dynamx.common.physics.utils.StairsBox;
@@ -50,6 +54,7 @@ import net.minecraft.world.World;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.lwjgl.BufferUtils;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.*;
 import java.nio.FloatBuffer;
@@ -368,7 +373,7 @@ public class DynamXUtils {
                     TextComponentTranslation msg = new TextComponentTranslation("trailer.attached", trailer.getPackInfo().getName(), carEntity.getPackInfo().getName());
                     msg.getStyle().setColor(TextFormatting.GREEN);
                     player.sendMessage(msg);
-                    if(player.world.isRemote && trailer instanceof TrailerEntity)
+                    if (player.world.isRemote && trailer instanceof TrailerEntity)
                         ((TrailerEntity<?>) trailer).playAttachSound();
                 } else {
                     TextComponentTranslation msg = new TextComponentTranslation("trailer.attach.fail", trailer.getPackInfo().getName(), carEntity.getPackInfo().getName());
@@ -418,5 +423,78 @@ public class DynamXUtils {
                 return super.resolveClass(desc);
             }
         };
+    }
+
+    /**
+     * Gets the position of the given object in the given 3D model
+     *
+     * @param modelData The 3D model
+     * @param objectName The name of the object to get the pos of
+     * @param allowPartCenter If true, the center of the object will be used as position for obj models (and the translation for gltf models) <br>
+     *                        If false, the position can only be read from gltf models
+     * @return The translation of the object, is this is a gltf model, or the center of the object if this is an obj model and allowPartCenter is true
+     */
+    @Nullable
+    public static Vector3f readPartPosition(DxModelData modelData, String objectName, boolean allowPartCenter) {
+        return readPartPosition(modelData, objectName, allowPartCenter, false);
+    }
+
+    /**
+     * Gets the position of the given object in the given 3D model
+     *
+     * @param modelData The 3D model
+     * @param objectName The name of the object to get the pos of
+     * @param allowPartCenter If true, the center of the object will be used as position for obj models (and the translation for gltf models) <br>
+     *                        If false, the position can only be read from gltf models
+     * @param forceCenter If true, the center of the object will be returned for both obj and gltf models
+     * @return The translation of the object, is this is a gltf model and forceCenter is false, or the center of the object if this is an obj model and allowPartCenter is true, or forceCenter is true
+     */
+    @Nullable
+    public static Vector3f readPartPosition(DxModelData modelData, String objectName, boolean allowPartCenter, boolean forceCenter) {
+        assert !forceCenter || allowPartCenter : "forceCenter is true but allowPartCenter is false";
+        if (!modelData.getMeshNames().contains(objectName.toLowerCase()))
+            return null;
+        if (forceCenter || modelData.getFormat() == EnumDxModelFormats.OBJ) {
+            return allowPartCenter ? modelData.getMeshCenter(objectName, new Vector3f()) : null;
+        } else if (modelData.getFormat() == EnumDxModelFormats.GLTF) {
+            NodeModel nodeModel = ((GltfModelData) modelData).getNodeModel(objectName);
+            float[] trans = nodeModel.getTranslation();
+            return trans == null ? null : new Vector3f(trans[0], trans[1], trans[2]);
+        }
+        return null;
+    }
+
+    /**
+     * Gets the rotation of the given object in the given 3D model <br>
+     * Note: This method only works for gltf models
+     *
+     * @param modelData The 3D model
+     * @param objectName The name of the object to get the rotation of
+     * @return The rotation of the object, or null if the model is not a gltf model or if the object has no rotation
+     */
+    @Nullable
+    public static Quaternion readPartRotation(DxModelData modelData, String objectName) {
+        if (modelData.getFormat() != EnumDxModelFormats.GLTF || !modelData.getMeshNames().contains(objectName.toLowerCase()))
+            return null;
+        NodeModel nodeModel = ((GltfModelData) modelData).getNodeModel(objectName);
+        float[] rot = nodeModel.getRotation();
+        if (rot != null) {
+            return new Quaternion(rot[0], rot[1], rot[2], rot[3]);
+        }
+        return null;
+    }
+
+    /**
+     * Gets the scale (size) of the given object in the given 3D model
+     *
+     * @param modelData The 3D model
+     * @param objectName The name of the object to get the scale of
+     * @return The scale of the object, or an empty vector if the object isn't found in the model
+     */
+    @Nonnull
+    public static Vector3f readPartScale(DxModelData modelData, String objectName) {
+        if (!modelData.getMeshNames().contains(objectName.toLowerCase()))
+            return new Vector3f();
+        return modelData.getMeshDimension(objectName, new Vector3f());
     }
 }

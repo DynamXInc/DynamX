@@ -37,22 +37,46 @@ public abstract class DxModelRenderer {
 
     /**
      * Called to render this model with default texture <br>
-     * Will draw nothing if the model is not correctly loaded
+     * Will draw nothing if the model is not correctly loaded <br>
+     * <strong>For GLTF models, this method pushed the GL11.GL_ALL_ATTRIB_BITS that must be popped with {@link DynamXRenderUtils#popGlAllAttribBits()}</strong>
+     *
+     * @param forceVanillaRender Should be false to render the model in the game world, true otherwise
      */
     public void renderModel(boolean forceVanillaRender) {
         renderModel((byte) 0, forceVanillaRender);
     }
 
     /**
-     * Called to render this model <br>
-     * Will draw nothing if the model is not correctly loaded
+     * Renders this model <br>
+     * Will draw nothing if the model is not correctly loaded <br>
+     * <strong>For GLTF models, this method pushed the GL11.GL_ALL_ATTRIB_BITS that must be popped with {@link DynamXRenderUtils#popGlAllAttribBits()}</strong>
+     *
+     * @param textureDataId      The texture id to use
+     * @param forceVanillaRender Should be false to render the model in the game world, true otherwise
      */
     public abstract void renderModel(byte textureDataId, boolean forceVanillaRender);
 
-    public abstract boolean renderGroups(String group, byte textureDataId, boolean forceVanillaRender);
+    /**
+     * Renders the given object of this model <br>
+     * Will draw nothing if the model is not correctly loaded or the object isn't found <br>
+     * <strong>For GLTF models, this method pushed the GL11.GL_ALL_ATTRIB_BITS that must be popped with {@link DynamXRenderUtils#popGlAllAttribBits()}</strong>
+     *
+     * @param group              The name of the object to render
+     * @param textureDataId      The texture id to use
+     * @param forceVanillaRender Should be false to render the model in the game world, true otherwise
+     * @return true if something has been drawn, false otherwise
+     */
+    public abstract boolean renderGroup(String group, byte textureDataId, boolean forceVanillaRender);
 
-    public abstract void renderGroup(String group, byte textureDataId, boolean forceVanillaRender);
-
+    /**
+     * Renders the default parts of this model <br>
+     * The default parts are the obj objects that are not drawn by an {@link fr.dynamx.api.contentpack.object.part.IDrawablePart} (like the chassis of a vehicle) <br>
+     * <strong>For GLTF models, this method pushed the GL11.GL_ALL_ATTRIB_BITS that must be popped with {@link DynamXRenderUtils#popGlAllAttribBits()}</strong>
+     *
+     * @param textureDataId      The texture id to use
+     * @param forceVanillaRender Should be false to render the model in the game world, true otherwise
+     * @return true if something has been drawn, false otherwise
+     */
     public abstract boolean renderDefaultParts(byte textureDataId, boolean forceVanillaRender);
 
     public void uploadVAOs() {
@@ -76,6 +100,7 @@ public abstract class DxModelRenderer {
         setModelColor(new Vector4f(canPlace ? 0 : 1, canPlace ? 1 : 0, 0, 0.7f));
         renderModel((byte) textureNum, true);
         GlStateManager.enableBlend();
+        DynamXRenderUtils.popGlAllAttribBits();
         GlStateManager.popMatrix();
     }
 

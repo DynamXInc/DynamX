@@ -198,7 +198,8 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
 
     /**
      * Called to render this part <br>
-     * Will draw a white box over the all entity if model wasn't loaded (not found for example)
+     * Will draw a white box over the all entity if model wasn't loaded (not found for example) <br>
+     * <strong>For GLTF models, this method pushed the GL11.GL_ALL_ATTRIB_BITS that must be popped with {@link DynamXRenderUtils#popGlAllAttribBits()}</strong>
      */
     public void renderModel(DxModelRenderer model, @Nullable Entity entity, byte textureDataId, boolean forceVanillaRender) {
         if (!model.isEmpty())
@@ -209,7 +210,8 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
 
     /**
      * Called to render the main part of this model with the custom texture <br>
-     * Will draw a white box over the all entity if model wasn't loaded (not found for example)
+     * Will draw a white box over the all entity if model wasn't loaded (not found for example) <br>
+     * <strong>For GLTF models, this method pushed the GL11.GL_ALL_ATTRIB_BITS that must be popped with {@link DynamXRenderUtils#popGlAllAttribBits()}</strong>
      */
     public void renderMainModel(DxModelRenderer model, @Nullable Entity entity, byte textureDataId, boolean forceVanillaRender) {
         boolean drawn = model.renderDefaultParts(textureDataId, forceVanillaRender);
@@ -220,10 +222,11 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
 
     /**
      * Called to render specific parts with the custom texture <br>
-     * Will draw a white box over the all entity if model wasn't loaded (not found for example)
+     * Will draw a white box over the all entity if model wasn't loaded (not found for example) <br>
+     * <strong>For GLTF models, this method pushed the GL11.GL_ALL_ATTRIB_BITS that must be popped with {@link DynamXRenderUtils#popGlAllAttribBits()}</strong>
      */
     public void renderModelGroup(DxModelRenderer model, String group, @Nullable Entity entity, byte textureDataId, boolean forceVanillaRender) {
-        boolean drawn = model.renderGroups(group, textureDataId, forceVanillaRender);
+        boolean drawn = model.renderGroup(group, textureDataId, forceVanillaRender);
         if (!drawn && entity != null) {
             renderOffsetAABB(entity.getEntityBoundingBox(), -entity.lastTickPosX, -entity.lastTickPosY, -entity.lastTickPosZ);
         }

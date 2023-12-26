@@ -9,6 +9,7 @@ import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.objloader.data.Material;
 import fr.dynamx.common.objloader.data.ObjModelData;
 import fr.dynamx.common.objloader.data.ObjObjectData;
+import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
@@ -88,40 +89,20 @@ public class ObjModelRenderer extends DxModelRenderer {
      * Will draw nothing if the model is not correctly loaded
      */
     public void renderGroup(ObjObjectRenderer obj, byte textureDataId) {
+        DynamXRenderUtils.popGlAllAttribBits();
         if (!MinecraftForge.EVENT_BUS.post(new DynamXModelRenderEvent.RenderPart(EventStage.PRE, this, getTextureVariants(), textureDataId, obj)) && !obj.getObjObjectData().getName().equals("main")) {
             obj.render(this, textureDataId);
             MinecraftForge.EVENT_BUS.post(new DynamXModelRenderEvent.RenderPart(EventStage.POST, this, getTextureVariants(), textureDataId, obj));
         }
     }
 
-    public void renderGroup(ObjObjectRenderer obj) {
-        renderGroup(obj, (byte) 0);
-    }
-
-    /**
-     * Called to render this part <br>
-     * Will draw nothing if the model is not correctly loaded
-     *
-     * @return True if successfully drawn something
-     */
     @Override
-    public boolean renderGroups(String group, byte textureDataId, boolean forceVanillaRender) {
-        boolean drawn = false;
-        for (ObjObjectRenderer object : objObjects) {
-            if (object.getObjObjectData().getName().equalsIgnoreCase(group)) {
-                renderGroup(object, textureDataId);
-                drawn = true;
-            }
-        }
-        return drawn;
-    }
-
-    @Override
-    public void renderGroup(String group, byte textureDataId, boolean forceVanillaRender) {
+    public boolean renderGroup(String group, byte textureDataId, boolean forceVanillaRender) {
         ObjObjectRenderer objObjectRenderer = getObjObjectRenderer(group);
-        if (objObjectRenderer != null) {
-            renderGroup(objObjectRenderer, textureDataId);
-        }
+        if (objObjectRenderer == null)
+            return false;
+        renderGroup(objObjectRenderer, textureDataId);
+        return true;
     }
 
     public boolean renderDefaultParts(byte textureDataId, boolean forceVanillaRender) {

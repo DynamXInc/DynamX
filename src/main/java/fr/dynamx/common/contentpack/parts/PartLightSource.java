@@ -2,8 +2,10 @@ package fr.dynamx.common.contentpack.parts;
 
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
 import fr.dynamx.api.contentpack.object.part.IDrawablePart;
+import fr.dynamx.api.contentpack.object.render.IModelPackObject;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.object.subinfo.SubInfoType;
@@ -14,16 +16,21 @@ import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import fr.dynamx.client.renders.scene.EntityRenderContext;
 import fr.dynamx.client.renders.scene.SceneBuilder;
 import fr.dynamx.client.renders.scene.SceneGraph;
+import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.AbstractLightsModule;
 import fr.dynamx.common.entities.vehicles.TrailerEntity;
+import fr.dynamx.common.objloader.data.DxModelData;
+import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
+import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import lombok.Getter;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderGlobal;
+import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -31,6 +38,7 @@ import java.util.*;
 /**
  * Contains multiple {@link LightObject}
  */
+@Getter
 @RegisteredSubInfoType(name = "MultiLight", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER, SubInfoTypeRegistries.BLOCKS, SubInfoTypeRegistries.PROPS}, strictName = false)
 public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISubInfoTypeOwner<PartLightSource>, IDrawablePart<PackPhysicsEntity<?, ?>, IPhysicsPackInfo>, IModelTextureVariantsSupplier.IModelTextureVariants {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER})
@@ -40,25 +48,31 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
         return null;
     };
 
-    @Getter
     private final String partName;
 
-    @Getter
     private final List<LightObject> sources = new ArrayList<>();
 
-    @Getter
     @PackFileProperty(configNames = "ObjectName")
     protected String objectName;
-    @Getter
     @PackFileProperty(configNames = "BaseMaterial", required = false)
     protected String baseMaterial = "default";
-    @Getter
-    @PackFileProperty(configNames = "Position", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y, description = "common.position", required = false)
+    /**
+     * The position of this part, relative to the 3D model. <br>
+     * If null, it will be read from the 3D model (if possible, see readPositionFromModel method).
+     */
+    @PackFileProperty(configNames = "Position", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y, description = "common.position", required = false, defaultValue = "From model")
     protected Vector3f position;
-    @Getter
-    @PackFileProperty(configNames = "Rotation", required = false, defaultValue = "none")
-    protected Quaternion rotation = new Quaternion();
-    @Getter
+    /**
+     * The rotation of this part, relative to the 3D model. <br>
+     * If null, it will be read from the 3D model (if possible, see readPositionFromModel method).
+     */
+    @PackFileProperty(configNames = "Rotation", required = false, defaultValue = "From model")
+    protected Quaternion rotation;
+    /**
+     * Indicates if the position and rotation were read from the 3D model, or set by the user. <br>
+     * Changes the behavior of the rendering.
+     */
+    protected boolean isAutomaticPosition;
     @PackFileProperty(configNames = "DependsOnNode", required = false, description = "PartLightSource.DependsOnNode")
     protected String nodeDependingOnName;
 
@@ -67,8 +81,35 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
         this.partName = partName;
     }
 
+    /**
+     * If this is a rotating light, this method reads the position and rotation from the 3D model owning this part. <br>
+     * If the configured position is null, this method reads the position. <br>
+     * If the configured position and rotation are null, this method also reads the rotation (only for GLTF models). <br>
+     * <br>
+     * If this isn't a rotating light, we don't need to do any transform to render it, so we don't need its position and rotation.
+     *
+     * @param model The 3D model owning this part
+     */
+    public void readPositionFromModel(ResourceLocation model) {
+        if (getPosition() == null && sources.stream().anyMatch(s -> s.getRotateDuration() > 0)) { //If the light isn't moving on itself, we don't need its position (it can be 0 0 0), but if it rotates, we need to place the rotation point correctly: we need the pos of the light
+            DxModelData modelData = DynamXContext.getDxModelDataFromCache(DynamXUtils.getModelPath(getPackName(), model));
+            if (modelData != null) {
+                position = DynamXUtils.readPartPosition(modelData, getObjectName(), true);
+                if (getRotation() == null && position != null)
+                    rotation = DynamXUtils.readPartRotation(modelData, getObjectName());
+            }
+            if (getPosition() == null) {
+                DynamXErrorManager.addPackError(getPackName(), "position_not_found_in_model", ErrorLevel.HIGH, owner.getFullName(), "3D object " + getObjectName() + " for part " + getName());
+            } else {
+                isAutomaticPosition = true;
+            }
+        }
+    }
+
     @Override
     public void appendTo(ILightOwner<?> owner) {
+        if (owner instanceof IModelPackObject)
+            readPositionFromModel(((IModelPackObject) owner).getModel());
         owner.addLightSource(this);
     }
 
@@ -174,7 +215,7 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
 
     class PartLightNode<T extends BaseVehicleEntity<?>, A extends IPhysicsPackInfo> extends SceneGraph.Node<T, A> {
         public PartLightNode(PartLightSource lightSource, Vector3f scale, List<SceneGraph<T, A>> linkedChilds) {
-            super(lightSource.getPosition(), GlQuaternionPool.newGlQuaternion(lightSource.getRotation()), scale, linkedChilds);
+            super(lightSource.getPosition(), lightSource.getRotation() != null ? GlQuaternionPool.newGlQuaternion(lightSource.getRotation()) : null, PartLightSource.this.isAutomaticPosition, scale, linkedChilds);
         }
 
         @Override
@@ -182,7 +223,7 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
             /* Rendering light sources */
             AbstractLightsModule lights = entity != null ? entity.getModuleByType(AbstractLightsModule.class) : null;
             GlStateManager.pushMatrix();
-            transform();
+            transformToRotationPoint();
             /* Rendering light source */
             LightObject onLightObject = null;
             if (lights != null) {
@@ -233,7 +274,8 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
                 step = step * 360;
                 GlStateManager.rotate(step, 0, 1, 0);
             }
-            context.getModel().renderGroups(getObjectName(), texId, context.isUseVanillaRender());
+            transformToPartPos();
+            context.getModel().renderGroup(getObjectName(), texId, context.isUseVanillaRender());
             if (entity != null && isOn) {
                 int i = entity.getBrightnessForRender();
                 int j = i % 65536;
@@ -247,7 +289,7 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
 
         @Override
         public void renderDebug(@Nullable T entity, EntityRenderContext context, A packInfo) {
-            if(DynamXDebugOptions.LIGHTS.isActive()) {
+            if (DynamXDebugOptions.LIGHTS.isActive()) {
                 GlStateManager.pushMatrix();
                 transformForDebug();
                 RenderGlobal.drawBoundingBox(-0.05f, -0.05f, -0.05f, 0.05f, 0.05f, 0.05f,

@@ -10,8 +10,11 @@ import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
+import lombok.Getter;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ResourceLocation;
+
+import javax.annotation.Nullable;
 
 /**
  * Wheel contained in a wheel file
@@ -27,37 +30,52 @@ public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IM
     };
 
     private final String packName;
+    @Getter
     private final String partName;
 
-    @PackFileProperty(configNames = "Model", description = "common.model", type = DefinitionType.DynamXDefinitionTypes.DYNX_RESOURCE_LOCATION, defaultValue = "obj/nom_du_vehicule/nom_du_modele.obj")
+    @PackFileProperty(configNames = "Model", description = "common.model", type = DefinitionType.DynamXDefinitionTypes.DYNX_RESOURCE_LOCATION, defaultValue = "obj/nom_du_vehicule/nom_du_modele.obj", required = false)
     private ResourceLocation model;
+    @Getter
     @PackFileProperty(configNames = "Width")
     private float wheelWidth;
+    @Getter
     @PackFileProperty(configNames = "Radius")
     private float wheelRadius;
+    @Getter
     @PackFileProperty(configNames = "RimRadius")
     private float rimRadius;
+    @Getter
     @PackFileProperty(configNames = "Friction")
     private float wheelFriction;
+    @Getter
     @PackFileProperty(configNames = "BrakeForce")
     private float wheelBrakeForce;
+    @Getter
     @PackFileProperty(configNames = "HandBrakeForce", required = false, defaultValue = "2*BrakeForce")
     private float handBrakeForce = -1;
+    @Getter
     @PackFileProperty(configNames = "RollInInfluence")
     private float wheelRollInInfluence;
+    @Getter
     @PackFileProperty(configNames = "SuspensionRestLength")
     private float suspensionRestLength;
+    @Getter
     @PackFileProperty(configNames = "SuspensionStiffness")
     private float suspensionStiffness;
+    @Getter
     @PackFileProperty(configNames = "SuspensionMaxForce")
     private float suspensionMaxForce;
+    @Getter
     @PackFileProperty(configNames = "WheelDampingRelaxation")
     private float wheelsDampingRelaxation;
+    @Getter
     @PackFileProperty(configNames = "WheelsDampingCompression")
     private float wheelsDampingCompression;
+    @Getter
     @PackFileProperty(configNames = "SkidParticle", required = false)
     private EnumParticleTypes skidParticle = EnumParticleTypes.SMOKE_NORMAL;
 
+    @Getter
     @PackFileProperty(configNames = "ScaleModifier", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false)
     private Vector3f scaleModifier = new Vector3f(1, 1, 1);
 
@@ -121,69 +139,10 @@ public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IM
         return getSubPropertyByType(MaterialVariantsInfo.class) != null;
     }
 
-    public String getPartName() {
-        return partName;
-    }
-
     @Override
+    @Nullable
     public ResourceLocation getModel() {
         return model;
-    }
-
-    public float getWheelWidth() {
-        return wheelWidth;
-    }
-
-    public float getWheelRadius() {
-        return wheelRadius;
-    }
-
-    public float getRimRadius() {
-        return rimRadius;
-    }
-
-    public float getWheelFriction() {
-        return wheelFriction;
-    }
-
-    public float getWheelBrakeForce() {
-        return wheelBrakeForce;
-    }
-
-    public float getHandBrakeForce() {
-        return handBrakeForce;
-    }
-
-    public float getWheelRollInInfluence() {
-        return wheelRollInInfluence;
-    }
-
-    public float getSuspensionRestLength() {
-        return suspensionRestLength;
-    }
-
-    public float getSuspensionStiffness() {
-        return suspensionStiffness;
-    }
-
-    public float getSuspensionMaxForce() {
-        return suspensionMaxForce;
-    }
-
-    public float getWheelsDampingRelaxation() {
-        return wheelsDampingRelaxation;
-    }
-
-    public float getWheelsDampingCompression() {
-        return wheelsDampingCompression;
-    }
-
-    public Vector3f getScaleModifier() {
-        return scaleModifier;
-    }
-
-    public EnumParticleTypes getSkidParticle() {
-        return skidParticle;
     }
 
     @Override

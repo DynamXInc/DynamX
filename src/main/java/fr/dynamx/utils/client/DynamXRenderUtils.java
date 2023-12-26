@@ -37,6 +37,7 @@ import java.util.List;
  * @see ClientDynamXUtils
  */
 public class DynamXRenderUtils {
+    private static boolean glAllAttribBitsEnabled;
 
     public static GridGLMesh gridMesh;
     public static ArrowMesh arrowMeshX;
@@ -231,6 +232,29 @@ public class DynamXRenderUtils {
         int errorCode = GL11.glGetError();
         if (errorCode != GL11.GL_NO_ERROR) {
             DynamXMain.log.warn("errorCode = " + errorCode);
+        }
+    }
+
+    /**
+     * Pushes GL11.GL_ALL_ATTRIB_BITS if not already pushed <br>
+     * <strong>This attribute must be popped after any DynamX model rendering (or it will break the vanilla game rendering)</strong> <br>
+     * The push is done by the gltf models rendering code, the pop is done by DynamX code that encapsulate the model rendering (but not the model rendering code itself,
+     * see {@link fr.dynamx.client.renders.model.renderer.GltfModelRenderer#renderVanillaOrShader(int, boolean)}.
+     */
+    public static void pushGlAllAttribBits() {
+        if (!glAllAttribBitsEnabled) {
+            glAllAttribBitsEnabled = true;
+            GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
+        }
+    }
+
+    /**
+     * Pops GL11.GL_ALL_ATTRIB_BITS if pushed by {@link DynamXRenderUtils#pushGlAllAttribBits()}
+     */
+    public static void popGlAllAttribBits() {
+        if (glAllAttribBitsEnabled) {
+            glAllAttribBitsEnabled = false;
+            GL11.glPopAttrib();
         }
     }
 }

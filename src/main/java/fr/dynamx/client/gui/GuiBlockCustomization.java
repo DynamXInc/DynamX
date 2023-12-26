@@ -7,7 +7,6 @@ import fr.aym.acsguis.component.panel.GuiPanel;
 import fr.aym.acsguis.component.textarea.GuiFloatField;
 import fr.aym.acsguis.component.textarea.GuiLabel;
 import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
-import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.blocks.TEDynamXBlock;
 import fr.dynamx.common.network.packets.MessageSyncBlockCustomization;
@@ -233,6 +232,7 @@ public class GuiBlockCustomization extends GuiFrame {
         if (rotate != 0)
             GlStateManager.rotate(rotate, 0, 0, 1);
         model.renderModel(true);
+        DynamXRenderUtils.popGlAllAttribBits();
     }
 
     @Override

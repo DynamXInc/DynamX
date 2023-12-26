@@ -12,8 +12,10 @@ import de.javagl.jgltf.model.NodeModel;
 import fr.dynamx.api.dxmodel.DxModelPath;
 import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
 import fr.dynamx.client.renders.animations.DxAnimation;
+import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.QuaternionPool;
+import lombok.Getter;
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +25,7 @@ import java.util.stream.IntStream;
 public class GltfModelRenderer extends DxModelRenderer implements IGltfModelReceiver {
 
     private RenderedGltfScene scene;
+    @Getter
     public List<NodeModel> nodeModels;
     public HashMap<String, List<InterpolatedChannel>> animations;
     public List<AnimationModel> animationModels;
@@ -44,18 +47,12 @@ public class GltfModelRenderer extends DxModelRenderer implements IGltfModelRece
     }
 
     @Override
-    public void renderGroup(String group, byte textureDataId, boolean forceVanillaRender) {
-        if (scene == null) return;
-        int nodeModelIndex = getNodeModelIndex(group);
-        renderVanillaOrShader(nodeModelIndex, forceVanillaRender);
-    }
-
-    @Override
-    public boolean renderGroups(String group, byte textureDataId, boolean forceVanillaRender) {
+    public boolean renderGroup(String group, byte textureDataId, boolean forceVanillaRender) {
         if (scene == null) return false;
         int nodeModelIndex = getNodeModelIndex(group);
+        if (nodeModelIndex == -1) return false;
         renderVanillaOrShader(nodeModelIndex, forceVanillaRender);
-        return nodeModelIndex != -1;
+        return true;
     }
 
     @Override
@@ -70,13 +67,20 @@ public class GltfModelRenderer extends DxModelRenderer implements IGltfModelRece
         return drawn;
     }
 
+    /**
+     * Renders this gtlf model <br>
+     * <strong>This method pushed the GL11.GL_ALL_ATTRIB_BITS that must be popped with {@link DynamXRenderUtils#popGlAllAttribBits()}</strong>
+     *
+     * @param nodeModelIndex     The index of the node model to render
+     * @param forceVanillaRender Should be false to render the model in the game world, true otherwise
+     */
     public void renderVanillaOrShader(int nodeModelIndex, boolean forceVanillaRender) {
+        DynamXRenderUtils.pushGlAllAttribBits();
         if (forceVanillaRender) {
             scene.renderForVanilla(nodeModelIndex);
         } else if (MCglTF.getInstance().isShaderModActive()) {
             scene.renderForShaderMod(nodeModelIndex);
         }
-
     }
 
     @Override
@@ -86,7 +90,12 @@ public class GltfModelRenderer extends DxModelRenderer implements IGltfModelRece
 
     public int getNodeModelIndex(String objectName) {
         return IntStream.range(0, nodeModels.size())
-                .filter(i -> nodeModels.get(i).getName().equalsIgnoreCase(objectName))
+                .filter(i -> {
+                    if (nodeModels.get(i).getName() == null) {
+                        return false;
+                    }
+                    return nodeModels.get(i).getName().equalsIgnoreCase(objectName);
+                })
                 .findFirst()
                 .orElse(-1);
     }

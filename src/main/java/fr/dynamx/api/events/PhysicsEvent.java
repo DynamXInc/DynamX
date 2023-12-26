@@ -1,5 +1,6 @@
 package fr.dynamx.api.events;
 
+import com.jme3.bullet.collision.PhysicsCollisionEvent;
 import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.common.entities.PhysicsEntity;
@@ -99,5 +100,19 @@ public class PhysicsEvent extends Event {
             this.object2 = object2;
             this.collisionInfo = collisionInfo;
         }
+
+
+        public static class Pre extends PhysicsCollision {
+
+            /**
+             * @param world   The physics world owning this chunk
+             * @param object1 First collision object colliding with the second
+             * @param object2 Second collision object colliding with the first
+             */
+            public Pre(IPhysicsWorld world, BulletShapeType<?> object1, BulletShapeType<?> object2, CollisionsHandler.CollisionInfo collisionInfo) {
+                super(world, object1, object2, collisionInfo);
+            }
+        }
+
     }
 }

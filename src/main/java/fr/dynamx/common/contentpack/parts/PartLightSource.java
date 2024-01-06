@@ -17,6 +17,7 @@ import fr.dynamx.client.renders.scene.EntityRenderContext;
 import fr.dynamx.client.renders.scene.SceneBuilder;
 import fr.dynamx.client.renders.scene.SceneGraph;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.contentpack.type.objects.AbstractItemObject;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.AbstractLightsModule;
@@ -108,8 +109,8 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
 
     @Override
     public void appendTo(ILightOwner<?> owner) {
-        if (owner instanceof IModelPackObject)
-            readPositionFromModel(((IModelPackObject) owner).getModel());
+        if (owner instanceof AbstractItemObject)
+            readPositionFromModel(((AbstractItemObject) owner).getModel());
         owner.addLightSource(this);
     }
 

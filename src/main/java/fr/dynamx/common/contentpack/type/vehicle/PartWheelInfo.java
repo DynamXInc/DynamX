@@ -9,6 +9,7 @@ import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
+import fr.dynamx.client.renders.scene.SceneGraph;
 import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
 import lombok.Getter;
 import net.minecraft.util.EnumParticleTypes;
@@ -148,5 +149,10 @@ public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IM
     @Override
     public String toString() {
         return "PartWheelInfo named " + getFullName();
+    }
+
+    @Override
+    public SceneGraph<?, ?> getSceneGraph() {
+        throw new UnsupportedOperationException();
     }
 }

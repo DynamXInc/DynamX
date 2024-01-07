@@ -18,7 +18,7 @@ import fr.dynamx.common.contentpack.parts.PartBlockSeat;
 import fr.dynamx.common.contentpack.parts.PartStorage;
 import fr.dynamx.common.contentpack.type.ObjectCollisionsHelper;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
-import fr.dynamx.common.entities.ICollidableObject;
+import fr.dynamx.common.entities.IDynamXObject;
 import fr.dynamx.common.entities.SeatEntity;
 import fr.dynamx.common.entities.modules.AbstractLightsModule;
 import fr.dynamx.common.entities.modules.StorageModule;
@@ -47,7 +47,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPackInfoReloadListener, ITickable {
+public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInfoReloadListener, ITickable {
     @Getter
     private BlockObject<?> packInfo;
     @Getter

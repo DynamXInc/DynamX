@@ -1,14 +1,13 @@
 package fr.dynamx.client.renders.scene;
 
-import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
 import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
-import fr.dynamx.common.entities.PhysicsEntity;
+import fr.dynamx.common.entities.IDynamXObject;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 /**
- * The context of a render call of {@link SceneGraph#render(PhysicsEntity, EntityRenderContext, IPhysicsPackInfo)} <br>
+ * The context of a render call of {@link SceneGraph#render(IDynamXObject, EntityRenderContext, fr.dynamx.api.contentpack.object.render.IModelPackObject)} <br>
  * Reused to avoid creating a new object each time.
  */
 @Getter

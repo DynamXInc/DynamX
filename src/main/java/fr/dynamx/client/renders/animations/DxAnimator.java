@@ -1,8 +1,6 @@
 package fr.dynamx.client.renders.animations;
 
-import com.modularmods.mcgltf.animation.GltfAnimationCreator;
 import com.modularmods.mcgltf.animation.InterpolatedChannel;
-import de.javagl.jgltf.model.*;
 import fr.dynamx.client.renders.model.renderer.GltfModelRenderer;
 import fr.dynamx.common.blocks.TEDynamXBlock;
 import lombok.Getter;

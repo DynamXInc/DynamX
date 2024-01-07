@@ -3,6 +3,7 @@ package fr.dynamx.api.events;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
 import fr.dynamx.api.contentpack.object.part.IDrawablePart;
+import fr.dynamx.api.contentpack.object.render.IModelPackObject;
 import fr.dynamx.client.renders.scene.EntityRenderContext;
 import fr.dynamx.client.renders.scene.SceneBuilder;
 import fr.dynamx.client.renders.scene.SceneGraph;
@@ -76,7 +77,7 @@ public class DynamXEntityRenderEvents extends Event {
         /**
          * The pack info containing the part
          */
-        private final IPhysicsPackInfo packInfo;
+        private final IModelPackObject packInfo;
         /**
          * The part that is being rendered
          */

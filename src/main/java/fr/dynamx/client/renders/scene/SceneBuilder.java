@@ -4,8 +4,12 @@ import com.jme3.math.Vector3f;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
 import fr.dynamx.api.contentpack.object.part.IDrawablePart;
+import fr.dynamx.api.contentpack.object.render.IModelPackObject;
 import fr.dynamx.api.events.DynamXEntityRenderEvents;
-import fr.dynamx.common.entities.ModularPhysicsEntity;
+import fr.dynamx.common.blocks.TEDynamXBlock;
+import fr.dynamx.common.contentpack.type.objects.BlockObject;
+import fr.dynamx.common.entities.IDynamXObject;
+import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import lombok.Getter;
 import net.minecraft.client.renderer.GlStateManager;
@@ -23,7 +27,7 @@ import java.util.Map;
  * @param <A> The type of the pack info (the owner of the scene graph)
  */
 @Getter
-public class SceneBuilder<T extends ModularPhysicsEntity<?>, A extends IPhysicsPackInfo> {
+public class SceneBuilder<T extends IDynamXObject, A extends IModelPackObject> {
     /**
      * Map of node name to Node
      */
@@ -233,12 +237,29 @@ public class SceneBuilder<T extends ModularPhysicsEntity<?>, A extends IPhysicsP
      * @param modelScale    The scale of the model
      * @return The root node of the scene graph
      */
-    public SceneGraph.EntityNode<T, A> buildEntitySceneGraph(A obj, List<IDrawablePart<T, A>> drawableParts, Vector3f modelScale) {
+    public <U extends PhysicsEntity<?>, V extends IPhysicsPackInfo> EntityNode<U, V> buildEntitySceneGraph(V obj, List<IDrawablePart<T, A>> drawableParts, Vector3f modelScale) {
         List<SceneGraph<T, A>> linkedNodes = new ArrayList<>();
         List<SceneGraph<T, A>> unlinkedNodes = new ArrayList<>();
-        drawableParts.forEach(part -> part.addToSceneGraph(obj, this));
-        build(obj, modelScale, linkedNodes, unlinkedNodes);
-        return new SceneGraph.EntityNode<>(linkedNodes, unlinkedNodes);
+        drawableParts.forEach(part -> part.addToSceneGraph((A) obj, this));
+        build((A) obj, modelScale, linkedNodes, unlinkedNodes);
+        return new EntityNode(linkedNodes, unlinkedNodes);
+    }
+
+    /**
+     * Builds the scene graph of a block
+     *
+     * @param obj           The pack object that owns the scene graph, used for error reporting
+     * @param drawableParts The list of parts that should be rendered
+     * @param modelScale    The scale of the model
+     * @return The root node of the scene graph
+     */
+    public <U extends TEDynamXBlock, V extends BlockObject<?>> BlockNode<U, V> buildBlockSceneGraph(V obj, List<IDrawablePart<T, A>> drawableParts, Vector3f modelScale) {
+        List<SceneGraph<T, A>> linkedNodes = new ArrayList<>();
+        List<SceneGraph<T, A>> unlinkedNodes = new ArrayList<>();
+        drawableParts.forEach(part -> part.addToSceneGraph((A) obj, this));
+        build((A) obj, modelScale, linkedNodes, unlinkedNodes);
+        linkedNodes.addAll(unlinkedNodes); // Don't handle them differently for blocks
+        return new BlockNode(linkedNodes);
     }
 
     /**

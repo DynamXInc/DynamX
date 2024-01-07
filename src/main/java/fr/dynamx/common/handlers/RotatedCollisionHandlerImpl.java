@@ -6,7 +6,7 @@ import fr.dynamx.api.physics.IRotatedCollisionHandler;
 import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.parts.PartShape;
-import fr.dynamx.common.entities.ICollidableObject;
+import fr.dynamx.common.entities.IDynamXObject;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.entities.PropsEntity;
 import fr.dynamx.common.physics.player.WalkingOnPlayerController;
@@ -133,7 +133,7 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
         }
     }
 
-    private Vector3f collideWith(Entity entity, ICollidableObject with, Vector3f withPosition, float mx, float my, float mz) {
+    private Vector3f collideWith(Entity entity, IDynamXObject with, Vector3f withPosition, float mx, float my, float mz) {
         if (entity.world.isRemote && ClientDebugSystem.enableDebugDrawing)
             VehicleDebugRenderer.PlayerCollisionsDebug.pos = entity.getPositionVector();
         float oldx = mx, oldy = my, oldz = mz;
@@ -299,14 +299,14 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
     }
 
     /**
-     * Gets all the {@link ICollidableObject} TileEntities in the given bounding box
+     * Gets all the {@link IDynamXObject} TileEntities in the given bounding box
      *
      * @param world The world
-     * @param inBox The box where we search the {@link ICollidableObject}
-     * @return The {@link ICollidableObject} {@link TileEntity} inside of the box
+     * @param inBox The box where we search the {@link IDynamXObject}
+     * @return The {@link IDynamXObject} {@link TileEntity} inside of the box
      */
-    private PooledHashMap<Vector3f, ICollidableObject> getCollidableTileEntities(World world, MutableBoundingBox inBox) {
-        PooledHashMap<Vector3f, ICollidableObject> entities = HashMapPool.get();
+    private PooledHashMap<Vector3f, IDynamXObject> getCollidableTileEntities(World world, MutableBoundingBox inBox) {
+        PooledHashMap<Vector3f, IDynamXObject> entities = HashMapPool.get();
 
         int minChunkX = (int) Math.floor(inBox.minX) >> 4;
         int maxChunkX = (int) Math.floor(inBox.maxX) >> 4;
@@ -318,8 +318,8 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
             for (int chunkZ = minChunkZ; chunkZ <= maxChunkZ; chunkZ++) {
                 Chunk chunk = world.getChunk(chunkX, chunkZ);
                 for (Map.Entry<BlockPos, TileEntity> te : chunk.getTileEntityMap().entrySet()) {
-                    if (te.getValue() instanceof ICollidableObject && inBox.contains(te.getKey())) {
-                        entities.put(Vector3fPool.get(te.getKey().getX(), te.getKey().getY(), te.getKey().getZ()), (ICollidableObject) te.getValue());
+                    if (te.getValue() instanceof IDynamXObject && inBox.contains(te.getKey())) {
+                        entities.put(Vector3fPool.get(te.getKey().getX(), te.getKey().getY(), te.getKey().getZ()), (IDynamXObject) te.getValue());
                     }
                 }
             }
@@ -370,8 +370,8 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
 
         motionChanged = false;
         if (!(entity instanceof PhysicsEntity)) {
-            PooledHashMap<Vector3f, ICollidableObject> collidableEntities = getCollidableTileEntities(entity.world, new MutableBoundingBox(entity.getEntityBoundingBox()).grow(icollidableCheckRadius));
-            for (Map.Entry<Vector3f, ICollidableObject> e : collidableEntities.entrySet()) {
+            PooledHashMap<Vector3f, IDynamXObject> collidableEntities = getCollidableTileEntities(entity.world, new MutableBoundingBox(entity.getEntityBoundingBox()).grow(icollidableCheckRadius));
+            for (Map.Entry<Vector3f, IDynamXObject> e : collidableEntities.entrySet()) {
                 //System.out.println("Input "+mx+" "+my+" "+mz+" "+nx+" "+ny+" "+nz+" "+entity.onGround+" "+entity.collidedVertically+" "+e.physicsPosition);
                 Vector3fPool.openPool();
                 QuaternionPool.openPool();

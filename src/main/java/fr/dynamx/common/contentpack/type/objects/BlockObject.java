@@ -7,6 +7,10 @@ import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.dxmodel.EnumDxModelFormats;
 import fr.dynamx.api.events.CreatePackItemEvent;
+import fr.dynamx.api.events.DynamXBlockEvent;
+import fr.dynamx.client.renders.scene.BlockNode;
+import fr.dynamx.client.renders.scene.SceneBuilder;
+import fr.dynamx.client.renders.scene.SceneGraph;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.contentpack.loader.InfoList;
 import fr.dynamx.common.contentpack.parts.ILightOwner;
@@ -21,10 +25,7 @@ import lombok.Setter;
 import net.minecraft.block.material.Material;
 import net.minecraftforge.common.MinecraftForge;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> implements ParticleEmitterInfo.IParticleEmitterContainer, ILightOwner<T> {
     @Getter
@@ -88,6 +89,20 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
         }
     }
 
+    private SceneGraph<?, ?> sceneGraph;
+
+    @Override
+    public SceneGraph<?, ?> getSceneGraph() {
+        if (sceneGraph == null) {
+            if (isModelValid()) {
+                DynamXBlockEvent.BuildSceneGraph buildSceneGraphEvent = new DynamXBlockEvent.BuildSceneGraph(new SceneBuilder<>(), this, getDrawableParts(), getScaleModifier());
+                sceneGraph = buildSceneGraphEvent.getSceneGraphResult();
+            } else
+                sceneGraph = new BlockNode<>(Collections.EMPTY_LIST);
+        }
+        return sceneGraph;
+    }
+
     @Override
     public String getTranslationKey(IDynamXItem<T> item, int itemMeta) {
         return super.getTranslationKey(item, itemMeta).replace("item", "tile");
@@ -115,6 +130,7 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
     @Override
     public void addLightSource(PartLightSource source) {
         lightSources.put(source.getObjectName(), source);
+        addDrawablePart(source);
     }
 
     @Override

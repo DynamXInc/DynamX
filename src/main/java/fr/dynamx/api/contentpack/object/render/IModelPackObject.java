@@ -4,6 +4,7 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
 import fr.dynamx.client.renders.model.ItemDxModel;
 import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
+import fr.dynamx.client.renders.scene.SceneGraph;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.optimization.Vector3fPool;
@@ -108,4 +109,6 @@ public interface IModelPackObject extends IModelTextureVariantsSupplier {
                 break;
         }
     }
+
+    SceneGraph<?,?> getSceneGraph();
 }

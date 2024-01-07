@@ -3,8 +3,6 @@ package fr.dynamx.common.contentpack.type.objects;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
-import fr.dynamx.api.contentpack.object.part.BasePart;
-import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
@@ -14,6 +12,7 @@ import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.CreatePackItemEvent;
 import fr.dynamx.api.events.DynamXEntityRenderEvents;
+import fr.dynamx.client.renders.scene.EntityNode;
 import fr.dynamx.client.renders.scene.SceneBuilder;
 import fr.dynamx.client.renders.scene.SceneGraph;
 import fr.dynamx.common.contentpack.ContentPackLoader;
@@ -22,7 +21,6 @@ import fr.dynamx.common.contentpack.loader.InfoList;
 import fr.dynamx.common.contentpack.loader.PackFilePropertyData;
 import fr.dynamx.common.contentpack.loader.SubInfoTypeAnnotationCache;
 import fr.dynamx.common.contentpack.loader.SubInfoTypesRegistry;
-import fr.dynamx.common.contentpack.parts.PartLightSource;
 import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
 import fr.dynamx.common.contentpack.type.ObjectCollisionsHelper;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
@@ -38,7 +36,6 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -120,6 +117,7 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
         this.useComplexCollisions = block.useComplexCollisions();
         this.particleEmitters = block.getParticleEmitters();
         this.collisionsHelper = block.getCollisionsHelper().copy();
+        this.getDrawableParts().addAll(block.getDrawableParts());
     }
 
     @Override
@@ -133,13 +131,8 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
         collisionsHelper.loadCollisions(this, DynamXUtils.getModelPath(getPackName(), model), "", centerOfMass, 0, useComplexCollisions, scaleModifier, ObjectCollisionsHelper.CollisionType.PROP);
         if(collisionsHelper.hasPhysicsCollisions())
             collisionsHelper.getPhysicsCollisionShape().setMargin(margin);
-
         if (!super.postLoad(hot))
             return false;
-
-        for (PartLightSource s : getOwner().lightSources.values()) {
-            addDrawablePart(s);
-        }
         if (FMLCommonHandler.instance().getSide().isClient()) {
             getSceneGraph();
         }
@@ -177,20 +170,6 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
     @Override
     public ItemStack getPickedResult(int metadata) {
         return new ItemStack((Item) getItems()[0], 1, metadata);
-    }
-
-    @Override
-    public void addSubProperty(ISubInfoType<T> property) {
-        super.addSubProperty(property);
-        if (property instanceof IDrawablePart)
-            addDrawablePart((IDrawablePart<?, ?>) property);
-    }
-
-    @Override
-    public void addPart(BasePart<T> part) {
-        super.addPart(part);
-        if (part instanceof IDrawablePart)
-            addDrawablePart((IDrawablePart<?, ?>) part);
     }
 
     @Override
@@ -232,33 +211,11 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
     public SceneGraph<?, ?> getSceneGraph() {
         if (sceneGraph == null) {
             if (isModelValid()) {
-                DynamXEntityRenderEvents.BuildSceneGraph buildSceneGraphEvent = new DynamXEntityRenderEvents.BuildSceneGraph(new SceneBuilder<>(), this, drawableParts, getScaleModifier());
+                DynamXEntityRenderEvents.BuildSceneGraph buildSceneGraphEvent = new DynamXEntityRenderEvents.BuildSceneGraph(new SceneBuilder<>(), this, getDrawableParts(), getScaleModifier());
                 sceneGraph = buildSceneGraphEvent.getSceneGraphResult();
             } else
-                sceneGraph = new SceneGraph.EntityNode<>(Collections.EMPTY_LIST, Collections.EMPTY_LIST);
+                sceneGraph = new EntityNode<>(Collections.EMPTY_LIST, Collections.EMPTY_LIST);
         }
         return sceneGraph;
-    }
-
-    /**
-     * The list of all rendered parts for this prop <br>
-     * A rendered part will not be rendered with the main part of the obj model <br>
-     * The {@link fr.dynamx.api.entities.modules.IPhysicsModule} using this part is responsible to render the part at the right location
-     */
-    @Getter
-    private final List<String> renderedParts = new ArrayList<>();
-    @Getter
-    private final List<IDrawablePart<?, ?>> drawableParts = new ArrayList<>();
-
-    protected void addDrawablePart(IDrawablePart<?, ?> part) {
-        String[] names = part.getRenderedParts();
-        if (names.length > 0)
-            renderedParts.addAll(Arrays.asList(names));
-        drawableParts.add(part);
-    }
-
-    @Override
-    public boolean canRenderPart(String partName) {
-        return !renderedParts.contains(partName);
     }
 }

@@ -117,6 +117,7 @@ public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A e
     @Override
     public boolean postLoad(boolean hot) {
         subProperties.forEach(subInfoType -> subInfoType.postLoad((A) this, hot));
+        parts.forEach(part -> part.postLoad((A) this, hot));
         return super.postLoad(hot);
     }
 

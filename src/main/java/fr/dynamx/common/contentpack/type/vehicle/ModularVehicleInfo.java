@@ -5,11 +5,8 @@ import fr.dynamx.api.contentpack.object.ICollisionsContainer;
 import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
-import fr.dynamx.api.contentpack.object.part.BasePart;
-import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.contentpack.object.render.IModelPackObject;
-import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
@@ -379,19 +376,5 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     public void addLightSource(PartLightSource source) {
         lightSources.put(source.getObjectName(), source);
         addDrawablePart(source);
-    }
-
-    @Override
-    public void addPart(BasePart<ModularVehicleInfo> part) {
-        super.addPart(part);
-        if (part instanceof IDrawablePart)
-            addDrawablePart((IDrawablePart<?, ?>) part);
-    }
-
-    @Override
-    public void addSubProperty(ISubInfoType<ModularVehicleInfo> property) {
-        super.addSubProperty(property);
-        if (property instanceof IDrawablePart)
-            addDrawablePart((IDrawablePart<?, ?>) property);
     }
 }

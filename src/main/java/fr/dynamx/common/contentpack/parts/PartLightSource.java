@@ -232,7 +232,6 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
             /* Rendering light source */
             LightObject onLightObject = null;
             if (lights != null) {
-                lights.setLightOn(3, true);
                 // Find the first light object that is on
                 for (LightObject source : getSources()) {
                     if (lights.isLightOn(source.getLightId())) {

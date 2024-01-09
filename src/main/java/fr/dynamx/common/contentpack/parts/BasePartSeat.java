@@ -5,7 +5,6 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
-import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.SeatsModule;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.EnumSeatPlayerPosition;
@@ -99,7 +98,7 @@ public abstract class BasePartSeat<A extends Entity, T extends ISubInfoTypeOwner
     }
 
     @Nullable
-    public PartDoor getLinkedPartDoor(BaseVehicleEntity<?> vehicleEntity) {
+    public PartDoor getLinkedPartDoor() {
         return null;
     }
 

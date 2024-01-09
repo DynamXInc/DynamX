@@ -1,6 +1,7 @@
 package fr.dynamx.common.contentpack.parts;
 
 import com.jme3.math.Vector3f;
+import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
 import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
@@ -23,6 +24,7 @@ import fr.dynamx.common.entities.vehicles.HelicopterEntity;
 import fr.dynamx.utils.EnumSeatPlayerPosition;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
+import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import lombok.Getter;
 import lombok.Setter;
@@ -71,12 +73,11 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
         }
         if (hasDoor()) {
             if (vehicleEntity instanceof CarEntity) {
-                PartDoor door = getLinkedPartDoor(vehicleEntity);
+                PartDoor door = getLinkedPartDoor();
                 if (door != null) {
                     if (!door.isPlayerMounting()) {
                         IModuleContainer.IDoorContainer doorContainer = (IModuleContainer.IDoorContainer) vehicleEntity;
-                        if (doorContainer.getDoors() == null)
-                            return false;
+                        if (doorContainer.getDoors() == null) return false;
                         if (!door.isEnabled() || doorContainer.getDoors().isDoorAttached(door.getId())) {
                             if (!door.isEnabled() || doorContainer.getDoors().isDoorOpened(door.getId())) {
                                 boolean didMount = mount(vehicleEntity, seats, player);
@@ -90,8 +91,7 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
                         }
                     } //else
                     //DynamXMain.log.error("Cannot mount : player mounting : " + linkedDoor);
-                } else
-                    DynamXMain.log.error("Cannot mount : part door not found : " + linkedDoor);
+                } else DynamXMain.log.error("Cannot mount : part door not found : " + linkedDoor);
             }
         } else {
             return mount(vehicleEntity, seats, player);
@@ -104,19 +104,26 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
     }
 
     @Nullable
-    public PartDoor getLinkedPartDoor(BaseVehicleEntity<?> vehicleEntity) {
-        return getLinkedDoor() == null ? null : vehicleEntity.getPackInfo().getPartsByType(PartDoor.class).stream().filter(partDoor -> partDoor.getPartName().equals(getLinkedDoor()))
-                .findFirst().orElse(null);
+    @Override
+    public PartDoor getLinkedPartDoor() {
+        System.out.println("Press f " + getLinkedDoor() +" // " + getOwner().getPartsByType(PartDoor.class).stream().map(PartDoor::getPartName).reduce((s, s2) -> s + ", " + s2).orElse("null"));
+        return getLinkedDoor() == null ? null : getOwner().getPartsByType(PartDoor.class).stream().filter(partDoor -> partDoor.getPartName().equalsIgnoreCase(getLinkedDoor())).findFirst().orElse(null);
+    }
+
+    @Override
+    public void postLoad(ModularVehicleInfo owner, boolean hot) {
+        super.postLoad(owner, hot);
+        if (hasDoor() && getLinkedPartDoor() == null) {
+            DynamXErrorManager.addPackError(getPackName(), "seat_door_not_found", ErrorLevel.HIGH, getName(), "Door " + getLinkedDoor() + " not found in " + owner.getFullName());
+        }
     }
 
     @Override
     public void addModules(PackPhysicsEntity<?, ?> entity, ModuleListBuilder modules) {
         if (!(entity instanceof IModuleContainer.ISeatsContainer))
             throw new IllegalStateException("The entity " + entity + " has PartSeats, but does not implement IHaveSeats !");
-        if (entity instanceof HelicopterEntity)
-            return; //Helicopters have their own SeatsModule
-        if (!modules.hasModuleOfClass(SeatsModule.class))
-            modules.add(new SeatsModule(entity));
+        if (entity instanceof HelicopterEntity) return; //Helicopters have their own SeatsModule
+        if (!modules.hasModuleOfClass(SeatsModule.class)) modules.add(new SeatsModule(entity));
     }
 
     @Override
@@ -146,8 +153,7 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
             SeatsModule seats = ((IModuleContainer.ISeatsContainer) entity).getSeats();
             assert seats != null;
             Entity seatRider = seats.getSeatToPassengerMap().get(PartEntitySeat.this);
-            if (seatRider == null)
-                return;
+            if (seatRider == null) return;
             ClientEventHandler.renderingEntity = seatRider.getUniqueID();
             if ((seatRider != Minecraft.getMinecraft().player || Minecraft.getMinecraft().gameSettings.thirdPersonView != 0)) {
                 DynamXRenderUtils.popGlAllAttribBits();
@@ -160,8 +166,7 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
                 RenderPhysicsEntity.shouldRenderPlayerSitting = position == EnumSeatPlayerPosition.SITTING;
                 if (getPlayerSize() != null)
                     GlStateManager.scale(getPlayerSize().x, getPlayerSize().y, getPlayerSize().z);
-                if (position == EnumSeatPlayerPosition.LYING)
-                    GlStateManager.rotate(90, -1, 0, 0);
+                if (position == EnumSeatPlayerPosition.LYING) GlStateManager.rotate(90, -1, 0, 0);
 
                 //The render the player, e.rotationYaw is the name plate rotation
                 if (seatRider instanceof AbstractClientPlayer) {
@@ -187,8 +192,7 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
                 GlStateManager.pushMatrix();
                 transformForDebug();
                 AxisAlignedBB box = getBox();
-                RenderGlobal.drawBoundingBox(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ,
-                        isDriver() ? 0 : 1, isDriver() ? 1 : 0, 0, 1);
+                RenderGlobal.drawBoundingBox(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, isDriver() ? 0 : 1, isDriver() ? 1 : 0, 0, 1);
                 GlStateManager.popMatrix();
             }
             super.renderDebug(entity, context, packInfo);

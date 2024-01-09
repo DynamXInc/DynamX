@@ -147,5 +147,6 @@ public class DynamXErrorManager {
         registerErrorFormatter(PACKS_ERRORS, "duplicate_scene", FORMATTER_MULTIPLE_ERROR_ONE_LI);
         registerErrorFormatter(PACKS_ERRORS, "wheel_no_model", FORMATTER_MULTIPLE_ERROR);
         registerErrorFormatter(PACKS_ERRORS, "position_not_found_in_model", FORMATTER_MULTIPLE_ERROR);
+        registerErrorFormatter(PACKS_ERRORS, "seat_door_not_found", FORMATTER_MULTIPLE_ERROR);
     }
 }

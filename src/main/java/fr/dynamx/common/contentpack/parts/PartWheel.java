@@ -85,7 +85,7 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
     }
 
     protected void readMudguardPositionFromModel(ResourceLocation model) {
-        if (getRotationPoint() == null) {
+        if (getRotationPoint() == null && isAutomaticPosition()) {
             DxModelData modelData = DynamXContext.getDxModelDataFromCache(DynamXUtils.getModelPath(getPackName(), model));
             if (modelData != null) {
                 setRotationPoint(DynamXUtils.readPartPosition(modelData, getMudGuardObjectName(), true));

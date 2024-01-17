@@ -44,6 +44,11 @@ label {
     background-color: translucent;
 }
 
+.hud_icon {
+    width: 10px;
+    height: 10px;
+}
+
 .speed_pane {
     right: 0px;
     bottom: 0px;
@@ -77,10 +82,19 @@ label {
     text-align: center;
 }
 
+#icon_1 {
+    left: 41px;
+    top: 15px;
+    background-image: url("dynamxmod:textures/limitor.png");
+}
+
 #speed_limit {
-    top: 5px;
-    left: 5px;
+    top: 20px;
+    left: 26px;
     color: lightblue;
+    text-align: center;
+    width: 40px;
+    font-size: 8px;
 }
 
 #engine_gear {

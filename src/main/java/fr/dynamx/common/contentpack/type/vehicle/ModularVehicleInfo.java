@@ -5,11 +5,8 @@ import fr.dynamx.api.contentpack.object.ICollisionsContainer;
 import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
-import fr.dynamx.api.contentpack.object.part.BasePart;
-import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.contentpack.object.render.IModelPackObject;
-import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
@@ -22,6 +19,7 @@ import fr.dynamx.api.events.DynamXEntityRenderEvents;
 import fr.dynamx.client.renders.model.ItemDxModel;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.client.renders.model.texture.TextureVariantData;
+import fr.dynamx.client.renders.scene.EntityNode;
 import fr.dynamx.client.renders.scene.SceneBuilder;
 import fr.dynamx.client.renders.scene.SceneGraph;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
@@ -167,15 +165,6 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     protected final Map<String, PartLightSource> lightSources = new HashMap<>();
 
     /**
-     * The list of all rendered parts for this vehicle <br>
-     * A rendered part will not be rendered with the main part of the obj model <br>
-     * The {@link fr.dynamx.api.entities.modules.IPhysicsModule} using this part is responsible to render the part at the right location
-     */
-    private final List<String> renderedParts = new ArrayList<>();
-    @Getter
-    private final List<IDrawablePart<?, ?>> drawableParts = new ArrayList<>();
-
-    /**
      * Maps the metadata to the texture data
      */
     private MaterialVariantsInfo<ModularVehicleInfo> variants;
@@ -281,11 +270,6 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     }
 
     @Override
-    public boolean canRenderPart(String partName) {
-        return !renderedParts.contains(partName);
-    }
-
-    @Override
     public <A extends InteractivePart<?, ?>> List<A> getInteractiveParts() {
         return (List<A>) getPartsByType(InteractivePart.class);
     }
@@ -301,10 +285,10 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     public SceneGraph<?, ?> getSceneGraph() {
         if (sceneGraph == null) {
             if (isModelValid()) {
-                DynamXEntityRenderEvents.BuildSceneGraph buildSceneGraphEvent = new DynamXEntityRenderEvents.BuildSceneGraph(new SceneBuilder<>(), this, drawableParts, getScaleModifier());
+                DynamXEntityRenderEvents.BuildSceneGraph buildSceneGraphEvent = new DynamXEntityRenderEvents.BuildSceneGraph(new SceneBuilder<>(), this, getDrawableParts(), getScaleModifier());
                 sceneGraph = buildSceneGraphEvent.getSceneGraphResult();
             } else
-                sceneGraph = new SceneGraph.EntityNode<>(Collections.EMPTY_LIST, Collections.EMPTY_LIST);
+                sceneGraph = new EntityNode<>(Collections.EMPTY_LIST, Collections.EMPTY_LIST);
         }
         return sceneGraph;
     }
@@ -392,26 +376,5 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     public void addLightSource(PartLightSource source) {
         lightSources.put(source.getObjectName(), source);
         addDrawablePart(source);
-    }
-
-    @Override
-    public void addPart(BasePart<ModularVehicleInfo> part) {
-        super.addPart(part);
-        if (part instanceof IDrawablePart)
-            addDrawablePart((IDrawablePart<?, ?>) part);
-    }
-
-    @Override
-    public void addSubProperty(ISubInfoType<ModularVehicleInfo> property) {
-        super.addSubProperty(property);
-        if (property instanceof IDrawablePart)
-            addDrawablePart((IDrawablePart<?, ?>) property);
-    }
-
-    protected void addDrawablePart(IDrawablePart<?, ?> part) {
-        String[] names = part.getRenderedParts();
-        if (names.length > 0)
-            renderedParts.addAll(Arrays.asList(names));
-        drawableParts.add(part);
     }
 }

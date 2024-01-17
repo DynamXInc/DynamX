@@ -9,6 +9,7 @@ import fr.dynamx.common.entities.SeatEntity;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
+import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
@@ -38,6 +39,8 @@ public class RenderSeatEntity extends Render<SeatEntity> {
                 RenderGlobal.drawBoundingBox(-0.5, -0.5, -0.5, 0.5, 0.5, 0.5,
                         1, 0, 0, 1);
             } else {
+                Vector3fPool.openPool();
+                QuaternionPool.openPool();
                 MutableBoundingBox box = new MutableBoundingBox();
                 for (PartBlockSeat seat : (List<PartBlockSeat>) block.getPackInfo().getPartsByType(PartBlockSeat.class)) {
                     seat.getBox(box);
@@ -48,6 +51,8 @@ public class RenderSeatEntity extends Render<SeatEntity> {
                     RenderGlobal.drawBoundingBox(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ,
                             0, 1, 0, 1);
                 }
+                QuaternionPool.closePool();
+                Vector3fPool.closePool();
             }
             GlStateManager.enableLighting();
             GlStateManager.enableTexture2D();

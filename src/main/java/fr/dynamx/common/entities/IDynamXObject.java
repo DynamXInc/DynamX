@@ -2,16 +2,17 @@ package fr.dynamx.common.entities;
 
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import fr.dynamx.common.blocks.TEDynamXBlock;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 
 import java.util.List;
 
 /**
- * DynamX objects that have complex collisions with players, for example {@link PhysicsEntity} and {@link fr.dynamx.common.blocks.TEDynamXBlock} <br>
+ * DynamX objects that have complex collisions with players, for example {@link PhysicsEntity} and {@link TEDynamXBlock} <br>
  * <br>
  * The collision is handled in the {@link fr.dynamx.api.physics.IRotatedCollisionHandler}
  */
-public interface ICollidableObject {
+public interface IDynamXObject {
     /**
      * @return The collision boxes composing this entity, with no rotation applied, but at the objet position <br>
      * Used for collisions with players and other entities <br>

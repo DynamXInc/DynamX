@@ -4,6 +4,7 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.part.BasePart;
+import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
 import fr.dynamx.api.contentpack.object.render.IModelPackObject;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
@@ -19,14 +20,11 @@ import lombok.Setter;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.util.ResourceLocation;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A extends ISubInfoTypeOwner<?>> extends ObjectInfo<T>
-        implements IModelPackObject, IPartContainer<A> {
-
+        implements IModelPackObject, IPartContainer<A>
+{
     @Getter
     @Setter
     @PackFileProperty(configNames = {"CreativeTabName", "CreativeTab", "TabName"}, required = false, defaultValue = "CreativeTab of DynamX", description = "common.creativetabname")
@@ -63,6 +61,17 @@ public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A e
     @Getter
     private final List<ISubInfoType<A>> subProperties = new ArrayList<>();
 
+    @Getter
+    private final List<IDrawablePart<?, ?>> drawableParts = new ArrayList<>();
+
+    /**
+     * The list of all rendered parts for this object <br>
+     * A rendered part will not be rendered with the main part of the 3D model (see {@link fr.dynamx.client.renders.model.renderer.DxModelRenderer#renderDefaultParts(byte, boolean)}) <br>
+     * The {@link BasePart}s using rendered parts are responsible to render the part at the right location (by implementing {@link IDrawablePart})
+     */
+    @Getter
+    private final List<String> renderedParts = new ArrayList<>();
+
     public AbstractItemObject(String packName, String fileName) {
         super(packName, fileName);
     }
@@ -94,21 +103,44 @@ public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A e
         part.setId(id);
         partIds.put(part.getIdClass(), id);
         parts.add(part);
+        if (part instanceof IDrawablePart)
+            addDrawablePart((IDrawablePart<?, ?>) part);
     }
 
     @Override
     public void addSubProperty(ISubInfoType<A> property) {
         subProperties.add(property);
+        if (property instanceof IDrawablePart)
+            addDrawablePart((IDrawablePart<?, ?>) property);
     }
 
     @Override
     public boolean postLoad(boolean hot) {
         subProperties.forEach(subInfoType -> subInfoType.postLoad((A) this, hot));
+        parts.forEach(part -> part.postLoad((A) this, hot));
         return super.postLoad(hot);
     }
 
     @Override
     public Enum3DRenderLocation get3DItemRenderLocation() {
         return item3DRenderLocation;
+    }
+
+    /**
+     * Adds a {@link IDrawablePart} to this object <br>
+     * The part will not be rendered with the main parts of the 3D model (see {@link fr.dynamx.client.renders.model.renderer.DxModelRenderer#renderDefaultParts(byte, boolean)})
+     *
+     * @param part The part to add
+     */
+    public void addDrawablePart(IDrawablePart<?, ?> part) {
+        String[] names = part.getRenderedParts();
+        if (names.length > 0)
+            renderedParts.addAll(Arrays.asList(names));
+        drawableParts.add(part);
+    }
+
+    @Override
+    public boolean canRenderPart(String partName) {
+        return !renderedParts.contains(partName);
     }
 }

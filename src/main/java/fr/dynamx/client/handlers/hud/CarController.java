@@ -21,7 +21,6 @@ import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.client.ClientDynamXUtils;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.MinecraftForge;
@@ -118,12 +117,22 @@ public class CarController extends BaseController {
                 hudIcons.initIcon(i, icons[i]);
             }
             speed.addTickListener(() -> hudIcons.tick(icons));
+        } else {
+            speed.add(new GuiPanel() {
+                @Override
+                public boolean isVisible() {
+                    if (entity.getModuleByType(CarEngineModule.class) != null) {
+                        return entity.getModuleByType(CarEngineModule.class).getSpeedLimit() != Float.MAX_VALUE;
+                    }
+                    return false;
+                }
+            }.setCssId("icon_1").setCssClass("hud_icon"));
         }
         panel.add(speed);
 
-        panel.add(new UpdatableGuiLabel("hud.car.speedlimit", s -> {
+        speed.add(new UpdatableGuiLabel("%s", s -> {
             if (speedLimit != Float.MAX_VALUE) {
-                return I18n.format(s, (int) speedLimit);
+                return String.format(s, (int) speedLimit);
             } else {
                 return "";
             }

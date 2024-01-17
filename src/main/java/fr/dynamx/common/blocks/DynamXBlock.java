@@ -8,10 +8,6 @@ import fr.dynamx.api.contentpack.object.render.IModelPackObject;
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.events.DynamXBlockEvent;
-import fr.dynamx.client.renders.animations.DxAnimation;
-import fr.dynamx.client.renders.animations.DxAnimator;
-import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
-import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.capability.DynamXChunkData;
 import fr.dynamx.common.capability.DynamXChunkDataProvider;
@@ -180,9 +176,9 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         if (playerIn.isSneaking() && playerIn.capabilities.isCreativeMode) {
             TileEntity te = worldIn.getTileEntity(pos);
-            /*if (te != null && worldIn.isRemote && isDxModel)
+            if (te != null && worldIn.isRemote && isDxModel)
                 ((TEDynamXBlock) te).openConfigGui();
-            return isDxModel;*/
+            return true;/*
             if (te instanceof TEDynamXBlock && hand.equals(EnumHand.MAIN_HAND)) {
                 DxAnimator animator = ((TEDynamXBlock) te).getAnimator();
                 if (playerIn.isSneaking()) {
@@ -194,7 +190,7 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
                 //TODO
                 animator.setBlendPose(DxAnimator.EnumBlendPose.START_END);
                 animator.addAnimation("Run1", DxAnimation.EnumAnimType.START_END);
-            }
+            }*/
         }
         if (!worldIn.isRemote) {
             TileEntity te = worldIn.getTileEntity(pos);

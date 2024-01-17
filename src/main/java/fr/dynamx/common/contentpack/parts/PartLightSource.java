@@ -3,7 +3,6 @@ package fr.dynamx.common.contentpack.parts;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.aym.acslib.api.services.error.ErrorLevel;
-import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
 import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.contentpack.object.render.IModelPackObject;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
@@ -12,11 +11,14 @@ import fr.dynamx.api.contentpack.object.subinfo.SubInfoType;
 import fr.dynamx.api.contentpack.registry.*;
 import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
+import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import fr.dynamx.client.renders.scene.EntityRenderContext;
 import fr.dynamx.client.renders.scene.SceneBuilder;
 import fr.dynamx.client.renders.scene.SceneGraph;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.blocks.TEDynamXBlock;
+import fr.dynamx.common.entities.IDynamXObject;
 import fr.dynamx.common.contentpack.type.objects.AbstractItemObject;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
@@ -32,6 +34,8 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -41,8 +45,8 @@ import java.util.*;
  */
 @Getter
 @RegisteredSubInfoType(name = "MultiLight", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER, SubInfoTypeRegistries.BLOCKS, SubInfoTypeRegistries.PROPS}, strictName = false)
-public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISubInfoTypeOwner<PartLightSource>, IDrawablePart<PackPhysicsEntity<?, ?>, IPhysicsPackInfo>, IModelTextureVariantsSupplier.IModelTextureVariants {
-    @IPackFilePropertyFixer.PackFilePropertyFixer(registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER})
+public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISubInfoTypeOwner<PartLightSource>, IDrawablePart<PackPhysicsEntity<?, ?>, IModelPackObject>, IModelTextureVariantsSupplier.IModelTextureVariants {
+    @IPackFilePropertyFixer.PackFilePropertyFixer(registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER, SubInfoTypeRegistries.BLOCKS, SubInfoTypeRegistries.PROPS})
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("PartName".equals(key))
             return new IPackFilePropertyFixer.FixResult("ObjectName", false);
@@ -141,7 +145,7 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
     }
 
     @Override
-    public void addToSceneGraph(IPhysicsPackInfo packInfo, SceneBuilder<PackPhysicsEntity<?, ?>, IPhysicsPackInfo> sceneBuilder) {
+    public void addToSceneGraph(IModelPackObject packInfo, SceneBuilder<PackPhysicsEntity<?, ?>, IModelPackObject> sceneBuilder) {
         if (nodeDependingOnName != null) {
             sceneBuilder.addNode(packInfo, this, nodeDependingOnName);
         } else {
@@ -150,7 +154,7 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
     }
 
     @Override
-    public SceneGraph<PackPhysicsEntity<?, ?>, IPhysicsPackInfo> createSceneGraph(Vector3f modelScale, List<SceneGraph<PackPhysicsEntity<?, ?>, IPhysicsPackInfo>> childGraph) {
+    public SceneGraph<PackPhysicsEntity<?, ?>, IModelPackObject> createSceneGraph(Vector3f modelScale, List<SceneGraph<PackPhysicsEntity<?, ?>, IModelPackObject>> childGraph) {
         return new PartLightNode<>(this, modelScale, (List) childGraph);
     }
 
@@ -214,15 +218,17 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
         return Collections.emptyList();
     }
 
-    class PartLightNode<T extends BaseVehicleEntity<?>, A extends IPhysicsPackInfo> extends SceneGraph.Node<T, A> {
+    class PartLightNode<T extends IDynamXObject, A extends IModelPackObject> extends SceneGraph.Node<T, A> {
         public PartLightNode(PartLightSource lightSource, Vector3f scale, List<SceneGraph<T, A>> linkedChilds) {
             super(lightSource.getPosition(), lightSource.getRotation() != null ? GlQuaternionPool.newGlQuaternion(lightSource.getRotation()) : null, PartLightSource.this.isAutomaticPosition, scale, linkedChilds);
         }
 
         @Override
+        @SideOnly(Side.CLIENT)
         public void render(@Nullable T entity, EntityRenderContext context, A packInfo) {
             /* Rendering light sources */
-            AbstractLightsModule lights = entity != null ? entity.getModuleByType(AbstractLightsModule.class) : null;
+            AbstractLightsModule lights = (entity instanceof PackPhysicsEntity<?, ?>) ? ((PackPhysicsEntity<?, ?>) entity).getModuleByType(AbstractLightsModule.class) :
+                    entity instanceof TEDynamXBlock ? ((TEDynamXBlock) entity).getLightsModule() : null;
             GlStateManager.pushMatrix();
             transformToRotationPoint();
             /* Rendering light source */
@@ -245,7 +251,7 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
             int activeStep = 0;
             if (isOn && onLightObject.getBlinkSequence() != null) {
                 int[] seq = onLightObject.getBlinkSequence();
-                int mod = entity.ticksExisted % seq[seq.length - 1];
+                int mod = ClientEventHandler.MC.getRenderViewEntity().ticksExisted % seq[seq.length - 1];
                 isOn = false; //Default state
                 for (int i = seq.length - 1; i >= 0; i--) {
                     if (mod > seq[i]) {
@@ -271,14 +277,14 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
             }
             //Render the light
             if (lights != null && lights.isLightOn(onLightObject.getLightId()) && onLightObject.getRotateDuration() > 0) {
-                float step = ((float) (entity.ticksExisted % onLightObject.getRotateDuration())) / onLightObject.getRotateDuration();
+                float step = ((float) (ClientEventHandler.MC.getRenderViewEntity().ticksExisted % onLightObject.getRotateDuration())) / onLightObject.getRotateDuration();
                 step = step * 360;
                 GlStateManager.rotate(step, 0, 1, 0);
             }
             transformToPartPos();
             context.getModel().renderGroup(getObjectName(), texId, context.isUseVanillaRender());
-            if (entity != null && isOn) {
-                int i = entity.getBrightnessForRender();
+            if (entity instanceof PackPhysicsEntity<?, ?> && isOn) {
+                int i = ((PackPhysicsEntity<?, ?>) entity).getBrightnessForRender();
                 int j = i % 65536;
                 int k = i / 65536;
                 OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float) j, (float) k);

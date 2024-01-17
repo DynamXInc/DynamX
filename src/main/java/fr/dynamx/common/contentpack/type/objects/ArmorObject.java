@@ -10,6 +10,7 @@ import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
 import fr.dynamx.client.renders.model.ModelObjArmor;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
+import fr.dynamx.client.renders.scene.SceneGraph;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.loader.InfoList;
 import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
@@ -219,6 +220,11 @@ public class ArmorObject<T extends ArmorObject<?>> extends AbstractItemObject<T,
      */
     public List<ISubInfoType<T>> getSubProperties() {
         return subProperties;
+    }
+
+    @Override
+    public SceneGraph<?, ?> getSceneGraph() {
+        return null;
     }
 
     @Override

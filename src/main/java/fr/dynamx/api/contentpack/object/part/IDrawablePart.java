@@ -1,10 +1,10 @@
 package fr.dynamx.api.contentpack.object.part;
 
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
+import fr.dynamx.api.contentpack.object.render.IModelPackObject;
 import fr.dynamx.client.renders.scene.SceneBuilder;
 import fr.dynamx.client.renders.scene.SceneGraph;
-import fr.dynamx.common.entities.ModularPhysicsEntity;
+import fr.dynamx.common.entities.IDynamXObject;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -16,7 +16,7 @@ import java.util.List;
  * @param <T> The entity type
  * @param <A> The type of the owner of this part
  */
-public interface IDrawablePart<T extends ModularPhysicsEntity<?>, A extends IPhysicsPackInfo> {
+public interface IDrawablePart<T extends IDynamXObject, A extends IModelPackObject> {
     /**
      * Called to update textures of this part (egg for wheels) according to the new entity's metadata
      *

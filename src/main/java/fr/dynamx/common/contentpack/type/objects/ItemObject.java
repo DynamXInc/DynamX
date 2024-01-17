@@ -5,6 +5,7 @@ import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.events.CreatePackItemEvent;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
+import fr.dynamx.client.renders.scene.SceneGraph;
 import fr.dynamx.common.contentpack.loader.InfoList;
 import fr.dynamx.common.items.DynamXItem;
 import net.minecraftforge.common.MinecraftForge;
@@ -66,6 +67,11 @@ public class ItemObject<T extends ItemObject<?>> extends AbstractItemObject<T, T
     @Override
     public IModelTextureVariants getTextureVariantsFor(ObjObjectRenderer objObjectRenderer) {
         // variants not supported on items
+        return null;
+    }
+
+    @Override
+    public SceneGraph<?, ?> getSceneGraph() {
         return null;
     }
 }

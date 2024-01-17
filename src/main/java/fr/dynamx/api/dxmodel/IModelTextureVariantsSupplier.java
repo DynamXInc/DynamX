@@ -1,8 +1,9 @@
 package fr.dynamx.api.dxmodel;
 
-import fr.dynamx.common.objloader.data.ObjObjectData;
+import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.client.renders.model.texture.TextureVariantData;
+import fr.dynamx.common.objloader.data.ObjObjectData;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -12,8 +13,10 @@ import java.util.Map;
  *
  * @see fr.dynamx.client.renders.model.renderer.ObjModelRenderer
  */
-public interface IModelTextureVariantsSupplier {
-    default IModelTextureVariants getMainObjectVariants() { return getTextureVariantsFor(null); }
+public interface IModelTextureVariantsSupplier extends INamedObject {
+    default IModelTextureVariants getMainObjectVariants() {
+        return getTextureVariantsFor(null);
+    }
 
     /**
      * @return An id to {@link TextureVariantData} map that can be applied to the given {@link ObjObjectData} <br>
@@ -46,7 +49,9 @@ public interface IModelTextureVariantsSupplier {
 
     interface IModelTextureVariants {
         TextureVariantData getDefaultVariant();
+
         TextureVariantData getVariant(byte variantId);
+
         Map<Byte, TextureVariantData> getTextureVariants();
     }
 }

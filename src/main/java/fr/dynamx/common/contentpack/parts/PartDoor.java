@@ -8,12 +8,14 @@ import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
+import fr.dynamx.api.contentpack.object.render.IModelPackObject;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.registry.*;
 import fr.dynamx.api.dxmodel.DxModelPath;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.VehicleEntityEvent;
+import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.client.renders.scene.EntityRenderContext;
 import fr.dynamx.client.renders.scene.SceneGraph;
 import fr.dynamx.common.DynamXContext;
@@ -332,7 +334,18 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
         return new PartDoorNode<>(this, modelScale, childGraph);
     }
 
-    class PartDoorNode<T extends BaseVehicleEntity<?>, A extends IPhysicsPackInfo> extends SceneGraph.Node<T, A> {
+    @Override
+    public ResourceLocation getModel() {
+        return getOwner().getModel();
+    }
+
+    @Nullable
+    @Override
+    public IModelTextureVariants getTextureVariantsFor(ObjObjectRenderer objObjectRenderer) {
+        return getOwner().getTextureVariantsFor(objObjectRenderer);
+    }
+
+    class PartDoorNode<T extends BaseVehicleEntity<?>, A extends IModelPackObject> extends SceneGraph.Node<T, A> {
         public PartDoorNode(PartDoor door, Vector3f scale, List<SceneGraph<T, A>> linkedChilds) {
             super(door.getCarAttachPoint(), null, PartDoor.this.isAutomaticPosition, scale, linkedChilds);
         }

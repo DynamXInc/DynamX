@@ -41,6 +41,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Quaternion;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
 @Mod.EventBusSubscriber(modid = DynamXConstants.ID, value = Side.CLIENT)
@@ -49,7 +50,7 @@ public class ClientDebugSystem {
     public static boolean enableDebugDrawing;
     public static int MOVE_DEBUG;
 
-    public static final Map<Long, PhysicsRigidBody> trackedRigidBodies = new HashMap<>();
+    public static final Map<Long, PhysicsRigidBody> trackedRigidBodies = new ConcurrentHashMap<>();
     public static final Map<Long, RigidBodyTransform>[] prevRigidBodyStates = new Map[]{new HashMap<>(), new HashMap<>()};
 
     private static byte curRigidBodyStatesIndex;

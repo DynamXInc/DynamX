@@ -213,6 +213,8 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     public void appendTo(ModularVehicleInfo owner) {
         readPosition(owner.getModel());
         super.appendTo(owner);
+        getCarAttachPoint().multLocal(getScaleModifier(this.owner));
+        getDoorAttachPoint().multLocal(getScaleModifier(this.owner));
         MutableBoundingBox box = new MutableBoundingBox(getScale()).offset(getPosition());
         collisionsHelper.addCollisionShape(new IShapeInfo() {
             @Override

@@ -185,7 +185,11 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
             log.info("Loading model textures...");
             //Loads all textures of models, cannot be done before because the TextureManager is not initialized
             bar.step("Uploading textures");
-            OBJLoader.getMtlLoaders().forEach(MTLLoader::uploadTextures);
+            OBJLoader.getMtlLoaders().forEach(mtlLoader -> {
+                if(mtlLoader == null)
+                    throw new NullPointerException("Null mtl loader ! IN " + OBJLoader.getMtlLoaders());
+                mtlLoader.uploadTextures();
+            });
             OBJLoader.getMtlLoaders().clear();
 
             if(ClientEventHandler.MC.world != null)

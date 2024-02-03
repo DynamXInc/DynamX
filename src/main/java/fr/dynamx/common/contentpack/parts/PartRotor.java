@@ -133,8 +133,6 @@ public class PartRotor extends BasePart<ModularVehicleInfo> implements IDrawable
                     GlStateManager.translate(0, 0.56152, 2.6077);
                 }
             }
-            //Scale it
-            GlStateManager.scale(packInfo.getScaleModifier().x, packInfo.getScaleModifier().y, packInfo.getScaleModifier().z);
             //Render it
             vehicleModel.renderGroup(getObjectName(), context.getTextureId(), context.isUseVanillaRender());
             GlStateManager.popMatrix();

@@ -6,6 +6,7 @@ import fr.dynamx.api.network.sync.SynchronizationRules;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
 import fr.dynamx.client.handlers.hud.HelicopterController;
 import fr.dynamx.common.contentpack.type.vehicle.BaseEngineInfo;
+import fr.dynamx.common.contentpack.type.vehicle.HelicopterPhysicsInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.network.sync.variables.EntityFloatArrayVariable;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
@@ -25,12 +26,21 @@ public class HelicopterEngineModule extends BasicEngineModule {
     private EntityFloatArrayVariable rollControls = new EntityFloatArrayVariable(SynchronizationRules.CONTROLS_TO_SPECTATORS, new float[2]);
     @SynchronizedEntityVariable(name = "power")
     private EntityVariable<Float> power = new EntityVariable<Float>(SynchronizationRules.CONTROLS_TO_SPECTATORS, 0f);
+    private int engineStartupTime;
+    private int startupTimer;
     @Getter
     private BaseEngineInfo engineInfo;
 
     public HelicopterEngineModule(BaseVehicleEntity<? extends BaseVehiclePhysicsHandler<?>> entity) {
         super(entity);
+        onPackInfosReloaded();
+    }
+
+    @Override
+    public void onPackInfosReloaded() {
+        super.onPackInfosReloaded();
         engineInfo = entity.getPackInfo().getSubPropertyByType(BaseEngineInfo.class);
+        engineStartupTime = entity.getPackInfo().getSubPropertyByType(HelicopterPhysicsInfo.class).getEngineStartupTime();
     }
 
     public void setPower(float power) {
@@ -50,9 +60,16 @@ public class HelicopterEngineModule extends BasicEngineModule {
     }
 
     @Override
+    public void onEngineSwitchedOn() {
+        super.onEngineSwitchedOn();
+        startupTimer = engineStartupTime;
+        power.set(1f/engineStartupTime);
+    }
+
+    @Override
     public void onEngineSwitchedOff() {
         super.onEngineSwitchedOff();
-        power.set(0f);
+        startupTimer = (int) (-20 * power.get());
     }
 
     @Override
@@ -75,7 +92,20 @@ public class HelicopterEngineModule extends BasicEngineModule {
 
     @Override
     public boolean listenEntityUpdates(Side side) {
-        return side.isClient();
+        return true;
+    }
+
+    @Override
+    public void updateEntity() {
+        if(startupTimer > 0) {
+            startupTimer--;
+            power.set(1f - (float)startupTimer/engineStartupTime);
+        } else if(startupTimer < 0) {
+            startupTimer++;
+            power.set(-(float)startupTimer/20);
+        }
+        if(entity.world.isRemote) //sounds
+            super.updateEntity();
     }
 
     @Override

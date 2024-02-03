@@ -11,36 +11,30 @@ import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.engines.HelicopterEngineModule;
 import lombok.Getter;
 
+@Getter
 @RegisteredSubInfoType(name = "HelicopterPhysics", registries = {SubInfoTypeRegistries.HELICOPTER})
-public class HelicopterPhysicsInfo extends SubInfoType<ModularVehicleInfo> {
-
-    @Getter
+public class HelicopterPhysicsInfo extends SubInfoType<ModularVehicleInfo>
+{
     @PackFileProperty(configNames = "MinPower", defaultValue = "0.4f")
-    private float minPower = 0.4f;
-    @Getter
+    protected float minPower = 0.4f;
     @PackFileProperty(configNames = "InclinedGravityFactor", defaultValue = "1.8f")
-    private float inclinedGravityFactor = 1.8f;
-    @Getter
+    protected float inclinedGravityFactor = 1.8f;
     @PackFileProperty(configNames = "ThrustForce", defaultValue = "3000")
-    private float thrustForce = 3000;
-    @Getter
+    protected float thrustForce = 3000;
     @PackFileProperty(configNames = "VerticalThrustCompensation", defaultValue = "2000")
-    private float verticalThrustCompensation = 2000;
-    @Getter
+    protected float verticalThrustCompensation = 2000;
     @PackFileProperty(configNames = "BrakeForce", defaultValue = "200")
-    private float brakeForce = 500;
-    @Getter
+    protected float brakeForce = 500;
     @PackFileProperty(configNames = "MouseYawForce", defaultValue = "2600")
-    private float mouseYawForce = 2600;
-    @Getter
+    protected float mouseYawForce = 2600;
     @PackFileProperty(configNames = "MousePitchForce", defaultValue = "2000")
-    private float mousePitchForce = 2000;
-    @Getter
+    protected float mousePitchForce = 2000;
     @PackFileProperty(configNames = "MouseRollForce", defaultValue = "400")
-    private float mouseRollForce = 400;
-    @Getter
+    protected float mouseRollForce = 400;
     @PackFileProperty(configNames = "RollForce", defaultValue = "6000")
-    private float rollForce = 6000;
+    protected float rollForce = 6000;
+    @PackFileProperty(configNames = "EngineStartupTime", defaultValue = "300 (15 secondes)")
+    protected int engineStartupTime = 20*15;
 
     public HelicopterPhysicsInfo(ISubInfoTypeOwner<ModularVehicleInfo> owner) {
         super(owner);

@@ -90,7 +90,7 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
     /**
      * Computes listeners of update methods
      */
-    protected void sortModules() {
+    protected void getListenerModules() {
         updateEntityListeners.clear();
         updatePhysicsListeners.clear();
         moduleList.forEach(m -> {
@@ -124,7 +124,7 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
             initCallback = null; //Free memory
         }
         //Init them before sorting because listened functions may change
-        sortModules();
+        getListenerModules();
         //SynchronizedVariablesRegistry.setSyncVarsForContext(world.isRemote ? Side.CLIENT : Side.SERVER, new HashMap<>(), getNetwork());
         return true;
     }

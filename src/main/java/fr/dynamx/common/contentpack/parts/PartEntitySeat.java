@@ -106,7 +106,6 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
     @Nullable
     @Override
     public PartDoor getLinkedPartDoor() {
-        System.out.println("Press f " + getLinkedDoor() +" // " + getOwner().getPartsByType(PartDoor.class).stream().map(PartDoor::getPartName).reduce((s, s2) -> s + ", " + s2).orElse("null"));
         return getLinkedDoor() == null ? null : getOwner().getPartsByType(PartDoor.class).stream().filter(partDoor -> partDoor.getPartName().equalsIgnoreCase(getLinkedDoor())).findFirst().orElse(null);
     }
 

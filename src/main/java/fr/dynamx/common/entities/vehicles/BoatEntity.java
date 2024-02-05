@@ -2,13 +2,12 @@ package fr.dynamx.common.entities.vehicles;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.IModuleContainer;
-import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
-import fr.dynamx.common.entities.modules.engines.BoatPropellerModule;
 import fr.dynamx.common.entities.modules.SeatsModule;
+import fr.dynamx.common.entities.modules.engines.BoatPropellerModule;
 import fr.dynamx.common.physics.entities.BoatPhysicsHandler;
 import net.minecraft.world.World;
 
@@ -32,8 +31,8 @@ public class BoatEntity<T extends BoatPhysicsHandler<?>> extends BaseVehicleEnti
     }
 
     @Override
-    protected void sortModules() {
-        super.sortModules();
+    protected void getListenerModules() {
+        super.getListenerModules();
         seats = getModuleByType(SeatsModule.class);
         propeller = getModuleByType(BoatPropellerModule.class);
     }

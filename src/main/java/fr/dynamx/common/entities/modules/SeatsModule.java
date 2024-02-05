@@ -8,11 +8,12 @@ import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.api.network.EnumPacketTarget;
 import fr.dynamx.client.camera.CameraMode;
-import fr.dynamx.common.network.sync.PhysicsEntitySynchronizer;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.network.sync.MessageSeatsSync;
+import fr.dynamx.common.network.sync.PhysicsEntitySynchronizer;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.Vector3fPool;
@@ -208,6 +209,9 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
                     }
                 } else {
                     log.warn("Entity with id " + e.getValue() + " not found for seat in " + entity);
+                    log.warn("Details " + msg.getSeatToEntity()+" "+entity.getPassengers());
+                    log.warn("Players there " + entity.world.playerEntities);
+                    log.warn("THE player id " + DynamXMain.proxy.getClientWorld());
                 }
             } else {
                 log.warn("Seat with id " + e.getKey() + " not found in " + entity);

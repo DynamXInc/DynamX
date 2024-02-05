@@ -26,6 +26,7 @@ public class VanillaNetworkHandler implements IDnxNetworkHandler {
 
     private <T> void sendPacketServer(IDnxPacket packet, EnumPacketTarget<T> targetType, @Nullable T target) {
         if (EnumPacketTarget.PLAYER == targetType) {
+            //System.out.println("SEND TO PLAYER " + target);
             HANDLER.sendTo(packet, (EntityPlayerMP) target);
         } else if (EnumPacketTarget.ALL_AROUND == targetType) {
             HANDLER.sendToAllAround(packet, (NetworkRegistry.TargetPoint) target);

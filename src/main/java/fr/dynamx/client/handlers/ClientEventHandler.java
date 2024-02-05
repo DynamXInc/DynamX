@@ -58,6 +58,7 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.client.event.sound.SoundLoadEvent;
 import net.minecraftforge.client.event.sound.SoundSetupEvent;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
@@ -443,6 +444,14 @@ public class ClientEventHandler {
         // If the entity has a ragdoll, don't render it
         if (event.getEntity().isInvisible() && DynamXContext.getPlayerToCollision().containsKey(event.getEntity()) && DynamXContext.getPlayerToCollision().get(event.getEntity()).ragdollEntity != null) {
             event.setCanceled(true);
+        }
+    }
+
+    @SubscribeEvent
+    public void onJoinWorld(EntityJoinWorldEvent event) {
+        if (event.getEntity() instanceof EntityPlayer) {
+            EntityPlayer player = (EntityPlayer) event.getEntity();
+            System.out.println("Player joined the world as " + player);
         }
     }
 }

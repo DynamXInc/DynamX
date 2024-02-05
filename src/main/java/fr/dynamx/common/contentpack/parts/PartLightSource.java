@@ -1,5 +1,6 @@
 package fr.dynamx.common.contentpack.parts;
 
+import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.aym.acslib.api.services.error.ErrorLevel;
@@ -14,6 +15,7 @@ import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import fr.dynamx.client.renders.scene.EntityRenderContext;
+import fr.dynamx.client.renders.scene.Node;
 import fr.dynamx.client.renders.scene.SceneBuilder;
 import fr.dynamx.client.renders.scene.SceneGraph;
 import fr.dynamx.common.DynamXContext;
@@ -26,6 +28,7 @@ import fr.dynamx.common.entities.modules.AbstractLightsModule;
 import fr.dynamx.common.entities.vehicles.TrailerEntity;
 import fr.dynamx.common.objloader.data.DxModelData;
 import fr.dynamx.utils.DynamXUtils;
+import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
@@ -218,7 +221,7 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
         return Collections.emptyList();
     }
 
-    class PartLightNode<T extends IDynamXObject, A extends IModelPackObject> extends SceneGraph.Node<T, A> {
+    class PartLightNode<T extends IDynamXObject, A extends IModelPackObject> extends Node<T, A> {
         public PartLightNode(PartLightSource lightSource, Vector3f scale, List<SceneGraph<T, A>> linkedChilds) {
             super(lightSource.getPosition(), lightSource.getRotation() != null ? GlQuaternionPool.newGlQuaternion(lightSource.getRotation()) : null, PartLightSource.this.isAutomaticPosition, scale, linkedChilds);
         }
@@ -229,7 +232,6 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
             /* Rendering light sources */
             AbstractLightsModule lights = (entity instanceof PackPhysicsEntity<?, ?>) ? ((PackPhysicsEntity<?, ?>) entity).getModuleByType(AbstractLightsModule.class) :
                     entity instanceof TEDynamXBlock ? ((TEDynamXBlock) entity).getLightsModule() : null;
-            GlStateManager.pushMatrix();
             transformToRotationPoint();
             /* Rendering light source */
             LightObject onLightObject = null;
@@ -278,9 +280,11 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
             //Render the light
             if (lights != null && lights.isLightOn(onLightObject.getLightId()) && onLightObject.getRotateDuration() > 0) {
                 float step = ((float) (ClientEventHandler.MC.getRenderViewEntity().ticksExisted % onLightObject.getRotateDuration())) / onLightObject.getRotateDuration();
-                step = step * 360;
-                GlStateManager.rotate(step, 0, 1, 0);
+                step = step * (FastMath.PI * 2);
+                transform.rotate(step, 0, 1, 0);
             }
+            GlStateManager.pushMatrix();
+            GlStateManager.multMatrix(ClientDynamXUtils.getMatrixBuffer(transform));
             transformToPartPos();
             context.getModel().renderGroup(getObjectName(), texId, context.isUseVanillaRender());
             if (entity instanceof PackPhysicsEntity<?, ?> && isOn) {
@@ -290,8 +294,8 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
                 OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float) j, (float) k);
                 GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             }
-            renderChildren(entity, context, packInfo);
             GlStateManager.popMatrix();
+            renderChildren(entity, context, packInfo);
         }
 
         @Override

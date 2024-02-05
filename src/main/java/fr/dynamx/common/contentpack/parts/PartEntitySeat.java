@@ -1,5 +1,6 @@
 package fr.dynamx.common.contentpack.parts;
 
+import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
@@ -12,6 +13,7 @@ import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
 import fr.dynamx.client.renders.scene.EntityRenderContext;
+import fr.dynamx.client.renders.scene.Node;
 import fr.dynamx.client.renders.scene.SceneGraph;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
@@ -22,6 +24,7 @@ import fr.dynamx.common.entities.modules.SeatsModule;
 import fr.dynamx.common.entities.vehicles.CarEntity;
 import fr.dynamx.common.entities.vehicles.HelicopterEntity;
 import fr.dynamx.utils.EnumSeatPlayerPosition;
+import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.errors.DynamXErrorManager;
@@ -140,7 +143,7 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
         return null;
     }
 
-    class PartEntitySeatNode<T extends BaseVehicleEntity<?>, A extends IPhysicsPackInfo> extends SceneGraph.Node<T, A> {
+    class PartEntitySeatNode<T extends BaseVehicleEntity<?>, A extends IPhysicsPackInfo> extends Node<T, A> {
         public PartEntitySeatNode(BasePartSeat seat, Vector3f scale, List<SceneGraph<T, A>> linkedChilds) {
             super(seat.getPosition(), GlQuaternionPool.newGlQuaternion(seat.getRotation()), scale, linkedChilds);
         }
@@ -157,16 +160,17 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
             if ((seatRider != Minecraft.getMinecraft().player || Minecraft.getMinecraft().gameSettings.thirdPersonView != 0)) {
                 DynamXRenderUtils.popGlAllAttribBits();
                 float partialTicks = context.getPartialTicks();
-                GlStateManager.pushMatrix();
                 transformToRotationPoint();
 
                 //Transform the player to match the seat rotation and size
                 EnumSeatPlayerPosition position = getPlayerPosition();
                 RenderPhysicsEntity.shouldRenderPlayerSitting = position == EnumSeatPlayerPosition.SITTING;
                 if (getPlayerSize() != null)
-                    GlStateManager.scale(getPlayerSize().x, getPlayerSize().y, getPlayerSize().z);
-                if (position == EnumSeatPlayerPosition.LYING) GlStateManager.rotate(90, -1, 0, 0);
+                    transform.scale(getPlayerSize().x, getPlayerSize().y, getPlayerSize().z);
+                if (position == EnumSeatPlayerPosition.LYING) transform.rotate(FastMath.PI / 2, 1, 0, 0);
 
+                GlStateManager.pushMatrix();
+                GlStateManager.multMatrix(ClientDynamXUtils.getMatrixBuffer(transform));
                 //The render the player, e.rotationYaw is the name plate rotation
                 if (seatRider instanceof AbstractClientPlayer) {
                     if (ClientEventHandler.renderPlayer != null) {

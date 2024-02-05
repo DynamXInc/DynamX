@@ -209,7 +209,14 @@ public class SceneBuilder<T extends IDynamXObject, A extends IModelPackObject> {
         validateNode(obj, nodeName, node);
         List<SceneGraph<T, A>> childGraph = node.nodes.isEmpty() ? null : node.generateScene(obj, modelScale);
         DynamXEntityRenderEvents.CreatePartScene createPartSceneEvent = new DynamXEntityRenderEvents.CreatePartScene(obj, node.leaf, modelScale, (List) childGraph);
-        return (SceneGraph<T, A>) createPartSceneEvent.getSceneGraphResult();
+
+        SceneGraph<T, A> graphResult = (SceneGraph<T, A>) createPartSceneEvent.getSceneGraphResult();
+        if (graphResult.getLinkedChildren() != null) {
+            for (SceneGraph<T, A> linkedChild : graphResult.getLinkedChildren()) {
+                linkedChild.setParent(graphResult);
+            }
+        }
+        return graphResult;
     }
 
     /**
@@ -242,7 +249,10 @@ public class SceneBuilder<T extends IDynamXObject, A extends IModelPackObject> {
         List<SceneGraph<T, A>> unlinkedNodes = new ArrayList<>();
         drawableParts.forEach(part -> part.addToSceneGraph((A) obj, this));
         build((A) obj, modelScale, linkedNodes, unlinkedNodes);
-        return new EntityNode(linkedNodes, unlinkedNodes);
+        EntityNode entityNode = new EntityNode(linkedNodes, unlinkedNodes);
+        linkedNodes.forEach(c -> c.setParent(entityNode));
+        unlinkedNodes.forEach(c -> c.setParent(entityNode));
+        return entityNode;
     }
 
     /**
@@ -259,7 +269,9 @@ public class SceneBuilder<T extends IDynamXObject, A extends IModelPackObject> {
         drawableParts.forEach(part -> part.addToSceneGraph((A) obj, this));
         build((A) obj, modelScale, linkedNodes, unlinkedNodes);
         linkedNodes.addAll(unlinkedNodes); // Don't handle them differently for blocks
-        return new BlockNode(linkedNodes);
+        BlockNode blockNode = new BlockNode(linkedNodes);
+        linkedNodes.forEach(c -> c.setParent(blockNode));
+        return blockNode;
     }
 
     /**
@@ -276,7 +288,7 @@ public class SceneBuilder<T extends IDynamXObject, A extends IModelPackObject> {
             node.leaf = new IDrawablePart<T, A>() {
                 @Override
                 public SceneGraph<T, A> createSceneGraph(Vector3f modelScale, List<SceneGraph<T, A>> childGraph) {
-                    return new SceneGraph.Node<T, A>(null, null, modelScale, childGraph) {
+                    return new fr.dynamx.client.renders.scene.Node<T, A>(null, null, modelScale, childGraph) {
                         @Override
                         public void render(@Nullable T entity, EntityRenderContext context, A packInfo) {
                             GlStateManager.pushMatrix();

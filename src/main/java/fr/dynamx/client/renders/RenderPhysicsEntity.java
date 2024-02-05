@@ -20,6 +20,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.MinecraftForge;
+import org.joml.Vector3f;
 import org.lwjgl.util.vector.Quaternion;
 
 import javax.annotation.Nullable;
@@ -39,8 +40,8 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
     /**
      * Setups render translation and rotation before rendering the entity
      */
-    public Quaternion setupRenderTransform(T entity, double x, double y, double z, float partialTicks) {
-        GlStateManager.translate((float) x, (float) y, (float) z);
+    public Quaternion setupRenderTransform(T entity, Vector3f renderPosition, float partialTicks) {
+        GlStateManager.translate((float) renderPosition.x, (float) renderPosition.y, (float) renderPosition.z);
         Quaternion q = ClientDynamXUtils.computeInterpolatedGlQuaternion(entity.prevRenderRotation, entity.renderRotation, partialTicks);
         GlStateManager.rotate(q);
         return q;
@@ -153,7 +154,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
 
                 renderEntityDebug(entity, context);
 
-                double x = context.getX(), y = context.getY(), z = context.getZ();
+                double x = context.getRenderPosition().x, y = context.getRenderPosition().y, z = context.getRenderPosition().z;
                 float partialTicks = context.getPartialTicks();
                 GlStateManager.translate((float) x, (float) y, (float) z);
 

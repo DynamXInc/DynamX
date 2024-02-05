@@ -42,7 +42,7 @@ public class RenderDoor<T extends DoorEntity<?>> extends RenderPhysicsEntity<T> 
         Vector3f scale = entity.getPackInfo().getScaleModifier();
         //TODO USE SCENE GRAPH
         GlStateManager.pushMatrix();
-        setupRenderTransform(entity, context.getX(), context.getY(), context.getZ(), context.getPartialTicks());
+        setupRenderTransform(entity, context.getRenderPosition(), context.getPartialTicks());
         GlStateManager.scale(scale.x, scale.y, scale.z);
         renderModelGroup(context.getModel(), entity.getPackInfo().getObjectName(), entity, context.getTextureId(), false);
         DynamXRenderUtils.popGlAllAttribBits();

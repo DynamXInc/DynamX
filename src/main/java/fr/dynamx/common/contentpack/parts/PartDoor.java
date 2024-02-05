@@ -17,6 +17,7 @@ import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.client.renders.scene.EntityRenderContext;
+import fr.dynamx.client.renders.scene.Node;
 import fr.dynamx.client.renders.scene.SceneGraph;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.type.ObjectCollisionsHelper;
@@ -347,37 +348,39 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
         return getOwner().getTextureVariantsFor(objObjectRenderer);
     }
 
-    class PartDoorNode<T extends BaseVehicleEntity<?>, A extends IModelPackObject> extends SceneGraph.Node<T, A> {
+    class PartDoorNode<T extends BaseVehicleEntity<?>, A extends IModelPackObject> extends Node<T, A> {
         public PartDoorNode(PartDoor door, Vector3f scale, List<SceneGraph<T, A>> linkedChilds) {
             super(door.getCarAttachPoint(), null, PartDoor.this.isAutomaticPosition, scale, linkedChilds);
         }
 
         @Override
         public void render(@Nullable T entity, EntityRenderContext context, A packInfo) {
-            GlStateManager.pushMatrix();
+            transform.set(parent.getTransform());
             DoorsModule module = entity != null ? entity.getModuleByType(DoorsModule.class) : null;
             if (!isEnabled() || module == null || module.getCurrentState(getId()) == DoorsModule.DoorState.CLOSED) {
                 Vector3f pos = Vector3fPool.get().addLocal(translation);
                 pos.subtract(getDoorAttachPoint(), pos);
-                GlStateManager.translate(pos.x, pos.y, pos.z);
+                transform.translate(pos.x, pos.y, pos.z);
             } else if (module.getTransforms().containsKey(getId())) {
                 float partialTicks = context.getPartialTicks();
                 SynchronizedRigidBodyTransform sync = module.getTransforms().get(getId());
-                RigidBodyTransform transform = sync.getTransform();
+                RigidBodyTransform rbSyncTrans = sync.getTransform();
                 RigidBodyTransform prev = sync.getPrevTransform();
-                Vector3f pos = Vector3fPool.get(prev.getPosition()).addLocal(transform.getPosition().subtract(prev.getPosition(), Vector3fPool.get()).multLocal(partialTicks));
-                GlStateManager.rotate(ClientDynamXUtils.computeInterpolatedGlQuaternion(entity.prevRenderRotation, entity.renderRotation, context.getPartialTicks(), true));
-                GlStateManager.translate(
-                        pos.x - (entity.prevPosX + (entity.posX - entity.prevPosX) * context.getPartialTicks()),
-                        pos.y - (entity.prevPosY + (entity.posY - entity.prevPosY) * context.getPartialTicks()),
-                        pos.z - (entity.prevPosZ + (entity.posZ - entity.prevPosZ) * context.getPartialTicks()));
-                GlStateManager.rotate(ClientDynamXUtils.computeInterpolatedGlQuaternion(prev.getRotation(), transform.getRotation(), partialTicks));
+                Vector3f pos = Vector3fPool.get(prev.getPosition()).addLocal(rbSyncTrans.getPosition().subtract(prev.getPosition(), Vector3fPool.get()).multLocal(partialTicks));
+
+                transform.rotate(ClientDynamXUtils.computeInterpolatedJomlQuaternion(entity.prevRenderRotation, entity.renderRotation, partialTicks, true));
+                transform.translate((float) (pos.x - (entity.prevPosX + (entity.posX - entity.prevPosX) * partialTicks)),
+                        (float) (pos.y - (entity.prevPosY + (entity.posY - entity.prevPosY) * partialTicks)),
+                        (float) (pos.z - (entity.prevPosZ + (entity.posZ - entity.prevPosZ) * partialTicks)));
+                transform.rotate(ClientDynamXUtils.computeInterpolatedJomlQuaternion(prev.getRotation(), rbSyncTrans.getRotation(), partialTicks));
             }
+            transform.scale(scale.x, scale.y, scale.z);
+            GlStateManager.pushMatrix();
+            GlStateManager.multMatrix(ClientDynamXUtils.getMatrixBuffer(transform));
             transformToPartPos();
-            GlStateManager.scale(scale.x, scale.y, scale.z);
             context.getRender().renderModelGroup(context.getModel(), getObjectName(), entity, context.getTextureId(), false);
-            renderChildren(entity, context, packInfo);
             GlStateManager.popMatrix();
+            renderChildren(entity, context, packInfo);
         }
 
         @Override

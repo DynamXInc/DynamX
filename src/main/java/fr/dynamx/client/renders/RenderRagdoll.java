@@ -63,9 +63,9 @@ public class RenderRagdoll<T extends RagdollEntity> extends RenderPhysicsEntity<
         bindTexture(texture);
 
         GlStateManager.pushMatrix();
-        GlStateManager.translate((float) context.getX() - (entity.prevPosX + (entity.posX - entity.prevPosX) * partialTicks),
-                (float) context.getY() - (entity.prevPosY + (entity.posY - entity.prevPosY) * partialTicks),
-                (float) context.getZ() - (entity.prevPosZ + (entity.posZ - entity.prevPosZ) * partialTicks));
+        GlStateManager.translate(context.getRenderPosition().x - (entity.prevPosX + (entity.posX - entity.prevPosX) * partialTicks),
+                context.getRenderPosition().y - (entity.prevPosY + (entity.posY - entity.prevPosY) * partialTicks),
+                context.getRenderPosition().z - (entity.prevPosZ + (entity.posZ - entity.prevPosZ) * partialTicks));
         // GlStateManager.disableLighting();
 
         //Chest

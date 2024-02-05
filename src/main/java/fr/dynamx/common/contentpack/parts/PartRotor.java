@@ -11,6 +11,7 @@ import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
 import fr.dynamx.client.renders.scene.EntityRenderContext;
+import fr.dynamx.client.renders.scene.Node;
 import fr.dynamx.client.renders.scene.SceneGraph;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
@@ -19,8 +20,10 @@ import fr.dynamx.common.entities.modules.HelicopterRotorModule;
 import fr.dynamx.common.entities.modules.engines.BoatPropellerModule;
 import fr.dynamx.common.entities.modules.engines.CarEngineModule;
 import fr.dynamx.common.entities.vehicles.HelicopterEntity;
+import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
+import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import lombok.Getter;
 import lombok.Setter;
@@ -98,7 +101,7 @@ public class PartRotor extends BasePart<ModularVehicleInfo> implements IDrawable
         ROTATING_WHEN_STARTED
     }
 
-    class PartRotorNode<T extends BaseVehicleEntity<?>, A extends ModularVehicleInfo> extends SceneGraph.Node<T, A> {
+    class PartRotorNode<T extends BaseVehicleEntity<?>, A extends ModularVehicleInfo> extends Node<T, A> {
         public PartRotorNode(PartRotor part, Vector3f scale, List<SceneGraph<T, A>> linkedChilds) {
             super(part.getPosition(), GlQuaternionPool.newGlQuaternion(part.getRotation()), PartRotor.this.isAutomaticPosition, scale, linkedChilds);
         }
@@ -108,12 +111,11 @@ public class PartRotor extends BasePart<ModularVehicleInfo> implements IDrawable
             DxModelRenderer vehicleModel = context.getModel();
             if (!vehicleModel.containsObjectOrNode(getObjectName()))
                 return;
-            GlStateManager.pushMatrix();
             transformToRotationPoint();
             // Rotating the rotor.
             if (null == RotorType.ALWAYS_ROTATING) {
                 //TODO
-                GlStateManager.rotate(context.getPartialTicks() * getRotationSpeed(), getRotationAxis().x, getRotationAxis().y, getRotationAxis().z);
+                transform.rotate(context.getPartialTicks() * getRotationSpeed() * DynamXMath.TO_RADIAN, getRotationAxis().x, getRotationAxis().y, getRotationAxis().z);
             } else if (entity != null) {
                 if (null == RotorType.ROTATING_WHEN_STARTED) {
                     //TODO : check if the vehicle is started
@@ -121,18 +123,22 @@ public class PartRotor extends BasePart<ModularVehicleInfo> implements IDrawable
                 }
                 if (entity.hasModuleOfType(HelicopterRotorModule.class)) {
                     HelicopterRotorModule partModule = entity.getModuleByType(HelicopterRotorModule.class);
-                    GlStateManager.rotate((partModule.getCurAngle() + context.getPartialTicks() * partModule.getCurPower()) * getRotationSpeed(), getRotationAxis().x, getRotationAxis().y, getRotationAxis().z);
+                    float angle = (partModule.getCurAngle() + context.getPartialTicks() * partModule.getCurPower()) * getRotationSpeed();
+                    transform.rotate(angle * DynamXMath.TO_RADIAN, getRotationAxis().x, getRotationAxis().y, getRotationAxis().z);
                 } else if (entity.hasModuleOfType(CarEngineModule.class)) {
                     CarEngineModule partModule = entity.getModuleByType(CarEngineModule.class);
                     float revs = partModule.getPhysicsHandler().getEngine().getRevs();
                     // GlStateManager.rotate((partModule.getCurAngle() + partialTicks * revs) * getRotationSpeed(), getRotationAxis().x, getRotationAxis().y, getRotationAxis().z);
                 } else if (entity.hasModuleOfType(BoatPropellerModule.class)) {
                     BoatPropellerModule partModule = entity.getModuleByType(BoatPropellerModule.class);
-                    GlStateManager.translate(0, -0.56152, -2.6077);
-                    GlStateManager.rotate((partModule.getBladeAngle() + context.getPartialTicks() * partModule.getRevs()) * getRotationSpeed(), getRotationAxis().x, getRotationAxis().y, getRotationAxis().z);
-                    GlStateManager.translate(0, 0.56152, 2.6077);
+                    transform.translate(0f, -0.56152f, -2.6077f);
+                    float angle = (partModule.getBladeAngle() + context.getPartialTicks() * partModule.getRevs()) * getRotationSpeed();
+                    transform.rotate(angle, getRotationAxis().x, getRotationAxis().y, getRotationAxis().z);
+                    transform.translate(0f, 0.56152f, 2.6077f);
                 }
             }
+            GlStateManager.pushMatrix();
+            GlStateManager.multMatrix(ClientDynamXUtils.getMatrixBuffer(transform));
             //Render it
             vehicleModel.renderGroup(getObjectName(), context.getTextureId(), context.isUseVanillaRender());
             GlStateManager.popMatrix();

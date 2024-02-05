@@ -95,11 +95,7 @@ public class DynamXBlockEvent extends Event {
         @Getter
         private final TESRDynamXBlock<?> renderer;
         @Getter
-        private final double x;
-        @Getter
-        private final double y;
-        @Getter
-        private final double z;
+        private org.joml.Vector3f renderPos;
         @Getter
         private final float partialTicks;
         @Getter
@@ -109,13 +105,11 @@ public class DynamXBlockEvent extends Event {
         @Getter
         private final EventStage stage;
 
-        public RenderTileEntity(DynamXBlock<?> dynamXBlock, World world, TEDynamXBlock tileEntity, TESRDynamXBlock<?> renderer, double x, double y, double z, float partialTicks, int destroyStage, float alpha, EventStage stage) {
+        public RenderTileEntity(DynamXBlock<?> dynamXBlock, World world, TEDynamXBlock tileEntity, TESRDynamXBlock<?> renderer, org.joml.Vector3f renderPos, float partialTicks, int destroyStage, float alpha, EventStage stage) {
             super(Side.CLIENT, dynamXBlock, world);
             this.tileEntity = tileEntity;
             this.renderer = renderer;
-            this.x = x;
-            this.y = y;
-            this.z = z;
+            this.renderPos = renderPos;
             this.partialTicks = partialTicks;
             this.destroyStage = destroyStage;
             this.alpha = alpha;

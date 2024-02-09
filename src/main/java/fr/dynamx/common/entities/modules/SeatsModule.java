@@ -110,7 +110,7 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
             return;
         }
         Vector3fPool.openPool();
-        Vector3f posVec = DynamXGeometry.rotateVectorByQuaternion(seat.getPosition(), entity.renderRotation);//PhysicsHelper.getRotatedPoint(seat.getPosition(), -this.rotationPitch, this.rotationYaw, this.rotationRoll);
+        Vector3f posVec = DynamXGeometry.rotateVectorByQuaternion(seat.getPosition(), entity.renderRotation);
         passenger.setPosition(entity.posX + posVec.x, entity.posY + posVec.y, entity.posZ + posVec.z);
         Vector3fPool.closePool();
     }
@@ -209,7 +209,7 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
                     }
                 } else {
                     log.warn("Entity with id " + e.getValue() + " not found for seat in " + entity);
-                    log.warn("Details " + msg.getSeatToEntity()+" "+entity.getPassengers());
+                    log.warn("Details " + msg.getSeatToEntity() + " " + entity.getPassengers());
                     log.warn("Players there " + entity.world.playerEntities);
                     log.warn("THE player id " + DynamXMain.proxy.getClientWorld());
                 }

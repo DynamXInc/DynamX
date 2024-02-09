@@ -43,7 +43,7 @@ public class DynamXLoadingTasks {
                         DynamXUtils.hotswapWorldPackInfos(DynamXMain.proxy.getServerWorld());
                 }
             } else if (taskContext == TaskContext.SERVER_RUNNING) {
-                DynamXContext.getNetwork().sendToClient(new MessageSyncConfig(true, DynamXConfig.mountedVehiclesSyncTickRate, ContentPackLoader.getBlocksGrip(), ContentPackLoader.slopes, ContentPackLoader.SLOPES_LENGTH, ContentPackLoader.PLACE_SLOPES, DynamXContext.getPhysicsSimulationMode(Side.CLIENT)), EnumPacketTarget.ALL);
+                DynamXContext.getNetwork().sendToClient(new MessageSyncConfig(true, DynamXConfig.mountedVehiclesSyncTickRate, ContentPackLoader.getBlocksGrip(), ContentPackLoader.slopes, ContentPackLoader.SLOPES_LENGTH, ContentPackLoader.PLACE_SLOPES, DynamXContext.getPhysicsSimulationMode(Side.CLIENT), -1), EnumPacketTarget.ALL);
                 for(World w : FMLCommonHandler.instance().getMinecraftServerInstance().worlds) {
                     DynamXUtils.hotswapWorldPackInfos(w);
                 }

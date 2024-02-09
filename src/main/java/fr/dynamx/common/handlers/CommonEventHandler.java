@@ -67,7 +67,7 @@ public class CommonEventHandler {
     @SubscribeEvent
     public void onLoggedIn(net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent event) {
         if (FMLCommonHandler.instance().getSide().isServer()) {
-            DynamXContext.getNetwork().sendToClient(new MessageSyncConfig(false, DynamXConfig.mountedVehiclesSyncTickRate, ContentPackLoader.getBlocksGrip(), ContentPackLoader.slopes, ContentPackLoader.SLOPES_LENGTH, ContentPackLoader.PLACE_SLOPES, DynamXContext.getPhysicsSimulationMode(Side.CLIENT)), EnumPacketTarget.PLAYER, (EntityPlayerMP) event.player);
+            DynamXContext.getNetwork().sendToClient(new MessageSyncConfig(false, DynamXConfig.mountedVehiclesSyncTickRate, ContentPackLoader.getBlocksGrip(), ContentPackLoader.slopes, ContentPackLoader.SLOPES_LENGTH, ContentPackLoader.PLACE_SLOPES, DynamXContext.getPhysicsSimulationMode(Side.CLIENT), event.player.getEntityId()), EnumPacketTarget.PLAYER, (EntityPlayerMP) event.player);
         }
     }
 
@@ -78,7 +78,7 @@ public class CommonEventHandler {
             ServerPhysicsSyncManager.onDisconnect(player);
             DynamXContext.getWalkingPlayers().remove(player);
         }
-        if(DynamXContext.getPlayerPickingObjects().containsKey(player.getEntityId()))
+        if (DynamXContext.getPlayerPickingObjects().containsKey(player.getEntityId()))
             PickingObjectHelper.handlePlayerDisconnection(player);
     }
 
@@ -129,7 +129,7 @@ public class CommonEventHandler {
     public static void onBlockChange(World world, BlockPos pos) {
         if ((!world.isRemote || FMLCommonHandler.instance().getMinecraftServerInstance() != null)) {
             IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(world);
-            if(physicsWorld != null)
+            if (physicsWorld != null)
                 physicsWorld.getTerrainManager().onBlockChange(world, pos);
         }
     }
@@ -146,7 +146,7 @@ public class CommonEventHandler {
     public void onWorldLoad(WorldEvent.Load event) {
         World world = event.getWorld();
         world.addEventListener(new DynamXWorldListener());
-        if(event.getWorld().isRemote || FMLCommonHandler.instance().getMinecraftServerInstance().isDedicatedServer()) {
+        if (event.getWorld().isRemote || FMLCommonHandler.instance().getMinecraftServerInstance().isDedicatedServer()) {
             DynamXMain.proxy.initPhysicsWorld(event.getWorld());
         }
     }
@@ -229,11 +229,11 @@ public class CommonEventHandler {
 
     //Walking players :
 
-
     @SubscribeEvent
     public void onPlayerUpdate(TickEvent.PlayerTickEvent e) {
         if (!(e.player.getRidingEntity() instanceof BaseVehicleEntity) && DynamXContext.getPhysicsWorld(e.player.world) != null && !e.player.isDead) {
-            if(!DynamXContext.getPlayerToCollision().containsKey(e.player) && DynamXPhysicsWorldBlacklistApi.isBlacklisted(e.player)) return;
+            if (!DynamXContext.getPlayerToCollision().containsKey(e.player) && DynamXPhysicsWorldBlacklistApi.isBlacklisted(e.player))
+                return;
             Vector3fPool.openPool();
             QuaternionPool.openPool();
             if (!DynamXContext.getPlayerToCollision().containsKey(e.player)) {

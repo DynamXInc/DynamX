@@ -3,9 +3,9 @@ package fr.dynamx.common.network.sync;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.network.EnumPacketTarget;
+import fr.dynamx.api.network.sync.EntityVariable;
 import fr.dynamx.api.network.sync.SimulationHolder;
 import fr.dynamx.api.network.sync.SyncTarget;
-import fr.dynamx.api.network.sync.EntityVariable;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariableRegistry;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.ModularPhysicsEntity;
@@ -61,7 +61,7 @@ public abstract class PhysicsEntitySynchronizer<T extends PhysicsEntity<?>> {
     public EntityVariable<Object> tryGetVariable(int id) {
         EntityVariable<?> var = synchronizedVariables.get(id);
         if (var == null)
-            throw new IllegalStateException("Variable " + id + " not registered on " + entity+". Variable is " + SynchronizedEntityVariableRegistry.getSyncVarRegistry().inverse().get(id));
+            throw new IllegalStateException("Variable " + id + " not registered on " + entity + ". Variable is " + SynchronizedEntityVariableRegistry.getSyncVarRegistry().inverse().get(id));
         return (EntityVariable<Object>) var;
     }
 

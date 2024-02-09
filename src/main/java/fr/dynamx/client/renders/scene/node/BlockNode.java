@@ -1,8 +1,9 @@
-package fr.dynamx.client.renders.scene;
+package fr.dynamx.client.renders.scene.node;
 
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
 import fr.dynamx.client.renders.model.renderer.GltfModelRenderer;
+import fr.dynamx.client.renders.scene.BaseRenderContext;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.blocks.TEDynamXBlock;
@@ -23,33 +24,37 @@ import net.minecraft.client.renderer.RenderGlobal;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 /**
  * A type of root node, corresponding to a block
  *
- * @param <T> The type of the entity that is rendered
  * @param <A> The type of the pack info (the owner of the scene graph)
  */
 @Getter
 @RequiredArgsConstructor
-public class BlockNode<T extends TEDynamXBlock, A extends BlockObject<?>> implements SceneGraph<T, A> {
+public class BlockNode<A extends BlockObject<?>> extends AbstractItemNode<BaseRenderContext.BlockRenderContext, A> {
     /**
      * The children that are linked to the entity (ie that will be rendered with the entity transformations)
      */
-    private final List<SceneGraph<T, A>> linkedChildren;
+    private final List<SceneNode<BaseRenderContext.BlockRenderContext, A>> linkedChildren;
 
+    /**
+     * The transformation matrix of the node <br>
+     * Stores the transformations of the node, and is used to render the node and its children <br>
+     * Do not use GlStateManager to apply transformations, use this matrix instead
+     */
     @Getter
     private final Matrix4f transform = new Matrix4f();
 
     @Override
-    public void render(@Nullable T te, EntityRenderContext context, A packInfo) {
-        if (te != null && te.getBlockType() instanceof DynamXBlock) { //the instanceof fixes a crash
+    public void render(BaseRenderContext.BlockRenderContext context, A packInfo) {
+        if (context.getTileEntity() != null && context.getTileEntity().getBlockType() instanceof DynamXBlock) { //the instanceof fixes a crash
             transform.identity();
             Vector3fPool.openPool();
             QuaternionPool.openPool();
             GlQuaternionPool.openPool();
+            TEDynamXBlock te = context.getTileEntity();
             applyTransform(te, context.getRenderPosition());
 
             //Rendering the model
@@ -67,7 +72,7 @@ public class BlockNode<T extends TEDynamXBlock, A extends BlockObject<?>> implem
             GlStateManager.popMatrix();
             //Render the linked children
             transform.scale(1 / packInfo.getScaleModifier().x, 1 / packInfo.getScaleModifier().y, 1 / packInfo.getScaleModifier().z);
-            linkedChildren.forEach(c -> c.render(te, context, packInfo));
+            linkedChildren.forEach(c -> c.render(context, packInfo));
 
             GlQuaternionPool.closePool();
             QuaternionPool.closePool();
@@ -79,24 +84,27 @@ public class BlockNode<T extends TEDynamXBlock, A extends BlockObject<?>> implem
     public void applyTransform(TEDynamXBlock te, Vector3f renderPos) {
         // Translate to block render pos and add the config translate value
         transform.translate((renderPos.x + 0.5f + te.getRelativeTranslation().x),
-                (renderPos.y + te.getRelativeTranslation().y),
+                (renderPos.y + 0.5f + te.getRelativeTranslation().y),
                 (renderPos.z + 0.5f + te.getRelativeTranslation().z));
         // Rotate to the config rotation value
         transform.rotate(DynamXUtils.toQuaternion(te.getCollidableRotation()));
         // Translate of the block object info translation
         if (te.getRelativeScale().x > 0 && te.getRelativeScale().y > 0 && te.getRelativeScale().z > 0) {
-            transform.translate(-0.5f, 0f, -0.5f);
+            transform.translate(-0.5f, 0.5f, -0.5f);
             // Scale to the config scale value
             transform.scale((te.getRelativeScale().x != 0 ? te.getRelativeScale().x : 1),
                     (te.getRelativeScale().y != 0 ? te.getRelativeScale().y : 1),
                     (te.getRelativeScale().z != 0 ? te.getRelativeScale().z : 1));
-            transform.translate(0.5f, 0f, 0.5f);
-        } else
-            transform.translate(DynamXUtils.toVector3f(te.getPackInfo().getTranslation()));
+            transform.translate(0.5f, 0.5f, 0.5f);
+        }
+        transform.translate(DynamXUtils.toVector3f(te.getPackInfo().getTranslation()));
     }
 
     @Override
-    public void renderDebug(@Nullable T te, EntityRenderContext context, A packInfo) {
+    public void renderDebug(BaseRenderContext.BlockRenderContext context, A packInfo) {
+        if (!(context instanceof BaseRenderContext.BlockRenderContext))
+            return;
+        TEDynamXBlock te = context.getTileEntity();
         if (te == null)
             return;
         Vector3fPool.openPool();
@@ -139,7 +147,7 @@ public class BlockNode<T extends TEDynamXBlock, A extends BlockObject<?>> implem
             GlQuaternionPool.closePool();
             QuaternionPool.closePool();
         }
-        linkedChildren.forEach(c -> c.renderDebug(te, context, packInfo));
+        linkedChildren.forEach(c -> c.renderDebug((BaseRenderContext.BlockRenderContext) context, packInfo));
         GlStateManager.popMatrix();
         GlQuaternionPool.closePool();
         QuaternionPool.closePool();
@@ -147,12 +155,12 @@ public class BlockNode<T extends TEDynamXBlock, A extends BlockObject<?>> implem
     }
 
     @Override
-    public SceneGraph<T, A> getParent() {
+    public SceneNode<BaseRenderContext.BlockRenderContext, A> getParent() {
         throw new UnsupportedOperationException("This node is a root node, it can't have a parent");
     }
 
     @Override
-    public void setParent(SceneGraph<T, A> parent) {
+    public void setParent(SceneNode<BaseRenderContext.BlockRenderContext, A> parent) {
         throw new UnsupportedOperationException("This node is a root node, it can't have a parent");
     }
 }

@@ -3,7 +3,8 @@ package fr.dynamx.client.renders;
 import fr.dynamx.api.events.DynamXEntityRenderEvents;
 import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
-import fr.dynamx.client.renders.scene.EntityRenderContext;
+import fr.dynamx.client.renders.scene.BaseRenderContext;
+import fr.dynamx.client.renders.scene.node.SceneNode;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
@@ -56,7 +57,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
         Vector3fPool.openPool();
         GlQuaternionPool.openPool();
         int renderPass = MinecraftForgeClient.getRenderPass();
-        EntityRenderContext context = getRenderContext(entity);
+        BaseRenderContext.EntityRenderContext context = getRenderContext(entity);
         if (context == null) {
             renderOffsetAABB(entity.getEntityBoundingBox(), x - entity.lastTickPosX, y - entity.lastTickPosY, z - entity.lastTickPosZ);
             return;
@@ -79,7 +80,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
         GlQuaternionPool.closePool();
     }
 
-    public void spawnParticles(T physicsEntity, EntityRenderContext context) {
+    public void spawnParticles(T physicsEntity, BaseRenderContext.EntityRenderContext context) {
         if (physicsEntity instanceof PackPhysicsEntity) {
             PackPhysicsEntity<?, ?> packPhysicsEntity = (PackPhysicsEntity<?, ?>) physicsEntity;
             if (packPhysicsEntity.getPackInfo() instanceof ParticleEmitterInfo.IParticleEmitterContainer) {
@@ -102,7 +103,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
     /**
      * Adds the debug renders to the list
      *
-     * @deprecated The debug should be rendered using the new {@link fr.dynamx.client.renders.scene.SceneGraph}s system
+     * @deprecated The debug should be rendered using the new {@link SceneNode}s system
      */
     @Deprecated
     @SuppressWarnings("unchecked")
@@ -115,12 +116,12 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
     /**
      * Renders the entity in the world
      */
-    public abstract void renderEntity(T entity, EntityRenderContext context);
+    public abstract void renderEntity(T entity, BaseRenderContext.EntityRenderContext context);
 
     /**
      * Renders the entity debug in the world
      */
-    public abstract void renderEntityDebug(T entity, EntityRenderContext context);
+    public abstract void renderEntityDebug(T entity, BaseRenderContext.EntityRenderContext context);
 
     /**
      * Should return an EntityRenderContext with the entity parameters set <br>
@@ -132,14 +133,14 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
      * @return A render context with the entity parameters set
      */
     @Nullable
-    public abstract EntityRenderContext getRenderContext(T entity);
+    public abstract BaseRenderContext.EntityRenderContext getRenderContext(T entity);
 
     /**
      * Renders active {@link DebugRenderer}s <br>
-     * Shouldn't be overridden : use {@link RenderPhysicsEntity#renderEntityDebug(PhysicsEntity, EntityRenderContext)} to render your debug <br>
+     * Shouldn't be overridden : use {@link RenderPhysicsEntity#renderEntityDebug(PhysicsEntity, BaseRenderContext.EntityRenderContext)} to render your debug <br>
      * Can be cancelled via the dedicated event
      */
-    public final void renderDebug(T entity, EntityRenderContext context) {
+    public final void renderDebug(T entity, BaseRenderContext.EntityRenderContext context) {
         if (ClientDebugSystem.enableDebugDrawing) {
             List<DebugRenderer<T>> validRotatedRenders = debugRenderers.stream().filter(r -> r.shouldRender(entity) && r.hasEntityRotation(entity)).collect(Collectors.toList());
             List<DebugRenderer<T>> validPureRenders = debugRenderers.stream().filter(r -> r.shouldRender(entity) && !r.hasEntityRotation(entity)).collect(Collectors.toList());

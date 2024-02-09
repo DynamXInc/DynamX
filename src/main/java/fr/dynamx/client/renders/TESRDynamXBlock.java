@@ -5,8 +5,8 @@ import fr.dynamx.api.events.DynamXBlockEvent;
 import fr.dynamx.api.events.EventStage;
 import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
-import fr.dynamx.client.renders.scene.EntityRenderContext;
-import fr.dynamx.client.renders.scene.SceneGraph;
+import fr.dynamx.client.renders.scene.BaseRenderContext;
+import fr.dynamx.client.renders.scene.node.SceneNode;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.blocks.TEDynamXBlock;
@@ -19,7 +19,7 @@ import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraftforge.common.MinecraftForge;
 
 public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialRenderer<T> {
-    protected final EntityRenderContext context = new EntityRenderContext(null);
+    protected final BaseRenderContext.BlockRenderContext context = new BaseRenderContext.BlockRenderContext();
 
     @Override
     public void render(T te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
@@ -31,12 +31,12 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
         if (modelRenderer == null) {
             return;
         }
-        EntityRenderContext context = this.context.setEntityParams(modelRenderer, (byte) te.getBlockMetadata());
+        BaseRenderContext.BlockRenderContext context = this.context.setModelParams(te, modelRenderer, (byte) te.getBlockMetadata());
         context.setRenderParams(x, y, z, partialTicks, false);
-        SceneGraph<T, BlockObject<?>> sceneGraph = (SceneGraph<T, BlockObject<?>>) packInfo.getSceneGraph();
+        SceneNode<BaseRenderContext.BlockRenderContext, BlockObject<?>> sceneNode = (SceneNode<BaseRenderContext.BlockRenderContext, BlockObject<?>>) packInfo.getSceneGraph();
         if (!MinecraftForge.EVENT_BUS.post(new DynamXBlockEvent.RenderTileEntity((DynamXBlock<?>) te.getBlockType(), te.getWorld(), te, this, context.getRenderPosition(),
                 context.getPartialTicks(), destroyStage, alpha, EventStage.PRE))) {
-            sceneGraph.render(te, context, packInfo);
+            sceneNode.render(context, packInfo);
 
             Vector3f pos = DynamXUtils.toVector3f(te.getPos())
                     .add(packInfo.getTranslation().add(te.getRelativeTranslation()))
@@ -53,7 +53,7 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
             GlStateManager.disableLighting();
             GlStateManager.disableDepth();
             GlStateManager.disableTexture2D();
-            sceneGraph.renderDebug(te, context, packInfo);
+            sceneNode.renderDebug(context, packInfo);
             GlStateManager.enableLighting();
             GlStateManager.enableTexture2D();
             GlStateManager.enableDepth();

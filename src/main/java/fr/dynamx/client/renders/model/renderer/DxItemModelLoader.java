@@ -1,13 +1,15 @@
 package fr.dynamx.client.renders.model.renderer;
 
-import com.jme3.math.Vector3f;
-import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
+import fr.dynamx.api.contentpack.object.render.IModelPackObject;
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.api.events.DynamXItemEvent;
 import fr.dynamx.api.events.EventStage;
 import fr.dynamx.client.renders.model.ItemDxModel;
+import fr.dynamx.client.renders.scene.BaseRenderContext;
+import fr.dynamx.client.renders.scene.node.AbstractItemNode;
+import fr.dynamx.client.renders.scene.node.SceneNode;
+import fr.dynamx.common.DynamXContext;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -29,6 +31,7 @@ import java.util.Map;
 public class DxItemModelLoader extends TileEntityItemStackRenderer implements ICustomModelLoader {
     private final Map<ModelResourceLocation, IResourcesOwner> REGISTRY = new HashMap<>();
     private final Map<Item, Map<Byte, ItemDxModel>> ITEM_TO_MODEL = new HashMap<>();
+    private final BaseRenderContext.ItemRenderContext renderContext = new BaseRenderContext.ItemRenderContext();
 
     public static ItemCameraTransforms.TransformType renderType;
 
@@ -55,32 +58,20 @@ public class DxItemModelLoader extends TileEntityItemStackRenderer implements IC
     public void renderByItem(ItemStack stack, float partialTicks) {
         if (ITEM_TO_MODEL.containsKey(stack.getItem())) {
             ItemDxModel model = getModel(stack.getItem(), stack.isItemStackDamageable() ? 0 : (byte) stack.getMetadata());
-            if (model == null) {
+            DxModelRenderer modelRenderer = model != null ? DynamXContext.getDxModelRegistry().getModel(model.getOwner().getModel()) : null;
+            if (modelRenderer == null) {
                 RenderItem renderItem = Minecraft.getMinecraft().getRenderItem();
                 renderItem.renderItem(stack, renderItem.getItemModelMesher().getModelManager().getMissingModel());
                 return;
-                //throw new NoSuchElementException("Item " + stack.getItem().getRegistryName() + " is not registered with metadata " + stack.getMetadata() + " into ObjItemModelLoader");
             }
-            if (!MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack, EventStage.PRE, renderType))) {
-                if (model.getOwner().get3DItemRenderLocation() == Enum3DRenderLocation.NONE || (renderType == ItemCameraTransforms.TransformType.GUI && model.getOwner().get3DItemRenderLocation() == Enum3DRenderLocation.WORLD)) {
-                    GlStateManager.translate(0.5F, 0.5F, 0.5F);
-                    Minecraft.getMinecraft().getRenderItem().renderItem(stack, model.getGuiBaked());
-                } else {
-                    if (!MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack, EventStage.TRANSFORM, renderType))) {
-                        model.getOwner().applyItemTransforms(renderType, stack, model);
-                        float scale = model.getOwner().getItemScale();
-                        Vector3f translate = model.getOwner().getItemTranslate();
-                        Vector3f rotate = model.getOwner().getItemRotate();
-                        GlStateManager.translate(translate.x, translate.y, translate.z);
-                        GlStateManager.scale(scale, scale, scale);
-                        GlStateManager.rotate(rotate.x, 1, 0, 0);
-                        GlStateManager.rotate(rotate.y, 0, 1, 0);
-                        GlStateManager.rotate(rotate.z, 0, 0, 1);
-                    }
-                    if (!MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack, EventStage.RENDER, renderType)))
-                        model.renderModel(stack, renderType);
-                    MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack, EventStage.POST, renderType));
-                }
+            SceneNode<?, ?> sceneGraph = model.getOwner().getSceneGraph();
+            if (!(sceneGraph instanceof AbstractItemNode)) {
+                throw new IllegalStateException("The scene graph of the item " + stack.getItem() + " is not an IItemNode");
+            }
+            if (!MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack, EventStage.PRE, renderType, sceneGraph.getTransform()))) {
+                renderContext.setModelParams(model, stack, modelRenderer, (byte) stack.getMetadata()).setRenderParams(renderType, partialTicks, true);
+                ((AbstractItemNode<?, IModelPackObject>) sceneGraph).renderAsItemNode(renderContext, model.getOwner());
+                MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack, EventStage.POST, renderType, sceneGraph.getTransform()));
             }
         } else {
             RenderItem renderItem = Minecraft.getMinecraft().getRenderItem();

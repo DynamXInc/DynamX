@@ -4,7 +4,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.client.renders.model.ModelObjArmor;
-import fr.dynamx.client.renders.scene.EntityRenderContext;
+import fr.dynamx.client.renders.scene.BaseRenderContext;
 import fr.dynamx.common.entities.RagdollEntity;
 import fr.dynamx.common.items.DynamXItemArmor;
 import fr.dynamx.common.physics.entities.EnumRagdollBodyPart;
@@ -24,7 +24,7 @@ import net.minecraftforge.common.MinecraftForge;
 import javax.annotation.Nullable;
 
 public class RenderRagdoll<T extends RagdollEntity> extends RenderPhysicsEntity<T> {
-    protected final EntityRenderContext context = new EntityRenderContext(this);
+    protected final BaseRenderContext.EntityRenderContext context = new BaseRenderContext.EntityRenderContext(this);
 
     private final ModelPlayer modelFat = new ModelPlayer(0, false);
     private final ModelPlayer modelLight = new ModelPlayer(0, true);
@@ -36,12 +36,12 @@ public class RenderRagdoll<T extends RagdollEntity> extends RenderPhysicsEntity<
 
     @Override
     @Nullable
-    public EntityRenderContext getRenderContext(T entity) {
+    public BaseRenderContext.EntityRenderContext getRenderContext(T entity) {
         return context;
     }
 
     @Override
-    public void renderEntity(T entity, EntityRenderContext context) {
+    public void renderEntity(T entity, BaseRenderContext.EntityRenderContext context) {
         if (entity.isInvisible())
             return;
         float partialTicks = context.getPartialTicks();
@@ -178,6 +178,6 @@ public class RenderRagdoll<T extends RagdollEntity> extends RenderPhysicsEntity<
     }
 
     @Override
-    public void renderEntityDebug(T entity, EntityRenderContext context) {
+    public void renderEntityDebug(T entity, BaseRenderContext.EntityRenderContext context) {
     }
 }

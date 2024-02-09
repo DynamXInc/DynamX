@@ -10,13 +10,15 @@ import fr.dynamx.api.contentpack.registry.*;
 import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
-import fr.dynamx.client.renders.scene.EntityRenderContext;
-import fr.dynamx.client.renders.scene.Node;
-import fr.dynamx.client.renders.scene.SceneGraph;
+import fr.dynamx.client.renders.scene.BaseRenderContext;
+import fr.dynamx.client.renders.scene.IRenderContext;
+import fr.dynamx.client.renders.scene.node.SceneNode;
+import fr.dynamx.client.renders.scene.node.SimpleNode;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.ModularPhysicsEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.WheelsModule;
 import fr.dynamx.common.objloader.data.DxModelData;
@@ -165,15 +167,15 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
     }
 
     @Override
-    public SceneGraph<BaseVehicleEntity<?>, ModularVehicleInfo> createSceneGraph(Vector3f modelScale, List<SceneGraph<BaseVehicleEntity<?>, ModularVehicleInfo>> childGraph) {
+    public SceneNode<IRenderContext, ModularVehicleInfo> createSceneGraph(Vector3f modelScale, List<SceneNode<IRenderContext, ModularVehicleInfo>> childGraph) {
         if (getMudGuardObjectName() != null) {
-            PartAttachedWheelNode<BaseVehicleEntity<?>, ModularVehicleInfo> wheelNode = new PartAttachedWheelNode<>(this, modelScale, childGraph);
+            PartAttachedWheelNode<ModularVehicleInfo> wheelNode = new PartAttachedWheelNode<>(this, modelScale, (List) childGraph);
             if (childGraph == null)
                 childGraph = new ArrayList<>();
-            childGraph.add(wheelNode);
-            return new PartBaseWheelNode<>(this, modelScale, childGraph, true);
+            childGraph.add((SceneNode) wheelNode);
+            return new PartBaseWheelNode<>(this, modelScale, (List) childGraph, true);
         }
-        return new PartBaseWheelNode<>(this, modelScale, childGraph, false);
+        return new PartBaseWheelNode<>(this, modelScale, (List) childGraph, false);
     }
 
     @Override
@@ -189,7 +191,7 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
             modules.add(new WheelsModule((BaseVehicleEntity<? extends BaseWheeledVehiclePhysicsHandler<?>>) entity));
     }
 
-    protected void applyWheelRotation(EntityRenderContext context, Matrix4f transform, WheelsModule wheelsModule) {
+    protected void applyWheelRotation(BaseRenderContext.EntityRenderContext context, Matrix4f transform, WheelsModule wheelsModule) {
         boolean isSeparateModel = getRimObjectName() == null;
         int index = VehicleEntityProperties.getPropertyIndex(getId(), VehicleEntityProperties.EnumVisualProperties.ROTATION_ANGLE);
         //Fix sign problems for wheel rotation
@@ -209,7 +211,7 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
         }
     }
 
-    protected void renderWheel(@Nullable BaseVehicleEntity<?> entity, EntityRenderContext context, ModularVehicleInfo entityInfo, PartWheelInfo wheelInfo, WheelsModule wheelsModule) {
+    protected void renderWheel(@Nullable ModularPhysicsEntity<?> entity, BaseRenderContext.EntityRenderContext context, ModularVehicleInfo entityInfo, PartWheelInfo wheelInfo, WheelsModule wheelsModule) {
         boolean isSeparateModel = getRimObjectName() == null;
         DxModelRenderer model = isSeparateModel ? DynamXContext.getDxModelRegistry().getModel(wheelInfo.getModel()) : context.getModel();
         /*Rendering the wheels */
@@ -233,17 +235,17 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
      * If the wheel has a mudguard, it will be rendered, and the wheel will be a child of this node (in a {@link PartAttachedWheelNode}). <br>
      * Otherwise, the wheel will be rendered in this node.
      */
-    class PartBaseWheelNode<T extends BaseVehicleEntity<?>, A extends ModularVehicleInfo> extends Node<T, A> {
+    class PartBaseWheelNode<A extends ModularVehicleInfo> extends SimpleNode<BaseRenderContext.EntityRenderContext, A> {
         private final boolean isMudGuard;
 
-        public PartBaseWheelNode(PartWheel wheel, Vector3f scale, List<SceneGraph<T, A>> linkedChilds, boolean isMudGuard) {
+        public PartBaseWheelNode(PartWheel wheel, Vector3f scale, List<SceneNode<BaseRenderContext.EntityRenderContext, A>> linkedChilds, boolean isMudGuard) {
             super(isMudGuard ? wheel.getRotationPoint() : wheel.getPosition(), GlQuaternionPool.newGlQuaternion(wheel.getSuspensionAxis()), PartWheel.this.isAutomaticPosition, scale, linkedChilds);
             this.isMudGuard = isMudGuard;
         }
 
         @Override
-        public void render(@Nullable T entity, EntityRenderContext context, A packInfo) {
-            WheelsModule wheelsModule = entity != null ? entity.getModuleByType(WheelsModule.class) : null;
+        public void render(BaseRenderContext.EntityRenderContext context, A packInfo) {
+            WheelsModule wheelsModule = context.getEntity() != null ? context.getEntity().getModuleByType(WheelsModule.class) : null;
             boolean hasWheelsModule = wheelsModule != null;
             if (!isMudGuard && hasWheelsModule && wheelsModule.getWheelsStates()[getId()] == WheelsModule.WheelState.REMOVED)
                 return;
@@ -262,12 +264,14 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
                 /* Suspension translation */
                 index = VehicleEntityProperties.getPropertyIndex(getId(), VehicleEntityProperties.EnumVisualProperties.SUSPENSION_LENGTH);
                 float suspensionLength = -(wheelsModule.prevVisualProperties[index] + (wheelsModule.visualProperties[index] - wheelsModule.prevVisualProperties[index]) * context.getPartialTicks());
-
                 transform.translate(0, suspensionLength - info.getSuspensionRestLength(), 0);
                 /* Wheel rotation */
                 if (!isMudGuard) {
                     applyWheelRotation(context, transform, wheelsModule);
                 }
+            } else {
+                /* Suspension translation */
+                transform.translate(0, -info.getSuspensionRestLength(), 0);
             }
             GlStateManager.pushMatrix();
             GlStateManager.multMatrix(ClientDynamXUtils.getMatrixBuffer(transform));
@@ -276,13 +280,13 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
             if (isMudGuard)
                 context.getModel().renderGroup(getMudGuardObjectName(), context.getTextureId(), context.isUseVanillaRender());
             else
-                renderWheel(entity, context, packInfo, info, wheelsModule);
+                renderWheel(context.getEntity(), context, packInfo, info, wheelsModule);
             GlStateManager.popMatrix();
-            renderChildren(entity, context, packInfo);
+            renderChildren(context, packInfo);
         }
 
         @Override
-        public void renderDebug(@Nullable T entity, EntityRenderContext context, A packInfo) {
+        public void renderDebug(BaseRenderContext.EntityRenderContext context, A packInfo) {
             if (!isMudGuard && DynamXDebugOptions.WHEELS.isActive()) {
                 GlStateManager.pushMatrix();
                 DynamXRenderUtils.glTranslate(getPosition());
@@ -291,15 +295,15 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
                         isDrivingWheel() ? 0 : 1, isDrivingWheel() ? 1 : 0, 0, 1);
                 GlStateManager.popMatrix();
             }
-            super.renderDebug(entity, context, packInfo);
+            super.renderDebug(context, packInfo);
         }
     }
 
     /**
      * Wheel rendered as a child of {@link PartBaseWheelNode} (when there is a mudguard)
      */
-    class PartAttachedWheelNode<T extends BaseVehicleEntity<?>, A extends ModularVehicleInfo> extends Node<T, A> {
-        public PartAttachedWheelNode(PartWheel wheel, Vector3f scale, List<SceneGraph<T, A>> linkedChilds) {
+    class PartAttachedWheelNode<A extends ModularVehicleInfo> extends SimpleNode<BaseRenderContext.EntityRenderContext, A> {
+        public PartAttachedWheelNode(PartWheel wheel, Vector3f scale, List<SceneNode<BaseRenderContext.EntityRenderContext, A>> linkedChilds) {
             super(PartWheel.this.isAutomaticPosition ? wheel.getPosition() : new Vector3f(wheel.getPosition().subtract(wheel.getRotationPoint())), null, PartWheel.this.isAutomaticPosition, scale, linkedChilds);
             if (wheel.getSuspensionAxis() != null && !isAutomaticPosition) //Note that we have the mudguard translation and rotation applied, so the translation must "anticipate" this rotation.
                 //Formula: translation = (wheelPos - mudGuardPos) * inverse(suspensionRotation) where mudGuardPos and suspensionRotation are applied in the previous node
@@ -307,8 +311,8 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
         }
 
         @Override
-        public void render(@Nullable T entity, EntityRenderContext context, A packInfo) {
-            WheelsModule wheelsModule = entity != null ? entity.getModuleByType(WheelsModule.class) : null;
+        public void render(BaseRenderContext.EntityRenderContext context, A packInfo) {
+            WheelsModule wheelsModule = context.getEntity() != null ? context.getEntity().getModuleByType(WheelsModule.class) : null;
             boolean hasWheelsModule = wheelsModule != null;
             if (hasWheelsModule && wheelsModule.getWheelsStates()[getId()] == WheelsModule.WheelState.REMOVED)
                 return;
@@ -322,13 +326,13 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
             GlStateManager.pushMatrix();
             GlStateManager.multMatrix(ClientDynamXUtils.getMatrixBuffer(transform));
             transformToPartPos();
-            renderWheel(entity, context, packInfo, info, wheelsModule);
+            renderWheel(context.getEntity(), context, packInfo, info, wheelsModule);
             GlStateManager.popMatrix();
-            renderChildren(entity, context, packInfo);
+            renderChildren(context, packInfo);
         }
 
         @Override
-        public void renderDebug(@Nullable T entity, EntityRenderContext context, A packInfo) {
+        public void renderDebug(BaseRenderContext.EntityRenderContext context, A packInfo) {
             if (DynamXDebugOptions.WHEELS.isActive()) {
                 GlStateManager.pushMatrix();
                 DynamXRenderUtils.glTranslate(getPosition());
@@ -337,7 +341,7 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
                         isDrivingWheel() ? 0 : 1, isDrivingWheel() ? 1 : 0, 0, 1);
                 GlStateManager.popMatrix();
             }
-            super.renderDebug(entity, context, packInfo);
+            super.renderDebug(context, packInfo);
         }
     }
 }

@@ -12,9 +12,10 @@ import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
-import fr.dynamx.client.renders.scene.EntityRenderContext;
-import fr.dynamx.client.renders.scene.Node;
-import fr.dynamx.client.renders.scene.SceneGraph;
+import fr.dynamx.client.renders.scene.BaseRenderContext;
+import fr.dynamx.client.renders.scene.IRenderContext;
+import fr.dynamx.client.renders.scene.node.SceneNode;
+import fr.dynamx.client.renders.scene.node.SimpleNode;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
@@ -129,7 +130,7 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
     }
 
     @Override
-    public SceneGraph<PackPhysicsEntity<?, ?>, IPhysicsPackInfo> createSceneGraph(Vector3f modelScale, List<SceneGraph<PackPhysicsEntity<?, ?>, IPhysicsPackInfo>> childGraph) {
+    public SceneNode<IRenderContext, IPhysicsPackInfo> createSceneGraph(Vector3f modelScale, List<SceneNode<IRenderContext, IPhysicsPackInfo>> childGraph) {
         return new PartEntitySeatNode<>(this, modelScale, (List) childGraph);
     }
 
@@ -143,16 +144,16 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
         return null;
     }
 
-    class PartEntitySeatNode<T extends BaseVehicleEntity<?>, A extends IPhysicsPackInfo> extends Node<T, A> {
-        public PartEntitySeatNode(BasePartSeat seat, Vector3f scale, List<SceneGraph<T, A>> linkedChilds) {
+    class PartEntitySeatNode<A extends IPhysicsPackInfo> extends SimpleNode<BaseRenderContext.EntityRenderContext, A> {
+        public PartEntitySeatNode(BasePartSeat seat, Vector3f scale, List<SceneNode<BaseRenderContext.EntityRenderContext, A>> linkedChilds) {
             super(seat.getPosition(), GlQuaternionPool.newGlQuaternion(seat.getRotation()), scale, linkedChilds);
         }
 
         @Override
-        public void render(@Nullable T entity, EntityRenderContext context, A packInfo) {
-            if (MinecraftForgeClient.getRenderPass() != 0 || !(entity instanceof IModuleContainer.ISeatsContainer))
+        public void render(BaseRenderContext.EntityRenderContext context, A packInfo) {
+            if (MinecraftForgeClient.getRenderPass() != 0 || !(context.getEntity() instanceof IModuleContainer.ISeatsContainer))
                 return;
-            SeatsModule seats = ((IModuleContainer.ISeatsContainer) entity).getSeats();
+            SeatsModule seats = ((IModuleContainer.ISeatsContainer) context.getEntity()).getSeats();
             assert seats != null;
             Entity seatRider = seats.getSeatToPassengerMap().get(PartEntitySeat.this);
             if (seatRider == null) return;
@@ -190,7 +191,7 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
 
 
         @Override
-        public void renderDebug(@Nullable T entity, EntityRenderContext context, A packInfo) {
+        public void renderDebug(BaseRenderContext.EntityRenderContext context, A packInfo) {
             if (DynamXDebugOptions.SEATS_AND_STORAGE.isActive()) {
                 GlStateManager.pushMatrix();
                 transformForDebug();
@@ -198,7 +199,7 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
                 RenderGlobal.drawBoundingBox(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, isDriver() ? 0 : 1, isDriver() ? 1 : 0, 0, 1);
                 GlStateManager.popMatrix();
             }
-            super.renderDebug(entity, context, packInfo);
+            super.renderDebug(context, packInfo);
         }
     }
 }

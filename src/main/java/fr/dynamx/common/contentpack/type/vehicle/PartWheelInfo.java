@@ -9,7 +9,7 @@ import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
-import fr.dynamx.client.renders.scene.SceneGraph;
+import fr.dynamx.client.renders.scene.node.SceneNode;
 import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
 import lombok.Getter;
 import net.minecraft.util.EnumParticleTypes;
@@ -110,7 +110,7 @@ public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IM
             handBrakeForce = wheelBrakeForce * 2;
         wheelRadius = getWheelRadius() * getScaleModifier().z;
         wheelWidth = getWheelWidth() * getScaleModifier().x;
-        if(texturesArray != null)
+        if (texturesArray != null)
             new MaterialVariantsInfo<>(this, texturesArray).appendTo(this);
     }
 
@@ -120,7 +120,7 @@ public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IM
 
     public byte getIdForVariant(String textureName) {
         MaterialVariantsInfo<?> variantsInfo = getVariants();
-        if(variantsInfo != null) {
+        if (variantsInfo != null) {
             for (byte i = 0; i < variantsInfo.getVariantsMap().size(); i++) {
                 if (variantsInfo.getVariantsMap().get(i).getName().equalsIgnoreCase(textureName))
                     return i;
@@ -152,7 +152,7 @@ public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IM
     }
 
     @Override
-    public SceneGraph<?, ?> getSceneGraph() {
+    public SceneNode<?, ?> getSceneGraph() {
         throw new UnsupportedOperationException();
     }
 }

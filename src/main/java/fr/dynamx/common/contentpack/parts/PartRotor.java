@@ -10,11 +10,13 @@ import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
-import fr.dynamx.client.renders.scene.EntityRenderContext;
-import fr.dynamx.client.renders.scene.Node;
-import fr.dynamx.client.renders.scene.SceneGraph;
+import fr.dynamx.client.renders.scene.BaseRenderContext;
+import fr.dynamx.client.renders.scene.IRenderContext;
+import fr.dynamx.client.renders.scene.node.SceneNode;
+import fr.dynamx.client.renders.scene.node.SimpleNode;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.ModularPhysicsEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.HelicopterRotorModule;
 import fr.dynamx.common.entities.modules.engines.BoatPropellerModule;
@@ -30,7 +32,6 @@ import lombok.Setter;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 @Getter
@@ -59,7 +60,7 @@ public class PartRotor extends BasePart<ModularVehicleInfo> implements IDrawable
     @Override
     public void appendTo(ModularVehicleInfo owner) {
         Quaternion rot = readPositionFromModel(owner.getModel(), getObjectName(), true, rotation == null);
-        if(rot != null)
+        if (rot != null)
             rotation = rot;
         super.appendTo(owner);
     }
@@ -91,7 +92,7 @@ public class PartRotor extends BasePart<ModularVehicleInfo> implements IDrawable
     }
 
     @Override
-    public SceneGraph<BaseVehicleEntity<?>, ModularVehicleInfo> createSceneGraph(Vector3f modelScale, List<SceneGraph<BaseVehicleEntity<?>, ModularVehicleInfo>> childGraph) {
+    public SceneNode<IRenderContext, ModularVehicleInfo> createSceneGraph(Vector3f modelScale, List<SceneNode<IRenderContext, ModularVehicleInfo>> childGraph) {
         return new PartRotorNode<>(this, modelScale, childGraph);
     }
 
@@ -101,17 +102,18 @@ public class PartRotor extends BasePart<ModularVehicleInfo> implements IDrawable
         ROTATING_WHEN_STARTED
     }
 
-    class PartRotorNode<T extends BaseVehicleEntity<?>, A extends ModularVehicleInfo> extends Node<T, A> {
-        public PartRotorNode(PartRotor part, Vector3f scale, List<SceneGraph<T, A>> linkedChilds) {
+    class PartRotorNode<A extends ModularVehicleInfo> extends SimpleNode<IRenderContext, A> {
+        public PartRotorNode(PartRotor part, Vector3f scale, List<SceneNode<IRenderContext, A>> linkedChilds) {
             super(part.getPosition(), GlQuaternionPool.newGlQuaternion(part.getRotation()), PartRotor.this.isAutomaticPosition, scale, linkedChilds);
         }
 
         @Override
-        public void render(@Nullable T entity, EntityRenderContext context, A packInfo) {
+        public void render(IRenderContext context, A packInfo) {
             DxModelRenderer vehicleModel = context.getModel();
             if (!vehicleModel.containsObjectOrNode(getObjectName()))
                 return;
             transformToRotationPoint();
+            ModularPhysicsEntity<?> entity = context instanceof BaseRenderContext.EntityRenderContext ? ((BaseRenderContext.EntityRenderContext) context).getEntity() : null;
             // Rotating the rotor.
             if (null == RotorType.ALWAYS_ROTATING) {
                 //TODO
@@ -145,7 +147,7 @@ public class PartRotor extends BasePart<ModularVehicleInfo> implements IDrawable
         }
 
         @Override
-        public void renderDebug(@Nullable T entity, EntityRenderContext context, A packInfo) {
+        public void renderDebug(IRenderContext context, A packInfo) {
             if (DynamXDebugOptions.ROTORS.isActive()) {
                 GlStateManager.pushMatrix();
                 transformForDebug();
@@ -153,7 +155,7 @@ public class PartRotor extends BasePart<ModularVehicleInfo> implements IDrawable
                         204F / 255, 123F / 255, 0, 1);
                 GlStateManager.popMatrix();
             }
-            super.renderDebug(entity, context, packInfo);
+            super.renderDebug(context, packInfo);
         }
     }
 }

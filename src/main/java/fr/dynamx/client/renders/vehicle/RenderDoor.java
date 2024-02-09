@@ -4,8 +4,8 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
 import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
-import fr.dynamx.client.renders.scene.EntityRenderContext;
-import fr.dynamx.client.renders.scene.SceneGraph;
+import fr.dynamx.client.renders.scene.BaseRenderContext;
+import fr.dynamx.client.renders.scene.node.SceneNode;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.parts.PartDoor;
 import fr.dynamx.common.entities.vehicles.DoorEntity;
@@ -17,7 +17,7 @@ import net.minecraftforge.common.MinecraftForge;
 import javax.annotation.Nullable;
 
 public class RenderDoor<T extends DoorEntity<?>> extends RenderPhysicsEntity<T> {
-    protected final EntityRenderContext context = new EntityRenderContext(this);
+    protected final BaseRenderContext.EntityRenderContext context = new BaseRenderContext.EntityRenderContext(this);
 
     public RenderDoor(RenderManager manager) {
         super(manager);
@@ -26,7 +26,7 @@ public class RenderDoor<T extends DoorEntity<?>> extends RenderPhysicsEntity<T> 
 
     @Override
     @Nullable
-    public EntityRenderContext getRenderContext(T entity) {
+    public BaseRenderContext.EntityRenderContext getRenderContext(T entity) {
         if (entity.getPackInfo() == null) {
             return null;
         }
@@ -34,11 +34,11 @@ public class RenderDoor<T extends DoorEntity<?>> extends RenderPhysicsEntity<T> 
         if (modelRenderer == null) {
             return null;
         }
-        return context.setEntityParams(modelRenderer, entity.getEntityTextureID());
+        return context.setModelParams(entity, modelRenderer, entity.getEntityTextureID());
     }
 
     @Override
-    public void renderEntity(T entity, EntityRenderContext context) {
+    public void renderEntity(T entity, BaseRenderContext.EntityRenderContext context) {
         Vector3f scale = entity.getPackInfo().getScaleModifier();
         //TODO USE SCENE GRAPH
         GlStateManager.pushMatrix();
@@ -50,7 +50,7 @@ public class RenderDoor<T extends DoorEntity<?>> extends RenderPhysicsEntity<T> 
     }
 
     @Override
-    public void renderEntityDebug(T entity, EntityRenderContext context) {
-        ((SceneGraph<T, PartDoor>) entity.getPackInfo().getSceneGraph()).renderDebug(entity, context, entity.getPackInfo());
+    public void renderEntityDebug(T entity, BaseRenderContext.EntityRenderContext context) {
+        ((SceneNode<BaseRenderContext.EntityRenderContext, PartDoor>) entity.getPackInfo().getSceneGraph()).renderDebug(context, entity.getPackInfo());
     }
 }

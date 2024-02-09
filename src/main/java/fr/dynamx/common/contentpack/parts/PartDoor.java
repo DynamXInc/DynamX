@@ -16,13 +16,15 @@ import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
-import fr.dynamx.client.renders.scene.EntityRenderContext;
-import fr.dynamx.client.renders.scene.Node;
-import fr.dynamx.client.renders.scene.SceneGraph;
+import fr.dynamx.client.renders.scene.BaseRenderContext;
+import fr.dynamx.client.renders.scene.IRenderContext;
+import fr.dynamx.client.renders.scene.node.SceneNode;
+import fr.dynamx.client.renders.scene.node.SimpleNode;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.type.ObjectCollisionsHelper;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.ModularPhysicsEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.common.handlers.TaskScheduler;
@@ -116,6 +118,8 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     protected boolean isPlayerMounting;
 
     protected ObjectCollisionsHelper collisionsHelper = new ObjectCollisionsHelper();
+
+    protected SceneNode<?, ?> sceneGraph;
 
     public PartDoor(ModularVehicleInfo owner, String partName) {
         super(owner, partName, 0, 0);
@@ -317,10 +321,8 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
         return Collections.EMPTY_LIST;
     }
 
-    private SceneGraph<?, ?> sceneGraph;
-
     @Override
-    public SceneGraph<?, ?> getSceneGraph() {
+    public SceneNode<?, ?> getSceneGraph() {
         if (sceneGraph == null) {
             sceneGraph = createSceneGraph(owner.getScaleModifier(), null);
         }
@@ -333,8 +335,8 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     }
 
     @Override
-    public SceneGraph<BaseVehicleEntity<?>, ModularVehicleInfo> createSceneGraph(Vector3f modelScale, List<SceneGraph<BaseVehicleEntity<?>, ModularVehicleInfo>> childGraph) {
-        return new PartDoorNode<>(this, modelScale, childGraph);
+    public SceneNode<IRenderContext, ModularVehicleInfo> createSceneGraph(Vector3f modelScale, List<SceneNode<IRenderContext, ModularVehicleInfo>> childGraph) {
+        return new PartDoorNode<>(this, modelScale, (List) childGraph);
     }
 
     @Override
@@ -348,14 +350,15 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
         return getOwner().getTextureVariantsFor(objObjectRenderer);
     }
 
-    class PartDoorNode<T extends BaseVehicleEntity<?>, A extends IModelPackObject> extends Node<T, A> {
-        public PartDoorNode(PartDoor door, Vector3f scale, List<SceneGraph<T, A>> linkedChilds) {
+    class PartDoorNode<A extends IModelPackObject> extends SimpleNode<BaseRenderContext.EntityRenderContext, A> {
+        public PartDoorNode(PartDoor door, Vector3f scale, List<SceneNode<BaseRenderContext.EntityRenderContext, A>> linkedChilds) {
             super(door.getCarAttachPoint(), null, PartDoor.this.isAutomaticPosition, scale, linkedChilds);
         }
 
         @Override
-        public void render(@Nullable T entity, EntityRenderContext context, A packInfo) {
+        public void render(BaseRenderContext.EntityRenderContext context, A packInfo) {
             transform.set(parent.getTransform());
+            ModularPhysicsEntity<?> entity = context.getEntity();
             DoorsModule module = entity != null ? entity.getModuleByType(DoorsModule.class) : null;
             if (!isEnabled() || module == null || module.getCurrentState(getId()) == DoorsModule.DoorState.CLOSED) {
                 Vector3f pos = Vector3fPool.get().addLocal(translation);
@@ -380,11 +383,11 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
             transformToPartPos();
             context.getRender().renderModelGroup(context.getModel(), getObjectName(), entity, context.getTextureId(), false);
             GlStateManager.popMatrix();
-            renderChildren(entity, context, packInfo);
+            renderChildren(context, packInfo);
         }
 
         @Override
-        public void renderDebug(@Nullable T entity, EntityRenderContext context, A packInfo) {
+        public void renderDebug(BaseRenderContext.EntityRenderContext context, A packInfo) {
             if (DynamXDebugOptions.DOOR_ATTACH_POINTS.isActive()) {
                 //if (entity instanceof BaseVehicleEntity) {
                 GlStateManager.pushMatrix();
@@ -410,7 +413,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
                             0.5f, 0, 1, 1);
                 }*/
             }
-            super.renderDebug(entity, context, packInfo);
+            super.renderDebug(context, packInfo);
         }
     }
 }

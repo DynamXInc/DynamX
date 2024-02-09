@@ -8,9 +8,9 @@ import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.dxmodel.EnumDxModelFormats;
 import fr.dynamx.api.events.CreatePackItemEvent;
 import fr.dynamx.api.events.DynamXBlockEvent;
-import fr.dynamx.client.renders.scene.BlockNode;
 import fr.dynamx.client.renders.scene.SceneBuilder;
-import fr.dynamx.client.renders.scene.SceneGraph;
+import fr.dynamx.client.renders.scene.node.BlockNode;
+import fr.dynamx.client.renders.scene.node.SceneNode;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.contentpack.loader.InfoList;
 import fr.dynamx.common.contentpack.parts.ILightOwner;
@@ -51,7 +51,9 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
     @Getter
     protected final Map<String, PartLightSource> lightSources = new HashMap<>();
 
-    private final List<ParticleEmitterInfo<?>> particleEmitters = new ArrayList<>();
+    protected final List<ParticleEmitterInfo<?>> particleEmitters = new ArrayList<>();
+
+    protected SceneNode<?, ?> sceneNode;
 
     public BlockObject(String packName, String fileName) {
         super(packName, fileName);
@@ -89,18 +91,16 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
         }
     }
 
-    private SceneGraph<?, ?> sceneGraph;
-
     @Override
-    public SceneGraph<?, ?> getSceneGraph() {
-        if (sceneGraph == null) {
+    public SceneNode<?, ?> getSceneGraph() {
+        if (sceneNode == null) {
             if (isModelValid()) {
-                DynamXBlockEvent.BuildSceneGraph buildSceneGraphEvent = new DynamXBlockEvent.BuildSceneGraph(new SceneBuilder<>(), this, getDrawableParts(), getScaleModifier());
-                sceneGraph = buildSceneGraphEvent.getSceneGraphResult();
+                DynamXBlockEvent.BuildSceneGraph buildSceneGraphEvent = new DynamXBlockEvent.BuildSceneGraph(new SceneBuilder<>(), this, (List) getDrawableParts(), getScaleModifier());
+                sceneNode = buildSceneGraphEvent.getSceneGraphResult();
             } else
-                sceneGraph = new BlockNode<>(Collections.EMPTY_LIST);
+                sceneNode = new BlockNode<>(Collections.EMPTY_LIST);
         }
-        return sceneGraph;
+        return sceneNode;
     }
 
     @Override

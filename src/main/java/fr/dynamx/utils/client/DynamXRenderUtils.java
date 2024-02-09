@@ -67,14 +67,26 @@ public class DynamXRenderUtils {
 
     private static RenderBaseVehicle<?> renderBaseVehicle;
 
+    /**
+     * @deprecated You should render the entity using its SceneGraph (see {@link fr.dynamx.client.renders.model.renderer.DxItemModelLoader} for an example)
+     */
+    @Deprecated
     public static void renderCar(ModularVehicleInfo car, byte textureId) {
-        if (renderBaseVehicle == null)
-            renderBaseVehicle = new RenderBaseVehicle<>(ClientEventHandler.MC.getRenderManager());
         Vector3fPool.openPool();
         GlQuaternionPool.openPool();
-        renderBaseVehicle.renderEntity(car, textureId);
+        getRenderBaseVehicle().renderEntity(car, textureId);
         GlQuaternionPool.closePool();
         Vector3fPool.closePool();
+    }
+
+    /**
+     * @deprecated Will be deleted
+     */
+    @Deprecated
+    public static RenderBaseVehicle<?> getRenderBaseVehicle() {
+        if (renderBaseVehicle == null)
+            renderBaseVehicle = new RenderBaseVehicle<>(ClientEventHandler.MC.getRenderManager());
+        return renderBaseVehicle;
     }
 
     public static void drawSphere(Vector3f translation, float radius, @Nullable Color sphereColor) {

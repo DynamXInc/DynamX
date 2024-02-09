@@ -2,9 +2,9 @@ package fr.dynamx.api.contentpack.object.part;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.render.IModelPackObject;
+import fr.dynamx.client.renders.scene.IRenderContext;
 import fr.dynamx.client.renders.scene.SceneBuilder;
-import fr.dynamx.client.renders.scene.SceneGraph;
-import fr.dynamx.common.entities.IDynamXObject;
+import fr.dynamx.client.renders.scene.node.SceneNode;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -16,7 +16,7 @@ import java.util.List;
  * @param <T> The entity type
  * @param <A> The type of the owner of this part
  */
-public interface IDrawablePart<T extends IDynamXObject, A extends IModelPackObject> {
+public interface IDrawablePart<T, A extends IModelPackObject> {
     /**
      * Called to update textures of this part (egg for wheels) according to the new entity's metadata
      *
@@ -45,7 +45,7 @@ public interface IDrawablePart<T extends IDynamXObject, A extends IModelPackObje
      * @param sceneBuilder The scene builder
      */
     @SideOnly(Side.CLIENT)
-    default void addToSceneGraph(A packInfo, SceneBuilder<T, A> sceneBuilder) {
+    default void addToSceneGraph(A packInfo, SceneBuilder<IRenderContext, A> sceneBuilder) {
         sceneBuilder.addNode(packInfo, this);
     }
 
@@ -58,14 +58,14 @@ public interface IDrawablePart<T extends IDynamXObject, A extends IModelPackObje
     }
 
     /**
-     * Creates the scene graph of this part
+     * Creates the scene node of this part
      *
      * @param modelScale The scale of the model (usually the scaleModifier of the packInfo)
      * @param childGraph The child scene graph (parts that are linked to this part)
-     * @return The scene graph of this part
+     * @return The scene node of this part
      */
     @SideOnly(Side.CLIENT)
-    SceneGraph<T, A> createSceneGraph(Vector3f modelScale, List<SceneGraph<T, A>> childGraph);
+    SceneNode<IRenderContext, A> createSceneGraph(Vector3f modelScale, List<SceneNode<IRenderContext, A>> childGraph);
 
     /**
      * @return The node name in the scene graph. Use this name in the scene path when you want to attach a part to this part. This can be the part name defined in the pack.

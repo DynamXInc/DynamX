@@ -1,8 +1,8 @@
-package fr.dynamx.client.renders.scene;
+package fr.dynamx.client.renders.scene.node;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.render.IModelPackObject;
-import fr.dynamx.common.entities.IDynamXObject;
+import fr.dynamx.client.renders.scene.IRenderContext;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
@@ -20,10 +20,10 @@ import java.util.List;
  * A basic node of the scene graph, with a position, a rotation and a scale, that can have linked children nodes. <br>
  * The children will be rendered with the same transformations as the node.
  *
- * @param <T> The type of the entity that is rendered
+ * @param <C> The type of the render context
  * @param <A> The type of the pack info (the owner of the scene graph)
  */
-public abstract class Node<T extends IDynamXObject, A extends IModelPackObject> implements SceneGraph<T, A> {
+public abstract class SimpleNode<C extends IRenderContext, A extends IModelPackObject> implements SceneNode<C, A> {
     /**
      * The translation of the node, relative to the previous node
      */
@@ -49,14 +49,23 @@ public abstract class Node<T extends IDynamXObject, A extends IModelPackObject> 
      */
     @Getter
     @Nullable
-    protected final List<SceneGraph<T, A>> linkedChildren;
+    protected final List<SceneNode<C, A>> linkedChildren;
 
+    /**
+     * The transformation matrix of the node <br>
+     * Stores the transformations of the node, and is used to render the node and its children <br>
+     * Contains the transformations of the parent node, and the transformations of this node <br>
+     * Do not use GlStateManager to apply transformations, use this matrix instead
+     */
     @Getter
     protected final Matrix4f transform = new Matrix4f();
 
+    /**
+     * The parent of this node
+     */
     @Setter
     @Getter
-    protected SceneGraph<T, A> parent;
+    protected SceneNode<C, A> parent;
 
     /**
      * Creates a new node with the given manual transformations
@@ -66,7 +75,7 @@ public abstract class Node<T extends IDynamXObject, A extends IModelPackObject> 
      * @param scale          The scale of the node, absolute, can't be null
      * @param linkedChildren The children of this node, can be null
      */
-    public Node(@Nullable Vector3f translation, @Nullable Quaternion rotation, @Nonnull Vector3f scale, @Nullable List<SceneGraph<T, A>> linkedChildren) {
+    public SimpleNode(@Nullable Vector3f translation, @Nullable Quaternion rotation, @Nonnull Vector3f scale, @Nullable List<SceneNode<C, A>> linkedChildren) {
         this(translation, rotation, false, scale, linkedChildren);
     }
 
@@ -80,7 +89,7 @@ public abstract class Node<T extends IDynamXObject, A extends IModelPackObject> 
      * @param scale               The scale of the node, absolute, can't be null
      * @param linkedChildren      The children of this node, can be null
      */
-    public Node(@Nullable Vector3f translation, @Nullable Quaternion rotation, boolean isAutomaticPosition, @Nonnull Vector3f scale, @Nullable List<SceneGraph<T, A>> linkedChildren) {
+    public SimpleNode(@Nullable Vector3f translation, @Nullable Quaternion rotation, boolean isAutomaticPosition, @Nonnull Vector3f scale, @Nullable List<SceneNode<C, A>> linkedChildren) {
         this.translation = translation;
         this.rotation = rotation;
         this.isAutomaticPosition = isAutomaticPosition;
@@ -89,7 +98,7 @@ public abstract class Node<T extends IDynamXObject, A extends IModelPackObject> 
     }
 
     /**
-     * Applies the rotation point transformations of this node <br>
+     * Applies the rotation point transformations of this node, and the parent's transformations <br>
      * This should be called before applying "dynamic" transformations to the node (like the rotation of a wheel), and before transformToPartPos()
      */
     protected void transformToRotationPoint() {
@@ -98,7 +107,6 @@ public abstract class Node<T extends IDynamXObject, A extends IModelPackObject> 
             transform.translate(translation.x, translation.y, translation.z);
         if (rotation != null)
             transform.rotate(DynamXUtils.toQuaternion(rotation));
-
         transform.scale(scale.x, scale.y, scale.z);
     }
 
@@ -130,20 +138,20 @@ public abstract class Node<T extends IDynamXObject, A extends IModelPackObject> 
      * Renders the children of this node (if any). <br>
      * This doesn't render the node itself, only the children. This should be called after the node transformations.
      *
-     * @param entity   The entity that is rendered, can be null if we are rendering a static scene graph (like in the inventory)
      * @param context  The render context
      * @param packInfo The pack info of the entity (the owner of the scene graph)
      */
-    protected void renderChildren(@Nullable T entity, EntityRenderContext context, A packInfo) {
+    protected void renderChildren(C context, A packInfo) {
+        transform.scale(1 / scale.x, 1 / scale.y, 1 / scale.z);
         if (linkedChildren != null) {
-            linkedChildren.forEach(c -> c.render(entity, context, packInfo));
+            linkedChildren.forEach(c -> c.render(context, packInfo));
         }
     }
 
     @Override
-    public void renderDebug(@Nullable T entity, EntityRenderContext context, A packInfo) {
+    public void renderDebug(C context, A packInfo) {
         if (linkedChildren != null) {
-            linkedChildren.forEach(c -> c.renderDebug(entity, context, packInfo));
+            linkedChildren.forEach(c -> c.renderDebug(context, packInfo));
         }
     }
 }

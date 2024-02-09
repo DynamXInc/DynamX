@@ -85,7 +85,7 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
         }
         if (!MODELS_REGISTRY.containsKey(location)) {
             MODELS_REGISTRY.put(location, customTextures);
-            if(location.getFormat() == EnumDxModelFormats.GLTF){
+            if (location.getFormat() == EnumDxModelFormats.GLTF) {
                 MCglTF.getInstance().registerModel(location);
             }
         } else if (customTextures != null && customTextures.hasVaryingTextures()) {
@@ -93,7 +93,7 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
             if (previousSupplier == null || !previousSupplier.hasVaryingTextures()) {
                 log.debug("Replacing model texture supplier of '" + location + "' from '" + previousSupplier + "' to '" + customTextures + "' : the previous doesn't have custom textures");
                 MODELS_REGISTRY.put(location, customTextures);
-                if(location.getFormat() == EnumDxModelFormats.GLTF){
+                if (location.getFormat() == EnumDxModelFormats.GLTF) {
                     MCglTF.getInstance().registerModel(location);
                 }
             } else {
@@ -142,7 +142,7 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
                 /* == Load models == */
                 List<Callable<?>> loadObjTasks = new ArrayList<>();
                 for (Map.Entry<DxModelPath, IModelTextureVariantsSupplier> name : MODELS_REGISTRY.entrySet()) {
-                    if(MODELS.containsKey(name.getKey().getModelPath())){
+                    if (MODELS.containsKey(name.getKey().getModelPath())) {
                         continue;
                     }
                     loadObjTasks.add(() -> {
@@ -156,7 +156,7 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
                                 try {
                                     model = new GltfModelRenderer(name.getKey(), name.getValue());
                                     MCglTF.getInstance().attachReceivers(name.getKey(), (GltfModelRenderer) model);
-                                }catch (Exception e){
+                                } catch (Exception e) {
                                     e.printStackTrace();
                                 }
                                 break;
@@ -198,7 +198,8 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
                 throw new RuntimeException(e);
             }
         }, () -> {
-            ProgressManager.ProgressBar bar = ProgressManager.push("Loading GLTF models", 1);
+            ProgressManager.ProgressBar bar = ProgressManager.push("Post loading models", 2);
+            bar.step("Loading GLTF models");
             log.info("Loading GLTF models...");
             long start = System.currentTimeMillis();
             if (!threadedLoadingService.mcLoadingFinished()) {
@@ -207,13 +208,12 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
             }
             try {
                 MCglTF.getInstance().reloadModels();
-            }catch (Exception e) {
-                e.printStackTrace();
-            }finally {
-                if(!threadedLoadingService.mcLoadingFinished()) {
+            } catch (Exception e) {
+                log.fatal("Exception loading GLTF models", e);
+            } finally {
+                if (!threadedLoadingService.mcLoadingFinished()) {
                     SplashProgress.resume();
                 }
-
             }
             log.info("MCgLTF took " + (System.currentTimeMillis() - start) + " ms to load " + MCglTF.lookup.size() + " gltf models");
             log.info("Loading model textures...");
@@ -221,10 +221,8 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
             bar.step("Uploading textures");
             OBJLoader.getMtlLoaders().forEach(MTLLoader::uploadTextures);
             OBJLoader.getMtlLoaders().clear();
-
             if (ClientEventHandler.MC.world != null)
                 uploadVAOs();
-
             ProgressManager.pop(bar);
             DynamXLoadingTasks.endTask(DynamXLoadingTasks.MODEL);
         });

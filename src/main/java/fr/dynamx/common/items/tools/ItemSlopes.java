@@ -16,12 +16,8 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.World;
 import net.minecraft.util.text.TextComponentTranslation;
-
-import javax.annotation.Nullable;
+import net.minecraft.world.World;
 
 public class ItemSlopes extends Item {
     public ItemSlopes() {
@@ -137,20 +133,5 @@ public class ItemSlopes extends Item {
 
     public static Vector3f getPosFromTag(NBTTagCompound tag) {
         return Vector3fPool.get(tag.getFloat("X"), tag.getFloat("Y"), tag.getFloat("Z"));
-    }
-
-    @Override
-    public boolean getShareTag() {
-        return super.getShareTag();
-    }
-
-    @Override
-    public NBTTagCompound getNBTShareTag(ItemStack stack) {
-        return super.getNBTShareTag(stack);
-    }
-
-    @Override
-    public void readNBTShareTag(ItemStack stack, @Nullable NBTTagCompound nbt) {
-        super.readNBTShareTag(stack, nbt);
     }
 }

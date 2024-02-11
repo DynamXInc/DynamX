@@ -28,7 +28,7 @@ public interface IModelPackObject extends IModelTextureVariantsSupplier {
     }
 
     default boolean shouldRegisterModel() {
-        return isModelValid();
+        return isModelValid() && !getModel().getPath().endsWith("json");
     }
 
     @SideOnly(Side.CLIENT)

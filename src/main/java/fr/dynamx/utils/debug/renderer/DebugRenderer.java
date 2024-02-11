@@ -2,6 +2,7 @@ package fr.dynamx.utils.debug.renderer;
 
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
+import fr.dynamx.client.renders.scene.node.SceneNode;
 import fr.dynamx.common.contentpack.parts.PartStorage;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
@@ -14,7 +15,7 @@ import java.util.List;
 /**
  * A debug renderer for a {@link fr.dynamx.client.renders.RenderPhysicsEntity}
  *
- * @deprecated The debug should be rendered using the new {@link fr.dynamx.client.renders.scene.SceneGraph}s system
+ * @deprecated The debug should be rendered using the new {@link SceneNode}s system
  * @param <T> The entity type
  * @see VehicleDebugRenderer
  * @see BoatDebugRenderer

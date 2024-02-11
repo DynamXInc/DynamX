@@ -116,7 +116,7 @@ public class HelicopterController extends BaseController {
         speed.setCssClass("speed_pane");
         float[] engineProperties = engine.getEngineProperties();
         speed.add(new UpdatableGuiLabel("%s", s -> String.format(s, engine.isEngineStarted() ? (int) engineProperties[VehicleEntityProperties.EnumEngineProperties.SPEED.ordinal()] : "--", "")).setCssId("engine_speed"));
-        speed.add(new UpdatableGuiLabel("Power %f", s -> String.format(s, engine.getPower())).setCssId("engine_gear"));
+        speed.add(new UpdatableGuiLabel("Power %.2f", s -> String.format(s, Math.abs(engine.getPower()))).setCssId("engine_gear"));
         panel.add(speed);
         panel.add(new UpdatableGuiLabel("View locked %b", s -> String.format(s, mouseLocked)).setCssId("engine_gear"));
         //panel.add(new UpdatableGuiLabel("                             AngleFront %f", s -> String.format(s, HelicopterEnginePhysicsHandler.AngleFront)).setCssId("engine_gear"));

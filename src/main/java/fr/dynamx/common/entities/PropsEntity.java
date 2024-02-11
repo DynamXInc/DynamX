@@ -2,7 +2,6 @@ package fr.dynamx.common.entities;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.IModuleContainer;
-import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.objects.PropObject;
@@ -62,8 +61,8 @@ public class PropsEntity<T extends PackEntityPhysicsHandler<PropObject<?>, ?>> e
     }
 
     @Override
-    protected void sortModules() {
-        super.sortModules();
+    protected void getListenerModules() {
+        super.getListenerModules();
         seats = getModuleByType(SeatsModule.class);
     }
 

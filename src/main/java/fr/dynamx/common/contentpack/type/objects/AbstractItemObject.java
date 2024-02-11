@@ -19,6 +19,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 
 import java.util.*;
 
@@ -118,6 +119,10 @@ public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A e
     public boolean postLoad(boolean hot) {
         subProperties.forEach(subInfoType -> subInfoType.postLoad((A) this, hot));
         parts.forEach(part -> part.postLoad((A) this, hot));
+        // Build the scene graph
+        if (FMLCommonHandler.instance().getSide().isClient()) {
+            getSceneGraph();
+        }
         return super.postLoad(hot);
     }
 

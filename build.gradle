@@ -77,6 +77,7 @@ dependencies {
         exclude module: 'commons-io'
         exclude module: 'gson'
     }
+    implementation 'org.joml:joml:1.10.5'
     compileOnly 'org.projectlombok:lombok:1.18.24'
 
     shadow('org.spongepowered:mixin:0.8.5') {

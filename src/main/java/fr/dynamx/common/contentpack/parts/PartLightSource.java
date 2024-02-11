@@ -1,8 +1,11 @@
 package fr.dynamx.common.contentpack.parts;
 
+import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.aym.acslib.api.services.error.ErrorLevel;
+import fr.dynamx.api.contentpack.object.ICollisionsContainer;
+import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.contentpack.object.render.IModelPackObject;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
@@ -13,19 +16,19 @@ import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.client.renders.model.texture.TextureVariantData;
-import fr.dynamx.client.renders.scene.EntityRenderContext;
+import fr.dynamx.client.renders.scene.BaseRenderContext;
+import fr.dynamx.client.renders.scene.IRenderContext;
 import fr.dynamx.client.renders.scene.SceneBuilder;
-import fr.dynamx.client.renders.scene.SceneGraph;
+import fr.dynamx.client.renders.scene.node.SceneNode;
+import fr.dynamx.client.renders.scene.node.SimpleNode;
 import fr.dynamx.common.DynamXContext;
-import fr.dynamx.common.blocks.TEDynamXBlock;
-import fr.dynamx.common.entities.IDynamXObject;
 import fr.dynamx.common.contentpack.type.objects.AbstractItemObject;
-import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.AbstractLightsModule;
 import fr.dynamx.common.entities.vehicles.TrailerEntity;
 import fr.dynamx.common.objloader.data.DxModelData;
 import fr.dynamx.utils.DynamXUtils;
+import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
@@ -45,7 +48,7 @@ import java.util.*;
  */
 @Getter
 @RegisteredSubInfoType(name = "MultiLight", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER, SubInfoTypeRegistries.BLOCKS, SubInfoTypeRegistries.PROPS}, strictName = false)
-public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISubInfoTypeOwner<PartLightSource>, IDrawablePart<PackPhysicsEntity<?, ?>, IModelPackObject>, IModelTextureVariantsSupplier.IModelTextureVariants {
+public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISubInfoTypeOwner<PartLightSource>, IDrawablePart<Object, IModelPackObject>, IModelTextureVariantsSupplier.IModelTextureVariants {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER, SubInfoTypeRegistries.BLOCKS, SubInfoTypeRegistries.PROPS})
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("PartName".equals(key))
@@ -115,6 +118,13 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
     public void appendTo(ILightOwner<?> owner) {
         if (owner instanceof AbstractItemObject)
             readPositionFromModel(((AbstractItemObject) owner).getModel());
+        if (position == null) {
+            INamedObject parent = getRootOwner();
+            DynamXErrorManager.addPackError(getPackName(), "required_property", ErrorLevel.HIGH, parent.getName(), "Position in " + getName());
+            position = new Vector3f();
+        } else {
+            position.multLocal(((ICollisionsContainer) owner).getScaleModifier());
+        }
         owner.addLightSource(this);
     }
 
@@ -145,7 +155,7 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
     }
 
     @Override
-    public void addToSceneGraph(IModelPackObject packInfo, SceneBuilder<PackPhysicsEntity<?, ?>, IModelPackObject> sceneBuilder) {
+    public void addToSceneGraph(IModelPackObject packInfo, SceneBuilder<IRenderContext, IModelPackObject> sceneBuilder) {
         if (nodeDependingOnName != null) {
             sceneBuilder.addNode(packInfo, this, nodeDependingOnName);
         } else {
@@ -154,7 +164,7 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
     }
 
     @Override
-    public SceneGraph<PackPhysicsEntity<?, ?>, IModelPackObject> createSceneGraph(Vector3f modelScale, List<SceneGraph<PackPhysicsEntity<?, ?>, IModelPackObject>> childGraph) {
+    public SceneNode<IRenderContext, IModelPackObject> createSceneGraph(Vector3f modelScale, List<SceneNode<IRenderContext, IModelPackObject>> childGraph) {
         return new PartLightNode<>(this, modelScale, (List) childGraph);
     }
 
@@ -218,18 +228,18 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
         return Collections.emptyList();
     }
 
-    class PartLightNode<T extends IDynamXObject, A extends IModelPackObject> extends SceneGraph.Node<T, A> {
-        public PartLightNode(PartLightSource lightSource, Vector3f scale, List<SceneGraph<T, A>> linkedChilds) {
+    class PartLightNode<A extends IModelPackObject> extends SimpleNode<IRenderContext, A> {
+        public PartLightNode(PartLightSource lightSource, Vector3f scale, List<SceneNode<IRenderContext, A>> linkedChilds) {
             super(lightSource.getPosition(), lightSource.getRotation() != null ? GlQuaternionPool.newGlQuaternion(lightSource.getRotation()) : null, PartLightSource.this.isAutomaticPosition, scale, linkedChilds);
         }
 
         @Override
         @SideOnly(Side.CLIENT)
-        public void render(@Nullable T entity, EntityRenderContext context, A packInfo) {
+        public void render(IRenderContext context, A packInfo) {
             /* Rendering light sources */
-            AbstractLightsModule lights = (entity instanceof PackPhysicsEntity<?, ?>) ? ((PackPhysicsEntity<?, ?>) entity).getModuleByType(AbstractLightsModule.class) :
-                    entity instanceof TEDynamXBlock ? ((TEDynamXBlock) entity).getLightsModule() : null;
-            GlStateManager.pushMatrix();
+            boolean isEntity = context instanceof BaseRenderContext.EntityRenderContext && ((BaseRenderContext.EntityRenderContext) context).getEntity() != null;
+            AbstractLightsModule lights = isEntity ? ((BaseRenderContext.EntityRenderContext) context).getEntity().getModuleByType(AbstractLightsModule.class) :
+                    context instanceof BaseRenderContext.BlockRenderContext && ((BaseRenderContext.BlockRenderContext) context).getTileEntity() != null ? ((BaseRenderContext.BlockRenderContext) context).getTileEntity().getLightsModule() : null;
             transformToRotationPoint();
             /* Rendering light source */
             LightObject onLightObject = null;
@@ -278,24 +288,26 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
             //Render the light
             if (lights != null && lights.isLightOn(onLightObject.getLightId()) && onLightObject.getRotateDuration() > 0) {
                 float step = ((float) (ClientEventHandler.MC.getRenderViewEntity().ticksExisted % onLightObject.getRotateDuration())) / onLightObject.getRotateDuration();
-                step = step * 360;
-                GlStateManager.rotate(step, 0, 1, 0);
+                step = step * (FastMath.PI * 2);
+                transform.rotate(step, 0, 1, 0);
             }
+            GlStateManager.pushMatrix();
+            GlStateManager.multMatrix(ClientDynamXUtils.getMatrixBuffer(transform));
             transformToPartPos();
             context.getModel().renderGroup(getObjectName(), texId, context.isUseVanillaRender());
-            if (entity instanceof PackPhysicsEntity<?, ?> && isOn) {
-                int i = ((PackPhysicsEntity<?, ?>) entity).getBrightnessForRender();
+            if (isEntity && isOn) {
+                int i = ((BaseRenderContext.EntityRenderContext) context).getEntity().getBrightnessForRender();
                 int j = i % 65536;
                 int k = i / 65536;
                 OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float) j, (float) k);
                 GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             }
-            renderChildren(entity, context, packInfo);
             GlStateManager.popMatrix();
+            renderChildren(context, packInfo);
         }
 
         @Override
-        public void renderDebug(@Nullable T entity, EntityRenderContext context, A packInfo) {
+        public void renderDebug(IRenderContext context, A packInfo) {
             if (DynamXDebugOptions.LIGHTS.isActive()) {
                 GlStateManager.pushMatrix();
                 transformForDebug();
@@ -303,7 +315,7 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
                         1, 1, 0, 1);
                 GlStateManager.popMatrix();
             }
-            super.renderDebug(entity, context, packInfo);
+            super.renderDebug(context, packInfo);
         }
     }
 }

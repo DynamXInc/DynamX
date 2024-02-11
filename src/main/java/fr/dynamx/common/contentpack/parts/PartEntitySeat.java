@@ -1,5 +1,6 @@
 package fr.dynamx.common.contentpack.parts;
 
+import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
@@ -11,8 +12,10 @@ import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
-import fr.dynamx.client.renders.scene.EntityRenderContext;
-import fr.dynamx.client.renders.scene.SceneGraph;
+import fr.dynamx.client.renders.scene.BaseRenderContext;
+import fr.dynamx.client.renders.scene.IRenderContext;
+import fr.dynamx.client.renders.scene.node.SceneNode;
+import fr.dynamx.client.renders.scene.node.SimpleNode;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
@@ -22,6 +25,7 @@ import fr.dynamx.common.entities.modules.SeatsModule;
 import fr.dynamx.common.entities.vehicles.CarEntity;
 import fr.dynamx.common.entities.vehicles.HelicopterEntity;
 import fr.dynamx.utils.EnumSeatPlayerPosition;
+import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.errors.DynamXErrorManager;
@@ -106,7 +110,6 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
     @Nullable
     @Override
     public PartDoor getLinkedPartDoor() {
-        System.out.println("Press f " + getLinkedDoor() +" // " + getOwner().getPartsByType(PartDoor.class).stream().map(PartDoor::getPartName).reduce((s, s2) -> s + ", " + s2).orElse("null"));
         return getLinkedDoor() == null ? null : getOwner().getPartsByType(PartDoor.class).stream().filter(partDoor -> partDoor.getPartName().equalsIgnoreCase(getLinkedDoor())).findFirst().orElse(null);
     }
 
@@ -127,7 +130,7 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
     }
 
     @Override
-    public SceneGraph<PackPhysicsEntity<?, ?>, IPhysicsPackInfo> createSceneGraph(Vector3f modelScale, List<SceneGraph<PackPhysicsEntity<?, ?>, IPhysicsPackInfo>> childGraph) {
+    public SceneNode<IRenderContext, IPhysicsPackInfo> createSceneGraph(Vector3f modelScale, List<SceneNode<IRenderContext, IPhysicsPackInfo>> childGraph) {
         return new PartEntitySeatNode<>(this, modelScale, (List) childGraph);
     }
 
@@ -141,16 +144,16 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
         return null;
     }
 
-    class PartEntitySeatNode<T extends BaseVehicleEntity<?>, A extends IPhysicsPackInfo> extends SceneGraph.Node<T, A> {
-        public PartEntitySeatNode(BasePartSeat seat, Vector3f scale, List<SceneGraph<T, A>> linkedChilds) {
+    class PartEntitySeatNode<A extends IPhysicsPackInfo> extends SimpleNode<BaseRenderContext.EntityRenderContext, A> {
+        public PartEntitySeatNode(BasePartSeat seat, Vector3f scale, List<SceneNode<BaseRenderContext.EntityRenderContext, A>> linkedChilds) {
             super(seat.getPosition(), GlQuaternionPool.newGlQuaternion(seat.getRotation()), scale, linkedChilds);
         }
 
         @Override
-        public void render(@Nullable T entity, EntityRenderContext context, A packInfo) {
-            if (MinecraftForgeClient.getRenderPass() != 0 || !(entity instanceof IModuleContainer.ISeatsContainer))
+        public void render(BaseRenderContext.EntityRenderContext context, A packInfo) {
+            if (MinecraftForgeClient.getRenderPass() != 0 || !(context.getEntity() instanceof IModuleContainer.ISeatsContainer))
                 return;
-            SeatsModule seats = ((IModuleContainer.ISeatsContainer) entity).getSeats();
+            SeatsModule seats = ((IModuleContainer.ISeatsContainer) context.getEntity()).getSeats();
             assert seats != null;
             Entity seatRider = seats.getSeatToPassengerMap().get(PartEntitySeat.this);
             if (seatRider == null) return;
@@ -158,16 +161,17 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
             if ((seatRider != Minecraft.getMinecraft().player || Minecraft.getMinecraft().gameSettings.thirdPersonView != 0)) {
                 DynamXRenderUtils.popGlAllAttribBits();
                 float partialTicks = context.getPartialTicks();
-                GlStateManager.pushMatrix();
                 transformToRotationPoint();
 
                 //Transform the player to match the seat rotation and size
                 EnumSeatPlayerPosition position = getPlayerPosition();
                 RenderPhysicsEntity.shouldRenderPlayerSitting = position == EnumSeatPlayerPosition.SITTING;
                 if (getPlayerSize() != null)
-                    GlStateManager.scale(getPlayerSize().x, getPlayerSize().y, getPlayerSize().z);
-                if (position == EnumSeatPlayerPosition.LYING) GlStateManager.rotate(90, -1, 0, 0);
+                    transform.scale(getPlayerSize().x, getPlayerSize().y, getPlayerSize().z);
+                if (position == EnumSeatPlayerPosition.LYING) transform.rotate(FastMath.PI / 2, 1, 0, 0);
 
+                GlStateManager.pushMatrix();
+                GlStateManager.multMatrix(ClientDynamXUtils.getMatrixBuffer(transform));
                 //The render the player, e.rotationYaw is the name plate rotation
                 if (seatRider instanceof AbstractClientPlayer) {
                     if (ClientEventHandler.renderPlayer != null) {
@@ -187,7 +191,7 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
 
 
         @Override
-        public void renderDebug(@Nullable T entity, EntityRenderContext context, A packInfo) {
+        public void renderDebug(BaseRenderContext.EntityRenderContext context, A packInfo) {
             if (DynamXDebugOptions.SEATS_AND_STORAGE.isActive()) {
                 GlStateManager.pushMatrix();
                 transformForDebug();
@@ -195,7 +199,7 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
                 RenderGlobal.drawBoundingBox(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, isDriver() ? 0 : 1, isDriver() ? 1 : 0, 0, 1);
                 GlStateManager.popMatrix();
             }
-            super.renderDebug(entity, context, packInfo);
+            super.renderDebug(context, packInfo);
         }
     }
 }

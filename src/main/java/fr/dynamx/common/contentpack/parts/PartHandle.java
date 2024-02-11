@@ -7,18 +7,20 @@ import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
-import fr.dynamx.client.renders.scene.EntityRenderContext;
-import fr.dynamx.client.renders.scene.SceneGraph;
+import fr.dynamx.client.renders.scene.BaseRenderContext;
+import fr.dynamx.client.renders.scene.IRenderContext;
+import fr.dynamx.client.renders.scene.node.SceneNode;
+import fr.dynamx.client.renders.scene.node.SimpleNode;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.engines.HelicopterEngineModule;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
+import fr.dynamx.utils.maths.DynamXMath;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.renderer.GlStateManager;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 
@@ -62,32 +64,32 @@ public class PartHandle extends BasePart<ModularVehicleInfo> implements IDrawabl
     }
 
     @Override
-    public SceneGraph<BaseVehicleEntity<?>, ModularVehicleInfo> createSceneGraph(Vector3f modelScale, List<SceneGraph<BaseVehicleEntity<?>, ModularVehicleInfo>> childGraph) {
-        return new PartHandleNode<>(this, modelScale, childGraph);
+    public SceneNode<IRenderContext, ModularVehicleInfo> createSceneGraph(Vector3f modelScale, List<SceneNode<IRenderContext, ModularVehicleInfo>> childGraph) {
+        return new PartHandleNode<>(this, modelScale, (List) childGraph);
     }
 
-    class PartHandleNode<T extends BaseVehicleEntity<?>, A extends ModularVehicleInfo> extends SceneGraph.Node<T, A> {
-        public PartHandleNode(PartHandle part, Vector3f scale, List<SceneGraph<T, A>> linkedChilds) {
+    class PartHandleNode<A extends ModularVehicleInfo> extends SimpleNode<BaseRenderContext.EntityRenderContext, A> {
+        public PartHandleNode(PartHandle part, Vector3f scale, List<SceneNode<BaseRenderContext.EntityRenderContext, A>> linkedChilds) {
             super(part.getPosition(), null, PartHandle.this.isAutomaticPosition, scale, linkedChilds);
         }
 
         @Override
-        public void render(@Nullable T entity, EntityRenderContext context, A packInfo) {
+        public void render(BaseRenderContext.EntityRenderContext context, A packInfo) {
             if (!context.getModel().containsObjectOrNode(getObjectName()))
                 return;
             GlStateManager.pushMatrix();
             transformToRotationPoint();
-            if (entity != null && entity.hasModuleOfType(HelicopterEngineModule.class)) {
-                HelicopterEngineModule engine = entity.getModuleByType(HelicopterEngineModule.class);
+            if (context.getEntity() != null && context.getEntity().hasModuleOfType(HelicopterEngineModule.class)) {
+                HelicopterEngineModule engine = context.getEntity().getModuleByType(HelicopterEngineModule.class);
                 // Rotating the handle with Dx and Dy
                 float dx = engine.getRollControls().get(0);
                 float dy = engine.getRollControls().get(1);
-                GlStateManager.rotate(dx, 0, 0, dx > 0 ? 0.5f : -0.5f);
-                GlStateManager.rotate(dy, dy > 0 ? 0.5f : -0.5f, 0, 0);
+                transform.rotate(dx * DynamXMath.TO_RADIAN, 0, dx > 0 ? 0.5f : -0.5f, 0);
+                transform.rotate(dy * DynamXMath.TO_RADIAN, dy > 0 ? 0.5f : -0.5f, 0, 0);
             }
             context.getModel().renderGroup(getObjectName(), context.getTextureId(), context.isUseVanillaRender());
-            renderChildren(entity, context, packInfo);
             GlStateManager.popMatrix();
+            renderChildren(context, packInfo);
         }
     }
 }

@@ -49,8 +49,8 @@ public class HelicopterEntity<T extends HelicopterPhysicsHandler<?>> extends Bas
     }
 
     @Override
-    protected void sortModules() {
-        super.sortModules();
+    protected void getListenerModules() {
+        super.getListenerModules();
         seats = getModuleByType(SeatsModule.class);
         doors = getModuleByType(DoorsModule.class);
     }

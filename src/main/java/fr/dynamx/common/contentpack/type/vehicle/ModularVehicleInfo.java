@@ -19,9 +19,9 @@ import fr.dynamx.api.events.DynamXEntityRenderEvents;
 import fr.dynamx.client.renders.model.ItemDxModel;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.client.renders.model.texture.TextureVariantData;
-import fr.dynamx.client.renders.scene.EntityNode;
 import fr.dynamx.client.renders.scene.SceneBuilder;
-import fr.dynamx.client.renders.scene.SceneGraph;
+import fr.dynamx.client.renders.scene.node.EntityNode;
+import fr.dynamx.client.renders.scene.node.SceneNode;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.loader.InfoList;
 import fr.dynamx.common.contentpack.parts.ILightOwner;
@@ -35,17 +35,15 @@ import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.EnumPlayerStandOnTop;
-import fr.dynamx.utils.client.DynamXRenderUtils;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import org.joml.Matrix4f;
 
 import java.util.*;
 
@@ -169,6 +167,8 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
      */
     private MaterialVariantsInfo<ModularVehicleInfo> variants;
 
+    protected SceneNode<?, ?> sceneGraph;
+
     @Deprecated
     @PackFileProperty(configNames = "Textures", required = false, type = DefinitionType.DynamXDefinitionTypes.STRING_ARRAY_2D)
     private String[][] texturesArray;
@@ -230,9 +230,6 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
             return false;
         //Validate vehicle type
         validator.validate(this);
-        if (FMLCommonHandler.instance().getSide().isClient()) {
-            getSceneGraph();
-        }
         return true;
     }
 
@@ -257,16 +254,10 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
 
     @Override
     @SideOnly(Side.CLIENT)
-    public void applyItemTransforms(ItemCameraTransforms.TransformType renderType, ItemStack stack, ItemDxModel model) {
-        super.applyItemTransforms(renderType, stack, model);
+    public void applyItemTransforms(ItemCameraTransforms.TransformType renderType, ItemStack stack, ItemDxModel model, Matrix4f transform) {
+        super.applyItemTransforms(renderType, stack, model, transform);
         if (renderType == ItemCameraTransforms.TransformType.GUI)
-            GlStateManager.rotate(180, 0, 1, 0);
-    }
-
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void renderItem3D(ItemStack item, ItemCameraTransforms.TransformType renderType) {
-        DynamXRenderUtils.renderCar(this, (byte) item.getMetadata());
+            transform.rotate((float) Math.PI, 0, 1, 0);
     }
 
     @Override
@@ -279,13 +270,11 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
         return new ItemStack((Item) getItems()[0], 1, metadata);
     }
 
-    private SceneGraph<?, ?> sceneGraph;
-
     @Override
-    public SceneGraph<?, ?> getSceneGraph() {
+    public SceneNode<?, ?> getSceneGraph() {
         if (sceneGraph == null) {
             if (isModelValid()) {
-                DynamXEntityRenderEvents.BuildSceneGraph buildSceneGraphEvent = new DynamXEntityRenderEvents.BuildSceneGraph(new SceneBuilder<>(), this, getDrawableParts(), getScaleModifier());
+                DynamXEntityRenderEvents.BuildSceneGraph buildSceneGraphEvent = new DynamXEntityRenderEvents.BuildSceneGraph(new SceneBuilder<>(), this, (List) getDrawableParts(), getScaleModifier());
                 sceneGraph = buildSceneGraphEvent.getSceneGraphResult();
             } else
                 sceneGraph = new EntityNode<>(Collections.EMPTY_LIST, Collections.EMPTY_LIST);

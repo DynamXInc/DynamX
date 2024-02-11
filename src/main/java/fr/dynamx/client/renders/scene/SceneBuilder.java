@@ -2,32 +2,28 @@ package fr.dynamx.client.renders.scene;
 
 import com.jme3.math.Vector3f;
 import fr.aym.acslib.api.services.error.ErrorLevel;
-import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
 import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.contentpack.object.render.IModelPackObject;
 import fr.dynamx.api.events.DynamXEntityRenderEvents;
-import fr.dynamx.common.blocks.TEDynamXBlock;
-import fr.dynamx.common.contentpack.type.objects.BlockObject;
-import fr.dynamx.common.entities.IDynamXObject;
-import fr.dynamx.common.entities.PhysicsEntity;
+import fr.dynamx.client.renders.scene.node.*;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import lombok.Getter;
 import net.minecraft.client.renderer.GlStateManager;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 
 /**
- * Builder for {@link SceneGraph}s
+ * Builder for {@link SceneNode}s
  *
- * @param <T> The type of the entity that is rendered
+ * @param <C> The type of the render context
  * @param <A> The type of the pack info (the owner of the scene graph)
  */
 @Getter
-public class SceneBuilder<T extends IDynamXObject, A extends IModelPackObject> {
+public class SceneBuilder<C extends IRenderContext, A extends IModelPackObject> {
     /**
      * Map of node name to Node
      */
@@ -39,7 +35,7 @@ public class SceneBuilder<T extends IDynamXObject, A extends IModelPackObject> {
      * @param obj  The pack object that owns the scene graph, used for error reporting
      * @param part The part that will be rendered at this node
      */
-    public void addNode(A obj, IDrawablePart<T, A> part) {
+    public void addNode(A obj, IDrawablePart<?, A> part) {
         addNode(obj, nodes, part, part.getNodeName().toLowerCase());
     }
 
@@ -53,7 +49,7 @@ public class SceneBuilder<T extends IDynamXObject, A extends IModelPackObject> {
      * @param part       The part that will be rendered at this node
      * @param parentNode The name of the parent node
      */
-    public void addNode(A obj, IDrawablePart<T, A> part, String parentNode) {
+    public void addNode(A obj, IDrawablePart<?, A> part, String parentNode) {
         if (!searchAddNode(obj, nodes, part, parentNode.toLowerCase(), part.getNodeName().toLowerCase())) {
             Node tempNode = new Node(null);
             nodes.put(parentNode.toLowerCase(), tempNode);
@@ -158,7 +154,7 @@ public class SceneBuilder<T extends IDynamXObject, A extends IModelPackObject> {
      * @param part     The part that will be rendered at this node
      * @param nodeName The name of the node
      */
-    private void addNode(A obj, Map<String, Node> nodes, IDrawablePart<T, A> part, String nodeName) {
+    private void addNode(A obj, Map<String, Node> nodes, IDrawablePart<?, A> part, String nodeName) {
         if (!nodes.containsKey(nodeName)) {
             nodes.put(nodeName, new Node(part));
             return;
@@ -182,7 +178,7 @@ public class SceneBuilder<T extends IDynamXObject, A extends IModelPackObject> {
      * @param nodeName   The name of the node
      * @return True if the node was added
      */
-    private boolean searchAddNode(A obj, Map<String, Node> nodes, IDrawablePart<T, A> part, String parentNode, String nodeName) {
+    private boolean searchAddNode(A obj, Map<String, Node> nodes, IDrawablePart<?, A> part, String parentNode, String nodeName) {
         if (nodes.containsKey(parentNode)) {
             addNode(obj, nodes.get(parentNode).nodes, part, nodeName);
             return true;
@@ -205,28 +201,56 @@ public class SceneBuilder<T extends IDynamXObject, A extends IModelPackObject> {
      * @param modelScale The scale of the model (from the pack info)
      * @return The scene graph of the node
      */
-    private SceneGraph<T, A> createSceneGraph(A obj, String nodeName, Node node, Vector3f modelScale) {
+    private SceneNode<C, A> createSceneGraph(A obj, String nodeName, Node node, Vector3f modelScale) {
         validateNode(obj, nodeName, node);
-        List<SceneGraph<T, A>> childGraph = node.nodes.isEmpty() ? null : node.generateScene(obj, modelScale);
+        List<SceneNode<C, A>> childGraph = node.nodes.isEmpty() ? null : node.generateScene(obj, modelScale);
         DynamXEntityRenderEvents.CreatePartScene createPartSceneEvent = new DynamXEntityRenderEvents.CreatePartScene(obj, node.leaf, modelScale, (List) childGraph);
-        return (SceneGraph<T, A>) createPartSceneEvent.getSceneGraphResult();
+
+        SceneNode<C, A> graphResult = (SceneNode<C, A>) createPartSceneEvent.getSceneGraphResult();
+        if (graphResult.getLinkedChildren() != null) {
+            for (SceneNode<C, A> linkedChild : graphResult.getLinkedChildren()) {
+                linkedChild.setParent(graphResult);
+            }
+        }
+        return graphResult;
     }
 
     /**
-     * Builds the scene graph into a linked and unlinked nodes list of {@link SceneGraph}s. <br>
+     * Builds the scene graph into a linked and unlinked nodes list of {@link SceneNode}s. <br>
      * The nodes should have been added before calling this method.
      *
      * @param obj          The pack object that owns the scene graph, used for error reporting
      * @param modelScale   The scale of the model
      * @param linkedNodes  The list of linked nodes to fill
      * @param unlikedNodes The list of unlinked nodes to fill
-     * @see SceneBuilder#buildEntitySceneGraph(IPhysicsPackInfo, List, Vector3f)
+     * @see SceneBuilder#buildEntitySceneGraph(IModelPackObject, List, Vector3f)
      */
-    public void build(A obj, Vector3f modelScale, List<SceneGraph<T, A>> linkedNodes, List<SceneGraph<T, A>> unlikedNodes) {
+    public void build(A obj, Vector3f modelScale, List<SceneNode<C, A>> linkedNodes, List<SceneNode<C, A>> unlikedNodes) {
         nodes.forEach((k, v) -> {
-            List<SceneGraph<T, A>> list = v.leaf.isLinkedToEntity() ? linkedNodes : unlikedNodes;
+            List<SceneNode<C, A>> list = v.leaf.isLinkedToEntity() ? linkedNodes : unlikedNodes;
             list.add(createSceneGraph(obj, k, v, modelScale));
         });
+    }
+
+    /**
+     * Builds the scene graph of an object
+     *
+     * @param nodeBuilder   A function that creates the root node of the scene graph from the linked and unlinked nodes
+     * @param obj           The pack object that owns the scene graph, used for error reporting
+     * @param drawableParts The list of parts that should be rendered
+     * @param modelScale    The scale of the model
+     * @param <W>           The type of the root node
+     * @return The root node of the scene graph
+     */
+    public <W extends SceneNode<C, A>> W buildNode(BiFunction<List<SceneNode<C, A>>, List<SceneNode<C, A>>, W> nodeBuilder, A obj, List<IDrawablePart<Object, A>> drawableParts, Vector3f modelScale) {
+        List<SceneNode<C, A>> linkedNodes = new ArrayList<>();
+        List<SceneNode<C, A>> unlinkedNodes = new ArrayList<>();
+        drawableParts.forEach(part -> part.addToSceneGraph(obj, (SceneBuilder<IRenderContext, A>) this));
+        build(obj, modelScale, linkedNodes, unlinkedNodes);
+        W node = nodeBuilder.apply(linkedNodes, unlinkedNodes);
+        linkedNodes.forEach(c -> c.setParent(node));
+        unlinkedNodes.forEach(c -> c.setParent(node));
+        return node;
     }
 
     /**
@@ -237,12 +261,8 @@ public class SceneBuilder<T extends IDynamXObject, A extends IModelPackObject> {
      * @param modelScale    The scale of the model
      * @return The root node of the scene graph
      */
-    public <U extends PhysicsEntity<?>, V extends IPhysicsPackInfo> EntityNode<U, V> buildEntitySceneGraph(V obj, List<IDrawablePart<T, A>> drawableParts, Vector3f modelScale) {
-        List<SceneGraph<T, A>> linkedNodes = new ArrayList<>();
-        List<SceneGraph<T, A>> unlinkedNodes = new ArrayList<>();
-        drawableParts.forEach(part -> part.addToSceneGraph((A) obj, this));
-        build((A) obj, modelScale, linkedNodes, unlinkedNodes);
-        return new EntityNode(linkedNodes, unlinkedNodes);
+    public EntityNode<?> buildEntitySceneGraph(A obj, List<IDrawablePart<Object, A>> drawableParts, Vector3f modelScale) {
+        return (EntityNode<?>) buildNode((l, u) -> new EntityNode(l, u), obj, drawableParts, modelScale);
     }
 
     /**
@@ -253,13 +273,41 @@ public class SceneBuilder<T extends IDynamXObject, A extends IModelPackObject> {
      * @param modelScale    The scale of the model
      * @return The root node of the scene graph
      */
-    public <U extends TEDynamXBlock, V extends BlockObject<?>> BlockNode<U, V> buildBlockSceneGraph(V obj, List<IDrawablePart<T, A>> drawableParts, Vector3f modelScale) {
-        List<SceneGraph<T, A>> linkedNodes = new ArrayList<>();
-        List<SceneGraph<T, A>> unlinkedNodes = new ArrayList<>();
-        drawableParts.forEach(part -> part.addToSceneGraph((A) obj, this));
-        build((A) obj, modelScale, linkedNodes, unlinkedNodes);
-        linkedNodes.addAll(unlinkedNodes); // Don't handle them differently for blocks
-        return new BlockNode(linkedNodes);
+    public BlockNode<?> buildBlockSceneGraph(A obj, List<IDrawablePart<Object, A>> drawableParts, Vector3f modelScale) {
+        return (BlockNode<?>) buildNode((l, u) -> {
+            l.addAll(u);
+            return new BlockNode(l);
+        }, obj, drawableParts, modelScale);
+    }
+
+    /**
+     * Builds the scene graph of an item
+     *
+     * @param obj           The pack object that owns the scene graph, used for error reporting
+     * @param drawableParts The list of parts that should be rendered
+     * @param modelScale    The scale of the model
+     * @return The root node of the scene graph
+     */
+    public ItemNode<?> buildItemSceneGraph(A obj, List<IDrawablePart<Object, A>> drawableParts, Vector3f modelScale) {
+        return (ItemNode<?>) buildNode((l, u) -> {
+            l.addAll(u);
+            return new ItemNode(l);
+        }, obj, drawableParts, modelScale);
+    }
+
+    /**
+     * Builds the scene graph of an armor
+     *
+     * @param obj           The pack object that owns the scene graph, used for error reporting
+     * @param drawableParts The list of parts that should be rendered
+     * @param modelScale    The scale of the model
+     * @return The root node of the scene graph
+     */
+    public ArmorNode<?> buildArmorSceneGraph(A obj, List<IDrawablePart<Object, A>> drawableParts, Vector3f modelScale) {
+        return (ArmorNode<?>) buildNode((l, u) -> {
+            l.addAll(u);
+            return new ArmorNode(l);
+        }, obj, drawableParts, modelScale);
     }
 
     /**
@@ -273,15 +321,15 @@ public class SceneBuilder<T extends IDynamXObject, A extends IModelPackObject> {
         if (node.leaf == null) {
             String child = node.nodes.keySet().stream().findFirst().orElse("<error: no child>");
             DynamXErrorManager.addPackError(obj.getPackName(), "missing_depends_on_node", ErrorLevel.HIGH, obj.getName(), "Part " + child + " depend on " + nodeName + " but it doesn't exist. Creating a fake one.");
-            node.leaf = new IDrawablePart<T, A>() {
+            node.leaf = new IDrawablePart<Object, A>() {
                 @Override
-                public SceneGraph<T, A> createSceneGraph(Vector3f modelScale, List<SceneGraph<T, A>> childGraph) {
-                    return new SceneGraph.Node<T, A>(null, null, modelScale, childGraph) {
+                public SceneNode<IRenderContext, A> createSceneGraph(Vector3f modelScale, List<SceneNode<IRenderContext, A>> childGraph) {
+                    return new SimpleNode<IRenderContext, A>(null, null, modelScale, childGraph) {
                         @Override
-                        public void render(@Nullable T entity, EntityRenderContext context, A packInfo) {
+                        public void render(IRenderContext context, A packInfo) {
                             GlStateManager.pushMatrix();
                             transformToRotationPoint();
-                            renderChildren(entity, context, packInfo);
+                            renderChildren(context, packInfo);
                             GlStateManager.popMatrix();
                         }
                     };
@@ -308,13 +356,13 @@ public class SceneBuilder<T extends IDynamXObject, A extends IModelPackObject> {
         /**
          * The leaf of this node, ie the part that will be rendered
          */
-        private IDrawablePart<T, A> leaf;
+        private IDrawablePart<?, A> leaf;
         /**
          * The children of this node
          */
         private final Map<String, Node> nodes = new HashMap<>();
 
-        private Node(IDrawablePart<T, A> leaf) {
+        private Node(IDrawablePart<?, A> leaf) {
             this.leaf = leaf;
         }
 
@@ -325,8 +373,8 @@ public class SceneBuilder<T extends IDynamXObject, A extends IModelPackObject> {
          * @param modelScale The scale of the model
          * @return The scene graph of this node
          */
-        private List<SceneGraph<T, A>> generateScene(A obj, Vector3f modelScale) {
-            List<SceneGraph<T, A>> list = new ArrayList<>();
+        private List<SceneNode<C, A>> generateScene(A obj, Vector3f modelScale) {
+            List<SceneNode<C, A>> list = new ArrayList<>();
             nodes.forEach((k, v) -> list.add(createSceneGraph(obj, k, v, modelScale)));
             return list;
         }

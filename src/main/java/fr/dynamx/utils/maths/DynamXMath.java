@@ -1,5 +1,6 @@
 package fr.dynamx.utils.maths;
 
+import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.utils.optimization.QuaternionPool;
@@ -15,6 +16,7 @@ import javax.vecmath.Quat4f;
  */
 public class DynamXMath {
     private static final ThreadLocal<SlerpInterpolation> SLERP_INTERPOLATION = ThreadLocal.withInitial(SlerpInterpolation::new);
+    public static final float TO_RADIAN = FastMath.PI / 180.f;
 
     /**
      * Linear interpolation from startValue to endValue by the given percent.

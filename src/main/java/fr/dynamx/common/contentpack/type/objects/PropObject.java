@@ -12,9 +12,9 @@ import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.CreatePackItemEvent;
 import fr.dynamx.api.events.DynamXEntityRenderEvents;
-import fr.dynamx.client.renders.scene.EntityNode;
 import fr.dynamx.client.renders.scene.SceneBuilder;
-import fr.dynamx.client.renders.scene.SceneGraph;
+import fr.dynamx.client.renders.scene.node.EntityNode;
+import fr.dynamx.client.renders.scene.node.SceneNode;
 import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.loader.InfoList;
@@ -32,7 +32,6 @@ import lombok.Setter;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -96,7 +95,9 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
     @PackFileProperty(configNames = "InWaterAngularDamping", required = false, defaultValue = "0.6")
     protected float inWaterAngularDamping = 0.6f;
 
-    private List<ParticleEmitterInfo<?>> particleEmitters = new ArrayList<>();
+    protected final List<ParticleEmitterInfo<?>> particleEmitters = new ArrayList<>();
+
+    protected SceneNode<?, ?> sceneGraph;
 
     public PropObject(ISubInfoTypeOwner<BlockObject<?>> owner, String fileName) {
         super(owner.getPackName(), fileName);
@@ -115,7 +116,7 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
         this.renderDistance = block.getRenderDistance();
         this.creativeTabName = block.getCreativeTabName();
         this.useComplexCollisions = block.useComplexCollisions();
-        this.particleEmitters = block.getParticleEmitters();
+        this.particleEmitters.addAll(block.getParticleEmitters());
         this.collisionsHelper = block.getCollisionsHelper().copy();
         this.getDrawableParts().addAll(block.getDrawableParts());
     }
@@ -129,13 +130,10 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
     @Override
     public boolean postLoad(boolean hot) {
         collisionsHelper.loadCollisions(this, DynamXUtils.getModelPath(getPackName(), model), "", centerOfMass, 0, useComplexCollisions, scaleModifier, ObjectCollisionsHelper.CollisionType.PROP);
-        if(collisionsHelper.hasPhysicsCollisions())
+        if (collisionsHelper.hasPhysicsCollisions())
             collisionsHelper.getPhysicsCollisionShape().setMargin(margin);
         if (!super.postLoad(hot))
             return false;
-        if (FMLCommonHandler.instance().getSide().isClient()) {
-            getSceneGraph();
-        }
         return true;
     }
 
@@ -205,13 +203,11 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
         return (SubInfoTypesRegistry<T>) SubInfoTypeRegistries.PROPS.getInfoList().getDefaultSubInfoTypesRegistry();
     }
 
-    private SceneGraph<?, ?> sceneGraph;
-
     @Override
-    public SceneGraph<?, ?> getSceneGraph() {
+    public SceneNode<?, ?> getSceneGraph() {
         if (sceneGraph == null) {
             if (isModelValid()) {
-                DynamXEntityRenderEvents.BuildSceneGraph buildSceneGraphEvent = new DynamXEntityRenderEvents.BuildSceneGraph(new SceneBuilder<>(), this, getDrawableParts(), getScaleModifier());
+                DynamXEntityRenderEvents.BuildSceneGraph buildSceneGraphEvent = new DynamXEntityRenderEvents.BuildSceneGraph(new SceneBuilder<>(), this, (List) getDrawableParts(), getScaleModifier());
                 sceneGraph = buildSceneGraphEvent.getSceneGraphResult();
             } else
                 sceneGraph = new EntityNode<>(Collections.EMPTY_LIST, Collections.EMPTY_LIST);

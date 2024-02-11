@@ -1,27 +1,30 @@
 package fr.dynamx.common.contentpack.type.objects;
 
 import fr.dynamx.api.contentpack.object.IDynamXItem;
-import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.events.CreatePackItemEvent;
+import fr.dynamx.api.events.DynamXItemEvent;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
-import fr.dynamx.client.renders.scene.SceneGraph;
+import fr.dynamx.client.renders.scene.SceneBuilder;
+import fr.dynamx.client.renders.scene.node.ItemNode;
+import fr.dynamx.client.renders.scene.node.SceneNode;
 import fr.dynamx.common.contentpack.loader.InfoList;
 import fr.dynamx.common.items.DynamXItem;
+import lombok.Getter;
+import lombok.Setter;
 import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ItemObject<T extends ItemObject<?>> extends AbstractItemObject<T, T> {
-    /**
-     * List of owned {@link ISubInfoType}s
-     */
-    protected final List<ISubInfoType<T>> subProperties = new ArrayList<>();
-
+    @Getter
+    @Setter
     @PackFileProperty(configNames = "MaxItemStackSize", required = false, defaultValue = "1")
     protected int maxItemStackSize = 1;
+
+    protected SceneNode<?, ?> sceneNode;
 
     public ItemObject(String packName, String fileName) {
         super(packName, fileName);
@@ -40,25 +43,6 @@ public class ItemObject<T extends ItemObject<?>> extends AbstractItemObject<T, T
     }
 
     @Override
-    public void addSubProperty(ISubInfoType<T> property) {
-        subProperties.add(property);
-    }
-
-    @Override
-    public int getMaxItemStackSize() {
-        return maxItemStackSize;
-    }
-
-    public void setMaxItemStackSize(int maxItemStackSize) {
-        this.maxItemStackSize = maxItemStackSize;
-    }
-
-    @Override
-    public List<ISubInfoType<T>> getSubProperties() {
-        return subProperties;
-    }
-
-    @Override
     public String toString() {
         return "ItemObject named " + getFullName();
     }
@@ -71,7 +55,14 @@ public class ItemObject<T extends ItemObject<?>> extends AbstractItemObject<T, T
     }
 
     @Override
-    public SceneGraph<?, ?> getSceneGraph() {
-        return null;
+    public SceneNode<?, ?> getSceneGraph() {
+        if (sceneNode == null) {
+            if (isModelValid()) {
+                DynamXItemEvent.BuildSceneGraph buildSceneGraphEvent = new DynamXItemEvent.BuildSceneGraph(new SceneBuilder<>(), this, (List) getDrawableParts());
+                sceneNode = buildSceneGraphEvent.getSceneGraphResult();
+            } else
+                sceneNode = new ItemNode<>(Collections.EMPTY_LIST);
+        }
+        return sceneNode;
     }
 }

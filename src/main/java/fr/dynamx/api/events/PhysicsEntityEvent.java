@@ -2,6 +2,7 @@ package fr.dynamx.api.events;
 
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
+import fr.dynamx.client.renders.scene.node.SceneNode;
 import fr.dynamx.common.entities.ModularPhysicsEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.items.DynamXItemSpawner;
@@ -154,7 +155,7 @@ public class PhysicsEntityEvent extends Event {
      *
      * @see DebugRenderer
      * @see RenderPhysicsEntity
-     * @deprecated The debug should be rendered using the new {@link fr.dynamx.client.renders.scene.SceneGraph}s system
+     * @deprecated The debug should be rendered using the new {@link SceneNode}s system
      */
     @Deprecated
     public static class InitRenderer<T extends PhysicsEntity> extends GenericEvent<T> {
@@ -172,7 +173,7 @@ public class PhysicsEntityEvent extends Event {
         /**
          * Adds the debug renders to the list of the entity renderer
          *
-         * @deprecated The debug should be rendered using the new {@link fr.dynamx.client.renders.scene.SceneGraph}s system
+         * @deprecated The debug should be rendered using the new {@link SceneNode}s system
          */
         @Deprecated
         public void addDebugRenderers(DebugRenderer<?>... renderers) {

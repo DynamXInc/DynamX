@@ -2,7 +2,6 @@ package fr.dynamx.common.entities.vehicles;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.IModuleContainer;
-import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
@@ -36,8 +35,8 @@ public class CarEntity<T extends CarEntity.CarPhysicsHandler<?>> extends BaseVeh
     }
 
     @Override
-    protected void sortModules() {
-        super.sortModules();
+    protected void getListenerModules() {
+        super.getListenerModules();
         seats = getModuleByType(SeatsModule.class);
         wheels = getModuleByType(WheelsModule.class);
         doors = getModuleByType(DoorsModule.class);

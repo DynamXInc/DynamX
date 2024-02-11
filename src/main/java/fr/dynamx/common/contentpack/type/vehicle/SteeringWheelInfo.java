@@ -10,18 +10,21 @@ import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
-import fr.dynamx.client.renders.scene.EntityRenderContext;
-import fr.dynamx.client.renders.scene.SceneGraph;
+import fr.dynamx.client.renders.scene.BaseRenderContext;
+import fr.dynamx.client.renders.scene.IRenderContext;
+import fr.dynamx.client.renders.scene.node.SceneNode;
+import fr.dynamx.client.renders.scene.node.SimpleNode;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.WheelsModule;
+import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
+import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -56,8 +59,8 @@ public class SteeringWheelInfo extends BasePart<ModularVehicleInfo> implements I
     }
 
     @Override
-    public SceneGraph<BaseVehicleEntity<?>, ModularVehicleInfo> createSceneGraph(Vector3f modelScale, List<SceneGraph<BaseVehicleEntity<?>, ModularVehicleInfo>> childGraph) {
-        return new SteeringWheelNode<>(this, modelScale, childGraph);
+    public SceneNode<IRenderContext, ModularVehicleInfo> createSceneGraph(Vector3f modelScale, List<SceneNode<IRenderContext, ModularVehicleInfo>> childGraph) {
+        return new SteeringWheelNode<>(this, modelScale, (List) childGraph);
     }
 
     @Override
@@ -70,35 +73,38 @@ public class SteeringWheelInfo extends BasePart<ModularVehicleInfo> implements I
         return "SteeringWheel";
     }
 
-    class SteeringWheelNode<T extends BaseVehicleEntity<?>, A extends ModularVehicleInfo> extends SceneGraph.Node<T, A> {
-        public SteeringWheelNode(SteeringWheelInfo part, Vector3f scale, List<SceneGraph<T, A>> linkedChilds) {
+    class SteeringWheelNode<A extends ModularVehicleInfo> extends SimpleNode<BaseRenderContext.EntityRenderContext, A> {
+        public SteeringWheelNode(SteeringWheelInfo part, Vector3f scale, List<SceneNode<BaseRenderContext.EntityRenderContext, A>> linkedChilds) {
             super(part.getPosition(), GlQuaternionPool.newGlQuaternion(part.getSteeringWheelBaseRotation()), SteeringWheelInfo.this.isAutomaticPosition, scale, linkedChilds);
         }
 
         @Override
-        public void render(@Nullable T entity, EntityRenderContext context, A packInfo) {
+        public void render(BaseRenderContext.EntityRenderContext context, A packInfo) {
             DxModelRenderer vehicleModel = context.getModel();
             /* Rendering the steering wheel */
-            GlStateManager.pushMatrix();
             //Translate to the steering wheel rotation point
             transformToRotationPoint();
             //Rotate the steering wheel
             int directingWheel = VehicleEntityProperties.getPropertyIndex(packInfo.getDirectingWheel(), VehicleEntityProperties.EnumVisualProperties.STEER_ANGLE);
-            if (entity != null && entity.hasModuleOfType(WheelsModule.class)) {
-                WheelsModule m = entity.getModuleByType(WheelsModule.class);
-                if (m.visualProperties.length > directingWheel)
-                    GlStateManager.rotate(-(m.prevVisualProperties[directingWheel] + (m.visualProperties[directingWheel] - m.prevVisualProperties[directingWheel]) * context.getPartialTicks()), 0F, 0F, 1F);
+            if (context.getEntity() != null && context.getEntity().hasModuleOfType(WheelsModule.class)) {
+                WheelsModule m = context.getEntity().getModuleByType(WheelsModule.class);
+                if (m.visualProperties.length > directingWheel) {
+                    float angle = -(m.prevVisualProperties[directingWheel] + (m.visualProperties[directingWheel] - m.prevVisualProperties[directingWheel]) * context.getPartialTicks()) * DynamXMath.TO_RADIAN;
+                    transform.rotate(angle, 0F, 0F, 1F);
+                }
             }
+            GlStateManager.pushMatrix();
+            GlStateManager.multMatrix(ClientDynamXUtils.getMatrixBuffer(transform));
             //Translate to the origin of the model
             transformToPartPos();
             //Render it
             vehicleModel.renderGroup(getObjectName(), context.getTextureId(), context.isUseVanillaRender());
-            renderChildren(entity, context, packInfo);
             GlStateManager.popMatrix();
+            renderChildren(context, packInfo);
         }
 
         @Override
-        public void renderDebug(@Nullable T entity, EntityRenderContext context, A packInfo) {
+        public void renderDebug(BaseRenderContext.EntityRenderContext context, A packInfo) {
             if (DynamXDebugOptions.WHEELS.isActive()) {
                 /* Rendering the steering wheel debug */
                 GlStateManager.pushMatrix();
@@ -107,7 +113,7 @@ public class SteeringWheelInfo extends BasePart<ModularVehicleInfo> implements I
                         0.5f, 1, 0.5f, 1);
                 GlStateManager.popMatrix();
             }
-            super.renderDebug(entity, context, packInfo);
+            super.renderDebug(context, packInfo);
         }
     }
 }

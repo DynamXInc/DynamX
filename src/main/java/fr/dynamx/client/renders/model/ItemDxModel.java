@@ -11,7 +11,6 @@ import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.block.model.ItemOverrideList;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.VertexFormat;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.ForgeHooksClient;
@@ -49,14 +48,6 @@ public class ItemDxModel implements IModel {
 
     public IModelPackObject getOwner() {
         return owner;
-    }
-
-    public void renderModel(ItemStack stack, ItemCameraTransforms.TransformType renderType) {
-        owner.renderItem3D(stack, renderType);
-    }
-
-    public boolean hasBaked() {
-        return guiBaked != null;
     }
 
     public IBakedModel getGuiBaked() {

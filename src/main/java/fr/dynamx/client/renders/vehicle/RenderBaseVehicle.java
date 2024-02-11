@@ -4,8 +4,9 @@ import fr.dynamx.api.events.DynamXEntityRenderEvents;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
 import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
-import fr.dynamx.client.renders.scene.EntityRenderContext;
-import fr.dynamx.client.renders.scene.SceneGraph;
+import fr.dynamx.client.renders.scene.BaseRenderContext;
+import fr.dynamx.client.renders.scene.IRenderContext;
+import fr.dynamx.client.renders.scene.node.SceneNode;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
@@ -22,7 +23,7 @@ import net.minecraftforge.common.MinecraftForge;
 import javax.annotation.Nullable;
 
 public class RenderBaseVehicle<T extends BaseVehicleEntity<?>> extends RenderPhysicsEntity<T> {
-    protected final EntityRenderContext context = new EntityRenderContext(this);
+    protected final BaseRenderContext.EntityRenderContext context = new BaseRenderContext.EntityRenderContext(this);
 
     public RenderBaseVehicle(RenderManager manager) {
         super(manager);
@@ -31,7 +32,7 @@ public class RenderBaseVehicle<T extends BaseVehicleEntity<?>> extends RenderPhy
     }
 
     @Override
-    public void spawnParticles(T carEntity, EntityRenderContext context) {
+    public void spawnParticles(T carEntity, BaseRenderContext.EntityRenderContext context) {
         super.spawnParticles(carEntity, context);
         if (!MinecraftForge.EVENT_BUS.post(new DynamXEntityRenderEvents.Render(carEntity, context, DynamXEntityRenderEvents.Render.Type.PARTICLES, 0))) {
             if (carEntity.hasModuleOfType(WheelsModule.class)) {
@@ -43,7 +44,7 @@ public class RenderBaseVehicle<T extends BaseVehicleEntity<?>> extends RenderPhy
 
     @Override
     @Nullable
-    public EntityRenderContext getRenderContext(T entity) {
+    public BaseRenderContext.EntityRenderContext getRenderContext(T entity) {
         if (entity.getPackInfo() == null) {
             return null;
         }
@@ -51,23 +52,23 @@ public class RenderBaseVehicle<T extends BaseVehicleEntity<?>> extends RenderPhy
         if (modelRenderer == null) {
             return null;
         }
-        return context.setEntityParams(modelRenderer, entity.getEntityTextureID());
+        return context.setModelParams(entity, modelRenderer, entity.getEntityTextureID());
     }
 
     @Override
-    public void renderEntity(T entity, EntityRenderContext context) {
-        ((SceneGraph<T, ModularVehicleInfo>) entity.getPackInfo().getSceneGraph()).render(entity, context, entity.getPackInfo());
+    public void renderEntity(T entity, BaseRenderContext.EntityRenderContext context) {
+        ((SceneNode<BaseRenderContext.EntityRenderContext, ModularVehicleInfo>) entity.getPackInfo().getSceneGraph()).render(context, entity.getPackInfo());
     }
 
     @Override
-    public void renderEntityDebug(T entity, EntityRenderContext context) {
-        ((SceneGraph<T, ModularVehicleInfo>) entity.getPackInfo().getSceneGraph()).renderDebug(entity, context, entity.getPackInfo());
+    public void renderEntityDebug(T entity, BaseRenderContext.EntityRenderContext context) {
+        ((SceneNode<BaseRenderContext.EntityRenderContext, ModularVehicleInfo>) entity.getPackInfo().getSceneGraph()).renderDebug(context, entity.getPackInfo());
     }
 
     /**
      * Renders the entity with the given texture id
      *
-     * @param packInfo The pack info of the entity
+     * @param packInfo  The pack info of the entity
      * @param textureId The texture id
      */
     public void renderEntity(ModularVehicleInfo packInfo, byte textureId) {
@@ -75,7 +76,7 @@ public class RenderBaseVehicle<T extends BaseVehicleEntity<?>> extends RenderPhy
         if (modelRenderer == null) {
             return;
         }
-        ((SceneGraph<T, ModularVehicleInfo>) packInfo.getSceneGraph()).render(null, context.setEntityParams(modelRenderer, textureId).setRenderParams(0, 0, 0, 1, true), packInfo);
+        ((SceneNode<IRenderContext, ModularVehicleInfo>) packInfo.getSceneGraph()).render(context.setRenderParams(0, 0, 0, 1, true).setModelParams(modelRenderer, textureId), packInfo);
     }
 
     public static class RenderCar<T extends CarEntity<?>> extends RenderBaseVehicle<T> {

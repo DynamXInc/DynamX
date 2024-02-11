@@ -52,6 +52,7 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.joml.Quaternionf;
 import org.lwjgl.BufferUtils;
 
 import javax.annotation.Nonnull;
@@ -141,8 +142,33 @@ public class DynamXUtils {
         return Vector3fPool.get((float) pos.x, (float) pos.y, (float) pos.z);
     }
 
+    public static Vector3f toVector3f(javax.vecmath.Vector3f pos) {
+        return Vector3fPool.get(pos.x, pos.y, pos.z);
+    }
+
     public static Vector3f toVector3f(BlockPos pos) {
         return Vector3fPool.get((float) pos.getX(), (float) pos.getY(), (float) pos.getZ());
+    }
+
+    public static Vector3f toVector3f(org.joml.Vector3f pos) {
+        return Vector3fPool.get(pos.x, pos.y, pos.z);
+    }
+
+    public static org.joml.Vector3f toVector3f(Vector3f pos) {
+        return new org.joml.Vector3f(pos.x, pos.y, pos.z);
+    }
+
+    public static org.joml.Vector3f toVector3f(float x, float y, float z) {
+        return new org.joml.Vector3f(x, y, z);
+    }
+
+
+    public static Quaternionf toQuaternion(Quaternion quat) {
+        return new Quaternionf(quat.getX(), quat.getY(), quat.getZ(), quat.getW());
+    }
+
+    public static Quaternionf toQuaternion(org.lwjgl.util.vector.Quaternion quat) {
+        return new Quaternionf(quat.getX(), quat.getY(), quat.getZ(), quat.getW());
     }
 
     public static Vector3f getPositionEyes(Entity entity) {

@@ -140,7 +140,8 @@ public abstract class BasePart<T extends ISubInfoTypeOwner<?>> extends SubInfoTy
                     rotation = DynamXUtils.readPartRotation(modelData, objectName);
             }
             if (getPosition() == null) {
-                DynamXErrorManager.addPackError(getPackName(), "position_not_found_in_model", ErrorLevel.HIGH, owner.getFullName(), "3D object '" + objectName + "' of part " + getName()+ " (for property 'Position')");
+                INamedObject parent = getRootOwner();
+                DynamXErrorManager.addPackError(getPackName(), "position_not_found_in_model", ErrorLevel.HIGH, parent.getName(), "3D object '" + objectName + "' of part " + getName()+ " (for property 'Position')");
                 setPosition(new Vector3f());
             } else {
                 isAutomaticPosition = true;

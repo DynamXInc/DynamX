@@ -102,7 +102,9 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
             lightsModule = new AbstractLightsModule.LightsModule(packInfo);
         else
             lightsModule = null;
-        this.hasSeats = !packInfo.getPartsByType(PartBlockSeat.class).isEmpty();
+        this.hasSeats = packInfo != null && !packInfo.getPartsByType(PartBlockSeat.class).isEmpty();
+        if(packInfo == null)
+            return;
         if (!hasSeats && seatEntities != null) {
             seatEntities.forEach(Entity::setDead);
             seatEntities = null;

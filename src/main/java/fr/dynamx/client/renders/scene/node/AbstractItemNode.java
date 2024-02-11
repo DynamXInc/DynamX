@@ -7,9 +7,9 @@ import fr.dynamx.api.events.EventStage;
 import fr.dynamx.client.renders.model.ItemDxModel;
 import fr.dynamx.client.renders.scene.BaseRenderContext;
 import fr.dynamx.client.renders.scene.IRenderContext;
+import fr.dynamx.common.contentpack.type.ViewTransformsInfo;
 import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.client.DynamXRenderUtils;
-import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
@@ -52,14 +52,13 @@ public abstract class AbstractItemNode<C extends IRenderContext, A extends IMode
             GlQuaternionPool.openPool();
             if (!MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack, EventStage.TRANSFORM, renderType, transform))) {
                 packInfo.applyItemTransforms(renderType, stack, model, transform);
-                float scale = packInfo.getItemScale();
-                com.jme3.math.Vector3f translate = packInfo.getItemTranslate();
-                com.jme3.math.Vector3f rotate = packInfo.getItemRotate();
-                transform.translate(translate.x, translate.y, translate.z);
-                transform.scale(scale, scale, scale);
-                transform.rotate(rotate.x * DynamXMath.TO_RADIAN, 1, 0, 0);
-                transform.rotate(rotate.y * DynamXMath.TO_RADIAN, 0, 1, 0);
-                transform.rotate(rotate.z * DynamXMath.TO_RADIAN, 0, 0, 1);
+                ViewTransformsInfo transformsInfo = packInfo.getViewTransformsInfo(renderType);
+                if(transformsInfo != null) {
+                    transform.mul(transformsInfo.getTransformMatrix());
+                } else {
+                    float scale = packInfo.getItemScale();
+                    transform.scale(scale, scale, scale);
+                }
             }
             if (!MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack, EventStage.RENDER, renderType, transform))) {
                 renderItemModel(context, packInfo, transform);

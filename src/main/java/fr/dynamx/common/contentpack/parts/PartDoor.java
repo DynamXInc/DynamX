@@ -201,15 +201,15 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
             }
         }
         if (getPosition() == null) {
-            DynamXErrorManager.addPackError(getPackName(), "position_not_found_in_model", ErrorLevel.HIGH, owner.getFullName(), "3D object '" + getObjectName() + "' of part " + getName() + " (for property 'Position')");
+            DynamXErrorManager.addPackError(getPackName(), "position_not_found_in_model", ErrorLevel.HIGH, owner.getName(), "3D object '" + getObjectName() + "' of part " + getName() + " (for property 'Position')");
             position = new Vector3f();
         }
         if (getCarAttachPoint() == null) {
-            DynamXErrorManager.addPackError(getPackName(), "position_not_found_in_model", ErrorLevel.HIGH, owner.getFullName(), "3D object '" + getObjectName() + "' of part " + getName() + " (for property 'LocalCarAttachPoint')");
+            DynamXErrorManager.addPackError(getPackName(), "position_not_found_in_model", ErrorLevel.HIGH, owner.getName(), "3D object '" + getObjectName() + "' of part " + getName() + " (for property 'LocalCarAttachPoint')");
             carAttachPoint = new Vector3f();
         }
         if (getScale().lengthSquared() == 0) { // If scale equals default value
-            DynamXErrorManager.addPackError(getPackName(), "position_not_found_in_model", ErrorLevel.HIGH, owner.getFullName(), "3D object '" + getObjectName() + "' of part " + getName() + " (for property 'Scale')");
+            DynamXErrorManager.addPackError(getPackName(), "position_not_found_in_model", ErrorLevel.HIGH, owner.getName(), "3D object '" + getObjectName() + "' of part " + getName() + " (for property 'Scale')");
             scale.set(0.5f, 0.7f, 0.5f);
         }
     }

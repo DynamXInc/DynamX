@@ -105,6 +105,8 @@ dynamx.error.duplicate_scene=Duplicate part(s) for rendering:
 dynamx.error.wheel_no_model=Wheel(s) has no separate 3D model, and no specified "Rim" object name to render.
 dynamx.error.position_not_found_in_model=Cannot determine the position of the part from the 3D model and it is not set in the part config.
 dynamx.error.seat_door_not_found=Seat's linked door not found
+dynamx.error.invalid_view_type=Invalid item view type
+dynamx.error.mixed_item_transforms_info=Mixed old "ItemTranslate/ItemRotate/ItemScale" and new "ItemTransforms" properties
 
 dynamx.reload.models.errors=§c[DynamX] Some models have errors, use the debug menu to see them
 

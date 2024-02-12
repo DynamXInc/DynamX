@@ -3,10 +3,13 @@ package fr.dynamx.common.blocks;
 import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import dz.betterlights.lighting.lightcasters.BlockLightCaster;
+import dz.betterlights.network.EnumPacketType;
 import fr.aym.acsguis.api.ACsGuiApi;
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
+import fr.dynamx.api.network.EnumPacketTarget;
 import fr.dynamx.client.gui.GuiBlockCustomization;
 import fr.dynamx.client.renders.animations.DxAnimator;
 import fr.dynamx.common.DynamXContext;
@@ -22,6 +25,7 @@ import fr.dynamx.common.entities.IDynamXObject;
 import fr.dynamx.common.entities.SeatEntity;
 import fr.dynamx.common.entities.modules.AbstractLightsModule;
 import fr.dynamx.common.entities.modules.StorageModule;
+import fr.dynamx.common.network.lights.PacketSyncPartLights;
 import fr.dynamx.common.physics.terrain.chunk.ChunkLoadingTicket;
 import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.VerticalChunkPos;
@@ -98,10 +102,10 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
         this.packInfo = packInfo;
         if (world != null)
             world.markBlockRangeForRenderUpdate(pos, pos);
-        if (packInfo != null && !packInfo.getLightSources().isEmpty())
-            lightsModule = new AbstractLightsModule.LightsModule(packInfo);
-        else
-            lightsModule = null;
+        if (packInfo != null && !packInfo.getLightSources().isEmpty() && lightsModule == null)
+            lightsModule = new AbstractLightsModule.BlockLightsModule(this, packInfo);
+        /*else
+            lightsModule = null;*/
         this.hasSeats = !packInfo.getPartsByType(PartBlockSeat.class).isEmpty();
         if (!hasSeats && seatEntities != null) {
             seatEntities.forEach(Entity::setDead);
@@ -336,6 +340,18 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
     public void onLoad() {
         DynamXChunkData data = world.getChunk(pos).getCapability(DynamXChunkDataProvider.DYNAM_X_CHUNK_DATA_CAPABILITY, null);
         data.getBlocksAABB().put(pos, computeBoundingBox().offset(pos));
+
+        if(lightsModule != null) {
+            lightsModule.getLightCastersSync().forEach((integer, lightCasterPartSync) -> {
+                lightCasterPartSync.lightCasters.values().forEach(lightCaster -> {
+                    if(lightCaster instanceof BlockLightCaster){
+                        ((BlockLightCaster) lightCaster).setBlockPos(pos);
+                    }
+                });
+                lightCasterPartSync.data2 = pos;
+                DynamXContext.getNetwork().getVanillaNetwork().sendPacket(new PacketSyncPartLights(lightCasterPartSync, EnumPacketType.ADD), EnumPacketTarget.ALL, null);
+            });
+        }
     }
 
     @Override

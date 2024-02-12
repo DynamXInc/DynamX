@@ -11,6 +11,9 @@ import fr.dynamx.api.network.IDnxNetworkSystem;
 import fr.dynamx.api.network.IDnxPacket;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.sync.MessagePacksHashs;
+import fr.dynamx.common.network.lights.PacketSyncEntityLights;
+import fr.dynamx.common.network.lights.PacketSyncItemInstanceUUID;
+import fr.dynamx.common.network.lights.PacketSyncPartLights;
 import fr.dynamx.common.network.packets.*;
 import fr.dynamx.common.network.sync.MessageMultiPhysicsEntitySync;
 import fr.dynamx.common.network.sync.MessagePhysicsEntitySync;
@@ -73,6 +76,9 @@ public class DynamXNetwork {
         registerMessage(channel, MessageCollisionDebugDraw.class, MessageCollisionDebugDraw.class, Side.CLIENT);
         registerMessage(channel, MessageCollisionDebugDraw.class, MessageCollisionDebugDraw.class, Side.CLIENT);
         registerMessage(channel, MessageHandleExplosion.class, MessageHandleExplosion.class, Side.CLIENT);
+        //BetterLights
+        registerMessage(channel, PacketSyncPartLights.ClientHandler.class, PacketSyncPartLights.class, Side.CLIENT);
+        registerMessage(channel, PacketSyncItemInstanceUUID.ClientHandler.class, PacketSyncItemInstanceUUID.class, Side.CLIENT);
 
         //To server
         registerMessage(channel, MessagePacksHashs.HandlerServer.class, MessagePacksHashs.class, Side.SERVER);
@@ -83,6 +89,8 @@ public class DynamXNetwork {
         registerMessage(channel, MessageSlopesConfigGui.class, MessageSlopesConfigGui.class, Side.SERVER);
         registerMessage(channel, MessageDebugRequest.class, MessageDebugRequest.class, Side.SERVER);
         registerMessage(channel, MessageAttachTrailer.class, MessageAttachTrailer.class, Side.SERVER);
+        //BetterLights
+        registerMessage(channel, PacketSyncEntityLights.ServerHandler.class, PacketSyncEntityLights.class, Side.SERVER);
 
         //Packet serializers
         PacketSerializer.addCustomSerializer(new PacketDataSerializer<Vector3f>() {

@@ -4,6 +4,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
 import fr.dynamx.common.contentpack.loader.PackConstants;
+import fr.dynamx.common.contentpack.parts.LightObject;
 import fr.dynamx.common.contentpack.parts.PartShape;
 import fr.dynamx.utils.EnumPlayerStandOnTop;
 import fr.dynamx.utils.EnumSeatPlayerPosition;
@@ -235,7 +236,8 @@ public class DefinitionType<T> {
             Material[] materials = new Material[] {Material.AIR, Material.GRASS, Material.GROUND, Material.WOOD, Material.ROCK, Material.IRON, Material.ANVIL, Material.WATER, Material.LAVA, Material.LEAVES, Material.PLANTS, Material.VINE, Material.SPONGE, Material.CLOTH, Material.FIRE, Material.SAND, Material.CIRCUITS, Material.CARPET, Material.GLASS, Material.REDSTONE_LIGHT, Material.TNT, Material.CORAL, Material.ICE, Material.PACKED_ICE, Material.SNOW, Material.CRAFTED_SNOW, Material.CACTUS, Material.CLAY, Material.GOURD, Material.DRAGON_EGG, Material.PORTAL, Material.CAKE, Material.WEB, Material.PISTON, Material.BARRIER, Material.STRUCTURE_VOID};
             return materials[names.indexOf(s.toUpperCase())];
         }, "type.material")),
-        AXIS(new DefinitionType<>(DynamXPhysicsHelper.EnumPhysicsAxis.class, DynamXPhysicsHelper.EnumPhysicsAxis::fromString, "type.axis"));
+        AXIS(new DefinitionType<>(DynamXPhysicsHelper.EnumPhysicsAxis.class, DynamXPhysicsHelper.EnumPhysicsAxis::fromString, "type.axis")),
+        LIGHT_ACTIVATION_STATE(new DefinitionType<>(LightObject.ActivationState.class, LightObject.ActivationState::fromString, "type.light_activation_state"));
 
         public final DefinitionType<?> type;
 

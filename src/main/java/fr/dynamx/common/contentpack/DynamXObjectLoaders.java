@@ -3,6 +3,7 @@ package fr.dynamx.common.contentpack;
 import fr.dynamx.api.contentpack.ContentPackType;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.contentpack.loader.*;
+import fr.dynamx.common.contentpack.parts.lights.LightSourceFile;
 import fr.dynamx.common.contentpack.type.objects.ArmorObject;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
 import fr.dynamx.common.contentpack.type.objects.ItemObject;
@@ -47,6 +48,9 @@ public class DynamXObjectLoaders {
         else
             throw new IllegalArgumentException("Unknown engine class: " + clazz);
     }), new SubInfoTypesRegistry<>());
+
+    public static InfoLoader<LightSourceFile> LIGHTS = new InfoLoader<>("light", LightSourceFile::new, new SubInfoTypesRegistry<>());
+
     public static SoundInfoLoader SOUNDS = new SoundInfoLoader("sounds", SoundListInfo::new);
 
     static {

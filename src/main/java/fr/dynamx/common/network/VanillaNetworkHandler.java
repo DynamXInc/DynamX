@@ -8,6 +8,7 @@ import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 
 import javax.annotation.Nullable;
@@ -21,6 +22,26 @@ public class VanillaNetworkHandler implements IDnxNetworkHandler {
             HANDLER.sendToServer(packet);
         } else {
             sendPacketServer(packet, targetType, target);
+        }
+    }
+
+    public <T> void sendPacket(IMessage packet, EnumPacketTarget<T> targetType, @Nullable T target) {
+        if (EnumPacketTarget.SERVER == targetType) {
+            HANDLER.sendToServer(packet);
+        } else {
+            sendPacketServer(packet, targetType, target);
+        }
+    }
+
+    private <T> void sendPacketServer(IMessage packet, EnumPacketTarget<T> targetType, @Nullable T target) {
+        if (EnumPacketTarget.PLAYER == targetType) {
+            HANDLER.sendTo(packet, (EntityPlayerMP) target);
+        } else if (EnumPacketTarget.ALL_AROUND == targetType) {
+            HANDLER.sendToAllAround(packet, (NetworkRegistry.TargetPoint) target);
+        } else if (EnumPacketTarget.ALL_TRACKING_ENTITY == targetType) {
+            HANDLER.sendToAllTracking(packet, (Entity) target);
+        } else if (EnumPacketTarget.ALL == targetType) {
+            HANDLER.sendToAll(packet);
         }
     }
 

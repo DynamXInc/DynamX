@@ -11,6 +11,8 @@ import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
+import fr.dynamx.common.contentpack.parts.ILightOwner;
+import fr.dynamx.common.contentpack.parts.PartLightSource;
 import fr.dynamx.common.contentpack.type.ObjectInfo;
 import fr.dynamx.common.items.DynamXItemRegistry;
 import fr.dynamx.utils.DynamXConstants;
@@ -24,8 +26,8 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 import java.util.*;
 
 public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A extends ISubInfoTypeOwner<?>> extends ObjectInfo<T>
-        implements IModelPackObject, IPartContainer<A>
-{
+        implements IModelPackObject, IPartContainer<A>, ILightOwner<A> {
+
     @Getter
     @Setter
     @PackFileProperty(configNames = {"CreativeTabName", "CreativeTab", "TabName"}, required = false, defaultValue = "CreativeTab of DynamX", description = "common.creativetabname")
@@ -72,6 +74,9 @@ public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A e
      */
     @Getter
     private final List<String> renderedParts = new ArrayList<>();
+
+    @Getter
+    protected final Map<String, PartLightSource> lightSources = new HashMap<>();
 
     public AbstractItemObject(String packName, String fileName) {
         super(packName, fileName);
@@ -147,5 +152,16 @@ public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A e
     @Override
     public boolean canRenderPart(String partName) {
         return !renderedParts.contains(partName);
+    }
+
+    @Override
+    public void addLightSource(PartLightSource source) {
+        lightSources.put(source.getPartName(), source);
+        addDrawablePart(source);
+    }
+
+    @Override
+    public PartLightSource getLightSource(String partName) {
+        return lightSources.get(partName);
     }
 }

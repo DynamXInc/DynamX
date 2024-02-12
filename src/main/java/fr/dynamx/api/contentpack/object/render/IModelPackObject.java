@@ -20,7 +20,7 @@ import org.joml.Matrix4f;
 import javax.annotation.Nullable;
 
 public interface IModelPackObject extends IModelTextureVariantsSupplier {
-    @SideOnly(Side.CLIENT)
+
     ResourceLocation getModel();
 
     default boolean isModelValid() {

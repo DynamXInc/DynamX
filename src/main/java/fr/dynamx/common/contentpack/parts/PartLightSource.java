@@ -3,6 +3,10 @@ package fr.dynamx.common.contentpack.parts;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import dz.betterlights.dynamx.LightCasterPartSync;
+import dz.betterlights.lighting.lightcasters.EntityLightCaster;
+import dz.betterlights.lighting.lightcasters.LightCaster;
+import dz.betterlights.util.BetterLightsHelper;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.ICollisionsContainer;
 import fr.dynamx.api.contentpack.object.INamedObject;
@@ -22,23 +26,37 @@ import fr.dynamx.client.renders.scene.SceneBuilder;
 import fr.dynamx.client.renders.scene.node.SceneNode;
 import fr.dynamx.client.renders.scene.node.SimpleNode;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.contentpack.parts.lights.SpotLightObject;
 import fr.dynamx.common.contentpack.type.objects.AbstractItemObject;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.AbstractLightsModule;
 import fr.dynamx.common.entities.vehicles.TrailerEntity;
+import fr.dynamx.common.items.DynamXItem;
 import fr.dynamx.common.objloader.data.DxModelData;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.errors.DynamXErrorManager;
+import fr.dynamx.utils.maths.DynamXGeometry;
+import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
+import fr.dynamx.utils.optimization.Vector3fPool;
+import fr.dynamx.utils.physics.DynamXPhysicsHelper;
 import lombok.Getter;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityOtherPlayerMP;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderGlobal;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import org.joml.Matrix4f;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -47,7 +65,7 @@ import java.util.*;
  * Contains multiple {@link LightObject}
  */
 @Getter
-@RegisteredSubInfoType(name = "MultiLight", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER, SubInfoTypeRegistries.BLOCKS, SubInfoTypeRegistries.PROPS}, strictName = false)
+@RegisteredSubInfoType(name = "MultiLight", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER, SubInfoTypeRegistries.BLOCKS, SubInfoTypeRegistries.PROPS, SubInfoTypeRegistries.ITEMS, SubInfoTypeRegistries.ARMORS}, strictName = false)
 public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISubInfoTypeOwner<PartLightSource>, IDrawablePart<Object, IModelPackObject>, IModelTextureVariantsSupplier.IModelTextureVariants {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER, SubInfoTypeRegistries.BLOCKS, SubInfoTypeRegistries.PROPS})
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
@@ -59,6 +77,8 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
     private final String partName;
 
     private final List<LightObject> sources = new ArrayList<>();
+    @Getter
+    private final List<SpotLightObject> spotLights = new ArrayList<>();
 
     @PackFileProperty(configNames = "ObjectName")
     protected String objectName;
@@ -99,7 +119,7 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
      * @param model The 3D model owning this part
      */
     public void readPositionFromModel(ResourceLocation model) {
-        if (getPosition() == null && sources.stream().anyMatch(s -> s.getRotateDuration() > 0)) { //If the light isn't moving on itself, we don't need its position (it can be 0 0 0), but if it rotates, we need to place the rotation point correctly: we need the pos of the light
+        if (getPosition() == null) {
             DxModelData modelData = DynamXContext.getDxModelDataFromCache(DynamXUtils.getModelPath(getPackName(), model));
             if (modelData != null) {
                 position = DynamXUtils.readPartPosition(modelData, getObjectName(), true);
@@ -123,7 +143,10 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
             DynamXErrorManager.addPackError(getPackName(), "required_property", ErrorLevel.HIGH, parent.getName(), "Position in " + getName());
             position = new Vector3f();
         } else {
-            position.multLocal(((ICollisionsContainer) owner).getScaleModifier());
+            if (owner instanceof ICollisionsContainer)
+                position.multLocal(((ICollisionsContainer) owner).getScaleModifier());
+            else if (owner instanceof AbstractItemObject)
+                position.multLocal(((AbstractItemObject) owner).getItemScale());
         }
         owner.addLightSource(this);
     }
@@ -140,7 +163,7 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
             if (entity instanceof TrailerEntity)
                 modules.add(new AbstractLightsModule.TrailerLightsModule(getOwner(), entity));
             else
-                modules.add(new AbstractLightsModule.LightsModule(getOwner()));
+                modules.add(new AbstractLightsModule.EntityLightsModule(entity, getOwner()));
         }
     }
 
@@ -218,6 +241,10 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
         sources.add(object);
     }
 
+    public void addSpotLight(SpotLightObject object) {
+        spotLights.add(object);
+    }
+
     @Override
     public void addSubProperty(ISubInfoType<PartLightSource> property) {
         throw new IllegalStateException("Cannot add sub property to a light");
@@ -238,12 +265,26 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
         public void render(IRenderContext context, A packInfo) {
             /* Rendering light sources */
             boolean isEntity = context instanceof BaseRenderContext.EntityRenderContext && ((BaseRenderContext.EntityRenderContext) context).getEntity() != null;
-            AbstractLightsModule lights = isEntity ? ((BaseRenderContext.EntityRenderContext) context).getEntity().getModuleByType(AbstractLightsModule.class) :
-                    context instanceof BaseRenderContext.BlockRenderContext && ((BaseRenderContext.BlockRenderContext) context).getTileEntity() != null ? ((BaseRenderContext.BlockRenderContext) context).getTileEntity().getLightsModule() : null;
+            boolean isItem = context instanceof BaseRenderContext.ItemRenderContext && ((BaseRenderContext.ItemRenderContext) context).getStack() != null;
+            boolean isBlock = context instanceof BaseRenderContext.BlockRenderContext && ((BaseRenderContext.BlockRenderContext) context).getTileEntity() != null;
+            boolean isArmor = context instanceof BaseRenderContext.ArmorRenderContext && ((BaseRenderContext.ArmorRenderContext) context).getArmorModel() != null;
+            AbstractLightsModule lights = null;
+            if (isEntity)
+                lights = ((BaseRenderContext.EntityRenderContext) context).getEntity().getModuleByType(AbstractLightsModule.class);
+            else if (isBlock)
+                lights = ((BaseRenderContext.BlockRenderContext) context).getTileEntity().getLightsModule();
+            else if (isItem)
+                lights = DynamXItem.getLightContainer(((BaseRenderContext.ItemRenderContext) context).getStack());
+            else if (isArmor) {
+                BaseRenderContext.ArmorRenderContext armorRenderContext = (BaseRenderContext.ArmorRenderContext) context;
+                ItemStack stack = armorRenderContext.getEntity().getItemStackFromSlot(armorRenderContext.getEquipmentSlot());
+                lights = DynamXItem.getLightContainer(stack);
+            }
             transformToRotationPoint();
             /* Rendering light source */
             LightObject onLightObject = null;
             if (lights != null) {
+                lights.setLightOn(10, true);
                 // Find the first light object that is on
                 for (LightObject source : getSources()) {
                     if (lights.isLightOn(source.getLightId())) {
@@ -277,14 +318,32 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
                 activeStep = activeStep % onLightObject.getBlinkTextures().size();
                 texId = onLightObject.getBlinkTextures().get(activeStep).getId();
             }
+            Vector3fPool.openPool();
             //Set luminescent
+
             if (isOn) {
+
+                if (lights.getLightCastersSync().containsKey(onLightObject.getLightId())) {
+                    LightCasterPartSync partSync = lights.getLightCastersSync().get(onLightObject.getLightId());
+                    for (Map.Entry<String, LightCaster> entry : partSync.lightCasters.entrySet()) {
+
+                        if (entry.getKey() != null && entry.getKey().equals(getObjectName())) {
+                            if(isItem) {
+                                renderLightFirstPerson(entry.getValue(), transform);
+                            } else
+                                renderLight(entry.getValue(), transform);
+                        }
+                    }
+                }
+
                 int i = 15728880;
                 int j = i % 65536;
                 int k = i / 65536;
                 OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float) j, (float) k);
                 GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             }
+            Vector3fPool.closePool();
+
             //Render the light
             if (lights != null && lights.isLightOn(onLightObject.getLightId()) && onLightObject.getRotateDuration() > 0) {
                 float step = ((float) (ClientEventHandler.MC.getRenderViewEntity().ticksExisted % onLightObject.getRotateDuration())) / onLightObject.getRotateDuration();
@@ -318,4 +377,106 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
             super.renderDebug(context, packInfo);
         }
     }
+
+    public static void renderLight(LightCaster lightCaster, Matrix4f transform) {
+        Matrix4f transformCopy = new Matrix4f(transform);
+
+        org.joml.Vector3f center = DynamXUtils.toVector3f(lightCaster.getBasePosition());
+        transformCopy.transformPosition(center);
+        org.joml.Vector3f baseRotation = DynamXUtils.toVector3f(lightCaster.getBaseRotation());
+        transformCopy.transformDirection(baseRotation);
+
+
+        EntityPlayerSP player = Minecraft.getMinecraft().player;
+        //interpolate
+        float x = (float) (player.prevPosX + (float) (player.posX - player.prevPosX) * Minecraft.getMinecraft().getRenderPartialTicks());
+        float y = (float) (player.prevPosY + (float) (player.posY - player.prevPosY) * Minecraft.getMinecraft().getRenderPartialTicks());
+        float z = (float) (player.prevPosZ + (float) (player.posZ - player.prevPosZ) * Minecraft.getMinecraft().getRenderPartialTicks());
+
+        // System.out.println(lightCaster +" " + center);
+        lightCaster
+                .pos(new Vector3f(center.x, center.y, center.z).add(x, y, z))
+                .direction(new Vector3f(baseRotation.x, baseRotation.y, baseRotation.z))
+                .setEnabled(true);
+    }
+    private static final Matrix4f rotationMatrix = new Matrix4f();
+    private static final org.joml.Vector3f RIGHT_DIRECTION = new org.joml.Vector3f(1,0,0);
+    private static final org.joml.Vector3f UP_DIRECTION = new org.joml.Vector3f(0,1,0);
+    private static final org.joml.Vector3f FORWARD_DIRECTION = new org.joml.Vector3f(0,0,1);
+    public static void renderLightFirstPerson(LightCaster lightCaster, Matrix4f transform){
+        float partialTicks = Minecraft.getMinecraft().getRenderPartialTicks();
+        EntityPlayerSP playerSp = Minecraft.getMinecraft().player;
+        if (!(lightCaster instanceof EntityLightCaster)) {
+            return;
+        }
+        UUID entityId = ((EntityLightCaster) lightCaster).getEntityId();
+        Entity entityHolder = playerSp.world.loadedEntityList.stream().filter(e -> e.getPersistentID().equals(entityId)).findFirst().orElse(null);
+        if(!(entityHolder instanceof EntityPlayer)){
+            return;
+        }
+        EntityPlayer playerHolder = (EntityPlayer) entityHolder;
+        if (!(playerHolder.getHeldItemMainhand().getItem() instanceof DynamXItem)) {
+            return;
+        }
+        float pitch = playerHolder.prevRotationPitch + (playerHolder.rotationPitch - playerHolder.prevRotationPitch) * partialTicks;
+        float yaw = playerHolder.prevRotationYaw + (playerHolder.rotationYaw - playerHolder.prevRotationYaw) * partialTicks;
+        Vector3fPool.openPool();
+        if (playerHolder instanceof EntityOtherPlayerMP || Minecraft.getMinecraft().gameSettings.thirdPersonView != 0) {
+            //updateLightThirdPerson(playerHolder, lightCaster, position, rotation, scale, yaw, pitch);
+
+        }
+        if(true){
+
+            float pitchHand = playerSp.prevRenderArmPitch + (playerSp.renderArmPitch - playerSp.prevRenderArmPitch) * partialTicks;
+            float yawHand = playerSp.prevRenderArmYaw + (playerSp.renderArmYaw - playerSp.prevRenderArmYaw) * partialTicks;
+
+
+            float swingProgress = playerSp.getSwingProgress(partialTicks);
+            float f = -0.4F * MathHelper.sin(MathHelper.sqrt(swingProgress) * (float) Math.PI);
+            float f1 = 0.2F * MathHelper.sin(MathHelper.sqrt(swingProgress) * ((float) Math.PI * 2F));
+            float f2 = -0.2F * MathHelper.sin(swingProgress * (float) Math.PI);
+            int i = -1;
+
+            rotationMatrix.identity();
+            rotationMatrix.translate(new org.joml.Vector3f((float) i * f, f1, f2));
+            rotationMatrix.translate(new org.joml.Vector3f((float) i * 0.56F, -0.52F + swingProgress * -0.6F, -0.72F));
+
+
+            f = MathHelper.sin(swingProgress * swingProgress * (float) Math.PI);
+            f1 = MathHelper.sin(MathHelper.sqrt(swingProgress) * (float) Math.PI);
+
+            rotationMatrix.rotate((float) Math.toRadians((float) i * (45.0F + f * -20.0F)), UP_DIRECTION);
+            rotationMatrix.rotate((float) Math.toRadians((float) i * f1 * -20.0F), FORWARD_DIRECTION);
+            rotationMatrix.rotate((float) Math.toRadians(f1 * -80.0F), RIGHT_DIRECTION);
+            rotationMatrix.rotate((float) Math.toRadians((float) i * -45.0F), UP_DIRECTION);
+
+           /* Matrix4f transformCopy = new Matrix4f(transform);
+            transformCopy.mul(rotationMatrix);*/
+           /* rotationMatrix.rotate((float) Math.toRadians(rotation.x), RIGHT_DIRECTION);
+            rotationMatrix.rotate((float) Math.toRadians(rotation.y), UP_DIRECTION);
+            rotationMatrix.rotate((float) Math.toRadians(rotation.z), FORWARD_DIRECTION);*/
+
+            Vector3f playerLookDirection = DynamXUtils.toVector3f(rotationMatrix.transformDirection(DynamXUtils.toVector3fJoml(playerSp.getLookVec())));
+
+            org.joml.Vector3f center = DynamXUtils.toVector3f(lightCaster.getBasePosition());
+            // center.multLocal(scale);
+            org.joml.Vector3f itemPosition = center.add(0.183f, 0.038f, 1.7f);
+            Vector3f playerPosition = DynamXUtils.toVector3f(playerSp.getPositionEyes(partialTicks));
+
+
+            Vector3f positionRotated = DynamXUtils.toVector3f(rotationMatrix.transformPosition(itemPosition));
+
+
+            Vector3f positionRotatedHand = DynamXGeometry.getRotatedPoint(positionRotated, -(playerSp.rotationPitch - pitchHand) * 0.1f,
+                    -(playerSp.rotationYaw - yawHand) * 0.1f, 0);
+            Vector3f positionRotatedPlayer = DynamXGeometry.getRotatedPoint(positionRotatedHand, pitch, yaw, 0);
+
+            lightCaster
+                    .pos(positionRotatedPlayer.addLocal(playerPosition))
+                    .direction(playerLookDirection)
+                    .setEnabled(true);
+        }
+        Vector3fPool.closePool();
+    }
+
 }

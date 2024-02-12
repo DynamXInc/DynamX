@@ -4,6 +4,7 @@ import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.PackInfo;
 import fr.dynamx.common.contentpack.loader.InfoList;
+import fr.dynamx.common.contentpack.parts.lights.LightSourceFile;
 import fr.dynamx.common.contentpack.type.objects.ArmorObject;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
 import fr.dynamx.common.contentpack.type.objects.ItemObject;
@@ -26,7 +27,9 @@ public enum SubInfoTypeRegistries {
     PROPS(DynamXObjectLoaders.PROPS, PropObject.class),
     WHEELS(DynamXObjectLoaders.WHEELS, PartWheelInfo.class),
     CAR_ENGINES(DynamXObjectLoaders.ENGINES, CarEngineInfo.class),
-    HELICOPTER_ENGINES(DynamXObjectLoaders.ENGINES, BaseEngineInfo.class);
+    HELICOPTER_ENGINES(DynamXObjectLoaders.ENGINES, BaseEngineInfo.class),
+    LIGHTS(DynamXObjectLoaders.LIGHTS, LightSourceFile .class);
+
 
     @Getter
     private final InfoList<?> infoList;

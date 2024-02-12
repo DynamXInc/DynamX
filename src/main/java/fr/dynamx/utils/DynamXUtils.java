@@ -142,6 +142,10 @@ public class DynamXUtils {
         return Vector3fPool.get((float) pos.x, (float) pos.y, (float) pos.z);
     }
 
+    public static org.joml.Vector3f toVector3fJoml(Vec3d pos) {
+        return new org.joml.Vector3f((float) pos.x, (float) pos.y, (float) pos.z);
+    }
+
     public static Vector3f toVector3f(javax.vecmath.Vector3f pos) {
         return Vector3fPool.get(pos.x, pos.y, pos.z);
     }

@@ -228,16 +228,19 @@ public class CommonEventHandler {
 
     @SubscribeEvent
     public void onPlayerUpdate(TickEvent.PlayerTickEvent e) {
-        if (!(e.player.getRidingEntity() instanceof PhysicsEntity<?>) && DynamXContext.getPhysicsWorld(e.player.world) != null && !e.player.isDead) {
+        if (!(e.player.getRidingEntity() instanceof PhysicsEntity<?>) && DynamXContext.getPhysicsWorld(e.player.world) != null
+                && !e.player.isDead && e.phase == TickEvent.Phase.END && DynamXMain.proxy.shouldUseBulletSimulation(e.player.world)) {
             if (!DynamXContext.getPlayerToCollision().containsKey(e.player) && DynamXPhysicsWorldBlacklistApi.isBlacklisted(e.player))
                 return;
             Vector3fPool.openPool();
             QuaternionPool.openPool();
+            System.out.println("=== tick player ===");
             if (!DynamXContext.getPlayerToCollision().containsKey(e.player)) {
                 PlayerPhysicsHandler playerPhysicsHandler = new PlayerPhysicsHandler(e.player);
                 DynamXContext.getPlayerToCollision().put(e.player, playerPhysicsHandler);
                 playerPhysicsHandler.addToWorld();
             }
+//System.out.println("Phase " + e.phase);
             DynamXContext.getPlayerToCollision().get(e.player).update(e.player.world);
             Vector3fPool.closePool();
             QuaternionPool.closePool();

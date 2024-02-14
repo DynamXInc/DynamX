@@ -141,7 +141,7 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
             return;
         }
         super.onUpdate();
-        if (world.isRemote && getMetadata() != lastMetadata) //Metadata has been sync, so update texture
+        if (world.isRemote && getMetadata() != lastMetadata && !isDead) //Metadata has been sync, so update texture
         {
             lastMetadata = getMetadata();
             entityTextureID = (byte) getMetadata();

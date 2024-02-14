@@ -1,6 +1,7 @@
 package fr.dynamx.common.physics.world;
 
 import fr.dynamx.api.events.PhysicsEvent;
+import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.utils.debug.Profiler;
 import fr.dynamx.utils.optimization.BoundingBoxPool;
@@ -100,6 +101,8 @@ public class BuiltinThreadedPhysicsWorld extends BasePhysicsWorld implements Run
                 }
                 profiler.end(Profiler.Profiles.STEP_SIMULATION);
                 profiler.update();
+
+            ClientDebugSystem.tickEvent(null);
             }
             if (ticksLate.get() == 0 && alive) {
                 try {

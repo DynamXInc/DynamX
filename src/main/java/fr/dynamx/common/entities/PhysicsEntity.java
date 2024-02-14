@@ -246,7 +246,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
         }
 
         //Update visual pos
-        updateMinecraftPos();
+        //updateMinecraftPos();
 
         //Post the update event
         PhysicsEntityEvent.Update update;
@@ -265,6 +265,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
      * Called in minecraft thread to update vanilla position and rotation fields, also used for render and updating "prev" fields
      */
     protected void updateMinecraftPos() {
+        System.out.println("updateMinecraftPos");
         prevPosX = posX;
         prevPosY = posY;
         prevPosZ = posZ;
@@ -358,6 +359,9 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
 
         simulatePhysics = simulatePhysics && isRegistered == EnumEntityPhysicsRegistryState.REGISTERED;
         postUpdatePhysics(simulatePhysics);
+
+        //Update visual pos
+        updateMinecraftPos();
 
         MinecraftForge.EVENT_BUS.post(world.isRemote ? new PhysicsEntityEvent.ClientUpdate(this, PhysicsEntityEvent.UpdateType.POST_PHYSICS_UPDATE, simulatePhysics) :
                 new PhysicsEntityEvent.ServerUpdate(this, PhysicsEntityEvent.UpdateType.POST_PHYSICS_UPDATE, simulatePhysics));

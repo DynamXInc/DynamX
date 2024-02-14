@@ -23,6 +23,7 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.EnumHelper;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
@@ -185,8 +186,9 @@ public class ArmorObject<T extends ArmorObject<?>> extends AbstractItemObject<T,
     public SceneNode<?, ?> getSceneGraph() {
         if (sceneNode == null) {
             if (isModelValid()) {
-                DynamXArmorEvent.BuildSceneGraph buildSceneGraphEvent = new DynamXArmorEvent.BuildSceneGraph(new SceneBuilder<>(), this, (List) getDrawableParts());
-                sceneNode = buildSceneGraphEvent.getSceneGraphResult();
+                DynamXArmorEvent.BuildSceneGraph event = new DynamXArmorEvent.BuildSceneGraph(new SceneBuilder<>(), this, (List) getDrawableParts());
+                MinecraftForge.EVENT_BUS.post(event);
+                sceneNode = event.getSceneGraphResult();
             } else
                 sceneNode = new ArmorNode<>(Collections.EMPTY_LIST);
         }

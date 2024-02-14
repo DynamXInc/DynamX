@@ -69,8 +69,9 @@ public class ItemObject<T extends ItemObject<?>> extends AbstractItemObject<T, T
     public SceneNode<?, ?> getSceneGraph() {
         if (sceneNode == null) {
             if (isModelValid()) {
-                DynamXItemEvent.BuildSceneGraph buildSceneGraphEvent = new DynamXItemEvent.BuildSceneGraph(new SceneBuilder<>(), this, (List) getDrawableParts());
-                sceneNode = buildSceneGraphEvent.getSceneGraphResult();
+                DynamXItemEvent.BuildSceneGraph event = new DynamXItemEvent.BuildSceneGraph(new SceneBuilder<>(), this, (List) getDrawableParts());
+                MinecraftForge.EVENT_BUS.post(event);
+                sceneNode = event.getSceneGraphResult();
             } else
                 sceneNode = new ItemNode<>(Collections.EMPTY_LIST);
         }

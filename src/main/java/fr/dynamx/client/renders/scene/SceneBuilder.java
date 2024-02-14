@@ -9,6 +9,7 @@ import fr.dynamx.client.renders.scene.node.*;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import lombok.Getter;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraftforge.common.MinecraftForge;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -204,9 +205,9 @@ public class SceneBuilder<C extends IRenderContext, A extends IModelPackObject> 
     private SceneNode<C, A> createSceneGraph(A obj, String nodeName, Node node, Vector3f modelScale) {
         validateNode(obj, nodeName, node);
         List<SceneNode<C, A>> childGraph = node.nodes.isEmpty() ? null : node.generateScene(obj, modelScale);
-        DynamXEntityRenderEvents.CreatePartScene createPartSceneEvent = new DynamXEntityRenderEvents.CreatePartScene(obj, node.leaf, modelScale, (List) childGraph);
-
-        SceneNode<C, A> graphResult = (SceneNode<C, A>) createPartSceneEvent.getSceneGraphResult();
+        DynamXEntityRenderEvents.CreatePartScene event = new DynamXEntityRenderEvents.CreatePartScene(obj, node.leaf, modelScale, (List) childGraph);
+        MinecraftForge.EVENT_BUS.post(event);
+        SceneNode<C, A> graphResult = (SceneNode<C, A>) event.getSceneGraphResult();
         if (graphResult.getLinkedChildren() != null) {
             for (SceneNode<C, A> linkedChild : graphResult.getLinkedChildren()) {
                 linkedChild.setParent(graphResult);

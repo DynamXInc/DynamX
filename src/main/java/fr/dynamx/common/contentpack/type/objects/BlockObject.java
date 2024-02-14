@@ -54,6 +54,7 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
 
     @PackFileProperty(configNames = "LightLevel", defaultValue = "0", required = false)
     @Getter
+    @Setter
     protected float lightLevel;
 
     @PackFileProperty(configNames = "Material", required = false, defaultValue = "ROCK")
@@ -110,8 +111,9 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
     public SceneNode<?, ?> getSceneGraph() {
         if (sceneNode == null) {
             if (isModelValid()) {
-                DynamXBlockEvent.BuildSceneGraph buildSceneGraphEvent = new DynamXBlockEvent.BuildSceneGraph(new SceneBuilder<>(), this, (List) getDrawableParts(), getScaleModifier());
-                sceneNode = buildSceneGraphEvent.getSceneGraphResult();
+                DynamXBlockEvent.BuildSceneGraph event = new DynamXBlockEvent.BuildSceneGraph(new SceneBuilder<>(), this, (List) getDrawableParts(), getScaleModifier());
+                MinecraftForge.EVENT_BUS.post(event);
+                sceneNode = event.getSceneGraphResult();
             } else
                 sceneNode = new BlockNode<>(Collections.EMPTY_LIST);
         }

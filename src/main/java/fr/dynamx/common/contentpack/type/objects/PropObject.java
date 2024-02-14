@@ -217,8 +217,9 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
     public SceneNode<?, ?> getSceneGraph() {
         if (sceneGraph == null) {
             if (isModelValid()) {
-                DynamXEntityRenderEvents.BuildSceneGraph buildSceneGraphEvent = new DynamXEntityRenderEvents.BuildSceneGraph(new SceneBuilder<>(), this, (List) getDrawableParts(), getScaleModifier());
-                sceneGraph = buildSceneGraphEvent.getSceneGraphResult();
+                DynamXEntityRenderEvents.BuildSceneGraph event = new DynamXEntityRenderEvents.BuildSceneGraph(new SceneBuilder<>(), this, (List) getDrawableParts(), getScaleModifier());
+                MinecraftForge.EVENT_BUS.post(event);
+                sceneGraph = event.getSceneGraphResult();
             } else
                 sceneGraph = new EntityNode<>(Collections.EMPTY_LIST, Collections.EMPTY_LIST);
         }

@@ -17,8 +17,13 @@ public class PhysicsSimulationModes {
 
         @Override
         public void updatePhysicsWorld(PhysicsSoftSpace dynamicsWorld) {
-            dynamicsWorld.update(getTimeStep(), 0, false, true, false);
-            dynamicsWorld.update(getTimeStep(), 0, false, true, false);
+            //dynamicsWorld.update(getTimeStep(), 0, false, true, false);
+            //dynamicsWorld.update(getTimeStep(), 0, false, true, false);
+            long nanoTime = System.nanoTime();
+            long nanoseconds = nanoTime - lastPhysicsUpdate;
+            float seconds = 1e-9f * nanoseconds;
+            dynamicsWorld.update(seconds);
+            this.lastPhysicsUpdate = nanoTime;
         }
 
         @Override

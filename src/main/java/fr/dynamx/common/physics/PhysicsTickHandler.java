@@ -2,6 +2,7 @@ package fr.dynamx.common.physics;
 
 import fr.dynamx.api.network.EnumPacketTarget;
 import fr.dynamx.api.physics.IPhysicsWorld;
+import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.handlers.TaskScheduler;
@@ -120,13 +121,15 @@ public class PhysicsTickHandler {
             QuaternionPool.openPool();
             Vector3fPool.openPool();
             physicsWorld.tickStart();
+            System.out.println(">> Tick start");
+        } else {
 
             float deltaTimeSecond = getDeltaTimeMilliseconds() * 1.0E-3F;
             if (deltaTimeSecond > 0.5f) // game was paused ?
                 deltaTimeSecond = 0.05f;
 
             Profiler.get().start(Profiler.Profiles.STEP_SIMULATION);
-            physicsWorld.stepSimulation(deltaTimeSecond);
+            physicsWorld.stepSimulation(deltaTimeSecond * 0.01f);
             Profiler.get().end(Profiler.Profiles.STEP_SIMULATION);
 
             if(physicsWorld.getDynamicsWorld() != null) {
@@ -137,13 +140,13 @@ public class PhysicsTickHandler {
                     }
                 });
             }
-        } else {
             physicsWorld.tickEnd();
 
             //Close Pool
             Vector3fPool.closePool();
             QuaternionPool.closePool();
             TransformPool.getPool().closeSubPool();
+            System.out.println(">> Tick end");
         }
     }
 

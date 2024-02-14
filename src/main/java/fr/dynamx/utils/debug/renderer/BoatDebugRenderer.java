@@ -2,10 +2,7 @@ package fr.dynamx.utils.debug.renderer;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
-import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
-import fr.dynamx.common.physics.entities.BoatPhysicsHandler;
 import fr.dynamx.common.physics.entities.PackEntityPhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.FloatPhysicsHandler;
 import fr.dynamx.utils.client.DynamXRenderUtils;
@@ -18,7 +15,7 @@ import org.lwjgl.opengl.GL11;
 
 public class BoatDebugRenderer {
     public static <T extends PhysicsEntity<?>> void addAll(RenderPhysicsEntity<T> to) {
-        to.addDebugRenderers(new FloatsDebug(), new VehicleDebugRenderer.SteeringWheelDebug(), new VehicleDebugRenderer.SeatDebug(), new VehicleDebugRenderer.PlayerCollisionsDebug(), new VehicleDebugRenderer.NetworkDebug());
+        to.addDebugRenderers(new FloatsDebug(), new DebugRenderer.StoragesDebug(), new VehicleDebugRenderer.PlayerCollisionsDebug(), new VehicleDebugRenderer.NetworkDebug());
     }
 
     public static class FloatsDebug implements DebugRenderer<PhysicsEntity<?>> {
@@ -58,6 +55,5 @@ public class BoatDebugRenderer {
             bufferBuilder.pos(pos.x + force.x + 0.0001, pos.y + force.y, pos.z + force.z + 0.0001).color(red, green, blue, 1f).endVertex();
             tessellator.draw();
         }
-
     }
 }

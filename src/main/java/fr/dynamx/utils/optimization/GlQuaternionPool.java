@@ -54,4 +54,8 @@ public class GlQuaternionPool extends ClassPool<Quaternion> {
     public static GlQuaternionPool getINSTANCE() {
         return INSTANCE;
     }
+
+    public static Quaternion newGlQuaternion(com.jme3.math.Quaternion fromJmeQuaternion) {
+        return fromJmeQuaternion == null ? null : new Quaternion(fromJmeQuaternion.getX(), fromJmeQuaternion.getY(), fromJmeQuaternion.getZ(), fromJmeQuaternion.getW());
+    }
 }

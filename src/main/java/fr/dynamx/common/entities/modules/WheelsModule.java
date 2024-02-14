@@ -17,6 +17,7 @@ import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.parts.PartWheel;
 import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.modules.engines.CarEngineModule;
 import fr.dynamx.common.network.sync.variables.EntityFloatArrayVariable;
 import fr.dynamx.common.network.sync.variables.EntityMapVariable;
 import fr.dynamx.common.physics.entities.BaseWheeledVehiclePhysicsHandler;
@@ -46,7 +47,7 @@ import java.util.Objects;
  * @see WheelsPhysicsHandler
  */
 @SynchronizedEntityVariable.SynchronizedPhysicsModule(modid = DynamXConstants.ID)
-public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHandler<?>>, IPhysicsModule.IEntityUpdateListener, IPhysicsModule.IPhysicsUpdateListener, IPackInfoReloadListener {
+public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHandler<?>>, IPhysicsModule.IPhysicsUpdateListener, IPackInfoReloadListener {
     //TODO CLEAN WHEELS CODE
     @SynchronizedEntityVariable(name = "wheel_infos")
     protected final EntityMapVariable<Map<Byte, PartWheelInfo>, Byte, PartWheelInfo> wheelInfos = new EntityMapVariable<>((variable, value) -> {
@@ -259,7 +260,7 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
             prevVisualProperties[indexRotationAngle] = angles[0];
             visualProperties[indexRotationAngle] = angles[1];
 
-            visualProperties[VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.SUSPENSION_LENGTH)] = info.getSuspensionLength() + info.getRestLength();
+            visualProperties[VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.SUSPENSION_LENGTH)] = info.getSuspensionLength();
             Vector3f pos = Vector3fPool.get();
             info.getCollisionLocation(pos);
             visualProperties[VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.COLLISION_X)] = pos.x;
@@ -286,7 +287,7 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
         //Dust particles when the vehicle friction is very low
         entity.getPackInfo().getPartsByType(PartWheel.class).forEach(partWheel -> {
             PartWheelInfo info = getWheelInfo(partWheel.getId());
-            if (!info.isModelValid() || info.getSkidParticle() == null) {
+            if (info == null || !info.isModelValid() || info.getSkidParticle() == null) {
                 return;
             }
             if (!(skidInfos.get()[partWheel.getId()] < 0.1f)) {
@@ -300,18 +301,13 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
         });
     }
 
+    @Override
+    public byte getInitPriority() {
+        //Take care to add wheels module BEFORE engine module (an engine needs a propulsion)
+        return 10;
+    }
+
     public final Map<Integer, VehicleSound> sounds = new HashMap<>();
-
-    @Override
-    public boolean listenEntityUpdates(Side side) {
-        return side.isClient();
-    }
-
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void updateEntity() {
-
-    }
 
     public enum WheelState {
         ADDED,

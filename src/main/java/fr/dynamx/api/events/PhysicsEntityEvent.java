@@ -2,7 +2,7 @@ package fr.dynamx.api.events;
 
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
-import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
+import fr.dynamx.client.renders.scene.node.SceneNode;
 import fr.dynamx.common.entities.ModularPhysicsEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.items.DynamXItemSpawner;
@@ -52,6 +52,7 @@ public class PhysicsEntityEvent extends Event {
         @Getter
         private final World world;
         @Getter
+        @Nullable
         private final EntityPlayer player;
         @Getter
         private final DynamXItemSpawner<?> itemSpawner;
@@ -61,7 +62,7 @@ public class PhysicsEntityEvent extends Event {
         /**
          * @param world         the physics world where the physics entity will be added
          * @param physicsEntity the physics entity being spawned
-         * @param player        the player who is spawning the entity
+         * @param player        the player who is spawning the entity, can be null in case of a command for example
          * @param item          item used to spawn the entity
          * @param pos           block pos of the raycast
          */
@@ -147,64 +148,16 @@ public class PhysicsEntityEvent extends Event {
     }
 
     /**
-     * Fired when rendering a physics entity, before and after the render, with <strong>no</strong> pos and rotations transformations applied <br>
-     * All phases are cancellable, except POST
-     */
-    public static class Render extends PhysicsEntityEvent {
-        /**
-         * The renderer of the entity
-         */
-        @Getter
-        private final RenderPhysicsEntity<?> renderer;
-        /**
-         * The render type
-         */
-        @Getter
-        private final Type renderType;
-        /**
-         * Render x, y and z pos
-         */
-        @Getter
-        private final double x, y, z;
-        /**
-         * Partials render ticks
-         */
-        @Getter
-        private final float partialTicks;
-        /**
-         * The render pass <br>
-         * 0 for solid objects <br>
-         * 1 for translucent objects <br>
-         * Some types of render event are fired for both
-         */
-        @Getter
-        private final int renderPass;
-
-        public Render(PhysicsEntity<?> physicsEntity, RenderPhysicsEntity<?> renderer, Type renderType, double x, double y, double z, float partialTicks, int renderPass) {
-            super(Side.CLIENT, physicsEntity);
-            this.renderer = renderer;
-            this.x = x;
-            this.y = y;
-            this.z = z;
-            this.renderType = renderType;
-            this.partialTicks = partialTicks;
-            this.renderPass = renderPass;
-        }
-
-        public enum Type {
-            ENTITY, RIDDING_PLAYERS, DEBUG, POST
-        }
-    }
-
-    /**
      * Called when the renderer on an entity is created <br>
      * You can add debug renderers for your addon, depending on the type of the entity <br>
-     * You can select for which entities you want to receive this event, supported generic types are "{@link fr.dynamx.common.entities.BaseVehicleEntity}", "{@link fr.dynamx.common.entities.PropsEntity}", "{@link fr.dynamx.common.entities.RagdollEntity}" and "{@link fr.dynamx.common.entities.vehicles.DoorEntity}"
+     * You can select for which entities you want to receive this event, supported generic types are "{@link fr.dynamx.common.entities.BaseVehicleEntity}", "{@link fr.dynamx.common.entities.PropsEntity}", "{@link fr.dynamx.common.entities.RagdollEntity}" and "{@link fr.dynamx.common.entities.vehicles.DoorEntity}" <br>
+     * <strong>Note:</strong> don't add parameters to PhysicsEntity : this would break the event on the fml side.
      *
      * @see DebugRenderer
      * @see RenderPhysicsEntity
+     * @deprecated The debug should be rendered using the new {@link SceneNode}s system
      */
-    //Note : don't add parameters to PhysicsEntity : this would break the event on the fml side
+    @Deprecated
     public static class InitRenderer<T extends PhysicsEntity> extends GenericEvent<T> {
         /**
          * The renderer for this type of entity
@@ -219,7 +172,10 @@ public class PhysicsEntityEvent extends Event {
 
         /**
          * Adds the debug renders to the list of the entity renderer
+         *
+         * @deprecated The debug should be rendered using the new {@link SceneNode}s system
          */
+        @Deprecated
         public void addDebugRenderers(DebugRenderer<?>... renderers) {
             this.renderer.addDebugRenderers(renderers);
         }

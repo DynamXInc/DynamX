@@ -2,13 +2,17 @@ package fr.dynamx.common.entities;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
+import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
 import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
+import fr.dynamx.client.renders.RenderPhysicsEntity;
+import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
+import fr.dynamx.common.contentpack.parts.BasePartSeat;
 import fr.dynamx.common.entities.modules.MovableModule;
 import fr.dynamx.common.physics.entities.PackEntityPhysicsHandler;
 import fr.dynamx.common.physics.joints.EntityJointsHandler;
@@ -38,15 +42,15 @@ import java.util.List;
  * @see IPhysicsModule
  * @see PackEntityPhysicsHandler For the physics implementation
  */
-public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>, A extends IPhysicsPackInfo> extends ModularPhysicsEntity<T> implements IPackInfoReloadListener {
+public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>, A extends IPhysicsPackInfo & IPartContainer<?>> extends ModularPhysicsEntity<T> implements IPackInfoReloadListener {
     private static final DataParameter<String> INFO_NAME = EntityDataManager.createKey(PackPhysicsEntity.class, DataSerializers.STRING);
     private static final DataParameter<Integer> METADATA = EntityDataManager.createKey(PackPhysicsEntity.class, DataSerializers.VARINT);
     private int lastMetadata = -1;
 
     /**
      * -- GETTER --
-     *  The texture id depends on the entity's metadata <br>
-     *  If -1 is returned, the entity will not be rendered
+     * The texture id depends on the entity's metadata <br>
+     * If -1 is returned, the entity will not be rendered
      *
      * @return The texture id to use for drawing chassis
      */
@@ -104,6 +108,7 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
             if (module instanceof IPackInfoReloadListener)
                 ((IPackInfoReloadListener) module).onPackInfosReloaded();
         }
+        rawBoxes.clear(); //Clear collisions cache
     }
 
     @Override
@@ -111,6 +116,7 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
         moduleList.add(jointsHandler);
         moduleList.add(movableModule = new MovableModule(this));
         movableModule.initSubModules(modules, this);
+        getPackInfo().addModules(this, modules);
     }
 
     @Override
@@ -139,8 +145,13 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
         {
             lastMetadata = getMetadata();
             entityTextureID = (byte) getMetadata();
-            packInfo.getDrawableParts().forEach(m -> ((IDrawablePart<PackPhysicsEntity<?, ?>>) m).onTexturesChange(this));
+            packInfo.getDrawableParts().forEach(m -> ((IDrawablePart<PackPhysicsEntity<?, ?>, A>) m).onTexturesChange(this));
         }
+    }
+
+    @Override
+    public boolean isInRangeToRenderDist(double range) {
+        return (getPackInfo() == null || getPackInfo().getRenderDistance() == -1) ? super.isInRangeToRenderDist(range) : getPackInfo().getRenderDistance() >= range;
     }
 
     @Override
@@ -155,18 +166,19 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
     public List<MutableBoundingBox> getCollisionBoxes() {
         if (getPackInfo() == null || physicsPosition == null)
             return new ArrayList<>(0);
+        Vector3f pos = Vector3fPool.get(posX, posY, posZ);
         if (rawBoxes.size() != getPackInfo().getCollisionsHelper().getShapes().size()) {
             rawBoxes.clear();
             for (IShapeInfo shape : getPackInfo().getCollisionsHelper().getShapes()) {
                 MutableBoundingBox boundingBox = new MutableBoundingBox(shape.getBoundingBox());
-                boundingBox.offset(physicsPosition);
+                boundingBox.offset(pos);
                 rawBoxes.add(boundingBox);
             }
         } else {
             for (int i = 0; i < getPackInfo().getCollisionsHelper().getShapes().size(); i++) {
                 MutableBoundingBox boundingBox = rawBoxes.get(i);
                 boundingBox.setTo(getPackInfo().getCollisionsHelper().getShapes().get(i).getBoundingBox());
-                boundingBox.offset(physicsPosition);
+                boundingBox.offset(pos);
             }
         }
         return rawBoxes;
@@ -188,6 +200,7 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
         for (float f = 1.0F; f < 4.0F; f += 0.1F) {
             for (InteractivePart<?, ?> part : getPackInfo().getInteractiveParts()) {
                 part.getBox(box);
+                box = DynamXContext.getCollisionHandler().rotateBB(Vector3fPool.get(), box, physicsRotation);
                 Vector3f partPos = DynamXGeometry.rotateVectorByQuaternion(part.getPosition(), physicsRotation);
                 partPos.addLocal(physicsPosition);
                 box.offset(partPos);
@@ -199,6 +212,21 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
             hitVec = hitVec.add(lookVec.x * 0.1F, lookVec.y * 0.1F, lookVec.z * 0.1F);
         }
         return nearest;
+    }
+
+    @Override
+    protected boolean canFitPassenger(Entity passenger) {
+        return this.getPassengers().size() < getPackInfo().getPartsByType(BasePartSeat.class).size();
+    }
+
+    @Override
+    public boolean shouldRiderSit() {
+        return RenderPhysicsEntity.shouldRenderPlayerSitting;
+    }
+
+    @Override
+    public boolean canPassengerSteer() {
+        return false;
     }
 
     @Override
@@ -231,5 +259,4 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
     private void setInfoName(String name) {
         this.getDataManager().set(INFO_NAME, name);
     }
-
 }

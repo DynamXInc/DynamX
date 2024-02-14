@@ -5,7 +5,6 @@ import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
 import fr.dynamx.common.contentpack.parts.PartFloat;
-import fr.dynamx.common.contentpack.type.vehicle.BoatPropellerInfo;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.physics.entities.modules.FloatPhysicsHandler;
 import lombok.Getter;
@@ -13,7 +12,6 @@ import lombok.Getter;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Physics handler of {@link PackPhysicsEntity} <br>
@@ -22,7 +20,7 @@ import java.util.Objects;
  * @param <T> The entity type
  * @param <A> The pack info type
  */
-public abstract class PackEntityPhysicsHandler<A extends IPhysicsPackInfo, T extends PackPhysicsEntity<?, A>> extends EntityPhysicsHandler<T> implements IPackInfoReloadListener {
+public abstract class PackEntityPhysicsHandler<A extends IPhysicsPackInfo & IPartContainer<?>, T extends PackPhysicsEntity<?, A>> extends EntityPhysicsHandler<T> implements IPackInfoReloadListener {
 
     @Getter
     protected A packInfo;
@@ -46,35 +44,39 @@ public abstract class PackEntityPhysicsHandler<A extends IPhysicsPackInfo, T ext
     @Override
     public void update() {
         super.update();
-        collisionObject.setLinearDamping(packInfo.getLinearDamping());
-        collisionObject.setAngularDamping(packInfo.getAngularDamping());
-        isInWater = false;
-
         float waterLevel = getWaterLevel();
         if (waterLevel == Float.MIN_VALUE) {
+            if (!isInWater)
+                return;
+            isInWater = false;
+            collisionObject.setLinearDamping(packInfo.getLinearDamping());
+            collisionObject.setAngularDamping(packInfo.getAngularDamping());
             return;
         }
-        isInWater = true;
-        collisionObject.setLinearDamping(0.6f);
-        collisionObject.setAngularDamping(0.6f);
+        if(!isInWater) {
+            isInWater = true;
+            collisionObject.setLinearDamping(packInfo.getInWaterLinearDamping());
+            collisionObject.setAngularDamping(packInfo.getInWaterAngularDamping());
+        }
         for (FloatPhysicsHandler floatPhysicsHandler : floatList) {
             floatPhysicsHandler.handleBuoyancy(waterLevel);
         }
     }
 
-
     @Nullable
     @Override
     public Vector3f getCenterOfMass() {
-        return getPackInfo().getCenterOfMass();
+        // Note: This method is called by the super constructor, before packInfo is initialized
+        return handledEntity.getPackInfo().getCenterOfMass();
     }
 
     @Override
     public void onPackInfosReloaded() {
         packInfo = handledEntity.getPackInfo();
-        if(getCollisionObject() != null) {
+        if (getCollisionObject() != null) {
             getCollisionObject().setAngularDamping(packInfo.getAngularDamping());
             getCollisionObject().setLinearDamping(packInfo.getLinearDamping());
+            isInWater = false;
         }
 
         //Debug, to clean
@@ -89,28 +91,26 @@ public abstract class PackEntityPhysicsHandler<A extends IPhysicsPackInfo, T ext
             debugDragForces.clear();
         }
 
-        if (packInfo instanceof IPartContainer) {
-            floatList = new ArrayList<>();
-            List<PartFloat> partsByType = ((IPartContainer<?>) packInfo).getPartsByType(PartFloat.class);
-            if (partsByType.isEmpty()) {
-                FloatPhysicsHandler floatPhysicsHandler = new FloatPhysicsHandler(handledEntity);
-                floatPhysicsHandler.setSize(0.5f);
-                floatPhysicsHandler.setScale(new Vector3f(0.5f, 0.5f, 0.5f));
-                floatPhysicsHandler.setBuoyCoefficient(2f);
-                floatPhysicsHandler.setDragCoefficient(0.1f);
+        floatList = new ArrayList<>();
+        List<PartFloat> partsByType = packInfo.getPartsByType(PartFloat.class);
+        if (partsByType.isEmpty()) {
+            FloatPhysicsHandler floatPhysicsHandler = new FloatPhysicsHandler(handledEntity);
+            floatPhysicsHandler.setSize(0.5f);
+            floatPhysicsHandler.setScale(new Vector3f(0.5f, 0.5f, 0.5f));
+            floatPhysicsHandler.setBuoyCoefficient(2f);
+            floatPhysicsHandler.setDragCoefficient(0.1f);
+            debugDragForces.add(floatPhysicsHandler.getDebugDragForce());
+            debugBuoyForces.add(floatPhysicsHandler.getDebugBuoyForce());
+            floatList.add(floatPhysicsHandler);
+            return;
+        }
+        floatList = new ArrayList<>(partsByType.size());
+        for (PartFloat<?> partFloat : partsByType) {
+            for (Vector3f floatCenter : partFloat.getChildrenPositionList()) {
+                FloatPhysicsHandler floatPhysicsHandler = new FloatPhysicsHandler(handledEntity, partFloat, floatCenter);
                 debugDragForces.add(floatPhysicsHandler.getDebugDragForce());
                 debugBuoyForces.add(floatPhysicsHandler.getDebugBuoyForce());
                 floatList.add(floatPhysicsHandler);
-                return;
-            }
-            floatList = new ArrayList<>(partsByType.size());
-            for (PartFloat<?> partFloat : partsByType) {
-                for (Vector3f floatCenter : partFloat.getChildrenPositionList()) {
-                    FloatPhysicsHandler floatPhysicsHandler = new FloatPhysicsHandler(handledEntity, partFloat, floatCenter);
-                    debugDragForces.add(floatPhysicsHandler.getDebugDragForce());
-                    debugBuoyForces.add(floatPhysicsHandler.getDebugBuoyForce());
-                    floatList.add(floatPhysicsHandler);
-                }
             }
         }
     }

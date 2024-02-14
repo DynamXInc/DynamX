@@ -10,7 +10,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.fml.relauncher.Side;
 
-import java.util.*;
+import java.util.Arrays;
 
 public class DynamXErrorManager {
     private static final ErrorManagerService errorManager = ACsLib.getPlatform().provideService(ErrorManagerService.class);
@@ -128,6 +128,7 @@ public class DynamXErrorManager {
         registerErrorFormatter(PACKS_ERRORS, "missing_prop", FORMATTER_MULTIPLE_ERROR);
         registerErrorFormatter(PACKS_ERRORS, "unknown_sub_info", FORMATTER_MULTIPLE_ERROR_ONE_LI);
         registerErrorFormatter(PACKS_ERRORS, "deprecated_seat_config", FORMATTER_MULTIPLE_ERROR_ONE_LI);
+        registerErrorFormatter(PACKS_ERRORS, "deprecated_door_config", FORMATTER_MULTIPLE_ERROR_ONE_LI);
         registerErrorFormatter(PACKS_ERRORS, "sound_error", FORMATTER_MULTIPLE_ERROR);
         registerErrorFormatter(PACKS_ERRORS, "config_error", FORMATTER_MULTIPLE_ERROR);
         registerErrorFormatter(PACKS_ERRORS, "pack_requirements", FORMATTER_MULTIPLE_ERROR); //FORMAT
@@ -142,5 +143,12 @@ public class DynamXErrorManager {
         registerErrorFormatter(PACKS_ERRORS, "deprecated_light_format", FORMATTER_MULTIPLE_ERROR);
         registerErrorFormatter(PACKS_ERRORS, "wheel_invalid_suspaxis", FORMATTER_MULTIPLE_ERROR);
         registerErrorFormatter(PACKS_ERRORS, "too_many_variants", FORMATTER_MULTIPLE_ERROR);
+        registerErrorFormatter(PACKS_ERRORS, "missing_depends_on_node", FORMATTER_MULTIPLE_ERROR_ONE_LI);
+        registerErrorFormatter(PACKS_ERRORS, "duplicate_scene", FORMATTER_MULTIPLE_ERROR_ONE_LI);
+        registerErrorFormatter(PACKS_ERRORS, "wheel_no_model", FORMATTER_MULTIPLE_ERROR);
+        registerErrorFormatter(PACKS_ERRORS, "position_not_found_in_model", FORMATTER_MULTIPLE_ERROR);
+        registerErrorFormatter(PACKS_ERRORS, "seat_door_not_found", FORMATTER_MULTIPLE_ERROR);
+        registerErrorFormatter(PACKS_ERRORS, "invalid_view_type", FORMATTER_MULTIPLE_ERROR);
+        registerErrorFormatter(PACKS_ERRORS, "mixed_item_transforms_info", FORMATTER_MULTIPLE_ERROR);
     }
 }

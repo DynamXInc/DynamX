@@ -2,7 +2,6 @@ package fr.dynamx.utils.client;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.client.handlers.ClientEventHandler;
-import fr.dynamx.client.renders.mesh.UvsOption;
 import fr.dynamx.client.renders.mesh.shapes.ArrowMesh;
 import fr.dynamx.client.renders.mesh.shapes.GridGLMesh;
 import fr.dynamx.client.renders.mesh.shapes.IcosphereGLMesh;
@@ -31,7 +30,6 @@ import org.lwjgl.util.glu.Sphere;
 import org.lwjgl.util.vector.Quaternion;
 
 import javax.annotation.Nullable;
-import javax.vecmath.Vector4f;
 import java.awt.*;
 import java.util.List;
 
@@ -41,6 +39,7 @@ import java.util.List;
  * @see ClientDynamXUtils
  */
 public class DynamXRenderUtils {
+    private static boolean glAllAttribBitsEnabled;
 
     public static GridGLMesh gridMesh;
     public static ArrowMesh arrowMeshX;
@@ -49,13 +48,15 @@ public class DynamXRenderUtils {
     public static IcosphereGLMesh icosphereMesh;
     public static OctasphereMesh sphereMesh;
 
+
     public static IcosphereGLMesh icosphereMeshToRender;
 
 
     private static final Sphere sphere = new Sphere();
 
-    public static void initGlMeshes(){
-        gridMesh = new GridGLMesh(10,10,0.2f);
+
+    public static void initGlMeshes() {
+        gridMesh = new GridGLMesh(10, 10, 0.2f);
         arrowMeshX = ArrowMesh.getMesh(0);
         arrowMeshY = ArrowMesh.getMesh(1);
         arrowMeshZ = ArrowMesh.getMesh(2);
@@ -80,24 +81,35 @@ public class DynamXRenderUtils {
 
     private static RenderBaseVehicle<?> renderBaseVehicle;
 
+    /**
+     * @deprecated You should render the entity using its SceneGraph (see {@link fr.dynamx.client.renders.model.renderer.DxItemModelLoader} for an example)
+     */
+    @Deprecated
     public static void renderCar(ModularVehicleInfo car, byte textureId) {
-        if (renderBaseVehicle == null)
-            renderBaseVehicle = new RenderBaseVehicle<>(ClientEventHandler.MC.getRenderManager());
         Vector3fPool.openPool();
         GlQuaternionPool.openPool();
-        renderBaseVehicle.renderMain(null, car, textureId, 1);
-        renderBaseVehicle.renderParts(null, car, textureId, 1);
+        getRenderBaseVehicle().renderEntity(car, textureId);
         GlQuaternionPool.closePool();
         Vector3fPool.closePool();
     }
 
+    /**
+     * @deprecated Will be deleted
+     */
+    @Deprecated
+    public static RenderBaseVehicle<?> getRenderBaseVehicle() {
+        if (renderBaseVehicle == null)
+            renderBaseVehicle = new RenderBaseVehicle<>(ClientEventHandler.MC.getRenderManager());
+        return renderBaseVehicle;
+    }
+
     public static void drawSphere(Vector3f translation, float radius, @Nullable Color sphereColor) {
         if (sphereColor != null)
-            GlStateManager.color(sphereColor.getRed()/255f, sphereColor.getGreen()/255f, sphereColor.getBlue()/255f, sphereColor.getAlpha()/255f);
+            GlStateManager.color(sphereColor.getRed() / 255f, sphereColor.getGreen() / 255f, sphereColor.getBlue() / 255f, sphereColor.getAlpha() / 255f);
         GlStateManager.translate(translation.x, translation.y, translation.z);
         GlStateManager.scale(radius, radius, radius);
         sphereMesh.render();
-        GlStateManager.scale(1/radius, 1/radius, 1/radius);
+        GlStateManager.scale(1 / radius, 1 / radius, 1 / radius);
         GlStateManager.translate(-translation.x, -translation.y, -translation.z);
         if (sphereColor != null)
             GlStateManager.color(1, 1, 1, 1);
@@ -246,6 +258,29 @@ public class DynamXRenderUtils {
         int errorCode = GL11.glGetError();
         if (errorCode != GL11.GL_NO_ERROR) {
             DynamXMain.log.warn("errorCode = " + errorCode);
+        }
+    }
+
+    /**
+     * Pushes GL11.GL_ALL_ATTRIB_BITS if not already pushed <br>
+     * <strong>This attribute must be popped after any DynamX model rendering (or it will break the vanilla game rendering)</strong> <br>
+     * The push is done by the gltf models rendering code, the pop is done by DynamX code that encapsulate the model rendering (but not the model rendering code itself,
+     * see {@link fr.dynamx.client.renders.model.renderer.GltfModelRenderer#renderVanillaOrShader(int, boolean)}.
+     */
+    public static void pushGlAllAttribBits() {
+        if (!glAllAttribBitsEnabled) {
+            glAllAttribBitsEnabled = true;
+            GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
+        }
+    }
+
+    /**
+     * Pops GL11.GL_ALL_ATTRIB_BITS if pushed by {@link DynamXRenderUtils#pushGlAllAttribBits()}
+     */
+    public static void popGlAllAttribBits() {
+        if (glAllAttribBitsEnabled) {
+            glAllAttribBitsEnabled = false;
+            GL11.glPopAttrib();
         }
     }
 }

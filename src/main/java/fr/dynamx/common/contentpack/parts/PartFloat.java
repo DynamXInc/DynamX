@@ -9,36 +9,30 @@ import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.optimization.Vector3fPool;
-import fr.dynamx.utils.physics.DynamXPhysicsHelper;
 import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.util.math.AxisAlignedBB;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
+@Setter
 @RegisteredSubInfoType(name = "float", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.PROPS}, strictName = false)
 public class PartFloat<T extends ISubInfoTypeOwner<T>> extends BasePart<T> {
-    @Getter
     protected AxisAlignedBB box;
-    @Getter
     protected float size = 1;
 
-    @Getter
     @PackFileProperty(configNames = "BuoyCoefficient", required = false, defaultValue = "1")
     protected float buoyCoefficient = 1f;
-    @Getter
     @PackFileProperty(configNames = "DragCoefficient", required = false, defaultValue = "0.05")
     protected float dragCoefficient = 0.05f;
-    @Getter
     @PackFileProperty(configNames = "Offset", required = false)
     protected Vector3f offset = new Vector3f();
-    @Getter
     @PackFileProperty(configNames = "LineSize", required = false)
     protected Vector3f lineSize = new Vector3f();
-    @Getter
     @PackFileProperty(configNames = "Spacing", required = false)
     protected Vector3f spacing = new Vector3f();
-    @Getter
     protected List<Vector3f> childrenPositionList = new ArrayList<>();
 
     public PartFloat(ISubInfoTypeOwner<T> owner, String partName) {
@@ -65,6 +59,7 @@ public class PartFloat<T extends ISubInfoTypeOwner<T>> extends BasePart<T> {
             }
         }
     }
+
     @Override
     public DynamXDebugOption getDebugOption() {
         return DynamXDebugOptions.WHEELS;

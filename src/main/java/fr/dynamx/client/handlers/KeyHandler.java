@@ -3,8 +3,8 @@ package fr.dynamx.client.handlers;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.client.camera.CameraSystem;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.contentpack.parts.BasePartSeat;
 import fr.dynamx.common.contentpack.parts.PartDoor;
-import fr.dynamx.common.contentpack.parts.PartSeat;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.common.entities.modules.MovableModule;
@@ -107,6 +107,7 @@ public class KeyHandler {
                     }
                 }
             } else {
+                //FIXME THIS MAY FIRED WHILE TAKING OBJECT
                 if (DynamXContext.getPlayerPickingObjects().containsKey(MC.player.getEntityId())) {
                     if (MC.isSingleplayer()) {
                         PickingObjectHelper.handlePickingControl(new MovableModule.Action(MovableModule.EnumAction.UNPICK), MC.player);
@@ -119,11 +120,13 @@ public class KeyHandler {
             if (KEY_LOCK_DOOR.isPressed()) {
                 Entity entity = mc.player.getRidingEntity();
                 if (entity instanceof BaseVehicleEntity && entity instanceof IModuleContainer.IDoorContainer && ((IModuleContainer.IDoorContainer) entity).getDoors() != null) {
-                    PartSeat seat = ((IModuleContainer.ISeatsContainer) entity).getSeats().getRidingSeat(MC.player);
-                    DoorsModule doors = ((IModuleContainer.IDoorContainer) entity).getDoors();
-                    PartDoor door = seat.getLinkedPartDoor((BaseVehicleEntity<?>) entity);
+                    BasePartSeat<?, ?> seat = ((IModuleContainer.ISeatsContainer) entity).getSeats().getRidingSeat(MC.player);
+                    if (seat == null)
+                        return;
+                    PartDoor door = seat.getLinkedPartDoor();
                     if (door == null)
                         return;
+                    DoorsModule doors = ((IModuleContainer.IDoorContainer) entity).getDoors();
                     DynamXContext.getNetwork().sendToServer(new MessageChangeDoorState((BaseVehicleEntity<?>) entity, doors.getInverseCurrentState(door.getId()), door.getId()));
                 }
             }
@@ -175,7 +178,7 @@ public class KeyHandler {
 
     private void controlCamera() {
         Entity entity = mc.player.getRidingEntity();
-        if(!(entity instanceof IModuleContainer.ISeatsContainer))
+        if (!(entity instanceof IModuleContainer.ISeatsContainer))
             return;
         if (KEY_ZOOM_IN.isPressed()) {
             CameraSystem.changeCameraZoom(false);
@@ -205,31 +208,6 @@ public class KeyHandler {
                     event.setCanceled(true);
                 }
             }
-            //Door interact
-            /*if (Mouse.isButtonDown(1)) {
-                if (!justPressed) {
-                    justPressed = true;
-                    Predicate<EnumBulletShapeType> predicateShape = p -> !p.isTerrain() && !p.isPlayer() && p != EnumBulletShapeType.VEHICLE;
-                    PhysicsRaycastResult raycastResult = DynamXUtils.castRayFromEntity(mc.player, 2, predicateShape);
-                    if (raycastResult == null)
-                        return;
-                    if (raycastResult.hitBody == null)
-                        return;
-                    Object userObject = raycastResult.hitBody.getUserObject();
-                    if (!(userObject instanceof BulletShapeType)) {
-                        return;
-                    }
-                    if (!(((BulletShapeType<?>) userObject).getObjectIn() instanceof DoorsModule.DoorVarContainer)) {
-                        return;
-                    }
-                    DoorsModule.DoorVarContainer doorContainer = (DoorsModule.DoorVarContainer) ((BulletShapeType<?>) userObject).getObjectIn();
-                    byte doorID = doorContainer.getDoorID();
-                    DoorsModule doorsModule = doorContainer.getModule();
-                    DynamXContext.getNetwork().sendToServer(new MessagePlayerMountVehicle(doorsModule.vehicleEntity.getEntityId(), doorID));
-                }
-            } else {
-                justPressed = false;
-            }*/
         }
     }
 }

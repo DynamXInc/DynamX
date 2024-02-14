@@ -13,6 +13,7 @@ import net.minecraft.stats.StatList;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
@@ -20,10 +21,15 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public abstract class DynamXItemSpawner<T extends AbstractItemObject<T, ?>> extends DynamXItem<T> {
     public DynamXItemSpawner(T itemInfo) {
         super(itemInfo);
+    }
+
+    public DynamXItemSpawner(String modid, String itemName, ResourceLocation model) {
+        super(modid, itemName, model);
     }
 
     @Override
@@ -69,5 +75,5 @@ public abstract class DynamXItemSpawner<T extends AbstractItemObject<T, ?>> exte
         return true;
     }
 
-    public abstract PackPhysicsEntity<?, ?> getSpawnEntity(World worldIn, EntityPlayer playerIn, Vector3f pos, float spawnRotation, int metadata);
+    public abstract PackPhysicsEntity<?, ?> getSpawnEntity(World worldIn, @Nullable EntityPlayer playerIn, Vector3f pos, float spawnRotation, int metadata);
 }

@@ -23,6 +23,10 @@ repositories {
     }
     maven { url = 'https://repo.spongepowered.org/maven' }
 
+    maven {
+        url "https://cursemaven.com"
+    }
+
     flatDir {
         dir 'libs'
     }
@@ -66,13 +70,14 @@ dependencies {
     implementation ("net.minecraftforge:mergetool:0.2.3.3") { force = true }
 
     implementation 'com.github.stephengold:Libbulletjme:' + libbulletjme_version
-    implementation "fr.aym.acsguis:ACsGuis:1.2.11-dev2"
-    implementation ":ModProtectionLib:1.3.3"
+    implementation "fr.aym.acsguis:ACsGuis:1.2.12"
+    implementation ":ModProtectionLib:1.3.4"
     implementation('org.spongepowered:mixin:0.8.5') {
         exclude module: 'guava'
         exclude module: 'commons-io'
         exclude module: 'gson'
     }
+    implementation 'org.joml:joml:1.10.5'
     compileOnly 'org.projectlombok:lombok:1.18.24'
 
     shadow('org.spongepowered:mixin:0.8.5') {

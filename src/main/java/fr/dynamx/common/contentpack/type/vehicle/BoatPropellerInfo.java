@@ -6,6 +6,10 @@ import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
+import fr.dynamx.api.entities.modules.ModuleListBuilder;
+import fr.dynamx.common.entities.PackPhysicsEntity;
+import fr.dynamx.common.entities.modules.engines.BoatPropellerModule;
+import fr.dynamx.common.entities.vehicles.BoatEntity;
 import lombok.Getter;
 
 @RegisteredSubInfoType(name = "BoatPropeller", registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
@@ -37,5 +41,13 @@ public class BoatPropellerInfo extends SubInfoType<ModularVehicleInfo> {
     @Override
     public String getName() {
         return "BoatPropeller";
+    }
+
+    @Override
+    public void addModules(PackPhysicsEntity<?, ?> entity, ModuleListBuilder modules) {
+        if(!(entity instanceof BoatEntity))
+            throw new IllegalStateException("The entity " + entity + " has PartSeats, but isn't a boat !");
+        if(!modules.hasModuleOfClass(BoatPropellerModule.class))
+            modules.add(new BoatPropellerModule((BoatEntity<?>) entity));
     }
 }

@@ -27,6 +27,7 @@ public class DynamXDebugOptions {
             ROTORS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Rotors").withSubCategory(VehicleDebugTypes.GENERAL.title),
             HANDLES = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Handles").withSubCategory(VehicleDebugTypes.GENERAL.title),
             FRICTION_POINTS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Force points").withSubCategory(VehicleDebugTypes.GENERAL.title),
+            LIGHTS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Lights").withSubCategory(VehicleDebugTypes.GENERAL.title),
             PLAYER_COLLISIONS = DynamXDebugOption.newOption(DebugCategories.GENERAL, "Advanced player collisions").withDescription("Debug for collisions between players and vehicles").withSubCategory(VehicleDebugTypes.COLLISIONS.title),
             TRAILER_ATTACH_POINTS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Trailer attach points").withSubCategory(VehicleDebugTypes.ATTACH_POINTS.title),
             DOOR_ATTACH_POINTS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Door attach points").withSubCategory(VehicleDebugTypes.ATTACH_POINTS.title),

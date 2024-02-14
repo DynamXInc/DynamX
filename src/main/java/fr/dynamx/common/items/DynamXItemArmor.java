@@ -1,8 +1,8 @@
 package fr.dynamx.common.items;
 
-import fr.dynamx.api.contentpack.object.IInfoOwner;
+import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
-import fr.dynamx.api.contentpack.object.render.IObjPackObject;
+import fr.dynamx.api.contentpack.object.render.IModelPackObject;
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.objects.ArmorObject;
@@ -25,7 +25,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class DynamXItemArmor<T extends ArmorObject<?>> extends ItemArmor implements IInfoOwner<T>, IResourcesOwner {
+public class DynamXItemArmor<T extends ArmorObject<?>> extends ItemArmor implements IDynamXItem<T>, IResourcesOwner {
     protected final int textureNum;
     protected T armorInfo;
 
@@ -90,7 +90,7 @@ public class DynamXItemArmor<T extends ArmorObject<?>> extends ItemArmor impleme
 
     @Override
     public boolean createJson() {
-        return getObjModel().get3DItemRenderLocation() != Enum3DRenderLocation.ALL;
+        return getDxModel().get3DItemRenderLocation() != Enum3DRenderLocation.ALL;
     }
 
     @Override
@@ -141,7 +141,7 @@ public class DynamXItemArmor<T extends ArmorObject<?>> extends ItemArmor impleme
     }
 
     @Override
-    public IObjPackObject getObjModel() {
+    public IModelPackObject getDxModel() {
         return getInfo();
     }
 }

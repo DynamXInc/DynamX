@@ -10,6 +10,7 @@ import fr.dynamx.utils.EnumSeatPlayerPosition;
 import fr.dynamx.utils.RegistryNameSetter;
 import fr.dynamx.utils.physics.DynamXPhysicsHelper;
 import fr.dynamx.utils.physics.EnumCollisionType;
+import lombok.Getter;
 import net.minecraft.block.material.Material;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ResourceLocation;
@@ -46,6 +47,12 @@ public class DefinitionType<T> {
     private final Function<String, T> parser;
     private final Function<T, String> inverser;
 
+    /**
+     * -- GETTER --
+     *
+     * @return the type name of the property
+     */
+    @Getter
     private final String typeName;
 
     /**
@@ -72,14 +79,6 @@ public class DefinitionType<T> {
         if (type != null) {
             definitionTypes.put(type, this);
         }
-    }
-
-    /**
-     * @return the type name of the property
-     */
-
-    public String getTypeName() {
-        return typeName;
     }
 
     /**
@@ -237,8 +236,6 @@ public class DefinitionType<T> {
             return materials[names.indexOf(s.toUpperCase())];
         }, "type.material")),
         AXIS(new DefinitionType<>(DynamXPhysicsHelper.EnumPhysicsAxis.class, DynamXPhysicsHelper.EnumPhysicsAxis::fromString, "type.axis"));
-
-
 
         public final DefinitionType<?> type;
 

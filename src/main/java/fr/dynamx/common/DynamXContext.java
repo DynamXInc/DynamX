@@ -30,23 +30,60 @@ import java.util.concurrent.ConcurrentHashMap;
  * Common DynamX variables
  */
 public class DynamXContext {
+    /**
+     * -- GETTER --
+     *
+     * @return The collision handler for collisions between players and physics entities
+     */
+    @Getter
     private static final IRotatedCollisionHandler collisionHandler = new RotatedCollisionHandlerImpl();
-    private static final IDnxNetworkSystem network;
+    /**
+     * -- GETTER --
+     *
+     * @return The current {@link IDnxNetworkSystem} for DynamX packets
+     */
+    @Getter
+    private static IDnxNetworkSystem network;
     @SideOnly(Side.CLIENT)
-    private static DynamXModelRegistry objModelRegistry;
+    private static DynamXModelRegistry dxModelRegistry;
     @SideOnly(Side.CLIENT)
     private static final Map<SoftbodyEntity, FacesMesh> SOFTBODY_ENTITY_MESH = new HashMap<>();
-
+    /**
+     * -- GETTER --
+     *
+     * @return The rigid bodies of all players
+     */
+    @Getter
     private static final Map<EntityPlayer, PlayerPhysicsHandler> playerToCollision = new HashMap<>();
+    /**
+     * -- GETTER --
+     *
+     * @return The players walking on the top of entities
+     */
+    @Getter
     private static final ConcurrentHashMap<EntityPlayer, PhysicsEntity<?>> walkingPlayers = new ConcurrentHashMap<>(0, 0.75f, 2);
+    /**
+     * -- GETTER --
+     *
+     * @return A map linking player ids with the entities they are holding
+     */
+    @Getter
     private static Map<Integer, Integer> playerPickingObjects = new HashMap<>();
 
     private static final IPhysicsSimulationMode[] physicsSimulationModes = new IPhysicsSimulationMode[]{new PhysicsSimulationModes.FullPhysics(), new PhysicsSimulationModes.FullPhysics()};
 
-    private static final Map<ResourceLocation, ObjModelData> OBJ_MODEL_DATA_CACHE = new HashMap<>();
+    private static final Map<ResourceLocation, DxModelData> DX_MODEL_DATA_CACHE = new HashMap<>();
 
     private static final Map<Integer, IPhysicsWorld> PHYSICS_WORLD_PER_DIMENSION = new HashMap<>();
 
+    protected static void initNetwork() {
+        network = DynamXNetwork.init(FMLCommonHandler.instance().getSide());
+    }
+
+    @SideOnly(Side.CLIENT)
+    public static void initObjModelRegistry() {
+        dxModelRegistry = new DynamXModelRegistry();
+    }
 
     /**
      * Use this to avoid manipulating physics on invalid sides
@@ -67,46 +104,11 @@ public class DynamXContext {
     }
 
     /**
-     * @return The collision handler for collisions between players and physics entities
-     */
-    public static IRotatedCollisionHandler getCollisionHandler() {
-        return collisionHandler;
-    }
-
-    /**
      * @return The obj model loader
      */
     @SideOnly(Side.CLIENT)
-    public static DynamXModelRegistry getObjModelRegistry() {
-        return objModelRegistry;
-    }
-
-    /**
-     * @return The rigid bodies of all players
-     */
-    public static Map<EntityPlayer, PlayerPhysicsHandler> getPlayerToCollision() {
-        return playerToCollision;
-    }
-
-    /**
-     * @return The players walking on the top of entities
-     */
-    public static ConcurrentHashMap<EntityPlayer, PhysicsEntity<?>> getWalkingPlayers() {
-        return walkingPlayers;
-    }
-
-    /**
-     * @return A map linking player ids with the entities they are holding
-     */
-    public static Map<Integer, Integer> getPlayerPickingObjects() {
-        return playerPickingObjects;
-    }
-
-    /**
-     * @return The current {@link IDnxNetworkSystem} for DynamX packets
-     */
-    public static IDnxNetworkSystem getNetwork() {
-        return network;
+    public static DynamXModelRegistry getDxModelRegistry() {
+        return dxModelRegistry;
     }
 
     public static Map<Integer, IPhysicsWorld> getPhysicsWorldPerDimensionMap() {
@@ -139,23 +141,25 @@ public class DynamXContext {
         DynamXContext.physicsSimulationModes[side.ordinal()] = physicsSimulationMode;
     }
 
-    public static ObjModelData getObjModelDataFromCache(ObjModelPath objModelPath) {
-        if (OBJ_MODEL_DATA_CACHE.containsKey(objModelPath.getModelPath())) {
-            return OBJ_MODEL_DATA_CACHE.get(objModelPath.getModelPath());
+    public static DxModelData getDxModelDataFromCache(DxModelPath objModelPath) {
+        if (DX_MODEL_DATA_CACHE.containsKey(objModelPath.getModelPath())) {
+            return DX_MODEL_DATA_CACHE.get(objModelPath.getModelPath());
         } else {
-            ObjModelData objModelData = new ObjModelData(DynamXUtils.getModelPath(objModelPath.getPackName(), objModelPath.getModelPath()));
-            OBJ_MODEL_DATA_CACHE.put(objModelPath.getModelPath(), objModelData);
+            DxModelData objModelData = null;
+            switch (objModelPath.getFormat()) {
+                case OBJ:
+                    objModelData = new ObjModelData(DynamXUtils.getModelPath(objModelPath.getPackName(), objModelPath.getModelPath()));
+                    break;
+                case GLTF:
+                    objModelData = new GltfModelData(DynamXUtils.getModelPath(objModelPath.getPackName(), objModelPath.getModelPath()));
+                    break;
+            }
+            DX_MODEL_DATA_CACHE.put(objModelPath.getModelPath(), objModelData);
             return objModelData;
         }
     }
 
-    public static Map<ResourceLocation, ObjModelData> getObjModelDataCache() {
-        return OBJ_MODEL_DATA_CACHE;
-    }
-
-    static {
-        network = DynamXNetwork.init(FMLCommonHandler.instance().getSide());
-        if (FMLCommonHandler.instance().getSide().isClient())
-            objModelRegistry = new DynamXModelRegistry();
+    public static Map<ResourceLocation, DxModelData> getDxModelDataCache() {
+        return DX_MODEL_DATA_CACHE;
     }
 }

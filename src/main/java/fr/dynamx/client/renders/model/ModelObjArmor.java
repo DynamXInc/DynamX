@@ -1,39 +1,49 @@
 package fr.dynamx.client.renders.model;
 
-import fr.aym.acslib.api.services.ErrorTrackingService;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.client.renders.model.renderer.ArmorRenderer;
-import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
-import fr.dynamx.common.DynamXContext;
-import fr.dynamx.common.DynamXMain;
+import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
+import fr.dynamx.client.renders.scene.BaseRenderContext;
+import fr.dynamx.client.renders.scene.node.SceneNode;
 import fr.dynamx.common.contentpack.type.objects.ArmorObject;
-import fr.dynamx.utils.DynamXLoadingTasks;
 import fr.dynamx.utils.errors.DynamXErrorManager;
+import lombok.Getter;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.model.ModelRenderer;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.ItemStack;
+import org.joml.Matrix4f;
 
 import javax.annotation.Nullable;
 
 public class ModelObjArmor extends ModelBiped {
+    private static final Matrix4f tempTransform = new Matrix4f();
     private final ArmorObject<?> armorObject;
+    private final DxModelRenderer model;
+    private final BaseRenderContext.ArmorRenderContext renderContext = new BaseRenderContext.ArmorRenderContext(this);
     private ArmorRenderer head;
     private ArmorRenderer body;
     private ArmorRenderer[] arms;
     private ArmorRenderer[] legs;
     private ArmorRenderer[] foot;
 
+    /**
+     * -- GETTER --
+     *
+     * @return the currently drawn part
+     */
+    @Getter
     private EntityEquipmentSlot activePart;
+    @Getter
     private byte activeTextureId;
 
-    public ModelObjArmor(ArmorObject<?> armorObject, ObjModelRenderer model) {
+    public ModelObjArmor(ArmorObject<?> armorObject, DxModelRenderer model) {
         this.armorObject = armorObject;
+        this.model = model;
         if (armorObject.getArmorHead() != null) {
             head = new ArmorRenderer(model, this, armorObject.getArmorHead());
             setBodyPart(head, bipedHead);
@@ -79,17 +89,6 @@ public class ModelObjArmor extends ModelBiped {
         this.activeTextureId = textureId;
     }
 
-    /**
-     * @return the currently drawn part
-     */
-    public EntityEquipmentSlot getActivePart() {
-        return activePart;
-    }
-
-    public byte getActiveTextureId() {
-        return activeTextureId;
-    }
-
     @Override
     public void setModelAttributes(ModelBase model) {
         super.setModelAttributes(model);
@@ -114,57 +113,56 @@ public class ModelObjArmor extends ModelBiped {
 
     @Override
     public void render(@Nullable Entity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
-        GlStateManager.pushMatrix();
-        //GlStateManager.scale(armorInfo.scale[0],armorInfo.scale[1],armorInfo.scale[2]);
-        isSneak = entity != null && entity.isSneaking();
         ItemStack itemstack = entity == null ? ItemStack.EMPTY : ((EntityLivingBase) entity).getItemStackFromSlot(EntityEquipmentSlot.MAINHAND);
-        rightArmPose = itemstack.isEmpty() ? ArmPose.EMPTY : ArmPose.ITEM;
-
         if (!itemstack.isEmpty()) {
             EnumAction enumaction = itemstack.getItemUseAction();
             if (enumaction == EnumAction.BLOCK) {
-                rightArmPose = ArmPose.BLOCK;
+                rightArmPose = ModelBiped.ArmPose.BLOCK;
             } else if (enumaction == EnumAction.BOW) {
-                rightArmPose = ArmPose.BOW_AND_ARROW;
+                rightArmPose = ModelBiped.ArmPose.BOW_AND_ARROW;
+            } else {
+                rightArmPose = ModelBiped.ArmPose.ITEM;
             }
+        } else {
+            rightArmPose = ModelBiped.ArmPose.EMPTY;
         }
-        if (isSneak) {
-            GlStateManager.translate(0.0F, 0.2F, 0.0F);
-        }
+        renderContext.setModelParams((EntityLivingBase) entity, getActivePart(), model, (byte) (armorObject.getMaxTextureMetadata() > 1 ? itemstack.getMetadata() : 0));
+        ((SceneNode<BaseRenderContext.ArmorRenderContext, ArmorObject<?>>) armorObject.getSceneGraph()).render(renderContext, armorObject);
+    }
 
-        switch (getActivePart()) {
+    public void renderPart(Matrix4f transform, EntityEquipmentSlot part) {
+        switch (part) {
             case HEAD: {
                 if (head != null) {
-                    render(head, scale);
+                    renderPart(transform, head);
                 }
                 break;
             }
             case CHEST: {
                 if (body != null) {
-                    render(body, scale);
+                    renderPart(transform, body);
                 }
                 if (arms != null) {
-                    render(arms[0], scale);
-                    render(arms[1], scale);
+                    renderPart(transform, arms[0]);
+                    renderPart(transform, arms[1]);
                 }
                 break;
             }
             case LEGS: {
                 if (legs != null) {
-                    render(legs[0], scale);
-                    render(legs[1], scale);
+                    renderPart(transform, legs[0]);
+                    renderPart(transform, legs[1]);
                 }
                 break;
             }
             case FEET: {
                 if (foot != null) {
-                    render(foot[0], scale);
-                    render(foot[1], scale);
+                    renderPart(transform, foot[0]);
+                    renderPart(transform, foot[1]);
                 }
                 break;
             }
         }
-        GlStateManager.popMatrix();
     }
 
     public void renderHead(float scale) {
@@ -184,33 +182,38 @@ public class ModelObjArmor extends ModelBiped {
     public void renderLeftArm(float scale) {
         if (arms != null) {
             setModelAttributes(this); //Reset rotations
-            render(arms[0], scale);
+            renderPart(arms[0], scale);
         }
     }
 
     public void renderRightArm(float scale) {
         if (arms != null) {
             setModelAttributes(this); //Reset rotations
-            render(arms[1], scale);
+            renderPart(arms[1], scale);
         }
     }
 
     public void renderLeftLeg(float scale) {
         if (legs != null) {
             setModelAttributes(this); //Reset rotations
-            render(legs[0], scale);
+            renderPart(legs[0], scale);
         }
     }
 
     public void renderRightLeg(float scale) {
         if (legs != null) {
             setModelAttributes(this); //Reset rotations
-            render(legs[1], scale);
+            renderPart(legs[1], scale);
         }
     }
 
-    protected void render(ArmorRenderer armor, float scale) {
+    protected void renderPart(ArmorRenderer armor, float scale) {
         armor.render(scale);
+    }
+
+    protected void renderPart(Matrix4f transform, ArmorRenderer armor) {
+        tempTransform.set(transform); // armor.render modifies the transform matrix
+        armor.render(tempTransform);
     }
 
     private static void copyModelAnglesForArmor(ModelRenderer bodyPart, ModelRenderer armor) {

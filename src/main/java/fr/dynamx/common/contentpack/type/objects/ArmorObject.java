@@ -1,26 +1,26 @@
 package fr.dynamx.common.contentpack.type.objects;
 
 import fr.aym.acslib.api.services.error.ErrorLevel;
-import fr.dynamx.api.contentpack.object.IInfoOwner;
-import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
+import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
-import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
+import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
+import fr.dynamx.api.events.DynamXArmorEvent;
 import fr.dynamx.client.renders.model.ModelObjArmor;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
+import fr.dynamx.client.renders.scene.SceneBuilder;
+import fr.dynamx.client.renders.scene.node.ArmorNode;
+import fr.dynamx.client.renders.scene.node.SceneNode;
 import fr.dynamx.common.DynamXContext;
-import fr.dynamx.common.contentpack.loader.ObjectLoader;
+import fr.dynamx.common.contentpack.loader.InfoList;
 import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
 import fr.dynamx.common.items.DynamXItemArmor;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import lombok.Getter;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemArmor;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraftforge.common.util.EnumHelper;
@@ -29,6 +29,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -39,6 +40,10 @@ public class ArmorObject<T extends ArmorObject<?>> extends AbstractItemObject<T,
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("Textures".equals(key))
             return new IPackFilePropertyFixer.FixResult("MaterialVariants", true, true);
+        if ("ItemTranslate".equals(key))
+            return new IPackFilePropertyFixer.FixResult("ItemTransforms block", true, true);
+        if ("ItemRotate".equals(key))
+            return new IPackFilePropertyFixer.FixResult("ItemTransforms block", true, true);
         return null;
     };
 
@@ -80,13 +85,14 @@ public class ArmorObject<T extends ArmorObject<?>> extends AbstractItemObject<T,
     @SideOnly(Side.CLIENT)
     protected ModelObjArmor objArmor;
 
+    protected SceneNode<?, ?> sceneNode;
+
     public ArmorObject(String packName, String fileName) {
         super(packName, fileName);
-        setItemScale(0.7f); //default value
     }
 
     public void initArmorModel() {
-        objArmor = new ModelObjArmor(this, DynamXContext.getObjModelRegistry().getModel(getModel()));
+        objArmor = new ModelObjArmor(this, DynamXContext.getDxModelRegistry().getModel(getModel()));
     }
 
     @SideOnly(Side.CLIENT)
@@ -113,14 +119,14 @@ public class ArmorObject<T extends ArmorObject<?>> extends AbstractItemObject<T,
     }
 
     @Override
-    protected IInfoOwner<T> createOwner(ObjectLoader<T, ?> loader) {
+    protected IDynamXItem<T> createItem(InfoList<T> loader) {
         throw new IllegalArgumentException("Call createOwners !");
     }
 
     @Override
-    public IInfoOwner<T>[] createOwners(ObjectLoader<T, ?> loader) {
+    public IDynamXItem<T>[] createItems(InfoList<T> loader) {
         ItemArmor.ArmorMaterial material = EnumHelper.addArmorMaterial(getFullName(), "", durability, reductionAmount, enchantibility, sound, toughness);
-        List<IInfoOwner<T>> owners = new ArrayList<>();
+        List<IDynamXItem<T>> owners = new ArrayList<>();
         if (getArmorHead() != null)
             owners.add(new DynamXItemArmor(this, material, EntityEquipmentSlot.HEAD));
         if (getArmorBody() != null || getArmorArms() != null)
@@ -131,8 +137,8 @@ public class ArmorObject<T extends ArmorObject<?>> extends AbstractItemObject<T,
             owners.add(new DynamXItemArmor(this, material, EntityEquipmentSlot.FEET));
         if (owners.isEmpty())
             DynamXErrorManager.addPackError(getPackName(), "armor_error", ErrorLevel.FATAL, getName(), "No configured items for this armor");
-        this.owners = owners.toArray(new IInfoOwner[0]);
-        return this.owners;
+        this.items = owners.toArray(new IDynamXItem[0]);
+        return this.items;
     }
 
     @Override
@@ -145,34 +151,7 @@ public class ArmorObject<T extends ArmorObject<?>> extends AbstractItemObject<T,
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
-    public void renderItem3D(ItemStack item, ItemCameraTransforms.TransformType renderType) {
-        EntityEquipmentSlot slot = ((DynamXItemArmor<?>) item.getItem()).armorType;
-        getObjArmor().setActivePart(slot, getMaxTextureMetadata() > 1 ? (byte) item.getMetadata() : 0);
-        //restore default rotations (contained in ModelBiped)
-        getObjArmor().setModelAttributes(getObjArmor());
-        if (renderType != ItemCameraTransforms.TransformType.GUI)
-            GlStateManager.rotate(90, 1, 0, 0);
-        switch (slot) {
-            case FEET:
-                GlStateManager.translate(0, 1.8, -0.15);
-                break;
-            case LEGS:
-                GlStateManager.translate(0, 1.5, -0.15);
-                break;
-            case CHEST:
-                GlStateManager.translate(0, 0.7, -0.15);
-                break;
-            case HEAD:
-                GlStateManager.translate(0, 0.2, -0.15);
-                break;
-        }
-        GlStateManager.rotate(180, 0, 0, 1);
-        getObjArmor().render(null, 0, 0, 0, 0, 0, 1);
-    }
-
-    @Override
-    public String getTranslationKey(IInfoOwner<T> item, int itemMeta) {
+    public String getTranslationKey(IDynamXItem<T> item, int itemMeta) {
         EntityEquipmentSlot slot = ((DynamXItemArmor<T>) item).armorType;
         if (itemMeta == 0 || getVariants() == null)
             return super.getTranslationKey(item, itemMeta) + "_" + slot.getName();
@@ -180,7 +159,7 @@ public class ArmorObject<T extends ArmorObject<?>> extends AbstractItemObject<T,
     }
 
     @Override
-    public String getTranslatedName(IInfoOwner<T> item, int itemMeta) {
+    public String getTranslatedName(IDynamXItem<T> item, int itemMeta) {
         String prefix = "";
         EntityEquipmentSlot slot = ((DynamXItemArmor<T>) item).armorType;
         switch (slot) {
@@ -202,23 +181,21 @@ public class ArmorObject<T extends ArmorObject<?>> extends AbstractItemObject<T,
         return prefix + " " + super.getTranslatedName(item, itemMeta) + "_" + getVariants().getVariant((byte) itemMeta).getName();
     }
 
-    /**
-     * List of owned {@link ISubInfoType}s
-     */
-    protected final List<ISubInfoType<T>> subProperties = new ArrayList<>();
-
-    /**
-     * Adds an {@link ISubInfoType}
-     */
-    public void addSubProperty(ISubInfoType<T> property) {
-        subProperties.add(property);
+    @Override
+    public SceneNode<?, ?> getSceneGraph() {
+        if (sceneNode == null) {
+            if (isModelValid()) {
+                DynamXArmorEvent.BuildSceneGraph buildSceneGraphEvent = new DynamXArmorEvent.BuildSceneGraph(new SceneBuilder<>(), this, (List) getDrawableParts());
+                sceneNode = buildSceneGraphEvent.getSceneGraphResult();
+            } else
+                sceneNode = new ArmorNode<>(Collections.EMPTY_LIST);
+        }
+        return sceneNode;
     }
 
-    /**
-     * @return The list of owned {@link ISubInfoType}s
-     */
-    public List<ISubInfoType<T>> getSubProperties() {
-        return subProperties;
+    @Override
+    public float getBaseItemScale() {
+        return 0.7f;
     }
 
     @Override

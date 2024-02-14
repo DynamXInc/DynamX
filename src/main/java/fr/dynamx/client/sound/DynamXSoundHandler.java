@@ -103,6 +103,14 @@ public class DynamXSoundHandler {
             for (IDynamXSound sound : playingSounds) {
                 sound.update(this);
             }
+            int maxSounds = DynamXConfig.getMaxSounds();
+            if (maxSounds > 0 && playingSounds.size() > maxSounds) {
+                playingSounds.sort((o1, o2) -> Float.compare(o1.getDistanceToPlayer(), o2.getDistanceToPlayer()));
+                for (int i = maxSounds; i < playingSounds.size(); i++) {
+                    setSoundVolume(playingSounds.get(i), 0);
+                    playingSounds.get(i).onMuted();
+                }
+            }
             Vector3fPool.closePool();
             //Remove sounds that were stopped
             if (!stoppingSounds.isEmpty()) {

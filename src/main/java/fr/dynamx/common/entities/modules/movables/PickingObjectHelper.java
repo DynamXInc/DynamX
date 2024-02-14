@@ -27,49 +27,72 @@ public class PickingObjectHelper {
     public static void handlePickingControl(MovableModule.Action moduleAction, EntityPlayer player) {
         World world = player.world;
         if (!player.capabilities.isCreativeMode && !(player.getHeldItemMainhand().getItem() instanceof ItemWrench)
-                && !DynamXConfig.allowPlayersToMoveObjects) {
+                && !DynamXConfig.allowPlayersToMoveObjects || moduleAction.getMovableAction() == MovableModule.EnumAction.ATTACH_OBJECTS) {
             return;
         }
         Vector3fPool.openPool();
         QuaternionPool.openPool();
-
-        if (moduleAction.getMovableAction() == MovableModule.EnumAction.ATTACH_OBJECTS) {
-
-        } else {
-            if (!DynamXContext.getPlayerPickingObjects().containsKey(player.getEntityId())) {
-                switch (moduleAction.getMovableAction()) {
-                    case PICK:
-                        startPicking(moduleAction, player);
-                        break;
-                    case TAKE:
-                        startTaking(moduleAction, world, player);
-                        break;
-                }
-            } else {
-                Entity entity = world.getEntityByID(DynamXContext.getPlayerPickingObjects().get(player.getEntityId()));
-                if (entity instanceof PhysicsEntity) {
-                    PhysicsEntity<?> physicsEntity = (PhysicsEntity<?>) entity;
-                    MovableModule movableModule = physicsEntity.getModuleByType(MovableModule.class);
-                    if (movableModule != null) {
-                        switch (movableModule.usingAction) {
-                            case PICK:
-                                controlPicking(moduleAction, movableModule);
-                                break;
-                            case TAKE:
-                                controlTaking(moduleAction, movableModule);
-                                break;
-                        }
-                    }
-                } else { //If the entity does not exist, stop holding it
-                    DynamXContext.getPlayerPickingObjects().remove(player.getEntityId());
-                }
+        if (!DynamXContext.getPlayerPickingObjects().containsKey(player.getEntityId())) {
+            switch (moduleAction.getMovableAction()) {
+                case PICK:
+                    startPicking(moduleAction, player);
+                    break;
+                case TAKE:
+                    startTaking(moduleAction, world, player);
+                    break;
             }
-            //Copy map to avoid concurrency errors
-            //TODO use map pool
-            DynamXContext.getNetwork().sendToClientFromOtherThread(new MessageSyncPlayerPicking(new HashMap<>(DynamXContext.getPlayerPickingObjects())), EnumPacketTarget.ALL, null);
+        } else {
+            Entity entity = world.getEntityByID(DynamXContext.getPlayerPickingObjects().get(player.getEntityId()));
+            if (entity instanceof PhysicsEntity) {
+                PhysicsEntity<?> physicsEntity = (PhysicsEntity<?>) entity;
+                MovableModule movableModule = physicsEntity.getModuleByType(MovableModule.class);
+                if (movableModule != null) {
+                    switch (movableModule.usingAction) {
+                        case PICK:
+                            controlPicking(moduleAction, movableModule);
+                            break;
+                        case TAKE:
+                            controlTaking(moduleAction, movableModule);
+                            break;
+                    }
+                }
+            } else { //If the entity does not exist, stop holding it
+                DynamXContext.getPlayerPickingObjects().remove(player.getEntityId());
+            }
         }
+        //Copy map to avoid concurrency errors
+        //TODO use map pool
+        DynamXContext.getNetwork().sendToClientFromOtherThread(new MessageSyncPlayerPicking(new HashMap<>(DynamXContext.getPlayerPickingObjects())), EnumPacketTarget.ALL, null);
         Vector3fPool.closePool();
         QuaternionPool.closePool();
+    }
+
+    public static void handlePlayerDisconnection(EntityPlayer player) {
+        World world = player.world;
+        if (!player.capabilities.isCreativeMode && !(player.getHeldItemMainhand().getItem() instanceof ItemWrench)
+                && !DynamXConfig.allowPlayersToMoveObjects) {
+            return;
+        }
+        Entity entity = world.getEntityByID(DynamXContext.getPlayerPickingObjects().get(player.getEntityId()));
+        if (entity instanceof PhysicsEntity) {
+            PhysicsEntity<?> physicsEntity = (PhysicsEntity<?>) entity;
+            MovableModule movableModule = physicsEntity.getModuleByType(MovableModule.class);
+            if (movableModule != null) {
+                switch (movableModule.usingAction) {
+                    case PICK:
+                        controlPicking(new MovableModule.Action(MovableModule.EnumAction.UNPICK), movableModule);
+                        break;
+                    case TAKE:
+                        controlTaking(new MovableModule.Action(MovableModule.EnumAction.UNTAKE), movableModule);
+                        break;
+                }
+            }
+        } else { //If the entity does not exist, stop holding it
+            DynamXContext.getPlayerPickingObjects().remove(player.getEntityId());
+        }
+        //Copy map to avoid concurrency errors
+        //TODO use map pool
+        DynamXContext.getNetwork().sendToClientFromOtherThread(new MessageSyncPlayerPicking(new HashMap<>(DynamXContext.getPlayerPickingObjects())), EnumPacketTarget.ALL, null);
     }
 
     private static void startPicking(MovableModule.Action moduleAction, EntityPlayer player) {

@@ -1,7 +1,7 @@
 package fr.dynamx.utils.client;
 
 import com.google.common.collect.Maps;
-import fr.dynamx.api.contentpack.object.IInfoOwner;
+import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.contentpack.type.ObjectInfo;
@@ -182,7 +182,7 @@ public class ContentPackUtils {
         ModelLoader.setCustomStateMapper(block, stateMapper);
     }
 
-    public static void registerDynamXBlockStateMapper(IInfoOwner<BlockObject<?>> block) {
+    public static void registerDynamXBlockStateMapper(IDynamXItem<BlockObject<?>> block) {
         registerBlockWithStateMapper((Block) block, new StateMapperBase() {
             protected ModelResourceLocation getModelResourceLocation(IBlockState state) {
                 Map<IProperty<?>, Comparable<?>> map = Maps.newLinkedHashMap(state.getProperties());

@@ -1,6 +1,6 @@
 package fr.dynamx.api.events;
 
-import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
+import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import lombok.Getter;

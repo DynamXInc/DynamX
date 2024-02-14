@@ -1,7 +1,6 @@
 package fr.dynamx.common.contentpack.loader;
 
 import fr.aym.acslib.api.services.error.ErrorLevel;
-import fr.dynamx.api.contentpack.object.IInfoOwner;
 import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
@@ -9,14 +8,20 @@ import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeEntry;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.ContentPackLoader;
-import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.sync.PackSyncHandler;
 import fr.dynamx.utils.errors.DynamXErrorManager;
+import lombok.Getter;
 
 import javax.annotation.Nullable;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -28,63 +33,48 @@ import java.util.stream.Collectors;
  * @see INamedObject
  * @see ObjectLoader
  */
-public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
+public class InfoLoader<T extends ISubInfoTypeOwner<?>> extends InfoList<T> {
     /**
      * Optional dependency matcher : <br>
      * Optional blocks are blocks depending on addons that don't throw errors and that are ignored when their dependency isn't loaded.
      */
     public static final Predicate<String> optionalDependencyMatcher = s -> s.equals("Op") || s.equals("OptionalDependency");
     /**
-     * Loaded objects, identified by their full name
-     */
-    protected final Map<String, T> infos = new HashMap<>();
-    /**
      * The prefix used to detect associated .dnx files
+     * -- GETTER --
+     *
+     * @return The prefix used to detect associated .dnx files
      */
+    @Getter
     protected final String prefix;
     /**
      * A function matching an object packName and name with its object class
      */
     protected final AssetCreator<T> assetCreator;
-    /**
-     * SubInfoTypesRegistry for this object
-     */
-    protected final SubInfoTypesRegistry<T> infoTypesRegistry;
 
     /**
-     * @param prefix       The prefix used to detect associated .dnx files
-     * @param assetCreator A function matching an object packName and name with its object class
+     * @param prefix                      The prefix used to detect associated .dnx files
+     * @param assetCreator                A function matching an object packName and name with its object
+     * @param defaultSubInfoTypesRegistry The default SubInfoTypesRegistry for this object (can be overridden by ISubInfoTypeOwners)
      */
-    public InfoLoader(String prefix, BiFunction<String, String, T> assetCreator, @Nullable SubInfoTypesRegistry<T> infoTypesRegistry) {
-        this.prefix = prefix;
-        this.assetCreator = ((pack, name, firstLine) -> assetCreator.apply(pack, name));
-        this.infoTypesRegistry = infoTypesRegistry;
+    public InfoLoader(String prefix, BiFunction<String, String, T> assetCreator, @Nullable SubInfoTypesRegistry<T> defaultSubInfoTypesRegistry) {
+        this(prefix, ((pack, name, firstLine) -> assetCreator.apply(pack, name)), defaultSubInfoTypesRegistry);
     }
 
     /**
-     * @param prefix       The prefix used to detect associated .dnx files
-     * @param assetCreator A function matching an object packName and name with its object class
+     * @param prefix                      The prefix used to detect associated .dnx files
+     * @param assetCreator                A function matching an object packName and name with its object
+     * @param defaultSubInfoTypesRegistry The default SubInfoTypesRegistry for this object (can be overridden by ISubInfoTypeOwners)
      */
-    public InfoLoader(String prefix, AssetCreator<T> assetCreator, @Nullable SubInfoTypesRegistry<T> infoTypesRegistry) {
+    public InfoLoader(String prefix, AssetCreator<T> assetCreator, @Nullable SubInfoTypesRegistry<T> defaultSubInfoTypesRegistry) {
+        super(defaultSubInfoTypesRegistry);
         this.prefix = prefix;
         this.assetCreator = assetCreator;
-        this.infoTypesRegistry = infoTypesRegistry;
     }
 
-    /**
-     * @return The prefix used to detect associated .dnx files
-     */
-    public String getPrefix() {
-        return prefix;
-    }
-
-    /**
-     * Clears infos, used for hot reload
-     *
-     * @param hot If it's an hot reload
-     */
-    public void clear(boolean hot) {
-        infos.clear();
+    @Override
+    public String getName() {
+        return getPrefix().substring(0, getPrefix().length() - 1);
     }
 
     /**
@@ -92,8 +82,8 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
      *
      * @param loadingPack The pack owning the object
      * @param configName  The object's name
-     * @param file The object file
-     * @param hot         If it's an hot reload
+     * @param file        The object file
+     * @param hot         If it's a hot reload
      * @return True if this InfoLoader has loaded this object
      * @throws IOException If an error occurs while reading the stream
      */
@@ -106,7 +96,7 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
                 T info = assetCreator.create(loadingPack, configName, null);
                 if (infos.containsKey(info.getFullName()))
                     throw new IllegalArgumentException("Found a duplicated pack file " + configName + " in pack " + loadingPack + " !");
-                readInfo(inputStream, info);
+                readInfo(getDefaultSubInfoTypesRegistry(), inputStream, info);
                 loadItems(info, hot);
                 return true;
             } finally {
@@ -123,66 +113,26 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
     }
 
     /**
-     * Reads the inputStream into the info object
-     *
-     * @param reader The object file
-     * @param info   The loading info
-     */
-    @SuppressWarnings("unchecked")
-    protected void readInfo(BufferedReader reader, INamedObject info) throws IOException {
-        if (info instanceof ISubInfoTypeOwner<?>)
-            readInfoWithSubInfos((T) info, reader);
-        else {
-            //TODO FACTORIZE WITH THE NEXT FUNCTION  AND ERROR IF SUBINFO DECLARED HERE
-            List<PackFilePropertyData<?>> foundProperties = new ArrayList<>();
-            String s;
-            boolean inComment = false;
-            INamedObject parent = info;
-            if (parent instanceof ISubInfoType)
-                parent = ((ISubInfoType<?>) parent).getRootOwner();
-            while ((s = reader.readLine()) != null) {
-                s = s.trim();
-                if (s.endsWith("*/")) {
-                    if (inComment)
-                        inComment = false;
-                    else
-                        //TODO FORMAT ERRORS
-                        DynamXErrorManager.addPackError(info.getPackName(), "syntax_error", ErrorLevel.HIGH, parent.getName(), "Illegal multi-line comment end in line " + s + ", property skipped in " + info.getName());
-                } else if (inComment && s.contains("}"))
-                    DynamXErrorManager.addPackError(info.getPackName(), "syntax_error", ErrorLevel.FATAL, parent.getName(), "Found a never ending multi-line comment in " + info.getName() + ", some properties may be missing in-game");
-                else if (!inComment && !s.startsWith("//")) {
-                    if (s.startsWith("/*"))
-                        inComment = true;
-                    else if (s.contains("}")) //End of sub property
-                        break;
-                    else
-                        readLineProperty(foundProperties, info, s);
-                }
-            }
-            if (inComment)
-                DynamXErrorManager.addPackError(info.getPackName(), "syntax_error", ErrorLevel.FATAL, parent.getName(), "Found a never ending multi-line comment in " + info.getName() + ", some properties may be missing in-game");
-            INamedObject finalParent = parent;
-            SubInfoTypeAnnotationCache.getOrLoadData(info.getClass()).values().forEach(p -> {
-                if (p.isRequired() && !foundProperties.contains(p) && foundProperties.stream().noneMatch(p2 -> p2.getField() == p.getField()))
-                    DynamXErrorManager.addPackError(info.getPackName(), "required_property", ErrorLevel.HIGH, finalParent.getName(), "'" + p.getConfigFieldName() + "' in " + info.getName());
-            });
-        }
-    }
-
-    /**
+     * Reads the inputStream into the info object <br>
      * Loads the contents of the input reader into the loading object <br>
      * Supports recursive loading of {@link fr.dynamx.api.contentpack.object.subinfo.SubInfoType}s
      *
-     * @param obj    The object to load
-     * @param reader The data of the object
+     * @param subInfoTypesRegistry The sub info types registry for this object
+     * @param info                 The object to load
+     * @param reader               The data of the object
      * @throws IOException If a reading error occurs
      */
-    protected void readInfoWithSubInfos(T obj, BufferedReader reader) throws IOException {
-        List<PackFilePropertyData<?>> foundProperties = obj.getInitiallyConfiguredProperties();
+    @SuppressWarnings("unchecked")
+    protected void readInfo(SubInfoTypesRegistry<T> subInfoTypesRegistry, BufferedReader reader, INamedObject info) throws IOException {
+        boolean isSubInfoOwner = info instanceof ISubInfoTypeOwner<?>;
+        T obj = isSubInfoOwner ? (T) info : null;
+        if (isSubInfoOwner && obj.getSubInfoTypesRegistry() != null)
+            subInfoTypesRegistry = (SubInfoTypesRegistry<T>) obj.getSubInfoTypesRegistry();
+        List<PackFilePropertyData<?>> foundProperties = isSubInfoOwner ? obj.getInitiallyConfiguredProperties() : new ArrayList<>();
         //Read the category
         String s;
         boolean inComment = false;
-        INamedObject parent = obj;
+        INamedObject parent = info;
         if (parent instanceof ISubInfoType)
             parent = ((ISubInfoType<?>) parent).getRootOwner();
         while ((s = reader.readLine()) != null) {
@@ -191,31 +141,33 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
                 if (inComment)
                     inComment = false;
                 else  //TODO FORMAT ERROR
-                    DynamXErrorManager.addPackError(obj.getPackName(), "syntax_error", ErrorLevel.HIGH, parent.getName(), "Illegal multi-line comment end in line " + s + ", property skipped in " + obj.getName());
+                    DynamXErrorManager.addPackError(info.getPackName(), "syntax_error", ErrorLevel.HIGH, parent.getName(), "Illegal multi-line comment end in line " + s + ", property skipped in " + info.getName());
+            } else if (!isSubInfoOwner && inComment && s.contains("}")) {
+                DynamXErrorManager.addPackError(info.getPackName(), "syntax_error", ErrorLevel.FATAL, parent.getName(), "Found a never ending multi-line comment in " + info.getName() + ", some properties may be missing in-game");
             } else if (!inComment && !s.startsWith("//")) {
                 if (s.startsWith("/*")) {
                     inComment = true;
-                } else if (s.contains("{")) { //New sub property
+                } else if (isSubInfoOwner && s.contains("{")) { //New sub property
                     String name = s.replace("{", "").trim();
-                    ISubInfoType<T> type = getClassForPropertyOwner(obj, name);
+                    ISubInfoType<T> type = getClassForPropertyOwner(subInfoTypesRegistry, obj, name);
                     if (type != null) { //Read all properties of type
-                        readInfo(reader, type);
+                        readInfo(subInfoTypesRegistry, reader, type);
                         type.appendTo(obj);
                     } else //Skip invalid properties
                         while ((s = reader.readLine()) != null && !s.contains("}")) ;
                 } else if (s.contains("}")) {//End of sub property
                     break;
                 } else {
-                    readLineProperty(foundProperties, obj, s);
+                    readLineProperty(subInfoTypesRegistry, foundProperties, info, s);
                 }
             }
         }
         if (inComment)
-            DynamXErrorManager.addPackError(obj.getPackName(), "syntax_error", ErrorLevel.FATAL, parent.getName(), "Found a never ending multi-line comment in " + obj.getName() + ", some properties may be missing in-game");
+            DynamXErrorManager.addPackError(info.getPackName(), "syntax_error", ErrorLevel.FATAL, parent.getName(), "Found a never ending multi-line comment in " + info.getName() + ", some properties may be missing in-game");
         INamedObject finalParent = parent;
-        SubInfoTypeAnnotationCache.getOrLoadData(obj.getClass()).values().forEach(p -> {
+        SubInfoTypeAnnotationCache.getOrLoadData(info.getClass()).values().forEach(p -> {
             if (p.isRequired() && !foundProperties.contains(p) && foundProperties.stream().noneMatch(p2 -> p2.getField() == p.getField()))
-                DynamXErrorManager.addPackError(obj.getPackName(), "required_property", ErrorLevel.HIGH, finalParent.getName(), "'" + p.getConfigFieldName() + "' in " + obj.getName());
+                DynamXErrorManager.addPackError(info.getPackName(), "required_property", ErrorLevel.HIGH, finalParent.getName(), "'" + p.getConfigFieldName() + "' in " + info.getName());
         });
     }
 
@@ -228,12 +180,12 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
      * @param line            The line to parse
      * @see fr.dynamx.api.contentpack.registry.PackFileProperty
      */
-    protected void readLineProperty(List<PackFilePropertyData<?>> foundProperties, INamedObject obj, String line) {
+    protected void readLineProperty(SubInfoTypesRegistry<T> subInfoTypesRegistry, List<PackFilePropertyData<?>> foundProperties, INamedObject obj, String line) {
         if (line.contains(":")) {
             int index = line.indexOf(':');
             String key = line.substring(0, index).trim();
             String value = line.substring(index + 1).trim();
-            IPackFilePropertyFixer propertyFixer = infoTypesRegistry.getSubInfoTypePropertiesFixer(obj.getClass());
+            IPackFilePropertyFixer propertyFixer = subInfoTypesRegistry.getSubInfoTypePropertiesFixer(obj.getClass());
             if (propertyFixer != null) {
                 IPackFilePropertyFixer.FixResult fixResult = propertyFixer.fixInputField(obj, key, value);
                 if (fixResult != null) {
@@ -243,7 +195,7 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
                             parent = ((ISubInfoType<?>) parent).getRootOwner();
                         DynamXErrorManager.addPackError(obj.getPackName(), "deprecated_prop", ErrorLevel.LOW, parent.getName(), "Deprecated config key found " + key + " in " + obj.getName() + ". You should now use " + fixResult.newKey());
                     }
-                    if(!fixResult.isKeepOldKey())
+                    if (!fixResult.isKeepOldKey())
                         key = fixResult.newKey();
                     value = fixResult.newValue(value);
                 }
@@ -289,23 +241,22 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
      * @see SubInfoTypesRegistry
      */
     @Nullable
-    protected ISubInfoType<T> getClassForPropertyOwner(T obj, String name) {
-        if(infoTypesRegistry == null) return null;
+    protected ISubInfoType<T> getClassForPropertyOwner(SubInfoTypesRegistry<T> subInfoTypesRegistry, T obj, String name) {
         String[] tags = name.split("#");
         String key = tags[0].toLowerCase();
         //Take strict before, and longer keys before
-        Collection<SubInfoTypeEntry<T>> types = infoTypesRegistry.getEntries().values().stream().sorted((t1, t2) -> t1.isStrict() != t2.isStrict() ? (t1.isStrict() ? -1 : 1) : t2.getKey().length() - t1.getKey().length()).collect(Collectors.toList());
+        Collection<SubInfoTypeEntry<T>> types = subInfoTypesRegistry.getEntries().values().stream().sorted((t1, t2) -> t1.isStrict() != t2.isStrict() ? (t1.isStrict() ? -1 : 1) : t2.getKey().length() - t1.getKey().length()).collect(Collectors.toList());
         for (SubInfoTypeEntry<T> type : types) {
             if (type.matches(key))
                 return type.create(obj, tags[0]);
         }
-        if(key.contains("seat") && infoTypesRegistry.getEntries().containsKey("seat")) {
+        if (key.contains("seat") && subInfoTypesRegistry.getEntries().containsKey("seat")) {
             DynamXErrorManager.addPackError(obj.getPackName(), "deprecated_seat_config", ErrorLevel.LOW, obj.getName(), name);
-            return infoTypesRegistry.getEntries().get("seat").create(obj, tags[0]);
+            return subInfoTypesRegistry.getEntries().get("seat").create(obj, tags[0]);
         }
-        if(key.contains("door") && infoTypesRegistry.getEntries().containsKey("door")) {
+        if (key.contains("door") && subInfoTypesRegistry.getEntries().containsKey("door")) {
             DynamXErrorManager.addPackError(obj.getPackName(), "deprecated_door_config", ErrorLevel.LOW, obj.getName(), name);
-            return infoTypesRegistry.getEntries().get("door").create(obj, tags[0]);
+            return subInfoTypesRegistry.getEntries().get("door").create(obj, tags[0]);
         }
         if (tags.length == 1 || !optionalDependencyMatcher.test(tags[1]))
             DynamXErrorManager.addPackError(obj.getPackName(), "unknown_sub_info", ErrorLevel.HIGH, obj.getName(), name);
@@ -313,41 +264,8 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
         return null;
     }
 
-    /**
-     * Puts the info into infos map, and updates other references to this objects (in {@link IInfoOwner}s for example)
-     */
-    public void loadItems(T info, boolean hot) {
-        info.onComplete(hot);
-        infos.put(info.getFullName(), info);
-    }
-
-    /**
-     * Post-loads the objects (shape generation...), and creates the IInfoOwners
-     *
-     * @param hot True if it's a hot reload
-     */
-    public void postLoad(boolean hot) {}
-
-    /**
-     * @return The info from the info's full name, or null
-     */
-    @Nullable
-    public T findInfo(String infoFullName) {
-        return infos.get(infoFullName);
-    }
-
-    /**
-     * @return Returns all owned infos
-     */
-    public Map<String, T> getInfos() {
-        return infos;
-    }
-
-    /**
-     * @return True if no info is registered
-     */
-    public boolean isEmpty() {
-        return infos.isEmpty();
+    @Override
+    public void postLoad(boolean hot) {
     }
 
     /**
@@ -431,8 +349,8 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
                 if (obj == null)
                     throw new IllegalArgumentException("Object " + o.substring(1) + " not found for pack sync in " + getPrefix());
                 try {
-                    String[] props = new String[split.length-1];
-                    System.arraycopy(split, 1, props, 0, split.length-1);
+                    String[] props = new String[split.length - 1];
+                    System.arraycopy(split, 1, props, 0, split.length - 1);
                     decodeAObject(obj, props);
                     loadItems(obj, o.charAt(0) == '*');
                 } catch (UnsupportedEncodingException e) {
@@ -454,7 +372,7 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
      * Overrides the object wih new delta <br>
      * Permits to keep same objects on server and client sides
      *
-     * @param obj     The object to override
+     * @param obj   The object to override
      * @param split The object data
      */
     protected void decodeAObject(INamedObject obj, String[] split) throws UnsupportedEncodingException {
@@ -468,26 +386,6 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> {
             setFieldValue(obj, n, split[i]);
             i++;
         }
-    }
-
-    @Nullable
-    public SubInfoTypesRegistry<T> getSubInfoTypesRegistry() {
-        return infoTypesRegistry;
-    }
-
-    /**
-     * @throws IllegalArgumentException If this object does not support sub info types or if this {@link SubInfoTypeEntry} is duplicated
-     * @deprecated Use {@link fr.dynamx.api.contentpack.registry.RegisteredSubInfoType} annotation
-     */
-    @Deprecated
-    public void addSubInfoType(SubInfoTypeEntry<T> entry) {
-        if (infoTypesRegistry == null)
-            throw new IllegalArgumentException("This object does not support sub info types !");
-        infoTypesRegistry.addSubInfoType(entry);
-    }
-
-    public boolean hasSubInfoTypesRegistry() {
-        return infoTypesRegistry != null;
     }
 
     public interface AssetCreator<T extends INamedObject> {

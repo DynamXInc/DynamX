@@ -5,15 +5,15 @@ import fr.dynamx.api.contentpack.object.subinfo.SubInfoType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
-import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
+import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
 import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import lombok.Getter;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@RegisteredSubInfoType(name = "MaterialVariants", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.WHEELS, SubInfoTypeRegistries.ARMORS, SubInfoTypeRegistries.BLOCKS_AND_PROPS,
-        SubInfoTypeRegistries.HELICOPTER})
+@RegisteredSubInfoType(name = "MaterialVariants", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.WHEELS, SubInfoTypeRegistries.ARMORS, SubInfoTypeRegistries.BLOCKS,
+        SubInfoTypeRegistries.HELICOPTER, SubInfoTypeRegistries.PROPS})
 public class MaterialVariantsInfo<T extends ISubInfoTypeOwner<T>> extends SubInfoType<T> implements IModelTextureVariantsSupplier.IModelTextureVariants {
     @PackFileProperty(configNames = "BaseMaterial", required = false)
     private String baseMaterial = "Default";

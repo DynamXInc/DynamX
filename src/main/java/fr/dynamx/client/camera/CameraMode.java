@@ -24,10 +24,6 @@ public enum CameraMode {
      * Keeps vehicle rotation on Y axis
      */
     FREE((i, q) -> {
-        if (i != 0)
-            q.set(0, q.getY(), 0, q.getW());
-        else
-            q.set(q.getX(), q.getY(), 0, q.getW());
         q.set(0, 0, 0, 1);
         return null;
     });

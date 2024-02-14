@@ -33,6 +33,7 @@ info.desc.MaterialVariantsInfo=Object Texture Variants
 info.desc.AbstractProp=Common Information for Blocks and Props in DynamX
 info.desc.BlockObject=DynamX Block Information
 info.desc.ModularVehicleInfo=DynamX Vehicle Information
+info.desc.CarInfo=Car Information
 info.desc.BasePart=Common Part Information
 info.desc.PartShape=Collision Boxes
 info.desc.EngineSound=Engine Sounds
@@ -41,7 +42,8 @@ info.desc.SteeringWheelInfo=Steering Wheel
 info.desc.FrictionPoint=Friction Point
 info.desc.InteractivePart=Interactive Part (seat, door...)
 info.desc.PartWheel=Wheel
-info.desc.PartSeat=Seat
+info.desc.BasePartSeat=Seat (base)
+info.desc.PartEntitySeat=Seat (entity)
 info.desc.PartDoor=Door
 info.desc.PartLightSource=Light Source Part
 info.desc.LightObject=Light Source
@@ -86,12 +88,18 @@ ModularVehicleInfo.PlayerStandOnTop=Defines if players can stand on this vehicle
 ModularVehicleInfo.DefaultZoomLevel=Default Third-Person View Zoom Level when getting into the vehicle
 ModularVehicleInfo.LinearDamping=Linear Velocity Damping (air resistance), between 0 and 1.
 ModularVehicleInfo.AngularDamping=Angular Velocity Damping (air resistance), between 0 and 1.
+ModularVehicleInfo.InWaterLinearDamping=Linear Velocity Damping (water resistance), between 0 and 1.
+ModularVehicleInfo.InWaterAngularDamping=Angular Velocity Damping (water resistance), between 0 and 1.
 ModularVehicleInfo.Textures=Deprecated. See [multi-texture configuration](../MultiTextures.md).
+ModularVehicleInfo.RenderDistanceSquared=Maximum distance at which the vehicle is rendered, can affect performance
+CarInfo.HandbrakeSoundOff=Name of the sound played when the handbrake is released
+CarInfo.HandbrakeSoundOn=Name of the sound played when the handbrake is engaged
+CarInfo.ReversingSound=Name of the sound played in loop when the vehicle is reversing
 
 # Steering wheel
 
 SteeringWheelInfo.Position=Position of the steering wheel on the chassis
-SteeringWheelInfo.PartName=Name of the steering wheel object in your model
+SteeringWheelInfo.ObjectName=Name of the steering wheel object in your model
 SteeringWheelInfo.Rotation=Basic rotation of the steering wheel, if you leave it as 0 0 0 0, the steering wheel will be flat facing you, rotation indicated in Blender in "quaternion" mode
 
 # Base part
@@ -148,23 +156,23 @@ PartWheelInfo.Textures=Deprecated. See [multi-texture configuration](MultiTextur
 
 #Part seat
 
-PartSeat.Driver=Indicates if it's the driver's seat (true) or not (false)
-PartSeat.LinkedDoorPart=Name of the linked PartDoor
-PartSeat.ShouldLimitFieldOfView=Defines if the player can rotate the camera all around them or not
-PartSeat.CameraRotation=Horizontal rotation of the camera, in degrees
-PartSeat.MinPitch=Minimum vertical rotation of the camera, in degrees
-PartSeat.MaxPitch=Maximum vertical rotation of the camera, in degrees
-PartSeat.MinYaw=Minimum horizontal rotation of the camera, in degrees
-PartSeat.MaxYaw=Maximum horizontal rotation of the camera, in degrees
-PartSeat.PlayerPosition=Player's position on the seat
-PartSeat.Rotation=Seat rotation
-PartSeat.CameraPositionY=Vertical position of the third-person camera
-PartSeat.PlayerSize=Player size on the seat (`1 1 1` corresponds to their actual size)
+PartEntitySeat.Driver=Indicates if it's the driver's seat (true) or not (false)
+PartEntitySeat.LinkedDoorPart=Name of the linked PartDoor
+BasePartSeat.ShouldLimitFieldOfView=Defines if the player can rotate the camera all around them or not
+BasePartSeat.CameraRotation=Horizontal rotation of the camera, in degrees
+BasePartSeat.MinPitch=Minimum vertical rotation of the camera, in degrees
+BasePartSeat.MaxPitch=Maximum vertical rotation of the camera, in degrees
+BasePartSeat.MinYaw=Minimum horizontal rotation of the camera, in degrees
+BasePartSeat.MaxYaw=Maximum horizontal rotation of the camera, in degrees
+BasePartSeat.PlayerPosition=Player's position on the seat
+BasePartSeat.Rotation=Seat rotation
+BasePartSeat.CameraPositionY=Vertical position of the third-person camera
+BasePartSeat.PlayerSize=Player size on the seat (`1 1 1` corresponds to their actual size)
 
 #PartDoor
 
 PartDoor.Enabled=Enables the physical door system. If you set it to false, the door will only be drawn but won't open.
-PartDoor.PartName=Name of the door object in your model.
+PartDoor.ObjectName=Name of the door object in your model.
 PartDoor.LocalCarAttachPoint=Door attachment point relative to the origin of the car object.
 PartDoor.LocalDoorAttachPoint=Door attachment point relative to the origin of the door object, corresponding to the previous point.
 PartDoor.Axis=Door rotation axis.
@@ -175,12 +183,16 @@ PartDoor.DoorCloseForce=Velocity (closing action speed), Maximum Force (door clo
 PartDoor.DoorCloseTime=Currently not used.
 PartDoor.AttachStrength=Door attachment strength (determines the force applied before the door breaks). (Not used for now).
 PartDoor.AutoMountDelay=Delay before the player is automatically mounted on the seat linked to the car (right-click directly on the door).
+PartDoor.DoorCloseSound=Name of the sound played when the door closes.
+PartDoor.DoorOpenSound=Name of the sound played when the door opens.
 
 #PartLightSource
 
-PartLightSource.PartName=Name of the light object in your model
+PartLightSource.ObjectName=Name of the light object in your model
+PartLightSource.PartName=Name of the light object in your model. Prefer using ObjectName.
 PartLightSource.BaseMaterial=(Advanced user) Name of the material used on the light object in the default state. This property behaves the same as the BaseMaterial property of multi-textures.
 PartLightSource.Rotation=Part rotation on the vehicle, rotation indicated in Blender in "quaternion" mode
+PartLightSource.DependsOnNode=Name of the part to which the light is attached: this allows attaching a light to a part that moves, like a door or a trunk, and it will move with it
 
 #LightObject
 
@@ -193,6 +205,7 @@ LightObject.RotateDuration=Time in ticks for the light part to rotate fully.
 
 TrailerAttachInfo.AttachPoint=Attachment point of the trailer on the model
 TrailerAttachInfo.AttachStrength=Should only be specified in the trailer configuration (not the car's) and defines the maximum force that can be applied to the attachment before it breaks (1000 is a good value for a lightweight car trailer)
+TrailerAttachInfo.AttachSound=Name of the sound played when the trailer is attached (optional, should be set in the trailer configuration)
 
 #PartStorage
 
@@ -207,7 +220,7 @@ FrictionPoint.Intensity=Force factor (Force = Intensity * |Vehicle Speed|, oppos
 
 BaseEngineInfo.Power=Engine power
 BaseEngineInfo.MaxRPM=Maximum engine revolutions per minute
-BaseEngineInfo.Braking=Engine braking power (when you release the accelerator)
+BaseEngineInfo.EngineBraking=Engine braking power (when you release the accelerator)
 CarEngineInfo.SteeringMethod=Steering behavior, 0: direct, 1: interpolated, 2: a mix between 0 and 1.
 CarEngineInfo.TurnSpeed=Speed at which the steering wheel turns the wheels
 
@@ -251,6 +264,8 @@ PropObject.Margin=Modifies the collision detection margin of an object (we stron
 PropObject.DespawnTime=Sets the time in ticks for the object to despawn (recommended to avoid lag)
 PropObject.LinearDamping=Linear velocity damping (air resistance), between 0 and 1.
 PropObject.AngularDamping=Angular velocity damping (air resistance), between 0 and 1.
+PropObject.InWaterLinearDamping=Linear velocity damping (water resistance), between 0 and 1.
+PropObject.InWaterAngularDamping=Angular velocity damping (water resistance), between 0 and 1.
 PropObject.Bounciness=Intensity of the prop's bounce effect (like a soccer ball), between 0 and 1.
 
 #Armors
@@ -316,7 +331,7 @@ PartFloat.Offset=Position (offset from the center) of the floats
 
 # Part Handle
 
-PartHandle.PartName=TODO
+PartHandle.ObjectName=TODO
 
 # Particle Emitter Info
 
@@ -327,7 +342,7 @@ info.desc.ParticleEmitterInfo=Particle source
 
 # Part Rotor
 
-PartRotor.PartName=Name of the rotor part in the OBJ model
+PartRotor.ObjectName=Name of the rotor part in the OBJ model
 PartRotor.Rotation=Rotation of the part on the vehicle, rotation indicated in Blender in "quaternion" mode
 PartRotor.RotationAxis=Rotation axis of the rotor (0, 1, 0 for a horizontal rotor, for example, 1, 0, 0 for a vertical rotor)
 PartRotor.RotationSpeed=Rotation speed of the rotor at full power

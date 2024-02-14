@@ -72,7 +72,7 @@ public class FloatPhysicsHandler {
         Vector3f velocityAtPoint = DynamXPhysicsHelper.getVelocityAtPoint(physicsHandler.getLinearVelocity(), physicsHandler.getAngularVelocity(), rotatedFloatPos);
         float velocityLength = velocityAtPoint.length();
         Vector3f dragDir = velocityAtPoint.normalize();
-        Vector3f dragForce = dragDir.multLocal(0.5f * DynamXPhysicsHelper.WATER_DENSITY * velocityLength * velocityLength * dragCoefficient * area);
+        Vector3f dragForce = dragDir.multLocal(-0.5f * DynamXPhysicsHelper.WATER_DENSITY * velocityLength * velocityLength * dragCoefficient * area);
 
         if (Vector3f.isValidVector(dragForce))
             physicsHandler.applyForce(dragForce.multLocal(0.05f), rotatedFloatPos);

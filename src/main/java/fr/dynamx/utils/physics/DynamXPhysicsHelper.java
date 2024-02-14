@@ -49,7 +49,6 @@ public class DynamXPhysicsHelper {
      * @param type      The {@link BulletShapeType} of this rigid body
      */
     public static PhysicsRigidBody createRigidBody(float mass, Transform transform, CollisionShape colShape, BulletShapeType<?> type) {
-
         PhysicsRigidBody rigidBody = new PhysicsRigidBody(colShape, mass);
         rigidBody.setPhysicsTransform(transform);
         rigidBody.setUserObject(type);
@@ -70,7 +69,7 @@ public class DynamXPhysicsHelper {
         Quaternion bodyQuaternion = new Quaternion().fromAngleNormalAxis((float) Math.toRadians(-spawnRotation), new Vector3f(0, 1, 0));
         Transform bodyTransform = new Transform(position, bodyQuaternion);
 
-        return createRigidBody(mass, bodyTransform, collisionShape, new BulletShapeType<>(EnumBulletShapeType.BULLET_ENTITY, physicsEntity, collisionShape));
+        return createRigidBody(mass, bodyTransform, collisionShape, new BulletShapeType<>(EnumBulletShapeType.BULLET_ENTITY, physicsEntity));
     }
 
     public static PhysicsRaycastResult castRay(IPhysicsWorld iPhysicsWorld, Vector3f from, Vector3f dir, Predicate<EnumBulletShapeType> ignoredBody) {

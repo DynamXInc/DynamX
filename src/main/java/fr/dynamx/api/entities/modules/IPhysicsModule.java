@@ -96,6 +96,10 @@ public interface IPhysicsModule<P extends AbstractEntityPhysicsHandler<?, ?>> {
     default void onSetSimulationHolder(SimulationHolder simulationHolder, EntityPlayer simulationPlayerHolder, SimulationHolder.UpdateContext changeContext) {
     }
 
+    default byte getInitPriority() {
+        return 0;
+    }
+
     /**
      * Implement this on you module to listen entity updates
      */

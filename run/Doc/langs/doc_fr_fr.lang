@@ -33,6 +33,7 @@ info.desc.MaterialVariantsInfo=Variantes de texture d'un objet
 info.desc.AbstractProp=Informations communes aux blocs et props DynamX
 info.desc.BlockObject=Informations d'un blocc DynamX
 info.desc.ModularVehicleInfo=Informations d'un véhicule DynamX
+info.desc.CarInfo=Informations d'une voiture DynamX
 info.desc.BasePart=Informations communes aux parts
 info.desc.PartShape=Boîtes de collisions
 info.desc.EngineSound=Sons des moteurs
@@ -41,7 +42,8 @@ info.desc.SteeringWheelInfo=Volant
 info.desc.FrictionPoint=Point de friction
 info.desc.InteractivePart=Part interactive (siège, porte...)
 info.desc.PartWheel=Roue
-info.desc.PartSeat=Siège
+info.desc.BasePartSeat=Siège (base)
+info.desc.PartEntitySeat=Siège (entité)
 info.desc.PartDoor=Port
 info.desc.PartLightSource=Part lumineuse
 info.desc.LightObject=Source de lumière
@@ -88,13 +90,19 @@ ModularVehicleInfo.PlayerStandOnTop=Définit si les joueurs peuvent rester debou
 ModularVehicleInfo.DefaultZoomLevel=Niveau de zoom par défaut en vue à la troisième personne en montant dans le véhicule
 ModularVehicleInfo.LinearDamping=Atténuation de la vélocité linéaire (résistance de l'air), entre 0 et 1.
 ModularVehicleInfo.AngularDamping=Atténuation de la vélocité angulaire (résistance de l'air), entre 0 et 1.
+ModularVehicleInfo.InWaterLinearDamping=Atténuation de la vélocité linéaire (résistance de l'eau), entre 0 et 1.
+ModularVehicleInfo.InWaterAngularDamping=Atténuation de la vélocité angulaire (résistance de l'eau), entre 0 et 1.
 ModularVehicleInfo.Textures=Déprécié. Voir [configuration du multi-textures](../MultiTextures.md).
+ModularVehicleInfo.RenderDistanceSquared=Distance maximale à laquelle le véhicule est rendu, peut affecter les performances
+CarInfo.HandbrakeSoundOff=Nom du son joué quand le frein à main est désactivé
+CarInfo.HandbrakeSoundOn=Nom du son joué quand le frein à main est activé
+CarInfo.ReversingSound=Nom du son joué en boucle quand le véhicule recule
 
 
 #Steering wheel
 
 SteeringWheelInfo.Position=Position du volant sur le chassis
-SteeringWheelInfo.PartName=Nom de l'objet du volant dans votre modèle
+SteeringWheelInfo.ObjectName=Nom de l'objet du volant dans votre modèle
 SteeringWheelInfo.Rotation=Rotation de base du volant, si vous laissez 0 0 0 0, le volant sera dessiné à plat face à vous, rotation indiquée dans blender dans le mode "quaternion"
 
 
@@ -138,23 +146,23 @@ PartWheelInfo.Textures=Déprécié. Voir [configuration du multi-textures](Multi
 
 #Part seat
 
-PartSeat.Driver=Indique si c'est le siège conducteur (true), ou non (false)
-PartSeat.LinkedDoorPart=Nom de la PartDoor liée à ce siège
-PartSeat.ShouldLimitFieldOfView=Définit si le joueur peut tourner la caméra tout autour de lui ou non
-PartSeat.CameraRotation=Rotation horizontale de la caméra, en degrés
-PartSeat.MinPitch=Rotation verticale minimale de la caméra, en degrés
-PartSeat.MaxPitch=Rotation verticale maximale de la caméra, en degrés
-PartSeat.MinYaw=Rotation horizontale minimale de la caméra, en degrés
-PartSeat.MaxYaw=Rotation horizontale maximale de la caméra, en degrés
-PartSeat.PlayerPosition=Position du joueur sur le siège
-PartSeat.Rotation=Rotation du siège
-PartSeat.CameraPositionY=Position verticale de la caméra à la troisième personne
-PartSeat.PlayerSize=Taille du joueur sur le siège (`1 1 1` correspond à sa taille réelle)
+PartEntitySeat.Driver=Indique si c'est le siège conducteur (true), ou non (false)
+PartEntitySeat.LinkedDoorPart=Nom de la PartDoor liée à ce siège
+BasePartSeat.ShouldLimitFieldOfView=Définit si le joueur peut tourner la caméra tout autour de lui ou non
+BasePartSeat.CameraRotation=Rotation horizontale de la caméra, en degrés
+BasePartSeat.MinPitch=Rotation verticale minimale de la caméra, en degrés
+BasePartSeat.MaxPitch=Rotation verticale maximale de la caméra, en degrés
+BasePartSeat.MinYaw=Rotation horizontale minimale de la caméra, en degrés
+BasePartSeat.MaxYaw=Rotation horizontale maximale de la caméra, en degrés
+BasePartSeat.PlayerPosition=Position du joueur sur le siège
+BasePartSeat.Rotation=Rotation du siège
+BasePartSeat.CameraPositionY=Position verticale de la caméra à la troisième personne
+BasePartSeat.PlayerSize=Taille du joueur sur le siège (`1 1 1` correspond à sa taille réelle)
 
 #PartDoor
 
 PartDoor.Enabled=Active le système de porte physique. Si voous mettez false, la porte sera seulement dessinée mais ne s'ouvrira pas.
-PartDoor.PartName=Nom de l'objet de la porte dans votre modèle.
+PartDoor.ObjectName=Nom de l'objet de la porte dans votre modèle.
 PartDoor.LocalCarAttachPoint=Point d'attache de la porte par rapport à l'origine de l'objet de la voiture.
 PartDoor.LocalDoorAttachPoint=Point d'attache de la porte, relatif à l'origine de l'objet de la porte, correspondant au point précédent.
 PartDoor.Axis=Axe de rotation de la porte.
@@ -165,12 +173,16 @@ PartDoor.DoorCloseForce=Vélocité (vitesse de l'action de fermeture), Force max
 PartDoor.DoorCloseTime=Non utilisé actuellement.
 PartDoor.AttachStrength=Force d'attache de la porte (détermine la force appliquée avant que la porte ne se casse). (Non utilisé pour le moment).
 PartDoor.AutoMountDelay=Délai avant que le joueur ne soit automatiquement installé sur le siège lié à la voiture (clic droit directement sur la porte).
+PartDoor.DoorCloseSound=Nom du son joué quand la porte se ferme.
+PartDoor.DoorOpenSound=Nom du son joué quand la porte s'ouvre.
 
 #PartLightSource
 
-PartLightSource.PartName=Nom de l'objet lumineux dans votre modèle
+PartLightSource.ObjectName=Nom de l'objet lumineux dans votre modèle
+PartLightSource.PartName=Nom de la part lumineuse dans votre modèle. Utilisez plutôt ObjectName.
 PartLightSource.BaseMaterial=(Utilisateur avancé) Nom du matériau utilisé sur l'objet lumineux dans l'état par défaut. Cette propriété a le même comportement que la propriété BaseMaterial du multi-textures.
 PartLightSource.Rotation=Rotation de la part sur le véhicule, rotation indiquée dans blender dans le mode "quaternion"
+PartLightSource.DependsOnNode=Nom de la part sur laquelle la lumière est attachée : cela permet d'attacher une lumière à un part qui bouge, comme une porte ou un coffre, et elle bougera avec
 
 #LightObject
 
@@ -184,6 +196,7 @@ LightObject.RotateDuration=Temps en ticks pour que la part lumineuse fasse un to
 
 TrailerAttachInfo.AttachPoint=Point d'attache de la remorque sur le modèle
 TrailerAttachInfo.AttachStrength=Ne doit être indiqué que dans le configuration de la remorque (et non pas de la voiture), cela défini la force maximale applicable à l'attache avant qu'elle ne casse (1000 est une bonne valeur pour une remorque légère de voiture)
+TrailerAttachInfo.AttachSound=Nom du son joué quand la remorque est attachée (facultatif, doit être paramétré dans la configuration de la remorque)
 
 
 #PartStorage
@@ -201,7 +214,7 @@ FrictionPoint.Intensity=Facteur de la force (Force = Intensity * |Vitesse du vé
 
 BaseEngineInfo.Power=Puissance du moteur
 BaseEngineInfo.MaxRPM=Tours moteurs par minute maximums du moteur
-BaseEngineInfo.Braking=Puissance du frein moteur (quand vous relâchez l'accélération)
+BaseEngineInfo.EngineBraking=Puissance du frein moteur (quand vous relâchez l'accélération)
 CarEngineInfo.SteeringMethod=Comportement du volant, 0 : direct, 1 : interpolé, 2 : mix entre 0 et 1.
 CarEngineInfo.TurnSpeed=Vitesse à laquelle le volant fait tourner les roues
 
@@ -245,6 +258,8 @@ PropObject.Margin=Modifie la marge de détection de collsion d'un objet (Nous vo
 PropObject.DespawnTime=Définit le temps de disparition de l'objet en question en ticks (Conseillée pour éviter les lags)
 PropObject.LinearDamping=Atténuation de la vélocité linéaire (résistance de l'air), entre 0 et 1.
 PropObject.AngularDamping=Atténuation de la vélocité angulaire (résistance de l'air), entre 0 et 1.
+PropObject.InWaterLinearDamping=Atténuation de la vélocité linéaire (résistance de l'eau), entre 0 et 1.
+PropObject.InWaterAngularDamping=Atténuation de la vélocité angulaire (résistance de l'eau), entre 0 et 1.
 PropObject.Bounciness=Intensité de l'effet de rebond du props (comme une balle de foot), entre 0 et 1.
 
 
@@ -312,7 +327,7 @@ PartFloat.Offset=Position (décalage par rapport au centre) des flotteurs
 
 #PartHandle
 
-PartHandle.PartName=TODO
+PartHandle.ObjectName=TODO
 
 # ParticleEmitterInfo
 
@@ -323,7 +338,7 @@ info.desc.ParticleEmitterInfo=Source de particules
 
 # PartRotor
 
-PartRotor.PartName=Nom de la part de l'hélice dans le modèle obj
+PartRotor.ObjectName=Nom de la part de l'hélice dans le modèle obj
 PartRotor.Rotation=Rotation de la part sur le véhicule, rotation indiquée dans blender dans le mode "quaternion"
 PartRotor.RotationAxis=Axe de rotation de l'hélice (0, 1, 0 pour une hélice horizontale par exemple, 1, 0, 0 pour une hélice verticale)
 PartRotor.RotationSpeed=Vitesse de rotation de l'hélice à pleine puissance

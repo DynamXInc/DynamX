@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -33,36 +34,47 @@ import java.util.zip.ZipFile;
  * Holds basic information about a pack <br>
  * Version, dependencies and path
  */
+@Getter
 public class PackInfo extends SubInfoTypeOwner<PackInfo> {
+    /**
+     * The pack name, defined as the pack folder name or the pack zip file name (without extension)
+     */
     protected final String originalPackName;
+    /**
+     * The path of the pack, relative to the DynamX directory (pack name with the file extension)
+     */
+    protected final String pathName;
+    /**
+     * The type of the pack
+     */
+    protected ContentPackType packType;
+
     /**
      * The PackName configured in the pack_info.dynx file
      */
-    @Getter
     @Setter
     @PackFileProperty(configNames = "PackName")
     protected String fixedPackName;
-    @Getter
-    protected String pathName;
-    @Getter
-    protected ContentPackType packType;
 
-    @Getter
     protected final List<RequiredAddonInfo> requiredAddons = new ArrayList<>();
 
-    @Getter
     @PackFileProperty(configNames = "PackVersion", required = false, defaultValue = "1.0.0")
     protected String packVersion = "<missing>";
-    @Getter
     @PackFileProperty(configNames = "CompatibleWithLoaderVersions", required = false, defaultValue = "[1.1.0,)")
     protected String compatibleLoaderVersions;
-    @Getter
     @PackFileProperty(configNames = "DcFileVersion", defaultValue = DynamXConstants.DC_FILE_VERSION)
     protected String dcFileVersion = DynamXConstants.DC_FILE_VERSION;
 
-    protected PackInfo(String packName, ContentPackType packType) {
+    /**
+     * Creates a new pack info
+     *
+     * @param packName The pack name (folder name or zip file name without extension)
+     * @param pathName The path of the pack, relative to the DynamX directory (pack name with the file extension)
+     * @param packType The type of the pack
+     */
+    protected PackInfo(String packName, String pathName, ContentPackType packType) {
         this.originalPackName = this.fixedPackName = packName;
-        this.pathName = packName;
+        this.pathName = pathName;
         this.packType = packType;
     }
 
@@ -72,7 +84,7 @@ public class PackInfo extends SubInfoTypeOwner<PackInfo> {
      * @return A PackInfo for the given addon
      */
     public static PackInfo forAddon(String modId) {
-        return new PackInfo(modId, ContentPackType.BUILTIN);
+        return new PackInfo(modId, modId, ContentPackType.BUILTIN);
     }
 
     public void validateVersions() {
@@ -116,15 +128,6 @@ public class PackInfo extends SubInfoTypeOwner<PackInfo> {
                 }
             }
         }
-    }
-
-    @Override
-    public void onComplete(boolean hotReload) {
-    }
-
-    public PackInfo setPathName(String pathName) {
-        this.pathName = pathName;
-        return this;
     }
 
     public PackInfo setPackVersion(String packVersion) {
@@ -178,6 +181,19 @@ public class PackInfo extends SubInfoTypeOwner<PackInfo> {
                 break;
         }
         return result;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PackInfo packInfo = (PackInfo) o;
+        return Objects.equals(fixedPackName, packInfo.fixedPackName) && Objects.equals(pathName, packInfo.pathName) && packType == packInfo.packType;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(fixedPackName, pathName, packType);
     }
 
     @RegisteredSubInfoType(name = "RequiredAddon", registries = SubInfoTypeRegistries.PACKS, strictName = false)

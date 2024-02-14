@@ -113,7 +113,7 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
             doorShape = partDoor.getCollisionsHelper().getPhysicsCollisionShape();
         PhysicsRigidBody doorBody = DynamXPhysicsHelper.fastCreateRigidBody(vehicleEntity, 40, doorShape, doorPos, vehicleEntity.rotationYaw);
         localVarContainer.setDoorBody(doorBody);
-        doorBody.setUserObject(new BulletShapeType<>(EnumBulletShapeType.BULLET_ENTITY, localVarContainer, doorBody.getCollisionShape()));
+        doorBody.setUserObject(new BulletShapeType<>(EnumBulletShapeType.BULLET_ENTITY, localVarContainer));
         DynamXContext.getPhysicsWorld(vehicleEntity.world).addCollisionObject(doorBody);
 
         attachedDoors.forEach((doorId, doorPhysics) -> {
@@ -198,7 +198,6 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
         }
     }
 
-
     public boolean isDoorOpened(byte doorID) {
         if (doorsState == null)
             return true;
@@ -218,7 +217,7 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
         doorsState.put(doorId, doorState);
         switch (doorState) {
             case OPENING:
-                playDoorSound(DoorState.OPENED);
+                playDoorSound(door, DoorState.OPENED);
                 if (usePhysics) {
                     doorPhysics.setJointLimit(door.getAxisToUse(), door.getOpenLimit().x, door.getOpenLimit().y);
                     doorPhysics.setJointRotationMotorVelocity(door.getAxisToUse(), door.getOpenMotor().x, door.getOpenMotor().y);
@@ -233,7 +232,7 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
                     doorPhysics.setJointRotationMotorVelocity(door.getAxisToUse(), door.getCloseMotor().x, door.getCloseMotor().y);
                 break;
             case CLOSED:
-                playDoorSound(DoorState.CLOSED);
+                playDoorSound(door, DoorState.CLOSED);
                 if (usePhysics) {
                     doorPhysics.setJointMotorState(door.getAxisToUse(), false);
                     doorPhysics.setJointLimit(door.getAxisToUse(), door.getCloseLimit().x, door.getCloseLimit().y);
@@ -254,9 +253,9 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
         return roundedExtreme >= 0 ? roundedCurrentAngle >= roundedExtreme : roundedCurrentAngle <= roundedExtreme;
     }
 
-    public void playDoorSound(DoorState doorState) {
+    public void playDoorSound(PartDoor door, DoorState doorState) {
         if (vehicleEntity.world.isRemote) {
-            ClientProxy.SOUND_HANDLER.playSingleSound(vehicleEntity.physicsPosition, doorState == DoorState.CLOSED ? "door_close" : "door_open", 1, 1);
+            ClientProxy.SOUND_HANDLER.playSingleSound(vehicleEntity.physicsPosition, doorState == DoorState.CLOSED ? door.getDoorCloseSound() : door.getDoorOpenSound(), 1, 1);
         }
     }
 

@@ -33,4 +33,14 @@ public interface IDynamXSound {
      * @return The volume of this sound, should be between 0 and 1
      */
     float getVolume();
+
+    /**
+     * @return The distance between the sound pos and the client player
+     */
+    float getDistanceToPlayer();
+
+    /**
+     * Fired when the sound volume is set to 0, if there are too many sounds playing
+     */
+    void onMuted();
 }

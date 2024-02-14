@@ -20,7 +20,6 @@ import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.joints.EntityJointsHandler;
 import fr.dynamx.common.physics.player.WalkingOnPlayerController;
 import fr.dynamx.common.physics.terrain.PhysicsEntityTerrainLoader;
-import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.PhysicsEntityException;
@@ -54,7 +53,7 @@ import java.util.Map;
  * @param <T> The physics handler type
  */
 @SynchronizedEntityVariable.SynchronizedPhysicsModule(modid = DynamXConstants.ID)
-public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>> extends Entity implements ICollidableObject, IEntityAdditionalSpawnData {
+public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>> extends Entity implements IDynamXObject, IEntityAdditionalSpawnData {
 
     /**
      * Entity network
@@ -129,6 +128,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
 
     /**
      * -- GETTER --
+     *
      * @return The terrain loader of this entity
      */
     @Getter
@@ -250,7 +250,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
 
         //Post the update event
         PhysicsEntityEvent.Update update;
-        if(world.isRemote) {
+        if (world.isRemote) {
             update = new PhysicsEntityEvent.ClientUpdate(this,
                     PhysicsEntityEvent.UpdateType.POST_ENTITY_UPDATE,
                     isRegistered == EnumEntityPhysicsRegistryState.REGISTERED && usesPhysicsWorld);
@@ -301,16 +301,11 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
         entityBoxCache = null; //The entity box has changed, mark it as dirty
         //TODO WIP
         for (Map.Entry<EntityPlayer, WalkingOnPlayerController> e : walkingOnPlayers.entrySet()) {
-            //List<EnumFacing> collisionFaces = e.getValue();
             EntityPlayer entity = e.getKey();
-            //for (EnumFacing f : collisionFaces) {
-            //if (!collisionFaces.contains(f.getOpposite())) //If not stuck between 2 aabb
             EnumFacing f = e.getValue().face;
             {
                 Vector3f vh = DynamXContext.getCollisionHandler().rotate(Vector3fPool.get((float) motionX, (float) motionY, (float) motionZ), physicsRotation);
                 float projVehicMotion = Vector3fPool.get(vh.x, vh.y, vh.z).dot(Vector3fPool.get(f.getDirectionVec().getX(), f.getDirectionVec().getY(), f.getDirectionVec().getZ()));
-                //if (projVehicMotion != 0)
-                //  System.out.println("Collide on face " + f + " " + projVehicMotion);
                 if (projVehicMotion != 0) //We push the player
                 {
                     e.getValue().applyOffset();
@@ -575,7 +570,8 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     /**
      * Method called when the entity's rigidbody enter in collision with something else
      */
-    public void onCollisionEnter(PhysicsCollisionEvent collisionEvent, BulletShapeType<?> entityA, BulletShapeType<?> entityB) {}
+    public void onCollisionEnter(PhysicsCollisionEvent collisionEvent, BulletShapeType<?> entityA, BulletShapeType<?> entityB) {
+    }
 
     /**
      * @return True if the player should have the motion of this entity when walking on the top of any collision box

@@ -33,14 +33,13 @@ public abstract class BaseVehiclePhysicsHandler<T extends BaseVehicleEntity<?>> 
 
     @Override
     public PhysicsRigidBody createShape(Vector3f position, Quaternion rotation, float spawnRotation) {
-        Vector3f tmp = Vector3fPool.get(position);
-        Transform transform = new Transform(tmp, QuaternionPool.get(rotation));
+        Transform transform = new Transform(position, QuaternionPool.get(rotation));
         ModularVehicleInfo modularVehicleInfo = getHandledEntity().getPackInfo();
 
         //Don't use this.getPackInfo() : it isn't initialized yet
         PhysicsRigidBody vehicleBody = new PhysicsRigidBody(modularVehicleInfo.getCollisionsHelper().getPhysicsCollisionShape(), modularVehicleInfo.getEmptyMass());
         vehicleBody.setPhysicsTransform(transform);
-        vehicleBody.setUserObject(new BulletShapeType<>(EnumBulletShapeType.VEHICLE, getHandledEntity(), vehicleBody.getCollisionShape()));
+        vehicleBody.setUserObject(new BulletShapeType<>(EnumBulletShapeType.VEHICLE, getHandledEntity()));
         vehicleBody.setSleepingThresholds(0.9f, 1.2f);
 
         vehicleBody.setDamping(modularVehicleInfo.getLinearDamping(), modularVehicleInfo.getAngularDamping());

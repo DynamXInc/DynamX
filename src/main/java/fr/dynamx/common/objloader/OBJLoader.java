@@ -38,9 +38,9 @@ public class OBJLoader {
     }
 
     public static String[] trim(String[] split) {
-        ArrayList<String> strings = new ArrayList<>();
+        List<String> strings = new ArrayList<>();
         for (String s : split)
-            if (s != null && !s.trim().equals(""))
+            if (s != null && !s.trim().isEmpty())
                 strings.add(s);
         return strings.toArray(new String[0]);
     }
@@ -75,15 +75,15 @@ public class OBJLoader {
             Map<ObjObjectData, IndexedModel> map = new HashMap<>();
 
             String currentMaterial = null;
-            HashMap<ObjObjectData, IndexedModel[]> objects = new HashMap<>();
+            Map<ObjObjectData, IndexedModel[]> objects = new HashMap<>();
             for (int j = 0, linesLength = lines.length; j < linesLength; j++) {
                 try {
                     String line = lines[j];
-                    if (line != null && !line.trim().equals("")) {
+                    if (line != null && !line.trim().isEmpty()) {
                         String[] parts = trim(line.split(" "));
                         if (parts.length == 0)
                             continue;
-                        if (parts[0] != COMMENT && parts.length == 1)
+                        if (!Objects.equals(parts[0].trim(), COMMENT) && parts.length == 1)
                             throw new IllegalArgumentException("Error at line " + j + ": '" + line + "' has no value(s)");
                         switch (parts[0]) {
                             case COMMENT:
@@ -200,7 +200,7 @@ public class OBJLoader {
             Set<ObjObjectData> keys = map.keySet();
             for (ObjObjectData object : keys) {
                 objObjects.add(object);
-                map.get(object).toMesh(object.getMesh());
+                map.get(object).toMesh(object);
             }
         } catch (Exception e) {
             throw new RuntimeException("Error while loading obj model", e);

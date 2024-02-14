@@ -1,26 +1,41 @@
 package fr.dynamx.common.contentpack.type.objects;
 
-import fr.dynamx.api.contentpack.object.IInfoOwner;
-import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
+import fr.dynamx.api.contentpack.object.IDynamXItem;
+import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
+import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.events.CreatePackItemEvent;
+import fr.dynamx.api.events.DynamXItemEvent;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
-import fr.dynamx.common.contentpack.loader.ObjectLoader;
+import fr.dynamx.client.renders.scene.SceneBuilder;
+import fr.dynamx.client.renders.scene.node.ItemNode;
+import fr.dynamx.client.renders.scene.node.SceneNode;
+import fr.dynamx.common.contentpack.loader.InfoList;
 import fr.dynamx.common.items.DynamXItem;
+import lombok.Getter;
+import lombok.Setter;
 import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ItemObject<T extends ItemObject<?>> extends AbstractItemObject<T, T> {
-    /**
-     * List of owned {@link ISubInfoType}s
-     */
-    protected final List<ISubInfoType<T>> subProperties = new ArrayList<>();
+    @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.ITEMS)
+    public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
+        if ("ItemTranslate".equals(key))
+            return new IPackFilePropertyFixer.FixResult("ItemTransforms block", true, true);
+        if ("ItemRotate".equals(key))
+            return new IPackFilePropertyFixer.FixResult("ItemTransforms block", true, true);
+        return null;
+    };
 
+    @Getter
+    @Setter
     @PackFileProperty(configNames = "MaxItemStackSize", required = false, defaultValue = "1")
     protected int maxItemStackSize = 1;
+
+    protected SceneNode<?, ?> sceneNode;
 
     public ItemObject(String packName, String fileName) {
         super(packName, fileName);
@@ -28,33 +43,14 @@ public class ItemObject<T extends ItemObject<?>> extends AbstractItemObject<T, T
 
     @Override
     @SuppressWarnings("unchecked")
-    protected IInfoOwner<T> createOwner(ObjectLoader<T, ?> loader) {
+    protected IDynamXItem<T> createItem(InfoList<T> loader) {
         CreatePackItemEvent.SimpleItem<T, ?> event = new CreatePackItemEvent.SimpleItem(loader, this);
         MinecraftForge.EVENT_BUS.post(event);
         if (event.isOverridden()) {
-            return (IInfoOwner<T>) event.getObjectItem();
+            return event.getObjectItem();
         } else {
             return new DynamXItem(this);
         }
-    }
-
-    @Override
-    public void addSubProperty(ISubInfoType<T> property) {
-        subProperties.add(property);
-    }
-
-    @Override
-    public int getMaxItemStackSize() {
-        return maxItemStackSize;
-    }
-
-    public void setMaxItemStackSize(int maxItemStackSize) {
-        this.maxItemStackSize = maxItemStackSize;
-    }
-
-    @Override
-    public List<ISubInfoType<T>> getSubProperties() {
-        return subProperties;
     }
 
     @Override
@@ -67,5 +63,17 @@ public class ItemObject<T extends ItemObject<?>> extends AbstractItemObject<T, T
     public IModelTextureVariants getTextureVariantsFor(ObjObjectRenderer objObjectRenderer) {
         // variants not supported on items
         return null;
+    }
+
+    @Override
+    public SceneNode<?, ?> getSceneGraph() {
+        if (sceneNode == null) {
+            if (isModelValid()) {
+                DynamXItemEvent.BuildSceneGraph buildSceneGraphEvent = new DynamXItemEvent.BuildSceneGraph(new SceneBuilder<>(), this, (List) getDrawableParts());
+                sceneNode = buildSceneGraphEvent.getSceneGraphResult();
+            } else
+                sceneNode = new ItemNode<>(Collections.EMPTY_LIST);
+        }
+        return sceneNode;
     }
 }

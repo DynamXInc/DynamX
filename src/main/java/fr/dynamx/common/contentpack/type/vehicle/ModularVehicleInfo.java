@@ -1,28 +1,29 @@
 package fr.dynamx.common.contentpack.type.vehicle;
 
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.contentpack.object.IInfoOwner;
+import fr.dynamx.api.contentpack.object.ICollisionsContainer;
+import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
-import fr.dynamx.api.contentpack.object.ICollisionsContainer;
-import fr.dynamx.api.contentpack.object.part.BasePart;
-import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
-import fr.dynamx.api.contentpack.object.render.IObjPackObject;
-import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
+import fr.dynamx.api.contentpack.object.render.IModelPackObject;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
+import fr.dynamx.api.dxmodel.DxModelPath;
+import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.CreatePackItemEvent;
-import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
-import fr.dynamx.api.obj.ObjModelPath;
-import fr.dynamx.client.renders.model.ItemObjModel;
+import fr.dynamx.api.events.DynamXEntityRenderEvents;
+import fr.dynamx.client.renders.model.ItemDxModel;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.client.renders.model.texture.TextureVariantData;
+import fr.dynamx.client.renders.scene.SceneBuilder;
+import fr.dynamx.client.renders.scene.node.EntityNode;
+import fr.dynamx.client.renders.scene.node.SceneNode;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
-import fr.dynamx.common.contentpack.loader.ObjectLoader;
+import fr.dynamx.common.contentpack.loader.InfoList;
 import fr.dynamx.common.contentpack.parts.ILightOwner;
 import fr.dynamx.common.contentpack.parts.PartLightSource;
 import fr.dynamx.common.contentpack.parts.PartWheel;
@@ -31,18 +32,18 @@ import fr.dynamx.common.contentpack.type.ObjectCollisionsHelper;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.contentpack.type.objects.AbstractItemObject;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.EnumPlayerStandOnTop;
-import fr.dynamx.utils.client.DynamXRenderUtils;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import org.joml.Matrix4f;
 
 import java.util.*;
 
@@ -51,31 +52,32 @@ import java.util.*;
  *
  * @see BaseVehicleEntity
  */
+@Getter
 public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, ModularVehicleInfo> implements IPhysicsPackInfo, IModelTextureVariantsSupplier,
-        ParticleEmitterInfo.IParticleEmitterContainer, IObjPackObject, IPartContainer<ModularVehicleInfo>, ICollisionsContainer, ILightOwner<ModularVehicleInfo> {
-    @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
+        ParticleEmitterInfo.IParticleEmitterContainer, IModelPackObject, IPartContainer<ModularVehicleInfo>, ICollisionsContainer, ILightOwner<ModularVehicleInfo> {
+    @IPackFilePropertyFixer.PackFilePropertyFixer(registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER})
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("UseHullShape".equals(key))
             return new IPackFilePropertyFixer.FixResult("UseComplexCollisions", true);
         if ("Textures".equals(key))
             return new IPackFilePropertyFixer.FixResult("MaterialVariants", true, true);
+        if ("ItemTranslate".equals(key))
+            return new IPackFilePropertyFixer.FixResult("ItemTransforms block", true, true);
+        if ("ItemRotate".equals(key))
+            return new IPackFilePropertyFixer.FixResult("ItemTransforms block", true, true);
         return null;
     };
 
-    @Getter
     @Setter
     private VehicleValidator validator;
 
     /* == Pack properties == */
 
-    @Getter
     @PackFileProperty(configNames = "DefaultEngine", required = false)
     protected String defaultEngine;
-    @Getter
     @PackFileProperty(configNames = "DefaultSounds", required = false)
     protected String defaultSounds;
 
-    @Getter
     @PackFileProperty(configNames = "MaxVehicleSpeed", required = false, defaultValue = "infinite")
     protected float vehicleMaxSpeed = Integer.MAX_VALUE;
 
@@ -83,92 +85,94 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
      * The directing wheel id <br>
      * Used to render the steering wheel
      */
-    @Getter
     private int directingWheel;
 
     @Getter
+    @Setter
     @PackFileProperty(configNames = "PlayerStandOnTop", required = false, defaultValue = "ALWAYS")
     protected EnumPlayerStandOnTop playerStandOnTop = EnumPlayerStandOnTop.ALWAYS;
 
     @Getter
+    @Setter
     @PackFileProperty(configNames = "DefaultZoomLevel", required = false, defaultValue = "4")
     protected int defaultZoomLevel = 4;
-
-    @Getter
-    private final Map<Class<? extends BasePart<?>>, Byte> partIds = new HashMap<>();
 
     /* == Physics properties == */
 
     @Getter
+    @Setter
     @PackFileProperty(configNames = "EmptyMass")
     protected int emptyMass;
     @Getter
-    @PackFileProperty(configNames = "CenterOfGravityOffset", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F)
+    @Setter
+    @PackFileProperty(configNames = "CenterOfGravityOffset", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false)
     protected Vector3f centerOfMass;
 
     @Getter
-    @PackFileProperty(configNames = "DragCoefficient")
+    @Setter
+    @PackFileProperty(configNames = "DragCoefficient", required = false)
     protected float dragFactor;
 
     @Getter
-    @PackFileProperty(configNames = "LinearDamping", required = false, defaultValue = "0.5")
+    @Setter
+    @PackFileProperty(configNames = "LinearDamping", required = false, defaultValue = "0.5 for helicopters, 0 for others")
     protected float linearDamping;
     @Getter
-    @PackFileProperty(configNames = "AngularDamping", required = false, defaultValue = "0.9")
+    @Setter
+    @PackFileProperty(configNames = "AngularDamping", required = false, defaultValue = "0.9 for helicopters, 0.5 for boats, 0 for others")
     protected float angularDamping;
 
+    @PackFileProperty(configNames = "InWaterLinearDamping", required = false, defaultValue = "0.6")
+    protected float inWaterLinearDamping = 0.6f;
+    @PackFileProperty(configNames = "InWaterAngularDamping", required = false, defaultValue = "0.9 for helicopters, 0.6 for others")
+    protected float inWaterAngularDamping = 0.6f;
+
     @Getter
+    @Setter
     @PackFileProperty(configNames = "UseComplexCollisions", required = false, defaultValue = "true", description = "common.UseComplexCollisions")
     protected boolean useComplexCollisions = true;
+
+    /**
+     * The shapes of this vehicle, can be used for collisions
+     */
     @Getter
     protected ObjectCollisionsHelper collisionsHelper = new ObjectCollisionsHelper();
 
     /**
      * The friction points of this vehicle
      */
-    @Getter
     protected final List<FrictionPoint> frictionPoints = new ArrayList<>();
 
     /* == Render properties == */
 
-    @Getter
     @PackFileProperty(configNames = "ShapeYOffset", required = false)
     protected float shapeYOffset;
 
-    @Getter
     @PackFileProperty(configNames = "ScaleModifier", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false,
             defaultValue = "1 1 1")
     protected Vector3f scaleModifier = new Vector3f(1, 1, 1);
 
+    @Setter
+    @PackFileProperty(configNames = "RenderDistanceSquared", required = false, defaultValue = "-1")
+    protected float renderDistance = -1;
+
     /**
      * The particle emitters of this vehicle
      */
-    @Getter
     protected final List<ParticleEmitterInfo<?>> particleEmitters = new ArrayList<>();
 
     /**
      * The light sources of this vehicle
      */
-    @Getter
     protected final Map<String, PartLightSource> lightSources = new HashMap<>();
-
-    /**
-     * The list of all rendered parts for this vehicle <br>
-     * A rendered part will not be rendered with the main part of the obj model <br>
-     * The {@link fr.dynamx.api.entities.modules.IPhysicsModule} using this part is responsible to render the part at the right location
-     */
-    @Getter
-    private final List<String> renderedParts = new ArrayList<>();
-    @Getter
-    private final List<IDrawablePart<?>> drawableParts = new ArrayList<>();
 
     /**
      * Maps the metadata to the texture data
      */
-    @Getter
     private MaterialVariantsInfo<ModularVehicleInfo> variants;
 
-    @Getter
+    protected SceneNode<?, ?> sceneGraph;
+
     @Deprecated
     @PackFileProperty(configNames = "Textures", required = false, type = DefinitionType.DynamXDefinitionTypes.STRING_ARRAY_2D)
     private String[][] texturesArray;
@@ -178,12 +182,11 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
         super(packName, fileName);
         this.validator = validator;
         this.validator.initProperties(this);
-        this.setItemScale(0.2f);
     }
 
     @Override
     public boolean postLoad(boolean hot) {
-        ObjModelPath modelPath = DynamXUtils.getModelPath(getPackName(), model);
+        DxModelPath modelPath = DynamXUtils.getModelPath(getPackName(), model);
         collisionsHelper.loadCollisions(this, modelPath, "chassis", centerOfMass, shapeYOffset, useComplexCollisions, scaleModifier, ObjectCollisionsHelper.CollisionType.VEHICLE);
 
         //Attach wheels and verify handbrake (V. 2.13.5)
@@ -235,17 +238,18 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
 
     @Override
     @SuppressWarnings({"unchecked"})
-    public IInfoOwner<ModularVehicleInfo> createOwner(ObjectLoader<ModularVehicleInfo, ?> loader) {
+    public IDynamXItem<ModularVehicleInfo> createItem(InfoList<ModularVehicleInfo> loader) {
         CreatePackItemEvent.VehicleItem<ModularVehicleInfo, ?> event = new CreatePackItemEvent.VehicleItem(loader, this);
         MinecraftForge.EVENT_BUS.post(event);
         if (event.isOverridden()) {
-            return (IInfoOwner<ModularVehicleInfo>) event.getObjectItem();
+            return event.getObjectItem();
         } else {
-            return (IInfoOwner<ModularVehicleInfo>) loader.getItem(this);
+            return validator.getSpawnItem(this);
         }
     }
 
-    public void addModules(BaseVehicleEntity<?> entity, ModuleListBuilder modules) {
+    @Override
+    public void addModules(PackPhysicsEntity<?, ?> entity, ModuleListBuilder modules) {
         getSubProperties().forEach(sub -> sub.addModules(entity, modules));
         getAllParts().forEach(sub -> sub.addModules(entity, modules));
         getLightSources().values().forEach(compoundLight -> compoundLight.addModules(entity, modules));
@@ -253,21 +257,10 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
 
     @Override
     @SideOnly(Side.CLIENT)
-    public void applyItemTransforms(ItemCameraTransforms.TransformType renderType, ItemStack stack, ItemObjModel model) {
-        super.applyItemTransforms(renderType, stack, model);
+    public void applyItemTransforms(ItemCameraTransforms.TransformType renderType, ItemStack stack, ItemDxModel model, Matrix4f transform) {
+        super.applyItemTransforms(renderType, stack, model, transform);
         if (renderType == ItemCameraTransforms.TransformType.GUI)
-            GlStateManager.rotate(180, 0, 1, 0);
-    }
-
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void renderItem3D(ItemStack item, ItemCameraTransforms.TransformType renderType) {
-        DynamXRenderUtils.renderCar(this, (byte) item.getMetadata());
-    }
-
-    @Override
-    public boolean canRenderPart(String partName) {
-        return !renderedParts.contains(partName);
+            transform.rotate((float) Math.PI, 0, 1, 0);
     }
 
     @Override
@@ -277,21 +270,24 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
 
     @Override
     public ItemStack getPickedResult(int metadata) {
-        return new ItemStack((Item) getOwners()[0], 1, metadata);
-    }
-
-    /**
-     * @param clazz The class of the part to return
-     * @param <A>   The type of the part to return
-     * @return The part with the given type and the given id (wheel index for example), or null
-     */
-    public <A extends BasePart<ModularVehicleInfo>> A getPartByTypeAndId(Class<A> clazz, byte id) {
-        return getPartsByType(clazz).stream().filter(t -> t.getId() == id).findFirst().orElse(null);
+        return new ItemStack((Item) getItems()[0], 1, metadata);
     }
 
     @Override
-    public PartLightSource getLightSource(String partName) {
-        return lightSources.get(partName);
+    public SceneNode<?, ?> getSceneGraph() {
+        if (sceneGraph == null) {
+            if (isModelValid()) {
+                DynamXEntityRenderEvents.BuildSceneGraph buildSceneGraphEvent = new DynamXEntityRenderEvents.BuildSceneGraph(new SceneBuilder<>(), this, (List) getDrawableParts(), getScaleModifier());
+                sceneGraph = buildSceneGraphEvent.getSceneGraphResult();
+            } else
+                sceneGraph = new EntityNode<>(Collections.EMPTY_LIST, Collections.EMPTY_LIST);
+        }
+        return sceneGraph;
+    }
+
+    @Override
+    public PartLightSource getLightSource(String objectName) {
+        return lightSources.get(objectName);
     }
 
     public byte getIdForVariant(String variantName) {
@@ -334,7 +330,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     }
 
     @Override
-    public String getTranslationKey(IInfoOwner<ModularVehicleInfo> item, int itemMeta) {
+    public String getTranslationKey(IDynamXItem<ModularVehicleInfo> item, int itemMeta) {
         if (itemMeta == 0)
             return super.getTranslationKey(item, itemMeta);
         TextureVariantData textureInfo = variants.getVariantsMap().get((byte) itemMeta);
@@ -342,7 +338,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     }
 
     @Override
-    public String getTranslatedName(IInfoOwner<ModularVehicleInfo> item, int itemMeta) {
+    public String getTranslatedName(IDynamXItem<ModularVehicleInfo> item, int itemMeta) {
         if (itemMeta == 0)
             return super.getTranslatedName(item, itemMeta);
         TextureVariantData textureInfo = variants.getVariantsMap().get((byte) itemMeta);
@@ -370,32 +366,12 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
      */
     @Override
     public void addLightSource(PartLightSource source) {
-        lightSources.put(source.getPartName(), source);
+        lightSources.put(source.getObjectName(), source);
         addDrawablePart(source);
     }
 
     @Override
-    public void addPart(BasePart<ModularVehicleInfo> part) {
-        byte id = (byte) (partIds.getOrDefault(part.getClass(), (byte) -1) + 1);
-        part.setId(id);
-        partIds.put((Class<? extends BasePart<?>>) part.getClass(), id);
-        super.addPart(part);
-        if (part instanceof IDrawablePart)
-            addDrawablePart((IDrawablePart<?>) part);
-    }
-
-    @Override
-    public void addSubProperty(ISubInfoType<ModularVehicleInfo> property) {
-        super.addSubProperty(property);
-        if (property instanceof IDrawablePart)
-            addDrawablePart((IDrawablePart<?>) property);
-    }
-
-    protected void addDrawablePart(IDrawablePart<?> part) {
-        String[] names = part.getRenderedParts();
-        if (names.length > 0)
-            renderedParts.addAll(Arrays.asList(names));
-        if (drawableParts.stream().noneMatch(p -> p.getClass() == part.getClass()))
-            drawableParts.add(part);
+    public float getBaseItemScale() {
+        return 0.2f;
     }
 }

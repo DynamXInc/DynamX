@@ -1,7 +1,6 @@
 package fr.dynamx.utils.optimization;
 
 import fr.dynamx.common.DynamXMain;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 
 import java.util.Stack;
 
@@ -65,9 +64,9 @@ public abstract class ClassPool<T> {
                 if (sizeWarnings < 4)
                     Thread.dumpStack();
                 sizeWarnings++;
-            } else {
+            } /*else {
                 DynamXMain.log.info("Bigger pool : " + poolNames + " " + pool.length + " ! " + this + " open c " + subPoolCount + " of type " + this);
-            }
+            }*/
         }
         instance = pool[root.getStartIndex() + root.getAffectedObjectsCount()]; //Take an unused instance
         root.affectObject(instance); //Instance is now used

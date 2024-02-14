@@ -7,7 +7,10 @@ import fr.dynamx.api.contentpack.ContentPackType;
 import fr.dynamx.api.events.ContentPackSystemEvent;
 import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariableRegistry;
-import fr.dynamx.client.gui.*;
+import fr.dynamx.client.gui.GuiBlockCustomization;
+import fr.dynamx.client.gui.GuiDnxDebug;
+import fr.dynamx.client.gui.GuiLoadingErrors;
+import fr.dynamx.client.gui.NewGuiDnxDebug;
 import fr.dynamx.client.handlers.hud.CarController;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
@@ -75,7 +78,12 @@ public class ContentPackLoader {
 
     /**
      * Protected resources of protected packs
+     * -- GETTER --
+     *
+     * @return Protected resources containers for each protected pack
+
      */
+    @Getter
     private static final Map<String, ModProtectionContainer> protectedResources = new HashMap<>();
 
     /**
@@ -170,13 +178,6 @@ public class ContentPackLoader {
         }
     }
 
-    /**
-     * @return Protected resources containers for each protected pack
-     */
-    public static Map<String, ModProtectionContainer> getProtectedResources() {
-        return protectedResources;
-    }
-
     @Nonnull
     public static ModProtectionContainer getProtectedResources(String packName) {
         return protectedResources.getOrDefault(packName, DynamXMain.mpsContainer);
@@ -203,12 +204,12 @@ public class ContentPackLoader {
         isHotReloading = initialized;
         if (!isHotReloading)
             initialized = true;
-        for (InfoLoader<?> loader : DynamXObjectLoaders.LOADERS)
+        for (InfoList<?> loader : DynamXObjectLoaders.getInfoLists())
             loader.clear(isHotReloading);
         DynamXErrorManager.getErrorManager().clear(DynamXErrorManager.PACKS_ERRORS);
-        DynamXContext.getObjModelDataCache().clear();
+        DynamXContext.getDxModelDataCache().clear();
         try {
-            ProgressManager.ProgressBar bar = ProgressManager.push("Loading content pack system", 1 + DynamXObjectLoaders.LOADERS.size());
+            ProgressManager.ProgressBar bar = ProgressManager.push("Loading content pack system", 1 + DynamXObjectLoaders.getInfoLists().size());
             bar.step("Discover assets");
 
             MinecraftForge.EVENT_BUS.post(new ContentPackSystemEvent.Load(PhysicsEntityEvent.Phase.PRE));
@@ -284,8 +285,8 @@ public class ContentPackLoader {
                 }
             }
             //Load shapes
-            for (InfoLoader<?> loader : DynamXObjectLoaders.LOADERS) {
-                bar.step("Post load : " + loader.getPrefix().substring(0, loader.getPrefix().length()-1));
+            for (InfoList<?> loader : DynamXObjectLoaders.getInfoLists()) {
+                bar.step("Post load : " + loader.getName());
                 loader.postLoad(isHotReloading);
             }
             ProgressManager.pop(bar);
@@ -309,11 +310,11 @@ public class ContentPackLoader {
         //Search for real pack name in the pack info
         String packVersion = "<missing pack info>";
         PackInfo loadedInfo = packInfo != null ? loadPackInfoFile(loadingPack, suffix, packInfo, contentPack.getName(), packType) : null;
-        if (loadedInfo != null) {
+        if (loadedInfo != null) { // Pack info exists
             loadingPack = loadedInfo.getFixedPackName();
             packVersion = loadedInfo.getPackVersion();
-        } else {
-            loadedInfo = new PackInfo(loadingPack, packType).setPathName(contentPack.getName()).setPackVersion("dummy_info");
+        } else { // Pack info doesn't exist: create a dummy one
+            loadedInfo = new PackInfo(loadingPack, contentPack.getName(), packType).setPackVersion("dummy_info");
             DynamXErrorManager.addError(loadingPack, DynamXErrorManager.PACKS_ERRORS, "missing_pack_info", ErrorLevel.HIGH, loadedInfo.getName(), "Add a pack_info.dynx file in the pack !", null, 600);
             DynamXObjectLoaders.PACKS.loadItems(loadedInfo, isHotReloading);
         }
@@ -325,8 +326,7 @@ public class ContentPackLoader {
 
     private static PackInfo loadPackInfoFile(String loadingPack, String suffix, PackFile file, String pathName, ContentPackType packType) {
         try {
-            String configName = file.getName().substring(0, file.getName().length() - suffix.length()).toLowerCase();
-            return DynamXObjectLoaders.PACKS.load(loadingPack, configName, file, isHotReloading, pathName, packType);
+            return DynamXObjectLoaders.PACKS.load(loadingPack, file, isHotReloading, pathName, packType);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         } catch (Throwable e) {
@@ -341,7 +341,7 @@ public class ContentPackLoader {
         try {
             String configName = file.getName().substring(0, file.getName().length() - suffix.length()).toLowerCase();
             boolean loaded = false;
-            for (InfoLoader<?> loader : DynamXObjectLoaders.LOADERS) {
+            for (InfoLoader<?> loader : DynamXObjectLoaders.getInfoLoaders()) {
                 if (loader.load(loadingPack, configName, file, isHotReloading)) {
                     loaded = true;
                     break;
@@ -421,6 +421,10 @@ public class ContentPackLoader {
         return BLOCKS_GRIP;
     }
 
+    /**
+     * A DynamX file found in a pack
+     */
+    @Getter
     public static class PackFile {
         private final String name;
         private final InputStream inputStream;
@@ -428,14 +432,6 @@ public class ContentPackLoader {
         private PackFile(String name, InputStream inputStream) {
             this.name = name;
             this.inputStream = inputStream;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public InputStream getInputStream() {
-            return inputStream;
         }
 
         @Override

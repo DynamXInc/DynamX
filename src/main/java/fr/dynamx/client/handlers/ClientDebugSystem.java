@@ -5,12 +5,12 @@ import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.part.BasePart;
-import fr.dynamx.common.network.sync.variables.NetworkActivityTracker;
 import fr.dynamx.client.camera.CameraSystem;
 import fr.dynamx.common.DynamXContext;
-import fr.dynamx.common.contentpack.parts.PartSeat;
+import fr.dynamx.common.contentpack.parts.BasePartSeat;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.network.packets.MessageDebugRequest;
+import fr.dynamx.common.network.sync.variables.NetworkActivityTracker;
 import fr.dynamx.common.physics.utils.RigidBodyTransform;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXUtils;
@@ -24,7 +24,9 @@ import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -39,6 +41,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Quaternion;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
 @Mod.EventBusSubscriber(modid = DynamXConstants.ID, value = Side.CLIENT)
@@ -47,6 +50,7 @@ public class ClientDebugSystem {
     public static boolean enableDebugDrawing;
     public static int MOVE_DEBUG;
 
+    public static final Map<Long, PhysicsRigidBody> trackedRigidBodies = new ConcurrentHashMap<>();
     public static final Map<Long, RigidBodyTransform>[] prevRigidBodyStates = new Map[]{new HashMap<>(), new HashMap<>()};
 
     private static byte curRigidBodyStatesIndex;
@@ -81,9 +85,14 @@ public class ClientDebugSystem {
                 if (curRigidBodyStatesIndex > 1) {
                     curRigidBodyStatesIndex = 0;
                 }
-                prevRigidBodyStates[curRigidBodyStatesIndex].clear();
-                for (PhysicsRigidBody body : DynamXContext.getPhysicsWorld(MC.world).getDynamicsWorld().getRigidBodyList()) {
-                    prevRigidBodyStates[curRigidBodyStatesIndex].put(body.nativeId(), new RigidBodyTransform(body));
+                prevRigidBodyStates[curRigidBodyStatesIndex].keySet().removeIf(aLong -> !trackedRigidBodies.containsKey(aLong));
+                for (Map.Entry<Long, PhysicsRigidBody> e : trackedRigidBodies.entrySet()) {
+                    prevRigidBodyStates[curRigidBodyStatesIndex].compute(e.getKey(), (k, v) -> {
+                        if (v == null)
+                            return new RigidBodyTransform(e.getValue());
+                        v.set(e.getValue());
+                        return v;
+                    });
                 }
                 Vector3fPool.closePool();
                 QuaternionPool.closePool();
@@ -125,7 +134,7 @@ public class ClientDebugSystem {
             } else if (!physicsTicks.isEmpty())
                 physicsTicks.clear();
 
-            if(DynamXDebugOptions.FULL_NETWORK_DEBUG.isActive())
+            if (DynamXDebugOptions.FULL_NETWORK_DEBUG.isActive())
                 NetworkActivityTracker.drawNetworkActivity(MC.fontRenderer, 10);
         }
     }
@@ -159,31 +168,22 @@ public class ClientDebugSystem {
             drawDebug(DynamXDebugOptions.CLIENT_SLOPE_BOXES);
 
             if (DynamXDebugOptions.PHYSICS_DEBUG.isActive()) {
+
+                for (PhysicsRigidBody body : DynamXContext.getPhysicsWorld(MC.world).getDynamicsWorld().getRigidBodyList()) {
+                    Vector3fPool.openPool();
+                    QuaternionPool.openPool();
+                    GlQuaternionPool.openPool();
+                    PhysicsDebugRenderer.debugRigidBody(body, getPrevRigidBodyTransform(body.nativeId()), getCurrentRigidBodyTransform(body.nativeId()), event.getPartialTicks());
+                    GlQuaternionPool.closePool();
+                    Vector3fPool.closePool();
+                    QuaternionPool.closePool();
+                }
                 Vector3fPool.openPool();
                 QuaternionPool.openPool();
                 GlQuaternionPool.openPool();
-
-                for (PhysicsRigidBody body : DynamXContext.getPhysicsWorld(MC.world).getDynamicsWorld().getRigidBodyList()) {
-                    PhysicsDebugRenderer.debugRigidBody(body, getPrevRigidBodyTransform(body.nativeId()), getCurrentRigidBodyTransform(body.nativeId()), event.getPartialTicks());
-                }
-
-                GlStateManager.disableLighting();
-                GlStateManager.enableTexture2D();
-                GlStateManager.enableAlpha();
-                GlStateManager.enableBlend();
-                GlStateManager.enableDepth();
-
-                //RenderHelper.enableStandardItemLighting();
-
-
                 DynamXContext.getPhysicsWorld(MC.world).getDynamicsWorld().getSoftBodyList().forEach(PhysicsDebugRenderer::debugSoftBody);
                 Vector3fPool.closePool();
                 QuaternionPool.closePool();
-
-                GlStateManager.disableLighting();
-                GlStateManager.disableTexture2D();
-                GlStateManager.enableAlpha();
-                GlStateManager.enableBlend();
 
                 GlStateManager.disableDepth();
                 Vector3fPool.openPool();
@@ -195,7 +195,6 @@ public class ClientDebugSystem {
                 Vector3fPool.closePool();
                 QuaternionPool.closePool();
                 GlStateManager.enableDepth();
-
             }
 
 
@@ -231,7 +230,7 @@ public class ClientDebugSystem {
                                 && dynamXDebugOption.isActive()).findFirst();
                 if (dynamXDebugOptions.isPresent()) {
                     wantedShape = basePart -> {
-                        if(basePart.getDebugOption() != null) {
+                        if (basePart.getDebugOption() != null) {
                             return basePart.getDebugOption().equals(dynamXDebugOptions.get());
                         }
                         return false;
@@ -257,7 +256,7 @@ public class ClientDebugSystem {
                 GlStateManager.translate(entityX, entityY, entityZ);
                 GlStateManager.rotate(rot);
                 float yOffset = 0;
-                if (basePart instanceof PartSeat)
+                if (basePart instanceof BasePartSeat)
                     yOffset = 0.9f;
                 DynamXRenderUtils.drawNameplate(MC.fontRenderer, basePart.getPartName(),
                         basePart.getPosition().x,
@@ -464,7 +463,7 @@ public class ClientDebugSystem {
         }
     }
 
-    public static Vector3f getInterpolatedTranslation(PhysicsRigidBody rigidBody, float partialTicks){
+    public static Vector3f getInterpolatedTranslation(PhysicsRigidBody rigidBody, float partialTicks) {
         RigidBodyTransform prevTransform = ClientDebugSystem.getPrevRigidBodyTransform(rigidBody.nativeId());
         RigidBodyTransform curTransform = ClientDebugSystem.getCurrentRigidBodyTransform(rigidBody.nativeId());
         if (prevTransform == null || curTransform == null) {
@@ -473,7 +472,7 @@ public class ClientDebugSystem {
         return DynamXMath.interpolateLinear(partialTicks, prevTransform.getPosition(), curTransform.getPosition());
     }
 
-    public static com.jme3.math.Quaternion getInterpolatedRotation(PhysicsRigidBody rigidBody, float partialTicks){
+    public static com.jme3.math.Quaternion getInterpolatedRotation(PhysicsRigidBody rigidBody, float partialTicks) {
         RigidBodyTransform prevTransform = ClientDebugSystem.getPrevRigidBodyTransform(rigidBody.nativeId());
         RigidBodyTransform curTransform = ClientDebugSystem.getCurrentRigidBodyTransform(rigidBody.nativeId());
         if (prevTransform == null || curTransform == null) {
@@ -482,10 +481,11 @@ public class ClientDebugSystem {
         return DynamXMath.slerp(partialTicks, prevTransform.getRotation(), curTransform.getRotation());
     }
 
-    public static RigidBodyTransform getCurrentRigidBodyTransform(long nativeBodyId){
+    public static RigidBodyTransform getCurrentRigidBodyTransform(long nativeBodyId) {
         return ClientDebugSystem.prevRigidBodyStates[ClientDebugSystem.curRigidBodyStatesIndex].get(nativeBodyId);
     }
-    public static RigidBodyTransform getPrevRigidBodyTransform(long nativeBodyId){
+
+    public static RigidBodyTransform getPrevRigidBodyTransform(long nativeBodyId) {
         return ClientDebugSystem.prevRigidBodyStates[ClientDebugSystem.prevRigidBodyStatesIndex].get(nativeBodyId);
     }
 }

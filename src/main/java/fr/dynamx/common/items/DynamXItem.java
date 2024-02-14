@@ -1,8 +1,8 @@
 package fr.dynamx.common.items;
 
-import fr.dynamx.api.contentpack.object.IInfoOwner;
+import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
-import fr.dynamx.api.contentpack.object.render.IObjPackObject;
+import fr.dynamx.api.contentpack.object.render.IModelPackObject;
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.objects.AbstractItemObject;
@@ -11,7 +11,7 @@ import fr.dynamx.utils.RegistryNameSetter;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 
-public class DynamXItem<T extends AbstractItemObject<T, ?>> extends Item implements IInfoOwner<T>, IResourcesOwner {
+public class DynamXItem<T extends AbstractItemObject<?, ?>> extends Item implements IDynamXItem<T>, IResourcesOwner {
     protected T itemInfo;
 
     /**
@@ -75,7 +75,7 @@ public class DynamXItem<T extends AbstractItemObject<T, ?>> extends Item impleme
     }
 
     @Override
-    public IObjPackObject getObjModel() {
+    public IModelPackObject getDxModel() {
         return getInfo();
     }
 

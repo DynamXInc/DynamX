@@ -1,6 +1,7 @@
 package fr.dynamx.common.objloader;
 
 import fr.dynamx.client.renders.model.texture.MaterialTexture;
+import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.objloader.data.Material;
 import fr.dynamx.utils.RegistryNameSetter;
 import lombok.Getter;
@@ -101,12 +102,17 @@ public class MTLLoader {
      * It creates all gl texture ids, so it should be called in gl thread
      */
     public void uploadTextures() {
-        TextureManager textureManager = Minecraft.getMinecraft().getTextureManager();
-        for (Material material : materials) {
-            material.ambientTexture.forEach((textureName, textures) -> textures.uploadTexture(textureManager));
-            material.diffuseTexture.forEach((textureName, textures) -> textures.uploadTexture(textureManager));
-            material.specularTexture.forEach((textureName, textures) -> textures.uploadTexture(textureManager));
-            material.normalTexture.forEach((textureName, textures) -> textures.uploadTexture(textureManager));
+        try {
+            TextureManager textureManager = Minecraft.getMinecraft().getTextureManager();
+            for (Material material : materials) {
+                material.ambientTexture.forEach((textureName, textures) -> textures.uploadTexture(textureManager));
+                material.diffuseTexture.forEach((textureName, textures) -> textures.uploadTexture(textureManager));
+                material.specularTexture.forEach((textureName, textures) -> textures.uploadTexture(textureManager));
+                material.normalTexture.forEach((textureName, textures) -> textures.uploadTexture(textureManager));
+            }
+        } catch (Exception e) {
+            DynamXMain.log.error("MTLLoader error", e);
+            throw new RuntimeException("MTLLoader error", e);
         }
     }
 }

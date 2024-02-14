@@ -121,7 +121,7 @@ public class PhysicsTickHandler {
             QuaternionPool.openPool();
             Vector3fPool.openPool();
             physicsWorld.tickStart();
-            System.out.println(">> Tick start");
+            //System.out.println(">> Tick start");
         } else {
 
             float deltaTimeSecond = getDeltaTimeMilliseconds() * 1.0E-3F;
@@ -146,7 +146,7 @@ public class PhysicsTickHandler {
             Vector3fPool.closePool();
             QuaternionPool.closePool();
             TransformPool.getPool().closeSubPool();
-            System.out.println(">> Tick end");
+           // System.out.println(">> Tick end");
         }
     }
 

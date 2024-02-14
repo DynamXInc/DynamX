@@ -6,6 +6,10 @@ import com.jme3.bullet.objects.PhysicsSoftBody;
 import com.jme3.math.Vector3f;
 import com.jme3.util.BufferUtils;
 import fr.dynamx.client.renders.mesh.shapes.FacesMesh;
+import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
+import fr.dynamx.client.renders.scene.BaseRenderContext;
+import fr.dynamx.client.shaders.DxShader;
+import fr.dynamx.client.shaders.ShaderManager;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.SoftbodyEntity;
 import fr.dynamx.utils.client.DynamXRenderUtils;
@@ -20,33 +24,22 @@ import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.util.vector.Quaternion;
 
+import javax.annotation.Nullable;
 import java.awt.*;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 public class RenderSoftbody<T extends SoftbodyEntity> extends RenderPhysicsEntity<T> {
-
+    protected final BaseRenderContext.EntityRenderContext context = new BaseRenderContext.EntityRenderContext(this);
 
     public RenderSoftbody(RenderManager manager) {
         super(manager);
     }
 
     @Override
-    public void renderParts(T entity, float partialTicks) {
-
-    }
-
-    @Override
-    protected Quaternion setupRenderTransform(T entity, double x, double y, double z, float entityYaw, float partialTicks) {
-        GlStateManager.translate((float) x, (float) y, (float) z);
-
-        return GlQuaternionPool.get();
-    }
-
-
-    @Override
-    public void renderMain(T entity, float partialsTicks) {
-
+    public void renderEntity(T entity, BaseRenderContext.EntityRenderContext context) {
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(context.getRenderPosition().x, context.getRenderPosition().y, context.getRenderPosition().z);
         FacesMesh facesMesh = DynamXContext.getSoftbodyEntityMesh().get(entity);
 
         PhysicsSoftBody collisionObject = entity.physicsHandler.getCollisionObject();
@@ -58,15 +51,18 @@ public class RenderSoftbody<T extends SoftbodyEntity> extends RenderPhysicsEntit
         collisionObject.getPhysicsLocation(physicsLocation);
         DynamXRenderUtils.glTranslate(physicsLocation.negateLocal());
 
-
+        ShaderManager.sceneGrid.useShader();
         facesMesh.render();
         facesMesh.update();
+
+        DxShader.stopShader();
 
 
 
 
         GlStateManager.disableLighting();
         GlStateManager.disableDepth();
+        GlStateManager.popMatrix();
 
        /*         IntBuffer faces = collisionObject.copyFaces(null);
         FloatBuffer nodeLocations = collisionObject.copyLocations(null);
@@ -99,7 +95,18 @@ public class RenderSoftbody<T extends SoftbodyEntity> extends RenderPhysicsEntit
         GlStateManager.enableLighting();
         GlStateManager.enableDepth();
 
+    }
 
+    @Override
+    public void renderEntityDebug(T entity, BaseRenderContext.EntityRenderContext context) {
 
     }
+
+    @Nullable
+    @Override
+    public BaseRenderContext.EntityRenderContext getRenderContext(T entity) {
+
+        return context.setModelParams(entity, null, (byte)0);
+    }
+
 }

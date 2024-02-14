@@ -234,7 +234,7 @@ public class CommonEventHandler {
                 return;
             Vector3fPool.openPool();
             QuaternionPool.openPool();
-            System.out.println("=== tick player ===");
+            //System.out.println("=== tick player ===");
             if (!DynamXContext.getPlayerToCollision().containsKey(e.player)) {
                 PlayerPhysicsHandler playerPhysicsHandler = new PlayerPhysicsHandler(e.player);
                 DynamXContext.getPlayerToCollision().put(e.player, playerPhysicsHandler);

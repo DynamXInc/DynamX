@@ -64,7 +64,7 @@ public class ClientDebugSystem {
         if(event != null)
             return;;
         if (!MC.isGamePaused()) {
-            System.out.println("Client tick");
+            //System.out.println("Client tick");
             enableDebugDrawing = DynamXDebugOptions.DEBUG_RENDER.isActive();
             if (Minecraft.getMinecraft().player != null && Minecraft.getMinecraft().player.ticksExisted % 5 == 0) {
                 int request = 0;

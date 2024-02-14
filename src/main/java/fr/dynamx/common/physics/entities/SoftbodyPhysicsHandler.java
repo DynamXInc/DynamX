@@ -31,23 +31,25 @@ public class SoftbodyPhysicsHandler<T extends SoftbodyEntity> extends AbstractEn
     @Override
     protected PhysicsSoftBody createShape(Vector3f position, Quaternion rotation, float spawnRotation) {
         PhysicsSoftBody softBody = new PhysicsSoftBody();
-        softBody.setUserObject(new BulletShapeType<>(EnumBulletShapeType.BULLET_ENTITY, handledEntity, softBody.getCollisionShape()));
+        softBody.setUserObject(new BulletShapeType<>(EnumBulletShapeType.BULLET_ENTITY, handledEntity));
         NativeSoftBodyUtil.appendFromTriMesh(DynamXRenderUtils.icosphereMesh, softBody);
 
         softBody.setPose(false, true);
         SoftBodyConfig config = softBody.getSoftConfig();
-        config.set(Sbcp.PoseMatching, 0.05f);
+        config.set(Sbcp.PoseMatching, 0.02f);
+        softBody.generateClusters();
+        softBody.randomizeConstraints();
 
-        // softBody.setPhysicsLocation(position);
+         softBody.setPhysicsLocation(position);
         FacesMesh facesMesh = new FacesMesh(softBody);
         DynamXContext.getSoftbodyEntityMesh().put(handledEntity, facesMesh);
         //softBody.setUserObject(facesMesh);
         facesMesh.setUvs(DynamXRenderUtils.icosphereMesh.getTextureCoordinates());
-        softBody.setCcdSweptSphereRadius(0.7f);
-        softBody.setCcdMotionThreshold(0.7f);
-        softBody.setMargin(0.1f);
+        //softBody.setCcdSweptSphereRadius(0.7f);
+        //softBody.setCcdMotionThreshold(0.7f);
+        softBody.setMargin(0.2f);
         for (int i = 0; i < softBody.countNodes(); i++) {
-            softBody.setNodeMass(i, 0);
+            //softBody.setNodeMass(i, 0);
         }
         /*softBody.setCcdSweptSphereRadius(0.7f);
         softBody.setCcdMotionThreshold(0.7f);
@@ -62,7 +64,7 @@ public class SoftbodyPhysicsHandler<T extends SoftbodyEntity> extends AbstractEn
         super.update();
         if (handledEntity.softBody != null && getCollisionObject() != null &&
                 handledEntity.changed) {
-            FloatBuffer nodes = BufferUtils.createFloatBuffer(handledEntity.softBody.countNodes() * 3);
+            /*FloatBuffer nodes = BufferUtils.createFloatBuffer(handledEntity.softBody.countNodes() * 3);
             handledEntity.softBody.copyLocations(nodes);
             //getCollisionObject().appendNodes(nodes);
 
@@ -76,7 +78,7 @@ public class SoftbodyPhysicsHandler<T extends SoftbodyEntity> extends AbstractEn
 
             FloatBuffer masses = BufferUtils.createFloatBuffer(handledEntity.softBody.countNodes());
             handledEntity.softBody.copyMasses(masses);
-            getCollisionObject().setMasses(masses);
+            getCollisionObject().setMasses(masses);*/
 
             //getCollisionObject().getSoftConfig().copyAll(handledEntity.softBody.getSoftConfig());
             handledEntity.changed = false;

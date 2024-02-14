@@ -265,7 +265,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
      * Called in minecraft thread to update vanilla position and rotation fields, also used for render and updating "prev" fields
      */
     protected void updateMinecraftPos() {
-        System.out.println("updateMinecraftPos");
+        //System.out.println("updateMinecraftPos");
         prevPosX = posX;
         prevPosY = posY;
         prevPosZ = posZ;

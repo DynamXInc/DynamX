@@ -1,7 +1,7 @@
 package fr.dynamx.common;
 
+import fr.dynamx.api.dxmodel.DxModelPath;
 import fr.dynamx.api.network.IDnxNetworkSystem;
-import fr.dynamx.api.obj.ObjModelPath;
 import fr.dynamx.api.physics.IPhysicsSimulationMode;
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.api.physics.IRotatedCollisionHandler;
@@ -11,10 +11,13 @@ import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.entities.SoftbodyEntity;
 import fr.dynamx.common.handlers.RotatedCollisionHandlerImpl;
 import fr.dynamx.common.network.DynamXNetwork;
+import fr.dynamx.common.objloader.data.DxModelData;
+import fr.dynamx.common.objloader.data.GltfModelData;
 import fr.dynamx.common.objloader.data.ObjModelData;
 import fr.dynamx.common.physics.player.PlayerPhysicsHandler;
 import fr.dynamx.common.physics.world.PhysicsSimulationModes;
 import fr.dynamx.utils.DynamXUtils;
+import lombok.Getter;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;

@@ -47,7 +47,7 @@ public class ItemSoftbody<T extends AbstractItemObject<T, ?>> extends DynamXItem
     public boolean changed;
 
     public ItemSoftbody() {
-        super(DynamXConstants.ID, "softbody", new ResourceLocation(DynamXConstants.ID, "softbody"));
+        super(DynamXConstants.ID, "softbody", new ResourceLocation(DynamXConstants.ID, ".obj"));
     }
 
     @Override
@@ -71,26 +71,27 @@ public class ItemSoftbody<T extends AbstractItemObject<T, ?>> extends DynamXItem
         if (playerIn.isSneaking()) {
             if (worldIn.isRemote) {
                 softBody = new PhysicsSoftBody();
-                softBody.setUserObject(new BulletShapeType<>(EnumBulletShapeType.BULLET_ENTITY, null, softBody.getCollisionShape()));
+                softBody.setUserObject(new BulletShapeType<>(EnumBulletShapeType.BULLET_ENTITY, null));
                 NativeSoftBodyUtil.appendFromTriMesh(DynamXRenderUtils.icosphereMesh, softBody);
                 FacesMesh facesMesh = new FacesMesh(softBody);
 
                 softBody.setPose(false, true);
                 SoftBodyConfig config = softBody.getSoftConfig();
                 config.set(Sbcp.PoseMatching, 0.05f);
-                softBody.setPhysicsLocation(new Vector3f(0, 0, 0));
+                //softBody.setPhysicsLocation(new Vector3f(0, 10, 0));
                 //softBody.applyScale(new Vector3f(10,10,10));
-                softBody.setCcdSweptSphereRadius(0.7f);
-                softBody.setCcdMotionThreshold(0.7f);
-                softBody.setMargin(0.1f);
+                //softBody.setCcdSweptSphereRadius(0.7f);
+                //softBody.setCcdMotionThreshold(0.7f);
+                //softBody.setMargin(0.1f);
                 for (int i = 0; i < softBody.countNodes(); i++) {
-                    softBody.setNodeMass(i, 0);
+                    //softBody.setNodeMass(i, 0);
                 }
                 DynamXContext.getPhysicsWorld(worldIn).addCollisionObject(softBody);
-                ACsGuiApi.asyncLoadThenShowGui("Block Customization", () -> new GuiSoftbodyConfig(this, facesMesh, softBody));
+                //ACsGuiApi.asyncLoadThenShowGui("Block Customization", () -> new GuiSoftbodyConfig(this, facesMesh, softBody));
 
             } else {
                 SoftbodyEntity entity = new SoftbodyEntity(worldIn, Vector3fPool.get(), 0);
+                entity.setPosition(playerIn.posX, playerIn.posY, playerIn.posZ);
                 //if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Spawn(worldIn, entity, playerIn, this, blockPos)))
                 worldIn.spawnEntity(entity);
 
@@ -116,7 +117,7 @@ public class ItemSoftbody<T extends AbstractItemObject<T, ?>> extends DynamXItem
                 Entity entity = worldIn.getEntityByID(stack.getTagCompound().getInteger("entityId"));
                 if(entity instanceof SoftbodyEntity){
                     SoftbodyEntity softbodyEntity = (SoftbodyEntity) entity;
-                    if(softBody != null && changed){
+                    if(softBody != null){
                         softbodyEntity.softBody = softBody;
                         softbodyEntity.changed = true;
                     }

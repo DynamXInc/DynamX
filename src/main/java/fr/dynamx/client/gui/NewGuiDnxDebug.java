@@ -13,6 +13,7 @@ import fr.aym.acsguis.cssengine.positionning.Size;
 import fr.aym.acsguis.event.listeners.mouse.IMouseMoveListener;
 import fr.aym.acsguis.utils.GuiConstants;
 import fr.aym.acsguis.utils.GuiCssError;
+import fr.dynamx.client.shaders.ShaderManager;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXLoadingTasks;
 import fr.dynamx.utils.debug.DynamXDebugOption;
@@ -71,6 +72,15 @@ public class NewGuiDnxDebug extends GuiFrame {
         generateDebugCategory(homePanel, DynamXDebugOptions.DebugCategories.HOME);
         //GuiLabel title = new GuiLabel("DynamX debug menu");
         //homePanel.add(title);
+
+
+        GuiLabel shaderBox = new GuiLabel("Reload shaders");
+        shaderBox.setCssId("reload_shaders").setCssClass("reload_button");
+        shaderBox.addClickListener((x, y, bu) -> {
+            ShaderManager.init(Minecraft.getMinecraft().getResourceManager());
+        });
+        homePanel.add(shaderBox);
+
         GuiLabel box = new GuiLabel("Reload packs");
         box.setCssId("reload_packs").setCssClass("reload_button");
         box.addClickListener((x, y, bu) -> {

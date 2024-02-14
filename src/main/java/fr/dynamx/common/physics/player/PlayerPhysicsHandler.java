@@ -77,7 +77,7 @@ public class PlayerPhysicsHandler {
                     position.set((float) playerIn.posX, (float) playerIn.posY + 0.8f, (float) playerIn.posZ);
                     if (Vector3f.isValidVector(position) && playerIn.fallDistance < 10) { //fixes a crash with elytra
                         bodyIn.setPhysicsLocation(position);
-                        System.out.println("setRbPos");
+                       // System.out.println("setRbPos");
                         bodyIn.setPhysicsRotation(QuaternionPool.get().fromAngleNormalAxis((float) Math.toRadians(-playerIn.rotationYaw), Vector3f.UNIT_Y));
                         bodyIn.setContactResponse(true);
                     } else

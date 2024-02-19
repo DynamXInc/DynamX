@@ -35,8 +35,10 @@ import java.nio.FloatBuffer;
 
 
 public class PhysicsDebugRenderer {
-    public static void debugSoftBody(PhysicsSoftBody physicsSoftBody) {
+    public static void debugSoftBody(PhysicsSoftBody physicsSoftBody, float partialTicks) {
         GlStateManager.pushMatrix();
+        GlStateManager.disableCull();
+        GlStateManager.enableDepth();
         Vector3f physicsLocation = Vector3fPool.get();
         Quaternion physicsRotation = QuaternionPool.get();
         physicsSoftBody.getPhysicsLocation(physicsLocation);
@@ -49,9 +51,10 @@ public class PhysicsDebugRenderer {
         DynamXContext.getSoftbodyEntityMesh().entrySet().stream().filter(entry -> entry.getKey().physicsHandler.getCollisionObject()
                         .equals(physicsSoftBody))
                 .forEach(entry -> {
-                    entry.getValue().render();
-                    entry.getValue().update();
+                    entry.getValue().update(partialTicks);
+                    entry.getValue().render(partialTicks);
                 });
+
         DxShader.stopShader();
 
         /*Vector3f physicsLocation = Vector3fPool.get();
@@ -91,6 +94,8 @@ public class PhysicsDebugRenderer {
 
         }
         GlStateManager.glEnd();*/
+        GlStateManager.enableCull();
+        GlStateManager.disableDepth();
         GlStateManager.popMatrix();
     }
 

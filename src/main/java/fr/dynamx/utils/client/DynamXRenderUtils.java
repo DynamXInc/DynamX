@@ -110,7 +110,7 @@ public class DynamXRenderUtils {
             GlStateManager.color(sphereColor.getRed() / 255f, sphereColor.getGreen() / 255f, sphereColor.getBlue() / 255f, sphereColor.getAlpha() / 255f);
         GlStateManager.translate(translation.x, translation.y, translation.z);
         GlStateManager.scale(radius, radius, radius);
-        sphereMesh.render();
+        sphereMesh.render(1);
         GlStateManager.scale(1 / radius, 1 / radius, 1 / radius);
         GlStateManager.translate(-translation.x, -translation.y, -translation.z);
         if (sphereColor != null)

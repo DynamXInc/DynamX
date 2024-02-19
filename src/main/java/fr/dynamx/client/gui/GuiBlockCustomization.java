@@ -194,17 +194,17 @@ public class GuiBlockCustomization extends GuiFrame {
 
         GlStateManager.color(1, 0, 0, 1);
         GlStateManager.glLineWidth(5);
-        DynamXRenderUtils.arrowMeshX.render();
+        DynamXRenderUtils.arrowMeshX.render(1);
         GlStateManager.color(0, 1, 0, 1);
-        DynamXRenderUtils.arrowMeshY.render();
+        DynamXRenderUtils.arrowMeshY.render(1);
         GlStateManager.color(0, 0, 1, 1);
-        DynamXRenderUtils.arrowMeshZ.render();
+        DynamXRenderUtils.arrowMeshZ.render(1);
 
         GlStateManager.translate(-1f, 0f, -1f);
 
         GlStateManager.color(1, 1, 1, 1);
         GlStateManager.glLineWidth(2);
-        DynamXRenderUtils.gridMesh.render();
+        DynamXRenderUtils.gridMesh.render(1);
 
         GlStateManager.enableTexture2D();
         GlStateManager.popMatrix();

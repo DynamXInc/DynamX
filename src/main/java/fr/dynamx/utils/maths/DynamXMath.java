@@ -6,6 +6,7 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.util.math.MathHelper;
+import org.lwjgl.util.vector.Matrix4f;
 
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector4f;
@@ -185,6 +186,37 @@ public class DynamXMath {
     public static int preciseRound(double of) {
         int c = (int) of;
         return of - c > 0.5 ? c + 1 : of - c < -0.5 ? c - 1 : c;
+    }
+
+    public static Vector3f transform(Matrix4f left, Vector3f right, Vector3f dest) {
+        if (dest == null)
+            dest = new Vector3f();
+
+        float x = left.m00 * right.x + left.m10 * right.y + left.m20 * right.z + left.m30 * 0;
+        float y = left.m01 * right.x + left.m11 * right.y + left.m21 * right.z + left.m31 * 0;
+        float z = left.m02 * right.x + left.m12 * right.y + left.m22 * right.z + left.m32 * 0;
+
+        dest.x = x;
+        dest.y = y;
+        dest.z = z;
+
+        return dest;
+    }
+
+
+    public static org.lwjgl.util.vector.Vector3f transform(Matrix4f left, org.lwjgl.util.vector.Vector3f right, org.lwjgl.util.vector.Vector3f dest) {
+        if (dest == null)
+            dest = new org.lwjgl.util.vector.Vector3f();
+
+        float x = left.m00 * right.x + left.m10 * right.y + left.m20 * right.z + left.m30 * 0;
+        float y = left.m01 * right.x + left.m11 * right.y + left.m21 * right.z + left.m31 * 0;
+        float z = left.m02 * right.x + left.m12 * right.y + left.m22 * right.z + left.m32 * 0;
+
+        dest.x = x;
+        dest.y = y;
+        dest.z = z;
+
+        return dest;
     }
 
     public static float roundFloat(float f, float precision) {

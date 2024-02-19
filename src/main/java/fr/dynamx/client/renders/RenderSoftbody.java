@@ -52,8 +52,8 @@ public class RenderSoftbody<T extends SoftbodyEntity> extends RenderPhysicsEntit
         DynamXRenderUtils.glTranslate(physicsLocation.negateLocal());
 
         ShaderManager.sceneGrid.useShader();
-        facesMesh.render();
-        facesMesh.update();
+        facesMesh.render(1);
+        facesMesh.update(context.getPartialTicks());
 
         DxShader.stopShader();
 

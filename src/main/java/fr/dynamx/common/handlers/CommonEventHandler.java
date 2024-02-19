@@ -10,6 +10,8 @@ import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.api.physics.player.DynamXPhysicsWorldBlacklistApi;
 import fr.dynamx.api.physics.terrain.DynamXTerrainApi;
 import fr.dynamx.api.physics.terrain.ITerrainUpdateBehavior;
+import fr.dynamx.bb.OBBPlayerManager;
+import fr.dynamx.bb.bbloader.BlockBenchOBBInfoLoader;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.blocks.DynamXBlock;
@@ -43,6 +45,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.ChunkEvent;
@@ -225,6 +228,12 @@ public class CommonEventHandler {
 
     //Walking players :
 
+    @SubscribeEvent
+    public void onPlayerUpdate(LivingEvent.LivingUpdateEvent e) {
+       /* if(DynamXContext.getPlayerToCollision().containsKey(Minecraft.getMinecraft().player)) {
+            DynamXContext.getPlayerToCollision().get(Minecraft.getMinecraft().player).update(Minecraft.getMinecraft().player.world);
+        }*/
+    }
 
     @SubscribeEvent
     public void onPlayerUpdate(TickEvent.PlayerTickEvent e) {
@@ -234,14 +243,22 @@ public class CommonEventHandler {
                 return;
             Vector3fPool.openPool();
             QuaternionPool.openPool();
-            //System.out.println("=== tick player ===");
-            if (!DynamXContext.getPlayerToCollision().containsKey(e.player)) {
+            if (!OBBPlayerManager.playerOBBObjectMap.isEmpty() && !DynamXContext.getPlayerToCollision().containsKey(e.player)) {
                 PlayerPhysicsHandler playerPhysicsHandler = new PlayerPhysicsHandler(e.player);
                 DynamXContext.getPlayerToCollision().put(e.player, playerPhysicsHandler);
                 playerPhysicsHandler.addToWorld();
             }
-//System.out.println("Phase " + e.phase);
-            DynamXContext.getPlayerToCollision().get(e.player).update(e.player.world);
+            EntityPlayer entityPlayer = e.player;
+            OBBPlayerManager.PlayerOBBModelObject playerOBBObject = OBBPlayerManager.playerOBBObjectMap.get(e.player.getName());
+            if (playerOBBObject == null) {
+                playerOBBObject = BlockBenchOBBInfoLoader.loadOBBInfo(OBBPlayerManager.PlayerOBBModelObject.class,
+                        new ResourceLocation("dynamxmod:obb/player.obb.json"));
+                OBBPlayerManager.playerOBBObjectMap.put(e.player.getName(), playerOBBObject);
+            }
+            OBBPlayerManager.computePose(e, playerOBBObject, 1);
+            if (DynamXContext.getPlayerToCollision().containsKey(e.player)) {
+                DynamXContext.getPlayerToCollision().get(e.player).update(e.player.world);
+            }
             Vector3fPool.closePool();
             QuaternionPool.closePool();
         }

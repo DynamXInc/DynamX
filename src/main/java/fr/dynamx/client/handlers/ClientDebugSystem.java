@@ -62,7 +62,7 @@ public class ClientDebugSystem {
     @SideOnly(Side.CLIENT)
     public static void tickEvent(TickEvent.ClientTickEvent event) {
         if(event != null)
-            return;;
+            return;
         if (!MC.isGamePaused()) {
             //System.out.println("Client tick");
             enableDebugDrawing = DynamXDebugOptions.DEBUG_RENDER.isActive();
@@ -99,6 +99,10 @@ public class ClientDebugSystem {
                 }
                 Vector3fPool.closePool();
                 QuaternionPool.closePool();
+
+                DynamXContext.getSOFTBODY_ENTITY_MESH_2().forEach((key, value) -> {
+                    value.update(1);
+                });
             }
         }
     }
@@ -184,7 +188,7 @@ public class ClientDebugSystem {
                 Vector3fPool.openPool();
                 QuaternionPool.openPool();
                 GlQuaternionPool.openPool();
-                DynamXContext.getPhysicsWorld(MC.world).getDynamicsWorld().getSoftBodyList().forEach(PhysicsDebugRenderer::debugSoftBody);
+                DynamXContext.getPhysicsWorld(MC.world).getDynamicsWorld().getSoftBodyList().forEach(b -> PhysicsDebugRenderer.debugSoftBody(b, event.getPartialTicks()));
                 Vector3fPool.closePool();
                 QuaternionPool.closePool();
 

@@ -41,7 +41,7 @@ public class SoftbodyPhysicsHandler<T extends SoftbodyEntity> extends AbstractEn
         softBody.randomizeConstraints();
 
          softBody.setPhysicsLocation(position);
-        FacesMesh facesMesh = new FacesMesh(softBody);
+        FacesMesh facesMesh = new FacesMesh(softBody, null, null);
         DynamXContext.getSoftbodyEntityMesh().put(handledEntity, facesMesh);
         //softBody.setUserObject(facesMesh);
         facesMesh.setUvs(DynamXRenderUtils.icosphereMesh.getTextureCoordinates());

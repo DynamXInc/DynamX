@@ -73,7 +73,7 @@ public class ItemSoftbody<T extends AbstractItemObject<T, ?>> extends DynamXItem
                 softBody = new PhysicsSoftBody();
                 softBody.setUserObject(new BulletShapeType<>(EnumBulletShapeType.BULLET_ENTITY, null));
                 NativeSoftBodyUtil.appendFromTriMesh(DynamXRenderUtils.icosphereMesh, softBody);
-                FacesMesh facesMesh = new FacesMesh(softBody);
+                FacesMesh facesMesh = new FacesMesh(softBody, null, null);
 
                 softBody.setPose(false, true);
                 SoftBodyConfig config = softBody.getSoftConfig();

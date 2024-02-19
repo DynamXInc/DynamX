@@ -31,13 +31,25 @@ package fr.dynamx.client.renders.mesh.shapes;
 
 import com.jme3.bullet.objects.PhysicsSoftBody;
 import com.jme3.bullet.util.NativeSoftBodyUtil;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
+import com.jme3.math.Vector3f;
 import com.jme3.util.BufferUtils;
 import fr.dynamx.client.renders.mesh.DxIndexBuffer;
 import fr.dynamx.client.renders.mesh.GLMesh;
 import fr.dynamx.client.renders.mesh.VertexBuffer;
+import fr.dynamx.common.DynamXMain;
+import fr.dynamx.common.physics.utils.RigidBodyTransform;
+import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.client.ClientDynamXUtils;
+import fr.dynamx.utils.maths.DynamXMath;
+import fr.dynamx.utils.optimization.GlQuaternionPool;
+import fr.dynamx.utils.optimization.QuaternionPool;
+import fr.dynamx.utils.optimization.Vector3fPool;
+import net.minecraft.client.renderer.GlStateManager;
 import org.lwjgl.opengl.GL11;
 
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 /**
@@ -55,6 +67,16 @@ public class FacesMesh extends GLMesh {
      * body being visualized
      */
     final private PhysicsSoftBody softBody;
+
+    final private RigidBodyTransform prevTransform;
+    final private RigidBodyTransform softTransform;
+
+    private FloatBuffer prevPositionsBuffer;
+    private FloatBuffer prevNormalsBuffer;
+    private FloatBuffer positionsBuffer;
+    private FloatBuffer normalsBuffer;
+
+
     // *************************************************************************
     // constructors
 
@@ -64,10 +86,12 @@ public class FacesMesh extends GLMesh {
      * @param softBody the soft body from which to generate the mesh (not null,
      * alias created)
      */
-    public FacesMesh(PhysicsSoftBody softBody) {
+    public FacesMesh(PhysicsSoftBody softBody, RigidBodyTransform prevTransform, RigidBodyTransform transform) {
         super(GL11.GL_TRIANGLES, softBody.countNodes());
 
         this.softBody = softBody;
+        this.prevTransform = prevTransform;
+        this.softTransform = transform;
 
         // Create the VertexBuffer for node locations.
         VertexBuffer positions = super.createPositions();
@@ -86,7 +110,12 @@ public class FacesMesh extends GLMesh {
         // Create a buffer for copying indices.
         this.copyIndices = BufferUtils.createIntBuffer(numIndices);
 
-        update();
+        this.prevPositionsBuffer = BufferUtils.createFloatBuffer(softBody.countNodes() * 3);
+        this.prevNormalsBuffer = BufferUtils.createFloatBuffer(softBody.countNodes() * 3);
+        this.positionsBuffer = BufferUtils.createFloatBuffer(softBody.countNodes() * 3);
+        this.normalsBuffer = BufferUtils.createFloatBuffer(softBody.countNodes() * 3);
+
+        update(1);
     }
 
     /**
@@ -94,7 +123,7 @@ public class FacesMesh extends GLMesh {
      *
      * @return true if successful, otherwise false
      */
-    public boolean update() {
+    public boolean update(float partialTicks) {
         int numNodes = softBody.countNodes();
         if (numNodes != countVertices()) {
             return false;
@@ -104,22 +133,60 @@ public class FacesMesh extends GLMesh {
             return false;
         }
 
-        // Update the vertex positions from node locations in physics space.
-        IntBuffer indexMap = null;
-        boolean localFlag = false;
-        boolean normalsFlag = true;
-        Transform transform = null; // physics locations = mesh positions
+        prevPositionsBuffer.rewind();
+        positionsBuffer.rewind();
+        this.prevPositionsBuffer.put(positionsBuffer);
+        prevNormalsBuffer.rewind();
+        normalsBuffer.rewind();
+        this.prevNormalsBuffer.put(normalsBuffer);
+
         NativeSoftBodyUtil.updateMesh(
-                softBody, indexMap, this, localFlag, normalsFlag, transform);
+                softBody, null, this, false, true, null);
+
+        positionsBuffer.rewind();
+        getPositionsData().rewind();
+        this.positionsBuffer.put(getPositionsData());
+        normalsBuffer.rewind();
+        getNormalsData().rewind();
+        this.normalsBuffer.put(getNormalsData());
 
         // Update the index buffer from faces. TODO avoid copying indices
         softBody.copyFaces(copyIndices);
         DxIndexBuffer indices = super.getIndexBuffer();
         for (int i = 0; i < vpt * numFaces; ++i) {
             int index = copyIndices.get(i);
+            if(index < 0) {
+                DynamXMain.log.error("Index is negative: " + index);
+                index = 0;
+            }
             indices.put(i, index);
         }
 
         return true;
+    }
+
+    @Override
+    public void render(float partialTicks) {
+        GlStateManager.pushMatrix();
+        FloatBuffer renderPosition = getPositionsData();
+        renderPosition.rewind();
+        for(int i = 0; i < renderPosition.capacity(); i++) {
+            float prev = prevPositionsBuffer.get(i);
+            float current = positionsBuffer.get(i);
+            float diff = current - prev;
+            renderPosition.put(i, prev + diff * partialTicks);
+        }
+        FloatBuffer renderNormals = getNormalsData();
+        renderNormals.rewind();
+        for(int i = 0; i < renderNormals.capacity(); i++) {
+            float prev = prevNormalsBuffer.get(i);
+            float current = normalsBuffer.get(i);
+            float diff = current - prev;
+            renderNormals.put(i, prev + diff * partialTicks);
+        }
+        getPositions().setModified();
+        setNormalsModified();
+        super.render(partialTicks);
+        GlStateManager.popMatrix();
     }
 }

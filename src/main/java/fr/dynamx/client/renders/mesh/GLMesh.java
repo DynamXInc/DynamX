@@ -519,7 +519,7 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
         return this;
     }
 
-    public void render() {
+    public void render(float partialTicks) {
         renderUsing();
     }
 

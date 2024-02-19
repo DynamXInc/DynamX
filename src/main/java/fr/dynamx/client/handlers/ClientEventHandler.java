@@ -1,11 +1,15 @@
 package fr.dynamx.client.handlers;
 
+import com.jme3.math.Vector3f;
 import fr.aym.acsguis.api.ACsGuiApi;
 import fr.aym.acslib.ACsLib;
 import fr.aym.mps.ModProtectionSystem;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.events.VehicleEntityEvent;
+import fr.dynamx.bb.OBBModelBone;
+import fr.dynamx.bb.OBBModelBox;
+import fr.dynamx.bb.OBBPlayerManager;
 import fr.dynamx.client.ClientProxy;
 import fr.dynamx.client.camera.CameraSystem;
 import fr.dynamx.client.gui.ButtonSlider;
@@ -14,6 +18,8 @@ import fr.dynamx.client.gui.GuiTexturedButton;
 import fr.dynamx.client.gui.VehicleHud;
 import fr.dynamx.client.renders.RenderMovableLine;
 import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
+import fr.dynamx.client.shaders.DxShader;
+import fr.dynamx.client.shaders.ShaderManager;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.blocks.DynamXBlock;
@@ -29,8 +35,10 @@ import fr.dynamx.common.physics.player.WalkingOnPlayerController;
 import fr.dynamx.common.slopes.GuiSlopesConfig;
 import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.errors.DynamXErrorManager;
+import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
@@ -66,7 +74,10 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
+import org.lwjgl.input.Keyboard;
 
+import java.awt.*;
+import java.util.Map;
 import java.util.UUID;
 
 public class ClientEventHandler {
@@ -325,18 +336,29 @@ public class ClientEventHandler {
         float y = (float) (MC.player.lastTickPosY + (MC.player.posY - MC.player.lastTickPosY) * partialTicks);
         float z = (float) (MC.player.lastTickPosZ + (MC.player.posZ - MC.player.lastTickPosZ) * partialTicks);
         GlStateManager.pushMatrix();
-        GlStateManager.disableLighting();
-        GlStateManager.disableTexture2D();
-        GlStateManager.disableDepth();
-        GlStateManager.translate(-x, -y, -z);
 
         Vector3fPool.openPool();
         QuaternionPool.openPool();
+
+        GlStateManager.disableTexture2D();
+        GlStateManager.disableCull();
+        GlStateManager.translate(-x, -y, -z);
+
+
+        ShaderManager.sceneGrid.useShader();
+        DynamXContext.getSOFTBODY_ENTITY_MESH_2().forEach((key, value) -> {
+            //value.update((float) partialTicks);
+            value.render((float) partialTicks);
+        });
+        DxShader.stopShader();
+
+        GlStateManager.enableCull();
+        GlStateManager.disableLighting();
+        GlStateManager.disableDepth();
         {
             RenderMovableLine.renderLine(event.getPartialTicks());
         }
-        Vector3fPool.closePool();
-        QuaternionPool.closePool();
+
 
         GlStateManager.enableTexture2D();
         GlStateManager.enableDepth();
@@ -350,44 +372,8 @@ public class ClientEventHandler {
         }
         renderBigEntities((float) partialTicks);
 
-        /*
-        GlStateManager.pushMatrix();
-        GlStateManager.disableTexture2D();
-        GlStateManager.disableDepth();
-        GlStateManager.depthMask(false);
-        GlStateManager.disableTexture2D();
-        GlStateManager.disableLighting();
-        GlStateManager.disableCull();
-        GlStateManager.disableBlend();
-
-        x = y =z = 0;
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder bufferbuilder = tessellator.getBuffer();
-
-        float f = MathHelper.cos(-0 * 0.017453292F - (float)Math.PI);
-        float f1 = MathHelper.sin(-0 * 0.017453292F - (float)Math.PI);
-        float f2 = -MathHelper.cos(-0 * 0.017453292F);
-        float f3 = MathHelper.sin(-0 * 0.017453292F);
-        Vec3d vec3d = new Vec3d((double)(f1 * f2), (double)f3, (double)(f * f2));
-
-        //Vec3d vec3d = MC.player.getLook((float) partialTicks);
-        Vector3f vector3f = Vector3fPool.get(vec3d);
-        if(MC.player.getRidingEntity() instanceof BaseVehicleEntity) {
-            Quaternion q = QuaternionPool.get();
-            DynamXMath.slerp((float) partialTicks, ((BaseVehicleEntity<?>) MC.player.getRidingEntity()).renderRotation, ((BaseVehicleEntity<?>) MC.player.getRidingEntity()).renderRotation, q);
-            vector3f = DynamXGeometry.rotateVectorByQuaternion(vector3f, q);
-        }
-        bufferbuilder.begin(3, DefaultVertexFormats.POSITION_COLOR);
-        bufferbuilder.pos(x, y + (double)MC.player.getEyeHeight(), z).color(0, 255, 255, 255).endVertex();
-        bufferbuilder.pos(x + vector3f.x * 20.0D, y + (double)MC.player.getEyeHeight() + vector3f.y * 20.0D, z + vector3f.z * 20.0D).color(0, 255, 255, 255).endVertex();
-        tessellator.draw();
-        GlStateManager.enableTexture2D();
-        GlStateManager.enableLighting();
-        GlStateManager.enableCull();
-        GlStateManager.disableBlend();
-        GlStateManager.depthMask(true);
-        GlStateManager.popMatrix();
-         */
+        Vector3fPool.closePool();
+        QuaternionPool.closePool();
     }
 
     private static void renderBigEntities(float partialTicks) {

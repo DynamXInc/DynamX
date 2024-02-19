@@ -1,5 +1,6 @@
 package fr.dynamx.common;
 
+import com.jme3.bullet.objects.PhysicsSoftBody;
 import fr.dynamx.api.dxmodel.DxModelPath;
 import fr.dynamx.api.network.IDnxNetworkSystem;
 import fr.dynamx.api.physics.IPhysicsSimulationMode;
@@ -51,6 +52,10 @@ public class DynamXContext {
     private static DynamXModelRegistry dxModelRegistry;
     @SideOnly(Side.CLIENT)
     private static final Map<SoftbodyEntity, FacesMesh> SOFTBODY_ENTITY_MESH = new HashMap<>();
+
+    @SideOnly(Side.CLIENT)
+    @Getter
+    private static final Map<PhysicsSoftBody, FacesMesh> SOFTBODY_ENTITY_MESH_2 = new HashMap<>();
     /**
      * -- GETTER --
      *

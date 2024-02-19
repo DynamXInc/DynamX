@@ -1,6 +1,17 @@
 package fr.dynamx.client.handlers;
 
+import com.jme3.bullet.collision.shapes.BoxCollisionShape;
+import com.jme3.bullet.objects.PhysicsRigidBody;
+import com.jme3.math.Matrix3f;
+import com.jme3.math.Quaternion;
+import com.jme3.math.Transform;
+import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.IModuleContainer;
+import fr.dynamx.api.physics.BulletShapeType;
+import fr.dynamx.api.physics.EnumBulletShapeType;
+import fr.dynamx.bb.OBBModelBone;
+import fr.dynamx.bb.OBBModelBox;
+import fr.dynamx.bb.OBBPlayerManager;
 import fr.dynamx.client.camera.CameraSystem;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.parts.BasePartSeat;
@@ -16,6 +27,7 @@ import fr.dynamx.common.network.packets.MessageDebugRequest;
 import fr.dynamx.common.network.packets.MessagePickObject;
 import fr.dynamx.common.physics.player.WalkingOnPlayerController;
 import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.physics.DynamXPhysicsHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
@@ -26,6 +38,9 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
+import org.lwjgl.util.vector.Matrix4f;
+
+import java.util.Map;
 
 import static fr.dynamx.client.handlers.ClientEventHandler.MC;
 
@@ -99,6 +114,31 @@ public class KeyHandler {
             }
 
             if (KEY_PICK_OBJECT.isKeyDown() && MC.player.getRidingEntity() == null && MC.player.getHeldItemMainhand().isEmpty()) {
+
+                OBBPlayerManager.PlayerOBBModelObject playerOBBObject = OBBPlayerManager.playerOBBObjectMap.get(MC.player.getName());
+
+                for (Map.Entry<OBBModelBox, OBBModelBone> entry : playerOBBObject.boneBinding.entrySet()) {
+                    if(entry.getKey().name.contains("rightArm")) {
+
+                        OBBModelBox box = entry.getKey();
+                        OBBModelBone bone = entry.getValue();
+
+                        Matrix4f rotation = bone.currentPose;
+
+                        Quaternion localQuat = new Quaternion().fromRotationMatrix(rotation.m00, rotation.m01, rotation.m02, rotation.m10, rotation.m11, rotation.m12, rotation.m20, rotation.m21, rotation.m22);
+                        Transform localTransform = new Transform(new Vector3f(box.center.x, box.center.y, box.center.z), localQuat);
+                        BoxCollisionShape shape = new BoxCollisionShape(box.size.x, box.size.y, box.size.z);
+                        shape.setScale(1/16f);
+
+                        PhysicsRigidBody rigidBody = DynamXPhysicsHelper.createRigidBody(60f, localTransform, shape,
+                                new BulletShapeType<>(EnumBulletShapeType.PLAYER, this));
+                        rigidBody.setKinematic(true);
+                        rigidBody.setEnableSleep(false);
+                        DynamXContext.getPhysicsWorld(MC.world).addCollisionObject(rigidBody);
+                    }
+                }
+
+
                 if (!DynamXContext.getPlayerPickingObjects().containsKey(MC.player.getEntityId())) {
                     if (MC.isSingleplayer()) {
                         PickingObjectHelper.handlePickingControl(new MovableModule.Action(MovableModule.EnumAction.PICK, 3), MC.player);

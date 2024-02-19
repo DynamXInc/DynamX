@@ -250,17 +250,17 @@ public class GuiSoftbodyConfig extends GuiFrame {
 
         GlStateManager.color(1, 0, 0, 1);
         GlStateManager.glLineWidth(5);
-        DynamXRenderUtils.arrowMeshX.render();
+        DynamXRenderUtils.arrowMeshX.render(1);
         GlStateManager.color(0, 1, 0, 1);
-        DynamXRenderUtils.arrowMeshY.render();
+        DynamXRenderUtils.arrowMeshY.render(1);
         GlStateManager.color(0, 0, 1, 1);
-        DynamXRenderUtils.arrowMeshZ.render();
+        DynamXRenderUtils.arrowMeshZ.render(1);
 
         GlStateManager.translate(-1f, 0f, -1f);
 
         GlStateManager.color(1, 1, 1, 1);
         GlStateManager.glLineWidth(2);
-        DynamXRenderUtils.gridMesh.render();
+        DynamXRenderUtils.gridMesh.render(1);
 
 
         GlStateManager.enableTexture2D();
@@ -277,7 +277,7 @@ public class GuiSoftbodyConfig extends GuiFrame {
         GlStateManager.enableBlend();
         GlStateManager.color(1, 1, 1, 1f);
 
-        mesh.render();
+        mesh.render(1);
 
         if (test != null) {
             GlStateManager.pushMatrix();
@@ -285,7 +285,7 @@ public class GuiSoftbodyConfig extends GuiFrame {
 
             GlStateManager.scale(0.03, 0.03, 0.03);
             GlStateManager.color(1, 0, 1, 0.4f);
-            DynamXRenderUtils.icosphereMeshToRender.render();
+            DynamXRenderUtils.icosphereMeshToRender.render(1);
             GlStateManager.popMatrix();
         }
 
@@ -308,7 +308,7 @@ public class GuiSoftbodyConfig extends GuiFrame {
             if (node.isFixed) {
                 GlStateManager.color(0, 0, 1, 1f);
             }
-            DynamXRenderUtils.icosphereMeshToRender.render();
+            DynamXRenderUtils.icosphereMeshToRender.render(1);
             GlStateManager.popMatrix();
 
         }

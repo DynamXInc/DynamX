@@ -170,14 +170,14 @@ public class VehicleDebugRenderer {
             }
 
             BoundingBoxPool.getPool().openSubPool();
-            DynamXContext.getPlayerToCollision().forEach((player, playerPhysicsHandler) -> {
+            /*DynamXContext.getPlayerToCollision().forEach((player, playerPhysicsHandler) -> {
                 if (playerPhysicsHandler.getBodyIn() != null) {
                     BoundingBox bb = playerPhysicsHandler.getBodyIn().boundingBox(BoundingBoxPool.get());
                     Vector3f min = bb.getMin(Vector3fPool.get());
                     Vector3f max = bb.getMax(Vector3fPool.get());
                     RenderGlobal.drawBoundingBox(min.x, min.y, min.z, max.x, max.y, max.z, 0.2f, 0.5f, 0.7f, 1);
                 }
-            });
+            });*/
             BoundingBoxPool.getPool().closeSubPool();
             GlStateManager.popMatrix();
             /* End of Aymeric's collision debug*/

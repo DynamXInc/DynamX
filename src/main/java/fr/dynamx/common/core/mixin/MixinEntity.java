@@ -5,6 +5,7 @@ import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.debug.Profiler;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MoverType;
 import net.minecraft.util.math.AxisAlignedBB;

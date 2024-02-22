@@ -4,7 +4,9 @@ import com.jme3.math.Vector3f;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
+import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
+import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.dxmodel.EnumDxModelFormats;
 import fr.dynamx.api.events.CreatePackItemEvent;
 import fr.dynamx.api.events.DynamXBlockEvent;
@@ -28,6 +30,19 @@ import net.minecraftforge.common.MinecraftForge;
 import java.util.*;
 
 public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> implements ParticleEmitterInfo.IParticleEmitterContainer, ILightOwner<T> {
+    @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.BLOCKS)
+    public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
+        if ("UseHullShape".equals(key))
+            return new IPackFilePropertyFixer.FixResult("UseComplexCollisions", true);
+        if ("Textures".equals(key))
+            return new IPackFilePropertyFixer.FixResult("MaterialVariants", true, true);
+        if ("ItemTranslate".equals(key))
+            return new IPackFilePropertyFixer.FixResult("ItemTransforms block", true, true);
+        if ("ItemRotate".equals(key))
+            return new IPackFilePropertyFixer.FixResult("ItemTransforms block", true, true);
+        return null;
+    };
+
     @Getter
     @Setter
     protected PropObject<?> propObject;

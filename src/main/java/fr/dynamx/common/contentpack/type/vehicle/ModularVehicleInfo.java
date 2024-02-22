@@ -55,12 +55,16 @@ import java.util.*;
 @Getter
 public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, ModularVehicleInfo> implements IPhysicsPackInfo, IModelTextureVariantsSupplier,
         ParticleEmitterInfo.IParticleEmitterContainer, IModelPackObject, IPartContainer<ModularVehicleInfo>, ICollisionsContainer, ILightOwner<ModularVehicleInfo> {
-    @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
+    @IPackFilePropertyFixer.PackFilePropertyFixer(registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER})
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("UseHullShape".equals(key))
             return new IPackFilePropertyFixer.FixResult("UseComplexCollisions", true);
         if ("Textures".equals(key))
             return new IPackFilePropertyFixer.FixResult("MaterialVariants", true, true);
+        if ("ItemTranslate".equals(key))
+            return new IPackFilePropertyFixer.FixResult("ItemTransforms block", true, true);
+        if ("ItemRotate".equals(key))
+            return new IPackFilePropertyFixer.FixResult("ItemTransforms block", true, true);
         return null;
     };
 
@@ -178,7 +182,6 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
         super(packName, fileName);
         this.validator = validator;
         this.validator.initProperties(this);
-        this.setItemScale(0.2f);
     }
 
     @Override
@@ -365,5 +368,10 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     public void addLightSource(PartLightSource source) {
         lightSources.put(source.getObjectName(), source);
         addDrawablePart(source);
+    }
+
+    @Override
+    public float getBaseItemScale() {
+        return 0.2f;
     }
 }

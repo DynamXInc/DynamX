@@ -11,14 +11,16 @@ import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
-import fr.dynamx.common.contentpack.parts.ILightOwner;
-import fr.dynamx.common.contentpack.parts.PartLightSource;
+import fr.dynamx.common.contentpack.type.ItemTransformsInfo;
 import fr.dynamx.common.contentpack.type.ObjectInfo;
+import fr.dynamx.common.contentpack.type.ViewTransformsInfo;
 import fr.dynamx.common.items.DynamXItemRegistry;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXReflection;
+import fr.dynamx.utils.errors.DynamXErrorManager;
 import lombok.Getter;
 import lombok.Setter;
+import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -36,16 +38,28 @@ public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A e
     @Setter
     @PackFileProperty(configNames = "Model", type = DefinitionType.DynamXDefinitionTypes.DYNX_RESOURCE_LOCATION, description = "common.model", defaultValue = "obj/name_of_vehicle/name_of_model.obj")
     protected ResourceLocation model;
+
+    /**
+     * @deprecated Replaced by {@link fr.dynamx.common.contentpack.type.ViewTransformsInfo}
+     */
     @Getter
-    @Setter
     @PackFileProperty(configNames = "ItemScale", required = false, description = "common.itemscale", defaultValue = "0.9")
-    protected float itemScale = 0.9f;
+    protected float itemScale = getBaseItemScale();
+    /**
+     * @deprecated Replaced by {@link fr.dynamx.common.contentpack.type.ViewTransformsInfo}
+     */
     @Getter
+    @Deprecated
     @PackFileProperty(configNames = "ItemTranslate", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false, defaultValue = "0 0 0")
-    protected Vector3f itemTranslate = new Vector3f(0, 0, 0);
+    protected Vector3f itemTranslate = null;
+    /**
+     * @deprecated Replaced by {@link fr.dynamx.common.contentpack.type.ViewTransformsInfo}
+     */
     @Getter
+    @Deprecated
     @PackFileProperty(configNames = "ItemRotate", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false, defaultValue = "0 0 0")
-    protected Vector3f itemRotate = new Vector3f(0, 0, 0);
+    protected Vector3f itemRotate = null;
+
     @Getter
     @Setter
     @PackFileProperty(configNames = "Item3DRenderLocation", required = false, description = "common.item3D", defaultValue = "all")
@@ -77,6 +91,10 @@ public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A e
 
     @Getter
     protected final Map<String, PartLightSource> lightSources = new HashMap<>();
+
+    @Getter
+    @Setter
+    private ItemTransformsInfo itemTransformsInfo;
 
     public AbstractItemObject(String packName, String fileName) {
         super(packName, fileName);
@@ -122,6 +140,13 @@ public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A e
 
     @Override
     public boolean postLoad(boolean hot) {
+        if(itemScale != getBaseItemScale() || itemTranslate != null || itemRotate != null) {
+            if(itemTransformsInfo != null) {
+                DynamXErrorManager.addPackError(getPackName(), "mixed_item_transforms_info", ErrorLevel.HIGH, getName(), "You can't mix old item transforms and ItemTransforms block !");
+            } else {
+                itemTransformsInfo = new ItemTransformsInfo(this, itemScale, itemTranslate, itemRotate);
+            }
+        }
         subProperties.forEach(subInfoType -> subInfoType.postLoad((A) this, hot));
         parts.forEach(part -> part.postLoad((A) this, hot));
         // Build the scene graph
@@ -152,6 +177,18 @@ public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A e
     @Override
     public boolean canRenderPart(String partName) {
         return !renderedParts.contains(partName);
+    }
+
+    @Override
+    public ViewTransformsInfo getViewTransformsInfo(ItemCameraTransforms.TransformType viewType) {
+        return itemTransformsInfo != null ? itemTransformsInfo.getViewTransforms(viewType) : null;
+    }
+
+    /**
+     * @return The default value for itemScale (applied to the item when getViewTransformsInfo returns null)
+     */
+    public float getBaseItemScale() {
+        return 0.9f;
     }
 
     @Override

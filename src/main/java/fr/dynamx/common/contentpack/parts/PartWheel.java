@@ -100,7 +100,7 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
                     suspensionAxis = DynamXUtils.readPartRotation(modelData, getMudGuardObjectName());
             }
             if (getRotationPoint() == null) {
-                DynamXErrorManager.addPackError(getPackName(), "position_not_found_in_model", ErrorLevel.HIGH, owner.getFullName(), "3D object '" + getMudGuardObjectName() + "' of part " + getName() + " (for property 'RotationPoint')");
+                DynamXErrorManager.addPackError(getPackName(), "position_not_found_in_model", ErrorLevel.HIGH, owner.getName(), "3D object '" + getMudGuardObjectName() + "' of part " + getName() + " (for property 'RotationPoint')");
             }
         }
     }

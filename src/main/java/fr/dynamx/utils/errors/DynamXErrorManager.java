@@ -148,5 +148,7 @@ public class DynamXErrorManager {
         registerErrorFormatter(PACKS_ERRORS, "wheel_no_model", FORMATTER_MULTIPLE_ERROR);
         registerErrorFormatter(PACKS_ERRORS, "position_not_found_in_model", FORMATTER_MULTIPLE_ERROR);
         registerErrorFormatter(PACKS_ERRORS, "seat_door_not_found", FORMATTER_MULTIPLE_ERROR);
+        registerErrorFormatter(PACKS_ERRORS, "invalid_view_type", FORMATTER_MULTIPLE_ERROR);
+        registerErrorFormatter(PACKS_ERRORS, "mixed_item_transforms_info", FORMATTER_MULTIPLE_ERROR);
     }
 }

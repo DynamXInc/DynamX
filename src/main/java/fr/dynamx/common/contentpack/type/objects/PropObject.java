@@ -5,10 +5,7 @@ import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
-import fr.dynamx.api.contentpack.registry.DefinitionType;
-import fr.dynamx.api.contentpack.registry.PackFileProperty;
-import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
-import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
+import fr.dynamx.api.contentpack.registry.*;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.CreatePackItemEvent;
 import fr.dynamx.api.events.DynamXEntityRenderEvents;
@@ -42,6 +39,19 @@ import java.util.stream.Collectors;
 @RegisteredSubInfoType(name = "prop", registries = SubInfoTypeRegistries.BLOCKS, strictName = false)
 public class PropObject<T extends PropObject<?>> extends AbstractProp<T> implements IPhysicsPackInfo,
         ISubInfoType<BlockObject<?>>, ParticleEmitterInfo.IParticleEmitterContainer {
+    @IPackFilePropertyFixer.PackFilePropertyFixer(registries = {SubInfoTypeRegistries.BLOCKS, SubInfoTypeRegistries.PROPS})
+    public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
+        if ("UseHullShape".equals(key))
+            return new IPackFilePropertyFixer.FixResult("UseComplexCollisions", true);
+        if ("Textures".equals(key))
+            return new IPackFilePropertyFixer.FixResult("MaterialVariants", true, true);
+        if ("ItemTranslate".equals(key))
+            return new IPackFilePropertyFixer.FixResult("ItemTransforms block", true, true);
+        if ("ItemRotate".equals(key))
+            return new IPackFilePropertyFixer.FixResult("ItemTransforms block", true, true);
+        return null;
+    };
+
     private final BlockObject<?> owner;
     @PackFileProperty(configNames = "EmptyMass")
     @Getter

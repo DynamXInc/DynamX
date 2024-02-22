@@ -127,7 +127,7 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
                     rotation = DynamXUtils.readPartRotation(modelData, getObjectName());
             }
             if (getPosition() == null) {
-                DynamXErrorManager.addPackError(getPackName(), "position_not_found_in_model", ErrorLevel.HIGH, owner.getFullName(), "3D object " + getObjectName() + " for part " + getName());
+                DynamXErrorManager.addPackError(getPackName(), "position_not_found_in_model", ErrorLevel.HIGH, owner.getName(), "3D object " + getObjectName() + " for part " + getName());
             } else {
                 isAutomaticPosition = true;
             }

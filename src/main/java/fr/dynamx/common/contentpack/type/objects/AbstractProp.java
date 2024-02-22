@@ -21,15 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractItemObject<T, T> implements ICollisionsContainer, ParticleEmitterInfo.IParticleEmitterContainer {
-    @IPackFilePropertyFixer.PackFilePropertyFixer(registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.PROPS})
-    public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
-        if ("UseHullShape".equals(key))
-            return new IPackFilePropertyFixer.FixResult("UseComplexCollisions", true);
-        if ("Textures".equals(key))
-            return new IPackFilePropertyFixer.FixResult("MaterialVariants", true, true);
-        return null;
-    };
-
     @Getter
     @Setter
     @PackFileProperty(configNames = "Translate", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false, defaultValue = "0 0 0")
@@ -58,7 +49,6 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
 
     public AbstractProp(String packName, String fileName) {
         super(packName, fileName);
-        setItemScale(0.3f);
     }
 
     abstract MaterialVariantsInfo<?> getVariants();
@@ -90,5 +80,10 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
     @Override
     public <A extends InteractivePart<?, ?>> List<A> getInteractiveParts() {
         return (List<A>) getPartsByType(InteractivePart.class);
+    }
+
+    @Override
+    public float getBaseItemScale() {
+        return 0.3f;
     }
 }

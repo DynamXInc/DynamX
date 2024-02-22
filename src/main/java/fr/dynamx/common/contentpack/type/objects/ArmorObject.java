@@ -40,6 +40,10 @@ public class ArmorObject<T extends ArmorObject<?>> extends AbstractItemObject<T,
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("Textures".equals(key))
             return new IPackFilePropertyFixer.FixResult("MaterialVariants", true, true);
+        if ("ItemTranslate".equals(key))
+            return new IPackFilePropertyFixer.FixResult("ItemTransforms block", true, true);
+        if ("ItemRotate".equals(key))
+            return new IPackFilePropertyFixer.FixResult("ItemTransforms block", true, true);
         return null;
     };
 
@@ -85,7 +89,6 @@ public class ArmorObject<T extends ArmorObject<?>> extends AbstractItemObject<T,
 
     public ArmorObject(String packName, String fileName) {
         super(packName, fileName);
-        setItemScale(0.7f); //default value
     }
 
     public void initArmorModel() {
@@ -188,6 +191,11 @@ public class ArmorObject<T extends ArmorObject<?>> extends AbstractItemObject<T,
                 sceneNode = new ArmorNode<>(Collections.EMPTY_LIST);
         }
         return sceneNode;
+    }
+
+    @Override
+    public float getBaseItemScale() {
+        return 0.7f;
     }
 
     @Override

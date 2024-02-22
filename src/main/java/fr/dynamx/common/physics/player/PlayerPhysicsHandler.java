@@ -170,8 +170,8 @@ public class PlayerPhysicsHandler {
                     bodies.forEach(physicsWorld::addCollisionObject);
                     physicsWorld.addCollisionObject(softBody);
                     anchors.forEach(physicsWorld::addJoint);
-                    softBody.setPhysicsLocation(Vector3fPool.get(playerIn.posX, playerIn.posY, playerIn.posZ));
-                    softBody.applyRotation(QuaternionPool.get().fromAngles(playerIn.rotationPitch * DynamXMath.TO_RADIAN, playerIn.rotationYaw * DynamXMath.TO_RADIAN, 0));
+                    //softBody.setPhysicsLocation(Vector3fPool.get(playerIn.posX, playerIn.posY, playerIn.posZ));
+                    //softBody.applyRotation(QuaternionPool.get().fromAngles(playerIn.rotationPitch * DynamXMath.TO_RADIAN, playerIn.rotationYaw * DynamXMath.TO_RADIAN, 0));
                     state = PlayerBodyState.ACTIVATING;
                 }
                 break;

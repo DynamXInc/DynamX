@@ -51,14 +51,14 @@ public class ObjectCollisionsHelper {
                     physicsCollisionShape = new CompoundCollisionShape();
                 }
 
-                // else Case 2.2: No shapes and complex collisions: generate part shapes from the obj model
+                // Case 2.2: No shapes and complex collisions: generate part shapes from the obj model
                 dxModelData.getMeshNames().forEach(meshName -> {
                     if (!partName.isEmpty() && !meshName.contains(partName.toLowerCase()))
                         return;
                     Vector3f dimension = dxModelData.getMeshDimension(meshName, new Vector3f()).multLocal(scaleModifier);
                     if (dimension.x == 0 && dimension.y == 0 && dimension.z == 0)
                         return;
-                    Vector3f center = dxModelData.getMeshCenter(meshName, new Vector3f());
+                    Vector3f center = dxModelData.getMeshCenter(meshName, new Vector3f()).multLocal(scaleModifier);
                     if (!useComplexCollisions) {
                         physicsCollisionShape.addChildShape(new BoxCollisionShape(dimension), center.add(centerOfMass));
                     }

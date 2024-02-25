@@ -70,6 +70,8 @@ public class SubInfoTypesRegistry<T extends ISubInfoTypeOwner<?>> {
                     throw new IllegalArgumentException("Only ISubInfoType objects can have the RegisteredSubInfoType annotation. Errored class: " + object);
 
                 RegisteredSubInfoType an = object.getAnnotation(RegisteredSubInfoType.class);
+                if(an.isClientOnly() && !event.getSide().isClient())
+                    continue;
                 Class<? extends ISubInfoTypeOwner<?>> subInfoTypeClass = null;
                 if (an.registries().length >= 1)
                     subInfoTypeClass = an.registries()[0].getInfoOwnerType();

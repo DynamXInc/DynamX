@@ -13,6 +13,7 @@ import fr.dynamx.utils.maths.DynamXMath;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
+import net.minecraftforge.fml.relauncher.Side;
 import org.joml.Matrix4f;
 
 import java.util.Arrays;
@@ -23,7 +24,7 @@ import java.util.Arrays;
  * @see ItemTransformsInfo
  */
 @RegisteredSubInfoType(name = "View", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER,
-        SubInfoTypeRegistries.BLOCKS, SubInfoTypeRegistries.ITEMS, SubInfoTypeRegistries.ARMORS}, strictName = false)
+        SubInfoTypeRegistries.BLOCKS, SubInfoTypeRegistries.ITEMS, SubInfoTypeRegistries.ARMORS}, strictName = false, isClientOnly = true)
 public class ViewTransformsInfo extends SubInfoType<ItemTransformsInfo> {
     private final String name;
 
@@ -49,9 +50,9 @@ public class ViewTransformsInfo extends SubInfoType<ItemTransformsInfo> {
     public ViewTransformsInfo(ItemTransformsInfo owner, EnumViewType type, float itemScale, Vector3f itemTranslate, Vector3f itemRotate) {
         this(owner, type.names[0]);
         this.itemScale = itemScale;
-        if(itemTranslate != null)
+        if (itemTranslate != null)
             this.itemTranslate.set(itemTranslate);
-        if(itemRotate != null)
+        if (itemRotate != null)
             this.itemRotate.set(itemRotate);
     }
 
@@ -63,7 +64,7 @@ public class ViewTransformsInfo extends SubInfoType<ItemTransformsInfo> {
     @Override
     public void appendTo(ItemTransformsInfo owner) {
         String name = this.name.replace("View", "");
-        if(name.startsWith("_"))
+        if (name.startsWith("_"))
             name = name.substring(1);
         EnumViewType viewType = EnumViewType.getFromName(name);
         if (viewType == null) {

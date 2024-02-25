@@ -8,6 +8,7 @@ import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.common.contentpack.type.objects.AbstractItemObject;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
+import net.minecraftforge.fml.relauncher.Side;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -19,7 +20,7 @@ import java.util.Map;
  * Stores item transforms for different views ({@link net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType}s)
  */
 @RegisteredSubInfoType(name = "ItemTransforms", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.ITEMS,
-        SubInfoTypeRegistries.ARMORS, SubInfoTypeRegistries.BLOCKS, SubInfoTypeRegistries.HELICOPTER})
+        SubInfoTypeRegistries.ARMORS, SubInfoTypeRegistries.BLOCKS, SubInfoTypeRegistries.HELICOPTER}, isClientOnly = true)
 public class ItemTransformsInfo extends SubInfoType<AbstractItemObject<?, ?>> implements ISubInfoTypeOwner<ItemTransformsInfo> {
     private final Map<ItemCameraTransforms.TransformType, ViewTransformsInfo> viewTransforms = new HashMap<>();
 
@@ -29,7 +30,7 @@ public class ItemTransformsInfo extends SubInfoType<AbstractItemObject<?, ?>> im
 
     public ItemTransformsInfo(AbstractItemObject<?, ?> owner, float itemScale, Vector3f itemTranslate, Vector3f itemRotate) {
         this((ISubInfoTypeOwner<AbstractItemObject<?, ?>>) owner);
-        for(ViewTransformsInfo.EnumViewType type : ViewTransformsInfo.EnumViewType.values()) {
+        for (ViewTransformsInfo.EnumViewType type : ViewTransformsInfo.EnumViewType.values()) {
             ViewTransformsInfo viewTransformsInfo = new ViewTransformsInfo(this, type, itemScale, itemTranslate, itemRotate);
             viewTransformsInfo.appendTo(this);
         }

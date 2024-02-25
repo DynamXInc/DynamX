@@ -1,5 +1,7 @@
 package fr.dynamx.api.contentpack.registry;
 
+import net.minecraftforge.fml.relauncher.Side;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -22,4 +24,9 @@ public @interface RegisteredSubInfoType {
      * @return if strict (default value), it will check if 'name' is equals, else if 'name' is contained, in the name of the sub property in the info file
      */
     boolean strictName() default true;
+
+    /**
+     * @return true if this sub info should only be loaded on the client side
+     */
+    boolean isClientOnly() default false;
 }

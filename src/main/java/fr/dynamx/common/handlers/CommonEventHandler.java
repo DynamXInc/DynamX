@@ -13,7 +13,8 @@ import fr.dynamx.api.physics.terrain.ITerrainUpdateBehavior;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.blocks.DynamXBlock;
-import fr.dynamx.common.capability.DynamXChunkDataProvider;
+import fr.dynamx.common.capability.chunkdata.DynamXChunkDataProvider;
+import fr.dynamx.common.capability.itemdata.DynamXItemDataProvider;
 import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
@@ -36,6 +37,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -59,11 +61,17 @@ import static fr.dynamx.common.handlers.TaskScheduler.schedule;
 
 public class CommonEventHandler {
 
-    public static final ResourceLocation CAPABILITY_LOCATION = new ResourceLocation(DynamXConstants.ID, "chunkaabb");
+    public static final ResourceLocation CAPABILITY_LOCATION_CHUNK = new ResourceLocation(DynamXConstants.ID, "chunkaabb");
+    public static final ResourceLocation CAPABILITY_LOCATION_ITEM = new ResourceLocation(DynamXConstants.ID, "itemcapa");
 
     @SubscribeEvent
     public void attachCapability(AttachCapabilitiesEvent<Chunk> event) {
-        event.addCapability(CAPABILITY_LOCATION, new DynamXChunkDataProvider());
+        event.addCapability(CAPABILITY_LOCATION_CHUNK, new DynamXChunkDataProvider());
+    }
+
+    @SubscribeEvent
+    public void attachCapabilityItem(AttachCapabilitiesEvent<ItemStack> event) {
+        event.addCapability(CAPABILITY_LOCATION_ITEM, new DynamXItemDataProvider());
     }
 
     @SubscribeEvent

@@ -1,8 +1,7 @@
 package fr.dynamx.common.network.lights;
 
+import fr.dynamx.common.capability.itemdata.DynamXItemData;
 import fr.dynamx.common.entities.modules.AbstractLightsModule;
-import fr.dynamx.common.items.DynamXItem;
-import fr.dynamx.common.items.lights.ItemLightContainer;
 import io.netty.buffer.ByteBuf;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -41,7 +40,7 @@ public class PacketSyncItemInstanceUUID implements IMessage {
         @Override
         @SideOnly(Side.CLIENT)
         public IMessage onMessage(PacketSyncItemInstanceUUID message, MessageContext ctx) {
-            DynamXItem.itemInstanceLights.put(message.id, new AbstractLightsModule.ItemLightsModule(null, null, message.id));
+            DynamXItemData.itemInstanceLights.put(message.id, new AbstractLightsModule.ItemLightsModule(null, null, message.id));
             return null;
         }
     }

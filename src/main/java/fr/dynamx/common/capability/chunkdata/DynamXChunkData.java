@@ -1,4 +1,4 @@
-package fr.dynamx.common.capability;
+package fr.dynamx.common.capability.chunkdata;
 
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;

@@ -1,52 +1,35 @@
 package fr.dynamx.common.items;
 
-import dz.betterlights.dynamx.LightCasterPartSync;
-import dz.betterlights.lighting.lightcasters.EntityLightCaster;
-import dz.betterlights.lighting.lightcasters.LightCaster;
-import dz.betterlights.network.EnumPacketType;
 import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
 import fr.dynamx.api.contentpack.object.render.IModelPackObject;
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.api.network.EnumPacketTarget;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.capability.itemdata.DynamXItemData;
+import fr.dynamx.common.capability.itemdata.DynamXItemDataProvider;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
-import fr.dynamx.common.contentpack.parts.LightObject;
-import fr.dynamx.common.contentpack.parts.PartLightSource;
-import fr.dynamx.common.contentpack.parts.lights.SpotLightObject;
 import fr.dynamx.common.contentpack.type.objects.AbstractItemObject;
 import fr.dynamx.common.entities.modules.AbstractLightsModule;
-import fr.dynamx.common.items.lights.ItemLightContainer;
 import fr.dynamx.common.network.lights.PacketSyncItemInstanceUUID;
-import fr.dynamx.common.network.lights.PacketSyncPartLights;
-import fr.dynamx.common.objloader.data.DxModelData;
-import fr.dynamx.common.objloader.data.ObjModelData;
 import fr.dynamx.utils.DynamXConstants;
-import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.RegistryNameSetter;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 public class DynamXItem<T extends AbstractItemObject<?, ?>> extends Item implements IDynamXItem<T>, IResourcesOwner {
     protected T itemInfo;
-
-    public static Map<UUID, AbstractLightsModule.ItemLightsModule> itemInstanceLights = new HashMap<>();
 
 
     /**
@@ -128,17 +111,42 @@ public class DynamXItem<T extends AbstractItemObject<?, ?>> extends Item impleme
         if(!stack.hasTagCompound()){
             stack.setTagCompound(new NBTTagCompound());
         }
-        DynamXItem<?> item = (DynamXItem<?>) stack.getItem();
+        DynamXItemData capability = stack.getCapability(DynamXItemDataProvider.DYNAMX_ITEM_DATA_CAPABILITY, null);
+
+        if(capability == null){
+            return new ActionResult<>(EnumActionResult.PASS, stack);
+        }
 
         UUID instanceUUID = stack.getTagCompound().getUniqueId("InstanceUUID");
-        if (!itemInstanceLights.containsKey(instanceUUID)) {
+        if (!DynamXItemData.itemInstanceLights.containsKey(instanceUUID)) {
             UUID id = UUID.randomUUID();
             if(FMLCommonHandler.instance().getSide().isServer()) {
                 DynamXContext.getNetwork().getVanillaNetwork().sendPacket(new PacketSyncItemInstanceUUID(id), EnumPacketTarget.ALL, null);
             }
             AbstractLightsModule.ItemLightsModule instanceLight = new AbstractLightsModule.ItemLightsModule(this, getInfo(), id);
             stack.getTagCompound().setUniqueId("InstanceUUID", id);
-            itemInstanceLights.put(id, instanceLight);
+            DynamXItemData.itemInstanceLights.put(id, instanceLight);
+            capability.itemModule = instanceLight;
+        }
+
+        AbstractLightsModule.ItemLightsModule instanceLight = capability.itemModule;
+        if(capability.lightIds.isEmpty()){
+            capability.lightIds.addAll(instanceLight.getLightCasterPartSyncs().keySet());
+        } else {
+            for (int i = 0; i < capability.lightIds.size(); i++) {
+                int id = capability.lightIds.get(i);
+                instanceLight.setLightOn(id, !instanceLight.isLightOn(id));
+            }
+        }
+        /*UUID instanceUUID = stack.getTagCompound().getUniqueId("InstanceUUID");
+        if (!capability.itemInstanceLights.containsKey(instanceUUID)) {
+            UUID id = UUID.randomUUID();
+            if(FMLCommonHandler.instance().getSide().isServer()) {
+                DynamXContext.getNetwork().getVanillaNetwork().sendPacket(new PacketSyncItemInstanceUUID(id), EnumPacketTarget.ALL, null);
+            }
+            AbstractLightsModule.ItemLightsModule instanceLight = new AbstractLightsModule.ItemLightsModule(this, getInfo(), id);
+            stack.getTagCompound().setUniqueId("InstanceUUID", id);
+            capability.itemInstanceLights.put(id, instanceLight);
         }
         if (!stack.getTagCompound().hasKey("LightLists")) {
             instanceUUID = stack.getTagCompound().getUniqueId("InstanceUUID");
@@ -161,7 +169,7 @@ public class DynamXItem<T extends AbstractItemObject<?, ?>> extends Item impleme
                 int id = compound.getInteger("LightId");
                 instanceLight.setLightOn(id, !instanceLight.isLightOn(id));
             }
-        }
+        }*/
 
         return new ActionResult<>(EnumActionResult.PASS, stack);
     }
@@ -176,6 +184,6 @@ public class DynamXItem<T extends AbstractItemObject<?, ?>> extends Item impleme
             return null;
         }
 
-        return itemInstanceLights.get(stack.getTagCompound().getUniqueId("InstanceUUID"));
+        return DynamXItemData.itemInstanceLights.get(stack.getTagCompound().getUniqueId("InstanceUUID"));
     }
 }

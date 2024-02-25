@@ -3,10 +3,13 @@ package fr.dynamx.common.contentpack.parts;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
-import dz.betterlights.dynamx.LightCasterPartSync;
+import dz.betterlights.BetterLightsMod;
+import dz.betterlights.dynamx.LightPartGroup;
+import dz.betterlights.handlers.IShaderUniformsHandler;
 import dz.betterlights.lighting.lightcasters.EntityLightCaster;
 import dz.betterlights.lighting.lightcasters.LightCaster;
-import dz.betterlights.util.BetterLightsHelper;
+import dz.betterlights.util.BetterLightsConstants;
+import dz.betterlights.util.OptifineUniformsUtil;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.ICollisionsContainer;
 import fr.dynamx.api.contentpack.object.INamedObject;
@@ -18,6 +21,9 @@ import fr.dynamx.api.contentpack.object.subinfo.SubInfoType;
 import fr.dynamx.api.contentpack.registry.*;
 import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
+import fr.dynamx.bb.OBBModelBone;
+import fr.dynamx.bb.OBBModelBox;
+import fr.dynamx.bb.OBBPlayerManager;
 import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import fr.dynamx.client.renders.scene.BaseRenderContext;
@@ -37,11 +43,9 @@ import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.errors.DynamXErrorManager;
-import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
-import fr.dynamx.utils.physics.DynamXPhysicsHelper;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityOtherPlayerMP;
@@ -49,17 +53,22 @@ import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderGlobal;
+import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.joml.Matrix4f;
+import org.joml.Vector4f;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
+import java.nio.FloatBuffer;
 import java.util.*;
+import java.util.List;
 
 /**
  * Contains multiple {@link LightObject}
@@ -324,13 +333,13 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
             if (isOn) {
 
                 if (lights.getLightCastersSync().containsKey(onLightObject.getLightId())) {
-                    LightCasterPartSync partSync = lights.getLightCastersSync().get(onLightObject.getLightId());
-                    for (Map.Entry<String, LightCaster> entry : partSync.lightCasters.entrySet()) {
+                    LightPartGroup partSync = lights.getLightCastersSync().get(onLightObject.getLightId());
+                    for (Map.Entry<String, LightCaster> entry : partSync.getLightCasters().entrySet()) {
 
                         if (entry.getKey() != null && entry.getKey().equals(getObjectName())) {
                             if(isItem) {
-                                renderLightFirstPerson(entry.getValue(), transform);
-                            } else
+                                renderLightFirstPerson(entry.getValue(), transform, (BaseRenderContext) context);
+                            }else
                                 renderLight(entry.getValue(), transform);
                         }
                     }
@@ -383,8 +392,13 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
 
         org.joml.Vector3f center = DynamXUtils.toVector3f(lightCaster.getBasePosition());
         transformCopy.transformPosition(center);
-        org.joml.Vector3f baseRotation = DynamXUtils.toVector3f(lightCaster.getBaseRotation());
-        transformCopy.transformDirection(baseRotation);
+
+        Vector3f baseRotation = lightCaster.getBaseRotation();
+        transformCopy.rotate((float) Math.toRadians(baseRotation.y), new org.joml.Vector3f(0, 1, 0));
+        transformCopy.rotate((float) Math.toRadians(baseRotation.x), new org.joml.Vector3f(1, 0, 0));
+        transformCopy.rotate((float) Math.toRadians(baseRotation.z), new org.joml.Vector3f(0, 0, 1));
+        org.joml.Vector3f direction = new org.joml.Vector3f(0,0,1);
+        transformCopy.transformDirection(direction);
 
 
         EntityPlayerSP player = Minecraft.getMinecraft().player;
@@ -396,14 +410,16 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
         // System.out.println(lightCaster +" " + center);
         lightCaster
                 .pos(new Vector3f(center.x, center.y, center.z).add(x, y, z))
-                .direction(new Vector3f(baseRotation.x, baseRotation.y, baseRotation.z))
+                .direction(new Vector3f(direction.x, direction.y, direction.z))
                 .setEnabled(true);
     }
-    private static final Matrix4f rotationMatrix = new Matrix4f();
-    private static final org.joml.Vector3f RIGHT_DIRECTION = new org.joml.Vector3f(1,0,0);
-    private static final org.joml.Vector3f UP_DIRECTION = new org.joml.Vector3f(0,1,0);
-    private static final org.joml.Vector3f FORWARD_DIRECTION = new org.joml.Vector3f(0,0,1);
-    public static void renderLightFirstPerson(LightCaster lightCaster, Matrix4f transform){
+    private static final Matrix4f itemModelViewMatrix = new Matrix4f();
+    private static final FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(16);
+
+    public static void renderLightFirstPerson(LightCaster lightCaster, Matrix4f transform, BaseRenderContext context){
+        if(OptifineUniformsUtil.isOptifineShadowPass()){
+            return;
+        }
         float partialTicks = Minecraft.getMinecraft().getRenderPartialTicks();
         EntityPlayerSP playerSp = Minecraft.getMinecraft().player;
         if (!(lightCaster instanceof EntityLightCaster)) {
@@ -418,65 +434,66 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
         if (!(playerHolder.getHeldItemMainhand().getItem() instanceof DynamXItem)) {
             return;
         }
-        float pitch = playerHolder.prevRotationPitch + (playerHolder.rotationPitch - playerHolder.prevRotationPitch) * partialTicks;
-        float yaw = playerHolder.prevRotationYaw + (playerHolder.rotationYaw - playerHolder.prevRotationYaw) * partialTicks;
         Vector3fPool.openPool();
-        if (playerHolder instanceof EntityOtherPlayerMP || Minecraft.getMinecraft().gameSettings.thirdPersonView != 0) {
-            //updateLightThirdPerson(playerHolder, lightCaster, position, rotation, scale, yaw, pitch);
 
-        }
-        if(true){
+        float x = (float) (playerSp.lastTickPosX + (playerSp.posX - playerSp.lastTickPosX) * partialTicks);
+        float y = (float) (playerSp.lastTickPosY + (playerSp.posY - playerSp.lastTickPosY) * partialTicks);
+        float z = (float) (playerSp.lastTickPosZ + (playerSp.posZ - playerSp.lastTickPosZ) * partialTicks);
 
-            float pitchHand = playerSp.prevRenderArmPitch + (playerSp.renderArmPitch - playerSp.prevRenderArmPitch) * partialTicks;
-            float yawHand = playerSp.prevRenderArmYaw + (playerSp.renderArmYaw - playerSp.prevRenderArmYaw) * partialTicks;
+        GlStateManager.multMatrix(ClientDynamXUtils.getMatrixBuffer(transform));
+        GL11.glGetFloat(GL11.GL_MODELVIEW_MATRIX, (FloatBuffer) matrixBuffer.position(0));
 
+        itemModelViewMatrix.set((FloatBuffer) matrixBuffer.position(0));
+        Matrix4f modelViewInverse = new Matrix4f(IShaderUniformsHandler.modelViewInverse);
 
-            float swingProgress = playerSp.getSwingProgress(partialTicks);
-            float f = -0.4F * MathHelper.sin(MathHelper.sqrt(swingProgress) * (float) Math.PI);
-            float f1 = 0.2F * MathHelper.sin(MathHelper.sqrt(swingProgress) * ((float) Math.PI * 2F));
-            float f2 = -0.2F * MathHelper.sin(swingProgress * (float) Math.PI);
-            int i = -1;
+        Vector3f itemPosition = DynamXUtils.toVector3f(itemModelViewMatrix.transformPosition(DynamXUtils.toVector3f(lightCaster.getBasePosition())));
+        Vector4f positionPlayerSpace = modelViewInverse.transform(new Vector4f(itemPosition.x, itemPosition.y, itemPosition.z, 1));
 
-            rotationMatrix.identity();
-            rotationMatrix.translate(new org.joml.Vector3f((float) i * f, f1, f2));
-            rotationMatrix.translate(new org.joml.Vector3f((float) i * 0.56F, -0.52F + swingProgress * -0.6F, -0.72F));
+        Vector3f itemPositionWorld = Vector3fPool.get(positionPlayerSpace.x, positionPlayerSpace.y, positionPlayerSpace.z).addLocal(x, y, z);
+        if(context instanceof BaseRenderContext.ItemRenderContext) {
+            BaseRenderContext.ItemRenderContext itemRenderContext = (BaseRenderContext.ItemRenderContext) context;
+            if (Minecraft.getMinecraft().gameSettings.thirdPersonView != 0 && itemRenderContext.getRenderType().equals(ItemCameraTransforms.TransformType.THIRD_PERSON_RIGHT_HAND)) {
+                updateLightThirdPerson(playerHolder, lightCaster, itemPositionWorld, itemRenderContext);
+            }
+            if (!(playerHolder instanceof EntityOtherPlayerMP) && Minecraft.getMinecraft().gameSettings.thirdPersonView == 0 && itemRenderContext.getRenderType().equals(ItemCameraTransforms.TransformType.FIRST_PERSON_RIGHT_HAND)) {
+                org.joml.Vector3f playerDir = DynamXUtils.toVector3fJoml(playerSp.getLook(partialTicks));
+                itemModelViewMatrix.transformDirection(playerDir);
 
-
-            f = MathHelper.sin(swingProgress * swingProgress * (float) Math.PI);
-            f1 = MathHelper.sin(MathHelper.sqrt(swingProgress) * (float) Math.PI);
-
-            rotationMatrix.rotate((float) Math.toRadians((float) i * (45.0F + f * -20.0F)), UP_DIRECTION);
-            rotationMatrix.rotate((float) Math.toRadians((float) i * f1 * -20.0F), FORWARD_DIRECTION);
-            rotationMatrix.rotate((float) Math.toRadians(f1 * -80.0F), RIGHT_DIRECTION);
-            rotationMatrix.rotate((float) Math.toRadians((float) i * -45.0F), UP_DIRECTION);
-
-           /* Matrix4f transformCopy = new Matrix4f(transform);
-            transformCopy.mul(rotationMatrix);*/
-           /* rotationMatrix.rotate((float) Math.toRadians(rotation.x), RIGHT_DIRECTION);
-            rotationMatrix.rotate((float) Math.toRadians(rotation.y), UP_DIRECTION);
-            rotationMatrix.rotate((float) Math.toRadians(rotation.z), FORWARD_DIRECTION);*/
-
-            Vector3f playerLookDirection = DynamXUtils.toVector3f(rotationMatrix.transformDirection(DynamXUtils.toVector3fJoml(playerSp.getLookVec())));
-
-            org.joml.Vector3f center = DynamXUtils.toVector3f(lightCaster.getBasePosition());
-            // center.multLocal(scale);
-            org.joml.Vector3f itemPosition = center.add(0.183f, 0.038f, 1.7f);
-            Vector3f playerPosition = DynamXUtils.toVector3f(playerSp.getPositionEyes(partialTicks));
-
-
-            Vector3f positionRotated = DynamXUtils.toVector3f(rotationMatrix.transformPosition(itemPosition));
-
-
-            Vector3f positionRotatedHand = DynamXGeometry.getRotatedPoint(positionRotated, -(playerSp.rotationPitch - pitchHand) * 0.1f,
-                    -(playerSp.rotationYaw - yawHand) * 0.1f, 0);
-            Vector3f positionRotatedPlayer = DynamXGeometry.getRotatedPoint(positionRotatedHand, pitch, yaw, 0);
-
-            lightCaster
-                    .pos(positionRotatedPlayer.addLocal(playerPosition))
-                    .direction(playerLookDirection)
-                    .setEnabled(true);
+                //org.joml.Vector3f dir = new org.joml.Vector3f(0,0,1);
+                //itemModelViewMatrix.transformDirection(dir);
+                //Vector3f forwardVector = Vector3fPool.get(itemModelViewMatrix.m20(), itemModelViewMatrix.m21(), itemModelViewMatrix.m22());
+                lightCaster
+                        .pos(itemPositionWorld)
+                        .direction(Vector3fPool.get(-playerDir.x, playerDir.y, -playerDir.z).normalize());
+            }
         }
         Vector3fPool.closePool();
     }
 
+    private static void updateLightThirdPerson(EntityPlayer player, LightCaster lightCaster, Vector3f itemPosition, BaseRenderContext.ItemRenderContext renderType){
+        OBBPlayerManager.PlayerOBBModelObject playerOBBObject = OBBPlayerManager.getPlayerOBBObject(player.getName());
+        Optional<Map.Entry<OBBModelBox, OBBModelBone>> rightArm = playerOBBObject.boneBinding.entrySet().stream().filter(entry -> entry.getKey().name.contains("rightArm")).findFirst();
+        Map.Entry<OBBModelBox, OBBModelBone> rightArmEntry = rightArm.get();
+        org.lwjgl.util.vector.Matrix4f handRot = rightArmEntry.getValue().currentPose;
+        Vector3f forwardVector = Vector3fPool.get(-handRot.m20, -handRot.m21, -handRot.m22);
+        lightCaster
+                .pos(itemPosition)
+                .direction(forwardVector.normalize());
+    }
+
+    private static void updateLightArmor(EntityPlayer player, LightCaster lightCaster, Vector3f itemPosition, ItemStack stack, BaseRenderContext.ArmorRenderContext context){
+        String armorType = context.getEquipmentSlot().getName();
+        switch (context.getEquipmentSlot()) {
+            case HEAD:
+                break;
+            case CHEST:
+                armorType = "body";
+                break;
+            case LEGS:
+                break;
+            case FEET:
+                break;
+        }
+
+    }
 }

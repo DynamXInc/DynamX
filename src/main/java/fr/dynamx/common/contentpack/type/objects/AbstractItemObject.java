@@ -1,6 +1,7 @@
 package fr.dynamx.common.contentpack.type.objects;
 
 import com.jme3.math.Vector3f;
+import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.part.BasePart;
@@ -11,6 +12,8 @@ import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
+import fr.dynamx.common.contentpack.parts.ILightOwner;
+import fr.dynamx.common.contentpack.parts.PartLightSource;
 import fr.dynamx.common.contentpack.type.ItemTransformsInfo;
 import fr.dynamx.common.contentpack.type.ObjectInfo;
 import fr.dynamx.common.contentpack.type.ViewTransformsInfo;

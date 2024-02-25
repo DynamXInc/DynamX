@@ -1,4 +1,4 @@
-package fr.dynamx.common.capability;
+package fr.dynamx.common.capability.chunkdata;
 
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.util.EnumFacing;

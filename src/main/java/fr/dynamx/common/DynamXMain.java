@@ -8,8 +8,10 @@ import fr.aym.acslib.api.services.mps.ModProtectionContainer;
 import fr.aym.acslib.api.services.mps.ModProtectionService;
 import fr.dynamx.api.dxmodel.EnumDxModelFormats;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariableRegistry;
-import fr.dynamx.common.capability.DynamXChunkData;
-import fr.dynamx.common.capability.DynamXChunkDataStorage;
+import fr.dynamx.common.capability.chunkdata.DynamXChunkData;
+import fr.dynamx.common.capability.chunkdata.DynamXChunkDataStorage;
+import fr.dynamx.common.capability.itemdata.DynamXItemData;
+import fr.dynamx.common.capability.itemdata.DynamXItemDataStorage;
 import fr.dynamx.common.contentpack.AddonInfo;
 import fr.dynamx.common.contentpack.AddonLoader;
 import fr.dynamx.common.contentpack.ContentPackLoader;
@@ -135,6 +137,7 @@ public class DynamXMain {
         NetworkRegistry.INSTANCE.registerGuiHandler(instance, new DynamXGuiHandler());
 
         CapabilityManager.INSTANCE.register(DynamXChunkData.class, new DynamXChunkDataStorage(), DynamXChunkData::new);
+        CapabilityManager.INSTANCE.register(DynamXItemData.class, new DynamXItemDataStorage(), DynamXItemData::new);
     }
 
     @EventHandler

@@ -1,8 +1,8 @@
 package fr.dynamx.common.core.mixin;
 
 import fr.dynamx.common.blocks.DynamXBlock;
-import fr.dynamx.common.capability.DynamXChunkData;
-import fr.dynamx.common.capability.DynamXChunkDataProvider;
+import fr.dynamx.common.capability.chunkdata.DynamXChunkData;
+import fr.dynamx.common.capability.chunkdata.DynamXChunkDataProvider;
 import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;

@@ -116,16 +116,17 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
         wheelInfos.put(partIndex, event.getNewWheel());
         if (wheelsPhysics != null)
             wheelsPhysics.getWheelByPartIndex(partIndex).setWheelInfo(event.getNewWheel());
-        computeWheelsTextureIds();
+        onTexturesChange(entity.getEntityTextureId());
     }
 
+    @Override
     @SideOnly(Side.CLIENT)
-    public void computeWheelsTextureIds() {
-        if (entity.getEntityTextureID() == -1)
+    public void onTexturesChange(byte newMetadata) {
+        if (newMetadata == -1)
             return;
-        String chassis = entity.getPackInfo().getVariantName(entity.getEntityTextureID());
+        String chassisVariant = entity.getPackInfo().getVariantName(newMetadata);
         for (byte i = 0; i < wheelsTextureId.length; i++) {
-            wheelsTextureId[i] = getWheelInfo(i).getIdForVariant(chassis);
+            wheelsTextureId[i] = getWheelInfo(i).getIdForVariant(chassisVariant);
         }
     }
 

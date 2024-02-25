@@ -22,7 +22,7 @@ public interface IPhysicsPackInfo extends ICollisionsContainer, IModelPackObject
 
     void addModules(PackPhysicsEntity<?, ?> entity, ModuleListBuilder modules);
 
-    default List<IDrawablePart<?, ?>> getDrawableParts() {
+    default List<IDrawablePart<?>> getDrawableParts() {
         return Collections.emptyList();
     }
 

@@ -51,7 +51,7 @@ import java.util.stream.Stream;
 @Getter
 @Setter
 @RegisteredSubInfoType(name = "wheel", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER}, strictName = false)
-public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfo> implements IDrawablePart<BaseVehicleEntity<?>, ModularVehicleInfo> {
+public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehicleInfo> implements IDrawablePart<ModularVehicleInfo> {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("isRight".equals(key))
@@ -157,13 +157,6 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
     @Override
     public String getObjectName() {
         return null;
-    }
-
-    @Override
-    public void onTexturesChange(BaseVehicleEntity<?> entity) {
-        if (!entity.hasModuleOfType(WheelsModule.class))
-            return;
-        entity.getModuleByType(WheelsModule.class).computeWheelsTextureIds();
     }
 
     @Override

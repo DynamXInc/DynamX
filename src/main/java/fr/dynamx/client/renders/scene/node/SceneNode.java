@@ -82,7 +82,7 @@ public interface SceneNode<C extends IRenderContext, A extends IModelPackObject>
         /**
          * The part that will be rendered (corresponding to the encapsulated scene node)
          */
-        private final IDrawablePart<Object, A> part;
+        private final IDrawablePart<A> part;
         /**
          * The encapsulated scene node
          */
@@ -139,7 +139,7 @@ public interface SceneNode<C extends IRenderContext, A extends IModelPackObject>
          * @param packInfo      The pack info of the entity (the owner of the scene node)
          * @return True to render the scene node, false to cancel the rendering
          */
-        boolean beforeRender(SceneNode<C, A> renderedScene, IDrawablePart<Object, A> renderPart, C context, A packInfo);
+        boolean beforeRender(SceneNode<C, A> renderedScene, IDrawablePart<A> renderPart, C context, A packInfo);
 
         /**
          * Called after the scene node is rendered (and after the children are rendered) <br>
@@ -150,6 +150,6 @@ public interface SceneNode<C extends IRenderContext, A extends IModelPackObject>
          * @param context       The render context
          * @param packInfo      The pack info of the entity (the owner of the scene node)
          */
-        void afterRender(SceneNode<C, A> renderedScene, IDrawablePart<Object, A> renderPart, C context, A packInfo);
+        void afterRender(SceneNode<C, A> renderedScene, IDrawablePart<A> renderPart, C context, A packInfo);
     }
 }

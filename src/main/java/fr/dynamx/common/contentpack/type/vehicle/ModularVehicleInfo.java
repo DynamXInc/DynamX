@@ -15,11 +15,10 @@ import fr.dynamx.api.dxmodel.DxModelPath;
 import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.CreatePackItemEvent;
-import fr.dynamx.api.events.DynamXEntityRenderEvents;
+import fr.dynamx.api.events.client.BuildSceneGraphEvent;
 import fr.dynamx.client.renders.model.ItemDxModel;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.client.renders.model.texture.TextureVariantData;
-import fr.dynamx.client.renders.scene.SceneBuilder;
 import fr.dynamx.client.renders.scene.node.EntityNode;
 import fr.dynamx.client.renders.scene.node.SceneNode;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
@@ -277,7 +276,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     public SceneNode<?, ?> getSceneGraph() {
         if (sceneGraph == null) {
             if (isModelValid()) {
-                DynamXEntityRenderEvents.BuildSceneGraph event = new DynamXEntityRenderEvents.BuildSceneGraph(new SceneBuilder<>(), this, (List) getDrawableParts(), getScaleModifier());
+                BuildSceneGraphEvent.BuildEntityScene event = new BuildSceneGraphEvent.BuildEntityScene(this, (List) getDrawableParts(), getScaleModifier());
                 MinecraftForge.EVENT_BUS.post(event);
                 sceneGraph = event.getSceneGraphResult();
             } else

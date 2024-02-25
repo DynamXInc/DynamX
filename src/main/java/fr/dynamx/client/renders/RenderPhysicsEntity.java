@@ -1,6 +1,6 @@
 package fr.dynamx.client.renders;
 
-import fr.dynamx.api.events.DynamXEntityRenderEvents;
+import fr.dynamx.api.events.client.DynamXEntityRenderEvent;
 import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
 import fr.dynamx.client.renders.scene.BaseRenderContext;
@@ -64,17 +64,17 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
         }
         context.setRenderParams(x, y, z, partialTicks, false);
         //Render vehicle
-        if (!MinecraftForge.EVENT_BUS.post(new DynamXEntityRenderEvents.Render(entity, context, DynamXEntityRenderEvents.Render.Type.ENTITY, renderPass))) {
+        if (!MinecraftForge.EVENT_BUS.post(new DynamXEntityRenderEvent(entity, context, DynamXEntityRenderEvent.Type.ENTITY, renderPass))) {
             renderEntity(entity, context);
         }
         if (renderPass == 0) {
             spawnParticles(entity, context);
             //Render debug
-            if (!MinecraftForge.EVENT_BUS.post(new DynamXEntityRenderEvents.Render(entity, context, DynamXEntityRenderEvents.Render.Type.DEBUG, renderPass))) {
+            if (!MinecraftForge.EVENT_BUS.post(new DynamXEntityRenderEvent(entity, context, DynamXEntityRenderEvent.Type.DEBUG, renderPass))) {
                 renderDebug(entity, context);
             }
         }
-        MinecraftForge.EVENT_BUS.post(new DynamXEntityRenderEvents.Render(entity, context, DynamXEntityRenderEvents.Render.Type.POST, renderPass));
+        MinecraftForge.EVENT_BUS.post(new DynamXEntityRenderEvent(entity, context, DynamXEntityRenderEvent.Type.POST, renderPass));
         Vector3fPool.closePool();
         QuaternionPool.closePool();
         GlQuaternionPool.closePool();

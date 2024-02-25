@@ -2,8 +2,7 @@ package fr.dynamx.client.renders.scene.node;
 
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
 import fr.dynamx.api.contentpack.object.render.IModelPackObject;
-import fr.dynamx.api.events.DynamXItemEvent;
-import fr.dynamx.api.events.EventStage;
+import fr.dynamx.api.events.client.DynamXRenderItemEvent;
 import fr.dynamx.client.renders.model.ItemDxModel;
 import fr.dynamx.client.renders.scene.BaseRenderContext;
 import fr.dynamx.client.renders.scene.IRenderContext;
@@ -50,7 +49,7 @@ public abstract class AbstractItemNode<C extends IRenderContext, A extends IMode
             Vector3fPool.openPool();
             QuaternionPool.openPool();
             GlQuaternionPool.openPool();
-            if (!MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack, EventStage.TRANSFORM, renderType, transform))) {
+            if (!MinecraftForge.EVENT_BUS.post(new DynamXRenderItemEvent(context, this, DynamXRenderItemEvent.EventStage.TRANSFORM))) {
                 packInfo.applyItemTransforms(renderType, stack, model, transform);
                 ViewTransformsInfo transformsInfo = packInfo.getViewTransformsInfo(renderType);
                 if(transformsInfo != null) {
@@ -60,7 +59,7 @@ public abstract class AbstractItemNode<C extends IRenderContext, A extends IMode
                     transform.scale(scale, scale, scale);
                 }
             }
-            if (!MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack, EventStage.RENDER, renderType, transform))) {
+            if (!MinecraftForge.EVENT_BUS.post(new DynamXRenderItemEvent(context, this, DynamXRenderItemEvent.EventStage.RENDER))) {
                 renderItemModel(context, packInfo, transform);
             }
             GlQuaternionPool.closePool();

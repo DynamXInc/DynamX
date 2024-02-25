@@ -212,14 +212,14 @@ public class VehicleEntityEvent extends Event {
     @Cancelable
     public static class UpdateSounds extends VehicleEntityEvent {
         @Getter
-        private final PhysicsEntityEvent.Phase eventPhase;
+        private final EventPhase eventPhase;
         /**
          * The {@link BasicEngineModule} of the entity, responsible for sounds update
          */
         @Getter
         private final BasicEngineModule module;
 
-        public UpdateSounds(BaseVehicleEntity<?> vehicleEntity, BasicEngineModule module, PhysicsEntityEvent.Phase phase) {
+        public UpdateSounds(BaseVehicleEntity<?> vehicleEntity, BasicEngineModule module, EventPhase phase) {
             super(Side.CLIENT, vehicleEntity);
             this.eventPhase = phase;
             this.module = module;

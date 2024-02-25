@@ -10,6 +10,7 @@ import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.dxmodel.EnumDxModelFormats;
 import fr.dynamx.api.events.CreatePackItemEvent;
 import fr.dynamx.api.events.DynamXBlockEvent;
+import fr.dynamx.api.events.client.BuildSceneGraphEvent;
 import fr.dynamx.client.renders.scene.SceneBuilder;
 import fr.dynamx.client.renders.scene.node.BlockNode;
 import fr.dynamx.client.renders.scene.node.SceneNode;
@@ -111,7 +112,7 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
     public SceneNode<?, ?> getSceneGraph() {
         if (sceneNode == null) {
             if (isModelValid()) {
-                DynamXBlockEvent.BuildSceneGraph event = new DynamXBlockEvent.BuildSceneGraph(new SceneBuilder<>(), this, (List) getDrawableParts(), getScaleModifier());
+                BuildSceneGraphEvent.BuildBlockScene event = new BuildSceneGraphEvent.BuildBlockScene(this, (List) getDrawableParts(), getScaleModifier());
                 MinecraftForge.EVENT_BUS.post(event);
                 sceneNode = event.getSceneGraphResult();
             } else

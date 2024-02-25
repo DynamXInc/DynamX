@@ -5,7 +5,7 @@ import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.aym.acslib.api.services.mps.ModProtectionContainer;
 import fr.dynamx.api.contentpack.ContentPackType;
 import fr.dynamx.api.events.ContentPackSystemEvent;
-import fr.dynamx.api.events.PhysicsEntityEvent;
+import fr.dynamx.api.events.EventPhase;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariableRegistry;
 import fr.dynamx.client.gui.GuiBlockCustomization;
 import fr.dynamx.client.gui.GuiDnxDebug;
@@ -213,7 +213,7 @@ public class ContentPackLoader {
             ProgressManager.ProgressBar bar = ProgressManager.push("Loading content pack system", 1 + DynamXObjectLoaders.getInfoLists().size());
             bar.step("Discover assets");
 
-            MinecraftForge.EVENT_BUS.post(new ContentPackSystemEvent.Load(PhysicsEntityEvent.Phase.PRE));
+            MinecraftForge.EVENT_BUS.post(new ContentPackSystemEvent.Load(EventPhase.PRE));
             //List<ModularVehicleInfoBuilder> vehiclesToLoad = new ArrayList<>();
             int packCount = 0;
             int errorCount = 0;
@@ -291,7 +291,7 @@ public class ContentPackLoader {
                 loader.postLoad(isHotReloading);
             }
             ProgressManager.pop(bar);
-            MinecraftForge.EVENT_BUS.post(new ContentPackSystemEvent.Load(PhysicsEntityEvent.Phase.POST));
+            MinecraftForge.EVENT_BUS.post(new ContentPackSystemEvent.Load(EventPhase.POST));
             log.info("Loaded " + packCount + " content packs");
             if (errorCount > 0)
                 log.warn("Ignored " + errorCount + " errored packs");

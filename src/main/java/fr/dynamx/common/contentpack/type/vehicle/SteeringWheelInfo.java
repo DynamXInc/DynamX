@@ -14,7 +14,6 @@ import fr.dynamx.client.renders.scene.BaseRenderContext;
 import fr.dynamx.client.renders.scene.IRenderContext;
 import fr.dynamx.client.renders.scene.node.SceneNode;
 import fr.dynamx.client.renders.scene.node.SimpleNode;
-import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.WheelsModule;
 import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
@@ -33,7 +32,7 @@ import java.util.List;
 @Getter
 @Setter
 @RegisteredSubInfoType(name = "steeringwheel", registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
-public class SteeringWheelInfo extends BasePart<ModularVehicleInfo> implements IDrawablePart<BaseVehicleEntity<?>, ModularVehicleInfo> {
+public class SteeringWheelInfo extends BasePart<ModularVehicleInfo> implements IDrawablePart<ModularVehicleInfo> {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("PartName".equals(key))

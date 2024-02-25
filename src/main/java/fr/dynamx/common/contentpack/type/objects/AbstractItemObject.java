@@ -80,7 +80,7 @@ public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A e
     private final List<ISubInfoType<A>> subProperties = new ArrayList<>();
 
     @Getter
-    private final List<IDrawablePart<?, ?>> drawableParts = new ArrayList<>();
+    private final List<IDrawablePart<?>> drawableParts = new ArrayList<>();
 
     /**
      * The list of all rendered parts for this object <br>
@@ -126,14 +126,14 @@ public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A e
         partIds.put(part.getIdClass(), id);
         parts.add(part);
         if (part instanceof IDrawablePart)
-            addDrawablePart((IDrawablePart<?, ?>) part);
+            addDrawablePart((IDrawablePart<?>) part);
     }
 
     @Override
     public void addSubProperty(ISubInfoType<A> property) {
         subProperties.add(property);
         if (property instanceof IDrawablePart)
-            addDrawablePart((IDrawablePart<?, ?>) property);
+            addDrawablePart((IDrawablePart<?>) property);
     }
 
     @Override
@@ -165,7 +165,7 @@ public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A e
      *
      * @param part The part to add
      */
-    public void addDrawablePart(IDrawablePart<?, ?> part) {
+    public void addDrawablePart(IDrawablePart<?> part) {
         String[] names = part.getRenderedParts();
         if (names.length > 0)
             renderedParts.addAll(Arrays.asList(names));

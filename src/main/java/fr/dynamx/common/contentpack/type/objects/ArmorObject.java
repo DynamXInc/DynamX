@@ -7,10 +7,9 @@ import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
-import fr.dynamx.api.events.DynamXArmorEvent;
+import fr.dynamx.api.events.client.BuildSceneGraphEvent;
 import fr.dynamx.client.renders.model.ModelObjArmor;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
-import fr.dynamx.client.renders.scene.SceneBuilder;
 import fr.dynamx.client.renders.scene.node.ArmorNode;
 import fr.dynamx.client.renders.scene.node.SceneNode;
 import fr.dynamx.common.DynamXContext;
@@ -186,7 +185,7 @@ public class ArmorObject<T extends ArmorObject<?>> extends AbstractItemObject<T,
     public SceneNode<?, ?> getSceneGraph() {
         if (sceneNode == null) {
             if (isModelValid()) {
-                DynamXArmorEvent.BuildSceneGraph event = new DynamXArmorEvent.BuildSceneGraph(new SceneBuilder<>(), this, (List) getDrawableParts());
+                BuildSceneGraphEvent.BuildArmorScene event = new BuildSceneGraphEvent.BuildArmorScene(this, (List) getDrawableParts());
                 MinecraftForge.EVENT_BUS.post(event);
                 sceneNode = event.getSceneGraphResult();
             } else

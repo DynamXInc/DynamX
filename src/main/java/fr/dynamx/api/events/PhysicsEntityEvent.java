@@ -37,10 +37,6 @@ public class PhysicsEntityEvent extends Event {
         return physicsEntity;
     }
 
-    public enum Phase {
-        PRE, POST
-    }
-
     /**
      * Fired when an entity is being spawned
      */

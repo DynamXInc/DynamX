@@ -34,7 +34,7 @@ public class RenderDoor<T extends DoorEntity<?>> extends RenderPhysicsEntity<T> 
         if (modelRenderer == null) {
             return null;
         }
-        return context.setModelParams(entity, modelRenderer, entity.getEntityTextureID());
+        return context.setModelParams(entity, modelRenderer, entity.getEntityTextureId());
     }
 
     @Override

@@ -101,6 +101,12 @@ public interface IPhysicsModule<P extends AbstractEntityPhysicsHandler<?, ?>> {
     }
 
     /**
+     * Called to update textures of this module (egg for wheels) according to the new entity's metadata
+     */
+    @SideOnly(Side.CLIENT)
+    default void onTexturesChange(byte newMetadata) {}
+
+    /**
      * Implement this on you module to listen entity updates
      */
     interface IEntityUpdateListener {

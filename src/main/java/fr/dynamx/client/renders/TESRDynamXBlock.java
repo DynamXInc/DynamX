@@ -2,7 +2,7 @@ package fr.dynamx.client.renders;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.events.DynamXBlockEvent;
-import fr.dynamx.api.events.EventStage;
+import fr.dynamx.api.events.EventPhase;
 import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
 import fr.dynamx.client.renders.scene.BaseRenderContext;
@@ -38,10 +38,8 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
         BaseRenderContext.BlockRenderContext context = this.context.setModelParams(te, modelRenderer, (byte) te.getBlockMetadata());
         context.setRenderParams(x, y, z, partialTicks, false);
         SceneNode<BaseRenderContext.BlockRenderContext, BlockObject<?>> sceneNode = (SceneNode<BaseRenderContext.BlockRenderContext, BlockObject<?>>) packInfo.getSceneGraph();
-        if (!MinecraftForge.EVENT_BUS.post(new DynamXBlockEvent.RenderTileEntity((DynamXBlock<?>) te.getBlockType(), te.getWorld(), te, this, context.getRenderPosition(),
-                context.getPartialTicks(), destroyStage, alpha, EventStage.PRE))) {
+        if (!MinecraftForge.EVENT_BUS.post(new DynamXBlockEvent.RenderTileEntity((DynamXBlock<?>) te.getBlockType(), context, sceneNode, this, destroyStage, alpha, EventPhase.PRE))) {
             sceneNode.render(context, packInfo);
-
             Vector3f pos = DynamXUtils.toVector3f(te.getPos())
                     .add(packInfo.getTranslation().add(te.getRelativeTranslation()))
                     .add(0.5f, 1.5f, 0.5f);
@@ -49,9 +47,7 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
                     .add(packInfo.getRotation())
                     .add(0, te.getRotation() * 22.5f, 0);
             DynamXRenderUtils.spawnParticles(packInfo, te.getWorld(), pos, rot);
-
-            MinecraftForge.EVENT_BUS.post(new DynamXBlockEvent.RenderTileEntity((DynamXBlock<?>) te.getBlockType(), te.getWorld(), te, this, context.getRenderPosition(),
-                    context.getPartialTicks(), destroyStage, alpha, EventStage.POST));
+            MinecraftForge.EVENT_BUS.post(new DynamXBlockEvent.RenderTileEntity((DynamXBlock<?>) te.getBlockType(), context, sceneNode, this, destroyStage, alpha, EventPhase.POST));
         }
         if (shouldRenderDebug()) {
             GlStateManager.disableLighting();

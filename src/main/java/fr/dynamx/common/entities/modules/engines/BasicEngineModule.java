@@ -5,7 +5,7 @@ import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.IVehicleController;
-import fr.dynamx.api.events.PhysicsEntityEvent;
+import fr.dynamx.api.events.EventPhase;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.api.network.sync.EntityVariable;
 import fr.dynamx.api.network.sync.SimulationHolder;
@@ -201,11 +201,11 @@ public abstract class BasicEngineModule implements IPhysicsModule<BaseVehiclePhy
     @Override
     @SideOnly(Side.CLIENT)
     public void updateEntity() {
-        if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.UpdateSounds(entity, this, PhysicsEntityEvent.Phase.PRE))) {
+        if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.UpdateSounds(entity, this, EventPhase.PRE))) {
             if (entity.getPackInfo() != null) {
                 updateSounds();
             }
-            MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.UpdateSounds(entity, this, PhysicsEntityEvent.Phase.POST));
+            MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.UpdateSounds(entity, this, EventPhase.POST));
         }
     }
 

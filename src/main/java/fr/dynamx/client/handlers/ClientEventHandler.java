@@ -1,5 +1,7 @@
 package fr.dynamx.client.handlers;
 
+import com.jme3.math.Vector3f;
+import com.mrcrayfish.obfuscate.client.event.ModelPlayerEvent;
 import fr.aym.acsguis.api.ACsGuiApi;
 import fr.aym.acslib.ACsLib;
 import fr.aym.mps.ModProtectionSystem;
@@ -22,6 +24,7 @@ import fr.dynamx.common.contentpack.type.objects.BlockObject;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.entities.PropsEntity;
+import fr.dynamx.common.items.DynamXItem;
 import fr.dynamx.common.items.DynamXItemSpawner;
 import fr.dynamx.common.items.tools.ItemSlopes;
 import fr.dynamx.common.network.packets.MessageEntityInteract;
@@ -39,6 +42,7 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.GuiScreenOptionsSounds;
+import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.culling.Frustum;
@@ -315,6 +319,23 @@ public class ClientEventHandler {
     public void onEntityCameraSetup(EntityViewRenderEvent.CameraSetup event) {
         if (event.getEntity().getRidingEntity() instanceof PhysicsEntity)
             CameraSystem.rotateVehicleCamera(event);
+    }
+
+    @SubscribeEvent
+    public void setupPlayerRotations(ModelPlayerEvent.SetupAngles.Post event) {
+        flashlightAnimation(event.getEntityPlayer(), event.getModelPlayer());
+    }
+
+    public static void flashlightAnimation(EntityPlayer player, ModelPlayer modelPlayer) {
+        ItemStack heldItem = player.getHeldItemMainhand();
+        if (heldItem.getItem() instanceof DynamXItem) {
+            if(((DynamXItem<?>) heldItem.getItem()).getInfo().getFullName().contains("flashlight")) {
+                DynamXItem<?> item = (DynamXItem<?>) heldItem.getItem();
+                modelPlayer.bipedRightArm.rotateAngleX = (float) (Math.PI + Math.PI / 10) + modelPlayer.bipedHead.rotateAngleX;
+                modelPlayer.bipedRightArm.rotateAngleY = modelPlayer.bipedHead.rotateAngleY;
+                modelPlayer.bipedRightArm.rotateAngleZ = modelPlayer.bipedHead.rotateAngleZ;
+            }
+        }
     }
 
     @SubscribeEvent

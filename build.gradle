@@ -77,10 +77,11 @@ dependencies {
         exclude module: 'commons-io'
         exclude module: 'gson'
     }
+    implementation fg.deobf('curse.maven:obfuscate-289380:2916310')
     implementation 'org.joml:joml:1.10.5'
 
     compileOnly 'org.projectlombok:lombok:1.18.24'
-    compileOnly files('run/mods/BetterLights-0.0.3.PREVIEW-all.jar')
+    compileOnly files('run/mods/BetterLights-0.0.4.PREVIEW-all.jar')
 
 
     shadow('org.spongepowered:mixin:0.8.5') {

@@ -1,7 +1,7 @@
 package fr.dynamx.common.entities.modules;
 
 import dz.betterlights.BetterLightsMod;
-import dz.betterlights.dynamx.LightCasterPartSync;
+import dz.betterlights.dynamx.LightPartGroup;
 import dz.betterlights.lighting.LightsSerialization;
 import dz.betterlights.lighting.lightcasters.BlockLightCaster;
 import dz.betterlights.lighting.lightcasters.EntityLightCaster;
@@ -9,7 +9,6 @@ import dz.betterlights.lighting.lightcasters.LightCaster;
 import dz.betterlights.network.EnumPacketType;
 import dz.betterlights.network.PacketSyncLight;
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
-import fr.dynamx.api.contentpack.object.render.IModelPackObject;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.network.EnumPacketTarget;
 import fr.dynamx.client.handlers.ClientEventHandler;
@@ -24,9 +23,7 @@ import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.items.DynamXItem;
 import fr.dynamx.common.network.lights.PacketSyncEntityLights;
 import fr.dynamx.common.network.lights.PacketSyncPartLights;
-import fr.dynamx.common.objloader.data.DxModelData;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
-import fr.dynamx.utils.DynamXUtils;
 import lombok.Getter;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
@@ -47,7 +44,7 @@ public abstract class AbstractLightsModule implements IPhysicsModule<BaseVehicle
     protected final Map<SpotLightObject, LightCaster> lightCasters = new HashMap<>();
 
     @Getter
-    protected final Map<Integer, LightCasterPartSync> lightCasterPartSyncs = new HashMap<>();
+    protected final Map<Integer, LightPartGroup> lightCasterPartSyncs = new HashMap<>();
 
     public AbstractLightsModule(ILightOwner<?> lightOwner) {
         this.lightOwner = lightOwner;
@@ -59,7 +56,7 @@ public abstract class AbstractLightsModule implements IPhysicsModule<BaseVehicle
 
     public void setLightOn(int id, boolean state) {
         if (lightCasterPartSyncs.containsKey(id)) {
-            lightCasterPartSyncs.get(id).isEnabled = state;
+            lightCasterPartSyncs.get(id).setEnabled(state);
         }
     }
 
@@ -67,8 +64,9 @@ public abstract class AbstractLightsModule implements IPhysicsModule<BaseVehicle
         return isLightOn(id.hashCode());
     }
 
+
     public boolean isLightOn(int id) {
-        return lightCasterPartSyncs.containsKey(id) && lightCasterPartSyncs.get(id).isEnabled;
+        return lightCasterPartSyncs.containsKey(id) && lightCasterPartSyncs.get(id).isEnabled();
     }
 
     @Override
@@ -77,60 +75,60 @@ public abstract class AbstractLightsModule implements IPhysicsModule<BaseVehicle
     }
 
     @Override
-    public Map<Integer, LightCasterPartSync> getLightCastersSync() {
+    public Map<Integer, LightPartGroup> getLightCastersSync() {
         return lightCasterPartSyncs;
     }
 
-    public void addLights(PackPhysicsEntity<?,?> entity) {
-        addLights(entity.getPackInfo(), entity, null, null, null);
+    public void addLights(PackPhysicsEntity<?, ?> entity) {
+        addLights(entity, null, null, null);
     }
 
     public void addLights(TEDynamXBlock tileEntity) {
-        addLights(tileEntity.getPackInfo(), null, tileEntity, null, null);
+        addLights(null, tileEntity, null, null);
     }
 
     public void addLights(DynamXItem<?> item, UUID id) {
-        addLights(item.getInfo(), null, null, item, id);
+        addLights(null, null, item, id);
     }
 
-    public void addLights(IModelPackObject packInfo, @Nullable PackPhysicsEntity<?,?> entity, @Nullable TEDynamXBlock tileEntity, @Nullable DynamXItem<?> item, @Nullable UUID id) {
+    public void addLights(@Nullable PackPhysicsEntity<?, ?> entity, @Nullable TEDynamXBlock tileEntity, @Nullable DynamXItem<?> item, @Nullable UUID id) {
         if (!FMLCommonHandler.instance().getEffectiveSide().isServer()) {
             return;
         }
         for (PartLightSource compound : lightOwner.getLightSources().values()) {
             //Create all the light casters for the spotlight objects
             for (SpotLightObject spotLight : compound.getSpotLights()) {
-                LightCaster lightCaster = null;
-                if(entity != null){
+                LightCaster lightCaster;
+                if (entity != null) {
                     lightCaster = new EntityLightCaster(entity);
-                }else if(tileEntity != null){
+                } else if (tileEntity != null) {
                     lightCaster = new BlockLightCaster(tileEntity);
                 } else if (item != null) {
                     lightCaster = new EntityLightCaster(ClientEventHandler.MC.player);
-                }
-                DxModelData objModel = DynamXContext.getDxModelDataFromCache(DynamXUtils.getModelPath(packInfo.getPackName(), packInfo.getModel()));
-                addLight(objModel, compound, lightCaster, spotLight);
+                } else
+                    throw new IllegalArgumentException("Invalid light owner type. Must be either a block, entity or item.");
+                createLightCaster(lightCaster, spotLight);
             }
             for (LightObject s : compound.getSources()) {
                 //Add all the spotlight objects to each light object (ID -> spotlights)
-                LightCasterPartSync lightCasterPartSync = new LightCasterPartSync();
-                lightCasterPartSync.ownerId = s.getLightId();
-                lightCasterPartSync.isEnabled = s.getActivationState().equals(LightObject.ActivationState.ALWAYS);
+                LightPartGroup lightCasterPartSync;
+                if (tileEntity != null) {
+                    lightCasterPartSync = new LightPartGroup.BlockOwner(s.getLightId(), tileEntity.getPos());
+                } else if (entity != null) {
+                    lightCasterPartSync = new LightPartGroup.EntityAndItemOwner(LightPartGroup.EnumOwnerType.ENTITY, s.getLightId(), entity.getPersistentID());
+                } else if (item != null) {
+                    lightCasterPartSync = new LightPartGroup.EntityAndItemOwner(LightPartGroup.EnumOwnerType.ITEM, s.getLightId(), id);
+                } else
+                    throw new IllegalArgumentException("Invalid light owner type. Must be either a block, entity or item.");
+
+                lightCasterPartSync.setEnabled(s.getActivationState().equals(LightObject.ActivationState.ALWAYS));
                 for (Map.Entry<SpotLightObject, LightCaster> entry : lightCasters.entrySet()) {
                     String objectName = entry.getKey().getOwner().getObjectName();
-                    lightCasterPartSync.lightCasters.put(objectName, entry.getValue());
+                    lightCasterPartSync.getLightCasters().put(objectName, entry.getValue());
                 }
-                if (tileEntity != null) {
-                    lightCasterPartSync.type = 0;
-                    lightCasterPartSync.data2 = tileEntity.getPos();
-                }else if (entity != null) {
-                    lightCasterPartSync.type = 1;
-                    lightCasterPartSync.data1 = entity.getPersistentID().toString();
-                }else if(item != null){
-                    lightCasterPartSync.type = 2;
-                    lightCasterPartSync.data1 = id.toString();
-                }
-                lightCasterPartSyncs.put(lightCasterPartSync.ownerId, lightCasterPartSync);
+
+                lightCasterPartSyncs.put(lightCasterPartSync.getOwnerId(), lightCasterPartSync);
+
                 DynamXContext.getNetwork().getVanillaNetwork().sendPacket(new PacketSyncPartLights(lightCasterPartSync, EnumPacketType.ADD), EnumPacketTarget.ALL, null);
             }
         }
@@ -197,7 +195,7 @@ public abstract class AbstractLightsModule implements IPhysicsModule<BaseVehicle
         public EntityLightsModule(Entity entity, ILightOwner<?> lightOwner) {
             super(lightOwner);
             this.entity = entity;
-            if(entity instanceof PackPhysicsEntity)
+            if (entity instanceof PackPhysicsEntity)
                 addLights((PackPhysicsEntity<?, ?>) entity);
         }
 
@@ -205,7 +203,7 @@ public abstract class AbstractLightsModule implements IPhysicsModule<BaseVehicle
         public void updateEntity() {
             super.updateEntity();
             if (entity.world.isRemote) {
-                if(lightCasterPartSyncs.isEmpty() && !isInit) {
+                if (lightCasterPartSyncs.isEmpty() && !isInit) {
                     isInit = true;
                     DynamXContext.getNetwork().getVanillaNetwork().sendPacket(new PacketSyncEntityLights(entity.getEntityId()), EnumPacketTarget.SERVER, null);
                 }
@@ -243,9 +241,9 @@ public abstract class AbstractLightsModule implements IPhysicsModule<BaseVehicle
                 return;
             }
 
-            for (Map.Entry<Integer, LightCasterPartSync> entry : lightCasterPartSyncs.entrySet()) {
-                for (LightCasterPartSync value : lightCasterPartSyncs.values()) {
-                    for (LightCaster lightCaster : value.lightCasters.values()) {
+            for (Map.Entry<Integer, LightPartGroup> entry : lightCasterPartSyncs.entrySet()) {
+                for (LightPartGroup value : lightCasterPartSyncs.values()) {
+                    for (LightCaster lightCaster : value.getLightCasters().values()) {
                         DynamXContext.getNetwork().getVanillaNetwork().sendPacket(new PacketSyncLight(lightCaster, EnumPacketType.REMOVE), EnumPacketTarget.ALL, null);
                         LightsSerialization.lights.remove(lightCaster);
                         BetterLightsMod.getLightManager().getLightsInWorld().remove(lightCaster);
@@ -276,9 +274,9 @@ public abstract class AbstractLightsModule implements IPhysicsModule<BaseVehicle
                 return;
             }
 
-            for (Map.Entry<Integer, LightCasterPartSync> entry : lightCasterPartSyncs.entrySet()) {
-                for (LightCasterPartSync value : lightCasterPartSyncs.values()) {
-                    for (LightCaster lightCaster : value.lightCasters.values()) {
+            for (Map.Entry<Integer, LightPartGroup> entry : lightCasterPartSyncs.entrySet()) {
+                for (LightPartGroup value : lightCasterPartSyncs.values()) {
+                    for (LightCaster lightCaster : value.getLightCasters().values()) {
                         DynamXContext.getNetwork().getVanillaNetwork().sendPacket(new PacketSyncLight(lightCaster, EnumPacketType.REMOVE), EnumPacketTarget.ALL, null);
                         LightsSerialization.lights.remove(lightCaster);
                         BetterLightsMod.getLightManager().getLightsInWorld().remove(lightCaster);

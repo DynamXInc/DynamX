@@ -16,6 +16,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RegisteredSubInfoType(name = "SpotLight", registries = {SubInfoTypeRegistries.LIGHTS, SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER, SubInfoTypeRegistries.BLOCKS,SubInfoTypeRegistries.PROPS, SubInfoTypeRegistries.ITEMS, SubInfoTypeRegistries.ARMORS}, strictName = false)
 public class SpotLightObject extends SubInfoType<PartLightSource> implements ISubInfoTypeOwner<SpotLightObject>
@@ -45,7 +46,7 @@ public class SpotLightObject extends SubInfoType<PartLightSource> implements ISu
 
     @Getter
     @PackFileProperty(configNames = "SpotLightColor", required = false)
-    protected Vector3f spotLightColor;
+    protected Vector3f spotLightColor = new Vector3f(1,1,1);
 
     @Getter
     private final List<VolumetricLightObject> volumetricLightObjects = new ArrayList<>();
@@ -82,5 +83,9 @@ public class SpotLightObject extends SubInfoType<PartLightSource> implements ISu
     @Override
     public List<ISubInfoType<SpotLightObject>> getSubProperties() {
         return null;
+    }
+
+    public List<LightObject> getLightObjects() {
+        return owner.getSources();
     }
 }

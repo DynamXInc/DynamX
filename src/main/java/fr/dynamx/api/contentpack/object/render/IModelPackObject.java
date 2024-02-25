@@ -5,6 +5,8 @@ import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
 import fr.dynamx.client.renders.model.ItemDxModel;
 import fr.dynamx.client.renders.scene.node.AbstractItemNode;
 import fr.dynamx.client.renders.scene.node.SceneNode;
+import fr.dynamx.common.contentpack.type.ViewTransformsInfo;
+import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;

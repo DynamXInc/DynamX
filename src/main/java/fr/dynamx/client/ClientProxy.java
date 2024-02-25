@@ -2,6 +2,8 @@ package fr.dynamx.client;
 
 import fr.aym.acslib.ACsLib;
 import fr.aym.acslib.api.services.ThreadedLoadingService;
+import fr.dynamx.api.dxmodel.DxModelPath;
+import fr.dynamx.bb.OBBPlayerManager;
 import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.client.handlers.KeyHandler;
 import fr.dynamx.client.network.ClientPhysicsEntitySynchronizer;
@@ -9,12 +11,14 @@ import fr.dynamx.client.renders.RenderProp;
 import fr.dynamx.client.renders.RenderRagdoll;
 import fr.dynamx.client.renders.RenderSeatEntity;
 import fr.dynamx.client.renders.TESRDynamXBlock;
+import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
 import fr.dynamx.client.renders.vehicle.RenderBaseVehicle;
 import fr.dynamx.client.renders.vehicle.RenderDoor;
 import fr.dynamx.client.sound.DynamXSoundHandler;
 import fr.dynamx.common.CommonProxy;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.blocks.TEDynamXBlock;
+import fr.dynamx.common.contentpack.PackInfo;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.entities.PropsEntity;
 import fr.dynamx.common.entities.RagdollEntity;
@@ -25,6 +29,7 @@ import fr.dynamx.common.network.sync.SPPhysicsEntitySynchronizer;
 import fr.dynamx.common.network.udp.CommandUdp;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.world.BuiltinThreadedPhysicsWorld;
+import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXLoadingTasks;
 import fr.dynamx.utils.client.CommandNetworkDebug;
 import fr.dynamx.utils.client.DynamXRenderUtils;
@@ -33,6 +38,7 @@ import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.resources.SimpleReloadableResourceManager;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.client.ClientCommandHandler;
@@ -71,6 +77,8 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
     public void preInit() {
         super.preInit();
 
+        DynamXContext.getDxModelRegistry().registerModel(new DxModelPath(PackInfo.forAddon(DynamXConstants.ID), new ResourceLocation("dynamxmod:obb/model.obj")));
+
         DynamXContext.getDxModelRegistry().onPackInfosReloaded();
 
         RenderingRegistry.registerEntityRenderingHandler(CarEntity.class, RenderBaseVehicle.RenderCar::new);
@@ -89,6 +97,7 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
     public void init() {
         super.init();
 
+        MinecraftForge.EVENT_BUS.register(new OBBPlayerManager());
         MinecraftForge.EVENT_BUS.register(new KeyHandler(FMLClientHandler.instance().getClient()));
         ClientCommandHandler.instance.registerCommand(new CommandUdp());
         ClientCommandHandler.instance.registerCommand(new CommandNetworkDebug());
@@ -99,6 +108,8 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
             Minecraft.getMinecraft().getFramebuffer().enableStencil();
     }
 
+    public static DxModelRenderer obbModel;
+
     @Override
     public void completeInit() {
         super.completeInit();
@@ -108,6 +119,8 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
         } finally {
             SplashProgress.resume();
         }
+
+        obbModel = DynamXContext.getDxModelRegistry().getModel(new ResourceLocation("dynamxmod:obb/model.obj"));
     }
 
     @Override

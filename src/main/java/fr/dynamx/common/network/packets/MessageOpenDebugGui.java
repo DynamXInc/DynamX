@@ -3,7 +3,6 @@ package fr.dynamx.common.network.packets;
 import fr.aym.acsguis.api.ACsGuiApi;
 import fr.dynamx.api.network.EnumNetworkType;
 import fr.dynamx.api.network.IDnxPacket;
-import fr.dynamx.client.gui.GuiDnxDebug;
 import fr.dynamx.client.gui.NewGuiDnxDebug;
 import io.netty.buffer.ByteBuf;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;

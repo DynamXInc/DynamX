@@ -86,6 +86,7 @@ dependencies {
         exclude module: 'gson'
     }
     shadow 'com.github.stephengold:Libbulletjme:' + libbulletjme_version
+    shadow 'org.joml:joml:1.10.5'
 
     shadow fileTree(dir: 'libs', include: '*.jar')
 

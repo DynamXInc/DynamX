@@ -37,6 +37,8 @@ public class ItemProps<T extends PropObject<T>> extends DynamXItemSpawner<T> {
         Vector3f pos;
         if (!worldIn.isRemote) {
             if (playerIn.isSneaking()) {
+                if(!playerIn.capabilities.isCreativeMode)
+                    return true;
                 for (float i = 0; i < 5; i += 1) {
                     for (float j = 0; j < 5; j += 1) {
                         for (float k = 0; k < 5; k += 1) {

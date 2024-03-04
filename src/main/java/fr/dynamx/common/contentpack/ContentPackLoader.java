@@ -8,7 +8,6 @@ import fr.dynamx.api.events.ContentPackSystemEvent;
 import fr.dynamx.api.events.EventPhase;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariableRegistry;
 import fr.dynamx.client.gui.GuiBlockCustomization;
-import fr.dynamx.client.gui.GuiDnxDebug;
 import fr.dynamx.client.gui.GuiLoadingErrors;
 import fr.dynamx.client.gui.NewGuiDnxDebug;
 import fr.dynamx.client.handlers.hud.CarController;
@@ -149,7 +148,6 @@ public class ContentPackLoader {
         DynamXMain.log.info("Loaded " + packCount + " DynamX resource packs");
         if (side.isClient()) {
             //Add built-in style, before customs by addons
-            ACsGuiApi.registerStyleSheetToPreload(GuiDnxDebug.STYLE);
             ACsGuiApi.registerStyleSheetToPreload(NewGuiDnxDebug.STYLE);
             ACsGuiApi.registerStyleSheetToPreload(GuiLoadingErrors.STYLE);
             ACsGuiApi.registerStyleSheetToPreload(CarController.STYLE);

@@ -301,6 +301,12 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
                 int k = i / 65536;
                 OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float) j, (float) k);
                 GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+            } else if(context instanceof BaseRenderContext.BlockRenderContext && isOn){
+                int i = ClientEventHandler.MC.world.getCombinedLight(((BaseRenderContext.BlockRenderContext) context).getTileEntity().getPos(), 0);
+                int j = i % 65536;
+                int k = i / 65536;
+                OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)j, (float)k);
+                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             }
             GlStateManager.popMatrix();
             renderChildren(context, packInfo);

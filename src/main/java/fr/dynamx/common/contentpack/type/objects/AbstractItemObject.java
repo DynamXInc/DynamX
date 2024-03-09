@@ -138,7 +138,7 @@ public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A e
 
     @Override
     public boolean postLoad(boolean hot) {
-        if(itemScale != getBaseItemScale() || itemTranslate != null || itemRotate != null) {
+        if(FMLCommonHandler.instance().getSide().isClient() && (itemScale != getBaseItemScale() || itemTranslate != null || itemRotate != null)) {
             if(itemTransformsInfo != null) {
                 DynamXErrorManager.addPackError(getPackName(), "mixed_item_transforms_info", ErrorLevel.HIGH, getName(), "You can't mix old item transforms and ItemTransforms block !");
             } else {

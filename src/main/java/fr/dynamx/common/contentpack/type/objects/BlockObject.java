@@ -9,9 +9,8 @@ import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.dxmodel.EnumDxModelFormats;
 import fr.dynamx.api.events.CreatePackItemEvent;
-import fr.dynamx.api.events.DynamXBlockEvent;
 import fr.dynamx.api.events.client.BuildSceneGraphEvent;
-import fr.dynamx.client.renders.scene.SceneBuilder;
+import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.client.renders.scene.node.BlockNode;
 import fr.dynamx.client.renders.scene.node.SceneNode;
 import fr.dynamx.common.blocks.DynamXBlock;
@@ -76,6 +75,14 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
         super(packName, fileName);
         itemIcon = "Block";
         collisionsHelper = new ObjectCollisionsHelper();
+    }
+
+    @Override
+    public IModelTextureVariants getTextureVariantsFor(ObjObjectRenderer objObjectRenderer) {
+        PartLightSource src = getLightSource(objObjectRenderer.getObjObjectData().getName());
+        if (src != null)
+            return src;
+        return super.getTextureVariantsFor(objObjectRenderer);
     }
 
     @Override

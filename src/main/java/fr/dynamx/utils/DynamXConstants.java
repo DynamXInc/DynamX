@@ -15,6 +15,8 @@ public class DynamXConstants
     public static final String DEFAULT_ACSGUIS_VERSION = "1.2.12";
     public static final String ACSLIBS_REQUIRED_VERSION = "[1.2.12,)";
 
+    public static final String LIBBULLET_BASE_URL = "https://files.dynamx.fr/4.0.0/LibBullet/";
+
     public static final String LIBBULLET_VERSION = "18.1.0";
     /** .dc file version, only change when an update of libbullet breaks the .dc files, to regenerate them */
     public static final String DC_FILE_VERSION = "12.5.0";

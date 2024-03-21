@@ -5,9 +5,9 @@ import com.jme3.math.Vector3f;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
-import fr.dynamx.api.obj.ObjModelPath;
+import fr.dynamx.api.dxmodel.DxModelPath;
 import fr.dynamx.common.DynamXContext;
-import fr.dynamx.common.objloader.data.ObjModelData;
+import fr.dynamx.common.objloader.data.DxModelData;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.physics.ShapeUtils;
@@ -16,8 +16,9 @@ import lombok.Getter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ObjectCollisionsHelper
-{
+public class ObjectCollisionsHelper {
+    private static CompoundCollisionShape EMPTY_COLLISION_SHAPE;
+
     /**
      * The collision shape of this object, generated either form the partShapes list, or the obj model of the object (hull shape/complex collisions)
      */
@@ -34,41 +35,43 @@ public class ObjectCollisionsHelper
         shapes.add(partShape);
     }
 
-    public void loadCollisions(INamedObject object, ObjModelPath modelPath, String partName, Vector3f centerOfMass, float shapeYOffset, boolean useComplexCollisions, Vector3f scaleModifier, CollisionType type) {
+    public void loadCollisions(INamedObject object, DxModelPath modelPath, String partName, Vector3f centerOfMass, float shapeYOffset, boolean useComplexCollisions, Vector3f scaleModifier, CollisionType type) {
         try {
             if (useComplexCollisions) {
                 // Case 1: complex collisions
                 physicsCollisionShape = ShapeUtils.generateComplexModelCollisions(modelPath, partName, scaleModifier, centerOfMass, shapeYOffset);
             }
-            if(getShapes().isEmpty()) {
+            if (getShapes().isEmpty()) {
                 // Case 2: No shapes (doesn't depends on complex collisions)
-                ObjModelData objModelData = DynamXContext.getObjModelDataFromCache(modelPath);
-                if(!useComplexCollisions) {
+                DxModelData dxModelData = DynamXContext.getDxModelDataFromCache(modelPath);
+                if (!useComplexCollisions) {
                     // Case 2.1: No shapes and no complex collisions: generate physics collisions automatically from the obj model (with part shapes)
                     if (type == CollisionType.VEHICLE)
                         throw new UnsupportedOperationException("Automatic physics collisions (UseComplexCollisions = false when no PartShape is added) are not supported for vehicles");
                     physicsCollisionShape = new CompoundCollisionShape();
                 }
-                // else Case 2.2: No shapes and complex collisions: generate part shapes from the obj model
-                objModelData.getObjObjects().forEach(objObject -> {
-                    if(!partName.isEmpty() && !objObject.getName().toLowerCase().contains(partName.toLowerCase()))
+
+                // Case 2.2: No shapes and complex collisions: generate part shapes from the obj model
+                dxModelData.getMeshNames().forEach(meshName -> {
+                    if (!partName.isEmpty() && !meshName.contains(partName.toLowerCase()))
                         return;
-                    if(!useComplexCollisions) {
-                        Vector3f half = objObject.getMesh().getDimension().multLocal(scaleModifier);
-                        if (half.x != 0 || half.y != 0 || half.z != 0) {
-                            physicsCollisionShape.addChildShape(new BoxCollisionShape(half), objObject.getMesh().getCenter().addLocal(centerOfMass));
-                        }
+                    Vector3f dimension = dxModelData.getMeshDimension(meshName, new Vector3f()).multLocal(scaleModifier);
+                    if (dimension.x == 0 && dimension.y == 0 && dimension.z == 0)
+                        return;
+                    Vector3f center = dxModelData.getMeshCenter(meshName, new Vector3f()).multLocal(scaleModifier);
+                    if (!useComplexCollisions) {
+                        physicsCollisionShape.addChildShape(new BoxCollisionShape(dimension), center.add(centerOfMass));
                     }
-                    MutableBoundingBox box = new MutableBoundingBox(objObject.getMesh().getDimension().mult(scaleModifier)).offset(objObject.getMesh().getCenter());
+                    MutableBoundingBox box = new MutableBoundingBox(dimension).offset(center);
                     shapes.add(new IShapeInfo() {
                         @Override
                         public Vector3f getPosition() {
-                            return objObject.getMesh().getCenter();
+                            return center;
                         }
 
                         @Override
                         public Vector3f getSize() {
-                            return objObject.getMesh().getDimension().multLocal(scaleModifier);
+                            return dimension;
                         }
 
                         @Override
@@ -77,7 +80,7 @@ public class ObjectCollisionsHelper
                         }
                     });
                 });
-            } else if(!useComplexCollisions) {
+            } else if (!useComplexCollisions) {
                 // Case 3: no complex collisions and shapes
                 // nb: the scale modifier is already applied to the part shapes
                 physicsCollisionShape = new CompoundCollisionShape();
@@ -99,7 +102,7 @@ public class ObjectCollisionsHelper
                     physicsCollisionShape.addChildShape(collisionShape, new Vector3f(centerOfMass.x, centerOfMass.y, centerOfMass.z).add(shape.getPosition()));
                 });
             }
-            if(type == CollisionType.BLOCK) {
+            if (type == CollisionType.BLOCK) {
                 getShapes().replaceAll(sh -> new IShapeInfo() {
                     @Override
                     public Vector3f getPosition() {
@@ -137,5 +140,11 @@ public class ObjectCollisionsHelper
         VEHICLE,
         BLOCK,
         PROP
+    }
+
+    public static CompoundCollisionShape getEmptyCollisionShape() {
+        if (EMPTY_COLLISION_SHAPE == null)
+            EMPTY_COLLISION_SHAPE = new CompoundCollisionShape();
+        return EMPTY_COLLISION_SHAPE;
     }
 }

@@ -2,7 +2,7 @@ package fr.dynamx.common.objloader;
 
 
 import fr.dynamx.common.objloader.data.Material;
-import fr.dynamx.common.objloader.data.Mesh;
+import fr.dynamx.common.objloader.data.ObjObjectData;
 import fr.dynamx.common.objloader.data.Vertex;
 import lombok.Getter;
 
@@ -30,17 +30,17 @@ public class IndexedModel {
     @Getter
     public final Map<String, Material.IndexPair> materials = new HashMap<>();
 
-    public void toMesh(Mesh mesh) {
+    public void toMesh(ObjObjectData mesh) {
         int n = Math.min(vertices.size(), Math.min(texCoords.size(), normals.size()));
         Integer[] indicesArray = indices.toArray(new Integer[0]);
         Vertex[] verticesArray = IntStream.range(0, n).mapToObj(i -> new Vertex(vertices.get(i),
                 texCoords.get(i),
                 normals.get(i), new Vector3f())).toArray(Vertex[]::new);
         int[] indicesArrayInt = Arrays.stream(indicesArray).mapToInt(integer -> integer).toArray();
-        mesh.vertices = verticesArray;
-        mesh.indices = indicesArrayInt;
-        mesh.materialForEachVertex = indicedMaterials.toArray(new String[0]);
-        mesh.materials = materials;
+        mesh.setVertices(verticesArray);
+        mesh.setIndices(indicesArrayInt);
+        mesh.setMaterialForEachVertex(indicedMaterials.toArray(new String[0]));
+        mesh.setMaterials(materials);
     }
 
     public void computeNormals() {

@@ -19,7 +19,7 @@ public class SoundInfoLoader extends InfoLoader<SoundListInfo> {
     }
 
     @Override
-    protected void readInfo(BufferedReader inputStream, INamedObject info) {
+    protected void readInfo(SubInfoTypesRegistry<SoundListInfo> subInfoTypesRegistry, BufferedReader inputStream, INamedObject info) {
         assert info instanceof SoundListInfo : "Bad SoundInfoLoader usage";
         final EngineSound[] readingCategory = {null};
         //Loaded sounds

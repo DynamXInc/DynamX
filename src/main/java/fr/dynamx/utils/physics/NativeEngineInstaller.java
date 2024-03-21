@@ -88,7 +88,7 @@ public class NativeEngineInstaller {
     private static boolean downloadJme(ProgressManager.ProgressBar bar, File to, String name, String jmeVersion) throws IOException {
         DynamXMain.log.info("Installing lightbulletjme native physics engine...");
         bar.step("0%");
-        URL url = new URL("https://github.com/stephengold/Libbulletjme/releases/download/" + jmeVersion + "/" + name);
+        URL url = new URL(DynamXConstants.LIBBULLET_BASE_URL + jmeVersion + "/" + name);
         download(bar, url, to);
         DynamXMain.log.info("Downloaded native physics engine from " + url + " to " + to);
         fillPercentBar(bar, bar.getStep(), bar.getSteps());

@@ -17,8 +17,4 @@ public class ItemHelicopter extends ItemModularEntity {
     public BaseVehicleEntity<?> getSpawnEntity(World worldIn, EntityPlayer playerIn, Vector3f pos, float spawnRotation, int metadata) {
         return new HelicopterEntity<>(getInfo().getFullName(), worldIn, pos, spawnRotation, metadata);
     }
-
-    public static ItemHelicopter getItemForCar(ModularVehicleInfo info) {
-        return new ItemHelicopter(info);
-    }
 }

@@ -1,5 +1,8 @@
 package fr.dynamx.api.contentpack;
 
+/**
+ * The type of a content pack
+ */
 public enum ContentPackType {
     NOTSET(false),
     FOLDER(false),

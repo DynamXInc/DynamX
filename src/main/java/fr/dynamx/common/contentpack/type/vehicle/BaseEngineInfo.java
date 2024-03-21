@@ -25,7 +25,7 @@ public class BaseEngineInfo extends SubInfoTypeOwner<BaseEngineInfo> implements 
     @PackFileProperty(configNames = "MaxRPM")
     private float maxRevs;
     @Getter
-    @PackFileProperty(configNames = "Braking")
+    @PackFileProperty(configNames = {"EngineBraking", "Braking"})
     private float braking;
 
     public List<Vector3f> points = new ArrayList<>();
@@ -104,6 +104,9 @@ public class BaseEngineInfo extends SubInfoTypeOwner<BaseEngineInfo> implements 
     @Override
     public ModularVehicleInfo getOwner() {
         return null;
+    }
+
+    public void addGear(GearInfo gearInfo) {
     }
 }
 

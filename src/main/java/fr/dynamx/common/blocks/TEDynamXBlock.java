@@ -6,26 +6,40 @@ import com.jme3.math.Vector3f;
 import fr.aym.acsguis.api.ACsGuiApi;
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
+import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.client.gui.GuiBlockCustomization;
+import fr.dynamx.client.renders.animations.DxAnimator;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.capability.DynamXChunkData;
 import fr.dynamx.common.capability.DynamXChunkDataProvider;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
+import fr.dynamx.common.contentpack.parts.PartBlockSeat;
+import fr.dynamx.common.contentpack.parts.PartStorage;
+import fr.dynamx.common.contentpack.type.ObjectCollisionsHelper;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
-import fr.dynamx.common.entities.ICollidableObject;
+import fr.dynamx.common.entities.IDynamXObject;
+import fr.dynamx.common.entities.SeatEntity;
 import fr.dynamx.common.entities.modules.AbstractLightsModule;
+import fr.dynamx.common.entities.modules.StorageModule;
+import fr.dynamx.common.physics.terrain.chunk.ChunkLoadingTicket;
+import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.VerticalChunkPos;
+import fr.dynamx.utils.debug.ChunkGraph;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import lombok.Getter;
+import lombok.Setter;
+import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -33,10 +47,27 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPackInfoReloadListener {
-    private BlockObject<?> blockObjectInfo;
+public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInfoReloadListener, ITickable {
+    @Getter
+    private BlockObject<?> packInfo;
+    @Getter
     private int rotation;
-    private Vector3f relativeTranslation = new Vector3f(), relativeScale = new Vector3f(), relativeRotation = new Vector3f();
+    @Getter
+    @Setter
+    private Vector3f relativeTranslation = new Vector3f();
+    @Getter
+    @Setter
+    private Vector3f relativeRotation = new Vector3f();
+    @Getter
+    @Setter
+    private Vector3f relativeScale = new Vector3f(1, 1, 1);
+
+    private boolean hasSeats;
+    @Getter
+    private List<SeatEntity> seatEntities;
+
+    @Getter
+    private StorageModule storageModule;
 
     /**
      * The cache of the block collisions, with position offset but no rotation
@@ -50,33 +81,55 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
     @Getter
     private AbstractLightsModule lightsModule;
 
+    @Getter
+    private final DxAnimator animator;
+
     public TEDynamXBlock() {
+        animator = new DxAnimator();
     }
 
-    public TEDynamXBlock(BlockObject<?> blockObjectInfo) {
-        setBlockObjectInfo(blockObjectInfo);
+    public TEDynamXBlock(BlockObject<?> packInfo) {
+        this();
+        setPackInfo(packInfo);
+        this.hasSeats = !packInfo.getPartsByType(PartBlockSeat.class).isEmpty();
     }
 
-    public BlockObject<?> getBlockObjectInfo() {
-        return blockObjectInfo;
-    }
-
-    public void setBlockObjectInfo(BlockObject<?> blockObjectInfo) {
-        this.blockObjectInfo = blockObjectInfo;
-        if(world != null)
+    public void setPackInfo(BlockObject<?> packInfo) {
+        this.packInfo = packInfo;
+        if (world != null)
             world.markBlockRangeForRenderUpdate(pos, pos);
-        if(blockObjectInfo != null && !blockObjectInfo.getLightSources().isEmpty())
-            lightsModule = new AbstractLightsModule.LightsModule(blockObjectInfo);
+        if (packInfo != null && !packInfo.getLightSources().isEmpty())
+            lightsModule = new AbstractLightsModule.LightsModule(packInfo);
         else
             lightsModule = null;
+        this.hasSeats = packInfo != null && !packInfo.getPartsByType(PartBlockSeat.class).isEmpty();
+        if(packInfo == null)
+            return;
+        if (!hasSeats && seatEntities != null) {
+            seatEntities.forEach(Entity::setDead);
+            seatEntities = null;
+        }
+        List<PartStorage> storages = packInfo.getPartsByType(PartStorage.class);
+        if (storages.isEmpty())
+            return;
+        if (storageModule != null && storages.size() == storageModule.getInventories().size())
+            return;
+        for (PartStorage storage : storages) {
+            if (storageModule == null)
+                storageModule = new StorageModule(this, pos, storage);
+            else
+                storageModule.addInventory(this, pos, storage);
+        }
     }
 
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-        if (blockObjectInfo != null)
-            compound.setString("BlockInfo", blockObjectInfo.getFullName());
-        if(lightsModule != null)
+        if (packInfo != null)
+            compound.setString("BlockInfo", packInfo.getFullName());
+        if (lightsModule != null)
             lightsModule.writeToNBT(compound);
+        if (storageModule != null)
+            storageModule.writeToNBT(compound);
         compound.setInteger("Rotation", rotation);
         compound.setFloat("TranslationX", relativeTranslation.x);
         compound.setFloat("TranslationY", relativeTranslation.y);
@@ -94,10 +147,22 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
     @Override
     public void readFromNBT(NBTTagCompound compound) {
         super.readFromNBT(compound);
-        if (compound.hasKey("BlockInfo"))
-            setBlockObjectInfo(DynamXObjectLoaders.BLOCKS.findInfo(compound.getString("BlockInfo")));
-        if(lightsModule != null)
+        if (!compound.hasKey("BlockInfo")) {
+            DynamXMain.log.error("TEDynamXBlock at " + pos + " has no BlockInfo tag. Ignoring it.");
+            return;
+        }
+        String info = compound.getString("BlockInfo");
+        BlockObject<?> packInfo = DynamXObjectLoaders.BLOCKS.findInfo(info);
+        if (packInfo == null) {
+            DynamXMain.log.error("Block object info is null for te " + this + " at " + pos + " : " + info + " not found. Ignoring it.");
+            return;
+        }
+        setPackInfo(DynamXObjectLoaders.BLOCKS.findInfo(compound.getString("BlockInfo")));
+        this.hasSeats = packInfo != null && !packInfo.getPartsByType(PartBlockSeat.class).isEmpty();
+        if (lightsModule != null)
             lightsModule.readFromNBT(compound);
+        if (storageModule != null)
+            storageModule.readFromNBT(compound);
         rotation = compound.getInteger("Rotation");
         relativeTranslation = new Vector3f(
                 compound.getFloat("TranslationX"),
@@ -112,11 +177,10 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
                 compound.getFloat("RotationY"),
                 compound.getFloat("RotationZ"));
 
-        if(blockObjectInfo == null && world != null && !world.isRemote) {
-            DynamXMain.log.warn("Block object info is null for te " + this + " at " + pos+ ". Removing it.");
+        if (packInfo == null && world != null && !world.isRemote) {
+            DynamXMain.log.warn("Block object info is null for te " + this + " at " + pos + ". Removing it.");
             world.setBlockToAir(pos);
-        }
-        else
+        } else
             markCollisionsDirty();
     }
 
@@ -129,7 +193,7 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
     @Override
     @SideOnly(Side.CLIENT)
     public double getMaxRenderDistanceSquared() {
-        return blockObjectInfo == null ? super.getMaxRenderDistanceSquared() : blockObjectInfo.getRenderDistance();
+        return packInfo == null || packInfo.getRenderDistance() == -1 ? super.getMaxRenderDistanceSquared() : packInfo.getRenderDistance();
     }
 
     @Override
@@ -149,34 +213,6 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
         super.onDataPacket(net, pkt);
         this.readFromNBT(pkt.getNbtCompound());
         this.world.markBlockRangeForRenderUpdate(pos, pos);
-    }
-
-    public Vector3f getRelativeTranslation() {
-        return relativeTranslation;
-    }
-
-    public void setRelativeTranslation(Vector3f relativeTranslation) {
-        this.relativeTranslation = relativeTranslation;
-    }
-
-    public Vector3f getRelativeScale() {
-        return relativeScale;
-    }
-
-    public void setRelativeScale(Vector3f relativeScale) {
-        this.relativeScale = relativeScale;
-    }
-
-    public Vector3f getRelativeRotation() {
-        return relativeRotation;
-    }
-
-    public void setRelativeRotation(Vector3f relativeRotation) {
-        this.relativeRotation = relativeRotation;
-    }
-
-    public int getRotation() {
-        return rotation;
     }
 
     public void setRotation(int rotation) {
@@ -225,7 +261,7 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
 
     @Override
     public List<MutableBoundingBox> getCollisionBoxes() {
-        if (blockObjectInfo != null && unrotatedCollisionsCache.size() != getUnrotatedCollisionBoxes().size()) {
+        if (packInfo != null && unrotatedCollisionsCache.size() != getUnrotatedCollisionBoxes().size()) {
             synchronized (unrotatedCollisionsCache) {
                 for (IShapeInfo shape : getUnrotatedCollisionBoxes()) {
                     MutableBoundingBox b = new MutableBoundingBox(shape.getBoundingBox());
@@ -245,23 +281,23 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
      * <strong>Note : </strong>The list is cached by the callers of this function, so you need to call markCollisionsDirty() to refresh them.
      */
     public List<IShapeInfo> getUnrotatedCollisionBoxes() {
-        if (blockObjectInfo == null) {
+        if (packInfo == null) {
             return Collections.EMPTY_LIST;
         }
-        return blockObjectInfo.getCollisionsHelper().getShapes();
+        return packInfo.getCollisionsHelper().getShapes();
     }
 
     /**
      * @return The collision of this tile entity in the PhysicsWorld, without rotation or custom translation
      */
     public CompoundCollisionShape getPhysicsCollision() {
-        if (blockObjectInfo == null) {
+        if (packInfo == null) {
             throw new IllegalStateException("BlockObjectInfo is null for te " + this + " at " + pos);
         }
-        if (!blockObjectInfo.getCollisionsHelper().hasPhysicsCollisions()) {
-            throw new IllegalStateException("BlockObjectInfo " + blockObjectInfo.getFullName() + " has no physics collisions");
+        if (!packInfo.getCollisionsHelper().hasPhysicsCollisions()) {
+            return ObjectCollisionsHelper.getEmptyCollisionShape();
         }
-        return blockObjectInfo.getCollisionsHelper().getPhysicsCollisionShape();
+        return packInfo.getCollisionsHelper().getPhysicsCollisionShape();
     }
 
     /**
@@ -272,7 +308,13 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
         boundingBoxCache = null;
         unrotatedCollisionsCache.clear();
         if (world != null && DynamXContext.usesPhysicsWorld(world)) {
-            DynamXContext.getPhysicsWorld(world).getTerrainManager().onChunkChanged(new VerticalChunkPos(getPos().getX() >> 4, getPos().getY() >> 4, getPos().getZ() >> 4));
+            VerticalChunkPos pos1 = new VerticalChunkPos(getPos().getX() >> 4, getPos().getY() >> 4, getPos().getZ() >> 4);
+            if (DynamXConfig.enableDebugTerrainManager) {
+                ChunkLoadingTicket ticket = DynamXContext.getPhysicsWorld(world).getTerrainManager().getTicket(pos1);
+                if (ticket != null)
+                    ChunkGraph.addToGrah(pos1, ChunkGraph.ChunkActions.CHK_UPDATE, ChunkGraph.ActionLocation.MAIN, ticket.getCollisions(), "Chunk changed from DynamX TE markDirty opf " + getPackInfo() + " at " + getPos() + ". Ticket " + ticket);
+            }
+            DynamXContext.getPhysicsWorld(world).getTerrainManager().onChunkChanged(pos1);
         }
         if (world != null) {
             DynamXChunkData data = world.getChunk(pos).getCapability(DynamXChunkDataProvider.DYNAM_X_CHUNK_DATA_CAPABILITY, null);
@@ -282,9 +324,9 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
 
     @Override
     public Quaternion getCollidableRotation() {
-        return blockObjectInfo == null ? QuaternionPool.get(0, 0, 0, 1) : DynamXGeometry.eulerToQuaternion((blockObjectInfo.getRotation().z - relativeRotation.z),
-                ((blockObjectInfo.getRotation().y - relativeRotation.y + getRotation() * 22.5f) % 360),
-                (blockObjectInfo.getRotation().x + relativeRotation.x));
+        return packInfo == null ? QuaternionPool.get(0, 0, 0, 1) : DynamXGeometry.eulerToQuaternion((packInfo.getRotation().z - relativeRotation.z),
+                ((packInfo.getRotation().y - relativeRotation.y + getRotation() * 22.5f) % 360),
+                (packInfo.getRotation().x + relativeRotation.x));
     }
 
     @Override
@@ -300,6 +342,60 @@ public class TEDynamXBlock extends TileEntity implements ICollidableObject, IPac
 
     @Override
     public void onPackInfosReloaded() {
-        setBlockObjectInfo(DynamXObjectLoaders.BLOCKS.findInfo(blockObjectInfo.getFullName()));
+        setPackInfo(DynamXObjectLoaders.BLOCKS.findInfo(packInfo.getFullName()));
+    }
+
+    @Override
+    public void update() {
+        if (hasSeats && (seatEntities == null || seatEntities.stream().anyMatch(e -> e.isDead)) && !world.isRemote) {
+            if (seatEntities != null) {
+                seatEntities.forEach(Entity::setDead);
+                seatEntities.clear();
+            } else
+                seatEntities = new ArrayList<>();
+            List<PartBlockSeat> seats = packInfo.getPartsByType(PartBlockSeat.class);
+            for (PartBlockSeat seat : seats) {
+                SeatEntity entity = new SeatEntity(world, seat.getId());
+                entity.setPosition(pos.getX() + 0.5f, pos.getY(), pos.getZ() + 0.5f);
+                world.spawnEntity(entity);
+                seatEntities.add(entity);
+            }
+        }
+        if(packInfo == null && !world.isRemote)
+        {
+            DynamXMain.log.error("Block info is null for te " + this + " at " + pos + ". Removing it.");
+            world.setBlockToAir(pos);
+        }
+    }
+
+    /**
+     * Ray-traces to get hit part when interacting with the entity
+     */
+    public InteractivePart<?, ?> getHitPart(Entity entity) {
+        if (getPackInfo() == null) {
+            return null;
+        }
+        Vec3d lookVec = entity.getLook(1.0F);
+        Vec3d hitVec = entity.getPositionVector().add(0, entity.getEyeHeight(), 0);
+        InteractivePart<?, ?> nearest = null;
+        Vector3f nearestPos = null;
+        Vector3f playerPos = Vector3fPool.get((float) entity.posX, (float) entity.posY, (float) entity.posZ);
+        MutableBoundingBox box = new MutableBoundingBox();
+        for (float f = 1.0F; f < 4.0F; f += 0.1F) {
+            for (InteractivePart<?, ?> part : getPackInfo().getInteractiveParts()) {
+                part.getBox(box);
+                box = DynamXContext.getCollisionHandler().rotateBB(Vector3fPool.get(), box, getCollidableRotation());
+                Vector3f partPos = DynamXGeometry.rotateVectorByQuaternion(part.getPosition(), getCollidableRotation());
+                partPos.addLocal(getPos().getX(), getPos().getY(), getPos().getZ());
+                partPos.addLocal(getCollisionOffset());
+                box.offset(partPos);
+                if ((nearestPos == null || DynamXGeometry.distanceBetween(partPos, playerPos) < DynamXGeometry.distanceBetween(nearestPos, playerPos)) && box.contains(hitVec)) {
+                    nearest = part;
+                    nearestPos = partPos;
+                }
+            }
+            hitVec = hitVec.add(lookVec.x * 0.1F, lookVec.y * 0.1F, lookVec.z * 0.1F);
+        }
+        return nearest;
     }
 }

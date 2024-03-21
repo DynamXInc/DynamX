@@ -1,6 +1,9 @@
 package fr.dynamx.utils.debug.renderer;
 
-import com.jme3.bullet.collision.shapes.*;
+import com.jme3.bullet.collision.shapes.BoxCollisionShape;
+import com.jme3.bullet.collision.shapes.CollisionShape;
+import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
+import com.jme3.bullet.collision.shapes.SphereCollisionShape;
 import com.jme3.bullet.collision.shapes.infos.ChildCollisionShape;
 import com.jme3.bullet.joints.Constraint;
 import com.jme3.bullet.joints.PhysicsJoint;
@@ -109,9 +112,8 @@ public class PhysicsDebugRenderer {
                         GlStateManager.rotate(GlQuaternionPool.get(physicsRotation));
                     }
                     GlStateManager.color(1, greenColor, blueColor, 1);
-                    DynamXRenderUtils.drawConvexHull(shapeType.getDebugTriangles(), DynamXDebugOptions.RENDER_WIREFRAME.isActive());
+                    DynamXRenderUtils.drawConvexHull(shapeType.getDebugTriangles(physicsRigidBody.getCollisionShape()), DynamXDebugOptions.RENDER_WIREFRAME.isActive());
                     GlStateManager.color(1, 1, 1, 1);
-
                 }
             }
         } else {

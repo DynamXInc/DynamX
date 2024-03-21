@@ -7,6 +7,7 @@ import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import lombok.Getter;
+import lombok.Setter;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import java.util.List;
  *
  * @see PartLightSource
  */
+@Setter
 public class LightObject {
     @PackFileProperty(configNames = "LightId")
     protected String lightId = "";
@@ -33,11 +35,8 @@ public class LightObject {
 
     protected int lightIdHashed;
 
+    @Getter
     private final List<TextureVariantData> blinkTextures = new ArrayList<>();
-
-    public List<TextureVariantData> getBlinkTextures() {
-        return blinkTextures;
-    }
 
     protected void hashLightId() {
         try {
@@ -47,11 +46,22 @@ public class LightObject {
         }
     }
 
+    /**
+     * @return The hashed light id (the light id if it's an int, or the hash if it's a string) <br>
+     * In {@link fr.dynamx.common.entities.modules.AbstractLightsModule}, it can be used to get the light (or you can use the string version of the id)
+     */
     public int getLightId() {
         return lightIdHashed;
     }
 
-    @RegisteredSubInfoType(name = "LightObject", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER, SubInfoTypeRegistries.BLOCKS_AND_PROPS}, strictName = false)
+    /**
+     * @return The light id as a string
+     */
+    public String getLightIdString() {
+        return lightId;
+    }
+
+    @RegisteredSubInfoType(name = "LightObject", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER, SubInfoTypeRegistries.BLOCKS, SubInfoTypeRegistries.PROPS}, strictName = false)
     public static class SubLightObject extends LightObject implements ISubInfoType<PartLightSource> {
         protected final PartLightSource owner;
 
@@ -67,7 +77,7 @@ public class LightObject {
 
         @Override
         public String getName() {
-            return "LightObject in " + owner.getName();
+            return "LightObject in " + owner.getPartName();
         }
 
         @Override

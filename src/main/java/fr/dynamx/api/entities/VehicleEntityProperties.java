@@ -1,7 +1,7 @@
 package fr.dynamx.api.entities;
 
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.entities.modules.CarEngineModule;
+import fr.dynamx.common.entities.modules.engines.CarEngineModule;
 import net.minecraftforge.common.util.EnumHelper;
 
 /**

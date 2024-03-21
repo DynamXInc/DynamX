@@ -1,23 +1,23 @@
 package fr.dynamx.common.entities.modules;
 
 import fr.dynamx.api.entities.modules.IPhysicsModule;
+import fr.dynamx.common.blocks.TEDynamXBlock;
 import fr.dynamx.common.contentpack.parts.PartStorage;
-import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.entities.ModularPhysicsEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.physics.entities.PackEntityPhysicsHandler;
 import lombok.Getter;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.util.Constants;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 public class StorageModule implements IPhysicsModule<PackEntityPhysicsHandler<?, ?>> {
     @Getter
@@ -27,8 +27,28 @@ public class StorageModule implements IPhysicsModule<PackEntityPhysicsHandler<?,
         addInventory(entity, partStorage);
     }
 
+    public StorageModule(TEDynamXBlock block, BlockPos pos, PartStorage partStorage) {
+        addInventory(block, pos, partStorage);
+    }
+
     public void addInventory(PackPhysicsEntity<?, ?> entity, PartStorage partStorage) {
-        inventories.put(partStorage.getId(), new InventoryBasic("part.storage"+entity.getPackInfo().getFullName(), false, partStorage.getStorageSize()));
+        addInventory(player -> !entity.isDead && entity.getDistanceSq(player) <= 256, partStorage);
+    }
+
+    public void addInventory(TEDynamXBlock block, BlockPos pos, PartStorage partStorage) {
+        addInventory(player -> {
+            return player.world.getTileEntity(pos) == block &&
+                    player.getDistanceSq((double) pos.getX() + 0.5D, (double) pos.getY() + 0.5D, (double) pos.getZ() + 0.5D) <= 64.0D;
+        }, partStorage);
+    }
+
+    public void addInventory(Predicate<EntityPlayer> usagePredicate, PartStorage partStorage) {
+        inventories.put(partStorage.getId(), new InventoryBasic("part.storage"+partStorage.getOwner().getFullName(), false, partStorage.getStorageSize()) {
+            @Override
+            public boolean isUsableByPlayer(EntityPlayer player) {
+                return usagePredicate.test(player);
+            }
+        });
     }
 
     public IInventory getInventory(byte id) {

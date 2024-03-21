@@ -1,30 +1,31 @@
 package fr.dynamx.common.contentpack.type.objects;
 
 import com.jme3.math.Vector3f;
-import fr.aym.acslib.api.services.error.ErrorLevel;
-import fr.dynamx.api.contentpack.object.IInfoOwner;
+import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
-import fr.dynamx.api.contentpack.registry.DefinitionType;
-import fr.dynamx.api.contentpack.registry.PackFileProperty;
-import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
-import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
+import fr.dynamx.api.contentpack.registry.*;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.CreatePackItemEvent;
+import fr.dynamx.api.events.client.BuildSceneGraphEvent;
+import fr.dynamx.client.renders.scene.SceneBuilder;
+import fr.dynamx.client.renders.scene.node.EntityNode;
+import fr.dynamx.client.renders.scene.node.SceneNode;
 import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
-import fr.dynamx.common.contentpack.loader.ObjectLoader;
+import fr.dynamx.common.contentpack.loader.InfoList;
 import fr.dynamx.common.contentpack.loader.PackFilePropertyData;
 import fr.dynamx.common.contentpack.loader.SubInfoTypeAnnotationCache;
+import fr.dynamx.common.contentpack.loader.SubInfoTypesRegistry;
 import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
 import fr.dynamx.common.contentpack.type.ObjectCollisionsHelper;
 import fr.dynamx.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.items.ItemProps;
 import fr.dynamx.utils.DynamXUtils;
-import fr.dynamx.utils.errors.DynamXErrorManager;
 import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
@@ -35,48 +36,78 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@RegisteredSubInfoType(name = "prop", registries = SubInfoTypeRegistries.BLOCKS_AND_PROPS, strictName = false)
+@RegisteredSubInfoType(name = "prop", registries = SubInfoTypeRegistries.BLOCKS, strictName = false)
 public class PropObject<T extends PropObject<?>> extends AbstractProp<T> implements IPhysicsPackInfo,
         ISubInfoType<BlockObject<?>>, ParticleEmitterInfo.IParticleEmitterContainer {
+    @IPackFilePropertyFixer.PackFilePropertyFixer(registries = {SubInfoTypeRegistries.BLOCKS, SubInfoTypeRegistries.PROPS})
+    public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
+        if ("UseHullShape".equals(key))
+            return new IPackFilePropertyFixer.FixResult("UseComplexCollisions", true);
+        if ("Textures".equals(key))
+            return new IPackFilePropertyFixer.FixResult("MaterialVariants", true, true);
+        if ("ItemTranslate".equals(key))
+            return new IPackFilePropertyFixer.FixResult("ItemTransforms block", true, true);
+        if ("ItemRotate".equals(key))
+            return new IPackFilePropertyFixer.FixResult("ItemTransforms block", true, true);
+        return null;
+    };
+
     private final BlockObject<?> owner;
     @PackFileProperty(configNames = "EmptyMass")
     @Getter
+    @Setter
     protected int emptyMass;
     @PackFileProperty(configNames = "CenterOfGravityOffset", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F)
     @Getter
+    @Setter
     protected Vector3f centerOfMass;
     @PackFileProperty(configNames = "SpawnOffset", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false, defaultValue = "0 0.65 0")
     @Getter
+    @Setter
     protected Vector3f spawnOffset = new Vector3f(0, 0.65f, 0);
+
     @PackFileProperty(configNames = "ContinuousCollisionDetection", required = false, defaultValue = "false")
     @Getter
+    @Setter
     protected boolean isCCDEnabled;
     @PackFileProperty(configNames = "Friction", required = false, defaultValue = "0.5")
     @Getter
+    @Setter
     protected float friction = 0.5f;
     @PackFileProperty(configNames = "Margin", required = false, defaultValue = "0.04")
     @Getter
+    @Setter
     protected float margin = 0.04f;
-    @PackFileProperty(configNames = "DespawnTime", required = false, defaultValue = "\"-1\" (disabled)")
     @Getter
-    protected float despawnTime = -1;
-    @PackFileProperty(configNames = "LinearDamping", required = false, defaultValue = "0")
-    protected float linearDamping;
-    @PackFileProperty(configNames = "AngularDamping", required = false, defaultValue = "0")
-    protected float angularDamping;
+    @Setter
     @PackFileProperty(configNames = "Bounciness", required = false, defaultValue = "0")
-    @Getter
     protected float restitutionFactor;
 
-    private List<ParticleEmitterInfo<?>> particleEmitters = new ArrayList<>();
+    @PackFileProperty(configNames = "DespawnTime", required = false, defaultValue = "\"-1\" (disabled)")
+    @Getter
+    @Setter
+    protected float despawnTime = -1;
 
-    public PropObject(String packName, String fileName) {
-        super(packName, fileName);
-        DynamXErrorManager.addPackError(getPackName(), "deprecated_prop_format", ErrorLevel.LOW, fileName, "Props should now be declared in the corresponding block_" + getName() + ".dynx file");
-        owner = null;
-        itemIcon = "Prop";
-        collisionsHelper = new ObjectCollisionsHelper();
-    }
+    @PackFileProperty(configNames = "LinearDamping", required = false, defaultValue = "0")
+
+    @Getter
+    @Setter
+    protected float linearDamping;
+    @PackFileProperty(configNames = "AngularDamping", required = false, defaultValue = "0")
+    @Getter
+    @Setter
+    protected float angularDamping;
+
+    @Getter
+    @PackFileProperty(configNames = "InWaterLinearDamping", required = false, defaultValue = "0.6")
+    protected float inWaterLinearDamping = 0.6f;
+    @Getter
+    @PackFileProperty(configNames = "InWaterAngularDamping", required = false, defaultValue = "0.6")
+    protected float inWaterAngularDamping = 0.6f;
+
+    protected final List<ParticleEmitterInfo<?>> particleEmitters = new ArrayList<>();
+
+    protected SceneNode<?, ?> sceneGraph;
 
     public PropObject(ISubInfoTypeOwner<BlockObject<?>> owner, String fileName) {
         super(owner.getPackName(), fileName);
@@ -89,14 +120,15 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
         this.itemScale = block.getItemScale();
         this.itemTranslate = block.getItemTranslate();
         this.itemRotate = block.getItemRotate();
-        this.item3DRenderLocation = block.get3DItemRenderLocation();
+        this.item3DRenderLocation = block.getItem3DRenderLocation();
         this.translation = block.getTranslation();
         this.scaleModifier = block.getScaleModifier();
         this.renderDistance = block.getRenderDistance();
         this.creativeTabName = block.getCreativeTabName();
         this.useComplexCollisions = block.useComplexCollisions();
-        this.particleEmitters = block.getParticleEmitters();
+        this.particleEmitters.addAll(block.getParticleEmitters());
         this.collisionsHelper = block.getCollisionsHelper().copy();
+        this.getDrawableParts().addAll(block.getDrawableParts());
     }
 
     @Override
@@ -108,8 +140,11 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
     @Override
     public boolean postLoad(boolean hot) {
         collisionsHelper.loadCollisions(this, DynamXUtils.getModelPath(getPackName(), model), "", centerOfMass, 0, useComplexCollisions, scaleModifier, ObjectCollisionsHelper.CollisionType.PROP);
-        collisionsHelper.getPhysicsCollisionShape().setMargin(margin);
-        return super.postLoad(hot);
+        if (collisionsHelper.hasPhysicsCollisions())
+            collisionsHelper.getPhysicsCollisionShape().setMargin(margin);
+        if (!super.postLoad(hot))
+            return false;
+        return true;
     }
 
     @Override
@@ -125,11 +160,11 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
     }
 
     @Override
-    public IInfoOwner<T> createOwner(ObjectLoader<T, ?> loader) {
+    public IDynamXItem<T> createItem(InfoList<T> loader) {
         CreatePackItemEvent.PropsItem<T, ?> event = new CreatePackItemEvent.PropsItem(loader, this);
         MinecraftForge.EVENT_BUS.post(event);
         if (event.isOverridden()) {
-            return (IInfoOwner<T>) event.getObjectItem();
+            return event.getObjectItem();
         } else {
             return new ItemProps(this);
         }
@@ -142,26 +177,7 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
 
     @Override
     public ItemStack getPickedResult(int metadata) {
-        return new ItemStack((Item) getOwners()[0], 1, metadata);
-    }
-
-    @Override
-    public float getAngularDamping() {
-        return angularDamping;
-    }
-
-    @Override
-    public float getLinearDamping() {
-        return linearDamping;
-    }
-
-    @Override
-    public void addSubProperty(ISubInfoType<T> property) {
-    }
-
-    @Override
-    public List<ISubInfoType<T>> getSubProperties() {
-        return Collections.emptyList();
+        return new ItemStack((Item) getItems()[0], 1, metadata);
     }
 
     @Override
@@ -186,8 +202,27 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
 
     @Override
     public void addModules(PackPhysicsEntity<?, ?> entity, ModuleListBuilder modules) {
-        //TODO SUPPORT PARTS WITH MODULES
-        if(getOwner() != null)
+        getSubProperties().forEach(sub -> sub.addModules(entity, modules));
+        getAllParts().forEach(sub -> sub.addModules(entity, modules));
+        if (getOwner() != null)
             getOwner().getLightSources().values().forEach(compoundLight -> compoundLight.addModules(entity, modules));
+    }
+
+    @Override
+    public SubInfoTypesRegistry<T> getSubInfoTypesRegistry() {
+        return (SubInfoTypesRegistry<T>) SubInfoTypeRegistries.PROPS.getInfoList().getDefaultSubInfoTypesRegistry();
+    }
+
+    @Override
+    public SceneNode<?, ?> getSceneGraph() {
+        if (sceneGraph == null) {
+            if (isModelValid()) {
+                BuildSceneGraphEvent.BuildEntityScene event = new BuildSceneGraphEvent.BuildEntityScene(this, (List) getDrawableParts(), getScaleModifier());
+                MinecraftForge.EVENT_BUS.post(event);
+                sceneGraph = event.getSceneGraphResult();
+            } else
+                sceneGraph = new EntityNode<>(Collections.EMPTY_LIST, Collections.EMPTY_LIST);
+        }
+        return sceneGraph;
     }
 }

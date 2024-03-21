@@ -1,23 +1,20 @@
 package fr.dynamx.api.events;
 
-import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
+import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
 import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import lombok.Getter;
 import net.minecraftforge.fml.common.eventhandler.Cancelable;
 import net.minecraftforge.fml.common.eventhandler.Event;
 
+@Getter
 public class DynamXModelRenderEvent extends Event {
-    @Getter
-    private final EventStage stage;
-    @Getter
+    private final EventPhase stage;
     private final ObjModelRenderer model;
-    @Getter
     private final IModelTextureVariantsSupplier textureSupplier;
-    @Getter
     private final byte textureId;
 
-    public DynamXModelRenderEvent(EventStage stage, ObjModelRenderer model, IModelTextureVariantsSupplier textureSupplier, byte textureId) {
+    public DynamXModelRenderEvent(EventPhase stage, ObjModelRenderer model, IModelTextureVariantsSupplier textureSupplier, byte textureId) {
         this.stage = stage;
         this.model = model;
         this.textureSupplier = textureSupplier;
@@ -26,14 +23,14 @@ public class DynamXModelRenderEvent extends Event {
 
     @Cancelable
     public static class RenderFullModel extends DynamXModelRenderEvent {
-        public RenderFullModel(EventStage stage, ObjModelRenderer model, IModelTextureVariantsSupplier textureSupplier, byte textureId) {
+        public RenderFullModel(EventPhase stage, ObjModelRenderer model, IModelTextureVariantsSupplier textureSupplier, byte textureId) {
             super(stage, model, textureSupplier, textureId);
         }
     }
 
     @Cancelable
     public static class RenderMainParts extends DynamXModelRenderEvent {
-        public RenderMainParts(EventStage stage, ObjModelRenderer model, IModelTextureVariantsSupplier textureSupplier, byte textureId) {
+        public RenderMainParts(EventPhase stage, ObjModelRenderer model, IModelTextureVariantsSupplier textureSupplier, byte textureId) {
             super(stage, model, textureSupplier, textureId);
         }
     }
@@ -43,7 +40,7 @@ public class DynamXModelRenderEvent extends Event {
         @Getter
         private final ObjObjectRenderer objObjectRenderer;
 
-        public RenderPart(EventStage stage, ObjModelRenderer model, IModelTextureVariantsSupplier textureSupplier, byte textureId, ObjObjectRenderer objObjectRenderer) {
+        public RenderPart(EventPhase stage, ObjModelRenderer model, IModelTextureVariantsSupplier textureSupplier, byte textureId, ObjObjectRenderer objObjectRenderer) {
             super(stage, model, textureSupplier, textureId);
             this.objObjectRenderer = objObjectRenderer;
         }

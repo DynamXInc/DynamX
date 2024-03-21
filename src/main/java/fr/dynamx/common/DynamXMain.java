@@ -6,12 +6,14 @@ import fr.aym.acslib.api.services.ThreadedLoadingService;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.aym.acslib.api.services.mps.ModProtectionContainer;
 import fr.aym.acslib.api.services.mps.ModProtectionService;
+import fr.dynamx.api.dxmodel.EnumDxModelFormats;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariableRegistry;
 import fr.dynamx.common.capability.DynamXChunkData;
 import fr.dynamx.common.capability.DynamXChunkDataStorage;
 import fr.dynamx.common.contentpack.AddonInfo;
 import fr.dynamx.common.contentpack.AddonLoader;
 import fr.dynamx.common.contentpack.ContentPackLoader;
+import fr.dynamx.common.entities.SeatEntity;
 import fr.dynamx.common.entities.PropsEntity;
 import fr.dynamx.common.entities.RagdollEntity;
 import fr.dynamx.common.entities.vehicles.*;
@@ -19,6 +21,7 @@ import fr.dynamx.common.handlers.DynamXGuiHandler;
 import fr.dynamx.common.items.tools.ItemRagdoll;
 import fr.dynamx.common.items.tools.ItemShockWave;
 import fr.dynamx.common.items.tools.ItemSlopes;
+import fr.dynamx.common.objloader.data.ObjModelData;
 import fr.dynamx.common.objloader.data.ObjObjectData;
 import fr.dynamx.server.command.DynamXCommands;
 import fr.dynamx.utils.DynamXConfig;
@@ -91,7 +94,7 @@ public class DynamXMain {
         // Loading protected files
         loadingService.addTask(mps.getTaskEndHook(), "certs_mps", () -> {
             try {
-                mpsContainer.setup("DynamXEA");
+                mpsContainer.setup("DynamX");
             } catch (Exception e) {
                 DynamXErrorManager.addError("DynamX initialization", DynamXErrorManager.INIT_ERRORS, "mps_error", ErrorLevel.FATAL, "MPS", null, e);
                 e.printStackTrace();
@@ -113,6 +116,7 @@ public class DynamXMain {
     public void preInit(FMLPreInitializationEvent event) {
         /* Loading configuration file */
         DynamXConfig.load(event.getSuggestedConfigurationFile());
+        DynamXContext.initNetwork();
 
         new ItemShockWave();
         new ItemSlopes();
@@ -121,12 +125,12 @@ public class DynamXMain {
         EntityRegistry.registerModEntity(new ResourceLocation(DynamXConstants.ID, "entity_car"), CarEntity.class, "entity_car", 102, this, 200, 4, false);
         EntityRegistry.registerModEntity(new ResourceLocation(DynamXConstants.ID, "entity_trailer"), TrailerEntity.class, "entity_trailer", 105, this, 200, 4, false);
         EntityRegistry.registerModEntity(new ResourceLocation(DynamXConstants.ID, "entity_prop"), PropsEntity.class, "entity_prop", 106, this, 200, 40, false);
-        //EntityRegistry.registerModEntity(new ResourceLocation(DynamXMain.ID, "entity_boat"), BoatEntity.class, "entity_boat", 107, this, 200, 4, false);
         EntityRegistry.registerModEntity(new ResourceLocation(DynamXConstants.ID, "entity_boat"), BoatEntity.class, "entity_boat", 107, this, 200, 4, false);
         EntityRegistry.registerModEntity(new ResourceLocation(DynamXConstants.ID, "entity_ragdoll"), RagdollEntity.class, "entity_ragdoll", 108, this, 200, 4, false);
-        EntityRegistry.registerModEntity(new ResourceLocation(DynamXConstants.ID, "entity_boat"), BoatEntity.class, "entity_boat", 107, this, 200, 4, false);
         EntityRegistry.registerModEntity(new ResourceLocation(DynamXConstants.ID, "entity_door"), DoorEntity.class, "entity_door", 109, this, 200, 4, false);
         EntityRegistry.registerModEntity(new ResourceLocation(DynamXConstants.ID, "entity_helico"), HelicopterEntity.class, "entity_helico", 110, this, 200, 4, false);
+        //TODO TEST UPDATE FREQUENCY
+        EntityRegistry.registerModEntity(new ResourceLocation(DynamXConstants.ID, "entity_seat"), SeatEntity.class, "entity_seat", 111, this, 164, 80, false);
         /* Registering gui handler */
         NetworkRegistry.INSTANCE.registerGuiHandler(instance, new DynamXGuiHandler());
 
@@ -157,7 +161,11 @@ public class DynamXMain {
         DynamXErrorManager.printErrors(event.getSide(), event.getSide().isServer() ? ErrorLevel.ADVICE : ErrorLevel.HIGH);
         if (FMLCommonHandler.instance().getMinecraftServerInstance() != null) {
             log.info("Clearing obj model data cache...");
-            DynamXContext.getObjModelDataCache().values().forEach(model -> model.getObjObjects().forEach(ObjObjectData::clearData));
+            DynamXContext.getDxModelDataCache().values()
+                    .stream()
+                    .filter(dxModelData -> dxModelData.getFormat().equals(EnumDxModelFormats.OBJ))
+                    .map(dxModelData -> (ObjModelData) dxModelData)
+                    .forEach(model -> model.getObjObjects().forEach(ObjObjectData::clearData));
         }
     }
 

@@ -16,6 +16,7 @@ import net.minecraftforge.fml.relauncher.Side;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -89,7 +90,7 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
     /**
      * Computes listeners of update methods
      */
-    protected void sortModules() {
+    protected void getListenerModules() {
         updateEntityListeners.clear();
         updatePhysicsListeners.clear();
         moduleList.forEach(m -> {
@@ -116,13 +117,14 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
     public boolean initEntityProperties() {
         createModules(new ModuleListBuilder(moduleList));
         fireCreateModulesEvent(world.isRemote ? Side.CLIENT : Side.SERVER);
+        moduleList.sort(Comparator.comparingInt(m -> -m.getInitPriority()));
         moduleList.forEach(IPhysicsModule::initEntityProperties);
         if (initCallback != null) {
             initCallback.onEntityInit(this, moduleList);
             initCallback = null; //Free memory
         }
         //Init them before sorting because listened functions may change
-        sortModules();
+        getListenerModules();
         //SynchronizedVariablesRegistry.setSyncVarsForContext(world.isRemote ? Side.CLIENT : Side.SERVER, new HashMap<>(), getNetwork());
         return true;
     }
@@ -223,23 +225,19 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
     protected void addPassenger(Entity passenger) {
         super.addPassenger(passenger);
         int size = moduleList.size();
-        for (int i = 0; i < size; i++) {
-            moduleList.get(i).addPassenger(passenger);
-        }
+        moduleList.forEach(iPhysicsModule -> iPhysicsModule.addPassenger(passenger));
     }
 
     @Override
     protected void removePassenger(Entity passenger) {
         super.removePassenger(passenger);
         int size = moduleList.size();
-        for (int i = 0; i < size; i++) {
-            moduleList.get(i).removePassenger(passenger);
-        }
+        moduleList.forEach(iPhysicsModule -> iPhysicsModule.removePassenger(passenger));
     }
 
     @Override
     public void applyOrientationToEntity(Entity passenger) {
-        if (this instanceof IModuleContainer.ISeatsContainer) {
+        if (this instanceof IModuleContainer.ISeatsContainer && ((IModuleContainer.ISeatsContainer) this).getSeats() != null) {
             ((IModuleContainer.ISeatsContainer) this).getSeats().applyOrientationToEntity(passenger);
         } else {
             super.applyOrientationToEntity(passenger);

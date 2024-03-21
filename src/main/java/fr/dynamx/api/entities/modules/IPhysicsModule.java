@@ -96,6 +96,16 @@ public interface IPhysicsModule<P extends AbstractEntityPhysicsHandler<?, ?>> {
     default void onSetSimulationHolder(SimulationHolder simulationHolder, EntityPlayer simulationPlayerHolder, SimulationHolder.UpdateContext changeContext) {
     }
 
+    default byte getInitPriority() {
+        return 0;
+    }
+
+    /**
+     * Called to update textures of this module (egg for wheels) according to the new entity's metadata
+     */
+    @SideOnly(Side.CLIENT)
+    default void onTexturesChange(byte newMetadata) {}
+
     /**
      * Implement this on you module to listen entity updates
      */

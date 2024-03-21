@@ -76,6 +76,12 @@ public abstract class PhysicsEntitySynchronizer<T extends PhysicsEntity<?>> {
         receivedVariables.put(id, new SynchronizedEntityVariableSnapshot(variable.getSerializer(), variable.get()));
     }
 
+    public void removeSynchronizedVariable(EntityVariable<?> variable) {
+        if (!synchronizedVariables.containsValue(variable))
+            throw new IllegalArgumentException("Variable isn't registered " + variable);
+        synchronizedVariables.remove(SynchronizedEntityVariableRegistry.getSyncVarRegistry().get(variable.getName()));
+    }
+
     /**
      * Called before ticking the physics world (can be in an external thread)
      *
@@ -162,7 +168,7 @@ public abstract class PhysicsEntitySynchronizer<T extends PhysicsEntity<?>> {
     public void resyncEntity(EntityPlayerMP target) {
         //Force tcp for first sync and resyncs
         DynamXContext.getNetwork().getVanillaNetwork().sendPacket(new MessagePhysicsEntitySync(entity, ServerPhysicsSyncManager.getTime(target), synchronizedVariables, false), EnumPacketTarget.PLAYER, target);
-        if (entity instanceof IModuleContainer.ISeatsContainer)
+        if (entity instanceof IModuleContainer.ISeatsContainer && ((IModuleContainer.ISeatsContainer) entity).hasSeats())
             DynamXContext.getNetwork().sendToClient(new MessageSeatsSync((IModuleContainer.ISeatsContainer) entity), EnumPacketTarget.PLAYER, target);
         if (entity.getJointsHandler() != null)
             entity.getJointsHandler().sync(target);

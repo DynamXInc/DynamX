@@ -2,18 +2,23 @@ package fr.dynamx.common.entities.vehicles;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.IModuleContainer;
-import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
+import fr.dynamx.common.contentpack.type.vehicle.TrailerAttachInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
+import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.common.entities.modules.SeatsModule;
 import fr.dynamx.common.entities.modules.WheelsModule;
 import fr.dynamx.common.physics.entities.BaseWheeledVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
+
+import static fr.dynamx.client.ClientProxy.SOUND_HANDLER;
 
 public class TrailerEntity<T extends TrailerEntity.TrailerPhysicsHandler<?>> extends BaseVehicleEntity<T> implements IModuleContainer.IDoorContainer, IModuleContainer.ISeatsContainer {
     private WheelsModule wheels;
@@ -34,10 +39,10 @@ public class TrailerEntity<T extends TrailerEntity.TrailerPhysicsHandler<?>> ext
     }
 
     @Override
-    public void createModules(ModuleListBuilder modules) {
-        modules.add(seats = new SeatsModule(this));
-        modules.add(wheels = new WheelsModule(this));
-        super.createModules(modules);
+    protected void getListenerModules() {
+        super.getListenerModules();
+        seats = getModuleByType(SeatsModule.class);
+        wheels = getModuleByType(WheelsModule.class);
         doors = getModuleByType(DoorsModule.class);
     }
 
@@ -47,7 +52,7 @@ public class TrailerEntity<T extends TrailerEntity.TrailerPhysicsHandler<?>> ext
     }
 
     @Override
-    public BaseVehicleEntity<?> cast() {
+    public PackPhysicsEntity<?, ?> cast() {
         return this;
     }
 
@@ -64,9 +69,14 @@ public class TrailerEntity<T extends TrailerEntity.TrailerPhysicsHandler<?>> ext
     @Nonnull
     @Override
     public SeatsModule getSeats() {
-        if (seats == null) //We may need seats before modules are created, because of seats sync
-            seats = new SeatsModule(this);
         return seats;
+    }
+
+    @SideOnly(Side.CLIENT)
+    public void playAttachSound() {
+        TrailerAttachInfo info = getPackInfo().getSubPropertyByType(TrailerAttachInfo.class);
+        if(info.getAttachSound() != null)
+            SOUND_HANDLER.playSingleSound(physicsPosition, info.getAttachSound(), 1, 1);
     }
 
     public static class TrailerPhysicsHandler<A extends TrailerEntity<?>> extends BaseWheeledVehiclePhysicsHandler<A> {

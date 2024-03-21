@@ -1,7 +1,7 @@
 package fr.dynamx.common.items;
 
-import fr.dynamx.api.contentpack.object.IInfoOwner;
-import fr.dynamx.api.contentpack.object.render.IObjPackObject;
+import fr.dynamx.api.contentpack.object.render.IModelPackObject;
+import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.blocks.TEDynamXBlock;
@@ -22,7 +22,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
-public class DynamXItemBlock extends ItemBlock implements IResourcesOwner, IInfoOwner<BlockObject<?>> {
+public class DynamXItemBlock extends ItemBlock implements IResourcesOwner, IDynamXItem<BlockObject<?>> {
 
     private final DynamXBlock<BlockObject<?>> dynamxMainBlock;
 
@@ -88,7 +88,7 @@ public class DynamXItemBlock extends ItemBlock implements IResourcesOwner, IInfo
         if (state.getBlock() == this.block) {
             setTileEntityNBT(world, player, pos, stack);
 
-            if (dynamxMainBlock.isObj()) {
+            if (dynamxMainBlock.isDxModel()) {
                 TileEntity tileentity = world.getTileEntity(pos);
 
                 if (tileentity instanceof TEDynamXBlock) {
@@ -113,8 +113,8 @@ public class DynamXItemBlock extends ItemBlock implements IResourcesOwner, IInfo
     }
 
     @Override
-    public IObjPackObject getObjModel() {
-        return ((IResourcesOwner) block).getObjModel();
+    public IModelPackObject getDxModel() {
+        return ((IResourcesOwner) block).getDxModel();
     }
 
     @Override

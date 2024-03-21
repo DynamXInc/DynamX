@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="https://dynamx.fr/banner_dynamx_2_crop.png" alt="DynamX Banner" width="60%">
+    <img src="https://files.dynamx.fr/img/banner_dynamx_2_crop.png" alt="DynamX Banner" width="60%">
     <br>
     <a href="https://www.curseforge.com/minecraft/mc-mods/dynamx">
         <img src="https://cf.way2muchnoise.eu/full_dynamx_downloads.svg" alt="Downloads">

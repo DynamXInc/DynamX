@@ -2,7 +2,7 @@ package fr.dynamx.common.physics.entities.modules;
 
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.common.contentpack.type.vehicle.GearInfo;
-import fr.dynamx.common.entities.modules.CarEngineModule;
+import fr.dynamx.common.entities.modules.engines.CarEngineModule;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.engine.AutomaticGearboxHandler;
 import fr.dynamx.common.physics.entities.parts.engine.Engine;
@@ -31,7 +31,7 @@ public class EnginePhysicsHandler implements IPackInfoReloadListener {
     @Getter
     private float accelerationForce;
     @Getter
-    private float steeringForce ;
+    private float steeringForce;
 
     public EnginePhysicsHandler(CarEngineModule module, BaseVehiclePhysicsHandler<?> handler, WheelsPhysicsHandler propulsionHandler) {
         this.module = module;
@@ -50,7 +50,7 @@ public class EnginePhysicsHandler implements IPackInfoReloadListener {
             gearBox.setGear(i, gear.getSpeedRange()[0], gear.getSpeedRange()[1], gear.getRpmRange()[0], gear.getRpmRange()[1]);
         }
         //TODO BOUGER ça
-        gearBoxHandler = new AutomaticGearboxHandler(this, gearBox, propulsionHandler);// propulsionHandler.createGearBox(module, this);
+        gearBoxHandler = new AutomaticGearboxHandler.CarGearBox(this, gearBox, propulsionHandler);// propulsionHandler.createGearBox(module, this);
     }
 
     public void update() {
@@ -220,23 +220,12 @@ public class EnginePhysicsHandler implements IPackInfoReloadListener {
     }
 
     public void setEngineStarted(boolean started) {
-        if (engine != null) {
-            if (started) {
-                startEngine();
-            } else {
-                stopEngine();
-            }
+        if (engine == null) {
+            return;
         }
-    }
-
-    public void startEngine() {
-        if (!engine.isStarted()) {
+        if (started && !engine.isStarted()) {
             engine.setStarted(true);
-        }
-    }
-
-    public void stopEngine() {
-        if (engine.isStarted()) {
+        } else if (!started && engine.isStarted()) {
             engine.setStarted(false);
         }
     }

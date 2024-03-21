@@ -1,7 +1,7 @@
 package fr.dynamx.client.renders.model.renderer;
 
 import fr.aym.acslib.api.services.error.ErrorLevel;
-import fr.dynamx.api.obj.IModelTextureVariantsSupplier;
+import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
 import fr.dynamx.client.renders.model.texture.MaterialTexture;
 import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import fr.dynamx.common.objloader.data.Material;
@@ -41,7 +41,7 @@ public class ObjObjectRenderer {
     public void uploadVAO() {
         if (modelRenderData.isEmpty()) //Add default render data
             modelRenderData.put((byte) 0, new VariantRenderData(null, null));
-        if (objObjectData.getMesh().materials.isEmpty()) {
+        if (objObjectData.getMaterials().isEmpty()) {
             objObjectData.clearData();
             return;
         }
@@ -51,10 +51,10 @@ public class ObjObjectRenderer {
                 DynamXRenderUtils.bindVertexArray(vaoID);
                 entry.getValue().vaoId = vaoID;
 
-                entry.getValue().ebo = setupIndicesBuffer(getObjObjectData().getMesh().indices);
-                entry.getValue().vboPositions = setupArraysPointers(EnumGLPointer.VERTEX, getObjObjectData().getMesh().getVerticesPos());
-                entry.getValue().vboNormals = setupArraysPointers(EnumGLPointer.NORMAL, getObjObjectData().getMesh().getVerticesNormals());
-                entry.getValue().vboTexCoords = setupArraysPointers(EnumGLPointer.TEX_COORDS, getObjObjectData().getMesh().getTextureCoords());
+                entry.getValue().ebo = setupIndicesBuffer(getObjObjectData().getIndices());
+                entry.getValue().vboPositions = setupArraysPointers(EnumGLPointer.VERTEX, getObjObjectData().getVerticesPos());
+                entry.getValue().vboNormals = setupArraysPointers(EnumGLPointer.NORMAL, getObjObjectData().getVerticesNormals());
+                entry.getValue().vboTexCoords = setupArraysPointers(EnumGLPointer.TEX_COORDS, getObjObjectData().getTextureCoords());
 
                 GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
                 DynamXRenderUtils.bindVertexArray(0);
@@ -83,7 +83,7 @@ public class ObjObjectRenderer {
         for (TextureVariantData variant : variants.getTextureVariants().values()) {
             boolean usesVariant = variant.getId() == 0 || model.getMaterials().containsKey(variant.getName());
             if (!usesVariant) { //search variant in used textures
-                for (String materialName : objObjectData.getMesh().materialForEachVertex) {
+                for (String materialName : objObjectData.getMaterialForEachVertex()) {
                     Material material = model.getMaterials().get(materialName);
                     if (material != null && material.diffuseTexture.containsKey(variant.getName())) {
                         usesVariant = true;
@@ -97,6 +97,10 @@ public class ObjObjectRenderer {
     }
 
     public void render(ObjModelRenderer model, byte textureVariantID) {
+        if (modelRenderData.isEmpty()) {
+            log.error("Default texture variant not loaded for model " + model.getLocation() + ". Trying to upload the vaos now.");
+            uploadVAO();
+        }
         if (modelRenderData.containsKey(textureVariantID))
             renderVAO(model, modelRenderData.get(textureVariantID));
         else if (modelRenderData.containsKey((byte) 0))
@@ -125,20 +129,20 @@ public class ObjObjectRenderer {
     int i = 0;
 
     private void renderVAO(ObjModelRenderer model, VariantRenderData renderData) {
-        if(renderData.vaoId == -1)
+        if (renderData.vaoId == -1)
             return;
         DynamXRenderUtils.bindVertexArray(renderData.vaoId);
         GlStateManager.glEnableClientState(GL11.GL_VERTEX_ARRAY);
         GlStateManager.glEnableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
         GlStateManager.glEnableClientState(GL11.GL_NORMAL_ARRAY);
 
-        for (Map.Entry<String, Material.IndexPair> pair : getObjObjectData().getMesh().materials.entrySet()) {
+        for (Map.Entry<String, Material.IndexPair> pair : getObjObjectData().getMaterials().entrySet()) {
             Material material = bindMaterial(model, pair.getKey(), renderData.getBaseVariant(), renderData.getVariant());
             if (material == null) {
                 continue;
             }
 
-            if(renderData.ebo != -1)
+            if (renderData.ebo != -1)
                 GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, renderData.ebo);
 
             if (material.transparency != 1) {
@@ -159,7 +163,7 @@ public class ObjObjectRenderer {
             }
             objectColor.set(1, 1, 1, 1);
 
-            if(renderData.ebo != -1)
+            if (renderData.ebo != -1)
                 GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, 0);
 
         }

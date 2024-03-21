@@ -114,7 +114,7 @@ public class MessageSyncConfig implements IDnxPacket, IMessageHandler<MessageSyn
             ContentPackLoader.SLOPES_LENGTH = slopesLength;
             ContentPackLoader.PLACE_SLOPES = slopesPlace;
             DynamXContext.setPhysicsSimulationMode(Side.SERVER, physicsSimulationMode == 1 ? new PhysicsSimulationModes.LightPhysics() : new PhysicsSimulationModes.FullPhysics());
-            System.out.println("Set entity id to " + entityId + " " + ClientEventHandler.MC.player);
+            // Fix issue with bungeecord not sending the new entityId to the client
             if (entityId != -1 && ClientEventHandler.MC.player != null) {
                 ClientEventHandler.MC.player.setEntityId(entityId);
             }

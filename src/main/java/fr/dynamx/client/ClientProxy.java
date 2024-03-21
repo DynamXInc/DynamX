@@ -107,9 +107,6 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
 
     @Override
     public World getClientWorld() {
-        if(FMLClientHandler.instance().getClient().player != null) {
-            System.out.println("The player is in world as " + FMLClientHandler.instance().getClient().player);
-        }
         return FMLClientHandler.instance().getClient().world;
     }
 

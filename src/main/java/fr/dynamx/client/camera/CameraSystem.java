@@ -78,9 +78,11 @@ public class CameraSystem {
         //Compute smoothed vehicle rotation, on axes according to camera mode
         animateCameraRotation(vehicle.prevRenderRotation, vehicle.renderRotation, (float) event.getRenderPartialTicks(), 0.1f);
 
+        // Subtract the vehicle yaw from the player yaw, as it's already applied above
+        float interpVehicleYaw = (float) MathHelper.wrapDegrees(vehicle.prevRotationYaw + (vehicle.rotationYaw - vehicle.prevRotationYaw) * event.getRenderPartialTicks());
         //Apply camera zoom
         if (ClientEventHandler.MC.gameSettings.thirdPersonView > 0) {
-            performZoomAction(renderEntity, event.getYaw(), event.getPitch(), event.getRenderPartialTicks(), jmeQuatCache);
+            performZoomAction(renderEntity, event.getYaw() - interpVehicleYaw, event.getPitch(), event.getRenderPartialTicks(), jmeQuatCache);
         }
 
         //Rotate the camera
@@ -96,12 +98,12 @@ public class CameraSystem {
                 GlStateManager.translate(0, -cameraPositionY, 0);
             }
             if (seat.getRotation() != null) {
-                GlStateManager.rotate(event.getYaw() + (watchingBehind ? 180 : 0) + seat.getRotationYaw(), 0.0F, 1.0F, 0.0F);
+                GlStateManager.rotate(event.getYaw() - interpVehicleYaw + (watchingBehind ? 180 : 0) + seat.getRotationYaw(), 0.0F, 1.0F, 0.0F);
             } else {
-                GlStateManager.rotate(event.getYaw() + (watchingBehind ? 180 : 0), 0.0F, 1.0F, 0.0F);
+                GlStateManager.rotate(event.getYaw() - interpVehicleYaw + (watchingBehind ? 180 : 0), 0.0F, 1.0F, 0.0F);
             }
         } else {
-            GlStateManager.rotate(event.getYaw() + (watchingBehind ? 180 : 0), 0.0F, 1.0F, 0.0F);
+            GlStateManager.rotate(event.getYaw() - interpVehicleYaw + (watchingBehind ? 180 : 0), 0.0F, 1.0F, 0.0F);
         }
 
         //Remove the eye translation

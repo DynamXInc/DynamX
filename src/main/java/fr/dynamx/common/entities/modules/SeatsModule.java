@@ -113,21 +113,28 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
         Vector3f posVec = DynamXGeometry.rotateVectorByQuaternion(seat.getPosition(), entity.renderRotation);
         passenger.setPosition(entity.posX + posVec.x, entity.posY + posVec.y, entity.posZ + posVec.z);
         Vector3fPool.closePool();
+
+        // make player's yaw follow the entity yaw
+        float deltaRotation = entity.rotationYaw - entity.prevRotationYaw;
+        passenger.rotationYaw += deltaRotation;
+        passenger.setRotationYawHead(passenger.getRotationYawHead() + deltaRotation);
+        applyOrientationToEntity(passenger);
     }
 
     /**
      * Rotates the passenger, limiting his field of view to avoid stiff necks
      */
     public void applyOrientationToEntity(Entity passenger) {
+        passenger.setRenderYawOffset(0);
         BasePartSeat seat = getRidingSeat(passenger);
         if (seat != null && seat.shouldLimitFieldOfView()) {
-            float f = MathHelper.wrapDegrees(passenger.rotationYaw);
+            // Limit yaw
+            float f = MathHelper.wrapDegrees(passenger.rotationYaw - entity.rotationYaw);
             float f1 = MathHelper.clamp(f, seat.getMaxYaw(), seat.getMinYaw());
-            passenger.rotationYaw = f1;
-            f = MathHelper.wrapDegrees(passenger.prevRotationYaw);
-            f1 = MathHelper.clamp(f, seat.getMaxYaw(), seat.getMinYaw());
-            passenger.prevRotationYaw = f1;
+            passenger.prevRotationYaw += f1 - f;
+            passenger.rotationYaw += f1 - f;
 
+            // Limit pitch
             float f2 = MathHelper.wrapDegrees(passenger.rotationPitch);
             float f3 = MathHelper.clamp(f2, seat.getMaxPitch(), seat.getMinPitch());
             passenger.rotationPitch = f3;
@@ -135,6 +142,7 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
             f3 = MathHelper.clamp(f2, seat.getMaxPitch(), seat.getMinPitch());
             passenger.prevRotationPitch = f3;
         }
+        passenger.setRotationYawHead(passenger.rotationYaw - entity.rotationYaw);
     }
 
     @Override

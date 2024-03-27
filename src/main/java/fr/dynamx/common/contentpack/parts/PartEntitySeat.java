@@ -175,10 +175,6 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
                 //The render the player, e.rotationYaw is the name plate rotation
                 if (seatRider instanceof AbstractClientPlayer) {
                     if (ClientEventHandler.renderPlayer != null) {
-                        //Remove player's yaw offset rotation, to avoid stiff neck
-                        if (shouldLimitFieldOfView()) {
-                            ((AbstractClientPlayer) seatRider).renderYawOffset = ((AbstractClientPlayer) seatRider).prevRenderYawOffset = 0;
-                        }
                         ClientEventHandler.renderPlayer.doRender((AbstractClientPlayer) seatRider, 0, 0, 0, seatRider.rotationYaw, partialTicks);
                     }
                 } else {

@@ -53,7 +53,7 @@ public abstract class MixinEntity {
         AxisAlignedBB axisalignedbb = getEntityBoundingBox();
         Vector3fPool.openPool();
         Profiler.get().start(Profiler.Profiles.ENTITY_COLLISION);
-        double[] data = DynamXContext.getCollisionHandler().handleCollisionWithBulletEntities((Entity) (Object) this, x, y, z);
+        double[] data = DynamXContext.getCollisionHandler().handleCollisionWithBulletEntities((Entity) (Object) this, type, x, y, z);
         Profiler.get().end(Profiler.Profiles.ENTITY_COLLISION);
         Vector3fPool.closePool();
         x1 = data[0];

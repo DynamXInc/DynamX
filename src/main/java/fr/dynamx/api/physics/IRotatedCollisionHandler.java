@@ -4,6 +4,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.MoverType;
 import net.minecraft.util.math.AxisAlignedBB;
 
 /**
@@ -41,7 +42,7 @@ public interface IRotatedCollisionHandler {
     /**
      * @return the updated motion of entity after colliding it with physics entities
      */
-    double[] handleCollisionWithBulletEntities(Entity entity, double mx, double my, double mz);
+    double[] handleCollisionWithBulletEntities(Entity entity, MoverType moverType, double mx, double my, double mz);
 
     /**
      * @return True if the last call to handleCollisionWithBulletEntities has changed the entity motion

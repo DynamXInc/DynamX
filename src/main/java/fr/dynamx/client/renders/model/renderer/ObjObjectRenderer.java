@@ -74,6 +74,8 @@ public class ObjObjectRenderer {
                     OpenGlHelper.glDeleteBuffers(renderData.vboPositions);
                 if (renderData.vboNormals != -1)
                     OpenGlHelper.glDeleteBuffers(renderData.vboNormals);
+                if (renderData.vboTexCoords != -1)
+                    OpenGlHelper.glDeleteBuffers(renderData.vboTexCoords);
             });
             modelRenderData.clear();
         }

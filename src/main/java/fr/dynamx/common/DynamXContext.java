@@ -137,20 +137,20 @@ public class DynamXContext {
         DynamXContext.physicsSimulationModes[side.ordinal()] = physicsSimulationMode;
     }
 
-    public static DxModelData getDxModelDataFromCache(DxModelPath objModelPath) {
-        if (DX_MODEL_DATA_CACHE.containsKey(objModelPath.getModelPath())) {
-            return DX_MODEL_DATA_CACHE.get(objModelPath.getModelPath());
+    public static DxModelData getDxModelDataFromCache(DxModelPath modelPath) {
+        if (DX_MODEL_DATA_CACHE.containsKey(modelPath.getModelPath())) {
+            return DX_MODEL_DATA_CACHE.get(modelPath.getModelPath());
         } else {
             DxModelData objModelData = null;
-            switch (objModelPath.getFormat()) {
+            switch (modelPath.getFormat()) {
                 case OBJ:
-                    objModelData = new ObjModelData(DynamXUtils.getModelPath(objModelPath.getPackName(), objModelPath.getModelPath()));
+                    objModelData = new ObjModelData(modelPath);
                     break;
                 case GLTF:
-                    objModelData = new GltfModelData(DynamXUtils.getModelPath(objModelPath.getPackName(), objModelPath.getModelPath()));
+                    objModelData = new GltfModelData(modelPath);
                     break;
             }
-            DX_MODEL_DATA_CACHE.put(objModelPath.getModelPath(), objModelData);
+            DX_MODEL_DATA_CACHE.put(modelPath.getModelPath(), objModelData);
             return objModelData;
         }
     }

@@ -9,6 +9,7 @@ import fr.dynamx.common.contentpack.type.objects.PropObject;
 import fr.dynamx.common.items.ItemProps;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -66,7 +67,8 @@ public class PropsLoader<T extends PropObject<?>> extends InfoList<T> {
 
     @Override
     public void postLoad(boolean hot) {
-        updateItems(this, owners, builtinObjects, hot);
+        // We pass Collections.emptyList() as the list of builtin objects, because, only for props, we still need to create the corresponding items
+        updateItems(this, owners, Collections.emptyList(), hot);
     }
 
     /**

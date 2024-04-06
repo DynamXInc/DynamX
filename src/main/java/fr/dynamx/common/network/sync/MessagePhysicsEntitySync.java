@@ -15,6 +15,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -27,7 +28,7 @@ public class MessagePhysicsEntitySync<T extends PhysicsEntity<?>> extends Physic
     //@Getter
     private Map<Integer, EntityVariable<?>> varsToSend;
     @Getter
-    private Map<Integer, SynchronizedEntityVariableSnapshot<?>> varsToRead;
+    private PooledHashMap<Integer, SynchronizedEntityVariableSnapshot<?>> varsToRead;
     /**
      * The "date" of the data contained in this packet
      */
@@ -36,6 +37,10 @@ public class MessagePhysicsEntitySync<T extends PhysicsEntity<?>> extends Physic
     private final boolean doSizeTrack = false;
     private boolean lightData;
     private T targetEntity;
+    @Getter
+    private int messageSize;
+    @Getter
+    private Map<String, Integer> moduleSizes;
 
     public MessagePhysicsEntitySync() {
         super(null);
@@ -101,6 +106,8 @@ public class MessagePhysicsEntitySync<T extends PhysicsEntity<?>> extends Physic
         final int[] j = {0};
         boolean[] log = {doSizeTrack};
         int sized = buf.readerIndex();
+        int size0 = sized;
+        moduleSizes = new HashMap<>();
         for (int i = 0; i < size; i++) {
             //if(log[0])
             //  System.out.println("Read var at "+j[0]+" "+entityId);
@@ -112,19 +119,21 @@ public class MessagePhysicsEntitySync<T extends PhysicsEntity<?>> extends Physic
                     System.out.println("Read var at " + j[0] + " " + entityId + " " + v);
                 v.read(buf);
                 varsToRead.put(id, v);
+                sized = buf.readerIndex() - sized;
                 if (doSizeTrack) {
-                    sized = buf.readerIndex() - sized;
                     int rd = buf.readInt();
                     if (sized != rd)
                         System.err.println("INDEX MISMATCH " + rd + " " + sized);
-                    sized = buf.readerIndex();
                 }
+                moduleSizes.put(SynchronizedEntityVariableRegistry.getSyncVarRegistry().inverse().get(id), sized);
+                sized = buf.readerIndex();
                 j[0]++;
             } catch (Exception e) {
                 throw new RuntimeException("Error reading sync packet for " + entityId + " has read " + varsToRead + " reading " + j[0] + " out of " + size + ". Var is " + v, e);
             }
         }
         //System.out.println("Rcv "+simulationTimeClient);
+        messageSize = buf.readerIndex() - size0;
     }
 
     @Override

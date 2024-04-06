@@ -33,6 +33,7 @@ public abstract class MPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> ex
                 getReceivedVariables().putAll(msg.getVarsToRead());
                 setSimulationTimeClient(msg.getSimulationTimeClient());
                 onDataReceived(msg);
+                msg.getVarsToRead().release();
             }
             getReceivedVariables().forEach((key, value) -> ((SynchronizedEntityVariableSnapshot<Object>) value).updateVariable(tryGetVariable(key)));
         }

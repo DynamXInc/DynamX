@@ -5,6 +5,7 @@ import fr.dynamx.api.network.EnumPacketTarget;
 import fr.dynamx.api.network.IDnxPacket;
 import fr.dynamx.client.network.ClientPhysicsSyncManager;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.network.sync.variables.NetworkActivityTracker;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
@@ -53,6 +54,7 @@ public class MessagePing implements IDnxPacket, net.minecraftforge.fml.common.ne
     private static void clientHandle(MessagePing message) {
         ClientPhysicsSyncManager.pingMs = ((int) (System.currentTimeMillis() - message.sentTime)) / 2;
         ClientPhysicsSyncManager.lastPing = message.sentTime;
+        NetworkActivityTracker.addPing(ClientPhysicsSyncManager.pingMs);
         if (message.manual)
             Minecraft.getMinecraft().player.sendMessage(new TextComponentString("[DynamX] Your ping is " + ClientPhysicsSyncManager.pingMs + " ms"));
     }

@@ -11,7 +11,7 @@ public class ClientPhysicsSyncManager {
 
     public static void tick() {
         if (!Minecraft.getMinecraft().isSingleplayer()) {
-            if (System.currentTimeMillis() - lastPing > 10000) {
+            if (System.currentTimeMillis() - lastPing > 1000) {
                 pingMs = -2;
                 lastPing = System.currentTimeMillis();
                 DynamXContext.getNetwork().sendToServer(new MessagePing(lastPing, false));

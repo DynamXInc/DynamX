@@ -41,6 +41,8 @@ public class ClientPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends
     @Setter
     private Quaternion serverRotation;
 
+    private int lastSyncPacketTime;
+
     public ClientPhysicsEntitySynchronizer(T entity) {
         super(entity);
     }
@@ -52,7 +54,8 @@ public class ClientPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends
 
     @Override
     protected void onDataReceived(MessagePhysicsEntitySync<T> msg) {
-        NetworkActivityTracker.addReceivedVars(entity, msg.getVarsToRead().keySet().stream().map(v -> getSynchronizedVariables().get(v)).collect(Collectors.toList()));
+        NetworkActivityTracker.addReceivedVars(entity, msg.getVarsToRead().keySet().stream().map(v -> getSynchronizedVariables().get(v)).collect(Collectors.toList()), msg.getMessageSize(), msg.getModuleSizes(), entity.ticksExisted - lastSyncPacketTime);
+        lastSyncPacketTime = entity.ticksExisted;
     }
 
     @Override

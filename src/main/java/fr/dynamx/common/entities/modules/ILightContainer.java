@@ -58,7 +58,7 @@ public interface ILightContainer {
             VolumetricLightObject volumetricLightObject = spotLightObject.getVolumetricLightObjects().get(0);
             lightCaster.getVolumetricFogConfig().setScattering(volumetricLightObject.getScattering());
             lightCaster.getVolumetricFogConfig().setSampleCount(volumetricLightObject.getSampleCount());
-            lightCaster.getVolumetricFogConfig().setIntensity(volumetricLightObject.getIntensity());
+            lightCaster.getVolumetricFogConfig().setDensity(volumetricLightObject.getIntensity());
         }
 
         getLightCasters().put(spotLightObject, lightCaster);

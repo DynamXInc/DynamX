@@ -436,9 +436,9 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
         }
         Vector3fPool.openPool();
 
-        float x = (float) (playerSp.lastTickPosX + (playerSp.posX - playerSp.lastTickPosX) * partialTicks);
-        float y = (float) (playerSp.lastTickPosY + (playerSp.posY - playerSp.lastTickPosY) * partialTicks);
-        float z = (float) (playerSp.lastTickPosZ + (playerSp.posZ - playerSp.lastTickPosZ) * partialTicks);
+        float x = (float) (entityHolder.lastTickPosX + (entityHolder.posX - entityHolder.lastTickPosX) * partialTicks);
+        float y = (float) (entityHolder.lastTickPosY + (entityHolder.posY - entityHolder.lastTickPosY) * partialTicks);
+        float z = (float) (entityHolder.lastTickPosZ + (entityHolder.posZ - entityHolder.lastTickPosZ) * partialTicks);
 
         GlStateManager.multMatrix(ClientDynamXUtils.getMatrixBuffer(transform));
         GL11.glGetFloat(GL11.GL_MODELVIEW_MATRIX, (FloatBuffer) matrixBuffer.position(0));
@@ -446,17 +446,17 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
         itemModelViewMatrix.set((FloatBuffer) matrixBuffer.position(0));
         Matrix4f modelViewInverse = new Matrix4f(IShaderUniformsHandler.modelViewInverse);
 
-        Vector3f itemPosition = DynamXUtils.toVector3f(itemModelViewMatrix.transformPosition(DynamXUtils.toVector3f(lightCaster.getBasePosition())));
+        Vector3f itemPosition = DynamXUtils.toVector3f(itemModelViewMatrix.transformPosition(new org.joml.Vector3f(0,0,-3)));
         Vector4f positionPlayerSpace = modelViewInverse.transform(new Vector4f(itemPosition.x, itemPosition.y, itemPosition.z, 1));
 
         Vector3f itemPositionWorld = Vector3fPool.get(positionPlayerSpace.x, positionPlayerSpace.y, positionPlayerSpace.z).addLocal(x, y, z);
         if(context instanceof BaseRenderContext.ItemRenderContext) {
             BaseRenderContext.ItemRenderContext itemRenderContext = (BaseRenderContext.ItemRenderContext) context;
-            if (Minecraft.getMinecraft().gameSettings.thirdPersonView != 0 && itemRenderContext.getRenderType().equals(ItemCameraTransforms.TransformType.THIRD_PERSON_RIGHT_HAND)) {
+            if ((Minecraft.getMinecraft().gameSettings.thirdPersonView != 0)) {
                 updateLightThirdPerson(playerHolder, lightCaster, itemPositionWorld, itemRenderContext);
             }
-            if (!(playerHolder instanceof EntityOtherPlayerMP) && Minecraft.getMinecraft().gameSettings.thirdPersonView == 0 && itemRenderContext.getRenderType().equals(ItemCameraTransforms.TransformType.FIRST_PERSON_RIGHT_HAND)) {
-                org.joml.Vector3f playerDir = DynamXUtils.toVector3fJoml(playerSp.getLook(partialTicks));
+            if (Minecraft.getMinecraft().gameSettings.thirdPersonView == 0) {
+                org.joml.Vector3f playerDir = DynamXUtils.toVector3fJoml(playerHolder.getLookVec());
                 itemModelViewMatrix.transformDirection(playerDir);
 
                 //org.joml.Vector3f dir = new org.joml.Vector3f(0,0,1);
@@ -464,7 +464,7 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
                 //Vector3f forwardVector = Vector3fPool.get(itemModelViewMatrix.m20(), itemModelViewMatrix.m21(), itemModelViewMatrix.m22());
                 lightCaster
                         .pos(itemPositionWorld)
-                        .direction(Vector3fPool.get(-playerDir.x, playerDir.y, -playerDir.z).normalize());
+                        .direction(Vector3fPool.get(playerDir.x, playerDir.y, playerDir.z).normalize());
             }
         }
         Vector3fPool.closePool();
@@ -475,7 +475,11 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
         Optional<Map.Entry<OBBModelBox, OBBModelBone>> rightArm = playerOBBObject.boneBinding.entrySet().stream().filter(entry -> entry.getKey().name.contains("rightArm")).findFirst();
         Map.Entry<OBBModelBox, OBBModelBone> rightArmEntry = rightArm.get();
         org.lwjgl.util.vector.Matrix4f handRot = rightArmEntry.getValue().currentPose;
-        Vector3f forwardVector = Vector3fPool.get(-handRot.m20, -handRot.m21, -handRot.m22);
+        Vector3f forwardVector = Vector3fPool.get(handRot.m20, handRot.m21, handRot.m22);
+
+        if(Minecraft.getMinecraft().player.equals(player)){
+            forwardVector.multLocal(-1);
+        }
         lightCaster
                 .pos(itemPosition)
                 .direction(forwardVector.normalize());

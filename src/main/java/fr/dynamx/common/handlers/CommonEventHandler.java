@@ -39,6 +39,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -57,12 +58,19 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.registries.IForgeRegistry;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import static fr.dynamx.common.handlers.TaskScheduler.schedule;
 
 public class CommonEventHandler {
 
     public static final ResourceLocation CAPABILITY_LOCATION_CHUNK = new ResourceLocation(DynamXConstants.ID, "chunkaabb");
     public static final ResourceLocation CAPABILITY_LOCATION_ITEM = new ResourceLocation(DynamXConstants.ID, "itemcapa");
+
+    public static final Map<BlockPos, AxisAlignedBB> BLOCK_BOXES = new HashMap<>();
 
     @SubscribeEvent
     public void attachCapability(AttachCapabilitiesEvent<Chunk> event) {

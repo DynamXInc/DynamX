@@ -18,9 +18,11 @@ import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.PackInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
+import fr.dynamx.common.entities.modules.AbstractLightsModule;
 import fr.dynamx.common.entities.modules.TrailerAttachModule;
 import fr.dynamx.common.entities.modules.engines.BasicEngineModule;
 import fr.dynamx.common.entities.vehicles.TrailerEntity;
+import fr.dynamx.common.items.DynamXItem;
 import fr.dynamx.common.objloader.data.DxModelData;
 import fr.dynamx.common.objloader.data.GltfModelData;
 import fr.dynamx.common.physics.joints.EntityJoint;
@@ -426,6 +428,22 @@ public class DynamXUtils {
         for (Entity e : w.loadedEntityList) {
             if (e instanceof IPackInfoReloadListener)
                 ((IPackInfoReloadListener) e).onPackInfosReloaded();
+            if (e instanceof EntityPlayer) {
+                e.getHeldEquipment().forEach(stack -> {
+                    if(stack.getItem() instanceof DynamXItem){
+                        AbstractLightsModule.ItemLightsModule lightContainer = DynamXItem.getLightContainer(stack);
+                        if(lightContainer != null)
+                            lightContainer.onPackInfosReloaded();
+                    }
+                });
+                e.getArmorInventoryList().forEach(stack -> {
+                    if(stack.getItem() instanceof DynamXItem){
+                        AbstractLightsModule.ItemLightsModule lightContainer = DynamXItem.getLightContainer(stack);
+                        if(lightContainer != null)
+                            lightContainer.onPackInfosReloaded();
+                    }
+                });
+            }
         }
         for (TileEntity te : w.loadedTileEntityList) {
             if (te instanceof IPackInfoReloadListener)
@@ -458,8 +476,8 @@ public class DynamXUtils {
     /**
      * Gets the position of the given object in the given 3D model
      *
-     * @param modelData The 3D model
-     * @param objectName The name of the object to get the pos of
+     * @param modelData       The 3D model
+     * @param objectName      The name of the object to get the pos of
      * @param allowPartCenter If true, the center of the object will be used as position for obj models (and the translation for gltf models) <br>
      *                        If false, the position can only be read from gltf models
      * @return The translation of the object, is this is a gltf model, or the center of the object if this is an obj model and allowPartCenter is true
@@ -472,11 +490,11 @@ public class DynamXUtils {
     /**
      * Gets the position of the given object in the given 3D model
      *
-     * @param modelData The 3D model
-     * @param objectName The name of the object to get the pos of
+     * @param modelData       The 3D model
+     * @param objectName      The name of the object to get the pos of
      * @param allowPartCenter If true, the center of the object will be used as position for obj models (and the translation for gltf models) <br>
      *                        If false, the position can only be read from gltf models
-     * @param forceCenter If true, the center of the object will be returned for both obj and gltf models
+     * @param forceCenter     If true, the center of the object will be returned for both obj and gltf models
      * @return The translation of the object, is this is a gltf model and forceCenter is false, or the center of the object if this is an obj model and allowPartCenter is true, or forceCenter is true
      */
     @Nullable
@@ -498,7 +516,7 @@ public class DynamXUtils {
      * Gets the rotation of the given object in the given 3D model <br>
      * Note: This method only works for gltf models
      *
-     * @param modelData The 3D model
+     * @param modelData  The 3D model
      * @param objectName The name of the object to get the rotation of
      * @return The rotation of the object, or null if the model is not a gltf model or if the object has no rotation
      */
@@ -517,7 +535,7 @@ public class DynamXUtils {
     /**
      * Gets the scale (size) of the given object in the given 3D model
      *
-     * @param modelData The 3D model
+     * @param modelData  The 3D model
      * @param objectName The name of the object to get the scale of
      * @return The scale of the object, or an empty vector if the object isn't found in the model
      */

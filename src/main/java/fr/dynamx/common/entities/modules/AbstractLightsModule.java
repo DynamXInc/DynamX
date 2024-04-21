@@ -11,7 +11,6 @@ import dz.betterlights.network.PacketSyncLight;
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.network.EnumPacketTarget;
-import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.blocks.TEDynamXBlock;
 import fr.dynamx.common.contentpack.parts.ILightOwner;
@@ -80,21 +79,21 @@ public abstract class AbstractLightsModule implements IPhysicsModule<BaseVehicle
     }
 
     public void addLights(PackPhysicsEntity<?, ?> entity) {
-        addLights(entity, null, null, null);
+        addLights(entity, null, null, null, null);
     }
 
     public void addLights(TEDynamXBlock tileEntity) {
-        addLights(null, tileEntity, null, null);
+        addLights(null, tileEntity, null, null, null);
     }
 
-    public void addLights(DynamXItem<?> item, UUID id) {
-        addLights(null, null, item, id);
+    public void addLights(DynamXItem<?> item, UUID id, Entity entityHolder) {
+        addLights(null, null, item, id, entityHolder);
     }
 
-    public void addLights(@Nullable PackPhysicsEntity<?, ?> entity, @Nullable TEDynamXBlock tileEntity, @Nullable DynamXItem<?> item, @Nullable UUID id) {
-        if (!FMLCommonHandler.instance().getEffectiveSide().isServer()) {
+    public void addLights(@Nullable PackPhysicsEntity<?, ?> entity, @Nullable TEDynamXBlock tileEntity, @Nullable DynamXItem<?> item, @Nullable UUID id, @Nullable Entity entityHolder) {
+       /* if (!FMLCommonHandler.instance().getEffectiveSide().isServer()) {
             return;
-        }
+        }*/
         for (PartLightSource compound : lightOwner.getLightSources().values()) {
             //Create all the light casters for the spotlight objects
             for (SpotLightObject spotLight : compound.getSpotLights()) {
@@ -104,7 +103,7 @@ public abstract class AbstractLightsModule implements IPhysicsModule<BaseVehicle
                 } else if (tileEntity != null) {
                     lightCaster = new BlockLightCaster(tileEntity);
                 } else if (item != null) {
-                    lightCaster = new EntityLightCaster(ClientEventHandler.MC.player);
+                    lightCaster = new EntityLightCaster(entityHolder);
                 } else
                     throw new IllegalArgumentException("Invalid light owner type. Must be either a block, entity or item.");
                 createLightCaster(lightCaster, spotLight);
@@ -129,7 +128,14 @@ public abstract class AbstractLightsModule implements IPhysicsModule<BaseVehicle
 
                 lightCasterPartSyncs.put(lightCasterPartSync.getOwnerId(), lightCasterPartSync);
 
-                DynamXContext.getNetwork().getVanillaNetwork().sendPacket(new PacketSyncPartLights(lightCasterPartSync, EnumPacketType.ADD), EnumPacketTarget.ALL, null);
+                if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
+                    DynamXContext.getNetwork().getVanillaNetwork().sendPacket(new PacketSyncPartLights(lightCasterPartSync, EnumPacketType.ADD), EnumPacketTarget.ALL, null);
+                } else {
+                    for (LightCaster caster : lightCasterPartSync.getLightCasters().values()) {
+                        BetterLightsMod.getLightManager().addLightCaster(caster, false);
+                        caster.lightPartGroup = lightCasterPartSync;
+                    }
+                }
             }
         }
 
@@ -261,34 +267,37 @@ public abstract class AbstractLightsModule implements IPhysicsModule<BaseVehicle
 
     public static class ItemLightsModule extends AbstractLightsModule implements IPackInfoReloadListener {
         private final DynamXItem<?> item;
+        private final UUID id;
+        private final Entity playerIn;
 
-        public ItemLightsModule(DynamXItem<?> item, ILightOwner<?> lightOwner, UUID id) {
+        public ItemLightsModule(DynamXItem<?> item, ILightOwner<?> lightOwner, UUID id, Entity playerIn) {
             super(lightOwner);
             this.item = item;
-            addLights(item, id);
+            this.id = id;
+            this.playerIn = playerIn;
+            addLights(item, id, playerIn);
         }
 
 
         public void removeLights() {
-            if (!FMLCommonHandler.instance().getEffectiveSide().isServer()) {
-                return;
-            }
-
-            for (Map.Entry<Integer, LightPartGroup> entry : lightCasterPartSyncs.entrySet()) {
-                for (LightPartGroup value : lightCasterPartSyncs.values()) {
-                    for (LightCaster lightCaster : value.getLightCasters().values()) {
+            for (LightPartGroup value : lightCasterPartSyncs.values()) {
+                for (LightCaster lightCaster : value.getLightCasters().values()) {
+                    LightsSerialization.lights.remove(lightCaster);
+                    BetterLightsMod.getLightManager().getLightsInWorld().remove(lightCaster);
+                    if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
                         DynamXContext.getNetwork().getVanillaNetwork().sendPacket(new PacketSyncLight(lightCaster, EnumPacketType.REMOVE), EnumPacketTarget.ALL, null);
-                        LightsSerialization.lights.remove(lightCaster);
-                        BetterLightsMod.getLightManager().getLightsInWorld().remove(lightCaster);
                     }
                 }
             }
+            lightCasterPartSyncs.clear();
+            lightCasters.clear();
 
         }
 
         @Override
         public void onPackInfosReloaded() {
-
+            removeLights();
+            addLights(item, id, playerIn);
         }
     }
 

@@ -12,7 +12,7 @@ import fr.dynamx.api.network.IDnxPacket;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.sync.MessagePacksHashs;
 import fr.dynamx.common.network.lights.PacketSyncEntityLights;
-import fr.dynamx.common.network.lights.PacketSyncItemInstanceUUID;
+import fr.dynamx.common.network.lights.PacketSyncItemLight;
 import fr.dynamx.common.network.lights.PacketSyncPartLights;
 import fr.dynamx.common.network.packets.*;
 import fr.dynamx.common.network.sync.MessageMultiPhysicsEntitySync;
@@ -78,7 +78,7 @@ public class DynamXNetwork {
         registerMessage(channel, MessageHandleExplosion.class, MessageHandleExplosion.class, Side.CLIENT);
         //BetterLights
         registerMessage(channel, PacketSyncPartLights.ClientHandler.class, PacketSyncPartLights.class, Side.CLIENT);
-        registerMessage(channel, PacketSyncItemInstanceUUID.ClientHandler.class, PacketSyncItemInstanceUUID.class, Side.CLIENT);
+        registerMessage(channel, PacketSyncItemLight.ClientHandler.class, PacketSyncItemLight.class, Side.CLIENT);
 
         //To server
         registerMessage(channel, MessagePacksHashs.HandlerServer.class, MessagePacksHashs.class, Side.SERVER);

@@ -11,9 +11,10 @@ import fr.dynamx.common.capability.itemdata.DynamXItemDataProvider;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.objects.AbstractItemObject;
 import fr.dynamx.common.entities.modules.AbstractLightsModule;
-import fr.dynamx.common.network.lights.PacketSyncItemInstanceUUID;
+import fr.dynamx.common.network.lights.PacketSyncItemLight;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.RegistryNameSetter;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -54,7 +55,7 @@ public class DynamXItem<T extends AbstractItemObject<?, ?>> extends Item impleme
      *
      * @param modid    The mod owning this item used to register the item
      * @param itemName The name of the item
-     * @param model     The obj model of the block "namespace:resourceName.obj"
+     * @param model    The obj model of the block "namespace:resourceName.obj"
      */
     public DynamXItem(String modid, String itemName, ResourceLocation model) {
         if (modid.contains("builtin_mod_")) { //Backward-compatibility
@@ -105,82 +106,71 @@ public class DynamXItem<T extends AbstractItemObject<?, ?>> extends Item impleme
     @Override
     public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
         ItemStack stack = playerIn.getHeldItem(handIn);
-        if(worldIn.isRemote){
-            return super.onItemRightClick(worldIn, playerIn, handIn);
-        }
-        if(!stack.hasTagCompound()){
-            stack.setTagCompound(new NBTTagCompound());
-        }
-        DynamXItemData capability = stack.getCapability(DynamXItemDataProvider.DYNAMX_ITEM_DATA_CAPABILITY, null);
 
-        if(capability == null){
+        if (worldIn.isRemote) {
             return new ActionResult<>(EnumActionResult.PASS, stack);
         }
-
-        UUID instanceUUID = stack.getTagCompound().getUniqueId("InstanceUUID");
-        if (!DynamXItemData.itemInstanceLights.containsKey(instanceUUID)) {
-            UUID id = UUID.randomUUID();
-            if(FMLCommonHandler.instance().getSide().isServer()) {
-                DynamXContext.getNetwork().getVanillaNetwork().sendPacket(new PacketSyncItemInstanceUUID(id), EnumPacketTarget.ALL, null);
-            }
-            AbstractLightsModule.ItemLightsModule instanceLight = new AbstractLightsModule.ItemLightsModule(this, getInfo(), id);
-            stack.getTagCompound().setUniqueId("InstanceUUID", id);
-            DynamXItemData.itemInstanceLights.put(id, instanceLight);
-            capability.itemModule = instanceLight;
+        if (!stack.hasTagCompound()) {
+            stack.setTagCompound(new NBTTagCompound());
         }
 
-        AbstractLightsModule.ItemLightsModule instanceLight = capability.itemModule;
-        if(capability.lightIds.isEmpty()){
-            capability.lightIds.addAll(instanceLight.getLightCasterPartSyncs().keySet());
-        } else {
-            for (int i = 0; i < capability.lightIds.size(); i++) {
-                int id = capability.lightIds.get(i);
-                instanceLight.setLightOn(id, !instanceLight.isLightOn(id));
+        DynamXItemData capability = stack.getCapability(DynamXItemDataProvider.DYNAMX_ITEM_DATA_CAPABILITY, null);
+        if (capability == null) {
+            return new ActionResult<>(EnumActionResult.FAIL, stack);
+        }
+
+        NBTTagCompound tagCompound = stack.getTagCompound();
+        AbstractLightsModule.ItemLightsModule itemModule = capability.itemModule;
+        boolean isServer = FMLCommonHandler.instance().getSide().isServer();
+
+        if (itemModule == null) {
+            UUID newId = UUID.randomUUID();
+            itemModule = new AbstractLightsModule.ItemLightsModule(this, getInfo(), newId, playerIn);
+            if (isServer) {
+                DynamXContext.getNetwork().getVanillaNetwork().sendPacket(new PacketSyncItemLight(newId, playerIn), EnumPacketTarget.ALL, null);
+            }
+            tagCompound.setUniqueId("InstanceUUID", newId);
+            DynamXItemData.itemInstanceLights.put(newId, itemModule);
+            capability.itemModule = itemModule;
+        }
+
+        UUID uuid = tagCompound.getUniqueId("InstanceUUID");
+        for (Integer id : itemModule.getLightCasterPartSyncs().keySet()) {
+            itemModule.setLightOn(id, !itemModule.isLightOn(id));
+            if (isServer) {
+                DynamXContext.getNetwork().getVanillaNetwork().sendPacket(new PacketSyncItemLight(uuid, !itemModule.isLightOn(id)), EnumPacketTarget.ALL, null);
             }
         }
-        /*UUID instanceUUID = stack.getTagCompound().getUniqueId("InstanceUUID");
-        if (!capability.itemInstanceLights.containsKey(instanceUUID)) {
-            UUID id = UUID.randomUUID();
-            if(FMLCommonHandler.instance().getSide().isServer()) {
-                DynamXContext.getNetwork().getVanillaNetwork().sendPacket(new PacketSyncItemInstanceUUID(id), EnumPacketTarget.ALL, null);
-            }
-            AbstractLightsModule.ItemLightsModule instanceLight = new AbstractLightsModule.ItemLightsModule(this, getInfo(), id);
-            stack.getTagCompound().setUniqueId("InstanceUUID", id);
-            capability.itemInstanceLights.put(id, instanceLight);
-        }
-        if (!stack.getTagCompound().hasKey("LightLists")) {
-            instanceUUID = stack.getTagCompound().getUniqueId("InstanceUUID");
-            NBTTagList list = new NBTTagList();
-            AbstractLightsModule.ItemLightsModule instanceLight = itemInstanceLights.get(instanceUUID);
-            instanceLight.getLightCasterPartSyncs().keySet().forEach(lightCasterContainer -> {
-                NBTTagCompound compound = new NBTTagCompound();
-                compound.setInteger("LightId", lightCasterContainer);
-                list.appendTag(compound);
-            });
-            stack.getTagCompound().setTag("LightLists", list);
-        } else {
-            AbstractLightsModule.ItemLightsModule instanceLight = itemInstanceLights.get(instanceUUID);
-            if(instanceLight == null || !stack.getTagCompound().hasKey("LightLists")){
-                return new ActionResult<>(EnumActionResult.PASS, stack);
-            }
-            NBTTagList list = stack.getTagCompound().getTagList("LightLists", Constants.NBT.TAG_COMPOUND);
-            for (int i = 0; i < list.tagCount(); i++) {
-                NBTTagCompound compound = list.getCompoundTagAt(i);
-                int id = compound.getInteger("LightId");
-                instanceLight.setLightOn(id, !instanceLight.isLightOn(id));
-            }
-        }*/
 
         return new ActionResult<>(EnumActionResult.PASS, stack);
     }
 
+    @Override
+    public void onUpdate(ItemStack stack, World worldIn, Entity entityIn, int itemSlot, boolean isSelected) {
+        super.onUpdate(stack, worldIn, entityIn, itemSlot, isSelected);
+        if (worldIn.isRemote) {
+            return;
+        }
+        DynamXItemData capability = stack.getCapability(DynamXItemDataProvider.DYNAMX_ITEM_DATA_CAPABILITY, null);
+        if (capability == null) {
+            return;
+        }
+        AbstractLightsModule.ItemLightsModule instanceLight = capability.itemModule;
+        if (instanceLight == null) {
+            return;
+        }
+        if (isSelected) {
+            return;
+        }
+        DynamXItemData.setLightOn(instanceLight, false);
+    }
 
     @Nullable
-    public static AbstractLightsModule.ItemLightsModule getLightContainer(ItemStack stack){
-        if(!stack.hasTagCompound()){
+    public static AbstractLightsModule.ItemLightsModule getLightContainer(ItemStack stack) {
+        if (!stack.hasTagCompound()) {
             return null;
         }
-        if(!stack.getTagCompound().hasUniqueId("InstanceUUID")){
+        if (!stack.getTagCompound().hasUniqueId("InstanceUUID")) {
             return null;
         }
 

@@ -79,8 +79,8 @@ public class ViewTransformsInfo extends SubInfoType<ItemTransformsInfo> {
         float scale = itemScale == -1 ? owner.getOwner().getBaseItemScale() : itemScale;
         transformMatrix.scale(scale, scale, scale);
         com.jme3.math.Vector3f rotate = getItemRotate();
-        transformMatrix.rotate(rotate.x * DynamXMath.TO_RADIAN, 1, 0, 0);
         transformMatrix.rotate(rotate.y * DynamXMath.TO_RADIAN, 0, 1, 0);
+        transformMatrix.rotate(rotate.x * DynamXMath.TO_RADIAN, 1, 0, 0);
         transformMatrix.rotate(rotate.z * DynamXMath.TO_RADIAN, 0, 0, 1);
     }
 

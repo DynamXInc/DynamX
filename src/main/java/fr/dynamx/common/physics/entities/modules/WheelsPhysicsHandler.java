@@ -56,7 +56,7 @@ public class WheelsPhysicsHandler {
 
     public void init() {
         handler.getPackInfo().getPartsByType(PartWheel.class).forEach(partWheel -> addWheel(partWheel, partWheel.getDefaultWheelInfo()));
-        pacejkaMagicFormula = new PacejkaMagicFormula(this);
+        pacejkaMagicFormula = new PacejkaMagicFormula(this, getNumWheels());
     }
 
     public void addWheel(PartWheel partWheel, PartWheelInfo wheelInfo) {

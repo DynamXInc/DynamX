@@ -6,15 +6,19 @@ import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
-import lombok.RequiredArgsConstructor;
 
 import static fr.dynamx.utils.maths.DynamXMath.clamp;
 
-@RequiredArgsConstructor
 public class PacejkaMagicFormula {
     private final WheelsPhysicsHandler wheelsPhysics;
-    public final float[] lateral = new float[10];
-    public final float[] longitudinal = new float[10];
+    public final float[] lateral;
+    public final float[] longitudinal;
+
+    public PacejkaMagicFormula(WheelsPhysicsHandler wheelsPhysics, int numWheels) {
+        this.wheelsPhysics = wheelsPhysics;
+        lateral = new float[numWheels];
+        longitudinal = new float[numWheels];
+    }
 
     public void update() {
         for (int i = 0; i < wheelsPhysics.getNumWheels(); i++) {

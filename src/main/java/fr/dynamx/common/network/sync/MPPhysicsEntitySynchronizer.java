@@ -1,15 +1,11 @@
 package fr.dynamx.common.network.sync;
 
 import com.google.common.collect.Queues;
-import fr.dynamx.api.network.sync.EntityVariable;
-import fr.dynamx.client.network.ClientPhysicsEntitySynchronizer;
 import fr.dynamx.common.entities.PhysicsEntity;
-import fr.dynamx.common.network.sync.variables.NetworkActivityTracker;
 import fr.dynamx.common.network.sync.variables.SynchronizedEntityVariableSnapshot;
 import lombok.Getter;
 
 import java.util.Queue;
-import java.util.stream.Collectors;
 
 public abstract class MPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends PhysicsEntitySynchronizer<T> {
     /**
@@ -31,7 +27,7 @@ public abstract class MPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> ex
             while (!receivedPackets.isEmpty()) {
                 MessagePhysicsEntitySync<T> msg = receivedPackets.remove();
                 getReceivedVariables().putAll(msg.getVarsToRead());
-                setSimulationTimeClient(msg.getSimulationTimeClient());
+                setSimulationTimeClient(msg.getSimulationTime());
                 onDataReceived(msg);
                 msg.getVarsToRead().release();
             }

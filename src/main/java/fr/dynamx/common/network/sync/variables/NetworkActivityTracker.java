@@ -2,8 +2,10 @@ package fr.dynamx.common.network.sync.variables;
 
 import fr.dynamx.api.network.sync.EntityVariable;
 import fr.dynamx.api.network.sync.SimulationHolder;
+import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.common.entities.PhysicsEntity;
+import fr.dynamx.utils.debug.DynamXDebugOptions;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.entity.Entity;
 
@@ -21,6 +23,8 @@ public class NetworkActivityTracker {
     public static int lastTime;
     public static int viewIndex = -1;
     public static int viewEntity = -1;
+
+    public static int lastLog;
 
     public static Map<PhysicsEntity<?>, EntitySyncData> getDebugAt(int time) {
         return syncDebug.get(time);
@@ -95,6 +99,8 @@ public class NetworkActivityTracker {
             int avgTimeDeltaPlus = 0, minTimeDeltaPlus = 0, maxTimeDeltaPlus = 0;
             int avgTimeDeltaLess = 0, minTimeDeltaLess = 0, maxTimeDeltaLess = 0;
             int avgPackets = 0, minPackets = 0, maxPackets = 0;
+            int avgMissOrderCount = 0, minMissOrderCount = 0, maxMissOrderCount = 0;
+            int avgMissOrderTime = 0, minMissOrderTime = 0, maxMissOrderTime = 0;
             Map<String, Integer> varCounts = new HashMap<>();
             Map<String, Integer> varSizes = new HashMap<>();
             for (EntitySyncData data : getDebugAt(i).values()) {
@@ -140,6 +146,20 @@ public class NetworkActivityTracker {
                 if (maxPackets == 0 || data.packetCount > maxPackets) {
                     maxPackets = data.packetCount;
                 }
+                avgMissOrderCount += data.missOrderCount;
+                if (minMissOrderCount == 0 || data.missOrderCount < minMissOrderCount) {
+                    minMissOrderCount = data.missOrderCount;
+                }
+                if (maxMissOrderCount == 0 || data.missOrderCount > maxMissOrderCount) {
+                    maxMissOrderCount = data.missOrderCount;
+                }
+                avgMissOrderTime += data.missOrderTime;
+                if (minMissOrderTime == 0 || data.missOrderTime < minMissOrderTime) {
+                    minMissOrderTime = data.missOrderTime;
+                }
+                if (maxMissOrderTime == 0 || data.missOrderTime > maxMissOrderTime) {
+                    maxMissOrderTime = data.missOrderTime;
+                }
                 for (String s : data.receivedVars) {
                     varCounts.put(s, varCounts.getOrDefault(s, 0) + 1);
                 }
@@ -156,6 +176,8 @@ public class NetworkActivityTracker {
             avgTimeDeltaPlus /= getDebugAt(i).size();
             avgTimeDeltaLess /= getDebugAt(i).size();
             avgPackets /= getDebugAt(i).size();
+            avgMissOrderCount /= getDebugAt(i).size();
+            avgMissOrderTime /= getDebugAt(i).size();
             varCounts = varCounts.entrySet().stream().sorted(Comparator.comparingInt(e -> -e.getValue())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
             Map<String, Integer> finalVarCounts = varCounts;
             //varSizes = varSizes.entrySet().stream().map(e -> new AbstractMap.SimpleEntry<>(e.getKey(), e.getValue() / finalVarCounts.getOrDefault(e.getKey(), 1))).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -170,10 +192,27 @@ public class NetworkActivityTracker {
             fontRenderer.drawString("Counts/sizes: " + varCounts.entrySet().stream().map(e -> e.getKey() + " : " + e.getValue() + "/" + finalVarSizes.getOrDefault(e.getKey(), -1)).collect(Collectors.joining(", "))
                     , 2, y, Color.RED.getRGB());
             y += fontRenderer.FONT_HEIGHT;
-            fontRenderer.drawString("Avg TimeDelta+ " + avgTimeDeltaPlus + " Min " + minTimeDeltaPlus + " Max " + maxTimeDeltaPlus
-                    + "    //    " + "Avg TimeDelta- " + avgTimeDeltaLess + " Min " + minTimeDeltaLess + " Max " + maxTimeDeltaLess
-                    + "    //    " + "Avg Packets " + avgPackets + " Min " + minPackets + " Max " + maxPackets + "    //    " + "Entities " + getDebugAt(i).size(), 2, y, Color.MAGENTA.getRGB());
+            fontRenderer.drawString("ATD+ " + avgTimeDeltaPlus + " Mi " + minTimeDeltaPlus + " Ma " + maxTimeDeltaPlus
+                    + " // " + "ATD- " + avgTimeDeltaLess + " Mi " + minTimeDeltaLess + " Ma " + maxTimeDeltaLess
+                    + " // " + "AMC " + avgMissOrderCount + " Mi " + minMissOrderCount + " Ma " + maxMissOrderCount
+                    + " // " + "AMT " + avgMissOrderTime + " Mi " + minMissOrderTime + " Ma " + maxMissOrderTime
+                    + " // " + "AP " + avgPackets + " Mi " + minPackets + " Ma " + maxPackets + " // " + "Ent " + getDebugAt(i).size(), 2, y, Color.MAGENTA.getRGB());
             y += fontRenderer.FONT_HEIGHT;
+
+            if (i == viewIndex && i != lastLog) {
+                lastLog = i;
+                String sb = "=========== Time " + i + " ===========" + "\n" +
+                        "Total size " + totalSize + " Avg Size " + avgSize + " Min " + minSize + " Max " + maxSize + " // " +
+                        "Avg Vars " + avgVars + " Min " + minVars + " Max " + maxVars + "\n" +
+                        "Counts/sizes: " + varCounts.entrySet().stream().map(e -> e.getKey() + " : " + e.getValue() + "/" + finalVarSizes.getOrDefault(e.getKey(), -1)).collect(Collectors.joining(", ")) + "\n" +
+                        "ATD+ " + avgTimeDeltaPlus + " Mi " + minTimeDeltaPlus + " Ma " + maxTimeDeltaPlus + " // " +
+                        "ATD- " + avgTimeDeltaLess + " Mi " + minTimeDeltaLess + " Ma " + maxTimeDeltaLess + "\n" +
+                        "AMC " + avgMissOrderCount + " Mi " + minMissOrderCount + " Ma " + maxMissOrderCount + " // " +
+                        "AMT " + avgMissOrderTime + " Mi " + minMissOrderTime + " Ma " + maxMissOrderTime + "\n" +
+                        "AP " + avgPackets + " Mi " + minPackets + " Ma " + maxPackets + " // " +
+                        "Ent " + getDebugAt(i).size();
+                System.out.println(sb);
+            }
         }
     }
 
@@ -196,27 +235,48 @@ public class NetworkActivityTracker {
         if (!syncDebug.containsKey(lastTime))
             syncDebug.put(lastTime, new ConcurrentHashMap<>());
         if (!getDebugAt(lastTime).containsKey(entity))
-            getDebugAt(lastTime).put(entity, new EntitySyncData(entity.getSynchronizer().getSimulationHolder(), entity.getSynchronizer().getSynchronizedVariables().values().stream().map(EntityVariable::getName).collect(Collectors.toList()), -1, -1, null, -1, -1));
+            getDebugAt(lastTime).put(entity, new EntitySyncData(entity.getSynchronizer().getSimulationHolder(), entity.getSynchronizer().getSynchronizedVariables().values().stream().map(EntityVariable::getName).collect(Collectors.toList()), -1, -1, null, -1, -1, -1, -1));
         getDebugAt(lastTime).get(entity).sentVars.addAll(variables.stream().map(EntityVariable::getName).collect(Collectors.toList()));
 
         if (viewIndex == -1)
             syncDebug.keySet().removeIf(i -> i < lastTime - 2 * 60);
     }
 
-    public static void addReceivedVars(PhysicsEntity<?> entity, Collection<EntityVariable<?>> variables, int messageSize, Map<String, Integer> moduleSizes, int timeDelta) {
+    public static void addReceivedVars(PhysicsEntity<?> entity, Collection<EntityVariable<?>> variables, int messageSize, Map<String, Integer> moduleSizes, int timeDelta, int simTime) {
+        if(!ClientDebugSystem.enableDebugDrawing || !DynamXDebugOptions.FULL_NETWORK_DEBUG.isActive()) {
+            return;
+        }
         lastTime = ClientEventHandler.MC.player.ticksExisted / 10;
         //System.out.println("Rcv " + lastTime+" "+variables.stream().map(SynchronizedEntityVariable::getName).collect(Collectors.toList()));
         if (!syncDebug.containsKey(lastTime))
             syncDebug.put(lastTime, new ConcurrentHashMap<>());
-        if (!getDebugAt(lastTime).containsKey(entity))
+        if (!getDebugAt(lastTime).containsKey(entity)) {
+            int missOrderTime = 0;
+            if (syncDebug.containsKey(lastTime - 1) && getDebugAt(lastTime - 1).containsKey(entity)) {
+                EntitySyncData data = getDebugAt(lastTime - 1).get(entity);
+                if ((simTime - data.lastSimTime) > 4 || simTime < data.lastSimTime) {
+                    missOrderTime += Math.abs(simTime - data.lastSimTime) - 1;
+                    if (missOrderTime == 19) { //Sleeping entities
+                        missOrderTime = 0;
+                    } else {
+                        System.out.println("/!\\ Step miss order " + entity + " " + simTime + " " + data.lastSimTime + " " + (simTime - data.lastSimTime));
+                    }
+                }
+            }
             getDebugAt(lastTime).put(entity, new EntitySyncData(entity.getSynchronizer().getSimulationHolder(), entity.getSynchronizer().getSynchronizedVariables().values().stream().map(EntityVariable::getName).collect(Collectors.toList()), entity.getDistance(ClientEventHandler.MC.player),
-                    messageSize, moduleSizes, timeDelta > 1 ? timeDelta - 1 : 0, timeDelta < 1 ? timeDelta - 1 : 0));
-        else {
+                    messageSize, moduleSizes, timeDelta > 1 ? timeDelta - 1 : 0, timeDelta < 1 ? timeDelta - 1 : 0, simTime, missOrderTime));
+        } else {
             EntitySyncData data = getDebugAt(lastTime).get(entity);
             data.messageSize += messageSize;
             moduleSizes.forEach((k, v) -> data.moduleSizes.put(k, data.moduleSizes.getOrDefault(k, 0) + v));
             data.timeDeltaPlus += timeDelta > 1 ? timeDelta - 1 : 0;
             data.timeDeltaLess += timeDelta < 1 ? timeDelta - 1 : 0;
+            if ((simTime - data.lastSimTime) > 4 || simTime < data.lastSimTime) {
+                System.out.println("/!\\ Miss order " + entity + " " + simTime + " " + data.lastSimTime + " " + (simTime - data.lastSimTime));
+                data.missOrderTime += Math.abs(simTime - data.lastSimTime) - 1;
+                data.missOrderCount += Math.abs(simTime - data.lastSimTime) > 1 ? 1 : 0;
+            }
+            data.lastSimTime = simTime;
             data.packetCount++;
         }
         getDebugAt(lastTime).get(entity).receivedVars.addAll(variables.stream().map(EntityVariable::getName).collect(Collectors.toList()));
@@ -244,7 +304,13 @@ public class NetworkActivityTracker {
         public int timeDeltaLess;
         public int packetCount;
 
-        public EntitySyncData(SimulationHolder simulationHolder, List<String> activeVars, float entityDistance, int messageSize, Map<String, Integer> moduleSizes, int timeDeltaPlus, int timeDeltaLess) {
+        public int lastSimTime;
+        public int missOrderCount;
+        public int missOrderTime;
+
+        //TODO PRINT DATA IN LOG
+
+        public EntitySyncData(SimulationHolder simulationHolder, List<String> activeVars, float entityDistance, int messageSize, Map<String, Integer> moduleSizes, int timeDeltaPlus, int timeDeltaLess, int simTime, int missOrderTime) {
             this.simulationHolder = simulationHolder;
             this.activeVars = activeVars;
             this.entityDistance = entityDistance;
@@ -253,6 +319,9 @@ public class NetworkActivityTracker {
             this.timeDeltaPlus = timeDeltaPlus;
             this.timeDeltaLess = timeDeltaLess;
             this.packetCount = 1;
+            this.lastSimTime = simTime;
+            this.missOrderCount = missOrderTime > 0 ? 1 : 0;
+            this.missOrderTime = missOrderTime;
         }
     }
 }

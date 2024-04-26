@@ -54,7 +54,7 @@ public class ClientPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends
 
     @Override
     protected void onDataReceived(MessagePhysicsEntitySync<T> msg) {
-        NetworkActivityTracker.addReceivedVars(entity, msg.getVarsToRead().keySet().stream().map(v -> getSynchronizedVariables().get(v)).collect(Collectors.toList()), msg.getMessageSize(), msg.getModuleSizes(), entity.ticksExisted - lastSyncPacketTime);
+        NetworkActivityTracker.addReceivedVars(entity, msg.getVarsToRead().keySet().stream().map(v -> getSynchronizedVariables().get(v)).collect(Collectors.toList()), msg.getMessageSize(), msg.getModuleSizes(), entity.ticksExisted - lastSyncPacketTime, msg.getSimulationTime());
         lastSyncPacketTime = entity.ticksExisted;
     }
 

@@ -32,7 +32,7 @@ public class MessagePhysicsEntitySync<T extends PhysicsEntity<?>> extends Physic
     /**
      * The "date" of the data contained in this packet
      */
-    private int simulationTimeClient;
+    private int simulationTime;
 
     private final boolean doSizeTrack = false;
     private boolean lightData;
@@ -46,11 +46,11 @@ public class MessagePhysicsEntitySync<T extends PhysicsEntity<?>> extends Physic
         super(null);
     }
 
-    public MessagePhysicsEntitySync(T entity, int simulationTimeClient, Map<Integer, EntityVariable<?>> varsToSync, boolean lightData) {
+    public MessagePhysicsEntitySync(T entity, int simulationTime, Map<Integer, EntityVariable<?>> varsToSync, boolean lightData) {
         super(entity);
         this.targetEntity = entity;
         this.varsToSend = varsToSync;
-        this.simulationTimeClient = simulationTimeClient;
+        this.simulationTime = simulationTime;
         this.lightData = lightData;
        // System.out.println("SEND "+entity.ticksExisted+" "+entityId);
        // System.out.println("Send "+simulationTimeClient);
@@ -61,7 +61,7 @@ public class MessagePhysicsEntitySync<T extends PhysicsEntity<?>> extends Physic
       //  System.out.println("Sending "+simulationTimeClient);
         int index = buf.writerIndex();
         super.toBytes(buf);
-        buf.writeInt(simulationTimeClient);
+        buf.writeInt(simulationTime);
         buf.writeInt(varsToSend.size());
         //buf.writeBoolean(doSizeTrack);
         final int[] j = {0};
@@ -98,7 +98,7 @@ public class MessagePhysicsEntitySync<T extends PhysicsEntity<?>> extends Physic
     @Override
     public void fromBytes(ByteBuf buf) {
         super.fromBytes(buf);
-        simulationTimeClient = buf.readInt();
+        simulationTime = buf.readInt();
         varsToRead = HashMapPool.get();
         int size = buf.readInt();
         //boolean doSizeTrack = buf.readBoolean();
@@ -155,8 +155,8 @@ public class MessagePhysicsEntitySync<T extends PhysicsEntity<?>> extends Physic
     /**
      * @return The "date" of the data contained in this packet
      */
-    public int getSimulationTimeClient() {
-        return simulationTimeClient;
+    public int getSimulationTime() {
+        return simulationTime;
     }
 
     @Override
@@ -164,7 +164,7 @@ public class MessagePhysicsEntitySync<T extends PhysicsEntity<?>> extends Physic
         return "MessagePhysicsEntitySync{" +
                 "varsToSend=" + varsToSend +
                 ", varsToRead=" + varsToRead +
-                ", simulationTimeClient=" + simulationTimeClient +
+                ", simulationTimeClient=" + simulationTime +
                 ", doSizeTrack=" + doSizeTrack +
                 ", lightData=" + lightData +
                 ", targetEntity=" + targetEntity +

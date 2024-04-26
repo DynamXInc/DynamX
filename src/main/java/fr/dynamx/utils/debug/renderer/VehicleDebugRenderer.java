@@ -226,7 +226,7 @@ public class VehicleDebugRenderer {
     public static class NetworkDebug implements DebugRenderer<BaseVehicleEntity<?>> {
         @Override
         public boolean shouldRender(BaseVehicleEntity<?> entity) {
-            return DynamXDebugOptions.FULL_NETWORK_DEBUG.isActive() && entity.getSynchronizer() instanceof ClientPhysicsEntitySynchronizer;
+            return DynamXDebugOptions.FULL_NETWORK_DEBUG.isActive() && entity.getSynchronizer() instanceof ClientPhysicsEntitySynchronizer && false;
         }
 
         @Override

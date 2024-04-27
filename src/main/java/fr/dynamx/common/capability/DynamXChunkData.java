@@ -1,5 +1,6 @@
 package fr.dynamx.common.capability;
 
+import lombok.Getter;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 
@@ -11,9 +12,6 @@ import java.util.Map;
  * Used for destroy and interaction raytracing
  */
 public class DynamXChunkData {
+    @Getter
     private final Map<BlockPos, AxisAlignedBB> blocksAABB = new HashMap<>();
-
-    public Map<BlockPos, AxisAlignedBB> getBlocksAABB() {
-        return blocksAABB;
-    }
 }

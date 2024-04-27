@@ -39,6 +39,7 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -246,9 +247,15 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
 
     @Override
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
+        TEDynamXBlock te = (TEDynamXBlock) worldIn.getTileEntity(pos);
+        if (te != null) {
+            te.removeChunkCollisions();
+        } else {
+            // This should not happen, but, just in case fallback and clear the block's chunk
+            DynamXChunkData data = worldIn.getChunk(pos).getCapability(DynamXChunkDataProvider.DYNAMX_CHUNK_DATA_CAPABILITY, null);
+            data.getBlocksAABB().remove(pos);
+        }
         super.breakBlock(worldIn, pos, state);
-        DynamXChunkData data = worldIn.getChunk(pos).getCapability(DynamXChunkDataProvider.DYNAM_X_CHUNK_DATA_CAPABILITY, null);
-        data.getBlocksAABB().remove(pos);
     }
 
     @Nullable

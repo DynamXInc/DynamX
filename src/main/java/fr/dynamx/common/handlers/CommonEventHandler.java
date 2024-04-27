@@ -37,7 +37,9 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
@@ -55,15 +57,27 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.registries.IForgeRegistry;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static fr.dynamx.common.handlers.TaskScheduler.schedule;
 
 public class CommonEventHandler {
 
     public static final ResourceLocation CAPABILITY_LOCATION = new ResourceLocation(DynamXConstants.ID, "chunkaabb");
 
+    public static final Map<ChunkPos, Map<BlockPos, AxisAlignedBB>> PENDING_CHUNKS_COLLISIONS = new HashMap<>();
+
     @SubscribeEvent
     public void attachCapability(AttachCapabilitiesEvent<Chunk> event) {
         event.addCapability(CAPABILITY_LOCATION, new DynamXChunkDataProvider());
+    }
+
+    @SubscribeEvent
+    public void onChunkLoad(ChunkEvent.Load e) {
+        if (PENDING_CHUNKS_COLLISIONS.containsKey(e.getChunk().getPos())) {
+            e.getChunk().getCapability(DynamXChunkDataProvider.DYNAMX_CHUNK_DATA_CAPABILITY, null).getBlocksAABB().putAll(PENDING_CHUNKS_COLLISIONS.get(e.getChunk().getPos()));
+        }
     }
 
     @SubscribeEvent

@@ -8,7 +8,6 @@ import net.minecraftforge.common.capabilities.Capability;
 import javax.annotation.Nullable;
 
 public class DynamXChunkDataStorage implements Capability.IStorage<DynamXChunkData> {
-
     @Nullable
     @Override
     public NBTBase writeNBT(Capability<DynamXChunkData> capability, DynamXChunkData instance, EnumFacing side) {
@@ -17,6 +16,5 @@ public class DynamXChunkDataStorage implements Capability.IStorage<DynamXChunkDa
 
     @Override
     public void readNBT(Capability<DynamXChunkData> capability, DynamXChunkData instance, EnumFacing side, NBTBase nbt) {
-
     }
 }

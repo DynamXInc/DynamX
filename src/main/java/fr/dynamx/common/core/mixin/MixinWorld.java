@@ -18,6 +18,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import javax.annotation.Nullable;
 import java.util.Map;
 
+import static net.minecraft.util.math.RayTraceResult.Type.MISS;
+
 /**
  * Patches the world raytrace to raytrace on dynamx blocks
  */
@@ -151,10 +153,10 @@ public abstract class MixinWorld {
 
                     //Ray-trace DynamX blocks
                     Chunk chunk = getChunk(blockpos);
-                    DynamXChunkData capability = chunk.getCapability(DynamXChunkDataProvider.DYNAM_X_CHUNK_DATA_CAPABILITY, null);
+                    DynamXChunkData capability = chunk.getCapability(DynamXChunkDataProvider.DYNAMX_CHUNK_DATA_CAPABILITY, null);
                     if(dynamXHit == null) {
                         for (Map.Entry<BlockPos, AxisAlignedBB> e : capability.getBlocksAABB().entrySet()) {
-                            RayTraceResult res = e.getValue().calculateIntercept(vec31, vec32);
+                            RayTraceResult res = e.getValue().contains(vec31) ? new RayTraceResult(new Vec3d(e.getKey().getX(), e.getKey().getY(), e.getKey().getZ()), EnumFacing.NORTH) : e.getValue().calculateIntercept(vec31, vec32);
                             if (res != null) {
                                 dynamXHit = res;
                                 dynamXHitPos = e.getKey();
@@ -180,7 +182,7 @@ public abstract class MixinWorld {
                             if(rayResult != null)
                                 return getCloserHit(rayTraceStart, rayResult, dynamXHit, dynamXHitPos);
                         } else {
-                            raytraceresult2 = new RayTraceResult(RayTraceResult.Type.MISS, vec31, enumfacing, blockpos);
+                            raytraceresult2 = new RayTraceResult(MISS, vec31, enumfacing, blockpos);
                         }
                     }
                 }
@@ -197,7 +199,7 @@ public abstract class MixinWorld {
 
     private RayTraceResult getCloserHit(Vec3d rayTraceStart, RayTraceResult rayTraceResult, RayTraceResult dynamXHit, BlockPos dynamXHitPos) {
         // If there is a DynamXhit, but Minecraft hit is closer
-        if(dynamXHit == null || rayTraceResult.hitVec.subtract(rayTraceStart).lengthSquared() < dynamXHit.hitVec.subtract(rayTraceStart).lengthSquared())
+        if(dynamXHit == null || (rayTraceResult.hitVec.subtract(rayTraceStart).lengthSquared() < dynamXHit.hitVec.subtract(rayTraceStart).lengthSquared() && rayTraceResult.typeOfHit != MISS))
             return rayTraceResult;
         else //Mc's hit is farther, so DynamX hit is closer :)
             return new RayTraceResult(dynamXHit.hitVec.add(dynamXHitPos.getX(), dynamXHitPos.getY(), dynamXHitPos.getZ()), dynamXHit.sideHit, dynamXHitPos);

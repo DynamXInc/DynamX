@@ -5,6 +5,9 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.physics.IRotatedCollisionHandler;
 import fr.dynamx.client.handlers.ClientDebugSystem;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.DynamXMain;
+import fr.dynamx.common.capability.DynamXChunkData;
+import fr.dynamx.common.capability.DynamXChunkDataProvider;
 import fr.dynamx.common.contentpack.parts.PartShape;
 import fr.dynamx.common.entities.IDynamXObject;
 import fr.dynamx.common.entities.PhysicsEntity;
@@ -318,10 +321,19 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
         for (int chunkX = minChunkX; chunkX <= maxChunkX; chunkX++) {
             for (int chunkZ = minChunkZ; chunkZ <= maxChunkZ; chunkZ++) {
                 Chunk chunk = world.getChunk(chunkX, chunkZ);
-                for (Map.Entry<BlockPos, TileEntity> te : chunk.getTileEntityMap().entrySet()) {
-                    if (te.getValue() instanceof IDynamXObject && inBox.contains(te.getKey())) {
-                        entities.put(Vector3fPool.get(te.getKey().getX(), te.getKey().getY(), te.getKey().getZ()), (IDynamXObject) te.getValue());
+                DynamXChunkData capability = chunk.getCapability(DynamXChunkDataProvider.DYNAMX_CHUNK_DATA_CAPABILITY, null);
+                for (Map.Entry<BlockPos, AxisAlignedBB> te : capability.getBlocksAABB().entrySet()) {
+                    if (!inBox.intersects(te.getValue()))
+                        continue;
+                    Vector3f pos = Vector3fPool.get(te.getKey().getX(), te.getKey().getY(), te.getKey().getZ());
+                    if (entities.containsKey(pos))
+                        continue;
+                    TileEntity tileEntity = world.getTileEntity(te.getKey());
+                    if (!(tileEntity instanceof IDynamXObject)) {
+                        DynamXMain.proxy.scheduleTask(world, () -> capability.getBlocksAABB().remove(te.getKey()));
+                        continue;
                     }
+                    entities.put(Vector3fPool.get(te.getKey().getX(), te.getKey().getY(), te.getKey().getZ()), (IDynamXObject) tileEntity);
                 }
             }
         }
@@ -336,9 +348,9 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
     }
 
     private boolean shouldHandleCollision(Entity entity, MoverType moverType) {
-        if(entity instanceof EntityPlayer) {
+        /*if(entity instanceof EntityPlayer) {
             return moverType.equals(MoverType.PLAYER);
-        }
+        }*/
         return (!(entity instanceof PhysicsEntity));
     }
 
@@ -378,8 +390,8 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
 
         motionChanged = false;
 
-        if(shouldHandleCollision(entity, moverType)) {
-            PooledHashMap<Vector3f, IDynamXObject> collidableEntities = getCollidableTileEntities(entity.world, new MutableBoundingBox(entity.getEntityBoundingBox()).grow(icollidableCheckRadius));
+        if (shouldHandleCollision(entity, moverType)) {
+            PooledHashMap<Vector3f, IDynamXObject> collidableEntities = getCollidableTileEntities(entity.world, new MutableBoundingBox(entity.getEntityBoundingBox()).grow(1));
             for (Map.Entry<Vector3f, IDynamXObject> e : collidableEntities.entrySet()) {
                 //System.out.println("Input "+mx+" "+my+" "+mz+" "+nx+" "+ny+" "+nz+" "+entity.onGround+" "+entity.collidedVertically+" "+e.physicsPosition);
                 Vector3fPool.openPool();

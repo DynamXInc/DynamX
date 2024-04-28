@@ -26,6 +26,7 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -33,13 +34,9 @@ import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.*;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -231,6 +228,21 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
         return null;
     }
 
+    @Override
+    public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
+        super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
+        int rotation = MathHelper.floor((placer.rotationYaw * 16.0F / 360.0F) + 0.5D) & 0xF;
+        if (isDxModel()) {
+            TileEntity tileentity = worldIn.getTileEntity(pos);
+            if (tileentity instanceof TEDynamXBlock) {
+                TEDynamXBlock teDynamXBlock = (TEDynamXBlock) tileentity;
+                teDynamXBlock.setRotation(rotation);
+            }
+        } else {
+            worldIn.setBlockState(pos, state.withProperty(DynamXBlock.METADATA, rotation));
+        }
+    }
+
     @Override //Handled by the RotatedCollisionHandler
     public void addCollisionBoxToList(IBlockState state, World world, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes, @Nullable Entity entityIn, boolean isActualState) {
     }
@@ -262,19 +274,6 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
     @Override
     public RayTraceResult collisionRayTrace(IBlockState blockState, World worldIn, BlockPos pos, Vec3d start, Vec3d end) {
         return this.rayTrace(pos, start, end, getComputedBB(worldIn, pos));
-    }
-
-    @Nullable
-    protected RayTraceResult rayTrace(BlockPos pos, Vec3d start, Vec3d end, AxisAlignedBB boundingBox) {
-        /*Vec3d vec3d = start.subtract(pos.getX(), pos.getY(), pos.getZ());
-        Vec3d vec3d1 = end.subtract(pos.getX(), pos.getY(), pos.getZ());
-        return !intersects(boundingBox, vec3d, vec3d1) ? null : new RayTraceResult(new Vec3d(0, 0, 0), EnumFacing.DOWN, pos);*/
-        return super.rayTrace(pos, start, end, boundingBox);
-    }
-
-    public static boolean intersects(AxisAlignedBB boundingBox, Vec3d min, Vec3d max) {
-        //Because vanilla method is side only client...
-        return boundingBox.intersects(Math.min(min.x, max.x), Math.min(min.y, max.y), Math.min(min.z, max.z), Math.max(min.x, max.x), Math.max(min.y, max.y), Math.max(min.z, max.z));
     }
 
     public AxisAlignedBB getComputedBB(IBlockAccess world, BlockPos pos) {

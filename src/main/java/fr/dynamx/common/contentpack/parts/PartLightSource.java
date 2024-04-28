@@ -5,11 +5,11 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import dz.betterlights.BetterLightsMod;
 import dz.betterlights.dynamx.LightPartGroup;
+import dz.betterlights.gl.GlobalMatrices;
 import dz.betterlights.handlers.IShaderUniformsHandler;
 import dz.betterlights.lighting.lightcasters.EntityLightCaster;
 import dz.betterlights.lighting.lightcasters.LightCaster;
-import dz.betterlights.util.BetterLightsConstants;
-import dz.betterlights.util.OptifineUniformsUtil;
+import dz.betterlights.utils.BetterLightsContext;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.ICollisionsContainer;
 import fr.dynamx.api.contentpack.object.INamedObject;
@@ -417,7 +417,7 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
     private static final FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(16);
 
     public static void renderLightFirstPerson(LightCaster lightCaster, Matrix4f transform, BaseRenderContext context){
-        if(OptifineUniformsUtil.isOptifineShadowPass()){
+        if(BetterLightsContext.isOptifineShadowPass()){
             return;
         }
         float partialTicks = Minecraft.getMinecraft().getRenderPartialTicks();
@@ -444,7 +444,7 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
         GL11.glGetFloat(GL11.GL_MODELVIEW_MATRIX, (FloatBuffer) matrixBuffer.position(0));
 
         itemModelViewMatrix.set((FloatBuffer) matrixBuffer.position(0));
-        Matrix4f modelViewInverse = new Matrix4f(IShaderUniformsHandler.modelViewInverse);
+        Matrix4f modelViewInverse = new Matrix4f(GlobalMatrices.invViewMatrixBuffer);
 
         Vector3f itemPosition = DynamXUtils.toVector3f(itemModelViewMatrix.transformPosition(new org.joml.Vector3f(0,0,-3)));
         Vector4f positionPlayerSpace = modelViewInverse.transform(new Vector4f(itemPosition.x, itemPosition.y, itemPosition.z, 1));

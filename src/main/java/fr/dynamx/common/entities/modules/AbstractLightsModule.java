@@ -2,7 +2,7 @@ package fr.dynamx.common.entities.modules;
 
 import dz.betterlights.BetterLightsMod;
 import dz.betterlights.dynamx.LightPartGroup;
-import dz.betterlights.lighting.LightsSerialization;
+import dz.betterlights.lighting.LightSerialization;
 import dz.betterlights.lighting.lightcasters.BlockLightCaster;
 import dz.betterlights.lighting.lightcasters.EntityLightCaster;
 import dz.betterlights.lighting.lightcasters.LightCaster;
@@ -220,7 +220,7 @@ public abstract class AbstractLightsModule implements IPhysicsModule<BaseVehicle
         @Override
         public void onPackInfosReloaded() {
             lightCasters.forEach((spotLightObject, lightCaster) -> {
-                LightsSerialization.lights.remove(lightCaster);
+                LightSerialization.lights.remove(lightCaster);
                 BetterLightsMod.getLightManager().getLightsInWorld().remove(lightCaster);
             });
             lightCasterPartSyncs.clear();
@@ -251,7 +251,7 @@ public abstract class AbstractLightsModule implements IPhysicsModule<BaseVehicle
                 for (LightPartGroup value : lightCasterPartSyncs.values()) {
                     for (LightCaster lightCaster : value.getLightCasters().values()) {
                         DynamXContext.getNetwork().getVanillaNetwork().sendPacket(new PacketSyncLight(lightCaster, EnumPacketType.REMOVE), EnumPacketTarget.ALL, null);
-                        LightsSerialization.lights.remove(lightCaster);
+                        LightSerialization.lights.remove(lightCaster);
                         BetterLightsMod.getLightManager().getLightsInWorld().remove(lightCaster);
                     }
                 }
@@ -282,7 +282,7 @@ public abstract class AbstractLightsModule implements IPhysicsModule<BaseVehicle
         public void removeLights() {
             for (LightPartGroup value : lightCasterPartSyncs.values()) {
                 for (LightCaster lightCaster : value.getLightCasters().values()) {
-                    LightsSerialization.lights.remove(lightCaster);
+                    LightSerialization.lights.remove(lightCaster);
                     BetterLightsMod.getLightManager().getLightsInWorld().remove(lightCaster);
                     if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
                         DynamXContext.getNetwork().getVanillaNetwork().sendPacket(new PacketSyncLight(lightCaster, EnumPacketType.REMOVE), EnumPacketTarget.ALL, null);

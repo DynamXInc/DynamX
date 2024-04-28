@@ -81,7 +81,7 @@ dependencies {
     implementation 'org.joml:joml:1.10.5'
 
     compileOnly 'org.projectlombok:lombok:1.18.24'
-    compileOnly files('run/mods/BetterLights-0.0.4.PREVIEW-all.jar')
+    compileOnly files('run/mods/BetterLights-1.0.2.PREVIEW-all.jar')
 
 
     shadow('org.spongepowered:mixin:0.8.5') {

@@ -79,10 +79,8 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
 
     @Override
     public IModelTextureVariants getTextureVariantsFor(ObjObjectRenderer objObjectRenderer) {
-        PartLightSource src = getLightSource(objObjectRenderer.getObjObjectData().getName());
-        if (src != null)
-            return src;
-        return super.getTextureVariantsFor(objObjectRenderer);
+        PartLightSource src = objObjectRenderer != null ? getLightSource(objObjectRenderer.getObjObjectData().getName()) : null;
+        return src != null ? src : super.getTextureVariantsFor(objObjectRenderer);
     }
 
     @Override

@@ -99,18 +99,24 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
      * @param model The 3D model owning this part
      */
     public void readPositionFromModel(ResourceLocation model) {
-        if (getPosition() == null && sources.stream().anyMatch(s -> s.getRotateDuration() > 0)) { //If the light isn't moving on itself, we don't need its position (it can be 0 0 0), but if it rotates, we need to place the rotation point correctly: we need the pos of the light
-            DxModelData modelData = DynamXContext.getDxModelDataFromCache(DynamXUtils.getModelPath(getPackName(), model));
-            if (modelData != null) {
-                position = DynamXUtils.readPartPosition(modelData, getObjectName(), true);
-                if (getRotation() == null && position != null)
-                    rotation = DynamXUtils.readPartRotation(modelData, getObjectName());
-            }
-            if (getPosition() == null) {
-                DynamXErrorManager.addPackError(getPackName(), "position_not_found_in_model", ErrorLevel.HIGH, owner.getName(), "3D object " + getObjectName() + " for part " + getName());
-            } else {
-                isAutomaticPosition = true;
-            }
+        if (getPosition() != null) {
+            return;
+        }
+        //If the light isn't moving on itself, we don't need its position (it can be 0 0 0), but if it rotates, we need to place the rotation point correctly: we need the pos of the light
+        if (sources.stream().noneMatch(s -> s.getRotateDuration() > 0)) {
+            position = new Vector3f();
+            return;
+        }
+        DxModelData modelData = DynamXContext.getDxModelDataFromCache(DynamXUtils.getModelPath(getPackName(), model));
+        if (modelData != null) {
+            position = DynamXUtils.readPartPosition(modelData, getObjectName(), true);
+            if (getRotation() == null && position != null)
+                rotation = DynamXUtils.readPartRotation(modelData, getObjectName());
+        }
+        if (getPosition() == null) {
+            DynamXErrorManager.addPackError(getPackName(), "position_not_found_in_model", ErrorLevel.HIGH, owner.getName(), "3D object " + getObjectName() + " for part " + getName());
+        } else {
+            isAutomaticPosition = true;
         }
     }
 
@@ -301,11 +307,11 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
                 int k = i / 65536;
                 OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float) j, (float) k);
                 GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            } else if(context instanceof BaseRenderContext.BlockRenderContext && isOn){
+            } else if (context instanceof BaseRenderContext.BlockRenderContext && isOn) {
                 int i = ClientEventHandler.MC.world.getCombinedLight(((BaseRenderContext.BlockRenderContext) context).getTileEntity().getPos(), 0);
                 int j = i % 65536;
                 int k = i / 65536;
-                OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)j, (float)k);
+                OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float) j, (float) k);
                 GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             }
             GlStateManager.popMatrix();

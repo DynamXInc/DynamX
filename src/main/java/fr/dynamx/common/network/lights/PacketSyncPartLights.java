@@ -82,7 +82,7 @@ public class PacketSyncPartLights implements ISerializablePacket {
                         }
                         //BetterLights
                         for (LightCaster caster : lightCaster.getLightCasters().values()) {
-                            BetterLightsMod.getLightManager().addLightCaster(caster, false);
+                            BetterLightsMod.getLightManager().addLightCaster(mc.world, caster, false);
                             caster.lightPartGroup = lightCaster;
                         }
                         //End of BetterLights
@@ -100,12 +100,12 @@ public class PacketSyncPartLights implements ISerializablePacket {
                         //BetterLights
                         BetterLightsMod.getLightManager().getLightsInWorld().stream()
                                 .filter(lightCaster1 -> lightCasterIds.contains(lightCaster1.getId()))
-                                .forEach(lightToRemove -> BetterLightsMod.getLightManager().removeLightCaster(lightToRemove, false));
+                                .forEach(lightToRemove -> BetterLightsMod.getLightManager().removeLightCaster(mc.world, lightToRemove, false));
                         //End of BetterLights
                     } else {
                         //BetterLights
                         for (LightCaster lightCaster11 : lightContainer.getLightCastersSync().get(lightCaster.getOwnerId()).getLightCasters().values()) {
-                            BetterLightsMod.getLightManager().removeLightCaster(lightCaster11, false);
+                            BetterLightsMod.getLightManager().removeLightCaster(mc.world, lightCaster11, false);
                         }
                         //End of BetterLights
                     }
@@ -115,7 +115,7 @@ public class PacketSyncPartLights implements ISerializablePacket {
                         //BetterLights
                         for (LightPartGroup value : lightContainer.getLightCastersSync().values()) {
                             for (LightCaster lightCaster1 : value.getLightCasters().values()) {
-                                BetterLightsMod.getLightManager().removeLightCaster(lightCaster1, false);
+                                BetterLightsMod.getLightManager().removeLightCaster(mc.world, lightCaster1, false);
                             }
                         }
                         //End of BetterLights

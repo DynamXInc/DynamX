@@ -28,6 +28,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 
@@ -79,15 +80,21 @@ public abstract class AbstractLightsModule implements IPhysicsModule<BaseVehicle
     }
 
     public void addLights(PackPhysicsEntity<?, ?> entity) {
-        addLights(entity, null, null, null, null);
+        if (entity.world.isRemote) {
+            addLights(entity, null, null, null, null);
+        }
     }
 
     public void addLights(TEDynamXBlock tileEntity) {
-        addLights(null, tileEntity, null, null, null);
+        if (tileEntity.getWorld().isRemote) {
+            addLights(null, tileEntity, null, null, null);
+        }
     }
 
     public void addLights(DynamXItem<?> item, UUID id, Entity entityHolder) {
-        addLights(null, null, item, id, entityHolder);
+        if(entityHolder.world.isRemote) {
+            addLights(null, null, item, id, entityHolder);
+        }
     }
 
     public void addLights(@Nullable PackPhysicsEntity<?, ?> entity, @Nullable TEDynamXBlock tileEntity, @Nullable DynamXItem<?> item, @Nullable UUID id, @Nullable Entity entityHolder) {
@@ -111,12 +118,16 @@ public abstract class AbstractLightsModule implements IPhysicsModule<BaseVehicle
             for (LightObject s : compound.getSources()) {
                 //Add all the spotlight objects to each light object (ID -> spotlights)
                 LightPartGroup lightCasterPartSync;
+                World world;
                 if (tileEntity != null) {
                     lightCasterPartSync = new LightPartGroup.BlockOwner(s.getLightId(), tileEntity.getPos());
+                    world = tileEntity.getWorld();
                 } else if (entity != null) {
                     lightCasterPartSync = new LightPartGroup.EntityAndItemOwner(LightPartGroup.EnumOwnerType.ENTITY, s.getLightId(), entity.getPersistentID());
+                    world = entity.world;
                 } else if (item != null) {
                     lightCasterPartSync = new LightPartGroup.EntityAndItemOwner(LightPartGroup.EnumOwnerType.ITEM, s.getLightId(), id);
+                    world = entityHolder.world;
                 } else
                     throw new IllegalArgumentException("Invalid light owner type. Must be either a block, entity or item.");
 
@@ -125,14 +136,12 @@ public abstract class AbstractLightsModule implements IPhysicsModule<BaseVehicle
                     String objectName = entry.getKey().getOwner().getObjectName();
                     lightCasterPartSync.getLightCasters().put(objectName, entry.getValue());
                 }
-
                 lightCasterPartSyncs.put(lightCasterPartSync.getOwnerId(), lightCasterPartSync);
-
-                if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
+                if (!world.isRemote) {
                     DynamXContext.getNetwork().getVanillaNetwork().sendPacket(new PacketSyncPartLights(lightCasterPartSync, EnumPacketType.ADD), EnumPacketTarget.ALL, null);
                 } else {
                     for (LightCaster caster : lightCasterPartSync.getLightCasters().values()) {
-                        BetterLightsMod.getLightManager().addLightCaster(caster, false);
+                        BetterLightsMod.getLightManager().addLightCaster(world, caster, false);
                         caster.lightPartGroup = lightCasterPartSync;
                     }
                 }
@@ -214,13 +223,12 @@ public abstract class AbstractLightsModule implements IPhysicsModule<BaseVehicle
                     DynamXContext.getNetwork().getVanillaNetwork().sendPacket(new PacketSyncEntityLights(entity.getEntityId()), EnumPacketTarget.SERVER, null);
                 }
             }
-
         }
 
         @Override
         public void onPackInfosReloaded() {
             lightCasters.forEach((spotLightObject, lightCaster) -> {
-                LightSerialization.lights.remove(lightCaster);
+                LightSerialization.getLights(entity.world).remove(lightCaster);
                 BetterLightsMod.getLightManager().getLightsInWorld().remove(lightCaster);
             });
             lightCasterPartSyncs.clear();
@@ -234,29 +242,35 @@ public abstract class AbstractLightsModule implements IPhysicsModule<BaseVehicle
 
     public static class BlockLightsModule extends AbstractLightsModule implements IPackInfoReloadListener {
         private final TileEntity tileEntity;
+        private boolean isInit = false;
 
         public BlockLightsModule(TileEntity tileEntity, ILightOwner<?> lightOwner) {
             super(lightOwner);
             this.tileEntity = tileEntity;
-            addLights((TEDynamXBlock) tileEntity);
         }
 
+        @Override
+        public void updateEntity() {
+            super.updateEntity();
+            if (!isInit) {
+                isInit = true;
+                addLights((TEDynamXBlock) tileEntity);
+            }
+        }
 
         public void removeLights() {
             if (!FMLCommonHandler.instance().getEffectiveSide().isServer()) {
                 return;
             }
-
             for (Map.Entry<Integer, LightPartGroup> entry : lightCasterPartSyncs.entrySet()) {
                 for (LightPartGroup value : lightCasterPartSyncs.values()) {
                     for (LightCaster lightCaster : value.getLightCasters().values()) {
                         DynamXContext.getNetwork().getVanillaNetwork().sendPacket(new PacketSyncLight(lightCaster, EnumPacketType.REMOVE), EnumPacketTarget.ALL, null);
-                        LightSerialization.lights.remove(lightCaster);
+                        LightSerialization.getLights(tileEntity.getWorld()).remove(lightCaster);
                         BetterLightsMod.getLightManager().getLightsInWorld().remove(lightCaster);
                     }
                 }
             }
-
         }
 
         @Override
@@ -282,7 +296,7 @@ public abstract class AbstractLightsModule implements IPhysicsModule<BaseVehicle
         public void removeLights() {
             for (LightPartGroup value : lightCasterPartSyncs.values()) {
                 for (LightCaster lightCaster : value.getLightCasters().values()) {
-                    LightSerialization.lights.remove(lightCaster);
+                    LightSerialization.getLights(playerIn.world).remove(lightCaster);
                     BetterLightsMod.getLightManager().getLightsInWorld().remove(lightCaster);
                     if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
                         DynamXContext.getNetwork().getVanillaNetwork().sendPacket(new PacketSyncLight(lightCaster, EnumPacketType.REMOVE), EnumPacketTarget.ALL, null);
@@ -291,7 +305,6 @@ public abstract class AbstractLightsModule implements IPhysicsModule<BaseVehicle
             }
             lightCasterPartSyncs.clear();
             lightCasters.clear();
-
         }
 
         @Override

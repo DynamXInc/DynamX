@@ -364,6 +364,10 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
 
     @Override
     public void update() {
+        if (packInfo == null && !world.isRemote) {
+            DynamXMain.log.error("Block info is null for te " + this + " at " + pos + ". Removing it.");
+            world.setBlockToAir(pos);
+        }
         if (hasSeats && (seatEntities == null || seatEntities.stream().anyMatch(e -> e.isDead)) && !world.isRemote) {
             if (seatEntities != null) {
                 seatEntities.forEach(Entity::setDead);
@@ -378,9 +382,8 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
                 seatEntities.add(entity);
             }
         }
-        if (packInfo == null && !world.isRemote) {
-            DynamXMain.log.error("Block info is null for te " + this + " at " + pos + ". Removing it.");
-            world.setBlockToAir(pos);
+        if(lightsModule != null) {
+            lightsModule.updateEntity();
         }
     }
 

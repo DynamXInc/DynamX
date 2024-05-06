@@ -29,6 +29,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -322,18 +323,22 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
             for (int chunkZ = minChunkZ; chunkZ <= maxChunkZ; chunkZ++) {
                 Chunk chunk = world.getChunk(chunkX, chunkZ);
                 DynamXChunkData capability = chunk.getCapability(DynamXChunkDataProvider.DYNAMX_CHUNK_DATA_CAPABILITY, null);
-                for (Map.Entry<BlockPos, AxisAlignedBB> te : capability.getBlocksAABB().entrySet()) {
-                    if (!inBox.intersects(te.getValue()))
-                        continue;
-                    Vector3f pos = Vector3fPool.get(te.getKey().getX(), te.getKey().getY(), te.getKey().getZ());
-                    if (entities.containsKey(pos))
-                        continue;
-                    TileEntity tileEntity = world.getTileEntity(te.getKey());
-                    if (!(tileEntity instanceof IDynamXObject)) {
-                        DynamXMain.proxy.scheduleTask(world, () -> capability.getBlocksAABB().remove(te.getKey()));
+                Iterator<Map.Entry<BlockPos, AxisAlignedBB>> iterator = capability.getBlocksAABB().entrySet().iterator();
+                while (iterator.hasNext()) {
+                    Map.Entry<BlockPos, AxisAlignedBB> entry = iterator.next();
+                    if (!inBox.intersects(entry.getValue())) {
                         continue;
                     }
-                    entities.put(Vector3fPool.get(te.getKey().getX(), te.getKey().getY(), te.getKey().getZ()), (IDynamXObject) tileEntity);
+                    Vector3f pos = Vector3fPool.get(entry.getKey().getX(), entry.getKey().getY(), entry.getKey().getZ());
+                    if (entities.containsKey(pos)) {
+                        continue;
+                    }
+                    TileEntity tileEntity = world.getTileEntity(entry.getKey());
+                    if (!(tileEntity instanceof IDynamXObject)) {
+                        iterator.remove();
+                        continue;
+                    }
+                    entities.put(Vector3fPool.get(entry.getKey().getX(), entry.getKey().getY(), entry.getKey().getZ()), (IDynamXObject) tileEntity);
                 }
             }
         }

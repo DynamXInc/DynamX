@@ -44,18 +44,20 @@ public class MessageSyncBlockCustomization implements IDnxPacket, IMessageHandle
 
     @Override
     public IDnxPacket onMessage(MessageSyncBlockCustomization message, MessageContext ctx) {
-        World world = ctx.getServerHandler().player.world;
-        TEDynamXBlock te = (TEDynamXBlock) ctx.getServerHandler().player.world.getTileEntity(message.blockPos);
-        if (te != null) {
-            if (ctx.getServerHandler().player.canUseCommand(4, "dynamx block_customization")) {
-                te.setRelativeTranslation(message.relativeTranslation);
-                te.setRelativeScale(message.relativeScale);
-                te.setRelativeRotation(message.relativeRotation);
-                te.markDirty();
-                te.markCollisionsDirty();
-                world.markBlockRangeForRenderUpdate(message.blockPos, message.blockPos);
+        ctx.getServerHandler().player.getServer().addScheduledTask(() -> {
+            World world = ctx.getServerHandler().player.world;
+            TEDynamXBlock te = (TEDynamXBlock) ctx.getServerHandler().player.world.getTileEntity(message.blockPos);
+            if (te != null) {
+                if (ctx.getServerHandler().player.canUseCommand(4, "dynamx block_customization")) {
+                    te.setRelativeTranslation(message.relativeTranslation);
+                    te.setRelativeScale(message.relativeScale);
+                    te.setRelativeRotation(message.relativeRotation);
+                    te.markDirty();
+                    te.markCollisionsDirty();
+                    world.markBlockRangeForRenderUpdate(message.blockPos, message.blockPos);
+                }
             }
-        }
+        });
         return null;
     }
 

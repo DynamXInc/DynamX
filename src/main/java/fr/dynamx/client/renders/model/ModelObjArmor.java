@@ -1,6 +1,8 @@
 package fr.dynamx.client.renders.model;
 
 import fr.aym.acslib.api.services.error.ErrorLevel;
+import fr.dynamx.api.events.EventPhase;
+import fr.dynamx.api.events.client.DynamXArmorRenderEvent;
 import fr.dynamx.client.renders.model.renderer.ArmorRenderer;
 import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
 import fr.dynamx.client.renders.scene.BaseRenderContext;
@@ -16,6 +18,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.common.MinecraftForge;
 import org.joml.Matrix4f;
 
 import javax.annotation.Nullable;
@@ -127,7 +130,10 @@ public class ModelObjArmor extends ModelBiped {
             rightArmPose = ModelBiped.ArmPose.EMPTY;
         }
         renderContext.setModelParams((EntityLivingBase) entity, getActivePart(), model, (byte) (armorObject.getMaxTextureMetadata() > 1 ? itemstack.getMetadata() : 0));
-        ((SceneNode<BaseRenderContext.ArmorRenderContext, ArmorObject<?>>) armorObject.getSceneGraph()).render(renderContext, armorObject);
+        if (!MinecraftForge.EVENT_BUS.post(new DynamXArmorRenderEvent(renderContext, armorObject.getSceneGraph(), EventPhase.PRE))) {
+            ((SceneNode<BaseRenderContext.ArmorRenderContext, ArmorObject<?>>) armorObject.getSceneGraph()).render(renderContext, armorObject);
+            MinecraftForge.EVENT_BUS.post(new DynamXArmorRenderEvent(renderContext, armorObject.getSceneGraph(), EventPhase.POST));
+        }
     }
 
     public void renderPart(Matrix4f transform, EntityEquipmentSlot part) {

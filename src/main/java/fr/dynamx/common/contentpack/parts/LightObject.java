@@ -1,14 +1,13 @@
 package fr.dynamx.common.contentpack.parts;
 
-import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.client.renders.model.texture.TextureVariantData;
-import fr.dynamx.common.contentpack.parts.lights.SpotLightObject;
 import lombok.Getter;
+import lombok.Setter;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -20,6 +19,7 @@ import java.util.List;
  *
  * @see PartLightSource
  */
+@Setter
 public class LightObject {
     @PackFileProperty(configNames = "LightId")
     protected String lightId = "";
@@ -54,8 +54,19 @@ public class LightObject {
         }
     }
 
+    /**
+     * @return The hashed light id (the light id if it's an int, or the hash if it's a string) <br>
+     * In {@link fr.dynamx.common.entities.modules.AbstractLightsModule}, it can be used to get the light (or you can use the string version of the id)
+     */
     public int getLightId() {
         return lightIdHashed;
+    }
+
+    /**
+     * @return The light id as a string
+     */
+    public String getLightIdString() {
+        return lightId;
     }
 
     @RegisteredSubInfoType(name = "LightObject", registries = {SubInfoTypeRegistries.LIGHTS, SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER, SubInfoTypeRegistries.BLOCKS, SubInfoTypeRegistries.PROPS, SubInfoTypeRegistries.ITEMS, SubInfoTypeRegistries.ARMORS}, strictName = false)

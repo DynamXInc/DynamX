@@ -5,9 +5,8 @@ import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.events.CreatePackItemEvent;
-import fr.dynamx.api.events.DynamXItemEvent;
+import fr.dynamx.api.events.client.BuildSceneGraphEvent;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
-import fr.dynamx.client.renders.scene.SceneBuilder;
 import fr.dynamx.client.renders.scene.node.ItemNode;
 import fr.dynamx.client.renders.scene.node.SceneNode;
 import fr.dynamx.common.contentpack.loader.InfoList;
@@ -69,8 +68,9 @@ public class ItemObject<T extends ItemObject<?>> extends AbstractItemObject<T, T
     public SceneNode<?, ?> getSceneGraph() {
         if (sceneNode == null) {
             if (isModelValid()) {
-                DynamXItemEvent.BuildSceneGraph buildSceneGraphEvent = new DynamXItemEvent.BuildSceneGraph(new SceneBuilder<>(), this, (List) getDrawableParts());
-                sceneNode = buildSceneGraphEvent.getSceneGraphResult();
+                BuildSceneGraphEvent.BuildItemScene event = new BuildSceneGraphEvent.BuildItemScene(this, (List) getDrawableParts());
+                MinecraftForge.EVENT_BUS.post(event);
+                sceneNode = event.getSceneGraphResult();
             } else
                 sceneNode = new ItemNode<>(Collections.EMPTY_LIST);
         }

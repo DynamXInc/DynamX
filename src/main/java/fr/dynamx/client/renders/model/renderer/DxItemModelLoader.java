@@ -2,8 +2,7 @@ package fr.dynamx.client.renders.model.renderer;
 
 import fr.dynamx.api.contentpack.object.render.IModelPackObject;
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
-import fr.dynamx.api.events.DynamXItemEvent;
-import fr.dynamx.api.events.EventStage;
+import fr.dynamx.api.events.client.DynamXRenderItemEvent;
 import fr.dynamx.client.renders.model.ItemDxModel;
 import fr.dynamx.client.renders.scene.BaseRenderContext;
 import fr.dynamx.client.renders.scene.node.AbstractItemNode;
@@ -68,10 +67,10 @@ public class DxItemModelLoader extends TileEntityItemStackRenderer implements IC
             if (!(sceneGraph instanceof AbstractItemNode)) {
                 throw new IllegalStateException("The scene graph of the item " + stack.getItem() + " is not an IItemNode");
             }
-            if (!MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack, EventStage.PRE, renderType, sceneGraph.getTransform()))) {
-                renderContext.setModelParams(model, stack, modelRenderer, (byte) stack.getMetadata()).setRenderParams(renderType, partialTicks, true);
+            renderContext.setModelParams(model, stack, modelRenderer, (byte) stack.getMetadata()).setRenderParams(renderType, partialTicks, true);
+            if (!MinecraftForge.EVENT_BUS.post(new DynamXRenderItemEvent(renderContext, (AbstractItemNode<?, ?>) sceneGraph, DynamXRenderItemEvent.EventStage.PRE))) {
                 ((AbstractItemNode<?, IModelPackObject>) sceneGraph).renderAsItemNode(renderContext, model.getOwner());
-                MinecraftForge.EVENT_BUS.post(new DynamXItemEvent.Render(stack, EventStage.POST, renderType, sceneGraph.getTransform()));
+                MinecraftForge.EVENT_BUS.post(new DynamXRenderItemEvent(renderContext, (AbstractItemNode<?, ?>) sceneGraph, DynamXRenderItemEvent.EventStage.POST));
             }
         } else {
             RenderItem renderItem = Minecraft.getMinecraft().getRenderItem();

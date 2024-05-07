@@ -1,7 +1,7 @@
 package fr.dynamx.client.renders.model.renderer;
 
-import fr.dynamx.api.events.DynamXArmorEvent;
-import fr.dynamx.api.events.PhysicsEntityEvent;
+import fr.dynamx.api.events.EventPhase;
+import fr.dynamx.api.events.client.DynamXArmorRenderEvent;
 import fr.dynamx.client.DynamXModelRegistry;
 import fr.dynamx.client.renders.model.MissingObjModel;
 import fr.dynamx.client.renders.model.ModelObjArmor;
@@ -45,8 +45,6 @@ public class ArmorRenderer extends ModelRenderer {
     public void render(float scale) {
         if (!this.isHidden) {
             if (this.showModel) {
-                if (MinecraftForge.EVENT_BUS.post(new DynamXArmorEvent.Render(model, objModel, objObjectRenderer, PhysicsEntityEvent.Phase.PRE, DynamXArmorEvent.Render.Type.NORMAL)))
-                    return;
                 GlStateManager.pushMatrix();
                 GlStateManager.translate(this.rotationPointX, this.rotationPointY, this.rotationPointZ);
                 GlStateManager.rotate(180, 1, 0, 0);
@@ -73,8 +71,6 @@ public class ArmorRenderer extends ModelRenderer {
     public void render(Matrix4f transform) {
         if (!this.isHidden) {
             if (this.showModel) {
-                if (MinecraftForge.EVENT_BUS.post(new DynamXArmorEvent.Render(model, objModel, objObjectRenderer, PhysicsEntityEvent.Phase.PRE, DynamXArmorEvent.Render.Type.NORMAL)))
-                    return;
                 transform.translate(this.rotationPointX, this.rotationPointY, this.rotationPointZ);
                 transform.rotate((float) Math.PI, 1, 0, 0);
                 if (this.rotateAngleZ != 0.0F) {
@@ -106,8 +102,6 @@ public class ArmorRenderer extends ModelRenderer {
     public void renderWithRotation(float scale) {
         if (!this.isHidden) {
             if (this.showModel) {
-                if (MinecraftForge.EVENT_BUS.post(new DynamXArmorEvent.Render(model, objModel, objObjectRenderer, PhysicsEntityEvent.Phase.PRE, DynamXArmorEvent.Render.Type.WITH_ROTATION)))
-                    return;
                 GlStateManager.pushMatrix();
                 GlStateManager.translate(this.rotationPointX * scale, this.rotationPointY * scale, this.rotationPointZ * scale);
                 rotateXYZ(true);
@@ -130,8 +124,6 @@ public class ArmorRenderer extends ModelRenderer {
     public void postRender(float scale) {
         if (!this.isHidden) {
             if (this.showModel) {
-                if (MinecraftForge.EVENT_BUS.post(new DynamXArmorEvent.Render(model, objModel, objObjectRenderer, PhysicsEntityEvent.Phase.POST, DynamXArmorEvent.Render.Type.NORMAL)))
-                    return;
                 if (this.rotateAngleX == 0.0F && this.rotateAngleY == 0.0F && this.rotateAngleZ == 0.0F) {
                     if (this.rotationPointX != 0.0F || this.rotationPointY != 0.0F || this.rotationPointZ != 0.0F) {
                         GlStateManager.translate(this.rotationPointX * scale, this.rotationPointY * scale, this.rotationPointZ * scale);

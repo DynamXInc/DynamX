@@ -51,7 +51,7 @@ import java.util.List;
 @Getter
 @Setter
 @RegisteredSubInfoType(name = "seat", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER}, strictName = false)
-public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVehicleInfo> implements IDrawablePart<PackPhysicsEntity<?, ?>, IPhysicsPackInfo> {
+public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVehicleInfo> implements IDrawablePart<IPhysicsPackInfo> {
     @PackFileProperty(configNames = "Driver")
     protected boolean isDriver;
 

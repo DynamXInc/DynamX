@@ -11,21 +11,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import java.util.List;
 
 /**
- * A part that can be rendered in the world with the 3D model of the entity
+ * A part that can be rendered in the world with the 3D model of an object (entity, block, item, etc)
  *
- * @param <T> The entity type
  * @param <A> The type of the owner of this part
  */
-public interface IDrawablePart<T, A extends IModelPackObject> {
-    /**
-     * Called to update textures of this part (egg for wheels) according to the new entity's metadata
-     *
-     * @param entity The entity
-     */
-    @SideOnly(Side.CLIENT)
-    default void onTexturesChange(T entity) {
-    }
-
+public interface IDrawablePart<A extends IModelPackObject> {
     /**
      * Prevents the added parts from being rendered with the main obj model of the vehicle. <br>
      * The SceneGraph create in {@link IDrawablePart#createSceneGraph} be used to render the part.

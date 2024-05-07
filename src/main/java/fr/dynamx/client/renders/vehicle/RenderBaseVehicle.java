@@ -1,7 +1,7 @@
 package fr.dynamx.client.renders.vehicle;
 
-import fr.dynamx.api.events.DynamXEntityRenderEvents;
 import fr.dynamx.api.events.PhysicsEntityEvent;
+import fr.dynamx.api.events.client.DynamXEntityRenderEvent;
 import fr.dynamx.client.renders.RenderPhysicsEntity;
 import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
 import fr.dynamx.client.renders.scene.BaseRenderContext;
@@ -34,7 +34,7 @@ public class RenderBaseVehicle<T extends BaseVehicleEntity<?>> extends RenderPhy
     @Override
     public void spawnParticles(T carEntity, BaseRenderContext.EntityRenderContext context) {
         super.spawnParticles(carEntity, context);
-        if (!MinecraftForge.EVENT_BUS.post(new DynamXEntityRenderEvents.Render(carEntity, context, DynamXEntityRenderEvents.Render.Type.PARTICLES, 0))) {
+        if (!MinecraftForge.EVENT_BUS.post(new DynamXEntityRenderEvent(carEntity, context, DynamXEntityRenderEvent.Type.PARTICLES, 0))) {
             if (carEntity.hasModuleOfType(WheelsModule.class)) {
                 //TODO GENERALIZE, USE SUPER
                 carEntity.getModuleByType(WheelsModule.class).spawnPropulsionParticles(this, context.getPartialTicks());
@@ -52,7 +52,7 @@ public class RenderBaseVehicle<T extends BaseVehicleEntity<?>> extends RenderPhy
         if (modelRenderer == null) {
             return null;
         }
-        return context.setModelParams(entity, modelRenderer, entity.getEntityTextureID());
+        return context.setModelParams(entity, modelRenderer, entity.getEntityTextureId());
     }
 
     @Override

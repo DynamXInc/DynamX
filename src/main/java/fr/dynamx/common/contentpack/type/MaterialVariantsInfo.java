@@ -8,6 +8,7 @@ import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
 import fr.dynamx.client.renders.model.texture.TextureVariantData;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +16,8 @@ import java.util.Map;
 @RegisteredSubInfoType(name = "MaterialVariants", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.WHEELS, SubInfoTypeRegistries.ARMORS, SubInfoTypeRegistries.BLOCKS,
         SubInfoTypeRegistries.HELICOPTER, SubInfoTypeRegistries.PROPS})
 public class MaterialVariantsInfo<T extends ISubInfoTypeOwner<T>> extends SubInfoType<T> implements IModelTextureVariantsSupplier.IModelTextureVariants {
+    @Setter
+    @Getter
     @PackFileProperty(configNames = "BaseMaterial", required = false)
     private String baseMaterial = "Default";
     @PackFileProperty(configNames = "Variants", defaultValue = "\"DynamX1 DynamX2\"")

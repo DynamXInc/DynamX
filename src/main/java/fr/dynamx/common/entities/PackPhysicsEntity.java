@@ -4,7 +4,6 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
-import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
@@ -55,7 +54,7 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
      * @return The texture id to use for drawing chassis
      */
     @Getter
-    private byte entityTextureID = -1;
+    private byte entityTextureId = -1;
 
     protected EntityJointsHandler jointsHandler = new EntityJointsHandler(this);
 
@@ -141,11 +140,11 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
             return;
         }
         super.onUpdate();
-        if (world.isRemote && getMetadata() != lastMetadata) //Metadata has been sync, so update texture
+        if (world.isRemote && getMetadata() != lastMetadata && !isDead) //Metadata has been sync, so update texture
         {
             lastMetadata = getMetadata();
-            entityTextureID = (byte) getMetadata();
-            packInfo.getDrawableParts().forEach(m -> ((IDrawablePart<PackPhysicsEntity<?, ?>, A>) m).onTexturesChange(this));
+            entityTextureId = (byte) getMetadata();
+            getModules().forEach(m -> m.onTexturesChange(entityTextureId));
         }
     }
 

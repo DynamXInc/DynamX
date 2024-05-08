@@ -38,8 +38,8 @@ public class MissingObjModel extends ObjModelRenderer {
         emptyPart.setCenter(new Vector3f());
         ObjObjectRenderer objObjectRenderer = new ObjObjectRenderer(emptyPart) {
             @Override
-            public void render(ObjModelRenderer model, byte textureVariantID) {
-                MissingObjModel.this.renderModel(textureVariantID, false); //take care, MissingObjModel.this != model
+            public void render(ObjModelRenderer model, byte textureVariantID, boolean forceVanillaRender) {
+                MissingObjModel.this.renderModel(textureVariantID, forceVanillaRender); //take care, MissingObjModel.this != model
             }
         };
         getObjObjects().add(objObjectRenderer);
@@ -56,8 +56,8 @@ public class MissingObjModel extends ObjModelRenderer {
     }
 
     @Override
-    public void renderGroup(ObjObjectRenderer group, byte textureDataId) {
-        renderModel(textureDataId, false);
+    public void renderGroup(ObjObjectRenderer group, byte textureDataId, boolean forceVanillaRender) {
+        renderModel(textureDataId, forceVanillaRender);
     }
 
     @Override

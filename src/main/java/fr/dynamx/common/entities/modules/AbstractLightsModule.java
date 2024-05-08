@@ -16,6 +16,7 @@ import fr.dynamx.common.blocks.TEDynamXBlock;
 import fr.dynamx.common.contentpack.parts.ILightOwner;
 import fr.dynamx.common.contentpack.parts.LightObject;
 import fr.dynamx.common.contentpack.parts.PartLightSource;
+import fr.dynamx.common.contentpack.parts.SimplePartLightSource;
 import fr.dynamx.common.contentpack.parts.lights.SpotLightObject;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
@@ -92,9 +93,9 @@ public abstract class AbstractLightsModule implements IPhysicsModule<BaseVehicle
     }
 
     public void addLights(DynamXItem<?> item, UUID id, Entity entityHolder) {
-        if(entityHolder.world.isRemote) {
+        //if(entityHolder.world.isRemote) {
             addLights(null, null, item, id, entityHolder);
-        }
+        //}
     }
 
     public void addLights(@Nullable PackPhysicsEntity<?, ?> entity, @Nullable TEDynamXBlock tileEntity, @Nullable DynamXItem<?> item, @Nullable UUID id, @Nullable Entity entityHolder) {
@@ -116,6 +117,8 @@ public abstract class AbstractLightsModule implements IPhysicsModule<BaseVehicle
                 createLightCaster(lightCaster, spotLight);
             }
             for (LightObject s : compound.getSources()) {
+                if(s instanceof SimplePartLightSource)
+                    continue;
                 //Add all the spotlight objects to each light object (ID -> spotlights)
                 LightPartGroup lightCasterPartSync;
                 World world;

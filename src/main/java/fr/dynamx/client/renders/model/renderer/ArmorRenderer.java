@@ -52,7 +52,7 @@ public class ArmorRenderer extends ModelRenderer {
                 GlStateManager.translate(-this.offsetX, this.offsetY, -this.offsetZ);
                 switch (objModel.getFormat()) {
                     case OBJ:
-                        ((ObjModelRenderer) objModel).renderGroup(objObjectRenderer, model.getActiveTextureId());
+                        ((ObjModelRenderer) objModel).renderGroup(objObjectRenderer, model.getActiveTextureId(), true);
                         break;
                     //TODO YANIS: GLTF
                 }
@@ -87,7 +87,7 @@ public class ArmorRenderer extends ModelRenderer {
                 GlStateManager.multMatrix(ClientDynamXUtils.getMatrixBuffer(transform));
                 switch (objModel.getFormat()) {
                     case OBJ:
-                        ((ObjModelRenderer) objModel).renderGroup(objObjectRenderer, model.getActiveTextureId());
+                        ((ObjModelRenderer) objModel).renderGroup(objObjectRenderer, model.getActiveTextureId(), true);
                         break;
                     //TODO YANIS: GLTF
                 }
@@ -107,7 +107,7 @@ public class ArmorRenderer extends ModelRenderer {
                 rotateXYZ(true);
                 switch (objModel.getFormat()) {
                     case OBJ:
-                        ((ObjModelRenderer) objModel).renderGroup(objObjectRenderer, model.getActiveTextureId());
+                        ((ObjModelRenderer) objModel).renderGroup(objObjectRenderer, model.getActiveTextureId(), true);
                         break;
                     //TODO YANIS: GLTF
                 }

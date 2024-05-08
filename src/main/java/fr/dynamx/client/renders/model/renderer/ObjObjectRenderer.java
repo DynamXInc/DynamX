@@ -17,6 +17,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraftforge.client.MinecraftForgeClient;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL15;
 
 import javax.annotation.Nullable;
@@ -33,6 +34,8 @@ public class ObjObjectRenderer {
     @Getter
     @Setter
     private Vector4f objectColor = new Vector4f(1, 1, 1, 1);
+
+    private boolean forceVanillaRender;
 
     public ObjObjectRenderer(ObjObjectData objObjectData) {
         this.objObjectData = objObjectData;
@@ -96,7 +99,8 @@ public class ObjObjectRenderer {
         }
     }
 
-    public void render(ObjModelRenderer model, byte textureVariantID) {
+    public void render(ObjModelRenderer model, byte textureVariantID, boolean forceVanillaRender) {
+        this.forceVanillaRender = forceVanillaRender;
         if (modelRenderData.isEmpty()) {
             log.error("Default texture variant not loaded for model " + model.getLocation() + ". Trying to upload the vaos now.");
             uploadVAO();
@@ -109,6 +113,10 @@ public class ObjObjectRenderer {
             throw new IllegalStateException("Default texture variant not loaded for model " + model.getLocation());
     }
 
+    public static final int COLOR_MAP_INDEX = GL13.GL_TEXTURE0;
+    public static final int NORMAL_MAP_INDEX = GL13.GL_TEXTURE2;
+    public static final int SPECULAR_MAP_INDEX = GL13.GL_TEXTURE3;
+
     private Material bindMaterial(ObjModelRenderer model, String materialName, @Nullable String baseVariantName, @Nullable String variantName) {
         if (variantName != null && materialName.equals(baseVariantName))
             materialName = variantName;
@@ -117,14 +125,29 @@ public class ObjObjectRenderer {
             material = model.getMaterials().get(baseVariantName);
         if (!isMaterialValid(model, material))
             return null;
-        // For compatibility with sub-textures directly in materials
-        MaterialTexture materialMultipleTextures = material.diffuseTexture.containsKey(variantName) ? material.diffuseTexture.get(variantName) : material.diffuseTexture.get("default");
-        if (materialMultipleTextures != null)
-            bindTexture(materialMultipleTextures.getGlTextureId());
-        else
-            log.error("Failed to load Default texture of " + objObjectData.getName() + " in " + model.getLocation() + " in material " + material.getName());
+
+        MaterialTexture diffuseTexture = material.diffuseTexture.getOrDefault(variantName, material.diffuseTexture.get("default"));
+        MaterialTexture normalTexture = material.normalTexture.getOrDefault(variantName, material.normalTexture.get("default"));
+        MaterialTexture specularTexture = material.specularTexture.getOrDefault(variantName, material.specularTexture.get("default"));
+
+        bindTexture(model, material, diffuseTexture, COLOR_MAP_INDEX, "Default");
+        if (!forceVanillaRender) {
+            bindTexture(model, material, normalTexture, NORMAL_MAP_INDEX, "Normal");
+            bindTexture(model, material, specularTexture, SPECULAR_MAP_INDEX, "Specular");
+        }
+
         return material;
     }
+
+    void bindTexture(DxModelRenderer model, Material material, MaterialTexture texture, int textureIndex, String textureType) {
+        if (texture != null) {
+            GL13.glActiveTexture(textureIndex);
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture.getGlTextureId());
+        } else {
+             //log.error("Failed to load {} texture of {} in {} in material {}", textureType, objObjectData.getName(), model.getLocation(), material.getName());
+        }
+    }
+
 
     int i = 0;
 

@@ -13,6 +13,7 @@ import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
+import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.QuaternionPool;
@@ -23,7 +24,10 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.lwjgl.input.Keyboard;
 
+import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -45,12 +49,37 @@ public class BlockNode<A extends BlockObject<?>> extends AbstractItemNode<BaseRe
      * Do not use GlStateManager to apply transformations, use this matrix instead
      */
     @Getter
-    private final Matrix4f transform = new Matrix4f();
+    private Matrix4f transform = new Matrix4f();
+
+    public float[] transformData = new float[16];
+    @Nullable
+    public float[] transformDataGuizmo;
+
+    public float[] translation = new float[3];
+    public float[] prevTranslation = new float[3];
+
+    public float[] rotation = new float[3];
+    public float[] prevRotation = new float[3];
+
+    public float[] scale = new float[3];
+    public float[] prevScale = new float[3];
+
+    public BaseRenderContext.BlockRenderContext context;
 
     @Override
     public void render(BaseRenderContext.BlockRenderContext context, A packInfo) {
+        this.context = context;
+        if (transformDataGuizmo == null) {
+            transformDataGuizmo = new float[16];
+            Arrays.fill(transformDataGuizmo, 0);
+            transformDataGuizmo[6] = 1;
+            transformDataGuizmo[7] = 1;
+            transformDataGuizmo[8] = 1;
+        }
         if (context.getTileEntity() != null && context.getTileEntity().getBlockType() instanceof DynamXBlock) { //the instanceof fixes a crash
             transform.identity();
+
+
             Vector3fPool.openPool();
             QuaternionPool.openPool();
             GlQuaternionPool.openPool();
@@ -66,8 +95,31 @@ public class BlockNode<A extends BlockObject<?>> extends AbstractItemNode<BaseRe
             }
             // Scale of the block object info scale modifier
             transform.scale(DynamXUtils.toVector3f(packInfo.getScaleModifier()));
+
+            transformDataGuizmo[6] += (scale[0] - prevScale[0]);
+            transformDataGuizmo[7] += (scale[1] - prevScale[1]);
+            transformDataGuizmo[8] += (scale[2] - prevScale[2]);
+
+            if (!Float.isNaN(transformDataGuizmo[6]) && !Float.isNaN(transformDataGuizmo[7]) && !Float.isNaN(transformDataGuizmo[8])) {
+                transform.scale(transformDataGuizmo[6], transformDataGuizmo[7], transformDataGuizmo[8]);
+            }
+
             GlStateManager.pushMatrix();
+
+
+            if (Keyboard.isKeyDown(Keyboard.KEY_G)) {
+                for (int i = 0; i < 16; i++) {
+                    transformDataGuizmo[i] = 0;
+                    transformData[i] = 0;
+                }
+                transformDataGuizmo[6] = 1;
+                transformDataGuizmo[7] = 1;
+                transformDataGuizmo[8] = 1;
+            }
+            transform.get(transformData);
+
             GlStateManager.multMatrix(ClientDynamXUtils.getMatrixBuffer(transform));
+
             model.renderDefaultParts(context.getTextureId(), context.isUseVanillaRender());
             GlStateManager.popMatrix();
             //Render the linked children
@@ -78,6 +130,10 @@ public class BlockNode<A extends BlockObject<?>> extends AbstractItemNode<BaseRe
             QuaternionPool.closePool();
             Vector3fPool.closePool();
             DynamXRenderUtils.popGlAllAttribBits();
+
+            System.arraycopy(translation, 0, prevTranslation, 0, translation.length);
+            System.arraycopy(rotation, 0, prevRotation, 0, rotation.length);
+            System.arraycopy(scale, 0, prevScale, 0, scale.length);
         }
     }
 
@@ -86,8 +142,23 @@ public class BlockNode<A extends BlockObject<?>> extends AbstractItemNode<BaseRe
         transform.translate((renderPos.x + 0.5f + te.getRelativeTranslation().x),
                 (renderPos.y + 0.5f + te.getRelativeTranslation().y),
                 (renderPos.z + 0.5f + te.getRelativeTranslation().z));
+
+        transformDataGuizmo[0] += (translation[0] - prevTranslation[0]);
+        transformDataGuizmo[1] += (translation[1] - prevTranslation[1]);
+        transformDataGuizmo[2] += (translation[2] - prevTranslation[2]);
+        transform.translate(transformDataGuizmo[0], transformDataGuizmo[1], transformDataGuizmo[2]);
+
+
         // Rotate to the config rotation value
         transform.rotate(DynamXUtils.toQuaternion(te.getCollidableRotation()));
+
+        transformDataGuizmo[3] += (rotation[0] - prevRotation[0]);
+        transformDataGuizmo[4] += (rotation[1] - prevRotation[1]);
+        transformDataGuizmo[5] += (rotation[2] - prevRotation[2]);
+        transform.rotate(transformDataGuizmo[3] * DynamXMath.TO_RADIAN, -1, 0, 0);
+        transform.rotate(transformDataGuizmo[4] * DynamXMath.TO_RADIAN, 0, 1, 0);
+        transform.rotate(transformDataGuizmo[5] * DynamXMath.TO_RADIAN, 0, 0, -1);
+
         // Translate of the block object info translation
         if (te.getRelativeScale().x > 0 && te.getRelativeScale().y > 0 && te.getRelativeScale().z > 0) {
             transform.translate(-0.5f, 0.5f, -0.5f);
@@ -152,6 +223,42 @@ public class BlockNode<A extends BlockObject<?>> extends AbstractItemNode<BaseRe
         GlQuaternionPool.closePool();
         QuaternionPool.closePool();
         Vector3fPool.closePool();
+    }
+
+    public void translate(float[] translation) {
+        this.translation[0] += translation[0];
+        this.translation[1] += translation[1];
+        this.translation[2] += translation[2];
+    }
+
+    public void rotate(float[] rotation) {
+        this.rotation[0] += rotation[0];
+        this.rotation[1] += rotation[1];
+        this.rotation[2] += rotation[2];
+    }
+
+    public void scale(float[] scale) {
+        this.scale[0] += scale[0];
+        this.scale[1] += scale[1];
+        this.scale[2] += scale[2];
+    }
+
+    public void translate(Vector3f translation) {
+        this.transformDataGuizmo[0] = translation.x;
+        this.transformDataGuizmo[1] = translation.y;
+        this.transformDataGuizmo[2] = translation.z;
+    }
+
+    public void rotate(Vector3f rotation) {
+        this.transformDataGuizmo[3] = rotation.x;
+        this.transformDataGuizmo[4] = rotation.y;
+        this.transformDataGuizmo[5] = rotation.z;
+    }
+
+    public void scale(Vector3f scale) {
+        this.transformDataGuizmo[6] = scale.x;
+        this.transformDataGuizmo[7] = scale.y;
+        this.transformDataGuizmo[8] = scale.z;
     }
 
     @Override

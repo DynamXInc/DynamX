@@ -14,8 +14,9 @@
   "minVersion": "0.6",
   "server": [],
   "client": [
-    "MixinRenderGlobal",
+    "MixinBetterLightEntityRenderer",
     "MixinEntityRenderer",
+    "MixinRenderGlobal",
     "MixinRenderManager"
   ]
 }

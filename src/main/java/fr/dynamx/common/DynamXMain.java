@@ -8,14 +8,15 @@ import fr.aym.acslib.api.services.mps.ModProtectionContainer;
 import fr.aym.acslib.api.services.mps.ModProtectionService;
 import fr.dynamx.api.dxmodel.EnumDxModelFormats;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariableRegistry;
+import fr.dynamx.client.renders.imgui.imlib.core.ImGuiImpl;
 import fr.dynamx.common.capability.DynamXChunkData;
 import fr.dynamx.common.capability.DynamXChunkDataStorage;
 import fr.dynamx.common.contentpack.AddonInfo;
 import fr.dynamx.common.contentpack.AddonLoader;
 import fr.dynamx.common.contentpack.ContentPackLoader;
-import fr.dynamx.common.entities.SeatEntity;
 import fr.dynamx.common.entities.PropsEntity;
 import fr.dynamx.common.entities.RagdollEntity;
+import fr.dynamx.common.entities.SeatEntity;
 import fr.dynamx.common.entities.vehicles.*;
 import fr.dynamx.common.handlers.DynamXGuiHandler;
 import fr.dynamx.common.items.tools.ItemRagdoll;
@@ -139,6 +140,7 @@ public class DynamXMain {
 
     @EventHandler
     public void init(FMLInitializationEvent event) {
+        ImGuiImpl.create();
         proxy.init();
     }
 

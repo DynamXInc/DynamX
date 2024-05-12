@@ -8,11 +8,10 @@ import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.client.ClientProxy;
 import fr.dynamx.client.camera.CameraSystem;
-import fr.dynamx.client.gui.ButtonSlider;
-import fr.dynamx.client.gui.GuiLoadingErrors;
-import fr.dynamx.client.gui.GuiTexturedButton;
-import fr.dynamx.client.gui.VehicleHud;
+import fr.dynamx.client.gui.*;
 import fr.dynamx.client.renders.RenderMovableLine;
+import fr.dynamx.client.renders.GlobalMatrices;
+import fr.dynamx.client.renders.imgui.imlib.core.ImGuiImpl;
 import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
@@ -35,11 +34,9 @@ import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiMainMenu;
-import net.minecraft.client.gui.GuiScreenOptionsSounds;
+import net.minecraft.client.gui.*;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.culling.ICamera;
@@ -66,6 +63,8 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.opengl.GL20;
 
 import java.util.UUID;
 
@@ -81,6 +80,8 @@ public class ClientEventHandler {
     private int playerOrientation;
     private BlockObject<?> blockObjectInfo;
     private int textureNum;
+
+    private GuiEditor editor = new GuiEditor();
 
     /* World events */
 
@@ -163,6 +164,13 @@ public class ClientEventHandler {
     @SubscribeEvent
     public void drawHudCursor(RenderGameOverlayEvent.Pre event) {
         if (event.getType() == RenderGameOverlayEvent.ElementType.CROSSHAIRS) {
+            if (MC.currentScreen == null || MC.currentScreen instanceof GuiChat) {
+                int currentProgram = GlStateManager.glGetInteger(GL20.GL_CURRENT_PROGRAM);
+                OpenGlHelper.glUseProgram(0);
+                editor.drawGui();
+                OpenGlHelper.glUseProgram(currentProgram);
+            }
+
             Vector3fPool.openPool();
             QuaternionPool.openPool();
             GlStateManager.enableBlend();
@@ -174,7 +182,7 @@ public class ClientEventHandler {
                     InteractivePart part = ((PackPhysicsEntity<?, ?>) MC.objectMouseOver.entityHit).getHitPart(MC.player);
                     if (part != null && part.canInteract(MC.objectMouseOver.entityHit, MC.player)) {
                         loc = part.getHudCursorTexture();
-                    } else if(MC.objectMouseOver.entityHit instanceof PropsEntity) {
+                    } else if (MC.objectMouseOver.entityHit instanceof PropsEntity) {
                         loc = new ResourceLocation(DynamXConstants.ID, "textures/focus.png");
                     }
                 } else if (MC.objectMouseOver.typeOfHit == RayTraceResult.Type.BLOCK) {
@@ -247,10 +255,15 @@ public class ClientEventHandler {
         ClientProxy.SOUND_HANDLER.load(event);
     }
 
+
     /* Tick/render events */
 
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
+        if ((MC.player != null) && (event.phase == TickEvent.Phase.START)) {
+            ImGuiImpl.handleKey();
+            ImGuiImpl.handleMouse();
+        }
         ClientProxy.SOUND_HANDLER.tick();
 
         if (connectionTime != -1 && !Minecraft.getMinecraft().isSingleplayer()) {
@@ -324,6 +337,27 @@ public class ClientEventHandler {
         float x = (float) (MC.player.lastTickPosX + (MC.player.posX - MC.player.lastTickPosX) * partialTicks);
         float y = (float) (MC.player.lastTickPosY + (MC.player.posY - MC.player.lastTickPosY) * partialTicks);
         float z = (float) (MC.player.lastTickPosZ + (MC.player.posZ - MC.player.lastTickPosZ) * partialTicks);
+        GlobalMatrices.viewMatrix.get(GlobalMatrices.tmpModelView);
+        GlobalMatrices.projectionMatrix.get(GlobalMatrices.tmpProjection);
+
+
+        if(Keyboard.isKeyDown(Keyboard.KEY_G)){
+            GuiEditor.blocks.clear();
+        }
+        for (int x1 = -10; x1 < 10; x1++) {
+            for (int y1 = -10; y1 < 10; y1++) {
+                for (int z1 = -10; z1 < 10; z1++) {
+                    TileEntity te = MC.player.world.getTileEntity(new BlockPos(x1 + MC.player.getPosition().getX(), y1 + MC.player.getPosition().getY(), z1 + MC.player.getPosition().getZ()));
+                    if (te instanceof TEDynamXBlock) {
+                        TEDynamXBlock block = (TEDynamXBlock) te;
+                        if (!GuiEditor.blocks.contains(block)) {
+                            GuiEditor.blocks.add(block);
+                        }
+                    }
+                }
+            }
+        }
+
         GlStateManager.pushMatrix();
         GlStateManager.disableLighting();
         GlStateManager.disableTexture2D();

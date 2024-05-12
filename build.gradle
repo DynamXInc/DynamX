@@ -64,23 +64,32 @@ minecraft {
         }
     }
 }
-
+ext {
+    imguiVersion = "1.86.11"
+}
 dependencies {
     minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2860'
-    implementation ("net.minecraftforge:mergetool:0.2.3.3") { force = true }
+    implementation("net.minecraftforge:mergetool:0.2.3.3") { force = true }
 
     implementation 'com.github.stephengold:Libbulletjme:' + libbulletjme_version
     implementation "fr.aym.acsguis:ACsGuis:1.2.12"
     implementation ":ModProtectionLib:1.4.0"
-    implementation('org.spongepowered:mixin:0.8.5') {
+    implementation('org.spongepowered:mixin:0.8.3') {
         exclude module: 'guava'
         exclude module: 'commons-io'
         exclude module: 'gson'
     }
     implementation 'org.joml:joml:1.10.5'
-    compileOnly 'org.projectlombok:lombok:1.18.24'
+    implementation "io.github.spair:imgui-java-binding:$imguiVersion"
+    implementation "io.github.spair:imgui-java-lwjgl3:$imguiVersion"
 
-    shadow('org.spongepowered:mixin:0.8.5') {
+    implementation "io.github.spair:imgui-java-natives-windows:$imguiVersion"
+    compileOnly 'org.projectlombok:lombok:1.18.24'
+    compileOnly files('run/mods/OptiFine_1.12.2_HD_U_G5.jar')
+    compileOnly files('run/mods/BetterLights-1.0.3.PREVIEW-all.jar')
+
+
+    shadow('org.spongepowered:mixin:0.8.3') {
         exclude module: 'guava'
         exclude module: 'commons-io'
         exclude module: 'gson'
@@ -91,8 +100,8 @@ dependencies {
     shadow fileTree(dir: 'libs', include: '*.jar')
 
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
-    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
-    testAnnotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    annotationProcessor 'org.spongepowered:mixin:0.8.3:processor'
+    testAnnotationProcessor 'org.spongepowered:mixin:0.8.3:processor'
 }
 
 mixin {
@@ -166,7 +175,7 @@ publishing {
         mavenJava(MavenPublication) {
             artifactId = mavenArtifactId
 
-            artifact(shadowJar){
+            artifact(shadowJar) {
                 classifier = ''
             }
             artifact sourcesJar

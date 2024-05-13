@@ -11,7 +11,7 @@ import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.Vector3fPool;
 
-public class HelicopterPhysicsHandler<A extends HelicopterEntity<?>> extends BaseVehiclePhysicsHandler<A> implements IPackInfoReloadListener {
+public class HelicopterPhysicsHandler<A extends HelicopterEntity<?>> extends BaseWheeledVehiclePhysicsHandler<A> implements IPackInfoReloadListener {
     private HelicopterPhysicsInfo physicsInfo;
     private final HelicopterEngineModule module;
 

@@ -52,6 +52,7 @@ public class HelicopterEntity<T extends HelicopterPhysicsHandler<?>> extends Bas
     protected void getListenerModules() {
         super.getListenerModules();
         seats = getModuleByType(SeatsModule.class);
+        wheels = getModuleByType(WheelsModule.class);
         doors = getModuleByType(DoorsModule.class);
     }
 

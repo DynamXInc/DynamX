@@ -13,7 +13,7 @@ import fr.dynamx.common.contentpack.type.vehicle.CarEngineInfo;
 import fr.dynamx.common.contentpack.type.vehicle.CarInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
-import fr.dynamx.common.physics.entities.modules.EnginePhysicsHandler;
+import fr.dynamx.common.physics.entities.modules.CarEnginePhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.engine.AutomaticGearboxHandler;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.optimization.Vector3fPool;
@@ -31,14 +31,14 @@ import static fr.dynamx.client.ClientProxy.SOUND_HANDLER;
  * Works with an {@link AutomaticGearboxHandler} and a {@link fr.dynamx.common.entities.modules.WheelsModule}
  *
  * @see fr.dynamx.api.entities.VehicleEntityProperties.EnumEngineProperties
- * @see EnginePhysicsHandler
+ * @see CarEnginePhysicsHandler
  */
 @SynchronizedEntityVariable.SynchronizedPhysicsModule(modid = DynamXConstants.ID)
 public class CarEngineModule extends BasicEngineModule implements IPackInfoReloadListener {
     @Getter
     protected CarEngineInfo engineInfo;
     @Getter
-    protected EnginePhysicsHandler physicsHandler;
+    protected CarEnginePhysicsHandler physicsHandler;
 
     protected ReversingSound reversingSound;
 
@@ -70,7 +70,7 @@ public class CarEngineModule extends BasicEngineModule implements IPackInfoReloa
     @Override
     public void initPhysicsEntity(@Nullable BaseVehiclePhysicsHandler<?> handler) {
         if (handler != null) {
-            physicsHandler = new EnginePhysicsHandler(this, handler, handler.getWheels());
+            physicsHandler = new CarEnginePhysicsHandler(this, handler, handler.getWheels());
         }
     }
 

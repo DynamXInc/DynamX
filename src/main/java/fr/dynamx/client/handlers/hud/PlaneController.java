@@ -9,7 +9,8 @@ import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.client.handlers.KeyHandler;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.engines.HelicopterEngineModule;
-import fr.dynamx.common.entities.vehicles.HelicopterEntity;
+import fr.dynamx.common.entities.modules.engines.PlaneEngineModule;
+import fr.dynamx.common.entities.vehicles.PlaneEntity;
 import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.MouseEvent;
@@ -23,10 +24,10 @@ import java.util.Collections;
 import java.util.List;
 
 @Mod.EventBusSubscriber(modid = DynamXConstants.ID, value = Side.CLIENT)
-public class HelicopterController extends BaseController {
+public class PlaneController extends BaseController {
     public static final ResourceLocation STYLE = new ResourceLocation(DynamXConstants.ID, "css/vehicle_hud.css");
 
-    protected final HelicopterEngineModule engine;
+    protected final PlaneEngineModule engine;
 
     protected static boolean mouseLocked = true;
 
@@ -34,7 +35,7 @@ public class HelicopterController extends BaseController {
      * @param entity is assumed to implement {@link IModuleContainer.ISeatsContainer}
      */
     @SideOnly(Side.CLIENT)
-    public HelicopterController(BaseVehicleEntity<?> entity, HelicopterEngineModule engine) {
+    public PlaneController(BaseVehicleEntity<?> entity, PlaneEngineModule engine) {
         super(entity, engine);
         this.engine = engine;
         while (KeyHandler.KEY_HELICOPTER_PITCH_FORWARD.isPressed()) ;
@@ -47,8 +48,8 @@ public class HelicopterController extends BaseController {
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
     public static void tickMouse(MouseEvent event) {
-        if (mouseLocked && MC.player.getRidingEntity() instanceof HelicopterEntity && ((HelicopterEntity<?>) MC.player.getRidingEntity()).getSeats().isLocalPlayerDriving()) {
-            HelicopterEngineModule engineModule = ((HelicopterEntity<?>) MC.player.getRidingEntity()).getModuleByType(HelicopterEngineModule.class);
+        if (mouseLocked && MC.player.getRidingEntity() instanceof PlaneEntity && ((PlaneEntity<?>) MC.player.getRidingEntity()).getSeats().isLocalPlayerDriving()) {
+            PlaneEngineModule engineModule = ((PlaneEntity<?>) MC.player.getRidingEntity()).getModuleByType(PlaneEngineModule.class);
             int invert = MC.gameSettings.invertMouse ? -1 : 1;
             engineModule.getRollControls().set(0, invert * event.getDx());
             engineModule.getRollControls().set(1, invert * event.getDy());
@@ -58,14 +59,14 @@ public class HelicopterController extends BaseController {
     @Override
     @SideOnly(Side.CLIENT)
     protected void updateControls() {
-        HelicopterEngineModule engine = entity.getModuleByType(HelicopterEngineModule.class);
+        PlaneEngineModule engine = entity.getModuleByType(PlaneEngineModule.class);
         if (engine.getEngineProperties() != null && engine != null) {
-            if (KeyHandler.KEY_POWERUP.isPressed() && isEngineStarted) {
+            /*if (KeyHandler.KEY_POWERUP.isPressed() && isEngineStarted) {
                 engine.setPower(engine.getPower() + 0.05f);
             }
             if (KeyHandler.KEY_POWERDOWN.isPressed() && isEngineStarted) {
                 engine.setPower(engine.getPower() - 0.05f);
-            }
+            }*/
             if (KeyHandler.KEY_LOCK_ROTATION.isPressed()) {
                 mouseLocked = !mouseLocked;
             }
@@ -116,7 +117,7 @@ public class HelicopterController extends BaseController {
         speed.setCssClass("speed_pane");
         float[] engineProperties = engine.getEngineProperties();
         speed.add(new UpdatableGuiLabel("%s", s -> String.format(s, engine.isEngineStarted() ? (int) engineProperties[VehicleEntityProperties.EnumEngineProperties.SPEED.ordinal()] : "--", "")).setCssId("engine_speed"));
-        speed.add(new UpdatableGuiLabel("Power %.2f", s -> String.format(s, Math.abs(engine.getPower()))).setCssId("engine_gear"));
+        //speed.add(new UpdatableGuiLabel("Power %.2f", s -> String.format(s, Math.abs(engine.getPower()))).setCssId("engine_gear"));
         panel.add(speed);
         panel.add(new UpdatableGuiLabel("View locked %b", s -> String.format(s, mouseLocked)).setCssId("engine_gear"));
         //panel.add(new UpdatableGuiLabel("                             AngleFront %f", s -> String.format(s, HelicopterEnginePhysicsHandler.AngleFront)).setCssId("engine_gear"));
@@ -131,6 +132,6 @@ public class HelicopterController extends BaseController {
     }
 
     public static boolean isMouseLocked() {
-        return mouseLocked && PlaneController.isMouseLocked();
+        return mouseLocked;
     }
 }

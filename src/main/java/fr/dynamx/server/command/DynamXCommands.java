@@ -4,7 +4,7 @@ import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Vector3f;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.RagdollEntity;
-import fr.dynamx.common.physics.entities.modules.EnginePhysicsHandler;
+import fr.dynamx.common.physics.entities.modules.CarEnginePhysicsHandler;
 import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXUtils;
@@ -139,7 +139,7 @@ public class DynamXCommands extends CommandBase {
             public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
                 if (args.length == 2) {
                     boolean testFullGo = parseBoolean(args[1]);
-                    EnginePhysicsHandler.inTestFullGo = testFullGo;
+                    CarEnginePhysicsHandler.inTestFullGo = testFullGo;
                     sender.sendMessage(new TextComponentString("Set test full go to " + testFullGo));
                 } else
                     throw new WrongUsageException(getUsage());

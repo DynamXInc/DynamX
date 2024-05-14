@@ -16,7 +16,7 @@ import fr.dynamx.common.contentpack.type.vehicle.BaseEngineInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.WheelsModule;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
-import fr.dynamx.common.physics.entities.modules.EnginePhysicsHandler;
+import fr.dynamx.common.physics.entities.modules.CarEnginePhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.engine.AutomaticGearboxHandler;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.optimization.Vector3fPool;
@@ -39,7 +39,7 @@ import static fr.dynamx.client.ClientProxy.SOUND_HANDLER;
  * Works with an {@link AutomaticGearboxHandler} and a {@link WheelsModule}
  *
  * @see VehicleEntityProperties.EnumEngineProperties
- * @see EnginePhysicsHandler
+ * @see CarEnginePhysicsHandler
  */
 @SynchronizedEntityVariable.SynchronizedPhysicsModule(modid = DynamXConstants.ID)
 public abstract class BasicEngineModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, IPhysicsModule.IPhysicsUpdateListener, IPhysicsModule.IEntityUpdateListener, IPackInfoReloadListener {
@@ -81,7 +81,7 @@ public abstract class BasicEngineModule implements IPhysicsModule<BaseVehiclePhy
     }
 
     public boolean isAccelerating() {
-        return EnginePhysicsHandler.inTestFullGo || (controls.get() & 2) == 2;
+        return CarEnginePhysicsHandler.inTestFullGo || (controls.get() & 2) == 2;
     }
 
     public boolean isReversing() {
@@ -104,7 +104,7 @@ public abstract class BasicEngineModule implements IPhysicsModule<BaseVehiclePhy
      * @return The engine off/on state
      */
     public boolean isEngineStarted() {
-        return (EnginePhysicsHandler.inTestFullGo) || ((controls.get() & 1) == 1);
+        return (CarEnginePhysicsHandler.inTestFullGo) || ((controls.get() & 1) == 1);
     }
 
     /**

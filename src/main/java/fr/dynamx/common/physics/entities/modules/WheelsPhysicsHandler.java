@@ -105,7 +105,7 @@ public class WheelsPhysicsHandler {
     }
 
     public void accelerate(CarEngineModule engine, float strength, float speedLimit) {
-        EnginePhysicsHandler module = engine.getPhysicsHandler();
+        CarEnginePhysicsHandler module = engine.getPhysicsHandler();
         if (!module.getEngine().isStarted()) {
             return;
         }

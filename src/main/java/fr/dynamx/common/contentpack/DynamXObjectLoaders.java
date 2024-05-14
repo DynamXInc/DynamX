@@ -10,10 +10,7 @@ import fr.dynamx.common.contentpack.type.objects.PropObject;
 import fr.dynamx.common.contentpack.type.vehicle.*;
 import fr.dynamx.common.items.DynamXItem;
 import fr.dynamx.common.items.DynamXItemArmor;
-import fr.dynamx.common.items.vehicle.ItemBoat;
-import fr.dynamx.common.items.vehicle.ItemCar;
-import fr.dynamx.common.items.vehicle.ItemHelicopter;
-import fr.dynamx.common.items.vehicle.ItemTrailer;
+import fr.dynamx.common.items.vehicle.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +29,7 @@ public class DynamXObjectLoaders {
     public static ObjectLoader<ModularVehicleInfo, ItemTrailer> TRAILERS = new ObjectLoader<>("trailer_", (packName, fileName) -> new ModularVehicleInfo(packName, fileName, VehicleValidator.TRAILER_VALIDATOR), WHEELED_VEHICLES.getDefaultSubInfoTypesRegistry());
     public static ObjectLoader<ModularVehicleInfo, ItemBoat> BOATS = new ObjectLoader<>("boat_", (packName, fileName) -> new ModularVehicleInfo(packName, fileName, VehicleValidator.BOAT_VALIDATOR), WHEELED_VEHICLES.getDefaultSubInfoTypesRegistry());
     public static ObjectLoader<ModularVehicleInfo, ItemHelicopter> HELICOPTERS = new ObjectLoader<>("helicopter_", (packName, fileName) -> new ModularVehicleInfo(packName, fileName, VehicleValidator.HELICOPTER_VALIDATOR), new SubInfoTypesRegistry<>());
+    public static ObjectLoader<ModularVehicleInfo, ItemPlane> PLANES = new ObjectLoader<>("plane_", (packName, fileName) -> new ModularVehicleInfo(packName, fileName, VehicleValidator.PLANE_VALIDATOR), HELICOPTERS.getDefaultSubInfoTypesRegistry());
     public static ObjectLoader<BlockObject<?>, DynamXBlock<?>> BLOCKS = new ObjectLoader<>("block", BlockObject::new, new SubInfoTypesRegistry<>());
     public static ObjectLoader<ItemObject<?>, DynamXItem<?>> ITEMS = new ObjectLoader<>("item", ItemObject::new, new SubInfoTypesRegistry<>());
     public static ObjectLoader<ArmorObject<?>, DynamXItemArmor<?>> ARMORS = new ObjectLoader<>("armor", ArmorObject::new, new SubInfoTypesRegistry<>());

@@ -8,7 +8,7 @@ import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.EnumBulletShapeType;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.physics.entities.modules.EnginePhysicsHandler;
+import fr.dynamx.common.physics.entities.modules.CarEnginePhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
@@ -49,16 +49,16 @@ public abstract class BaseVehiclePhysicsHandler<T extends BaseVehicleEntity<?>> 
     @Override
     public void update() {
         super.update();
-        if (!EnginePhysicsHandler.inTestFullGo && getCollisionObject().getActivationState() == 4 && getHandledEntity().getControllingPassenger() == null) {
+        if (!CarEnginePhysicsHandler.inTestFullGo && getCollisionObject().getActivationState() == 4 && getHandledEntity().getControllingPassenger() == null) {
             getCollisionObject().setEnableSleep(true);
         }
-        if (EnginePhysicsHandler.inTestFullGo)
+        if (CarEnginePhysicsHandler.inTestFullGo)
             getCollisionObject().activate();
     }
 
     @Override
     public void setForceActivation(boolean force) {
-        if (EnginePhysicsHandler.inTestFullGo)
+        if (CarEnginePhysicsHandler.inTestFullGo)
             force = true;
         super.setForceActivation(force);
         forceActivation = force;

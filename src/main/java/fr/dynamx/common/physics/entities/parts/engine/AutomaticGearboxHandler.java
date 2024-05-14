@@ -3,7 +3,7 @@ package fr.dynamx.common.physics.entities.parts.engine;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.modules.engines.BoatPropellerModule;
 import fr.dynamx.common.physics.entities.BoatPhysicsHandler;
-import fr.dynamx.common.physics.entities.modules.EnginePhysicsHandler;
+import fr.dynamx.common.physics.entities.modules.CarEnginePhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.wheel.WheelPhysics;
 import fr.dynamx.utils.DynamXConfig;
@@ -94,7 +94,7 @@ public abstract class AutomaticGearboxHandler {
     public static class CarGearBox extends AutomaticGearboxHandler {
         private final WheelsPhysicsHandler wheels;
 
-        public CarGearBox(EnginePhysicsHandler vehicle, GearBox gearBox, WheelsPhysicsHandler wheels) {
+        public CarGearBox(CarEnginePhysicsHandler vehicle, GearBox gearBox, WheelsPhysicsHandler wheels) {
             super(vehicle.getEngine(), gearBox);
             this.wheels = wheels;
         }

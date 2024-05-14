@@ -20,6 +20,7 @@ public enum SubInfoTypeRegistries {
     TRAILERS(DynamXObjectLoaders.TRAILERS, ModularVehicleInfo.class),
     BOATS(DynamXObjectLoaders.BOATS, ModularVehicleInfo.class),
     HELICOPTER(DynamXObjectLoaders.HELICOPTERS, ModularVehicleInfo.class),
+    PLANE(DynamXObjectLoaders.PLANES, ModularVehicleInfo.class),
     ITEMS(DynamXObjectLoaders.ITEMS, ItemObject.class),
     ARMORS(DynamXObjectLoaders.ARMORS, ArmorObject.class),
     BLOCKS(DynamXObjectLoaders.BLOCKS, BlockObject.class),

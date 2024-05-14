@@ -11,10 +11,7 @@ import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.WheelsModule;
-import fr.dynamx.common.entities.vehicles.BoatEntity;
-import fr.dynamx.common.entities.vehicles.CarEntity;
-import fr.dynamx.common.entities.vehicles.HelicopterEntity;
-import fr.dynamx.common.entities.vehicles.TrailerEntity;
+import fr.dynamx.common.entities.vehicles.*;
 import fr.dynamx.utils.debug.renderer.BoatDebugRenderer;
 import fr.dynamx.utils.debug.renderer.VehicleDebugRenderer;
 import net.minecraft.client.renderer.entity.RenderManager;
@@ -102,6 +99,13 @@ public class RenderBaseVehicle<T extends BaseVehicleEntity<?>> extends RenderPhy
 
     public static class RenderHelicopter<T extends HelicopterEntity<?>> extends RenderBaseVehicle<T> {
         public RenderHelicopter(RenderManager manager) {
+            super(manager);
+            VehicleDebugRenderer.addAll(this, true);
+        }
+    }
+
+    public static class RenderPlane<T extends PlaneEntity<?>> extends RenderBaseVehicle<T> {
+        public RenderPlane(RenderManager manager) {
             super(manager);
             VehicleDebugRenderer.addAll(this, true);
         }

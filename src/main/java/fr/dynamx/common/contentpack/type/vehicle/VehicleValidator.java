@@ -4,10 +4,7 @@ import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.common.contentpack.parts.PartRotor;
 import fr.dynamx.common.contentpack.parts.PartWheel;
 import fr.dynamx.common.items.DynamXItemSpawner;
-import fr.dynamx.common.items.vehicle.ItemBoat;
-import fr.dynamx.common.items.vehicle.ItemCar;
-import fr.dynamx.common.items.vehicle.ItemHelicopter;
-import fr.dynamx.common.items.vehicle.ItemTrailer;
+import fr.dynamx.common.items.vehicle.*;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 
 import java.util.List;
@@ -105,6 +102,34 @@ public interface VehicleValidator {
             List<PartRotor> rotors = info.getPartsByType(PartRotor.class);
             if (rotors.isEmpty())
                 throw new IllegalArgumentException("Helicopter " + info.getFullName() + " has no rotors");
+        }
+
+        @Override
+        public Class<? extends BaseEngineInfo> getEngineClass() {
+            return BaseEngineInfo.class;
+        }
+    };
+    VehicleValidator PLANE_VALIDATOR = new VehicleValidator() {
+        @Override
+        public void initProperties(ModularVehicleInfo info) {
+            info.linearDamping = 0.5f;
+            info.angularDamping = 0.9f;
+            info.inWaterAngularDamping = 0.9f;
+        }
+
+        @Override
+        public DynamXItemSpawner<ModularVehicleInfo> getSpawnItem(ModularVehicleInfo info) {
+            return new ItemPlane(info);
+        }
+
+        @Override
+        public void validate(ModularVehicleInfo info) {
+            HelicopterPhysicsInfo physicsInfo = info.getSubPropertyByType(HelicopterPhysicsInfo.class);
+            if (physicsInfo == null)
+                throw new IllegalArgumentException("Plane " + info.getFullName() + " has no HelicopterPhysics");
+            BaseEngineInfo engine = info.getSubPropertyByType(BaseEngineInfo.class);
+            if (engine == null)
+                throw new IllegalArgumentException("Plane " + info.getFullName() + " has no engine");
         }
 
         @Override

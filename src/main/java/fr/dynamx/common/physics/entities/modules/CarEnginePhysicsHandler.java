@@ -16,7 +16,7 @@ import java.util.List;
  * @see IEnginePhysicsHandler
  * @see CarEngineModule
  */
-public class EnginePhysicsHandler implements IPackInfoReloadListener {
+public class CarEnginePhysicsHandler implements IPackInfoReloadListener {
     //TODO HANDLE STEERING IN CAR PHYSICS HANDLER
     private final CarEngineModule module;
     private final BaseVehiclePhysicsHandler<?> handler;
@@ -33,7 +33,7 @@ public class EnginePhysicsHandler implements IPackInfoReloadListener {
     @Getter
     private float steeringForce;
 
-    public EnginePhysicsHandler(CarEngineModule module, BaseVehiclePhysicsHandler<?> handler, WheelsPhysicsHandler propulsionHandler) {
+    public CarEnginePhysicsHandler(CarEngineModule module, BaseVehiclePhysicsHandler<?> handler, WheelsPhysicsHandler propulsionHandler) {
         this.module = module;
         this.handler = handler;
         this.propulsionHandler = propulsionHandler;

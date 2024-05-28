@@ -22,7 +22,7 @@ import fr.dynamx.common.handlers.TaskScheduler;
 import fr.dynamx.common.items.ItemProps;
 import fr.dynamx.common.network.packets.MessageDebugRequest;
 import fr.dynamx.common.physics.joints.JointHandlerRegistry;
-import fr.dynamx.utils.DynamXConfig;
+import fr.hermes.forge1122.dynamx.DynamXConfig;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;

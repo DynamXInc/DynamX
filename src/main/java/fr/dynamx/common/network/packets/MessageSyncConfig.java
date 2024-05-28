@@ -7,7 +7,7 @@ import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.physics.world.PhysicsSimulationModes;
-import fr.dynamx.utils.DynamXConfig;
+import fr.hermes.forge1122.dynamx.DynamXConfig;
 import fr.dynamx.utils.DynamXLoadingTasks;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.block.Block;

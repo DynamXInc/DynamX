@@ -76,7 +76,7 @@ public class DynamXContext {
 
     private static final Map<Integer, IPhysicsWorld> PHYSICS_WORLD_PER_DIMENSION = new HashMap<>();
 
-    protected static void initNetwork() {
+    public static void initNetwork() {
         network = DynamXNetwork.init(FMLCommonHandler.instance().getSide());
     }
 

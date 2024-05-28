@@ -14,7 +14,7 @@ import fr.dynamx.common.physics.terrain.chunk.ChunkLoadingTicket;
 import fr.dynamx.common.physics.terrain.chunk.ChunkState;
 import fr.dynamx.common.physics.terrain.chunk.DebugChunkCollisions;
 import fr.dynamx.common.physics.terrain.element.TerrainElementType;
-import fr.dynamx.utils.DynamXConfig;
+import fr.hermes.forge1122.dynamx.DynamXConfig;
 import fr.dynamx.utils.VerticalChunkPos;
 import fr.dynamx.utils.debug.ChunkGraph;
 import fr.dynamx.utils.debug.Profiler;

@@ -1,7 +1,6 @@
 package fr.dynamx.common.physics.entities.parts.engine;
 
-import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
-import fr.dynamx.utils.DynamXConfig;
+import fr.hermes.forge1122.dynamx.DynamXConfig;
 import fr.dynamx.utils.maths.DynamXMath;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

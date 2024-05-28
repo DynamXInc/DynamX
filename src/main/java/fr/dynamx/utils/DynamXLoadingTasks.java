@@ -10,6 +10,7 @@ import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.contentpack.sync.MessagePacksHashs;
 import fr.dynamx.common.contentpack.sync.PackSyncHandler;
 import fr.dynamx.common.network.packets.MessageSyncConfig;
+import fr.hermes.forge1122.dynamx.DynamXConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.FMLCommonHandler;

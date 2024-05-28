@@ -8,7 +8,7 @@ import fr.dynamx.common.contentpack.type.objects.PropObject;
 import fr.dynamx.common.entities.modules.SeatsModule;
 import fr.dynamx.common.physics.entities.PackEntityPhysicsHandler;
 import fr.dynamx.common.physics.entities.PropPhysicsHandler;
-import fr.dynamx.utils.DynamXConfig;
+import fr.hermes.forge1122.dynamx.DynamXConfig;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;

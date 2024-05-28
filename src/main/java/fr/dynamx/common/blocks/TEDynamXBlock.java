@@ -24,7 +24,7 @@ import fr.dynamx.common.entities.modules.AbstractLightsModule;
 import fr.dynamx.common.entities.modules.StorageModule;
 import fr.dynamx.common.handlers.CommonEventHandler;
 import fr.dynamx.common.physics.terrain.chunk.ChunkLoadingTicket;
-import fr.dynamx.utils.DynamXConfig;
+import fr.hermes.forge1122.dynamx.DynamXConfig;
 import fr.dynamx.utils.VerticalChunkPos;
 import fr.dynamx.utils.debug.ChunkGraph;
 import fr.dynamx.utils.maths.DynamXGeometry;

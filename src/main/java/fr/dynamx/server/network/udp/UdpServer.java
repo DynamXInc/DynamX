@@ -1,7 +1,7 @@
 package fr.dynamx.server.network.udp;
 
 import fr.dynamx.common.DynamXMain;
-import fr.dynamx.utils.DynamXConfig;
+import fr.hermes.forge1122.dynamx.DynamXConfig;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 

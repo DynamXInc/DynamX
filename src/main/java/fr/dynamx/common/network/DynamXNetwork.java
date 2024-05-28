@@ -17,7 +17,7 @@ import fr.dynamx.common.network.sync.MessagePhysicsEntitySync;
 import fr.dynamx.common.network.sync.MessageSeatsSync;
 import fr.dynamx.common.network.udp.auth.MessageDynamXUdpSettings;
 import fr.dynamx.server.network.DynamXServerNetworkSystem;
-import fr.dynamx.utils.DynamXConfig;
+import fr.hermes.forge1122.dynamx.DynamXConfig;
 import io.netty.buffer.ByteBuf;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;

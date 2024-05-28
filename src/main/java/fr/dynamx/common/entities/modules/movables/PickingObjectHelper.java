@@ -9,7 +9,7 @@ import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.common.entities.modules.MovableModule;
 import fr.dynamx.common.items.tools.ItemWrench;
 import fr.dynamx.common.network.packets.MessageSyncPlayerPicking;
-import fr.dynamx.utils.DynamXConfig;
+import fr.hermes.forge1122.dynamx.DynamXConfig;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;

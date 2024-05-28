@@ -6,7 +6,7 @@ import fr.dynamx.common.physics.entities.BoatPhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.EnginePhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
 import fr.dynamx.common.physics.entities.parts.wheel.WheelPhysics;
-import fr.dynamx.utils.DynamXConfig;
+import fr.hermes.forge1122.dynamx.DynamXConfig;
 import fr.dynamx.utils.maths.DynamXMath;
 import lombok.RequiredArgsConstructor;
 import net.minecraftforge.fml.relauncher.Side;

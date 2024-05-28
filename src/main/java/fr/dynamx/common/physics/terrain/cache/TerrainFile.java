@@ -1,7 +1,7 @@
 package fr.dynamx.common.physics.terrain.cache;
 
 import fr.dynamx.common.DynamXMain;
-import fr.dynamx.utils.DynamXConfig;
+import fr.hermes.forge1122.dynamx.DynamXConfig;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.VerticalChunkPos;
 

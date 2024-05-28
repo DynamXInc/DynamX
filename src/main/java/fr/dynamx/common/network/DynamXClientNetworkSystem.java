@@ -3,7 +3,7 @@ package fr.dynamx.common.network;
 import fr.dynamx.api.network.*;
 import fr.dynamx.client.network.udp.UdpClientNetworkHandler;
 import fr.dynamx.common.DynamXMain;
-import fr.dynamx.utils.DynamXConfig;
+import fr.hermes.forge1122.dynamx.DynamXConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ServerAddress;
 import net.minecraft.client.multiplayer.ServerData;

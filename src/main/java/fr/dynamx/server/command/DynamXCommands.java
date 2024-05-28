@@ -5,7 +5,7 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.RagdollEntity;
 import fr.dynamx.common.physics.entities.modules.EnginePhysicsHandler;
-import fr.dynamx.utils.DynamXConfig;
+import fr.hermes.forge1122.dynamx.DynamXConfig;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.optimization.PooledHashMap;

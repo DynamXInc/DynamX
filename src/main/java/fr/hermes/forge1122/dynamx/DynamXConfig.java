@@ -1,7 +1,8 @@
-package fr.dynamx.utils;
+package fr.hermes.forge1122.dynamx;
 
 import fr.aym.acslib.ACsLib;
 import fr.aym.acslib.api.services.StatsReportingService;
+import fr.dynamx.utils.VerticalChunkPos;
 import lombok.Getter;
 import net.minecraftforge.common.config.Configuration;
 

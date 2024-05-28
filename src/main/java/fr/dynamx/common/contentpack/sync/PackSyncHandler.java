@@ -4,7 +4,7 @@ import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.loader.PackFilePropertyData;
 import fr.dynamx.common.contentpack.loader.SubInfoTypeAnnotationCache;
-import fr.dynamx.utils.DynamXConfig;
+import fr.hermes.forge1122.dynamx.DynamXConfig;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

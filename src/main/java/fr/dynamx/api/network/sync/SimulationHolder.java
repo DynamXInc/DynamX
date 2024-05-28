@@ -1,6 +1,5 @@
 package fr.dynamx.api.network.sync;
 
-import fr.dynamx.utils.DynamXConfig;
 import net.minecraftforge.fml.relauncher.Side;
 
 /**

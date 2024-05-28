@@ -4,7 +4,7 @@ import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.network.udp.EncapsulatedUDPPacket;
 import fr.dynamx.common.network.udp.UdpTestPacket;
 import fr.dynamx.common.network.udp.auth.UDPServerAuthenticationCompletePacket;
-import fr.dynamx.utils.DynamXConfig;
+import fr.hermes.forge1122.dynamx.DynamXConfig;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.entity.player.EntityPlayerMP;

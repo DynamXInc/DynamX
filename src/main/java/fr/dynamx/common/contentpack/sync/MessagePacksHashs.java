@@ -8,7 +8,7 @@ import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.loader.InfoLoader;
 import fr.dynamx.common.handlers.TaskScheduler;
-import fr.dynamx.utils.DynamXConfig;
+import fr.hermes.forge1122.dynamx.DynamXConfig;
 import fr.dynamx.utils.DynamXUtils;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;

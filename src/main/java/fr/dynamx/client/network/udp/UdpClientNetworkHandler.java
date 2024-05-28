@@ -11,7 +11,7 @@ import fr.dynamx.common.contentpack.sync.PackSyncHandler;
 import fr.dynamx.common.network.udp.EncapsulatedUDPPacket;
 import fr.dynamx.common.network.udp.UDPPacket;
 import fr.dynamx.common.network.udp.auth.UDPClientAuthenticationPacket;
-import fr.dynamx.utils.DynamXConfig;
+import fr.hermes.forge1122.dynamx.DynamXConfig;
 import fr.dynamx.utils.optimization.UPDByteArrayPool;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

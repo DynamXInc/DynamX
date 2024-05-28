@@ -1,8 +1,12 @@
-package fr.dynamx.common.contentpack;
+package fr.hermes.forge1122.dynamx;
 
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.DynamXAddon;
+import fr.dynamx.api.network.sync.SynchronizedEntityVariableRegistry;
+import fr.dynamx.common.contentpack.AddonInfo;
+import fr.dynamx.common.contentpack.loader.SubInfoTypesRegistry;
 import fr.dynamx.utils.errors.DynamXErrorManager;
+import fr.hermes.dynamx.IAddonLoader;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.common.ProgressManager;
@@ -25,13 +29,20 @@ import static fr.dynamx.common.DynamXMain.log;
  *
  * @see DynamXAddon
  */
-public class AddonLoader {
+public class AddonLoader implements IAddonLoader {
     /**
      * Loaded addons
      */
-    private static final Map<String, AddonInfo> addons = new HashMap<>();
+    private final Map<String, AddonInfo> addons = new HashMap<>();
 
-    protected static void discoverAddons(FMLConstructionEvent event) {
+    private FMLConstructionEvent event;
+
+    protected void setForgeData(FMLConstructionEvent event) {
+        this.event = event;
+    }
+
+    @Override
+    public void discoverAddons() {
         Set<ASMDataTable.ASMData> modData = event.getASMHarvestedData().getAll(DynamXAddon.class.getName());
         for (ASMDataTable.ASMData data : modData) {
             if (canRunOn(data.getAnnotationInfo().get("sides"), event.getSide())) {
@@ -61,6 +72,8 @@ public class AddonLoader {
                 }
             }
         }
+        SubInfoTypesRegistry.discoverSubInfoTypes(event);
+        SynchronizedEntityVariableRegistry.discoverSyncVars(event);
     }
 
     /**
@@ -78,10 +91,8 @@ public class AddonLoader {
         return false;
     }
 
-    /**
-     * Initializes all addons (discovered in init method)
-     */
-    public static void initAddons() {
+    @Override
+    public void initAddons() {
         ProgressManager.ProgressBar bar = ProgressManager.push("Loading DynamX addons", 1);
         bar.step("Initialize addons");
         for (AddonInfo addon : getAddons().values()) {
@@ -100,18 +111,13 @@ public class AddonLoader {
         ProgressManager.pop(bar);
     }
 
-    /**
-     * @param addon The addon id as specified in its annotation (may also be the modid of the addon)
-     * @return True if the addon is loaded
-     */
-    public static boolean isAddonLoaded(String addon) {
+    @Override
+    public boolean isAddonLoaded(String addon) {
         return getAddons().containsKey(addon);
     }
 
-    /**
-     * @return Loaded addons
-     */
-    public static Map<String, AddonInfo> getAddons() {
+    @Override
+    public Map<String, AddonInfo> getAddons() {
         return addons;
     }
 }

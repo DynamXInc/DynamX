@@ -6,7 +6,7 @@ import fr.dynamx.common.network.VanillaNetworkHandler;
 import fr.dynamx.server.network.udp.ServerIPAdressRetriever;
 import fr.dynamx.server.network.udp.UdpServerConnectionHandler;
 import fr.dynamx.server.network.udp.UdpServerNetworkHandler;
-import fr.dynamx.utils.DynamXConfig;
+import fr.hermes.forge1122.dynamx.DynamXConfig;
 import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nullable;

@@ -1,8 +1,7 @@
 package fr.dynamx.common.physics.terrain.chunk;
 
-import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.physics.terrain.WorldTerrainState;
-import fr.dynamx.utils.DynamXConfig;
+import fr.hermes.forge1122.dynamx.DynamXConfig;
 import fr.dynamx.utils.VerticalChunkPos;
 import fr.dynamx.utils.debug.ChunkGraph;
 

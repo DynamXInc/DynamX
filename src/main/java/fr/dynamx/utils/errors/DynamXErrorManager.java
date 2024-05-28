@@ -53,10 +53,10 @@ public class DynamXErrorManager {
         errorManager.addError(pack, errorCategory, genericType, errorLevel, object, message, exception, priority);
     }
 
-    public static void printErrors(Side side, ErrorLevel minLevel) {
+    public static void printErrors(boolean isClient, ErrorLevel minLevel) {
         if(errorManager.getAllErrors().values().stream().anyMatch(e -> e.getHighestErrorLevel().ordinal() >= minLevel.ordinal())) {
             DynamXMain.log.error("==== DynamX loading errors ====");
-            if(side.isClient())
+            if(isClient)
                 errorManager.printErrors(DynamXMain.log, Arrays.asList(INIT_ERRORS, PACKS_ERRORS, MODEL_ERRORS, ACsLib.getPlatform().getACsLibErrorCategory(), ACsGuiApi.getCssErrorType(), ModProtectionSystem.getMpsErrorCategory()), minLevel);
             else
                 errorManager.printErrors(DynamXMain.log, Arrays.asList(INIT_ERRORS, PACKS_ERRORS, MODEL_ERRORS, ACsLib.getPlatform().getACsLibErrorCategory(), ModProtectionSystem.getMpsErrorCategory()), minLevel);

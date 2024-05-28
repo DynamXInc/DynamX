@@ -3,7 +3,7 @@ package fr.dynamx.client.network.udp;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.network.udp.CommandUdp;
 import fr.dynamx.common.network.udp.EncapsulatedUDPPacket;
-import fr.dynamx.utils.DynamXConfig;
+import fr.hermes.forge1122.dynamx.DynamXConfig;
 import fr.dynamx.utils.optimization.UPDByteArrayPool;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

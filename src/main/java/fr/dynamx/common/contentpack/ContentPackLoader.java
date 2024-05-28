@@ -21,21 +21,10 @@ import fr.dynamx.common.slopes.GuiSlopesConfig;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXLoadingTasks;
 import fr.dynamx.utils.errors.DynamXErrorManager;
+import fr.hermes.core.HermesMod;
+import fr.hermes.core.HermesProgressManager;
+import fr.hermes.forge1122.dynamx.AddonLoader;
 import lombok.Getter;
-import net.minecraft.block.Block;
-import net.minecraft.client.Minecraft;
-import net.minecraft.launchwrapper.LaunchClassLoader;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.client.FMLClientHandler;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.FMLModContainer;
-import net.minecraftforge.fml.common.MetadataCollection;
-import net.minecraftforge.fml.common.ProgressManager;
-import net.minecraftforge.fml.common.discovery.ContainerType;
-import net.minecraftforge.fml.common.discovery.ModCandidate;
-import net.minecraftforge.fml.common.event.FMLConstructionEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import java.io.*;
@@ -94,7 +83,7 @@ public class ContentPackLoader {
      * @param folderName The packs folder name
      * @return The chosen folder file
      */
-    public static File init(FMLConstructionEvent event, ModProtectionContainer modProtectionContainer, String folderName, Side side) {
+    public static File init(HermesMod mod, ModProtectionContainer modProtectionContainer, String folderName, boolean isClient) {
         //Production-environment
         File myDir = new File(folderName);
         if (!myDir.exists()) {
@@ -109,19 +98,15 @@ public class ContentPackLoader {
             } else //First run, in production environment
                 myDir.mkdirs();
         }
-        //Discover addons
-        AddonLoader.discoverAddons(event);
-        SubInfoTypesRegistry.discoverSubInfoTypes(event);
-        SynchronizedEntityVariableRegistry.discoverSyncVars(event);
         //Discover resources
         int packCount = 0;
         for (File file : myDir.listFiles()) {
             if (file.isDirectory() || file.getName().endsWith(".zip") || file.getName().endsWith(PACK_FILE_EXTENSION)) {
                 DynamXMain.log.debug("Loading resource pack: " + file.getName());
                 //Add assets
-                if (side.isClient() && loadPackResources(file, file.isDirectory() ? ContainerType.DIR : ContainerType.JAR))
+                if (isClient && loadPackResources(file))
                     packCount++;
-                else if (side.isServer())
+                else if (!isClient)
                     packCount++;
                 //Add custom ModProtectionSystem repositories
                 protectedResources.put(file.getName(), modProtectionContainer.getParent().loadCustomRepository(modProtectionContainer, file));
@@ -132,7 +117,7 @@ public class ContentPackLoader {
                     if (f.isFile() && f.getName().endsWith(".jar")) {
                         try {
                             //Protected resources (.part files), only add to classpath
-                            ((LaunchClassLoader) Thread.currentThread().getContextClassLoader()).addURL(f.toURI().toURL());
+                            mod.getUtils().addPathToClasspath(f.toURI().toURL());
                         } catch (Throwable e) {
                             DynamXMain.log.error("Failed to load mps resources jar : " + f.getName());
                             DynamXMain.log.throwing(e);
@@ -146,7 +131,7 @@ public class ContentPackLoader {
             }
         }
         DynamXMain.log.info("Loaded " + packCount + " DynamX resource packs");
-        if (side.isClient()) {
+        if (isClient) {
             //Add built-in style, before customs by addons
             ACsGuiApi.registerStyleSheetToPreload(NewGuiDnxDebug.STYLE);
             ACsGuiApi.registerStyleSheetToPreload(GuiLoadingErrors.STYLE);
@@ -157,24 +142,8 @@ public class ContentPackLoader {
         return myDir; //return the used path, used when reloading config
     }
 
-    private static boolean loadPackResources(File file, ContainerType type) {
-        try {
-            HashMap<String, Object> map = new HashMap<>();
-            map.put("modid", DynamXConstants.ID);
-            map.put("name", "DynamX assets : " + file.getName());
-            map.put("version", "1.0");
-            FMLModContainer container = new FMLModContainer("fr.dynamx.common.DynamXMain", new ModCandidate(file, file, type), map);
-            container.bindMetadata(MetadataCollection.from(null, ""));
-            FMLClientHandler.instance().addModAsResource(container);
-            return true;
-        } catch (Throwable e) {
-            DynamXMain.log.error("Failed to load textures and models of DynamX pack : " + file.getName());
-            DynamXMain.log.throwing(e);
-            if (!(e instanceof Exception)) //todo clean
-                e = new RuntimeException("encapsulated error", e);
-            DynamXErrorManager.addError(file.getName(), DynamXErrorManager.INIT_ERRORS, "res_pack_load_fail", ErrorLevel.FATAL, "assets", "Failed to register as resource pack", (Exception) e, 700);
-            return false;
-        }
+    private static boolean loadPackResources(HermesMod mod, File file) {
+        return mod.getUtils().addFileResources(file);
     }
 
     @Nonnull
@@ -199,7 +168,7 @@ public class ContentPackLoader {
      * @param resDir            The packs folder
      * @param loadBlocksConfigs If should load blocks.dynx and slopes.dynx
      */
-    public static void reload(File resDir, boolean loadBlocksConfigs) {
+    public static void reload(HermesMod mod, boolean isClient, File resDir, boolean loadBlocksConfigs) {
         isHotReloading = initialized;
         if (!isHotReloading)
             initialized = true;
@@ -208,10 +177,10 @@ public class ContentPackLoader {
         DynamXErrorManager.getErrorManager().clear(DynamXErrorManager.PACKS_ERRORS);
         DynamXContext.getDxModelDataCache().clear();
         try {
-            ProgressManager.ProgressBar bar = ProgressManager.push("Loading content pack system", 1 + DynamXObjectLoaders.getInfoLists().size());
+            HermesProgressManager.HermesProgressBar bar = mod.getProgressManager().push("Loading content pack system", 1 + DynamXObjectLoaders.getInfoLists().size());
             bar.step("Discover assets");
 
-            MinecraftForge.EVENT_BUS.post(new ContentPackSystemEvent.Load(EventPhase.PRE));
+            //TODO MinecraftForge.EVENT_BUS.post(new ContentPackSystemEvent.Load(EventPhase.PRE));
             //List<ModularVehicleInfoBuilder> vehiclesToLoad = new ArrayList<>();
             int packCount = 0;
             int errorCount = 0;
@@ -288,8 +257,8 @@ public class ContentPackLoader {
                 bar.step("Post load : " + loader.getName());
                 loader.postLoad(isHotReloading);
             }
-            ProgressManager.pop(bar);
-            MinecraftForge.EVENT_BUS.post(new ContentPackSystemEvent.Load(EventPhase.POST));
+            bar.pop();
+            //TODO MinecraftForge.EVENT_BUS.post(new ContentPackSystemEvent.Load(EventPhase.POST));
             log.info("Loaded " + packCount + " content packs");
             if (errorCount > 0)
                 log.warn("Ignored " + errorCount + " errored packs");
@@ -297,7 +266,7 @@ public class ContentPackLoader {
             log.error("Fatal error while loading DynamX packs, we can't continue !", e);
             throw new RuntimeException(e);
         }
-        if (FMLCommonHandler.instance().getSide().isClient()) {
+        if (isClient) {
             //Reload languages added by packs
             scheduleLanguageRefresh();
         }
@@ -380,7 +349,6 @@ public class ContentPackLoader {
                 PLACE_SLOPES = Boolean.parseBoolean(m.group(1));
                 continue;
             }
-
 
             Block block = Block.getBlockFromName(array[i]);
             if (block != null) {

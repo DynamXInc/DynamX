@@ -4,7 +4,7 @@ import fr.dynamx.api.physics.terrain.ITerrainCache;
 import fr.dynamx.api.physics.terrain.ITerrainElement;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.physics.terrain.element.TerrainElementsFactory;
-import fr.dynamx.utils.DynamXConfig;
+import fr.hermes.forge1122.dynamx.DynamXConfig;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.VerticalChunkPos;
 

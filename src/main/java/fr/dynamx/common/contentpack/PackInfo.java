@@ -12,6 +12,7 @@ import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.errors.DynamXErrorManager;
+import fr.hermes.forge1122.dynamx.AddonLoader;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.util.ResourceLocation;

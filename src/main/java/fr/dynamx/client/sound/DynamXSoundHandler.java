@@ -2,7 +2,7 @@ package fr.dynamx.client.sound;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.audio.IDynamXSound;
-import fr.dynamx.utils.DynamXConfig;
+import fr.hermes.forge1122.dynamx.DynamXConfig;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;

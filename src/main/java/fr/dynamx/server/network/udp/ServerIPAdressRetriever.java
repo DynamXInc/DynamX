@@ -1,7 +1,7 @@
 package fr.dynamx.server.network.udp;
 
 import fr.dynamx.common.DynamXMain;
-import fr.dynamx.utils.DynamXConfig;
+import fr.hermes.forge1122.dynamx.DynamXConfig;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 

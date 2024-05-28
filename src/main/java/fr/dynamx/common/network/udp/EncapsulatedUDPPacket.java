@@ -3,7 +3,7 @@ package fr.dynamx.common.network.udp;
 import fr.dynamx.api.network.IDnxPacket;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.network.DynamXNetwork;
-import fr.dynamx.utils.DynamXConfig;
+import fr.hermes.forge1122.dynamx.DynamXConfig;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.fml.relauncher.Side;

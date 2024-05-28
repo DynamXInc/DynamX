@@ -4,7 +4,7 @@ import fr.dynamx.api.physics.terrain.IBlockCollisionBehavior;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.blocks.TEDynamXBlock;
 import fr.dynamx.common.physics.terrain.element.DynamXBlockTerrainElement;
-import fr.dynamx.utils.DynamXConfig;
+import fr.hermes.forge1122.dynamx.DynamXConfig;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import net.minecraft.block.*;
 import net.minecraft.block.state.IBlockState;

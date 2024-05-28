@@ -4,7 +4,7 @@ import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.physics.terrain.chunk.ChunkCollisions;
 import fr.dynamx.common.physics.terrain.chunk.ChunkLoadingTicket;
 import fr.dynamx.common.physics.terrain.chunk.DebugChunkCollisions;
-import fr.dynamx.utils.DynamXConfig;
+import fr.hermes.forge1122.dynamx.DynamXConfig;
 import fr.dynamx.utils.VerticalChunkPos;
 
 import java.util.ArrayList;

@@ -6,7 +6,7 @@ import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.network.packets.MessageSyncConfig;
 import fr.dynamx.common.physics.world.PhysicsSimulationModes;
-import fr.dynamx.utils.DynamXConfig;
+import fr.hermes.forge1122.dynamx.DynamXConfig;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;

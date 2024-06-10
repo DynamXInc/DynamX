@@ -94,20 +94,20 @@ public class DynamXMain {
         // Loading protected files
         loadingService.addTask(mps.getTaskEndHook(), "certs_mps", () -> {
             try {
+                AddonLoader.initMpsAddons(mpsContainer);
                 mpsContainer.setup("DynamX");
             } catch (Exception e) {
                 DynamXErrorManager.addError("DynamX initialization", DynamXErrorManager.INIT_ERRORS, "mps_error", ErrorLevel.FATAL, "MPS", null, e);
                 e.printStackTrace();
             }
         });
+        loadingService.step(mps.getTaskEndHook());
 
         bar.step("Init addons");
         //Loading content packs
         AddonLoader.initAddons();
 
         bar.step("Init packs");
-
-        loadingService.step(mps.getTaskEndHook());
         proxy.schedulePacksInit();
         ProgressManager.pop(bar);
     }

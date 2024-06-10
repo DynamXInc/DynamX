@@ -348,8 +348,8 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
     public void addChunkCollisions() {
         List<Chunk> chunks = new ArrayList<>();
         AxisAlignedBB bb = computeBoundingBox().offset(pos);
-        for (int x = (int) bb.minX; x <= bb.maxX; x += (int) Math.max(1, Math.min(bb.maxX - bb.minX, 16))) {
-            for (int z = (int) bb.minZ; z <= bb.maxZ; z += (int) Math.max(1, Math.min(bb.maxZ - bb.minZ, 16))) {
+        for (int x = (int) bb.minX; x <= bb.minX+Math.max(1, bb.maxX-bb.minX); x += (int) Math.max(1, Math.min(bb.maxX - bb.minX, 16))) {
+            for (int z = (int) bb.minZ; z <= bb.minZ+Math.max(1, bb.maxZ-bb.minZ); z += (int) Math.max(1, Math.min(bb.maxZ - bb.minZ, 16))) {
                 if (!world.isChunkGeneratedAt(x >> 4, z >> 4)) {
                     ChunkPos pos = new ChunkPos(x >> 4, z >> 4);
                     if (!CommonEventHandler.PENDING_CHUNKS_COLLISIONS.containsKey(pos))
@@ -370,8 +370,8 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
     public void removeChunkCollisions() {
         List<Chunk> chunks = new ArrayList<>();
         AxisAlignedBB bb = computeBoundingBox().offset(pos);
-        for (int x = (int) bb.minX; x <= bb.maxX; x += (int) Math.max(1, Math.min(bb.maxX - bb.minX, 16))) {
-            for (int z = (int) bb.minZ; z <= bb.maxZ; z += (int) Math.max(1, Math.min(bb.maxZ - bb.minZ, 16))) {
+        for (int x = (int) bb.minX; x <= bb.minX+Math.max(1, bb.maxX-bb.minX); x += (int) Math.max(1, Math.min(bb.maxX - bb.minX, 16))) {
+            for (int z = (int) bb.minZ; z <= bb.minZ+Math.max(1, bb.maxZ-bb.minZ); z += (int) Math.max(1, Math.min(bb.maxZ - bb.minZ, 16))) {
                 ChunkPos pos = new ChunkPos(x >> 4, z >> 4);
                 if (CommonEventHandler.PENDING_CHUNKS_COLLISIONS.containsKey(pos))
                     CommonEventHandler.PENDING_CHUNKS_COLLISIONS.get(pos).remove(this.pos);

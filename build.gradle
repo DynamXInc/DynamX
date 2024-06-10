@@ -72,7 +72,7 @@ dependencies {
     implementation 'com.github.stephengold:Libbulletjme:' + libbulletjme_version
     implementation "fr.aym.acsguis:ACsGuis:1.2.12"
     implementation ":ModProtectionLib:1.4.1"
-    implementation('org.spongepowered:mixin:0.8.5') {
+    implementation('org.spongepowered:mixin:0.8.3') {
         exclude module: 'guava'
         exclude module: 'commons-io'
         exclude module: 'gson'
@@ -80,7 +80,7 @@ dependencies {
     implementation 'org.joml:joml:1.10.5'
     compileOnly 'org.projectlombok:lombok:1.18.24'
 
-    shadow('org.spongepowered:mixin:0.8.5') {
+    shadow('org.spongepowered:mixin:0.8.3') {
         exclude module: 'guava'
         exclude module: 'commons-io'
         exclude module: 'gson'
@@ -91,8 +91,8 @@ dependencies {
     shadow fileTree(dir: 'libs', include: '*.jar')
 
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
-    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
-    testAnnotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    annotationProcessor 'org.spongepowered:mixin:0.8.3:processor'
+    testAnnotationProcessor 'org.spongepowered:mixin:0.8.3:processor'
 }
 
 mixin {

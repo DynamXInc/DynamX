@@ -73,8 +73,8 @@ public class HelicopterEntity<T extends HelicopterPhysicsHandler<?>> extends Bas
                 @Override
                 public void applyOrientationToEntity(Entity passenger) {
                     if(seats != null && seats.getControllingPassenger() == passenger && HelicopterController.isMouseLocked()) {
-                        passenger.rotationYaw = 0;
-                        passenger.prevRotationYaw = 0;
+                        passenger.rotationYaw = HelicopterEntity.this.rotationYaw;
+                        passenger.prevRotationYaw = HelicopterEntity.this.prevRotationYaw;
                         passenger.rotationPitch = 0;
                         passenger.prevRotationPitch = 0;
                     } else {

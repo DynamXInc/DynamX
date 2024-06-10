@@ -6,6 +6,7 @@ import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.dxmodel.DxModelPath;
+import fr.dynamx.api.dxmodel.EnumDxModelFormats;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.objloader.data.DxModelData;
 import fr.dynamx.utils.errors.DynamXErrorManager;
@@ -36,12 +37,17 @@ public class ObjectCollisionsHelper {
     }
 
     public void loadCollisions(INamedObject object, DxModelPath modelPath, String partName, Vector3f centerOfMass, float shapeYOffset, boolean useComplexCollisions, Vector3f scaleModifier, CollisionType type) {
+        useComplexCollisions = useComplexCollisions && modelPath.getFormat() != EnumDxModelFormats.JSON;
         try {
             if (useComplexCollisions) {
                 // Case 1: complex collisions
                 physicsCollisionShape = ShapeUtils.generateComplexModelCollisions(modelPath, partName, scaleModifier, centerOfMass, shapeYOffset);
             }
             if (getShapes().isEmpty()) {
+                if (modelPath.getFormat() == EnumDxModelFormats.JSON) {
+                    // We can't generate collisions from a json model
+                    return;
+                }
                 // Case 2: No shapes (doesn't depends on complex collisions)
                 DxModelData dxModelData = DynamXContext.getDxModelDataFromCache(modelPath);
                 if (!useComplexCollisions) {
@@ -52,6 +58,7 @@ public class ObjectCollisionsHelper {
                 }
 
                 // Case 2.2: No shapes and complex collisions: generate part shapes from the obj model
+                boolean finalUseComplexCollisions = useComplexCollisions;
                 dxModelData.getMeshNames().forEach(meshName -> {
                     if (!partName.isEmpty() && !meshName.contains(partName.toLowerCase()))
                         return;
@@ -59,7 +66,7 @@ public class ObjectCollisionsHelper {
                     if (dimension.x == 0 && dimension.y == 0 && dimension.z == 0)
                         return;
                     Vector3f center = dxModelData.getMeshCenter(meshName, new Vector3f()).multLocal(scaleModifier);
-                    if (!useComplexCollisions) {
+                    if (!finalUseComplexCollisions) {
                         physicsCollisionShape.addChildShape(new BoxCollisionShape(dimension), center.add(centerOfMass));
                     }
                     MutableBoundingBox box = new MutableBoundingBox(dimension).offset(center);

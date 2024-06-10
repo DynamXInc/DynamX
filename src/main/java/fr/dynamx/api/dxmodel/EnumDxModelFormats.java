@@ -2,13 +2,9 @@ package fr.dynamx.api.dxmodel;
 
 public enum EnumDxModelFormats {
 
-    OBJ, GLTF;
+    OBJ, GLTF, JSON;
 
-    public static boolean isValidFormat(String path){
-        for (EnumDxModelFormats value : values()) {
-            if(path.endsWith(value.name().toLowerCase()))
-                return true;
-        }
-        return false;
+    public static boolean isDxModel(String path){
+        return path.endsWith(OBJ.name().toLowerCase()) || path.endsWith(GLTF.name().toLowerCase());
     }
 }

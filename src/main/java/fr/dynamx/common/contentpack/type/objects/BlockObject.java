@@ -147,7 +147,7 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
     }
 
     public boolean isDxModel() {
-        return EnumDxModelFormats.isValidFormat(getModel().getPath());
+        return EnumDxModelFormats.isDxModel(getModel().getPath());
     }
 
     @Override

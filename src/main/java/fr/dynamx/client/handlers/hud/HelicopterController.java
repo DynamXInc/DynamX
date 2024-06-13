@@ -11,6 +11,7 @@ import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.engines.HelicopterEngineModule;
 import fr.dynamx.common.entities.vehicles.HelicopterEntity;
 import fr.dynamx.utils.DynamXConstants;
+import lombok.Getter;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -28,6 +29,7 @@ public class HelicopterController extends BaseController {
 
     protected final HelicopterEngineModule engine;
 
+    @Getter
     protected static boolean mouseLocked = true;
 
     /**
@@ -128,9 +130,5 @@ public class HelicopterController extends BaseController {
     @SideOnly(Side.CLIENT)
     public List<ResourceLocation> getHudCssStyles() {
         return Collections.singletonList(STYLE);
-    }
-
-    public static boolean isMouseLocked() {
-        return mouseLocked;
     }
 }

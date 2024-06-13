@@ -8,8 +8,11 @@ import fr.dynamx.common.entities.modules.engines.BasicEngineModule;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.Minecraft;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public abstract class BaseController implements IVehicleController {
+    @SideOnly(Side.CLIENT)
     protected static final Minecraft MC = Minecraft.getMinecraft();
 
     protected final BaseVehicleEntity<?> entity;
@@ -30,6 +33,7 @@ public abstract class BaseController implements IVehicleController {
     /**
      * @param entity is assumed to implement {@link IModuleContainer.ISeatsContainer}
      */
+    @SideOnly(Side.CLIENT)
     public BaseController(BaseVehicleEntity<?> entity, BasicEngineModule engine) {
         this.entity = entity;
         isEngineStarted = engine.isEngineStarted();
@@ -43,6 +47,7 @@ public abstract class BaseController implements IVehicleController {
     protected abstract void updateControls();
 
     @Override
+    @SideOnly(Side.CLIENT)
     public void update() {
         if (((IModuleContainer.ISeatsContainer) entity).getSeats().isLocalPlayerDriving()) {
             accelerating = MC.gameSettings.keyBindForward.isKeyDown();

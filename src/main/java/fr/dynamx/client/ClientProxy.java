@@ -2,6 +2,7 @@ package fr.dynamx.client;
 
 import fr.aym.acslib.ACsLib;
 import fr.aym.acslib.api.services.ThreadedLoadingService;
+import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.client.handlers.KeyHandler;
 import fr.dynamx.client.network.ClientPhysicsEntitySynchronizer;
@@ -14,6 +15,7 @@ import fr.dynamx.client.renders.vehicle.RenderDoor;
 import fr.dynamx.client.sound.DynamXSoundHandler;
 import fr.dynamx.common.CommonProxy;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.blocks.TEDynamXBlock;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.entities.PropsEntity;
@@ -174,17 +176,15 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
     public void initPhysicsWorld(World world) {
         if (DynamXContext.getPhysicsWorldPerDimensionMap().containsKey(world.provider.getDimension())) {
             // connecting to another server (e.g. with bungeecoord) : unload the previous world
-            /*System.out.println("Duplicate world load detected. Unloading old.");
+            DynamXMain.log.info("Duplicate world load detected. Are using BungeeCoord ? Unloading old world.");
             IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(world);
-            System.out.println("Found: " + physicsWorld);
-            if (physicsWorld != null && physicsWorld.ownsWorld(world)) {
-                System.out.println("Owned. Clearing.");
+            if (physicsWorld != null) {
+                DynamXMain.log.debug("Clearing current physics world...");
                 physicsWorld.clearAll();
                 DynamXContext.getPlayerToCollision().clear();
             } else {
-                System.out.println("Not owned. Wtf. Cannot clear.");
-            }*/
-            throw new IllegalStateException("Physics world of " + world + " is already loaded ! World: " + DynamXContext.getPhysicsWorldPerDimensionMap().get(world.provider.getDimension()));
+                throw new IllegalStateException("Physics world loaded but not found. Dim: " + world.provider.getDimension() + " World: " + world);
+            }
         }
         DynamXContext.getPhysicsWorldPerDimensionMap().put(world.provider.getDimension(), new BuiltinThreadedPhysicsWorld(world, !ClientEventHandler.MC.isSingleplayer()));
     }

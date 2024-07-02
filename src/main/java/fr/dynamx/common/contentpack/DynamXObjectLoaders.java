@@ -16,6 +16,7 @@ import fr.dynamx.common.items.vehicle.ItemHelicopter;
 import fr.dynamx.common.items.vehicle.ItemTrailer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -58,6 +59,6 @@ public class DynamXObjectLoaders {
     }
 
     public static List<InfoLoader<?>> getInfoLoaders() {
-        return INFO_LISTS.stream().filter(l -> l instanceof InfoLoader).map(l -> (InfoLoader<?>) l).collect(Collectors.toList());
+        return Collections.unmodifiableList(INFO_LISTS.stream().filter(l -> l instanceof InfoLoader).map(l -> (InfoLoader<?>) l).collect(Collectors.toList()));
     }
 }

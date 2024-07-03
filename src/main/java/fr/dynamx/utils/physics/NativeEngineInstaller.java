@@ -66,9 +66,7 @@ public class NativeEngineInstaller {
         if (!success) {
             ProgressManager.ProgressBar bar = ProgressManager.push("Download native physics engine...", 101);
             try {
-                bar.step("SSL");
-                if ((DynamXConstants.DYNAMX_CERT != null || DynamXConstants.DYNAMX_AUX_CERT != null) && SSLHelper.shouldInstallCert())
-                    SSLHelper.installCertificates(DynamXConstants.DYNAMX_CERT, DynamXConstants.DYNAMX_AUX_CERT);
+                bar.step("Download physics engine...");
                 success = downloadJme(bar, file, platform + buildType + flavor + "_" + name, jmeVersion);
                 System.load(absoluteFilename);
             } catch (IOException e) {

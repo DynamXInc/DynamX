@@ -11,7 +11,6 @@ import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.engines.HelicopterEngineModule;
 import fr.dynamx.common.entities.vehicles.HelicopterEntity;
 import fr.dynamx.utils.DynamXConstants;
-import lombok.Getter;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -28,9 +27,6 @@ public class HelicopterController extends BaseController {
     public static final ResourceLocation STYLE = new ResourceLocation(DynamXConstants.ID, "css/vehicle_hud.css");
 
     protected final HelicopterEngineModule engine;
-
-    @Getter
-    protected static boolean mouseLocked = true;
 
     /**
      * @param entity is assumed to implement {@link IModuleContainer.ISeatsContainer}
@@ -49,7 +45,7 @@ public class HelicopterController extends BaseController {
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
     public static void tickMouse(MouseEvent event) {
-        if (mouseLocked && MC.player.getRidingEntity() instanceof HelicopterEntity && ((HelicopterEntity<?>) MC.player.getRidingEntity()).getSeats().isLocalPlayerDriving()) {
+        if (HelicopterEntity.isMouseLocked() && MC.player.getRidingEntity() instanceof HelicopterEntity && ((HelicopterEntity<?>) MC.player.getRidingEntity()).getSeats().isLocalPlayerDriving()) {
             HelicopterEngineModule engineModule = ((HelicopterEntity<?>) MC.player.getRidingEntity()).getModuleByType(HelicopterEngineModule.class);
             int invert = MC.gameSettings.invertMouse ? -1 : 1;
             engineModule.getRollControls().set(0, invert * event.getDx());
@@ -69,7 +65,7 @@ public class HelicopterController extends BaseController {
                 engine.setPower(engine.getPower() - 0.05f);
             }
             if (KeyHandler.KEY_LOCK_ROTATION.isPressed()) {
-                mouseLocked = !mouseLocked;
+                HelicopterEntity.setMouseLocked(!HelicopterEntity.isMouseLocked());
             }
             boolean rolling = false;
             if (KeyHandler.KEY_HELICOPTER_PITCH_FORWARD.isKeyDown()) {
@@ -120,7 +116,7 @@ public class HelicopterController extends BaseController {
         speed.add(new UpdatableGuiLabel("%s", s -> String.format(s, engine.isEngineStarted() ? (int) engineProperties[VehicleEntityProperties.EnumEngineProperties.SPEED.ordinal()] : "--", "")).setCssId("engine_speed"));
         speed.add(new UpdatableGuiLabel("Power %.2f", s -> String.format(s, Math.abs(engine.getPower()))).setCssId("engine_gear"));
         panel.add(speed);
-        panel.add(new UpdatableGuiLabel("View locked %b", s -> String.format(s, mouseLocked)).setCssId("engine_gear"));
+        panel.add(new UpdatableGuiLabel("View locked %b", s -> String.format(s, HelicopterEntity.isMouseLocked())).setCssId("engine_gear"));
         //panel.add(new UpdatableGuiLabel("                             AngleFront %f", s -> String.format(s, HelicopterEnginePhysicsHandler.AngleFront)).setCssId("engine_gear"));
         panel.setCssId("engine_hud");
         return panel;

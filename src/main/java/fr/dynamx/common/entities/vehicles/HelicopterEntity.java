@@ -4,7 +4,6 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.client.camera.CameraMode;
-import fr.dynamx.client.handlers.hud.HelicopterController;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
@@ -14,6 +13,7 @@ import fr.dynamx.common.entities.modules.SeatsModule;
 import fr.dynamx.common.entities.modules.WheelsModule;
 import fr.dynamx.common.physics.entities.HelicopterPhysicsHandler;
 import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
 
@@ -21,6 +21,10 @@ import javax.annotation.Nonnull;
 
 public class HelicopterEntity<T extends HelicopterPhysicsHandler<?>> extends BaseVehicleEntity<T> implements
         IModuleContainer.ISeatsContainer, IModuleContainer.IDoorContainer {
+    @Getter
+    @Setter
+    protected static boolean mouseLocked = true;
+
     private SeatsModule seats;
     private DoorsModule doors;
     @Getter
@@ -72,7 +76,7 @@ public class HelicopterEntity<T extends HelicopterPhysicsHandler<?>> extends Bas
             seats = new SeatsModule(this, CameraMode.FIXED) {
                 @Override
                 public void applyOrientationToEntity(Entity passenger) {
-                    if(seats != null && seats.getControllingPassenger() == passenger && HelicopterController.isMouseLocked()) {
+                    if (seats != null && seats.getControllingPassenger() == passenger && isMouseLocked()) {
                         passenger.rotationYaw = HelicopterEntity.this.rotationYaw;
                         passenger.prevRotationYaw = HelicopterEntity.this.prevRotationYaw;
                         passenger.rotationPitch = 0;

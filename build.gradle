@@ -71,7 +71,7 @@ dependencies {
 
     implementation 'com.github.stephengold:Libbulletjme:' + libbulletjme_version
     implementation "fr.aym.acsguis:ACsGuis:1.2.12"
-    implementation ":ModProtectionLib:1.4.1"
+    implementation ":ModProtectionLib:1.4.2"
     implementation('org.spongepowered:mixin:0.8.3') {
         exclude module: 'guava'
         exclude module: 'commons-io'

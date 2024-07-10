@@ -96,6 +96,9 @@ public class BlockNode<A extends BlockObject<?>> extends AbstractItemNode<BaseRe
                     (te.getRelativeScale().y != 0 ? te.getRelativeScale().y : 1),
                     (te.getRelativeScale().z != 0 ? te.getRelativeScale().z : 1));
             transform.translate(0.5f, 0.5f, 0.5f);
+        } else {
+            // Backward-compatibility: old blocks were having 0, 0, 0 as default scale
+            transform.translate(0, 1, 0);
         }
         transform.translate(DynamXUtils.toVector3f(te.getPackInfo().getTranslation()));
     }

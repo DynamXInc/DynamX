@@ -186,6 +186,8 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     }
 
     protected void readPosition(ResourceLocation model) {
+        if (getPosition() != null && getCarAttachPoint() != null && getScale().lengthSquared() != 0)
+            return; // Fix: don't load the model data if we don't need to
         DxModelData modelData = DynamXContext.getDxModelDataFromCache(DynamXUtils.getModelPath(getPackName(), model));
         if (modelData != null) {
             if (getPosition() == null) {

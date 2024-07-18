@@ -13,7 +13,7 @@ import static fr.dynamx.utils.DynamXConstants.*;
 
 public class DynamXMpsConfig extends BasicMpsConfig {
     public DynamXMpsConfig() {
-        super(VERSION, MPS_KEY, null, new DynamXMpsUrlFactory(MPS_URL, new String[]{MPS_AUX_URL}), new String[0], MPS_STARTER);
+        super(VERSION, MPS_KEY, null, new DynamXMpsUrlFactory(MPS_URL, MPS_AUX_URLS), new String[0], MPS_STARTER);
     }
 
     public static class DynamXMpsUrlFactory extends MpsUrlFactory.DefaultUrlFactory {

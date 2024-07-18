@@ -32,7 +32,7 @@ public class DynamXConstants
      * For compatibility reasons, the main mps url is still mps.dynamx.fr, but mps dynamically rewrites it to v3.mps.dynamx.fr which has a valid DynamXRootCA certificate <br>
      * This rewrite will stay "hidden" and the new packs still need to be ciphered using the mps.dynamx.fr url <br>
      * The lets encrypt certificate is used for aux mps urls, and can be used for external mps servers. <br>
-     * The aux mps is now mps.dynamx.fr, and the other aux url mps2.dynamx.fr currently uses an old certificate valid until September 24.
+     * The aux mps is now mps.dynamx.fr, and the other aux url mps2.dynamx.fr currently uses old certificates valid until September 24.
      */
     public static final String DYNAMX_CERT = "certs/DynamXRootCA.crt", DYNAMX_AUX_CERT = "certs/letsencrypt-isrgrootx1.der";
 

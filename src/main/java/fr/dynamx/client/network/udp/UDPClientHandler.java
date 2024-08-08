@@ -4,7 +4,7 @@ import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.network.udp.CommandUdp;
 import fr.dynamx.common.network.udp.EncapsulatedUDPPacket;
 import fr.dynamx.utils.DynamXConfig;
-import fr.dynamx.utils.optimization.UPDByteArrayPool;
+import fr.dynamx.utils.optimization.UDPByteArrayPool;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
@@ -47,7 +47,7 @@ public class UDPClientHandler implements Runnable {
             } else
                 throw new IllegalArgumentException("Illegal dynamx packet id " + id);
         }
-        UPDByteArrayPool.getINSTANCE().free(data);
+        UDPByteArrayPool.getINSTANCE().free(data);
     }
 
     @Override

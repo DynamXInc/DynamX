@@ -125,7 +125,7 @@ public class UdpServerNetworkHandler implements IDnxNetworkHandler {
             world.getEntityTracker().getTrackingPlayers((Entity) target).forEach(player -> {
                 UDPClient client = clientMap.get(player.getEntityId());
                 if (client == null)
-                    vanillaFallback(packet, (EntityPlayerMP) target);
+                    vanillaFallback(packet, (EntityPlayerMP) player);
                 else
                     sendPacket(pck, client);
             });
@@ -133,7 +133,7 @@ public class UdpServerNetworkHandler implements IDnxNetworkHandler {
             FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getPlayers().forEach(player -> {
                 UDPClient client = clientMap.get(player.getEntityId());
                 if (client == null)
-                    vanillaFallback(packet, (EntityPlayerMP) target);
+                    vanillaFallback(packet, player);
                 else
                     sendPacket(pck, client);
             });

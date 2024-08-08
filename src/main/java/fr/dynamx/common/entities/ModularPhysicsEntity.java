@@ -71,7 +71,7 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
      * @param physicsInitCallback The new {@link ModularEntityInitCallback}
      */
     public ModularPhysicsEntity<T> setPhysicsInitCallback(ModularEntityPhysicsInitCallback physicsInitCallback) {
-        if(initialized == EnumEntityInitState.ALL){
+        if (initialized == EnumEntityInitState.ALL) {
             physicsInitCallback.onPhysicsInit(this, physicsHandler);
             return this;
         }

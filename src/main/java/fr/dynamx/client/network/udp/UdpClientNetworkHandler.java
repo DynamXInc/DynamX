@@ -12,7 +12,7 @@ import fr.dynamx.common.network.udp.EncapsulatedUDPPacket;
 import fr.dynamx.common.network.udp.UDPPacket;
 import fr.dynamx.common.network.udp.auth.UDPClientAuthenticationPacket;
 import fr.dynamx.utils.DynamXConfig;
-import fr.dynamx.utils.optimization.UPDByteArrayPool;
+import fr.dynamx.utils.optimization.UDPByteArrayPool;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
@@ -103,7 +103,7 @@ public class UdpClientNetworkHandler implements IDnxNetworkHandler {
         this.authenticate();
 
         while (running) {
-            byte[] packetBuffer = UPDByteArrayPool.getINSTANCE().get(); //Note that the array is not cleaned and may contain old data
+            byte[] packetBuffer = UDPByteArrayPool.getINSTANCE().get(); //Note that the array is not cleaned and may contain old data
             DatagramPacket p = new DatagramPacket(packetBuffer, packetBuffer.length);
 
             try {

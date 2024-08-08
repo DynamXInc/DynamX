@@ -81,6 +81,8 @@ public class HelicopterEntity<T extends HelicopterPhysicsHandler<?>> extends Bas
                         passenger.prevRotationYaw = HelicopterEntity.this.prevRotationYaw;
                         passenger.rotationPitch = 0;
                         passenger.prevRotationPitch = 0;
+                        passenger.setRenderYawOffset(0);
+                        passenger.setRotationYawHead(passenger.rotationYaw - HelicopterEntity.this.rotationYaw);
                     } else {
                         super.applyOrientationToEntity(passenger);
                     }

@@ -5,12 +5,12 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 @NotThreadSafe
-public class UPDByteArrayPool {
-    private static final UPDByteArrayPool INSTANCE = new UPDByteArrayPool(4096);
+public class UDPByteArrayPool {
+    private static final UDPByteArrayPool INSTANCE = new UDPByteArrayPool(4096);
     private final int arraysSize;
     private final Queue<byte[]> frees = new ConcurrentLinkedQueue<>();
 
-    public UPDByteArrayPool(int arraysSize) {
+    public UDPByteArrayPool(int arraysSize) {
         this.arraysSize = arraysSize;
     }
 
@@ -27,7 +27,7 @@ public class UPDByteArrayPool {
             throw new IllegalArgumentException("Wrong array length : " + array.length + " instead of " + arraysSize);
     }
 
-    public static UPDByteArrayPool getINSTANCE() {
+    public static UDPByteArrayPool getINSTANCE() {
         return INSTANCE;
     }
 }

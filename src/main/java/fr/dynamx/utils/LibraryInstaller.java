@@ -3,6 +3,7 @@ package fr.dynamx.utils;
 import fr.aym.mps.utils.SSLHelper;
 import org.apache.logging.log4j.Logger;
 
+import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 import java.io.*;
@@ -51,14 +52,14 @@ public class LibraryInstaller {
         return success;
     }
 
-    //FIXME PUT IN LIB, BUT WITH CUSTOM LOGGER IN PARAMETER
+    //FIXME PUT IN LIB
     public static void installCertificates(Logger log, String sslCertificateFilePath, String sslCertificateFilePathAux) {
         try {
             /*if (disableSSLCertification) {
                 trustAllCerts();
             } else */
             {
-                log.info("Installing root server's certificate for " + sslCertificateFilePath + " and " + sslCertificateFilePathAux);
+                log.info("Installing root server's certificates: " + sslCertificateFilePath + " and " + sslCertificateFilePathAux);
                 KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
                 Path ksPath = Paths.get(System.getProperty("java.home"), "lib", "security", "cacerts");
                 keyStore.load(Files.newInputStream(ksPath), "changeit".toCharArray());
@@ -71,9 +72,12 @@ public class LibraryInstaller {
                 }
                 TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
                 tmf.init(keyStore);
-                SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
+                SSLContext sslContext = SSLContext.getInstance("TLS");
                 sslContext.init(null, tmf.getTrustManagers(), null);
                 SSLContext.setDefault(sslContext);
+                //System.out.println("Load is good");
+                HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
+                //System.out.println("VERY good");
             }
 
         } catch (Exception e) {

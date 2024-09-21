@@ -26,20 +26,24 @@ public class DynamXMpsConfig extends BasicMpsConfig {
         }
 
         @Override
-        public URL getHomeUrl(ModProtectionConfig config, int attempt) throws MalformedURLException {
+        public URL getHomeUrl(ModProtectionConfig config, int attempt, boolean pre150Server) throws MalformedURLException {
             String mpsURL = attempt > -1 ? getAuxUrls()[attempt] : getPatchedMainUrl();
-            return new URL(mpsURL + config.getMpsVersion() + "/home.php?access_key=" + config.getMpsAccessKey());
+            if (pre150Server)
+                return new URL(mpsURL + config.getMpsVersion() + "/home.php?access_key=" + config.getMpsAccessKey());
+            return new URL(mpsURL + "home/" + config.getMpsVersion() + "/" + config.getMpsAccessKey() + "/" + config.getUserId());
         }
 
         @Override
-        public URL getResourceUrl(ModProtectionConfig config, int attempt, String encodedModVersion, String resource, @Nullable ModProtectionContainer.CustomRepoParams params) throws MalformedURLException {
+        public URL getResourceUrl(ModProtectionConfig config, int attempt, String encodedModVersion, String resource, @Nullable ModProtectionContainer.CustomRepoParams params, boolean pre150Server) throws MalformedURLException {
             if (params != null) {
                 if (attempt == -1)
                     return new URL(MPS_URL_PATCHER.apply(params.getDomain()) + resource);
                 return new URL(params.getDomain().replace(getMainUrl(), getAuxUrls()[attempt]) + resource); //apply aux url
             }
             String mpsURL = (attempt > -1 ? getAuxUrls()[attempt] : getPatchedMainUrl());
-            return new URL(mpsURL + config.getMpsVersion() + "/router.php?mod_version=" + encodedModVersion + "&target=" + resource);
+            if (pre150Server)
+                return new URL(mpsURL + config.getMpsVersion() + "/router.php?mod_version=" + encodedModVersion + "&target=" + resource);
+            return new URL(mpsURL + "get/" + resource + "/" + encodedModVersion);
         }
     }
 }

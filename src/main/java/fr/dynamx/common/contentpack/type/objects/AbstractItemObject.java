@@ -40,24 +40,13 @@ public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A e
     @PackFileProperty(configNames = "Model", type = DefinitionType.DynamXDefinitionTypes.DYNX_RESOURCE_LOCATION, description = "common.model", defaultValue = "obj/name_of_vehicle/name_of_model.obj")
     protected ResourceLocation model;
 
-    /**
-     * @deprecated Replaced by {@link fr.dynamx.common.contentpack.type.ViewTransformsInfo}
-     */
     @Getter
     @PackFileProperty(configNames = "ItemScale", required = false, description = "common.itemscale", defaultValue = "0.9")
     protected float itemScale = getBaseItemScale();
-    /**
-     * @deprecated Replaced by {@link fr.dynamx.common.contentpack.type.ViewTransformsInfo}
-     */
     @Getter
-    @Deprecated
     @PackFileProperty(configNames = "ItemTranslate", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false, defaultValue = "0 0 0")
     protected Vector3f itemTranslate = null;
-    /**
-     * @deprecated Replaced by {@link fr.dynamx.common.contentpack.type.ViewTransformsInfo}
-     */
     @Getter
-    @Deprecated
     @PackFileProperty(configNames = "ItemRotate", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false, defaultValue = "0 0 0")
     protected Vector3f itemRotate = null;
 

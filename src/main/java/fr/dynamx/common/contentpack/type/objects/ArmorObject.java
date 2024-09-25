@@ -40,10 +40,6 @@ public class ArmorObject<T extends ArmorObject<?>> extends AbstractItemObject<T,
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("Textures".equals(key))
             return new IPackFilePropertyFixer.FixResult("MaterialVariants", true, true);
-        if ("ItemTranslate".equals(key))
-            return new IPackFilePropertyFixer.FixResult("ItemTransforms block", true, true);
-        if ("ItemRotate".equals(key))
-            return new IPackFilePropertyFixer.FixResult("ItemTransforms block", true, true);
         return null;
     };
 

@@ -1,9 +1,7 @@
 package fr.dynamx.common.contentpack.type.objects;
 
 import fr.dynamx.api.contentpack.object.IDynamXItem;
-import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
-import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.events.CreatePackItemEvent;
 import fr.dynamx.api.events.client.BuildSceneGraphEvent;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
@@ -20,15 +18,6 @@ import java.util.Collections;
 import java.util.List;
 
 public class ItemObject<T extends ItemObject<?>> extends AbstractItemObject<T, T> {
-    @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.ITEMS)
-    public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
-        if ("ItemTranslate".equals(key))
-            return new IPackFilePropertyFixer.FixResult("ItemTransforms block", true, true);
-        if ("ItemRotate".equals(key))
-            return new IPackFilePropertyFixer.FixResult("ItemTransforms block", true, true);
-        return null;
-    };
-
     @Getter
     @Setter
     @PackFileProperty(configNames = "MaxItemStackSize", required = false, defaultValue = "1")

@@ -9,7 +9,6 @@ import fr.dynamx.api.contentpack.registry.*;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.CreatePackItemEvent;
 import fr.dynamx.api.events.client.BuildSceneGraphEvent;
-import fr.dynamx.client.renders.scene.SceneBuilder;
 import fr.dynamx.client.renders.scene.node.EntityNode;
 import fr.dynamx.client.renders.scene.node.SceneNode;
 import fr.dynamx.common.contentpack.ContentPackLoader;
@@ -45,10 +44,6 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
             return new IPackFilePropertyFixer.FixResult("UseComplexCollisions", true);
         if ("Textures".equals(key))
             return new IPackFilePropertyFixer.FixResult("MaterialVariants", true, true);
-        if ("ItemTranslate".equals(key))
-            return new IPackFilePropertyFixer.FixResult("ItemTransforms block", true, true);
-        if ("ItemRotate".equals(key))
-            return new IPackFilePropertyFixer.FixResult("ItemTransforms block", true, true);
         return null;
     };
 

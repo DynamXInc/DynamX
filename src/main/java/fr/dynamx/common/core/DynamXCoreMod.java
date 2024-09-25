@@ -11,7 +11,9 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.launch.MixinBootstrap;
 import org.spongepowered.asm.mixin.Mixins;
 
+import javax.net.ssl.SSLContext;
 import java.io.File;
+import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 
 @IFMLLoadingPlugin.MCVersion("1.12.2")
@@ -42,10 +44,18 @@ public class DynamXCoreMod implements IFMLLoadingPlugin {
     public void injectData(Map<String, Object> data) {
         StatsBotCorePlugin.runtimeDeobfuscationEnabled = (Boolean) data.get("runtimeDeobfuscationEnabled");
         if (StatsBotCorePlugin.runtimeDeobfuscationEnabled) { //Production
-            if (DynamXConstants.DYNAMX_CERT != null || DynamXConstants.DYNAMX_AUX_CERT != null) // && SSLHelper.shouldInstallCert())
-                LibraryInstaller.installCertificates(LOG, DynamXConstants.DYNAMX_CERT, DynamXConstants.DYNAMX_AUX_CERT);
+            SSLContext sslContext;
+            if (DynamXConstants.DYNAMX_CERT != null || DynamXConstants.DYNAMX_AUX_CERT != null) { // && SSLHelper.shouldInstallCert())
+                sslContext = SSLHelper.createCustomSSLContext(DynamXConstants.DYNAMX_CERT, DynamXConstants.DYNAMX_AUX_CERT);
+            } else {
+                try {
+                    sslContext = SSLContext.getDefault();
+                } catch (NoSuchAlgorithmException e) {
+                    throw new RuntimeException("SSLContext error", e);
+                }
+            }
             LOG.info("Checking ACsGuis installation...");
-            if (!LibraryInstaller.loadACsGuis(LOG, new File("mods"), DynamXConstants.DEFAULT_ACSGUIS_VERSION)) {
+            if (!LibraryInstaller.loadACsGuis(LOG, sslContext, new File("mods"), DynamXConstants.DEFAULT_ACSGUIS_VERSION)) {
                 LOG.fatal("ACsGuis library cannot be found or installed !");
             }
         } else {

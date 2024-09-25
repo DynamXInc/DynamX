@@ -3,11 +3,12 @@ package fr.dynamx.utils.physics;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.system.JmeSystem;
 import com.jme3.system.Platform;
-import fr.aym.mps.utils.SSLHelper;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.LibraryInstaller;
 import net.minecraftforge.fml.common.ProgressManager;
 
+import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -95,6 +96,9 @@ public class NativeEngineInstaller {
 
     public static void download(ProgressManager.ProgressBar bar, URL from, File to) throws IOException {
         HttpURLConnection connection = (HttpURLConnection) from.openConnection();
+        if(connection instanceof HttpsURLConnection) {
+            ((HttpsURLConnection) connection).setSSLSocketFactory(LibraryInstaller.getDynamXSSLContext().getSocketFactory());
+        }
         // Adding some user agents
         //connection.addRequestProperty("User-Agent", "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.124 Safari/537.36");
         InputStream in = new BufferedInputStream(connection.getInputStream());

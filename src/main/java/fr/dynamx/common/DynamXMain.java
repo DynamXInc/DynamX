@@ -13,9 +13,9 @@ import fr.dynamx.common.capability.DynamXChunkDataStorage;
 import fr.dynamx.common.contentpack.AddonInfo;
 import fr.dynamx.common.contentpack.AddonLoader;
 import fr.dynamx.common.contentpack.ContentPackLoader;
-import fr.dynamx.common.entities.SeatEntity;
 import fr.dynamx.common.entities.PropsEntity;
 import fr.dynamx.common.entities.RagdollEntity;
+import fr.dynamx.common.entities.SeatEntity;
 import fr.dynamx.common.entities.vehicles.*;
 import fr.dynamx.common.handlers.DynamXGuiHandler;
 import fr.dynamx.common.items.tools.ItemRagdoll;
@@ -73,7 +73,9 @@ public class DynamXMain {
         ModProtectionService mps = ACsLib.getPlatform().provideService(ModProtectionService.class);
 
         mpsContainer = mps.createNewMpsContainer("DynamX models", new DynamXMpsConfig(), false);
-        mps.addCustomContainer(OLD_MPS_URL, mpsContainer); // Enables retro-compatibility with old packs
+        for (String oldMpsUrl : OLD_MPS_URLS) { // Enables retro-compatibility with old packs
+            mps.addCustomContainer(oldMpsUrl, mpsContainer);
+        }
 
         //Packs init
         resourcesDirectory = ContentPackLoader.init(event, mpsContainer, DynamXConstants.RES_DIR_NAME, event.getSide());

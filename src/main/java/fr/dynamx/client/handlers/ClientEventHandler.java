@@ -8,10 +8,7 @@ import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.client.ClientProxy;
 import fr.dynamx.client.camera.CameraSystem;
-import fr.dynamx.client.gui.ButtonSlider;
-import fr.dynamx.client.gui.GuiLoadingErrors;
-import fr.dynamx.client.gui.GuiTexturedButton;
-import fr.dynamx.client.gui.VehicleHud;
+import fr.dynamx.client.gui.*;
 import fr.dynamx.client.renders.RenderMovableLine;
 import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
 import fr.dynamx.common.DynamXContext;
@@ -62,6 +59,7 @@ import net.minecraftforge.client.event.sound.SoundLoadEvent;
 import net.minecraftforge.client.event.sound.SoundSetupEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.fml.client.CustomModLoadingErrorDisplayException;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -133,7 +131,14 @@ public class ClientEventHandler {
 
     /* Gui events */
 
-    //private static final ResourceLocation CRAFTING_TABLE_GUI_TEXTURES = new ResourceLocation("textures/gui/container/crafting_table.png");
+    @SubscribeEvent
+    public void guiOpenEvent(GuiOpenEvent event) {
+        if (event.getGui() instanceof GuiMainMenu && DynamXMain.memoizedLoadingError != null) {
+            DynamXMain.log.warn("Some errors occurred while loading DynamX content. Showing user a custom error screen.");
+            CustomModLoadingErrorDisplayException custom = DynamXMain.memoizedLoadingError.toCustomModLoadingErrorDisplayException("You can ignore this error but you may miss some 3D models.");
+            event.setGui(new GuiMpsLoadingError(custom, (GuiMainMenu) event.getGui()));
+        }
+    }
 
     @SubscribeEvent
     public void initMainMenu(GuiScreenEvent.InitGuiEvent.Post event) {
@@ -174,7 +179,7 @@ public class ClientEventHandler {
                     InteractivePart part = ((PackPhysicsEntity<?, ?>) MC.objectMouseOver.entityHit).getHitPart(MC.player);
                     if (part != null && part.canInteract(MC.objectMouseOver.entityHit, MC.player)) {
                         loc = part.getHudCursorTexture();
-                    } else if(MC.objectMouseOver.entityHit instanceof PropsEntity) {
+                    } else if (MC.objectMouseOver.entityHit instanceof PropsEntity) {
                         loc = new ResourceLocation(DynamXConstants.ID, "textures/focus.png");
                     }
                 } else if (MC.objectMouseOver.typeOfHit == RayTraceResult.Type.BLOCK) {

@@ -6,6 +6,7 @@ import fr.aym.acslib.api.services.ThreadedLoadingService;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.aym.acslib.api.services.mps.ModProtectionContainer;
 import fr.aym.acslib.api.services.mps.ModProtectionService;
+import fr.aym.mps.utils.UserErrorMessageException;
 import fr.dynamx.api.dxmodel.EnumDxModelFormats;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariableRegistry;
 import fr.dynamx.common.capability.DynamXChunkData;
@@ -63,6 +64,19 @@ public class DynamXMain {
 
     public static ModProtectionContainer mpsContainer;
 
+    /**
+     * An error that occurred during construction, to be thrown at pre-init <br>
+     * This is used to prevent the game from starting if a critical error occurred during construction <br>
+     * The error cannot be thrown during construction because some required Minecraft classes are not loaded yet
+     */
+    public static UserErrorMessageException memoizedConstructionError;
+    /**
+     * An error that occurred during loading, to be thrown at the end of loading <br>
+     * This error will be shown to the user at the end of the loading process <br>
+     * This error can be skipped by the user
+     */
+    public static UserErrorMessageException memoizedLoadingError;
+
     @EventHandler
     public void construction(FMLConstructionEvent event) {
         log.info(NAME + " version " + VERSION + " (pack loader version " + PACK_LOADER_VERSION.getVersionString() + ") is running, by Yanis and Aym'");
@@ -83,8 +97,17 @@ public class DynamXMain {
         bar.step("Init bullet");
         // Loading LibBullet
         // Needs to be done before protection setup, because of weird behaviors when downloading bullet and installing https certificates at the same time
-        if (!NativeEngineInstaller.loadLibbulletjme(resourcesDirectory, LIBBULLET_VERSION, "Release", "Sp", false))
-            throw new RuntimeException("Native physics engine cannot be found or installed !");
+        try {
+            NativeEngineInstaller.loadLibbulletjme(resourcesDirectory, LIBBULLET_VERSION, "Release", "Sp", false);
+        } catch (UserErrorMessageException e) {
+            log.fatal("Encountered error while loading libbulletjme. Cancelling DynamX loading and showing the error at pre-init.", e);
+            memoizedConstructionError = e;
+            while (bar.getStep() < 5) {
+                bar.step("Error");
+            }
+            ProgressManager.pop(bar);
+            return;
+        }
 
         //Telemetry
         if (false && event.getSide().isClient()) {
@@ -100,7 +123,12 @@ public class DynamXMain {
                 mpsContainer.setup("DynamX");
             } catch (Exception e) {
                 DynamXErrorManager.addError("DynamX initialization", DynamXErrorManager.INIT_ERRORS, "mps_error", ErrorLevel.FATAL, "MPS", null, e);
-                e.printStackTrace();
+                if (e instanceof UserErrorMessageException) {
+                    log.fatal("Encountered error while setting up MPS. Showing the error when Minecraft loading ends.", e);
+                    memoizedLoadingError = (UserErrorMessageException) e;
+                } else {
+                    log.fatal("Encountered error while setting up MPS.", e);
+                }
             }
         });
         loadingService.step(mps.getTaskEndHook());
@@ -116,6 +144,10 @@ public class DynamXMain {
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
+        if (memoizedConstructionError != null) {
+            log.warn("Construction error detected, throwing it now");
+            throw event.getSide().isClient() ? memoizedConstructionError.toCustomModLoadingErrorDisplayException(null) : memoizedConstructionError;
+        }
         /* Loading configuration file */
         DynamXConfig.load(event.getSuggestedConfigurationFile());
         DynamXContext.initNetwork();

@@ -3,15 +3,19 @@ package fr.dynamx.utils.physics;
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.system.JmeSystem;
 import com.jme3.system.Platform;
+import fr.aym.mps.utils.UserErrorMessageException;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.LibraryInstaller;
 import net.minecraftforge.fml.common.ProgressManager;
 
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLHandshakeException;
 import java.io.*;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.logging.Level;
 
 public class NativeEngineInstaller {
@@ -23,9 +27,8 @@ public class NativeEngineInstaller {
      * @param buildType  "Debug" or "Release"
      * @param flavor     "Sp" or "Dp"
      * @param isMt       Is multithreaded or not
-     * @return true after successful load, otherwise false
      */
-    public static boolean loadLibbulletjme(File directory, String jmeVersion, String buildType, String flavor, boolean isMt) {
+    public static void loadLibbulletjme(File directory, String jmeVersion, String buildType, String flavor, boolean isMt) throws UserErrorMessageException {
         assert buildType.equals("Debug") || buildType.equals("Release");
         assert flavor.equals("Sp") || flavor.equals("Dp");
 
@@ -68,35 +71,54 @@ public class NativeEngineInstaller {
             ProgressManager.ProgressBar bar = ProgressManager.push("Download native physics engine...", 101);
             try {
                 bar.step("Download physics engine...");
-                success = downloadJme(bar, file, platform + buildType + flavor + "_" + name, jmeVersion);
+                downloadJme(bar, file, platform + buildType + flavor + "_" + name, jmeVersion);
                 System.load(absoluteFilename);
+            } catch (ConnectException | UnknownHostException e) {
+                DynamXMain.log.fatal("Cannot connect to the server to download physics engine", e);
+                throw new UserErrorMessageException("Cannot connect to the server to download DynamX physics engine", e,
+                        "Cannot download the DynamX physics engine",
+                        "Cannot connect to the server, please check your internet connection and try again later",
+                        "Please also verify that you have the latest version of DynamX",
+                        "",
+                        "If needed, you can find help on DynamX's discord server");
+            } catch (SSLHandshakeException e) {
+                DynamXMain.log.fatal("SSL Handshake error while trying to download physics engine", e);
+                throw new UserErrorMessageException("SSL Handshake error while trying to download DynamX physics engine", e,
+                        "Cannot download the DynamX physics engine",
+                        "An SSL error occurred, please check your internet connection and try again later",
+                        "Please also ensure that you have the latest version of DynamX",
+                        "",
+                        "If needed, you can find help on DynamX's discord server");
             } catch (IOException e) {
                 DynamXMain.log.fatal("Cannot auto-download light bullet", e);
+                throw new UserErrorMessageException("Cannot auto-download DynamX physics engine", e,
+                        "Cannot download the DynamX physics engine",
+                        "An error occurred while trying to download the DynamX physics engine",
+                        "Please check your internet connection and try again later",
+                        "Please also ensure that you have the latest version of DynamX",
+                        "More information can be found in the log file.",
+                        "",
+                        "If needed, you can find help on DynamX's discord server");
+            } finally {
                 fillPercentBar(bar, bar.getStep(), bar.getSteps());
-                success = false;
+                ProgressManager.pop(bar);
             }
-            ProgressManager.pop(bar);
         }
-
-
         PhysicsRigidBody.logger2.setLevel(Level.OFF); // disable logging for physicsrigedbody to avoid spamming the console
-
-        return success;
     }
 
-    private static boolean downloadJme(ProgressManager.ProgressBar bar, File to, String name, String jmeVersion) throws IOException {
+    private static void downloadJme(ProgressManager.ProgressBar bar, File to, String name, String jmeVersion) throws IOException {
         DynamXMain.log.info("Installing lightbulletjme native physics engine...");
         bar.step("0%");
         URL url = new URL(DynamXConstants.LIBBULLET_BASE_URL + jmeVersion + "/" + name);
         download(bar, url, to);
         DynamXMain.log.info("Downloaded native physics engine from " + url + " to " + to);
         fillPercentBar(bar, bar.getStep(), bar.getSteps());
-        return true;
     }
 
     public static void download(ProgressManager.ProgressBar bar, URL from, File to) throws IOException {
         HttpURLConnection connection = (HttpURLConnection) from.openConnection();
-        if(connection instanceof HttpsURLConnection) {
+        if (connection instanceof HttpsURLConnection) {
             ((HttpsURLConnection) connection).setSSLSocketFactory(LibraryInstaller.getDynamXSSLContext().getSocketFactory());
         }
         // Adding some user agents

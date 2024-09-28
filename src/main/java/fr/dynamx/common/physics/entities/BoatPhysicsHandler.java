@@ -8,8 +8,6 @@ import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.Vector3fPool;
 
 public class BoatPhysicsHandler<T extends BoatEntity<?>> extends BaseVehiclePhysicsHandler<T> {
-
-
     public BoatPhysicsHandler(T entity) {
         super(entity);
     }

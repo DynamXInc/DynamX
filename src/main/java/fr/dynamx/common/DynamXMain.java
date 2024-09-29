@@ -40,6 +40,7 @@ import net.minecraftforge.fml.common.network.NetworkCheckHandler;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
 import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -146,7 +147,10 @@ public class DynamXMain {
     public void preInit(FMLPreInitializationEvent event) {
         if (memoizedConstructionError != null) {
             log.warn("Construction error detected, throwing it now");
-            throw event.getSide().isClient() ? memoizedConstructionError.toCustomModLoadingErrorDisplayException(null) : memoizedConstructionError;
+            if (event.getSide().isClient())
+                throwConstructionErrorClient();
+            else
+                throw memoizedConstructionError;
         }
         /* Loading configuration file */
         DynamXConfig.load(event.getSuggestedConfigurationFile());
@@ -234,6 +238,14 @@ public class DynamXMain {
             SynchronizedEntityVariableRegistry.sortRegistry(mods::containsKey);
         }
         return true;
+    }
+
+    /**
+     * Separated client method as {@link net.minecraftforge.fml.client.CustomModLoadingErrorDisplayException} is client-side only
+     */
+    @SideOnly(Side.CLIENT)
+    private void throwConstructionErrorClient() {
+        throw memoizedConstructionError.toCustomModLoadingErrorDisplayException(null);
     }
 }
 

@@ -30,10 +30,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumBlockRenderType;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.*;
 import net.minecraft.util.math.*;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -66,11 +63,10 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
      */
     public DynamXBlock(T blockObjectInfo) {
         super(blockObjectInfo.getMaterial());
-        this.blockObjectInfo = blockObjectInfo;
+        setInfo(blockObjectInfo);
         setCreativeTab(blockObjectInfo.getCreativeTab(DynamXItemRegistry.objectTab));
         textureNum = Math.min(16, blockObjectInfo.getMaxTextureMetadata());
         isDxModel = blockObjectInfo.isDxModel();
-        setLightLevel(blockObjectInfo.getLightLevel());
 
         initBlock(DynamXConstants.ID);
         setTranslationKey(DynamXConstants.ID + "." + blockObjectInfo.getFullName().toLowerCase());
@@ -292,6 +288,13 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
     @Override
     public void setInfo(T info) {
         blockObjectInfo = info;
+        setLightLevel(blockObjectInfo.getLightLevel());
+        setHardness(blockObjectInfo.getBlockHardness());
+        setResistance(blockObjectInfo.getBlockResistance());
+        setSoundType(blockObjectInfo.getSoundType());
+        if (!StringUtils.isNullOrEmpty(blockObjectInfo.getHarvestTool())) {
+            setHarvestLevel(blockObjectInfo.getHarvestTool(), blockObjectInfo.getHarvestLevel());
+        }
     }
 
     @Override

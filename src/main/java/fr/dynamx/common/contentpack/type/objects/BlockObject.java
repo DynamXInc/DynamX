@@ -24,6 +24,7 @@ import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import lombok.Getter;
 import lombok.Setter;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraftforge.common.MinecraftForge;
 
@@ -56,6 +57,26 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
     @PackFileProperty(configNames = "Material", required = false, defaultValue = "ROCK")
     @Getter
     protected Material material = Material.ROCK;
+
+    @PackFileProperty(configNames = {"BreakHardness", "Hardness"}, required = false, defaultValue = "0.6")
+    @Getter
+    protected float blockHardness = 0.6f;
+
+    @PackFileProperty(configNames = {"ExplosionResistance", "Resistance"}, required = false, defaultValue = "3")
+    @Getter
+    protected float blockResistance = 3;
+
+    @PackFileProperty(configNames = "SoundType", required = false, defaultValue = "STONE")
+    @Getter
+    protected SoundType soundType = SoundType.STONE;
+
+    @PackFileProperty(configNames = "HarvestTool", required = false)
+    @Getter
+    protected String harvestTool;
+
+    @PackFileProperty(configNames = "HarvestLevel", required = false, defaultValue = "0")
+    @Getter
+    protected int harvestLevel;
 
     /**
      * The light sources of this block

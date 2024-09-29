@@ -22,7 +22,6 @@ public class DynamXItem<T extends AbstractItemObject<?, ?>> extends Item impleme
         RegistryNameSetter.setRegistryName(this, DynamXConstants.ID, itemInfo.getFullName().toLowerCase());
         setTranslationKey(DynamXConstants.ID + "." + itemInfo.getFullName().toLowerCase());
         setCreativeTab(itemInfo.getCreativeTab(DynamXItemRegistry.objectTab));
-        setMaxStackSize(itemInfo.getMaxItemStackSize());
         DynamXItemRegistry.add(this);
     }
 
@@ -60,6 +59,7 @@ public class DynamXItem<T extends AbstractItemObject<?, ?>> extends Item impleme
 
     public void setInfo(T itemInfo) {
         this.itemInfo = itemInfo;
+        setMaxStackSize(itemInfo.getMaxItemStackSize());
     }
 
     @Override

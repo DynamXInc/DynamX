@@ -11,6 +11,7 @@ import fr.dynamx.utils.RegistryNameSetter;
 import fr.dynamx.utils.physics.DynamXPhysicsHelper;
 import fr.dynamx.utils.physics.EnumCollisionType;
 import lombok.Getter;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ResourceLocation;
@@ -235,7 +236,12 @@ public class DefinitionType<T> {
             Material[] materials = new Material[] {Material.AIR, Material.GRASS, Material.GROUND, Material.WOOD, Material.ROCK, Material.IRON, Material.ANVIL, Material.WATER, Material.LAVA, Material.LEAVES, Material.PLANTS, Material.VINE, Material.SPONGE, Material.CLOTH, Material.FIRE, Material.SAND, Material.CIRCUITS, Material.CARPET, Material.GLASS, Material.REDSTONE_LIGHT, Material.TNT, Material.CORAL, Material.ICE, Material.PACKED_ICE, Material.SNOW, Material.CRAFTED_SNOW, Material.CACTUS, Material.CLAY, Material.GOURD, Material.DRAGON_EGG, Material.PORTAL, Material.CAKE, Material.WEB, Material.PISTON, Material.BARRIER, Material.STRUCTURE_VOID};
             return materials[names.indexOf(s.toUpperCase())];
         }, "type.material")),
-        AXIS(new DefinitionType<>(DynamXPhysicsHelper.EnumPhysicsAxis.class, DynamXPhysicsHelper.EnumPhysicsAxis::fromString, "type.axis"));
+        AXIS(new DefinitionType<>(DynamXPhysicsHelper.EnumPhysicsAxis.class, DynamXPhysicsHelper.EnumPhysicsAxis::fromString, "type.axis")),
+        SOUND_TYPE(new DefinitionType<>(SoundType.class, (s) -> {
+            List<String> names = Arrays.asList("WOOD", "GROUND", "PLANT", "STONE", "METAL", "GLASS", "CLOTH", "SAND", "SNOW", "LADDER", "ANVIL", "SLIME", "WET_GRASS", "CORAL", "LEAVES", "BAMBOO", "BAMBOO_SAPLING", "SWEET_BERRY_BUSH");
+            SoundType[] soundTypes = new SoundType[] {SoundType.WOOD, SoundType.GROUND, SoundType.PLANT, SoundType.STONE, SoundType.METAL, SoundType.GLASS, SoundType.CLOTH, SoundType.SAND, SoundType.SNOW, SoundType.LADDER, SoundType.ANVIL, SoundType.SLIME};
+            return soundTypes[names.indexOf(s.toUpperCase())];
+        }, "type.sound_type"));
 
         public final DefinitionType<?> type;
 

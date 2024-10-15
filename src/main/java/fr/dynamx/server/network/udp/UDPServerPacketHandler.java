@@ -42,17 +42,25 @@ public class UDPServerPacketHandler {
     }
 
     private void handleAuthentication(InetSocketAddress address, DatagramPacket packet, ByteBuf in) {
-        final String hash = ByteBufUtils.readUTF8String(in);
-        final EntityPlayerMP player = this.server.waitingAuth.remove(hash);
+        try {
+            final String hash = ByteBufUtils.readUTF8String(in);
+            final EntityPlayerMP player = this.server.waitingAuth.remove(hash);
 
-        if (player != null) {
-            UDPClient client = new UDPClient(player, address, hash);
-            this.clientNetworkMap.put(client.socketAddress, client);
-            this.server.clientMap.put(player.getEntityId(), client);
-            DynamXMain.log.info(client + " has been authenticated by server.");
-            this.server.sendPacket(new UDPServerAuthenticationCompletePacket(), client);
-        } else
-            DynamXMain.log.warn("Cannot authenticate a client : not waiting for auth");
+            if (player != null) {
+                UDPClient client = new UDPClient(player, address, hash);
+                this.clientNetworkMap.put(client.socketAddress, client);
+                this.server.clientMap.put(player.getEntityId(), client);
+                DynamXMain.log.info(client + " has been authenticated by server.");
+                this.server.sendPacket(new UDPServerAuthenticationCompletePacket(), client);
+            } else {
+                DynamXMain.log.warn("Cannot authenticate a client : not waiting for auth");
+            }
+        } catch (Exception e) {
+            if(DynamXConfig.udpDebug) {
+                throw e;
+            }
+            // Else just ignore, it may be a bad packet, or an intentional attack
+        }
     }
 
     public void read(byte[] data, final DatagramPacket packet) {

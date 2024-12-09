@@ -1,5 +1,7 @@
 package fr.dynamx.client.renders.scene.node;
 
+import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
+import fr.dynamx.client.renders.model.renderer.GltfModelRenderer;
 import fr.dynamx.client.renders.scene.BaseRenderContext;
 import fr.dynamx.common.contentpack.type.objects.ItemObject;
 import lombok.Getter;
@@ -36,6 +38,11 @@ public class ItemNode<A extends ItemObject<?>> extends AbstractItemNode<BaseRend
 
     @Override
     public void renderItemModel(BaseRenderContext.ItemRenderContext context, A packInfo, Matrix4f transform) {
+        //Rendering the model
+        DxModelRenderer model = context.getModel();
+        if (model instanceof GltfModelRenderer) {
+            ((GltfModelRenderer) model).resetModel(1);
+        }
         super.renderItemModel(context, packInfo, transform);
         //Render the linked children
         if (!linkedChildren.isEmpty()) {

@@ -58,7 +58,7 @@ public class BlockNode<A extends BlockObject<?>> extends AbstractItemNode<BaseRe
             applyTransform(te, context.getRenderPosition());
 
             //Rendering the model
-            DxModelRenderer model = DynamXContext.getDxModelRegistry().getModel(te.getPackInfo().getModel());
+            DxModelRenderer model = context.getModel();
             if (model instanceof GltfModelRenderer) {
                 te.getAnimator().update((GltfModelRenderer) model, context.getPartialTicks());
 

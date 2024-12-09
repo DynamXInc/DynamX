@@ -34,27 +34,7 @@ public class DxAnimation {
     //public float currentTime = 0;
     public float finalTime = 100;
 
-
-    /*public void updateTimer(DxAnimator animator, boolean shouldLoop, float endTime, float deltaTime) {
-        if (currentTime > (endTime - (finalTime / 20)) && !shouldLoop && isPlaying) {
-            isPlaying = false;
-            currentTime = endTime - (finalTime / 20);
-        } else if (currentTime >= endTime && !shouldLoop) {
-            hasEnded = true;
-            if (animator != null) {
-                animator.animationQueue.poll();
-            }
-        } else {
-            if (currentTime < (endTime - (finalTime / 20))) {
-                isPlaying = true;
-            }
-            hasEnded = false;
-            currentTime += deltaTime;
-            if (animator != null) {
-                animator.isAnimationPlaying = true;
-            }
-        }
-    }*/
+    private final DxAnimation.Timer timer = new DxAnimation.Timer();
 
     boolean allTimerEnder;
     InterpolatedChannel.TransformType update = null;
@@ -64,52 +44,62 @@ public class DxAnimation {
         float worldTime = Animation.getWorldTime(Minecraft.getMinecraft().world, partialTicks);
         float tmpDeltaTime = 0;
         if (allTimerEnder) {
-            channels.forEach(channel -> {
-                channel.timer.timerEnded = false;
-                channel.timer.shouldPlayFinalTransition = false;
-                channel.timer.currentTime = 0;
-            });
+            timer.timerEnded = false;
+            timer.shouldPlayFinalTransition = false;
+            timer.currentTime = 0;
             if (animator != null) {
                 animator.isAnimationPlaying = false;
                 animator.animationQueue.poll();
             }
             isPlaying = false;
+            //System.out.println("END CONFIRMED");
+            for (InterpolatedChannel channel : channels) {
+                update = channel.update(0);
+                GltfModelRenderer.Transform transform = modelRenderer.initialNodeTransforms.get(channel.nodeModel);
+                if (update != null)
+                    modelRenderer.resetNodeModel(channel.nodeModel, transform, 1);
+            }
             return;
         }
-        for (InterpolatedChannel channel : channels) {
-            float endTime = getEndTime(channel) + (finalTime / 20);
-            Timer timer = channel.timer;
-            if (timer.timerEnded) {
-                allTimerEnder = true;
-                continue;
-            }
+        if (timer.timerEnded) {
+            //System.out.println("ANIM END");
+            allTimerEnder = true;
+        } else {
             allTimerEnder = false;
+        }
+       // System.out.println("===== FRAME =====");
+        float endTime = getEndTime(channels.get(0));// + (finalTime / 20);
+        //System.out.println("Animation: " + name + " - " + timer.currentTime + " - " + endTime + " " + finalTime + " " + worldTime + " " + (worldTime % endTime));
+        tmpDeltaTime = 0.01f; // todo use DxAnimation.time_step ?
+        timer.updateTimer(animator, this, endTime, tmpDeltaTime);
+        for (InterpolatedChannel channel : channels) {
             isPlaying = true;
-            timer.updateTimer(animator, this, endTime, tmpDeltaTime);
             if (shouldLoop) {
-                channel.update(worldTime % endTime);
+                channel.update(timer.currentTime);//worldTime % endTime);
             } else {
                 if (!timer.shouldPlayFinalTransition) {
-                    update = channel.update(Math.min(timer.currentTime, endTime - (finalTime / 20)));
+                    update = channel.update(timer.currentTime);//Math.min(timer.currentTime, endTime - (finalTime / 20)));
+                    if (update != null)
+                        modelRenderer.blendInitialPose(channel.nodeModel, update.copiedValues, update.type, 1);
                 }
-                if ((animator.getBlendPose().equals(DxAnimator.EnumBlendPose.START)
+                /*if ((animator.getBlendPose().equals(DxAnimator.EnumBlendPose.START)
                         || animator.getBlendPose().equals(DxAnimator.EnumBlendPose.START_END)
                         || animator.getBlendPose().equals(DxAnimator.EnumBlendPose.END))) {
                     if (!timer.shouldPlayFinalTransition && (animType.equals(EnumAnimType.START) || animType.equals(EnumAnimType.START_END))) {
                         tmpDeltaTime = partialTicks / (endTime - (finalTime / 20));
                         if (update != null) {
-                            System.out.println(timer.currentTime);
-
-                            modelRenderer.blendInitialPose(channel.nodeModel, update.copiedValues, update.type, timer.currentTime / 100);
+                            //System.out.println(timer.currentTime);
+                            System.out.println("Channel " + channel.nodeModel.getName() + " end");
+                            modelRenderer.blendInitialPose(channel.nodeModel, update.copiedValues, update.type, 0);
                         }
                     }
                     if (timer.shouldPlayFinalTransition && (animType.equals(EnumAnimType.END) || animType.equals(EnumAnimType.START_END))) {
                         tmpDeltaTime = partialTicks / (finalTime);
                         GltfModelRenderer.Transform transform = modelRenderer.initialNodeTransforms.get(channel.nodeModel);
-                        float delta = (timer.currentTime - (endTime - (finalTime / 20))) / (finalTime / 20);
+                        float delta = (timer.currentTime);//todo - (endTime - (finalTime / 20))) / (finalTime / 20);
                         modelRenderer.resetNodeModel(channel.nodeModel, transform, delta);
                     }
-                }
+                }*/
             }
 
         }
@@ -117,6 +107,10 @@ public class DxAnimation {
     }
 
     public void resetAnimation() {
+      //  System.out.println("RESANIM " + this.name);
+        timer.timerEnded = false;
+        timer.shouldPlayFinalTransition = false;
+        timer.currentTime = 0;
         for (InterpolatedChannel channel : channels) {
             channel.update(0);
         }
@@ -125,7 +119,6 @@ public class DxAnimation {
     public void resetModel(GltfModelRenderer gltfModelRenderer, float partialTicks) {
         gltfModelRenderer.resetModel(partialTicks);
     }
-
 
     public float getStartTime(InterpolatedChannel channel) {
         return channel.getKeys()[0];
@@ -161,9 +154,9 @@ public class DxAnimation {
 
 
         public void updateTimer(DxAnimator animator, DxAnimation animation, float endTime, float deltaTime) {
-            if (!shouldPlayFinalTransition && currentTime < endTime - (animation.finalTime / 20)) {
+            if (!shouldPlayFinalTransition && currentTime < endTime) {// - (animation.finalTime / 20)) {
                 currentTime += deltaTime;
-            } else if (currentTime >= endTime - (animation.finalTime / 20)) {
+            } else if (currentTime >= endTime) {// - (animation.finalTime / 20)) {
                 shouldPlayFinalTransition = true;
             }
             if (shouldPlayFinalTransition && currentTime < endTime) {
@@ -171,7 +164,6 @@ public class DxAnimation {
             } else if (currentTime >= endTime) {
                 timerEnded = true;
             }
-
         }
     }
 }

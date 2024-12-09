@@ -9,6 +9,11 @@ import fr.dynamx.api.contentpack.object.render.IModelPackObject;
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.events.DynamXBlockEvent;
+import fr.dynamx.client.renders.animations.DxAnimation;
+import fr.dynamx.client.renders.animations.DxAnimator;
+import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
+import fr.dynamx.client.renders.model.renderer.GltfModelRenderer;
+import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.capability.DynamXChunkData;
 import fr.dynamx.common.capability.DynamXChunkDataProvider;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
@@ -167,9 +172,10 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
 
     @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-        if (worldIn.isRemote && !playerIn.isSneaking()) {
+        /*if (worldIn.isRemote && !playerIn.isSneaking()) {
+                        //TODO wip animation
             return false;
-        }
+        }*/
         TileEntity te = worldIn.getTileEntity(pos);
         if (te instanceof TEDynamXBlock) {
             //TODO ADD INTERACT EVENTS
@@ -177,23 +183,29 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
             InteractivePart<IDynamXObject, ?> hitPart = (InteractivePart<IDynamXObject, ?>) ((TEDynamXBlock) te).getHitPart(playerIn);
             if (hitPart == null || !hitPart.canInteract((IDynamXObject) te, playerIn)) {
                 // If there's no hit/can't interact, try to open the customization gui
-                if (playerIn.isSneaking() && playerIn.capabilities.isCreativeMode) {
-                    if (worldIn.isRemote && isDxModel)
+                        //TODO wip animation
+                if (/*playerIn.isSneaking() && */worldIn.isRemote && playerIn.capabilities.isCreativeMode) {
+                    /*if (worldIn.isRemote && isDxModel)
                         ((TEDynamXBlock) te).openConfigGui();
-                    return true;
-                    /*
-                    //TODO animations
+                    return true;*/
                     if (te instanceof TEDynamXBlock && hand.equals(EnumHand.MAIN_HAND)) {
                         DxAnimator animator = ((TEDynamXBlock) te).getAnimator();
                         if (playerIn.isSneaking()) {
-                            DxModelRenderer model = DynamXContext.getDxModelRegistry().getModel(blockObjectInfo.getModel());
-                            animator.playNextAnimation();
-                            //te.getAnimator().addAnimation("Reset");
-                            return true;
+                            animator.setBlendPose(DxAnimator.EnumBlendPose.START_END);
+                            animator.addAnimation("Run1", DxAnimation.EnumAnimType.START_END);
+                            animator.addAnimation("jumpattack_broadcast.001", DxAnimation.EnumAnimType.START_END);
+                            animator.addAnimation("jumpattack_broadcast.002", DxAnimation.EnumAnimType.START_END);
+                            animator.addAnimation("testDeploy_A", DxAnimation.EnumAnimType.START_END);
+                            animator.addAnimation("testDeploy_C", DxAnimation.EnumAnimType.START_END);
                         }
-                        animator.setBlendPose(DxAnimator.EnumBlendPose.START_END);
-                        animator.addAnimation("Run1", DxAnimation.EnumAnimType.START_END);
-                    }*/
+                        DxModelRenderer model = DynamXContext.getDxModelRegistry().getModel(blockObjectInfo.getModel());
+                        DxAnimation anim = animator.getPlayingAnimation();
+                        if (anim != null)
+                            anim.resetModel((GltfModelRenderer) model, 0);
+                        animator.playNextAnimation();
+                        //animator.addAnimation("Idle01", DxAnimation.EnumAnimType.START_END);
+                        return true;
+                    }
                 }
                 return false;
             }

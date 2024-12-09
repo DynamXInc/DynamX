@@ -56,8 +56,6 @@ public class DxAnimator {
      */
     public void update(GltfModelRenderer modelRenderer, float partialTicks) {
         if (shouldPause) return;
-
-
         if (animationQueue.isEmpty()) {
             if (modelRenderer.animation != null) {
                 /*modelRenderer.animation.resetAnimation();
@@ -65,12 +63,13 @@ public class DxAnimator {
                 modelRenderer.animation = null;*/
             }
             isAnimationPlaying = false;
+            modelRenderer.resetModel(1);
             return;
         }
 
         //System.out.println(animationQueue);
         DxAnimation currentAnimation = animationQueue.peek();
-        currentAnimation.playAnimation(modelRenderer,this, partialTicks);
+        currentAnimation.playAnimation(modelRenderer, this, partialTicks);
     }
 
     /**
@@ -99,7 +98,9 @@ public class DxAnimator {
      * Plays the next animation in the queue
      */
     public void playNextAnimation() {
-        animationQueue.poll();
+        if (!animationQueue.isEmpty()) {
+            animationQueue.poll().resetAnimation();
+        }
     }
 
     /**
@@ -110,7 +111,7 @@ public class DxAnimator {
         return animationQueue.peek();
     }
 
-    public enum EnumBlendPose{
+    public enum EnumBlendPose {
         NONE, START, END, START_END
     }
 

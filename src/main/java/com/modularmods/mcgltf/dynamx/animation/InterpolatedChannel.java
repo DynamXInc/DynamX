@@ -14,8 +14,6 @@ public abstract class InterpolatedChannel {
 	protected final float[] timesS;
 
 	public NodeModel nodeModel;
-
-	public DxAnimation.Timer timer = new DxAnimation.Timer();
 	
 	public InterpolatedChannel(float[] timesS, NodeModel nodeModel) {
 		this.timesS = timesS;

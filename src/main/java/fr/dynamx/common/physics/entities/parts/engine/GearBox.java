@@ -1,11 +1,15 @@
 package fr.dynamx.common.physics.entities.parts.engine;
 
+import com.jme3.math.Vector3f;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.utils.DynamXConfig;
+import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.maths.DynamXMath;
-import lombok.AllArgsConstructor;
+import fr.dynamx.utils.optimization.Vector3fPool;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import net.minecraft.util.math.MathHelper;
 
 public class GearBox {
     /**
@@ -21,18 +25,18 @@ public class GearBox {
         this.gears = new GearData[gearCount];
 
         for (int i = 0; i < gearCount; i++) {
-            this.gears[i] = new GearData(0, 0, 0, 0);
+            this.gears[i] = new GearData();
         }
     }
 
-    public void setGear(int gearNum, float start, float end, float rpmStart, float rpmEnd) {
-
+    public void setGear(float maxRPM, int gearNum, float start, float end, float rpmStart, float rpmEnd, float gearRatio) {
         GearData gear = this.gears[gearNum];
-
         gear.setStart(start);
         gear.setEnd(end);
-        gear.setRpmStart(rpmStart);
-        gear.setRpmEnd(rpmEnd);
+        gear.setRpmStart(rpmStart / maxRPM);
+        gear.setRpmEnd(rpmEnd / maxRPM);
+        gear.setGearRatio(gearRatio);
+        gear.setGearChangeThreshold(100 / maxRPM);
     }
 
     public GearData getActiveGear() {
@@ -101,21 +105,37 @@ public class GearBox {
         return getActiveGearNum() == 0 ? 0 : DynamXConfig.gearChangeDelay;
     }
 
-    public float getRPM(Engine engine, float speed) {
+    public float getRPM(BaseVehiclePhysicsHandler<?> vehicle, Engine engine, float speed) {
+        //TODO WORK HERE
         GearData gear = getActiveGear();
         float revs = DynamXMath.normalize(speed, gear.getStart(), gear.getEnd());
-        revs *= (gear.getRpmEnd() - gear.getRpmStart()) / engine.getMaxRevs();
-        revs += gear.getRpmStart() / engine.getMaxRevs(); //on ajoute les tours moteurs minimaux (irl si on tombe dessous on cale donc avec une boite auto pas possible)
+        revs = MathHelper.clamp(revs, 0, 1);
+        revs *= (gear.getRpmEnd() - gear.getRpmStart());
+        revs += gear.getRpmStart(); //on ajoute les tours moteurs minimaux (irl si on tombe dessous on cale donc avec une boite auto pas possible)
+
+        Vector3f rotatedForwardDirection = Vector3fPool.get();
+        rotatedForwardDirection = vehicle.getRotation().mult(DynamXGeometry.FORWARD_DIRECTION, rotatedForwardDirection);
+        float rotationPitch = DynamXGeometry.getPitchFromRotationVector(rotatedForwardDirection) % 360;
+        rotationPitch = (float) (rotationPitch * Math.PI / 180);
+        float requiredTorque = (float) -(vehicle.getCollisionObject().getMass() * vehicle.getCollisionObject().getGravity(Vector3fPool.get()).y * Math.sin(rotationPitch));
+        requiredTorque = requiredTorque;
+        float currentTorque = engine.getTorqueOutput(gear, revs);
+        float loadFactor = requiredTorque / currentTorque;
+        System.out.println("LOD " + loadFactor + " " + requiredTorque + "/" + currentTorque + " // " + rotationPitch + " RPM " + engine.getRevs() + " " + revs);
+        if(loadFactor > 1) {
+            float adjust = 0.1f;
+            revs = revs + (loadFactor - 1) * adjust;
+        }
         return revs;
     }
 
-    @AllArgsConstructor
-    public static class GearData{
-        @Getter
-        @Setter
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class GearData {
         private float start, end;
-        @Getter
-        @Setter
         private float rpmStart, rpmEnd;
+        private float gearChangeThreshold;
+        private float gearRatio;
     }
 }

@@ -3,7 +3,6 @@ package fr.dynamx.common.physics.entities.parts.engine;
 import com.jme3.math.Vector3f;
 import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.contentpack.type.vehicle.BaseEngineInfo;
-import fr.dynamx.common.contentpack.type.vehicle.CarEngineInfo;
 import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.maths.LinearSpline;
 import lombok.Getter;
@@ -13,13 +12,23 @@ import lombok.Setter;
  * A simple engine with a power, a power graph, revs, and engine braking.
  */
 public class Engine {
-
     /**
-     * The total power of the engine. This will be distributed to the propellant(s).
+     * The engine config type, using either a torque curve or a power curve
+     */
+    @Setter
+    @Getter
+    private BaseEngineInfo.EngineConfigType configType;
+    /**
+     * The maximum capacity of the engine. The nature of it depends on the configType. <br>
+     * <ul>
+     *     <li>For EngineConfigType.POWER, it's the maximum power of the engine.</li>
+     *     <li>For EngineConfigType.TORQUE, it's the maximum torque of the engine.</li>
+     * </ul>
+     * T
      */
     @Getter
     @Setter
-    private float power;
+    private float maxCapacity;
 
     /**
      * Revolutions in a 0 - 1 range.
@@ -46,7 +55,10 @@ public class Engine {
     @Setter
     private boolean started;
 
-    private final LinearSpline powerGraph;
+    /**
+     * Can be either the torque graph, or the power graph of the engine, depending on the configType.
+     */
+    private final LinearSpline engineGraph;
 
     /**
      * Defines an engine
@@ -54,29 +66,32 @@ public class Engine {
      * @param engineInfo The engine info, loaded from the {@link ContentPackLoader}
      */
     public Engine(BaseEngineInfo engineInfo) {
-        power = engineInfo.getPower();
+        configType = engineInfo.getConfigType();
+        maxCapacity = configType == BaseEngineInfo.EngineConfigType.POWER ? engineInfo.getMaxPower() : engineInfo.getMaxTorque();
         maxRevs = engineInfo.getMaxRevs();
         braking = engineInfo.getBraking();
-
-        powerGraph = new LinearSpline(engineInfo.points);
+        engineGraph = new LinearSpline(engineInfo.points);
     }
 
     /**
-     * Gets the power output at the current RPM.
-     * This is essentially the "power graph" of the engine.
+     * Gets the torque output at the current RPM.
+     * This configType EngineConfigType.POWER, this is essentially the "power graph" of the engine.
      *
-     * @return the power of the engine at the current RPM.
+     * @return the torque of the engine at the current RPM.
      */
-    public float getPowerOutputAtRevs() {
-        if (powerGraph == null) {
+    public float getTorqueOutput(GearBox.GearData currentGear, float rpm) {
+        if (engineGraph == null) {
             return 0;
         }
-        float revs = getRevs() * getMaxRevs();
-       // System.out.println("Revs: " +revs + " MaxRevs: " + getMaxRevs()+" "+evaluateSpline(powerGraph, getRevs() * getMaxRevs()));
+        float revs = rpm * getMaxRevs();
         revs = DynamXMath.clamp(revs, 0, getMaxRevs() - 0.01f);
-        float power = evaluateSpline(powerGraph, revs);
-        return power * getPower();
-
+        if (configType == BaseEngineInfo.EngineConfigType.POWER) {
+            float power = evaluateSpline(engineGraph, revs);
+            return power * getMaxCapacity() * 2;
+        } else { // TORQUE
+            float power = evaluateSpline(engineGraph, revs);
+            return power * getMaxCapacity() * currentGear.getGearRatio();
+        }
     }
 
     /**

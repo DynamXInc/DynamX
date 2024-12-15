@@ -2,6 +2,7 @@ package fr.dynamx.common.physics.entities.parts.engine;
 
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.modules.engines.BoatPropellerModule;
+import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.common.physics.entities.BoatPhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.EnginePhysicsHandler;
 import fr.dynamx.common.physics.entities.modules.WheelsPhysicsHandler;
@@ -17,67 +18,68 @@ public abstract class AutomaticGearboxHandler {
     private final GearBox gearBox;
     private float targetRPM;
 
-    public void update(float currentAcceleration) {
+    public void update(BaseVehiclePhysicsHandler<?> vehicle, float currentAcceleration) {
         if (gearBox == null)
             return;
-        if (engine.isStarted()) {
-            float revs = engine.getRevs() * engine.getMaxRevs();
-            GearBox.GearData gear = gearBox.getActiveGear();
-            boolean gearChanged = false;
-            int changeCounter = gearBox.updateGearChangeCounter();
-            int oldGear = gearBox.getActiveGearNum();
-            if (changeCounter <= 2) {
-                if (revs > gear.getRpmEnd() - 100) //Sur-régime : on passe la vitesse supérieure
-                {
-                    gearChanged = gearBox.increaseGear();
-                } else if (revs < gear.getRpmStart() + 100) //Sous-régime : on diminue la vitesse
-                {
-                    gearChanged = gearBox.decreaseGear();
-                }
-            }
-            if (gearBox.getActiveGearNum() == 0 && currentAcceleration != 0) //Accération en étant au point mort : on passe la première
-            {
-                gearBox.setActiveGearNum(currentAcceleration > 0 ? 1 : -1);
-                gearChanged = false;
-            } else if (setNeutralWhenNotAccelerating() && currentAcceleration == 0 && gearBox.getActiveGearNum() != 0) //On accélère pas : on passe au point mort
-            {
-                gearBox.setActiveGearNum(0);
-                gearChanged = true;
-            }
-            if (gearBox.getActiveGearNum() != 0) //une vitesse est passée, on get les rpm correspondant à la vitesse, dans la gamme de rpm "autorisés"
-            {
-                float vehicleSpeed = getVehicleSpeed();
-                if (gearChanged && oldGear != 0) {
-                    revs = engine.getRevs();
-                    targetRPM = gearBox.getRPM(engine, vehicleSpeed);
-                    targetRPM = DynamXMath.clamp(targetRPM, 0, 1);
-                } else if (changeCounter > 0) {
-                    //targetRPM = gearBox.getRPM(engine, vehicle.getSpeed(Vehicle.SpeedUnit.KMH));
-                    //targetRPM = DynamXMath.clamp(targetRPM, 0, 1);
-
-                    revs = engine.getRevs();
-                    float drev = targetRPM - revs;
-                    drev /= gearBox.getGearChangeTime();
-                    revs = revs + drev;
-                } else {
-                    revs = gearBox.getRPM(engine, vehicleSpeed);
-                    revs = DynamXMath.clamp(revs, 0, 1);
-                }
-            } else {
-                targetRPM = gearBox.getActiveGear().getRpmStart() / engine.getMaxRevs();
-                revs = engine.getRevs();
-                if (revs != targetRPM) {
-                    float drev = targetRPM - revs;
-                    drev /= DynamXConfig.gearChangeDelay; //Interpolation : take some ticks to come back to required speed
-                    revs = revs + drev;
-                }
-            }
-            revs = DynamXMath.clamp(revs, 0, 1);
-            engine.setRevs(revs);
-        } else {
+        if (!engine.isStarted()) {
             gearBox.setActiveGearNum(0);
             engine.setRevs(0);
+            return;
         }
+        float revs = engine.getRevs();
+        GearBox.GearData gear = gearBox.getActiveGear();
+        boolean gearChanged = false;
+        int changeCounter = gearBox.updateGearChangeCounter();
+        int oldGear = gearBox.getActiveGearNum();
+        //TODO GEAR CHANGE DISABLED TEMPORARILY
+        if (changeCounter <= 2 && false) {
+            if (revs > gear.getRpmEnd() - gear.getGearChangeThreshold()) //Sur-régime : on passe la vitesse supérieure
+            {
+                gearChanged = gearBox.increaseGear();
+            } else if (revs < gear.getRpmStart() + gear.getGearChangeThreshold()) //Sous-régime : on diminue la vitesse
+            {
+                gearChanged = gearBox.decreaseGear();
+            }
+        }
+        if (gearBox.getActiveGearNum() == 0 && currentAcceleration != 0) //Accération en étant au point mort : on passe la première
+        {
+            gearBox.setActiveGearNum(currentAcceleration > 0 ? 1 : -1);
+            gearChanged = false;
+        } else if (setNeutralWhenNotAccelerating() && currentAcceleration == 0 && gearBox.getActiveGearNum() != 0) //On accélère pas : on passe au point mort
+        {
+            gearBox.setActiveGearNum(0);
+            gearChanged = true;
+        }
+        if (gearBox.getActiveGearNum() != 0) //une vitesse est passée, on get les rpm correspondant à la vitesse, dans la gamme de rpm "autorisés"
+        {
+            float vehicleSpeed = getVehicleSpeed();
+            if (gearChanged && oldGear != 0) {
+                revs = engine.getRevs();
+                targetRPM = gearBox.getRPM(vehicle, engine, vehicleSpeed);
+                targetRPM = DynamXMath.clamp(targetRPM, 0, 1);
+            } else if (changeCounter > 0) {
+                //targetRPM = gearBox.getRPM(engine, vehicle.getSpeed(Vehicle.SpeedUnit.KMH));
+                //targetRPM = DynamXMath.clamp(targetRPM, 0, 1);
+
+                revs = engine.getRevs();
+                float drev = targetRPM - revs;
+                drev /= gearBox.getGearChangeTime();
+                revs = revs + drev;
+            } else {
+                revs = gearBox.getRPM(vehicle, engine, vehicleSpeed);
+                revs = DynamXMath.clamp(revs, 0, 1);
+            }
+        } else {
+            targetRPM = gearBox.getActiveGear().getRpmStart();
+            revs = engine.getRevs();
+            if (revs != targetRPM) {
+                float drev = targetRPM - revs;
+                drev /= DynamXConfig.gearChangeDelay; //Interpolation : take some ticks to come back to required speed
+                revs = revs + drev;
+            }
+        }
+        revs = DynamXMath.clamp(revs, 0, 1);
+        engine.setRevs(revs);
     }
 
     protected boolean setNeutralWhenNotAccelerating() {

@@ -107,14 +107,12 @@ public class SynchronizedEntityVariableRegistry {
      */
     public static void sortRegistry(Predicate<String> useMod) {
         DynamXMain.log.debug("Sorting SynchronizedVariables registry ids...");
-        System.out.println("Sorting registry using " + classToMod);
         List<String> buff = new ArrayList<>();
         for (Class<?> res : baseSyncVarRegistry.keySet()) {
             if (useMod.test(classToMod.get(res))) {
-                System.out.println("Accepted " + res + " " + classToMod.get(res));
                 buff.addAll(baseSyncVarRegistry.get(res));
             } else {
-                System.out.println("Rejected " + res + " " + classToMod.get(res));
+                DynamXMain.log.debug("Rejected " + res + " " + classToMod.get(res));
             }
         }
         buff.sort(Comparator.comparing(String::toString)); //Unique sorting
@@ -126,15 +124,10 @@ public class SynchronizedEntityVariableRegistry {
             syncVarRegistry.put(res, index);
             serializerMap.put(index, findSerializer(res));
         }
-        System.out.println("Finalized registry state: " + syncVarRegistry);
-        System.out.println("Finalized base registry state: " + baseSyncVarRegistry);
     }
 
     @SneakyThrows
     public static void addVarsOf(PhysicsEntitySynchronizer<?> synchronizer, Object instance) {
-        System.out.println("Adding vars of " + instance);
-        System.out.println("Registry state: " + syncVarRegistry);
-        System.out.println("Base registry state: " + baseSyncVarRegistry);
         Class<?> clazz = instance.getClass();
         while (clazz != null) {
             if (baseSyncVarRegistry.containsKey(clazz)) {

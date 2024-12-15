@@ -19,8 +19,15 @@ public class BaseEngineInfo extends SubInfoTypeOwner<BaseEngineInfo> implements 
     private final String engineName;
 
     @Getter
-    @PackFileProperty(configNames = "Power")
-    private float power;
+    private EngineConfigType configType;
+
+    @Getter
+    @PackFileProperty(configNames = {"MaxPower", "Power"}, required = false)
+    private float maxPower = -1;
+    @Getter
+    @PackFileProperty(configNames = "MaxTorque", required = false)
+    private float maxTorque = -1;
+
     @Getter
     @PackFileProperty(configNames = "MaxRPM")
     private float maxRevs;
@@ -40,7 +47,12 @@ public class BaseEngineInfo extends SubInfoTypeOwner<BaseEngineInfo> implements 
         this.engineName = name;
     }
 
-    void addPoint(RPMPower rpmPower) {
+    protected void addPoint(EngineConfigType engineConfigType, RPMPower rpmPower) {
+        if (configType == null) {
+            configType = engineConfigType;
+        } else if (configType != engineConfigType) {
+            throw new IllegalArgumentException("Mismatching RPMPoint types ! The first one is " + configType + ". The current one is " + engineConfigType);
+        }
         points.add(rpmPower.getRpmPower());
     }
 
@@ -61,17 +73,33 @@ public class BaseEngineInfo extends SubInfoTypeOwner<BaseEngineInfo> implements 
 
     @Override
     public void appendTo(ModularVehicleInfo owner) {
-        float max = 0;
+        Vector3f max = new Vector3f(0, 0, 0);
         for (Vector3f power : points) {
-            if (power.x > max)
-                max = power.x;
+            // rpm test
+            if (power.x > max.x)
+                max.x = power.x;
+            // hp/torque test
+            if (power.y > max.y) {
+                max.y = power.y;
+                max.z = power.x; // rpm at which the hp/torque is maxed
+            }
         }
-        if (max < maxRevs)
+        if (max.x < maxRevs)
             throw new IllegalArgumentException("Engine's MaxRPM must be lower or equal to the bigger point's RPM");
-
+        if (configType == EngineConfigType.TORQUE && maxTorque == -1) {
+            throw new IllegalArgumentException("Engine's MaxTorque must be set when using a torque curve");
+        } else if (configType == EngineConfigType.POWER && maxPower == -1) {
+            throw new IllegalArgumentException("Engine's MaxPower must be set when using a power curve");
+        }
         //Fix bug : engine duplicated when using pack sync option
         owner.getSubProperties().removeIf(p -> p.getFullName().equals(getFullName()));
         owner.addSubProperty(this);
+    }
+
+    @Nullable
+    @Override
+    public ModularVehicleInfo getOwner() {
+        return null;
     }
 
     @Override
@@ -100,13 +128,18 @@ public class BaseEngineInfo extends SubInfoTypeOwner<BaseEngineInfo> implements 
         }
     }
 
-    @Nullable
-    @Override
-    public ModularVehicleInfo getOwner() {
-        return null;
+    public void addGear(GearInfo gearInfo) {
     }
 
-    public void addGear(GearInfo gearInfo) {
+    public enum EngineConfigType {
+        /**
+         * Legacy power curve support
+         */
+        POWER,
+        /**
+         * Newer torque support (and better physically)
+         */
+        TORQUE
     }
 }
 

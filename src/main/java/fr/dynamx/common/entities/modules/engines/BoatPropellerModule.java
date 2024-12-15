@@ -132,7 +132,7 @@ public class BoatPropellerModule extends BasicEngineModule implements IPackInfoR
                 gearBox = new GearBox(gears.size());
                 for (int i = 0; i < gears.size(); i++) {
                     GearInfo gear = gears.get(i);
-                    gearBox.setGear(i, gear.getSpeedRange()[0], gear.getSpeedRange()[1], gear.getRpmRange()[0], gear.getRpmRange()[1]);
+                    gearBox.setGear(engineInfo.getMaxRevs(), i, gear.getSpeedRange()[0], gear.getSpeedRange()[1], gear.getRpmRange()[0], gear.getRpmRange()[1], gear.getGearRatio());
                 }
                 //TODO move this (cf EnginePhysicsHandler)
                 gearBoxHandler = new AutomaticGearboxHandler.BoatGearBox((BoatPhysicsHandler<?>) entity.physicsHandler, this, gearBox);// propulsionHandler.createGearBox(module, this);
@@ -155,7 +155,7 @@ public class BoatPropellerModule extends BasicEngineModule implements IPackInfoR
                 return;
             setEngineStarted(BoatPropellerModule.this.isEngineStarted());
             if (gearBoxHandler != null)
-                gearBoxHandler.update(physicsAccelerationForce);
+                gearBoxHandler.update(boatPhysicsHandler, physicsAccelerationForce);
         }
 
         public void updateTurn0() {
@@ -212,7 +212,7 @@ public class BoatPropellerModule extends BasicEngineModule implements IPackInfoR
         public void accelerate(float strength) {
             this.physicsAccelerationForce = strength;
             if (hasEngine()) {
-                float power = getEngine().getPowerOutputAtRevs() / 1000;
+                float power = getEngine().getTorqueOutput(gearBox.getActiveGear(), engine.getRevs()) / 2000;
                 strength = power * strength;
             }
             Vector3f look = DynamXGeometry.FORWARD_DIRECTION;

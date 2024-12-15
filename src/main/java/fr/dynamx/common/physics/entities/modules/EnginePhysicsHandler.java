@@ -47,7 +47,7 @@ public class EnginePhysicsHandler implements IPackInfoReloadListener {
         gearBox = new GearBox(gears.size());
         for (int i = 0; i < gears.size(); i++) {
             GearInfo gear = gears.get(i);
-            gearBox.setGear(i, gear.getSpeedRange()[0], gear.getSpeedRange()[1], gear.getRpmRange()[0], gear.getRpmRange()[1]);
+            gearBox.setGear(engine.getMaxRevs(), i, gear.getSpeedRange()[0], gear.getSpeedRange()[1], gear.getRpmRange()[0], gear.getRpmRange()[1], gear.getGearRatio());
         }
         //TODO BOUGER ça
         gearBoxHandler = new AutomaticGearboxHandler.CarGearBox(this, gearBox, propulsionHandler);// propulsionHandler.createGearBox(module, this);
@@ -68,7 +68,7 @@ public class EnginePhysicsHandler implements IPackInfoReloadListener {
         updateMovement();
         setEngineStarted(module.isEngineStarted());
         if (gearBoxHandler != null)
-            gearBoxHandler.update(accelerationForce);
+            gearBoxHandler.update(handler, accelerationForce);
     }
 
     public void updateTurn0() {
@@ -236,7 +236,7 @@ public class EnginePhysicsHandler implements IPackInfoReloadListener {
 
     public void accelerate(float strength) {
         this.accelerationForce = strength;
-        propulsionHandler.accelerate(module, strength, module.getRealSpeedLimit());
+        propulsionHandler.accelerate(this, strength, module.getRealSpeedLimit());
     }
 
     public void disengageEngine() {

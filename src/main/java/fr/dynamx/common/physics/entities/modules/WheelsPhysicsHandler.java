@@ -5,6 +5,7 @@ import com.google.common.collect.HashBiMap;
 import com.jme3.bullet.objects.VehicleWheel;
 import com.jme3.math.Vector3f;
 import fr.dynamx.common.contentpack.parts.PartWheel;
+import fr.dynamx.common.contentpack.type.vehicle.BaseEngineInfo;
 import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.engines.CarEngineModule;
@@ -104,18 +105,21 @@ public class WheelsPhysicsHandler {
         }
     }
 
-    public void accelerate(CarEngineModule engine, float strength, float speedLimit) {
-        EnginePhysicsHandler module = engine.getPhysicsHandler();
-        if (!module.getEngine().isStarted()) {
+    public void accelerate(EnginePhysicsHandler enginePhysics, float strength, float speedLimit) {
+        if (!enginePhysics.getEngine().isStarted()) {
             return;
         }
         for (WheelPhysics wheelPhysics : vehicleWheelData) {
-            if (!wheelPhysics.isDrivingWheel() || strength == 0 || !module.isEngaged() || !(Math.abs(handler.getSpeed(BaseVehiclePhysicsHandler.SpeedUnit.KMH)) < speedLimit)) {
+            if (!wheelPhysics.isDrivingWheel() || strength == 0 || !enginePhysics.isEngaged() || !(Math.abs(handler.getSpeed(BaseVehiclePhysicsHandler.SpeedUnit.KMH)) < speedLimit)) {
                 wheelPhysics.accelerate(0);
                 continue;
             }
-            float power = (module.getEngine().getPowerOutputAtRevs());
-            wheelPhysics.accelerate(power * strength * 2);
+            float torque = enginePhysics.getEngine().getTorqueOutput(enginePhysics.getGearBox().getActiveGear(), enginePhysics.getEngine().getRevs());
+            // Legacy compatibility: don't compute the force applied on wheels realistically. It wasn't.
+            if(enginePhysics.getEngine().getConfigType() != BaseEngineInfo.EngineConfigType.POWER) {
+                torque = torque / wheelPhysics.getPhysicsWheel().getRadius();
+            }
+            wheelPhysics.accelerate(torque * strength);
             isAccelerating = true;
         }
     }

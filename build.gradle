@@ -72,7 +72,7 @@ dependencies {
     implementation 'com.github.stephengold:Libbulletjme:' + libbulletjme_version
     implementation "fr.aym.acsguis:ACsGuis:1.3.0-dev9"
     //implementation ":ACsGuis:1.3.0-dev8-all"
-    implementation ":ModProtectionLib:1.5.1"
+    implementation ":ModProtectionLib:1.5.2"
     implementation('org.spongepowered:mixin:0.8.3') {
         exclude module: 'guava'
         exclude module: 'commons-io'
@@ -91,7 +91,7 @@ dependencies {
 
     //shadow fileTree(dir: 'libs', include: '*.jar')
     //shadow ':ModProtectionLib:1.5.0'
-    shadow fileTree(dir: 'libs', include: 'ModProtectionLib-1.5.1.jar')
+    shadow fileTree(dir: 'libs', include: 'ModProtectionLib-1.5.2.jar')
 
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
     annotationProcessor 'org.spongepowered:mixin:0.8.3:processor'

@@ -30,7 +30,7 @@ public class DynamXItemBlock extends ItemBlock implements IResourcesOwner, IDyna
         super(block);
         this.blockIn = (DynamXBlock<BlockObject<?>>) block;
         RegistryNameSetter.setRegistryName(this, block.getRegistryName().toString());
-        if (block.textureNum > 1) {
+        if (block.getMaxMeta() > 1) {
             setHasSubtypes(true);
             setMaxDamage(0);
         }
@@ -39,7 +39,7 @@ public class DynamXItemBlock extends ItemBlock implements IResourcesOwner, IDyna
     @Override
     public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items) {
         if (this.isInCreativeTab(tab)) {
-            for (byte m = 0; m < blockIn.textureNum; m++) {
+            for (byte m = 0; m < blockIn.getMaxMeta(); m++) {
                 items.add(new ItemStack(this, 1, m));
             }
         }
@@ -47,7 +47,7 @@ public class DynamXItemBlock extends ItemBlock implements IResourcesOwner, IDyna
 
     @Override
     public String getTranslationKey(ItemStack stack) {
-        return (stack.getMetadata() != 0 && blockIn.textureNum > 1) ? super.getTranslationKey(stack) + "_" + blockIn.getInfo().getMainObjectVariantName((byte) stack.getMetadata())
+        return (stack.getMetadata() != 0 && blockIn.getMaxMeta() > 1) ? super.getTranslationKey(stack) + "_" + blockIn.getInfo().getMainObjectVariantName((byte) stack.getMetadata())
                 : super.getTranslationKey(stack);
     }
 
@@ -98,7 +98,7 @@ public class DynamXItemBlock extends ItemBlock implements IResourcesOwner, IDyna
 
     @Override
     public int getMaxMeta() {
-        return blockIn.textureNum;
+        return blockIn.getMaxMeta();
     }
 
     @Override

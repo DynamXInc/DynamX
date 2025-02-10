@@ -50,7 +50,7 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
      */
     public T blockObjectInfo;
 
-    public final int textureNum;
+    private final int textureNum;
 
     private final boolean isDxModel;
 
@@ -160,7 +160,7 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         tooltip.add("Description: " + getInfo().getDescription());
         tooltip.add("Pack: " + getInfo().getPackName());
-        if (stack.getMetadata() > 0 && textureNum > 1) {
+        if (stack.getMetadata() > 0 && getMaxMeta() > 1) {
             tooltip.add("Texture: " + getInfo().getMainObjectVariantName((byte) stack.getMetadata()));
         }
     }

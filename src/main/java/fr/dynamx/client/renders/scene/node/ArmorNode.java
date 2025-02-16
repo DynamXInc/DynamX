@@ -41,7 +41,7 @@ public class ArmorNode<A extends ArmorObject<?>> extends AbstractItemNode<BaseRe
         if (context.getArmorModel().isSneak) {
             transform.translate(0.0F, 0.2F, 0.0F);
         }
-        context.getArmorModel().renderPart(transform, context.getEquipmentSlot());
+        context.getArmorModel().renderPart(transform, context.getEquipmentSlot(), context.isUseVanillaRender());
         //Render the linked children
         if (!linkedChildren.isEmpty()) {
             linkedChildren.forEach(c -> c.render(context, packInfo));
@@ -72,7 +72,7 @@ public class ArmorNode<A extends ArmorObject<?>> extends AbstractItemNode<BaseRe
                 break;
         }
         transform.rotate((float) Math.PI, 0, 0, 1);
-        packInfo.getObjArmor().renderPart(transform, slot);
+        packInfo.getObjArmor().renderPart(transform, slot, context.isUseVanillaRender());
         DynamXRenderUtils.popGlAllAttribBits();
     }
 

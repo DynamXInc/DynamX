@@ -136,35 +136,35 @@ public class ModelObjArmor extends ModelBiped {
         }
     }
 
-    public void renderPart(Matrix4f transform, EntityEquipmentSlot part) {
+    public void renderPart(Matrix4f transform, EntityEquipmentSlot part, boolean forceVanillaRender) {
         switch (part) {
             case HEAD: {
                 if (head != null) {
-                    renderPart(transform, head);
+                    renderPart(transform, head, forceVanillaRender);
                 }
                 break;
             }
             case CHEST: {
                 if (body != null) {
-                    renderPart(transform, body);
+                    renderPart(transform, body, forceVanillaRender);
                 }
                 if (arms != null) {
-                    renderPart(transform, arms[0]);
-                    renderPart(transform, arms[1]);
+                    renderPart(transform, arms[0], forceVanillaRender);
+                    renderPart(transform, arms[1], forceVanillaRender);
                 }
                 break;
             }
             case LEGS: {
                 if (legs != null) {
-                    renderPart(transform, legs[0]);
-                    renderPart(transform, legs[1]);
+                    renderPart(transform, legs[0], forceVanillaRender);
+                    renderPart(transform, legs[1], forceVanillaRender);
                 }
                 break;
             }
             case FEET: {
                 if (foot != null) {
-                    renderPart(transform, foot[0]);
-                    renderPart(transform, foot[1]);
+                    renderPart(transform, foot[0], forceVanillaRender);
+                    renderPart(transform, foot[1], forceVanillaRender);
                 }
                 break;
             }
@@ -217,9 +217,9 @@ public class ModelObjArmor extends ModelBiped {
         armor.render(scale);
     }
 
-    protected void renderPart(Matrix4f transform, ArmorRenderer armor) {
+    protected void renderPart(Matrix4f transform, ArmorRenderer armor, boolean forceVanillaRender) {
         tempTransform.set(transform); // armor.render modifies the transform matrix
-        armor.render(tempTransform);
+        armor.render(tempTransform, forceVanillaRender);
     }
 
     private static void copyModelAnglesForArmor(ModelRenderer bodyPart, ModelRenderer armor) {

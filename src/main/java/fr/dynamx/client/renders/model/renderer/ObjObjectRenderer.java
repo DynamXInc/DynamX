@@ -1,5 +1,6 @@
 package fr.dynamx.client.renders.model.renderer;
 
+import com.modularmods.mcgltf.dynamx.MCglTF;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
 import fr.dynamx.client.renders.model.texture.MaterialTexture;
@@ -118,12 +119,23 @@ public class ObjObjectRenderer {
             log.error("Default texture variant not loaded for model " + model.getLocation() + ". Trying to upload the vaos now.");
             uploadVAO();
         }
-        if (modelRenderData.containsKey(textureVariantID))
+
+        if (modelRenderData.containsKey(textureVariantID)) {
             renderVAO(model, modelRenderData.get(textureVariantID), forceVanillaRender);
-        else if (modelRenderData.containsKey((byte) 0))
+        } else if (modelRenderData.containsKey((byte) 0)) {
             renderVAO(model, modelRenderData.get((byte) 0), forceVanillaRender);
-        else
+        } else {
             throw new IllegalStateException("Default texture variant not loaded for model " + model.getLocation());
+        }
+
+        if (!forceVanillaRender) {
+            GlStateManager.setActiveTexture(NORMAL_MAP_INDEX);
+            GlStateManager.bindTexture(MCglTF.getInstance().getDefaultNormalMap());
+            GlStateManager.setActiveTexture(SPECULAR_MAP_INDEX);
+            GlStateManager.bindTexture(MCglTF.getInstance().getDefaultSpecularMap());
+            GlStateManager.setActiveTexture(COLOR_MAP_INDEX);
+            GlStateManager.bindTexture(MCglTF.getInstance().getDefaultColorMap());
+        }
     }
 
     /**
@@ -173,8 +185,8 @@ public class ObjObjectRenderer {
         if (texture == null) {
             return;
         }
-        GL13.glActiveTexture(textureIndex);
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture.getGlTextureId());
+        GlStateManager.setActiveTexture(textureIndex);
+        GlStateManager.bindTexture(texture.getGlTextureId());
     }
 
     private void renderVAO(ObjModelRenderer model, VariantRenderData renderData, boolean forceVanillaRender) {
@@ -220,10 +232,6 @@ public class ObjObjectRenderer {
         GlStateManager.glDisableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
         GlStateManager.glDisableClientState(GL11.GL_NORMAL_ARRAY);
         DynamXRenderUtils.bindVertexArray(0);
-    }
-
-    private void bindTexture(int id) {
-        GlStateManager.bindTexture(id);
     }
 
     private int setupIndicesBuffer(int[] indices) {

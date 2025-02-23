@@ -108,17 +108,16 @@ public class HelicopterController extends BaseController {
 
     @Override
     @SideOnly(Side.CLIENT)
-    public GuiComponent<?> createHud() {
+    public GuiComponent createHud() {
         GuiPanel panel = new GuiPanel();
         GuiPanel speed = new GuiPanel();
         speed.setCssClass("speed_pane");
         float[] engineProperties = engine.getEngineProperties();
-        speed.add(new UpdatableGuiLabel("%s", s -> String.format(s, engine.isEngineStarted() ? (int) engineProperties[VehicleEntityProperties.EnumEngineProperties.SPEED.ordinal()] : "--", "")).setCssId("engine_speed"));
-        speed.add(new UpdatableGuiLabel("Power %.2f", s -> String.format(s, Math.abs(engine.getPower()))).setCssId("engine_gear"));
-        panel.add(speed);
-        panel.add(new UpdatableGuiLabel("View locked %b", s -> String.format(s, HelicopterEntity.isMouseLocked())).setCssId("engine_gear"));
-        //panel.add(new UpdatableGuiLabel("                             AngleFront %f", s -> String.format(s, HelicopterEnginePhysicsHandler.AngleFront)).setCssId("engine_gear"));
+        speed.add(new UpdatableGuiLabel("%s", (UpdatableGuiLabel.LabelValueFunction) val -> val.set(engine.isEngineStarted() ? (int) engineProperties[VehicleEntityProperties.EnumEngineProperties.SPEED.ordinal()] : "--", "")).setCssId("engine_speed"));
+        speed.add(new UpdatableGuiLabel("Power %.2f", (UpdatableGuiLabel.LabelValueFunction) val -> val.set(Math.abs(engine.getPower()))).setCssId("engine_gear"));
+        panel.add(new UpdatableGuiLabel("View locked %b", (UpdatableGuiLabel.LabelValueFunction) val -> val.set(HelicopterEntity.isMouseLocked())).setCssId("engine_gear"));
         panel.setCssId("engine_hud");
+        panel.add(speed);
         return panel;
     }
 

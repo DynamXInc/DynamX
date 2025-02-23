@@ -21,8 +21,8 @@ import java.util.Collections;
 import java.util.List;
 
 public class GuiWrenchSelection extends GuiFrame {
-
-    WrenchMode currentMode;
+    private final List<String> infos = new ArrayList<>();
+    private WrenchMode currentMode;
 
     public GuiWrenchSelection() {
         super(new GuiScaler.Identity());
@@ -92,8 +92,6 @@ public class GuiWrenchSelection extends GuiFrame {
         GlStateManager.disableBlend();
     }
 
-    List<String> infos = new ArrayList<>();
-
     @Override
     public void drawBackground(int mouseX, int mouseY, float partialTicks, ComponentRenderContext renderContext) {
         super.drawBackground(mouseX, mouseY, partialTicks, renderContext);
@@ -102,7 +100,7 @@ public class GuiWrenchSelection extends GuiFrame {
         infos.clear();
         WrenchMode wrenchMode = getModeWithMousePos(mouseX, mouseY);
         infos.add(I18n.format(wrenchMode.getLabel()));
-        GuiAPIClientHelper.drawHoveringText(infos, mouseX, mouseY);
+        GuiAPIClientHelper.drawHoveringText(getResolution(), infos, mouseX, mouseY);
 
         if (currentMode != null) {
             GlStateManager.scale(0.7f, 0.7f, 0);

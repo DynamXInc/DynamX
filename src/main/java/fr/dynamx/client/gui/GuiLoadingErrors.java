@@ -7,7 +7,7 @@ import fr.aym.acsguis.component.layout.GuiScaler;
 import fr.aym.acsguis.component.panel.GuiFrame;
 import fr.aym.acsguis.component.panel.GuiPanel;
 import fr.aym.acsguis.component.panel.GuiScrollPane;
-import fr.aym.acsguis.component.style.ComponentStyleManager;
+import fr.aym.acsguis.component.style.InternalComponentStyle;
 import fr.aym.acsguis.component.textarea.GuiLabel;
 import fr.aym.acsguis.component.textarea.GuiTextArea;
 import fr.aym.acslib.api.services.error.*;
@@ -27,7 +27,7 @@ public class GuiLoadingErrors extends GuiFrame {
     public static final ResourceLocation STYLE = new ResourceLocation(DynamXConstants.ID, "css/loading_errors.css");
 
     private final GuiPanel summary;
-    private GuiComponent<?> displayed;
+    private GuiComponent displayed;
 
     public GuiLoadingErrors() {
         super(new GuiScaler.Identity());
@@ -35,8 +35,8 @@ public class GuiLoadingErrors extends GuiFrame {
 
         summary = new GuiScrollPane() {
             @Override
-            public List<GuiComponent<?>> getReversedChildComponents() {
-                List<GuiComponent<?>> list = super.getReversedChildComponents();
+            public List<GuiComponent> getReversedChildComponents() {
+                List<GuiComponent> list = super.getReversedChildComponents();
                 list.sort(GuiComponent::compareTo);
                 Collections.reverse(list);
                 return list;
@@ -51,8 +51,8 @@ public class GuiLoadingErrors extends GuiFrame {
 
     private void fillSummary(String filter) {
         summary.removeAllChildren();
-        summary.add(new GuiLabel(TextFormatting.DARK_AQUA + "Errors while loading DynamX and the content packs").getStyle().setPaddingLeft(2).setPaddingTop(2).getOwner());
-        summary.add(new GuiLabel(TextFormatting.GRAY + "Click on any category to view it, press escape to go back").getStyle().setPaddingLeft(2).setPaddingTop(2).getOwner());
+        summary.add(new GuiLabel(TextFormatting.DARK_AQUA + "Errors while loading DynamX and the content packs").getStyleCustomizer().setPaddingLeft(2).setPaddingTop(2).getOwner());
+        summary.add(new GuiLabel(TextFormatting.GRAY + "Click on any category to view it, press escape to go back").getStyleCustomizer().setPaddingLeft(2).setPaddingTop(2).getOwner());
 
         Map<ResourceLocation, LocatedErrorList> allErrors = DynamXErrorManager.getErrorManager().getAllErrors();
         if (filter != null)
@@ -89,7 +89,7 @@ public class GuiLoadingErrors extends GuiFrame {
                 fatals = locatedErrorList.getErrors().stream().filter(er -> er.getLevel() == ErrorLevel.ADVICE).count();
                 if (fatals > 0)
                     title.append(ErrorLevel.ADVICE.color.toString()).append(fatals).append(" advice(s)");
-                summary.add(new GuiLabel("+ " + title).setCssId("label-closed").getStyle().setPaddingLeft(2).setPaddingTop(2).getOwner().addClickListener((x, y, b) ->
+                summary.add(new GuiLabel("+ " + title).getStyleCustomizer().setPaddingLeft(2).setPaddingTop(2).getOwner().setCssId("label-closed").addClickListener((x, y, b) ->
                         showErrors(false, new ArrayList<>(), entry.getKey(), locatedErrorList)
                 ));
             });
@@ -146,13 +146,13 @@ public class GuiLoadingErrors extends GuiFrame {
         else
             remove(summary);
         GuiPanel errorsPanel = new GuiScrollPane();
-        Map<GuiComponent<?>, Integer> heightMap = new HashMap<>();
+        Map<GuiComponent, Integer> heightMap = new HashMap<>();
         errorsPanel.setLayout(new GridLayout(-1, 20, 2, GridLayout.GridDirection.HORIZONTAL, 1) {
-            private final Map<ComponentStyleManager, Integer> seenElements = new HashMap<>();
-            private ComponentStyleManager lastElement;
+            private final Map<InternalComponentStyle, Integer> seenElements = new HashMap<>();
+            private InternalComponentStyle lastElement;
 
             @Override
-            public float getY(ComponentStyleManager target) {
+            public float getY(InternalComponentStyle target) {
                 if (!seenElements.containsKey(target)) {
                     if (lastElement != null)
                         seenElements.put(target, (int) (lastElement.getYPos().getRawValue() + lastElement.getHeight().getRawValue() + 2));
@@ -164,7 +164,7 @@ public class GuiLoadingErrors extends GuiFrame {
             }
 
             @Override
-            public float getHeight(ComponentStyleManager target) {
+            public float getHeight(InternalComponentStyle target) {
                 return heightMap.containsKey(target.getOwner()) ? heightMap.get(target.getOwner()) : super.getHeight(target);
             }
 
@@ -175,8 +175,8 @@ public class GuiLoadingErrors extends GuiFrame {
                 lastElement = null;
             }
         });
-        errorsPanel.add(new GuiLabel(TextFormatting.DARK_AQUA + "Errors while loading " + location).getStyle().setPaddingLeft(2).setPaddingTop(2).getOwner());
-        errorsPanel.add(new GuiLabel(TextFormatting.GRAY + "Click on any category to view it, press escape to go back").getStyle().setPaddingLeft(2).setPaddingTop(2).getOwner());
+        errorsPanel.add(new GuiLabel(TextFormatting.DARK_AQUA + "Errors while loading " + location).getStyleCustomizer().setPaddingLeft(2).setPaddingTop(2).getOwner());
+        errorsPanel.add(new GuiLabel(TextFormatting.GRAY + "Click on any category to view it, press escape to go back").getStyleCustomizer().setPaddingLeft(2).setPaddingTop(2).getOwner());
         errorsPanel.add(new GuiLabel(TextFormatting.GRAY + "  -> Show all").setCssId("label-closed").addClickListener((x, y, b) ->
                 showErrors(!deployAll, new ArrayList<>(), location, locatedErrorList)
         ));
@@ -189,14 +189,14 @@ public class GuiLoadingErrors extends GuiFrame {
             GuiTextArea label = new GuiLabel("");
             label.setEditable(false);
             heightMap.put(label, setDeployed(label, s1, errorListPerObject, deployAll != deployObjs.contains(id)));
-            errorsPanel.add(label.getStyle().setPaddingLeft(2).setPaddingTop(2).getOwner().addClickListener((x, y, b) -> {
+            errorsPanel.add(label.getStyleCustomizer().setPaddingLeft(2).setPaddingTop(2).getOwner().addClickListener((x, y, b) -> {
                 if (deployObjs.contains(id))
                     deployObjs.remove((Integer) id);
                 else
                     deployObjs.add(id);
                 heightMap.put(label, setDeployed(label, s1, errorListPerObject, deployAll != deployObjs.contains(id)));
                 errorsPanel.getLayout().clear();
-                errorsPanel.getStyle().refreshCss(false);
+                errorsPanel.getStyle().refreshStyle();
             }));
             i.getAndIncrement();
         });
@@ -205,7 +205,7 @@ public class GuiLoadingErrors extends GuiFrame {
         ));
         displayed = errorsPanel;
         errorsPanel.setFocused(true);
-        add(errorsPanel.getStyle().setForegroundColor(0x88FF88).setBackgroundColor(0xDD222222).getOwner());
+        add(errorsPanel.getStyleCustomizer().setForegroundColor(0x88FF88).setBackgroundColor(0xDD222222).getOwner());
     }
 
     @Override
@@ -213,12 +213,14 @@ public class GuiLoadingErrors extends GuiFrame {
         if (keyCode == 1) {
             if (displayed != null) {
                 goBack();
-            } else if (mc.world != null)
+            } else if (mc.world != null) {
                 mc.displayGuiScreen(new NewGuiDnxDebug().getGuiScreen());
-            else
+            } else {
                 mc.displayGuiScreen(null);
-        } else
+            }
+        } else {
             super.onKeyTyped(typedChar, keyCode);
+        }
     }
 
     private void goBack() {
@@ -235,11 +237,6 @@ public class GuiLoadingErrors extends GuiFrame {
 
     @Override
     public boolean usesDefaultStyle() {
-        return false;
-    }
-
-    @Override
-    public boolean needsCssReload() {
         return false;
     }
 }

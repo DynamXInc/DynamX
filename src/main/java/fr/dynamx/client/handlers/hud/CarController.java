@@ -2,11 +2,8 @@ package fr.dynamx.client.handlers.hud;
 
 import fr.aym.acsguis.component.GuiComponent;
 import fr.aym.acsguis.component.panel.GuiPanel;
-import fr.aym.acsguis.component.style.AutoStyleHandler;
-import fr.aym.acsguis.component.style.ComponentStyleManager;
 import fr.aym.acsguis.component.textarea.GuiLabel;
 import fr.aym.acsguis.component.textarea.UpdatableGuiLabel;
-import fr.aym.acsguis.cssengine.selectors.EnumSelectorContext;
 import fr.aym.acsguis.cssengine.style.EnumCssStyleProperty;
 import fr.aym.acsguis.utils.GuiConstants;
 import fr.dynamx.api.entities.IModuleContainer;
@@ -27,8 +24,6 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -91,21 +86,21 @@ public class CarController extends BaseController {
 
     @Override
     @SideOnly(Side.CLIENT)
-    public GuiComponent<?> createHud() {
+    public GuiComponent createHud() {
         GuiPanel panel = new GuiPanel();
         float maxRpm = entity.getPackInfo().getSubPropertyByType(CarEngineInfo.class).getMaxRevs() + 3000; // todo CONFIGURABLE
         float scale = 90f / 300;
         GuiPanel speed = new SpeedometerPanel(this, scale, maxRpm);
         speed.setCssClass("speed_pane");
         speed.setCssId("speedometer_texture");
-        float[] engineProperties = engine.getEngineProperties();
-        speed.add(new UpdatableGuiLabel("%s", s -> String.format(s, engine.isEngineStarted() ? Math.abs((int) engineProperties[VehicleEntityProperties.EnumEngineProperties.SPEED.ordinal()]) : "--", "")).setCssId("engine_speed"));
-        // speed.add(new UpdatableGuiLabel("%d", s -> String.format(s, (int) (engineProperties[VehicleEntityProperties.EnumEngineProperties.REVS.ordinal()] * entity.getPackInfo().getSubPropertyByType(EngineInfo.class).getMaxRevs()), "")).setCssId("engine_rpm"));
 
-        speed.add(new UpdatableGuiLabel("%s", s -> String.format(s, getGearString((int) engineProperties[VehicleEntityProperties.EnumEngineProperties.ACTIVE_GEAR.ordinal()]))).setCssId("engine_gear"));
+        float[] engineProperties = engine.getEngineProperties();
+        speed.add(new UpdatableGuiLabel("%s", (UpdatableGuiLabel.LabelValueFunction) val -> val.set(engine.isEngineStarted() ? Math.abs((int) engineProperties[VehicleEntityProperties.EnumEngineProperties.SPEED.ordinal()]) : "--", "")).setCssId("engine_speed"));
+        speed.add(new UpdatableGuiLabel("%s", (UpdatableGuiLabel.LabelValueFunction) val -> val.set(getGearString((int) engineProperties[VehicleEntityProperties.EnumEngineProperties.ACTIVE_GEAR.ordinal()]))).setCssId("engine_gear"));
         addRpmCounter(speed, scale, maxRpm);
+
         if (hudIcons != null) {
-            GuiComponent<?>[] icons = new GuiComponent[hudIcons.iconCount()];
+            GuiComponent[] icons = new GuiComponent[hudIcons.iconCount()];
             for (int i = 0; i < icons.length; i++) {
                 int finalI = i;
                 speed.add(icons[i] = new GuiPanel() {
@@ -130,18 +125,18 @@ public class CarController extends BaseController {
         }
         panel.add(speed);
 
-        speed.add(new UpdatableGuiLabel("%s", s -> {
+        speed.add(new UpdatableGuiLabel("%s", val -> {
             if (speedLimit != Float.MAX_VALUE) {
-                return String.format(s, (int) speedLimit);
+                val.set((int) speedLimit);
             } else {
-                return "";
+                val.set("");
             }
         }).setCssId("speed_limit"));
 
         //Debug
         String cclass = ClientDebugSystem.enableDebugDrawing ? "hud_label_debug" : "hud_label_hidden";
-        panel.add(new UpdatableGuiLabel("Handbrake : %s", s -> String.format(s, (engine.isHandBraking() ? "§cON" : "§aOFF"))).setCssId("handbrake_state").setCssClass(cclass));
-        panel.add(new UpdatableGuiLabel("Sounds : %s", s -> String.format(s, (engine.getCurrentEngineSound() == null ? "none" : engine.getCurrentEngineSound().getSoundName()))).setCssId("engine_sounds").setCssClass(cclass));
+        panel.add(new UpdatableGuiLabel("Handbrake : %s", (UpdatableGuiLabel.LabelValueFunction) val -> val.set((engine.isHandBraking() ? "§cON" : "§aOFF"))).setCssId("handbrake_state").setCssClass(cclass));
+        panel.add(new UpdatableGuiLabel("Sounds : %s", (UpdatableGuiLabel.LabelValueFunction) val -> val.set((engine.getCurrentEngineSound() == null ? "none" : engine.getCurrentEngineSound().getSoundName()))).setCssId("engine_sounds").setCssClass(cclass));
         panel.setCssId("engine_hud");
 
         return panel;
@@ -169,31 +164,23 @@ public class CarController extends BaseController {
             double x = (45 - Math.cos(angle) * r) - Math.abs(halfLetter * Math.cos(angle));
             double y = (45 - Math.sin(angle) * r) - Math.abs(halfLetter * Math.sin(angle)) - 2;
 
-            speedometer.add(new GuiLabel("" + i).setCssClass("rpm_letter").getStyle().addAutoStyleHandler(new AutoStyleHandler<ComponentStyleManager>() {
-                @Override
-                public boolean handleProperty(EnumCssStyleProperty property, EnumSelectorContext context, ComponentStyleManager target) {
-                    if (property == EnumCssStyleProperty.LEFT) {
-                        target.getXPos().setAbsolute(-(float) x, GuiConstants.ENUM_RELATIVE_POS.END);
-                        return true;
-                    }
-                    if (property == EnumCssStyleProperty.TOP) {
-                        target.getYPos().setAbsolute((float) y);
-                        return true;
-                    }
-                    if (property == EnumCssStyleProperty.COLOR) {
-                        if (angle > Math.PI - Math.PI / 3) {
-                            target.setForegroundColor(0xFFE23F3F);
-                        }
-                        return true;
-                    }
-                    return false;
+            speedometer.add(new GuiLabel("" + i).setCssClass("rpm_letter").getStyleCustomizer().withAutoStyles((property, context, target) -> {
+                if (property == EnumCssStyleProperty.LEFT) {
+                    target.getXPos().setAbsolute(-(float) x, GuiConstants.ENUM_RELATIVE_POS.END);
+                    return true;
                 }
-
-                @Override
-                public Collection<EnumCssStyleProperty> getModifiedProperties(ComponentStyleManager target) {
-                    return Arrays.asList(EnumCssStyleProperty.LEFT, EnumCssStyleProperty.TOP, EnumCssStyleProperty.COLOR);
+                if (property == EnumCssStyleProperty.TOP) {
+                    target.getYPos().setAbsolute((float) y);
+                    return true;
                 }
-            }).getOwner());
+                if (property == EnumCssStyleProperty.COLOR) {
+                    if (angle > Math.PI - Math.PI / 3) {
+                        target.setForegroundColor(0xFFE23F3F);
+                    }
+                    return true;
+                }
+                return false;
+            }, EnumCssStyleProperty.LEFT, EnumCssStyleProperty.TOP, EnumCssStyleProperty.COLOR).getOwner());
         }
     }
 }

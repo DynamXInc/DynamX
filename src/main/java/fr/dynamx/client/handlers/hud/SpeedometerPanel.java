@@ -14,10 +14,13 @@ public class SpeedometerPanel extends CircleCounterPanel {
     }
 
     @Override
-    public void tick() {
-        super.tick();
+    public boolean tick() {
+        if (!super.tick()) {
+            return false;
+        }
         prevValue = value;
         //Don't use modified maxRpm here
         value = carController.engine.getEngineProperty(VehicleEntityProperties.EnumEngineProperties.REVS) * carController.entity.getPackInfo().getSubPropertyByType(CarEngineInfo.class).getMaxRevs();
+        return true;
     }
 }

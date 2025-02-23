@@ -70,7 +70,7 @@ dependencies {
     implementation ("net.minecraftforge:mergetool:0.2.3.3") { force = true }
 
     implementation 'com.github.stephengold:Libbulletjme:' + libbulletjme_version
-    implementation "fr.aym.acsguis:ACsGuis:1.3.0-dev9"
+    implementation "fr.aym.acsguis:ACsGuis:1.4.0-dev1"
     //implementation ":ACsGuis:1.3.0-dev8-all"
     implementation ":ModProtectionLib:1.5.2"
     implementation('org.spongepowered:mixin:0.8.3') {

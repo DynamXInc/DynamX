@@ -61,12 +61,12 @@ public class BoatController extends BaseController {
 
     @Override
     @SideOnly(Side.CLIENT)
-    public GuiComponent<?> createHud() {
+    public GuiComponent createHud() {
         GuiPanel panel = new GuiPanel();
         GuiPanel speed = new GuiPanel();
         speed.setCssClass("speed_pane");
         float[] engineProperties = engine.getEngineProperties();
-        speed.add(new UpdatableGuiLabel("%s", s -> String.format(s, engine.isEngineStarted() ? (int) engineProperties[VehicleEntityProperties.EnumEngineProperties.SPEED.ordinal()] : "--", "")).setCssId("engine_speed"));
+        speed.add(new UpdatableGuiLabel("%s", (UpdatableGuiLabel.LabelValueFunction) val -> val.set(engine.isEngineStarted() ? (int) engineProperties[VehicleEntityProperties.EnumEngineProperties.SPEED.ordinal()] : "--", "")).setCssId("engine_speed"));
         panel.add(speed);
         panel.setCssId("engine_hud");
         return panel;

@@ -27,7 +27,7 @@ public interface IVehicleController {
      */
     @Nullable
     @SideOnly(Side.CLIENT)
-    GuiComponent<?> createHud();
+    GuiComponent createHud();
 
     /**
      * Called to get the vehicle HUD style when the driver mounts, on client side <br>

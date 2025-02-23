@@ -39,7 +39,7 @@ public class VehicleHud extends GuiFrame {
             List<ResourceLocation> hudStyle = c.getHudCssStyles();
             if (hudStyle != null)
                 styleSheets.addAll(hudStyle);
-            GuiComponent<?> hud = c.createHud();
+            GuiComponent hud = c.createHud();
             if (hud != null) {
                 add(hud);
             }
@@ -81,29 +81,27 @@ public class VehicleHud extends GuiFrame {
                     float y = getScreenY() + 5;
                     GuiTextureSprite.drawScaledCustomSizeModalRect(x, y, (float) (k * 10), (float) (176 + l * 8), 10, 8, 10, 8, 256.0F, 256.0F);
                 }
-                getStyle().setPaddingLeft(14);
             }
         };
         netWarning.setCssId("network_warning");
+        netWarning.getStyleCustomizer().setPaddingLeft(14);
         add(netWarning);
     }
 
     @Override
-    public void tick() {
-        super.tick();
+    public boolean tick() {
+        if (!super.tick()) {
+            return false;
+        }
         if (netWarning != null && ClientPhysicsSyncManager.pingMs > 100 && riddenEntity.ticksExisted % (20 * 3) < (20 * 2))
             netWarning.setText(ClientPhysicsSyncManager.getPingMessage());
         else if (netWarning != null && !netWarning.getText().isEmpty())
             netWarning.setText("");
+        return true;
     }
 
     @Override
     public List<ResourceLocation> getCssStyles() {
         return styleSheets;
-    }
-
-    @Override
-    public boolean needsCssReload() {
-        return false;
     }
 }

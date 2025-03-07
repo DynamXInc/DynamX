@@ -1,5 +1,6 @@
 package fr.dynamx.client.gui;
 
+import fr.aym.acsguis.api.ACsGuiFrame;
 import fr.aym.acsguis.api.GuiAPIClientHelper;
 import fr.aym.acsguis.component.GuiComponent;
 import fr.aym.acsguis.component.layout.GridLayout;
@@ -21,9 +22,10 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-
 //TODO CLEAN
+@ACsGuiFrame
 public class GuiLoadingErrors extends GuiFrame {
+    @ACsGuiFrame.RegisteredStyleSheet
     public static final ResourceLocation STYLE = new ResourceLocation(DynamXConstants.ID, "css/loading_errors.css");
 
     private final GuiPanel summary;

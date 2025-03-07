@@ -1,6 +1,7 @@
 package fr.dynamx.client.gui;
 
 import com.jme3.math.Vector3f;
+import fr.aym.acsguis.api.ACsGuiFrame;
 import fr.aym.acsguis.component.layout.GuiScaler;
 import fr.aym.acsguis.component.panel.GuiFrame;
 import fr.aym.acsguis.component.panel.GuiPanel;
@@ -26,7 +27,9 @@ import org.lwjgl.input.Mouse;
 import java.util.Collections;
 import java.util.List;
 
+@ACsGuiFrame
 public class GuiBlockCustomization extends GuiFrame {
+    @ACsGuiFrame.RegisteredStyleSheet
     public static final ResourceLocation STYLE = new ResourceLocation(DynamXConstants.ID, "css/block_custom.css");
 
     private final DxModelRenderer model;

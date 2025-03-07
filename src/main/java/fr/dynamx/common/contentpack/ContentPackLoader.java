@@ -146,14 +146,6 @@ public class ContentPackLoader {
             }
         }
         DynamXMain.log.info("Loaded " + packCount + " DynamX resource packs");
-        if (side.isClient()) {
-            //Add built-in style, before customs by addons
-            ACsGuiApi.registerStyleSheetToPreload(NewGuiDnxDebug.STYLE);
-            ACsGuiApi.registerStyleSheetToPreload(GuiLoadingErrors.STYLE);
-            ACsGuiApi.registerStyleSheetToPreload(CarController.STYLE);
-            ACsGuiApi.registerStyleSheetToPreload(GuiBlockCustomization.STYLE);
-            ACsGuiApi.registerStyleSheetToPreload(GuiSlopesConfig.STYLE);
-        }
         return myDir; //return the used path, used when reloading config
     }
 

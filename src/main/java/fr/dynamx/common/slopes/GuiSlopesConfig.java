@@ -1,5 +1,6 @@
 package fr.dynamx.common.slopes;
 
+import fr.aym.acsguis.api.ACsGuiFrame;
 import fr.aym.acsguis.component.button.GuiButton;
 import fr.aym.acsguis.component.button.GuiCheckBox;
 import fr.aym.acsguis.component.layout.GridLayout;
@@ -24,7 +25,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@ACsGuiFrame
 public class GuiSlopesConfig extends GuiFrame {
+    @ACsGuiFrame.RegisteredStyleSheet
     public static final ResourceLocation STYLE = new ResourceLocation(DynamXConstants.ID, "css/slope_generator.css");
 
     private final IMouseClickListener exitButton;

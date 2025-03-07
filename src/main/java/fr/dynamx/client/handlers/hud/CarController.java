@@ -1,5 +1,6 @@
 package fr.dynamx.client.handlers.hud;
 
+import fr.aym.acsguis.api.ACsGuiFrame;
 import fr.aym.acsguis.component.GuiComponent;
 import fr.aym.acsguis.component.panel.GuiPanel;
 import fr.aym.acsguis.component.textarea.GuiLabel;
@@ -27,7 +28,9 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import java.util.Collections;
 import java.util.List;
 
+@ACsGuiFrame
 public class CarController extends BaseController {
+    @ACsGuiFrame.RegisteredStyleSheet
     public static final ResourceLocation STYLE = new ResourceLocation(DynamXConstants.ID, "css/vehicle_hud.css");
 
     //TODO CREATE EVENT TO INIT THIS ?

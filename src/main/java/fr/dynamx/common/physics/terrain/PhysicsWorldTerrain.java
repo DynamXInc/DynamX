@@ -270,15 +270,21 @@ public class PhysicsWorldTerrain implements ITerrainManager {
                     DynamXMain.log.error("[PWT] Ignored async loaded chunk, new request sent " + toffer.getSnap().getTicket() + " " + toffer.getSnap().getSnapIndex());
                 return;
             }
+            if(!getTerrainState().isLoadedAnywhere(toffer.getSnap().getPos())) {
+                if (DynamXConfig.enableDebugTerrainManager)
+                    DynamXMain.log.error("[PWT] Ignored async loaded chunk, not in-use anymore!" + toffer.getSnap().getTicket() + " " + toffer.getSnap().getSnapIndex());
+                return;
+            }
             ChunkCollisions offer = toffer.getCollisionsIn();
             ChunkLoadingTicket ticket = toffer.getSnap().getTicket();
-            if (isDebug)
-                ChunkGraph.addToGrah(ticket.getPos(), ChunkGraph.ChunkActions.HOTSWAP, ChunkGraph.ActionLocation.MAIN, offer, "ASYNC LOAD Ticket " + ticket + " " + toffer.getSnap().getSnapIndex());
-            ticket.incrStatusIndex(); //Invalidate other loading operations
-            ticket.setLoaded(offer);  //Will remove the previous chunk from loaded terrain
-            if (getTerrainState().isLoadedAnywhere(offer.getPos()))
+            synchronized (ticket) {
+                if (isDebug)
+                    ChunkGraph.addToGrah(ticket.getPos(), ChunkGraph.ChunkActions.HOTSWAP, ChunkGraph.ActionLocation.MAIN, offer, "ASYNC LOAD Ticket " + ticket + " " + toffer.getSnap().getSnapIndex());
+                ticket.incrStatusIndex(); //Invalidate other loading operations
+                ticket.setLoaded(offer);  //Will remove the previous chunk from loaded terrain
                 addUsedChunk(ticket, false); //Add the new chunk to the physics world. FIX : ONLY IF IT'S USED
-            ticket.fireLoadedCallback(); //Call this after adding the chunk : the callback may ask for a new load of this ticket
+                ticket.fireLoadedCallback(); //Call this after adding the chunk : the callback may ask for a new load of this ticket
+            }
         }
     }
 

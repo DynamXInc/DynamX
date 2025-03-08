@@ -3,12 +3,10 @@ package fr.dynamx.client.gui;
 import fr.aym.acsguis.api.ACsGuiFrame;
 import fr.aym.acsguis.api.GuiAPIClientHelper;
 import fr.aym.acsguis.component.GuiComponent;
-import fr.aym.acsguis.component.layout.GridLayout;
 import fr.aym.acsguis.component.layout.GuiScaler;
 import fr.aym.acsguis.component.panel.GuiFrame;
 import fr.aym.acsguis.component.panel.GuiPanel;
 import fr.aym.acsguis.component.panel.GuiScrollPane;
-import fr.aym.acsguis.component.style.InternalComponentStyle;
 import fr.aym.acsguis.component.textarea.GuiLabel;
 import fr.aym.acsguis.component.textarea.GuiTextArea;
 import fr.aym.acslib.api.services.error.*;
@@ -44,7 +42,7 @@ public class GuiLoadingErrors extends GuiFrame {
                 return list;
             }
         };
-        summary.setLayout(new GridLayout(-1, 20, 2, GridLayout.GridDirection.HORIZONTAL, 1));
+        summary.setCssId("content-pane");
         fillSummary(null);
         summary.setFocused(true);
         add(summary);
@@ -100,7 +98,7 @@ public class GuiLoadingErrors extends GuiFrame {
         }
     }
 
-    private int setDeployed(GuiTextArea label, String object, List<ErrorData> errorListPerObject, boolean deploy) {
+    private void setDeployed(GuiTextArea label, String object, List<ErrorData> errorListPerObject, boolean deploy) {
         label.setMaxTextLength(50000);
         StringBuilder title = new StringBuilder(object + " : ");
         int height = 20;
@@ -139,7 +137,7 @@ public class GuiLoadingErrors extends GuiFrame {
             label.setText("+ " + TextFormatting.GREEN + title);
             label.setCssId("label-closed");
         }
-        return height;
+        label.getStyleCustomizer().setHeight(height);
     }
 
     private void showErrors(boolean deployAll, List<Integer> deployObjs, ResourceLocation location, LocatedErrorList locatedErrorList) {
@@ -148,35 +146,7 @@ public class GuiLoadingErrors extends GuiFrame {
         else
             remove(summary);
         GuiPanel errorsPanel = new GuiScrollPane();
-        Map<GuiComponent, Integer> heightMap = new HashMap<>();
-        errorsPanel.setLayout(new GridLayout(-1, 20, 2, GridLayout.GridDirection.HORIZONTAL, 1) {
-            private final Map<InternalComponentStyle, Integer> seenElements = new HashMap<>();
-            private InternalComponentStyle lastElement;
-
-            @Override
-            public float getY(InternalComponentStyle target) {
-                if (!seenElements.containsKey(target)) {
-                    if (lastElement != null)
-                        seenElements.put(target, (int) (lastElement.getYPos().getRawValue() + lastElement.getHeight().getRawValue() + 2));
-                    else
-                        seenElements.put(target, 0);
-                    lastElement = target;
-                }
-                return seenElements.get(target);
-            }
-
-            @Override
-            public float getHeight(InternalComponentStyle target) {
-                return heightMap.containsKey(target.getOwner()) ? heightMap.get(target.getOwner()) : super.getHeight(target);
-            }
-
-            @Override
-            public void clear() {
-                super.clear();
-                seenElements.clear();
-                lastElement = null;
-            }
-        });
+        errorsPanel.setCssId("content-pane");
         errorsPanel.add(new GuiLabel(TextFormatting.DARK_AQUA + "Errors while loading " + location).getStyleCustomizer().setPaddingLeft(2).setPaddingTop(2).getOwner());
         errorsPanel.add(new GuiLabel(TextFormatting.GRAY + "Click on any category to view it, press escape to go back").getStyleCustomizer().setPaddingLeft(2).setPaddingTop(2).getOwner());
         errorsPanel.add(new GuiLabel(TextFormatting.GRAY + "  -> Show all").setCssId("label-closed").addClickListener((x, y, b) ->
@@ -190,13 +160,13 @@ public class GuiLoadingErrors extends GuiFrame {
             int id = i.get();
             GuiTextArea label = new GuiLabel("");
             label.setEditable(false);
-            heightMap.put(label, setDeployed(label, s1, errorListPerObject, deployAll != deployObjs.contains(id)));
+            setDeployed(label, s1, errorListPerObject, deployAll != deployObjs.contains(id));
             errorsPanel.add(label.getStyleCustomizer().setPaddingLeft(2).setPaddingTop(2).getOwner().addClickListener((x, y, b) -> {
                 if (deployObjs.contains(id))
                     deployObjs.remove((Integer) id);
                 else
                     deployObjs.add(id);
-                heightMap.put(label, setDeployed(label, s1, errorListPerObject, deployAll != deployObjs.contains(id)));
+                setDeployed(label, s1, errorListPerObject, deployAll != deployObjs.contains(id));
                 errorsPanel.getLayout().clear();
                 errorsPanel.getStyle().refreshStyle();
             }));

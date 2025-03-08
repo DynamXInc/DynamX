@@ -44,3 +44,7 @@ label, text_area {
 #label-deployed {
     background-color: rgba(50, 50, 50, 189);
 }
+
+#content-pane label {
+    height: 20px;
+}

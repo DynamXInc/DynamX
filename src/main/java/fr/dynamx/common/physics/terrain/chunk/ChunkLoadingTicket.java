@@ -113,8 +113,9 @@ public class ChunkLoadingTicket implements VerticalChunkPos.VerticalChunkPosCont
     public void setLoaded(ChunkCollisions collisions) {
         setCollisions(collisions);
         this.status = ChunkState.LOADED;
-        if (DynamXConfig.enableDebugTerrainManager)
+        if (DynamXConfig.enableDebugTerrainManager) {
             ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.SET_LOADED, ChunkGraph.ActionLocation.UNKNOWN, null, this + " " + (collisions != null ? collisions.getElements().getElements().size() + " / " + collisions.getElements().getPersistentElements().size() : "null coll"));
+        }
     }
 
     /**
@@ -131,8 +132,9 @@ public class ChunkLoadingTicket implements VerticalChunkPos.VerticalChunkPosCont
      * Marks this chunks as unloaded, and clears the contained data
      */
     public void setUnloaded() {
-        if (DynamXConfig.enableDebugTerrainManager)
+        if (DynamXConfig.enableDebugTerrainManager) {
             ChunkGraph.addToGrah(getPos(), ChunkGraph.ChunkActions.DESTROY, ChunkGraph.ActionLocation.MAIN, getCollisions());
+        }
         incrStatusIndex();
         fireLoadedCallback(); //complete with old collisions
         setCollisions(null);

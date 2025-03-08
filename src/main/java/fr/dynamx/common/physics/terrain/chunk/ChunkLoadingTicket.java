@@ -134,8 +134,7 @@ public class ChunkLoadingTicket implements VerticalChunkPos.VerticalChunkPosCont
         if (DynamXConfig.enableDebugTerrainManager)
             ChunkGraph.addToGrah(getPos(), ChunkGraph.ChunkActions.DESTROY, ChunkGraph.ActionLocation.MAIN, getCollisions());
         incrStatusIndex();
-        if (loadedCallback != null) //complete with old collisions
-            loadedCallback.complete(collisions);
+        fireLoadedCallback(); //complete with old collisions
         setCollisions(null);
         status = ChunkState.NONE;
         priority = ChunkLoadingTicket.TicketPriority.NONE;

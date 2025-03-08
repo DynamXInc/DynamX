@@ -88,95 +88,94 @@ public class MessageQueryChunks implements IDnxPacket {
 
         @Override
         public IDnxPacket onMessage(MessageQueryChunks message, MessageContext ctx) {
-            if (ctx.side.isServer()) {
-                PooledHashMap<VerticalChunkPos, byte[]> emptyGuys = HashMapPool.get();
-                PooledHashMap<ChunkLoadingTicket, byte[]> boysToLoad = HashMapPool.get();
-                IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(ctx.getServerHandler().player.world);
-                message.requests.forEach((pos, data) -> {
-                    byte dataType = data[0];
-                    if (dataType == 0 || dataType == 1) {
-                        ChunkLoadingTicket ticket = physicsWorld.getTerrainManager().getTicket(pos);
-                        if (ticket.getStatus() == ChunkState.LOADED) {
-                            // System.out.println("Already loaded "+ticket);
-                            processElements(ctx, pos, data, ticket.getCollisions().getElements());
-                        } else {
-                            boysToLoad.put(ticket, data);
-                        }
-                    } else if (dataType == 2) {
-                        byte[] dt = ((FileTerrainCache) physicsWorld.getTerrainManager().getCache()).getSlopesFile().getRawChunkData(pos);
-                        //System.out.println("Found "+dt+" at "+pos);
-                        if (dt == null) {
-                            emptyGuys.put(pos, data);
-                        } else {
-                            //Don't use reply (return) system, because it may interfere with packet sending (weird bugs seen, maybe due to Mohist)
-                            DynamXContext.getNetwork().sendToClientFromOtherThread(new MessageChunkData(pos, data, dt), EnumPacketTarget.PLAYER, ctx.getServerHandler().player);
-                        }
+            if (!ctx.side.isServer()) {
+                onMessageClient(message);
+                return null;
+            }
+            PooledHashMap<VerticalChunkPos, byte[]> emptyGuys = HashMapPool.get();
+            PooledHashMap<ChunkLoadingTicket, byte[]> boysToLoad = HashMapPool.get();
+            IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(ctx.getServerHandler().player.world);
+            message.requests.forEach((pos, data) -> {
+                byte dataType = data[0];
+                if (dataType == 0 || dataType == 1) {
+                    ChunkLoadingTicket ticket = physicsWorld.getTerrainManager().getTicket(pos);
+                    if (ticket.getStatus() == ChunkState.LOADED) {
+                        // System.out.println("Already loaded "+ticket);
+                        processElements(ctx, pos, data, ticket.getCollisions().getElements());
+                    } else {
+                        boysToLoad.put(ticket, data);
                     }
-                });
-                if (!emptyGuys.isEmpty()) {
-                    //Copy the map for packet sending
-                    //Don't use reply (return) system, because it may interfere with packet sending (weird bugs seen, maybe due to Mohist)
-                    DynamXContext.getNetwork().sendToClientFromOtherThread(new MessageQueryChunks(emptyGuys), EnumPacketTarget.PLAYER, ctx.getServerHandler().player);
-                } else {
-                    emptyGuys.release();
+                } else if (dataType == 2) {
+                    byte[] dt = ((FileTerrainCache) physicsWorld.getTerrainManager().getCache()).getSlopesFile().getRawChunkData(pos);
+                    //System.out.println("Found "+dt+" at "+pos);
+                    if (dt == null) {
+                        emptyGuys.put(pos, data);
+                    } else {
+                        //Don't use reply (return) system, because it may interfere with packet sending (weird bugs seen, maybe due to Mohist)
+                        DynamXContext.getNetwork().sendToClientFromOtherThread(new MessageChunkData(pos, data, dt), EnumPacketTarget.PLAYER, ctx.getServerHandler().player);
+                    }
                 }
-                if (!boysToLoad.isEmpty()) {
-                    physicsWorld.schedule(() -> { //Be sync with physics/terrain thread
-                        boysToLoad.forEach((ticket, data) -> {
-                            if (ticket.getStatus() == ChunkState.LOADING && ticket.getPriority() == ChunkLoadingTicket.TicketPriority.LOW) {
-                                //System.out.println("Other case "+ticket);
-                                ticket.getLoadedCallback().thenAccept((collisions -> {
-                                    if (ticket.getPriority() == ChunkLoadingTicket.TicketPriority.LOW) { //If it stills low (not loaded at another location)
-                                        physicsWorld.getTerrainManager().subscribeToChunk(ticket.getPos(), ChunkLoadingTicket.TicketPriority.MEDIUM, Profiler.get());
-                                        ticket.getLoadedCallback().whenComplete((collisions2, e) -> {
-                                            if (collisions2 != null) {
-                                                processElements(ctx, ticket.getPos(), data, collisions2.getElements());
-                                            } else if (e != null) {
-                                                DynamXMain.log.error("0x54 Failed to load chunk {}, for client {}", ticket, ctx.getServerHandler().player.getName(), e);
-                                            }
-                                        }).exceptionally(e -> {
-                                            DynamXMain.log.error("0x52 Failed to send chunk {}, for client {}", ticket, ctx.getServerHandler().player.getName(), e);
-                                            return null;
-                                        });
-                                    }
-                                })).exceptionally(e -> {
-                                    DynamXMain.log.error("0x51 Failed to mark chunk {} for load, for client {}", ticket, ctx.getServerHandler().player.getName(), e);
-                                    return null;
-                                });
-                                return;
-                            }
-                            if (ticket.getStatus() != ChunkState.LOADING) {
-                                if (!physicsWorld.getTerrainManager().subscribeToChunk(ticket.getPos(), ChunkLoadingTicket.TicketPriority.MEDIUM, Profiler.get())) {
-                                    DynamXMain.log.error("0x56 Failed to load chunk {}, for client {}: chunk not loaded in vanilla Minecraft.", ticket, ctx.getServerHandler().player.getName());
-                                    return;
-                                }
-                            }
-                            if (ticket.getLoadedCallback() != null) {
+            });
+            message.requests.release();
+            if (!emptyGuys.isEmpty()) {
+                //Copy the map for packet sending
+                //Don't use reply (return) system, because it may interfere with packet sending (weird bugs seen, maybe due to Mohist)
+                DynamXContext.getNetwork().sendToClientFromOtherThread(new MessageQueryChunks(emptyGuys), EnumPacketTarget.PLAYER, ctx.getServerHandler().player);
+            } else {
+                emptyGuys.release();
+            }
+            if (boysToLoad.isEmpty()) {
+                boysToLoad.release();
+                return null;
+            }
+            physicsWorld.schedule(() -> { //Be sync with physics/terrain thread
+                boysToLoad.forEach((ticket, data) -> {
+                    if (ticket.getStatus() == ChunkState.LOADING && ticket.getPriority() == ChunkLoadingTicket.TicketPriority.LOW) {
+                        //System.out.println("Other case "+ticket);
+                        ticket.getLoadedCallback().thenAccept((collisions -> {
+                            if (ticket.getPriority() == ChunkLoadingTicket.TicketPriority.LOW) { //If it stills low (not loaded at another location)
+                                physicsWorld.getTerrainManager().subscribeToChunk(ticket.getPos(), ChunkLoadingTicket.TicketPriority.MEDIUM, Profiler.get());
                                 ticket.getLoadedCallback().whenComplete((collisions2, e) -> {
                                     if (collisions2 != null) {
                                         processElements(ctx, ticket.getPos(), data, collisions2.getElements());
                                     } else if (e != null) {
-                                        DynamXMain.log.error("0x55 Failed to load chunk {}, for client {}", ticket, ctx.getServerHandler().player.getName(), e);
+                                        DynamXMain.log.error("0x54 Failed to load chunk {}, for client {}", ticket, ctx.getServerHandler().player.getName(), e);
                                     }
                                 }).exceptionally(e -> {
-                                    DynamXMain.log.error("0x53 Failed to send chunk {} to client {}", ticket, ctx.getServerHandler().player.getName(), e);
-                                    boysToLoad.release();
-                                    message.requests.release();
+                                    DynamXMain.log.error("0x52 Failed to send chunk {}, for client {}", ticket, ctx.getServerHandler().player.getName(), e);
                                     return null;
                                 });
-                            } else {
-                                throw new IllegalStateException("Ticket " + ticket + " has no loading callback, but it should be loading i think. 0x10301.");
                             }
+                        })).exceptionally(e -> {
+                            DynamXMain.log.error("0x51 Failed to mark chunk {} for load, for client {}", ticket, ctx.getServerHandler().player.getName(), e);
+                            return null;
                         });
-                        boysToLoad.release();
-                    });
-                } else {
-                    boysToLoad.release();
-                }
-                message.requests.release();
-            } else {
-                onMessageClient(message);
-            }
+                        return;
+                    }
+                    if (ticket.getStatus() != ChunkState.LOADING) {
+                        if (!physicsWorld.getTerrainManager().subscribeToChunk(ticket.getPos(), ChunkLoadingTicket.TicketPriority.MEDIUM, Profiler.get())) {
+                            DynamXMain.log.error("0x56 Failed to load chunk {}, for client {}: chunk not loaded in vanilla Minecraft.", ticket, ctx.getServerHandler().player.getName());
+                            return;
+                        }
+                    }
+                    if (ticket.getLoadedCallback() != null) {
+                        ticket.getLoadedCallback().whenComplete((collisions2, e) -> {
+                            if (collisions2 != null) {
+                                processElements(ctx, ticket.getPos(), data, collisions2.getElements());
+                            } else if (e != null) {
+                                DynamXMain.log.error("0x55 Failed to load chunk {}, for client {}", ticket, ctx.getServerHandler().player.getName(), e);
+                            }
+                        }).exceptionally(e -> {
+                            DynamXMain.log.error("0x53 Failed to send chunk {} to client {}", ticket, ctx.getServerHandler().player.getName(), e);
+                            boysToLoad.release();
+                            return null;
+                        });
+                    } else {
+                        throw new IllegalStateException("Ticket " + ticket + " has no loading callback, but it should be loading i think. 0x10301.");
+                    }
+                });
+                boysToLoad.release();
+            });
             return null;
         }
     }

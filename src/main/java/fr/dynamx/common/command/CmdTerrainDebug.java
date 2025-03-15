@@ -47,7 +47,7 @@ public class CmdTerrainDebug implements ISubCommand {
                 throw new WrongUsageException(getUsage());
             }
             DynamXConfig.enableDebugTerrainManager = enableDebug;
-            sender.sendMessage(new TextComponentString(prefix() + (enableDebug ? "Enabled" : "Disabled") + " terrain debug. This will not persist after game restart."));
+            sender.sendMessage(new TextComponentString(prefix() + (enableDebug ? "Enabled" : "Disabled") + " terrain debug. Enabling it can have some performance impact. This configuration will not persist after game restart."));
         } else if (args.length == 1) {
             sender.sendMessage(new TextComponentString(prefix() + "Terrain debug is " + (DynamXConfig.enableDebugTerrainManager ? "enabled" : "disabled")));
         }

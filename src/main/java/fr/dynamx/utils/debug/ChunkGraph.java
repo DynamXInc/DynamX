@@ -38,7 +38,7 @@ public class ChunkGraph {
 
                 graphs.get(pos).actions.add(new HistoryEntry(action, location, System.currentTimeMillis(), chunk == null ? null : ((DebugChunkCollisions) chunk).getId(), info));
                 if (LISTEN == 0) {
-                    while (graphs.get(pos).actions.size() > 25) { //TODOOLD DISABLE THIS SO EXPENSIVE THING
+                    while (graphs.get(pos).actions.size() > 25) {
                         graphs.get(pos).actions.remove(0);
                     }
                 }

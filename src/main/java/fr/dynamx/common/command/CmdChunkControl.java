@@ -20,7 +20,6 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nullable;
-import javax.xml.soap.Text;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +31,7 @@ public class CmdChunkControl implements ISubCommand {
     }
 
     private String prefix() {
-        if(isClient) {
+        if (isClient) {
             return TextFormatting.GOLD + "[DynamX-Client] " + TextFormatting.RESET;
         }
         return TextFormatting.GREEN + "[DynamX-Server] " + TextFormatting.RESET;
@@ -53,29 +52,29 @@ public class CmdChunkControl implements ISubCommand {
         if (args.length >= 3) {
             IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(sender.getEntityWorld());
             if (args[1].equalsIgnoreCase("graphmode")) {
-                if(args.length != 3) {
+                if (args.length != 3) {
                     throw new WrongUsageException("chunkcontrol graphmode <mode>");
                 }
                 String mode = args[2];
                 int modeInt;
                 switch (mode) {
-                    case "disable":
+                    case "print_then_disable":
                         sender.sendMessage(new TextComponentString(prefix() + "Totally disabling data gathering..."));
                         modeInt = -1;
                         break;
-                    case "stop":
+                    case "print_then_keep_recent":
                         sender.sendMessage(new TextComponentString(prefix() + "Stopping data gathering and printing graph in the log"));
                         modeInt = 0;
                         break;
-                    case "start_tracked_chunks":
+                    case "keep_tracked":
                         sender.sendMessage(new TextComponentString(prefix() + "Starting data gathering for debug chunks"));
                         modeInt = 1;
                         break;
-                    case "start_full":
+                    case "keep_all":
                         sender.sendMessage(new TextComponentString(prefix() + "/!\\ Starting data gathering for all chunks. Be careful, this is a memory leak."));
                         modeInt = 2;
                         break;
-                    case "disable_and_get_physics_object_count":
+                    case "print_disable_and_get_physics_object_count":
                         sender.sendMessage(new TextComponentString(prefix() + "There is b:" + physicsWorld.getDynamicsWorld().countRigidBodies() + " j:" + physicsWorld.getDynamicsWorld().countJoints() + " co:" + physicsWorld.getDynamicsWorld().countCollisionObjects()));
                         modeInt = 3;
                         break;
@@ -163,11 +162,11 @@ public class CmdChunkControl implements ISubCommand {
             props.add("fullinfo");
         }
         if (args.length == 3 && args[1].equals("graphmode")) {
-            props.add("disable");
-            props.add("stop");
-            props.add("start_tracked_chunks");
-            props.add("start_full");
-            props.add("disable_and_get_physics_object_count");
+            props.add("print_then_disable");
+            props.add("print_then_keep_recent");
+            props.add("keep_tracked");
+            props.add("keep_all");
+            props.add("print_disable_and_get_physics_object_count");
         }
         r.addAll(CommandBase.getListOfStringsMatchingLastWord(args, props));
     }

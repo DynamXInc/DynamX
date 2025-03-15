@@ -45,7 +45,7 @@ public class WorldTerrainState {
      * Adds an entity to the given chunk, so we know we shouldn't unload it
      *
      * @param world The physics world
-     * @param pos The chunk pos
+     * @param pos   The chunk pos
      */
     public void addSubscriber(IPhysicsWorld world, VerticalChunkPos pos) {
         if (!world.isCallingFromPhysicsThread()) {
@@ -65,7 +65,7 @@ public class WorldTerrainState {
      * Adds the chunk to the unloadQueue if no one is using it
      *
      * @param world The physics world
-     * @param pos The chunk pos
+     * @param pos   The chunk pos
      */
     public void removeSubscriber(IPhysicsWorld world, VerticalChunkPos pos) {
         if (!world.isCallingFromPhysicsThread()) {
@@ -96,7 +96,7 @@ public class WorldTerrainState {
             ChunkLoadingTicket ticket = terrain.getTicket(pos);
             loadedTerrain.remove(pos);
             // Sometimes, the chunk can be unsubscribed even before it has been loaded
-            if(ticket.getStatus() == ChunkState.LOADED) {
+            if (ticket.getStatus() == ChunkState.LOADED) {
                 if (ticket.getCollisions() == null) {
                     throw new IllegalStateException("Cannot remove null collisions of " + ticket);
                 }
@@ -118,18 +118,18 @@ public class WorldTerrainState {
      * It the chunk is still used, it marks it as unloaded, so when it's not used anymore, it will be unloaded from memory
      *
      * @param terrain The physics terrain containing the tracked chunks
-     * @param pos The chunk pos
+     * @param pos     The chunk pos
      */
     public void onChunkUnload(PhysicsWorldTerrain terrain, VerticalChunkPos pos) {
         if (isLoadedAnywhere(pos)) {
             pendingForInvalidation.add(pos);
         } else {
             ChunkLoadingTicket ticket = terrain.removeTicket(pos); //Will cancel current loading processes
-            if (terrain.isDebug())
+            if (terrain.isDebug()) {
                 ChunkGraph.addToGrah(ticket.getPos(), ChunkGraph.ChunkActions.CHK_UNLOAD, ChunkGraph.ActionLocation.MAIN, ticket.getCollisions(), "Ticket " + ticket);
-            ticket.setUnloaded(); //will prevent loadings
+            }
+            ticket.setUnloaded(); //will prevent concurrent loadings
             terrain.getCache().invalidate(ticket, false, false);
-            //unload the collision.
         }
     }
 

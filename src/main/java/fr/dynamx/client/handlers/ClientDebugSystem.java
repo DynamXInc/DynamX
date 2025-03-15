@@ -48,7 +48,6 @@ import java.util.function.Predicate;
 public class ClientDebugSystem {
     private static final List<ProfilingData.Measure> physicsTicks = new ArrayList<>();
     public static boolean enableDebugDrawing;
-    public static int MOVE_DEBUG;
 
     public static final Map<Long, PhysicsRigidBody> trackedRigidBodies = new ConcurrentHashMap<>();
     public static final Map<Long, RigidBodyTransform>[] prevRigidBodyStates = new Map[]{new HashMap<>(), new HashMap<>()};

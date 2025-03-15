@@ -26,13 +26,12 @@ import fr.dynamx.common.entities.SeatEntity;
 import fr.dynamx.common.entities.vehicles.*;
 import fr.dynamx.common.network.sync.PhysicsEntitySynchronizer;
 import fr.dynamx.common.network.sync.SPPhysicsEntitySynchronizer;
-import fr.dynamx.common.network.udp.CommandUdp;
+import fr.dynamx.client.command.CmdUdpTest;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.world.BuiltinThreadedPhysicsWorld;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXLoadingTasks;
-import fr.dynamx.utils.client.CommandNetworkDebug;
-import fr.dynamx.utils.client.DynamXClientCommand;
+import fr.dynamx.client.command.DynamXClientCommand;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.optimization.Vector3fPool;
@@ -99,8 +98,6 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
         super.init();
 
         MinecraftForge.EVENT_BUS.register(new KeyHandler(FMLClientHandler.instance().getClient()));
-        ClientCommandHandler.instance.registerCommand(new CommandUdp());
-        ClientCommandHandler.instance.registerCommand(new CommandNetworkDebug());
         ClientCommandHandler.instance.registerCommand(new DynamXClientCommand());
 
         ClientRegistry.bindTileEntitySpecialRenderer(TEDynamXBlock.class, new TESRDynamXBlock<>());

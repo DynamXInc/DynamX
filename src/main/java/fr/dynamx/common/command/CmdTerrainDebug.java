@@ -8,11 +8,25 @@ import net.minecraft.command.WrongUsageException;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
 public class CmdTerrainDebug implements ISubCommand {
+    private final boolean isClient;
+
+    public CmdTerrainDebug(boolean isClient) {
+        this.isClient = isClient;
+    }
+
+    private String prefix() {
+        if(isClient) {
+            return TextFormatting.GOLD + "[DynamX-Client] " + TextFormatting.RESET;
+        }
+        return TextFormatting.GREEN + "[DynamX-Server] " + TextFormatting.RESET;
+    }
+
     @Override
     public String getName() {
         return "terrain_debug";
@@ -33,9 +47,9 @@ public class CmdTerrainDebug implements ISubCommand {
                 throw new WrongUsageException(getUsage());
             }
             DynamXConfig.enableDebugTerrainManager = enableDebug;
-            sender.sendMessage(new TextComponentString((enableDebug ? "Enabled" : "Disabled") + " terrain debug"));
+            sender.sendMessage(new TextComponentString(prefix() + (enableDebug ? "Enabled" : "Disabled") + " terrain debug. This will not persist after game restart."));
         } else if (args.length == 1) {
-            sender.sendMessage(new TextComponentString("Terrain debug is " + (DynamXConfig.enableDebugTerrainManager ? "enabled" : "disabled")));
+            sender.sendMessage(new TextComponentString(prefix() + "Terrain debug is " + (DynamXConfig.enableDebugTerrainManager ? "enabled" : "disabled")));
         }
     }
 

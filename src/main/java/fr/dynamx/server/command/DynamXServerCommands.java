@@ -30,13 +30,13 @@ public class DynamXServerCommands extends CommandBase {
         addCommand(new CmdReloadConfig());
         addCommand(new CmdRefreshChunks());
         addCommand(new CmdNetworkConfig());
-        addCommand(new CmdChunkControl());
+        addCommand(new CmdChunkControl(false));
         addCommand(new CmdSpawnObjects());
         addCommand(new CmdKillEntities());
         addCommand(new CmdOpenDebugGui());
         addCommand(new CmdSpawnRagdoll());
         addCommand(new CmdShockWave());
-        addCommand(new CmdTerrainDebug());
+        addCommand(new CmdTerrainDebug(false));
         addCommand(new CmdPhysicsMode());
     }
 

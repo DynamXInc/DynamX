@@ -1,4 +1,4 @@
-package fr.dynamx.utils.client;
+package fr.dynamx.client.command;
 
 import fr.dynamx.common.command.CmdChunkControl;
 import fr.dynamx.common.command.CmdOpenDebugGui;
@@ -24,8 +24,10 @@ public class DynamXClientCommand extends CommandBase {
 
     public DynamXClientCommand() {
         addCommand(new CmdOpenDebugGui());
-        addCommand(new CmdChunkControl());
-        addCommand(new CmdTerrainDebug());
+        addCommand(new CmdChunkControl(true));
+        addCommand(new CmdTerrainDebug(true));
+        addCommand(new CmdClientNetworkDebug());
+        addCommand(new CmdUdpTest());
 
         //TODO INVESTIGATE ON DISABLE MAP POOL ON CLIENT THEN REMOVE
         addCommand(new ISubCommand() {
@@ -58,7 +60,7 @@ public class DynamXClientCommand extends CommandBase {
 
     @Override
     public String getName() {
-        return "dynamx_client";
+        return "client_dynamx";
     }
 
     @Override

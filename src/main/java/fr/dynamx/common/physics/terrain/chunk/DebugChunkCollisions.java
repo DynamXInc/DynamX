@@ -20,6 +20,6 @@ public class DebugChunkCollisions extends ChunkCollisions {
 
     @Override
     public String toString() {
-        return "DebugChunkCollisions[x=" + getPos().x + ";y=" + getPos().y + ";z=" + getPos().z + "] with id " + id;
+        return "DebugChunkCollisions[x=" + getPos().x + ";y=" + getPos().y + ";z=" + getPos().z + "] with id " + id + " and state " + getChunkState();
     }
 }

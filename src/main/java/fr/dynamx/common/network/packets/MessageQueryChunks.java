@@ -16,6 +16,7 @@ import fr.dynamx.common.physics.terrain.chunk.ChunkState;
 import fr.dynamx.common.physics.terrain.chunk.ChunkTerrain;
 import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.VerticalChunkPos;
+import fr.dynamx.utils.debug.ChunkGraph;
 import fr.dynamx.utils.debug.Profiler;
 import fr.dynamx.utils.optimization.HashMapPool;
 import fr.dynamx.utils.optimization.PooledHashMap;
@@ -94,6 +95,7 @@ public class MessageQueryChunks implements IDnxPacket {
                     }
                     ticket.getLoadedCallback().whenComplete((collisions2, e) -> {
                         if (collisions2 != null) {
+                            ChunkGraph.addToGrah(ticket.getPos(), ChunkGraph.ChunkActions.NETWORK_SEND, ChunkGraph.ActionLocation.NETWORK, collisions2, ticket + " => WAIT FOR MEDIUM_AFTER_LOW LOAD (" + data[0] + ")");
                             processLoadedElements(ctx, ticket.getPos(), data, collisions2.getElements());
                         } else if (e != null) {
                             DynamXMain.log.error("0x54 Failed to load chunk {}, for client {}", ticket, ctx.getServerHandler().player.getName(), e);
@@ -118,6 +120,7 @@ public class MessageQueryChunks implements IDnxPacket {
             if (ticket.getLoadedCallback() != null) {
                 ticket.getLoadedCallback().whenComplete((collisions2, e) -> {
                     if (collisions2 != null) {
+                        ChunkGraph.addToGrah(ticket.getPos(), ChunkGraph.ChunkActions.NETWORK_SEND, ChunkGraph.ActionLocation.NETWORK, collisions2, ticket + " => WAIT FOR LOAD (" + data[0] + ") Subscribed: " + subscribe);
                         processLoadedElements(ctx, ticket.getPos(), data, collisions2.getElements());
                     } else if (e != null) {
                         DynamXMain.log.error("0x55 Failed to load chunk {}, for client {}", ticket, ctx.getServerHandler().player.getName(), e);
@@ -158,6 +161,7 @@ public class MessageQueryChunks implements IDnxPacket {
                 if (dataType == 0 || dataType == 1) {
                     ChunkLoadingTicket ticket = terrainManager.getTicket(pos);
                     if (ticket.getStatus() == ChunkState.LOADED) {
+                        ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.NETWORK_SEND, ChunkGraph.ActionLocation.NETWORK, ticket.getCollisions(), ticket + " => DIRECT SEND (" + dataType + ")");
                         processLoadedElements(ctx, pos, data, ticket.getCollisions().getElements());
                     } else {
                         boysToLoad.put(ticket, data);
@@ -165,9 +169,11 @@ public class MessageQueryChunks implements IDnxPacket {
                 } else if (dataType == 2) {
                     byte[] dt = ((FileTerrainCache) terrainManager.getCache()).getSlopesFile().getRawChunkData(pos);
                     if (dt == null) {
+                        ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.NETWORK_SEND, ChunkGraph.ActionLocation.NETWORK, null, "Empty guy (" + dataType + ")");
                         emptyGuys.put(pos, data);
                     } else {
                         //Don't use reply (return) system, because it may interfere with packet sending (weird bugs seen, maybe due to Mohist)
+                        ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.NETWORK_SEND, ChunkGraph.ActionLocation.NETWORK, null, "Slope data only (" + dataType + ")");
                         DynamXContext.getNetwork().sendToClientFromOtherThread(new MessageChunkData(pos, data, dt), EnumPacketTarget.PLAYER, ctx.getServerHandler().player);
                     }
                 }

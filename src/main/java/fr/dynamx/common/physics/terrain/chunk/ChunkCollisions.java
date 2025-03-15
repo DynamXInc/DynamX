@@ -341,7 +341,7 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
             boolean shouldSave = localLoadCollisions(terrainElements, cache, needType, ticket, fpos, localProfiler);
             if (!c.isValid()) {
                 if (DynamXConfig.enableDebugTerrainManager) {
-                    System.err.println("[COLL] Ignored async loaded chunk, new request sent " + c.getTicket() + " " + c.getSnapIndex() + " Got " + terrainElements);
+                    DynamXMain.log.error("[COLL] Ignored async loaded chunk, new request sent {} {} Got {}", c.getTicket(), c.getSnapIndex(), terrainElements);
                     ChunkGraph.addToGrah(ticket.getPos(), ChunkGraph.ChunkActions.ASYNC_COMPLETE_FUTURE_EXEC, ChunkGraph.ActionLocation.LOADER, this, "IGNORED async load. " + ticket + " " + elements + " snapid " + c.getSnapIndex() + " Got " + terrainElements);
                 }
                 return;

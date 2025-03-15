@@ -286,26 +286,34 @@ public class PhysicsWorldTerrain implements ITerrainManager {
     private void receiveAsyncLoadedChunks() {
         while (!asyncLoadedQueue.isEmpty()) {
             ChunkLoadingTicket.AsyncLoadedChunk toffer = asyncLoadedQueue.poll();
-            if (toffer == null) return; //We aren't safe from weird multithreading errors
+            if (toffer == null) {
+                continue; //We aren't safe from weird multithreading errors
+            }
+
             if (!toffer.getSnap().isValid()) //The received version isn't valid anymore
             {
-                if (DynamXConfig.enableDebugTerrainManager)
-                    DynamXMain.log.error("[PWT] Ignored async loaded chunk, new request sent " + toffer.getSnap().getTicket() + " " + toffer.getSnap().getSnapIndex());
-                return;
+                if (isDebug) {
+                    DynamXMain.log.error("[PWT] Ignored async loaded chunk, new request sent {} {}", toffer.getSnap().getTicket(), toffer.getSnap().getSnapIndex());
+                }
+                continue;
             }
-            if (!getTerrainState().isLoadedAnywhere(toffer.getSnap().getPos())) {
-                if (DynamXConfig.enableDebugTerrainManager)
-                    DynamXMain.log.error("[PWT] Ignored async loaded chunk, not in-use anymore!" + toffer.getSnap().getTicket() + " " + toffer.getSnap().getSnapIndex());
-                return;
-            }
+
             ChunkCollisions offer = toffer.getCollisionsIn();
             ChunkLoadingTicket ticket = toffer.getSnap().getTicket();
+
             synchronized (ticket) {
-                if (isDebug)
+                if (isDebug) {
                     ChunkGraph.addToGrah(ticket.getPos(), ChunkGraph.ChunkActions.HOTSWAP, ChunkGraph.ActionLocation.MAIN, offer, "ASYNC LOAD Ticket " + ticket + " " + toffer.getSnap().getSnapIndex());
+                }
                 ticket.incrStatusIndex(); //Invalidate other loading operations
                 ticket.setLoaded(offer);  //Will remove the previous chunk from loaded terrain
-                addChunkToPhysicsWorld(ticket, false); //Add the new chunk to the physics world. FIX : ONLY IF IT'S USED
+
+                if (getTerrainState().isLoadedAnywhere(toffer.getSnap().getPos())) {
+                    addChunkToPhysicsWorld(ticket, false); //Add the new chunk to the physics world, if it's used
+                } else if (DynamXConfig.enableDebugTerrainManager) {
+                    DynamXMain.log.error("[PWT] Ignored async loaded chunk, not in-use anymore! {} {}", toffer.getSnap().getTicket(), toffer.getSnap().getSnapIndex());
+                }
+
                 ticket.fireLoadedCallback(); //Call this after adding the chunk : the callback may ask for a new load of this ticket
             }
         }

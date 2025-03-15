@@ -1,4 +1,4 @@
-package fr.dynamx.server.command;
+package fr.dynamx.common.command;
 
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.api.physics.terrain.ITerrainElement;
@@ -31,14 +31,17 @@ public class CmdChunkControl implements ISubCommand {
 
     @Override
     public String getUsage() {
-        return getName() + " <getelements|getslopes|clearslopes|graph|getgraph|resetstate|fullinfo> [pos|mode]";
+        return getName() + " <graphmode|getelements|getslopes|clearslopes|getgraph|resetstate|fullinfo> <pos|mode>";
     }
 
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         if (args.length >= 3) {
             IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(sender.getEntityWorld());
-            if (args[1].equalsIgnoreCase("graph") && args.length == 3) {
+            if (args[1].equalsIgnoreCase("graphmode")) {
+                if(args.length != 3) {
+                    throw new WrongUsageException("chunkcontrol graphmode <mode>");
+                }
                 int mode = CommandBase.parseInt(args[2]);
                 switch (mode) {
                     case -1:
@@ -118,26 +121,34 @@ public class CmdChunkControl implements ISubCommand {
                         physicsWorld.getTerrainManager().onChunkChanged(pos);
                         sender.sendMessage(new TextComponentString(TextFormatting.GRAY + "Reloading this chunk..."));
                     }
-                } else
-                    throw new WrongUsageException("/dynamx " + getUsage());
+                } else {
+                    throw new WrongUsageException(getUsage());
+                }
             } else
-                throw new WrongUsageException("/dynamx " + getUsage());
+                throw new WrongUsageException(getUsage());
         } else
-            throw new WrongUsageException("/dynamx " + getUsage());
+            throw new WrongUsageException(getUsage());
     }
 
     @Override
     public void getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos, List<String> r) {
+        List<String> props = new ArrayList<>();
         if (args.length == 2) {
-            List<String> props = new ArrayList<>();
+            props.add("graphmode");
             props.add("getelements");
             props.add("getslopes");
             props.add("clear");
-            props.add("graph");
             props.add("getgraph");
             props.add("resetstate");
             props.add("fullinfo");
-            r.addAll(CommandBase.getListOfStringsMatchingLastWord(args, props));
         }
+        if (args.length == 3 && args[2].equals("graphmode")) {
+            props.add("-1");
+            props.add("0");
+            props.add("1");
+            props.add("2");
+            props.add("3");
+        }
+        r.addAll(CommandBase.getListOfStringsMatchingLastWord(args, props));
     }
 }

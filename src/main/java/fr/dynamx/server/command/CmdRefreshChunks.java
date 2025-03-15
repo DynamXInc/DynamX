@@ -1,6 +1,7 @@
 package fr.dynamx.server.command;
 
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.command.ISubCommand;
 import fr.dynamx.utils.VerticalChunkPos;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;

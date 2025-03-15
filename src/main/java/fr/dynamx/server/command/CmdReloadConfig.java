@@ -1,5 +1,6 @@
 package fr.dynamx.server.command;
 
+import fr.dynamx.common.command.ISubCommand;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.DynamXLoadingTasks;
 import net.minecraft.command.CommandException;

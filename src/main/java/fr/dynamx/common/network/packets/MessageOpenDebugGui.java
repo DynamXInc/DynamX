@@ -37,10 +37,6 @@ public class MessageOpenDebugGui implements IDnxPacket {
     public static class Handler implements IMessageHandler<MessageOpenDebugGui, IMessage> {
         @Override
         public IMessage onMessage(MessageOpenDebugGui message, MessageContext ctx) {
-            /*if (message.action == -20) {
-                //CmdOpenDebugGui.openedGuis.remove(ctx.getServerHandler().player);
-            }
-            else*/
             if (message.action == 125) {
                 ACsGuiApi.asyncLoadThenShowGui("Dnx Debug", NewGuiDnxDebug::new);
             }

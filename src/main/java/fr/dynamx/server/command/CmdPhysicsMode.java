@@ -3,6 +3,7 @@ package fr.dynamx.server.command;
 import fr.dynamx.api.network.EnumPacketTarget;
 import fr.dynamx.api.physics.IPhysicsSimulationMode;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.command.ISubCommand;
 import fr.dynamx.common.network.packets.MessageSyncConfig;
 import fr.dynamx.common.physics.world.PhysicsSimulationModes;
 import net.minecraft.command.CommandException;

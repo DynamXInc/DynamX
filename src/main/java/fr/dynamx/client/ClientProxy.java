@@ -32,6 +32,7 @@ import fr.dynamx.common.physics.world.BuiltinThreadedPhysicsWorld;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXLoadingTasks;
 import fr.dynamx.utils.client.CommandNetworkDebug;
+import fr.dynamx.utils.client.DynamXClientCommand;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.optimization.Vector3fPool;
@@ -100,7 +101,7 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
         MinecraftForge.EVENT_BUS.register(new KeyHandler(FMLClientHandler.instance().getClient()));
         ClientCommandHandler.instance.registerCommand(new CommandUdp());
         ClientCommandHandler.instance.registerCommand(new CommandNetworkDebug());
-        //TODO /dynamxclient command
+        ClientCommandHandler.instance.registerCommand(new DynamXClientCommand());
 
         ClientRegistry.bindTileEntitySpecialRenderer(TEDynamXBlock.class, new TESRDynamXBlock<>());
         if (!Minecraft.getMinecraft().getFramebuffer().isStencilEnabled())

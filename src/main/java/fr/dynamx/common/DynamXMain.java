@@ -24,7 +24,7 @@ import fr.dynamx.common.items.tools.ItemShockWave;
 import fr.dynamx.common.items.tools.ItemSlopes;
 import fr.dynamx.common.objloader.data.ObjModelData;
 import fr.dynamx.common.objloader.data.ObjObjectData;
-import fr.dynamx.server.command.DynamXCommands;
+import fr.dynamx.server.command.DynamXServerCommands;
 import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXMpsConfig;
@@ -209,7 +209,7 @@ public class DynamXMain {
 
     @EventHandler
     public void onServerStarting(FMLServerStartingEvent event) {
-        event.registerServerCommand(new DynamXCommands());
+        event.registerServerCommand(new DynamXServerCommands());
     }
 
     @EventHandler

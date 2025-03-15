@@ -1,4 +1,4 @@
-package fr.dynamx.server.command;
+package fr.dynamx.common.command;
 
 import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.command.CommandException;

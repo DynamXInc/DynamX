@@ -6,6 +6,7 @@ import fr.dynamx.api.network.EnumPacketTarget;
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.api.physics.terrain.ITerrainElement;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.command.ISubCommand;
 import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.items.tools.ItemSlopes;
 import fr.dynamx.common.network.packets.MessageSwitchAutoSlopesMode;

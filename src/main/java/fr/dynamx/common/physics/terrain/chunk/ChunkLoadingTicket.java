@@ -95,8 +95,9 @@ public class ChunkLoadingTicket implements VerticalChunkPos.VerticalChunkPosCont
         incrStatusIndex();
         this.loadedCallback = new CompletableFuture<>();
         this.status = ChunkState.LOADING;
-        if (DynamXConfig.enableDebugTerrainManager)
-            ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.SET_LOADING, ChunkGraph.ActionLocation.UNKNOWN, null, "" + this);
+        if (DynamXConfig.enableDebugTerrainManager) {
+            ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.SET_LOADING, ChunkGraph.ActionLocation.UNKNOWN, this);
+        }
     }
 
     /**

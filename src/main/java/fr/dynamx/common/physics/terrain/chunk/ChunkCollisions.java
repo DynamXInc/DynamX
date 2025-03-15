@@ -310,12 +310,13 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
         // and load the slopes, async
         if (cached == null && cache.isRemoteCache()) {
             cache.asyncLoad(ticket, TerrainElementType.PERSISTENT_ELEMENTS).thenAccept(elements -> {
-                if (DynamXConfig.enableDebugTerrainManager)
-                    System.out.println("Post-adding slopes to " + this + " ! Are " + elements);
-                if (elements != null) //If there are loaded persistent elements
+                if (elements != null) { //If there are loaded persistent elements
                     addPersistentElements(manager, elements.getPersistentElements());
-                if (DynamXConfig.enableDebugTerrainManager)
-                    ChunkGraph.addToGrah(ticket.getPos(), ChunkGraph.ChunkActions.ASYNC_COMPLETE_FUTURE_EXEC, ChunkGraph.ActionLocation.MAIN, this, "Post adder. " + ticket + " " + elements.getPersistentElements());
+                }
+                if (DynamXConfig.enableDebugTerrainManager) {
+                    ChunkGraph.addToGrah(ticket.getPos(), ChunkGraph.ChunkActions.ASYNC_COMPLETE_FUTURE_EXEC, ChunkGraph.ActionLocation.MAIN, this,
+                            "Post adder. " + ticket + " " + (elements == null ? "null" : elements.getPersistentElements()));
+                }
             }).exceptionally(e -> {
                 DynamXMain.log.error("Failed to post-add persistent elements to chunk " + ticket, e);
                 return null;

@@ -19,6 +19,7 @@ import fr.dynamx.utils.maths.DynamXMath;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.renderer.GlStateManager;
+import org.joml.Matrix4f;
 
 import java.util.List;
 
@@ -73,11 +74,11 @@ public class PartHandle extends BasePart<ModularVehicleInfo> implements IDrawabl
         }
 
         @Override
-        public void render(BaseRenderContext.EntityRenderContext context, A packInfo) {
+        public void render(BaseRenderContext.EntityRenderContext context, A packInfo, Matrix4f parentTransform) {
             if (!context.getModel().containsObjectOrNode(getObjectName()))
                 return;
             GlStateManager.pushMatrix();
-            transformToRotationPoint();
+            transformToRotationPoint(parentTransform);
             if (context.getEntity() != null && context.getEntity().hasModuleOfType(HelicopterEngineModule.class)) {
                 HelicopterEngineModule engine = context.getEntity().getModuleByType(HelicopterEngineModule.class);
                 // Rotating the handle with Dx and Dy
@@ -88,7 +89,7 @@ public class PartHandle extends BasePart<ModularVehicleInfo> implements IDrawabl
             }
             context.getModel().renderGroup(getObjectName(), context.getTextureId(), context.isUseVanillaRender());
             GlStateManager.popMatrix();
-            renderChildren(context, packInfo);
+            renderChildren(context, packInfo, transform);
         }
     }
 }

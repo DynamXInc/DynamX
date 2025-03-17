@@ -157,7 +157,7 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
                 && ((PhysicsEntity<?>) ClientEventHandler.MC.player.getRidingEntity()).getSynchronizer().getSimulationHolder().ownsPhysics(Side.CLIENT)) {
             return true;
         }
-        return DynamXContext.getPlayerPickingObjects().containsKey(ClientEventHandler.MC.player.getEntityId()) &&
+        return ClientEventHandler.MC.player != null && DynamXContext.getPlayerPickingObjects().containsKey(ClientEventHandler.MC.player.getEntityId()) &&
                 DynamXContext.getPlayerPickingObjects().get(ClientEventHandler.MC.player.getEntityId()) == entity.getEntityId();
         //on client side : true if the player is driving a vehicle (in any entity)
         /*return entity.getNetwork().getSimulationHolder() == SimulationHolder.SERVER_SP || (!entity.world.isRemote && entity.getNetwork().getSimulationHolder() == SimulationHolder.SERVER)

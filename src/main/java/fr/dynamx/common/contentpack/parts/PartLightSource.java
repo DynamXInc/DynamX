@@ -42,6 +42,7 @@ import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import org.joml.Matrix4f;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -287,12 +288,12 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
 
         @Override
         @SideOnly(Side.CLIENT)
-        public void render(IRenderContext context, A packInfo) {
+        public void render(IRenderContext context, A packInfo, Matrix4f parentTransform) {
             /* Rendering light sources */
             boolean isEntity = context instanceof BaseRenderContext.EntityRenderContext && ((BaseRenderContext.EntityRenderContext) context).getEntity() != null;
             AbstractLightsModule lights = isEntity ? ((BaseRenderContext.EntityRenderContext) context).getEntity().getModuleByType(AbstractLightsModule.class) :
                     context instanceof BaseRenderContext.BlockRenderContext && ((BaseRenderContext.BlockRenderContext) context).getTileEntity() != null ? ((BaseRenderContext.BlockRenderContext) context).getTileEntity().getModuleByType(AbstractLightsModule.class) : null;
-            transformToRotationPoint();
+            transformToRotationPoint(parentTransform);
             /* Rendering light source */
             LightObject onLightObject = null;
             if (lights != null) {
@@ -369,7 +370,7 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
                 GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             }
             GlStateManager.popMatrix();
-            renderChildren(context, packInfo);
+            renderChildren(context, packInfo, transform);
         }
 
         @Override

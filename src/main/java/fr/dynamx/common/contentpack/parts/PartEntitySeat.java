@@ -43,6 +43,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.client.MinecraftForgeClient;
+import org.joml.Matrix4f;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -197,7 +198,7 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
         }
 
         @Override
-        public void render(BaseRenderContext.EntityRenderContext context, A packInfo) {
+        public void render(BaseRenderContext.EntityRenderContext context, A packInfo, Matrix4f parentTransform) {
             if (MinecraftForgeClient.getRenderPass() != 0 || !(context.getEntity() instanceof IModuleContainer.ISeatsContainer))
                 return;
             SeatsModule seats = ((IModuleContainer.ISeatsContainer) context.getEntity()).getSeats();
@@ -210,7 +211,7 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
             ClientEventHandler.renderingEntity = seatRider.getUniqueID();
             DynamXRenderUtils.popGlAllAttribBits();
             float partialTicks = context.getPartialTicks();
-            transformToRotationPoint();
+            transformToRotationPoint(parentTransform);
 
             //Transform the player to match the seat rotation and size
             EnumSeatPlayerPosition position = getPlayerPosition();

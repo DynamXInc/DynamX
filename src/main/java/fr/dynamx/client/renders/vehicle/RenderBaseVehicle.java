@@ -57,7 +57,7 @@ public class RenderBaseVehicle<T extends BaseVehicleEntity<?>> extends RenderPhy
 
     @Override
     public void renderEntity(T entity, BaseRenderContext.EntityRenderContext context) {
-        ((SceneNode<BaseRenderContext.EntityRenderContext, ModularVehicleInfo>) entity.getPackInfo().getSceneGraph()).render(context, entity.getPackInfo());
+        ((SceneNode<BaseRenderContext.EntityRenderContext, ModularVehicleInfo>) entity.getPackInfo().getSceneGraph()).render(context, entity.getPackInfo(), null);
     }
 
     @Override
@@ -76,7 +76,7 @@ public class RenderBaseVehicle<T extends BaseVehicleEntity<?>> extends RenderPhy
         if (modelRenderer == null) {
             return;
         }
-        ((SceneNode<IRenderContext, ModularVehicleInfo>) packInfo.getSceneGraph()).render(context.setRenderParams(0, 0, 0, 1, true).setModelParams(modelRenderer, textureId), packInfo);
+        ((SceneNode<IRenderContext, ModularVehicleInfo>) packInfo.getSceneGraph()).render(context.setRenderParams(0, 0, 0, 1, true).setModelParams(modelRenderer, textureId), packInfo, null);
     }
 
     public static class RenderCar<T extends CarEntity<?>> extends RenderBaseVehicle<T> {

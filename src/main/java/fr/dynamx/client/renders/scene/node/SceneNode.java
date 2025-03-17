@@ -25,14 +25,17 @@ public interface SceneNode<C extends IRenderContext, A extends IModelPackObject>
     /**
      * Renders this subtree of the scene node.
      *
-     * @param context  The render context
-     * @param packInfo The pack info of the entity (the owner of the scene graph)
+     * @param context         The render context
+     * @param packInfo        The pack info of the entity (the owner of the scene graph)
+     * @param parentTransform The transformation matrix of the parent node, shouldn't be modified. This <strong>isn't</strong> the transform of THIS node. <br> <br>
+     *                        Nodes are rendered using the transformations stored in the transform matrix, NOT using open gl transformations methods. <br>
+     *                        Each child node should be rendered with the transformations of the parent node.
      */
-    void render(C context, A packInfo);
+    void render(C context, A packInfo, Matrix4f parentTransform);
 
     /**
      * Renders the debug of this subtree of the scene node. <br>
-     * <strong>Note:</strong> unlike {@link SceneNode#render(IRenderContext, IModelPackObject)}, the transformations of the parent nodes are not applied.
+     * <strong>Note:</strong> unlike {@link SceneNode#render(IRenderContext, IModelPackObject, Matrix4f)}, the transformations of the parent nodes are not applied.
      *
      * @param context  The render context
      * @param packInfo The pack info of the entity (the owner of the scene graph)
@@ -43,14 +46,6 @@ public interface SceneNode<C extends IRenderContext, A extends IModelPackObject>
      * @return The children of the scene node (attached parts)
      */
     List<SceneNode<C, A>> getLinkedChildren();
-
-    /**
-     * Nodes are rendered using the transformations stored in the transform matrix, NOT using open gl transformations methods. <br>
-     * Each child node will be rendered with the transformations of the parent node.
-     *
-     * @return The transformation matrix of this node
-     */
-    Matrix4f getTransform();
 
     /**
      * @return The parent of this node
@@ -89,9 +84,9 @@ public interface SceneNode<C extends IRenderContext, A extends IModelPackObject>
         private final SceneNode<C, A> encapsulatedScene;
 
         @Override
-        public void render(C context, A packInfo) {
+        public void render(C context, A packInfo, Matrix4f parentTransform) {
             if (listener.beforeRender(encapsulatedScene, part, context, packInfo)) {
-                encapsulatedScene.render(context, packInfo);
+                encapsulatedScene.render(context, packInfo, parentTransform);
                 listener.afterRender(encapsulatedScene, part, context, packInfo);
             }
         }
@@ -104,11 +99,6 @@ public interface SceneNode<C extends IRenderContext, A extends IModelPackObject>
         @Override
         public List<SceneNode<C, A>> getLinkedChildren() {
             return Collections.singletonList(encapsulatedScene);
-        }
-
-        @Override
-        public Matrix4f getTransform() {
-            return encapsulatedScene.getTransform();
         }
 
         @Override

@@ -131,7 +131,7 @@ public class ModelObjArmor extends ModelBiped {
         }
         renderContext.setModelParams((EntityLivingBase) entity, getActivePart(), model, (byte) (armorObject.getMaxVariantId() > 1 ? itemstack.getMetadata() : 0));
         if (!MinecraftForge.EVENT_BUS.post(new DynamXArmorRenderEvent(renderContext, armorObject.getSceneGraph(), EventPhase.PRE))) {
-            ((SceneNode<BaseRenderContext.ArmorRenderContext, ArmorObject<?>>) armorObject.getSceneGraph()).render(renderContext, armorObject);
+            ((SceneNode<BaseRenderContext.ArmorRenderContext, ArmorObject<?>>) armorObject.getSceneGraph()).render(renderContext, armorObject, null);
             MinecraftForge.EVENT_BUS.post(new DynamXArmorRenderEvent(renderContext, armorObject.getSceneGraph(), EventPhase.POST));
         }
     }

@@ -48,6 +48,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
+import org.joml.Matrix4f;
 
 import javax.annotation.Nullable;
 import javax.vecmath.Vector2f;
@@ -368,8 +369,8 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
         }
 
         @Override
-        public void render(BaseRenderContext.EntityRenderContext context, A packInfo) {
-            transform.set(parent.getTransform());
+        public void render(BaseRenderContext.EntityRenderContext context, A packInfo, Matrix4f parentTransform) {
+            transform.set(parentTransform);
             ModularPhysicsEntity<?> entity = context.getEntity();
             DoorsModule module = entity != null ? entity.getModuleByType(DoorsModule.class) : null;
             if (!isEnabled() || module == null || module.getCurrentState(getId()) == DoorsModule.DoorState.CLOSED) {
@@ -395,7 +396,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
             transformToPartPos();
             context.getRender().renderModelGroup(context.getModel(), getObjectName(), entity, context.getTextureId(), false);
             GlStateManager.popMatrix();
-            renderChildren(context, packInfo);
+            renderChildren(context, packInfo, transform);
         }
 
         @Override

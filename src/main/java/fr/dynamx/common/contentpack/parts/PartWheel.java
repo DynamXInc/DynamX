@@ -239,7 +239,7 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
         }
 
         @Override
-        public void render(BaseRenderContext.EntityRenderContext context, A packInfo) {
+        public void render(BaseRenderContext.EntityRenderContext context, A packInfo, Matrix4f parentTransform) {
             WheelsModule wheelsModule = context.getEntity() != null ? context.getEntity().getModuleByType(WheelsModule.class) : null;
             boolean hasWheelsModule = wheelsModule != null;
             if (!isMudGuard && hasWheelsModule && wheelsModule.getWheelsStates()[getId()] == WheelsModule.WheelState.REMOVED)
@@ -247,7 +247,7 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
             PartWheelInfo info = hasWheelsModule ? wheelsModule.getWheelInfo(getId()) : getDefaultWheelInfo();
             if (!info.isModelValid() && getRimObjectName() == null && !isMudGuard)
                 return;
-            transformToRotationPoint();
+            transformToRotationPoint(parentTransform);
             int index;
             if (hasWheelsModule) {
                 /* Steering rotation*/
@@ -277,7 +277,7 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
             else
                 renderWheel(context.getEntity(), context, packInfo, info, wheelsModule);
             GlStateManager.popMatrix();
-            renderChildren(context, packInfo);
+            renderChildren(context, packInfo, transform);
         }
 
         @Override
@@ -308,7 +308,7 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
         }
 
         @Override
-        public void render(BaseRenderContext.EntityRenderContext context, A packInfo) {
+        public void render(BaseRenderContext.EntityRenderContext context, A packInfo, Matrix4f parentTransform) {
             WheelsModule wheelsModule = context.getEntity() != null ? context.getEntity().getModuleByType(WheelsModule.class) : null;
             boolean hasWheelsModule = wheelsModule != null;
             if (hasWheelsModule && wheelsModule.getWheelsStates()[getId()] == WheelsModule.WheelState.REMOVED)
@@ -316,7 +316,7 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
             PartWheelInfo info = hasWheelsModule ? wheelsModule.getWheelInfo(getId()) : getDefaultWheelInfo();
             if (!info.isModelValid() && getRimObjectName() == null)
                 return;
-            transformToRotationPoint();
+            transformToRotationPoint(parentTransform);
             if (hasWheelsModule) {
                 applyWheelRotation(context, transform, wheelsModule);
             }
@@ -325,7 +325,7 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
             transformToPartPos();
             renderWheel(context.getEntity(), context, packInfo, info, wheelsModule);
             GlStateManager.popMatrix();
-            renderChildren(context, packInfo);
+            renderChildren(context, packInfo, transform);
         }
 
         @Override

@@ -24,6 +24,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
+import org.joml.Matrix4f;
 
 import java.util.List;
 
@@ -79,11 +80,11 @@ public class SteeringWheelInfo extends BasePart<ModularVehicleInfo> implements I
         }
 
         @Override
-        public void render(BaseRenderContext.EntityRenderContext context, A packInfo) {
+        public void render(BaseRenderContext.EntityRenderContext context, A packInfo, Matrix4f parentTransform) {
             DxModelRenderer vehicleModel = context.getModel();
             /* Rendering the steering wheel */
             //Translate to the steering wheel rotation point
-            transformToRotationPoint();
+            transformToRotationPoint(parentTransform);
             //Rotate the steering wheel
             if (context.getEntity() != null && context.getEntity().hasModuleOfType(WheelsModule.class)) {
                 int directingWheel = VehicleEntityProperties.getPropertyIndex(packInfo.getDirectingWheel(), VehicleEntityProperties.EnumVisualProperties.STEER_ANGLE);
@@ -94,7 +95,7 @@ public class SteeringWheelInfo extends BasePart<ModularVehicleInfo> implements I
                 }
             } else if (context.getEntity() != null && context.getEntity().hasModuleOfType(BoatPropellerModule.class)) {
                 BoatPropellerModule module = context.getEntity().getModuleByType(BoatPropellerModule.class);
-                float angle = module.getPrevPhysicsSteeringForce()+ (module.getPhysicsSteeringForce() - module.getPrevPhysicsSteeringForce() ) * context.getPartialTicks();
+                float angle = module.getPrevPhysicsSteeringForce() + (module.getPhysicsSteeringForce() - module.getPrevPhysicsSteeringForce()) * context.getPartialTicks();
                 angle = angle * 6;
                 transform.rotate(angle, 0F, 0F, 1F);
             }
@@ -105,7 +106,7 @@ public class SteeringWheelInfo extends BasePart<ModularVehicleInfo> implements I
             //Render it
             vehicleModel.renderGroup(getObjectName(), context.getTextureId(), context.isUseVanillaRender());
             GlStateManager.popMatrix();
-            renderChildren(context, packInfo);
+            renderChildren(context, packInfo, transform);
         }
 
         @Override

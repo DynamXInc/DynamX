@@ -17,12 +17,12 @@ import java.util.List;
  *
  * @param <A> The type of the pack info (the owner of the scene graph)
  */
-@Getter
 @RequiredArgsConstructor
 public class ArmorNode<A extends ArmorObject<?>> extends AbstractItemNode<BaseRenderContext.ArmorRenderContext, A> {
     /**
      * The children that are linked to the entity (ie that will be rendered with the entity transformations)
      */
+    @Getter
     private final List<SceneNode<BaseRenderContext.ArmorRenderContext, A>> linkedChildren;
 
     /**
@@ -30,11 +30,10 @@ public class ArmorNode<A extends ArmorObject<?>> extends AbstractItemNode<BaseRe
      * Stores the transformations of the node, and is used to render the node and its children <br>
      * Do not use GlStateManager to apply transformations, use this matrix instead
      */
-    @Getter
     private final Matrix4f transform = new Matrix4f();
 
     @Override
-    public void render(BaseRenderContext.ArmorRenderContext context, A packInfo) {
+    public void render(BaseRenderContext.ArmorRenderContext context, A packInfo, Matrix4f parentTransform) {
         //GlStateManager.scale(armorInfo.scale[0],armorInfo.scale[1],armorInfo.scale[2]);
         transform.identity();
         context.getArmorModel().isSneak = context.getEntity() != null && context.getEntity().isSneaking();
@@ -44,7 +43,7 @@ public class ArmorNode<A extends ArmorObject<?>> extends AbstractItemNode<BaseRe
         context.getArmorModel().renderPart(transform, context.getEquipmentSlot(), context.isUseVanillaRender());
         //Render the linked children
         if (!linkedChildren.isEmpty()) {
-            linkedChildren.forEach(c -> c.render(context, packInfo));
+            linkedChildren.forEach(c -> c.render(context, packInfo, transform));
         }
         DynamXRenderUtils.popGlAllAttribBits();
     }

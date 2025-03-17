@@ -31,12 +31,12 @@ import java.util.List;
  *
  * @param <A> The type of the pack info (the owner of the scene graph)
  */
-@Getter
 @RequiredArgsConstructor
 public class BlockNode<A extends BlockObject<?>> extends AbstractItemNode<BaseRenderContext.BlockRenderContext, A> {
     /**
      * The children that are linked to the entity (ie that will be rendered with the entity transformations)
      */
+    @Getter
     private final List<SceneNode<BaseRenderContext.BlockRenderContext, A>> linkedChildren;
 
     /**
@@ -44,11 +44,10 @@ public class BlockNode<A extends BlockObject<?>> extends AbstractItemNode<BaseRe
      * Stores the transformations of the node, and is used to render the node and its children <br>
      * Do not use GlStateManager to apply transformations, use this matrix instead
      */
-    @Getter
     private final Matrix4f transform = new Matrix4f();
 
     @Override
-    public void render(BaseRenderContext.BlockRenderContext context, A packInfo) {
+    public void render(BaseRenderContext.BlockRenderContext context, A packInfo, Matrix4f parentTransform) {
         if (context.getTileEntity() != null && context.getTileEntity().getBlockType() instanceof DynamXBlock) { //the instanceof fixes a crash
             transform.identity();
             Vector3fPool.openPool();
@@ -72,7 +71,7 @@ public class BlockNode<A extends BlockObject<?>> extends AbstractItemNode<BaseRe
             GlStateManager.popMatrix();
             //Render the linked children
             transform.scale(1 / packInfo.getScaleModifier().x, 1 / packInfo.getScaleModifier().y, 1 / packInfo.getScaleModifier().z);
-            linkedChildren.forEach(c -> c.render(context, packInfo));
+            linkedChildren.forEach(c -> c.render(context, packInfo, transform));
 
             GlQuaternionPool.closePool();
             QuaternionPool.closePool();

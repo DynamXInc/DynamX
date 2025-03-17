@@ -31,6 +31,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
+import org.joml.Matrix4f;
 
 import java.util.List;
 
@@ -108,11 +109,11 @@ public class PartRotor extends BasePart<ModularVehicleInfo> implements IDrawable
         }
 
         @Override
-        public void render(IRenderContext context, A packInfo) {
+        public void render(IRenderContext context, A packInfo, Matrix4f parentTransform) {
             DxModelRenderer vehicleModel = context.getModel();
             if (!vehicleModel.containsObjectOrNode(getObjectName()))
                 return;
-            transformToRotationPoint();
+            transformToRotationPoint(parentTransform);
             ModularPhysicsEntity<?> entity = context instanceof BaseRenderContext.EntityRenderContext ? ((BaseRenderContext.EntityRenderContext) context).getEntity() : null;
             // Rotating the rotor.
             if (null == RotorType.ALWAYS_ROTATING) {

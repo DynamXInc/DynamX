@@ -13,7 +13,6 @@ import fr.dynamx.common.blocks.TEDynamXBlock;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.client.DynamXRenderUtils;
-import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.renderer.GlStateManager;
@@ -39,7 +38,7 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
         context.setRenderParams(x, y, z, partialTicks, false);
         SceneNode<BaseRenderContext.BlockRenderContext, BlockObject<?>> sceneNode = (SceneNode<BaseRenderContext.BlockRenderContext, BlockObject<?>>) packInfo.getSceneGraph();
         if (!MinecraftForge.EVENT_BUS.post(new DynamXBlockEvent.RenderTileEntity((DynamXBlock<?>) te.getBlockType(), context, sceneNode, this, destroyStage, alpha, EventPhase.PRE))) {
-            sceneNode.render(context, packInfo);
+            sceneNode.render(context, packInfo, null);
             Vector3f pos = DynamXUtils.toVector3f(te.getPos())
                     .add(packInfo.getTranslation().add(te.getRelativeTranslation()))
                     .add(0.5f, 1.5f, 0.5f);

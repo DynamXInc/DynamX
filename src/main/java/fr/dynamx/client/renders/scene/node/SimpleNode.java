@@ -57,7 +57,6 @@ public abstract class SimpleNode<C extends IRenderContext, A extends IModelPackO
      * Contains the transformations of the parent node, and the transformations of this node <br>
      * Do not use GlStateManager to apply transformations, use this matrix instead
      */
-    @Getter
     protected final Matrix4f transform = new Matrix4f();
 
     /**
@@ -100,9 +99,13 @@ public abstract class SimpleNode<C extends IRenderContext, A extends IModelPackO
     /**
      * Applies the rotation point transformations of this node, and the parent's transformations <br>
      * This should be called before applying "dynamic" transformations to the node (like the rotation of a wheel), and before transformToPartPos()
+     *
+     * @param parentTransform The transformation matrix of the parent node, shouldn't be modified <br>
+     *     Nodes are rendered using the transformations stored in the transform matrix, NOT using open gl transformations methods. <br>
+     *     Each child node should be rendered with the transformations of the parent node.
      */
-    protected void transformToRotationPoint() {
-        transform.set(parent.getTransform());
+    protected void transformToRotationPoint(Matrix4f parentTransform) {
+        transform.set(parentTransform);
         if (translation != null)
             transform.translate(translation.x, translation.y, translation.z);
         if (rotation != null)
@@ -138,13 +141,16 @@ public abstract class SimpleNode<C extends IRenderContext, A extends IModelPackO
      * Renders the children of this node (if any). <br>
      * This doesn't render the node itself, only the children. This should be called after the node transformations.
      *
-     * @param context  The render context
-     * @param packInfo The pack info of the entity (the owner of the scene graph)
+     * @param context         The render context
+     * @param packInfo        The pack info of the entity (the owner of the scene graph)
+     * @param transform The transformation matrix of this node <br>
+     *                        Nodes are rendered using the transformations stored in the transform matrix, NOT using open gl transformations methods. <br>
+     *                        Each child node should be rendered with the transformations of the parent node.
      */
-    protected void renderChildren(C context, A packInfo) {
-        transform.scale(1 / scale.x, 1 / scale.y, 1 / scale.z);
+    protected void renderChildren(C context, A packInfo, Matrix4f transform) {
+        this.transform.scale(1 / scale.x, 1 / scale.y, 1 / scale.z);
         if (linkedChildren != null) {
-            linkedChildren.forEach(c -> c.render(context, packInfo));
+            linkedChildren.forEach(c -> c.render(context, packInfo, transform));
         }
     }
 

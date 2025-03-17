@@ -24,7 +24,6 @@ import java.util.List;
  *
  * @param <A> The type of the pack info (the owner of the scene graph)
  */
-@Getter
 @RequiredArgsConstructor
 public class EntityNode<A extends IPhysicsPackInfo> extends AbstractItemNode<BaseRenderContext.EntityRenderContext, A> {
     private static final BaseRenderContext.EntityRenderContext context = new BaseRenderContext.EntityRenderContext(DynamXRenderUtils.getRenderBaseVehicle());
@@ -32,10 +31,12 @@ public class EntityNode<A extends IPhysicsPackInfo> extends AbstractItemNode<Bas
     /**
      * The children that are linked to the entity (ie that will be rendered with the entity transformations)
      */
+    @Getter
     private final List<SceneNode<BaseRenderContext.EntityRenderContext, A>> linkedChildren;
     /**
      * The children that are not linked to the entity (ie that will be rendered with the world transformations)
      */
+    @Getter
     private final List<SceneNode<BaseRenderContext.EntityRenderContext, A>> unlinkedChildren;
 
     /**
@@ -46,15 +47,14 @@ public class EntityNode<A extends IPhysicsPackInfo> extends AbstractItemNode<Bas
     private final Matrix4f transform = new Matrix4f();
 
     @Override
-    public void render(BaseRenderContext.EntityRenderContext context, A packInfo) {
-        transform.identity();
-        renderWithCurrentTransform(context, packInfo);
+    public void render(BaseRenderContext.EntityRenderContext context, A packInfo, Matrix4f parentTransform) {
+        renderWithTransform(context, packInfo, transform.identity());
     }
 
     /**
      * Implementation of the render method, to allow the use of a modified transform matrix
      */
-    protected void renderWithCurrentTransform(BaseRenderContext.EntityRenderContext context, A packInfo) {
+    protected void renderWithTransform(BaseRenderContext.EntityRenderContext context, A packInfo, Matrix4f transform) {
         QuaternionPool.openPool();
         GlQuaternionPool.openPool();
         ModularPhysicsEntity<?> entity = context.getEntity();
@@ -71,16 +71,16 @@ public class EntityNode<A extends IPhysicsPackInfo> extends AbstractItemNode<Bas
         GlStateManager.popMatrix();
         transform.scale(1 / packInfo.getScaleModifier().x, 1 / packInfo.getScaleModifier().y, 1 / packInfo.getScaleModifier().z);
         //Render the linked children
-        linkedChildren.forEach(c -> c.render(context, packInfo));
+        linkedChildren.forEach(c -> c.render(context, packInfo, transform));
         //Render the unlinked children, if this is a static scene graph (not in the world)
         if (entity == null)
-            unlinkedChildren.forEach(c -> c.render(context, packInfo));
+            unlinkedChildren.forEach(c -> c.render(context, packInfo, transform));
         //Render the unlinked children, if any
         if (entity != null && !unlinkedChildren.isEmpty()) {
             transform.translate((float) (context.getRenderPosition().x - (entity.prevPosX + (entity.posX - entity.prevPosX) * context.getPartialTicks())),
                     (float) (context.getRenderPosition().y - (entity.prevPosY + (entity.posY - entity.prevPosY) * context.getPartialTicks())),
                     (float) (context.getRenderPosition().z - (entity.prevPosZ + (entity.posZ - entity.prevPosZ) * context.getPartialTicks())));
-            unlinkedChildren.forEach(c -> c.render(context, packInfo));
+            unlinkedChildren.forEach(c -> c.render(context, packInfo, transform));
         }
         GlQuaternionPool.closePool();
         QuaternionPool.closePool();
@@ -124,7 +124,6 @@ public class EntityNode<A extends IPhysicsPackInfo> extends AbstractItemNode<Bas
 
     @Override
     public void renderItemModel(BaseRenderContext.ItemRenderContext context, A packInfo, Matrix4f transform) {
-        this.transform.set(transform);
-        renderWithCurrentTransform((BaseRenderContext.EntityRenderContext) EntityNode.context.setRenderParams(0, 0, 0, context.getPartialTicks(), context.isUseVanillaRender()).setModelParams(context.getModel(), context.getTextureId()), packInfo);
+        renderWithTransform((BaseRenderContext.EntityRenderContext) EntityNode.context.setRenderParams(0, 0, 0, context.getPartialTicks(), context.isUseVanillaRender()).setModelParams(context.getModel(), context.getTextureId()), packInfo, transform);
     }
 }

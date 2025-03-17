@@ -119,7 +119,11 @@ public class BoatPropellerModule extends BasicEngineModule implements IPackInfoR
     }
 
     public float getRevs() {
-        return !hasEngine() ? 0 : this.getEngineProperties()[VehicleEntityProperties.EnumEngineProperties.REVS.ordinal()];
+        if( !hasEngine()  || this.getEngineProperties()[VehicleEntityProperties.EnumEngineProperties.ACTIVE_GEAR.ordinal()] == 0 ) {
+            return 0;
+        }
+        float factor = propellerPhysicsHandler == null ? 1 : propellerPhysicsHandler.getPhysicsAccelerationForce();
+        return this.getEngineProperties()[VehicleEntityProperties.EnumEngineProperties.REVS.ordinal()] * factor;
     }
 
     public class BoatPropellerHandler implements IPackInfoReloadListener {
@@ -240,6 +244,7 @@ public class BoatPropellerModule extends BasicEngineModule implements IPackInfoR
         }
 
         public void brake(float strength) {
+            this.physicsAccelerationForce = strength;
             Vector3f look = DynamXGeometry.FORWARD_DIRECTION;
             look = DynamXGeometry.rotateVectorByQuaternion(look, entity.physicsRotation);
             look.multLocal(-getBrakeForce() * strength);

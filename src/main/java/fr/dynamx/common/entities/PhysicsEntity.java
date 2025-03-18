@@ -463,11 +463,6 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     }
 
     @Override
-    public float getEyeHeight() {
-        return 0;
-    }
-
-    @Override
     public boolean canBeCollidedWith() {
         return true;
     }

@@ -1,9 +1,6 @@
 package fr.dynamx.server.command;
 
-import fr.dynamx.common.command.CmdChunkControl;
-import fr.dynamx.common.command.CmdOpenDebugGui;
-import fr.dynamx.common.command.CmdTerrainDebug;
-import fr.dynamx.common.command.ISubCommand;
+import fr.dynamx.common.command.*;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -38,6 +35,7 @@ public class DynamXServerCommands extends CommandBase {
         addCommand(new CmdShockWave());
         addCommand(new CmdTerrainDebug(false));
         addCommand(new CmdPhysicsMode());
+        addCommand(new CmdPrintVehicleInfos());
     }
 
     public void addCommand(ISubCommand command) {

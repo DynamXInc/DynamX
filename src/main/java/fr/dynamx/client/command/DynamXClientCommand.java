@@ -1,9 +1,6 @@
 package fr.dynamx.client.command;
 
-import fr.dynamx.common.command.CmdChunkControl;
-import fr.dynamx.common.command.CmdOpenDebugGui;
-import fr.dynamx.common.command.CmdTerrainDebug;
-import fr.dynamx.common.command.ISubCommand;
+import fr.dynamx.common.command.*;
 import fr.dynamx.utils.optimization.PooledHashMap;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -28,6 +25,7 @@ public class DynamXClientCommand extends CommandBase {
         addCommand(new CmdTerrainDebug(true));
         addCommand(new CmdClientNetworkDebug());
         addCommand(new CmdUdpTest());
+        addCommand(new CmdPrintVehicleInfos());
 
         //TODO INVESTIGATE ON DISABLE MAP POOL ON CLIENT THEN REMOVE
         addCommand(new ISubCommand() {

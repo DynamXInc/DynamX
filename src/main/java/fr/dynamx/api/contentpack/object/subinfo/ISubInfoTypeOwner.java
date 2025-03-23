@@ -1,8 +1,8 @@
 package fr.dynamx.api.contentpack.object.subinfo;
 
 import fr.dynamx.api.contentpack.object.INamedObject;
-import fr.dynamx.common.contentpack.loader.SubInfoTypesRegistry;
 import fr.dynamx.common.contentpack.loader.PackFilePropertyData;
+import fr.dynamx.common.contentpack.loader.SubInfoTypesRegistry;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -43,6 +43,7 @@ public interface ISubInfoTypeOwner<T extends ISubInfoTypeOwner<?>> extends IName
 
     /**
      * If null, the object loader will use the last used registry (usually the default one) <br>
+     *
      * @return The sub info types registry for this object
      */
     default SubInfoTypesRegistry<T> getSubInfoTypesRegistry() {

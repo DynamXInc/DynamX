@@ -3,9 +3,9 @@ package fr.dynamx.common.contentpack.loader;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
-import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.doc.ContentPackDocGenerator;
 import fr.dynamx.utils.doc.DocLocale;
+import fr.dynamx.utils.errors.DynamXErrorManager;
 import lombok.Getter;
 
 import java.lang.reflect.Field;
@@ -54,6 +54,9 @@ public class PackFilePropertyData<T> {
      * Parses the provided config value (string format) into the appropriate object to affect it to the class field
      */
     public T parse(String value) {
+        if (value.equals("null")) {
+            return null;
+        }
         return type.getValue(value);
     }
 
@@ -74,7 +77,7 @@ public class PackFilePropertyData<T> {
             DynamXErrorManager.addError(on.getPackName(), DynamXErrorManager.PACKS_ERRORS, "property_parse_error", ErrorLevel.HIGH, on.getName(), getConfigFieldName(), e);
             return null; //Error while parsing
         }
-        if(Modifier.isFinal(field.getModifiers()))
+        if (Modifier.isFinal(field.getModifiers()))
             throw new IllegalArgumentException("Field " + field + " is final : cannot use it as a PackFileProperty !");
         field.setAccessible(true);
         field.set(on, val);
@@ -90,7 +93,7 @@ public class PackFilePropertyData<T> {
             if (type != ContentPackDocGenerator.DocType.OPTIONAL)
                 return;
         }
-        if(!configFieldName.equals(aliases[0]))
+        if (!configFieldName.equals(aliases[0]))
             return;
         String docKey = description.isEmpty() ? field.getDeclaringClass().getSimpleName() + "." + configFieldName : description;
         String sep = "|";

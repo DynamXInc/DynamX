@@ -112,7 +112,7 @@ public class BlockObject<T extends BlockObject<T>> extends AbstractProp<T> imple
         if (texturesArray != null)
             new MaterialVariantsInfo(this, texturesArray).appendTo(this);
         //Map lights
-        lightSources.values().forEach(PartLightSource::postLoad);
+        lightSources.values().forEach(l -> l.postLoad(hot));
         collisionsHelper.loadCollisions(this, DynamXUtils.getModelPath(getPackName(), model), "", translation, 0, useComplexCollisions, scaleModifier, ObjectCollisionsHelper.CollisionType.BLOCK);
         if (hasTextureVariants() && getMaxVariantId() > 16 && (getCreativeTabName() == null || !getCreativeTabName().equalsIgnoreCase("None"))) {
             DynamXErrorManager.addError(getPackName(), DynamXErrorManager.PACKS_ERRORS, "too_many_variants", ErrorLevel.HIGH, getName(), "You can't use more than 16 variants on blocks !");

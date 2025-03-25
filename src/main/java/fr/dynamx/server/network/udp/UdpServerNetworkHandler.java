@@ -15,6 +15,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.StringUtils;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 
@@ -54,10 +55,14 @@ public class UdpServerNetworkHandler implements IDnxNetworkHandler {
 
         try {
             this.server.send(new DatagramPacket(data, data.length, client.socketAddress));
-            if (DynamXConfig.udpDebug)
-                DynamXMain.log.info("[UDP-DEBUG] Sent the packet " + packet.id());
+            if (DynamXConfig.udpDebug) {
+                DynamXMain.log.info("[UDP-DEBUG] Sent the packet {}", packet.id());
+            }
         } catch (IOException e) {
-            e.printStackTrace();
+            DynamXMain.log.error("Error while sending udp packet " + packet + " to " + client + ". Disconnecting the client.", e);
+            if(client.player.connection != null && !client.player.hasDisconnected()) {
+                client.player.connection.disconnect(new TextComponentString("DynamX mod had an unexpected udp error. Please try to reconnect."));
+            }
         }
     }
 
@@ -86,7 +91,7 @@ public class UdpServerNetworkHandler implements IDnxNetworkHandler {
             try {
                 UdpServerNetworkHandler.this.handler.read(evt.getPacketAsBytes(), evt.getPacket());
             } catch (Exception e) {
-                e.printStackTrace();
+                DynamXMain.log.error("Error while reading udp packet from " + evt.getPacket().getSocketAddress(), e);
             }
         });
         this.server.start();

@@ -1,7 +1,6 @@
 package fr.dynamx.common.physics.terrain.chunk;
 
 import com.jme3.bullet.objects.PhysicsRigidBody;
-import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.api.physics.terrain.ITerrainCache;
@@ -374,10 +373,12 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
         QuaternionPool.openPool();
 
         boolean debug = DynamXConfig.enableDebugTerrainManager && DynamXConfig.chunkDebugPoses.contains(getPos());
-        if (debug)
-            DynamXMain.log.info("[CHUNK DEBUG] Computing collisions of chunk " + this + " with " + this.elements + " before, and take from " + ticket + " at " + System.currentTimeMillis());
-        if (DynamXConfig.enableDebugTerrainManager)
+        if (debug) {
+            DynamXMain.log.info("[CHUNK DEBUG] Computing collisions of chunk {} with {} before, and take from {} at {}", this, this.elements, ticket, System.currentTimeMillis());
+        }
+        if (DynamXConfig.enableDebugTerrainManager) {
             ChunkGraph.addToGrah(getPos(), ChunkGraph.ChunkActions.LOAD_INTERNAL_DOING, ChunkGraph.ActionLocation.UNKNOWN, this, "Previous : " + ticket + " " + type + " " + cachedElements);
+        }
 
         boolean shouldSave = false;
         if (type != TerrainElementType.PERSISTENT_ELEMENTS) {
@@ -386,12 +387,12 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
                 ChunkGraph.addToGrah(getPos(), ChunkGraph.ChunkActions.LOAD_INTERNAL_DOING, ChunkGraph.ActionLocation.UNKNOWN, this, "DONE WITH  " + this.elements.getElements().size());
                 shouldSave = true;
                 if (debug) {
-                    DynamXMain.log.info("[CHUNK DEBUG] Choice 1. Elements after : " + this.elements.getElements(type) + " " + type + " // Gave from param " + (cachedElements != null ? cachedElements.getElements(TerrainElementType.ALL) : "null"));
+                    DynamXMain.log.info("[CHUNK DEBUG] Choice 1. Elements after : {} {} // Gave from param {}", this.elements.getElements(type), type, cachedElements != null ? cachedElements.getElements(TerrainElementType.ALL) : "null");
                 }
             } else {
                 this.elements.getElements().addAll(cachedElements.getElements());
                 if (debug) {
-                    DynamXMain.log.info("[CHUNK DEBUG] Choice 2. Elements after : " + this.elements.getElements(type));
+                    DynamXMain.log.info("[CHUNK DEBUG] Choice 2. Elements after : {}", this.elements.getElements(type));
                 }
             }
         }
@@ -436,7 +437,11 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
             setChunkState(EnumChunkCollisionsState.COMPUTING);
             cachedElements.getElements().clear();
             cache.invalidate(ticket.getPos(), true, false);
-            return localLoadCollisions(cachedElements, cache, TerrainElementType.RELOAD_ALL, ticket, pos, profiler);
+
+            shouldSave = localLoadCollisions(cachedElements, cache, TerrainElementType.RELOAD_ALL, ticket, pos, profiler);
+            QuaternionPool.closePool();
+            Vector3fPool.closePool();
+            return shouldSave;
         }
         this.elements.getPersistentElements().forEach(element -> {
             PhysicsRigidBody b = element.build(mcWorld, pos);

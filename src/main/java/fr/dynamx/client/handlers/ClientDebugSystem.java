@@ -276,9 +276,7 @@ public class ClientDebugSystem {
                 QuaternionPool.closePool();
                 GlStateManager.popMatrix();
             }
-
             Vector3fPool.closePool();
-
         }
     }
 

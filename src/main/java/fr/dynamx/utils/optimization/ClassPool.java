@@ -26,10 +26,11 @@ public abstract class ClassPool<T> {
      * Opens a sub pool, all objects affected after this called will be released once you call closeSubPool
      */
     public void openSubPool() {
-        if (root == null)
+        if (root == null) {
             root = new SubClassPool<>(null, 0);
-        else
+        } else {
             root = new SubClassPool<>(root, root.getStartIndex() + root.getAffectedObjectsCount());
+        }
         subPoolCount++;
     }
 
@@ -40,8 +41,9 @@ public abstract class ClassPool<T> {
         if (root != null) {
             root = root.getParent();
             subPoolCount--;
-        } else
+        } else {
             DynamXMain.log.warn(new IllegalStateException("Tried to close a pool that was not opened"));
+        }
     }
 
     /**
@@ -61,12 +63,11 @@ public abstract class ClassPool<T> {
 
             if (pool.length > capacityWarning) {
                 DynamXMain.log.warn("Optimization issue : Pool is very large : " + poolNames + " " + pool.length + " ! " + this + " open c " + subPoolCount + " of type " + this);
-                if (sizeWarnings < 4)
+                if (sizeWarnings < 8) {
                     Thread.dumpStack();
+                }
                 sizeWarnings++;
-            } /*else {
-                DynamXMain.log.info("Bigger pool : " + poolNames + " " + pool.length + " ! " + this + " open c " + subPoolCount + " of type " + this);
-            }*/
+            }
         }
         instance = pool[root.getStartIndex() + root.getAffectedObjectsCount()]; //Take an unused instance
         root.affectObject(instance); //Instance is now used

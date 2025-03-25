@@ -81,24 +81,25 @@ public class PickObjects extends MovableModule {
     @Override
     public void preUpdatePhysics(boolean b) {
         EntityPlayer mover = this.mover.get();
-        if (b && joint != null && mover != null) {
-            Vector3fPool.openPool();
-            Vector3f playerPosition = Vector3fPool.get(
-                    (float) mover.posX,
-                    (float) mover.posY + mover.getEyeHeight(),
-                    (float) mover.posZ);
-            Vector3f pickRaw = DynamXUtils.calculateRay(mover, 64, Vector3fPool.get());
-
-            Vector3f newRayTo = Vector3fPool.get(pickRaw);
-            Vector3f eyePos = Vector3fPool.get(playerPosition);
-            Vector3f dir = newRayTo.subtractLocal(eyePos.x, eyePos.y, eyePos.z);
-            dir = dir.normalize();
-            dir.multLocal(pickDistance.get());
-
-            Vector3f newPos = eyePos.addLocal(dir);
-            joint.setPivotInB(newPos);
-            Vector3fPool.closePool();
+        if (!b || joint == null || mover == null) {
+            return;
         }
+        Vector3fPool.openPool();
+        Vector3f playerPosition = Vector3fPool.get(
+                (float) mover.posX,
+                (float) mover.posY + mover.getEyeHeight(),
+                (float) mover.posZ);
+        Vector3f pickRaw = DynamXUtils.calculateRay(mover, 64, Vector3fPool.get());
+
+        Vector3f newRayTo = Vector3fPool.get(pickRaw);
+        Vector3f eyePos = Vector3fPool.get(playerPosition);
+        Vector3f dir = newRayTo.subtractLocal(eyePos.x, eyePos.y, eyePos.z);
+        dir = dir.normalize();
+        dir.multLocal(pickDistance.get());
+
+        Vector3f newPos = eyePos.addLocal(dir);
+        joint.setPivotInB(newPos);
+        Vector3fPool.closePool();
     }
 
     @Override

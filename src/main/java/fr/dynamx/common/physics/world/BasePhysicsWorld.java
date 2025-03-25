@@ -52,9 +52,9 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
     private final AtomicBoolean scheduledTasksLock = new AtomicBoolean();
 
     public BasePhysicsWorld(World world, boolean isRemoteWorld) {
-        Vector3fPool.openPool(); //Open a pool for the whole session, the Vector3f created here may be used forever
-        TransformPool.getPool().openSubPool();
-        BoundingBoxPool.getPool().openSubPool();
+        //Vector3fPool.openPool(); //Open a pool for the whole session, the Vector3f created here may be used forever
+        //TransformPool.getPool().openSubPool();
+        //BoundingBoxPool.getPool().openSubPool();
         this.mcWorld = world;
         this.manager = new PhysicsWorldTerrain(this, mcWorld, isRemoteWorld);
     }

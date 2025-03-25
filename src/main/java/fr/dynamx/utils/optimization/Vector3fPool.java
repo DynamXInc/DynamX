@@ -102,7 +102,7 @@ public class Vector3fPool extends ClassPool<Vector3f> {
     }
 
     public Vector3fPool() {
-        super(50000, 1000);
+        super(40000, 4000);
     }
 
     public static Map<Long, RetainedVector3fPool> getInstances() {

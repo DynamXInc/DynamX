@@ -80,14 +80,19 @@ public class MessageQueryChunks implements IDnxPacket {
             }
         }
 
-        private void loadChunk(MessageContext ctx, ITerrainManager terrainManager, ChunkLoadingTicket ticket, byte[] data) {
+        private void loadChunk(MessageContext ctx, ITerrainManager terrainManager, VerticalChunkPos pos, byte[] data) {
+            ChunkLoadingTicket ticket = terrainManager.getTicket(pos);
             if (ticket.getStatus() == ChunkState.LOADING && ticket.getPriority() == ChunkLoadingTicket.TicketPriority.LOW) {
                 ticket.getLoadedCallback().thenAccept((collisions -> {
                     if (ticket.getPriority() != ChunkLoadingTicket.TicketPriority.LOW) {
+                        if (ticket.getStatus() == ChunkState.LOADED && ticket.getCollisions() != null) {
+                            ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.NETWORK_SEND, ChunkGraph.ActionLocation.NETWORK, ticket.getCollisions(), ticket + " => SEND AFTER EXTERNAL LOADING");
+                            processLoadedElements(ctx, pos, data, ticket.getCollisions().getElements());
+                        }
                         return;
                     }
                     //If it stills low (not loaded at another location)
-                    if (!terrainManager.subscribeToChunk(ticket.getPos(), ChunkLoadingTicket.TicketPriority.MEDIUM, Profiler.get())) {
+                    if (!terrainManager.subscribeToChunk(pos, ChunkLoadingTicket.TicketPriority.MEDIUM, Profiler.get())) {
                         if (DynamXConfig.enableDebugTerrainManager) {
                             DynamXMain.log.error("0x57 Failed to load chunk {}, for client {}: chunk not loaded in vanilla Minecraft. But chunk loaded with LOW priority?", ticket, ctx.getServerHandler().player.getName());
                         }
@@ -95,12 +100,12 @@ public class MessageQueryChunks implements IDnxPacket {
                     }
                     ticket.getLoadedCallback().whenComplete((collisions2, e) -> {
                         if (collisions2 != null) {
-                            ChunkGraph.addToGrah(ticket.getPos(), ChunkGraph.ChunkActions.NETWORK_SEND, ChunkGraph.ActionLocation.NETWORK, collisions2, ticket + " => WAIT FOR MEDIUM_AFTER_LOW LOAD (" + data[0] + ")");
-                            processLoadedElements(ctx, ticket.getPos(), data, collisions2.getElements());
+                            ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.NETWORK_SEND, ChunkGraph.ActionLocation.NETWORK, collisions2, ticket + " => WAIT FOR MEDIUM_AFTER_LOW LOAD (" + data[0] + ")");
+                            processLoadedElements(ctx, pos, data, collisions2.getElements());
                         } else if (e != null) {
                             DynamXMain.log.error("0x54 Failed to load chunk {}, for client {}", ticket, ctx.getServerHandler().player.getName(), e);
                         }
-                        terrainManager.unsubscribeFromChunk(ticket.getPos());
+                        terrainManager.unsubscribeFromChunk(pos);
                     });
                 })).exceptionally(e -> {
                     DynamXMain.log.error("0x51 Failed to mark chunk {} for load, for client {}", ticket, ctx.getServerHandler().player.getName(), e);
@@ -108,9 +113,10 @@ public class MessageQueryChunks implements IDnxPacket {
                 });
                 return;
             }
+            // Here, we now the chunk isn't yet loaded
             final boolean subscribe = ticket.getStatus() != ChunkState.LOADING;
             if (subscribe) {
-                if (!terrainManager.subscribeToChunk(ticket.getPos(), ChunkLoadingTicket.TicketPriority.MEDIUM, Profiler.get())) {
+                if (!terrainManager.subscribeToChunk(pos, ChunkLoadingTicket.TicketPriority.MEDIUM, Profiler.get())) {
                     if (DynamXConfig.enableDebugTerrainManager) {
                         DynamXMain.log.error("0x56 Failed to load chunk {}, for client {}: chunk not loaded in vanilla Minecraft.", ticket, ctx.getServerHandler().player.getName());
                     }
@@ -120,21 +126,24 @@ public class MessageQueryChunks implements IDnxPacket {
             if (ticket.getLoadedCallback() != null) {
                 ticket.getLoadedCallback().whenComplete((collisions2, e) -> {
                     if (collisions2 != null) {
-                        ChunkGraph.addToGrah(ticket.getPos(), ChunkGraph.ChunkActions.NETWORK_SEND, ChunkGraph.ActionLocation.NETWORK, collisions2, ticket + " => WAIT FOR LOAD (" + data[0] + ") Subscribed: " + subscribe);
-                        processLoadedElements(ctx, ticket.getPos(), data, collisions2.getElements());
+                        ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.NETWORK_SEND, ChunkGraph.ActionLocation.NETWORK, collisions2, ticket + " => WAIT FOR LOAD (" + data[0] + ") Subscribed: " + subscribe);
+                        processLoadedElements(ctx, pos, data, collisions2.getElements());
                     } else if (e != null) {
                         DynamXMain.log.error("0x55 Failed to load chunk {}, for client {}", ticket, ctx.getServerHandler().player.getName(), e);
                     }
                     if (subscribe) {
-                        terrainManager.unsubscribeFromChunk(ticket.getPos());
+                        terrainManager.unsubscribeFromChunk(pos);
                     }
                 });
                 return;
             }
             if (subscribe) {
-                terrainManager.unsubscribeFromChunk(ticket.getPos());
+                terrainManager.unsubscribeFromChunk(pos);
             }
-            throw new IllegalStateException("Ticket " + ticket + " has no loading callback, but it should be loading i think. 0x10301.");
+            if (!DynamXConfig.ignoreDangerousTerrainErrors) {
+                throw new IllegalStateException("Ticket " + ticket + " has no loading callback, but it should be loading i think. 0x10301. Subscribe: " + subscribe + ".");
+            }
+            DynamXMain.log.fatal("[IgnoredDangerousTerrainError] Ticket {} has no loading callback, but it should be loading i think. 0x10301. Subscribe: {}.", ticket, subscribe);
         }
 
         @SideOnly(Side.CLIENT)
@@ -153,7 +162,7 @@ public class MessageQueryChunks implements IDnxPacket {
                 return null;
             }
             PooledHashMap<VerticalChunkPos, byte[]> emptyGuys = HashMapPool.get();
-            PooledHashMap<ChunkLoadingTicket, byte[]> boysToLoad = HashMapPool.get();
+            PooledHashMap<VerticalChunkPos, byte[]> boysToLoad = HashMapPool.get();
             IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(ctx.getServerHandler().player.world);
             ITerrainManager terrainManager = physicsWorld.getTerrainManager();
             message.requests.forEach((pos, data) -> {
@@ -164,7 +173,7 @@ public class MessageQueryChunks implements IDnxPacket {
                         ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.NETWORK_SEND, ChunkGraph.ActionLocation.NETWORK, ticket.getCollisions(), ticket + " => DIRECT SEND (" + dataType + ")");
                         processLoadedElements(ctx, pos, data, ticket.getCollisions().getElements());
                     } else {
-                        boysToLoad.put(ticket, data);
+                        boysToLoad.put(pos, data);
                     }
                 } else if (dataType == 2) {
                     byte[] dt = ((FileTerrainCache) terrainManager.getCache()).getSlopesFile().getRawChunkData(pos);

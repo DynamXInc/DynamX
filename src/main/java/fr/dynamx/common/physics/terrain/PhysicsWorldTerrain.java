@@ -177,7 +177,7 @@ public class PhysicsWorldTerrain implements ITerrainManager {
                     if (!DynamXConfig.ignoreDangerousTerrainErrors) {
                         throw new IllegalStateException("Chunk " + ticket + " is still loading and has HIGH priority. This shouldn't happen.");
                     }
-                    DynamXMain.log.error("Chunk {} is still loading and has HIGH priority. This shouldn't happen.", ticket);
+                    DynamXMain.log.error("[IgnoredDangerousTerrainError] Chunk {} is still loading and has HIGH priority. This shouldn't happen.", ticket);
                     return false;
                 }
                 if (!ticket.getCollisions().getChunkState().areComputedElementsAdded()) {
@@ -236,7 +236,7 @@ public class PhysicsWorldTerrain implements ITerrainManager {
                             System.out.println("Graph not found !");
                         }
                         if (!DynamXConfig.ignoreDangerousTerrainErrors) {
-                            throw new IllegalStateException("[0x2] Chunk is already added " + collisions + " " + collisions.getChunkState() + " " + ticket);
+                            throw new IllegalStateException("[IgnoredDangerousTerrainError] [0x2] Chunk is already added " + collisions + " " + collisions.getChunkState() + " " + ticket);
                         }
                     }
                     collisions.addToBulletWorld(physicsWorld, Profiler.get());
@@ -251,7 +251,7 @@ public class PhysicsWorldTerrain implements ITerrainManager {
                     System.out.println("Graph not found !");
                 }
                 if (!DynamXConfig.ignoreDangerousTerrainErrors) {
-                    throw new IllegalStateException("[0x1] Chunk " + collisions + " already loaded ! UnloadQueue " + terrainState.getUnloadQueue() + " Loaded " + terrainState.getLoadedTerrain());
+                    throw new IllegalStateException("[IgnoredDangerousTerrainError] [0x1] Chunk " + collisions + " already loaded ! UnloadQueue " + terrainState.getUnloadQueue() + " Loaded " + terrainState.getLoadedTerrain());
                 }
             }
         } else { //Incorrect ticket state (not loaded)
@@ -264,7 +264,7 @@ public class PhysicsWorldTerrain implements ITerrainManager {
                 System.out.println("Graph not found !");
             }
             if (!DynamXConfig.ignoreDangerousTerrainErrors)
-                throw new IllegalStateException("Bad ticket state " + ticket);
+                throw new IllegalStateException("[IgnoredDangerousTerrainError] Bad ticket state " + ticket);
         }
 
         Profiler.get().end(ADD_USED);

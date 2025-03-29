@@ -251,7 +251,7 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
      */
     public AxisAlignedBB computeBoundingBox() {
         if (boundingBoxCache == null) {
-            QuaternionPool.getINSTANCE().openSubPool();
+            QuaternionPool.openPool();
             Vector3fPool.openPool();
             List<IShapeInfo> boxes = getUnrotatedCollisionBoxes(); //Get PartShape boxes
             if (boxes.isEmpty()) {//If there is no boxes, create a default one
@@ -275,7 +275,7 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
                 boundingBoxCache = container.toBB();
             }
             Vector3fPool.closePool();
-            QuaternionPool.getINSTANCE().closeSubPool();
+            QuaternionPool.closePool();
         }
         return boundingBoxCache;
     }

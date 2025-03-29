@@ -36,6 +36,7 @@ public class DynamXServerCommands extends CommandBase {
         addCommand(new CmdTerrainDebug(false));
         addCommand(new CmdPhysicsMode());
         addCommand(new CmdPrintVehicleInfos());
+        addCommand(new CmdPoolStates());
     }
 
     public void addCommand(ISubCommand command) {

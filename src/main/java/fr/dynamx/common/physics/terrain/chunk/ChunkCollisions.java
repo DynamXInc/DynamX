@@ -17,8 +17,8 @@ import fr.dynamx.utils.DynamXReflection;
 import fr.dynamx.utils.VerticalChunkPos;
 import fr.dynamx.utils.debug.ChunkGraph;
 import fr.dynamx.utils.debug.Profiler;
-import fr.dynamx.utils.optimization.BoundingBoxPool;
 import fr.dynamx.utils.optimization.QuaternionPool;
+import fr.dynamx.utils.optimization.SubClassPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
@@ -58,10 +58,9 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
     public ChunkCollisions(World mcWorld, VerticalChunkPos pos) {
         this.myPos = pos;
         this.mcWorld = mcWorld;
-        if (DynamXConfig.enableDebugTerrainManager)
+        if (DynamXConfig.enableDebugTerrainManager) {
             ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.CREATE_INSTANCE, ChunkGraph.ActionLocation.UNKNOWN, this);
-        if (state != EnumChunkCollisionsState.INVALID)
-            reset();
+        }
         setChunkState(EnumChunkCollisionsState.INITIALIZED);
     }
 
@@ -256,15 +255,11 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
         List<ITerrainElement> elements = this.elements.getElements(terrainType);
         if (!elements.isEmpty()) //Body may be empty if the chunk is empty
         {
-            Vector3fPool.openPool();
-            BoundingBoxPool.getPool().openSubPool();
             elements.forEach(body -> {
                 physicsWorld.removeCollisionObject(body.getBody());
                 body.removeDebugFromWorld(mcWorld);
             });
             updateNearEntities();
-            BoundingBoxPool.getPool().closeSubPool();
-            Vector3fPool.closePool();
         }
     }
 
@@ -369,8 +364,8 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
     private boolean localLoadCollisions(@Nullable ChunkTerrain cachedElements, ITerrainCache cache, TerrainElementType type, ChunkLoadingTicket ticket, Vector3f pos, Profiler profiler) {
         profiler.start(Profiler.Profiles.CHUNK_SHAPE_COMPUTE);
 
-        Vector3fPool.openPool();
-        QuaternionPool.openPool();
+        Vector3fPool.openPool(SubClassPool.CHUNK_COLLISIONS_LOAD);
+        QuaternionPool.openPool(SubClassPool.CHUNK_COLLISIONS_LOAD);
 
         boolean debug = DynamXConfig.enableDebugTerrainManager && DynamXConfig.chunkDebugPoses.contains(getPos());
         if (debug) {

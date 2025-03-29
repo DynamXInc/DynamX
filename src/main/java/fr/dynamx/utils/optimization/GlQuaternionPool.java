@@ -9,7 +9,11 @@ public class GlQuaternionPool extends ClassPool<Quaternion> {
     private static final GlQuaternionPool INSTANCE = new GlQuaternionPool();
 
     public static void openPool() {
-        getINSTANCE().openSubPool();
+        getINSTANCE().openSubPool(SubClassPool.GL_QUATERNION_DEFAULT);
+    }
+
+    public static void openPool(String identifier) {
+        getINSTANCE().openSubPool(identifier);
     }
 
     public static void closePool() {

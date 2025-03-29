@@ -28,6 +28,7 @@ import fr.dynamx.common.physics.joints.EntityJointsHandler;
 import fr.dynamx.common.physics.utils.StairsBox;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
+import fr.dynamx.utils.optimization.QuaternionPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import fr.dynamx.utils.physics.DynamXPhysicsHelper;
 import fr.dynamx.utils.physics.PhysicsRaycastResult;
@@ -110,7 +111,7 @@ public class DynamXUtils {
     }
 
     public static Quaternion readQuaternionNBT(NBTTagCompound compound) {
-        return new Quaternion(compound.getFloat("QuatX"), compound.getFloat("QuatY"), compound.getFloat("QuatZ"), compound.getFloat("QuatW"));
+        return QuaternionPool.get(compound.getFloat("QuatX"), compound.getFloat("QuatY"), compound.getFloat("QuatZ"), compound.getFloat("QuatW"));
     }
 
     /**
@@ -119,7 +120,7 @@ public class DynamXUtils {
     public static DxModelPath getModelPath(String packName, ResourceLocation model) {
         List<PackInfo> packLocations = DynamXObjectLoaders.PACKS.findPackLocations(packName);
         if (packLocations.isEmpty()) {
-            DynamXMain.log.error("Pack info " + packName + " not found. This should not happen.");
+            DynamXMain.log.error("Pack info {} not found. This should not happen.", packName);
             return new DxModelPath(PackInfo.forAddon(packName).setPackType(ContentPackType.FOLDER), model);
         }
         return new DxModelPath(packLocations, model);

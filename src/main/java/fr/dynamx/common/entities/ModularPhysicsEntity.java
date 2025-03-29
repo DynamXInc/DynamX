@@ -294,6 +294,18 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
         }
     }
 
+    @Override
+    public void setDead() {
+        super.setDead();
+        moduleList.forEach(IPhysicsModule::onSetDead);
+    }
+
+    @Override
+    public void onRemovedFromWorld() {
+        super.onRemovedFromWorld();
+        moduleList.forEach(IPhysicsModule::onRemovedFromWorld);
+    }
+
     public List<IPhysicsModule<?>> getModules() {
         return moduleList;
     }

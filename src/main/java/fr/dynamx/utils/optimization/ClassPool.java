@@ -1,8 +1,7 @@
 package fr.dynamx.utils.optimization;
 
 import fr.dynamx.common.DynamXMain;
-
-import java.util.Stack;
+import net.minecraft.util.text.TextFormatting;
 
 /**
  * Class pool utility for optimization <br>
@@ -15,7 +14,6 @@ public abstract class ClassPool<T> {
     protected SubClassPool<T> root;
     protected int subPoolCount;
     protected int sizeWarnings;
-    protected Stack<String> poolNames = new Stack<>();
 
     public ClassPool(int capacityWarning, int initialCapacity) {
         this.capacityWarning = capacityWarning;
@@ -25,11 +23,11 @@ public abstract class ClassPool<T> {
     /**
      * Opens a sub pool, all objects affected after this called will be released once you call closeSubPool
      */
-    public void openSubPool() {
+    public void openSubPool(String identifier) {
         if (root == null) {
-            root = new SubClassPool<>(null, 0);
+            root = new SubClassPool<>(null, 0, identifier);
         } else {
-            root = new SubClassPool<>(root, root.getStartIndex() + root.getAffectedObjectsCount());
+            root = new SubClassPool<>(root, root.getStartIndex() + root.getAffectedObjectsCount(), identifier);
         }
         subPoolCount++;
     }
@@ -39,6 +37,7 @@ public abstract class ClassPool<T> {
      */
     public void closeSubPool() {
         if (root != null) {
+            //root.onClose();
             root = root.getParent();
             subPoolCount--;
         } else {
@@ -53,7 +52,7 @@ public abstract class ClassPool<T> {
         T instance;
         if (root == null) {
             DynamXMain.log.throwing(new IllegalStateException("No sub-pool opened ! Opening a default one"));
-            openSubPool();
+            openSubPool(SubClassPool.DEFAULT_DEFAULT);
         }
         if (root.getStartIndex() + root.getAffectedObjectsCount() >= pool.length) //If the pool is too small
         {
@@ -62,7 +61,7 @@ public abstract class ClassPool<T> {
             pool = nPool;
 
             if (pool.length > capacityWarning) {
-                DynamXMain.log.warn("Optimization issue : Pool is very large : " + poolNames + " " + pool.length + " ! " + this + " open c " + subPoolCount + " of type " + this);
+                DynamXMain.log.warn("Optimization issue : Pool is very large : {} ! open c {} of type {}", pool.length, subPoolCount, this);
                 if (sizeWarnings < 8) {
                     Thread.dumpStack();
                 }
@@ -99,5 +98,28 @@ public abstract class ClassPool<T> {
 
     public int getUnaffectedObjectsCount() {
         return pool.length - getTotalAffectedObject();
+    }
+
+    public String getDebugInfo() {
+        return "spc=" + subPoolCount + ", tt=" + pool.length + ", used=" + getCurrentPoolObjectCount() + ", tt_used=" + getTotalAffectedObject() + ", tt_free=" + getUnaffectedObjectsCount();
+    }
+
+    public String getExpandedDebugInfo() {
+        if(root == null) {
+            return "empty";
+        }
+        int curDepth = subPoolCount;
+        StringBuilder result = new StringBuilder();
+        SubClassPool<T> current = root;
+        int maxDepth = curDepth - 400;
+        if(curDepth > 400) {
+            result.append(TextFormatting.RED).append("Current pool depth is larger than 400. You have a leak somewhere.").append("\n");
+        }
+        while (current != null && curDepth > maxDepth) {
+            result.append("At: " ).append(curDepth).append(": ").append(current).append("\n");
+            current = current.getParent();
+            curDepth -= 1;
+        }
+        return result.toString();
     }
 }

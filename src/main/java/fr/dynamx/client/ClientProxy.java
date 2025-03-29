@@ -5,6 +5,7 @@ import fr.aym.acslib.ACsLib;
 import fr.aym.acslib.api.services.ThreadedLoadingService;
 import fr.aym.mps.utils.UserErrorMessageException;
 import fr.dynamx.api.physics.IPhysicsWorld;
+import fr.dynamx.client.command.DynamXClientCommand;
 import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.client.handlers.KeyHandler;
 import fr.dynamx.client.network.ClientPhysicsEntitySynchronizer;
@@ -26,14 +27,13 @@ import fr.dynamx.common.entities.SeatEntity;
 import fr.dynamx.common.entities.vehicles.*;
 import fr.dynamx.common.network.sync.PhysicsEntitySynchronizer;
 import fr.dynamx.common.network.sync.SPPhysicsEntitySynchronizer;
-import fr.dynamx.client.command.CmdUdpTest;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.world.BuiltinThreadedPhysicsWorld;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXLoadingTasks;
-import fr.dynamx.client.command.DynamXClientCommand;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.errors.DynamXErrorManager;
+import fr.dynamx.utils.optimization.SubClassPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IResourceManager;
@@ -222,8 +222,9 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
                 loadingState++;
                 ThreadedLoadingService loadingService = ACsLib.getPlatform().provideService(ThreadedLoadingService.class);
                 loadingService.addTask(ThreadedLoadingService.ModLoadingSteps.BLOCK_REGISTRY, "packsload", () -> {
-                    Vector3fPool.openPool(); //Open a pool for the loading of entities
+                    Vector3fPool.openPool(SubClassPool.PACK_MODEL_LOAD); //Open a pool for the loading of entities
                     DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.MC_INIT, DynamXLoadingTasks.PACK);
+                    Vector3fPool.closePool();
 
                     //Must follow addons init
                     loadingService.addTask(ThreadedLoadingService.ModLoadingSteps.INIT, "proxy preinit", this::preInit);

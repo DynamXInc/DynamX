@@ -10,6 +10,8 @@ import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.QuaternionPool;
+import fr.dynamx.utils.optimization.SubClassPool;
+import fr.dynamx.utils.optimization.Vector3fPool;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.client.renderer.GlStateManager;
@@ -55,8 +57,10 @@ public class EntityNode<A extends IPhysicsPackInfo> extends AbstractItemNode<Bas
      * Implementation of the render method, to allow the use of a modified transform matrix
      */
     protected void renderWithTransform(BaseRenderContext.EntityRenderContext context, A packInfo, Matrix4f transform) {
-        QuaternionPool.openPool();
-        GlQuaternionPool.openPool();
+        Vector3fPool.openPool(SubClassPool.ENTITY_RENDER_NODE);
+        QuaternionPool.openPool(SubClassPool.ENTITY_RENDER_NODE);
+        GlQuaternionPool.openPool(SubClassPool.ENTITY_RENDER_NODE);
+
         ModularPhysicsEntity<?> entity = context.getEntity();
         if (entity != null) {
             transform.translate(context.getRenderPosition());
@@ -64,17 +68,21 @@ public class EntityNode<A extends IPhysicsPackInfo> extends AbstractItemNode<Bas
         }
         // Scale to the config scale value
         transform.scale(DynamXUtils.toVector3f(packInfo.getScaleModifier()));
+
         //Render the model
         GlStateManager.pushMatrix();
         GlStateManager.multMatrix(ClientDynamXUtils.getMatrixBuffer(transform));
         context.getRender().renderMainModel(context.getModel(), entity, context.getTextureId(), context.isUseVanillaRender()); //TODO SIMPLIFY SCALE THINGS
         GlStateManager.popMatrix();
         transform.scale(1 / packInfo.getScaleModifier().x, 1 / packInfo.getScaleModifier().y, 1 / packInfo.getScaleModifier().z);
+
         //Render the linked children
         linkedChildren.forEach(c -> c.render(context, packInfo, transform));
+
         //Render the unlinked children, if this is a static scene graph (not in the world)
-        if (entity == null)
+        if (entity == null) {
             unlinkedChildren.forEach(c -> c.render(context, packInfo, transform));
+        }
         //Render the unlinked children, if any
         if (entity != null && !unlinkedChildren.isEmpty()) {
             transform.translate((float) (context.getRenderPosition().x - (entity.prevPosX + (entity.posX - entity.prevPosX) * context.getPartialTicks())),
@@ -82,8 +90,10 @@ public class EntityNode<A extends IPhysicsPackInfo> extends AbstractItemNode<Bas
                     (float) (context.getRenderPosition().z - (entity.prevPosZ + (entity.posZ - entity.prevPosZ) * context.getPartialTicks())));
             unlinkedChildren.forEach(c -> c.render(context, packInfo, transform));
         }
+
         GlQuaternionPool.closePool();
         QuaternionPool.closePool();
+        Vector3fPool.closePool();
         DynamXRenderUtils.popGlAllAttribBits();
     }
 

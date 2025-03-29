@@ -324,9 +324,7 @@ public class PhysicsWorldTerrain implements ITerrainManager {
         terrainCache.tick();
         if (!asyncLoadedQueue.isEmpty()) {
             Profiler.get().start(RCV_ASYNC);
-            Vector3fPool.openPool();
             receiveAsyncLoadedChunks();
-            Vector3fPool.closePool();
             Profiler.get().end(RCV_ASYNC);
         }
         //Tick terrain loaders (as the slopes item)
@@ -351,7 +349,7 @@ public class PhysicsWorldTerrain implements ITerrainManager {
     public ChunkCollisions loadChunkCollisionsNow(ChunkLoadingTicket ticket, Profiler profiler) {
         profiler.start(Profiler.Profiles.EMERGENCY_CHUNK_LOAD);
         VerticalChunkPos pos = ticket.getPos();
-        ChunkCollisions coll = isDebug() ? new DebugChunkCollisions(getWorld(), pos, getPhysicsWorld()) : new ChunkCollisions(getWorld(), pos);
+        ChunkCollisions coll = isDebug() ? new DebugChunkCollisions(getWorld(), pos) : new ChunkCollisions(getWorld(), pos);
 
         if (isDebug()) {
             ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.LOAD_NOW, ChunkGraph.ActionLocation.MAIN, coll, "Ticket " + ticket);

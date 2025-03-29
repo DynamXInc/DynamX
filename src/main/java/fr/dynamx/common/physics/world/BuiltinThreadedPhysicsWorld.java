@@ -3,8 +3,6 @@ package fr.dynamx.common.physics.world;
 import fr.dynamx.api.events.PhysicsEvent;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.utils.debug.Profiler;
-import fr.dynamx.utils.optimization.BoundingBoxPool;
-import fr.dynamx.utils.optimization.TransformPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.ITextComponent;
@@ -45,11 +43,6 @@ public class BuiltinThreadedPhysicsWorld extends BasePhysicsWorld implements Run
             crashCount++;
             DynamXMain.log.fatal("DynamX physics thread has crashed, telling to restart !");
             DynamXMain.log.error("Exception : " + e.toString(), e);
-            //Refresh pools
-            Vector3fPool.closePool();
-            TransformPool.getPool().closeSubPool();
-            BoundingBoxPool.getPool().closeSubPool();
-            //DynamXMain.physicsWorld = new BuiltinThreadedPhysicsWorld(mcWorld); //Create a new simulator
 
             if (world.getMinecraftServer() != null)
                 world.getMinecraftServer().getPlayerList().sendMessage(new TextComponentString("[DynamX] Physics thread has crashed, please restart the server !"));

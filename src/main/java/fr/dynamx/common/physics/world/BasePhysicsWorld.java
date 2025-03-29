@@ -21,9 +21,8 @@ import fr.dynamx.common.physics.utils.PhysicsWorldOperation;
 import fr.dynamx.server.network.ServerPhysicsSyncManager;
 import fr.dynamx.utils.PhysicsEntityException;
 import fr.dynamx.utils.debug.Profiler;
-import fr.dynamx.utils.optimization.BoundingBoxPool;
 import fr.dynamx.utils.optimization.QuaternionPool;
-import fr.dynamx.utils.optimization.TransformPool;
+import fr.dynamx.utils.optimization.SubClassPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
@@ -52,9 +51,6 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
     private final AtomicBoolean scheduledTasksLock = new AtomicBoolean();
 
     public BasePhysicsWorld(World world, boolean isRemoteWorld) {
-        //Vector3fPool.openPool(); //Open a pool for the whole session, the Vector3f created here may be used forever
-        //TransformPool.getPool().openSubPool();
-        //BoundingBoxPool.getPool().openSubPool();
         this.mcWorld = world;
         this.manager = new PhysicsWorldTerrain(this, mcWorld, isRemoteWorld);
     }
@@ -125,7 +121,7 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
      * @param syncThreadsLock Semaphore to acquire when getting the positions from the physics engine to the minecraft thread. Can be null if the physics are in the minecraft thread
      */
     protected void stepSimulationImpl(Profiler profiler, Semaphore syncThreadsLock) {
-        Vector3fPool.openPool();
+        Vector3fPool.openPool(SubClassPool.PHYSICS_WORLD_STEP);
         //Process pending operations
         flushOperations(profiler);
         //Check entity statuses and load terrain around them
@@ -164,8 +160,8 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
         //Read the input data and send it to the physics
         profiler.start(Profiler.Profiles.PHYSICS_TICK_ENTITIES_PRE);
         entities.forEach(e -> {
-            QuaternionPool.openPool();
-            Vector3fPool.openPool();
+            QuaternionPool.openPool(SubClassPool.TICK_ENTITY_PHY_PRE);
+            Vector3fPool.openPool(SubClassPool.TICK_ENTITY_PHY_PRE);
             try {
                 //e.getNetwork().onPrePhysicsTick(profiler);
                 e.getSynchronizer().onPrePhysicsTick(profiler);
@@ -201,8 +197,8 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
             }
         }
         entities.forEach(e -> {
-            QuaternionPool.openPool();
-            Vector3fPool.openPool();
+            QuaternionPool.openPool(SubClassPool.TICK_ENTITY_PHY_POST);
+            Vector3fPool.openPool(SubClassPool.TICK_ENTITY_PHY_POST);
             try {
                 e.getSynchronizer().onPostPhysicsTick(profiler);
             } catch (Exception ex) {

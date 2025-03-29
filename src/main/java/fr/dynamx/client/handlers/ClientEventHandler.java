@@ -31,6 +31,7 @@ import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.QuaternionPool;
+import fr.dynamx.utils.optimization.SubClassPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -175,8 +176,8 @@ public class ClientEventHandler {
     @SubscribeEvent
     public void drawHudCursor(RenderGameOverlayEvent.Pre event) {
         if (event.getType() == RenderGameOverlayEvent.ElementType.CROSSHAIRS) {
-            Vector3fPool.openPool();
-            QuaternionPool.openPool();
+            Vector3fPool.openPool(SubClassPool.CURSOR_HIT);
+            QuaternionPool.openPool(SubClassPool.CURSOR_HIT);
             GlStateManager.enableBlend();
             GameSettings gamesettings = MC.gameSettings;
 
@@ -279,88 +280,91 @@ public class ClientEventHandler {
 
         model = null;
         EntityPlayer entityPlayer = Minecraft.getMinecraft().player;
-        if (entityPlayer != null) {
-            if (DynamXContext.getWalkingPlayers().containsKey(entityPlayer)) {
-                PhysicsEntity<?> physicsEntity = DynamXContext.getWalkingPlayers().get(entityPlayer);
-                if (!physicsEntity.canPlayerStandOnTop()) {
-                    if (WalkingOnPlayerController.controller != null) {
-                        WalkingOnPlayerController.controller.disable();
-                        entityPlayer.motionY += 0.2D;
-                    }
+        if (entityPlayer == null) {
+            return;
+        }
+        if (DynamXContext.getWalkingPlayers().containsKey(entityPlayer)) {
+            PhysicsEntity<?> physicsEntity = DynamXContext.getWalkingPlayers().get(entityPlayer);
+            if (!physicsEntity.canPlayerStandOnTop()) {
+                if (WalkingOnPlayerController.controller != null) {
+                    WalkingOnPlayerController.controller.disable();
+                    entityPlayer.motionY += 0.2D;
                 }
             }
+        }
 
-            ItemStack currentItem = entityPlayer.inventory.getCurrentItem();
-            if (currentItem.getItem() instanceof ItemBlock && ((ItemBlock) currentItem.getItem()).getBlock() instanceof DynamXBlock) {
-                ItemBlock itemBlock = (ItemBlock) currentItem.getItem();
-                DynamXBlock<?> block = (DynamXBlock<?>) itemBlock.getBlock();
-                RayTraceResult target = Minecraft.getMinecraft().objectMouseOver;
-                if (target != null && target.typeOfHit == RayTraceResult.Type.BLOCK && block.isDxModel()) {
-                    EnumFacing side = target.sideHit;
-                    playerOrientation = MathHelper.floor((entityPlayer.rotationYaw * 16.0F / 360.0F) + 0.5D) & 0xF;
-                    blockPos = new BlockPos(target.getBlockPos().getX() + side.getXOffset(),
-                            target.getBlockPos().getY() + side.getYOffset(),
-                            target.getBlockPos().getZ() + side.getZOffset());
+        ItemStack currentItem = entityPlayer.inventory.getCurrentItem();
+        if (currentItem.getItem() instanceof ItemBlock && ((ItemBlock) currentItem.getItem()).getBlock() instanceof DynamXBlock) {
+            ItemBlock itemBlock = (ItemBlock) currentItem.getItem();
+            DynamXBlock<?> block = (DynamXBlock<?>) itemBlock.getBlock();
+            RayTraceResult target = Minecraft.getMinecraft().objectMouseOver;
+            if (target != null && target.typeOfHit == RayTraceResult.Type.BLOCK && block.isDxModel()) {
+                EnumFacing side = target.sideHit;
+                playerOrientation = MathHelper.floor((entityPlayer.rotationYaw * 16.0F / 360.0F) + 0.5D) & 0xF;
+                blockPos = new BlockPos(target.getBlockPos().getX() + side.getXOffset(),
+                        target.getBlockPos().getY() + side.getYOffset(),
+                        target.getBlockPos().getZ() + side.getZOffset());
 
-                    textureNum = currentItem.getMetadata();
-                    blockObjectInfo = block.blockObjectInfo;
-                    this.canPlace = itemBlock.canPlaceBlockOnSide(entityPlayer.world, blockPos, side, entityPlayer, currentItem);
-                    this.model = DynamXContext.getDxModelRegistry().getModel(block.blockObjectInfo.getModel());
-                }
+                textureNum = currentItem.getMetadata();
+                blockObjectInfo = block.blockObjectInfo;
+                this.canPlace = itemBlock.canPlaceBlockOnSide(entityPlayer.world, blockPos, side, entityPlayer, currentItem);
+                this.model = DynamXContext.getDxModelRegistry().getModel(block.blockObjectInfo.getModel());
             }
         }
     }
 
     @SubscribeEvent
     public void onDrawBlockHighlight(DrawBlockHighlightEvent event) {
-        if (this.model != null) {
-            GlStateManager.enableAlpha();
-            GlQuaternionPool.openPool();
-            QuaternionPool.openPool();
-            model.renderPreview(blockObjectInfo, event.getPlayer(), blockPos, canPlace, playerOrientation, event.getPartialTicks(), textureNum);
-            QuaternionPool.closePool();
-            GlQuaternionPool.closePool();
+        if (this.model == null) {
+            return;
         }
+        GlStateManager.enableAlpha();
+        GlQuaternionPool.openPool();
+        QuaternionPool.openPool();
+        model.renderPreview(blockObjectInfo, event.getPlayer(), blockPos, canPlace, playerOrientation, event.getPartialTicks(), textureNum);
+        QuaternionPool.closePool();
+        GlQuaternionPool.closePool();
     }
 
     @SubscribeEvent
     public void onEntityCameraSetup(EntityViewRenderEvent.CameraSetup event) {
-        if (event.getEntity().getRidingEntity() instanceof PhysicsEntity)
+        if (event.getEntity().getRidingEntity() instanceof PhysicsEntity) {
             CameraSystem.rotateVehicleCamera(event);
+        }
     }
 
     @SubscribeEvent
     public void renderWorldLast(RenderWorldLastEvent event) {
         double partialTicks = event.getPartialTicks();
 
-        float x = (float) (MC.player.lastTickPosX + (MC.player.posX - MC.player.lastTickPosX) * partialTicks);
-        float y = (float) (MC.player.lastTickPosY + (MC.player.posY - MC.player.lastTickPosY) * partialTicks);
-        float z = (float) (MC.player.lastTickPosZ + (MC.player.posZ - MC.player.lastTickPosZ) * partialTicks);
-        GlStateManager.pushMatrix();
-        GlStateManager.disableLighting();
-        GlStateManager.disableTexture2D();
-        GlStateManager.disableDepth();
-        GlStateManager.translate(-x, -y, -z);
+        if (RenderMovableLine.hasMovableLines()) {
+            float x = (float) (MC.player.lastTickPosX + (MC.player.posX - MC.player.lastTickPosX) * partialTicks);
+            float y = (float) (MC.player.lastTickPosY + (MC.player.posY - MC.player.lastTickPosY) * partialTicks);
+            float z = (float) (MC.player.lastTickPosZ + (MC.player.posZ - MC.player.lastTickPosZ) * partialTicks);
+            GlStateManager.pushMatrix();
+            GlStateManager.disableLighting();
+            GlStateManager.disableTexture2D();
+            GlStateManager.disableDepth();
+            GlStateManager.translate(-x, -y, -z);
 
-        Vector3fPool.openPool();
-        QuaternionPool.openPool();
-        {
+            Vector3fPool.openPool();
+            QuaternionPool.openPool();
             RenderMovableLine.renderLine(event.getPartialTicks());
-        }
-        Vector3fPool.closePool();
-        QuaternionPool.closePool();
+            Vector3fPool.closePool();
+            QuaternionPool.closePool();
 
-        GlStateManager.enableTexture2D();
-        GlStateManager.enableDepth();
-        GlStateManager.enableLighting();
-        GlStateManager.popMatrix();
+            GlStateManager.enableTexture2D();
+            GlStateManager.enableDepth();
+            GlStateManager.enableLighting();
+            GlStateManager.popMatrix();
+        }
 
         if (ClientDebugSystem.enableDebugDrawing) {
             if (DynamXDebugOptions.CAMERA_RAYCAST.isActive()) {
                 CameraSystem.drawDebug();
             }
         }
-        if(!isRenderingEntitiesWithOptifineShaders) {
+        if (!isRenderingEntitiesWithOptifineShaders) {
             renderBigEntities((float) partialTicks);
         } else {
             isRenderingEntitiesWithOptifineShaders = false;

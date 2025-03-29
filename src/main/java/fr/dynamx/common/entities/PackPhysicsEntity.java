@@ -16,8 +16,10 @@ import fr.dynamx.common.entities.modules.MovableModule;
 import fr.dynamx.common.physics.entities.PackEntityPhysicsHandler;
 import fr.dynamx.common.physics.joints.EntityJointsHandler;
 import fr.dynamx.utils.client.ClientDynamXUtils;
+import fr.dynamx.utils.debug.Profiler;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
+import fr.dynamx.utils.optimization.SubClassPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import lombok.Getter;
 import lombok.Setter;
@@ -139,6 +141,8 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
             setDead();
             return;
         }
+        Vector3fPool.openPool(SubClassPool.TICK_ENTITY_MC);
+        Profiler.get().start(Profiler.Profiles.TICK_ENTITIES);
         super.onUpdate();
         if (world.isRemote && getMetadata() != lastMetadata && !isDead) //Metadata has been sync, so update texture
         {
@@ -146,6 +150,8 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
             entityTextureId = (byte) getMetadata();
             getModules().forEach(m -> m.onTexturesChange(entityTextureId));
         }
+        Profiler.get().end(Profiler.Profiles.TICK_ENTITIES);
+        Vector3fPool.closePool();
     }
 
     @Override

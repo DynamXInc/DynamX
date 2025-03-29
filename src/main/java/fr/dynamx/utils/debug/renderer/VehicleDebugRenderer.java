@@ -18,6 +18,7 @@ import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.BoundingBoxPool;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
+import fr.dynamx.utils.optimization.SubClassPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
@@ -169,7 +170,7 @@ public class VehicleDebugRenderer {
                         realmotion.z * 10 + pos.z, 0, 0, 1, 1);
             }
 
-            BoundingBoxPool.getPool().openSubPool();
+            BoundingBoxPool.getPool().openSubPool(SubClassPool.BOUNDING_BOX_DEFAULT);
             DynamXContext.getPlayerToCollision().forEach((player, playerPhysicsHandler) -> {
                 if (playerPhysicsHandler.getBodyIn() != null) {
                     BoundingBox bb = playerPhysicsHandler.getBodyIn().boundingBox(BoundingBoxPool.get());

@@ -14,6 +14,7 @@ import fr.dynamx.utils.debug.TerrainDebugData;
 import fr.dynamx.utils.debug.TerrainDebugRenderer;
 import fr.dynamx.utils.optimization.BoundingBoxPool;
 import fr.dynamx.utils.optimization.QuaternionPool;
+import fr.dynamx.utils.optimization.SubClassPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -85,16 +86,19 @@ public class DynamXBlockTerrainElement implements ITerrainElement {
 
     @Override
     public void addDebugToWorld(World mcWorld, Vector3f pos) {
+        Vector3fPool.openPool();
         QuaternionPool.openPool();
-        BoundingBoxPool.getPool().openSubPool();
+        BoundingBoxPool.getPool().openSubPool(SubClassPool.BOUNDING_BOX_DEFAULT);
 
         BoundingBox b = body.getCollisionShape().boundingBox(body.getPhysicsLocation(Vector3fPool.get()), body.getPhysicsRotation(QuaternionPool.get()), BoundingBoxPool.get());
         Vector3f min = b.getMin(Vector3fPool.get());
         Vector3f max = b.getMax(Vector3fPool.get());
         debugData = new TerrainDebugData(TerrainDebugRenderer.DYNAMXBLOCKS, new float[]{min.x, min.y, min.z, max.x, max.y, max.z});
         (mcWorld.isRemote ? DynamXDebugOptions.CLIENT_BLOCK_BOXES : DynamXDebugOptions.BLOCK_BOXES).getDataIn().put(debugData.getUuid(), debugData);
+
         BoundingBoxPool.getPool().closeSubPool();
         QuaternionPool.closePool();
+        Vector3fPool.closePool();
     }
 
     @Override

@@ -160,7 +160,6 @@ public class FileTerrainCache implements ITerrainCache {
             ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.LOAD_FROM_SAVE, ChunkGraph.ActionLocation.UNKNOWN, null, "Status: " + ticket.getStatusIndex());
 
         profiler.start(Profiler.Profiles.CHUNK_COLLS_LOAD_FROM_FILE);
-        Vector3fPool.openPool();
         ChunkPos cpos = new ChunkPos(pos.x >> 5, pos.z >> 5); //16x16 chunks
 
         List<ITerrainElement> elements = getFileAt(cpos).loadChunk(pos, this);
@@ -170,7 +169,6 @@ public class FileTerrainCache implements ITerrainCache {
             saveFile(pos, new ChunkTerrain(elements == null ? new ArrayList<>() : elements, persistentElements == null ? new ArrayList<>() : (List<ITerrainElement.IPersistentTerrainElement>) persistentElements));
         }
 
-        Vector3fPool.closePool();
         profiler.end(Profiler.Profiles.CHUNK_COLLS_LOAD_FROM_FILE);
         return new ChunkTerrain(elements == null ? new ArrayList<>() : elements, persistentElements == null ? new ArrayList<>() : (List<ITerrainElement.IPersistentTerrainElement>) persistentElements);
     }

@@ -30,4 +30,8 @@ public class UDPByteArrayPool {
     public static UDPByteArrayPool getINSTANCE() {
         return INSTANCE;
     }
+
+    public String getDebugInfo() {
+        return "free=" + frees.size();
+    }
 }

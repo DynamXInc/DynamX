@@ -33,6 +33,7 @@ public class ObjObjectRenderer {
     public static final int NORMAL_MAP_INDEX = GL13.GL_TEXTURE2;
     public static final int SPECULAR_MAP_INDEX = GL13.GL_TEXTURE3;
 
+    @Getter
     private final Map<Byte, VariantRenderData> modelRenderData = new HashMap<>();
 
     @Getter

@@ -1,6 +1,10 @@
 package fr.dynamx.common.command;
 
 import fr.dynamx.api.contentpack.object.IPartContainer;
+import fr.dynamx.client.renders.scene.node.EntityNode;
+import fr.dynamx.common.DynamXMain;
+import fr.dynamx.common.contentpack.parts.PartWheel;
+import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.ModularPhysicsEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
@@ -14,6 +18,7 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class CmdPrintVehicleInfos implements ISubCommand {
     @Override
@@ -69,9 +74,32 @@ public class CmdPrintVehicleInfos implements ISubCommand {
         NBTTagCompound tagCompound = new NBTTagCompound();
         target.writeToNBT(tagCompound);
         System.out.println("NBT " + tagCompound);
+        if (sender.getEntityWorld().isRemote && target instanceof PackPhysicsEntity) {
+            printClientInfos((PackPhysicsEntity<?, ?>) target);
+        }
         System.out.println("===================================");
 
         builder.append(TextFormatting.GOLD).append("===================================");
         sender.sendMessage(new TextComponentString(builder.toString()));
+    }
+
+    private void printClientInfos(PackPhysicsEntity<?, ?> entity) {
+        if (!(entity.getPackInfo() instanceof ModularVehicleInfo)) {
+            return;
+        }
+        ModularVehicleInfo info = (ModularVehicleInfo) entity.getPackInfo();
+        System.out.println("SceneGraph: " + info.getSceneGraph());
+        if (!(info.getSceneGraph() instanceof EntityNode)) {
+            DynamXMain.log.error("SceneNode of {} isn't a EntityNode", entity);
+            return;
+        }
+        System.out.println("Linked children: " + info.getSceneGraph().getLinkedChildren());
+        System.out.println("UnLinked children: " + ((EntityNode) info.getSceneGraph()).getUnlinkedChildren());
+        List<PartWheel> wheels = info.getPartsByType(PartWheel.class);
+        boolean modelInsights = true;
+        for (PartWheel wheel : wheels) {
+            wheel.printFullRenderInsights(entity, modelInsights);
+            modelInsights = false;
+        }
     }
 }

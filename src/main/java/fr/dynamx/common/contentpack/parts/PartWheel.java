@@ -10,6 +10,7 @@ import fr.dynamx.api.contentpack.registry.*;
 import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
+import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
 import fr.dynamx.client.renders.scene.BaseRenderContext;
 import fr.dynamx.client.renders.scene.IRenderContext;
 import fr.dynamx.client.renders.scene.node.SceneNode;
@@ -223,6 +224,47 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
                 context.getModel().renderGroup(getTireObjectName(), wheelTextureId, context.isUseVanillaRender());
             }
         }
+    }
+
+    public void printFullRenderInsights(PackPhysicsEntity<?, ?> entity, boolean modelInsights) {
+        System.out.println("=-=-=-=-=");
+        System.out.println("Wheel " + getName() + ", id=" + getId() + " render infos:");
+        System.out.println("Default info: " + getDefaultWheelInfo());
+        WheelsModule module = entity.getModuleByType(WheelsModule.class);
+        if (module != null) {
+            System.out.println("Actual info: " + module.getWheelInfo(getId()));
+            System.out.println("Wheel state: " + module.getWheelsStates()[getId()]);
+            System.out.println("Wheel tex id " + module.getWheelsTextureId()[getId()]);
+        } else {
+            System.out.println("Error: no wheels module found");
+        }
+        System.out.println("separate model: " + (getRimObjectName() == null));
+        System.out.println("rim object: " + getRimObjectName());
+        System.out.println("tire object: " + getTireObjectName());
+        System.out.println("mud guard object: " + getMudGuardObjectName());
+        if (getDefaultWheelInfo() != null) {
+            PartWheelInfo wheelInfo = module != null ? module.getWheelInfo(getId()) : null;
+            if(wheelInfo == null) {
+                wheelInfo = getDefaultWheelInfo();
+            }
+            DxModelRenderer model = DynamXContext.getDxModelRegistry().getModel(wheelInfo.getModel());
+            System.out.println("3D model: " + model);
+            if (modelInsights) {
+                if (model != null) {
+                    System.out.println("model rim: " + model.containsObjectOrNode("rim"));
+                    System.out.println("Model empty? " + model.isEmpty());
+                }
+                if (model instanceof ObjModelRenderer) {
+                    ((ObjModelRenderer) model).getObjObjects().forEach(obj -> {
+                        System.out.println("Part " + obj.getObjObjectData().getName() + " vao: " + obj.getModelRenderData());
+                    });
+                }
+            }
+            System.out.println("is model valid: " + wheelInfo.isModelValid());
+        } else {
+            System.out.println("Error no default wheel info found");
+        }
+        System.out.println("=-=-=-=-=");
     }
 
     /**

@@ -3,7 +3,6 @@ package fr.dynamx.common.physics.joints;
 import com.jme3.bullet.joints.Constraint;
 import fr.dynamx.api.entities.modules.AttachModule;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
-import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.entities.PhysicsEntity;
 import net.minecraft.util.ResourceLocation;
@@ -63,7 +62,7 @@ public class JointHandler<A extends PhysicsEntity<?>, B extends PhysicsEntity<?>
         if (isValidEntity(main, attached, jointId) && isValidEntity(attached, main, jointId)) {
             //Use null as constraint if we are not using physics
             //The allows to sync the joint to the client even if we are not simulating it here
-            Constraint joint = DynamXContext.usesPhysicsWorld(entity1.world) ? main.getModuleByType(getAttachModuleClass()).createJoint(attached, jointId) : null;
+            Constraint joint = entity1.physicsHandler != null && entity2.physicsHandler != null ? main.getModuleByType(getAttachModuleClass()).createJoint(attached, jointId) : null;
             main.getJointsHandler().addJoint(this, joint, jointId, attached);
             return true;
         } else {

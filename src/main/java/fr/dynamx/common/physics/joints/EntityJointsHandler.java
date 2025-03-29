@@ -258,28 +258,31 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
                 for (EntityJoint.CachedJoint j : queuedRestorations) {
                     boolean found = false;
                     for (Entity e : entity.world.loadedEntityList) {
-                        if (e.getPersistentID().equals(j.getId())) {
-                            found = true;
-                            if (e instanceof PhysicsEntity<?>) {
-                                JointHandler<?, ?, ?> jointHandler = JointHandlerRegistry.getHandlerUnsafe(j.getType());
-                                if (jointHandler != null) {
-                                    for (EntityJoint<?> joint : joints) {
-                                        if (joint.getJointId() == j.getJid() && j.getType().equals(joint.getType()) && (joint.getEntity1() == e || joint.getEntity2() == e)) {
-                                            DynamXMain.log.warn("TRYING TO ADD DUPLICATED JOINT " + j + " " + entity + " " + joints + " " + e + ". Sync cancelled");
-                                            continue i;
-                                        }
-                                    }
-                                    jointHandler.createJoint(entity, (PhysicsEntity<?>) e, j.getJid());
-                                } else {
-                                    DynamXMain.log.warn("[Joints NBT Load] Failed to re attach " + entity + " to " + e + " : joint handler " + j.getType() + " not found !");
-                                }
-                            } else
-                                DynamXMain.log.warn("[Joints NBT Load] Failed to re attach " + entity + " to entity with uuid " + j.getId() + " : wrong entity type : " + e);
-                            break;
+                        if (!e.getPersistentID().equals(j.getId())) {
+                            continue;
                         }
+                        found = true;
+                        if (!(e instanceof PhysicsEntity<?>)) {
+                            DynamXMain.log.warn("[Joints NBT Load] Failed to re attach " + entity + " to entity with uuid " + j.getId() + " : wrong entity type : " + e);
+                            continue;
+                        }
+                        JointHandler<?, ?, ?> jointHandler = JointHandlerRegistry.getHandlerUnsafe(j.getType());
+                        if (jointHandler == null) {
+                            DynamXMain.log.warn("[Joints NBT Load] Failed to re attach " + entity + " to " + e + " : joint handler " + j.getType() + " not found !");
+                            continue;
+                        }
+                        for (EntityJoint<?> joint : joints) {
+                            if (joint.getJointId() == j.getJid() && j.getType().equals(joint.getType()) && (joint.getEntity1() == e || joint.getEntity2() == e)) {
+                                DynamXMain.log.warn("TRYING TO ADD DUPLICATED JOINT " + j + " " + entity + " " + joints + " " + e + ". Sync cancelled");
+                                continue i;
+                            }
+                        }
+                        jointHandler.createJoint(entity, (PhysicsEntity<?>) e, j.getJid());
+                        break;
                     }
-                    if (!found)
+                    if (!found) {
                         DynamXMain.log.warn("[Joints NBT Load] Failed to re attach " + entity + " to entity with uuid " + j.getId() + " : not found");
+                    }
                 }
                 restoringJoints = false;
                 queuedRestorations.clear();

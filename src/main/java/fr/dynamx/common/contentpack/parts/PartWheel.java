@@ -245,7 +245,7 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
             if (!isMudGuard && hasWheelsModule && wheelsModule.getWheelsStates()[getId()] == WheelsModule.WheelState.REMOVED)
                 return;
             PartWheelInfo info = hasWheelsModule ? wheelsModule.getWheelInfo(getId()) : getDefaultWheelInfo();
-            if (!info.isModelValid() && getRimObjectName() == null && !isMudGuard)
+            if (info == null || (!info.isModelValid() && getRimObjectName() == null && !isMudGuard))
                 return;
             transformToRotationPoint(parentTransform);
             int index;
@@ -314,7 +314,7 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
             if (hasWheelsModule && wheelsModule.getWheelsStates()[getId()] == WheelsModule.WheelState.REMOVED)
                 return;
             PartWheelInfo info = hasWheelsModule ? wheelsModule.getWheelInfo(getId()) : getDefaultWheelInfo();
-            if (!info.isModelValid() && getRimObjectName() == null)
+            if (info == null || (!info.isModelValid() && getRimObjectName() == null))
                 return;
             transformToRotationPoint(parentTransform);
             if (hasWheelsModule) {

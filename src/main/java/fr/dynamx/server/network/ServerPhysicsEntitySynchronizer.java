@@ -70,8 +70,11 @@ public class ServerPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends
 
     private void sendSyncTo(EntityPlayer p, PooledHashMap<Integer, EntityVariable<?>> varsToSync) {
         //System.out.println("out " + varsToSync);
-        if (!varsToSync.isEmpty())
+        if (!varsToSync.isEmpty()) {
             ServerPhysicsSyncManager.addEntitySync(p, entity, varsToSync);
+        } else {
+            varsToSync.release();
+        }
     }
 
     @Override

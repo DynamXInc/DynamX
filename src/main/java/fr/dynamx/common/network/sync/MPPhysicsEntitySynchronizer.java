@@ -35,6 +35,7 @@ public abstract class MPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> ex
     }
 
     protected void onDataReceived(MessagePhysicsEntitySync<T> msg) {
+        msg.getVarsToRead().release();
     }
 
     public abstract void setSimulationTimeClient(int simulationTimeClient);

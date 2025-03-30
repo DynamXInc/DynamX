@@ -9,7 +9,7 @@ public class PooledHashMap<K, V> extends HashMap<K, V> {
     private final HashMapPool owningPool;
     private volatile boolean locked;
 
-    public static boolean DISABLE_POOL = FMLCommonHandler.instance().getSide().isClient();
+    public static boolean DISABLE_POOL = false;//FMLCommonHandler.instance().getSide().isClient();
 
     protected PooledHashMap(HashMapPool owningPool) {
         this.owningPool = owningPool;
@@ -57,9 +57,13 @@ public class PooledHashMap<K, V> extends HashMap<K, V> {
     }
 
     public void release() {
+        if(locked) {
+            throw new IllegalStateException("Locked: Already available in pool");
+        }
         locked = true;
         clear();
-        if (!DISABLE_POOL)
+        if (!DISABLE_POOL) {
             owningPool.releaseMap(this);
+        }
     }
 }

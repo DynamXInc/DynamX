@@ -218,6 +218,8 @@ public class PhysicsWorldTerrain implements ITerrainManager {
      */
     private void addChunkToPhysicsWorld(ChunkLoadingTicket ticket, boolean checkNotLoaded, boolean checkStatus) {
         Profiler.get().start(ADD_USED);
+        Vector3fPool.openPool();
+
         if ((!checkStatus || ticket.getStatus() == ChunkState.LOADED) && ticket.getPriority() != ChunkLoadingTicket.TicketPriority.NONE) {
             ChunkCollisions collisions = ticket.getCollisions();
             if (!checkNotLoaded || !terrainState.isLoadedAnywhere(ticket.getPos())) {
@@ -263,10 +265,12 @@ public class PhysicsWorldTerrain implements ITerrainManager {
             } else {
                 System.out.println("Graph not found !");
             }
-            if (!DynamXConfig.ignoreDangerousTerrainErrors)
+            if (!DynamXConfig.ignoreDangerousTerrainErrors) {
                 throw new IllegalStateException("[IgnoredDangerousTerrainError] Bad ticket state " + ticket);
+            }
         }
 
+        Vector3fPool.closePool();
         Profiler.get().end(ADD_USED);
     }
 

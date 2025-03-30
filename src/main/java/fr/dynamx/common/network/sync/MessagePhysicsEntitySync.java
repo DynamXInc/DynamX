@@ -31,7 +31,7 @@ public class MessagePhysicsEntitySync<T extends PhysicsEntity<?>> extends Physic
     //@Getter
     private Map<Integer, EntityVariable<?>> varsToSend;
     @Getter
-    private Map<Integer, SynchronizedEntityVariableSnapshot<?>> varsToRead;
+    private PooledHashMap<Integer, SynchronizedEntityVariableSnapshot<?>> varsToRead;
     /**
      * The "date" of the data contained in this packet
      */

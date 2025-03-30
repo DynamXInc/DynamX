@@ -3,7 +3,6 @@ package fr.dynamx.common.physics.world;
 import fr.dynamx.api.events.PhysicsEvent;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.utils.debug.Profiler;
-import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;

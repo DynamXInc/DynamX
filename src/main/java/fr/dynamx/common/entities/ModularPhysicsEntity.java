@@ -132,10 +132,14 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
 
     @Override
     public void initPhysicsEntity(boolean usePhysics) {
-        if (usePhysics) physicsHandler = createPhysicsHandler();
+        if (usePhysics) {
+            physicsHandler = createPhysicsHandler();
+            assert physicsHandler != null : "PhysicsHandler can't be null when using physics!";
+        }
         moduleList.forEach(m -> ((IPhysicsModule<T>) m).initPhysicsEntity(physicsHandler));
-        if (usePhysics)
+        if (usePhysics) {
             physicsHandler.addToWorld(); //Add the physics handler to the physics world AFTER modules initialisation
+        }
         if (physicsInitCallback != null) {
             physicsInitCallback.onPhysicsInit(this, physicsHandler);
             physicsInitCallback = null; //Free memory

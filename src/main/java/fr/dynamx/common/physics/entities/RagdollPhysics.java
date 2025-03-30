@@ -69,7 +69,7 @@ public class RagdollPhysics<T extends RagdollEntity> extends EntityPhysicsHandle
     }
 
     @Override
-    public void removePhysicsEntity() {
+    public void removeFromWorld() {
         // chest is already in bodyParts super.removePhysicsEntity();
         bodyParts.values().forEach(physicsRigidBody -> DynamXContext.getPhysicsWorld(getHandledEntity().world).removeCollisionObject(physicsRigidBody));
     }

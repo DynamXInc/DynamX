@@ -530,8 +530,9 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
             physicsWorld.removeBulletEntity(this);
             terrainCache.onRemoved(physicsWorld.getTerrainManager());
         }
-        if (physicsHandler != null)
-            physicsHandler.removePhysicsEntity();
+        if (physicsHandler != null) {
+            physicsHandler.removeFromWorld();
+        }
     }
 
     @Override

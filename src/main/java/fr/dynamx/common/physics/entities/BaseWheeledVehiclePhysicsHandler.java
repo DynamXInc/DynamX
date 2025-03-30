@@ -84,7 +84,7 @@ public abstract class BaseWheeledVehiclePhysicsHandler<T extends BaseVehicleEnti
     }
 
     @Override
-    public void removePhysicsEntity() {
+    public void removeFromWorld() {
         if (physicsVehicle != null) {
             DynamXContext.getPhysicsWorld(getHandledEntity().world).removeVehicle(physicsVehicle);
         }

@@ -26,7 +26,8 @@ public class CmdPoolStates implements ISubCommand {
 
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-        if(sender.getEntityWorld().isRemote) {
+        boolean client = sender.getEntityWorld().isRemote;
+        if (client) {
             sender.sendMessage(new TextComponentString(TextFormatting.DARK_PURPLE + "Side: client"));
         } else {
             sender.sendMessage(new TextComponentString(TextFormatting.BLUE + "Side: server"));
@@ -72,11 +73,14 @@ public class CmdPoolStates implements ISubCommand {
         }
 
         String result = "BoundingBox: " + BoundingBoxPool.getPool().getDebugInfo() + "\n" +
-                "GlQuaternion: " + GlQuaternionPool.getINSTANCE().getDebugInfo() + "\n" +
                 "HashMap: " + HashMapPool.getINSTANCE().getDebugInfo() + "\n" +
                 "Quaternion: " + QuaternionPool.getPool().getDebugInfo() + "\n" +
                 "UDPByteArray: " + UDPByteArrayPool.getINSTANCE().getDebugInfo() + "\n" +
                 "Vector3f: " + Vector3fPool.getPool().getDebugInfo() + "\n";
+
+        if (client) {
+            result += getClientResult();
+        }
 
         sender.sendMessage(new TextComponentString(TextFormatting.GOLD + "Current thread pools:"));
         sender.sendMessage(new TextComponentString(result));
@@ -98,11 +102,15 @@ public class CmdPoolStates implements ISubCommand {
 
     @Override
     public void getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos, List<String> r) {
-        if(args.length == 2) {
+        if (args.length == 2) {
             r.add("inspect");
-        } else if(args.length == 3) {
+        } else if (args.length == 3) {
             r.add("Vector3f");
             r.add("Quaternion");
         }
+    }
+
+    private String getClientResult() {
+        return "GlQuaternion: " + GlQuaternionPool.getINSTANCE().getDebugInfo() + "\n";
     }
 }

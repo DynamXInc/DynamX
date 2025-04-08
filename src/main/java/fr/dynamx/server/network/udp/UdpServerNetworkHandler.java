@@ -60,9 +60,11 @@ public class UdpServerNetworkHandler implements IDnxNetworkHandler {
             }
         } catch (IOException e) {
             DynamXMain.log.error("Error while sending udp packet " + packet + " to " + client + ". Disconnecting the client.", e);
-            if(client.player.connection != null && !client.player.hasDisconnected()) {
-                client.player.connection.disconnect(new TextComponentString("DynamX mod had an unexpected udp error. Please try to reconnect."));
-            }
+            client.player.server.addScheduledTask(() -> {
+                if (client.player.connection != null && !client.player.hasDisconnected()) {
+                    client.player.connection.disconnect(new TextComponentString("DynamX mod had an unexpected udp error. Please try to reconnect."));
+                }
+            });
         }
     }
 

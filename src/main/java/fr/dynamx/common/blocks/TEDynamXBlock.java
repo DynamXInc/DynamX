@@ -214,7 +214,7 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
     @Override
     @SideOnly(Side.CLIENT)
     public double getMaxRenderDistanceSquared() {
-        return packInfo == null || packInfo.getRenderDistance() == -1 ? super.getMaxRenderDistanceSquared() : packInfo.getRenderDistance();
+        return packInfo == null || packInfo.getRenderDistanceSquared() == -1 ? super.getMaxRenderDistanceSquared() : packInfo.getRenderDistanceSquared();
     }
 
     @Override

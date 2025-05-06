@@ -230,6 +230,14 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
     }
 
     @Override
+    public boolean isInRangeToRenderDist(double range) {
+        if (getPackInfo() != null && getPackInfo().getRenderDistanceSquared() != -1) {
+            return range < getPackInfo().getRenderDistanceSquared();
+        }
+        return super.isInRangeToRenderDist(range);
+    }
+
+    @Override
     public EntityJointsHandler getJointsHandler() {
         return jointsHandler;
     }

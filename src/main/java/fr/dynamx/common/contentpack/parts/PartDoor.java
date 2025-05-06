@@ -272,8 +272,8 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     }
 
     @Override
-    public float getRenderDistance() {
-        return owner.getRenderDistance();
+    public float getRenderDistanceSquared() {
+        return owner.getRenderDistanceSquared();
     }
 
     @Override

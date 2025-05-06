@@ -29,7 +29,7 @@ public abstract class AbstractProp<T extends AbstractProp<T>> extends AbstractIt
     @Getter
     @Setter
     @PackFileProperty(configNames = "RenderDistanceSquared", required = false, defaultValue = "4096")
-    protected float renderDistance = 4096;
+    protected float renderDistanceSquared = 4096;
 
     @Getter
     @Accessors(fluent = true)

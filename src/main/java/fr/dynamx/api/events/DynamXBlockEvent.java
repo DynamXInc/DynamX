@@ -13,9 +13,12 @@ import net.minecraftforge.fml.common.eventhandler.Cancelable;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.relauncher.Side;
 
+import javax.annotation.Nullable;
+
 @Getter
 public class DynamXBlockEvent extends Event {
     private final Side side;
+    @Nullable
     private final DynamXBlock<?> block;
     private final World world;
 

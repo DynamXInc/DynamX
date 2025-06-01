@@ -61,7 +61,7 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
      * @param blockObjectInfo a BlockObject loaded by the content pack system
      */
     public DynamXBlock(T blockObjectInfo) {
-        super(blockObjectInfo.getMaterial());
+        super(blockObjectInfo.getMaterial() != null ? blockObjectInfo.getMaterial() : Material.ROCK);
         setInfo(blockObjectInfo);
         setCreativeTab(blockObjectInfo.getCreativeTab(DynamXItemRegistry.objectTab));
         textureNum = Math.min(16, blockObjectInfo.getMaxVariantId());

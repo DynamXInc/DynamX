@@ -91,3 +91,7 @@ wrench.mode.change_skins=§9Changer le skin des véhicules
 wrench.mode.entity_seat=§dMettre des entités dans les véhicules
 wrench.mode.none=§cClé à molette désactivée
 wrench.mode.launch_entities=§6Lancer des props
+
+dynamx.item.variant=Variante : %s
+dynamx.item.description=Description : %s
+dynamx.item.pack=Pack : %s

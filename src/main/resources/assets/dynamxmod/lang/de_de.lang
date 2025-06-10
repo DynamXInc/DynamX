@@ -59,3 +59,7 @@ cmd.slopes.auto.result=§6[AUTO] Slopes wurden generiert in %s ms
 cmd.slopes.auto.success=§a[AUTO] Die Slopes wurden hinzugefügt !
 
 hud.car.speedlimit=Geschwindigkeitsbegrenzung : %s
+
+dynamx.item.variant=Variante : %s
+dynamx.item.description=Beschreibung : %s
+dynamx.item.pack=Pack : %s

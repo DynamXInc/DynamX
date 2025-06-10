@@ -17,6 +17,7 @@ import fr.dynamx.common.contentpack.type.objects.PropObject;
 import fr.dynamx.common.entities.IDynamXObject;
 import fr.dynamx.common.items.DynamXItemRegistry;
 import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.RegistryNameSetter;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -158,11 +159,8 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
 
     @SideOnly(Side.CLIENT)
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-        tooltip.add("Description: " + getInfo().getDescription());
-        tooltip.add("Pack: " + getInfo().getPackName());
-        if (stack.getMetadata() > 0 && getMaxMeta() > 1) {
-            tooltip.add("Texture: " + getInfo().getMainObjectVariantName((byte) stack.getMetadata()));
-        }
+        super.addInformation(stack, worldIn, tooltip, flagIn);
+        DynamXUtils.addItemTooltip(tooltip, getInfo(), (byte) stack.getMetadata());
     }
 
     @Override

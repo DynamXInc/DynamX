@@ -3,19 +3,12 @@ package fr.dynamx.common.items;
 import com.jme3.math.Vector3f;
 import fr.dynamx.common.contentpack.type.objects.PropObject;
 import fr.dynamx.common.entities.PropsEntity;
-import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-
-import javax.annotation.Nullable;
-import java.util.List;
 
 public class ItemProps<T extends PropObject<T>> extends DynamXItemSpawner<T> {
 
@@ -37,7 +30,7 @@ public class ItemProps<T extends PropObject<T>> extends DynamXItemSpawner<T> {
         Vector3f pos;
         if (!worldIn.isRemote) {
             if (playerIn.isSneaking()) {
-                if(!playerIn.capabilities.isCreativeMode)
+                if (!playerIn.capabilities.isCreativeMode)
                     return true;
                 for (float i = 0; i < 5; i += 1) {
                     for (float j = 0; j < 5; j += 1) {
@@ -78,17 +71,5 @@ public class ItemProps<T extends PropObject<T>> extends DynamXItemSpawner<T> {
     @Override
     public int getMaxMeta() {
         return textureNum;
-    }
-
-    @SideOnly(Side.CLIENT)
-    public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-        tooltip.add("Description: " + getInfo().getDescription());
-        tooltip.add("Pack: " + getInfo().getPackName());
-        if (stack.getMetadata() != 0) {
-            if (textureNum > stack.getMetadata())
-                tooltip.add("Texture: " + getInfo().getMainObjectVariantName((byte) stack.getMetadata()));
-            else
-                tooltip.add(TextFormatting.RED + "Texture not found, check your pack errors");
-        }
     }
 }

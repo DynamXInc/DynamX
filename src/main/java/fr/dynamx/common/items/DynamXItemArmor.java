@@ -7,6 +7,7 @@ import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.objects.ArmorObject;
 import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.RegistryNameSetter;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.util.ITooltipFlag;
@@ -117,12 +118,8 @@ public class DynamXItemArmor<T extends ArmorObject<?>> extends ItemArmor impleme
 
     @Override
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-        tooltip.add("Description: " + getInfo().getDescription());
-        tooltip.add("Pack: " + getInfo().getPackName());
-        if (stack.getMetadata() > 0 && textureNum > 1)
-            tooltip.add("Texture: " + getInfo().getMainObjectVariantName((byte) stack.getMetadata()));
         super.addInformation(stack, worldIn, tooltip, flagIn);
-        //tooltip.add("Armor slot : "+armorType.getName());
+        DynamXUtils.addItemTooltip(tooltip, getInfo(), (byte) stack.getMetadata());
     }
 
     @Nullable
@@ -135,7 +132,8 @@ public class DynamXItemArmor<T extends ArmorObject<?>> extends ItemArmor impleme
     @Nullable
     @Override
     @SideOnly(Side.CLIENT)
-    public ModelBiped getArmorModel(EntityLivingBase entityLiving, ItemStack itemStack, EntityEquipmentSlot armorSlot, ModelBiped _default) {
+    public ModelBiped getArmorModel(EntityLivingBase entityLiving, ItemStack itemStack, EntityEquipmentSlot
+            armorSlot, ModelBiped _default) {
         armorInfo.getObjArmor().setActivePart(armorSlot, textureNum > 1 ? (byte) itemStack.getMetadata() : 0);
         return armorInfo.getObjArmor();
     }

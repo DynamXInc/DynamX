@@ -69,7 +69,7 @@ public class ObjObjectData{
     }
 
     public com.jme3.math.Vector3f min(@Nullable com.jme3.math.Vector3f result) {
-        if (vertices.length == 0) {
+        if (vertices == null || vertices.length == 0) {
             if (result == null)
                 return new com.jme3.math.Vector3f();
             return result.set(0, 0, 0);

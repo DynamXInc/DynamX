@@ -31,16 +31,15 @@ public class DynamXLoadingTasks {
         @Override
         public void accept(TaskContext taskContext) {
             ContentPackLoader.reload(DynamXMain.resourcesDirectory, taskContext != TaskContext.CLIENT || taskContext.isSinglePlayer());
-            if (taskContext.isClient()) //Dedicated server
-            {
+            if (taskContext.isClient()) { //Dedicated server
                 DynamXContext.getDxModelRegistry().getItemRenderer().refreshItemInfos();
-                if (taskContext == TaskContext.CLIENT && !taskContext.isSinglePlayer() && DynamXConfig.syncPacks) {
-                    DynamXMain.log.debug("Requesting pack sync...");
-                    DynamXContext.getNetwork().sendToServer(new MessagePacksHashs(PackSyncHandler.getObjects()));
+                if (taskContext == TaskContext.CLIENT && !taskContext.isSinglePlayer()) {
+                    PackSyncHandler.requestPackSync();
                 } else if (taskContext != TaskContext.MC_INIT) {
                     DynamXUtils.hotswapWorldPackInfos(DynamXMain.proxy.getClientWorld());
-                    if (taskContext.isSinglePlayer())
+                    if (taskContext.isSinglePlayer()) {
                         DynamXUtils.hotswapWorldPackInfos(DynamXMain.proxy.getServerWorld());
+                    }
                 }
             } else if (taskContext == TaskContext.SERVER_RUNNING) {
                 DynamXContext.getNetwork().sendToClient(new MessageSyncConfig(true, -1), EnumPacketTarget.ALL);

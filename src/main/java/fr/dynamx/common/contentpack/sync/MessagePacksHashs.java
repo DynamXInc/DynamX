@@ -77,6 +77,7 @@ public class MessagePacksHashs implements IDnxPacket {
         @Override
         public IMessage onMessage(MessagePacksHashs message, MessageContext ctx) {
             if (!DynamXConfig.syncPacks) {
+                DynamXMain.log.warn("[PackSync] Sync requested by {}, but disabled on server", ctx.getServerHandler().player);
                 return null;
             }
             try {
@@ -85,6 +86,7 @@ public class MessagePacksHashs implements IDnxPacket {
                     DynamXMain.log.debug("[PackSync] No delta for {}", ctx.getServerHandler().player);
                     return null;
                 }
+
                 Map<String, Map<String, byte[]>> fullData = new HashMap<>();
                 for (Map.Entry<String, List<String>> entry : delta.entrySet()) {
                     String s = entry.getKey();
@@ -93,7 +95,8 @@ public class MessagePacksHashs implements IDnxPacket {
                     InfoLoader<?> loader = DynamXObjectLoaders.getInfoLoaders().stream().filter(i -> i.getPrefix().equals(s)).findFirst().get();
                     loader.encodeObjects(l, fullData.get(s));
                 }
-                DynamXMain.log.info("[PackSync] Sending {} changed pack files to {}", fullData.size(), ctx.getServerHandler().player);
+
+                DynamXMain.log.info("[PackSync] Sending {} changed pack files to {}", fullData.entrySet().stream().map(e -> e.getKey() + "->" + e.getValue().size()).collect(Collectors.toList()), ctx.getServerHandler().player);
                 DynamXContext.getNetwork().sendToClientFromOtherThread(new MessagePacksHashs(fullData), EnumPacketTarget.PLAYER, ctx.getServerHandler().player);
             } catch (Exception e) {
                 DynamXMain.log.error("[PackSync] Failed to sync changed pack files for " + ctx.getServerHandler().player, e);

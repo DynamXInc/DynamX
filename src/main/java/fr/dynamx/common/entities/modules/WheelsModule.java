@@ -26,6 +26,7 @@ import fr.dynamx.common.physics.entities.parts.wheel.WheelPhysics;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import jme3utilities.Validate;
 import lombok.Getter;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
@@ -38,7 +39,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Basic wheel implementation <br>
@@ -48,16 +48,26 @@ import java.util.Objects;
  */
 @SynchronizedEntityVariable.SynchronizedPhysicsModule(modid = DynamXConstants.ID)
 public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHandler<?>>, IPhysicsModule.IPhysicsUpdateListener, IPackInfoReloadListener {
-    //TODO CLEAN WHEELS CODE
     @SynchronizedEntityVariable(name = "wheel_infos")
-    protected final EntityMapVariable<Map<Byte, PartWheelInfo>, Byte, PartWheelInfo> wheelInfos = new EntityMapVariable<>((variable, value) -> {
-        value.forEach(this::setWheelInfo);
+    protected final EntityMapVariable<Map<Byte, String>, Byte, String> synchronizedWheelInfos = new EntityMapVariable<>((variable, value) -> {
+        value.forEach((wheelIndex, wheelInfoName) -> {
+            PartWheelInfo wheelInfo = DynamXObjectLoaders.WHEELS.findInfo(wheelInfoName);
+            if (wheelInfo == null) {
+                throw new IllegalStateException("Cannot synchronize wheel " + wheelIndex + " to " + wheelInfoName + ": wheel not found in infos registry.");
+            }
+            setWheelInfo(wheelIndex, wheelInfo);
+        });
     }, SynchronizationRules.CONTROLS_TO_SPECTATORS);
+
+    @Getter
+    protected final Map<Byte, PartWheelInfo> wheelInfos = new HashMap<>();
+
     /**
      * Wheels visual states, based on the physical states
      */
     @SynchronizedEntityVariable(name = "wheel_states")
     protected EntityVariable<WheelState[]> wheelsStates;
+
     @SynchronizedEntityVariable(name = "skid_infos")
     public EntityFloatArrayVariable skidInfos = new EntityFloatArrayVariable(SynchronizationRules.PHYSICS_TO_SPECTATORS, null);
 
@@ -100,23 +110,40 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
     @Override
     public void onPackInfosReloaded() {
         for (PartWheel part : entity.getPackInfo().getPartsByType(PartWheel.class)) {
-            if (wheelInfos.get().containsKey(part.getId()) && Objects.equals(wheelInfos.get().get(part.getId()).getFullName(), part.getDefaultWheelInfo().getFullName()))
-                setWheelInfo(part.getId(), part.getDefaultWheelInfo());
+            if (!synchronizedWheelInfos.get().containsKey(part.getId())) {
+                // Changing number of wheels on spawned vehicles isn't supported
+                continue;
+            }
+
+            String wheelInfoName = synchronizedWheelInfos.get().get(part.getId());
+            PartWheelInfo wheelInfo = DynamXObjectLoaders.WHEELS.findInfo(wheelInfoName);
+            if (wheelInfo == null) {
+                DynamXMain.log.warn("[Pack Reload] Replacing missing wheel info {} by default wheel info {}", wheelInfoName, part.getDefaultWheelName());
+                wheelInfo = part.getDefaultWheelInfo();
+            }
+            setWheelInfo(part.getId(), wheelInfo);
         }
     }
 
     public void setWheelInfo(byte partIndex, PartWheelInfo info) {
-        if (wheelInfos.get().get(partIndex) == info) {
+        Validate.nonNull(info, "Wheel info can't be null");
+
+        if (wheelInfos.get(partIndex) == info) {
             return;
         }
-        VehicleEntityEvent.ChangeWheel event = new VehicleEntityEvent.ChangeWheel(FMLCommonHandler.instance().getEffectiveSide(), entity, this, wheelInfos.get().get(partIndex), info, partIndex);
+
+        VehicleEntityEvent.ChangeWheel event = new VehicleEntityEvent.ChangeWheel(FMLCommonHandler.instance().getEffectiveSide(), entity, this, wheelInfos.get(partIndex), info, partIndex);
         if (MinecraftForge.EVENT_BUS.post(event)) {
             return;
         }
+
+        synchronizedWheelInfos.put(partIndex, event.getNewWheel().getFullName());
         wheelInfos.put(partIndex, event.getNewWheel());
+
         if (wheelsPhysics != null) {
             wheelsPhysics.getWheelByPartIndex(partIndex).setWheelInfo(event.getNewWheel());
         }
+
         if (entity.world.isRemote) {
             onTexturesChange(entity.getEntityTextureId());
         }
@@ -125,8 +152,9 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
     @Override
     @SideOnly(Side.CLIENT)
     public void onTexturesChange(byte newMetadata) {
-        if (newMetadata == -1)
+        if (newMetadata == -1 || entity.getPackInfo() == null) {
             return;
+        }
         String chassisVariant = entity.getPackInfo().getVariantName(newMetadata);
         for (byte i = 0; i < wheelsTextureId.length; i++) {
             wheelsTextureId[i] = getWheelInfo(i).getIdForVariant(chassisVariant);
@@ -139,11 +167,7 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
     }
 
     public PartWheelInfo getWheelInfo(byte partIndex) {
-        return wheelInfos.get().get(partIndex);
-    }
-
-    public Map<Byte, PartWheelInfo> getWheelInfos() {
-        return wheelInfos.get();
+        return wheelInfos.get(partIndex);
     }
 
     /**
@@ -155,17 +179,23 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
 
     @Override
     public void initEntityProperties() {
-        int wheelCount = entity.getPackInfo().getPartsByType(PartWheel.class).size();
-        skidInfos.set(new float[wheelCount]);
+        // Load pack wheel infos
         for (PartWheel part : entity.getPackInfo().getPartsByType(PartWheel.class)) {
+            synchronizedWheelInfos.put(part.getId(), part.getDefaultWheelName());
             wheelInfos.put(part.getId(), part.getDefaultWheelInfo());
         }
+
+        int wheelCount = entity.getPackInfo().getPartsByType(PartWheel.class).size();
+
+        skidInfos.set(new float[wheelCount]);
         wheelsStates.set(new WheelState[wheelCount]);
+
         this.wheelsTextureId = new byte[wheelCount];
         for (int i = 0; i < wheelCount; i++) {
             wheelsStates.get()[i] = WheelState.ADDED;
             wheelsTextureId[i] = -1;
         }
+
         visualProperties = new float[wheelCount * VehicleEntityProperties.EnumVisualProperties.values().length];
         prevVisualProperties = new float[visualProperties.length];
     }
@@ -222,17 +252,19 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
     @Override
     public void postUpdatePhysics(boolean simulatingPhysics) {
         System.arraycopy(visualProperties, 0, prevVisualProperties, 0, prevVisualProperties.length);
-        if (simulatingPhysics)
+        if (simulatingPhysics) {
             updateVisualProperties();
+        }
     }
 
     @Override
     public void readFromNBT(NBTTagCompound tag) {
-        int wheelCount = Math.min(tag.getByte("WheelCount"), wheelInfos.get().size());
+        int wheelCount = Math.min(tag.getByte("WheelCount"), synchronizedWheelInfos.get().size());
         for (byte i = 0; i < wheelCount; i++) {
             PartWheelInfo info = DynamXObjectLoaders.WHEELS.findInfo(tag.getString("WheelInfo" + i));
-            if (info != null)
+            if (info != null) {
                 setWheelInfo(i, info);
+            }
             wheelsStates.get()[i] = WheelState.values()[tag.getByte("WheelState" + i)];
         }
     }
@@ -242,7 +274,7 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
         tag.setByte("WheelCount", (byte) wheelsStates.get().length);
         for (byte i = 0; i < wheelsStates.get().length; i++) {
             tag.setByte("WheelState" + i, (byte) wheelsStates.get()[i].ordinal());
-            tag.setString("WheelInfo" + i, wheelInfos.get().get(i).getFullName());
+            tag.setString("WheelInfo" + i, synchronizedWheelInfos.get().get(i));
         }
     }
 
@@ -273,8 +305,9 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
         }
         for (byte b = 0; b < numWheels; b++) {
             WheelPhysics w = wheelsPhysics.getWheel(b);
-            if (w != null)
+            if (w != null) {
                 skidInfos.set(b, w.getSkidInfo());
+            }
         }
     }
 

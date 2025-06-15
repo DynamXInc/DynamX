@@ -43,36 +43,44 @@ public class UdpServerConnectionHandler {
     private void onConnected(EntityPlayer entity) {
         EntityPlayerMP player = (EntityPlayerMP) entity;
 
-        if (networkHandler instanceof UdpServerNetworkHandler) {
-            UdpServerNetworkHandler voiceServer = (UdpServerNetworkHandler) this.networkHandler;
-            String hash = null;
-
-            while (hash == null) {
-                try {
-                    hash = this.sha256(RandomStringUtils.random(32));
-                } catch (NoSuchAlgorithmException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (DynamXConfig.udpDebug)
-                DynamXMain.log.info("[UDP-DEBUG] Initiating auth of " + player);
-            voiceServer.waitingAuth.put(hash, player);
-            DynamXContext.getNetwork().sendToClient(new MessageDynamXUdpSettings(this.networkHandler.getType().ordinal(), DynamXConfig.udpPort, hash, DynamXConfig.usingProxy ? ((DynamXServerNetworkSystem) DynamXContext.getNetwork()).getServerIPAdressRetriever().getAddress() : "", DynamXConfig.syncPacks), EnumPacketTarget.PLAYER, player);
-        } else {
+        if (!(networkHandler instanceof UdpServerNetworkHandler)) {
             DynamXContext.getNetwork().sendToClient(new MessageDynamXUdpSettings(this.networkHandler.getType().ordinal(), 0, "", "", DynamXConfig.syncPacks), EnumPacketTarget.PLAYER, player);
+            return;
         }
+
+        if (DynamXConfig.udpDebug) {
+            DynamXMain.log.info("[UDP-DEBUG] Initiating auth of {}", player);
+        }
+
+        String hash = null;
+        while (hash == null) {
+            try {
+                hash = this.sha256(RandomStringUtils.random(32));
+            } catch (NoSuchAlgorithmException e) {
+                DynamXMain.log.error(e);
+            }
+        }
+
+        UdpServerNetworkHandler voiceServer = (UdpServerNetworkHandler) this.networkHandler;
+        voiceServer.waitingAuth.put(hash, player);
+        DynamXContext.getNetwork().sendToClient(new MessageDynamXUdpSettings(this.networkHandler.getType().ordinal(), DynamXConfig.udpPort, hash, DynamXConfig.usingProxy ? ((DynamXServerNetworkSystem) DynamXContext.getNetwork()).getServerIPAdressRetriever().getAddress() : "", DynamXConfig.syncPacks), EnumPacketTarget.PLAYER, player);
     }
 
     @SubscribeEvent
     public void onDisconnect(PlayerEvent.PlayerLoggedOutEvent event) {
-        if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
-            if (DynamXConfig.udpDebug)
-                DynamXMain.log.info("[UDP-DEBUG] Disconnected " + event.player);
-            if (networkHandler instanceof UdpServerNetworkHandler) {
-                ((UdpServerNetworkHandler) networkHandler).closeConnection(event.player.getEntityId());
-            }
-            this.loggedIn.remove(event.player.getGameProfile());
+        if (!FMLCommonHandler.instance().getEffectiveSide().isServer()) {
+            return;
         }
+
+        if (DynamXConfig.udpDebug) {
+            DynamXMain.log.info("[UDP-DEBUG] Disconnected {}", event.player);
+        }
+
+        if (networkHandler instanceof UdpServerNetworkHandler) {
+            ((UdpServerNetworkHandler) networkHandler).closeConnection(event.player.getEntityId());
+        }
+
+        this.loggedIn.remove(event.player.getGameProfile());
     }
 
     private String sha256(String s) throws NoSuchAlgorithmException {

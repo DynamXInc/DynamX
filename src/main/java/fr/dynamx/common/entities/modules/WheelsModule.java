@@ -114,9 +114,12 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
             return;
         }
         wheelInfos.put(partIndex, event.getNewWheel());
-        if (wheelsPhysics != null)
+        if (wheelsPhysics != null) {
             wheelsPhysics.getWheelByPartIndex(partIndex).setWheelInfo(event.getNewWheel());
-        onTexturesChange(entity.getEntityTextureId());
+        }
+        if (entity.world.isRemote) {
+            onTexturesChange(entity.getEntityTextureId());
+        }
     }
 
     @Override

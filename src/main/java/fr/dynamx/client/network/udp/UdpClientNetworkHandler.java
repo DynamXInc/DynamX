@@ -43,8 +43,9 @@ public class UdpClientNetworkHandler implements IDnxNetworkHandler {
     public void authenticate() {
         this.setAuthenticated(false);
         this.sendPacket(new UDPClientAuthenticationPacket(hash));
-        if (DynamXConfig.udpDebug)
+        if (DynamXConfig.udpDebug) {
             DynamXMain.log.info("[UDP-DEBUG] Auth rq sent");
+        }
     }
 
     void handleAuth() {

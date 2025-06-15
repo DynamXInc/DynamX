@@ -6,6 +6,7 @@ import fr.dynamx.utils.DynamXUtils;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IResource;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 
 import javax.vecmath.Vector2f;
@@ -25,7 +26,7 @@ public class OBJLoader {
     private static final String USE_MATERIAL = "usemtl";
     private static final String NEW_MATERIAL = "mtllib";
     @Getter
-    private static final List<MTLLoader> mtlLoaders = new ArrayList<>();
+    private static final NonNullList<MTLLoader> mtlLoaders = NonNullList.create();
 
     private boolean hasNormals = false;
     private boolean hasTexCoords = false;

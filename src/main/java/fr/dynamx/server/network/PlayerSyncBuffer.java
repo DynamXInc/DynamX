@@ -7,7 +7,6 @@ import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.network.sync.MessageMultiPhysicsEntitySync;
 import fr.dynamx.common.network.sync.MessagePhysicsEntitySync;
-import fr.dynamx.server.command.CmdNetworkConfig;
 import fr.dynamx.utils.optimization.PooledHashMap;
 import net.minecraft.entity.player.EntityPlayerMP;
 
@@ -90,12 +89,8 @@ public class PlayerSyncBuffer {
      * Updates buffers, and send data that need to be sent
      */
     public void update() {
-        /*if(DynamXCommands.sync_buff)
-        {
-          //  System.out.println("AT");
-           System.out.println(this.toString());
-        }*/
         final Queue<MessagePhysicsEntitySync<?>> sendQueue = new ArrayDeque<>();
+        // Nominal case
         if (queuedPackets.size() <= NEW_SENDS_LIMIT && delayedPackets.size() <= DELAYED_SENDS_LIMIT) {
             if (!delayedPackets.isEmpty()) {
                 delayedPackets.forEach(syncItem -> syncItem.send(sendQueue));
@@ -103,8 +98,7 @@ public class PlayerSyncBuffer {
             }
             queuedPackets.forEach(syncItem -> syncItem.send(sendQueue));
             queuedPackets.clear();
-        } else //too much to send
-        {
+        } else { // Too much to send
             List<SyncItem<?>> keep = new ArrayList<>();
             if (!delayedPackets.isEmpty()) {
                 delayedPackets.forEach(s -> {
@@ -125,41 +119,34 @@ public class PlayerSyncBuffer {
             });
             queuedPackets.clear();
 
-            //System.out.println("FC "+count[0]);
             while (!keep.isEmpty() && sendQueue.size() <= NEW_SENDS_LIMIT + DELAYED_SENDS_LIMIT) {
                 SyncItem<?> s = keep.remove(0);
                 s.send(sendQueue);
             }
-            //System.out.println("FA "+count[0]);
             if (!keep.isEmpty()) {
                 delayedPackets.addAll(keep);
-                //System.out.println("Delay "+delayedPackets+" "+keep);
                 keep.clear();
             }
         }
+
         syncTime++;
-        /*if(DynamXCommands.sync_buff && !delayedPackets.isEmpty())
-        {
-            System.out.println("PT");
-            System.out.println(this.toString()+" "+sendQueue.size());
-        }*/
-        if (!sendQueue.isEmpty()) {
-            if (CmdNetworkConfig.sync_buff && playerIn.getName().equalsIgnoreCase("aymericred"))
-                System.out.println("Send you " + sendQueue);
-            if (sendQueue.size() == 1)
-                DynamXContext.getNetwork().sendToClient(sendQueue.poll(), EnumPacketTarget.PLAYER, playerIn);
-            else {
-                while (sendQueue.size() > ENTITIES_PER_PACKETS) {
-                    List<MessagePhysicsEntitySync<?>> buff = new ArrayList<>();
-                    for (int i = 0; i < ENTITIES_PER_PACKETS; i++) {
-                        buff.add(sendQueue.poll());
-                    }
-                    DynamXContext.getNetwork().sendToClient(new MessageMultiPhysicsEntitySync(buff), EnumPacketTarget.PLAYER, playerIn);
-                }
-                DynamXContext.getNetwork().sendToClient(new MessageMultiPhysicsEntitySync(sendQueue), EnumPacketTarget.PLAYER, playerIn);
-            }
-            //System.out.println("Sent msg sync " + syncTime+" "+playerIn.ticksExisted);
+
+        if (sendQueue.isEmpty()) {
+            return;
         }
+        // Send packets in sendQueue
+        if (sendQueue.size() == 1) {
+            DynamXContext.getNetwork().sendToClient(sendQueue.poll(), EnumPacketTarget.PLAYER, playerIn);
+            return;
+        }
+        while (sendQueue.size() > ENTITIES_PER_PACKETS) {
+            List<MessagePhysicsEntitySync<?>> buff = new ArrayList<>();
+            for (int i = 0; i < ENTITIES_PER_PACKETS; i++) {
+                buff.add(sendQueue.poll());
+            }
+            DynamXContext.getNetwork().sendToClient(new MessageMultiPhysicsEntitySync(buff), EnumPacketTarget.PLAYER, playerIn);
+        }
+        DynamXContext.getNetwork().sendToClient(new MessageMultiPhysicsEntitySync(sendQueue), EnumPacketTarget.PLAYER, playerIn);
     }
 
     /**

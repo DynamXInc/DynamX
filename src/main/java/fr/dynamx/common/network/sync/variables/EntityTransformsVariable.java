@@ -6,7 +6,7 @@ import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.physics.utils.RigidBodyTransform;
 import fr.dynamx.common.physics.utils.SynchronizedRigidBodyTransform;
-import fr.dynamx.utils.debug.SyncTracker;
+import fr.dynamx.utils.debug.SyncHelper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -52,10 +52,10 @@ public class EntityTransformsVariable extends ListeningEntityVariable<Map<Byte, 
                             //TODO CLEAN
                             RigidBodyTransform pos = transform.getValue().getPhysicTransform();
                             RigidBodyTransform ctransform = transforms.get(transform.getKey());
-                            if (SyncTracker.different(pos.getPosition().x, ctransform.getPosition().x) || SyncTracker.different(pos.getPosition().y, ctransform.getPosition().y) || SyncTracker.different(pos.getPosition().z, ctransform.getPosition().z)) {
+                            if (SyncHelper.different(pos.getPosition().x, ctransform.getPosition().x) || SyncHelper.different(pos.getPosition().y, ctransform.getPosition().y) || SyncHelper.different(pos.getPosition().z, ctransform.getPosition().z)) {
                                 changed = true;
-                            } else if (SyncTracker.different(pos.getRotation().getX(), ctransform.getRotation().getX()) || SyncTracker.different(pos.getRotation().getY(), ctransform.getRotation().getY()) ||
-                                    SyncTracker.different(pos.getRotation().getZ(), ctransform.getRotation().getZ()) || SyncTracker.different(pos.getRotation().getW(), ctransform.getRotation().getW())) {
+                            } else if (SyncHelper.different(pos.getRotation().getX(), ctransform.getRotation().getX()) || SyncHelper.different(pos.getRotation().getY(), ctransform.getRotation().getY()) ||
+                                    SyncHelper.different(pos.getRotation().getZ(), ctransform.getRotation().getZ()) || SyncHelper.different(pos.getRotation().getW(), ctransform.getRotation().getW())) {
                                 changed = true;
                             }
                         }

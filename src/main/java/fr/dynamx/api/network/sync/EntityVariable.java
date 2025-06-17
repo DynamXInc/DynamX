@@ -1,6 +1,6 @@
 package fr.dynamx.api.network.sync;
 
-import fr.dynamx.utils.debug.SyncTracker;
+import fr.dynamx.utils.debug.SyncHelper;
 import io.netty.buffer.ByteBuf;
 import lombok.Getter;
 import net.minecraftforge.fml.relauncher.Side;
@@ -47,7 +47,7 @@ public class EntityVariable<T> {
 
     public void set(T value) {
         // todo wtf here
-        if((value instanceof Float && SyncTracker.different((Float) value, (Float) this.value)) || (!(value instanceof Float) && value != this.value)) {
+        if((value instanceof Float && SyncHelper.different((Float) value, (Float) this.value)) || (!(value instanceof Float) && value != this.value)) {
             this.value = value;
             changed = true;
         }

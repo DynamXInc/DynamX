@@ -2,7 +2,7 @@ package fr.dynamx.common.network.sync.variables;
 
 import fr.dynamx.api.network.sync.EntityVariable;
 import fr.dynamx.api.network.sync.SynchronizationRules;
-import fr.dynamx.utils.debug.SyncTracker;
+import fr.dynamx.utils.debug.SyncHelper;
 
 import java.util.function.BiConsumer;
 
@@ -22,7 +22,7 @@ public class EntityFloatArrayVariable extends EntityVariable<float[]>
 
     public void set(int i, float value) {
         // if already changed, or if the new value has significantly changed
-        if (changed || SyncTracker.different(get()[i], value)) {
+        if (changed || SyncHelper.different(get()[i], value)) {
             get()[i] = value;
             setChanged(true);
         }

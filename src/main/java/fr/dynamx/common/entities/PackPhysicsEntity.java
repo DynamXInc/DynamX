@@ -96,18 +96,28 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
         packInfo = createInfo(getInfoName());
         if (packInfo != null && packInfo.getCollisionsHelper().hasPhysicsCollisions())
             return super.initEntityProperties();
-        DynamXMain.log.warn("Failed to find info of " + this + ". Should be " + getInfoName());
+        DynamXMain.log.warn("Failed to find info of {}. Should be {}.", this, getInfoName());
         return false;
     }
 
     @Override
     public void onPackInfosReloaded() {
-        setPackInfo(createInfo(getInfoName()));
-        if (physicsHandler != null)
+        A packInfo = createInfo(getInfoName());
+        if (packInfo == null) {
+            DynamXMain.log.warn("Failed to find info of {} after packs reload. Should be {}. Killing the entity.", this, getInfoName());
+            setDead();
+            return;
+        }
+        setPackInfo(packInfo);
+
+        if (physicsHandler != null) {
             physicsHandler.onPackInfosReloaded();
+        }
+
         for (IPhysicsModule<?> module : moduleList) {
-            if (module instanceof IPackInfoReloadListener)
+            if (module instanceof IPackInfoReloadListener) {
                 ((IPackInfoReloadListener) module).onPackInfosReloaded();
+            }
         }
         rawBoxes.clear(); //Clear collisions cache
     }

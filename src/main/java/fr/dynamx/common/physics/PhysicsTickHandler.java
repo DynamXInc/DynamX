@@ -192,9 +192,6 @@ public class PhysicsTickHandler {
     private float getDeltaTimeMilliseconds() {
         long cur = System.currentTimeMillis();
         long dt = cur - lastTickTimeMs;
-        if (false && CmdNetworkConfig.sync_buff)
-            if (dt > 51)
-                System.out.println("DT is " + dt);
         lastTickTimeMs = cur;
         return dt;
     }

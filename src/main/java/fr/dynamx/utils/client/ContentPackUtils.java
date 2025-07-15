@@ -22,6 +22,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -147,13 +148,14 @@ public class ContentPackUtils {
      * Writes the translation of this object in the pack lang file, if not already present in the translation file
      */
     @SuppressWarnings("unchecked")
-    public static void addMissingLangFile(File dynxDir, String packName, String translationKey, String translationValue) {
-        if (!I18n.hasKey(translationKey)) {
-            try {
-                writeInLangFile(getPackLangFile(dynxDir, packName), translationKey+"="+translationValue);
-            } catch (IOException e) {
-                log.error("Failed to add missing translation for " + packName + " : " +  translationKey, e);
-            }
+    public static void addMissingLangTranslation(File dynxDir, String packName, String translationKey, String translationValue) {
+        if (I18n.hasKey(translationKey)) {
+            return;
+        }
+        try {
+            writeInLangFile(getPackLangFile(dynxDir, packName), translationKey+"="+translationValue);
+        } catch (IOException e) {
+            log.error("Failed to add missing translation for " + packName + " : " +  translationKey, e);
         }
     }
 
@@ -161,12 +163,11 @@ public class ContentPackUtils {
      * Writes the translation of this object in the given lang file, if not already present in the file
      */
     public static void writeInLangFile(File langFile, String translation) throws IOException {
-        BufferedReader inputStream = new BufferedReader(new InputStreamReader(new FileInputStream(langFile)));
+        BufferedReader inputStream = new BufferedReader(new InputStreamReader(Files.newInputStream(langFile.toPath())));
         if (inputStream.lines().noneMatch(s -> s.contains(translation.substring(0, translation.lastIndexOf("="))))) {
             BufferedWriter out = new BufferedWriter(new FileWriter(langFile, true));
             out.write(translation + "\n");
             out.close();
-            //log.info("Translation not found so we added one");
         }
         inputStream.close();
     }
@@ -184,6 +185,7 @@ public class ContentPackUtils {
 
     public static void registerDynamXBlockStateMapper(IDynamXItem<BlockObject<?>> block) {
         registerBlockWithStateMapper((Block) block, new StateMapperBase() {
+            @Override
             protected ModelResourceLocation getModelResourceLocation(IBlockState state) {
                 Map<IProperty<?>, Comparable<?>> map = Maps.newLinkedHashMap(state.getProperties());
                 map.put(DynamXBlock.METADATA, ((state.getValue(DynamXBlock.METADATA) + 1) / 4) % 4);

@@ -61,6 +61,8 @@ public class EntityNode<A extends IPhysicsPackInfo> extends AbstractItemNode<Bas
         QuaternionPool.openPool(SubClassPool.ENTITY_RENDER_NODE);
         GlQuaternionPool.openPool(SubClassPool.ENTITY_RENDER_NODE);
 
+        GlStateManager.enableRescaleNormal();
+
         ModularPhysicsEntity<?> entity = context.getEntity();
         if (entity != null) {
             transform.translate(context.getRenderPosition());
@@ -90,6 +92,8 @@ public class EntityNode<A extends IPhysicsPackInfo> extends AbstractItemNode<Bas
                     (float) (context.getRenderPosition().z - (entity.prevPosZ + (entity.posZ - entity.prevPosZ) * context.getPartialTicks())));
             unlinkedChildren.forEach(c -> c.render(context, packInfo, transform));
         }
+
+        GlStateManager.disableRescaleNormal();
 
         GlQuaternionPool.closePool();
         QuaternionPool.closePool();

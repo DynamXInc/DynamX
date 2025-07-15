@@ -411,6 +411,8 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
         motionChanged = false;
 
         if (shouldHandleCollision(entity)) {
+            Vector3fPool.openPool(SubClassPool.ROTATED_COLLS_HANDLER_0);
+
             PooledHashMap<Vector3f, IDynamXObject> collidableEntities = getCollidableTileEntities(entity.world, new MutableBoundingBox(entity.getEntityBoundingBox()).grow(1));
             for (Map.Entry<Vector3f, IDynamXObject> e : collidableEntities.entrySet()) {
                 //System.out.println("Input "+mx+" "+my+" "+mz+" "+nx+" "+ny+" "+nz+" "+entity.onGround+" "+entity.collidedVertically+" "+e.physicsPosition);
@@ -459,6 +461,8 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
                     Vector3fPool.closePool();
                 }
             }
+
+            Vector3fPool.closePool();
         }
         //if(entity.world.isRemote && entity instanceof EntityPlayer)
         //System.out.println("Got motiin "+nx+" "+ny+" "+nz);

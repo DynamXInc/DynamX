@@ -16,6 +16,7 @@ public class SubClassPool<T> {
 
     public static final String CURSOR_HIT = "cursor_hit";
     public static final String PLAYER_COLL = "player_coll";
+    public static final String ROTATED_COLLS_HANDLER_0 = "rchi_0";
     public static final String ROTATED_COLLS_HANDLER_1 = "rchi_1";
     public static final String ROTATED_COLLS_HANDLER_2 = "rchi_2";
     public static final String CHUNK_COLLISIONS_LOAD = "coll_load";

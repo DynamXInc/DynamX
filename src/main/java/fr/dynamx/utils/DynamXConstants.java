@@ -11,7 +11,7 @@ public class DynamXConstants {
     public static final String RES_DIR_NAME = "DynamX";
 
     public static final String ACS_GUIS_BASE_URL = "https://maven.dynamx.fr/artifactory/ACsGuisRepo/fr/aym/acsguis/ACsGuis/%1$s/ACsGuis-%1$s.jar";//"https://mps.dynamx.fr/files/4.0.0/ACsGuis/ACsGuis-%s-all.jar";
-    public static final String DEFAULT_ACSGUIS_VERSION = "1.4.1-beta";
+    public static final String DEFAULT_ACSGUIS_VERSION = "1.4.2-beta";
     public static final String ACSGUIS_REQUIRED_VERSION = "[1.4.0,)";
     public static final String ACSLIBS_REQUIRED_VERSION = "[1.2.12,)";
 
@@ -35,5 +35,5 @@ public class DynamXConstants {
 
     public static final String STATS_URL = "https://dynamx.fr/statsbot/statsbotrcv.php", STATS_PRODUCT = "DNX_" + VERSION + "_BETA", STATS_TOKEN = "ZG54OnN0YWJkOTg=";
 
-    public static final boolean REMAP = true;
+    public static final boolean REMAP = false;
 }

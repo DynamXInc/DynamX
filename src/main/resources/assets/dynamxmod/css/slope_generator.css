@@ -68,6 +68,10 @@ checkbox {
     left: 50%;
     right: 50%;
     width: 80%;
+
+    height: 20px;
+
+    background-color: violet;
 }
 
 #blacklist_add
@@ -76,6 +80,8 @@ checkbox {
     left: 50%;
     right: 50%;
     width: 80%;
+
+    background-color: red;
 }
 #blacklist_add:hover
 {
@@ -87,7 +93,9 @@ checkbox {
     left: 50%;
     right: 50%;
     width: 80%;
-    height: 100px;
+    height: 60px;
+
+    background-color: blue;
 }
 
 .blacklist_block
@@ -97,6 +105,8 @@ checkbox {
     left: auto;
     height: auto;
     padding: 0;
+
+    background-color: green;
 }
 .blacklist_block:hover
 {

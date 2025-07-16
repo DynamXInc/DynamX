@@ -88,8 +88,6 @@ public class GuiSlopesConfig extends GuiFrame {
             DynamXContext.getNetwork().sendToServer(new MessageSlopesConfigGui(config.serialize()));
         }));
         setPauseGame(false);
-
-        setEnableDebugPanel(true);
     }
 
     private void setupBlacklist(SlopeBuildingConfig config, GuiScrollPane pane) {

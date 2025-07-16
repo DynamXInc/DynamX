@@ -57,7 +57,7 @@ public class GuiSlopesConfig extends GuiFrame {
         GuiLabel lab;
         GuiScrollPane pane;
         add((pane = new GuiScrollPane()).setCssId("blacklist"));
-        add((text = new GuiSearchField(10, 20) {
+        add((text = new GuiSearchField(10) {
             @Override
             public List<String> generateAvailableNames() {
                 List<String> list = new ArrayList<>();
@@ -88,6 +88,8 @@ public class GuiSlopesConfig extends GuiFrame {
             DynamXContext.getNetwork().sendToServer(new MessageSlopesConfigGui(config.serialize()));
         }));
         setPauseGame(false);
+
+        setEnableDebugPanel(true);
     }
 
     private void setupBlacklist(SlopeBuildingConfig config, GuiScrollPane pane) {

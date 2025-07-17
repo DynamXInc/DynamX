@@ -22,7 +22,6 @@ public class DynamXGuiHandler implements IGuiHandler {
         {
             PackPhysicsEntity<?, ?> e = (PackPhysicsEntity<?, ?>) world.getEntityByID(x);
             IInventory inventory = e != null && e.hasModuleOfType(StorageModule.class) ? e.getModuleByType(StorageModule.class).getInventory((byte) y) : null;
-            System.out.println("Recuit simumlé " + e +" "+inventory);
             return inventory == null ? null : new ContainerChest(player.inventory, inventory, player);
         } else if(ID >= 2) //block storage
         {

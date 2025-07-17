@@ -116,7 +116,9 @@ public class OBJLoader {
                                     MTLLoader material = new MTLLoader();
                                     material.parse(location, new String(DynamXUtils.readInputStream(resp.getInputStream()), StandardCharsets.UTF_8));
                                     material.getMaterials().forEach(m -> materials.put(m.getName().toLowerCase(), m));
-                                    mtlLoaders.add(material);
+                                    synchronized (mtlLoaders) {
+                                        mtlLoaders.add(material);
+                                    }
                                 }
                                 break;
                             case USE_MATERIAL:

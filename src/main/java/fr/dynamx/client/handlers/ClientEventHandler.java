@@ -72,7 +72,6 @@ import java.util.UUID;
 public class ClientEventHandler {
     public static final Minecraft MC = Minecraft.getMinecraft();
     public static UUID renderingEntity;
-    public static RenderPlayer renderPlayer;
     /**
      * There are two choices: <br/>
      * - When Optifine is enabled with shaders, the {@link fr.dynamx.common.core.mixin.MixinRenderGlobal} renders the big entities behind the player's chunk <br>
@@ -438,7 +437,6 @@ public class ClientEventHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void playerRender(RenderPlayerEvent.Pre event) {
-        renderPlayer = event.getRenderer();
         if (event.getEntityPlayer().getRidingEntity() instanceof PhysicsEntity && event.getEntity().getUniqueID() != renderingEntity && event.getRenderer().getRenderManager().isRenderShadow()) { //If shadows are disabled, were are in GuiInventory, CAN BREAK OTHER MODS
             //If the player is on a seat, and GlobalRender isn't rendering players riding the entity, just cancel the event, and cancel all modifications by other mods (priority = EventPriority.HIGHEST)
             event.setCanceled(true);

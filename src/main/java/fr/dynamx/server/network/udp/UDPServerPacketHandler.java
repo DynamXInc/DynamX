@@ -76,7 +76,7 @@ public class UDPServerPacketHandler {
                 DynamXMain.log.error("[UDP-DEBUG] Read packet with id " + id + " but client is null..." + packet.getAddress());
         }
 
-        if(client == null) {
+        if(client == null && id != 0) { // 0 is auth packet
             return; // player disconnected-ignore packet
         }
 

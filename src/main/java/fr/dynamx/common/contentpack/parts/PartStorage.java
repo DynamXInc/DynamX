@@ -22,6 +22,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 
 @Getter
 @Setter
@@ -89,8 +90,10 @@ public class PartStorage<T extends ISubInfoTypeOwner<T>> extends InteractivePart
     public void postLoad(T owner, boolean hot) {
         super.postLoad(owner, hot);
 
-        String ownerName = owner instanceof ObjectInfo ? ((ObjectInfo<?>) owner).getDefaultName() : owner.getName();
-        ContentPackUtils.addMissingLangTranslation(DynamXMain.resourcesDirectory, getPackName(),
-                "part.storage" + owner.getFullName(), ownerName + "'s trunk");
+        if(FMLCommonHandler.instance().getSide().isClient()) {
+            String ownerName = owner instanceof ObjectInfo ? ((ObjectInfo<?>) owner).getDefaultName() : owner.getName();
+            ContentPackUtils.addMissingLangTranslation(DynamXMain.resourcesDirectory, getPackName(),
+                    "part.storage" + owner.getFullName(), ownerName + "'s trunk");
+        }
     }
 }

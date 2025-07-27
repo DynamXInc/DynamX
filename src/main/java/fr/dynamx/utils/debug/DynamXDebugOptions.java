@@ -19,7 +19,8 @@ public class DynamXDebugOptions {
     public static final DynamXDebugOption.TerrainDebugOption BLOCK_BOXES = (DynamXDebugOption.TerrainDebugOption) DynamXDebugOption.newTerrainOption("Server block boxes", true, 4, 1, 2, 8).withDescription("Not available in solo").withSubCategory("Server"),
             SLOPE_BOXES = (DynamXDebugOption.TerrainDebugOption) DynamXDebugOption.newTerrainOption("Server slopes", true, 16, 32).withDescription("Not available in solo").withSubCategory("Server"),
             CLIENT_BLOCK_BOXES = (DynamXDebugOption.TerrainDebugOption) DynamXDebugOption.newTerrainOption("Client block boxes", true, 8, 1, 2, 4).withSubCategory("Client"),
-            CLIENT_SLOPE_BOXES = (DynamXDebugOption.TerrainDebugOption) DynamXDebugOption.newTerrainOption("Client slopes", true, 32, 16).withSubCategory("Client");
+            CLIENT_SLOPE_BOXES = (DynamXDebugOption.TerrainDebugOption) DynamXDebugOption.newTerrainOption("Client slopes", true, 32, 16).withSubCategory("Client"),
+            VEHICLE_MESH_WIREFRAME = (DynamXDebugOption.TerrainDebugOption) DynamXDebugOption.newTerrainOption("Vehicle mesh", true, 4, 16).withSubCategory("Client");
 
     public static final DynamXDebugOption CENTER_OF_MASS = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Center of mass").withSubCategory(VehicleDebugTypes.GENERAL.title),
             SEATS_AND_STORAGE = DynamXDebugOption.newOption(DebugCategories.VEHICLES, "Seats and storage").withSubCategory(VehicleDebugTypes.GENERAL.title),

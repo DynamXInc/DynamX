@@ -13,6 +13,7 @@ import java.util.List;
 public class ChunkTerrain {
     private final List<ITerrainElement> elements;
     private final List<ITerrainElement.IPersistentTerrainElement> persistentElements;
+    private ITerrainElement vehicleElement;
 
     public ChunkTerrain() {
         this(new ArrayList<>(), new ArrayList<>());
@@ -25,6 +26,14 @@ public class ChunkTerrain {
     public ChunkTerrain(List<ITerrainElement> elements, List<ITerrainElement.IPersistentTerrainElement> persistentElements) {
         this.elements = elements;
         this.persistentElements = persistentElements;
+    }
+
+    public ITerrainElement getVehicleElement() {
+        return vehicleElement;
+    }
+
+    public void setVehicleElement(ITerrainElement vehicleElement) {
+        this.vehicleElement = vehicleElement;
     }
 
     public List<ITerrainElement> getElements() {
@@ -51,6 +60,9 @@ public class ChunkTerrain {
             case RELOAD_ALL:
                 List<ITerrainElement> elements = new ArrayList<>(this.elements);
                 elements.addAll(this.persistentElements);
+                if (vehicleElement != null) {
+                    elements.add(vehicleElement);
+                }
                 return elements;
             case COMPUTED_TERRAIN:
                 return this.elements;

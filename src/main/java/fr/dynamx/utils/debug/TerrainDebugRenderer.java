@@ -5,7 +5,8 @@ public enum TerrainDebugRenderer {
     STAIRS(0.5f, 0, 1),
     DYNAMXBLOCKS(0, 1, 0),
     SLOPES(1, 1, 0),
-    CUSTOM_SLOPE(1, 0, 0);
+    CUSTOM_SLOPE(1, 0, 0),
+    VEHICLE_MESH(0, 1, 1);
 
     private final float r, g, b;
 

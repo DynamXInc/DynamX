@@ -165,6 +165,7 @@ public class ClientDebugSystem {
             drawDebug(DynamXDebugOptions.CLIENT_BLOCK_BOXES);
             drawDebug(DynamXDebugOptions.SLOPE_BOXES);
             drawDebug(DynamXDebugOptions.CLIENT_SLOPE_BOXES);
+            drawDebug(DynamXDebugOptions.VEHICLE_MESH_WIREFRAME);
 
             if (DynamXDebugOptions.PHYSICS_DEBUG.isActive()) {
 
@@ -313,6 +314,9 @@ public class ClientDebugSystem {
                             }
                             //no break here
                         case SLOPES:
+                            drawSlopeDebug(pos.getValue().getData(), pos.getValue().getRenderer().getR(), pos.getValue().getRenderer().getG(), pos.getValue().getRenderer().getB(), 0.5f);
+                            break;
+                        case VEHICLE_MESH:
                             drawSlopeDebug(pos.getValue().getData(), pos.getValue().getRenderer().getR(), pos.getValue().getRenderer().getG(), pos.getValue().getRenderer().getB(), 0.5f);
                             break;
                     }

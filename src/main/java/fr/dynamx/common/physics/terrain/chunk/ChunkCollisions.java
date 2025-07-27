@@ -1,7 +1,6 @@
 package fr.dynamx.common.physics.terrain.chunk;
 
 import com.jme3.bullet.objects.PhysicsRigidBody;
-import com.jme3.math.Matrix3f;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.api.physics.terrain.ITerrainCache;
@@ -11,6 +10,7 @@ import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.physics.terrain.computing.TerrainCollisionsCalculator;
+import fr.dynamx.common.physics.terrain.computing.SmoothTerrainCalculator;
 import fr.dynamx.common.physics.terrain.element.EmptyTerrainElement;
 import fr.dynamx.common.physics.terrain.element.TerrainElementType;
 import fr.dynamx.utils.DynamXConfig;
@@ -160,6 +160,9 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
         setChunkState(EnumChunkCollisionsState.INVALID);
         elements.getElements().forEach(ITerrainElement::clear);
         elements.getPersistentElements().forEach(ITerrainElement::clear);
+        if (elements.getVehicleElement() != null) {
+            elements.getVehicleElement().clear();
+        }
         if (debug)
             DynamXMain.log.info("[CHUNK DEBUG] Resetting chunk " + getPos() + " with " + elements);
         elements.getElements().clear(); //Don't remove persistent elements, it may be re-used
@@ -225,6 +228,9 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
             //(mcWorld.isRemote ? DynamXDebugOptions.CLIENT_CHUNK_BOXES : DynamXDebugOptions.CHUNK_BOXES).getDataIn().put(new BlockPos(myPos.x, myPos.y, myPos.z), new float[]{min.x, min.y, min.z, max.x, max.y, max.z, 0, 0, 1});
             updateNearEntities();
         }
+        if (this.elements.getVehicleElement() != null && this.elements.getVehicleElement().getBody() != null) {
+            physicsWorld.addCollisionObject(this.elements.getVehicleElement().getBody());
+        }
         if (DynamXConfig.enableDebugTerrainManager)
             ChunkGraph.addToGrah(getPos(), ChunkGraph.ChunkActions.ADD_TO_WORLD, ChunkGraph.ActionLocation.MAIN, this, "Type " + terrainType + "./// Amount of components " + this.elements.getElements().size() + " " + this.elements.getElements(terrainType).size() + " added " + addedBodys);
         if (profiler != null)
@@ -266,6 +272,9 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
             updateNearEntities();
             BoundingBoxPool.getPool().closeSubPool();
             Vector3fPool.closePool();
+        }
+        if (this.elements.getVehicleElement() != null && this.elements.getVehicleElement().getBody() != null) {
+            physicsWorld.removeCollisionObject(this.elements.getVehicleElement().getBody());
         }
     }
 
@@ -383,6 +392,7 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
         if (type != TerrainElementType.PERSISTENT_ELEMENTS) {
             if (cachedElements == null || cachedElements.getElements().isEmpty()) {
                 this.elements.getElements().addAll(TerrainCollisionsCalculator.computeCollisionFaces(myPos, mcWorld, profiler, false));
+                this.elements.setVehicleElement(SmoothTerrainCalculator.generateTerrainMesh(myPos, mcWorld));
                 ChunkGraph.addToGrah(getPos(), ChunkGraph.ChunkActions.LOAD_INTERNAL_DOING, ChunkGraph.ActionLocation.UNKNOWN, this, "DONE WITH  " + this.elements.getElements().size());
                 shouldSave = true;
                 if (debug) {
@@ -390,6 +400,7 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
                 }
             } else {
                 this.elements.getElements().addAll(cachedElements.getElements());
+                this.elements.setVehicleElement(cachedElements.getVehicleElement());
                 if (debug) {
                     DynamXMain.log.info("[CHUNK DEBUG] Choice 2. Elements after : " + this.elements.getElements(type));
                 }
@@ -449,6 +460,10 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
                 maxSize = element.getMaxSize().clone();
             }
         });
+
+        if (this.elements.getVehicleElement() != null) {
+            this.elements.getVehicleElement().build(mcWorld, pos);
+        }
 
         QuaternionPool.closePool();
         Vector3fPool.closePool();

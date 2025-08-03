@@ -106,7 +106,12 @@ public class ClientDebugSystem {
                 s = "Entities: " + DynamXContext.getPhysicsWorld(MC.world).getLoadedEntityCount();
             } else
                 s = "Not simulating...";
+
             fontRenderer.drawString(s, event.getResolution().getScaledWidth() - fontRenderer.getStringWidth(s) - 2, 12, 0xFFBC00);
+
+
+            s = "Particles: " + DynamXContext.getParticleManager().getGlobalParticlesCount();
+            fontRenderer.drawString(s, event.getResolution().getScaledWidth() - fontRenderer.getStringWidth(s) - 2, 22, 0xFFBC00);
             //fontRenderer.drawString("Physics time: " + BasePhysicsWorld.TIME +" ms", event.getResolution().getScaledWidth() - fontRenderer.getStringWidth(s) - 40, 22, 0xFFBC00);
 
             if (DynamXDebugOptions.PROFILING.isActive()) {

@@ -28,8 +28,8 @@ package fr.dynamx.client.renders.mesh;
 
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import jme3utilities.Validate;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL15;
+import lombok.Setter;
+import org.lwjgl.opengl.*;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
@@ -49,7 +49,8 @@ public class DxIndexBuffer extends jme3utilities.lbj.IndexBuffer {
     /**
      * target for glBindBuffer() and glBufferData() (=vertex array indices)
      */
-    final private static int target = GL15.GL_ELEMENT_ARRAY_BUFFER;
+    @Setter
+    private int target = GL15.GL_ELEMENT_ARRAY_BUFFER;
     // *************************************************************************
     // fields
 
@@ -70,6 +71,15 @@ public class DxIndexBuffer extends jme3utilities.lbj.IndexBuffer {
      * OpenGL name of the VBO, or null if the VBO hasn't been generated yet
      */
     private Integer vbo;
+
+    @Setter
+    private int location = -1;
+
+    @Setter
+    private boolean normalized;
+
+    @Setter
+    private int fpv = 1;
     // *************************************************************************
     // constructors
 
@@ -77,7 +87,7 @@ public class DxIndexBuffer extends jme3utilities.lbj.IndexBuffer {
      * Instantiate an IndexBuffer with a new data buffer.
      *
      * @param maxVertices one more than the highest index value (&ge;0)
-     * @param capacity number of indices (&ge;0)
+     * @param capacity    number of indices (&ge;0)
      */
     public DxIndexBuffer(int maxVertices, int capacity) {
         super(maxVertices, capacity);
@@ -134,9 +144,9 @@ public class DxIndexBuffer extends jme3utilities.lbj.IndexBuffer {
      * its data store (if needed).
      *
      * @param drawMode the kind of geometric primitives to draw, such as
-     * GL_LINE_LOOP
+     *                 GL_LINE_LOOP
      */
-    void drawElements(int drawMode) {
+    void drawElements(int drawMode, boolean instancing, int instanceCount) {
         if (vbo == null) {
             generateVbo();
         }
@@ -145,10 +155,14 @@ public class DxIndexBuffer extends jme3utilities.lbj.IndexBuffer {
             updateDataStore();
         }
 
-        //bindVbo();
+        bindVbo();
         long indices = 0L;
         int numIndices = capacity();
-        GL11.glDrawElements(drawMode, numIndices, elementType, indices);
+        if (instancing) {
+            GL31.glDrawElementsInstanced(drawMode, numIndices, elementType, indices, instanceCount);
+        } else {
+            GL11.glDrawElements(drawMode, numIndices, elementType, indices);
+        }
         DynamXRenderUtils.checkForOglError();
     }
 
@@ -258,6 +272,16 @@ public class DxIndexBuffer extends jme3utilities.lbj.IndexBuffer {
         return this;
     }
 
+    public DxIndexBuffer setStream() {
+        if (vbo != null) {
+            throw new IllegalStateException(
+                    "Too late to alter the usage hint.");
+        }
+
+        this.usageHint = GL15.GL_STREAM_DRAW;
+        return this;
+    }
+
     /**
      * Indicate that the buffer data has changed.
      *
@@ -268,6 +292,7 @@ public class DxIndexBuffer extends jme3utilities.lbj.IndexBuffer {
         this.isModified = true;
         return this;
     }
+
     // *************************************************************************
     // private methods
 
@@ -279,10 +304,15 @@ public class DxIndexBuffer extends jme3utilities.lbj.IndexBuffer {
         DynamXRenderUtils.checkForOglError();
     }
 
+    private void unbindVbo() {
+        GL15.glBindBuffer(target, 0);
+        DynamXRenderUtils.checkForOglError();
+    }
+
     /**
      * Generate the VBO for this buffer and initialize its data store.
      */
-    private void generateVbo() {
+    public void generateVbo() {
         assert vbo == null;
 
         this.vbo = GL15.glGenBuffers();
@@ -308,6 +338,13 @@ public class DxIndexBuffer extends jme3utilities.lbj.IndexBuffer {
         }
         isModified = false;
 
+
+        if (location != -1) {
+            GL20.glEnableVertexAttribArray(location);
+            GL20.glVertexAttribPointer(location, fpv, elementType,
+                    normalized, 0, 0);
+        }
+
         if (usageHint == GL15.GL_STATIC_DRAW) {
             makeImmutable();
         }
@@ -316,7 +353,7 @@ public class DxIndexBuffer extends jme3utilities.lbj.IndexBuffer {
     /**
      * Update the data store.
      */
-    private void updateDataStore() {
+    public void updateDataStore() {
         assert isModified;
 
         bindVbo();
@@ -335,6 +372,7 @@ public class DxIndexBuffer extends jme3utilities.lbj.IndexBuffer {
             GL15.glBufferSubData(target, offset, (IntBuffer) buffer);
             DynamXRenderUtils.checkForOglError();
         }
+        unbindVbo();
 
         isModified = false;
     }

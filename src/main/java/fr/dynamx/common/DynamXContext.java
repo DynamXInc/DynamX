@@ -6,6 +6,8 @@ import fr.dynamx.api.physics.IPhysicsSimulationMode;
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.api.physics.IRotatedCollisionHandler;
 import fr.dynamx.client.DynamXModelRegistry;
+import fr.dynamx.client.renders.IShaderUniformsHandler;
+import fr.dynamx.client.particles.DxParticleManager;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.handlers.RotatedCollisionHandlerImpl;
 import fr.dynamx.common.network.DynamXNetwork;
@@ -14,8 +16,8 @@ import fr.dynamx.common.objloader.data.GltfModelData;
 import fr.dynamx.common.objloader.data.ObjModelData;
 import fr.dynamx.common.physics.player.PlayerPhysicsHandler;
 import fr.dynamx.common.physics.world.PhysicsSimulationModes;
-import fr.dynamx.utils.DynamXUtils;
 import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
@@ -48,6 +50,10 @@ public class DynamXContext {
     @SideOnly(Side.CLIENT)
     private static DynamXModelRegistry dxModelRegistry;
 
+    @Getter
+    @Setter
+    private static DxParticleManager particleManager;
+
     /**
      * -- GETTER --
      *
@@ -75,6 +81,14 @@ public class DynamXContext {
     private static final Map<ResourceLocation, DxModelData> DX_MODEL_DATA_CACHE = new HashMap<>();
 
     private static final Map<Integer, IPhysicsWorld> PHYSICS_WORLD_PER_DIMENSION = new HashMap<>();
+
+    public static boolean optifineShadersOn;
+
+    @Getter
+    public static IShaderUniformsHandler shaderUniformsHandler;
+
+    public final static int centerAttribLocation = 10;
+    public final static int colorAttribLocation = 11;
 
     protected static void initNetwork() {
         network = DynamXNetwork.init(FMLCommonHandler.instance().getSide());

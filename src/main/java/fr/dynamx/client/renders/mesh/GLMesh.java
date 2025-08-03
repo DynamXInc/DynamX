@@ -34,15 +34,18 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import com.jme3.util.BufferUtils;
+import fr.dynamx.common.DynamXContext;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import jme3utilities.Validate;
 import jme3utilities.math.MyMath;
 import jme3utilities.math.MyVector3f;
 import lombok.Getter;
-import net.minecraft.client.renderer.GlStateManager;
+import lombok.Setter;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.GL31;
 
 import javax.vecmath.Vector4f;
 import java.nio.FloatBuffer;
@@ -51,8 +54,7 @@ import java.util.Map;
 
 /**
  * Encapsulate a vertex array object (VAO), to which vertex buffer objects
- * (VBOs) are attached. The VAO is created lazily, the first time
- * {@link #enableAttributes(ShaderProgram)} is invoked.
+ * (VBOs) are attached
  */
 public class GLMesh implements jme3utilities.lbj.Mesh {
     // *************************************************************************
@@ -73,6 +75,12 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
     // *************************************************************************
     // fields
 
+    @Setter
+    private boolean instancing;
+
+    @Getter
+    @Setter
+    private int instanceCount;
     /**
      * true for mutable, or false if immutable
      */
@@ -101,13 +109,27 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
     private VertexBuffer normals;
     /**
      * vertex positions (3 floats per vertex)
+     * -- GETTER --
+     * Access the positions VertexBuffer.
+     *
+     * @return the pre-existing buffer (not null)
      */
+    @Getter
     private VertexBuffer positions;
     /**
      * texture coordinates (2 floats per vertex) or null if none
      */
     @Getter
     private VertexBuffer textureCoordinates;
+
+    @Getter
+    private VertexBuffer colors;
+
+    @Getter
+    private VertexBuffer centers;
+
+    @Getter
+    private DataBuffer modelMatrix;
     // *************************************************************************
     // constructors
 
@@ -115,9 +137,9 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
      * Instantiate a mutable mesh with the specified mode and vertex positions,
      * but no indices, normals, or texture coordinates.
      *
-     * @param drawMode draw mode, such as GL_TRIANGLES
+     * @param drawMode       draw mode, such as GL_TRIANGLES
      * @param positionsArray vertex positions (not null, not empty, length a
-     * multiple of 3, unaffected)
+     *                       multiple of 3, unaffected)
      */
     public GLMesh(int drawMode, float... positionsArray) {
         this(drawMode, positionsArray.length / numAxes);
@@ -132,9 +154,9 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
      * Instantiate a mutable mesh with the specified mode and vertex positions,
      * but no indices, normals, or texture coordinates.
      *
-     * @param drawMode draw mode, such as GL_TRIANGLES
+     * @param drawMode        draw mode, such as GL_TRIANGLES
      * @param positionsBuffer vertex positions (not null, not empty, capacity a
-     * multiple of 3, alias created)
+     *                        multiple of 3, alias created)
      */
     protected GLMesh(int drawMode, FloatBuffer positionsBuffer) {
         this(drawMode, positionsBuffer.capacity() / numAxes);
@@ -151,9 +173,9 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
      * Instantiate a mutable mesh with the specified mode and vertex positions,
      * but no indices, normals, or texture coordinates.
      *
-     * @param drawMode draw mode, such as GL_TRIANGLES
+     * @param drawMode       draw mode, such as GL_TRIANGLES
      * @param positionsArray vertex positions (in mesh coordinates, not null,
-     * not empty)
+     *                       not empty)
      */
     public GLMesh(int drawMode, Vector3f... positionsArray) {
         this(drawMode, positionsArray.length);
@@ -166,7 +188,7 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
      * Instantiate a mutable mesh with the specified mode and number of
      * vertices, but no indices, normals, positions, or texture coordinates.
      *
-     * @param drawMode draw mode, such as GL_TRIANGLES
+     * @param drawMode    draw mode, such as GL_TRIANGLES
      * @param vertexCount number of vertices (&ge;0)
      */
     protected GLMesh(int drawMode, int vertexCount) {
@@ -201,6 +223,12 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
         if (textureCoordinates != null) {
             textureCoordinates.cleanUp();
         }
+        if (colors != null) {
+            colors.cleanUp();
+        }
+        if (centers != null) {
+            centers.cleanUp();
+        }
 
         GL30.glDeleteVertexArrays(vaoId);
         DynamXRenderUtils.checkForOglError();
@@ -214,72 +242,6 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
      */
     public int countIndexedVertices() {
         int result = (indices == null) ? vertexCount : indices.capacity();
-        return result;
-    }
-
-    /**
-     * Count how many line primitives this Mesh contains.
-     *
-     * @return the count (&ge;0)
-     */
-    public int countLines() {
-        int numIndices = countIndexedVertices();
-        int result;
-        switch (drawMode) {
-            case GL11.GL_LINES:
-                result = numIndices / 2;
-                break;
-
-            case GL11.GL_LINE_LOOP:
-                result = numIndices;
-                break;
-
-            case GL11.GL_LINE_STRIP:
-                result = numIndices - 1;
-                break;
-
-            case GL11.GL_POINTS:
-            case GL11.GL_TRIANGLES:
-            case GL11.GL_TRIANGLE_STRIP:
-            case GL11.GL_TRIANGLE_FAN:
-            case GL11.GL_QUADS:
-                result = 0;
-                break;
-
-            default:
-                throw new IllegalStateException("drawMode = " + drawMode);
-        }
-
-        return result;
-    }
-
-    /**
-     * Count how many point primitives this Mesh contains.
-     *
-     * @return the count (&ge;0)
-     */
-    public int countPoints() {
-        int numIndices = countIndexedVertices();
-        int result;
-        switch (drawMode) {
-            case GL11.GL_POINTS:
-                result = numIndices;
-                break;
-
-            case GL11.GL_LINES:
-            case GL11.GL_LINE_LOOP:
-            case GL11.GL_LINE_STRIP:
-            case GL11.GL_TRIANGLES:
-            case GL11.GL_TRIANGLE_STRIP:
-            case GL11.GL_TRIANGLE_FAN:
-            case GL11.GL_QUADS:
-                result = 0;
-                break;
-
-            default:
-                throw new IllegalStateException("drawMode = " + drawMode);
-        }
-
         return result;
     }
 
@@ -324,16 +286,6 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
      */
     public int countVertices() {
         return vertexCount;
-    }
-
-    /**
-     * Return the draw mode, which indicates the kind of geometric primitives
-     * contained in this Mesh.
-     *
-     * @return the mode, such as: GL_TRIANGLES, GL_LINE_LOOP, or GL_POINTS
-     */
-    public int drawMode() {
-        return drawMode;
     }
 
     /**
@@ -438,11 +390,11 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
      * Generate texture coordinates using the specified strategy and
      * coefficients. Any pre-existing texture coordinates are discarded.
      *
-     * @param option how to generate the texture coordinates (not null)
+     * @param option        how to generate the texture coordinates (not null)
      * @param uCoefficients the coefficients for generating the first (U)
-     * texture coordinate (not null)
+     *                      texture coordinate (not null)
      * @param vCoefficients the coefficients for generating the 2nd (V) texture
-     * coordinate (not null)
+     *                      coordinate (not null)
      * @return the (modified) current instance (for chaining)
      */
     public GLMesh generateUvs(UvsOption option, Vector4f uCoefficients,
@@ -482,18 +434,9 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
         return this;
     }
 
-    public void setUvs(VertexBuffer uvs){
+    public void setUvs(VertexBuffer uvs) {
         verifyMutable();
         this.textureCoordinates = new VertexBuffer(uvs.getBuffer(), uvs.fpv, 2);
-    }
-
-    /**
-     * Access the positions VertexBuffer.
-     *
-     * @return the pre-existing buffer (not null)
-     */
-    public VertexBuffer getPositions() {
-        return positions;
     }
 
     /**
@@ -513,6 +456,12 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
         if (indices != null) {
             indices.makeImmutable();
         }
+        if (colors != null) {
+            colors.makeImmutable();
+        }
+        if (centers != null) {
+            centers.makeImmutable();
+        }
 
         return this;
     }
@@ -523,8 +472,6 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
 
     /**
      * Render using the specified ShaderProgram.
-     *
-     * @param program the program to use (not null)
      */
     public void renderUsing() {
         enableAttributes();
@@ -533,20 +480,32 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
         DynamXRenderUtils.checkForOglError();
 
         if (indices == null) {
-            int startVertex = 0;
-            GL11.glDrawArrays(drawMode, startVertex, vertexCount);
-            DynamXRenderUtils.checkForOglError();
+            if (instancing) {
+                GL31.glDrawArraysInstanced(drawMode, 0, vertexCount, instanceCount);
+            } else {
+                int startVertex = 0;
+                GL11.glDrawArrays(drawMode, startVertex, vertexCount);
+                DynamXRenderUtils.checkForOglError();
+            }
 
         } else {
-            indices.drawElements(drawMode);
+
+            indices.drawElements(drawMode, instancing, instanceCount);
             DynamXRenderUtils.checkForOglError();
+
 
         }
 
         disableAttributes();
         DynamXRenderUtils.checkForOglError();
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+        if (indices != null) {
+            GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, 0);
+
+        }
 
         DynamXRenderUtils.bindVertexArray(0);
+        DynamXRenderUtils.checkForOglError();
 
 
     }
@@ -629,9 +588,9 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
      * that the Z components of the coefficients are currently unused.
      *
      * @param uCoefficients the coefficients for calculating new Us (not null,
-     * unaffected)
+     *                      unaffected)
      * @param vCoefficients the coefficients for calculating new Vs (not null,
-     * unaffected)
+     *                      unaffected)
      * @return the (modified) current instance (for chaining)
      */
     public GLMesh transformUvs(Vector4f uCoefficients, Vector4f vCoefficients) {
@@ -672,6 +631,7 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
         this.indices = new DxIndexBuffer(vertexCount, capacity);
         return indices;
     }
+
 
     /**
      * Create a buffer for putting vertex normals.
@@ -719,7 +679,7 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
      * Set new normals for the vertices.
      *
      * @param normalsArray the desired vertex normals (not null,
-     * length=3*vertexCount, unaffected)
+     *                     length=3*vertexCount, unaffected)
      */
     protected void setNormals(float... normalsArray) {
         verifyMutable();
@@ -734,7 +694,7 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
      * Set new positions for the vertices.
      *
      * @param positionArray the desired vertex positions (not null,
-     * length=3*vertexCount, unaffected)
+     *                      length=3*vertexCount, unaffected)
      */
     protected void setPositions(float... positionArray) {
         verifyMutable();
@@ -749,7 +709,7 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
      * Set new texture coordinates for the vertices.
      *
      * @param uvArray the desired vertex texture coordinates (not null,
-     * length=2*vertexCount, unaffected)
+     *                length=2*vertexCount, unaffected)
      */
     protected void setUvs(float... uvArray) {
         verifyMutable();
@@ -758,6 +718,19 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
 
         this.textureCoordinates
                 = new VertexBuffer(uvArray, 2, 2);
+    }
+
+
+    protected void setCenters(float... centersArray) {
+        verifyMutable();
+
+        this.centers = new VertexBuffer(centersArray, 4, DynamXContext.centerAttribLocation);
+    }
+
+    protected void setColors(float... colorsArray) {
+        verifyMutable();
+
+        this.colors = new VertexBuffer(colorsArray, 4, DynamXContext.colorAttribLocation);
     }
     // *************************************************************************
     // jme3utilities.lbj.Mesh methods
@@ -791,6 +764,14 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
     @Override
     public FloatBuffer getPositionsData() {
         return positions.getBuffer();
+    }
+
+    public VertexBuffer getColorsData() {
+        return colors;
+    }
+
+    public FloatBuffer getCentersData() {
+        return centers.getBuffer();
     }
 
     /**
@@ -830,6 +811,14 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
     public void setPositionsModified() {
         positions.setModified();
     }
+
+    public void setColorsModified() {
+        colors.setModified();
+    }
+
+    public void setCentersModified() {
+        centers.setModified();
+    }
     // *************************************************************************
     // private methods
 
@@ -837,7 +826,6 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
      * Prepare all vertex attributes for rendering.
      * <p>
      * If the VAO doesn't already exist, it is created.
-     *
      */
     private void enableAttributes() {
         if (vaoId == null) {
@@ -864,9 +852,15 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
         if (textureCoordinates != null) {
             textureCoordinates.prepareToDraw();
         }
+        if (colors != null) {
+            colors.prepareToDraw();
+        }
+        if (centers != null) {
+            centers.prepareToDraw();
+        }
     }
 
-    private void disableAttributes(){
+    private void disableAttributes() {
         positions.stopDraw();
         if (normals != null) {
             normals.stopDraw();
@@ -874,6 +868,13 @@ public class GLMesh implements jme3utilities.lbj.Mesh {
         if (textureCoordinates != null) {
             textureCoordinates.stopDraw();
         }
+        if (centers != null) {
+            centers.stopDraw();
+        }
+        if (colors != null) {
+            colors.stopDraw();
+        }
+        DynamXRenderUtils.checkForOglError();
     }
 
     /**

@@ -2,6 +2,8 @@ package fr.dynamx.client.handlers;
 
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.client.camera.CameraSystem;
+import fr.dynamx.client.particles.DxParticleEmitters;
+import fr.dynamx.client.particles.DxParticleSystem;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.parts.BasePartSeat;
 import fr.dynamx.common.contentpack.parts.PartDoor;
@@ -19,13 +21,17 @@ import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import org.joml.Vector3f;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
+
+import java.util.Random;
 
 import static fr.dynamx.client.handlers.ClientEventHandler.MC;
 
@@ -59,6 +65,7 @@ public class KeyHandler {
     private final Minecraft mc;
     private int holdingDown;
     private boolean justPressed;
+    private final Random rand = new Random();
 
     public KeyHandler(Minecraft minecraft) {
         this.mc = minecraft;
@@ -93,6 +100,7 @@ public class KeyHandler {
                 WalkingOnPlayerController.controller.disable();
             }
             controlCamera();
+
 
             if (KEY_DEBUG.isPressed()) {
                 Minecraft.getMinecraft().player.sendChatMessage("/dynamx debug_gui");
@@ -132,6 +140,15 @@ public class KeyHandler {
             }
 
             if (MC.objectMouseOver != null) {
+                if (Keyboard.isKeyDown(Keyboard.KEY_K)) {
+                    if (MC.player.isSneaking()) {
+                        DynamXContext.getParticleManager().clear();
+                    } else {
+                        RayTraceResult objectMouseOver = MC.objectMouseOver;
+                        DxParticleSystem smokeEmitter = DxParticleEmitters.createSmokeEmitter(new Vector3f((float) objectMouseOver.hitVec.x, (float) objectMouseOver.hitVec.y + 1, (float) objectMouseOver.hitVec.z));
+                        DynamXContext.getParticleManager().addParticleSystem(smokeEmitter);
+                    }
+                }
                 Entity entityHit = MC.objectMouseOver.entityHit;
                 if (KEY_TAKE_OBJECT.isKeyDown()) {
                     if (holdingDown == 0) {

@@ -42,7 +42,6 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.culling.ICamera;
-import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -309,6 +308,10 @@ public class ClientEventHandler {
                 this.canPlace = itemBlock.canPlaceBlockOnSide(entityPlayer.world, blockPos, side, entityPlayer, currentItem);
                 this.model = DynamXContext.getDxModelRegistry().getModel(block.blockObjectInfo.getModel());
             }
+        }
+
+        if (event.phase == TickEvent.Phase.START) {
+            DynamXContext.getShaderUniformsHandler().tick();
         }
     }
 

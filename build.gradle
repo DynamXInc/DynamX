@@ -79,6 +79,8 @@ dependencies {
     }
     implementation 'org.joml:joml:1.10.5'
     compileOnly 'org.projectlombok:lombok:1.18.24'
+        compileOnly files('run/mods/OptiFine_1.12.2_HD_U_G5.jar')
+
 
     shadow('org.spongepowered:mixin:0.8.3') {
         exclude module: 'guava'

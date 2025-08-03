@@ -30,25 +30,18 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import com.jme3.util.BufferUtils;
-import fr.dynamx.common.DynamXContext;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import jme3utilities.Validate;
 import jme3utilities.math.MyBuffer;
 import jme3utilities.math.MyQuaternion;
+import net.minecraft.client.renderer.GlStateManager;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
-import org.lwjgl.opengl.GL33;
 
 import java.nio.FloatBuffer;
 
-/**
- * Wrapper class for a named attribute in a SPORT mesh, including its VBO and
- * data.
- *
- * @author Stephen Gold sgold@sonic.net
- */
-public class VertexBuffer {
+public class DataBuffer {
     // *************************************************************************
     // constants
 
@@ -103,7 +96,7 @@ public class VertexBuffer {
      * @param attribIndex name of the corresponding attrib variable in shaders
      *                    (not null, not empty)
      */
-    VertexBuffer(float[] data, int fpv, int attribIndex) {
+    DataBuffer(float[] data, int fpv, int attribIndex) {
         Validate.nonNull(data, "data");
         Validate.inRange(fpv, "floats per vertex", 1, 4);
         Validate.require(
@@ -123,7 +116,7 @@ public class VertexBuffer {
      * @param attribIndex name of the corresponding attrib variable in shaders
      *                    (not null, not empty)
      */
-    VertexBuffer(FloatBuffer data, int fpv, int attribIndex) {
+    DataBuffer(FloatBuffer data, int fpv, int attribIndex) {
         Validate.nonNull(data, "data");
         Validate.inRange(fpv, "floats per vertex", 1, 4);
         Validate.require(
@@ -143,7 +136,7 @@ public class VertexBuffer {
      * @param attribIndex name of the corresponding attrib variable in shaders
      *                    (not null, not empty)
      */
-    VertexBuffer(int numVertices, int fpv, int attribIndex) {
+    DataBuffer(int numVertices, int fpv, int attribIndex) {
         Validate.nonNegative(numVertices, "number of vertices");
         Validate.inRange(fpv, "floats per vertex", 1, 4);
 
@@ -181,7 +174,7 @@ public class VertexBuffer {
      *
      * @return the (modified) current instance (for chaining)
      */
-    public VertexBuffer flip() {
+    public DataBuffer flip() {
         dataBuffer.flip();
         return this;
     }
@@ -240,7 +233,7 @@ public class VertexBuffer {
      *
      * @return the (modified) current instance (for chaining)
      */
-    public VertexBuffer makeImmutable() {
+    public DataBuffer makeImmutable() {
         this.isMutable = false;
         return this;
     }
@@ -261,6 +254,7 @@ public class VertexBuffer {
      * VBO, if that hasn't happened yet.
      */
     void prepareToDraw() {
+
         int location = attribIndex;
         if (location == -1) { // attribute not active in the program
             return;
@@ -279,27 +273,25 @@ public class VertexBuffer {
         int stride = 0; // tightly packed
         long startOffset = 0L;
 
+
         GL20.glEnableVertexAttribArray(location);
         GL20.glVertexAttribPointer(location, fpv, elementType,
                 normalized, stride, startOffset);
 
-        if(location == 0) {
-            GL33.glVertexAttribDivisor(0, 0); // particles vertices : always reuse the same 4 vertices -> 0
-        } else if(location == DynamXContext.centerAttribLocation) {
-            GL33.glVertexAttribDivisor(DynamXContext.centerAttribLocation, 1); // positions : one per quad (its center)
-        } else if(location == DynamXContext.colorAttribLocation) {
-            GL33.glVertexAttribDivisor(DynamXContext.colorAttribLocation, 1); // colors : one per quad (its color)
-        }
+
         DynamXRenderUtils.checkForOglError();
 
+
         unbindVbo();
+
     }
 
     void stopDraw() {
         int location = attribIndex;
-        if (location != -1) {
-            GL20.glDisableVertexAttribArray(location);
+        if (location == -1) { // attribute not active in the program
+            return;
         }
+        GL20.glDisableVertexAttribArray(location);
     }
 
     /**
@@ -309,7 +301,7 @@ public class VertexBuffer {
      * @param fValue the value to be written
      * @return the (modified) current instance (for chaining)
      */
-    public VertexBuffer put(float fValue) {
+    public DataBuffer put(float fValue) {
         verifyMutable();
 
         dataBuffer.put(fValue);
@@ -326,7 +318,7 @@ public class VertexBuffer {
      * @param fValue   the value to write
      * @return the (modified) current instance (for chaining)
      */
-    public VertexBuffer put(int position, float fValue) {
+    public DataBuffer put(int position, float fValue) {
         verifyMutable();
 
         dataBuffer.put(position, fValue);
@@ -343,7 +335,7 @@ public class VertexBuffer {
      * @param vector   the vector to write (not null, unaffected)
      * @return the (modified) current instance (for chaining)
      */
-    public VertexBuffer put(int position, Vector3f vector) {
+    public DataBuffer put(int position, Vector3f vector) {
         verifyMutable();
 
         MyBuffer.put(dataBuffer, position, vector);
@@ -359,7 +351,7 @@ public class VertexBuffer {
      * @param vector the value to be written (not null, unaffected)
      * @return the (modified) current instance (for chaining)
      */
-    public VertexBuffer put(Vector3f vector) {
+    public DataBuffer put(Vector3f vector) {
         verifyMutable();
 
         dataBuffer.put(vector.x);
@@ -376,7 +368,7 @@ public class VertexBuffer {
      * @param quaternion the desired rotation (not null, unaffected)
      * @return the (modified) current instance (for chaining)
      */
-    public VertexBuffer rotate(Quaternion quaternion) {
+    public DataBuffer rotate(Quaternion quaternion) {
         if (MyQuaternion.isRotationIdentity(quaternion)) {
             return this;
         }
@@ -395,7 +387,7 @@ public class VertexBuffer {
      * @param scaleFactor the scale factor to apply
      * @return the (modified) current instance (for chaining)
      */
-    public VertexBuffer scale(float scaleFactor) {
+    public DataBuffer scale(float scaleFactor) {
         if (scaleFactor == 1f) {
             return this;
         }
@@ -417,7 +409,7 @@ public class VertexBuffer {
      *
      * @return the (modified) current instance (for chaining)
      */
-    public VertexBuffer setDynamic() {
+    public DataBuffer setDynamic() {
         if (vbo != null) {
             throw new IllegalStateException(
                     "Too late to alter the usage hint.");
@@ -427,7 +419,7 @@ public class VertexBuffer {
         return this;
     }
 
-    public VertexBuffer setStream() {
+    public DataBuffer setStream() {
         if (vbo != null) {
             throw new IllegalStateException(
                     "Too late to alter the usage hint.");
@@ -442,7 +434,7 @@ public class VertexBuffer {
      *
      * @return the (modified) current instance (for chaining)
      */
-    public VertexBuffer setModified() {
+    public DataBuffer setModified() {
         verifyMutable();
         this.isModified = true;
         return this;
@@ -454,7 +446,7 @@ public class VertexBuffer {
      * @param transform the transform to apply (not null, unaffected)
      * @return the (modified) current instance (for chaining)
      */
-    public VertexBuffer transform(Transform transform) {
+    public DataBuffer transform(Transform transform) {
         verifyMutable();
         if (fpv != GLMesh.numAxes) {
             throw new IllegalStateException("fpv = " + fpv);
@@ -529,7 +521,5 @@ public class VertexBuffer {
         DynamXRenderUtils.checkForOglError();
 
         isModified = false;
-
-        unbindVbo();
     }
 }

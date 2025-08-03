@@ -1,5 +1,6 @@
 package fr.dynamx.common;
 
+import fr.dynamx.client.particles.DxParticleManager;
 import fr.dynamx.common.network.sync.PhysicsEntitySynchronizer;
 import fr.dynamx.common.blocks.TEDynamXBlock;
 import fr.dynamx.common.entities.PhysicsEntity;
@@ -26,6 +27,7 @@ public abstract class CommonProxy {
     public void init() {
         MinecraftForge.EVENT_BUS.register(new PhysicsTickHandler());
         MinecraftForge.EVENT_BUS.register(new CommonEventHandler());
+        DynamXContext.setParticleManager(new DxParticleManager());
     }
 
     public void completeInit(){}

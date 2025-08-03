@@ -9,6 +9,8 @@ import fr.aym.acslib.api.services.mps.ModProtectionService;
 import fr.aym.mps.utils.UserErrorMessageException;
 import fr.dynamx.api.dxmodel.EnumDxModelFormats;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariableRegistry;
+import fr.dynamx.client.renders.OptifineShaderUniformsHandler;
+import fr.dynamx.client.renders.VanillaShaderUniformsHandler;
 import fr.dynamx.common.capability.DynamXChunkData;
 import fr.dynamx.common.capability.DynamXChunkDataStorage;
 import fr.dynamx.common.contentpack.AddonInfo;
@@ -41,6 +43,7 @@ import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import net.optifine.shaders.Shaders;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -173,6 +176,10 @@ public class DynamXMain {
         NetworkRegistry.INSTANCE.registerGuiHandler(instance, new DynamXGuiHandler());
 
         CapabilityManager.INSTANCE.register(DynamXChunkData.class, new DynamXChunkDataStorage(), DynamXChunkData::new);
+
+        if (event.getSide().isClient()) {
+            loadUniformHandler();
+        }
     }
 
     @EventHandler
@@ -206,6 +213,24 @@ public class DynamXMain {
                     .forEach(model -> model.getObjObjects().forEach(ObjObjectData::clearData));
         }
     }
+
+    @SideOnly(Side.CLIENT)
+    private void loadUniformHandler() {
+        try {
+            Class.forName("net.optifine.shaders.Shaders");
+            log.info("Optifine detected !");
+            if (Shaders.shaderPackLoaded) {
+                DynamXContext.shaderUniformsHandler = new OptifineShaderUniformsHandler();
+            } else {
+                DynamXContext.shaderUniformsHandler = new VanillaShaderUniformsHandler();
+            }
+
+        } catch (ClassNotFoundException e) {
+            log.info("Optifine not detected !");
+            DynamXContext.shaderUniformsHandler = new VanillaShaderUniformsHandler();
+        }
+    }
+
 
     @EventHandler
     public void onServerStarting(FMLServerStartingEvent event) {

@@ -27,11 +27,9 @@ import fr.dynamx.common.entities.modules.SeatsModule;
 import fr.dynamx.common.entities.vehicles.CarEntity;
 import fr.dynamx.common.entities.vehicles.HelicopterEntity;
 import fr.dynamx.utils.EnumSeatPlayerPosition;
-import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.errors.DynamXErrorManager;
-import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import lombok.Getter;
 import lombok.Setter;
@@ -195,7 +193,7 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
         private final MutableBoundingBox debugBox = new MutableBoundingBox();
 
         public PartEntitySeatNode(PartEntitySeat seat, Vector3f scale, List<SceneNode<BaseRenderContext.EntityRenderContext, A>> linkedChilds) {
-            super(seat.getRelativeRenderPosition(), GlQuaternionPool.newGlQuaternion(seat.getRotation()), scale, linkedChilds);
+            super(seat.getRelativeRenderPosition(), seat.getRotation(), scale, linkedChilds);
         }
 
         @Override
@@ -229,7 +227,7 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
             }
 
             GlStateManager.pushMatrix();
-            GlStateManager.multMatrix(ClientDynamXUtils.getMatrixBuffer(transform));
+            glTransformToPartPos();
 
             //The render the player, e.rotationYaw is the name plate rotation
             if (seatRider instanceof AbstractClientPlayer) {
@@ -253,11 +251,7 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
                 return;
             }
             GlStateManager.pushMatrix();
-            Vector3f translation = PartEntitySeat.this.getPosition();
-            GlStateManager.translate(translation.x, translation.y, translation.z);
-            if (rotation != null) {
-                GlStateManager.rotate(rotation);
-            }
+            transformForDebug();
             getBox(debugBox);
             RenderGlobal.drawBoundingBox(debugBox.minX, debugBox.minY, debugBox.minZ,
                     debugBox.maxX, debugBox.maxY, debugBox.maxZ,

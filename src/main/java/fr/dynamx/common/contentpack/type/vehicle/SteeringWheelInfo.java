@@ -16,10 +16,8 @@ import fr.dynamx.client.renders.scene.node.SceneNode;
 import fr.dynamx.client.renders.scene.node.SimpleNode;
 import fr.dynamx.common.entities.modules.WheelsModule;
 import fr.dynamx.common.entities.modules.engines.BoatPropellerModule;
-import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.maths.DynamXMath;
-import fr.dynamx.utils.optimization.GlQuaternionPool;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.renderer.GlStateManager;
@@ -76,7 +74,7 @@ public class SteeringWheelInfo extends BasePart<ModularVehicleInfo> implements I
 
     class SteeringWheelNode<A extends ModularVehicleInfo> extends SimpleNode<BaseRenderContext.EntityRenderContext, A> {
         public SteeringWheelNode(SteeringWheelInfo part, Vector3f scale, List<SceneNode<BaseRenderContext.EntityRenderContext, A>> linkedChilds) {
-            super(part.getPosition(), GlQuaternionPool.newGlQuaternion(part.getSteeringWheelBaseRotation()), SteeringWheelInfo.this.isAutomaticPosition, scale, linkedChilds);
+            super(part.getPosition(), part.getSteeringWheelBaseRotation(), SteeringWheelInfo.this.isAutomaticPosition, scale, linkedChilds);
         }
 
         @Override
@@ -99,10 +97,10 @@ public class SteeringWheelInfo extends BasePart<ModularVehicleInfo> implements I
                 angle = angle * 6;
                 transform.rotate(angle, 0F, 0F, 1F);
             }
+
             GlStateManager.pushMatrix();
-            GlStateManager.multMatrix(ClientDynamXUtils.getMatrixBuffer(transform));
             //Translate to the origin of the model
-            transformToPartPos();
+            glTransformToPartPos();
             //Render it
             vehicleModel.renderGroup(getObjectName(), context.getTextureId(), context.isUseVanillaRender());
             GlStateManager.popMatrix();

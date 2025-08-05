@@ -30,10 +30,8 @@ import fr.dynamx.common.entities.modules.AbstractLightsModule;
 import fr.dynamx.common.entities.vehicles.TrailerEntity;
 import fr.dynamx.common.objloader.data.DxModelData;
 import fr.dynamx.utils.DynamXUtils;
-import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.errors.DynamXErrorManager;
-import fr.dynamx.utils.optimization.GlQuaternionPool;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.renderer.GlStateManager;
@@ -283,7 +281,7 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
 
     class PartLightNode<A extends IModelPackObject> extends SimpleNode<IRenderContext, A> {
         public PartLightNode(PartLightSource lightSource, Vector3f scale, List<SceneNode<IRenderContext, A>> linkedChilds) {
-            super(lightSource.getPosition(), lightSource.getRotation() != null ? GlQuaternionPool.newGlQuaternion(lightSource.getRotation()) : null, PartLightSource.this.isAutomaticPosition, scale, linkedChilds);
+            super(lightSource.getPosition(), lightSource.getRotation() != null ? lightSource.getRotation() : null, PartLightSource.this.isAutomaticPosition, scale, linkedChilds);
         }
 
         @Override
@@ -352,9 +350,9 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
                 step = step * (FastMath.PI * 2);
                 transform.rotate(step, 0, 1, 0);
             }
+
             GlStateManager.pushMatrix();
-            GlStateManager.multMatrix(ClientDynamXUtils.getMatrixBuffer(transform));
-            transformToPartPos();
+            glTransformToPartPos();
             context.getModel().renderGroup(getObjectName(), texId, context.isUseVanillaRender());
             if (isEntity && isOn) {
                 int i = ((BaseRenderContext.EntityRenderContext) context).getEntity().getBrightnessForRender();

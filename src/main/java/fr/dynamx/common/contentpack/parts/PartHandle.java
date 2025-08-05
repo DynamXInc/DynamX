@@ -1,5 +1,6 @@
 package fr.dynamx.common.contentpack.parts;
 
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.part.BasePart;
 import fr.dynamx.api.contentpack.object.part.IDrawablePart;
@@ -70,14 +71,13 @@ public class PartHandle extends BasePart<ModularVehicleInfo> implements IDrawabl
 
     class PartHandleNode<A extends ModularVehicleInfo> extends SimpleNode<BaseRenderContext.EntityRenderContext, A> {
         public PartHandleNode(PartHandle part, Vector3f scale, List<SceneNode<BaseRenderContext.EntityRenderContext, A>> linkedChilds) {
-            super(part.getPosition(), null, PartHandle.this.isAutomaticPosition, scale, linkedChilds);
+            super(part.getPosition(), (Quaternion) null, PartHandle.this.isAutomaticPosition, scale, linkedChilds);
         }
 
         @Override
         public void render(BaseRenderContext.EntityRenderContext context, A packInfo, Matrix4f parentTransform) {
             if (!context.getModel().containsObjectOrNode(getObjectName()))
                 return;
-            GlStateManager.pushMatrix();
             transformToRotationPoint(parentTransform);
             if (context.getEntity() != null && context.getEntity().hasModuleOfType(HelicopterEngineModule.class)) {
                 HelicopterEngineModule engine = context.getEntity().getModuleByType(HelicopterEngineModule.class);
@@ -87,6 +87,9 @@ public class PartHandle extends BasePart<ModularVehicleInfo> implements IDrawabl
                 transform.rotate(dx * DynamXMath.TO_RADIAN, 0, dx > 0 ? 0.5f : -0.5f, 0);
                 transform.rotate(dy * DynamXMath.TO_RADIAN, dy > 0 ? 0.5f : -0.5f, 0, 0);
             }
+
+            GlStateManager.pushMatrix();
+            glTransformToPartPos();
             context.getModel().renderGroup(getObjectName(), context.getTextureId(), context.isUseVanillaRender());
             GlStateManager.popMatrix();
             renderChildren(context, packInfo, transform);

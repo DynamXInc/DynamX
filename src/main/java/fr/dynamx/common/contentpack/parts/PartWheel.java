@@ -25,14 +25,12 @@ import fr.dynamx.common.entities.modules.WheelsModule;
 import fr.dynamx.common.objloader.data.DxModelData;
 import fr.dynamx.common.physics.entities.BaseWheeledVehiclePhysicsHandler;
 import fr.dynamx.utils.DynamXUtils;
-import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.maths.DynamXMath;
-import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import lombok.Getter;
 import lombok.Setter;
@@ -276,19 +274,24 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
         private final boolean isMudGuard;
 
         public PartBaseWheelNode(PartWheel wheel, Vector3f scale, List<SceneNode<BaseRenderContext.EntityRenderContext, A>> linkedChilds, boolean isMudGuard) {
-            super(isMudGuard ? wheel.getRotationPoint() : wheel.getPosition(), GlQuaternionPool.newGlQuaternion(wheel.getSuspensionAxis()), PartWheel.this.isAutomaticPosition, scale, linkedChilds);
+            super(isMudGuard ? wheel.getRotationPoint() : wheel.getPosition(), wheel.getSuspensionAxis(), PartWheel.this.isAutomaticPosition, scale, linkedChilds);
             this.isMudGuard = isMudGuard;
         }
 
         @Override
         public void render(BaseRenderContext.EntityRenderContext context, A packInfo, Matrix4f parentTransform) {
             WheelsModule wheelsModule = context.getEntity() != null ? context.getEntity().getModuleByType(WheelsModule.class) : null;
+
             boolean hasWheelsModule = wheelsModule != null;
-            if (!isMudGuard && hasWheelsModule && wheelsModule.getWheelsStates()[getId()] == WheelsModule.WheelState.REMOVED)
+            if (!isMudGuard && hasWheelsModule && wheelsModule.getWheelsStates()[getId()] == WheelsModule.WheelState.REMOVED) {
                 return;
+            }
+
             PartWheelInfo info = hasWheelsModule ? wheelsModule.getWheelInfo(getId()) : getDefaultWheelInfo();
-            if (info == null || (!info.isModelValid() && getRimObjectName() == null && !isMudGuard))
+            if (info == null || (!info.isModelValid() && getRimObjectName() == null && !isMudGuard)) {
                 return;
+            }
+
             transformToRotationPoint(parentTransform);
             int index;
             if (hasWheelsModule) {
@@ -310,14 +313,15 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
                 /* Suspension translation */
                 transform.translate(0, -info.getSuspensionRestLength(), 0);
             }
+
             GlStateManager.pushMatrix();
-            GlStateManager.multMatrix(ClientDynamXUtils.getMatrixBuffer(transform));
-            transformToPartPos();
+            glTransformToPartPos();
             /* Render node */
-            if (isMudGuard)
+            if (isMudGuard) {
                 context.getModel().renderGroup(getMudGuardObjectName(), context.getTextureId(), context.isUseVanillaRender());
-            else
+            } else {
                 renderWheel(context.getEntity(), context, packInfo, info, wheelsModule);
+            }
             GlStateManager.popMatrix();
             renderChildren(context, packInfo, transform);
         }
@@ -343,28 +347,34 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
         private final MutableBoundingBox debugBox = new MutableBoundingBox();
 
         public PartAttachedWheelNode(PartWheel wheel, Vector3f scale, List<SceneNode<BaseRenderContext.EntityRenderContext, A>> linkedChilds) {
-            super(PartWheel.this.isAutomaticPosition ? wheel.getPosition() : new Vector3f(wheel.getPosition().subtract(wheel.getRotationPoint())), null, PartWheel.this.isAutomaticPosition, scale, linkedChilds);
-            if (wheel.getSuspensionAxis() != null && !isAutomaticPosition) //Note that we have the mudguard translation and rotation applied, so the translation must "anticipate" this rotation.
+            super(PartWheel.this.isAutomaticPosition ? wheel.getPosition() : new Vector3f(wheel.getPosition().subtract(wheel.getRotationPoint())), (Quaternion) null, PartWheel.this.isAutomaticPosition, scale, linkedChilds);
+            if (wheel.getSuspensionAxis() != null && !isAutomaticPosition) { //Note that we have the mudguard translation and rotation applied, so the translation must "anticipate" this rotation.
                 //Formula: translation = (wheelPos - mudGuardPos) * inverse(suspensionRotation) where mudGuardPos and suspensionRotation are applied in the previous node
                 translation.set(DynamXGeometry.rotateVectorByQuaternion(translation, wheel.getSuspensionAxis().inverse()));
+            }
         }
 
         @Override
         public void render(BaseRenderContext.EntityRenderContext context, A packInfo, Matrix4f parentTransform) {
             WheelsModule wheelsModule = context.getEntity() != null ? context.getEntity().getModuleByType(WheelsModule.class) : null;
+
             boolean hasWheelsModule = wheelsModule != null;
-            if (hasWheelsModule && wheelsModule.getWheelsStates()[getId()] == WheelsModule.WheelState.REMOVED)
+            if (hasWheelsModule && wheelsModule.getWheelsStates()[getId()] == WheelsModule.WheelState.REMOVED) {
                 return;
+            }
+
             PartWheelInfo info = hasWheelsModule ? wheelsModule.getWheelInfo(getId()) : getDefaultWheelInfo();
-            if (info == null || (!info.isModelValid() && getRimObjectName() == null))
+            if (info == null || (!info.isModelValid() && getRimObjectName() == null)) {
                 return;
+            }
+
             transformToRotationPoint(parentTransform);
             if (hasWheelsModule) {
                 applyWheelRotation(context, transform, wheelsModule);
             }
+
             GlStateManager.pushMatrix();
-            GlStateManager.multMatrix(ClientDynamXUtils.getMatrixBuffer(transform));
-            transformToPartPos();
+            glTransformToPartPos();
             renderWheel(context.getEntity(), context, packInfo, info, wheelsModule);
             GlStateManager.popMatrix();
             renderChildren(context, packInfo, transform);

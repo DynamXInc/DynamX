@@ -1,9 +1,11 @@
 package fr.dynamx.utils.optimization;
 
+import org.joml.Quaternionf;
 import org.lwjgl.util.vector.Quaternion;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
+// TODO convert to Quaternionf pool
 @NotThreadSafe
 public class GlQuaternionPool extends ClassPool<Quaternion> {
     private static final GlQuaternionPool INSTANCE = new GlQuaternionPool();
@@ -29,6 +31,12 @@ public class GlQuaternionPool extends ClassPool<Quaternion> {
     public static Quaternion get(Quaternion from) {
         Quaternion v = getINSTANCE().provideNewInstance();
         v.set(from);
+        return v;
+    }
+
+    public static Quaternion get(Quaternionf from) {
+        Quaternion v = getINSTANCE().provideNewInstance();
+        v.set(from.x, from.y, from.z, from.w);
         return v;
     }
 

@@ -168,37 +168,40 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
         if (worldIn.isRemote && !playerIn.isSneaking()) {
             return false;
         }
+
         TileEntity te = worldIn.getTileEntity(pos);
-        if (te instanceof TEDynamXBlock) {
-            //TODO ADD INTERACT EVENTS
-            //If we clicked a part, try to interact with it.
-            InteractivePart<IDynamXObject, ?> hitPart = (InteractivePart<IDynamXObject, ?>) ((TEDynamXBlock) te).getHitPart(playerIn);
-            if (hitPart == null || !hitPart.canInteract((IDynamXObject) te, playerIn)) {
-                // If there's no hit/can't interact, try to open the customization gui
-                if (playerIn.isSneaking() && playerIn.capabilities.isCreativeMode) {
-                    if (worldIn.isRemote && isDxModel)
-                        ((TEDynamXBlock) te).openConfigGui();
-                    return true;
-                    /*
-                    //TODO animations
-                    if (te instanceof TEDynamXBlock && hand.equals(EnumHand.MAIN_HAND)) {
-                        DxAnimator animator = ((TEDynamXBlock) te).getAnimator();
-                        if (playerIn.isSneaking()) {
-                            DxModelRenderer model = DynamXContext.getDxModelRegistry().getModel(blockObjectInfo.getModel());
-                            animator.playNextAnimation();
-                            //te.getAnimator().addAnimation("Reset");
-                            return true;
-                        }
-                        animator.setBlendPose(DxAnimator.EnumBlendPose.START_END);
-                        animator.addAnimation("Run1", DxAnimation.EnumAnimType.START_END);
-                    }*/
-                }
-                return false;
-            }
-            // only interact on server side
-            return worldIn.isRemote || hitPart.interact((IDynamXObject) te, playerIn);
+        if (!(te instanceof TEDynamXBlock)) {
+            return false;
         }
-        return false;
+
+        //TODO ADD INTERACT EVENTS
+        //If we clicked a part, try to interact with it.
+        InteractivePart<IDynamXObject, ?> hitPart = (InteractivePart<IDynamXObject, ?>) ((TEDynamXBlock) te).getHitPart(playerIn);
+        if (hitPart == null || !hitPart.canInteract((IDynamXObject) te, playerIn)) {
+            // If there's no hit/can't interact, try to open the customization gui
+            if (playerIn.isSneaking() && playerIn.capabilities.isCreativeMode) {
+                if (worldIn.isRemote && isDxModel) {
+                    ((TEDynamXBlock) te).openConfigGui();
+                }
+                return true;
+                /*
+                //TODO animations
+                if (te instanceof TEDynamXBlock && hand.equals(EnumHand.MAIN_HAND)) {
+                    DxAnimator animator = ((TEDynamXBlock) te).getAnimator();
+                    if (playerIn.isSneaking()) {
+                        DxModelRenderer model = DynamXContext.getDxModelRegistry().getModel(blockObjectInfo.getModel());
+                        animator.playNextAnimation();
+                        //te.getAnimator().addAnimation("Reset");
+                        return true;
+                    }
+                    animator.setBlendPose(DxAnimator.EnumBlendPose.START_END);
+                    animator.addAnimation("Run1", DxAnimation.EnumAnimType.START_END);
+                }*/
+            }
+            return false;
+        }
+        // only interact on server side
+        return worldIn.isRemote || hitPart.interact((IDynamXObject) te, playerIn);
     }
 
     @Override

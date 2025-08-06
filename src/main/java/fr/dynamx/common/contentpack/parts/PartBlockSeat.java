@@ -28,31 +28,32 @@ public class PartBlockSeat<T extends ISubInfoTypeOwner<T>> extends BasePartSeat<
     public boolean interact(IDynamXObject entity, EntityPlayer with) {
         if (entity instanceof TEDynamXBlock) {
             byte idx = getId();
-            if (idx >= ((TEDynamXBlock) entity).getSeatEntities().size())
+            if (idx >= ((TEDynamXBlock) entity).getSeatEntities().size()) {
                 idx = 0;
+            }
             SeatEntity seatEntity = ((TEDynamXBlock) entity).getSeatEntities().get(idx);
             return with.startRiding(seatEntity);
-        } else if (entity instanceof PropsEntity) {
+        }
+        if (entity instanceof PropsEntity) {
             PropsEntity<?> vehicleEntity = (PropsEntity<?>) entity;
             SeatsModule seats = ((IModuleContainer.ISeatsContainer) vehicleEntity).getSeats();
             Entity seatRider = seats.getSeatToPassengerMap().get(this);
-            if (seatRider != null) {
-                if (seatRider != with) {
-                    with.sendMessage(new TextComponentString("The seat is already taken"));
-                    return false;
-                }
+            if (seatRider != null && seatRider != with) {
+                with.sendMessage(new TextComponentString("The seat is already taken"));
+                return false;
             }
             return mountEntity(vehicleEntity, seats, with);
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override
     public void addModules(PackPhysicsEntity<?, ?> entity, ModuleListBuilder modules) {
-        if (!(entity instanceof IModuleContainer.ISeatsContainer))
+        if (!(entity instanceof IModuleContainer.ISeatsContainer)) {
             throw new IllegalStateException("The entity " + entity + " has PartSeats, but does not implement IHaveSeats !");
-        if (!modules.hasModuleOfClass(SeatsModule.class))
+        }
+        if (!modules.hasModuleOfClass(SeatsModule.class)) {
             modules.add(new SeatsModule(entity));
+        }
     }
 }

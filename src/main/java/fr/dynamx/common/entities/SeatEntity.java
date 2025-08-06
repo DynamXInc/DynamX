@@ -37,7 +37,9 @@ public class SeatEntity extends Entity implements IEntityAdditionalSpawnData {
 
     @Override
     public void updatePassenger(Entity passenger) {
-        if (block == null || mySeat == null) return;
+        if (block == null || mySeat == null) {
+            return;
+        }
         Vector3fPool.openPool();
         Vector3f posVec = DynamXGeometry.rotateVectorByQuaternion(mySeat.getPosition(), block.getCollidableRotation());
         posVec.addLocal(block.getRelativeTranslation());

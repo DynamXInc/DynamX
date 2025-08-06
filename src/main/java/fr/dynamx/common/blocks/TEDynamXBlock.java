@@ -475,7 +475,7 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
                 box = DynamXContext.getCollisionHandler().rotateBB(Vector3fPool.get(), box, getCollidableRotation());
                 Vector3f partPos = DynamXGeometry.rotateVectorByQuaternion(part.getPosition(), getCollidableRotation());
                 partPos.addLocal(getPos().getX() + getPackInfo().getTranslation().x + getCollisionOffset().x,
-                        getPos().getY() + 1.5f + getPackInfo().getTranslation().y + getCollisionOffset().y,
+                        getPos().getY() + getPackInfo().getTranslation().y + getCollisionOffset().y,
                         getPos().getZ() + getPackInfo().getTranslation().z + getCollisionOffset().z);
                 box.offset(partPos);
                 if ((nearestPos == null || DynamXGeometry.distanceBetween(partPos, playerPos) < DynamXGeometry.distanceBetween(nearestPos, playerPos)) && box.contains(hitVec)) {

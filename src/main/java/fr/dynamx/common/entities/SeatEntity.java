@@ -6,13 +6,15 @@ import fr.dynamx.common.contentpack.parts.PartBlockSeat;
 import fr.dynamx.utils.EnumSeatPlayerPosition;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 
-public class SeatEntity extends Entity {
+public class SeatEntity extends Entity implements IEntityAdditionalSpawnData {
     protected TEDynamXBlock block;
     protected PartBlockSeat<?> mySeat;
     protected byte seatID;
@@ -101,5 +103,15 @@ public class SeatEntity extends Entity {
     @Override
     protected void writeEntityToNBT(NBTTagCompound nbtTagCompound) {
         nbtTagCompound.setByte("SeatID", seatID);
+    }
+
+    @Override
+    public void writeSpawnData(ByteBuf buffer) {
+        buffer.writeByte(seatID);
+    }
+
+    @Override
+    public void readSpawnData(ByteBuf additionalData) {
+        seatID = additionalData.readByte();
     }
 }

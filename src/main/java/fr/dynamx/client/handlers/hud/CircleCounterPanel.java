@@ -1,6 +1,7 @@
 package fr.dynamx.client.handlers.hud;
 
 import fr.aym.acsguis.component.panel.GuiPanel;
+import fr.aym.acsguis.utils.ComponentRenderContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
@@ -27,8 +28,8 @@ public class CircleCounterPanel extends GuiPanel {
     }
 
     @Override
-    public void drawBackground(int mouseX, int mouseY, float partialTicks) {
-        super.drawBackground(mouseX, mouseY, partialTicks);
+    public void drawBackground(int mouseX, int mouseY, float partialTicks, ComponentRenderContext renderContext) {
+        super.drawBackground(mouseX, mouseY, partialTicks, renderContext);
 
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
 

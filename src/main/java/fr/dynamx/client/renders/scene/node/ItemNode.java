@@ -13,12 +13,12 @@ import java.util.List;
  *
  * @param <A> The type of the pack info (the owner of the scene graph)
  */
-@Getter
 @RequiredArgsConstructor
 public class ItemNode<A extends ItemObject<?>> extends AbstractItemNode<BaseRenderContext.ItemRenderContext, A> {
     /**
      * The children that are linked to the entity (ie that will be rendered with the entity transformations)
      */
+    @Getter
     private final List<SceneNode<BaseRenderContext.ItemRenderContext, A>> linkedChildren;
 
     /**
@@ -26,11 +26,10 @@ public class ItemNode<A extends ItemObject<?>> extends AbstractItemNode<BaseRend
      * Stores the transformations of the node, and is used to render the node and its children <br>
      * Do not use GlStateManager to apply transformations, use this matrix instead
      */
-    @Getter
     private final Matrix4f transform = new Matrix4f();
 
     @Override
-    public void render(BaseRenderContext.ItemRenderContext context, A packInfo) {
+    public void render(BaseRenderContext.ItemRenderContext context, A packInfo, Matrix4f parentTransform) {
         renderAsItemNode(context, packInfo);
     }
 
@@ -39,7 +38,7 @@ public class ItemNode<A extends ItemObject<?>> extends AbstractItemNode<BaseRend
         super.renderItemModel(context, packInfo, transform);
         //Render the linked children
         if (!linkedChildren.isEmpty()) {
-            linkedChildren.forEach(c -> c.render(context, packInfo));
+            linkedChildren.forEach(c -> c.render(context, packInfo, transform));
         }
     }
 

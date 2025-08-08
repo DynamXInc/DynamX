@@ -13,7 +13,7 @@ import java.util.List;
  * Used on client side
  *
  * @see IPhysicsModule
- * @see IEngineModule
+ * @see fr.dynamx.common.entities.modules.engines.CarEngineModule
  */
 public interface IVehicleController {
     /**
@@ -27,7 +27,7 @@ public interface IVehicleController {
      */
     @Nullable
     @SideOnly(Side.CLIENT)
-    GuiComponent<?> createHud();
+    GuiComponent createHud();
 
     /**
      * Called to get the vehicle HUD style when the driver mounts, on client side <br>

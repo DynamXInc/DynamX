@@ -1,7 +1,7 @@
 package fr.dynamx.client.network.udp;
 
 import fr.dynamx.common.DynamXMain;
-import fr.dynamx.common.network.udp.CommandUdp;
+import fr.dynamx.client.command.CmdUdpTest;
 import fr.dynamx.common.network.udp.EncapsulatedUDPPacket;
 import fr.hermes.forge1122.dynamx.DynamXConfig;
 import fr.dynamx.utils.optimization.UPDByteArrayPool;
@@ -37,8 +37,8 @@ public class UDPClientHandler implements Runnable {
         else if (id == 9) {
             int testId = in.readInt();
             String sample = ByteBufUtils.readUTF8String(in);
-            long sentTime = in.readLong() - CommandUdp.startTime, rcvTime = in.readLong() - CommandUdp.startTime, clientRcv = System.currentTimeMillis() - CommandUdp.startTime;
-            CommandUdp.received[testId] = true;
+            long sentTime = in.readLong() - CmdUdpTest.startTime, rcvTime = in.readLong() - CmdUdpTest.startTime, clientRcv = System.currentTimeMillis() - CmdUdpTest.startTime;
+            CmdUdpTest.received[testId] = true;
             System.out.println("Packet " + testId + " sent at " + sentTime + " received on srv at " + rcvTime + " on client at " + clientRcv);
         } else {
             if (id >= 10) {
@@ -47,7 +47,7 @@ public class UDPClientHandler implements Runnable {
             } else
                 throw new IllegalArgumentException("Illegal dynamx packet id " + id);
         }
-        UPDByteArrayPool.getINSTANCE().free(data);
+        UDPByteArrayPool.getINSTANCE().free(data);
     }
 
     @Override

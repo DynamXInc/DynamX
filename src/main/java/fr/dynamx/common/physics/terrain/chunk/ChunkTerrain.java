@@ -48,6 +48,7 @@ public class ChunkTerrain {
     public List<ITerrainElement> getElements(TerrainElementType type) {
         switch (type) {
             case ALL:
+            case RELOAD_ALL:
                 List<ITerrainElement> elements = new ArrayList<>(this.elements);
                 elements.addAll(this.persistentElements);
                 return elements;

@@ -2,23 +2,18 @@ package fr.dynamx.api.contentpack.object.part;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
+import fr.dynamx.common.entities.IDynamXObject;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
-import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 
-/**
- * A {@link BasePart} that can be interacted with
- */
-public abstract class InteractivePart<A extends Entity, T extends ISubInfoTypeOwner<T>> extends BasePart<T> {
+public abstract class InteractivePart<A extends IDynamXObject, T extends ISubInfoTypeOwner<T>> extends BasePart<T> {
     /**
      * The box used for interaction and raytracing
      */
     @Setter
-    @Getter
     private AxisAlignedBB box;
 
     public InteractivePart(T owner, String partName) {
@@ -65,7 +60,7 @@ public abstract class InteractivePart<A extends Entity, T extends ISubInfoTypeOw
     /**
      * Checks if the player can interact with this part
      *
-     * @param with The target entity. Null if the part is on a block and the method is fired to get the cursor to display on client.
+     * @param with   The target entity/block entity
      * @param player The interacting player
      * @return True if the player can interact with this part
      */

@@ -1,14 +1,14 @@
 package fr.dynamx.client.renders.model.renderer;
 
 import com.jme3.math.Quaternion;
-import com.modularmods.mcgltf.IGltfModelReceiver;
-import com.modularmods.mcgltf.MCglTF;
-import com.modularmods.mcgltf.RenderedGltfModel;
-import com.modularmods.mcgltf.RenderedGltfScene;
-import com.modularmods.mcgltf.animation.GltfAnimationCreator;
-import com.modularmods.mcgltf.animation.InterpolatedChannel;
-import de.javagl.jgltf.model.AnimationModel;
-import de.javagl.jgltf.model.NodeModel;
+import com.modularmods.mcgltf.dynamx.IGltfModelReceiver;
+import com.modularmods.mcgltf.dynamx.MCglTF;
+import com.modularmods.mcgltf.dynamx.RenderedGltfModel;
+import com.modularmods.mcgltf.dynamx.RenderedGltfScene;
+import com.modularmods.mcgltf.dynamx.animation.GltfAnimationCreator;
+import com.modularmods.mcgltf.dynamx.animation.InterpolatedChannel;
+import de.javagl.jgltf.dynamx.model.AnimationModel;
+import de.javagl.jgltf.dynamx.model.NodeModel;
 import fr.dynamx.api.dxmodel.DxModelPath;
 import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
 import fr.dynamx.client.renders.animations.DxAnimation;

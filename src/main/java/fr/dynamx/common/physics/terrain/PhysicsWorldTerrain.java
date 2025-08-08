@@ -72,13 +72,10 @@ public class PhysicsWorldTerrain implements ITerrainManager {
 
     private final WorldTerrainState terrainState = new WorldTerrainState();
 
-    private final boolean isDebug;
-
     public PhysicsWorldTerrain(IPhysicsWorld physicsWorld, World world, boolean isRemoteWorld) {
         this.physicsWorld = physicsWorld;
         this.world = world;
         this.terrainCache = isRemoteWorld ? new RemoteTerrainCache(world) : new FileTerrainCache(world);
-        this.isDebug = DynamXConfig.enableDebugTerrainManager;
     }
 
     @Override
@@ -119,14 +116,14 @@ public class PhysicsWorldTerrain implements ITerrainManager {
             if (!terrainState.isLoadedAnywhere(ticket.getPos())) { //Not already added to the world
                 profiler.end(GET_T2);
                 profiler.start(ADD_T3);
-                addUsedChunk(ticket, true);
+                addChunkToPhysicsWorld(ticket, true);
                 profiler.end(ADD_T3);
             } else
                 profiler.end(GET_T2);
             //Set chunk used after loading it : this will avoid weird sync errors
             subscribeToChunk(ticket);
         } else if (ticket.getStatus() == ChunkState.NONE) { //Not loaded ? Load it
-            if (isDebug) {
+            if (isDebug()) {
                 ChunkGraph.addToGrah(ticket.getPos(), ChunkGraph.ChunkActions.INITIATE_LOAD, ChunkGraph.ActionLocation.MAIN, null, ticket + " " + priority);
             }
             ticket.setLoading();
@@ -141,7 +138,7 @@ public class PhysicsWorldTerrain implements ITerrainManager {
                 case HIGH:
                     profiler.start(LOAD_NOW);
                     loadChunkCollisionsNow(ticket, profiler);
-                    addUsedChunk(ticket, true);
+                    addChunkToPhysicsWorld(ticket, true);
                     //Set chunk used after loading it : this will avoid weird sync errors
                     subscribeToChunk(ticket);
                     profiler.end(LOAD_NOW);
@@ -150,13 +147,14 @@ public class PhysicsWorldTerrain implements ITerrainManager {
         }
         //Loading but in a lower priority ? Or loaded but only with slopes ? Load it
         else if ((ticket.getStatus() == ChunkState.LOADING || ticket.getStatus() == ChunkState.LOADED) && priority.ordinal() > ticket.getPriority().ordinal()) {
-            if (isDebug)
+            if (isDebug()) {
                 ChunkGraph.addToGrah(ticket.getPos(), ChunkGraph.ChunkActions.OVERRIDE_LOAD, ChunkGraph.ActionLocation.MAIN, null, ticket + " " + priority);
+            }
             ticket.setPriority(priority);
             if (ticket.getStatus() == ChunkState.LOADED)
                 ticket.setLoading();
             else
-                ticket.incrStatusIndex("Higher priority"); //This will cancel current loading operations
+                ticket.incrStatusIndex(); //This will cancel current loading operations
             //Set chunk used before loading it : this will avoid weird async errors
             subscribeToChunk(ticket);
             switch (priority) {
@@ -166,13 +164,30 @@ public class PhysicsWorldTerrain implements ITerrainManager {
                 case HIGH:
                     profiler.start(LOAD_NOW);
                     loadChunkCollisionsNow(ticket, Profiler.get());
-                    addUsedChunk(ticket, false);
+                    addChunkToPhysicsWorld(ticket, false);
                     profiler.end(LOAD_NOW);
                     break;
             }
         } else {
             //else it's loading
             subscribeToChunk(ticket);
+            // If a chunk is loading with HIGH prio, it might be just reloading (chunk change) (or stuck :/)
+            if (ticket.getPriority() == ChunkLoadingTicket.TicketPriority.HIGH && ticket.getStatus() == ChunkState.LOADING) {
+                if (ticket.getCollisions() == null) {
+                    if (!DynamXConfig.ignoreDangerousTerrainErrors) {
+                        throw new IllegalStateException("Chunk " + ticket + " is still loading and has HIGH priority. This shouldn't happen.");
+                    }
+                    DynamXMain.log.error("[IgnoredDangerousTerrainError] Chunk {} is still loading and has HIGH priority. This shouldn't happen.", ticket);
+                    return false;
+                }
+                if (!ticket.getCollisions().getChunkState().areComputedElementsAdded()) {
+                    if (isDebug()) {
+                        DynamXMain.log.warn("Chunk {} is still loading and has HIGH priority. Adding old version to world...", ticket);
+                        ChunkGraph.addToGrah(ticket.getPos(), ChunkGraph.ChunkActions.OVERRIDE_LOAD, ChunkGraph.ActionLocation.MAIN, null, "=> FORCED OLD COLLISIONS. " + ticket + " " + priority);
+                    }
+                    addChunkToPhysicsWorld(ticket, false, false);
+                }
+            }
         }
         if (!asyncLoadedQueue.isEmpty()) {
             profiler.start(RCV_ASYNC);
@@ -194,11 +209,19 @@ public class PhysicsWorldTerrain implements ITerrainManager {
     /**
      * Adds the given chunk to the physics world, checking its loaded state
      */
-    private void addUsedChunk(ChunkLoadingTicket ticket, boolean checkNotLoaded) {
+    private void addChunkToPhysicsWorld(ChunkLoadingTicket ticket, boolean checkNotLoaded) {
+        addChunkToPhysicsWorld(ticket, checkNotLoaded, true);
+    }
+
+    /**
+     * Adds the given chunk to the physics world, checking its loaded state
+     */
+    private void addChunkToPhysicsWorld(ChunkLoadingTicket ticket, boolean checkNotLoaded, boolean checkStatus) {
         Profiler.get().start(ADD_USED);
-        if (ticket.getStatus() == ChunkState.LOADED && ticket.getPriority() != ChunkLoadingTicket.TicketPriority.NONE) {
+        Vector3fPool.openPool();
+
+        if ((!checkStatus || ticket.getStatus() == ChunkState.LOADED) && ticket.getPriority() != ChunkLoadingTicket.TicketPriority.NONE) {
             ChunkCollisions collisions = ticket.getCollisions();
-            //terrainState.addSubscriber(physicsWorld, ticket.getPos());
             if (!checkNotLoaded || !terrainState.isLoadedAnywhere(ticket.getPos())) {
                 if (ticket.getPriority() == ChunkLoadingTicket.TicketPriority.LOW) {
                     if (!collisions.getChunkState().arePersistentElementsAdded()) {
@@ -215,7 +238,7 @@ public class PhysicsWorldTerrain implements ITerrainManager {
                             System.out.println("Graph not found !");
                         }
                         if (!DynamXConfig.ignoreDangerousTerrainErrors) {
-                            throw new IllegalStateException("[0x2] Chunk is already added " + collisions + " " + collisions.getChunkState() + " " + ticket);
+                            throw new IllegalStateException("[IgnoredDangerousTerrainError] [0x2] Chunk is already added " + collisions + " " + collisions.getChunkState() + " " + ticket);
                         }
                     }
                     collisions.addToBulletWorld(physicsWorld, Profiler.get());
@@ -230,7 +253,7 @@ public class PhysicsWorldTerrain implements ITerrainManager {
                     System.out.println("Graph not found !");
                 }
                 if (!DynamXConfig.ignoreDangerousTerrainErrors) {
-                    throw new IllegalStateException("[0x1] Chunk " + collisions + " already loaded ! UnloadQueue " + terrainState.getUnloadQueue() + " Loaded " + terrainState.getLoadedTerrain());
+                    throw new IllegalStateException("[IgnoredDangerousTerrainError] [0x1] Chunk " + collisions + " already loaded ! UnloadQueue " + terrainState.getUnloadQueue() + " Loaded " + terrainState.getLoadedTerrain());
                 }
             }
         } else { //Incorrect ticket state (not loaded)
@@ -242,10 +265,12 @@ public class PhysicsWorldTerrain implements ITerrainManager {
             } else {
                 System.out.println("Graph not found !");
             }
-            if (!DynamXConfig.ignoreDangerousTerrainErrors)
-                throw new IllegalStateException("Bad ticket state " + ticket);
+            if (!DynamXConfig.ignoreDangerousTerrainErrors) {
+                throw new IllegalStateException("[IgnoredDangerousTerrainError] Bad ticket state " + ticket);
+            }
         }
 
+        Vector3fPool.closePool();
         Profiler.get().end(ADD_USED);
     }
 
@@ -263,22 +288,35 @@ public class PhysicsWorldTerrain implements ITerrainManager {
     private void receiveAsyncLoadedChunks() {
         while (!asyncLoadedQueue.isEmpty()) {
             ChunkLoadingTicket.AsyncLoadedChunk toffer = asyncLoadedQueue.poll();
-            if (toffer == null) return; //We aren't safe from weird multithreading errors
-            if (!toffer.getSnap().isValid()) //The received version isn't valid anymore
-            {
-                if (DynamXConfig.enableDebugTerrainManager)
-                    DynamXMain.log.error("[PWT] Ignored async loaded chunk, new request sent " + toffer.getSnap().getTicket() + " " + toffer.getSnap().getSnapIndex());
-                return;
+            if (toffer == null) {
+                continue; //We aren't safe from weird multithreading errors
             }
+
+            if (!toffer.getSnap().isValid()) { //The received version isn't valid anymore
+                if (isDebug()) {
+                    DynamXMain.log.warn("[PWT] Ignored async loaded chunk, new request sent {} {}", toffer.getSnap().getTicket(), toffer.getSnap().getSnapIndex());
+                }
+                continue;
+            }
+
             ChunkCollisions offer = toffer.getCollisionsIn();
             ChunkLoadingTicket ticket = toffer.getSnap().getTicket();
-            if (isDebug)
-                ChunkGraph.addToGrah(ticket.getPos(), ChunkGraph.ChunkActions.HOTSWAP, ChunkGraph.ActionLocation.MAIN, offer, "ASYNC LOAD Ticket " + ticket + " " + toffer.getSnap().getSnapIndex());
-            ticket.incrStatusIndex("Loaded async"); //Invalidate other loading operations
-            ticket.setLoaded(terrainState, offer);  //Will remove the previous chunk from loaded terrain
-            if (getTerrainState().isLoadedAnywhere(offer.getPos()))
-                addUsedChunk(ticket, false); //Add the new chunk to the physics world. FIX : ONLY IF IT'S USED
-            ticket.fireLoadedCallback(); //Call this after adding the chunk : the callback may ask for a new load of this ticket
+
+            synchronized (ticket) {
+                if (isDebug()) {
+                    ChunkGraph.addToGrah(ticket.getPos(), ChunkGraph.ChunkActions.HOTSWAP, ChunkGraph.ActionLocation.MAIN, offer, "ASYNC LOAD Ticket " + ticket + " " + toffer.getSnap().getSnapIndex());
+                }
+                ticket.incrStatusIndex(); //Invalidate other loading operations
+                ticket.setLoaded(offer);  //Will remove the previous chunk from loaded terrain
+
+                if (getTerrainState().isLoadedAnywhere(toffer.getSnap().getPos())) {
+                    addChunkToPhysicsWorld(ticket, false); //Add the new chunk to the physics world, if it's used
+                } else if (isDebug()) {
+                    DynamXMain.log.warn("[PWT] Ignored async loaded chunk, not in-use anymore! {} {}", toffer.getSnap().getTicket(), toffer.getSnap().getSnapIndex());
+                }
+
+                ticket.fireLoadedCallback(); //Call this after adding the chunk : the callback may ask for a new load of this ticket
+            }
         }
     }
 
@@ -290,9 +328,7 @@ public class PhysicsWorldTerrain implements ITerrainManager {
         terrainCache.tick();
         if (!asyncLoadedQueue.isEmpty()) {
             Profiler.get().start(RCV_ASYNC);
-            Vector3fPool.openPool();
             receiveAsyncLoadedChunks();
-            Vector3fPool.closePool();
             Profiler.get().end(RCV_ASYNC);
         }
         //Tick terrain loaders (as the slopes item)
@@ -317,15 +353,20 @@ public class PhysicsWorldTerrain implements ITerrainManager {
     public ChunkCollisions loadChunkCollisionsNow(ChunkLoadingTicket ticket, Profiler profiler) {
         profiler.start(Profiler.Profiles.EMERGENCY_CHUNK_LOAD);
         VerticalChunkPos pos = ticket.getPos();
-        ChunkCollisions coll = isDebug ? new DebugChunkCollisions(getWorld(), pos, getPhysicsWorld()) : new ChunkCollisions(getWorld(), pos);
-        if (isDebug)
+        ChunkCollisions coll = isDebug() ? new DebugChunkCollisions(getWorld(), pos) : new ChunkCollisions(getWorld(), pos);
+
+        if (isDebug()) {
             ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.LOAD_NOW, ChunkGraph.ActionLocation.MAIN, coll, "Ticket " + ticket);
-        ticket.incrStatusIndex("Load now"); //When we start to load the chunk, we can consider it's the more up-to-date version, and we are in the physics thread, so very good
+        }
+
+        ticket.incrStatusIndex(); //When we start to load the chunk, we can consider it's the more up-to-date version, and we are in the physics thread, so very good
         coll.loadCollisionsSync(this, getCache(), ticket, Vector3fPool.get(pos.x * 16, pos.y * 16, pos.z * 16), profiler);
         ticket.fireLoadedCallback(); //Call this after adding the chunk : the callback may ask for a new load of this ticket
         profiler.end(Profiler.Profiles.EMERGENCY_CHUNK_LOAD);
-        if (isDebug)
+
+        if (isDebug()) {
             ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.HOTSWAP, ChunkGraph.ActionLocation.MAIN, coll, "SYNCED LOAD Ticket " + ticket);
+        }
         return coll;
     }
 
@@ -383,34 +424,35 @@ public class PhysicsWorldTerrain implements ITerrainManager {
 
     private void onChunkChangedInternal(VerticalChunkPos pos) {
         notifyWillChangeInternal();
-        if (chunkTickets.containsKey(pos)) { //If the chunk is loaded
-            ChunkLoadingTicket ticket = chunkTickets.get(pos);
-            if (isDebug)
-                ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.CHK_UPDATE, ChunkGraph.ActionLocation.MAIN, ticket.getCollisions(), "Chunk changed. Ticket " + ticket);
-            if (ticket.getStatus() != ChunkState.LOADING) { //If not loading
-                terrainCache.invalidate(ticket, true, true); //Invalidate the cache
-                //If chunk terrain is loaded
-                if (ticket.getStatus() != ChunkState.NONE && ticket.getPriority().ordinal() > ChunkLoadingTicket.TicketPriority.NONE.ordinal()) {
-                    //If it's not loading in the main physics thread
-                    if (ticket.getStatus() != ChunkState.LOADING || ticket.getPriority() != ChunkLoadingTicket.TicketPriority.HIGH) {
-                        ticket.setLoading(); //Reload it, async
-                        asyncLoadChunkCollisions(ticket);
-                    }
-                }
-            } else { //If it's loading, it's iznogood
-                if (DynamXConfig.enableDebugTerrainManager) {
-                    DynamXMain.log.error("This chunk is still loading, wtf " + ticket);
-                    ChunkGraph graph = ChunkGraph.getAt(pos);
-                    if (graph != null) {
-                        System.out.println("Printing graph " + pos);
-                        graph.prettyPrint();
-                    } else {
-                        System.out.println("Graph not found :/");
-                    }
+        if (!chunkTickets.containsKey(pos)) {  //If the chunk is not loaded, just notify of the change
+            terrainCache.invalidate(pos, true, true);
+            return;
+        }
+        ChunkLoadingTicket ticket = chunkTickets.get(pos);
+        if (isDebug()) {
+            ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.CHK_UPDATE, ChunkGraph.ActionLocation.MAIN, ticket.getCollisions(), "Chunk changed. Ticket " + ticket);
+        }
+        if (ticket.getStatus() == ChunkState.LOADING) { //If it's loading, it's iznogood
+            if (isDebug()) {
+                DynamXMain.log.error("This chunk is still loading, wtf " + ticket);
+                ChunkGraph graph = ChunkGraph.getAt(pos);
+                if (graph != null) {
+                    System.out.println("Printing graph " + pos);
+                    graph.prettyPrint();
+                } else {
+                    System.out.println("Graph not found :/");
                 }
             }
-        } else {  //Else just notify of the change
-            terrainCache.invalidate(pos, true, true);
+            return;
+        }
+        terrainCache.invalidate(ticket, true, true); //Invalidate the cache
+        //If chunk terrain is loaded
+        if (ticket.getStatus() != ChunkState.NONE && ticket.getPriority().ordinal() > ChunkLoadingTicket.TicketPriority.NONE.ordinal()) {
+            //If it's not loading in the main physics thread
+            if (ticket.getStatus() != ChunkState.LOADING || ticket.getPriority() != ChunkLoadingTicket.TicketPriority.HIGH) {
+                ticket.setLoading(); //Reload it, async
+                asyncLoadChunkCollisions(ticket);
+            }
         }
     }
 
@@ -452,7 +494,7 @@ public class PhysicsWorldTerrain implements ITerrainManager {
     }
 
     public boolean isDebug() {
-        return isDebug;
+        return DynamXConfig.enableDebugTerrainManager;
     }
 
     /**
@@ -464,11 +506,12 @@ public class PhysicsWorldTerrain implements ITerrainManager {
      */
     public void onBlockChange(World world, BlockPos pos) {
         VerticalChunkPos pos1 = new VerticalChunkPos(pos.getX() >> 4, pos.getY() >> 4, pos.getZ() >> 4);
-        if (DynamXConfig.enableDebugTerrainManager) {
+        if (isDebug()) {
             IBlockState state = world.getBlockState(pos);
             ChunkLoadingTicket ticket = DynamXContext.getPhysicsWorld(world).getTerrainManager().getTicket(pos1);
-            if (ticket != null)
+            if (ticket != null) {
                 ChunkGraph.addToGrah(pos1, ChunkGraph.ChunkActions.CHK_UPDATE, ChunkGraph.ActionLocation.MAIN, ticket.getCollisions(), "Chunk changed from world change of " + state + " at " + pos + " (" + state.getBlock() + "). Ticket " + ticket);
+            }
         }
         scheduledChunkReload.put(pos1, (byte) 10);
     }

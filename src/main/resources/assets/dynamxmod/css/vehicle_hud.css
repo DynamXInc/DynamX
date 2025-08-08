@@ -17,8 +17,11 @@
 }
 
 #network_warning {
-    top: 110px;
+    top: 2px;
+    left: 2px;
     color: red;
+    text-shadow: none;
+    padding-left: 10px;
 }
 
 .root > .hud_item {
@@ -34,14 +37,14 @@
     height: 75px;*/
     width: 100%;
     height: 100%;
-    background-color: translucent;
+    background-color: transparent;
 }
 
 label {
     padding: 0px;
     left: 10px;
     width: 100%;
-    background-color: translucent;
+    background-color: transparent;
 }
 
 .hud_icon {
@@ -69,7 +72,8 @@ label {
     bottom: 50%;
     font-family: "dnx:e_hud";
     text-align: center;
-    background-color: translucent;
+    text-align-vertical: top;
+    background-color: transparent;
 }
 
 #engine_rpm {

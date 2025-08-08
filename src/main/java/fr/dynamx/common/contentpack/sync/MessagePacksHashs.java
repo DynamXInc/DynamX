@@ -10,6 +10,7 @@ import fr.dynamx.common.contentpack.loader.InfoLoader;
 import fr.dynamx.common.handlers.TaskScheduler;
 import fr.hermes.forge1122.dynamx.DynamXConfig;
 import fr.dynamx.utils.DynamXUtils;
+import fr.dynamx.utils.optimization.Vector3fPool;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.TextComponentString;
@@ -20,10 +21,10 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class MessagePacksHashs implements IDnxPacket {
     private Map<String, Map<String, byte[]>> objects;
@@ -75,32 +76,31 @@ public class MessagePacksHashs implements IDnxPacket {
     public static class HandlerServer implements IMessageHandler<MessagePacksHashs, IMessage> {
         @Override
         public IMessage onMessage(MessagePacksHashs message, MessageContext ctx) {
-            if (DynamXConfig.syncPacks) {
-                try {
-                    Map<String, List<String>> delta = PackSyncHandler.getFullDelta(message.objects);
-                    if (delta.values().stream().anyMatch(l -> !l.isEmpty())) {
-                        Map<String, Map<String, byte[]>> fullData = new HashMap<>();
-                        int size = 0;
-                        for (Map.Entry<String, List<String>> entry : delta.entrySet()) {
-                            String s = entry.getKey();
-                            List<String> l = entry.getValue();
-                            fullData.put(s, new HashMap<>());
-                            size += s.getBytes(StandardCharsets.UTF_8).length;
-                            InfoLoader<?> loader = DynamXObjectLoaders.getInfoLoaders().stream().filter(i -> i.getPrefix().equals(s)).findFirst().get();
-                            loader.encodeObjects(l, fullData.get(s));
-                            for (Map.Entry<String, byte[]> e : fullData.get(s).entrySet()) {
-                                String a = e.getKey();
-                                byte[] b = e.getValue();
-                                size += a.getBytes(StandardCharsets.UTF_8).length + b.length;
-                            }
-                        }
-                        DynamXContext.getNetwork().sendToClientFromOtherThread(new MessagePacksHashs(fullData), EnumPacketTarget.PLAYER, ctx.getServerHandler().player);
-                    }
-                    //else
-                    //  System.out.println("There is no delta");
-                } catch (Exception e) {
-                    ctx.getServerHandler().getNetworkManager().closeChannel(new TextComponentString("Invalid DynamX pack " + e.getMessage()));
+            if (!DynamXConfig.syncPacks) {
+                DynamXMain.log.warn("[PackSync] Sync requested by {}, but disabled on server", ctx.getServerHandler().player);
+                return null;
+            }
+            try {
+                Map<String, List<String>> delta = PackSyncHandler.getFullDelta(message.objects);
+                if (delta.values().stream().allMatch(List::isEmpty)) {
+                    DynamXMain.log.debug("[PackSync] No delta for {}", ctx.getServerHandler().player);
+                    return null;
                 }
+
+                Map<String, Map<String, byte[]>> fullData = new HashMap<>();
+                for (Map.Entry<String, List<String>> entry : delta.entrySet()) {
+                    String s = entry.getKey();
+                    List<String> l = entry.getValue();
+                    fullData.put(s, new HashMap<>());
+                    InfoLoader<?> loader = DynamXObjectLoaders.getInfoLoaders().stream().filter(i -> i.getPrefix().equals(s)).findFirst().get();
+                    loader.encodeObjects(l, fullData.get(s));
+                }
+
+                DynamXMain.log.info("[PackSync] Sending {} changed pack files to {}", fullData.entrySet().stream().map(e -> e.getKey() + "->" + e.getValue().size()).collect(Collectors.toList()), ctx.getServerHandler().player);
+                DynamXContext.getNetwork().sendToClientFromOtherThread(new MessagePacksHashs(fullData), EnumPacketTarget.PLAYER, ctx.getServerHandler().player);
+            } catch (Exception e) {
+                DynamXMain.log.error("[PackSync] Failed to sync changed pack files for " + ctx.getServerHandler().player, e);
+                ctx.getServerHandler().getNetworkManager().closeChannel(new TextComponentString("Invalid DynamX pack " + e.getMessage()));
             }
             return null;
         }
@@ -110,14 +110,19 @@ public class MessagePacksHashs implements IDnxPacket {
         @Override
         @SideOnly(Side.CLIENT)
         public IMessage onMessage(MessagePacksHashs message, MessageContext ctx) {
+            DynamXMain.log.info("[PackSync] Received server packs, applying diff of {} elements...",
+                    message.objects.entrySet().stream().map(e -> e.getKey() + "->" + e.getValue().size()).collect(Collectors.toList()));
+
             Minecraft.getMinecraft().ingameGUI.setOverlayMessage("Synchronizing DynamX packs...", false);
             Minecraft.getMinecraft().addScheduledTask(() -> {
+                Vector3fPool.openPool();
+
                 try {
                     for (Map.Entry<String, Map<String, byte[]>> entry : message.objects.entrySet()) {
                         String s = entry.getKey();
                         Map<String, byte[]> l = entry.getValue();
                         InfoLoader<?> loader = DynamXObjectLoaders.getInfoLoaders().stream().
-                         filter(i -> i.getPrefix().equals(s)).findFirst().get();
+                                filter(i -> i.getPrefix().equals(s)).findFirst().get();
                         loader.receiveObjects(l);
                     }
                 } catch (Exception e) {
@@ -129,10 +134,12 @@ public class MessagePacksHashs implements IDnxPacket {
                         }
                     });
                 }
-                PackSyncHandler.computeAll();
+
                 DynamXContext.getDxModelRegistry().getItemRenderer().refreshItemInfos();
                 DynamXUtils.hotswapWorldPackInfos(DynamXMain.proxy.getClientWorld());
                 Minecraft.getMinecraft().ingameGUI.setOverlayMessage("", false);
+
+                Vector3fPool.closePool();
             });
             return null;
         }

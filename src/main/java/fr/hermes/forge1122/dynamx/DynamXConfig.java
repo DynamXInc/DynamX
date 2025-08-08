@@ -7,8 +7,7 @@ import lombok.Getter;
 import net.minecraftforge.common.config.Configuration;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class DynamXConfig
 {
@@ -33,12 +32,15 @@ public class DynamXConfig
     public static boolean allowPlayersToMoveObjects = true;
     public static int[] allowedWrenchModes;
 
+    public static boolean disableItemTooltips;
+
     public static List<VerticalChunkPos> chunkDebugPoses;
     public static boolean enableDebugTerrainManager, ignoreDangerousTerrainErrors;
 
     public static int ragdollSpawnMinForce;
 
     public static boolean disableSSLCertification;
+    public static Set<String> ignoreCollisionEntities;
 
     @Getter
     private static float masterSoundVolume = 0.8f;
@@ -50,20 +52,36 @@ public class DynamXConfig
     public static void load(File file) {
         cfg = new Configuration(file);
         cfg.load();
+
+        // Multiplayer
         syncPacks = cfg.getBoolean("SyncContentPacks", "Multiplayer", false, "If enabled, the server will send all content pack objects to the clients (only where there are differences)");
         allowedWrenchModes = cfg.get("Multiplayer", "AllowedWrenchModes", new int[]{0, 2, 5}).getIntList();
+
+        // UDP
         useUdp = cfg.getBoolean("UseUdpServer", "UDP", true, "True to use (faster) UDP networking, false to use vanilla networking (TCP)");
         doUdpTimeOut = cfg.getBoolean("DoUdpTimeOut", "UDP", true, "True to automatically disconnect players when the udp connection cannot be established");
         udpPort = cfg.getInt("UdpPort", "UDP", 25575, 2000, 65535, "A port for the udp server, if enabled");
         usingProxy = cfg.getBoolean("HasProxy", "UDP", false, "If you have a proxy in front of your server");
         udpDebug = cfg.getBoolean("PrintUdpDebug", "UDP", false, "True to print debug for UDP connections");
+
+        // Visuals
         maxZoomOut = cfg.getInt("MaxZoomOut", "Visuals", 20, 0, 200, "Max de-zoom in F5 view");
+        disableItemTooltips = cfg.getBoolean("DisableItemTooltips", "Visuals", false, "Disables item tooltips showing pack information.");
+
+        // Physics
         allowPlayersToMoveObjects = cfg.getBoolean("AllowPlayersToMoveObjects", "Physics", true, "Allow player in survival to move ");
         ragdollSpawnMinForce = cfg.getInt("RagdollSpawnMinForce", "Physics", -1, -1, Integer.MAX_VALUE, "The minimum force of collision to spawn player ragdolls. Set to -1 to disable it.");
         //todo update doc and see new impact on perfs
         blockCollisionRadius = cfg.getInt("BlockCollisionRadius2", "Physics", 3, 0, 16, "The radius of collision checking with DynamX blocks around players. Has an impact on game performance. NOTE : Renamed with a '2' to replace the old default value and stay below 30 for stable performance");
         maxComplexBlockBoxes = cfg.getInt("MaxComplexBoxes", "Physics", 8, 0, 100, "The amount of detailed collisions per each complex block. If the block has more collisions (e.g. Decocraft), it will be a cube containing all collisions. Has an impact on game performance.");
+        ignoreCollisionEntities = new HashSet<>(Arrays.asList(cfg.getStringList(
+                "IgnoreCollisionEntities",
+                "Physics",
+                new String[]{"example.entity.*"},
+                "A list of entity classes that should ignore collisions. Useful for optimization or special behaviors. Wildcard supported (*)"
+        )));
 
+        // Statistics
         if (cfg.hasKey("Statistics", "CollectData")) {
             if (!cfg.getBoolean("CollectData", "Statistics", true, "Enables automatic reporting of your computer info (GPU, memory, OS) and useful crash-reports"))
                 ACsLib.getPlatform().provideService(StatsReportingService.class).disable();
@@ -74,6 +92,8 @@ public class DynamXConfig
                     "You can disable this in the configuration file of DynamX \n " +
                     "(under 'config' directory)", DynamXErrorTracker.ErrorLevel.ADVICE);*/
         }
+
+        // Debug
         int[] x, y, z;
         x = cfg.get("Debug", "ChunkDebugX", new int[3], "X poses of chunks to debug", Integer.MIN_VALUE, Integer.MAX_VALUE).getIntList();
         y = cfg.get("Debug", "ChunkDebugY", new int[3], "Y poses of chunks to debug", Integer.MIN_VALUE, Integer.MAX_VALUE).getIntList();
@@ -90,6 +110,7 @@ public class DynamXConfig
         ignoreDangerousTerrainErrors = cfg.get("Debug", "IgnoreDangerousTerrainErrors", false, "Will try to prevent the game from crashing when there is a weird error in the terrain. Only enable this if you want server stability.").getBoolean();
         disableSSLCertification = cfg.get("Debug", "DisableSSLVerification", false, "Disables ssl certificates for dynamx.fr, may be a security breach for your computer, DO NOT disable it if you don't know what you are doing").getBoolean();
 
+        // Sounds
         masterSoundVolume = (float) cfg.get("Sounds", "Volume", 0.8f, "The volume of DynamX sounds (engines...)").getDouble();
         maxSounds = cfg.get("Sounds", "MaxSounds", 8, "The maximum amount of sounds DynamX can play at the same time").getInt();
         cfg.save();

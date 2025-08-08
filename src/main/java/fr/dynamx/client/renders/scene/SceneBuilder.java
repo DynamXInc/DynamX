@@ -1,5 +1,6 @@
 package fr.dynamx.client.renders.scene;
 
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.part.IDrawablePart;
@@ -10,6 +11,7 @@ import fr.dynamx.utils.errors.DynamXErrorManager;
 import lombok.Getter;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraftforge.common.MinecraftForge;
+import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -325,12 +327,12 @@ public class SceneBuilder<C extends IRenderContext, A extends IModelPackObject> 
             node.leaf = new IDrawablePart<A>() {
                 @Override
                 public SceneNode<IRenderContext, A> createSceneGraph(Vector3f modelScale, List<SceneNode<IRenderContext, A>> childGraph) {
-                    return new SimpleNode<IRenderContext, A>(null, null, modelScale, childGraph) {
+                    return new SimpleNode<IRenderContext, A>(null, (Quaternion) null, modelScale, childGraph) {
                         @Override
-                        public void render(IRenderContext context, A packInfo) {
+                        public void render(IRenderContext context, A packInfo, Matrix4f parentTransform) {
                             GlStateManager.pushMatrix();
-                            transformToRotationPoint();
-                            renderChildren(context, packInfo);
+                            transformToRotationPoint(parentTransform);
+                            renderChildren(context, packInfo, transform);
                             GlStateManager.popMatrix();
                         }
                     };

@@ -11,6 +11,7 @@ import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.QuaternionPool;
+import fr.dynamx.utils.optimization.SubClassPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
@@ -28,6 +29,13 @@ import org.joml.Matrix4f;
  */
 public abstract class AbstractItemNode<C extends IRenderContext, A extends IModelPackObject> implements SceneNode<C, A> {
     /**
+     * The transformation matrix of this item node <br>
+     * Stores the transformations of the item node, and is used to render the node and its children <br>
+     * Do not use GlStateManager to apply transformations, use this matrix instead
+     */
+    private final Matrix4f transform = new Matrix4f();
+
+    /**
      * Renders this node as an item with an {@link fr.dynamx.client.renders.scene.BaseRenderContext.ItemRenderContext} <br>
      * You normally don't need to override this method, {@link #renderItemModel(BaseRenderContext.ItemRenderContext, IModelPackObject, Matrix4f)} is here for that
      *
@@ -44,11 +52,10 @@ public abstract class AbstractItemNode<C extends IRenderContext, A extends IMode
             Minecraft.getMinecraft().getRenderItem().renderItem(stack, model.getGuiBaked());
             GlStateManager.popMatrix();
         } else {
-            Matrix4f transform = getTransform();
             transform.identity();
-            Vector3fPool.openPool();
-            QuaternionPool.openPool();
-            GlQuaternionPool.openPool();
+            Vector3fPool.openPool(SubClassPool.ITEM_RENDER_NODE);
+            QuaternionPool.openPool(SubClassPool.ITEM_RENDER_NODE);
+            GlQuaternionPool.openPool(SubClassPool.ITEM_RENDER_NODE);
             if (!MinecraftForge.EVENT_BUS.post(new DynamXRenderItemEvent(context, this, DynamXRenderItemEvent.EventStage.TRANSFORM))) {
                 packInfo.applyItemTransforms(renderType, stack, model, transform);
                 ViewTransformsInfo transformsInfo = packInfo.getViewTransformsInfo(renderType);

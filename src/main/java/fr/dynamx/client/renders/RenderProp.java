@@ -38,7 +38,7 @@ public class RenderProp<T extends PropsEntity<?>> extends RenderPhysicsEntity<T>
 
     @Override
     public void renderEntity(T entity, BaseRenderContext.EntityRenderContext context) {
-        ((SceneNode<BaseRenderContext.EntityRenderContext, PropObject<?>>) entity.getPackInfo().getSceneGraph()).render(context, entity.getPackInfo());
+        ((SceneNode<BaseRenderContext.EntityRenderContext, PropObject<?>>) entity.getPackInfo().getSceneGraph()).render(context, entity.getPackInfo(), null);
     }
 
     @Override

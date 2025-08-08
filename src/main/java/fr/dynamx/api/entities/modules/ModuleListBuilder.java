@@ -1,12 +1,20 @@
 package fr.dynamx.api.entities.modules;
 
+import lombok.Getter;
+
 import java.util.List;
 
 /**
- * Helper class to build a {@link IPhysicsModule} list
+ * Helper class to build a {@link IBaseModule} list
  */
+@Getter
 public class ModuleListBuilder {
-    private final List<IPhysicsModule<?>> moduleList;
+    /**
+     * -- GETTER --
+     *
+     * @return The current modules list
+     */
+    private final List<IBaseModule> moduleList;
 
     /**
      * The modules will be added to the given list <br>
@@ -14,8 +22,8 @@ public class ModuleListBuilder {
      *
      * @param moduleList The module list
      */
-    public ModuleListBuilder(List<IPhysicsModule<?>> moduleList) {
-        this.moduleList = moduleList;
+    public ModuleListBuilder(List<? extends IBaseModule> moduleList) {
+        this.moduleList = (List<IBaseModule>) moduleList;
     }
 
     /**
@@ -23,7 +31,7 @@ public class ModuleListBuilder {
      *
      * @param module The module
      */
-    public void add(IPhysicsModule<?> module) {
+    public void add(IBaseModule module) {
         moduleList.add(module);
     }
 
@@ -31,7 +39,7 @@ public class ModuleListBuilder {
      * @param clazz The module class
      * @return True if there is already a module of this type
      */
-    public boolean hasModuleOfClass(Class<? extends IPhysicsModule<?>> clazz) {
+    public boolean hasModuleOfClass(Class<? extends IBaseModule> clazz) {
         return moduleList.stream().anyMatch(m -> clazz.isAssignableFrom(m.getClass()));
     }
 
@@ -40,14 +48,7 @@ public class ModuleListBuilder {
      * @param <Y>   The module type
      * @return The module of the given type, or null
      */
-    public <Y extends IPhysicsModule<?>> Y getByClass(Class<Y> clazz) {
+    public <Y extends IBaseModule> Y getByClass(Class<Y> clazz) {
         return (Y) moduleList.stream().filter(m -> clazz.isAssignableFrom(m.getClass())).findFirst().orElse(null);
-    }
-
-    /**
-     * @return The current modules list
-     */
-    public List<IPhysicsModule<?>> getModuleList() {
-        return moduleList;
     }
 }

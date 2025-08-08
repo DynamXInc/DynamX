@@ -28,7 +28,7 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 
 import java.util.*;
 
-public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A extends ISubInfoTypeOwner<?>> extends ObjectInfo<T>
+public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A extends ISubInfoTypeOwner<A>> extends ObjectInfo<T>
         implements IModelPackObject, IPartContainer<A>
 {
     @Getter
@@ -40,24 +40,13 @@ public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A e
     @PackFileProperty(configNames = "Model", type = DefinitionType.DynamXDefinitionTypes.DYNX_RESOURCE_LOCATION, description = "common.model", defaultValue = "obj/name_of_vehicle/name_of_model.obj")
     protected ResourceLocation model;
 
-    /**
-     * @deprecated Replaced by {@link fr.dynamx.common.contentpack.type.ViewTransformsInfo}
-     */
     @Getter
     @PackFileProperty(configNames = "ItemScale", required = false, description = "common.itemscale", defaultValue = "0.9")
     protected float itemScale = getBaseItemScale();
-    /**
-     * @deprecated Replaced by {@link fr.dynamx.common.contentpack.type.ViewTransformsInfo}
-     */
     @Getter
-    @Deprecated
     @PackFileProperty(configNames = "ItemTranslate", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false, defaultValue = "0 0 0")
     protected Vector3f itemTranslate = null;
-    /**
-     * @deprecated Replaced by {@link fr.dynamx.common.contentpack.type.ViewTransformsInfo}
-     */
     @Getter
-    @Deprecated
     @PackFileProperty(configNames = "ItemRotate", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false, defaultValue = "0 0 0")
     protected Vector3f itemRotate = null;
 
@@ -139,7 +128,7 @@ public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A e
     @Override
     public boolean postLoad(boolean hot) {
         if(FMLCommonHandler.instance().getSide().isClient() && (itemScale != getBaseItemScale() || itemTranslate != null || itemRotate != null)) {
-            if(itemTransformsInfo != null) {
+            if(itemTransformsInfo != null && !hot) { //TODO WOULD BE BETTER WITH PRE-LOAD/CLEANING SYSTEM WITH PACK SYNC SYSTEM
                 DynamXErrorManager.addPackError(getPackName(), "mixed_item_transforms_info", ErrorLevel.HIGH, getName(), "You can't mix old item transforms and ItemTransforms block !");
             } else {
                 itemTransformsInfo = new ItemTransformsInfo(this, itemScale, itemTranslate, itemRotate);

@@ -59,23 +59,28 @@ public class MessageEntityInteract implements IDnxPacket, IMessageHandler<Messag
         }
         if (context.getHeldItemMainhand().getItem() instanceof ItemWrench) {
             ((ItemWrench) context.getHeldItemMainhand().getItem()).interact(context, physicsEntity);
-        } else if (!(physicsEntity instanceof IModuleContainer.ISeatsContainer) || !((IModuleContainer.ISeatsContainer) physicsEntity).hasSeats() || !((IModuleContainer.ISeatsContainer) physicsEntity).getSeats().isEntitySitting(context)) {
-            if (!(physicsEntity instanceof PackPhysicsEntity)) {
+            return;
+        }
+        if (!(physicsEntity instanceof PackPhysicsEntity) || (physicsEntity instanceof IModuleContainer.ISeatsContainer
+                && ((IModuleContainer.ISeatsContainer) physicsEntity).hasSeats()
+                && ((IModuleContainer.ISeatsContainer) physicsEntity).getSeats().isEntitySitting(context))) {
+            return;
+        }
+        PackPhysicsEntity<?, ?> targetEntity = (PackPhysicsEntity<?, ?>) physicsEntity;
+        //If we clicked a part, try to interact with it.
+        Vector3fPool.openPool();
+        InteractivePart hitPart = targetEntity.getHitPart(context);
+        if (hitPart != null && hitPart.canInteract(targetEntity, context)) {
+            if ((hitPart instanceof PartEntitySeat && ((PartEntitySeat) hitPart).hasDoor()) && context.isSneaking()) {
+                Vector3fPool.closePool();
                 return;
             }
-            PackPhysicsEntity<?, ?> targetEntity = (PackPhysicsEntity<?, ?>) physicsEntity;
-            //If we clicked a part, try to interact with it.
-            Vector3fPool.openPool();
-            InteractivePart hitPart = targetEntity.getHitPart(context);
-            if (hitPart != null && hitPart.canInteract(targetEntity, context)) {
-                if ((hitPart instanceof PartEntitySeat && ((PartEntitySeat) hitPart).hasDoor()) && context.isSneaking()) {
-                    return;
-                }
-                if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.PlayerInteract(context, targetEntity, hitPart)))
-                    hitPart.interact(targetEntity, context);
-            } else
-                MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.PlayerInteract(context, targetEntity, null));
-            Vector3fPool.closePool();
+            if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.PlayerInteract(context, targetEntity, hitPart))) {
+                hitPart.interact(targetEntity, context);
+            }
+        } else {
+            MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.PlayerInteract(context, targetEntity, null));
         }
+        Vector3fPool.closePool();
     }
 }

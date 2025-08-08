@@ -26,15 +26,20 @@ public interface IModelTextureVariantsSupplier extends INamedObject {
     IModelTextureVariants getTextureVariantsFor(ObjObjectRenderer objObjectRenderer);
 
     default String getMainObjectVariantName(byte variantId) {
+        return getMainObjectVariantNameOrDefault(variantId, "default");
+    }
+
+    default String getMainObjectVariantNameOrDefault(byte variantId, String notFoundVariantName) {
         IModelTextureVariants variants = getMainObjectVariants();
-        return variants != null ? variants.getVariant(variantId).getName() : "default";
+        TextureVariantData variant = variants != null ? variants.getVariant(variantId) : null;
+        return variant != null ? variant.getName() : notFoundVariantName;
     }
 
     /**
      * @return True if this supplier has varying textures (more textures than the default texture) <br>
      * If you return false, and this model is registered twice, this texture supplier can be replaced by the other one
      */
-    default boolean hasVaryingTextures() {
+    default boolean hasTextureVariants() {
         return false;
     }
 
@@ -46,6 +51,8 @@ public interface IModelTextureVariantsSupplier extends INamedObject {
     default boolean canRenderPart(String partName) {
         return true;
     }
+
+    byte getMaxVariantId();
 
     interface IModelTextureVariants {
         TextureVariantData getDefaultVariant();

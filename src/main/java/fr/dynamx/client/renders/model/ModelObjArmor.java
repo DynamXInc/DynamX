@@ -129,42 +129,42 @@ public class ModelObjArmor extends ModelBiped {
         } else {
             rightArmPose = ModelBiped.ArmPose.EMPTY;
         }
-        renderContext.setModelParams((EntityLivingBase) entity, getActivePart(), model, (byte) (armorObject.getMaxTextureMetadata() > 1 ? itemstack.getMetadata() : 0));
+        renderContext.setModelParams((EntityLivingBase) entity, getActivePart(), model, (byte) (armorObject.getMaxVariantId() > 1 ? itemstack.getMetadata() : 0));
         if (!MinecraftForge.EVENT_BUS.post(new DynamXArmorRenderEvent(renderContext, armorObject.getSceneGraph(), EventPhase.PRE))) {
-            ((SceneNode<BaseRenderContext.ArmorRenderContext, ArmorObject<?>>) armorObject.getSceneGraph()).render(renderContext, armorObject);
+            ((SceneNode<BaseRenderContext.ArmorRenderContext, ArmorObject<?>>) armorObject.getSceneGraph()).render(renderContext, armorObject, null);
             MinecraftForge.EVENT_BUS.post(new DynamXArmorRenderEvent(renderContext, armorObject.getSceneGraph(), EventPhase.POST));
         }
     }
 
-    public void renderPart(Matrix4f transform, EntityEquipmentSlot part) {
+    public void renderPart(Matrix4f transform, EntityEquipmentSlot part, boolean forceVanillaRender) {
         switch (part) {
             case HEAD: {
                 if (head != null) {
-                    renderPart(transform, head);
+                    renderPart(transform, head, forceVanillaRender);
                 }
                 break;
             }
             case CHEST: {
                 if (body != null) {
-                    renderPart(transform, body);
+                    renderPart(transform, body, forceVanillaRender);
                 }
                 if (arms != null) {
-                    renderPart(transform, arms[0]);
-                    renderPart(transform, arms[1]);
+                    renderPart(transform, arms[0], forceVanillaRender);
+                    renderPart(transform, arms[1], forceVanillaRender);
                 }
                 break;
             }
             case LEGS: {
                 if (legs != null) {
-                    renderPart(transform, legs[0]);
-                    renderPart(transform, legs[1]);
+                    renderPart(transform, legs[0], forceVanillaRender);
+                    renderPart(transform, legs[1], forceVanillaRender);
                 }
                 break;
             }
             case FEET: {
                 if (foot != null) {
-                    renderPart(transform, foot[0]);
-                    renderPart(transform, foot[1]);
+                    renderPart(transform, foot[0], forceVanillaRender);
+                    renderPart(transform, foot[1], forceVanillaRender);
                 }
                 break;
             }
@@ -217,9 +217,9 @@ public class ModelObjArmor extends ModelBiped {
         armor.render(scale);
     }
 
-    protected void renderPart(Matrix4f transform, ArmorRenderer armor) {
+    protected void renderPart(Matrix4f transform, ArmorRenderer armor, boolean forceVanillaRender) {
         tempTransform.set(transform); // armor.render modifies the transform matrix
-        armor.render(tempTransform);
+        armor.render(tempTransform, forceVanillaRender);
     }
 
     private static void copyModelAnglesForArmor(ModelRenderer bodyPart, ModelRenderer armor) {

@@ -14,7 +14,6 @@ import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.blocks.DynamXBlock;
 import fr.dynamx.common.capability.DynamXChunkDataProvider;
-import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
 import fr.dynamx.common.entities.PhysicsEntity;
@@ -30,6 +29,7 @@ import fr.hermes.forge1122.dynamx.DynamXConfig;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.client.ContentPackUtils;
 import fr.dynamx.utils.optimization.QuaternionPool;
+import fr.dynamx.utils.optimization.SubClassPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -54,7 +54,6 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.registries.IForgeRegistry;
 
 import java.util.HashMap;
@@ -83,7 +82,7 @@ public class CommonEventHandler {
     @SubscribeEvent
     public void onLoggedIn(net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent event) {
         if (FMLCommonHandler.instance().getSide().isServer()) {
-            DynamXContext.getNetwork().sendToClient(new MessageSyncConfig(false, DynamXConfig.mountedVehiclesSyncTickRate, ContentPackLoader.getBlocksGrip(), ContentPackLoader.slopes, ContentPackLoader.SLOPES_LENGTH, ContentPackLoader.PLACE_SLOPES, DynamXContext.getPhysicsSimulationMode(Side.CLIENT), event.player.getEntityId()), EnumPacketTarget.PLAYER, (EntityPlayerMP) event.player);
+            DynamXContext.getNetwork().sendToClient(new MessageSyncConfig(false, event.player.getEntityId()), EnumPacketTarget.PLAYER, (EntityPlayerMP) event.player);
         }
     }
 
@@ -111,7 +110,7 @@ public class CommonEventHandler {
             } else if (event.getTarget().ticksExisted <= 20) //If we were riding a vehicle, when we span we need to receive our seat : we do that here
             {
                 if (event.getTarget() instanceof IModuleContainer.ISeatsContainer && ((IModuleContainer.ISeatsContainer) event.getTarget()).hasSeats()) {
-                    schedule(new TaskScheduler.ScheduledTask((short) 10) {
+                    schedule(new TaskScheduler.ScheduledTask((short) 20) {
                         @Override
                         public void run() {
                             DynamXContext.getNetwork().sendToClient(new MessageSeatsSync((IModuleContainer.ISeatsContainer) event.getTarget()), EnumPacketTarget.PLAYER, (EntityPlayerMP) event.getEntityPlayer());
@@ -244,8 +243,8 @@ public class CommonEventHandler {
         if (!(e.player.getRidingEntity() instanceof PhysicsEntity<?>) && DynamXContext.getPhysicsWorld(e.player.world) != null && !e.player.isDead) {
             if (!DynamXContext.getPlayerToCollision().containsKey(e.player) && DynamXPhysicsWorldBlacklistApi.isBlacklisted(e.player))
                 return;
-            Vector3fPool.openPool();
-            QuaternionPool.openPool();
+            Vector3fPool.openPool(SubClassPool.PLAYER_COLL);
+            QuaternionPool.openPool(SubClassPool.PLAYER_COLL);
             if (!DynamXContext.getPlayerToCollision().containsKey(e.player)) {
                 PlayerPhysicsHandler playerPhysicsHandler = new PlayerPhysicsHandler(e.player);
                 DynamXContext.getPlayerToCollision().put(e.player, playerPhysicsHandler);

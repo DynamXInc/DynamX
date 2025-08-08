@@ -21,7 +21,7 @@ public class ClientPhysicsSyncManager {
     }
 
     public static String getPingMessage() {
-        return pingMs >= 80 ? "Warning : you have a bad connection ! PING is " + pingMs + " ms" : pingMs == -2 ? "Pinging..." : "";
+        return pingMs >= 80 ? pingMs + " ms" : "";
     }
 
     public static boolean hasBadConnection() {

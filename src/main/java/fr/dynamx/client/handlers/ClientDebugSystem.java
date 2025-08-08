@@ -48,7 +48,6 @@ import java.util.function.Predicate;
 public class ClientDebugSystem {
     private static final List<ProfilingData.Measure> physicsTicks = new ArrayList<>();
     public static boolean enableDebugDrawing;
-    public static int MOVE_DEBUG;
 
     public static final Map<Long, PhysicsRigidBody> trackedRigidBodies = new ConcurrentHashMap<>();
     public static final Map<Long, RigidBodyTransform>[] prevRigidBodyStates = new Map[]{new HashMap<>(), new HashMap<>()};
@@ -79,8 +78,6 @@ public class ClientDebugSystem {
             }
 
             if (MC.world != null && DynamXContext.getPhysicsWorld(MC.world) != null) {
-                QuaternionPool.openPool();
-                Vector3fPool.openPool();
                 curRigidBodyStatesIndex++;
                 if (curRigidBodyStatesIndex > 1) {
                     curRigidBodyStatesIndex = 0;
@@ -94,8 +91,6 @@ public class ClientDebugSystem {
                         return v;
                     });
                 }
-                Vector3fPool.closePool();
-                QuaternionPool.closePool();
             }
         }
     }
@@ -277,9 +272,7 @@ public class ClientDebugSystem {
                 QuaternionPool.closePool();
                 GlStateManager.popMatrix();
             }
-
             Vector3fPool.closePool();
-
         }
     }
 

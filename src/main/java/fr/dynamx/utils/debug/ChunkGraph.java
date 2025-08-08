@@ -38,7 +38,7 @@ public class ChunkGraph {
 
                 graphs.get(pos).actions.add(new HistoryEntry(action, location, System.currentTimeMillis(), chunk == null ? null : ((DebugChunkCollisions) chunk).getId(), info));
                 if (LISTEN == 0) {
-                    while (graphs.get(pos).actions.size() > 25) { //TODOOLD DISABLE THIS SO EXPENSIVE THING
+                    while (graphs.get(pos).actions.size() > 25) {
                         graphs.get(pos).actions.remove(0);
                     }
                 }
@@ -91,11 +91,11 @@ public class ChunkGraph {
         CREATE_INSTANCE, ADD_TO_WORLD, HOTSWAP, ASYNC_MANAGER_QUERY, LOAD_NOW, LOAD_ASYNC, DESTROY, CHK_UNLOAD,
         CHK_UPDATE, RESET, LOAD_INTERNAL, LOAD_INTERNAL_DOING, SEND_SAVE, LOAD_FROM_SAVE, SEND_INVALIDATE, SAVE_TO_FILE, INVALIDATED,
         ERR_ASYNC_CACHE_LOAD_STARTED, ERR_ASYNC_CACHE_LOAD_FAIL, ASYNC_REMOTE_RCV, ASYNC_COMPLETE_FUTURE_EXEC,
-        SET_LOADING, REMOVE_FROM_WORLD, INITIATE_LOAD, OVERRIDE_LOAD, SET_LOADED,
+        SET_LOADING, REMOVE_FROM_WORLD, INITIATE_LOAD, OVERRIDE_LOAD, SET_LOADED, NETWORK_SEND;
     }
 
     public enum ActionLocation {
-        MAIN, LOADER, SAVER, UNKNOWN
+        MAIN, LOADER, SAVER, UNKNOWN, NETWORK;
     }
 
     public static class HistoryEntry {

@@ -43,18 +43,15 @@ public class UdpClientNetworkHandler implements IDnxNetworkHandler {
     public void authenticate() {
         this.setAuthenticated(false);
         this.sendPacket(new UDPClientAuthenticationPacket(hash));
-        if (DynamXConfig.udpDebug)
+        if (DynamXConfig.udpDebug) {
             DynamXMain.log.info("[UDP-DEBUG] Auth rq sent");
+        }
     }
 
     void handleAuth() {
         DynamXMain.log.info("Successfully authenticated with udp server.");
         this.setAuthenticated(true);
-
-        if (DynamXConfig.syncPacks) {
-            DynamXMain.log.debug("Requesting pack sync...");
-            DynamXContext.getNetwork().sendToServer(new MessagePacksHashs(PackSyncHandler.getObjects()));
-        }
+        PackSyncHandler.requestPackSync();
     }
 
     private byte warningThreshold;
@@ -103,7 +100,7 @@ public class UdpClientNetworkHandler implements IDnxNetworkHandler {
         this.authenticate();
 
         while (running) {
-            byte[] packetBuffer = UPDByteArrayPool.getINSTANCE().get(); //Note that the array is not cleaned and may contain old data
+            byte[] packetBuffer = UDPByteArrayPool.getINSTANCE().get(); //Note that the array is not cleaned and may contain old data
             DatagramPacket p = new DatagramPacket(packetBuffer, packetBuffer.length);
 
             try {

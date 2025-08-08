@@ -1,12 +1,15 @@
 package fr.dynamx.common.network.sync;
 
 import fr.dynamx.api.entities.IModuleContainer;
+import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.parts.BasePartSeat;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.network.packets.PhysicsEntityMessage;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,11 +39,15 @@ public class MessageSeatsSync extends PhysicsEntityMessage<MessageSeatsSync> {
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
     protected void processMessageClient(PhysicsEntityMessage<?> message, PhysicsEntity<?> entity, EntityPlayer player) {
-        if (entity instanceof IModuleContainer.ISeatsContainer && ((IModuleContainer.ISeatsContainer) entity).hasSeats())
-            ((IModuleContainer.ISeatsContainer) entity).getSeats().updateSeats((MessageSeatsSync) message, entity.getSynchronizer());
-        else
-            log.fatal("Received seats packet for an entity that have no seats !");
+        if (!(entity instanceof IModuleContainer.ISeatsContainer) || !((IModuleContainer.ISeatsContainer) entity).hasSeats()) {
+            if (entity != null) { // Not just despawned
+                log.error("Received seats packet for an entity that have no seats! Entity: {}", entity);
+            }
+            return;
+        }
+        DynamXContext.getPhysicsWorld(entity.world).schedule(() -> ((IModuleContainer.ISeatsContainer) entity).getSeats().updateSeats((MessageSeatsSync) message, entity.getSynchronizer()));
     }
 
     @Override

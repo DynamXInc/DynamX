@@ -9,7 +9,6 @@ import fr.dynamx.api.contentpack.registry.*;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.CreatePackItemEvent;
 import fr.dynamx.api.events.client.BuildSceneGraphEvent;
-import fr.dynamx.client.renders.scene.SceneBuilder;
 import fr.dynamx.client.renders.scene.node.EntityNode;
 import fr.dynamx.client.renders.scene.node.SceneNode;
 import fr.dynamx.common.contentpack.ContentPackLoader;
@@ -37,7 +36,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RegisteredSubInfoType(name = "prop", registries = SubInfoTypeRegistries.BLOCKS, strictName = false)
-public class PropObject<T extends PropObject<?>> extends AbstractProp<T> implements IPhysicsPackInfo,
+public class PropObject<T extends PropObject<T>> extends AbstractProp<T> implements IPhysicsPackInfo,
         ISubInfoType<BlockObject<?>>, ParticleEmitterInfo.IParticleEmitterContainer {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = {SubInfoTypeRegistries.BLOCKS, SubInfoTypeRegistries.PROPS})
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
@@ -45,10 +44,6 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
             return new IPackFilePropertyFixer.FixResult("UseComplexCollisions", true);
         if ("Textures".equals(key))
             return new IPackFilePropertyFixer.FixResult("MaterialVariants", true, true);
-        if ("ItemTranslate".equals(key))
-            return new IPackFilePropertyFixer.FixResult("ItemTransforms block", true, true);
-        if ("ItemRotate".equals(key))
-            return new IPackFilePropertyFixer.FixResult("ItemTransforms block", true, true);
         return null;
     };
 
@@ -123,7 +118,7 @@ public class PropObject<T extends PropObject<?>> extends AbstractProp<T> impleme
         this.item3DRenderLocation = block.getItem3DRenderLocation();
         this.translation = block.getTranslation();
         this.scaleModifier = block.getScaleModifier();
-        this.renderDistance = block.getRenderDistance();
+        this.renderDistanceSquared = block.getRenderDistanceSquared();
         this.creativeTabName = block.getCreativeTabName();
         this.useComplexCollisions = block.useComplexCollisions();
         this.particleEmitters.addAll(block.getParticleEmitters());

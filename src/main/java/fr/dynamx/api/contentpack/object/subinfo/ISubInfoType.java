@@ -3,6 +3,7 @@ package fr.dynamx.api.contentpack.object.subinfo;
 import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
+import fr.dynamx.common.blocks.TEDynamXBlock;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 
@@ -53,6 +54,15 @@ public interface ISubInfoType<T extends ISubInfoTypeOwner<?>> extends INamedObje
      * @param modules The modules list where you should add your module(s)
      */
     default void addModules(PackPhysicsEntity<?, ?> entity, ModuleListBuilder modules) {
+    }
+
+    /**
+     * Adds the {@link fr.dynamx.api.blocks.IBlockEntityModule}s associated with this sub info type to the given block entity
+     *
+     * @param blockEntity  The block entity being initialized
+     * @param modules The modules list where you should add your module(s)
+     */
+    default void addBlockModules(TEDynamXBlock blockEntity, ModuleListBuilder modules) {
     }
 
     /**

@@ -3,7 +3,7 @@ package fr.dynamx.server.command;
 import fr.dynamx.api.network.EnumPacketTarget;
 import fr.dynamx.api.physics.IPhysicsSimulationMode;
 import fr.dynamx.common.DynamXContext;
-import fr.dynamx.common.contentpack.ContentPackLoader;
+import fr.dynamx.common.command.ISubCommand;
 import fr.dynamx.common.network.packets.MessageSyncConfig;
 import fr.dynamx.common.physics.world.PhysicsSimulationModes;
 import fr.hermes.forge1122.dynamx.DynamXConfig;
@@ -59,7 +59,7 @@ public class CmdPhysicsMode implements ISubCommand {
             DynamXContext.setPhysicsSimulationMode(Side.CLIENT, light);
             sender.sendMessage(new TextComponentString("Physics simulation mode is: client=" + DynamXContext.getPhysicsSimulationMode(Side.CLIENT).getName()
                     + ", server=" + DynamXContext.getPhysicsSimulationMode(Side.SERVER).getName()));
-            DynamXContext.getNetwork().sendToClient(new MessageSyncConfig(false, DynamXConfig.mountedVehiclesSyncTickRate, ContentPackLoader.getBlocksGrip(), ContentPackLoader.slopes, ContentPackLoader.SLOPES_LENGTH, ContentPackLoader.PLACE_SLOPES, light, -1), EnumPacketTarget.ALL);
+            DynamXContext.getNetwork().sendToClient(new MessageSyncConfig(false, -1), EnumPacketTarget.ALL);
         } else {
             throw new WrongUsageException(getUsage());
         }

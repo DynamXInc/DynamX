@@ -54,7 +54,7 @@ public class LateInfoLoader<T extends ISubInfoTypeOwner<?>> extends InfoLoader<T
         BufferedReader inputStream = null;
         try {
             inputStream = new BufferedReader(new InputStreamReader(file.getInputStream()));
-            T info = assetCreator.create(loadingPack, configName, clazz.getName());
+            T info = assetCreator.create(loadingPack, configName, clazz.toString());
             if (infos.containsKey(info.getFullName()))
                 throw new IllegalArgumentException("Found a duplicated pack file " + configName + " in pack " + loadingPack + " !");
             readInfo(getDefaultSubInfoTypesRegistry(), inputStream, info);

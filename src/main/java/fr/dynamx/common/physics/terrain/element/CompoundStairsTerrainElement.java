@@ -34,6 +34,7 @@ public class CompoundStairsTerrainElement implements ITerrainElement {
     }
 
     public CompoundStairsTerrainElement(int x, int y, int z, List<StairsBox> boxes) {
+        assert !boxes.isEmpty() : "CompoundStairsTerrainElement boxes list cannot be empty";
         IndexedMeshBuilder builder = new IndexedMeshBuilder(x, y, z, debugData);
         builder.addStairBoxes(boxes);
         this.meshes = builder.getMeshes();

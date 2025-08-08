@@ -6,6 +6,7 @@ import fr.dynamx.common.DynamXMain;
 import fr.dynamx.utils.VerticalChunkPos;
 import fr.dynamx.utils.debug.Profiler;
 import fr.dynamx.utils.optimization.QuaternionPool;
+import fr.dynamx.utils.optimization.SubClassPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -60,8 +61,8 @@ public class TerrainCollisionsCalculator {
         int y = myPos.y * 16;
         int z = myPos.z * 16;
 
-        Vector3fPool.openPool();
-        QuaternionPool.openPool();
+        Vector3fPool.openPool(SubClassPool.CHUNK_COLLISIONS_COMPUTE);
+        QuaternionPool.openPool(SubClassPool.CHUNK_COLLISIONS_COMPUTE);
 
         //Root terrain
         TerrainBoxConstructor boxBuilder = new TerrainBoxConstructor(new AxisAlignedBB(x, y, z, x + 16, y + 16, z + 16), x, y, z, debug);

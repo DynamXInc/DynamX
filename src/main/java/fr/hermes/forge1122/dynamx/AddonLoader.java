@@ -1,12 +1,14 @@
 package fr.hermes.forge1122.dynamx;
 
 import fr.aym.acslib.api.services.error.ErrorLevel;
+import fr.aym.acslib.api.services.mps.ModProtectionContainer;
 import fr.dynamx.api.contentpack.DynamXAddon;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariableRegistry;
 import fr.dynamx.common.contentpack.AddonInfo;
 import fr.dynamx.common.contentpack.loader.SubInfoTypesRegistry;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import fr.hermes.dynamx.IAddonLoader;
+import lombok.Getter;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.common.ProgressManager;
@@ -32,10 +34,18 @@ import static fr.dynamx.common.DynamXMain.log;
 public class AddonLoader implements IAddonLoader {
     /**
      * Loaded addons
+     * -- GETTER --
+     *
+     * @return Loaded addons
      */
+    @Getter
     private final Map<String, AddonInfo> addons = new HashMap<>();
-
     private FMLConstructionEvent event;
+
+    /**
+     * MPS event subscribers
+     */
+    private static final Map<String, Method> mpsInitSubscribers = new HashMap<>();
 
     protected void setForgeData(FMLConstructionEvent event) {
         this.event = event;
@@ -51,17 +61,21 @@ public class AddonLoader implements IAddonLoader {
                     Class<?> addon = Class.forName(data.getClassName());
                     DynamXAddon an = addon.getAnnotation(DynamXAddon.class);
                     name = an.modid() + ":" + an.name();
-                    log.debug("Found addon candidate " + an.name() + " of mod " + an.modid());
+                    log.debug("Found addon candidate {} of mod {}", an.name(), an.modid());
                     boolean found = false;
                     for (Method md : addon.getDeclaredMethods()) {
                         if (md.isAnnotationPresent(DynamXAddon.AddonEventSubscriber.class)) {
                             if (!Modifier.isStatic(md.getModifiers()))
                                 throw new IllegalArgumentException("Addon's @AddonEventSubscriber init method must have static access !");
+                            if (md.getParameterCount() == 1 && md.getParameterTypes()[0].equals(ModProtectionContainer.class)) {
+                                log.debug("Found MPS init subscriber for addon {} of mod {}", an.name(), an.modid());
+                                mpsInitSubscribers.put(an.modid(), md);
+                                continue;
+                            }
                             if (md.getParameterCount() != 0)
                                 throw new IllegalArgumentException("Addon's @AddonEventSubscriber init method must have 0 parameters !");
                             getAddons().put(an.modid(), new AddonInfo(an.modid(), an.name(), an.version(), md, an.requiredOnClient()));
                             found = true;
-                            break;
                         }
                     }
                     if (!found)
@@ -91,6 +105,24 @@ public class AddonLoader implements IAddonLoader {
         return false;
     }
 
+    /**
+     * Initializes all addons (discovered in init method)
+     */
+    public static void initMpsAddons(ModProtectionContainer mpsContainer) {
+        for (Map.Entry<String, Method> addon : mpsInitSubscribers.entrySet()) {
+            try {
+                addon.getValue().invoke(null, mpsContainer);
+            } catch (Exception e) {
+                log.error("MPS addon {} cannot be initialized !", addon.getKey(), e);
+                DynamXErrorManager.addError("DynamX initialization", DynamXErrorManager.INIT_ERRORS, "addon_init_error", ErrorLevel.FATAL, addon.getKey(), "Initializing mps dependencies", e);
+            }
+        }
+        log.info("Loaded MPS addons: {}", mpsInitSubscribers.keySet());
+    }
+
+    /**
+     * Initializes all addons (discovered in init method)
+     */
     @Override
     public void initAddons() {
         ProgressManager.ProgressBar bar = ProgressManager.push("Loading DynamX addons", 1);
@@ -103,21 +135,16 @@ public class AddonLoader implements IAddonLoader {
                 addon.initAddon();
                 container.ifPresent(modContainer -> Loader.instance().setActiveModContainer(current));
             } catch (Exception e) {
-                log.error("Addon " + addon.toString() + " cannot be initialized !", e);
-                DynamXErrorManager.addError("DynamX initialization", DynamXErrorManager.INIT_ERRORS, "addon_init_error", ErrorLevel.FATAL, addon.getAddonName(), null, e);
+                log.error("Addon {} cannot be initialized !", addon.toString(), e);
+                DynamXErrorManager.addError("DynamX initialization", DynamXErrorManager.INIT_ERRORS, "addon_init_error", ErrorLevel.FATAL, addon.getAddonName(), "Initializing the addon", e);
             }
         }
-        log.info("Loaded addons: " + getAddons().values());
+        log.info("Loaded addons: {}", getAddons().values());
         ProgressManager.pop(bar);
     }
 
     @Override
     public boolean isAddonLoaded(String addon) {
         return getAddons().containsKey(addon);
-    }
-
-    @Override
-    public Map<String, AddonInfo> getAddons() {
-        return addons;
     }
 }

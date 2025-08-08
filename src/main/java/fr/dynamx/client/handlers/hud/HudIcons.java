@@ -21,14 +21,14 @@ public interface HudIcons {
      * @param componentId The id of the component
      * @param component   The component added
      */
-    void initIcon(int componentId, GuiComponent<?> component);
+    void initIcon(int componentId, GuiComponent component);
 
     /**
      * Fired when ticking the hud
      *
      * @param components The custom icons
      */
-    void tick(GuiComponent<?>[] components);
+    void tick(GuiComponent[] components);
 
     /**
      * Fired at each render frame to check if the component should be visible or not

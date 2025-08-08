@@ -1,6 +1,6 @@
 package fr.dynamx.client;
 
-import com.modularmods.mcgltf.MCglTF;
+import com.modularmods.mcgltf.dynamx.MCglTF;
 import fr.aym.acslib.ACsLib;
 import fr.aym.acslib.api.services.ThreadedLoadingService;
 import fr.aym.acslib.api.services.error.ErrorLevel;
@@ -88,9 +88,9 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
             if (location.getFormat() == EnumDxModelFormats.GLTF) {
                 MCglTF.getInstance().registerModel(location);
             }
-        } else if (customTextures != null && customTextures.hasVaryingTextures()) {
+        } else if (customTextures != null && customTextures.hasTextureVariants()) {
             IModelTextureVariantsSupplier previousSupplier = MODELS_REGISTRY.get(location);
-            if (previousSupplier == null || !previousSupplier.hasVaryingTextures()) {
+            if (previousSupplier == null || !previousSupplier.hasTextureVariants()) {
                 log.debug("Replacing model texture supplier of '" + location + "' from '" + previousSupplier + "' to '" + customTextures + "' : the previous doesn't have custom textures");
                 MODELS_REGISTRY.put(location, customTextures);
                 if (location.getFormat() == EnumDxModelFormats.GLTF) {
@@ -219,12 +219,10 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
             log.info("Loading model textures...");
             //Loads all textures of models, cannot be done before because the TextureManager is not initialized
             bar.step("Uploading textures");
-            OBJLoader.getMtlLoaders().forEach(mtlLoader -> {
-                if(mtlLoader == null)
-                    throw new NullPointerException("Null mtl loader ! IN " + OBJLoader.getMtlLoaders());
-                mtlLoader.uploadTextures();
-            });
-            OBJLoader.getMtlLoaders().clear();
+            synchronized (OBJLoader.getMtlLoaders()) {
+                OBJLoader.getMtlLoaders().forEach(MTLLoader::uploadTextures);
+                OBJLoader.getMtlLoaders().clear();
+            }
             if (ClientEventHandler.MC.world != null)
                 uploadVAOs();
             ProgressManager.pop(bar);

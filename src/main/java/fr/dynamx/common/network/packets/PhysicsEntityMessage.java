@@ -53,7 +53,7 @@ public abstract class PhysicsEntityMessage<T extends PhysicsEntityMessage> imple
 
     @Override
     public IMessage onMessage(PhysicsEntityMessage message, MessageContext ctx) {
-        if(ctx.side.isClient()) {
+        if (ctx.side.isClient()) {
             clientSchedule(() -> processMessage(ctx.side, message, getClientPlayer()));
         } else {
             DynamXContext.getPhysicsWorld(ctx.getServerHandler().player.world).schedule(() -> processMessage(ctx.side, message, ctx.getServerHandler().player));
@@ -69,6 +69,10 @@ public abstract class PhysicsEntityMessage<T extends PhysicsEntityMessage> imple
     protected void processMessage(Side side, PhysicsEntityMessage<?> message, EntityPlayer player) {
         if (message.entityId == -1)
             throw new IllegalArgumentException("EntityId isn't valid, maybe you don't call fromBytes and toBytes " + message);
+        if (player == null || player.world == null) {
+            log.warn("Skipping receive PhysicsEntityMessage " + message + ": local player or world not yet loaded. Player: " + player);
+            return;
+        }
         Entity ent = player.world.getEntityByID(message.entityId);
         if (ent instanceof PhysicsEntity) {
             if (side.isClient()) {
@@ -83,6 +87,7 @@ public abstract class PhysicsEntityMessage<T extends PhysicsEntityMessage> imple
 
     @SideOnly(Side.CLIENT)
     protected abstract void processMessageClient(PhysicsEntityMessage<?> message, PhysicsEntity<?> entity, EntityPlayer player);
+
     protected abstract void processMessageServer(PhysicsEntityMessage<?> message, PhysicsEntity<?> entity, EntityPlayer player);
 
     @SideOnly(Side.CLIENT)
@@ -92,7 +97,7 @@ public abstract class PhysicsEntityMessage<T extends PhysicsEntityMessage> imple
 
     @SideOnly(Side.CLIENT)
     protected void clientSchedule(Runnable task) {
-        if(getClientPlayer() == null)
+        if (getClientPlayer() == null)
             return;
         IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(getClientPlayer().world);
         if (getPreferredNetwork() != EnumNetworkType.VANILLA_TCP && physicsWorld != null) { //If initialized, and not a "vanilla packet" (vanilla packet does not always concern physics, like seats)

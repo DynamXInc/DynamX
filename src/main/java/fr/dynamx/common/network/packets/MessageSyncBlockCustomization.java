@@ -6,7 +6,9 @@ import fr.dynamx.api.network.IDnxPacket;
 import fr.dynamx.common.blocks.TEDynamXBlock;
 import fr.dynamx.utils.DynamXUtils;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -47,16 +49,21 @@ public class MessageSyncBlockCustomization implements IDnxPacket, IMessageHandle
         ctx.getServerHandler().player.getServer().addScheduledTask(() -> {
             World world = ctx.getServerHandler().player.world;
             TEDynamXBlock te = (TEDynamXBlock) ctx.getServerHandler().player.world.getTileEntity(message.blockPos);
-            if (te != null) {
-                if (ctx.getServerHandler().player.canUseCommand(4, "dynamx block_customization")) {
-                    te.setRelativeTranslation(message.relativeTranslation);
-                    te.setRelativeScale(message.relativeScale);
-                    te.setRelativeRotation(message.relativeRotation);
-                    te.markDirty();
-                    te.markCollisionsDirty();
-                    world.markBlockRangeForRenderUpdate(message.blockPos, message.blockPos);
-                }
+            if (te == null) {
+                return;
             }
+            if (!ctx.getServerHandler().player.canUseCommand(4, "dynamx block_customization")) {
+                ctx.getServerHandler().player.sendMessage(new TextComponentString("You're not allowed to do this"));
+                return;
+            }
+            te.setRelativeTranslation(message.relativeTranslation);
+            te.setRelativeScale(message.relativeScale);
+            te.setRelativeRotation(message.relativeRotation);
+
+            te.markDirty();
+            te.markCollisionsDirty(true);
+            IBlockState state = world.getBlockState(message.blockPos);
+            world.notifyBlockUpdate(message.blockPos, state, state, 4);
         });
         return null;
     }

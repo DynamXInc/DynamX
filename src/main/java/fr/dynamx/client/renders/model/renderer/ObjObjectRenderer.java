@@ -1,5 +1,6 @@
 package fr.dynamx.client.renders.model.renderer;
 
+import com.modularmods.mcgltf.dynamx.MCglTF;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
 import fr.dynamx.client.renders.model.texture.MaterialTexture;
@@ -17,6 +18,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraftforge.client.MinecraftForgeClient;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL15;
 
 import javax.annotation.Nullable;
@@ -27,9 +29,16 @@ import java.util.Map;
 import static fr.dynamx.common.DynamXMain.log;
 
 public class ObjObjectRenderer {
+    public static final int COLOR_MAP_INDEX = GL13.GL_TEXTURE0;
+    public static final int NORMAL_MAP_INDEX = GL13.GL_TEXTURE2;
+    public static final int SPECULAR_MAP_INDEX = GL13.GL_TEXTURE3;
+
+    @Getter
     private final Map<Byte, VariantRenderData> modelRenderData = new HashMap<>();
+
     @Getter
     private final ObjObjectData objObjectData;
+
     @Getter
     @Setter
     private Vector4f objectColor = new Vector4f(1, 1, 1, 1);
@@ -83,8 +92,14 @@ public class ObjObjectRenderer {
 
     public void setTextureVariants(ObjModelRenderer model, IModelTextureVariantsSupplier.IModelTextureVariants variants) {
         for (TextureVariantData variant : variants.getTextureVariants().values()) {
+            // The variant may, or may not, be added as a separated Material/as a texture in the material
+            // Let's check that
+            // Base/default variant should always be added.
+            // 1. If the variant exists as a Material, add it.
             boolean usesVariant = variant.getId() == 0 || model.getMaterials().containsKey(variant.getName());
-            if (!usesVariant) { //search variant in used textures
+            if (!usesVariant) {
+                // 2. If a material has a texture with the same name as the variant
+                // This obj object is actually using this  variant
                 for (String materialName : objObjectData.getMaterialForEachVertex()) {
                     Material material = model.getMaterials().get(materialName);
                     if (material != null && material.diffuseTexture.containsKey(variant.getName())) {
@@ -93,44 +108,89 @@ public class ObjObjectRenderer {
                     }
                 }
             }
-            if (usesVariant)
+            // If the variant is used, let's add it and create a vao for it
+            if (usesVariant) {
                 modelRenderData.put(variant.getId(), new VariantRenderData(variants.getDefaultVariant(), variant));
+            }
         }
     }
 
-    public void render(ObjModelRenderer model, byte textureVariantID) {
+    public void render(ObjModelRenderer model, byte textureVariantID, boolean forceVanillaRender) {
         if (modelRenderData.isEmpty()) {
             log.error("Default texture variant not loaded for model " + model.getLocation() + ". Trying to upload the vaos now.");
             uploadVAO();
         }
-        if (modelRenderData.containsKey(textureVariantID))
-            renderVAO(model, modelRenderData.get(textureVariantID));
-        else if (modelRenderData.containsKey((byte) 0))
-            renderVAO(model, modelRenderData.get((byte) 0));
-        else
+
+        if (modelRenderData.containsKey(textureVariantID)) {
+            renderVAO(model, modelRenderData.get(textureVariantID), forceVanillaRender);
+        } else if (modelRenderData.containsKey((byte) 0)) {
+            renderVAO(model, modelRenderData.get((byte) 0), forceVanillaRender);
+        } else {
             throw new IllegalStateException("Default texture variant not loaded for model " + model.getLocation());
+        }
+
+        if (!forceVanillaRender) {
+            GlStateManager.setActiveTexture(NORMAL_MAP_INDEX);
+            GlStateManager.bindTexture(MCglTF.getInstance().getDefaultNormalMap());
+            GlStateManager.setActiveTexture(SPECULAR_MAP_INDEX);
+            GlStateManager.bindTexture(MCglTF.getInstance().getDefaultSpecularMap());
+            GlStateManager.setActiveTexture(COLOR_MAP_INDEX);
+            GlStateManager.bindTexture(MCglTF.getInstance().getDefaultColorMap());
+        }
     }
 
-    private Material bindMaterial(ObjModelRenderer model, String materialName, @Nullable String baseVariantName, @Nullable String variantName) {
-        if (variantName != null && materialName.equals(baseVariantName))
+    /**
+     * Binds the desired material
+     *
+     * @param model              The obj model containing this obj object, and the associated materials
+     * @param materialName       The material to bind
+     * @param baseVariantName    The base/default variant of the model
+     * @param variantName        The variant to bind. If the materialName is the same as the baseVariantName, the materialName will be replaced by the variantName (if a material with this name exists).
+     *                           It will also load the texture matching this variantName, if any (or load the default one).
+     * @param forceVanillaRender True will prevent from applying PBR/specular textures
+     * @return The bound material, or null if no matching material was found
+     */
+    private Material bindMaterial(ObjModelRenderer model, String materialName, @Nullable String baseVariantName, @Nullable String variantName, boolean forceVanillaRender) {
+        if (variantName != null && materialName.equals(baseVariantName)) {
             materialName = variantName;
+        }
+
         Material material = model.getMaterials().get(materialName);
-        if (material == null && baseVariantName != null)
+        if (material == null && baseVariantName != null) {
             material = model.getMaterials().get(baseVariantName);
-        if (!isMaterialValid(model, material))
+        }
+
+        if (!isMaterialValid(model, material)) {
             return null;
-        // For compatibility with sub-textures directly in materials
-        MaterialTexture materialMultipleTextures = material.diffuseTexture.containsKey(variantName) ? material.diffuseTexture.get(variantName) : material.diffuseTexture.get("default");
-        if (materialMultipleTextures != null)
-            bindTexture(materialMultipleTextures.getGlTextureId());
-        else
-            log.error("Failed to load Default texture of " + objObjectData.getName() + " in " + model.getLocation() + " in material " + material.getName());
+        }
+
+        MaterialTexture diffuseTexture = material.diffuseTexture.getOrDefault(variantName, material.diffuseTexture.get("default"));
+        bindTextureIfAny(diffuseTexture, COLOR_MAP_INDEX);
+
+        if (diffuseTexture == null) {
+            log.error("Failed to load texture of {} in {} in material {}", objObjectData.getName(), model.getLocation(), material.getName());
+        }
+
+        if (!forceVanillaRender) {
+            MaterialTexture normalTexture = material.normalTexture.getOrDefault(variantName, material.normalTexture.get("default"));
+            bindTextureIfAny(normalTexture, NORMAL_MAP_INDEX);
+
+            MaterialTexture specularTexture = material.specularTexture.getOrDefault(variantName, material.specularTexture.get("default"));
+            bindTextureIfAny(specularTexture, SPECULAR_MAP_INDEX);
+        }
+
         return material;
     }
 
-    int i = 0;
+    private void bindTextureIfAny(@Nullable MaterialTexture texture, int textureIndex) {
+        if (texture == null) {
+            return;
+        }
+        GlStateManager.setActiveTexture(textureIndex);
+        GlStateManager.bindTexture(texture.getGlTextureId());
+    }
 
-    private void renderVAO(ObjModelRenderer model, VariantRenderData renderData) {
+    private void renderVAO(ObjModelRenderer model, VariantRenderData renderData, boolean forceVanillaRender) {
         if (renderData.vaoId == -1)
             return;
         DynamXRenderUtils.bindVertexArray(renderData.vaoId);
@@ -139,7 +199,7 @@ public class ObjObjectRenderer {
         GlStateManager.glEnableClientState(GL11.GL_NORMAL_ARRAY);
 
         for (Map.Entry<String, Material.IndexPair> pair : getObjObjectData().getMaterials().entrySet()) {
-            Material material = bindMaterial(model, pair.getKey(), renderData.getBaseVariant(), renderData.getVariant());
+            Material material = bindMaterial(model, pair.getKey(), renderData.getBaseVariant(), renderData.getVariant(), forceVanillaRender);
             if (material == null) {
                 continue;
             }
@@ -173,10 +233,6 @@ public class ObjObjectRenderer {
         GlStateManager.glDisableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
         GlStateManager.glDisableClientState(GL11.GL_NORMAL_ARRAY);
         DynamXRenderUtils.bindVertexArray(0);
-    }
-
-    private void bindTexture(int id) {
-        GlStateManager.bindTexture(id);
     }
 
     private int setupIndicesBuffer(int[] indices) {

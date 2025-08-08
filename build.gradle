@@ -70,9 +70,9 @@ dependencies {
     implementation ("net.minecraftforge:mergetool:0.2.3.3") { force = true }
 
     implementation 'com.github.stephengold:Libbulletjme:' + libbulletjme_version
-    implementation "fr.aym.acsguis:ACsGuis:1.2.12"
-    implementation ":ModProtectionLib:1.4.0"
-    implementation('org.spongepowered:mixin:0.8.5') {
+    implementation "fr.aym.acsguis:ACsGuis:1.4.2-beta"
+    implementation ":ModProtectionLib:1.5.3"
+    implementation('org.spongepowered:mixin:0.8.3') {
         exclude module: 'guava'
         exclude module: 'commons-io'
         exclude module: 'gson'
@@ -80,7 +80,7 @@ dependencies {
     implementation 'org.joml:joml:1.10.5'
     compileOnly 'org.projectlombok:lombok:1.18.24'
 
-    shadow('org.spongepowered:mixin:0.8.5') {
+    shadow('org.spongepowered:mixin:0.8.3') {
         exclude module: 'guava'
         exclude module: 'commons-io'
         exclude module: 'gson'
@@ -88,16 +88,18 @@ dependencies {
     shadow 'com.github.stephengold:Libbulletjme:' + libbulletjme_version
     shadow 'org.joml:joml:1.10.5'
 
-    shadow fileTree(dir: 'libs', include: '*.jar')
+    //shadow fileTree(dir: 'libs', include: '*.jar')
+    //shadow ':ModProtectionLib:1.5.0'
+    shadow fileTree(dir: 'libs', include: 'ModProtectionLib-1.5.3.jar')
 
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
-    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
-    testAnnotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    annotationProcessor 'org.spongepowered:mixin:0.8.3:processor'
+    testAnnotationProcessor 'org.spongepowered:mixin:0.8.3:processor'
 }
 
 mixin {
-    add sourceSets.main, "refmap.dynamxmod.json"
     config 'mixins.dynamxmod.json'
+    add sourceSets.main, "refmap.dynamxmod.json"
 }
 
 jar {
@@ -117,6 +119,7 @@ shadowJar {
     duplicatesStrategy 'exclude'
     configurations = [project.configurations.shadow]
     classifier = 'all'
+    exclude "module-info.class"
 }
 
 reobf {

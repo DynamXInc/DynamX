@@ -1,5 +1,6 @@
 package fr.dynamx.common.slopes;
 
+import fr.aym.acslib.utils.DeserializedData;
 import fr.aym.acslib.utils.nbtserializer.ISerializable;
 import fr.aym.acslib.utils.nbtserializer.NBTSerializer;
 import net.minecraft.block.Block;
@@ -25,7 +26,7 @@ public class SlopeBuildingConfig implements ISerializable {
     public SlopeBuildingConfig(NBTTagCompound from) {
         if (!from.isEmpty()) {
             try {
-                NBTSerializer.unserialize(from, this);
+                NBTSerializer.deserialize(from, this);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -88,16 +89,16 @@ public class SlopeBuildingConfig implements ISerializable {
     }
 
     @Override
-    public void populateWithSavedObjects(Object[] objects) {
+    public void populateWithSavedObjects(DeserializedData objects) {
+        version = objects.next();
+        facing = EnumFacing.byIndex(objects.next());
+        diagDir = objects.next();
+        enableSlabs = NBTSerializer.convert(objects.next());
         blackList.clear();
-        List<String> auBlack = (List<String>) objects[4];
+        List<String> auBlack = objects.next();
         for (String loc : auBlack) {
             blackList.add(Block.REGISTRY.getObject(new ResourceLocation(loc)));
         }
-        version = (int) objects[0];
-        facing = EnumFacing.byIndex((Integer) objects[1]);
-        diagDir = (int) objects[2];
-        enableSlabs = NBTSerializer.convert((Byte) objects[3]);
     }
 
     public boolean isValidBlock(IBlockState block) {

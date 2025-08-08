@@ -22,7 +22,6 @@ public class DynamXGuiHandler implements IGuiHandler {
         {
             PackPhysicsEntity<?, ?> e = (PackPhysicsEntity<?, ?>) world.getEntityByID(x);
             IInventory inventory = e != null && e.hasModuleOfType(StorageModule.class) ? e.getModuleByType(StorageModule.class).getInventory((byte) y) : null;
-            System.out.println("Recuit simumlé " + e +" "+inventory);
             return inventory == null ? null : new ContainerChest(player.inventory, inventory, player);
         } else if(ID >= 2) //block storage
         {
@@ -30,7 +29,7 @@ public class DynamXGuiHandler implements IGuiHandler {
             if(!(te instanceof TEDynamXBlock))
                 return null;
             TEDynamXBlock block = (TEDynamXBlock) te;
-            IInventory inventory = block.getStorageModule() != null ? block.getStorageModule().getInventory((byte) (ID-2)) : null;
+            IInventory inventory = block.hasModuleOfType(StorageModule.class) ? block.getModuleByType(StorageModule.class).getInventory((byte) (ID-2)) : null;
             return inventory == null ? null : new ContainerChest(player.inventory, inventory, player);
         }
         return null;
@@ -50,7 +49,7 @@ public class DynamXGuiHandler implements IGuiHandler {
             if(!(te instanceof TEDynamXBlock))
                 return null;
             TEDynamXBlock block = (TEDynamXBlock) te;
-            IInventory inventory = block.getStorageModule() != null ? block.getStorageModule().getInventory((byte) (ID-2)) : null;
+            IInventory inventory = block.hasModuleOfType(StorageModule.class) ? block.getModuleByType(StorageModule.class).getInventory((byte) (ID-2)) : null;
             return inventory == null ? null : new GuiChest(player.inventory, inventory);
         }
         return null;

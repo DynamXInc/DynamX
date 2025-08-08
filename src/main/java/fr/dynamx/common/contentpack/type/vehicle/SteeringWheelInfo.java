@@ -15,14 +15,14 @@ import fr.dynamx.client.renders.scene.IRenderContext;
 import fr.dynamx.client.renders.scene.node.SceneNode;
 import fr.dynamx.client.renders.scene.node.SimpleNode;
 import fr.dynamx.common.entities.modules.WheelsModule;
-import fr.dynamx.utils.client.ClientDynamXUtils;
+import fr.dynamx.common.entities.modules.engines.BoatPropellerModule;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.maths.DynamXMath;
-import fr.dynamx.utils.optimization.GlQuaternionPool;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
+import org.joml.Matrix4f;
 
 import java.util.List;
 
@@ -74,32 +74,37 @@ public class SteeringWheelInfo extends BasePart<ModularVehicleInfo> implements I
 
     class SteeringWheelNode<A extends ModularVehicleInfo> extends SimpleNode<BaseRenderContext.EntityRenderContext, A> {
         public SteeringWheelNode(SteeringWheelInfo part, Vector3f scale, List<SceneNode<BaseRenderContext.EntityRenderContext, A>> linkedChilds) {
-            super(part.getPosition(), GlQuaternionPool.newGlQuaternion(part.getSteeringWheelBaseRotation()), SteeringWheelInfo.this.isAutomaticPosition, scale, linkedChilds);
+            super(part.getPosition(), part.getSteeringWheelBaseRotation(), SteeringWheelInfo.this.isAutomaticPosition, scale, linkedChilds);
         }
 
         @Override
-        public void render(BaseRenderContext.EntityRenderContext context, A packInfo) {
+        public void render(BaseRenderContext.EntityRenderContext context, A packInfo, Matrix4f parentTransform) {
             DxModelRenderer vehicleModel = context.getModel();
             /* Rendering the steering wheel */
             //Translate to the steering wheel rotation point
-            transformToRotationPoint();
+            transformToRotationPoint(parentTransform);
             //Rotate the steering wheel
-            int directingWheel = VehicleEntityProperties.getPropertyIndex(packInfo.getDirectingWheel(), VehicleEntityProperties.EnumVisualProperties.STEER_ANGLE);
             if (context.getEntity() != null && context.getEntity().hasModuleOfType(WheelsModule.class)) {
+                int directingWheel = VehicleEntityProperties.getPropertyIndex(packInfo.getDirectingWheel(), VehicleEntityProperties.EnumVisualProperties.STEER_ANGLE);
                 WheelsModule m = context.getEntity().getModuleByType(WheelsModule.class);
                 if (m.visualProperties.length > directingWheel) {
                     float angle = -(m.prevVisualProperties[directingWheel] + (m.visualProperties[directingWheel] - m.prevVisualProperties[directingWheel]) * context.getPartialTicks()) * DynamXMath.TO_RADIAN;
                     transform.rotate(angle, 0F, 0F, 1F);
                 }
+            } else if (context.getEntity() != null && context.getEntity().hasModuleOfType(BoatPropellerModule.class)) {
+                BoatPropellerModule module = context.getEntity().getModuleByType(BoatPropellerModule.class);
+                float angle = module.getPrevPhysicsSteeringForce() + (module.getPhysicsSteeringForce() - module.getPrevPhysicsSteeringForce()) * context.getPartialTicks();
+                angle = angle * 6;
+                transform.rotate(angle, 0F, 0F, 1F);
             }
+
             GlStateManager.pushMatrix();
-            GlStateManager.multMatrix(ClientDynamXUtils.getMatrixBuffer(transform));
             //Translate to the origin of the model
-            transformToPartPos();
+            glTransformToPartPos();
             //Render it
             vehicleModel.renderGroup(getObjectName(), context.getTextureId(), context.isUseVanillaRender());
             GlStateManager.popMatrix();
-            renderChildren(context, packInfo);
+            renderChildren(context, packInfo, transform);
         }
 
         @Override

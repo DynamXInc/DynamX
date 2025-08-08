@@ -2,9 +2,12 @@ package fr.dynamx.common.entities;
 
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import fr.dynamx.api.contentpack.object.IPartContainer;
+import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
 import fr.dynamx.common.blocks.TEDynamXBlock;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -29,4 +32,11 @@ public interface IDynamXObject {
      * @return The offset of the collision boxes
      */
     Vector3f getCollisionOffset();
+
+    /**
+     * @return The pack info of this object. Can be null for non-pack objects (ragdolls for example)
+     * @param <A> The type of the pack info
+     */
+    @Nullable
+    <A extends IPartContainer<?>> A getPackInfo();
 }

@@ -6,13 +6,15 @@ import fr.dynamx.common.contentpack.parts.PartBlockSeat;
 import fr.dynamx.utils.EnumSeatPlayerPosition;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.Vector3fPool;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 
-public class SeatEntity extends Entity {
+public class SeatEntity extends Entity implements IEntityAdditionalSpawnData {
     protected TEDynamXBlock block;
     protected PartBlockSeat<?> mySeat;
     protected byte seatID;
@@ -35,7 +37,9 @@ public class SeatEntity extends Entity {
 
     @Override
     public void updatePassenger(Entity passenger) {
-        if (block == null || mySeat == null) return;
+        if (block == null || mySeat == null) {
+            return;
+        }
         Vector3fPool.openPool();
         Vector3f posVec = DynamXGeometry.rotateVectorByQuaternion(mySeat.getPosition(), block.getCollidableRotation());
         posVec.addLocal(block.getRelativeTranslation());
@@ -48,21 +52,23 @@ public class SeatEntity extends Entity {
      */
     @Override
     public void applyOrientationToEntity(Entity passenger) {
-        if (mySeat != null && mySeat.shouldLimitFieldOfView()) {
-            float f = MathHelper.wrapDegrees(passenger.rotationYaw);
-            float f1 = MathHelper.clamp(f, mySeat.getMaxYaw(), mySeat.getMinYaw());
-            passenger.rotationYaw = f1;
-            f = MathHelper.wrapDegrees(passenger.prevRotationYaw);
-            f1 = MathHelper.clamp(f, mySeat.getMaxYaw(), mySeat.getMinYaw());
-            passenger.prevRotationYaw = f1;
-
-            float f2 = MathHelper.wrapDegrees(passenger.rotationPitch);
-            float f3 = MathHelper.clamp(f2, mySeat.getMaxPitch(), mySeat.getMinPitch());
-            passenger.rotationPitch = f3;
-            f2 = MathHelper.wrapDegrees(passenger.prevRotationPitch);
-            f3 = MathHelper.clamp(f2, mySeat.getMaxPitch(), mySeat.getMinPitch());
-            passenger.prevRotationPitch = f3;
+        if (mySeat == null || !mySeat.shouldLimitFieldOfView()) {
+            return;
         }
+        float blockYaw = block.getPackInfo() == null ? 0 : (block.getPackInfo().getRotation().y - block.getRelativeRotation().y + block.getRotation() * 22.5f);
+        passenger.setRenderYawOffset(blockYaw);
+        float f = MathHelper.wrapDegrees(passenger.rotationYaw - blockYaw);
+        float f1 = MathHelper.clamp(f, mySeat.getMinYaw(), mySeat.getMaxYaw());
+        passenger.prevRotationYaw += f1 - f;
+        passenger.rotationYaw += f1 - f;
+        passenger.setRotationYawHead(passenger.rotationYaw);
+
+        float f2 = MathHelper.wrapDegrees(passenger.rotationPitch);
+        float f3 = MathHelper.clamp(f2, mySeat.getMinPitch(), mySeat.getMaxPitch());
+        passenger.rotationPitch = f3;
+        f2 = MathHelper.wrapDegrees(passenger.prevRotationPitch);
+        f3 = MathHelper.clamp(f2, mySeat.getMinPitch(), mySeat.getMaxPitch());
+        passenger.prevRotationPitch = f3;
     }
 
     @Override
@@ -99,5 +105,15 @@ public class SeatEntity extends Entity {
     @Override
     protected void writeEntityToNBT(NBTTagCompound nbtTagCompound) {
         nbtTagCompound.setByte("SeatID", seatID);
+    }
+
+    @Override
+    public void writeSpawnData(ByteBuf buffer) {
+        buffer.writeByte(seatID);
+    }
+
+    @Override
+    public void readSpawnData(ByteBuf additionalData) {
+        seatID = additionalData.readByte();
     }
 }

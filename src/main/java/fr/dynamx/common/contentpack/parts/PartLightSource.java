@@ -22,33 +22,37 @@ import fr.dynamx.client.renders.scene.SceneBuilder;
 import fr.dynamx.client.renders.scene.node.SceneNode;
 import fr.dynamx.client.renders.scene.node.SimpleNode;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.blocks.TEDynamXBlock;
+import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
 import fr.dynamx.common.contentpack.type.objects.AbstractItemObject;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.AbstractLightsModule;
 import fr.dynamx.common.entities.vehicles.TrailerEntity;
 import fr.dynamx.common.objloader.data.DxModelData;
 import fr.dynamx.utils.DynamXUtils;
-import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.errors.DynamXErrorManager;
-import fr.dynamx.utils.optimization.GlQuaternionPool;
 import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import org.joml.Matrix4f;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Contains multiple {@link LightObject}
  */
+@Setter
 @Getter
 @RegisteredSubInfoType(name = "MultiLight", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER, SubInfoTypeRegistries.BLOCKS, SubInfoTypeRegistries.PROPS}, strictName = false)
-public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISubInfoTypeOwner<PartLightSource>, IDrawablePart<IModelPackObject>, IModelTextureVariantsSupplier.IModelTextureVariants {
+public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISubInfoTypeOwner<PartLightSource>, IDrawablePart<IModelPackObject> {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.HELICOPTER, SubInfoTypeRegistries.BLOCKS, SubInfoTypeRegistries.PROPS})
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("PartName".equals(key))
@@ -62,25 +66,41 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
 
     @PackFileProperty(configNames = "ObjectName")
     protected String objectName;
-    @PackFileProperty(configNames = "BaseMaterial", required = false)
-    protected String baseMaterial = "default";
+
+    /**
+     * The base, off, material of the light <br>
+     * By default, it will use the primary material given in the obj model <br>
+     * Overridden by MaterialVariants BaseMaterial, <strong>if defined</strong>
+     */
+    @PackFileProperty(configNames = "BaseMaterial", required = false, defaultValue = "MaterialVariantsInfo value, or primary material configured in the model")
+    protected String baseMaterial;
+
+    /**
+     * Maps the metadata to the texture data <br>
+     * Optional on light sources, but should be used to have different "off" state textures, according to the vehicle/block/prop variants
+     */
+    private MaterialVariantsInfo<PartLightSource> variants;
+
     /**
      * The position of this part, relative to the 3D model. <br>
      * If null, it will be read from the 3D model (if possible, see readPositionFromModel method).
      */
     @PackFileProperty(configNames = "Position", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED_Y, description = "common.position", required = false, defaultValue = "From model")
     protected Vector3f position;
+
     /**
      * The rotation of this part, relative to the 3D model. <br>
      * If null, it will be read from the 3D model (if possible, see readPositionFromModel method).
      */
     @PackFileProperty(configNames = "Rotation", required = false, defaultValue = "From model")
     protected Quaternion rotation;
+
     /**
      * Indicates if the position and rotation were read from the 3D model, or set by the user. <br>
      * Changes the behavior of the rendering.
      */
     protected boolean isAutomaticPosition;
+
     @PackFileProperty(configNames = "DependsOnNode", required = false, description = "PartLightSource.DependsOnNode")
     protected String nodeDependingOnName;
 
@@ -151,6 +171,11 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
     }
 
     @Override
+    public void addBlockModules(TEDynamXBlock blockEntity, ModuleListBuilder modules) {
+        addModules(null, modules);
+    }
+
+    @Override
     public String getName() {
         return "PartLightSource with name " + getPartName();
     }
@@ -174,47 +199,63 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
         return new PartLightNode<>(this, modelScale, (List) childGraph);
     }
 
-    private final Map<Byte, TextureVariantData> variantsMap = new HashMap<>();
-
-    @Override
-    public TextureVariantData getDefaultVariant() {
-        return variantsMap.get((byte) 0);
-    }
-
-    @Override
-    public TextureVariantData getVariant(byte variantId) {
-        return variantsMap.getOrDefault(variantId, getDefaultVariant());
-    }
-
-    @Override
-    public Map<Byte, TextureVariantData> getTextureVariants() {
-        return variantsMap;
-    }
-
     /**
      * Post loads this light (computes texture variants)
      */
-    public void postLoad() {
-        Map<String, TextureVariantData> nameToVariant = new HashMap<>();
-        byte nextTextureId = 0;
-        TextureVariantData data = new TextureVariantData(baseMaterial, nextTextureId);
-        variantsMap.put(data.getId(), data);
-        nameToVariant.put(baseMaterial, data);
+    public void postLoad(boolean hotReload) {
+        configureLightTextureVariants(hotReload);
+    }
 
+    /**
+     * Computes texture variants of this lights <br>
+     * It adds the variants configured on the light, and the owner's variants, if any
+     */
+    public void configureLightTextureVariants(boolean hotReload) {
+        TextureVariantData textureVariant;
+        Map<String, TextureVariantData> nameToVariant = new HashMap<>();
+        // Create material variants if not set by the user
+        if (variants == null) {
+            variants = new MaterialVariantsInfo<>(this);
+            textureVariant = new TextureVariantData(baseMaterial != null ? baseMaterial : "default", (byte) 0);
+            variants.addVariant(textureVariant, hotReload);
+        } else if (baseMaterial != null && variants.getBaseMaterial().equalsIgnoreCase("default")) {
+            // Add base light state, if customized here but not in MaterialVariantsInfo yet
+            variants.setBaseMaterial(baseMaterial);
+            textureVariant = new TextureVariantData(baseMaterial, (byte) 0);
+            variants.addVariant(textureVariant, hotReload);
+        }
+        // Add known variants to the nameToVariant map, and compute the last used variantId
+        // The last used variant id is either the max variant id of the light owner, or the max id of the variants configured here
+        AtomicReference<Byte> nextTextureId = new AtomicReference<>(owner instanceof IModelTextureVariantsSupplier ? ((IModelTextureVariantsSupplier) owner).getMaxVariantId() : 0);
+        variants.getTextureVariants().forEach((id, variant) -> {
+            if (nameToVariant.containsKey(variant.getName())) {
+                return;
+            }
+            nameToVariant.put(variant.getName(), variant);
+            if (variant.getId() >= nextTextureId.get()) {
+                nextTextureId.set((byte) (variant.getId() + 1));
+            }
+        });
+
+        // Add "on" light variants
         List<LightObject> sources = getSources();
         for (LightObject source : sources) {
-            if (source.getTextures() != null) {
-                source.getBlinkTextures().clear();
-                for (int j = 0; j < source.getTextures().length; j++) {
-                    String name = source.getTextures()[j];
-                    if (nameToVariant.containsKey(name)) {
-                        source.getBlinkTextures().add(nameToVariant.get(name));
-                    } else {
-                        data = new TextureVariantData(name, ++nextTextureId);
-                        source.getBlinkTextures().add(data);
-                        variantsMap.put(data.getId(), data);
-                        nameToVariant.put(name, data);
-                    }
+            if (source.getTextures() == null) {
+                continue;
+            }
+            source.getBlinkTextures().clear();
+            // For each configured light textures
+            for (int j = 0; j < source.getTextures().length; j++) {
+                String name = source.getTextures()[j];
+                if (nameToVariant.containsKey(name)) {
+                    // Texture shared with other sources
+                    source.getBlinkTextures().add(nameToVariant.get(name));
+                } else {
+                    // Add a new texture to the light
+                    textureVariant = new TextureVariantData(name, nextTextureId.getAndSet((byte) (nextTextureId.get() + 1)));
+                    source.getBlinkTextures().add(textureVariant);
+                    variants.addVariant(textureVariant, hotReload);
+                    nameToVariant.put(name, textureVariant);
                 }
             }
         }
@@ -226,6 +267,10 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
 
     @Override
     public void addSubProperty(ISubInfoType<PartLightSource> property) {
+        if (property instanceof MaterialVariantsInfo) {
+            variants = (MaterialVariantsInfo<PartLightSource>) property;
+            return;
+        }
         throw new IllegalStateException("Cannot add sub property to a light");
     }
 
@@ -236,17 +281,17 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
 
     class PartLightNode<A extends IModelPackObject> extends SimpleNode<IRenderContext, A> {
         public PartLightNode(PartLightSource lightSource, Vector3f scale, List<SceneNode<IRenderContext, A>> linkedChilds) {
-            super(lightSource.getPosition(), lightSource.getRotation() != null ? GlQuaternionPool.newGlQuaternion(lightSource.getRotation()) : null, PartLightSource.this.isAutomaticPosition, scale, linkedChilds);
+            super(lightSource.getPosition(), lightSource.getRotation() != null ? lightSource.getRotation() : null, PartLightSource.this.isAutomaticPosition, scale, linkedChilds);
         }
 
         @Override
         @SideOnly(Side.CLIENT)
-        public void render(IRenderContext context, A packInfo) {
+        public void render(IRenderContext context, A packInfo, Matrix4f parentTransform) {
             /* Rendering light sources */
             boolean isEntity = context instanceof BaseRenderContext.EntityRenderContext && ((BaseRenderContext.EntityRenderContext) context).getEntity() != null;
             AbstractLightsModule lights = isEntity ? ((BaseRenderContext.EntityRenderContext) context).getEntity().getModuleByType(AbstractLightsModule.class) :
-                    context instanceof BaseRenderContext.BlockRenderContext && ((BaseRenderContext.BlockRenderContext) context).getTileEntity() != null ? ((BaseRenderContext.BlockRenderContext) context).getTileEntity().getLightsModule() : null;
-            transformToRotationPoint();
+                    context instanceof BaseRenderContext.BlockRenderContext && ((BaseRenderContext.BlockRenderContext) context).getTileEntity() != null ? ((BaseRenderContext.BlockRenderContext) context).getTileEntity().getModuleByType(AbstractLightsModule.class) : null;
+            transformToRotationPoint(parentTransform);
             /* Rendering light source */
             LightObject onLightObject = null;
             if (lights != null) {
@@ -277,11 +322,19 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
                     }
                 }
             }
-            //for testing only isOn = onLightObject != null;
-            byte texId = 0;
+            // Compute the texture id:
+            byte texId;
             if (isOn && !onLightObject.getBlinkTextures().isEmpty()) {
+                // If on, use the on texture at this step
                 activeStep = activeStep % onLightObject.getBlinkTextures().size();
                 texId = onLightObject.getBlinkTextures().get(activeStep).getId();
+            } else {
+                // If off, get the current object/owner variant, and check that it exists for the light. Else, use the default variant.
+                // This assumes "on" variants have variant ids strictly bigger than variants of the object/owner.
+                texId = context.getTextureId();
+                if (!getVariants().hasVariant(texId)) {
+                    texId = 0;
+                }
             }
             //Set luminescent
             if (isOn) {
@@ -297,9 +350,9 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
                 step = step * (FastMath.PI * 2);
                 transform.rotate(step, 0, 1, 0);
             }
+
             GlStateManager.pushMatrix();
-            GlStateManager.multMatrix(ClientDynamXUtils.getMatrixBuffer(transform));
-            transformToPartPos();
+            glTransformToPartPos();
             context.getModel().renderGroup(getObjectName(), texId, context.isUseVanillaRender());
             if (isEntity && isOn) {
                 int i = ((BaseRenderContext.EntityRenderContext) context).getEntity().getBrightnessForRender();
@@ -315,7 +368,7 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
                 GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             }
             GlStateManager.popMatrix();
-            renderChildren(context, packInfo);
+            renderChildren(context, packInfo, transform);
         }
 
         @Override

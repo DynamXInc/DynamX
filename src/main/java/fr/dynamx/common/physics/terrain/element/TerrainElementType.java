@@ -18,5 +18,9 @@ public enum TerrainElementType {
     /**
      * Manually added terrain (see {@link fr.dynamx.common.physics.terrain.element.CustomSlopeTerrainElement})
      */
-    PERSISTENT_ELEMENTS
+    PERSISTENT_ELEMENTS,
+    /**
+     * Reload all types from start when an incorrect {@link fr.dynamx.api.physics.terrain.ITerrainElement} was found
+     */
+    RELOAD_ALL
 }

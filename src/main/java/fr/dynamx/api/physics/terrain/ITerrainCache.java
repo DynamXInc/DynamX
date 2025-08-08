@@ -18,20 +18,24 @@ import java.util.concurrent.CompletableFuture;
  */
 public interface ITerrainCache {
     /**
-     * Marks the chunk's data to be removed from this cache
+     * Marks the chunk's data to be removed from this cache <br>
+     * This will NOT invalidate current loading/saving processes
      *
+     * @param pos         The chunk collisions pos
      * @param changed     True if the data has changed and should be deleted, false if we just don't need the data to be loaded in the cache anymore
      * @param syncChanges If chunk should be invalidated for clients
      */
     void invalidate(VerticalChunkPos pos, boolean changed, boolean syncChanges);
 
     /**
-     * Marks the chunk's data to be removed from this cache
+     * Marks the chunk's data to be removed from this cache <br>
+     * This WILL invalidate current loading/saving processes
      *
+     * @param ticket      The chunk collisions loading ticket. It's status index is incremented to block all previous loading/saving attempts.
      * @param changed     True if the data has changed and should be deleted, false if we just don't need the data to be loaded in the cache anymore
      * @param syncChanges If chunk should be invalidated for clients
      */
-    void invalidate(ChunkLoadingTicket pos, boolean changed, boolean syncChanges);
+    void invalidate(ChunkLoadingTicket ticket, boolean changed, boolean syncChanges);
 
     /**
      * Clears all cached data, called on world unload

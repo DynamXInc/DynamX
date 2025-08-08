@@ -77,6 +77,7 @@ dynamx.error.syntax_error=Syntax error
 dynamx.error.deprecated_prop=Deprecated properties (that will be removed in future)
 dynamx.error.deprecated_prop_format=props_ files are deprecated
 dynamx.error.deprecated_light_format=Legacy Light parts are deprecated when using multiple lights on one part. It should now be declared in a 'MultiLight' sub property.
+dynamx.error.duplicated_multi_light=You use multiple 'MultiLight' properties for the same object of the 3D model. You must merge them.
 dynamx.error.missing_prop=Unknown pack file properties
 dynamx.error.unknown_sub_info=Unknown sub properties
 dynamx.error.deprecated_seat_config=Use the convention "Seat_Name" (instead of "NameSeat") to name your seats. In names:
@@ -131,3 +132,7 @@ wrench.mode.change_skins=§9Change vehicle skin
 wrench.mode.entity_seat=§dPut entity in seat
 wrench.mode.none=§cWrench disabled
 wrench.mode.launch_entities=§6Launch props
+
+dynamx.item.variant=Variant: %s
+dynamx.item.description=Description: %s
+dynamx.item.pack=Pack: %s

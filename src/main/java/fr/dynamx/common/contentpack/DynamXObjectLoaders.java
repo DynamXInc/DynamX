@@ -16,6 +16,7 @@ import fr.dynamx.common.items.vehicle.ItemHelicopter;
 import fr.dynamx.common.items.vehicle.ItemTrailer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -38,11 +39,11 @@ public class DynamXObjectLoaders {
     public static PropsLoader<PropObject<?>> PROPS = new PropsLoader<>();
     public static InfoLoader<PartWheelInfo> WHEELS = new InfoLoader<>("wheel", PartWheelInfo::new, new SubInfoTypesRegistry<>());
     public static LateInfoLoader<BaseEngineInfo> ENGINES = new LateInfoLoader<>("engine", ((pack, name, clazz) -> {
-        if(Objects.equals(clazz, CarEngineInfo.class.getName()))
+        if(Objects.equals(clazz, CarEngineInfo.class.toString()))
             return new CarEngineInfo(pack, name);
-        else if(Objects.equals(clazz, BaseEngineInfo.class.getName()))
+        else if(Objects.equals(clazz, BaseEngineInfo.class.toString()))
             return new BaseEngineInfo(pack, name);
-        else if(Objects.equals(clazz, BoatEngineInfo.class.getName()))
+        else if(Objects.equals(clazz, BoatEngineInfo.class.toString()))
             return new BoatEngineInfo(pack, name);
         else
             throw new IllegalArgumentException("Unknown engine class: " + clazz);
@@ -58,6 +59,6 @@ public class DynamXObjectLoaders {
     }
 
     public static List<InfoLoader<?>> getInfoLoaders() {
-        return INFO_LISTS.stream().filter(l -> l instanceof InfoLoader).map(l -> (InfoLoader<?>) l).collect(Collectors.toList());
+        return Collections.unmodifiableList(INFO_LISTS.stream().filter(l -> l instanceof InfoLoader).map(l -> (InfoLoader<?>) l).collect(Collectors.toList()));
     }
 }

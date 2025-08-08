@@ -4,6 +4,7 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.audio.IDynamXSound;
 import fr.hermes.forge1122.dynamx.DynamXConfig;
 import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.optimization.SubClassPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SoundHandler;
@@ -99,7 +100,7 @@ public class DynamXSoundHandler {
     public void tick() {
         if (ready()) {
             //Update all sounds
-            Vector3fPool.openPool();
+            Vector3fPool.openPool(SubClassPool.DX_SOUND_HANDLER);
             for (IDynamXSound sound : playingSounds) {
                 sound.update(this);
             }

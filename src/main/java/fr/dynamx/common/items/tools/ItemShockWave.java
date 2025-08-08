@@ -2,7 +2,8 @@ package fr.dynamx.common.items.tools;
 
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.items.DynamXItemRegistry;
-import fr.dynamx.server.command.DynamXCommands;
+import fr.dynamx.server.command.CmdShockWave;
+import fr.dynamx.server.command.DynamXServerCommands;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.RegistryNameSetter;
 import fr.dynamx.utils.optimization.Vector3fPool;
@@ -29,7 +30,7 @@ public class ItemShockWave extends Item {
     @Override
     public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
         List<PhysicsEntity> entities = worldIn.getEntitiesWithinAABB(PhysicsEntity.class, playerIn.getEntityBoundingBox().grow(20));
-        entities.forEach(physicsEntity -> DynamXPhysicsHelper.createExplosion(physicsEntity, Vector3fPool.get((float) playerIn.posX, (float) playerIn.posY, (float) playerIn.posZ), DynamXCommands.explosionForce));
+        entities.forEach(physicsEntity -> DynamXPhysicsHelper.createExplosion(physicsEntity, Vector3fPool.get((float) playerIn.posX, (float) playerIn.posY, (float) playerIn.posZ), CmdShockWave.explosionForce));
         return new ActionResult<ItemStack>(EnumActionResult.PASS, playerIn.getHeldItem(handIn));
     }
 }

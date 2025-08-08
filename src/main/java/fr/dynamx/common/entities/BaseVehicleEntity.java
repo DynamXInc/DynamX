@@ -61,27 +61,6 @@ public abstract class BaseVehicleEntity<T extends BaseVehiclePhysicsHandler<?>> 
     }
 
     @Override
-    public void onUpdate() {
-        Profiler.get().start(Profiler.Profiles.TICK_ENTITIES);
-        Vector3fPool.openPool();
-        super.onUpdate();
-        Vector3fPool.closePool();
-        Profiler.get().end(Profiler.Profiles.TICK_ENTITIES);
-    }
-
-    @Override
-    public void setDead() {
-        super.setDead();
-        moduleList.forEach(IPhysicsModule::onSetDead);
-    }
-
-    @Override
-    public void onRemovedFromWorld() {
-        super.onRemovedFromWorld();
-        moduleList.forEach(IPhysicsModule::onRemovedFromWorld);
-    }
-
-    @Override
     public String getName() {
         return "DynamXVehicle:" + getInfoName() + ":" + getEntityId();
     }

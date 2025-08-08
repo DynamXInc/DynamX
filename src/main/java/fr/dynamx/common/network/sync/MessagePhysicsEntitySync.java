@@ -2,10 +2,12 @@ package fr.dynamx.common.network.sync;
 
 import fr.dynamx.api.network.EnumNetworkType;
 import fr.dynamx.api.network.sync.EntityVariable;
+import fr.dynamx.api.network.sync.EntityVariableSerializer;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariableRegistry;
-import fr.dynamx.common.network.sync.variables.SynchronizedEntityVariableSnapshot;
+import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.network.packets.PhysicsEntityMessage;
+import fr.dynamx.common.network.sync.variables.SynchronizedEntityVariableSnapshot;
 import fr.dynamx.utils.optimization.HashMapPool;
 import fr.dynamx.utils.optimization.PooledHashMap;
 import io.netty.buffer.ByteBuf;
@@ -15,7 +17,9 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * BulletEntity sync packet
@@ -27,7 +31,7 @@ public class MessagePhysicsEntitySync<T extends PhysicsEntity<?>> extends Physic
     //@Getter
     private Map<Integer, EntityVariable<?>> varsToSend;
     @Getter
-    private Map<Integer, SynchronizedEntityVariableSnapshot<?>> varsToRead;
+    private PooledHashMap<Integer, SynchronizedEntityVariableSnapshot<?>> varsToRead;
     /**
      * The "date" of the data contained in this packet
      */
@@ -47,13 +51,13 @@ public class MessagePhysicsEntitySync<T extends PhysicsEntity<?>> extends Physic
         this.varsToSend = varsToSync;
         this.simulationTimeClient = simulationTimeClient;
         this.lightData = lightData;
-       // System.out.println("SEND "+entity.ticksExisted+" "+entityId);
-       // System.out.println("Send "+simulationTimeClient);
+        // System.out.println("SEND "+entity.ticksExisted+" "+entityId);
+        // System.out.println("Send "+simulationTimeClient);
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
-      //  System.out.println("Sending "+simulationTimeClient);
+        //  System.out.println("Sending "+simulationTimeClient);
         int index = buf.writerIndex();
         super.toBytes(buf);
         buf.writeInt(simulationTimeClient);
@@ -105,9 +109,13 @@ public class MessagePhysicsEntitySync<T extends PhysicsEntity<?>> extends Physic
             //if(log[0])
             //  System.out.println("Read var at "+j[0]+" "+entityId);
             SynchronizedEntityVariableSnapshot<?> v = null;
+            int id = -1;
             try {
-                int id = buf.readInt();
-                v = new SynchronizedEntityVariableSnapshot<>(SynchronizedEntityVariableRegistry.getSerializerMap().get(id), null);
+                id = buf.readInt();
+                EntityVariableSerializer<?> serializer = SynchronizedEntityVariableRegistry.getSerializerMap().get(id);
+                if (serializer == null)
+                    throw new IllegalArgumentException("Serializer not found for id " + id + " in " + SynchronizedEntityVariableRegistry.getSerializerMap() + ". Variable is " + SynchronizedEntityVariableRegistry.getSyncVarRegistry().inverse().get(id));
+                v = new SynchronizedEntityVariableSnapshot<>(serializer, null);
                 if (log[0])
                     System.out.println("Read var at " + j[0] + " " + entityId + " " + v);
                 v.read(buf);
@@ -121,7 +129,12 @@ public class MessagePhysicsEntitySync<T extends PhysicsEntity<?>> extends Physic
                 }
                 j[0]++;
             } catch (Exception e) {
-                throw new RuntimeException("Error reading sync packet for " + entityId + " has read " + varsToRead + " reading " + j[0] + " out of " + size + ". Var is " + v, e);
+                DynamXMain.log.error("[PRE-ERROR-DEBUG] Synchronized variable registry is " + SynchronizedEntityVariableRegistry.getSyncVarRegistry() + " and serializer map is " + SynchronizedEntityVariableRegistry.getSerializerMap());
+                final List<String> readVars = varsToRead.entrySet().stream().map(entry ->
+                        SynchronizedEntityVariableRegistry.getSyncVarRegistry().inverse().get(entry.getKey()) + " (id: " + entry.getKey() + ") =" + entry.getValue()
+                ).collect(Collectors.toList());
+                throw new RuntimeException("Error reading sync packet for " + entityId + " has read " + readVars + " reading " + j[0] + " out of " + size
+                        + ". Var snapshot is " + v + ". Reading variable name is " + SynchronizedEntityVariableRegistry.getSyncVarRegistry().inverse().get(id) + " (id=" + id + ")", e);
             }
         }
         //System.out.println("Rcv "+simulationTimeClient);
@@ -130,12 +143,12 @@ public class MessagePhysicsEntitySync<T extends PhysicsEntity<?>> extends Physic
     @Override
     protected void processMessageClient(PhysicsEntityMessage<?> message, PhysicsEntity<?> entity, EntityPlayer player) {
         //System.out.println("Rcv syncs " + entity.ticksExisted);
-        ((MPPhysicsEntitySynchronizer<?>)entity.getSynchronizer()).receiveEntitySyncPacket((MessagePhysicsEntitySync) message);
+        ((MPPhysicsEntitySynchronizer<?>) entity.getSynchronizer()).receiveEntitySyncPacket((MessagePhysicsEntitySync) message);
     }
 
     @Override
     protected void processMessageServer(PhysicsEntityMessage<?> message, PhysicsEntity<?> entity, EntityPlayer player) {
-        ((MPPhysicsEntitySynchronizer<?>)entity.getSynchronizer()).receiveEntitySyncPacket((MessagePhysicsEntitySync) message);
+        ((MPPhysicsEntitySynchronizer<?>) entity.getSynchronizer()).receiveEntitySyncPacket((MessagePhysicsEntitySync) message);
     }
 
     @Override

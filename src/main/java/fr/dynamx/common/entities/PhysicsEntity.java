@@ -27,6 +27,7 @@ import fr.dynamx.utils.debug.Profiler;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.QuaternionPool;
+import fr.dynamx.utils.optimization.SubClassPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import io.netty.buffer.ByteBuf;
 import lombok.Getter;
@@ -143,12 +144,16 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
         // Network Init
         synchronizer = DynamXMain.proxy.getNetHandlerForEntity(this);
         usesPhysicsWorld = DynamXContext.usesPhysicsWorld(world);
+
+        ignoreFrustumCheck = true;
     }
 
     public PhysicsEntity(World world, Vector3f pos, float spawnRotationAngle) {
         this(world);
         setPosition(pos.x, pos.y, pos.z);
         rotationYaw = spawnRotationAngle;
+
+        ignoreFrustumCheck = true;
     }
 
     @Override
@@ -183,7 +188,8 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
                 }
             case ONLY_ENTITY_PROPERTIES:
                 initPhysicsEntity(usesPhysicsWorld);
-                getSynchronizer().setSimulationHolder(getSynchronizer().getDefaultSimulationHolder(), null);
+                // Will refresh simulation holders on joint entities
+                getSynchronizer().setSimulationHolder(getSynchronizer().getSimulationHolder(), getSynchronizer().getSimulationPlayerHolder());
                 registerSynchronizedVariables();
                 MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Init(world.isRemote ? Side.CLIENT : Side.SERVER, this, usesPhysicsWorld));
                 initialized = EnumEntityInitState.ALL;
@@ -193,12 +199,19 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
 
     @Override
     public void writeSpawnData(ByteBuf buffer) {
-        DynamXUtils.writeQuaternion(buffer, physicsRotation);
     }
 
     @Override
     public void readSpawnData(ByteBuf additionalData) {
-        physicsRotation.set(DynamXUtils.readQuaternion(additionalData));
+        // Fix: since initEntityProperties was added here, checkEntityInit wasn't called anymore on client, and so physicsRotation wasn't correct
+        if (physicsRotation.equals(Quaternion.IDENTITY)) {
+            physicsRotation.set(DynamXGeometry.rotationYawToQuaternion(rotationYaw));
+        }
+        if (!initEntityProperties()) {
+            setDead();
+            return;
+        }
+        initialized = EnumEntityInitState.ONLY_ENTITY_PROPERTIES;
     }
 
     @Override
@@ -232,7 +245,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
             if (physicsHandler.getPhysicsState() == EntityPhysicsState.FROZEN) {
                 physicsHandler.setPhysicsState(EntityPhysicsState.UNFREEZE);
             } else {
-                this.physicsHandler.setPhysicsState(EntityPhysicsState.ENABLE);
+                physicsHandler.setPhysicsState(EntityPhysicsState.ENABLE);
             }
             if (isRegistered == EnumEntityPhysicsRegistryState.NOT_REGISTERED) {
                 DynamXContext.getPhysicsWorld(world).addBulletEntity(this);
@@ -434,7 +447,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
      */
     @Override
     public void onUpdate() {
-        Vector3fPool.openPool();
+        Vector3fPool.openPool(SubClassPool.TICK_ENTITY_MC);
         double d1 = prevPosX;
         double d2 = prevPosY;
         double d3 = prevPosZ;
@@ -448,11 +461,6 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
             throw new PhysicsEntityException(this, "mcThreadUpdate", ex);
         }
         Vector3fPool.closePool();
-    }
-
-    @Override
-    public float getEyeHeight() {
-        return 0;
     }
 
     @Override
@@ -473,42 +481,43 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
 
     @Override
     public AxisAlignedBB getEntityBoundingBox() {
-        if (entityBoxCache == null) {
-            if (physicsPosition.length() == 0) {
-                physicsPosition.set(Vector3fPool.get((float) posX, (float) posY, (float) posZ));
-            }
-            Vector3fPool.openPool();
-            if (physicsHandler != null) {
-                Vector3f min = Vector3fPool.get();
-                Vector3f max = Vector3fPool.get();
-                BoundingBox boundingBox = physicsHandler.getBoundingBox();
-                boundingBox.getMin(min);
-                boundingBox.getMax(max);
+        if (entityBoxCache != null) {
+            return entityBoxCache;
+        }
+        if (physicsPosition.length() == 0) {
+            physicsPosition.set((float) posX, (float) posY, (float) posZ);
+        }
+        Vector3fPool.openPool();
+        if (physicsHandler != null) {
+            Vector3f min = Vector3fPool.get();
+            Vector3f max = Vector3fPool.get();
+            BoundingBox boundingBox = physicsHandler.getBoundingBox();
+            boundingBox.getMin(min);
+            boundingBox.getMax(max);
+            entityBoxCache = new AxisAlignedBB(min.x, min.y, min.z, max.x, max.y, max.z);
+        } else {
+            List<MutableBoundingBox> boxes = getCollisionBoxes(); //Get PartShape boxes
+            if (boxes.isEmpty()) { //If there is no boxes, create a default one
+                Vector3f min = Vector3fPool.get(getPositionVector()).subtractLocal(2, 1, 2);
+                Vector3f max = Vector3fPool.get(getPositionVector()).addLocal(2, 2, 2);
                 entityBoxCache = new AxisAlignedBB(min.x, min.y, min.z, max.x, max.y, max.z);
             } else {
-                List<MutableBoundingBox> boxes = getCollisionBoxes(); //Get PartShape boxes
-                if (boxes.isEmpty()) { //If there is no boxes, create a default one
-                    Vector3f min = Vector3fPool.get(getPositionVector()).subtractLocal(2, 1, 2);
-                    Vector3f max = Vector3fPool.get(getPositionVector()).addLocal(2, 2, 2);
-                    entityBoxCache = new AxisAlignedBB(min.x, min.y, min.z, max.x, max.y, max.z);
+                MutableBoundingBox container;
+                if (boxes.size() == 1) { //If there is one, no more calculus to do !
+                    container = boxes.get(0);
                 } else {
-                    MutableBoundingBox container;
-                    if (boxes.size() == 1) { //If there is one, no more calculus to do !
-                        container = boxes.get(0);
-                    } else {
-                        container = new MutableBoundingBox(boxes.get(0));
-                        for (int i = 1; i < boxes.size(); i++) { //Else create a bigger box containing all the boxes
-                            container.growTo(boxes.get(i));
-                        }
+                    container = new MutableBoundingBox(boxes.get(0));
+                    for (int i = 1; i < boxes.size(); i++) { //Else create a bigger box containing all the boxes
+                        container.growTo(boxes.get(i));
                     }
-                    //The container box corresponding to an unrotated entity, so rotate it !
-                    container = DynamXContext.getCollisionHandler().rotateBB(physicsPosition, container, physicsRotation);
-                    container.grow(0.5, 0.0, 0.5); //Grow it to avoid little glitches on the corners of the car
-                    entityBoxCache = container.toBB();
                 }
+                //The container box corresponding to an unrotated entity, so rotate it !
+                container = DynamXContext.getCollisionHandler().rotateBB(physicsPosition, container, physicsRotation);
+                container.grow(0.5, 0.0, 0.5); //Grow it to avoid little glitches on the corners of the car
+                entityBoxCache = container.toBB();
             }
-            Vector3fPool.closePool();
         }
+        Vector3fPool.closePool();
         return entityBoxCache;
     }
 
@@ -521,8 +530,9 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
             physicsWorld.removeBulletEntity(this);
             terrainCache.onRemoved(physicsWorld.getTerrainManager());
         }
-        if (physicsHandler != null)
-            physicsHandler.removePhysicsEntity();
+        if (physicsHandler != null) {
+            physicsHandler.removeFromWorld();
+        }
     }
 
     @Override

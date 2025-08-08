@@ -1,7 +1,11 @@
 package fr.dynamx.client;
 
+import fr.aym.acsguis.api.ACsGuiApiService;
 import fr.aym.acslib.ACsLib;
 import fr.aym.acslib.api.services.ThreadedLoadingService;
+import fr.aym.mps.utils.UserErrorMessageException;
+import fr.dynamx.api.physics.IPhysicsWorld;
+import fr.dynamx.client.command.DynamXClientCommand;
 import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.client.handlers.KeyHandler;
 import fr.dynamx.client.network.ClientPhysicsEntitySynchronizer;
@@ -14,6 +18,7 @@ import fr.dynamx.client.renders.vehicle.RenderDoor;
 import fr.dynamx.client.sound.DynamXSoundHandler;
 import fr.dynamx.common.CommonProxy;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.blocks.TEDynamXBlock;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.entities.PropsEntity;
@@ -22,13 +27,13 @@ import fr.dynamx.common.entities.SeatEntity;
 import fr.dynamx.common.entities.vehicles.*;
 import fr.dynamx.common.network.sync.PhysicsEntitySynchronizer;
 import fr.dynamx.common.network.sync.SPPhysicsEntitySynchronizer;
-import fr.dynamx.common.network.udp.CommandUdp;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.world.BuiltinThreadedPhysicsWorld;
+import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXLoadingTasks;
-import fr.dynamx.utils.client.CommandNetworkDebug;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.errors.DynamXErrorManager;
+import fr.dynamx.utils.optimization.SubClassPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IResourceManager;
@@ -46,6 +51,9 @@ import net.minecraftforge.fml.client.SplashProgress;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.versioning.DefaultArtifactVersion;
+import net.minecraftforge.fml.common.versioning.InvalidVersionSpecificationException;
+import net.minecraftforge.fml.common.versioning.VersionRange;
 import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.function.Predicate;
@@ -90,9 +98,7 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
         super.init();
 
         MinecraftForge.EVENT_BUS.register(new KeyHandler(FMLClientHandler.instance().getClient()));
-        ClientCommandHandler.instance.registerCommand(new CommandUdp());
-        ClientCommandHandler.instance.registerCommand(new CommandNetworkDebug());
-        //TODO /dynamxclient command
+        ClientCommandHandler.instance.registerCommand(new DynamXClientCommand());
 
         ClientRegistry.bindTileEntitySpecialRenderer(TEDynamXBlock.class, new TESRDynamXBlock<>());
         if (!Minecraft.getMinecraft().getFramebuffer().isStencilEnabled())
@@ -151,7 +157,7 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
                 && ((PhysicsEntity<?>) ClientEventHandler.MC.player.getRidingEntity()).getSynchronizer().getSimulationHolder().ownsPhysics(Side.CLIENT)) {
             return true;
         }
-        return DynamXContext.getPlayerPickingObjects().containsKey(ClientEventHandler.MC.player.getEntityId()) &&
+        return ClientEventHandler.MC.player != null && DynamXContext.getPlayerPickingObjects().containsKey(ClientEventHandler.MC.player.getEntityId()) &&
                 DynamXContext.getPlayerPickingObjects().get(ClientEventHandler.MC.player.getEntityId()) == entity.getEntityId();
         //on client side : true if the player is driving a vehicle (in any entity)
         /*return entity.getNetwork().getSimulationHolder() == SimulationHolder.SERVER_SP || (!entity.world.isRemote && entity.getNetwork().getSimulationHolder() == SimulationHolder.SERVER)
@@ -174,17 +180,15 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
     public void initPhysicsWorld(World world) {
         if (DynamXContext.getPhysicsWorldPerDimensionMap().containsKey(world.provider.getDimension())) {
             // connecting to another server (e.g. with bungeecoord) : unload the previous world
-            /*System.out.println("Duplicate world load detected. Unloading old.");
+            DynamXMain.log.info("Duplicate world load detected. Are using BungeeCoord ? Unloading old world.");
             IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(world);
-            System.out.println("Found: " + physicsWorld);
-            if (physicsWorld != null && physicsWorld.ownsWorld(world)) {
-                System.out.println("Owned. Clearing.");
+            if (physicsWorld != null) {
+                DynamXMain.log.debug("Clearing current physics world...");
                 physicsWorld.clearAll();
                 DynamXContext.getPlayerToCollision().clear();
             } else {
-                System.out.println("Not owned. Wtf. Cannot clear.");
-            }*/
-            throw new IllegalStateException("Physics world of " + world + " is already loaded ! World: " + DynamXContext.getPhysicsWorldPerDimensionMap().get(world.provider.getDimension()));
+                throw new IllegalStateException("Physics world loaded but not found. Dim: " + world.provider.getDimension() + " World: " + world);
+            }
         }
         DynamXContext.getPhysicsWorldPerDimensionMap().put(world.provider.getDimension(), new BuiltinThreadedPhysicsWorld(world, !ClientEventHandler.MC.isSingleplayer()));
     }
@@ -193,6 +197,21 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
 
     @Override
     public void schedulePacksInit() {
+        try {
+            VersionRange versionRange = VersionRange.createFromVersionSpec(DynamXConstants.ACSGUIS_REQUIRED_VERSION);
+            ACsGuiApiService service = ACsLib.getPlatform().provideService(ACsGuiApiService.class);
+            if (!versionRange.containsVersion(new DefaultArtifactVersion(service.getVersion()))) {
+                DynamXMain.log.fatal("Invalid version of ACsGuis found: {}. Expected to be in {}. Halting game loading at pre init.", service.getVersion(), versionRange);
+                DynamXMain.memoizedConstructionError = new UserErrorMessageException("Invalid ACsGuis version " + service.getVersion(), null,
+                        "Invalid ACsGuis version " + service.getVersion(),
+                        "This version of DynamX requires a version of ACsGuis in range " + versionRange + ".",
+                        "We advise you to install version " + DynamXConstants.DEFAULT_ACSGUIS_VERSION + " of ACsGuis.");
+                return;
+            }
+        } catch (InvalidVersionSpecificationException e) {
+            throw new RuntimeException("Bad ACSGUIS_REQUIRED_VERSION", e);
+        }
+
         //This event handler needs to be registered before mc's sound system init
         MinecraftForge.EVENT_BUS.register(new ClientEventHandler());
 
@@ -203,8 +222,9 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
                 loadingState++;
                 ThreadedLoadingService loadingService = ACsLib.getPlatform().provideService(ThreadedLoadingService.class);
                 loadingService.addTask(ThreadedLoadingService.ModLoadingSteps.BLOCK_REGISTRY, "packsload", () -> {
-                    Vector3fPool.openPool(); //Open a pool for the loading of entities
+                    Vector3fPool.openPool(SubClassPool.PACK_MODEL_LOAD); //Open a pool for the loading of entities
                     DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.MC_INIT, DynamXLoadingTasks.PACK);
+                    Vector3fPool.closePool();
 
                     //Must follow addons init
                     loadingService.addTask(ThreadedLoadingService.ModLoadingSteps.INIT, "proxy preinit", this::preInit);

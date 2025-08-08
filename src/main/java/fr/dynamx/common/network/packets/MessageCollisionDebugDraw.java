@@ -1,5 +1,6 @@
 package fr.dynamx.common.network.packets;
 
+import fr.aym.acslib.utils.DeserializedData;
 import fr.aym.acslib.utils.packetserializer.ISerializablePacket;
 import fr.dynamx.api.network.EnumNetworkType;
 import fr.dynamx.api.network.IDnxPacket;
@@ -29,9 +30,9 @@ public class MessageCollisionDebugDraw implements IDnxPacket, net.minecraftforge
     }
 
     @Override
-    public void populateWithSavedObjects(Object[] objects) {
-        this.chunkOrBlockData = (Map<Integer, TerrainDebugData>) objects[0];
-        this.slopeData = (Map<Integer, TerrainDebugData>) objects[1];
+    public void populateWithSavedObjects(DeserializedData objects) {
+        this.chunkOrBlockData = objects.next();
+        this.slopeData = objects.next();
     }
 
     @Override

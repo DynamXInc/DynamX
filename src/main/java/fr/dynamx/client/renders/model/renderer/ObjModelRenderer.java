@@ -49,11 +49,13 @@ public class ObjModelRenderer extends DxModelRenderer {
             for (ObjObjectRenderer object : objObjects) {
                 loadingObject = object;
                 object.clearVAO();
-                if (object.getObjObjectData().getMaterials().isEmpty() || getTextureVariants() == null)
+                if (object.getObjObjectData().getMaterials().isEmpty() || getTextureVariants() == null) {
                     continue;
+                }
                 IModelTextureVariantsSupplier.IModelTextureVariants variants = this.getTextureVariants().getTextureVariantsFor(object);
-                if (variants != null)
+                if (variants != null) {
                     object.setTextureVariants(this, variants);
+                }
             }
         } catch (Exception e) {
             DynamXErrorManager.addError(textureVariants != null ? textureVariants.getPackName() : "Non-pack model", DynamXErrorManager.MODEL_ERRORS, "obj_error", ErrorLevel.HIGH, getLocation().getModelPath().toString(), (loadingObject == null ? null : loadingObject.getObjObjectData().getName()), e);
@@ -88,10 +90,10 @@ public class ObjModelRenderer extends DxModelRenderer {
      * Called to render this group with displayList <br>
      * Will draw nothing if the model is not correctly loaded
      */
-    public void renderGroup(ObjObjectRenderer obj, byte textureDataId) {
+    public void renderGroup(ObjObjectRenderer obj, byte textureDataId, boolean forceVanillaRender) {
         DynamXRenderUtils.popGlAllAttribBits();
         if (!MinecraftForge.EVENT_BUS.post(new DynamXModelRenderEvent.RenderPart(EventPhase.PRE, this, getTextureVariants(), textureDataId, obj)) && !obj.getObjObjectData().getName().equals("main")) {
-            obj.render(this, textureDataId);
+            obj.render(this, textureDataId, forceVanillaRender);
             MinecraftForge.EVENT_BUS.post(new DynamXModelRenderEvent.RenderPart(EventPhase.POST, this, getTextureVariants(), textureDataId, obj));
         }
     }
@@ -101,7 +103,7 @@ public class ObjModelRenderer extends DxModelRenderer {
         ObjObjectRenderer objObjectRenderer = getObjObjectRenderer(group);
         if (objObjectRenderer == null)
             return false;
-        renderGroup(objObjectRenderer, textureDataId);
+        renderGroup(objObjectRenderer, textureDataId, forceVanillaRender);
         return true;
     }
 
@@ -112,11 +114,11 @@ public class ObjModelRenderer extends DxModelRenderer {
             boolean drawn = false;
             for (ObjObjectRenderer object : objObjects) {
                 if (textureVariants.canRenderPart(object.getObjObjectData().getName())) {
-                    renderGroup(object, textureDataId);
+                    renderGroup(object, textureDataId, forceVanillaRender);
                     drawn = true;
                 }
             }
-            MinecraftForge.EVENT_BUS.post(new DynamXModelRenderEvent.RenderMainParts(EventPhase.POST, this, textureVariants, textureDataId));
+            MinecraftForge.EVENT_BUS.post(new DynamXModelRenderEvent.RenderMainParts(EventPhase.POST, this, getTextureVariants(), textureDataId));
             return drawn;
         }
         return true;
@@ -132,7 +134,7 @@ public class ObjModelRenderer extends DxModelRenderer {
         if (!MinecraftForge.EVENT_BUS.post(new DynamXModelRenderEvent.RenderFullModel(EventPhase.PRE, this, getTextureVariants(), textureDataId))) {
             objObjects.forEach(object -> {
                 object.setObjectColor(modelColor);
-                renderGroup(object, textureDataId);
+                renderGroup(object, textureDataId, forceVanillaRender);
             });
             MinecraftForge.EVENT_BUS.post(new DynamXModelRenderEvent.RenderFullModel(EventPhase.POST, this, getTextureVariants(), textureDataId));
         }

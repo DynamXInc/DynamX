@@ -10,7 +10,7 @@ import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.network.packets.MessageForcePlayerPos;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
-import fr.dynamx.utils.debug.SyncTracker;
+import fr.dynamx.utils.debug.SyncHelper;
 import lombok.Getter;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -20,7 +20,7 @@ import java.util.concurrent.Callable;
 
 public class EntityPosVariable extends ListeningEntityVariable<EntityPosVariable.EntityPositionData> {
     //TODO CLEAN
-    public static int CRITIC1 = 30, CRITIC1warn = 100, CRITIC2 = 400, CRITIC3 = 50;
+    public static int CRITIC1 = 3, CRITIC1warn = 100, CRITIC2 = 400, CRITIC3 = 50;
 
     public EntityPosVariable(PhysicsEntity<?> entity) {
         super(((entityPositionDataSynchronizedEntityVariable, entityPositionData) -> {
@@ -45,7 +45,6 @@ public class EntityPosVariable extends ListeningEntityVariable<EntityPosVariable
                 if (ignoreFor <= 0) {
                     Vector3f pos = entityPositionData.position;
                     float delta = entity.physicsPosition.subtract(pos).length();
-                    CRITIC1 = 3;
                     if (delta > CRITIC1) {
                         EntityPlayer controllingPlayer = entity.getSynchronizer().getSimulationPlayerHolder();
                         boolean isControllingPlayerRidingThisEntity = controllingPlayer == entity.getControllingPassenger();
@@ -86,10 +85,10 @@ public class EntityPosVariable extends ListeningEntityVariable<EntityPosVariable
                 Vector3f pos = entity.physicsPosition;
                 if (positionData == null || positionData.bodyActive != physicsHandler.isBodyActive()) {
                     changed = true;
-                } else if (SyncTracker.different(pos.x, positionData.position.x) || SyncTracker.different(pos.y, positionData.position.y) || SyncTracker.different(pos.z, positionData.position.z)) {
+                } else if (SyncHelper.different(pos.x, positionData.position.x) || SyncHelper.different(pos.y, positionData.position.y) || SyncHelper.different(pos.z, positionData.position.z)) {
                     changed = true;
-                } else if (SyncTracker.different(entity.physicsRotation.getX(), positionData.rotation.getX()) || SyncTracker.different(entity.physicsRotation.getY(), positionData.rotation.getY()) ||
-                        SyncTracker.different(entity.physicsRotation.getZ(), positionData.rotation.getZ()) || SyncTracker.different(entity.physicsRotation.getW(), positionData.rotation.getW())) {
+                } else if (SyncHelper.different(entity.physicsRotation.getX(), positionData.rotation.getX()) || SyncHelper.different(entity.physicsRotation.getY(), positionData.rotation.getY()) ||
+                        SyncHelper.different(entity.physicsRotation.getZ(), positionData.rotation.getZ()) || SyncHelper.different(entity.physicsRotation.getW(), positionData.rotation.getW())) {
                     changed = true;
                 }
                 if (changed) {
@@ -100,6 +99,7 @@ public class EntityPosVariable extends ListeningEntityVariable<EntityPosVariable
                 return positionData;
             }
         });
+        this.set(new EntityPositionData(false, entity.physicsPosition, entity.physicsRotation));
     }
 
     public static class EntityPositionData {

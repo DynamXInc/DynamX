@@ -7,7 +7,7 @@ import fr.dynamx.common.physics.terrain.element.TerrainElementsFactory;
 import fr.dynamx.utils.VerticalChunkPos;
 import net.minecraft.world.World;
 
-import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -24,17 +24,18 @@ public interface ITerrainElement {
      * Called once, after element init (in constructor), or after load method was called <br>
      * Should return the PhysicsRigidBody corresponding to this collision element
      *
-     *
      * @param world
-     * @param pos The location of the body to create
-     * @return A new rigid body for this terrain element
+     * @param pos   The location of the body to create
+     * @return A new rigid body for this terrain element. Null for invalid elements. Returning null will force chunk collisions reloading.
      */
+    @Nullable
     PhysicsRigidBody build(World world, Vector3f pos);
 
     /**
-     * Called after build has been called, should return the same body
+     * Called after build has been called, should return the same body <br>
+     * Null for invalid elements
      */
-    @Nonnull
+    @Nullable
     PhysicsRigidBody getBody();
 
     /**

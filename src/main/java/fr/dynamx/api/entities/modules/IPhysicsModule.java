@@ -13,25 +13,14 @@ import javax.annotation.Nullable;
 
 /**
  * Base implementation of a {@link ModularPhysicsEntity} module <br>
- * There is 3 built-in module types, but you can create others <br>
- * <h2>Supported modules :</h2>
- * - {@link ISeatsModule} <br>
- * - {@link IPropulsionModule} <br>
- * - {@link IEngineModule}
+ * For examples, you can check the default modules of DynamX : <br>
+ *
+ * @see fr.dynamx.common.entities.modules.SeatsModule
+ * @see fr.dynamx.common.entities.modules.AbstractLightsModule
+ * @see fr.dynamx.common.entities.modules.WheelsModule
+ * @see fr.dynamx.common.entities.modules.engines.BasicEngineModule
  */
-public interface IPhysicsModule<P extends AbstractEntityPhysicsHandler<?, ?>> {
-    /**
-     * Called when reading the entity nbt
-     */
-    default void readFromNBT(NBTTagCompound tag) {
-    }
-
-    /**
-     * Called when writing the entity nbt
-     */
-    default void writeToNBT(NBTTagCompound tag) {
-    }
-
+public interface IPhysicsModule<P extends AbstractEntityPhysicsHandler<?, ?>> extends IBaseModule {
     /**
      * Called when a passenger is added to the entity
      */
@@ -94,10 +83,6 @@ public interface IPhysicsModule<P extends AbstractEntityPhysicsHandler<?, ?>> {
      * @param changeContext    The context of this update
      */
     default void onSetSimulationHolder(SimulationHolder simulationHolder, EntityPlayer simulationPlayerHolder, SimulationHolder.UpdateContext changeContext) {
-    }
-
-    default byte getInitPriority() {
-        return 0;
     }
 
     /**

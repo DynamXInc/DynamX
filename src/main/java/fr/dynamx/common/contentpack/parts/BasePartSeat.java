@@ -5,6 +5,7 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
+import fr.dynamx.common.entities.IDynamXObject;
 import fr.dynamx.common.entities.modules.SeatsModule;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.EnumSeatPlayerPosition;
@@ -29,22 +30,22 @@ import javax.annotation.Nullable;
  */
 @Getter
 @Setter
-public abstract class BasePartSeat<A extends Entity, T extends ISubInfoTypeOwner<T>> extends InteractivePart<A, T> {
+public abstract class BasePartSeat<A extends IDynamXObject, T extends ISubInfoTypeOwner<T>> extends InteractivePart<A, T> {
     @Accessors(fluent = true)
     @PackFileProperty(configNames = "ShouldLimitFieldOfView", required = false, defaultValue = "true")
     protected boolean shouldLimitFieldOfView = true;
 
-    @PackFileProperty(configNames = "MaxYaw", required = false, defaultValue = "-105")
-    protected float maxYaw = -105.0f;
+    @PackFileProperty(configNames = "MaxYaw", required = false, defaultValue = "105")
+    protected float maxYaw = 105.0f;
 
-    @PackFileProperty(configNames = "MinYaw", required = false, defaultValue = "105")
-    protected float minYaw = 105.0f;
+    @PackFileProperty(configNames = "MinYaw", required = false, defaultValue = "-105")
+    protected float minYaw = -105.0f;
 
-    @PackFileProperty(configNames = "MaxPitch", required = false, defaultValue = "-105")
-    protected float maxPitch = -105.0f;
+    @PackFileProperty(configNames = "MaxPitch", required = false, defaultValue = "105")
+    protected float maxPitch = 105.0f;
 
-    @PackFileProperty(configNames = "MinPitch", required = false, defaultValue = "105")
-    protected float minPitch = 105.0f;
+    @PackFileProperty(configNames = "MinPitch", required = false, defaultValue = "-105")
+    protected float minPitch = -105.0f;
 
     @PackFileProperty(configNames = "Rotation", required = false, defaultValue = "1 0 0 0")
     protected Quaternion rotation;
@@ -70,14 +71,14 @@ public abstract class BasePartSeat<A extends Entity, T extends ISubInfoTypeOwner
         return DynamXDebugOptions.SEATS_AND_STORAGE;
     }
 
-    public boolean mount(A vehicleEntity, SeatsModule seats, Entity entity) {
-        if (seats.getSeatToPassengerMap().containsValue(entity)) {
+    public boolean mountEntity(A riddenEntity, SeatsModule seatsModule, Entity rider) {
+        if (seatsModule.getSeatToPassengerMap().containsValue(rider)) {
             return false; //Player on another seat
         }
-        seats.getSeatToPassengerMap().put(this, entity);
-        if (!entity.startRiding(vehicleEntity, false)) //something went wrong : dismount
+        seatsModule.getSeatToPassengerMap().put(this, rider);
+        if (!rider.startRiding((Entity) riddenEntity, false)) //something went wrong : dismount
         {
-            seats.getSeatToPassengerMap().remove(this);
+            seatsModule.getSeatToPassengerMap().remove(this);
             return false;
         }
         return true;

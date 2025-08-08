@@ -1,23 +1,17 @@
 package fr.dynamx.common.contentpack;
 
-import fr.aym.acsguis.api.ACsGuiApi;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.aym.acslib.api.services.mps.ModProtectionContainer;
 import fr.dynamx.api.contentpack.ContentPackType;
 import fr.dynamx.api.events.ContentPackSystemEvent;
 import fr.dynamx.api.events.EventPhase;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariableRegistry;
-import fr.dynamx.client.gui.GuiBlockCustomization;
-import fr.dynamx.client.gui.GuiLoadingErrors;
-import fr.dynamx.client.gui.NewGuiDnxDebug;
-import fr.dynamx.client.handlers.hud.CarController;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.loader.InfoList;
 import fr.dynamx.common.contentpack.loader.InfoLoader;
 import fr.dynamx.common.contentpack.loader.SubInfoTypesRegistry;
 import fr.dynamx.common.contentpack.sync.PackSyncHandler;
-import fr.dynamx.common.slopes.GuiSlopesConfig;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXLoadingTasks;
 import fr.dynamx.utils.errors.DynamXErrorManager;
@@ -131,14 +125,6 @@ public class ContentPackLoader {
             }
         }
         DynamXMain.log.info("Loaded " + packCount + " DynamX resource packs");
-        if (isClient) {
-            //Add built-in style, before customs by addons
-            ACsGuiApi.registerStyleSheetToPreload(NewGuiDnxDebug.STYLE);
-            ACsGuiApi.registerStyleSheetToPreload(GuiLoadingErrors.STYLE);
-            ACsGuiApi.registerStyleSheetToPreload(CarController.STYLE);
-            ACsGuiApi.registerStyleSheetToPreload(GuiBlockCustomization.STYLE);
-            ACsGuiApi.registerStyleSheetToPreload(GuiSlopesConfig.STYLE);
-        }
         return myDir; //return the used path, used when reloading config
     }
 

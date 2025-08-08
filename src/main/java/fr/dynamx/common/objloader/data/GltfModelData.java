@@ -1,8 +1,8 @@
 package fr.dynamx.common.objloader.data;
 
 import com.jme3.math.Vector3f;
-import com.modularmods.mcgltf.MCglTF;
-import de.javagl.jgltf.model.*;
+import com.modularmods.mcgltf.dynamx.MCglTF;
+import de.javagl.jgltf.dynamx.model.*;
 import fr.dynamx.api.dxmodel.DxModelPath;
 import lombok.Getter;
 

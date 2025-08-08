@@ -1,16 +1,19 @@
 package fr.dynamx.api.contentpack.registry;
 
+import com.google.common.collect.BiMap;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
 import fr.dynamx.common.contentpack.loader.PackConstants;
 import fr.dynamx.common.contentpack.parts.PartShape;
+import fr.dynamx.utils.DynamXReflection;
 import fr.dynamx.utils.EnumPlayerStandOnTop;
 import fr.dynamx.utils.EnumSeatPlayerPosition;
 import fr.dynamx.utils.RegistryNameSetter;
 import fr.dynamx.utils.physics.DynamXPhysicsHelper;
 import fr.dynamx.utils.physics.EnumCollisionType;
 import lombok.Getter;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ResourceLocation;
@@ -18,9 +21,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 import javax.vecmath.Vector2f;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -31,6 +32,9 @@ import java.util.function.Function;
  * @see PackFileProperty
  */
 public class DefinitionType<T> {
+    private static final BiMap<String, Material> MATERIALS = DynamXReflection.getBlockMaterialMap();
+    private static final BiMap<String, SoundType> SOUNDS = DynamXReflection.getSoundTypeMap();
+
     private static final Map<Class<?>, DefinitionType<?>> definitionTypes = new HashMap<>();
 
     /**
@@ -160,7 +164,7 @@ public class DefinitionType<T> {
             String[] t = s.split(", ");
             Vector3f[] vec_array = new Vector3f[t.length];
             for (int i = 0; i < vec_array.length; i++) {
-                vec_array[i] = new Vector3f(Float.parseFloat(t[i].split(" ")[0]), Float.parseFloat(t[i].split(" ")[2]), Float.parseFloat(t[i].split(" ")[1])*-1);
+                vec_array[i] = new Vector3f(Float.parseFloat(t[i].split(" ")[0]), Float.parseFloat(t[i].split(" ")[2]), Float.parseFloat(t[i].split(" ")[1]) * -1);
             }
             return vec_array;
         }, DefinitionType::arrayToString, "type.vector3f.array.blender")),
@@ -230,12 +234,9 @@ public class DefinitionType<T> {
         DYNX_RESOURCE_LOCATION(new DefinitionType<>(ResourceLocation.class, RegistryNameSetter::getDynamXModelResourceLocation, "type.resourcelocation")),
         PLAYER_STAND_ON_TOP(new DefinitionType<>(EnumPlayerStandOnTop.class, EnumPlayerStandOnTop::fromString, "type.player_stand_on_top")),
         PLAYER_SEAT_POSITION(new DefinitionType<>(EnumSeatPlayerPosition.class, EnumSeatPlayerPosition::fromString, "type.player_seat_position")),
-        MATERIAL(new DefinitionType<>(Material.class, (s) -> {
-            List<String> names = Arrays.asList("AIR", "GRASS", "GROUND", "WOOD", "ROCK", "IRON", "ANVIL", "WATER", "LAVA", "LEAVES", "PLANTS", "VINE", "SPONGE", "CLOTH", "FIRE", "SAND", "CIRCUITS", "CARPET", "GLASS", "REDSTONE_LIGHT", "TNT", "CORAL", "ICE", "PACKED_ICE", "SNOW", "CRAFTED_SNOW", "CACTUS", "CLAY", "GOURD", "DRAGON_EGG", "PORTAL", "CAKE", "WEB", "PISTON", "BARRIER", "STRUCTURE_VOID");
-            Material[] materials = new Material[] {Material.AIR, Material.GRASS, Material.GROUND, Material.WOOD, Material.ROCK, Material.IRON, Material.ANVIL, Material.WATER, Material.LAVA, Material.LEAVES, Material.PLANTS, Material.VINE, Material.SPONGE, Material.CLOTH, Material.FIRE, Material.SAND, Material.CIRCUITS, Material.CARPET, Material.GLASS, Material.REDSTONE_LIGHT, Material.TNT, Material.CORAL, Material.ICE, Material.PACKED_ICE, Material.SNOW, Material.CRAFTED_SNOW, Material.CACTUS, Material.CLAY, Material.GOURD, Material.DRAGON_EGG, Material.PORTAL, Material.CAKE, Material.WEB, Material.PISTON, Material.BARRIER, Material.STRUCTURE_VOID};
-            return materials[names.indexOf(s.toUpperCase())];
-        }, "type.material")),
-        AXIS(new DefinitionType<>(DynamXPhysicsHelper.EnumPhysicsAxis.class, DynamXPhysicsHelper.EnumPhysicsAxis::fromString, "type.axis"));
+        MATERIAL(new DefinitionType<>(Material.class, (s) -> MATERIALS.get(s.toUpperCase()), material -> MATERIALS.inverse().get(material), "type.material")),
+        AXIS(new DefinitionType<>(DynamXPhysicsHelper.EnumPhysicsAxis.class, DynamXPhysicsHelper.EnumPhysicsAxis::fromString, "type.axis")),
+        SOUND_TYPE(new DefinitionType<>(SoundType.class, (s) -> SOUNDS.get(s.toUpperCase()), sound -> SOUNDS.inverse().get(sound), "type.sound_type"));
 
         public final DefinitionType<?> type;
 

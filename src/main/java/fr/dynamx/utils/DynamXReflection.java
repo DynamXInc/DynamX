@@ -1,6 +1,11 @@
 package fr.dynamx.utils;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import lombok.SneakyThrows;
 import net.minecraft.block.Block;
+import net.minecraft.block.SoundType;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
@@ -8,8 +13,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Map;
 
 import static fr.dynamx.common.DynamXMain.log;
 
@@ -55,5 +63,31 @@ public class DynamXReflection {
     public static String getCreativeTabName(CreativeTabs tab) {
         //System.out.println("Name of "+tab+" is "+ObfuscationReflectionHelper.getPrivateValue(CreativeTabs.class, tab, 15));
         return ObfuscationReflectionHelper.getPrivateValue(CreativeTabs.class, tab, 15);
+    }
+
+    @SneakyThrows
+    public static BiMap<String, Material> getBlockMaterialMap() {
+        BiMap<String, Material> materials = HashBiMap.create();
+        Field[] fields = Material.class.getDeclaredFields();
+        for(Field field : fields) {
+            if(!Modifier.isStatic(field.getModifiers()) || !field.getType().equals(Material.class)) {
+                continue;
+            }
+            materials.put(field.getName(), (Material) field.get(null));
+        }
+        return materials;
+    }
+
+    @SneakyThrows
+    public static BiMap<String, SoundType> getSoundTypeMap() {
+        BiMap<String, SoundType> soundTypes = HashBiMap.create();
+        Field[] fields = SoundType.class.getDeclaredFields();
+        for(Field field : fields) {
+            if(!Modifier.isStatic(field.getModifiers()) || !field.getType().equals(SoundType.class)) {
+                continue;
+            }
+            soundTypes.put(field.getName(), (SoundType) field.get(null));
+        }
+        return soundTypes;
     }
 }

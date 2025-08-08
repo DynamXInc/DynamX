@@ -4,13 +4,15 @@ import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.modules.engines.HelicopterEngineModule;
 import fr.dynamx.common.physics.entities.BaseVehiclePhysicsHandler;
+import io.netty.buffer.ByteBuf;
 import lombok.Getter;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.relauncher.Side;
 
-public class HelicopterRotorModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, IPhysicsModule.IEntityUpdateListener {
+public class HelicopterRotorModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, IPhysicsModule.IEntityUpdateListener, IEntityAdditionalSpawnData {
     protected final BaseVehicleEntity<? extends BaseVehiclePhysicsHandler<?>> entity;
     private HelicopterEngineModule engine;
 
@@ -62,10 +64,21 @@ public class HelicopterRotorModule implements IPhysicsModule<BaseVehiclePhysicsH
                 double zSpeed = Math.sin(Math.toRadians(i)) * 0.9;
                 double xSpeed = Math.cos(Math.toRadians(i)) * 0.9;
 
-                if (world.isAirBlock(new BlockPos((int) (entity.getPosition().getX() + x), (int) (entity.getPosition().getY() + y), (int) (entity.getPosition().getZ() + z)))) {
+                if (world.isAirBlock(new BlockPos((int) (entity.getPosition().getX() + x), (int) (y), (int) (entity.getPosition().getZ() + z)))) {
                     world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, entity.posX + x, y, entity.posZ + z, xSpeed, 0, zSpeed);
                 }
             }
         }
+    }
+
+    @Override
+    public void writeSpawnData(ByteBuf buffer) {
+        // curPower isn't computed on server side
+        buffer.writeFloat(engine != null ? engine.getPower() : 0);
+    }
+
+    @Override
+    public void readSpawnData(ByteBuf additionalData) {
+        curPower = additionalData.readFloat();
     }
 }

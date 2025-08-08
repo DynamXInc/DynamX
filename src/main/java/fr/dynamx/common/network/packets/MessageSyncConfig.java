@@ -2,7 +2,7 @@ package fr.dynamx.common.network.packets;
 
 import fr.dynamx.api.network.EnumNetworkType;
 import fr.dynamx.api.network.IDnxPacket;
-import fr.dynamx.api.physics.IPhysicsSimulationMode;
+import fr.dynamx.api.network.sync.SynchronizedEntityVariableRegistry;
 import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.contentpack.ContentPackLoader;
@@ -13,6 +13,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -33,19 +34,21 @@ public class MessageSyncConfig implements IDnxPacket, IMessageHandler<MessageSyn
     private boolean slopesPlace;
     private int physicsSimulationMode;
     private int entityId;
+    private int serverSynchronizedVariablesCount;
 
     public MessageSyncConfig() {
     }
 
-    public MessageSyncConfig(boolean reloadResources, int syncDelay, Map<Block, float[]> blockInfos, List<Block> slopes, int slopesLength, boolean slopesPlace, IPhysicsSimulationMode physicsSimulationMode, int entityId) {
+    public MessageSyncConfig(boolean reloadResources, int entityId) {
         this.reloadResources = reloadResources;
-        this.syncDelay = syncDelay;
-        this.blockInfos = blockInfos;
-        this.slopes = slopes;
-        this.slopesLength = slopesLength;
-        this.slopesPlace = slopesPlace;
-        this.physicsSimulationMode = physicsSimulationMode instanceof PhysicsSimulationModes.LightPhysics ? 1 : 0;
+        this.syncDelay = DynamXConfig.mountedVehiclesSyncTickRate;
+        this.blockInfos = ContentPackLoader.getBlocksGrip();
+        this.slopes = ContentPackLoader.slopes;
+        this.slopesLength = ContentPackLoader.SLOPES_LENGTH;
+        this.slopesPlace = ContentPackLoader.PLACE_SLOPES;
+        this.physicsSimulationMode = DynamXContext.getPhysicsSimulationMode(Side.CLIENT) instanceof PhysicsSimulationModes.LightPhysics ? 1 : 0;
         this.entityId = entityId;
+        this.serverSynchronizedVariablesCount = SynchronizedEntityVariableRegistry.getSyncVarRegistry().size();
     }
 
     @Override
@@ -64,6 +67,7 @@ public class MessageSyncConfig implements IDnxPacket, IMessageHandler<MessageSyn
         slopes.forEach(b -> buf.writeInt(Block.getIdFromBlock(b)));
         buf.writeInt(physicsSimulationMode);
         buf.writeInt(entityId);
+        buf.writeInt(serverSynchronizedVariablesCount);
     }
 
     @Override
@@ -87,6 +91,7 @@ public class MessageSyncConfig implements IDnxPacket, IMessageHandler<MessageSyn
         }
         physicsSimulationMode = buf.readInt();
         entityId = buf.readInt();
+        serverSynchronizedVariablesCount = buf.readInt();
     }
 
     @Override
@@ -117,6 +122,13 @@ public class MessageSyncConfig implements IDnxPacket, IMessageHandler<MessageSyn
             // Fix issue with bungeecord not sending the new entityId to the client
             if (entityId != -1 && ClientEventHandler.MC.player != null) {
                 ClientEventHandler.MC.player.setEntityId(entityId);
+            }
+            // Ensure the server and the client have the same synchronized variables, using a basic "count of variables" check
+            // The DynamX network check handler already checks if the client and server has the same addon, but different versions of the same addon, or bugged addons, can give different synchronized variables
+            if (SynchronizedEntityVariableRegistry.getSyncVarRegistry().size() != serverSynchronizedVariablesCount) {
+                String message = "[DynamX] Server and client synchronized variables count mismatch! Verify you have the SAME DynamX addons on server AND client sides. Server: " + serverSynchronizedVariablesCount + " Client: " + SynchronizedEntityVariableRegistry.getSyncVarRegistry().size();
+                Minecraft.getMinecraft().getConnection().getNetworkManager().closeChannel(new TextComponentString(message));
+                throw new IllegalStateException(message);
             }
         });
     }

@@ -31,12 +31,12 @@ import java.util.List;
  *
  * @param <A> The type of the pack info (the owner of the scene graph)
  */
-@Getter
 @RequiredArgsConstructor
 public class BlockNode<A extends BlockObject<?>> extends AbstractItemNode<BaseRenderContext.BlockRenderContext, A> {
     /**
      * The children that are linked to the entity (ie that will be rendered with the entity transformations)
      */
+    @Getter
     private final List<SceneNode<BaseRenderContext.BlockRenderContext, A>> linkedChildren;
 
     /**
@@ -44,11 +44,10 @@ public class BlockNode<A extends BlockObject<?>> extends AbstractItemNode<BaseRe
      * Stores the transformations of the node, and is used to render the node and its children <br>
      * Do not use GlStateManager to apply transformations, use this matrix instead
      */
-    @Getter
     private final Matrix4f transform = new Matrix4f();
 
     @Override
-    public void render(BaseRenderContext.BlockRenderContext context, A packInfo) {
+    public void render(BaseRenderContext.BlockRenderContext context, A packInfo, Matrix4f parentTransform) {
         if (context.getTileEntity() != null && context.getTileEntity().getBlockType() instanceof DynamXBlock) { //the instanceof fixes a crash
             transform.identity();
             Vector3fPool.openPool();
@@ -72,7 +71,7 @@ public class BlockNode<A extends BlockObject<?>> extends AbstractItemNode<BaseRe
             GlStateManager.popMatrix();
             //Render the linked children
             transform.scale(1 / packInfo.getScaleModifier().x, 1 / packInfo.getScaleModifier().y, 1 / packInfo.getScaleModifier().z);
-            linkedChildren.forEach(c -> c.render(context, packInfo));
+            linkedChildren.forEach(c -> c.render(context, packInfo, transform));
 
             GlQuaternionPool.closePool();
             QuaternionPool.closePool();
@@ -96,6 +95,9 @@ public class BlockNode<A extends BlockObject<?>> extends AbstractItemNode<BaseRe
                     (te.getRelativeScale().y != 0 ? te.getRelativeScale().y : 1),
                     (te.getRelativeScale().z != 0 ? te.getRelativeScale().z : 1));
             transform.translate(0.5f, 0.5f, 0.5f);
+        } else {
+            // Backward-compatibility: old blocks were having 0, 0, 0 as default scale
+            transform.translate(0, 1, 0);
         }
         transform.translate(DynamXUtils.toVector3f(te.getPackInfo().getTranslation()));
     }
@@ -107,16 +109,19 @@ public class BlockNode<A extends BlockObject<?>> extends AbstractItemNode<BaseRe
         TEDynamXBlock te = context.getTileEntity();
         if (te == null)
             return;
+        transform.identity();
         Vector3fPool.openPool();
         QuaternionPool.openPool();
         GlQuaternionPool.openPool();
         GlStateManager.pushMatrix();
         applyTransform(te, context.getRenderPosition());
+        GlStateManager.multMatrix(ClientDynamXUtils.getMatrixBuffer(transform));
         if (DynamXDebugOptions.PLAYER_TO_OBJECT_COLLISION_DEBUG.isActive()) {
             QuaternionPool.openPool();
             GlQuaternionPool.openPool();
             GlStateManager.pushMatrix();
-            GlStateManager.translate(-0.5D, -1.5D, -0.5D);
+            // Special translation for the PartShapes because their position already "contains" the block's translation, so we need to remove it
+            GlStateManager.translate(-0.5f - packInfo.getTranslation().x, -1.5f - packInfo.getTranslation().y, -0.5f - packInfo.getTranslation().z);
             for (IShapeInfo partShape : te.getUnrotatedCollisionBoxes()) {
                 RenderGlobal.drawBoundingBox(
                         (partShape.getPosition().x - partShape.getSize().x),
@@ -135,15 +140,12 @@ public class BlockNode<A extends BlockObject<?>> extends AbstractItemNode<BaseRe
         if (DynamXDebugOptions.SEATS_AND_STORAGE.isActive()) {
             QuaternionPool.openPool();
             GlQuaternionPool.openPool();
-            GlStateManager.pushMatrix();
-            GlStateManager.translate(0D, -1.5D, 0D);
             for (PartStorage storage : (List<PartStorage>) packInfo.getPartsByType(PartStorage.class)) {
                 storage.getBox(box);
                 box.offset(storage.getPosition());
                 RenderGlobal.drawBoundingBox(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ,
                         1, 0.7f, 0, 1);
             }
-            GlStateManager.popMatrix();
             GlQuaternionPool.closePool();
             QuaternionPool.closePool();
         }

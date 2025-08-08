@@ -6,16 +6,15 @@
     "MixinChunk",
     "MixinEntity",
     "MixinEntityLivingBase",
-    "MixinEntityPlayerSP",
-    "MixinWorld",
-    "MixinChunk",
-    "MixinNetHandlerPlayServer"
+    "MixinNetHandlerPlayServer",
+    "MixinWorld"
   ],
   "minVersion": "0.6",
   "server": [],
   "client": [
-    "MixinRenderGlobal",
+    "MixinEntityPlayerSP",
     "MixinEntityRenderer",
+    "MixinRenderGlobal",
     "MixinRenderManager"
   ]
 }

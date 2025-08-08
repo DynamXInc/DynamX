@@ -136,8 +136,13 @@ public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IM
     }
 
     @Override
-    public boolean hasVaryingTextures() {
+    public boolean hasTextureVariants() {
         return getSubPropertyByType(MaterialVariantsInfo.class) != null;
+    }
+
+    @Override
+    public byte getMaxVariantId() {
+        return (byte) (hasTextureVariants() ? getVariants().getVariantsMap().size() : 1);
     }
 
     @Override

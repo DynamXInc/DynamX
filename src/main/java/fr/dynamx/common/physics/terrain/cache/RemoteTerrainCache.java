@@ -60,8 +60,8 @@ public class RemoteTerrainCache implements ITerrainCache {
     }
 
     @Override
-    public void invalidate(ChunkLoadingTicket pos, boolean changed, boolean syncChanges) {
-        invalidate(pos.getPos(), changed, syncChanges);
+    public void invalidate(ChunkLoadingTicket ticket, boolean changed, boolean syncChanges) {
+        invalidate(ticket.getPos(), changed, syncChanges);
     }
 
     @Override
@@ -140,117 +140,117 @@ public class RemoteTerrainCache implements ITerrainCache {
      * @param rawData   The received data
      */
     public void receiveChunkData(VerticalChunkPos pos, byte dataType, byte snapIdMod, @Nullable byte[] rawData) {
-        if (queries.containsKey(pos)) {
-            CompletableChunkLoading snap = queries.get(pos);
-            if (snap.getSnapIdMod() != snapIdMod) {
-                if (DynamXConfig.enableDebugTerrainManager)
-                    DynamXMain.log.error("PRE: Ignoring request answer " + snapIdMod + ". Now we want " + snap.getSnapIdMod() + " " + pos + ". Some data was " + (rawData == null));
-                return;
-            }
-            if (DynamXContext.getPhysicsWorld(world) != null) {
-                ChunkTerrain data = null;
-                //If received data is not null, and if there are normal elements
-                if (rawData != null && dataType != 2) {
-                    List<ITerrainElement> elements = new ArrayList<>();
-                    List<ITerrainElement.IPersistentTerrainElement> persistents = new ArrayList<>();
-                    Vector3fPool.openPool();
-                    //long start = System.currentTimeMillis();
-                    long start2;
-                    ObjectInputStream in = null;
-                    try {
-                        in = DynamXUtils.getTerrainObjectsIS(new GZIPInputStream(new ByteArrayInputStream(rawData)));
-                        int size = in.readInt();
-                        for (int i = 0; i < size; i++) { //Read all received elements
-                            start2 = System.currentTimeMillis();
-                            ITerrainElement o = TerrainElementsFactory.getById(in.readByte());
-                            if (o.load(ITerrainElement.TerrainSaveType.NETWORK, in, pos)) {
-                                if (o instanceof ITerrainElement.IPersistentTerrainElement) {
-                                    if (dataType == 0)
-                                        persistents.add((ITerrainElement.IPersistentTerrainElement) o);
-                                    else //This dataType does not allow persistent elements
-                                        DynamXMain.log.error("Persistent elements should be sent before normal elements. Data " + pos + " " + dataType + " " + o);
-                                } else {
-                                    elements.add(o);
-                                }
-                            }
-                            start2 = System.currentTimeMillis() - start2;
-                            if (start2 > DynamXConfig.networkChunkComputeWarnTime) {
-                                DynamXMain.log.warn("Took " + start2 + " ms to load terrain from network at " + pos + " for element " + i + " of type " + o);
-                            }
-                        }
-                        if (dataType == 1) { //Add cached persistent elements to the received data
-                            List<?> t = rawSlopeDataCache.loadChunk(pos, this);
-                            if (t != null) {
-                                persistents.addAll((Collection<? extends ITerrainElement.IPersistentTerrainElement>) t);
-                            }
-                        }
-                    } catch (Exception e) {
-                        if (!HAD_THE_ERROR) {
-                            DynamXMain.log.fatal("Cannot unserialize terrain element at " + pos, e);
-                            HAD_THE_ERROR = true;
-                        }
-                        elements = new ArrayList<>(); //Mark the error
-                        persistents = new ArrayList<>();
-                    } finally {
-                        if (in != null) {
-                            try {
-                                in.close();
-                            } catch (IOException e) {
-                                DynamXMain.log.error("I/O error closing data stream", e);
-                            }
-                        }
-                        /*start = (System.currentTimeMillis() - start);
-                        if (start > DynamXConfig.networkChunkComputeWarnTime) {
-                            DynamXMain.log.warn("Took " + start + " ms to load terrain from network at " + pos + " ! Loaded " + elements + " elements and " + persistents + " persistent elements");
-                        }*/
-                        Vector3fPool.closePool();
-                        data = new ChunkTerrain(elements, persistents);
-                    }
-                }
-                //Handle received data
-                ChunkTerrain finalData = data;
-                DynamXContext.getPhysicsWorld(world).schedule(() -> receiveChunkData(pos, dataType, snapIdMod, rawData, finalData));
-            }
-        } else {
+        if (!queries.containsKey(pos)) {
             //TODO DEBUG THIS AND THE BOY BELOW
             DynamXMain.log.error("NO CORRESPONDING QUERY FOUND FOR " + pos + " " + dataType + " " + snapIdMod + " " + (rawData == null) + " at step: receiving data");
+            return;
         }
+        CompletableChunkLoading snap = queries.get(pos);
+        if (snap.getSnapIdMod() != snapIdMod) {
+            if (DynamXConfig.enableDebugTerrainManager)
+                DynamXMain.log.error("PRE: Ignoring request answer " + snapIdMod + ". Now we want " + snap.getSnapIdMod() + " " + pos + ". Some data was " + (rawData == null));
+            return;
+        }
+        if (DynamXContext.getPhysicsWorld(world) == null) {
+            return;
+        }
+        ChunkTerrain data = null;
+        //If received data is not null, and if there are normal elements
+        if (rawData != null && dataType != 2) {
+            List<ITerrainElement> elements = new ArrayList<>();
+            List<ITerrainElement.IPersistentTerrainElement> persistents = new ArrayList<>();
+            Vector3fPool.openPool();
+            //long start = System.currentTimeMillis();
+            long start2;
+            ObjectInputStream in = null;
+            try {
+                in = DynamXUtils.getTerrainObjectsIS(new GZIPInputStream(new ByteArrayInputStream(rawData)));
+                int size = in.readInt();
+                for (int i = 0; i < size; i++) { //Read all received elements
+                    start2 = System.currentTimeMillis();
+                    ITerrainElement o = TerrainElementsFactory.getById(in.readByte());
+                    if (o.load(ITerrainElement.TerrainSaveType.NETWORK, in, pos)) {
+                        if (o instanceof ITerrainElement.IPersistentTerrainElement) {
+                            if (dataType == 0)
+                                persistents.add((ITerrainElement.IPersistentTerrainElement) o);
+                            else //This dataType does not allow persistent elements
+                                DynamXMain.log.error("Persistent elements should be sent before normal elements. Data " + pos + " " + dataType + " " + o);
+                        } else {
+                            elements.add(o);
+                        }
+                    }
+                    start2 = System.currentTimeMillis() - start2;
+                    if (start2 > DynamXConfig.networkChunkComputeWarnTime) {
+                        DynamXMain.log.warn("Took " + start2 + " ms to load terrain from network at " + pos + " for element " + i + " of type " + o);
+                    }
+                }
+                if (dataType == 1) { //Add cached persistent elements to the received data
+                    List<?> t = rawSlopeDataCache.loadChunk(pos, this);
+                    if (t != null) {
+                        persistents.addAll((Collection<? extends ITerrainElement.IPersistentTerrainElement>) t);
+                    }
+                }
+            } catch (Exception e) {
+                if (!HAD_THE_ERROR) {
+                    DynamXMain.log.fatal("Cannot unserialize terrain element at " + pos, e);
+                    HAD_THE_ERROR = true;
+                }
+                elements = new ArrayList<>(); //Mark the error
+                persistents = new ArrayList<>();
+            } finally {
+                if (in != null) {
+                    try {
+                        in.close();
+                    } catch (IOException e) {
+                        DynamXMain.log.error("I/O error closing data stream", e);
+                    }
+                }
+                /*start = (System.currentTimeMillis() - start);
+                if (start > DynamXConfig.networkChunkComputeWarnTime) {
+                    DynamXMain.log.warn("Took " + start + " ms to load terrain from network at " + pos + " ! Loaded " + elements + " elements and " + persistents + " persistent elements");
+                }*/
+                Vector3fPool.closePool();
+                data = new ChunkTerrain(elements, persistents);
+            }
+        }
+        //Handle received data
+        ChunkTerrain finalData = data;
+        DynamXContext.getPhysicsWorld(world).schedule(() -> receiveChunkData(pos, dataType, snapIdMod, rawData, finalData));
     }
 
     private void receiveChunkData(VerticalChunkPos pos, byte dataType, byte snapIdMod, @Nullable byte[] rawData, @Nullable ChunkTerrain parsedData) {
         ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.ASYNC_REMOTE_RCV, ChunkGraph.ActionLocation.LOADER, null, "DataType " + dataType + " " + snapIdMod + " " + parsedData + " " + queries.containsKey(pos) + " " + (rawData == null));
-        if (queries.containsKey(pos)) {
-            CompletableChunkLoading future = queries.get(pos);
-            if (future.getSnapIdMod() != snapIdMod) { //Re-check validity
-                if (DynamXConfig.enableDebugTerrainManager)
-                    DynamXMain.log.error("HD: Ignoring request answer " + snapIdMod + ". Now we want " + future.getSnapIdMod() + " " + pos + ". Some data was " + (rawData == null));
-                return;
-            } else {
-                queries.remove(pos);
-            }
-            if (dataType == 2) { //Persistent elements
-                if (rawData != null) { //Not empty : load received elements and complete the query
-                    rawSlopeDataCache.putData(pos, rawData);
-                    Vector3fPool.openPool();
-                    future.complete(new ChunkTerrain((List<ITerrainElement.IPersistentTerrainElement>) (List<?>) rawSlopeDataCache.loadChunk(pos, this)));
-                    Vector3fPool.closePool();
-                } else { //Empty : complete the query
-                    future.complete(new ChunkTerrain());
-                }
-            } else {
-                if (parsedData != null) { //Not empty : store received elements
-                    dataCache.put(pos, parsedData);
-                } else { //Empty : it's an error
-                    DynamXMain.log.error("Found an empty errored chunk at " + pos + " " + dataType + " " + (rawData == null));
-                    erroredChunks.add(pos);
-                }
-                //Complete the query
+        if (!queries.containsKey(pos)) {
+            DynamXMain.log.error("NO CORRESPONDING QUERY FOUND FOR " + pos + " " + dataType + " " + (rawData == null) + " at step: handling data");
+            return;
+        }
+        CompletableChunkLoading future = queries.get(pos);
+        if (future.getSnapIdMod() != snapIdMod) { //Re-check validity
+            if (DynamXConfig.enableDebugTerrainManager)
+                DynamXMain.log.error("HD: Ignoring request answer " + snapIdMod + ". Now we want " + future.getSnapIdMod() + " " + pos + ". Some data was " + (rawData == null));
+            return;
+        }
+        queries.remove(pos);
+        if (dataType == 2) { //Persistent elements
+            if (rawData != null) { //Not empty : load received elements and complete the query
+                rawSlopeDataCache.putData(pos, rawData);
                 Vector3fPool.openPool();
-                future.complete(parsedData);
+                future.complete(new ChunkTerrain((List<ITerrainElement.IPersistentTerrainElement>) (List<?>) rawSlopeDataCache.loadChunk(pos, this)));
                 Vector3fPool.closePool();
+            } else { //Empty : complete the query
+                future.complete(new ChunkTerrain());
             }
         } else {
-            DynamXMain.log.error("NO CORRESPONDING QUERY FOUND FOR " + pos + " " + dataType + " " + (rawData == null) + " at step: handling data");
+            if (parsedData != null) { //Not empty : store received elements
+                dataCache.put(pos, parsedData);
+            } else { //Empty : it's an error
+                DynamXMain.log.error("Found an empty errored chunk at " + pos + " " + dataType + " " + (rawData == null));
+                erroredChunks.add(pos);
+            }
+            //Complete the query
+            Vector3fPool.openPool();
+            future.complete(parsedData);
+            Vector3fPool.closePool();
         }
     }
 

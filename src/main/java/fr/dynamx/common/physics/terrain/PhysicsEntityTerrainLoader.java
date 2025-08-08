@@ -93,11 +93,11 @@ public class PhysicsEntityTerrainLoader implements IPhysicsTerrainLoader {
             if (!toLoad.isEmpty()) {
                 toLoad.forEach((load, priority) -> {
                     if (!terrain.subscribeToChunk(load, priority, profiler)) {
-                        // failed to load (because the chunk is not laoded into Minecaft), so we mark it as not loaded here
+                        // failed to load (because the chunk is not loaded into Minecraft), so we mark it as not loaded here
                         int i = load.y - curChunkY + radiusYHalf;
                         int j = (load.x - curChunkX + radiusHHalf) + (load.z - curChunkZ + radiusHHalf) * radiusH;
                         if (i < 0 || i > loadMatrice.length || j < 0 || j > loadMatrice[i].length) {
-                            DynamXMain.log.error("Local chunk pos computation error " + i+" "+j+" "+lastChunkX+" "+lastChunkY+" "+lastChunkZ+" "+curChunkX+" "+curChunkY+" "+curChunkZ+" "+radiusY+" "+radiusYHalf+" "+radiusH+" "+radiusHHalf);
+                            DynamXMain.log.error("Local chunk pos computation error {} {} {} {} {} {} {} {} " + radiusY + " " + radiusYHalf + " " + radiusH + " " + radiusHHalf, i, j, lastChunkX, lastChunkY, lastChunkZ, curChunkX, curChunkY, curChunkZ);
                             return;
                         }
                         loadMatrice[i][j] = -1;

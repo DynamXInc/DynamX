@@ -4,11 +4,8 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.ICollisionsContainer;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
-import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
-import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
-import fr.dynamx.api.dxmodel.DxModelPath;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.common.contentpack.type.MaterialVariantsInfo;
 import fr.dynamx.common.contentpack.type.ObjectCollisionsHelper;
@@ -20,7 +17,7 @@ import lombok.experimental.Accessors;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractItemObject<T, T> implements ICollisionsContainer, ParticleEmitterInfo.IParticleEmitterContainer {
+public abstract class AbstractProp<T extends AbstractProp<T>> extends AbstractItemObject<T, T> implements ICollisionsContainer, ParticleEmitterInfo.IParticleEmitterContainer {
     @Getter
     @Setter
     @PackFileProperty(configNames = "Translate", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false, defaultValue = "0 0 0")
@@ -32,7 +29,7 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
     @Getter
     @Setter
     @PackFileProperty(configNames = "RenderDistanceSquared", required = false, defaultValue = "4096")
-    protected float renderDistance = 4096;
+    protected float renderDistanceSquared = 4096;
 
     @Getter
     @Accessors(fluent = true)
@@ -59,12 +56,13 @@ public abstract class AbstractProp<T extends AbstractProp<?>> extends AbstractIt
     }
 
     @Override
-    public boolean hasVaryingTextures() {
+    public boolean hasTextureVariants() {
         return getVariants() != null;
     }
 
-    public int getMaxTextureMetadata() {
-        return hasVaryingTextures() ? getVariants().getVariantsMap().size() : 1;
+    @Override
+    public byte getMaxVariantId() {
+        return (byte) (hasTextureVariants() ? getVariants().getVariantsMap().size() : 1);
     }
 
     @Override

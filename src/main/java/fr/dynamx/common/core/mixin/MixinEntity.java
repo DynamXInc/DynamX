@@ -1,17 +1,14 @@
 package fr.dynamx.common.core.mixin;
 
 import fr.dynamx.common.DynamXContext;
-import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.debug.Profiler;
-import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MoverType;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -51,11 +48,11 @@ public abstract class MixinEntity {
                     shift = At.Shift.AFTER, ordinal = 5))
     private void move(MoverType type, double x, double y, double z, CallbackInfo ci) {
         AxisAlignedBB axisalignedbb = getEntityBoundingBox();
-        Vector3fPool.openPool();
+
         Profiler.get().start(Profiler.Profiles.ENTITY_COLLISION);
         double[] data = DynamXContext.getCollisionHandler().handleCollisionWithBulletEntities((Entity) (Object) this, type, x, y, z);
         Profiler.get().end(Profiler.Profiles.ENTITY_COLLISION);
-        Vector3fPool.closePool();
+
         x1 = data[0];
         y1 = data[1];
         z1 = data[2];

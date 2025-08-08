@@ -80,7 +80,8 @@ public class PhysicsEvent extends Event {
     }
 
     /**
-     * Called when a collision occurs in the physics engine
+     * Called when a collision occurs between two objects <br>
+     * This is a filtered version of {@link PhysicsCollision.Pre} that is called only once per collision
      */
     public static class PhysicsCollision extends PhysicsEvent {
         @Getter
@@ -101,7 +102,10 @@ public class PhysicsEvent extends Event {
             this.collisionInfo = collisionInfo;
         }
 
-
+        /**
+         * Called when a collision occurs in the physics engine <br>
+         * This can be fired multiple times per collision, as it's called for each contact point, directly from the physics engine
+         */
         public static class Pre extends PhysicsCollision {
 
             /**

@@ -1,5 +1,6 @@
 package fr.dynamx.common.slopes;
 
+import fr.aym.acsguis.api.ACsGuiFrame;
 import fr.aym.acsguis.component.button.GuiButton;
 import fr.aym.acsguis.component.button.GuiCheckBox;
 import fr.aym.acsguis.component.layout.GridLayout;
@@ -24,7 +25,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@ACsGuiFrame
 public class GuiSlopesConfig extends GuiFrame {
+    @ACsGuiFrame.RegisteredStyleSheet
     public static final ResourceLocation STYLE = new ResourceLocation(DynamXConstants.ID, "css/slope_generator.css");
 
     private final IMouseClickListener exitButton;
@@ -54,7 +57,7 @@ public class GuiSlopesConfig extends GuiFrame {
         GuiLabel lab;
         GuiScrollPane pane;
         add((pane = new GuiScrollPane()).setCssId("blacklist"));
-        add((text = new GuiSearchField(10, 20) {
+        add((text = new GuiSearchField(10) {
             @Override
             public List<String> generateAvailableNames() {
                 List<String> list = new ArrayList<>();
@@ -85,10 +88,12 @@ public class GuiSlopesConfig extends GuiFrame {
             DynamXContext.getNetwork().sendToServer(new MessageSlopesConfigGui(config.serialize()));
         }));
         setPauseGame(false);
+
+        setEnableDebugPanel(true);
     }
 
     private void setupBlacklist(SlopeBuildingConfig config, GuiScrollPane pane) {
-        pane.removeAllChilds();
+        pane.removeAllChildren();
         for (Block bo : config.getBlackList()) {
             ResourceLocation bl = bo.getRegistryName();
             pane.add(new GuiLabel(bl.toString()).setCssClass("blacklist_block").addClickListener((x, y, bt) -> {

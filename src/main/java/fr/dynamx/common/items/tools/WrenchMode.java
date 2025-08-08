@@ -313,7 +313,7 @@ public class WrenchMode {
             if (targetEntity instanceof BaseVehicleEntity) {
                 BaseVehicleEntity<?> vehicleEntity = (BaseVehicleEntity<?>) targetEntity;
                 //TODO TAKE HIDDEN VARIANTS IN ACCOUNT
-                if (vehicleEntity.getMetadata() + 1 < vehicleEntity.getPackInfo().getMaxTextureMetadata()) {
+                if (vehicleEntity.getMetadata() + 1 < vehicleEntity.getPackInfo().getMaxVariantId()) {
                     vehicleEntity.setMetadata(vehicleEntity.getMetadata() + 1);
                 } else {
                     vehicleEntity.setMetadata(0);
@@ -352,7 +352,7 @@ public class WrenchMode {
                             SeatsModule seats = ((IModuleContainer.ISeatsContainer) baseVehicleEntity).getSeats();
                             Entity seatRider = seats.getSeatToPassengerMap().get(partSeat);
                             if (seatRider == null) {
-                                partSeat.mount(baseVehicleEntity, seatsModule, entity);
+                                partSeat.mountEntity(baseVehicleEntity, seatsModule, entity);
                                 context.sendMessage(new TextComponentString("Entity added to vehicle"));
                                 return;
                             }

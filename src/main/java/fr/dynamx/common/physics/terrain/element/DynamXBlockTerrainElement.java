@@ -6,6 +6,7 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.EnumBulletShapeType;
 import fr.dynamx.api.physics.terrain.ITerrainElement;
+import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.blocks.TEDynamXBlock;
 import fr.dynamx.utils.VerticalChunkPos;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
@@ -13,6 +14,7 @@ import fr.dynamx.utils.debug.TerrainDebugData;
 import fr.dynamx.utils.debug.TerrainDebugRenderer;
 import fr.dynamx.utils.optimization.BoundingBoxPool;
 import fr.dynamx.utils.optimization.QuaternionPool;
+import fr.dynamx.utils.optimization.SubClassPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -65,7 +67,8 @@ public class DynamXBlockTerrainElement implements ITerrainElement {
     public PhysicsRigidBody build(World world, Vector3f pos) {
         TileEntity te = world.getTileEntity(this.pos);
         if (!(te instanceof TEDynamXBlock)) { //Not generated, should not happen because this should be removed from chunk
-            throw new IllegalStateException("DynamX block TE failed to load at " + this.pos);
+            DynamXMain.log.warn("[CHUNK DEBUG] Outdated DynamX block collisions found at: {}: TE not found. Maybe your packs have changed. The chunk will be reloaded", this.pos);
+            return null;
         }
         PhysicsRigidBody p = new PhysicsRigidBody(((TEDynamXBlock) te).getPhysicsCollision(), 0);
         p.setPhysicsLocation(pos.add(Vector3fPool.get(x + 0.5f, y + 1.5f, z + 0.5f)).addLocal(((TEDynamXBlock) te).getRelativeTranslation()));
@@ -83,16 +86,19 @@ public class DynamXBlockTerrainElement implements ITerrainElement {
 
     @Override
     public void addDebugToWorld(World mcWorld, Vector3f pos) {
+        Vector3fPool.openPool();
         QuaternionPool.openPool();
-        BoundingBoxPool.getPool().openSubPool();
+        BoundingBoxPool.getPool().openSubPool(SubClassPool.BOUNDING_BOX_DEFAULT);
 
         BoundingBox b = body.getCollisionShape().boundingBox(body.getPhysicsLocation(Vector3fPool.get()), body.getPhysicsRotation(QuaternionPool.get()), BoundingBoxPool.get());
         Vector3f min = b.getMin(Vector3fPool.get());
         Vector3f max = b.getMax(Vector3fPool.get());
         debugData = new TerrainDebugData(TerrainDebugRenderer.DYNAMXBLOCKS, new float[]{min.x, min.y, min.z, max.x, max.y, max.z});
         (mcWorld.isRemote ? DynamXDebugOptions.CLIENT_BLOCK_BOXES : DynamXDebugOptions.BLOCK_BOXES).getDataIn().put(debugData.getUuid(), debugData);
+
         BoundingBoxPool.getPool().closeSubPool();
         QuaternionPool.closePool();
+        Vector3fPool.closePool();
     }
 
     @Override

@@ -1,5 +1,6 @@
 package fr.dynamx.common.entities.modules;
 
+import fr.dynamx.api.blocks.IBlockEntityModule;
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.common.contentpack.parts.ILightOwner;
@@ -17,8 +18,8 @@ import net.minecraftforge.common.util.Constants;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class AbstractLightsModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>> {
-    @Getter
+@Getter
+public abstract class AbstractLightsModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, IBlockEntityModule {
     private final ILightOwner<?> lightOwner;
 
     public AbstractLightsModule(ILightOwner<?> lightOwner) {

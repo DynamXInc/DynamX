@@ -1,14 +1,11 @@
 package fr.dynamx.client.renders.model.renderer;
 
-import fr.dynamx.api.events.EventPhase;
-import fr.dynamx.api.events.client.DynamXArmorRenderEvent;
 import fr.dynamx.client.DynamXModelRegistry;
 import fr.dynamx.client.renders.model.MissingObjModel;
 import fr.dynamx.client.renders.model.ModelObjArmor;
 import fr.dynamx.utils.client.ClientDynamXUtils;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.joml.Matrix4f;
@@ -52,7 +49,7 @@ public class ArmorRenderer extends ModelRenderer {
                 GlStateManager.translate(-this.offsetX, this.offsetY, -this.offsetZ);
                 switch (objModel.getFormat()) {
                     case OBJ:
-                        ((ObjModelRenderer) objModel).renderGroup(objObjectRenderer, model.getActiveTextureId());
+                        ((ObjModelRenderer) objModel).renderGroup(objObjectRenderer, model.getActiveTextureId(), true);
                         break;
                     //TODO YANIS: GLTF
                 }
@@ -68,7 +65,7 @@ public class ArmorRenderer extends ModelRenderer {
      * @param transform The transformation matrix to use, modified by the model's transformations
      */
     @SideOnly(Side.CLIENT)
-    public void render(Matrix4f transform) {
+    public void render(Matrix4f transform, boolean forceVanillaRender) {
         if (!this.isHidden) {
             if (this.showModel) {
                 transform.translate(this.rotationPointX, this.rotationPointY, this.rotationPointZ);
@@ -87,7 +84,7 @@ public class ArmorRenderer extends ModelRenderer {
                 GlStateManager.multMatrix(ClientDynamXUtils.getMatrixBuffer(transform));
                 switch (objModel.getFormat()) {
                     case OBJ:
-                        ((ObjModelRenderer) objModel).renderGroup(objObjectRenderer, model.getActiveTextureId());
+                        ((ObjModelRenderer) objModel).renderGroup(objObjectRenderer, model.getActiveTextureId(), forceVanillaRender);
                         break;
                     //TODO YANIS: GLTF
                 }
@@ -107,7 +104,7 @@ public class ArmorRenderer extends ModelRenderer {
                 rotateXYZ(true);
                 switch (objModel.getFormat()) {
                     case OBJ:
-                        ((ObjModelRenderer) objModel).renderGroup(objObjectRenderer, model.getActiveTextureId());
+                        ((ObjModelRenderer) objModel).renderGroup(objObjectRenderer, model.getActiveTextureId(), true);
                         break;
                     //TODO YANIS: GLTF
                 }

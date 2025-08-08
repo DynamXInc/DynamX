@@ -1,5 +1,6 @@
 package fr.dynamx.server.command;
 
+import fr.dynamx.common.command.ISubCommand;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.entities.PropsEntity;
 import fr.dynamx.common.entities.RagdollEntity;
@@ -15,7 +16,6 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.List;
 
 public class CmdKillEntities implements ISubCommand {

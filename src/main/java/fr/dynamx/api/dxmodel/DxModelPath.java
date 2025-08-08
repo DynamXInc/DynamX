@@ -30,6 +30,7 @@ public class DxModelPath implements INamedObject {
 
         if(modelPath.getPath().endsWith(".obj")) format = EnumDxModelFormats.OBJ;
         else if(modelPath.getPath().endsWith(".gltf")) format = EnumDxModelFormats.GLTF;
+        else if(modelPath.getPath().endsWith(".json")) format = EnumDxModelFormats.JSON;
         else throw new IllegalArgumentException("Model format not supported: " + modelPath.getPath());
     }
 

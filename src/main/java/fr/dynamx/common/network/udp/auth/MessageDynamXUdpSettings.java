@@ -55,8 +55,10 @@ public class MessageDynamXUdpSettings implements IDnxPacket, IMessageHandler<Mes
 
     @Override
     public IMessage onMessage(final MessageDynamXUdpSettings packet, MessageContext ctx) {
-        if (DynamXConfig.udpDebug)
+        if (DynamXConfig.udpDebug) {
             DynamXMain.log.info("[UDP-DEBUG] Received auth proposal");
+        }
+        DynamXMain.log.info("Received udp auth proposal. PackSync is {}.", packet.syncDynamXPacks);
         DynamXConfig.syncPacks = packet.syncDynamXPacks;
         Minecraft.getMinecraft().addScheduledTask(() -> ((DynamXClientNetworkSystem) DynamXContext.getNetwork()).startNetwork(EnumNetworkType.values()[packet.voiceServerType], packet.hash, packet.ip, packet.udpPort));
         return null;

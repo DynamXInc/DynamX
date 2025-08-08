@@ -1,6 +1,7 @@
 package fr.dynamx.common.contentpack.type.vehicle;
 
 import com.jme3.math.Vector3f;
+import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.ICollisionsContainer;
 import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.IPartContainer;
@@ -34,6 +35,7 @@ import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.EnumPlayerStandOnTop;
+import fr.dynamx.utils.errors.DynamXErrorManager;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
@@ -60,10 +62,6 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
             return new IPackFilePropertyFixer.FixResult("UseComplexCollisions", true);
         if ("Textures".equals(key))
             return new IPackFilePropertyFixer.FixResult("MaterialVariants", true, true);
-        if ("ItemTranslate".equals(key))
-            return new IPackFilePropertyFixer.FixResult("ItemTransforms block", true, true);
-        if ("ItemRotate".equals(key))
-            return new IPackFilePropertyFixer.FixResult("ItemTransforms block", true, true);
         return null;
     };
 
@@ -153,7 +151,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
 
     @Setter
     @PackFileProperty(configNames = "RenderDistanceSquared", required = false, defaultValue = "-1")
-    protected float renderDistance = -1;
+    protected float renderDistanceSquared = -1;
 
     /**
      * The particle emitters of this vehicle
@@ -226,7 +224,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
             variants.appendTo(this);
         }
         //Map lights
-        lightSources.values().forEach(PartLightSource::postLoad);
+        lightSources.values().forEach(l -> l.postLoad(hot));
         //Post-load sub-properties
         if (!super.postLoad(hot))
             return false;
@@ -314,19 +312,20 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
 
     @Override
     public IModelTextureVariantsSupplier.IModelTextureVariants getTextureVariantsFor(ObjObjectRenderer objObjectRenderer) {
-        PartLightSource src = getLightSource(objObjectRenderer.getObjObjectData().getName());
+        PartLightSource src = objObjectRenderer != null ? getLightSource(objObjectRenderer.getObjObjectData().getName()) : null;
         if (src != null)
-            return src;
+            return src.getVariants();
         return getVariants();
     }
 
     @Override
-    public boolean hasVaryingTextures() {
+    public boolean hasTextureVariants() {
         return getVariants() != null;
     }
 
-    public int getMaxTextureMetadata() {
-        return hasVaryingTextures() ? getVariants().getVariantsMap().size() : 1;
+    @Override
+    public byte getMaxVariantId() {
+        return (byte) (hasTextureVariants() ? getVariants().getVariantsMap().size() : 1);
     }
 
     @Override
@@ -366,6 +365,10 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
      */
     @Override
     public void addLightSource(PartLightSource source) {
+        if (lightSources.containsKey(source.getObjectName())) {
+            DynamXErrorManager.addPackError(getPackName(), "duplicated_multi_light", ErrorLevel.HIGH, getName(), "Light named " + source.getPartName() + " on part " + source.getObjectName() + " is in conflict with " + lightSources.get(source.getObjectName()).getPartName());
+            return;
+        }
         lightSources.put(source.getObjectName(), source);
         addDrawablePart(source);
     }

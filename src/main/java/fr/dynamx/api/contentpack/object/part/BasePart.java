@@ -30,7 +30,7 @@ import net.minecraft.util.ResourceLocation;
  * @param <T> The owner of this part. Should implement ISubInfoTypeOwner<?>.
  */
 @Getter
-public abstract class BasePart<T extends ISubInfoTypeOwner<?>> extends SubInfoType<T> {
+public abstract class BasePart<T extends ISubInfoTypeOwner<T>> extends SubInfoType<T> {
     /**
      * Deprecated properties of BasePart: <br>
      * - ShapePosition -> Position <br>
@@ -79,6 +79,7 @@ public abstract class BasePart<T extends ISubInfoTypeOwner<?>> extends SubInfoTy
     /**
      * The scale (size) of this part, relative to the 3D model.
      */
+    @Setter
     @PackFileProperty(configNames = "Scale", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F_INVERSED, required = false, description = "common.scale", defaultValue = "0.5 1 0.5")
     protected Vector3f scale = new Vector3f(0.5f, 1, 0.5f);
 

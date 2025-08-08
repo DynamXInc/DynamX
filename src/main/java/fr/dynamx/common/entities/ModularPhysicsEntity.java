@@ -9,9 +9,11 @@ import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariableRegistry;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.common.physics.entities.PackEntityPhysicsHandler;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.relauncher.Side;
 
 import javax.annotation.Nullable;
@@ -71,7 +73,7 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
      * @param physicsInitCallback The new {@link ModularEntityInitCallback}
      */
     public ModularPhysicsEntity<T> setPhysicsInitCallback(ModularEntityPhysicsInitCallback physicsInitCallback) {
-        if(initialized == EnumEntityInitState.ALL){
+        if (initialized == EnumEntityInitState.ALL) {
             physicsInitCallback.onPhysicsInit(this, physicsHandler);
             return this;
         }
@@ -125,16 +127,19 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
         }
         //Init them before sorting because listened functions may change
         getListenerModules();
-        //SynchronizedVariablesRegistry.setSyncVarsForContext(world.isRemote ? Side.CLIENT : Side.SERVER, new HashMap<>(), getNetwork());
         return true;
     }
 
     @Override
     public void initPhysicsEntity(boolean usePhysics) {
-        if (usePhysics) physicsHandler = createPhysicsHandler();
+        if (usePhysics) {
+            physicsHandler = createPhysicsHandler();
+            assert physicsHandler != null : "PhysicsHandler can't be null when using physics!";
+        }
         moduleList.forEach(m -> ((IPhysicsModule<T>) m).initPhysicsEntity(physicsHandler));
-        if (usePhysics)
+        if (usePhysics) {
             physicsHandler.addToWorld(); //Add the physics handler to the physics world AFTER modules initialisation
+        }
         if (physicsInitCallback != null) {
             physicsInitCallback.onPhysicsInit(this, physicsHandler);
             physicsInitCallback = null; //Free memory
@@ -183,6 +188,36 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
     protected void writeEntityToNBT(NBTTagCompound tagCompound) {
         super.writeEntityToNBT(tagCompound);
         moduleList.forEach(m -> m.writeToNBT(tagCompound));
+    }
+
+    @Override
+    public void writeSpawnData(ByteBuf buffer) {
+        super.writeSpawnData(buffer);
+        buffer.writeInt(moduleList.size());
+        moduleList.forEach(m -> {
+            if (m instanceof IEntityAdditionalSpawnData) {
+                ((IEntityAdditionalSpawnData) m).writeSpawnData(buffer);
+            }
+        });
+    }
+
+    @Override
+    public void readSpawnData(ByteBuf additionalData) {
+        super.readSpawnData(additionalData);
+        int size = additionalData.readInt();
+        if(size == 0) {
+            return;
+        }
+        int i = 0;
+        for (IPhysicsModule<?> m : moduleList) {
+            if (i >= size) {
+                return;
+            }
+            if (m instanceof IEntityAdditionalSpawnData) {
+                ((IEntityAdditionalSpawnData) m).readSpawnData(additionalData);
+                i++;
+            }
+        }
     }
 
     @Override
@@ -261,6 +296,18 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
         } else {
             return super.getControllingPassenger();
         }
+    }
+
+    @Override
+    public void setDead() {
+        super.setDead();
+        moduleList.forEach(IPhysicsModule::onSetDead);
+    }
+
+    @Override
+    public void onRemovedFromWorld() {
+        super.onRemovedFromWorld();
+        moduleList.forEach(IPhysicsModule::onRemovedFromWorld);
     }
 
     public List<IPhysicsModule<?>> getModules() {

@@ -2,6 +2,7 @@ package fr.dynamx.common.physics.terrain.computing;
 
 import fr.dynamx.api.physics.terrain.ITerrainElement;
 import fr.dynamx.common.physics.terrain.element.CompoundBoxTerrainElement;
+import fr.dynamx.common.physics.terrain.element.EmptyTerrainElement;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -122,7 +123,13 @@ public class TerrainBoxConstructor {
             result.add(new CompoundBoxTerrainElement(-x, -y, -z, vanillaBoxes));
         }
         //And add all standard TerrainElements
-        result.add(new CompoundBoxTerrainElement(-x, -y, -z, outListMutable));
+        if (!outListMutable.isEmpty()) {
+            result.add(new CompoundBoxTerrainElement(-x, -y, -z, outListMutable));
+        }
+        if (result.isEmpty()) {
+            // Helps to know that chunk collisions had been successfully loaded, but for an empty chunk
+            result.add(new EmptyTerrainElement());
+        }
         return result;
     }
 }

@@ -14,7 +14,8 @@ public enum TerrainElementsFactory {
     COMPOUND_BOX(CompoundBoxTerrainElement::new),
     CUSTOM_SLOPE(() -> new CustomSlopeTerrainElement((byte) 1)),
     COMPOUND_STAIRS(CompoundStairsTerrainElement::new),
-    DYNAMX_BLOCK(DynamXBlockTerrainElement::new);
+    DYNAMX_BLOCK(DynamXBlockTerrainElement::new),
+    EMPTY(EmptyTerrainElement::new);
 
     private final Callable<ITerrainElement> factory;
 

@@ -7,9 +7,16 @@ import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.objects.AbstractItemObject;
 import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.RegistryNameSetter;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
+
+import javax.annotation.Nullable;
+import java.util.List;
 
 public class DynamXItem<T extends AbstractItemObject<?, ?>> extends Item implements IDynamXItem<T>, IResourcesOwner {
     protected T itemInfo;
@@ -22,7 +29,6 @@ public class DynamXItem<T extends AbstractItemObject<?, ?>> extends Item impleme
         RegistryNameSetter.setRegistryName(this, DynamXConstants.ID, itemInfo.getFullName().toLowerCase());
         setTranslationKey(DynamXConstants.ID + "." + itemInfo.getFullName().toLowerCase());
         setCreativeTab(itemInfo.getCreativeTab(DynamXItemRegistry.objectTab));
-        setMaxStackSize(itemInfo.getMaxItemStackSize());
         DynamXItemRegistry.add(this);
     }
 
@@ -36,7 +42,7 @@ public class DynamXItem<T extends AbstractItemObject<?, ?>> extends Item impleme
      *
      * @param modid    The mod owning this item used to register the item
      * @param itemName The name of the item
-     * @param model     The obj model of the block "namespace:resourceName.obj"
+     * @param model    The obj model of the block "namespace:resourceName.obj"
      */
     public DynamXItem(String modid, String itemName, ResourceLocation model) {
         if (modid.contains("builtin_mod_")) { //Backward-compatibility
@@ -54,12 +60,19 @@ public class DynamXItem<T extends AbstractItemObject<?, ?>> extends Item impleme
         DynamXItemRegistry.add(this);
     }
 
+    @Override
+    public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
+        super.addInformation(stack, worldIn, tooltip, flagIn);
+        DynamXUtils.addItemTooltip(tooltip, getInfo(), (byte) stack.getMetadata());
+    }
+
     public T getInfo() {
         return itemInfo;
     }
 
     public void setInfo(T itemInfo) {
         this.itemInfo = itemInfo;
+        setMaxStackSize(itemInfo.getMaxItemStackSize());
     }
 
     @Override

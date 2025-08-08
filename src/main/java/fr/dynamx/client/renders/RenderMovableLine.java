@@ -19,6 +19,9 @@ import org.lwjgl.opengl.GL11;
 import java.util.Map;
 
 public class RenderMovableLine {
+    public static boolean hasMovableLines() {
+        return !DynamXContext.getPlayerPickingObjects().isEmpty();
+    }
 
     public static void renderLine(float partialTicks) {
         for (Map.Entry<Integer, Integer> entry : DynamXContext.getPlayerPickingObjects().entrySet()) {

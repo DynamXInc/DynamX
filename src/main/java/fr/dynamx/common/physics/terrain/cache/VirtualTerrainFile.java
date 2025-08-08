@@ -19,7 +19,9 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 /**
- * Terrain data cache
+ * Virtual terrain data cache (used as is on remote clients)
+ *
+ * @see FileTerrainCache
  */
 public class VirtualTerrainFile {
     protected final ConcurrentHashMap<VerticalChunkPos, byte[]> dataCache = new ConcurrentHashMap<>();
@@ -27,8 +29,9 @@ public class VirtualTerrainFile {
 
     public void lock(VerticalChunkPos pos) {
         synchronized (loadingLocks) {
-            if (!loadingLocks.containsKey(pos))
+            if (!loadingLocks.containsKey(pos)) {
                 loadingLocks.put(pos, new ReentrantLock());
+            }
             loadingLocks.get(pos).lock();
         }
     }
@@ -39,9 +42,9 @@ public class VirtualTerrainFile {
 
     public void setChunk(VerticalChunkPos pos, List<ITerrainElement> elements) throws IOException {
         boolean debug = DynamXConfig.enableDebugTerrainManager && DynamXConfig.chunkDebugPoses.contains(pos);
-        if (debug)
-            DynamXMain.log.info("[CHUNK DEBUG] Saving chunk " + pos + " with " + elements.size() + " elements");
-
+        if (debug) {
+            DynamXMain.log.info("[CHUNK DEBUG] Saving chunk " + pos + " with " + elements.size() + " elements in " + this);
+        }
         lock(pos);
         ByteArrayOutputStream data = new ByteArrayOutputStream();
         ObjectOutputStream out = new ObjectOutputStream(new GZIPOutputStream(data));
@@ -49,85 +52,71 @@ public class VirtualTerrainFile {
         for (ITerrainElement e : elements) {
             if (debug)
                 DynamXMain.log.info("[CHUNK DEBUG] Saving element " + e);
-            //out.writeUTF(e.getClass().getName());
             out.writeByte(e.getFactory().ordinal());
             e.save(ITerrainElement.TerrainSaveType.DISK, out);
         }
         out.close();
-        //elements.clear();
         byte[] arr = data.toByteArray();
-        sumOfBytes += arr.length;
-        //DynamXMain.log.debug("Saving "+pos+" with "+elements+" takes "+arr.length+" bytes. Total "+sumOfBytes+" bytes");
         dataCache.put(pos, arr);
         unlock(pos);
     }
 
-    public static long sumOfBytes;
-
     public List<ITerrainElement> loadChunk(VerticalChunkPos pos, ITerrainCache terrainCache) {
         boolean debug = DynamXConfig.enableDebugTerrainManager && DynamXConfig.chunkDebugPoses.contains(pos);
-        if (debug)
-            DynamXMain.log.info("[CHUNK DEBUG] Loading chunk " + pos);
+        if (debug) {
+            DynamXMain.log.info("[CHUNK DEBUG] Loading chunk " + pos + " in " + this);
+        }
 
         lock(pos);
-        if (dataCache.containsKey(pos)) {
-            byte[] dt = dataCache.get(pos);
-
-            List<ITerrainElement> trimeshShape = new ArrayList<>();
-            ObjectInputStream in = null;
-            try {
-                if (dt == null) {
-                    if (this instanceof TerrainFile) {
-                        DynamXMain.log.error("Java multithreading crazy things... Cannot load chunk at " + pos + " because contains null element in data cache ?!?!? WTF");
-                        terrainCache.invalidate(pos, true, false);
-                    }
-                    trimeshShape = null;
-                } else {
-                    in = DynamXUtils.getTerrainObjectsIS(new GZIPInputStream(new ByteArrayInputStream(dt)));
-                    int size = in.readInt();
-                    //System.out.println("Read "+size+" elements in stream of size "+in.available());
-                    if (debug)
-                        DynamXMain.log.info("[CHUNK DEBUG] Found " + size + " elements");
-                    for (int i = 0; i < size; i++) {
-                        ITerrainElement o;
-                        o = TerrainElementsFactory.getById(in.readByte());
-                        if (debug)
-                            DynamXMain.log.info("[CHUNK DEBUG] Loading element " + o);
-                        if (o.load(ITerrainElement.TerrainSaveType.DISK, in, pos)) {
-                            trimeshShape.add(o);
-                        } else {
-                            throw new IllegalStateException("Terrain element " + o + " failed to load");
-                        }
-                    }
-                    in.close();
-                }
-            } catch (InvalidClassException | IllegalArgumentException e) {
-                DynamXMain.log.warn("Invalid terrain save version at " + pos + ", invalidating it... Error is " + e.getMessage());
-                if (in != null) {
-                    try {
-                        in.close();
-                    } catch (IOException ignored) {
-                    }
-                }
-                terrainCache.invalidate(pos, true, false); //remove loaded elements
-            } catch (Exception e) {
-                DynamXMain.log.error("Cannot load terrain save at " + pos + ", invalidating it...", e);
-                if (in != null) {
-                    try {
-                        in.close();
-                    } catch (IOException ignored) {
-                    }
-                }
-                terrainCache.invalidate(pos, true, false); //remove loaded elements
-            } finally {
-                unlock(pos);
+        byte[] dt = dataCache.get(pos);
+        if (dt == null) {
+            if (debug) {
+                DynamXMain.log.error("[CHUNK DEBUG] Chunk not found in save file " + this);
             }
-            return trimeshShape;
+            unlock(pos);
+            return null;
         }
-        if (debug)
-            DynamXMain.log.error("[CHUNK DEBUG] Chunk not found in save file");
-        unlock(pos);
-        return null;
+        List<ITerrainElement> terrainElements = new ArrayList<>();
+        ObjectInputStream in = null;
+        try {
+            in = DynamXUtils.getTerrainObjectsIS(new GZIPInputStream(new ByteArrayInputStream(dt)));
+            int size = in.readInt();
+            if (debug)
+                DynamXMain.log.info("[CHUNK DEBUG] Found " + size + " elements");
+            for (int i = 0; i < size; i++) {
+                ITerrainElement o;
+                o = TerrainElementsFactory.getById(in.readByte());
+                if (debug)
+                    DynamXMain.log.info("[CHUNK DEBUG] Loading element " + o);
+                if (o.load(ITerrainElement.TerrainSaveType.DISK, in, pos)) {
+                    terrainElements.add(o);
+                } else {
+                    throw new IllegalStateException("Terrain element " + o + " failed to load");
+                }
+            }
+            in.close();
+        } catch (InvalidClassException | IllegalArgumentException e) {
+            DynamXMain.log.warn("Invalid terrain save version at " + pos + ", invalidating it... Error is " + e.getMessage());
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException ignored) {
+                }
+            }
+            terrainCache.invalidate(pos, true, false); //remove loaded elements
+        } catch (Exception e) {
+            DynamXMain.log.error("Cannot load terrain save at " + pos + ", invalidating it...", e);
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException ignored) {
+                }
+            }
+            terrainCache.invalidate(pos, true, false); //remove loaded elements
+        } finally {
+            unlock(pos);
+        }
+        return terrainElements;
     }
 
     public void removeChunk(VerticalChunkPos pos) {

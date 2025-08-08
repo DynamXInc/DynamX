@@ -1,6 +1,7 @@
 package fr.dynamx.client.gui;
 
 import fr.aym.acsguis.api.ACsGuiApi;
+import fr.aym.acsguis.api.ACsGuiFrame;
 import fr.aym.acsguis.component.button.GuiButton;
 import fr.aym.acsguis.component.button.GuiCheckBox;
 import fr.aym.acsguis.component.layout.GridLayout;
@@ -27,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@ACsGuiFrame
 public class NewGuiDnxDebug extends GuiFrame {
     private final GuiPanel homePanel;
     private final GuiLabel homeButton;
@@ -36,6 +38,7 @@ public class NewGuiDnxDebug extends GuiFrame {
 
     private static Panel activePanel = Panel.NONE;
 
+    @ACsGuiFrame.RegisteredStyleSheet
     public static final ResourceLocation STYLE = new ResourceLocation(DynamXConstants.ID, "css/new_dnx_debug.css");
 
     public NewGuiDnxDebug() {

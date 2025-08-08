@@ -8,12 +8,14 @@ import fr.dynamx.api.contentpack.registry.IPackFilePropertyFixer;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.dxmodel.EnumDxModelFormats;
+import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.events.CreatePackItemEvent;
 import fr.dynamx.api.events.client.BuildSceneGraphEvent;
 import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.client.renders.scene.node.BlockNode;
 import fr.dynamx.client.renders.scene.node.SceneNode;
 import fr.dynamx.common.blocks.DynamXBlock;
+import fr.dynamx.common.blocks.TEDynamXBlock;
 import fr.dynamx.common.contentpack.loader.InfoList;
 import fr.dynamx.common.contentpack.parts.ILightOwner;
 import fr.dynamx.common.contentpack.parts.PartLightSource;
@@ -24,22 +26,19 @@ import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.errors.DynamXErrorManager;
 import lombok.Getter;
 import lombok.Setter;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraftforge.common.MinecraftForge;
 
 import java.util.*;
 
-public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> implements ParticleEmitterInfo.IParticleEmitterContainer, ILightOwner<T> {
+public class BlockObject<T extends BlockObject<T>> extends AbstractProp<T> implements ParticleEmitterInfo.IParticleEmitterContainer, ILightOwner<T> {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.BLOCKS)
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("UseHullShape".equals(key))
             return new IPackFilePropertyFixer.FixResult("UseComplexCollisions", true);
         if ("Textures".equals(key))
             return new IPackFilePropertyFixer.FixResult("MaterialVariants", true, true);
-        if ("ItemTranslate".equals(key))
-            return new IPackFilePropertyFixer.FixResult("ItemTransforms block", true, true);
-        if ("ItemRotate".equals(key))
-            return new IPackFilePropertyFixer.FixResult("ItemTransforms block", true, true);
         return null;
     };
 
@@ -61,6 +60,26 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
     @Getter
     protected Material material = Material.ROCK;
 
+    @PackFileProperty(configNames = {"BreakHardness", "Hardness"}, required = false, defaultValue = "0.6")
+    @Getter
+    protected float blockHardness = 0.6f;
+
+    @PackFileProperty(configNames = {"ExplosionResistance", "Resistance"}, required = false, defaultValue = "3")
+    @Getter
+    protected float blockResistance = 3;
+
+    @PackFileProperty(configNames = "SoundType", required = false, defaultValue = "STONE")
+    @Getter
+    protected SoundType soundType = SoundType.STONE;
+
+    @PackFileProperty(configNames = "HarvestTool", required = false)
+    @Getter
+    protected String harvestTool;
+
+    @PackFileProperty(configNames = "HarvestLevel", required = false, defaultValue = "0")
+    @Getter
+    protected int harvestLevel;
+
     /**
      * The light sources of this block
      */
@@ -80,7 +99,7 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
     @Override
     public IModelTextureVariants getTextureVariantsFor(ObjObjectRenderer objObjectRenderer) {
         PartLightSource src = objObjectRenderer != null ? getLightSource(objObjectRenderer.getObjObjectData().getName()) : null;
-        return src != null ? src : super.getTextureVariantsFor(objObjectRenderer);
+        return src != null ? src.getVariants() : super.getTextureVariantsFor(objObjectRenderer);
     }
 
     @Override
@@ -93,9 +112,9 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
         if (texturesArray != null)
             new MaterialVariantsInfo(this, texturesArray).appendTo(this);
         //Map lights
-        lightSources.values().forEach(PartLightSource::postLoad);
+        lightSources.values().forEach(l -> l.postLoad(hot));
         collisionsHelper.loadCollisions(this, DynamXUtils.getModelPath(getPackName(), model), "", translation, 0, useComplexCollisions, scaleModifier, ObjectCollisionsHelper.CollisionType.BLOCK);
-        if (hasVaryingTextures() && getMaxTextureMetadata() > 16 && (getCreativeTabName() == null || !getCreativeTabName().equalsIgnoreCase("None"))) {
+        if (hasTextureVariants() && getMaxVariantId() > 16 && (getCreativeTabName() == null || !getCreativeTabName().equalsIgnoreCase("None"))) {
             DynamXErrorManager.addError(getPackName(), DynamXErrorManager.PACKS_ERRORS, "too_many_variants", ErrorLevel.HIGH, getName(), "You can't use more than 16 variants on blocks !");
         }
         return super.postLoad(hot);
@@ -147,11 +166,15 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
     }
 
     public boolean isDxModel() {
-        return EnumDxModelFormats.isValidFormat(getModel().getPath());
+        return EnumDxModelFormats.isDxModel(getModel().getPath());
     }
 
     @Override
     public void addLightSource(PartLightSource source) {
+        if (lightSources.containsKey(source.getObjectName())) {
+            DynamXErrorManager.addPackError(getPackName(), "duplicated_multi_light", ErrorLevel.HIGH, getName(), "Light named " + source.getPartName() + " on part " + source.getObjectName() + " is in conflict with " + lightSources.get(source.getObjectName()).getPartName());
+            return;
+        }
         lightSources.put(source.getObjectName(), source);
         addDrawablePart(source);
     }
@@ -159,5 +182,11 @@ public class BlockObject<T extends BlockObject<?>> extends AbstractProp<T> imple
     @Override
     public PartLightSource getLightSource(String objectName) {
         return lightSources.get(objectName);
+    }
+
+    public void addModules(TEDynamXBlock blockEntity, ModuleListBuilder modules) {
+        getSubProperties().forEach(sub -> sub.addBlockModules(blockEntity, modules));
+        getAllParts().forEach(sub -> sub.addBlockModules(blockEntity, modules));
+        getLightSources().values().forEach(compoundLight -> compoundLight.addBlockModules(blockEntity, modules));
     }
 }

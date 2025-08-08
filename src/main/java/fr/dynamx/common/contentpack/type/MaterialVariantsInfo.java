@@ -18,7 +18,7 @@ import java.util.Map;
 public class MaterialVariantsInfo<T extends ISubInfoTypeOwner<T>> extends SubInfoType<T> implements IModelTextureVariantsSupplier.IModelTextureVariants {
     @Setter
     @Getter
-    @PackFileProperty(configNames = "BaseMaterial", required = false)
+    @PackFileProperty(configNames = "BaseMaterial", required = false, defaultValue = "Primary material configured in the model")
     private String baseMaterial = "Default";
     @PackFileProperty(configNames = "Variants", defaultValue = "\"DynamX1 DynamX2\"")
     private String[] texturesArray;
@@ -72,5 +72,16 @@ public class MaterialVariantsInfo<T extends ISubInfoTypeOwner<T>> extends SubInf
     @Override
     public Map<Byte, TextureVariantData> getTextureVariants() {
         return variantsMap;
+    }
+
+    public void addVariant(TextureVariantData variantData, boolean allowOverride) {
+        if (variantsMap.containsKey(variantData.getId()) && !allowOverride) {
+            throw new IllegalArgumentException("Texture variant id " + variantData.getId() + " already took");
+        }
+        variantsMap.put(variantData.getId(), variantData);
+    }
+
+    public boolean hasVariant(byte variantId) {
+        return variantsMap.containsKey(variantId);
     }
 }

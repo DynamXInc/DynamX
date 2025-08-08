@@ -1,5 +1,6 @@
 package fr.dynamx.common.contentpack.parts;
 
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.IPartContainer;
@@ -48,6 +49,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
+import org.joml.Matrix4f;
 
 import javax.annotation.Nullable;
 import javax.vecmath.Vector2f;
@@ -186,6 +188,8 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     }
 
     protected void readPosition(ResourceLocation model) {
+        if (getPosition() != null && getCarAttachPoint() != null && getScale().lengthSquared() != 0)
+            return; // Fix: don't load the model data if we don't need to
         DxModelData modelData = DynamXContext.getDxModelDataFromCache(DynamXUtils.getModelPath(getPackName(), model));
         if (modelData != null) {
             if (getPosition() == null) {
@@ -269,8 +273,8 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     }
 
     @Override
-    public float getRenderDistance() {
-        return owner.getRenderDistance();
+    public float getRenderDistanceSquared() {
+        return owner.getRenderDistanceSquared();
     }
 
     @Override
@@ -350,14 +354,24 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
         return getOwner().getTextureVariantsFor(objObjectRenderer);
     }
 
+    @Override
+    public boolean hasTextureVariants() {
+        return getOwner().hasTextureVariants();
+    }
+
+    @Override
+    public byte getMaxVariantId() {
+        return getOwner().getMaxVariantId();
+    }
+
     class PartDoorNode<A extends IModelPackObject> extends SimpleNode<BaseRenderContext.EntityRenderContext, A> {
         public PartDoorNode(PartDoor door, Vector3f scale, List<SceneNode<BaseRenderContext.EntityRenderContext, A>> linkedChilds) {
-            super(door.getCarAttachPoint(), null, PartDoor.this.isAutomaticPosition, scale, linkedChilds);
+            super(door.getCarAttachPoint(), (Quaternion) null, PartDoor.this.isAutomaticPosition, scale, linkedChilds);
         }
 
         @Override
-        public void render(BaseRenderContext.EntityRenderContext context, A packInfo) {
-            transform.set(parent.getTransform());
+        public void render(BaseRenderContext.EntityRenderContext context, A packInfo, Matrix4f parentTransform) {
+            transform.set(parentTransform);
             ModularPhysicsEntity<?> entity = context.getEntity();
             DoorsModule module = entity != null ? entity.getModuleByType(DoorsModule.class) : null;
             if (!isEnabled() || module == null || module.getCurrentState(getId()) == DoorsModule.DoorState.CLOSED) {
@@ -378,12 +392,12 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
                 transform.rotate(ClientDynamXUtils.computeInterpolatedJomlQuaternion(prev.getRotation(), rbSyncTrans.getRotation(), partialTicks));
             }
             transform.scale(scale.x, scale.y, scale.z);
+
             GlStateManager.pushMatrix();
-            GlStateManager.multMatrix(ClientDynamXUtils.getMatrixBuffer(transform));
-            transformToPartPos();
+            glTransformToPartPos();
             context.getRender().renderModelGroup(context.getModel(), getObjectName(), entity, context.getTextureId(), false);
             GlStateManager.popMatrix();
-            renderChildren(context, packInfo);
+            renderChildren(context, packInfo, transform);
         }
 
         @Override

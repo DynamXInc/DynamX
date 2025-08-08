@@ -4,6 +4,7 @@ import com.jme3.math.FastMath;
 import fr.aym.acsguis.api.GuiAPIClientHelper;
 import fr.aym.acsguis.component.layout.GuiScaler;
 import fr.aym.acsguis.component.panel.GuiFrame;
+import fr.aym.acsguis.utils.ComponentRenderContext;
 import fr.dynamx.common.items.tools.ItemWrench;
 import fr.dynamx.common.items.tools.WrenchMode;
 import fr.dynamx.utils.DynamXConstants;
@@ -20,8 +21,8 @@ import java.util.Collections;
 import java.util.List;
 
 public class GuiWrenchSelection extends GuiFrame {
-
-    WrenchMode currentMode;
+    private final List<String> infos = new ArrayList<>();
+    private WrenchMode currentMode;
 
     public GuiWrenchSelection() {
         super(new GuiScaler.Identity());
@@ -91,17 +92,15 @@ public class GuiWrenchSelection extends GuiFrame {
         GlStateManager.disableBlend();
     }
 
-    List<String> infos = new ArrayList<>();
-
     @Override
-    public void drawBackground(int mouseX, int mouseY, float partialTicks) {
-        super.drawBackground(mouseX, mouseY, partialTicks);
+    public void drawBackground(int mouseX, int mouseY, float partialTicks, ComponentRenderContext renderContext) {
+        super.drawBackground(mouseX, mouseY, partialTicks, renderContext);
         drawDisk(getWidth() / 2f, getHeight() / 2f, 110, 60, Color.BLACK, 0.5f);
 
         infos.clear();
         WrenchMode wrenchMode = getModeWithMousePos(mouseX, mouseY);
         infos.add(I18n.format(wrenchMode.getLabel()));
-        GuiAPIClientHelper.drawHoveringText(infos, mouseX, mouseY);
+        GuiAPIClientHelper.drawHoveringText(getResolution(), infos, mouseX, mouseY);
 
         if (currentMode != null) {
             GlStateManager.scale(0.7f, 0.7f, 0);
@@ -113,8 +112,8 @@ public class GuiWrenchSelection extends GuiFrame {
 
     private WrenchMode getModeWithMousePos(int mouseX, int mouseY) {
         //TODO GENERALIZE MODE FINDING
-        int mx = mouseX - getWidth() / 2;
-        int my = mouseY - getHeight() / 2;
+        float mx = mouseX - getWidth() / 2;
+        float my = mouseY - getHeight() / 2;
         int maxModes = WrenchMode.getWrenchModes().size() - 1;
         double theta = FastMath.atan2(my, mx);
         theta += FastMath.PI / maxModes;

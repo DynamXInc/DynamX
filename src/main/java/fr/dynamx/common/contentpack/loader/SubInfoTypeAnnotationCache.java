@@ -51,27 +51,32 @@ public class SubInfoTypeAnnotationCache {
             if (f.isAnnotationPresent(PackFileProperty.class)) {
                 PackFileProperty property = f.getAnnotation(PackFileProperty.class);
                 DefinitionType<?> type = property.type().type;
-                if (type == null)
+                if (type == null) {
                     type = DefinitionType.getParserOf(f.getType());
+                }
                 if (type != null) {
                     for (String configName : property.configNames()) {
                         PackFilePropertyData<?> d = new PackFilePropertyData<>(f, configName, property.configNames(), type, property.required(), property.description(), property.defaultValue());
                         packFileProperties.put(d.getConfigFieldName(), d);
                     }
-                } else
+                } else {
                     throw new IllegalArgumentException("No parser for field " + f.getName() + " of " + classToParse.getName());
+                }
             }
             if (f.isAnnotationPresent(IPackFilePropertyFixer.PackFilePropertyFixer.class)) {
-                if (!INamedObject.class.isAssignableFrom(classToParse))
+                if (!INamedObject.class.isAssignableFrom(classToParse)) {
                     throw new IllegalArgumentException("Only INamedObject objects can have the @PackFilePropertyFixer annotation. Errored class: " + classToParse);
+                }
                 try {
                     Object value = f.get(null);
-                    if (!(value instanceof IPackFilePropertyFixer))
+                    if (!(value instanceof IPackFilePropertyFixer)) {
                         throw new IllegalArgumentException("@PackFilePropertyFixer should annotate a static IPackFilePropertyFixer field. Errored class: " + classToParse);
+                    }
                     //System.out.println("Detect in " + classToParse + " " + Arrays.toString(f.getAnnotation(IPackFilePropertyFixer.PackFilePropertyFixer.class).registries()));
                     for (SubInfoTypeRegistries registry : f.getAnnotation(IPackFilePropertyFixer.PackFilePropertyFixer.class).registries()) {
-                        if (!registry.getInfoList().hasSubInfoTypesRegistry())
+                        if (!registry.getInfoList().hasSubInfoTypesRegistry()) {
                             throw new IllegalArgumentException("No sub info type registry on registry " + registry);
+                        }
                         registry.getInfoList().getDefaultSubInfoTypesRegistry().addSubInfoTypePropertiesFixer((Class<? extends INamedObject>) classToParse, (IPackFilePropertyFixer) value);
                     }
                 } catch (IllegalAccessException e) {

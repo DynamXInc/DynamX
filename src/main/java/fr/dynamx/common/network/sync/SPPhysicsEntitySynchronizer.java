@@ -1,16 +1,15 @@
 package fr.dynamx.common.network.sync;
 
-import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.IVehicleController;
 import fr.dynamx.api.network.sync.ClientEntityNetHandler;
+import fr.dynamx.api.network.sync.EntityVariable;
 import fr.dynamx.api.network.sync.SimulationHolder;
 import fr.dynamx.api.network.sync.SyncTarget;
-import fr.dynamx.api.network.sync.EntityVariable;
-import fr.dynamx.common.network.sync.variables.SynchronizedEntityVariableSnapshot;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PhysicsEntity;
+import fr.dynamx.common.network.sync.variables.SynchronizedEntityVariableSnapshot;
 import fr.dynamx.utils.debug.Profiler;
 import fr.dynamx.utils.optimization.PooledHashMap;
 import io.netty.buffer.ByteBuf;
@@ -21,20 +20,35 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
- * Simplified networks handler (there are no packets sent) for singleplayer games
+ * Simplified network handler (there are no packets sent) for single player games
  */
 public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends PhysicsEntitySynchronizer<T> implements ClientEntityNetHandler {
+    /**
+     * The side of this single player entity synchronizer
+     */
     private final Side mySide;
+    /**
+     * The list of {@link IVehicleController}s loaded on this entity
+     */
     private final List<IVehicleController> controllers = new ArrayList<>();
 
+    /**
+     * @param entityIn The synchronized entity
+     * @param side     The side of this single player entity synchronizer
+     */
     public SPPhysicsEntitySynchronizer(T entityIn, Side side) {
         super(entityIn);
         this.mySide = side;
     }
 
+    /**
+     * @return The entity matching this entity, but on the other side (if called on client side, it will return the server side entity, and vice versa)
+     */
     public Entity getOtherSideEntity() {
         if (mySide.isServer()) {
             return Minecraft.getMinecraft().player == null ? null : DynamXMain.proxy.getClientWorld().getEntityByID(entity.getEntityId());
@@ -42,19 +56,25 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
         return DynamXMain.proxy.getServerWorld().getEntityByID(entity.getEntityId());
     }
 
-    private <A> void sendMyVars(SPPhysicsEntitySynchronizer<T> other, SyncTarget to) {
+    /**
+     * Send all changed synchronized variables to the given SyncTarget
+     *
+     * @param other The synchronized of the matching entity on the other side, matching the sync target
+     * @param to    The sync target
+     */
+    private void sendMyVars(SPPhysicsEntitySynchronizer<T> other, SyncTarget to) {
         PooledHashMap<Integer, EntityVariable<?>> varsToSync = getVarsToSync(mySide, to);
         ByteBuf buf = Unpooled.buffer();
         for (Map.Entry<Integer, EntityVariable<?>> entry : varsToSync.entrySet()) {
             Integer varId = entry.getKey();
-            EntityVariable<A> sourceVar = (EntityVariable<A>) entry.getValue();
+            EntityVariable<?> sourceVar = entry.getValue();
             sourceVar.writeValue(buf, false);
             sourceVar.setChanged(false);
-            SynchronizedEntityVariableSnapshot<A> targetVar = (SynchronizedEntityVariableSnapshot<A>) other.getReceivedVariables().get(varId);
-            if(targetVar != null) {
+            SynchronizedEntityVariableSnapshot<?> targetVar = other.getReceivedVariables().get(varId);
+            if (targetVar != null) {
                 targetVar.read(buf);
-            } else if(other.getEntity().ticksExisted > 20) {
-                DynamXMain.log.error("Var not found " + varId + " " + sourceVar + " " + other.getReceivedVariables() + " on " + entity);
+            } else if (other.getEntity().ticksExisted > 20) {
+                DynamXMain.log.error("Synchronized variable not found " + varId + " " + sourceVar + " " + other.getReceivedVariables() + " on " + entity);
             }
             buf.clear();
         }
@@ -67,13 +87,13 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
             entity.physicsHandler.setForceActivation(true);
         }
         setSimulationHolder(SimulationHolder.DRIVER_SP, player);
-        if (player.world.isRemote && player.isUser()) {
-            if (entity instanceof BaseVehicleEntity) {
-                for (Object module : ((BaseVehicleEntity) entity).getModules()) {
-                    IVehicleController c = ((IPhysicsModule) module).createNewController();
-                    if (c != null)
-                        controllers.add(c);
-                }
+        if (!player.world.isRemote || !player.isUser() || !(entity instanceof BaseVehicleEntity)) {
+            return;
+        }
+        for (IPhysicsModule<?> module : ((BaseVehicleEntity<?>) entity).getModules()) {
+            IVehicleController c = module.createNewController();
+            if (c != null) {
+                controllers.add(c);
             }
         }
     }
@@ -104,9 +124,8 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
     @Override
     public void onPostPhysicsTick(Profiler profiler) {
         entity.postUpdatePhysicsWrapper(profiler, entity.usesPhysicsWorld());
-
         Entity other = getOtherSideEntity();
-        if (other instanceof PhysicsEntity && ((PhysicsEntity<?>) other).initialized != PhysicsEntity.EnumEntityInitState.NOT_INITIALIZED) {
+        if (other instanceof PhysicsEntity && ((PhysicsEntity<?>) other).initialized == PhysicsEntity.EnumEntityInitState.ALL) {
             if (!mySide.isServer()) {
                 sendMyVars((SPPhysicsEntitySynchronizer<T>) ((T) other).getSynchronizer(), SyncTarget.SERVER);
             } else {
@@ -118,6 +137,8 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
     }
 
     /**
+     * Side client only method
+     *
      * @return True if the driving player is Minecraft.getMinecraft().player
      */
     @SideOnly(Side.CLIENT)

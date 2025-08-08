@@ -42,17 +42,25 @@ public class UDPServerPacketHandler {
     }
 
     private void handleAuthentication(InetSocketAddress address, DatagramPacket packet, ByteBuf in) {
-        final String hash = ByteBufUtils.readUTF8String(in);
-        final EntityPlayerMP player = this.server.waitingAuth.remove(hash);
+        try {
+            final String hash = ByteBufUtils.readUTF8String(in);
+            final EntityPlayerMP player = this.server.waitingAuth.remove(hash);
 
-        if (player != null) {
-            UDPClient client = new UDPClient(player, address, hash);
-            this.clientNetworkMap.put(client.socketAddress, client);
-            this.server.clientMap.put(player.getEntityId(), client);
-            DynamXMain.log.info(client + " has been authenticated by server.");
-            this.server.sendPacket(new UDPServerAuthenticationCompletePacket(), client);
-        } else
-            DynamXMain.log.warn("Cannot authenticate a client : not waiting for auth");
+            if (player != null) {
+                UDPClient client = new UDPClient(player, address, hash);
+                this.clientNetworkMap.put(client.socketAddress, client);
+                this.server.clientMap.put(player.getEntityId(), client);
+                DynamXMain.log.info(client + " has been authenticated by server.");
+                this.server.sendPacket(new UDPServerAuthenticationCompletePacket(), client);
+            } else {
+                DynamXMain.log.warn("Cannot authenticate a client : not waiting for auth");
+            }
+        } catch (Exception e) {
+            if(DynamXConfig.udpDebug) {
+                throw e;
+            }
+            // Else just ignore, it may be a bad packet, or an intentional attack
+        }
     }
 
     public void read(byte[] data, final DatagramPacket packet) {
@@ -67,13 +75,18 @@ public class UDPServerPacketHandler {
             else
                 DynamXMain.log.error("[UDP-DEBUG] Read packet with id " + id + " but client is null..." + packet.getAddress());
         }
+
+        if(client == null && id != 0) { // 0 is auth packet
+            return; // player disconnected-ignore packet
+        }
+
         this.threadService.execute(() -> {
             if (id == 0) {
                 UDPServerPacketHandler.this.handleAuthentication(address, packet, in);
             } else if (id == 9) {
                 UdpTestPacket packet2 = new UdpTestPacket(in.readInt(), ByteBufUtils.readUTF8String(in), in.readLong(), in.readLong() == -1 ? System.currentTimeMillis() : -2);
                 server.sendPacket(packet2, client);
-            } else if (client != null) {
+            } else {
                 if (id >= 10) {
                     EncapsulatedUDPPacket.readAndHandle(id, in, client.player);
                 } else {

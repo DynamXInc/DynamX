@@ -1,6 +1,6 @@
 package fr.dynamx.client.renders.animations;
 
-import com.modularmods.mcgltf.animation.InterpolatedChannel;
+import com.modularmods.mcgltf.dynamx.animation.InterpolatedChannel;
 import fr.dynamx.client.renders.model.renderer.GltfModelRenderer;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import lombok.Getter;

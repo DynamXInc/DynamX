@@ -1,5 +1,6 @@
 package fr.dynamx.common.core.mixin;
 
+import fr.dynamx.client.handlers.ClientEventHandler;
 import fr.dynamx.utils.DynamXConstants;
 import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraftforge.client.MinecraftForgeClient;
@@ -12,11 +13,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /**
  * First step for our stencil test
  * In this step we execute the basic things to use our stencil buffer. Then, we make everything pass the stencil test
+ *
  * @see MixinRenderManager for the second step
  */
 @Mixin(value = EntityRenderer.class, remap = DynamXConstants.REMAP)
 public abstract class MixinEntityRenderer {
-
     @Inject(method = "renderWorldPass(IFJ)V",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderGlobal;renderEntities(Lnet/minecraft/entity/Entity;Lnet/minecraft/client/renderer/culling/ICamera;F)V"))
     private void preRenderEntities(int pass, float partialTicks, long finishTimeNano, CallbackInfo ci) {
@@ -31,5 +32,6 @@ public abstract class MixinEntityRenderer {
             //Disables writing to the buffer
             GL11.glStencilMask(0x00);
         }
+        ClientEventHandler.resetBigEntities();
     }
 }

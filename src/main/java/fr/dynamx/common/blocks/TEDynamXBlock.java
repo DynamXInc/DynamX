@@ -4,9 +4,12 @@ import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.aym.acsguis.api.ACsGuiApi;
+import fr.dynamx.api.blocks.IBlockEntityModule;
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
+import fr.dynamx.api.entities.modules.IPhysicsModule;
+import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.client.gui.GuiBlockCustomization;
 import fr.dynamx.client.renders.animations.DxAnimator;
 import fr.dynamx.common.DynamXContext;
@@ -15,13 +18,10 @@ import fr.dynamx.common.capability.DynamXChunkData;
 import fr.dynamx.common.capability.DynamXChunkDataProvider;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.parts.PartBlockSeat;
-import fr.dynamx.common.contentpack.parts.PartStorage;
 import fr.dynamx.common.contentpack.type.ObjectCollisionsHelper;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
 import fr.dynamx.common.entities.IDynamXObject;
 import fr.dynamx.common.entities.SeatEntity;
-import fr.dynamx.common.entities.modules.AbstractLightsModule;
-import fr.dynamx.common.entities.modules.StorageModule;
 import fr.dynamx.common.handlers.CommonEventHandler;
 import fr.dynamx.common.physics.terrain.chunk.ChunkLoadingTicket;
 import fr.hermes.forge1122.dynamx.DynamXConfig;
@@ -46,10 +46,7 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInfoReloadListener, ITickable {
     @Getter
@@ -70,9 +67,6 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
     @Getter
     private List<SeatEntity> seatEntities;
 
-    @Getter
-    private StorageModule storageModule;
-
     /**
      * The cache of the block collisions, with position offset but no rotation
      */
@@ -82,8 +76,9 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
      */
     protected AxisAlignedBB boundingBoxCache;
 
-    @Getter
-    private AbstractLightsModule lightsModule;
+    private EnumBlockEntityInitState initialized = EnumBlockEntityInitState.NOT_INITIALIZED;
+    protected final List<IBlockEntityModule> moduleList = new ArrayList<>();
+    protected final List<IBlockEntityModule.IBlockEntityUpdateListener> updateEntityListeners = new ArrayList<>();
 
     @Getter
     private final DxAnimator animator;
@@ -102,38 +97,58 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
         this.packInfo = packInfo;
         if (world != null)
             world.markBlockRangeForRenderUpdate(pos, pos);
-        if (packInfo != null && !packInfo.getLightSources().isEmpty())
-            lightsModule = new AbstractLightsModule.LightsModule(packInfo);
-        else
-            lightsModule = null;
-        this.hasSeats = packInfo != null && !packInfo.getPartsByType(PartBlockSeat.class).isEmpty();
         if (packInfo == null)
             return;
+        this.hasSeats = !packInfo.getPartsByType(PartBlockSeat.class).isEmpty();
         if (!hasSeats && seatEntities != null) {
             seatEntities.forEach(Entity::setDead);
             seatEntities = null;
         }
-        List<PartStorage> storages = packInfo.getPartsByType(PartStorage.class);
-        if (storages.isEmpty())
+    }
+
+    /**
+     * Computes listeners of update methods
+     */
+    protected void getListenerModules() {
+        updateEntityListeners.clear();
+        moduleList.forEach(m -> {
+            if (m instanceof IBlockEntityModule.IBlockEntityUpdateListener && ((IBlockEntityModule.IBlockEntityUpdateListener) m).listenBlockEntityUpdates(world.isRemote ? Side.CLIENT : Side.SERVER))
+                updateEntityListeners.add((IBlockEntityModule.IBlockEntityUpdateListener) m);
+        });
+        initialized = EnumBlockEntityInitState.ALL;
+    }
+
+    public <Y extends IPhysicsModule<?>> Y getModuleByType(Class<Y> moduleClass) {
+        return (Y) moduleList.stream().filter(m -> moduleClass.isAssignableFrom(m.getClass())).findFirst().orElse(null);
+    }
+
+    public boolean hasModuleOfType(Class<? extends IPhysicsModule<?>> moduleClass) {
+        return moduleList.stream().anyMatch(m -> moduleClass.isAssignableFrom(m.getClass()));
+    }
+
+    public void initBlockEntityModules() {
+        if (packInfo == null)
             return;
-        if (storageModule != null && storages.size() == storageModule.getInventories().size())
-            return;
-        for (PartStorage storage : storages) {
-            if (storageModule == null)
-                storageModule = new StorageModule(this, pos, storage);
-            else
-                storageModule.addInventory(this, pos, storage);
+        createModules(new ModuleListBuilder(moduleList));
+        //TODO fireCreateModulesEvent(world.isRemote ? Side.CLIENT : Side.SERVER);
+        moduleList.sort(Comparator.comparingInt(m -> -m.getInitPriority()));
+        moduleList.forEach(IBlockEntityModule::initBlockEntityProperties);
+        if (world != null) {
+            getListenerModules();
+        } else {
+            initialized = EnumBlockEntityInitState.MODULES_CREATED;
         }
+    }
+
+    protected void createModules(ModuleListBuilder modules) {
+        getPackInfo().addModules(this, modules);
     }
 
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
+        super.writeToNBT(compound);
         if (packInfo != null)
             compound.setString("BlockInfo", packInfo.getFullName());
-        if (lightsModule != null)
-            lightsModule.writeToNBT(compound);
-        if (storageModule != null)
-            storageModule.writeToNBT(compound);
         compound.setInteger("Rotation", rotation);
         compound.setFloat("TranslationX", relativeTranslation.x);
         compound.setFloat("TranslationY", relativeTranslation.y);
@@ -144,7 +159,8 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
         compound.setFloat("RotationX", relativeRotation.x);
         compound.setFloat("RotationY", relativeRotation.y);
         compound.setFloat("RotationZ", relativeRotation.z);
-        super.writeToNBT(compound);
+        // Write modules data
+        moduleList.forEach(m -> m.writeToNBT(compound));
         return compound;
     }
 
@@ -163,10 +179,6 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
         }
         setPackInfo(DynamXObjectLoaders.BLOCKS.findInfo(compound.getString("BlockInfo")));
         this.hasSeats = packInfo != null && !packInfo.getPartsByType(PartBlockSeat.class).isEmpty();
-        if (lightsModule != null)
-            lightsModule.readFromNBT(compound);
-        if (storageModule != null)
-            storageModule.readFromNBT(compound);
         rotation = compound.getInteger("Rotation");
         relativeTranslation = new Vector3f(
                 compound.getFloat("TranslationX"),
@@ -181,11 +193,16 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
                 compound.getFloat("RotationY"),
                 compound.getFloat("RotationZ"));
 
+        // Read modules data
+        initBlockEntityModules();
+        moduleList.forEach(iBlockEntityModule -> iBlockEntityModule.readFromNBT(compound));
+
         if (packInfo == null && world != null && !world.isRemote) {
             DynamXMain.log.warn("Block object info is null for te " + this + " at " + pos + ". Removing it.");
             world.setBlockToAir(pos);
-        } else
-            markCollisionsDirty();
+        } else {
+            markCollisionsDirty(false);
+        }
     }
 
     @Override
@@ -197,7 +214,7 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
     @Override
     @SideOnly(Side.CLIENT)
     public double getMaxRenderDistanceSquared() {
-        return packInfo == null || packInfo.getRenderDistance() == -1 ? super.getMaxRenderDistanceSquared() : packInfo.getRenderDistance();
+        return packInfo == null || packInfo.getRenderDistanceSquared() == -1 ? super.getMaxRenderDistanceSquared() : packInfo.getRenderDistanceSquared();
     }
 
     @Override
@@ -221,7 +238,7 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
 
     public void setRotation(int rotation) {
         this.rotation = rotation;
-        markCollisionsDirty();
+        markCollisionsDirty(true);
     }
 
     @SideOnly(Side.CLIENT)
@@ -234,7 +251,7 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
      */
     public AxisAlignedBB computeBoundingBox() {
         if (boundingBoxCache == null) {
-            QuaternionPool.getINSTANCE().openSubPool();
+            QuaternionPool.openPool();
             Vector3fPool.openPool();
             List<IShapeInfo> boxes = getUnrotatedCollisionBoxes(); //Get PartShape boxes
             if (boxes.isEmpty()) {//If there is no boxes, create a default one
@@ -258,9 +275,9 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
                 boundingBoxCache = container.toBB();
             }
             Vector3fPool.closePool();
-            QuaternionPool.getINSTANCE().closeSubPool();
+            QuaternionPool.closePool();
         }
-        return boundingBoxCache;//.offset(pos);
+        return boundingBoxCache;
     }
 
     @Override
@@ -286,7 +303,7 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
      */
     public List<IShapeInfo> getUnrotatedCollisionBoxes() {
         if (packInfo == null) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
         return packInfo.getCollisionsHelper().getShapes();
     }
@@ -307,14 +324,16 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
     /**
      * Invalidates the block collisions caches, and reloads them <br>
      * Will provoke lag if you call this each tick
+     *
+     * @param updatePhysicsTerrain True to recompute the {@link fr.dynamx.common.physics.terrain.chunk.ChunkCollisions} of the chunk, for collisions of the {@link fr.dynamx.api.physics.IPhysicsWorld}
      */
-    public void markCollisionsDirty() {
+    public void markCollisionsDirty(boolean updatePhysicsTerrain) {
         if (world != null) {
             removeChunkCollisions();
         }
         boundingBoxCache = null;
         unrotatedCollisionsCache.clear();
-        if (world != null && DynamXContext.usesPhysicsWorld(world)) {
+        if (updatePhysicsTerrain && world != null && DynamXContext.usesPhysicsWorld(world)) {
             VerticalChunkPos pos1 = new VerticalChunkPos(getPos().getX() >> 4, getPos().getY() >> 4, getPos().getZ() >> 4);
             if (DynamXConfig.enableDebugTerrainManager) {
                 ChunkLoadingTicket ticket = DynamXContext.getPhysicsWorld(world).getTerrainManager().getTicket(pos1);
@@ -345,11 +364,15 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
         addChunkCollisions();
     }
 
-    public void addChunkCollisions() {
+    /**
+     * Adds the block collisions to the chunk data using {@link DynamXChunkData} <br>
+     * Used for large blocks that can be in multiple chunks
+     */
+    protected void addChunkCollisions() {
         List<Chunk> chunks = new ArrayList<>();
         AxisAlignedBB bb = computeBoundingBox().offset(pos);
-        for (int x = (int) bb.minX; x <= bb.maxX; x += (int) Math.max(1, Math.min(bb.maxX - bb.minX, 16))) {
-            for (int z = (int) bb.minZ; z <= bb.maxZ; z += (int) Math.max(1, Math.min(bb.maxZ - bb.minZ, 16))) {
+        for (int x = (int) bb.minX; x <= bb.minX + Math.max(1, bb.maxX - bb.minX); x += (int) Math.max(1, Math.min(bb.maxX - bb.minX, 16))) {
+            for (int z = (int) bb.minZ; z <= bb.minZ + Math.max(1, bb.maxZ - bb.minZ); z += (int) Math.max(1, Math.min(bb.maxZ - bb.minZ, 16))) {
                 if (!world.isChunkGeneratedAt(x >> 4, z >> 4)) {
                     ChunkPos pos = new ChunkPos(x >> 4, z >> 4);
                     if (!CommonEventHandler.PENDING_CHUNKS_COLLISIONS.containsKey(pos))
@@ -361,17 +384,21 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
                 if (!chunks.contains(chunk)) {
                     chunks.add(chunk);
                     DynamXChunkData data = chunk.getCapability(DynamXChunkDataProvider.DYNAMX_CHUNK_DATA_CAPABILITY, null);
-                    data.getBlocksAABB().put(pos, computeBoundingBox().offset(pos));
+                    Objects.requireNonNull(data).getBlocksAABB().put(this.pos, computeBoundingBox().offset(this.pos));
                 }
             }
         }
     }
 
-    public void removeChunkCollisions() {
+    /**
+     * Removes the block collisions from the chunk data using {@link DynamXChunkData} <br>
+     * Used for large blocks that can be in multiple chunks
+     */
+    protected void removeChunkCollisions() {
         List<Chunk> chunks = new ArrayList<>();
         AxisAlignedBB bb = computeBoundingBox().offset(pos);
-        for (int x = (int) bb.minX; x <= bb.maxX; x += (int) Math.max(1, Math.min(bb.maxX - bb.minX, 16))) {
-            for (int z = (int) bb.minZ; z <= bb.maxZ; z += (int) Math.max(1, Math.min(bb.maxZ - bb.minZ, 16))) {
+        for (int x = (int) bb.minX; x <= bb.minX + Math.max(1, bb.maxX - bb.minX); x += (int) Math.max(1, Math.min(bb.maxX - bb.minX, 16))) {
+            for (int z = (int) bb.minZ; z <= bb.minZ + Math.max(1, bb.maxZ - bb.minZ); z += (int) Math.max(1, Math.min(bb.maxZ - bb.minZ, 16))) {
                 ChunkPos pos = new ChunkPos(x >> 4, z >> 4);
                 if (CommonEventHandler.PENDING_CHUNKS_COLLISIONS.containsKey(pos))
                     CommonEventHandler.PENDING_CHUNKS_COLLISIONS.get(pos).remove(this.pos);
@@ -391,6 +418,10 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
     @Override
     public void onPackInfosReloaded() {
         setPackInfo(DynamXObjectLoaders.BLOCKS.findInfo(packInfo.getFullName()));
+        for (IBlockEntityModule module : moduleList) {
+            if (module instanceof IPackInfoReloadListener)
+                ((IPackInfoReloadListener) module).onPackInfosReloaded();
+        }
     }
 
     @Override
@@ -409,8 +440,18 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
                 seatEntities.add(entity);
             }
         }
+        if (initialized != EnumBlockEntityInitState.ALL) {
+            if (initialized == EnumBlockEntityInitState.MODULES_CREATED) {
+                getListenerModules();
+            } else {
+                initBlockEntityModules();
+            }
+        }
+        if (!updateEntityListeners.isEmpty()) {
+            updateEntityListeners.forEach(IBlockEntityModule.IBlockEntityUpdateListener::updateBlockEntity);
+        }
         if (packInfo == null && !world.isRemote) {
-            DynamXMain.log.error("Block info is null for te " + this + " at " + pos + ". Removing it.");
+            DynamXMain.log.error(String.format("Block info is null for te %s at %s. Removing it.", this, pos));
             world.setBlockToAir(pos);
         }
     }
@@ -433,8 +474,9 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
                 part.getBox(box);
                 box = DynamXContext.getCollisionHandler().rotateBB(Vector3fPool.get(), box, getCollidableRotation());
                 Vector3f partPos = DynamXGeometry.rotateVectorByQuaternion(part.getPosition(), getCollidableRotation());
-                partPos.addLocal(getPos().getX(), getPos().getY(), getPos().getZ());
-                partPos.addLocal(getCollisionOffset());
+                partPos.addLocal(getPos().getX() + getPackInfo().getTranslation().x + getCollisionOffset().x,
+                        getPos().getY() + getPackInfo().getTranslation().y + getCollisionOffset().y,
+                        getPos().getZ() + getPackInfo().getTranslation().z + getCollisionOffset().z);
                 box.offset(partPos);
                 if ((nearestPos == null || DynamXGeometry.distanceBetween(partPos, playerPos) < DynamXGeometry.distanceBetween(nearestPos, playerPos)) && box.contains(hitVec)) {
                     nearest = part;
@@ -444,5 +486,13 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
             hitVec = hitVec.add(lookVec.x * 0.1F, lookVec.y * 0.1F, lookVec.z * 0.1F);
         }
         return nearest;
+    }
+
+    public List<IBlockEntityModule> getModules() {
+        return moduleList;
+    }
+
+    public enum EnumBlockEntityInitState {
+        NOT_INITIALIZED, MODULES_CREATED, ALL
     }
 }

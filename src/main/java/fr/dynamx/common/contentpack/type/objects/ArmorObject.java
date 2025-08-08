@@ -35,15 +35,11 @@ import java.util.List;
 /**
  * Armor object, for "armor_" files
  */
-public class ArmorObject<T extends ArmorObject<?>> extends AbstractItemObject<T, T> implements IModelTextureVariantsSupplier {
+public class ArmorObject<T extends ArmorObject<T>> extends AbstractItemObject<T, T> implements IModelTextureVariantsSupplier {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.ARMORS)
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
         if ("Textures".equals(key))
             return new IPackFilePropertyFixer.FixResult("MaterialVariants", true, true);
-        if ("ItemTranslate".equals(key))
-            return new IPackFilePropertyFixer.FixResult("ItemTransforms block", true, true);
-        if ("ItemRotate".equals(key))
-            return new IPackFilePropertyFixer.FixResult("ItemTransforms block", true, true);
         return null;
     };
 
@@ -110,12 +106,13 @@ public class ArmorObject<T extends ArmorObject<?>> extends AbstractItemObject<T,
     }
 
     @Override
-    public boolean hasVaryingTextures() {
+    public boolean hasTextureVariants() {
         return getVariants() != null;
     }
 
-    public int getMaxTextureMetadata() {
-        return getVariants() != null ? getVariants().getVariantsMap().size() : 1;
+    @Override
+    public byte getMaxVariantId() {
+        return (byte) (hasTextureVariants() ? getVariants().getVariantsMap().size() : 1);
     }
 
     @Override

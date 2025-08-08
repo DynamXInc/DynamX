@@ -42,7 +42,7 @@ public class RegistryNameSetter {
      * @return The ResourceLocation corresponding to the given resourceName, appending 'pathPrefix' and the namespace dynamxmod if no namespace is present
      */
     public static ResourceLocation getDynamXResourceLocation(String pathPrefix, String resourceName) {
-        String[] astring = new String[]{DynamXConstants.ID, resourceName};
+        String[] astring = new String[]{DynamXConstants.ID, pathPrefix + resourceName};
         int i = resourceName.indexOf(58);
         if (i >= 0) {
             astring[1] = resourceName.substring(i + 1);
@@ -51,6 +51,6 @@ public class RegistryNameSetter {
                 astring[0] = resourceName.substring(0, i);
             }
         }
-        return new ResourceLocation(astring[0], pathPrefix + astring[1]);
+        return new ResourceLocation(astring[0], astring[1]);
     }
 }

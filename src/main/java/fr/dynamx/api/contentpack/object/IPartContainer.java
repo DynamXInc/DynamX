@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public interface IPartContainer<T extends ISubInfoTypeOwner<?>> extends ISubInfoTypeOwner<T> {
+public interface IPartContainer<T extends ISubInfoTypeOwner<T>> extends ISubInfoTypeOwner<T> {
 
     /**
      * @param clazz The class of the parts to return

@@ -27,10 +27,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Provides helper methods for rotated collisions and handles collisions with entities <br>
@@ -351,11 +349,28 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
         return motionChanged;
     }
 
-    private boolean shouldHandleCollision(Entity entity, MoverType moverType) {
-        /*if(entity instanceof EntityPlayer) {
-            return moverType.equals(MoverType.PLAYER);
-        }*/
-        return (!(entity instanceof PhysicsEntity));
+    private volatile Set<Pattern> compiledIgnorePatterns;
+    private boolean shouldHandleCollision(Entity entity) {
+        if(entity instanceof PhysicsEntity) {
+            return false;
+        }
+        if (compiledIgnorePatterns == null) {
+            compiledIgnorePatterns = new HashSet<>();
+            for (String pattern : DynamXConfig.ignoreCollisionEntities) {
+                String regex = pattern
+                        .replace(".", "\\.")
+                        .replace("*", ".*");
+                compiledIgnorePatterns.add(Pattern.compile("^" + regex + "$"));
+            }
+        }
+
+        String className = entity.getClass().getName();
+        for (Pattern pattern : compiledIgnorePatterns) {
+            if (pattern.matcher(className).matches()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -394,12 +409,14 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
 
         motionChanged = false;
 
-        if (shouldHandleCollision(entity, moverType)) {
+        if (shouldHandleCollision(entity)) {
+            Vector3fPool.openPool(SubClassPool.ROTATED_COLLS_HANDLER_0);
+
             PooledHashMap<Vector3f, IDynamXObject> collidableEntities = getCollidableTileEntities(entity.world, new MutableBoundingBox(entity.getEntityBoundingBox()).grow(1));
             for (Map.Entry<Vector3f, IDynamXObject> e : collidableEntities.entrySet()) {
                 //System.out.println("Input "+mx+" "+my+" "+mz+" "+nx+" "+ny+" "+nz+" "+entity.onGround+" "+entity.collidedVertically+" "+e.physicsPosition);
-                Vector3fPool.openPool();
-                QuaternionPool.openPool();
+                Vector3fPool.openPool(SubClassPool.ROTATED_COLLS_HANDLER_1);
+                QuaternionPool.openPool(SubClassPool.ROTATED_COLLS_HANDLER_1);
                 float castx = (float) nx, casty = (float) ny, castz = (float) nz;
                 Vector3f n = collideWith(entity, e.getValue(), e.getKey(), castx, casty, castz);
                 if (castx != n.x) {
@@ -422,8 +439,8 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
             for (PhysicsEntity e : entities) {
                 if (!DynamXContext.getPlayerPickingObjects().containsValue(e.getEntityId())) {
                     //System.out.println("Input "+mx+" "+my+" "+mz+" "+nx+" "+ny+" "+nz+" "+entity.onGround+" "+entity.collidedVertically+" "+e.physicsPosition);
-                    Vector3fPool.openPool();
-                    QuaternionPool.openPool();
+                    Vector3fPool.openPool(SubClassPool.ROTATED_COLLS_HANDLER_2);
+                    QuaternionPool.openPool(SubClassPool.ROTATED_COLLS_HANDLER_2);
                     float castx = (float) nx, casty = (float) ny, castz = (float) nz;
                     Vector3f withPos = Vector3fPool.get((float) e.posX, (float) e.posY, (float) e.posZ);
                     Vector3f n = collideWith(entity, e, withPos, castx, casty, castz);
@@ -443,6 +460,8 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
                     Vector3fPool.closePool();
                 }
             }
+
+            Vector3fPool.closePool();
         }
         //if(entity.world.isRemote && entity instanceof EntityPlayer)
         //System.out.println("Got motiin "+nx+" "+ny+" "+nz);

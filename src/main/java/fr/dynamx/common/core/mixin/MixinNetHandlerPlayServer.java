@@ -31,24 +31,24 @@ public class MixinNetHandlerPlayServer {
     @Redirect(method = "processPlayer",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;isInvulnerableDimensionChange()Z", ordinal = 0))
     private boolean test(EntityPlayerMP instance) {
-        if (DynamXContext.getWalkingPlayers().containsKey(player)) {
-            //TODO IMPROVE SECURITY
-            //LOGGER.warn("Ignoring moving too quickly from " + player.getName() + " : walking on vehicle !");
+        if (DynamXContext.getWalkingPlayers().containsKey(instance)) {
+            // TODO: IMPROVE SECURITY
+            // LOGGER.warn("Ignoring moving too quickly from " + instance.getName() + " : walking on vehicle !");
             return false;
         } else {
-            return true;
+            return instance.isInvulnerableDimensionChange();
         }
     }
 
     @Redirect(method = "processPlayer",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;isInvulnerableDimensionChange()Z", ordinal = 1))
     private boolean test2(EntityPlayerMP instance) {
-        if (DynamXContext.getWalkingPlayers().containsKey(player)) {
-            //TODO IMPROVE SECURITY
-            //LOGGER.warn("Ignoring moving wrongly from " + player.getName() + " : walking on vehicle !");
+        if (DynamXContext.getWalkingPlayers().containsKey(instance)) {
+            // TODO: IMPROVE SECURITY
+            // LOGGER.warn("Ignoring moving wrongly from " + instance.getName() + " : walking on vehicle !");
             return false;
         } else {
-            return true;
+            return instance.isInvulnerableDimensionChange();
         }
     }
 

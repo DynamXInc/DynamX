@@ -1,6 +1,7 @@
 package fr.dynamx.common.blocks;
 
 import com.jme3.math.Vector3f;
+import fr.dynamx.api.blocks.IBlockEntityModule;
 import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
@@ -8,16 +9,15 @@ import fr.dynamx.api.contentpack.object.render.IModelPackObject;
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.events.DynamXBlockEvent;
-import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.capability.DynamXChunkData;
 import fr.dynamx.common.capability.DynamXChunkDataProvider;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
-import fr.dynamx.common.contentpack.parts.PartBlockSeat;
-import fr.dynamx.common.contentpack.parts.PartStorage;
 import fr.dynamx.common.contentpack.type.objects.BlockObject;
 import fr.dynamx.common.contentpack.type.objects.PropObject;
+import fr.dynamx.common.entities.IDynamXObject;
 import fr.dynamx.common.items.DynamXItemRegistry;
 import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.RegistryNameSetter;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -30,10 +30,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumBlockRenderType;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.*;
 import net.minecraft.util.math.*;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -54,7 +51,7 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
      */
     public T blockObjectInfo;
 
-    public final int textureNum;
+    private final int textureNum;
 
     private final boolean isDxModel;
 
@@ -65,12 +62,11 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
      * @param blockObjectInfo a BlockObject loaded by the content pack system
      */
     public DynamXBlock(T blockObjectInfo) {
-        super(blockObjectInfo.getMaterial());
-        this.blockObjectInfo = blockObjectInfo;
+        super(blockObjectInfo.getMaterial() != null ? blockObjectInfo.getMaterial() : Material.ROCK);
+        setInfo(blockObjectInfo);
         setCreativeTab(blockObjectInfo.getCreativeTab(DynamXItemRegistry.objectTab));
-        textureNum = Math.min(16, blockObjectInfo.getMaxTextureMetadata());
+        textureNum = Math.min(16, blockObjectInfo.getMaxVariantId());
         isDxModel = blockObjectInfo.isDxModel();
-        setLightLevel(blockObjectInfo.getLightLevel());
 
         initBlock(DynamXConstants.ID);
         setTranslationKey(DynamXConstants.ID + "." + blockObjectInfo.getFullName().toLowerCase());
@@ -163,53 +159,49 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
 
     @SideOnly(Side.CLIENT)
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-        tooltip.add("Description: " + getInfo().getDescription());
-        tooltip.add("Pack: " + getInfo().getPackName());
-        if (stack.getMetadata() > 0 && textureNum > 1) {
-            tooltip.add("Texture: " + getInfo().getMainObjectVariantName((byte) stack.getMetadata()));
-        }
+        super.addInformation(stack, worldIn, tooltip, flagIn);
+        DynamXUtils.addItemTooltip(tooltip, getInfo(), (byte) stack.getMetadata());
     }
 
     @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-        if (playerIn.isSneaking() && playerIn.capabilities.isCreativeMode) {
-            TileEntity te = worldIn.getTileEntity(pos);
-            if (te != null && worldIn.isRemote && isDxModel)
-                ((TEDynamXBlock) te).openConfigGui();
-            return true;/*
-            if (te instanceof TEDynamXBlock && hand.equals(EnumHand.MAIN_HAND)) {
-                DxAnimator animator = ((TEDynamXBlock) te).getAnimator();
-                if (playerIn.isSneaking()) {
-                    DxModelRenderer model = DynamXContext.getDxModelRegistry().getModel(blockObjectInfo.getModel());
-                    animator.playNextAnimation();
-                    //te.getAnimator().addAnimation("Reset");
-                    return true;
-                }
-                //TODO
-                animator.setBlendPose(DxAnimator.EnumBlendPose.START_END);
-                animator.addAnimation("Run1", DxAnimation.EnumAnimType.START_END);
-            }*/
+        if (worldIn.isRemote && !playerIn.isSneaking()) {
+            return false;
         }
-        if (!worldIn.isRemote) {
-            TileEntity te = worldIn.getTileEntity(pos);
-            if (te instanceof TEDynamXBlock) {
-                //If we clicked a part, try to interact with it.
-                InteractivePart hitPart = ((TEDynamXBlock) te).getHitPart(playerIn);
-                if (hitPart instanceof PartStorage) {
-                    playerIn.openGui(DynamXMain.instance, hitPart.getId() + 2, worldIn, pos.getX(), pos.getY(), pos.getZ());
-                    return true;
+
+        TileEntity te = worldIn.getTileEntity(pos);
+        if (!(te instanceof TEDynamXBlock)) {
+            return false;
+        }
+
+        //TODO ADD INTERACT EVENTS
+        //If we clicked a part, try to interact with it.
+        InteractivePart<IDynamXObject, ?> hitPart = (InteractivePart<IDynamXObject, ?>) ((TEDynamXBlock) te).getHitPart(playerIn);
+        if (hitPart == null || !hitPart.canInteract((IDynamXObject) te, playerIn)) {
+            // If there's no hit/can't interact, try to open the customization gui
+            if (playerIn.isSneaking() && playerIn.capabilities.isCreativeMode) {
+                if (worldIn.isRemote && isDxModel) {
+                    ((TEDynamXBlock) te).openConfigGui();
                 }
-                if (hitPart instanceof PartBlockSeat && hitPart.canInteract(((TEDynamXBlock) te).getSeatEntities().get(0), playerIn)) {
-                    // TODO if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.PlayerInteract(context, (BaseVehicleEntity<?>) vehicleEntity, hitPart)))
-                    byte idx = hitPart.getId();
-                    if (idx >= ((TEDynamXBlock) te).getSeatEntities().size())
-                        idx = 0;
-                    hitPart.interact(((TEDynamXBlock) te).getSeatEntities().get(idx), playerIn);
-                    return true;
-                }
+                return true;
+                /*
+                //TODO animations
+                if (te instanceof TEDynamXBlock && hand.equals(EnumHand.MAIN_HAND)) {
+                    DxAnimator animator = ((TEDynamXBlock) te).getAnimator();
+                    if (playerIn.isSneaking()) {
+                        DxModelRenderer model = DynamXContext.getDxModelRegistry().getModel(blockObjectInfo.getModel());
+                        animator.playNextAnimation();
+                        //te.getAnimator().addAnimation("Reset");
+                        return true;
+                    }
+                    animator.setBlendPose(DxAnimator.EnumBlendPose.START_END);
+                    animator.addAnimation("Run1", DxAnimation.EnumAnimType.START_END);
+                }*/
             }
+            return false;
         }
-        return false;
+        // only interact on server side
+        return worldIn.isRemote || hitPart.interact((IDynamXObject) te, playerIn);
     }
 
     @Override
@@ -262,12 +254,22 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
         TEDynamXBlock te = (TEDynamXBlock) worldIn.getTileEntity(pos);
         if (te != null) {
             te.removeChunkCollisions();
+            te.getModules().forEach(IBlockEntityModule::onBlockBreak);
         } else {
             // This should not happen, but, just in case fallback and clear the block's chunk
             DynamXChunkData data = worldIn.getChunk(pos).getCapability(DynamXChunkDataProvider.DYNAMX_CHUNK_DATA_CAPABILITY, null);
             data.getBlocksAABB().remove(pos);
         }
         super.breakBlock(worldIn, pos, state);
+    }
+
+    @Override
+    public void getDrops(NonNullList<ItemStack> drops, IBlockAccess world, BlockPos pos, IBlockState state, int fortune) {
+        super.getDrops(drops, world, pos, state, fortune);
+        TEDynamXBlock te = (TEDynamXBlock) world.getTileEntity(pos);
+        if (te != null) {
+            te.getModules().forEach(module -> module.getBlockDrops(drops, world, pos, state, fortune));
+        }
     }
 
     @Nullable
@@ -292,6 +294,13 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
     @Override
     public void setInfo(T info) {
         blockObjectInfo = info;
+        setLightLevel(blockObjectInfo.getLightLevel());
+        setHardness(blockObjectInfo.getBlockHardness());
+        setResistance(blockObjectInfo.getBlockResistance());
+        setSoundType(blockObjectInfo.getSoundType());
+        if (!StringUtils.isNullOrEmpty(blockObjectInfo.getHarvestTool())) {
+            setHarvestLevel(blockObjectInfo.getHarvestTool(), blockObjectInfo.getHarvestLevel());
+        }
     }
 
     @Override

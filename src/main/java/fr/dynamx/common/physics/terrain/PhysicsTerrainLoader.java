@@ -50,38 +50,29 @@ public class PhysicsTerrainLoader {
         VerticalChunkPos lookingAt = chk.getTicket().getPos();
         try {
             if (chk.isValid()) { //If loading ticket is still valid
-                //long start = System.currentTimeMillis();
-                //System.out.println("ASYNC LOADING ZOFIPZ?QCOFPSF? "+lookingAt+" "+chk.getTicket().getPriority());
                 profiler.start(Profiler.Profiles.TERRAIN_LOADER_TICK);
-                Vector3fPool.openPool();
-                BoundingBoxPool.getPool().openSubPool();
-                ChunkCollisions collision = manager.isDebug() ? new DebugChunkCollisions(manager.getWorld(), lookingAt, manager.getPhysicsWorld()) : new ChunkCollisions(manager.getWorld(), lookingAt);
-                if (manager.isDebug())
+                ChunkCollisions collision = manager.isDebug() ? new DebugChunkCollisions(manager.getWorld(), lookingAt) : new ChunkCollisions(manager.getWorld(), lookingAt);
+                if (manager.isDebug()) {
                     ChunkGraph.addToGrah(lookingAt, ChunkGraph.ChunkActions.LOAD_ASYNC, ChunkGraph.ActionLocation.LOADER, collision, "Ticket " + chk.getTicket() + " " + chk.isValid());
+                }
                 if (!chk.isValid()) {
-                    if (manager.isDebug())
-                        DynamXMain.log.warn("Aborting load at " + lookingAt);
-                    Vector3fPool.closePool();
-                    BoundingBoxPool.getPool().closeSubPool();
+                    if (manager.isDebug()) {
+                        DynamXMain.log.warn("Aborting load at {}", lookingAt);
+                    }
                     profiler.end(Profiler.Profiles.TERRAIN_LOADER_TICK);
                     return;
                 }
-                chk.getTicket().incrStatusIndex("Loading async"); //Invalidate other loading processes
+                chk.getTicket().incrStatusIndex(); //Invalidate other loading processes
+                Vector3fPool.openPool();
                 collision.loadCollisionsAsync(manager, manager.getCache(), chk.getTicket(), Vector3fPool.get(lookingAt.x * 16, lookingAt.y * 16, lookingAt.z * 16)).exceptionally(e -> {
-                    DynamXMain.log.fatal("Failed to async-load chunk " + chk.getTicket(), e);
+                    DynamXMain.log.fatal("Failed to async-load chunk {}", chk.getTicket(), e);
                     return null;
                 });
                 Vector3fPool.closePool();
-                BoundingBoxPool.getPool().closeSubPool();
                 profiler.end(Profiler.Profiles.TERRAIN_LOADER_TICK);
                 profiler.update();
-
-                //System.out.println("ASYNC LOADED C "+lookingAt+" "+(System.currentTimeMillis()-start)+" ms");
-            } else {
-                //System.err.println("C NOT VALID "+lookingAt+" "+chk.getTicket()+" "+chk.getSnapIndex());
             }
-            if (profiler.isActive()) //Profiling
-            {
+            if (profiler.isActive()) { //Profiling
                 List<String> st = profiler.getData();
                 if (!st.isEmpty()) {
                     profiler.printData("Terrain thread");
@@ -89,7 +80,7 @@ public class PhysicsTerrainLoader {
                 }
             }
         } catch (Exception e1) {
-            DynamXMain.log.fatal("Chunk error at " + lookingAt, e1);
+            DynamXMain.log.fatal("Chunk error at {}", lookingAt, e1);
         }
     }
 }

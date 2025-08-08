@@ -2,13 +2,13 @@ package fr.dynamx.common.items;
 
 import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
+import fr.dynamx.common.contentpack.parts.PartEntitySeat;
 import fr.dynamx.common.contentpack.parts.PartWheel;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -24,7 +24,7 @@ public abstract class ItemModularEntity extends DynamXItemSpawner<ModularVehicle
         maxStackSize = 1;
         setCreativeTab(modulableVehicleInfo.getCreativeTab(DynamXItemRegistry.vehicleTab));
 
-        textureNum = modulableVehicleInfo.getMaxTextureMetadata();
+        textureNum = modulableVehicleInfo.getMaxVariantId();
         if (textureNum > 1)
             setHasSubtypes(true);
     }
@@ -58,17 +58,16 @@ public abstract class ItemModularEntity extends DynamXItemSpawner<ModularVehicle
 
     @SideOnly(Side.CLIENT)
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-        tooltip.add("Description: " + getInfo().getDescription());
-        tooltip.add("Pack: " + getInfo().getPackName());
-        if (stack.getMetadata() != 0) {
-            if (textureNum > stack.getMetadata())
-                tooltip.add("Texture: " + getInfo().getVariantName((byte) stack.getMetadata()));
-            else
-                tooltip.add(TextFormatting.RED + "Texture not found, check your pack errors");
+        super.addInformation(stack, worldIn, tooltip, flagIn);
+
+        if(flagIn.isAdvanced()) {
+            getInfo().getPartsByType(PartWheel.class).forEach(vehicleWheelInfo -> tooltip.add("Wheel: " + vehicleWheelInfo.getDefaultWheelName()));
+
+            int seats = getInfo().getPartsByType(PartEntitySeat.class).size();
+            if (seats > 0) {
+                tooltip.add(seats + " seats");
+            }
         }
-        getInfo().getPartsByType(PartWheel.class).forEach(vehicleWheelInfo -> tooltip.add("Wheel: " + vehicleWheelInfo.getDefaultWheelName()));
-        //vehicleInfo.getPartsByType(PartSeat.class).forEach(seatInfo -> tooltip.add("Seat: " + seatInfo.getPartName()));
-        //vehicleInfo.partShapes.forEach(vehicleCollisionInfo -> tooltip.add("Collisions: " + vehicleCollisionInfo.shapeName));
     }
 
     @Override

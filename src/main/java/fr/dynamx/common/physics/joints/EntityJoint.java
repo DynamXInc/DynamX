@@ -1,6 +1,7 @@
 package fr.dynamx.common.physics.joints;
 
 import com.jme3.bullet.joints.Constraint;
+import fr.aym.acslib.utils.DeserializedData;
 import fr.aym.acslib.utils.nbtserializer.ISerializable;
 import fr.aym.acslib.utils.nbtserializer.NBTSerializer;
 import fr.dynamx.common.entities.PhysicsEntity;
@@ -146,11 +147,11 @@ public class EntityJoint<T extends Constraint> {
         }
 
         @Override
-        public void populateWithSavedObjects(Object[] objects) {
-            id = (UUID) objects[0];
-            type = new ResourceLocation((String) objects[1]);
-            jid = (byte) objects[2];
-            jointOwner = NBTSerializer.convert((Byte) objects[3]);
+        public void populateWithSavedObjects(DeserializedData objects) {
+            id = objects.next();
+            type = new ResourceLocation(objects.next());
+            jid = objects.next();
+            jointOwner = NBTSerializer.convert(objects.next());
         }
     }
 }

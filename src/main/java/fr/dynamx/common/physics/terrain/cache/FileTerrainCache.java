@@ -90,8 +90,7 @@ public class FileTerrainCache implements ITerrainCache {
     public void addChunkToSave(ChunkLoadingTicket loadingTicket, ChunkCollisions collisions) {
         if (DynamXConfig.enableDebugTerrainManager)
             ChunkGraph.addToGrah(collisions.getPos(), ChunkGraph.ChunkActions.SEND_SAVE, ChunkGraph.ActionLocation.UNKNOWN, collisions);
-        //don't incr index here, but todoold take care if it's not incr just after chunk has been loaded
-        //System.out.println("Adding dirty "+loadingTicket.getPos());
+        //don't incr index here
         dirtyChunks.add(loadingTicket.getPos());
         ChunkLoadingTicket.Snap snap = loadingTicket.snapshot();
         POOL.submit(() -> {
@@ -117,13 +116,12 @@ public class FileTerrainCache implements ITerrainCache {
         if (DynamXConfig.enableDebugTerrainManager)
             ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.SEND_INVALIDATE, ChunkGraph.ActionLocation.UNKNOWN, null, "Changed: " + changed + " Status " + ticket.getStatusIndex());
         if (changed) {
-            ticket.incrStatusIndex("invalidated_changed"); //will prevent any other tasks like loading
+            ticket.incrStatusIndex(); //will prevent any other tasks like loading/saving
             invalidate(pos, syncChanges);
         }
     }
 
     private void invalidate(VerticalChunkPos pos, boolean syncChanges) {
-        //invalidatingChunks.add(pos);
         if (syncChanges)
             dirtyChunks.add(pos);
         ChunkPos cpos = new ChunkPos(pos.x >> 5, pos.z >> 5); //16x16 chunks
@@ -162,7 +160,6 @@ public class FileTerrainCache implements ITerrainCache {
             ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.LOAD_FROM_SAVE, ChunkGraph.ActionLocation.UNKNOWN, null, "Status: " + ticket.getStatusIndex());
 
         profiler.start(Profiler.Profiles.CHUNK_COLLS_LOAD_FROM_FILE);
-        Vector3fPool.openPool();
         ChunkPos cpos = new ChunkPos(pos.x >> 5, pos.z >> 5); //16x16 chunks
 
         List<ITerrainElement> elements = getFileAt(cpos).loadChunk(pos, this);
@@ -172,8 +169,6 @@ public class FileTerrainCache implements ITerrainCache {
             saveFile(pos, new ChunkTerrain(elements == null ? new ArrayList<>() : elements, persistentElements == null ? new ArrayList<>() : (List<ITerrainElement.IPersistentTerrainElement>) persistentElements));
         }
 
-        //System.out.println("LOADE "+persistentElements+" at "+pos);
-        Vector3fPool.closePool();
         profiler.end(Profiler.Profiles.CHUNK_COLLS_LOAD_FROM_FILE);
         return new ChunkTerrain(elements == null ? new ArrayList<>() : elements, persistentElements == null ? new ArrayList<>() : (List<ITerrainElement.IPersistentTerrainElement>) persistentElements);
     }
@@ -262,6 +257,7 @@ public class FileTerrainCache implements ITerrainCache {
     }
 
     protected void writeModifiedFiles() {
+        DynamXMain.log.debug("Saving {} DynamX terrain files", terrainFileSaveQueue.size());
         while (!terrainFileSaveQueue.isEmpty()) {
             ChunkPos cpos = terrainFileSaveQueue.remove();
             TerrainFile FILE = getFileAt(cpos);

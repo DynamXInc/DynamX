@@ -1,5 +1,6 @@
 package fr.dynamx.utils.debug;
 
+import fr.aym.acslib.utils.DeserializedData;
 import fr.aym.acslib.utils.packetserializer.ISerializablePacket;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -40,9 +41,9 @@ public class TerrainDebugData implements ISerializablePacket {
     }
 
     @Override
-    public void populateWithSavedObjects(Object[] objects) {
-        this.uuid = (int) objects[0];
-        this.renderer = TerrainDebugRenderer.values()[(int) objects[1]];
-        this.data = (float[]) objects[2];
+    public void populateWithSavedObjects(DeserializedData objects) {
+        this.uuid = objects.next();
+        this.renderer = TerrainDebugRenderer.values()[(int) objects.next()];
+        this.data = objects.next();
     }
 }

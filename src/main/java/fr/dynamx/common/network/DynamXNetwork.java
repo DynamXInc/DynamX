@@ -99,7 +99,7 @@ public class DynamXNetwork {
             }
 
             @Override
-            public Vector3f unserialize(ByteBuf byteBuf) {
+            public Vector3f deserialize(ByteBuf byteBuf) {
                 return new Vector3f(byteBuf.readFloat(), byteBuf.readFloat(), byteBuf.readFloat());
             }
         });
@@ -118,7 +118,7 @@ public class DynamXNetwork {
             }
 
             @Override
-            public Quaternion unserialize(ByteBuf byteBuf) {
+            public Quaternion deserialize(ByteBuf byteBuf) {
                 return new Quaternion(byteBuf.readFloat(), byteBuf.readFloat(), byteBuf.readFloat(), byteBuf.readFloat());
             }
         });

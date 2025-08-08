@@ -13,13 +13,14 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 /**
- * Terrain data cache
+ * Terrain data cache, saved in a data file in the World
  */
 public class TerrainFile extends VirtualTerrainFile {
-    private static final int VERSION = 6;
+    private static final int VERSION = 7;
     private static final int SLOPES_VERSION = 4;
 
     private final File container;
+    private final boolean isSlopes;
     private final int version;
 
     //TODO BETTER MT
@@ -31,9 +32,11 @@ public class TerrainFile extends VirtualTerrainFile {
     }
 
     public TerrainFile(File container, boolean isSlopes) {
-        if (DynamXConfig.enableDebugTerrainManager)
-            DynamXMain.log.info("Chunk debug pos are " + DynamXConfig.chunkDebugPoses+" // load " + container);
+        if (DynamXConfig.enableDebugTerrainManager) {
+            DynamXMain.log.info("Chunk debug pos are " + DynamXConfig.chunkDebugPoses + " // load " + container);
+        }
         this.container = container;
+        this.isSlopes = isSlopes;
         this.version = isSlopes ? SLOPES_VERSION : VERSION;
     }
 
@@ -57,7 +60,7 @@ public class TerrainFile extends VirtualTerrainFile {
             if (container.exists()) {
                 ObjectInputStream in = DynamXUtils.getTerrainObjectsIS(new GZIPInputStream(new FileInputStream(container)));
                 short version = in.readShort();
-                if (version >= this.getVersion()) {
+                if (isSlopes ? version == getVersion() : version >= 6) {
                     int size = in.readInt();
                     for (int i = 0; i < size; i++) {
                         VerticalChunkPos pos = new VerticalChunkPos(in.readInt(), in.readInt(), in.readInt());
@@ -102,5 +105,10 @@ public class TerrainFile extends VirtualTerrainFile {
             ioLoading = false;
             ioLock.unlock();
         }
+    }
+
+    @Override
+    public String toString() {
+        return "TerrainFile@" + Integer.toHexString(hashCode()) + " at " + container;
     }
 }

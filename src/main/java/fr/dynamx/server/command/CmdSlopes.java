@@ -6,6 +6,7 @@ import fr.dynamx.api.network.EnumPacketTarget;
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.api.physics.terrain.ITerrainElement;
 import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.command.ISubCommand;
 import fr.dynamx.common.contentpack.ContentPackLoader;
 import fr.dynamx.common.items.tools.ItemSlopes;
 import fr.dynamx.common.network.packets.MessageSwitchAutoSlopesMode;
@@ -16,6 +17,7 @@ import fr.dynamx.common.slopes.SlopeGenerator;
 import fr.dynamx.utils.VerticalChunkPos;
 import fr.dynamx.utils.debug.Profiler;
 import fr.dynamx.utils.optimization.BoundingBoxPool;
+import fr.dynamx.utils.optimization.SubClassPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -201,6 +203,7 @@ public class CmdSlopes implements ISubCommand {
                         }
                         if (chunkData != null) {
                             List<ITerrainElement.IPersistentTerrainElement> toRemove = new ArrayList<>();
+                            BoundingBoxPool.getPool().openSubPool(SubClassPool.BOUNDING_BOX_DEFAULT);
                             for (ITerrainElement.IPersistentTerrainElement element : chunkData.getElements().getPersistentElements()) {
                                 BoundingBox box = BoundingBoxPool.get();
                                 element.getBody().boundingBox(box);
@@ -215,6 +218,7 @@ public class CmdSlopes implements ISubCommand {
                                 } else
                                     out = true;
                             }
+                            BoundingBoxPool.getPool().closeSubPool();
                             chunkData.removePersistentElements(physicsWorld.getTerrainManager(), toRemove);
                         } else {
                             sender.sendMessage(new TextComponentTranslation("cmd.slopes.delete.terrainerror", chunkPos.toString()));

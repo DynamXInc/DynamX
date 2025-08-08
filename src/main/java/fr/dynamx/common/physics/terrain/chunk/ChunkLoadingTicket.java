@@ -2,6 +2,7 @@ package fr.dynamx.common.physics.terrain.chunk;
 
 import fr.dynamx.common.physics.terrain.WorldTerrainState;
 import fr.hermes.forge1122.dynamx.DynamXConfig;
+import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.VerticalChunkPos;
 import fr.dynamx.utils.debug.ChunkGraph;
 
@@ -57,21 +58,14 @@ public class ChunkLoadingTicket implements VerticalChunkPos.VerticalChunkPosCont
         return statusIndex;
     }
 
-    //private final List<String> indexChangers = new ArrayList<>();
-
     /**
      * Increments the status index of this ticket, stopping all running loading operations based on snapshots.
      *
      * @see Snap
      */
-    public void incrStatusIndex(String from) {
-        //indexChangers.add(from);
+    public void incrStatusIndex() {
         statusIndex++;
     }
-
-    /*public List<String> getIndexChangers() {
-        return indexChangers;
-    }*/
 
     /**
      * @return The position of this ticket. It's the unique identifier of this ticket.
@@ -100,11 +94,12 @@ public class ChunkLoadingTicket implements VerticalChunkPos.VerticalChunkPosCont
      * Also creates a new loaded callback
      */
     public void setLoading() {
-        incrStatusIndex("Set loading");
+        incrStatusIndex();
         this.loadedCallback = new CompletableFuture<>();
         this.status = ChunkState.LOADING;
-        if (DynamXConfig.enableDebugTerrainManager)
-            ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.SET_LOADING, ChunkGraph.ActionLocation.UNKNOWN, null, "" + this);
+        if (DynamXConfig.enableDebugTerrainManager) {
+            ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.SET_LOADING, ChunkGraph.ActionLocation.UNKNOWN, this);
+        }
     }
 
     /**
@@ -118,11 +113,12 @@ public class ChunkLoadingTicket implements VerticalChunkPos.VerticalChunkPosCont
      * Marks this chunk as loaded an updates contained chunk collisions <br>
      * <strong>Note : fireLoadedCallback is not called by this function</strong>
      */
-    public void setLoaded(WorldTerrainState terrainState, ChunkCollisions collisions) {
-        setCollisions(terrainState, collisions);
+    public void setLoaded(ChunkCollisions collisions) {
+        setCollisions(collisions);
         this.status = ChunkState.LOADED;
-        if (DynamXConfig.enableDebugTerrainManager)
+        if (DynamXConfig.enableDebugTerrainManager) {
             ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.SET_LOADED, ChunkGraph.ActionLocation.UNKNOWN, null, this + " " + (collisions != null ? collisions.getElements().getElements().size() + " / " + collisions.getElements().getPersistentElements().size() : "null coll"));
+        }
     }
 
     /**
@@ -130,33 +126,35 @@ public class ChunkLoadingTicket implements VerticalChunkPos.VerticalChunkPosCont
      * It should be called separately from the setLoaded method, as it may be followed by a new loading operation on this chunk (async loading for clients)
      */
     public void fireLoadedCallback() {
-        if (loadedCallback != null)
+        if (loadedCallback != null) {
             loadedCallback.complete(collisions);
+        }
     }
 
     /**
      * Marks this chunks as unloaded, and clears the contained data
      */
-    public void setUnloaded(WorldTerrainState terrainState) {
-        if (DynamXConfig.enableDebugTerrainManager)
+    public void setUnloaded() {
+        if (DynamXConfig.enableDebugTerrainManager) {
             ChunkGraph.addToGrah(getPos(), ChunkGraph.ChunkActions.DESTROY, ChunkGraph.ActionLocation.MAIN, getCollisions());
-        incrStatusIndex("Set unloaded");
-        if (loadedCallback != null) //complete with old collisions
-            loadedCallback.complete(collisions);
-        setCollisions(terrainState, null);
+        }
+        incrStatusIndex();
+        fireLoadedCallback(); //complete with old collisions
+        setCollisions(null);
         status = ChunkState.NONE;
         priority = ChunkLoadingTicket.TicketPriority.NONE;
     }
 
-    private void setCollisions(WorldTerrainState terrainState, ChunkCollisions collisions) {
-        if (collisions != this.collisions) {
-            if (this.collisions != null) {
-                this.collisions.removeFromBulletWorld();
-                if (this.collisions.getChunkState().areComputedElementsAdded() || this.collisions.getChunkState().arePersistentElementsAdded()) {
-                    throw new IllegalStateException("Elements still added ! " + this.collisions + " wtf " + this);
-                }
-                this.collisions.reset();
+    private void setCollisions(ChunkCollisions collisions) {
+        if (collisions == this.collisions) {
+            return;
+        }
+        if (this.collisions != null) {
+            this.collisions.removeFromBulletWorld();
+            if (this.collisions.getChunkState().areComputedElementsAdded() || this.collisions.getChunkState().arePersistentElementsAdded()) {
+                throw new IllegalStateException("Elements still added ! " + this.collisions + " wtf " + this);
             }
+            this.collisions.reset();
         }
         this.collisions = collisions;
     }

@@ -33,15 +33,7 @@ public class GuiLoadingErrors extends GuiFrame {
         super(new GuiScaler.Identity());
         setCssId("root");
 
-        summary = new GuiScrollPane() {
-            @Override
-            public List<GuiComponent> getReversedChildComponents() {
-                List<GuiComponent> list = super.getReversedChildComponents();
-                list.sort(GuiComponent::compareTo);
-                Collections.reverse(list);
-                return list;
-            }
-        };
+        summary = new GuiScrollPane();
         summary.setCssId("content-pane");
         fillSummary(null);
         summary.setFocused(true);

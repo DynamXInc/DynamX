@@ -74,8 +74,8 @@ public class MaterialVariantsInfo<T extends ISubInfoTypeOwner<T>> extends SubInf
         return variantsMap;
     }
 
-    public void addVariant(TextureVariantData variantData) {
-        if (variantsMap.containsKey(variantData.getId())) {
+    public void addVariant(TextureVariantData variantData, boolean allowOverride) {
+        if (variantsMap.containsKey(variantData.getId()) && !allowOverride) {
             throw new IllegalArgumentException("Texture variant id " + variantData.getId() + " already took");
         }
         variantsMap.put(variantData.getId(), variantData);

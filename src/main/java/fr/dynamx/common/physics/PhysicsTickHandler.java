@@ -11,7 +11,7 @@ import fr.dynamx.utils.DynamXLoadingTasks;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.debug.Profiler;
 import fr.dynamx.utils.optimization.QuaternionPool;
-import fr.dynamx.utils.optimization.TransformPool;
+import fr.dynamx.utils.optimization.SubClassPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
@@ -35,7 +35,7 @@ public class PhysicsTickHandler {
     @SideOnly(Side.CLIENT)
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void tickClient(TickEvent.ClientTickEvent event) {
-        if(event.phase == TickEvent.Phase.START) {
+        if (event.phase == TickEvent.Phase.START) {
             try {
                 Profiler.get().start(Profiler.Profiles.TICK);
             } catch (Exception e) {
@@ -47,8 +47,8 @@ public class PhysicsTickHandler {
         }
 
         if (event.phase == TickEvent.Phase.START) {
-            QuaternionPool.openPool();
-            Vector3fPool.openPool();
+            QuaternionPool.openPool(SubClassPool.TICK_CLIENT);
+            Vector3fPool.openPool(SubClassPool.TICK_CLIENT);
             DynamXLoadingTasks.tick();
         } else {
             Profiler.get().end(Profiler.Profiles.TICK);
@@ -78,11 +78,13 @@ public class PhysicsTickHandler {
 
     @SubscribeEvent
     public void tickServer(TickEvent.ServerTickEvent event) {
-        if(event.phase == TickEvent.Phase.START) {
+        if (event.phase == TickEvent.Phase.START) {
+            QuaternionPool.openPool(SubClassPool.TICK_SERVER);
+            Vector3fPool.openPool(SubClassPool.TICK_SERVER);
             try {
                 Profiler.get().start(Profiler.Profiles.TICK);
             } catch (Exception e) {
-                e.printStackTrace();
+                DynamXMain.log.throwing(e);
             }
         }
         for (WorldServer world : FMLCommonHandler.instance().getMinecraftServerInstance().worlds) {
@@ -91,10 +93,7 @@ public class PhysicsTickHandler {
             }
         }
 
-
         if (event.phase == TickEvent.Phase.START) {
-            QuaternionPool.openPool();
-            Vector3fPool.openPool();
             if (FMLCommonHandler.instance().getSide().isServer()) {
                 DynamXLoadingTasks.tick();
             }
@@ -114,37 +113,35 @@ public class PhysicsTickHandler {
 
     private void tickWorldPhysics(TickEvent.Phase phase, World world) {
         IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(world);
-        if (phase == TickEvent.Phase.START) {
-            //Open Pool
-            TransformPool.getPool().openSubPool();
-            QuaternionPool.openPool();
-            Vector3fPool.openPool();
-            physicsWorld.tickStart();
-
-            float deltaTimeSecond = getDeltaTimeMilliseconds() * 1.0E-3F;
-            if (deltaTimeSecond > 0.5f) // game was paused ?
-                deltaTimeSecond = 0.05f;
-
-            Profiler.get().start(Profiler.Profiles.STEP_SIMULATION);
-            physicsWorld.stepSimulation(deltaTimeSecond);
-            Profiler.get().end(Profiler.Profiles.STEP_SIMULATION);
-
-            if(physicsWorld.getDynamicsWorld() != null) {
-                physicsWorld.getDynamicsWorld().getJointList().forEach(joint -> {
-                    if ((joint.getBodyA() != null && !physicsWorld.getDynamicsWorld().contains(joint.getBodyA()))
-                            || (joint.getBodyB() != null && !physicsWorld.getDynamicsWorld().contains(joint.getBodyB()))) {
-                        physicsWorld.removeJoint(joint);
-                    }
-                });
-            }
-        } else {
+        if (phase == TickEvent.Phase.END) {
             physicsWorld.tickEnd();
-
-            //Close Pool
-            Vector3fPool.closePool();
-            QuaternionPool.closePool();
-            TransformPool.getPool().closeSubPool();
+            return;
         }
+        // START phase
+        QuaternionPool.openPool(SubClassPool.TICK_PHYSICS_WORLD);
+        Vector3fPool.openPool(SubClassPool.TICK_PHYSICS_WORLD);
+
+        physicsWorld.tickStart();
+
+        float deltaTimeSecond = getDeltaTimeMilliseconds() * 1.0E-3F;
+        if (deltaTimeSecond > 0.5f) // game was paused ?
+            deltaTimeSecond = 0.05f;
+
+        Profiler.get().start(Profiler.Profiles.STEP_SIMULATION);
+        physicsWorld.stepSimulation(deltaTimeSecond);
+        Profiler.get().end(Profiler.Profiles.STEP_SIMULATION);
+
+        if (physicsWorld.getDynamicsWorld() != null) {
+            physicsWorld.getDynamicsWorld().getJointList().forEach(joint -> {
+                if ((joint.getBodyA() != null && !physicsWorld.getDynamicsWorld().contains(joint.getBodyA()))
+                        || (joint.getBodyB() != null && !physicsWorld.getDynamicsWorld().contains(joint.getBodyB()))) {
+                    physicsWorld.removeJoint(joint);
+                }
+            });
+        }
+
+        Vector3fPool.closePool();
+        QuaternionPool.closePool();
     }
 
     private void sendClientsDebug() {
@@ -195,9 +192,6 @@ public class PhysicsTickHandler {
     private float getDeltaTimeMilliseconds() {
         long cur = System.currentTimeMillis();
         long dt = cur - lastTickTimeMs;
-        if (false && CmdNetworkConfig.sync_buff)
-            if (dt > 51)
-                System.out.println("DT is " + dt);
         lastTickTimeMs = cur;
         return dt;
     }

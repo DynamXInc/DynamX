@@ -151,7 +151,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
 
     @Setter
     @PackFileProperty(configNames = "RenderDistanceSquared", required = false, defaultValue = "-1")
-    protected float renderDistance = -1;
+    protected float renderDistanceSquared = -1;
 
     /**
      * The particle emitters of this vehicle
@@ -224,7 +224,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
             variants.appendTo(this);
         }
         //Map lights
-        lightSources.values().forEach(PartLightSource::postLoad);
+        lightSources.values().forEach(l -> l.postLoad(hot));
         //Post-load sub-properties
         if (!super.postLoad(hot))
             return false;

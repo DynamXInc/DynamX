@@ -25,8 +25,8 @@ public class RigidBodyTransform {
     }
 
     public void set(PhysicsRigidBody from) {
-        setPosition(from.getPhysicsLocation(Vector3fPool.get()));
-        setRotation(from.getPhysicsRotation(QuaternionPool.get()));
+        from.getPhysicsLocation(position);
+        from.getPhysicsRotation(rotation);
     }
 
     public void set(RigidBodyTransform transform) {

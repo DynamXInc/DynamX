@@ -72,6 +72,7 @@ public class MessageEntityInteract implements IDnxPacket, IMessageHandler<Messag
         InteractivePart hitPart = targetEntity.getHitPart(context);
         if (hitPart != null && hitPart.canInteract(targetEntity, context)) {
             if ((hitPart instanceof PartEntitySeat && ((PartEntitySeat) hitPart).hasDoor()) && context.isSneaking()) {
+                Vector3fPool.closePool();
                 return;
             }
             if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.PlayerInteract(context, targetEntity, hitPart))) {

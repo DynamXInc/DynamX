@@ -1,5 +1,6 @@
 package fr.dynamx.common.contentpack.parts;
 
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.IPartContainer;
@@ -272,8 +273,8 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     }
 
     @Override
-    public float getRenderDistance() {
-        return owner.getRenderDistance();
+    public float getRenderDistanceSquared() {
+        return owner.getRenderDistanceSquared();
     }
 
     @Override
@@ -365,7 +366,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
 
     class PartDoorNode<A extends IModelPackObject> extends SimpleNode<BaseRenderContext.EntityRenderContext, A> {
         public PartDoorNode(PartDoor door, Vector3f scale, List<SceneNode<BaseRenderContext.EntityRenderContext, A>> linkedChilds) {
-            super(door.getCarAttachPoint(), null, PartDoor.this.isAutomaticPosition, scale, linkedChilds);
+            super(door.getCarAttachPoint(), (Quaternion) null, PartDoor.this.isAutomaticPosition, scale, linkedChilds);
         }
 
         @Override
@@ -391,9 +392,9 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
                 transform.rotate(ClientDynamXUtils.computeInterpolatedJomlQuaternion(prev.getRotation(), rbSyncTrans.getRotation(), partialTicks));
             }
             transform.scale(scale.x, scale.y, scale.z);
+
             GlStateManager.pushMatrix();
-            GlStateManager.multMatrix(ClientDynamXUtils.getMatrixBuffer(transform));
-            transformToPartPos();
+            glTransformToPartPos();
             context.getRender().renderModelGroup(context.getModel(), getObjectName(), entity, context.getTextureId(), false);
             GlStateManager.popMatrix();
             renderChildren(context, packInfo, transform);

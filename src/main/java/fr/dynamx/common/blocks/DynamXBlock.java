@@ -17,6 +17,7 @@ import fr.dynamx.common.contentpack.type.objects.PropObject;
 import fr.dynamx.common.entities.IDynamXObject;
 import fr.dynamx.common.items.DynamXItemRegistry;
 import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.DynamXUtils;
 import fr.dynamx.utils.RegistryNameSetter;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -61,7 +62,7 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
      * @param blockObjectInfo a BlockObject loaded by the content pack system
      */
     public DynamXBlock(T blockObjectInfo) {
-        super(blockObjectInfo.getMaterial());
+        super(blockObjectInfo.getMaterial() != null ? blockObjectInfo.getMaterial() : Material.ROCK);
         setInfo(blockObjectInfo);
         setCreativeTab(blockObjectInfo.getCreativeTab(DynamXItemRegistry.objectTab));
         textureNum = Math.min(16, blockObjectInfo.getMaxVariantId());
@@ -158,11 +159,8 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
 
     @SideOnly(Side.CLIENT)
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-        tooltip.add("Description: " + getInfo().getDescription());
-        tooltip.add("Pack: " + getInfo().getPackName());
-        if (stack.getMetadata() > 0 && getMaxMeta() > 1) {
-            tooltip.add("Texture: " + getInfo().getMainObjectVariantName((byte) stack.getMetadata()));
-        }
+        super.addInformation(stack, worldIn, tooltip, flagIn);
+        DynamXUtils.addItemTooltip(tooltip, getInfo(), (byte) stack.getMetadata());
     }
 
     @Override
@@ -170,37 +168,40 @@ public class DynamXBlock<T extends BlockObject<?>> extends Block implements IDyn
         if (worldIn.isRemote && !playerIn.isSneaking()) {
             return false;
         }
+
         TileEntity te = worldIn.getTileEntity(pos);
-        if (te instanceof TEDynamXBlock) {
-            //TODO ADD INTERACT EVENTS
-            //If we clicked a part, try to interact with it.
-            InteractivePart<IDynamXObject, ?> hitPart = (InteractivePart<IDynamXObject, ?>) ((TEDynamXBlock) te).getHitPart(playerIn);
-            if (hitPart == null || !hitPart.canInteract((IDynamXObject) te, playerIn)) {
-                // If there's no hit/can't interact, try to open the customization gui
-                if (playerIn.isSneaking() && playerIn.capabilities.isCreativeMode) {
-                    if (worldIn.isRemote && isDxModel)
-                        ((TEDynamXBlock) te).openConfigGui();
-                    return true;
-                    /*
-                    //TODO animations
-                    if (te instanceof TEDynamXBlock && hand.equals(EnumHand.MAIN_HAND)) {
-                        DxAnimator animator = ((TEDynamXBlock) te).getAnimator();
-                        if (playerIn.isSneaking()) {
-                            DxModelRenderer model = DynamXContext.getDxModelRegistry().getModel(blockObjectInfo.getModel());
-                            animator.playNextAnimation();
-                            //te.getAnimator().addAnimation("Reset");
-                            return true;
-                        }
-                        animator.setBlendPose(DxAnimator.EnumBlendPose.START_END);
-                        animator.addAnimation("Run1", DxAnimation.EnumAnimType.START_END);
-                    }*/
-                }
-                return false;
-            }
-            // only interact on server side
-            return worldIn.isRemote || hitPart.interact((IDynamXObject) te, playerIn);
+        if (!(te instanceof TEDynamXBlock)) {
+            return false;
         }
-        return false;
+
+        //TODO ADD INTERACT EVENTS
+        //If we clicked a part, try to interact with it.
+        InteractivePart<IDynamXObject, ?> hitPart = (InteractivePart<IDynamXObject, ?>) ((TEDynamXBlock) te).getHitPart(playerIn);
+        if (hitPart == null || !hitPart.canInteract((IDynamXObject) te, playerIn)) {
+            // If there's no hit/can't interact, try to open the customization gui
+            if (playerIn.isSneaking() && playerIn.capabilities.isCreativeMode) {
+                if (worldIn.isRemote && isDxModel) {
+                    ((TEDynamXBlock) te).openConfigGui();
+                }
+                return true;
+                /*
+                //TODO animations
+                if (te instanceof TEDynamXBlock && hand.equals(EnumHand.MAIN_HAND)) {
+                    DxAnimator animator = ((TEDynamXBlock) te).getAnimator();
+                    if (playerIn.isSneaking()) {
+                        DxModelRenderer model = DynamXContext.getDxModelRegistry().getModel(blockObjectInfo.getModel());
+                        animator.playNextAnimation();
+                        //te.getAnimator().addAnimation("Reset");
+                        return true;
+                    }
+                    animator.setBlendPose(DxAnimator.EnumBlendPose.START_END);
+                    animator.addAnimation("Run1", DxAnimation.EnumAnimType.START_END);
+                }*/
+            }
+            return false;
+        }
+        // only interact on server side
+        return worldIn.isRemote || hitPart.interact((IDynamXObject) te, playerIn);
     }
 
     @Override

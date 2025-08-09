@@ -11,6 +11,7 @@ import fr.dynamx.utils.DynamXConfig;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.maths.DynamXMath;
+import fr.dynamx.utils.optimization.SubClassPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
@@ -71,7 +72,7 @@ public class CameraSystem {
      * Only works when camera is inside vehicles.
      */
     public static void rotateVehicleCamera(EntityViewRenderEvent.CameraSetup event) {
-        Vector3fPool.openPool();
+        Vector3fPool.openPool(SubClassPool.CAMERA_UPDATE);
         PhysicsEntity<?> vehicle = (PhysicsEntity<?>) event.getEntity().getRidingEntity();
         Entity renderEntity = event.getEntity();
 
@@ -91,6 +92,7 @@ public class CameraSystem {
         if (vehicle instanceof IModuleContainer.ISeatsContainer && ((IModuleContainer.ISeatsContainer) vehicle).hasSeats()) {
             BasePartSeat seat = ((IModuleContainer.ISeatsContainer) vehicle).getSeats().getRidingSeat(renderEntity);
             if(seat == null) {
+                Vector3fPool.closePool();
                 return;
             }
             if(ClientEventHandler.MC.gameSettings.thirdPersonView > 0 && seat.getCameraPositionY() != 0) {
@@ -229,7 +231,7 @@ public class CameraSystem {
                 pt1.addLocal(pt0);
                 pt2.set(end);
                 pt2.addLocal(pt0);
-                cameraRadius.put(Vector3fPool.get(-38, "came", pt1), Vector3fPool.get(-38, "came", pt2));
+                cameraRadius.put(Vector3fPool.getPermanentVector(pt1), Vector3fPool.getPermanentVector(pt2));
             }
 
             RayTraceResult raytraceresult = ClientEventHandler.MC.world.rayTraceBlocks(new Vec3d(d0 + start.x, d1 + start.y, d2 + start.z), new Vec3d(d0 + end.x, d1 + end.y, d2 + end.z), false, true, false);

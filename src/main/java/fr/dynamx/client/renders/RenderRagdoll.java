@@ -45,7 +45,6 @@ public class RenderRagdoll<T extends RagdollEntity> extends RenderPhysicsEntity<
         if (entity.isInvisible())
             return;
         float partialTicks = context.getPartialTicks();
-        BoundingBoxPool.getPool().openSubPool();
 
         String useSkin = entity.getSkin();
         ResourceLocation texture;
@@ -83,8 +82,6 @@ public class RenderRagdoll<T extends RagdollEntity> extends RenderPhysicsEntity<
 
         // GlStateManager.enableLighting();
         GlStateManager.popMatrix();
-
-        BoundingBoxPool.getPool().closeSubPool();
     }
 
     private void renderBodyPart(T ragdollPhysics, EnumRagdollBodyPart enumBodyPart, ModelRenderer model, float partialTicks, ResourceLocation texture) {

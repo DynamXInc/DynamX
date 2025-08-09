@@ -51,8 +51,9 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
         //Fixes the position of physics objects when reloading them from a save
         Vector3f position = Vector3fPool.get(entity.physicsPosition);
         Vector3f centerOfMass = getCenterOfMass();
-        if (centerOfMass != null)
+        if (centerOfMass != null) {
             position.addLocal(DynamXGeometry.rotateVectorByQuaternion(centerOfMass, entity.physicsRotation).multLocal(-1));
+        }
         this.collisionObject = createShape(position, entity.physicsRotation, entity.rotationYaw);
     }
 
@@ -70,13 +71,15 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
      * Adds the collision object to the physics world
      */
     public void addToWorld() {
-        DynamXContext.getPhysicsWorld(handledEntity.world).addCollisionObject(collisionObject);
+        if (collisionObject != null) {
+            DynamXContext.getPhysicsWorld(handledEntity.world).addCollisionObject(collisionObject);
+        }
     }
 
     /**
      * Removes the collision object from the physics world
      */
-    public void removePhysicsEntity() {
+    public void removeFromWorld() {
         if (collisionObject != null) {
             DynamXContext.getPhysicsWorld(handledEntity.world).removeCollisionObject(collisionObject);
         }

@@ -110,8 +110,9 @@ public abstract class InfoList<T extends ISubInfoTypeOwner<?>> {
         for (T info : infos.values()) {
             bar1.step(info.getFullName());
             try {
-                if (!info.postLoad(hot))
+                if (!info.postLoad(hot)) {
                     continue;
+                }
             } catch (Exception e) {
                 DynamXErrorManager.addError(info.getPackName(), DynamXErrorManager.PACKS_ERRORS, "complete_object_error", ErrorLevel.FATAL, info.getName(), null, e);
                 continue;
@@ -133,8 +134,9 @@ public abstract class InfoList<T extends ISubInfoTypeOwner<?>> {
                                 }
                             };
                             DynamXItemRegistry.creativeTabs.add(tab);
-                            if (client)
-                                ContentPackUtils.addMissingLangFile(DynamXMain.resourcesDirectory, info.getPackName(), tab.getTranslationKey(), tab.getTabLabel());
+                            if (client) {
+                                ContentPackUtils.addMissingLangTranslation(DynamXMain.resourcesDirectory, info.getPackName(), tab.getTranslationKey(), tab.getTabLabel());
+                            }
                         }
                     }
                 }
@@ -150,7 +152,7 @@ public abstract class InfoList<T extends ISubInfoTypeOwner<?>> {
                                 for (int metadata = 0; metadata < ((IResourcesOwner) ob).getMaxMeta(); metadata++) {
                                     String translationKey = info.getTranslationKey((IDynamXItem) ob, metadata) + ".name";
                                     String translationValue = info.getTranslatedName((IDynamXItem) ob, metadata);
-                                    ContentPackUtils.addMissingLangFile(DynamXMain.resourcesDirectory, info.getPackName(), translationKey, translationValue);
+                                    ContentPackUtils.addMissingLangTranslation(DynamXMain.resourcesDirectory, info.getPackName(), translationKey, translationValue);
                                 }
                             }
                         }

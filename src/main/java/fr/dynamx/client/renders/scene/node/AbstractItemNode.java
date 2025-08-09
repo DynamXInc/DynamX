@@ -11,6 +11,7 @@ import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.QuaternionPool;
+import fr.dynamx.utils.optimization.SubClassPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
@@ -52,9 +53,9 @@ public abstract class AbstractItemNode<C extends IRenderContext, A extends IMode
             GlStateManager.popMatrix();
         } else {
             transform.identity();
-            Vector3fPool.openPool();
-            QuaternionPool.openPool();
-            GlQuaternionPool.openPool();
+            Vector3fPool.openPool(SubClassPool.ITEM_RENDER_NODE);
+            QuaternionPool.openPool(SubClassPool.ITEM_RENDER_NODE);
+            GlQuaternionPool.openPool(SubClassPool.ITEM_RENDER_NODE);
             if (!MinecraftForge.EVENT_BUS.post(new DynamXRenderItemEvent(context, this, DynamXRenderItemEvent.EventStage.TRANSFORM))) {
                 packInfo.applyItemTransforms(renderType, stack, model, transform);
                 ViewTransformsInfo transformsInfo = packInfo.getViewTransformsInfo(renderType);

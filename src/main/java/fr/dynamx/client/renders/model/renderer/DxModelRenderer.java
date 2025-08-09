@@ -89,6 +89,7 @@ public abstract class DxModelRenderer {
         double px = player.lastTickPosX + (player.posX - player.lastTickPosX) * partialTicks;
         double py = player.lastTickPosY + (player.posY - player.lastTickPosY) * partialTicks;
         double pz = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * partialTicks;
+
         GlStateManager.pushMatrix();
         GlStateManager.translate(-px + blockPos.getX() + 0.5, -py + blockPos.getY() + 1.5, -pz + blockPos.getZ() + 0.5);
         GlStateManager.rotate(GlQuaternionPool.get(DynamXGeometry.eulerToQuaternion((blockObjectInfo.getRotation().z),

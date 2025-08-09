@@ -118,7 +118,7 @@ public class PropObject<T extends PropObject<T>> extends AbstractProp<T> impleme
         this.item3DRenderLocation = block.getItem3DRenderLocation();
         this.translation = block.getTranslation();
         this.scaleModifier = block.getScaleModifier();
-        this.renderDistance = block.getRenderDistance();
+        this.renderDistanceSquared = block.getRenderDistanceSquared();
         this.creativeTabName = block.getCreativeTabName();
         this.useComplexCollisions = block.useComplexCollisions();
         this.particleEmitters.addAll(block.getParticleEmitters());

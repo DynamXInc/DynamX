@@ -73,6 +73,7 @@ public abstract class PackEntityPhysicsHandler<A extends IPhysicsPackInfo & IPar
     @Override
     public void onPackInfosReloaded() {
         packInfo = handledEntity.getPackInfo();
+
         if (getCollisionObject() != null) {
             getCollisionObject().setAngularDamping(packInfo.getAngularDamping());
             getCollisionObject().setLinearDamping(packInfo.getLinearDamping());

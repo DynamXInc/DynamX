@@ -224,36 +224,48 @@ public abstract class BasicEngineModule implements IPhysicsModule<BaseVehiclePhy
     @SideOnly(Side.CLIENT)
     public void updateSounds() {
         BaseEngineInfo engineInfo = getEngineInfo();
-        if (engineInfo != null && engineInfo.getEngineSounds() != null) {
-            if (engineSounds.isEmpty()) { //Sounds are not initialized
-                engineInfo.getEngineSounds().forEach(engineSound -> engineSounds.put(engineSound.id, new EngineSound(engineSound, entity, this)));
+        if (engineInfo == null || engineInfo.getEngineSounds() == null) {
+            return;
+        }
+
+        if (engineSounds.isEmpty()) { //Sounds are not initialized
+            engineInfo.getEngineSounds().forEach(engineSound -> engineSounds.put(engineSound.id, new EngineSound(engineSound, entity, this)));
+        }
+
+        if (!isEngineStarted()) {
+            if (currentEngineSound != null) {
+                SOUND_HANDLER.stopSound(currentEngineSound);
             }
-            if (isEngineStarted()) {
-                boolean forInterior = Minecraft.getMinecraft().gameSettings.thirdPersonView == 0 && entity.isRidingOrBeingRiddenBy(Minecraft.getMinecraft().player);
-                float rpm = getEngineProperty(VehicleEntityProperties.EnumEngineProperties.REVS) * engineInfo.getMaxRevs();
-                lastEngineSound = currentEngineSound;
-                if (currentEngineSound == null || !currentEngineSound.shouldPlay(rpm, forInterior)) {
-                    engineSounds.forEach((id, vehicleSound) -> {
-                        if (vehicleSound.shouldPlay(rpm, forInterior)) {
-                            this.currentEngineSound = vehicleSound;
-                        }
-                    });
+            currentEngineSound = lastEngineSound = null;
+            return;
+        }
+        // engine is started: check what sound should be playing
+
+        boolean forInterior = Minecraft.getMinecraft().gameSettings.thirdPersonView == 0 && entity.isRidingOrBeingRiddenBy(Minecraft.getMinecraft().player);
+        float rpm = getEngineProperty(VehicleEntityProperties.EnumEngineProperties.REVS) * engineInfo.getMaxRevs();
+        lastEngineSound = currentEngineSound;
+        if (currentEngineSound == null || !currentEngineSound.shouldPlay(rpm, forInterior)) {
+            for (EngineSound sound : engineSounds.values()) {
+                if (sound.shouldPlay(rpm, forInterior)) {
+                    this.currentEngineSound = sound;
+                    break;
                 }
-                if (currentEngineSound != lastEngineSound) //if playing sound changed
-                {
-                    if (lastEngineSound != null)
-                        SOUND_HANDLER.stopSound(lastEngineSound);
-                    if (currentEngineSound != null) {
-                        if (currentEngineSound.getState() == EnumSoundState.STOPPING) //already playing
-                            currentEngineSound.onStarted();
-                        else
-                            SOUND_HANDLER.playStreamingSound(Vector3fPool.get(currentEngineSound.getPosX(), currentEngineSound.getPosY(), currentEngineSound.getPosZ()), currentEngineSound);
-                    }
-                }
+            }
+        }
+
+        if (currentEngineSound == lastEngineSound) {
+            return;
+        }
+        // if playing sound changed
+
+        if (lastEngineSound != null) {
+            SOUND_HANDLER.stopSound(lastEngineSound);
+        }
+        if (currentEngineSound != null) {
+            if (currentEngineSound.getState() == EnumSoundState.STOPPING) { //already playing
+                currentEngineSound.onStarted();
             } else {
-                if (currentEngineSound != null)
-                    SOUND_HANDLER.stopSound(currentEngineSound);
-                currentEngineSound = lastEngineSound = null;
+                SOUND_HANDLER.playStreamingSound(Vector3fPool.get(currentEngineSound.getPosX(), currentEngineSound.getPosY(), currentEngineSound.getPosZ()), currentEngineSound);
             }
         }
     }

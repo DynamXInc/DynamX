@@ -214,7 +214,7 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
     @Override
     @SideOnly(Side.CLIENT)
     public double getMaxRenderDistanceSquared() {
-        return packInfo == null || packInfo.getRenderDistance() == -1 ? super.getMaxRenderDistanceSquared() : packInfo.getRenderDistance();
+        return packInfo == null || packInfo.getRenderDistanceSquared() == -1 ? super.getMaxRenderDistanceSquared() : packInfo.getRenderDistanceSquared();
     }
 
     @Override
@@ -251,7 +251,7 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
      */
     public AxisAlignedBB computeBoundingBox() {
         if (boundingBoxCache == null) {
-            QuaternionPool.getINSTANCE().openSubPool();
+            QuaternionPool.openPool();
             Vector3fPool.openPool();
             List<IShapeInfo> boxes = getUnrotatedCollisionBoxes(); //Get PartShape boxes
             if (boxes.isEmpty()) {//If there is no boxes, create a default one
@@ -275,7 +275,7 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
                 boundingBoxCache = container.toBB();
             }
             Vector3fPool.closePool();
-            QuaternionPool.getINSTANCE().closeSubPool();
+            QuaternionPool.closePool();
         }
         return boundingBoxCache;
     }
@@ -475,7 +475,7 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
                 box = DynamXContext.getCollisionHandler().rotateBB(Vector3fPool.get(), box, getCollidableRotation());
                 Vector3f partPos = DynamXGeometry.rotateVectorByQuaternion(part.getPosition(), getCollidableRotation());
                 partPos.addLocal(getPos().getX() + getPackInfo().getTranslation().x + getCollisionOffset().x,
-                        getPos().getY() + 1.5f + getPackInfo().getTranslation().y + getCollisionOffset().y,
+                        getPos().getY() + getPackInfo().getTranslation().y + getCollisionOffset().y,
                         getPos().getZ() + getPackInfo().getTranslation().z + getCollisionOffset().z);
                 box.offset(partPos);
                 if ((nearestPos == null || DynamXGeometry.distanceBetween(partPos, playerPos) < DynamXGeometry.distanceBetween(nearestPos, playerPos)) && box.contains(hitVec)) {

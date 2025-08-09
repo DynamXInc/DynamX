@@ -28,6 +28,12 @@ public class HashMapPool {
     }
 
     protected void releaseMap(PooledHashMap<?, ?> map) {
-        freeMaps.add(map);
+        if(freeMaps.size() < 100) {
+            freeMaps.add(map);
+        }
+    }
+
+    public String getDebugInfo() {
+        return "free= " + freeMaps.size();
     }
 }

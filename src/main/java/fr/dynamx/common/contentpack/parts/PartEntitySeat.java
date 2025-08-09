@@ -27,11 +27,9 @@ import fr.dynamx.common.entities.modules.SeatsModule;
 import fr.dynamx.common.entities.vehicles.CarEntity;
 import fr.dynamx.common.entities.vehicles.HelicopterEntity;
 import fr.dynamx.utils.EnumSeatPlayerPosition;
-import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.errors.DynamXErrorManager;
-import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import lombok.Getter;
 import lombok.Setter;
@@ -39,6 +37,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
+import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.TextComponentString;
@@ -194,13 +193,15 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
         private final MutableBoundingBox debugBox = new MutableBoundingBox();
 
         public PartEntitySeatNode(PartEntitySeat seat, Vector3f scale, List<SceneNode<BaseRenderContext.EntityRenderContext, A>> linkedChilds) {
-            super(seat.getRelativeRenderPosition(), GlQuaternionPool.newGlQuaternion(seat.getRotation()), scale, linkedChilds);
+            super(seat.getRelativeRenderPosition(), seat.getRotation(), scale, linkedChilds);
         }
 
         @Override
         public void render(BaseRenderContext.EntityRenderContext context, A packInfo, Matrix4f parentTransform) {
-            if (MinecraftForgeClient.getRenderPass() != 0 || !(context.getEntity() instanceof IModuleContainer.ISeatsContainer))
+            if (MinecraftForgeClient.getRenderPass() != 0 || !(context.getEntity() instanceof IModuleContainer.ISeatsContainer)) {
                 return;
+            }
+
             SeatsModule seats = ((IModuleContainer.ISeatsContainer) context.getEntity()).getSeats();
             assert seats != null;
             Entity seatRider = seats.getSeatToPassengerMap().get(PartEntitySeat.this);
@@ -208,47 +209,54 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
                     (seatRider == Minecraft.getMinecraft().player && Minecraft.getMinecraft().gameSettings.thirdPersonView == 0)) {
                 return;
             }
+
             ClientEventHandler.renderingEntity = seatRider.getUniqueID();
             DynamXRenderUtils.popGlAllAttribBits();
+
             float partialTicks = context.getPartialTicks();
             transformToRotationPoint(parentTransform);
 
             //Transform the player to match the seat rotation and size
             EnumSeatPlayerPosition position = getPlayerPosition();
             RenderPhysicsEntity.shouldRenderPlayerSitting = position == EnumSeatPlayerPosition.SITTING;
-            if (getPlayerSize() != null)
+            if (getPlayerSize() != null) {
                 transform.scale(getPlayerSize().x, getPlayerSize().y, getPlayerSize().z);
-            if (position == EnumSeatPlayerPosition.LYING) transform.rotate(FastMath.PI / 2, 1, 0, 0);
+            }
+            if (position == EnumSeatPlayerPosition.LYING) {
+                transform.rotate(FastMath.PI / 2, 1, 0, 0);
+            }
 
             GlStateManager.pushMatrix();
-            GlStateManager.multMatrix(ClientDynamXUtils.getMatrixBuffer(transform));
+            glTransformToPartPos();
+
             //The render the player, e.rotationYaw is the name plate rotation
             if (seatRider instanceof AbstractClientPlayer) {
-                if (ClientEventHandler.renderPlayer != null) {
-                    ClientEventHandler.renderPlayer.doRender((AbstractClientPlayer) seatRider, 0, 0, 0, seatRider.rotationYaw, partialTicks);
+                String skinType = ((AbstractClientPlayer) seatRider).getSkinType();
+                RenderPlayer renderPlayer = context.getRender().getRenderManager().getSkinMap().get(skinType);
+                if (renderPlayer != null) {
+                    renderPlayer.doRender((AbstractClientPlayer) seatRider, 0, 0, 0, seatRider.rotationYaw, partialTicks);
                 }
             } else {
-                Minecraft.getMinecraft().getRenderManager().renderEntity(seatRider, 0, 0, 0, seatRider.rotationYaw, partialTicks, false);
+                context.getRender().getRenderManager().renderEntity(seatRider, 0, 0, 0, seatRider.rotationYaw, partialTicks, false);
             }
+
             GlStateManager.popMatrix();
             ClientEventHandler.renderingEntity = null;
         }
 
         @Override
         public void renderDebug(BaseRenderContext.EntityRenderContext context, A packInfo) {
-            if (DynamXDebugOptions.SEATS_AND_STORAGE.isActive()) {
-                GlStateManager.pushMatrix();
-                Vector3f translation = PartEntitySeat.this.getPosition();
-                GlStateManager.translate(translation.x, translation.y, translation.z);
-                if (rotation != null)
-                    GlStateManager.rotate(rotation);
-                getBox(debugBox);
-                RenderGlobal.drawBoundingBox(debugBox.minX, debugBox.minY, debugBox.minZ,
-                        debugBox.maxX, debugBox.maxY, debugBox.maxZ,
-                        isDriver() ? 0 : 1, isDriver() ? 1 : 0, 0, 1);
-                GlStateManager.popMatrix();
-            }
             super.renderDebug(context, packInfo);
+            if (!DynamXDebugOptions.SEATS_AND_STORAGE.isActive()) {
+                return;
+            }
+            GlStateManager.pushMatrix();
+            transformForDebug();
+            getBox(debugBox);
+            RenderGlobal.drawBoundingBox(debugBox.minX, debugBox.minY, debugBox.minZ,
+                    debugBox.maxX, debugBox.maxY, debugBox.maxZ,
+                    isDriver() ? 0 : 1, isDriver() ? 1 : 0, 0, 1);
+            GlStateManager.popMatrix();
         }
     }
 }

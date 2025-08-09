@@ -239,8 +239,9 @@ public class UdpServer {
         if (this.mSocket == null) {
             throw new IOException("No socket available to send packet; is the server running?");
         } else {
-            if (DynamXConfig.udpDebug)
-                DynamXMain.log.info("[UDP-DEBUG] Sending the packet ! Size: " + packet.getLength());
+            if (DynamXConfig.udpDebug) {
+                DynamXMain.log.info("[UDP-DEBUG] Sending the packet ! Size: {}", packet.getLength());
+            }
             this.mSocket.send(packet);
         }
     }

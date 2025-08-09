@@ -10,7 +10,7 @@ import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.network.packets.MessageForcePlayerPos;
 import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
-import fr.dynamx.utils.debug.SyncTracker;
+import fr.dynamx.utils.debug.SyncHelper;
 import lombok.Getter;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -85,10 +85,10 @@ public class EntityPosVariable extends ListeningEntityVariable<EntityPosVariable
                 Vector3f pos = entity.physicsPosition;
                 if (positionData == null || positionData.bodyActive != physicsHandler.isBodyActive()) {
                     changed = true;
-                } else if (SyncTracker.different(pos.x, positionData.position.x) || SyncTracker.different(pos.y, positionData.position.y) || SyncTracker.different(pos.z, positionData.position.z)) {
+                } else if (SyncHelper.different(pos.x, positionData.position.x) || SyncHelper.different(pos.y, positionData.position.y) || SyncHelper.different(pos.z, positionData.position.z)) {
                     changed = true;
-                } else if (SyncTracker.different(entity.physicsRotation.getX(), positionData.rotation.getX()) || SyncTracker.different(entity.physicsRotation.getY(), positionData.rotation.getY()) ||
-                        SyncTracker.different(entity.physicsRotation.getZ(), positionData.rotation.getZ()) || SyncTracker.different(entity.physicsRotation.getW(), positionData.rotation.getW())) {
+                } else if (SyncHelper.different(entity.physicsRotation.getX(), positionData.rotation.getX()) || SyncHelper.different(entity.physicsRotation.getY(), positionData.rotation.getY()) ||
+                        SyncHelper.different(entity.physicsRotation.getZ(), positionData.rotation.getZ()) || SyncHelper.different(entity.physicsRotation.getW(), positionData.rotation.getW())) {
                     changed = true;
                 }
                 if (changed) {

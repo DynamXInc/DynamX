@@ -28,6 +28,7 @@ import fr.dynamx.server.network.ServerPhysicsSyncManager;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.client.ContentPackUtils;
 import fr.dynamx.utils.optimization.QuaternionPool;
+import fr.dynamx.utils.optimization.SubClassPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -241,8 +242,8 @@ public class CommonEventHandler {
         if (!(e.player.getRidingEntity() instanceof PhysicsEntity<?>) && DynamXContext.getPhysicsWorld(e.player.world) != null && !e.player.isDead) {
             if (!DynamXContext.getPlayerToCollision().containsKey(e.player) && DynamXPhysicsWorldBlacklistApi.isBlacklisted(e.player))
                 return;
-            Vector3fPool.openPool();
-            QuaternionPool.openPool();
+            Vector3fPool.openPool(SubClassPool.PLAYER_COLL);
+            QuaternionPool.openPool(SubClassPool.PLAYER_COLL);
             if (!DynamXContext.getPlayerToCollision().containsKey(e.player)) {
                 PlayerPhysicsHandler playerPhysicsHandler = new PlayerPhysicsHandler(e.player);
                 DynamXContext.getPlayerToCollision().put(e.player, playerPhysicsHandler);

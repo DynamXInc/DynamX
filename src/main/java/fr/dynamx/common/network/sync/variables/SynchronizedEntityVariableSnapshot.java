@@ -40,11 +40,13 @@ public class SynchronizedEntityVariableSnapshot<T> {
      * @param variable The variable to update
      */
     public void updateVariable(EntityVariable<T> variable) {
-        if(updated) {
-            variable.receiveValue(value);
-            updated = false;
-            if(value instanceof PooledHashMap) //TODO CLEAN
-                ((PooledHashMap<?, ?>) value).release();
+        if (!updated) {
+            return;
+        }
+        variable.receiveValue(value);
+        updated = false;
+        if(value instanceof PooledHashMap) {
+            ((PooledHashMap<?, ?>) value).release();
         }
     }
 

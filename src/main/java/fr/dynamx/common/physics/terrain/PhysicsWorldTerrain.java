@@ -177,7 +177,7 @@ public class PhysicsWorldTerrain implements ITerrainManager {
                     if (!DynamXConfig.ignoreDangerousTerrainErrors) {
                         throw new IllegalStateException("Chunk " + ticket + " is still loading and has HIGH priority. This shouldn't happen.");
                     }
-                    DynamXMain.log.error("Chunk {} is still loading and has HIGH priority. This shouldn't happen.", ticket);
+                    DynamXMain.log.error("[IgnoredDangerousTerrainError] Chunk {} is still loading and has HIGH priority. This shouldn't happen.", ticket);
                     return false;
                 }
                 if (!ticket.getCollisions().getChunkState().areComputedElementsAdded()) {
@@ -218,6 +218,8 @@ public class PhysicsWorldTerrain implements ITerrainManager {
      */
     private void addChunkToPhysicsWorld(ChunkLoadingTicket ticket, boolean checkNotLoaded, boolean checkStatus) {
         Profiler.get().start(ADD_USED);
+        Vector3fPool.openPool();
+
         if ((!checkStatus || ticket.getStatus() == ChunkState.LOADED) && ticket.getPriority() != ChunkLoadingTicket.TicketPriority.NONE) {
             ChunkCollisions collisions = ticket.getCollisions();
             if (!checkNotLoaded || !terrainState.isLoadedAnywhere(ticket.getPos())) {
@@ -236,7 +238,7 @@ public class PhysicsWorldTerrain implements ITerrainManager {
                             System.out.println("Graph not found !");
                         }
                         if (!DynamXConfig.ignoreDangerousTerrainErrors) {
-                            throw new IllegalStateException("[0x2] Chunk is already added " + collisions + " " + collisions.getChunkState() + " " + ticket);
+                            throw new IllegalStateException("[IgnoredDangerousTerrainError] [0x2] Chunk is already added " + collisions + " " + collisions.getChunkState() + " " + ticket);
                         }
                     }
                     collisions.addToBulletWorld(physicsWorld, Profiler.get());
@@ -251,7 +253,7 @@ public class PhysicsWorldTerrain implements ITerrainManager {
                     System.out.println("Graph not found !");
                 }
                 if (!DynamXConfig.ignoreDangerousTerrainErrors) {
-                    throw new IllegalStateException("[0x1] Chunk " + collisions + " already loaded ! UnloadQueue " + terrainState.getUnloadQueue() + " Loaded " + terrainState.getLoadedTerrain());
+                    throw new IllegalStateException("[IgnoredDangerousTerrainError] [0x1] Chunk " + collisions + " already loaded ! UnloadQueue " + terrainState.getUnloadQueue() + " Loaded " + terrainState.getLoadedTerrain());
                 }
             }
         } else { //Incorrect ticket state (not loaded)
@@ -263,10 +265,12 @@ public class PhysicsWorldTerrain implements ITerrainManager {
             } else {
                 System.out.println("Graph not found !");
             }
-            if (!DynamXConfig.ignoreDangerousTerrainErrors)
-                throw new IllegalStateException("Bad ticket state " + ticket);
+            if (!DynamXConfig.ignoreDangerousTerrainErrors) {
+                throw new IllegalStateException("[IgnoredDangerousTerrainError] Bad ticket state " + ticket);
+            }
         }
 
+        Vector3fPool.closePool();
         Profiler.get().end(ADD_USED);
     }
 
@@ -324,9 +328,7 @@ public class PhysicsWorldTerrain implements ITerrainManager {
         terrainCache.tick();
         if (!asyncLoadedQueue.isEmpty()) {
             Profiler.get().start(RCV_ASYNC);
-            Vector3fPool.openPool();
             receiveAsyncLoadedChunks();
-            Vector3fPool.closePool();
             Profiler.get().end(RCV_ASYNC);
         }
         //Tick terrain loaders (as the slopes item)
@@ -351,7 +353,7 @@ public class PhysicsWorldTerrain implements ITerrainManager {
     public ChunkCollisions loadChunkCollisionsNow(ChunkLoadingTicket ticket, Profiler profiler) {
         profiler.start(Profiler.Profiles.EMERGENCY_CHUNK_LOAD);
         VerticalChunkPos pos = ticket.getPos();
-        ChunkCollisions coll = isDebug() ? new DebugChunkCollisions(getWorld(), pos, getPhysicsWorld()) : new ChunkCollisions(getWorld(), pos);
+        ChunkCollisions coll = isDebug() ? new DebugChunkCollisions(getWorld(), pos) : new ChunkCollisions(getWorld(), pos);
 
         if (isDebug()) {
             ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.LOAD_NOW, ChunkGraph.ActionLocation.MAIN, coll, "Ticket " + ticket);

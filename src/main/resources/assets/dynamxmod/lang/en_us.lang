@@ -132,3 +132,7 @@ wrench.mode.change_skins=§9Change vehicle skin
 wrench.mode.entity_seat=§dPut entity in seat
 wrench.mode.none=§cWrench disabled
 wrench.mode.launch_entities=§6Launch props
+
+dynamx.item.variant=Variant: %s
+dynamx.item.description=Description: %s
+dynamx.item.pack=Pack: %s

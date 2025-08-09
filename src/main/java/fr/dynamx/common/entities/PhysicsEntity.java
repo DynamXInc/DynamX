@@ -27,6 +27,7 @@ import fr.dynamx.utils.debug.Profiler;
 import fr.dynamx.utils.maths.DynamXGeometry;
 import fr.dynamx.utils.optimization.MutableBoundingBox;
 import fr.dynamx.utils.optimization.QuaternionPool;
+import fr.dynamx.utils.optimization.SubClassPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import io.netty.buffer.ByteBuf;
 import lombok.Getter;
@@ -446,7 +447,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
      */
     @Override
     public void onUpdate() {
-        Vector3fPool.openPool();
+        Vector3fPool.openPool(SubClassPool.TICK_ENTITY_MC);
         double d1 = prevPosX;
         double d2 = prevPosY;
         double d3 = prevPosZ;
@@ -480,42 +481,43 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
 
     @Override
     public AxisAlignedBB getEntityBoundingBox() {
-        if (entityBoxCache == null) {
-            if (physicsPosition.length() == 0) {
-                physicsPosition.set(Vector3fPool.get((float) posX, (float) posY, (float) posZ));
-            }
-            Vector3fPool.openPool();
-            if (physicsHandler != null) {
-                Vector3f min = Vector3fPool.get();
-                Vector3f max = Vector3fPool.get();
-                BoundingBox boundingBox = physicsHandler.getBoundingBox();
-                boundingBox.getMin(min);
-                boundingBox.getMax(max);
+        if (entityBoxCache != null) {
+            return entityBoxCache;
+        }
+        if (physicsPosition.length() == 0) {
+            physicsPosition.set((float) posX, (float) posY, (float) posZ);
+        }
+        Vector3fPool.openPool();
+        if (physicsHandler != null) {
+            Vector3f min = Vector3fPool.get();
+            Vector3f max = Vector3fPool.get();
+            BoundingBox boundingBox = physicsHandler.getBoundingBox();
+            boundingBox.getMin(min);
+            boundingBox.getMax(max);
+            entityBoxCache = new AxisAlignedBB(min.x, min.y, min.z, max.x, max.y, max.z);
+        } else {
+            List<MutableBoundingBox> boxes = getCollisionBoxes(); //Get PartShape boxes
+            if (boxes.isEmpty()) { //If there is no boxes, create a default one
+                Vector3f min = Vector3fPool.get(getPositionVector()).subtractLocal(2, 1, 2);
+                Vector3f max = Vector3fPool.get(getPositionVector()).addLocal(2, 2, 2);
                 entityBoxCache = new AxisAlignedBB(min.x, min.y, min.z, max.x, max.y, max.z);
             } else {
-                List<MutableBoundingBox> boxes = getCollisionBoxes(); //Get PartShape boxes
-                if (boxes.isEmpty()) { //If there is no boxes, create a default one
-                    Vector3f min = Vector3fPool.get(getPositionVector()).subtractLocal(2, 1, 2);
-                    Vector3f max = Vector3fPool.get(getPositionVector()).addLocal(2, 2, 2);
-                    entityBoxCache = new AxisAlignedBB(min.x, min.y, min.z, max.x, max.y, max.z);
+                MutableBoundingBox container;
+                if (boxes.size() == 1) { //If there is one, no more calculus to do !
+                    container = boxes.get(0);
                 } else {
-                    MutableBoundingBox container;
-                    if (boxes.size() == 1) { //If there is one, no more calculus to do !
-                        container = boxes.get(0);
-                    } else {
-                        container = new MutableBoundingBox(boxes.get(0));
-                        for (int i = 1; i < boxes.size(); i++) { //Else create a bigger box containing all the boxes
-                            container.growTo(boxes.get(i));
-                        }
+                    container = new MutableBoundingBox(boxes.get(0));
+                    for (int i = 1; i < boxes.size(); i++) { //Else create a bigger box containing all the boxes
+                        container.growTo(boxes.get(i));
                     }
-                    //The container box corresponding to an unrotated entity, so rotate it !
-                    container = DynamXContext.getCollisionHandler().rotateBB(physicsPosition, container, physicsRotation);
-                    container.grow(0.5, 0.0, 0.5); //Grow it to avoid little glitches on the corners of the car
-                    entityBoxCache = container.toBB();
                 }
+                //The container box corresponding to an unrotated entity, so rotate it !
+                container = DynamXContext.getCollisionHandler().rotateBB(physicsPosition, container, physicsRotation);
+                container.grow(0.5, 0.0, 0.5); //Grow it to avoid little glitches on the corners of the car
+                entityBoxCache = container.toBB();
             }
-            Vector3fPool.closePool();
         }
+        Vector3fPool.closePool();
         return entityBoxCache;
     }
 
@@ -528,8 +530,9 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
             physicsWorld.removeBulletEntity(this);
             terrainCache.onRemoved(physicsWorld.getTerrainManager());
         }
-        if (physicsHandler != null)
-            physicsHandler.removePhysicsEntity();
+        if (physicsHandler != null) {
+            physicsHandler.removeFromWorld();
+        }
     }
 
     @Override

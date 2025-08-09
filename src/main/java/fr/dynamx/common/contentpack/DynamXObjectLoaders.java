@@ -39,11 +39,11 @@ public class DynamXObjectLoaders {
     public static PropsLoader<PropObject<?>> PROPS = new PropsLoader<>();
     public static InfoLoader<PartWheelInfo> WHEELS = new InfoLoader<>("wheel", PartWheelInfo::new, new SubInfoTypesRegistry<>());
     public static LateInfoLoader<BaseEngineInfo> ENGINES = new LateInfoLoader<>("engine", ((pack, name, clazz) -> {
-        if(Objects.equals(clazz, CarEngineInfo.class.getName()))
+        if(Objects.equals(clazz, CarEngineInfo.class.toString()))
             return new CarEngineInfo(pack, name);
-        else if(Objects.equals(clazz, BaseEngineInfo.class.getName()))
+        else if(Objects.equals(clazz, BaseEngineInfo.class.toString()))
             return new BaseEngineInfo(pack, name);
-        else if(Objects.equals(clazz, BoatEngineInfo.class.getName()))
+        else if(Objects.equals(clazz, BoatEngineInfo.class.toString()))
             return new BoatEngineInfo(pack, name);
         else
             throw new IllegalArgumentException("Unknown engine class: " + clazz);

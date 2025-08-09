@@ -6,6 +6,7 @@ import fr.dynamx.api.network.IDnxNetworkHandler;
 import fr.dynamx.api.network.IDnxPacket;
 import fr.dynamx.common.DynamXContext;
 import fr.dynamx.common.DynamXMain;
+import fr.dynamx.common.handlers.TaskScheduler;
 import fr.dynamx.common.network.udp.EncapsulatedUDPPacket;
 import fr.dynamx.common.network.udp.UDPPacket;
 import fr.dynamx.utils.DynamXConfig;
@@ -15,6 +16,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.StringUtils;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 
@@ -54,10 +56,20 @@ public class UdpServerNetworkHandler implements IDnxNetworkHandler {
 
         try {
             this.server.send(new DatagramPacket(data, data.length, client.socketAddress));
-            if (DynamXConfig.udpDebug)
-                DynamXMain.log.info("[UDP-DEBUG] Sent the packet " + packet.id());
+            if (DynamXConfig.udpDebug) {
+                DynamXMain.log.info("[UDP-DEBUG] Sent the packet {}", packet.id());
+            }
         } catch (IOException e) {
-            e.printStackTrace();
+            DynamXMain.log.error("Error while sending udp packet " + packet + " to " + client + ". Disconnecting the client.", e);
+            // Schedule the task so it executes in the server thread outside any loop (avoids concurrent modification errors in ServerPhysicsSyncManager)
+            TaskScheduler.schedule(new TaskScheduler.ScheduledTask((short) 0) {
+                @Override
+                public void run() {
+                    if (client.player.connection != null && !client.player.hasDisconnected()) {
+                        client.player.connection.disconnect(new TextComponentString("DynamX mod had an unexpected udp error. Please try to reconnect."));
+                    }
+                }
+            });
         }
     }
 
@@ -86,7 +98,7 @@ public class UdpServerNetworkHandler implements IDnxNetworkHandler {
             try {
                 UdpServerNetworkHandler.this.handler.read(evt.getPacketAsBytes(), evt.getPacket());
             } catch (Exception e) {
-                e.printStackTrace();
+                DynamXMain.log.error("Error while reading udp packet from " + evt.getPacket().getSocketAddress(), e);
             }
         });
         this.server.start();

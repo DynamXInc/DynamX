@@ -1,6 +1,8 @@
 package fr.dynamx.common.contentpack.sync;
 
 import fr.dynamx.api.contentpack.object.INamedObject;
+import fr.dynamx.common.DynamXContext;
+import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.loader.PackFilePropertyData;
 import fr.dynamx.common.contentpack.loader.SubInfoTypeAnnotationCache;
@@ -11,25 +13,33 @@ import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 /**
- * Responsible to keep same object properties on client and server side, if the config option is enabled
+ * Responsible to keep same object properties on client and server side, if the SyncPacks config option is enabled
  */
 public class PackSyncHandler {
     private static final Map<String, Map<String, byte[]>> objects = new HashMap<>();
 
     public static void computeAll() {
-        //objects.clear();
-        if (DynamXConfig.syncPacks) {
-            DynamXObjectLoaders.getInfoLoaders().forEach((i) -> {
-                Map<String, byte[]> objs = new HashMap<>();
-                PackSyncHandler hacheur = new PackSyncHandler();
-                i.hashObjects(hacheur, objs);
-                objects.put(i.getPrefix(), objs);
-            });
+        if (!DynamXConfig.syncPacks) {
+            return;
         }
+        DynamXMain.log.debug("[PackSync] Computing pack files hash.");
+        objects.clear();
+        PackSyncHandler harsher = new PackSyncHandler();
+        DynamXObjectLoaders.getInfoLoaders().forEach((i) -> {
+            Map<String, byte[]> objs = new HashMap<>();
+            i.hashObjects(harsher, objs);
+            objects.put(i.getPrefix(), objs);
+        });
     }
 
-    public static Map<String, Map<String, byte[]>> getObjects() {
-        return objects;
+    public static void requestPackSync() {
+        if (!DynamXConfig.syncPacks) {
+            DynamXMain.log.debug("[PackSync] Not enabled.");
+            return;
+        }
+        computeAll();
+        DynamXMain.log.debug("[PackSync] Requesting pack sync...");
+        DynamXContext.getNetwork().sendToServer(new MessagePacksHashs(objects));
     }
 
     public byte[] hash(INamedObject object) {
@@ -78,12 +88,12 @@ public class PackSyncHandler {
 
     public static Map<String, List<String>> getFullDelta(Map<String, Map<String, byte[]>> with) {
         Map<String, List<String>> delta = new HashMap<>();
-        getObjects().forEach((s, m) -> {
+        objects.forEach((s, m) -> {
             List<String> dt = getDelta(m, with.getOrDefault(s, new HashMap<>()));
             delta.put(s, dt);
         });
         with.forEach((s, m) -> {
-            if (!getObjects().containsKey(s)) {
+            if (!objects.containsKey(s)) {
                 List<String> dt = new ArrayList<>();
                 m.forEach((o, d) -> {
                     dt.add("+" + o);

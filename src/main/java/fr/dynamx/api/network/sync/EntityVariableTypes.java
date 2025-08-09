@@ -2,8 +2,6 @@ package fr.dynamx.api.network.sync;
 
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
-import fr.dynamx.common.contentpack.DynamXObjectLoaders;
-import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
 import fr.dynamx.common.entities.PhysicsEntity;
 import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.common.entities.modules.WheelsModule;
@@ -236,22 +234,23 @@ public enum EntityVariableTypes {
             return currentValue;
         }
     }),
-    WHEELS_INFOS(CustomType.mapType(Byte.class, PartWheelInfo.class),  new EntityVariableSerializer<Map<Byte, PartWheelInfo>>() {
+    WHEELS_INFOS(CustomType.mapType(Byte.class, String.class), new EntityVariableSerializer<Map<Byte, String>>() {
         @Override
-        public void writeObject(ByteBuf buf, Map<Byte, PartWheelInfo> object) {
+        public void writeObject(ByteBuf buf, Map<Byte, String> object) {
             buf.writeInt(object.size());
             object.forEach((id, info) -> {
                 buf.writeByte(id);
-                ByteBufUtils.writeUTF8String(buf, info.getFullName());
+                ByteBufUtils.writeUTF8String(buf, info);
             });
         }
 
         @Override
-        public Map<Byte, PartWheelInfo> readObject(ByteBuf buf) {
-            Map<Byte, PartWheelInfo> currentValue = HashMapPool.get();
+        public Map<Byte, String> readObject(ByteBuf buf) {
+            Map<Byte, String> currentValue = HashMapPool.get();
             int size = buf.readInt();
-            for (byte i = 0; i < size; i++)
-                currentValue.put(buf.readByte(), DynamXObjectLoaders.WHEELS.findInfo(ByteBufUtils.readUTF8String(buf)));
+            for (byte i = 0; i < size; i++) {
+                currentValue.put(buf.readByte(), ByteBufUtils.readUTF8String(buf));
+            }
             return currentValue;
         }
     }),
@@ -365,7 +364,7 @@ public enum EntityVariableTypes {
         @Override
         public boolean equals(Object var1) {
             if (var1 instanceof ParameterizedType) {
-                ParameterizedType var2 = (ParameterizedType)var1;
+                ParameterizedType var2 = (ParameterizedType) var1;
                 if (this == var2) {
                     return true;
                 } else {
@@ -394,7 +393,7 @@ public enum EntityVariableTypes {
                 Type[] var3 = this.actualTypeArguments;
                 int var4 = var3.length;
 
-                for(int var5 = 0; var5 < var4; ++var5) {
+                for (int var5 = 0; var5 < var4; ++var5) {
                     Type var6 = var3[var5];
                     if (!var2) {
                         var1.append(", ");

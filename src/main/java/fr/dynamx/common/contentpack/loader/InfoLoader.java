@@ -258,8 +258,13 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> extends InfoList<T> {
             DynamXErrorManager.addPackError(obj.getPackName(), "deprecated_door_config", ErrorLevel.LOW, obj.getName(), name);
             return subInfoTypesRegistry.getEntries().get("door").create(obj, tags[0]);
         }
-        if (tags.length == 1 || !optionalDependencyMatcher.test(tags[1]))
-            DynamXErrorManager.addPackError(obj.getPackName(), "unknown_sub_info", ErrorLevel.HIGH, obj.getName(), name);
+        if (tags.length == 1 || !optionalDependencyMatcher.test(tags[1])) {
+            INamedObject parent = obj;
+            if (parent instanceof ISubInfoType) {
+                parent = ((ISubInfoType<?>) parent).getRootOwner();
+            }
+            DynamXErrorManager.addPackError(parent.getPackName(), "unknown_sub_info", ErrorLevel.HIGH, parent.getName(), name + (parent != obj ? " in " + obj.getName() : ""));
+        }
         // else optional block
         return null;
     }
@@ -319,10 +324,11 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> extends InfoList<T> {
             try {
                 p.getField().setAccessible(true);
                 Object e = p.getField().get(object);
-                if (e != null)
+                if (e != null) {
                     sdata.append(p.getType().toValue(e));
-                else
+                } else {
                     sdata.append("null");
+                }
                 sdata.append("\n");
                 p.getField().setAccessible(false);
             } catch (Exception e) {
@@ -346,8 +352,9 @@ public class InfoLoader<T extends ISubInfoTypeOwner<?>> extends InfoList<T> {
             if (o.charAt(0) == '*' || o.charAt(0) == '-') {
                 String[] split = new String(d, StandardCharsets.UTF_8).split("\n");
                 T obj = o.charAt(0) == '*' ? findInfo(of) : assetCreator.create(pack, object, split[0]);
-                if (obj == null)
+                if (obj == null) {
                     throw new IllegalArgumentException("Object " + o.substring(1) + " not found for pack sync in " + getPrefix());
+                }
                 try {
                     String[] props = new String[split.length - 1];
                     System.arraycopy(split, 1, props, 0, split.length - 1);

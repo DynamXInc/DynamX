@@ -17,7 +17,6 @@ public class DynamXServerNetworkSystem implements IDnxNetworkSystem {
     private ServerIPAdressRetriever serverIPAdressRetriever;
 
     public DynamXServerNetworkSystem(EnumNetworkType networkType) {
-        System.out.println("START NET OF TYPE " + networkType + " " + DynamXConfig.useUdp);
         VANILLA_NETWORK = new VanillaNetworkHandler();
         switch (networkType) {
             case VANILLA_TCP:

@@ -51,9 +51,7 @@ public class PhysicsTerrainLoader {
         try {
             if (chk.isValid()) { //If loading ticket is still valid
                 profiler.start(Profiler.Profiles.TERRAIN_LOADER_TICK);
-                Vector3fPool.openPool();
-                BoundingBoxPool.getPool().openSubPool();
-                ChunkCollisions collision = manager.isDebug() ? new DebugChunkCollisions(manager.getWorld(), lookingAt, manager.getPhysicsWorld()) : new ChunkCollisions(manager.getWorld(), lookingAt);
+                ChunkCollisions collision = manager.isDebug() ? new DebugChunkCollisions(manager.getWorld(), lookingAt) : new ChunkCollisions(manager.getWorld(), lookingAt);
                 if (manager.isDebug()) {
                     ChunkGraph.addToGrah(lookingAt, ChunkGraph.ChunkActions.LOAD_ASYNC, ChunkGraph.ActionLocation.LOADER, collision, "Ticket " + chk.getTicket() + " " + chk.isValid());
                 }
@@ -61,18 +59,16 @@ public class PhysicsTerrainLoader {
                     if (manager.isDebug()) {
                         DynamXMain.log.warn("Aborting load at {}", lookingAt);
                     }
-                    Vector3fPool.closePool();
-                    BoundingBoxPool.getPool().closeSubPool();
                     profiler.end(Profiler.Profiles.TERRAIN_LOADER_TICK);
                     return;
                 }
                 chk.getTicket().incrStatusIndex(); //Invalidate other loading processes
+                Vector3fPool.openPool();
                 collision.loadCollisionsAsync(manager, manager.getCache(), chk.getTicket(), Vector3fPool.get(lookingAt.x * 16, lookingAt.y * 16, lookingAt.z * 16)).exceptionally(e -> {
                     DynamXMain.log.fatal("Failed to async-load chunk {}", chk.getTicket(), e);
                     return null;
                 });
                 Vector3fPool.closePool();
-                BoundingBoxPool.getPool().closeSubPool();
                 profiler.end(Profiler.Profiles.TERRAIN_LOADER_TICK);
                 profiler.update();
             }

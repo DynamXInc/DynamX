@@ -78,8 +78,6 @@ public class ClientDebugSystem {
             }
 
             if (MC.world != null && DynamXContext.getPhysicsWorld(MC.world) != null) {
-                QuaternionPool.openPool();
-                Vector3fPool.openPool();
                 curRigidBodyStatesIndex++;
                 if (curRigidBodyStatesIndex > 1) {
                     curRigidBodyStatesIndex = 0;
@@ -93,8 +91,6 @@ public class ClientDebugSystem {
                         return v;
                     });
                 }
-                Vector3fPool.closePool();
-                QuaternionPool.closePool();
             }
         }
     }
@@ -276,9 +272,7 @@ public class ClientDebugSystem {
                 QuaternionPool.closePool();
                 GlStateManager.popMatrix();
             }
-
             Vector3fPool.closePool();
-
         }
     }
 

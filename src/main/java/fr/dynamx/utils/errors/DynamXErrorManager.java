@@ -134,7 +134,7 @@ public class DynamXErrorManager {
         registerErrorFormatter(PACKS_ERRORS, "pack_requirements", FORMATTER_MULTIPLE_ERROR); //FORMAT
         registerErrorFormatter(PACKS_ERRORS, "collision_shape_error", FORMATTER_SINGLE_ERROR);
         registerErrorFormatter(PACKS_ERRORS, "complete_object_error", FORMATTER_SINGLE_ERROR);
-        registerErrorFormatter(PACKS_ERRORS, "property_parse_error", FORMATTER_MULTIPLE_ERROR); //FORMAT
+        registerErrorFormatter(PACKS_ERRORS, "property_parse_error", FORMATTER_SINGLE_ERROR); //FORMAT
         registerErrorFormatter(PACKS_ERRORS, "pack_load_fail", FORMATTER_SINGLE_ERROR);
         registerErrorFormatter(PACKS_ERRORS, "missing_pack_info", FORMATTER_MULTIPLE_ERROR);  //FORMAT
         registerErrorFormatter(PACKS_ERRORS, "pack_file_load_error", FORMATTER_SINGLE_ERROR);

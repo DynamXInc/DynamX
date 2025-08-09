@@ -40,5 +40,5 @@ public interface IPhysicsPackInfo extends ICollisionsContainer, IModelPackObject
         return 0.6f;
     }
 
-    float getRenderDistance();
+    float getRenderDistanceSquared();
 }

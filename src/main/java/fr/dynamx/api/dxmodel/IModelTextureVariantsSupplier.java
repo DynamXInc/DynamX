@@ -26,8 +26,13 @@ public interface IModelTextureVariantsSupplier extends INamedObject {
     IModelTextureVariants getTextureVariantsFor(ObjObjectRenderer objObjectRenderer);
 
     default String getMainObjectVariantName(byte variantId) {
+        return getMainObjectVariantNameOrDefault(variantId, "default");
+    }
+
+    default String getMainObjectVariantNameOrDefault(byte variantId, String notFoundVariantName) {
         IModelTextureVariants variants = getMainObjectVariants();
-        return variants != null ? variants.getVariant(variantId).getName() : "default";
+        TextureVariantData variant = variants != null ? variants.getVariant(variantId) : null;
+        return variant != null ? variant.getName() : notFoundVariantName;
     }
 
     /**

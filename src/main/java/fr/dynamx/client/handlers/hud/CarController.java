@@ -98,8 +98,12 @@ public class CarController extends BaseController {
         speed.setCssId("speedometer_texture");
 
         float[] engineProperties = engine.getEngineProperties();
-        speed.add(new UpdatableGuiLabel("%s", (UpdatableGuiLabel.LabelValueFunction) val -> val.set(engine.isEngineStarted() ? Math.abs((int) engineProperties[VehicleEntityProperties.EnumEngineProperties.SPEED.ordinal()]) : "--", "")).setCssId("engine_speed"));
-        speed.add(new UpdatableGuiLabel("%s", (UpdatableGuiLabel.LabelValueFunction) val -> val.set(getGearString((int) engineProperties[VehicleEntityProperties.EnumEngineProperties.ACTIVE_GEAR.ordinal()]))).setCssId("engine_gear"));
+        speed.add(new UpdatableGuiLabel("%s", (UpdatableGuiLabel.LabelValueFunction) val ->
+                val.set(engine.isEngineStarted() ? Math.abs((int) engineProperties[VehicleEntityProperties.EnumEngineProperties.SPEED.ordinal()]) : "--", ""))
+            .setCssId("engine_speed"));
+        speed.add(new UpdatableGuiLabel("%s", (UpdatableGuiLabel.LabelValueFunction) val ->
+                val.set(getGearString((int) engineProperties[VehicleEntityProperties.EnumEngineProperties.ACTIVE_GEAR.ordinal()])))
+            .setCssId("engine_gear"));
         addRpmCounter(speed, scale, maxRpm);
 
         if (hudIcons != null) {

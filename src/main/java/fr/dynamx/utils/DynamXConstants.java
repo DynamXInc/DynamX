@@ -3,17 +3,15 @@ package fr.dynamx.utils;
 import net.minecraftforge.fml.common.versioning.ArtifactVersion;
 import net.minecraftforge.fml.common.versioning.DefaultArtifactVersion;
 
-import java.util.function.Function;
-
 public class DynamXConstants {
     public static final String NAME = "DynamX";
     public static final String ID = "dynamxmod";
-    public static final String VERSION = "4.1.0";
-    public static final String VERSION_TYPE = "Beta";
+    public static final String VERSION = "4.2.0";
+    public static final String VERSION_TYPE = "dev4";
     public static final String RES_DIR_NAME = "DynamX";
 
     public static final String ACS_GUIS_BASE_URL = "https://maven.dynamx.fr/artifactory/ACsGuisRepo/fr/aym/acsguis/ACsGuis/%1$s/ACsGuis-%1$s.jar";//"https://mps.dynamx.fr/files/4.0.0/ACsGuis/ACsGuis-%s-all.jar";
-    public static final String DEFAULT_ACSGUIS_VERSION = "1.4.0-beta";
+    public static final String DEFAULT_ACSGUIS_VERSION = "1.4.2-beta";
     public static final String ACSGUIS_REQUIRED_VERSION = "[1.4.0,)";
     public static final String ACSLIBS_REQUIRED_VERSION = "[1.2.12,)";
 

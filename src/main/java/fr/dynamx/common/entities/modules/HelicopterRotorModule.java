@@ -64,7 +64,7 @@ public class HelicopterRotorModule implements IPhysicsModule<BaseVehiclePhysicsH
                 double zSpeed = Math.sin(Math.toRadians(i)) * 0.9;
                 double xSpeed = Math.cos(Math.toRadians(i)) * 0.9;
 
-                if (world.isAirBlock(new BlockPos((int) (entity.getPosition().getX() + x), (int) (entity.getPosition().getY() + y), (int) (entity.getPosition().getZ() + z)))) {
+                if (world.isAirBlock(new BlockPos((int) (entity.getPosition().getX() + x), (int) (y), (int) (entity.getPosition().getZ() + z)))) {
                     world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, entity.posX + x, y, entity.posZ + z, xSpeed, 0, zSpeed);
                 }
             }

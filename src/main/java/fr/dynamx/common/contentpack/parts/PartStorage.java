@@ -8,10 +8,12 @@ import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.blocks.TEDynamXBlock;
+import fr.dynamx.common.contentpack.type.ObjectInfo;
 import fr.dynamx.common.entities.IDynamXObject;
 import fr.dynamx.common.entities.PackPhysicsEntity;
 import fr.dynamx.common.entities.modules.StorageModule;
 import fr.dynamx.utils.DynamXConstants;
+import fr.dynamx.utils.client.ContentPackUtils;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import lombok.Getter;
@@ -20,6 +22,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 
 @Getter
 @Setter
@@ -81,5 +84,16 @@ public class PartStorage<T extends ISubInfoTypeOwner<T>> extends InteractivePart
     @Override
     public String getName() {
         return "PartStorage named " + getPartName();
+    }
+
+    @Override
+    public void postLoad(T owner, boolean hot) {
+        super.postLoad(owner, hot);
+
+        if(FMLCommonHandler.instance().getSide().isClient()) {
+            String ownerName = owner instanceof ObjectInfo ? ((ObjectInfo<?>) owner).getDefaultName() : owner.getName();
+            ContentPackUtils.addMissingLangTranslation(DynamXMain.resourcesDirectory, getPackName(),
+                    "part.storage" + owner.getFullName(), ownerName + "'s trunk");
+        }
     }
 }

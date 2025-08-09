@@ -42,7 +42,9 @@ public class MessageSeatsSync extends PhysicsEntityMessage<MessageSeatsSync> {
     @SideOnly(Side.CLIENT)
     protected void processMessageClient(PhysicsEntityMessage<?> message, PhysicsEntity<?> entity, EntityPlayer player) {
         if (!(entity instanceof IModuleContainer.ISeatsContainer) || !((IModuleContainer.ISeatsContainer) entity).hasSeats()) {
-            log.fatal("Received seats packet for an entity that have no seats !");
+            if (entity != null) { // Not just despawned
+                log.error("Received seats packet for an entity that have no seats! Entity: {}", entity);
+            }
             return;
         }
         DynamXContext.getPhysicsWorld(entity.world).schedule(() -> ((IModuleContainer.ISeatsContainer) entity).getSeats().updateSeats((MessageSeatsSync) message, entity.getSynchronizer()));

@@ -1,5 +1,6 @@
 package fr.dynamx.client.renders.scene;
 
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.dynamx.api.contentpack.object.part.IDrawablePart;
@@ -326,7 +327,7 @@ public class SceneBuilder<C extends IRenderContext, A extends IModelPackObject> 
             node.leaf = new IDrawablePart<A>() {
                 @Override
                 public SceneNode<IRenderContext, A> createSceneGraph(Vector3f modelScale, List<SceneNode<IRenderContext, A>> childGraph) {
-                    return new SimpleNode<IRenderContext, A>(null, null, modelScale, childGraph) {
+                    return new SimpleNode<IRenderContext, A>(null, (Quaternion) null, modelScale, childGraph) {
                         @Override
                         public void render(IRenderContext context, A packInfo, Matrix4f parentTransform) {
                             GlStateManager.pushMatrix();

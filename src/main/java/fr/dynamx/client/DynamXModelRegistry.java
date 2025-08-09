@@ -23,6 +23,7 @@ import fr.dynamx.common.DynamXMain;
 import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.loader.InfoList;
 import fr.dynamx.common.contentpack.type.objects.ArmorObject;
+import fr.dynamx.common.objloader.MTLLoader;
 import fr.dynamx.common.objloader.OBJLoader;
 import fr.dynamx.utils.DynamXConstants;
 import fr.dynamx.utils.DynamXLoadingTasks;
@@ -218,12 +219,10 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
             log.info("Loading model textures...");
             //Loads all textures of models, cannot be done before because the TextureManager is not initialized
             bar.step("Uploading textures");
-            OBJLoader.getMtlLoaders().forEach(mtlLoader -> {
-                if(mtlLoader == null)
-                    throw new NullPointerException("Null mtl loader ! IN " + OBJLoader.getMtlLoaders());
-                mtlLoader.uploadTextures();
-            });
-            OBJLoader.getMtlLoaders().clear();
+            synchronized (OBJLoader.getMtlLoaders()) {
+                OBJLoader.getMtlLoaders().forEach(MTLLoader::uploadTextures);
+                OBJLoader.getMtlLoaders().clear();
+            }
             if (ClientEventHandler.MC.world != null)
                 uploadVAOs();
             ProgressManager.pop(bar);

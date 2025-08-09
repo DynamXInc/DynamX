@@ -30,10 +30,8 @@ import fr.dynamx.common.entities.modules.AbstractLightsModule;
 import fr.dynamx.common.entities.vehicles.TrailerEntity;
 import fr.dynamx.common.objloader.data.DxModelData;
 import fr.dynamx.utils.DynamXUtils;
-import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.errors.DynamXErrorManager;
-import fr.dynamx.utils.optimization.GlQuaternionPool;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.renderer.GlStateManager;
@@ -204,27 +202,27 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
     /**
      * Post loads this light (computes texture variants)
      */
-    public void postLoad() {
-        configureLightTextureVariants();
+    public void postLoad(boolean hotReload) {
+        configureLightTextureVariants(hotReload);
     }
 
     /**
      * Computes texture variants of this lights <br>
      * It adds the variants configured on the light, and the owner's variants, if any
      */
-    public void configureLightTextureVariants() {
+    public void configureLightTextureVariants(boolean hotReload) {
         TextureVariantData textureVariant;
         Map<String, TextureVariantData> nameToVariant = new HashMap<>();
         // Create material variants if not set by the user
         if (variants == null) {
             variants = new MaterialVariantsInfo<>(this);
             textureVariant = new TextureVariantData(baseMaterial != null ? baseMaterial : "default", (byte) 0);
-            variants.addVariant(textureVariant);
+            variants.addVariant(textureVariant, hotReload);
         } else if (baseMaterial != null && variants.getBaseMaterial().equalsIgnoreCase("default")) {
             // Add base light state, if customized here but not in MaterialVariantsInfo yet
             variants.setBaseMaterial(baseMaterial);
             textureVariant = new TextureVariantData(baseMaterial, (byte) 0);
-            variants.addVariant(textureVariant);
+            variants.addVariant(textureVariant, hotReload);
         }
         // Add known variants to the nameToVariant map, and compute the last used variantId
         // The last used variant id is either the max variant id of the light owner, or the max id of the variants configured here
@@ -256,7 +254,7 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
                     // Add a new texture to the light
                     textureVariant = new TextureVariantData(name, nextTextureId.getAndSet((byte) (nextTextureId.get() + 1)));
                     source.getBlinkTextures().add(textureVariant);
-                    variants.addVariant(textureVariant);
+                    variants.addVariant(textureVariant, hotReload);
                     nameToVariant.put(name, textureVariant);
                 }
             }
@@ -283,7 +281,7 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
 
     class PartLightNode<A extends IModelPackObject> extends SimpleNode<IRenderContext, A> {
         public PartLightNode(PartLightSource lightSource, Vector3f scale, List<SceneNode<IRenderContext, A>> linkedChilds) {
-            super(lightSource.getPosition(), lightSource.getRotation() != null ? GlQuaternionPool.newGlQuaternion(lightSource.getRotation()) : null, PartLightSource.this.isAutomaticPosition, scale, linkedChilds);
+            super(lightSource.getPosition(), lightSource.getRotation() != null ? lightSource.getRotation() : null, PartLightSource.this.isAutomaticPosition, scale, linkedChilds);
         }
 
         @Override
@@ -352,9 +350,9 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
                 step = step * (FastMath.PI * 2);
                 transform.rotate(step, 0, 1, 0);
             }
+
             GlStateManager.pushMatrix();
-            GlStateManager.multMatrix(ClientDynamXUtils.getMatrixBuffer(transform));
-            transformToPartPos();
+            glTransformToPartPos();
             context.getModel().renderGroup(getObjectName(), texId, context.isUseVanillaRender());
             if (isEntity && isOn) {
                 int i = ((BaseRenderContext.EntityRenderContext) context).getEntity().getBrightnessForRender();

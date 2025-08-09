@@ -125,7 +125,7 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
     public void onPostPhysicsTick(Profiler profiler) {
         entity.postUpdatePhysicsWrapper(profiler, entity.usesPhysicsWorld());
         Entity other = getOtherSideEntity();
-        if (other instanceof PhysicsEntity && ((PhysicsEntity<?>) other).initialized != PhysicsEntity.EnumEntityInitState.NOT_INITIALIZED) {
+        if (other instanceof PhysicsEntity && ((PhysicsEntity<?>) other).initialized == PhysicsEntity.EnumEntityInitState.ALL) {
             if (!mySide.isServer()) {
                 sendMyVars((SPPhysicsEntitySynchronizer<T>) ((T) other).getSynchronizer(), SyncTarget.SERVER);
             } else {

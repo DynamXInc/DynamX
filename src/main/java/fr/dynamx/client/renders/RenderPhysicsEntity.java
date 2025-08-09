@@ -13,9 +13,9 @@ import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.debug.renderer.DebugRenderer;
 import fr.dynamx.utils.optimization.GlQuaternionPool;
 import fr.dynamx.utils.optimization.QuaternionPool;
+import fr.dynamx.utils.optimization.SubClassPool;
 import fr.dynamx.utils.optimization.Vector3fPool;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
@@ -52,18 +52,22 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
     @Override
     public void doRender(T entity, double x, double y, double z, float entityYaw, float partialTicks) {
         entity.wasRendered = true;
-        if (!canRender(entity))
+        if (!canRender(entity)) {
             return;
-        QuaternionPool.openPool();
-        Vector3fPool.openPool();
-        GlQuaternionPool.openPool();
-        int renderPass = MinecraftForgeClient.getRenderPass();
+        }
+
         BaseRenderContext.EntityRenderContext context = getRenderContext(entity);
         if (context == null) {
             renderOffsetAABB(entity.getEntityBoundingBox(), x - entity.lastTickPosX, y - entity.lastTickPosY, z - entity.lastTickPosZ);
             return;
         }
         context.setRenderParams(x, y, z, partialTicks, false);
+
+        int renderPass = MinecraftForgeClient.getRenderPass();
+        QuaternionPool.openPool(SubClassPool.ENTITY_RENDER);
+        Vector3fPool.openPool(SubClassPool.ENTITY_RENDER);
+        GlQuaternionPool.openPool(SubClassPool.ENTITY_RENDER);
+
         //Render vehicle
         if (!MinecraftForge.EVENT_BUS.post(new DynamXEntityRenderEvent(entity, context, DynamXEntityRenderEvent.Type.ENTITY, renderPass))) {
             renderEntity(entity, context);
@@ -76,6 +80,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
             }
         }
         MinecraftForge.EVENT_BUS.post(new DynamXEntityRenderEvent(entity, context, DynamXEntityRenderEvent.Type.POST, renderPass));
+
         Vector3fPool.closePool();
         QuaternionPool.closePool();
         GlQuaternionPool.closePool();

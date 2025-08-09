@@ -22,11 +22,9 @@ import fr.dynamx.common.entities.modules.HelicopterRotorModule;
 import fr.dynamx.common.entities.modules.engines.BoatPropellerModule;
 import fr.dynamx.common.entities.modules.engines.CarEngineModule;
 import fr.dynamx.common.entities.vehicles.HelicopterEntity;
-import fr.dynamx.utils.client.ClientDynamXUtils;
 import fr.dynamx.utils.debug.DynamXDebugOption;
 import fr.dynamx.utils.debug.DynamXDebugOptions;
 import fr.dynamx.utils.maths.DynamXMath;
-import fr.dynamx.utils.optimization.GlQuaternionPool;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.renderer.GlStateManager;
@@ -105,7 +103,7 @@ public class PartRotor extends BasePart<ModularVehicleInfo> implements IDrawable
 
     class PartRotorNode<A extends ModularVehicleInfo> extends SimpleNode<IRenderContext, A> {
         public PartRotorNode(PartRotor part, Vector3f scale, List<SceneNode<IRenderContext, A>> linkedChilds) {
-            super(part.getPosition(), GlQuaternionPool.newGlQuaternion(part.getRotation()), PartRotor.this.isAutomaticPosition, scale, linkedChilds);
+            super(part.getPosition(), part.getRotation(), PartRotor.this.isAutomaticPosition, scale, linkedChilds);
         }
 
         @Override
@@ -134,14 +132,13 @@ public class PartRotor extends BasePart<ModularVehicleInfo> implements IDrawable
                     // GlStateManager.rotate((partModule.getCurAngle() + partialTicks * revs) * getRotationSpeed(), getRotationAxis().x, getRotationAxis().y, getRotationAxis().z);
                 } else if (entity.hasModuleOfType(BoatPropellerModule.class)) {
                     BoatPropellerModule partModule = entity.getModuleByType(BoatPropellerModule.class);
-                    transform.translate(0f, -0.56152f, -2.6077f);
                     float angle = (partModule.getBladeAngle() + context.getPartialTicks() * partModule.getRevs()) * getRotationSpeed();
                     transform.rotate(angle, getRotationAxis().x, getRotationAxis().y, getRotationAxis().z);
-                    transform.translate(0f, 0.56152f, 2.6077f);
                 }
             }
+
             GlStateManager.pushMatrix();
-            GlStateManager.multMatrix(ClientDynamXUtils.getMatrixBuffer(transform));
+            glTransformToPartPos();
             //Render it
             vehicleModel.renderGroup(getObjectName(), context.getTextureId(), context.isUseVanillaRender());
             GlStateManager.popMatrix();

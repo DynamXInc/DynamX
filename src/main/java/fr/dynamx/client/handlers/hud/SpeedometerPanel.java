@@ -7,10 +7,13 @@ import net.minecraft.util.ResourceLocation;
 
 public class SpeedometerPanel extends CircleCounterPanel {
     private final CarController carController;
+    private final float maxRevs;
 
     public SpeedometerPanel(CarController carController, float scale, float maxRpm) {
-        super(new ResourceLocation(DynamXConstants.ID, "textures/waw.png"), false, 300, 300, scale, maxRpm);
+        super(new ResourceLocation(DynamXConstants.ID, "textures/rpm_curve.png"),
+                false, 300, 300, scale, maxRpm);
         this.carController = carController;
+        this.maxRevs = carController.entity.getPackInfo().getSubPropertyByType(CarEngineInfo.class).getMaxRevs();
     }
 
     @Override
@@ -20,7 +23,7 @@ public class SpeedometerPanel extends CircleCounterPanel {
         }
         prevValue = value;
         //Don't use modified maxRpm here
-        value = carController.engine.getEngineProperty(VehicleEntityProperties.EnumEngineProperties.REVS) * carController.entity.getPackInfo().getSubPropertyByType(CarEngineInfo.class).getMaxRevs();
+        value = carController.engine.getEngineProperty(VehicleEntityProperties.EnumEngineProperties.REVS) * maxRevs;
         return true;
     }
 }

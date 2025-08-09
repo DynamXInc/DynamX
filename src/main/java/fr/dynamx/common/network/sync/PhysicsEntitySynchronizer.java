@@ -178,8 +178,9 @@ public abstract class PhysicsEntitySynchronizer<T extends PhysicsEntity<?>> {
         PooledHashMap<Integer, EntityVariable<?>> ret = HashMapPool.get();
         getSynchronizedVariables().forEach((i, s) -> {
             SyncTarget varTarget = s.getSyncTarget(simulationHolder, fromSide);
-            if (target.isIncluded(varTarget))
+            if (target.isIncluded(varTarget)) {
                 ret.put(i, s);
+            }
         });
         return ret;
     }

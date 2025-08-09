@@ -132,10 +132,14 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
 
     @Override
     public void initPhysicsEntity(boolean usePhysics) {
-        if (usePhysics) physicsHandler = createPhysicsHandler();
+        if (usePhysics) {
+            physicsHandler = createPhysicsHandler();
+            assert physicsHandler != null : "PhysicsHandler can't be null when using physics!";
+        }
         moduleList.forEach(m -> ((IPhysicsModule<T>) m).initPhysicsEntity(physicsHandler));
-        if (usePhysics)
+        if (usePhysics) {
             physicsHandler.addToWorld(); //Add the physics handler to the physics world AFTER modules initialisation
+        }
         if (physicsInitCallback != null) {
             physicsInitCallback.onPhysicsInit(this, physicsHandler);
             physicsInitCallback = null; //Free memory
@@ -292,6 +296,18 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
         } else {
             return super.getControllingPassenger();
         }
+    }
+
+    @Override
+    public void setDead() {
+        super.setDead();
+        moduleList.forEach(IPhysicsModule::onSetDead);
+    }
+
+    @Override
+    public void onRemovedFromWorld() {
+        super.onRemovedFromWorld();
+        moduleList.forEach(IPhysicsModule::onRemovedFromWorld);
     }
 
     public List<IPhysicsModule<?>> getModules() {

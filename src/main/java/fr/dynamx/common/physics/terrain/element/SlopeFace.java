@@ -1,10 +1,13 @@
 package fr.dynamx.common.physics.terrain.element;
 
 import com.jme3.math.Vector3f;
-import fr.dynamx.utils.optimization.Vector3fPool;
 
 import java.io.Serializable;
 
+/**
+ * @deprecated Not implemented
+ */
+@Deprecated
 public class SlopeFace implements Serializable {
     private Vector3f[] points;
 
@@ -17,7 +20,7 @@ public class SlopeFace implements Serializable {
 
     public SlopeFace buildShape(Vector3f offset, byte X, byte Y, byte type, byte u, byte v, boolean full, long poolId) // type = 1 ou 2
     {
-        points = new Vector3f[8];
+        /*points = new Vector3f[8];
         if (type == 1) {
 
             if (X == 0 && Y == -1) { // SOUTH X=0 Y=-1
@@ -84,7 +87,7 @@ public class SlopeFace implements Serializable {
          * points[1] = Vector3fPool.get(poolId, 1, full?1:.5f, 1); points[2] =
          * Vector3fPool.get(poolId, 1, full?1:.5f, 2); points[3] = Vector3fPool.get(poolId, 0,
          * .5f, 2); faces.add(new SlopeCollisionFace(points));
-         */
+         *//*
 
         // FACE PLATE
         points[4] = Vector3fPool.get(poolId, offset.toString(), 0, 0, 0);
@@ -94,7 +97,7 @@ public class SlopeFace implements Serializable {
 
         for (Vector3f p : points) {
             p.addLocal(offset);
-        }
+        }*/
         //System.out.println("Slope offset "+offset);
         return this;
     }

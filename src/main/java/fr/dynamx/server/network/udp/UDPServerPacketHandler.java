@@ -75,13 +75,18 @@ public class UDPServerPacketHandler {
             else
                 DynamXMain.log.error("[UDP-DEBUG] Read packet with id " + id + " but client is null..." + packet.getAddress());
         }
+
+        if(client == null && id != 0) { // 0 is auth packet
+            return; // player disconnected-ignore packet
+        }
+
         this.threadService.execute(() -> {
             if (id == 0) {
                 UDPServerPacketHandler.this.handleAuthentication(address, packet, in);
             } else if (id == 9) {
                 UdpTestPacket packet2 = new UdpTestPacket(in.readInt(), ByteBufUtils.readUTF8String(in), in.readLong(), in.readLong() == -1 ? System.currentTimeMillis() : -2);
                 server.sendPacket(packet2, client);
-            } else if (client != null) {
+            } else {
                 if (id >= 10) {
                     EncapsulatedUDPPacket.readAndHandle(id, in, client.player);
                 } else {

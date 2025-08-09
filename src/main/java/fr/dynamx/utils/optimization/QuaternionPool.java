@@ -9,27 +9,31 @@ public class QuaternionPool extends ClassPool<Quaternion> {
     private static final ThreadLocal<QuaternionPool> LOCAL_POOL = ThreadLocal.withInitial(QuaternionPool::new);
 
     public static void openPool() {
-        getINSTANCE().openSubPool();
+        getPool().openSubPool(SubClassPool.QUATERNION_DEFAULT);
+    }
+
+    public static void openPool(String identifier) {
+        getPool().openSubPool(identifier);
     }
 
     public static void closePool() {
-        getINSTANCE().closeSubPool();
+        getPool().closeSubPool();
     }
 
     public static Quaternion get() {
-        Quaternion v = getINSTANCE().provideNewInstance();
+        Quaternion v = getPool().provideNewInstance();
         v.set(0, 0, 0, 0);
         return v;
     }
 
     public static Quaternion get(float x, float y, float z, float w) {
-        Quaternion v = getINSTANCE().provideNewInstance();
+        Quaternion v = getPool().provideNewInstance();
         v.set(x, y, z, w);
         return v;
     }
 
     public static Quaternion get(Quaternion from) {
-        Quaternion v = getINSTANCE().provideNewInstance();
+        Quaternion v = getPool().provideNewInstance();
         v.set(from);
         return v;
     }
@@ -51,7 +55,7 @@ public class QuaternionPool extends ClassPool<Quaternion> {
         return 200;
     }
 
-    public static QuaternionPool getINSTANCE() {
+    public static QuaternionPool getPool() {
         return LOCAL_POOL.get();
     }
 }

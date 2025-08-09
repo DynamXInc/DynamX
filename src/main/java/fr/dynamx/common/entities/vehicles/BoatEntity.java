@@ -6,16 +6,19 @@ import fr.dynamx.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.common.entities.BaseVehicleEntity;
 import fr.dynamx.common.entities.PackPhysicsEntity;
+import fr.dynamx.common.entities.modules.DoorsModule;
 import fr.dynamx.common.entities.modules.SeatsModule;
 import fr.dynamx.common.entities.modules.engines.BoatPropellerModule;
 import fr.dynamx.common.physics.entities.BoatPhysicsHandler;
 import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
-public class BoatEntity<T extends BoatPhysicsHandler<?>> extends BaseVehicleEntity<T> implements IModuleContainer.ISeatsContainer {
+public class BoatEntity<T extends BoatPhysicsHandler<?>> extends BaseVehicleEntity<T> implements IModuleContainer.ISeatsContainer, IModuleContainer.IDoorContainer {
     private SeatsModule seats;
     private BoatPropellerModule propeller;
+    private DoorsModule doors;
 
     public BoatEntity(World world) {
         super(world);
@@ -35,6 +38,7 @@ public class BoatEntity<T extends BoatPhysicsHandler<?>> extends BaseVehicleEnti
         super.getListenerModules();
         seats = getModuleByType(SeatsModule.class);
         propeller = getModuleByType(BoatPropellerModule.class);
+        doors = getModuleByType(DoorsModule.class);
     }
 
     @Nonnull
@@ -65,4 +69,9 @@ public class BoatEntity<T extends BoatPhysicsHandler<?>> extends BaseVehicleEnti
             physicsHandler.onPackInfosReloaded();
     }
 
+    @Nullable
+    @Override
+    public DoorsModule getDoors() {
+        return doors;
+    }
 }

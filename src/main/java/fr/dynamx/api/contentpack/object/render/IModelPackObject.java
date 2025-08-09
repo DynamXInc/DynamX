@@ -1,12 +1,13 @@
 package fr.dynamx.api.contentpack.object.render;
 
 import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
-import fr.dynamx.client.renders.model.ItemDxModel;
-import fr.dynamx.client.renders.scene.node.AbstractItemNode;
-import fr.dynamx.client.renders.scene.node.SceneNode;
-import fr.dynamx.common.contentpack.type.ViewTransformsInfo;
-import fr.dynamx.utils.client.ClientDynamXUtils;
-import fr.dynamx.utils.maths.DynamXMath;
+import fr.dynamx.core.client.DynamXModelRegistry;
+import fr.dynamx.core.client.renders.model.ItemDxModel;
+import fr.dynamx.core.client.renders.scene.node.AbstractItemNode;
+import fr.dynamx.core.client.renders.scene.node.SceneNode;
+import fr.dynamx.core.common.contentpack.type.ViewTransformsInfo;
+import fr.dynamx.core.utils.client.ClientDynamXUtils;
+import fr.dynamx.core.utils.maths.DynamXMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
@@ -37,7 +38,7 @@ public interface IModelPackObject extends IModelTextureVariantsSupplier {
     }
 
     /**
-     * @return True if the model returned by {@link #getModel()} should be loaded by the {@link fr.dynamx.client.DynamXModelRegistry}
+     * @return True if the model returned by {@link #getModel()} should be loaded by the {@link DynamXModelRegistry}
      */
     default boolean shouldRegisterModel() {
         return isModelValid() && !getModel().getPath().endsWith("json");

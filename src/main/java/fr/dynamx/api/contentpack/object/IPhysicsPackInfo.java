@@ -4,15 +4,15 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.contentpack.object.render.IModelPackObject;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
-import fr.dynamx.common.contentpack.type.ObjectInfo;
-import fr.dynamx.common.entities.PackPhysicsEntity;
+import fr.dynamx.core.common.contentpack.type.ObjectInfo;
+import fr.dynamx.core.common.entities.PackPhysicsEntity;
 import net.minecraft.item.ItemStack;
 
 import java.util.Collections;
 import java.util.List;
 
 /**
- * Describes an {@link ObjectInfo} which can be used in a {@link fr.dynamx.common.entities.PackPhysicsEntity}
+ * Describes an {@link ObjectInfo} which can be used in a {@link PackPhysicsEntity}
  */
 public interface IPhysicsPackInfo extends ICollisionsContainer, IModelPackObject {
     /**

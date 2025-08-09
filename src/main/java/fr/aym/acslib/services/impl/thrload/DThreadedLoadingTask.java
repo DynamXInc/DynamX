@@ -4,7 +4,7 @@ import fr.aym.acslib.ACsLib;
 import fr.aym.acslib.api.services.ThreadedLoadingService;
 import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.aym.acslib.utils.ACsLogger;
-import fr.dynamx.utils.errors.DynamXErrorManager;
+import fr.dynamx.core.utils.errors.DynamXErrorManager;
 import net.minecraftforge.fml.client.CustomModLoadingErrorDisplayException;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.LoaderException;

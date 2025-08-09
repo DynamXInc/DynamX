@@ -1,12 +1,12 @@
 package fr.dynamx.api.events;
 
 import fr.dynamx.api.entities.modules.IPhysicsModule;
-import fr.dynamx.client.renders.RenderPhysicsEntity;
-import fr.dynamx.client.renders.scene.node.SceneNode;
-import fr.dynamx.common.entities.ModularPhysicsEntity;
-import fr.dynamx.common.entities.PhysicsEntity;
-import fr.dynamx.common.items.DynamXItemSpawner;
-import fr.dynamx.utils.debug.renderer.DebugRenderer;
+import fr.dynamx.core.client.renders.RenderPhysicsEntity;
+import fr.dynamx.core.client.renders.scene.node.SceneNode;
+import fr.dynamx.core.common.entities.*;
+import fr.dynamx.core.common.items.DynamXItemSpawner;
+import fr.dynamx.core.common.entities.vehicles.DoorEntity;
+import fr.dynamx.core.utils.debug.renderer.DebugRenderer;
 import lombok.Getter;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -146,7 +146,7 @@ public class PhysicsEntityEvent extends Event {
     /**
      * Called when the renderer on an entity is created <br>
      * You can add debug renderers for your addon, depending on the type of the entity <br>
-     * You can select for which entities you want to receive this event, supported generic types are "{@link fr.dynamx.common.entities.BaseVehicleEntity}", "{@link fr.dynamx.common.entities.PropsEntity}", "{@link fr.dynamx.common.entities.RagdollEntity}" and "{@link fr.dynamx.common.entities.vehicles.DoorEntity}" <br>
+     * You can select for which entities you want to receive this event, supported generic types are "{@link BaseVehicleEntity}", "{@link PropsEntity}", "{@link RagdollEntity}" and "{@link DoorEntity}" <br>
      * <strong>Note:</strong> don't add parameters to PhysicsEntity : this would break the event on the fml side.
      *
      * @see DebugRenderer
@@ -229,7 +229,7 @@ public class PhysicsEntityEvent extends Event {
      * You can modify the module list to add or remove ones <br>
      * Take care of their order : a propulsion module should be added before an engine module <br> <br>
      * <strong>Note that you have a method to add your modules in your ISubInfoTypes</strong> <br> <br>
-     * You can select for which entities you want to receive this event, supported generic types are "{@link fr.dynamx.common.entities.BaseVehicleEntity}", "{@link fr.dynamx.common.entities.PropsEntity}", "{@link fr.dynamx.common.entities.RagdollEntity}" and "{@link fr.dynamx.common.entities.vehicles.DoorEntity}"
+     * You can select for which entities you want to receive this event, supported generic types are "{@link BaseVehicleEntity}", "{@link PropsEntity}", "{@link RagdollEntity}" and "{@link DoorEntity}"
      *
      * @see IPhysicsModule
      * @see ModularPhysicsEntity

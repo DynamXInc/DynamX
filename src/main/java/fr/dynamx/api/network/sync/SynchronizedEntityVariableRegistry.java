@@ -2,8 +2,8 @@ package fr.dynamx.api.network.sync;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import fr.dynamx.common.DynamXMain;
-import fr.dynamx.common.network.sync.PhysicsEntitySynchronizer;
+import fr.dynamx.core.common.DynamXMain;
+import fr.dynamx.core.common.network.sync.PhysicsEntitySynchronizer;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import net.minecraftforge.fml.common.discovery.ASMDataTable;

@@ -2,9 +2,11 @@ package fr.dynamx.api.physics.terrain;
 
 import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Vector3f;
-import fr.dynamx.common.physics.terrain.chunk.ChunkCollisions;
-import fr.dynamx.common.physics.terrain.element.TerrainElementsFactory;
-import fr.dynamx.utils.VerticalChunkPos;
+import fr.dynamx.core.common.physics.terrain.chunk.ChunkCollisions;
+import fr.dynamx.core.common.physics.terrain.element.CompoundBoxTerrainElement;
+import fr.dynamx.core.common.physics.terrain.element.TerrainElementsFactory;
+import fr.dynamx.core.common.physics.terrain.element.CustomSlopeTerrainElement;
+import fr.dynamx.core.utils.VerticalChunkPos;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
@@ -16,7 +18,7 @@ import java.io.ObjectOutputStream;
  * A TerrainElement is a collision element used by {@link ChunkCollisions} that can be saved in files, then reloaded without computing the collisions again <br>
  * <strong>NOTE : all TerrainElements must have an empty constructor, used when loading them from a file</strong>
  *
- * @see fr.dynamx.common.physics.terrain.element.CompoundBoxTerrainElement
+ * @see CompoundBoxTerrainElement
  * @see IPersistentTerrainElement
  */
 public interface ITerrainElement {
@@ -102,7 +104,7 @@ public interface ITerrainElement {
     /**
      * The element will not be deleted when chunk is invalidated
      *
-     * @see fr.dynamx.common.physics.terrain.element.CustomSlopeTerrainElement
+     * @see CustomSlopeTerrainElement
      */
     interface IPersistentTerrainElement extends ITerrainElement {
     }

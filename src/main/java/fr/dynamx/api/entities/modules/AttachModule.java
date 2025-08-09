@@ -1,9 +1,9 @@
 package fr.dynamx.api.entities.modules;
 
 import com.jme3.bullet.joints.Constraint;
-import fr.dynamx.common.entities.PhysicsEntity;
-import fr.dynamx.common.physics.joints.EntityJoint;
-import fr.dynamx.common.physics.joints.JointHandler;
+import fr.dynamx.core.common.entities.PhysicsEntity;
+import fr.dynamx.core.common.physics.joints.EntityJoint;
+import fr.dynamx.core.common.physics.joints.JointHandler;
 
 /**
  * The basis of any attach module, permitting to add joints between entities, or between different parts of one entity <br>

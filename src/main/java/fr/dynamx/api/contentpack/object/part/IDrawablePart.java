@@ -2,9 +2,9 @@ package fr.dynamx.api.contentpack.object.part;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.render.IModelPackObject;
-import fr.dynamx.client.renders.scene.IRenderContext;
-import fr.dynamx.client.renders.scene.SceneBuilder;
-import fr.dynamx.client.renders.scene.node.SceneNode;
+import fr.dynamx.core.client.renders.scene.IRenderContext;
+import fr.dynamx.core.client.renders.scene.SceneBuilder;
+import fr.dynamx.core.client.renders.scene.node.SceneNode;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 

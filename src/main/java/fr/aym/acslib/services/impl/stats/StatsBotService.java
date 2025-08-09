@@ -2,7 +2,7 @@ package fr.aym.acslib.services.impl.stats;
 
 import fr.aym.acslib.api.ACsRegisteredService;
 import fr.aym.acslib.api.services.StatsReportingService;
-import fr.dynamx.common.DynamXMain;
+import fr.dynamx.core.common.DynamXMain;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraftforge.common.MinecraftForge;

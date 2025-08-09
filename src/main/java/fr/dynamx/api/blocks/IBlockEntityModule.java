@@ -1,6 +1,7 @@
 package fr.dynamx.api.blocks;
 
 import fr.dynamx.api.entities.modules.IBaseModule;
+import fr.dynamx.core.common.blocks.TEDynamXBlock;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
@@ -9,7 +10,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.fml.relauncher.Side;
 
 /**
- * Base implementation of a {@link fr.dynamx.common.blocks.TEDynamXBlock} module
+ * Base implementation of a {@link TEDynamXBlock} module
  */
 public interface IBlockEntityModule extends IBaseModule {
     /**

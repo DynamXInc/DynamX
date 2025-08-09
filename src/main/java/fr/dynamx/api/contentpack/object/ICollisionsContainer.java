@@ -1,7 +1,7 @@
 package fr.dynamx.api.contentpack.object;
 
 import com.jme3.math.Vector3f;
-import fr.dynamx.common.contentpack.type.ObjectCollisionsHelper;
+import fr.dynamx.core.common.contentpack.type.ObjectCollisionsHelper;
 
 /**
  * todo doc

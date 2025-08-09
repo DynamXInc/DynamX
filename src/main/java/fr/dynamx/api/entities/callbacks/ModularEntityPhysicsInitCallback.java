@@ -1,7 +1,7 @@
 package fr.dynamx.api.entities.callbacks;
 
-import fr.dynamx.common.entities.ModularPhysicsEntity;
-import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
+import fr.dynamx.core.common.entities.ModularPhysicsEntity;
+import fr.dynamx.core.common.physics.entities.AbstractEntityPhysicsHandler;
 
 import javax.annotation.Nullable;
 

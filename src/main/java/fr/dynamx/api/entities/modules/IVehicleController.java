@@ -1,6 +1,7 @@
 package fr.dynamx.api.entities.modules;
 
 import fr.aym.acsguis.component.GuiComponent;
+import fr.dynamx.core.common.entities.modules.engines.CarEngineModule;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -13,7 +14,7 @@ import java.util.List;
  * Used on client side
  *
  * @see IPhysicsModule
- * @see fr.dynamx.common.entities.modules.engines.CarEngineModule
+ * @see CarEngineModule
  */
 public interface IVehicleController {
     /**

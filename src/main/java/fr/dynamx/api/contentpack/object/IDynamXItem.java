@@ -1,6 +1,6 @@
 package fr.dynamx.api.contentpack.object;
 
-import fr.dynamx.common.contentpack.type.ObjectInfo;
+import fr.dynamx.core.common.contentpack.type.ObjectInfo;
 
 /**
  * An IDynamXItem is something having an {@link ObjectInfo}. It is, for example, an item or a block

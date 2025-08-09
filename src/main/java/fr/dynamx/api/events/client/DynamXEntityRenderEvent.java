@@ -1,7 +1,7 @@
 package fr.dynamx.api.events.client;
 
-import fr.dynamx.client.renders.scene.BaseRenderContext;
-import fr.dynamx.common.entities.PhysicsEntity;
+import fr.dynamx.core.client.renders.scene.BaseRenderContext;
+import fr.dynamx.core.common.entities.PhysicsEntity;
 import lombok.Getter;
 import net.minecraftforge.fml.common.eventhandler.Event;
 

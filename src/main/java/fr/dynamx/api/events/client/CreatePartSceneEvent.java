@@ -3,7 +3,7 @@ package fr.dynamx.api.events.client;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.contentpack.object.render.IModelPackObject;
-import fr.dynamx.client.renders.scene.node.SceneNode;
+import fr.dynamx.core.client.renders.scene.node.SceneNode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;

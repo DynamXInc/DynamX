@@ -1,10 +1,9 @@
 package fr.dynamx.api.events;
 
-import com.jme3.bullet.collision.PhysicsCollisionEvent;
 import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.IPhysicsWorld;
-import fr.dynamx.common.entities.PhysicsEntity;
-import fr.dynamx.common.physics.CollisionsHandler;
+import fr.dynamx.core.common.entities.PhysicsEntity;
+import fr.dynamx.core.common.physics.CollisionsHandler;
 import lombok.Getter;
 import net.minecraftforge.fml.common.eventhandler.Event;
 

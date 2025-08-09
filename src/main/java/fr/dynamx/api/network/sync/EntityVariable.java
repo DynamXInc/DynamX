@@ -1,6 +1,6 @@
 package fr.dynamx.api.network.sync;
 
-import fr.dynamx.utils.debug.SyncHelper;
+import fr.dynamx.core.utils.debug.SyncHelper;
 import io.netty.buffer.ByteBuf;
 import lombok.Getter;
 import net.minecraftforge.fml.relauncher.Side;

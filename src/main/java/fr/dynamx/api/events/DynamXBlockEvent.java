@@ -1,11 +1,11 @@
 package fr.dynamx.api.events;
 
-import fr.dynamx.client.renders.TESRDynamXBlock;
-import fr.dynamx.client.renders.scene.BaseRenderContext;
-import fr.dynamx.client.renders.scene.node.SceneNode;
-import fr.dynamx.common.blocks.DynamXBlock;
-import fr.dynamx.common.blocks.TEDynamXBlock;
-import fr.dynamx.common.contentpack.type.objects.BlockObject;
+import fr.dynamx.core.client.renders.TESRDynamXBlock;
+import fr.dynamx.core.client.renders.scene.BaseRenderContext;
+import fr.dynamx.core.client.renders.scene.node.SceneNode;
+import fr.dynamx.core.common.blocks.DynamXBlock;
+import fr.dynamx.core.common.blocks.TEDynamXBlock;
+import fr.dynamx.core.common.contentpack.type.objects.BlockObject;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.world.World;

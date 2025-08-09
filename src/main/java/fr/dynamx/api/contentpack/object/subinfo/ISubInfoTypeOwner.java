@@ -1,8 +1,8 @@
 package fr.dynamx.api.contentpack.object.subinfo;
 
 import fr.dynamx.api.contentpack.object.INamedObject;
-import fr.dynamx.common.contentpack.loader.PackFilePropertyData;
-import fr.dynamx.common.contentpack.loader.SubInfoTypesRegistry;
+import fr.dynamx.core.common.contentpack.loader.PackFilePropertyData;
+import fr.dynamx.core.common.contentpack.loader.SubInfoTypesRegistry;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;

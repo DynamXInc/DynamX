@@ -1,8 +1,8 @@
 package fr.dynamx.api.events;
 
 import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
-import fr.dynamx.client.renders.model.renderer.ObjModelRenderer;
-import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
+import fr.dynamx.core.client.renders.model.renderer.ObjModelRenderer;
+import fr.dynamx.core.client.renders.model.renderer.ObjObjectRenderer;
 import lombok.Getter;
 import net.minecraftforge.fml.common.eventhandler.Cancelable;
 import net.minecraftforge.fml.common.eventhandler.Event;

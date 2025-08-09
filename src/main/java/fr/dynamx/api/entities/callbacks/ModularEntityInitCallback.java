@@ -1,7 +1,7 @@
 package fr.dynamx.api.entities.callbacks;
 
 import fr.dynamx.api.entities.modules.IPhysicsModule;
-import fr.dynamx.common.entities.ModularPhysicsEntity;
+import fr.dynamx.core.common.entities.ModularPhysicsEntity;
 
 import java.util.List;
 

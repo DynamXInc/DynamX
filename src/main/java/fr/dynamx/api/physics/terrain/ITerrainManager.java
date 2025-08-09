@@ -1,11 +1,11 @@
 package fr.dynamx.api.physics.terrain;
 
 import fr.dynamx.api.physics.IPhysicsWorld;
-import fr.dynamx.common.physics.terrain.WorldTerrainState;
-import fr.dynamx.common.physics.terrain.chunk.ChunkCollisions;
-import fr.dynamx.common.physics.terrain.chunk.ChunkLoadingTicket;
-import fr.dynamx.utils.VerticalChunkPos;
-import fr.dynamx.utils.debug.Profiler;
+import fr.dynamx.core.common.physics.terrain.WorldTerrainState;
+import fr.dynamx.core.common.physics.terrain.chunk.ChunkCollisions;
+import fr.dynamx.core.common.physics.terrain.chunk.ChunkLoadingTicket;
+import fr.dynamx.core.utils.VerticalChunkPos;
+import fr.dynamx.core.utils.debug.Profiler;
 import net.minecraft.world.World;
 import net.minecraftforge.event.world.ChunkEvent;
 

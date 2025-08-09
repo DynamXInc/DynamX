@@ -46,7 +46,7 @@ import de.javagl.jgltf.dynamx.model.io.v1.GltfAssetV1;
 import de.javagl.jgltf.dynamx.model.v1.gl.DefaultModels;
 import de.javagl.jgltf.dynamx.model.v1.gl.GltfDefaults;
 import de.javagl.jgltf.dynamx.model.v1.gl.TechniqueStatesFunctionsModels;
-import fr.dynamx.common.contentpack.PackInfo;
+import fr.dynamx.core.common.contentpack.PackInfo;
 import net.minecraft.util.ResourceLocation;
 
 import java.nio.ByteBuffer;

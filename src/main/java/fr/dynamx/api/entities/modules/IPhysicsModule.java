@@ -1,11 +1,14 @@
 package fr.dynamx.api.entities.modules;
 
 import fr.dynamx.api.network.sync.SimulationHolder;
-import fr.dynamx.common.entities.ModularPhysicsEntity;
-import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
+import fr.dynamx.core.common.entities.ModularPhysicsEntity;
+import fr.dynamx.core.common.entities.modules.AbstractLightsModule;
+import fr.dynamx.core.common.entities.modules.SeatsModule;
+import fr.dynamx.core.common.entities.modules.WheelsModule;
+import fr.dynamx.core.common.physics.entities.AbstractEntityPhysicsHandler;
+import fr.dynamx.core.common.entities.modules.engines.BasicEngineModule;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -15,10 +18,10 @@ import javax.annotation.Nullable;
  * Base implementation of a {@link ModularPhysicsEntity} module <br>
  * For examples, you can check the default modules of DynamX : <br>
  *
- * @see fr.dynamx.common.entities.modules.SeatsModule
- * @see fr.dynamx.common.entities.modules.AbstractLightsModule
- * @see fr.dynamx.common.entities.modules.WheelsModule
- * @see fr.dynamx.common.entities.modules.engines.BasicEngineModule
+ * @see SeatsModule
+ * @see AbstractLightsModule
+ * @see WheelsModule
+ * @see BasicEngineModule
  */
 public interface IPhysicsModule<P extends AbstractEntityPhysicsHandler<?, ?>> extends IBaseModule {
     /**

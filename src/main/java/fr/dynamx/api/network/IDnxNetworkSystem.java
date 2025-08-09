@@ -1,6 +1,6 @@
 package fr.dynamx.api.network;
 
-import fr.dynamx.common.network.VanillaNetworkHandler;
+import fr.dynamx.core.common.network.VanillaNetworkHandler;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 
 import javax.annotation.Nullable;

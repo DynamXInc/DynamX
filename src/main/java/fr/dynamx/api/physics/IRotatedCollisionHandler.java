@@ -2,7 +2,7 @@ package fr.dynamx.api.physics;
 
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
-import fr.dynamx.utils.optimization.MutableBoundingBox;
+import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MoverType;
 import net.minecraft.util.math.AxisAlignedBB;

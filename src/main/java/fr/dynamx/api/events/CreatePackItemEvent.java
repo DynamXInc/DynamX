@@ -2,11 +2,12 @@ package fr.dynamx.api.events;
 
 import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
-import fr.dynamx.common.contentpack.loader.InfoList;
-import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
-import fr.dynamx.common.contentpack.type.ObjectInfo;
-import fr.dynamx.common.contentpack.type.objects.AbstractItemObject;
-import fr.dynamx.common.contentpack.type.objects.PropObject;
+import fr.dynamx.core.common.contentpack.loader.InfoList;
+import fr.dynamx.core.common.contentpack.type.vehicle.ModularVehicleInfo;
+import fr.dynamx.core.common.contentpack.type.ObjectInfo;
+import fr.dynamx.core.common.contentpack.type.objects.AbstractItemObject;
+import fr.dynamx.core.common.contentpack.type.objects.BlockObject;
+import fr.dynamx.core.common.contentpack.type.objects.PropObject;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraftforge.fml.common.eventhandler.Cancelable;
@@ -73,7 +74,7 @@ public abstract class CreatePackItemEvent<B extends ObjectInfo<?> & ISubInfoType
     }
 
     /**
-     * Called by the ContentPackSystem when creating the block of a {@link fr.dynamx.common.contentpack.type.objects.BlockObject} <br>
+     * Called by the ContentPackSystem when creating the block of a {@link BlockObject} <br>
      * Set your own item to prevent default behavior <br>
      * You can cancel the event to avoid other addons to modify your behavior
      */

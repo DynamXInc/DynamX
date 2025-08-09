@@ -1,11 +1,12 @@
 package fr.dynamx.api.network.sync;
 
 import fr.dynamx.api.entities.modules.IVehicleController;
+import fr.dynamx.core.common.network.sync.PhysicsEntitySynchronizer;
 
 import java.util.List;
 
 /**
- * Client {@link fr.dynamx.common.network.sync.PhysicsEntitySynchronizer}, handles controls and hud via the {@link IVehicleController}s
+ * Client {@link PhysicsEntitySynchronizer}, handles controls and hud via the {@link IVehicleController}s
  */
 public interface ClientEntityNetHandler {
     /**

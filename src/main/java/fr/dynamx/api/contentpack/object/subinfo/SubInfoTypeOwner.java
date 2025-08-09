@@ -1,6 +1,6 @@
 package fr.dynamx.api.contentpack.object.subinfo;
 
-import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
+import fr.dynamx.core.common.contentpack.type.vehicle.ModularVehicleInfo;
 
 import java.util.ArrayList;
 import java.util.List;

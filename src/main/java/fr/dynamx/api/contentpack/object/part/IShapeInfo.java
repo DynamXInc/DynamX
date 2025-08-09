@@ -1,8 +1,8 @@
 package fr.dynamx.api.contentpack.object.part;
 
 import com.jme3.math.Vector3f;
-import fr.dynamx.common.contentpack.parts.PartShape;
-import fr.dynamx.utils.optimization.MutableBoundingBox;
+import fr.dynamx.core.common.contentpack.parts.PartShape;
+import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 
 /**
  * A simple cuboid collision shape

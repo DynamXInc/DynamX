@@ -1,0 +1,99 @@
+package fr.dynamx.core.common.items;
+
+import fr.dynamx.api.contentpack.object.IDynamXItem;
+import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
+import fr.dynamx.api.contentpack.object.render.IModelPackObject;
+import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
+import fr.dynamx.core.common.contentpack.DynamXObjectLoaders;
+import fr.dynamx.core.common.contentpack.type.objects.AbstractItemObject;
+import fr.dynamx.core.utils.DynamXConstants;
+import fr.dynamx.core.utils.DynamXUtils;
+import fr.dynamx.core.utils.RegistryNameSetter;
+import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
+
+import javax.annotation.Nullable;
+import java.util.List;
+
+public class DynamXItem<T extends AbstractItemObject<?, ?>> extends Item implements IDynamXItem<T>, IResourcesOwner {
+    protected T itemInfo;
+
+    /**
+     * Use the other constructor to create custom blocks and easily set BlockObject's properties
+     */
+    public DynamXItem(T itemInfo) {
+        this.setInfo(itemInfo);
+        RegistryNameSetter.setRegistryName(this, DynamXConstants.ID, itemInfo.getFullName().toLowerCase());
+        setTranslationKey(DynamXConstants.ID + "." + itemInfo.getFullName().toLowerCase());
+        setCreativeTab(itemInfo.getCreativeTab(DynamXItemRegistry.objectTab));
+        DynamXItemRegistry.add(this);
+    }
+
+    /**
+     * Use this constructor to create a custom item having the same functionalities as pack item <br>
+     * You can customise item properties using this.getInfo() <br> <br>
+     * NOTE : Registry name and translation key are automatically set and the item is automatically registered into Forge by DynamX,
+     * but don't forget to set a creative tab !<br><br>
+     *
+     * <strong>NOTE : Should be called during addons initialization</strong>
+     *
+     * @param modid    The mod owning this item used to register the item
+     * @param itemName The name of the item
+     * @param model    The obj model of the block "namespace:resourceName.obj"
+     */
+    public DynamXItem(String modid, String itemName, ResourceLocation model) {
+        if (modid.contains("builtin_mod_")) { //Backward-compatibility
+            itemInfo = (T) DynamXObjectLoaders.ITEMS.addBuiltinObject(this, modid, itemName);
+            modid = modid.replace("builtin_mod_", "");
+        } else {
+            itemInfo = (T) DynamXObjectLoaders.ITEMS.addBuiltinObject(this, "dynx." + modid, itemName);
+        }
+        itemInfo.setModel(model);
+        itemInfo.setDescription("Builtin " + modid + "'s item");
+
+        RegistryNameSetter.setRegistryName(this, modid, itemInfo.getFullName().toLowerCase());
+        setTranslationKey(itemInfo.getFullName().toLowerCase());
+        setMaxStackSize(itemInfo.getMaxItemStackSize());
+        DynamXItemRegistry.add(this);
+    }
+
+    @Override
+    public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
+        super.addInformation(stack, worldIn, tooltip, flagIn);
+        DynamXUtils.addItemTooltip(tooltip, getInfo(), (byte) stack.getMetadata());
+    }
+
+    public T getInfo() {
+        return itemInfo;
+    }
+
+    public void setInfo(T itemInfo) {
+        this.itemInfo = itemInfo;
+        setMaxStackSize(itemInfo.getMaxItemStackSize());
+    }
+
+    @Override
+    public String toString() {
+        return "DynamXItem{" +
+                "itemInfo=" + getInfo().getFullName() +
+                '}';
+    }
+
+    @Override
+    public String getJsonName(int meta) {
+        return getInfo().getFullName().toLowerCase();
+    }
+
+    @Override
+    public IModelPackObject getDxModel() {
+        return getInfo();
+    }
+
+    @Override
+    public boolean createJson() {
+        return IResourcesOwner.super.createJson() || itemInfo.get3DItemRenderLocation() != Enum3DRenderLocation.ALL;
+    }
+}

@@ -3,18 +3,18 @@
   "package": "fr.dynamx.common.core.mixin",
   "refmap": "refmap.dynamxmod.json",
   "mixins": [
-    "MixinChunk",
-    "MixinEntity",
-    "MixinEntityLivingBase",
-    "MixinNetHandlerPlayServer",
-    "MixinWorld"
+    "fr.dynamx.core.common.core.mixin.MixinChunk",
+    "fr.dynamx.core.common.core.mixin.MixinEntity",
+    "fr.dynamx.core.common.core.mixin.MixinEntityLivingBase",
+    "fr.dynamx.core.common.core.mixin.MixinNetHandlerPlayServer",
+    "fr.dynamx.core.common.core.mixin.MixinWorld"
   ],
   "minVersion": "0.6",
   "server": [],
   "client": [
-    "MixinEntityPlayerSP",
-    "MixinEntityRenderer",
-    "MixinRenderGlobal",
-    "MixinRenderManager"
+    "fr.dynamx.core.common.core.mixin.MixinEntityPlayerSP",
+    "fr.dynamx.core.common.core.mixin.MixinEntityRenderer",
+    "fr.dynamx.core.common.core.mixin.MixinRenderGlobal",
+    "fr.dynamx.core.common.core.mixin.MixinRenderManager"
   ]
 }

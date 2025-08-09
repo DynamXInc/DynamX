@@ -31,7 +31,7 @@ import de.javagl.jgltf.dynamx.model.io.v1.GltfAssetV1;
 import de.javagl.jgltf.dynamx.model.io.v2.GltfAssetV2;
 import de.javagl.jgltf.dynamx.model.v1.GltfModelV1;
 import de.javagl.jgltf.dynamx.model.v2.GltfModelCreatorV2;
-import fr.dynamx.common.contentpack.PackInfo;
+import fr.dynamx.core.common.contentpack.PackInfo;
 import net.minecraft.util.ResourceLocation;
 
 /**

@@ -1,17 +1,17 @@
 package fr.dynamx.api.contentpack.registry;
 
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
-import fr.dynamx.common.contentpack.DynamXObjectLoaders;
-import fr.dynamx.common.contentpack.PackInfo;
-import fr.dynamx.common.contentpack.loader.InfoList;
-import fr.dynamx.common.contentpack.type.objects.ArmorObject;
-import fr.dynamx.common.contentpack.type.objects.BlockObject;
-import fr.dynamx.common.contentpack.type.objects.ItemObject;
-import fr.dynamx.common.contentpack.type.objects.PropObject;
-import fr.dynamx.common.contentpack.type.vehicle.BaseEngineInfo;
-import fr.dynamx.common.contentpack.type.vehicle.CarEngineInfo;
-import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
-import fr.dynamx.common.contentpack.type.vehicle.PartWheelInfo;
+import fr.dynamx.core.common.contentpack.DynamXObjectLoaders;
+import fr.dynamx.core.common.contentpack.PackInfo;
+import fr.dynamx.core.common.contentpack.loader.InfoList;
+import fr.dynamx.core.common.contentpack.type.objects.ArmorObject;
+import fr.dynamx.core.common.contentpack.type.objects.BlockObject;
+import fr.dynamx.core.common.contentpack.type.objects.ItemObject;
+import fr.dynamx.core.common.contentpack.type.objects.PropObject;
+import fr.dynamx.core.common.contentpack.type.vehicle.BaseEngineInfo;
+import fr.dynamx.core.common.contentpack.type.vehicle.CarEngineInfo;
+import fr.dynamx.core.common.contentpack.type.vehicle.ModularVehicleInfo;
+import fr.dynamx.core.common.contentpack.type.vehicle.PartWheelInfo;
 import lombok.Getter;
 
 public enum SubInfoTypeRegistries {

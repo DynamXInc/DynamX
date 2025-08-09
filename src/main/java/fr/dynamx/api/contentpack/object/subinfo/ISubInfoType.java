@@ -3,9 +3,11 @@ package fr.dynamx.api.contentpack.object.subinfo;
 import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
-import fr.dynamx.common.blocks.TEDynamXBlock;
-import fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo;
-import fr.dynamx.common.entities.PackPhysicsEntity;
+import fr.dynamx.core.common.blocks.TEDynamXBlock;
+import fr.dynamx.core.common.contentpack.parts.PartShape;
+import fr.dynamx.core.common.contentpack.type.vehicle.ModularVehicleInfo;
+import fr.dynamx.core.common.entities.PackPhysicsEntity;
+import fr.dynamx.core.common.contentpack.type.objects.BlockObject;
 
 import javax.annotation.Nullable;
 
@@ -17,7 +19,7 @@ import javax.annotation.Nullable;
  * ShapeScale: 0.936054 1.60526 0.280718 <br>
  * ShapePosition: -0.023108 0.605695 1.45133 <br>
  * }
- * </code> <br> is a {@link fr.dynamx.common.contentpack.parts.PartShape}
+ * </code> <br> is a {@link PartShape}
  * <br> The SubInfoTypes must be registered with the @{@link fr.dynamx.api.contentpack.registry.RegisteredSubInfoType} annotation
  *
  * @param <T> The type of the {@link ISubInfoTypeOwner} owning this sub info
@@ -68,7 +70,7 @@ public interface ISubInfoType<T extends ISubInfoTypeOwner<?>> extends INamedObje
     /**
      * Used for error messages
      *
-     * @return The root owner of this sub info type (generally the {@link ModularVehicleInfo} or the {@link fr.dynamx.common.contentpack.type.objects.BlockObject})
+     * @return The root owner of this sub info type (generally the {@link ModularVehicleInfo} or the {@link BlockObject})
      * where this sub info is declared
      */
     default INamedObject getRootOwner() {

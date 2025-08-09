@@ -1,8 +1,8 @@
 package com.modularmods.mcgltf.dynamx.animation;
 
 import de.javagl.jgltf.dynamx.model.NodeModel;
-import fr.dynamx.client.renders.animations.DxAnimation;
-import fr.dynamx.client.renders.model.renderer.GltfModelRenderer;
+import fr.dynamx.core.client.renders.animations.DxAnimation;
+import fr.dynamx.core.client.renders.model.renderer.GltfModelRenderer;
 
 import java.util.Arrays;
 

@@ -1,7 +1,7 @@
 package fr.dynamx.api.events.client;
 
-import fr.dynamx.client.renders.scene.BaseRenderContext;
-import fr.dynamx.client.renders.scene.node.AbstractItemNode;
+import fr.dynamx.core.client.renders.scene.BaseRenderContext;
+import fr.dynamx.core.client.renders.scene.node.AbstractItemNode;
 import lombok.Getter;
 import net.minecraftforge.fml.common.eventhandler.Cancelable;
 import net.minecraftforge.fml.common.eventhandler.Event;

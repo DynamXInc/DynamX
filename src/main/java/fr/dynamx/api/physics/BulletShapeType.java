@@ -3,7 +3,7 @@ package fr.dynamx.api.physics;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.math.Vector3f;
-import fr.dynamx.utils.physics.ShapeUtils;
+import fr.dynamx.core.utils.physics.ShapeUtils;
 import lombok.Getter;
 
 import javax.annotation.Nullable;

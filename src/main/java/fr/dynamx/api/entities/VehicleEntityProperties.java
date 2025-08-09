@@ -1,7 +1,8 @@
 package fr.dynamx.api.entities;
 
-import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.entities.modules.engines.CarEngineModule;
+import fr.dynamx.core.common.entities.BaseVehicleEntity;
+import fr.dynamx.core.common.entities.modules.WheelsModule;
+import fr.dynamx.core.common.entities.modules.engines.CarEngineModule;
 import net.minecraftforge.common.util.EnumHelper;
 
 /**
@@ -9,7 +10,7 @@ import net.minecraftforge.common.util.EnumHelper;
  */
 public class VehicleEntityProperties {
     /**
-     * Float properties stored in all {@link fr.dynamx.common.entities.modules.WheelsModule} <br>
+     * Float properties stored in all {@link WheelsModule} <br>
      * One wheel has all of these properties
      */
     public enum EnumVisualProperties {
@@ -51,7 +52,7 @@ public class VehicleEntityProperties {
     }
 
     /**
-     * Returns the index of a wheel visual property in the visualProperties array, for {@link fr.dynamx.common.entities.modules.WheelsModule}
+     * Returns the index of a wheel visual property in the visualProperties array, for {@link WheelsModule}
      *
      * @param partIndex            The wheel id
      * @param enumVisualProperties The visual property
@@ -62,7 +63,7 @@ public class VehicleEntityProperties {
     }
 
     /**
-     * Returns a property from its index in the visualProperties array, not depending on the wheel, for {@link fr.dynamx.common.entities.modules.WheelsModule}
+     * Returns a property from its index in the visualProperties array, not depending on the wheel, for {@link WheelsModule}
      *
      * @param index The property index in the visualProperties array
      * @return The property
@@ -72,7 +73,7 @@ public class VehicleEntityProperties {
     }
 
     /**
-     * Adds a visual property, each wheel of each {@link fr.dynamx.common.entities.modules.WheelsModule} will contain this property, and it will be automatically synced over the network
+     * Adds a visual property, each wheel of each {@link WheelsModule} will contain this property, and it will be automatically synced over the network
      *
      * @param name              The property name, should be unique (add your modid)
      * @param interpolationType The interpolation type for sync : 0 = linear interpolation, 1 = angular interpolation

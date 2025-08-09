@@ -1,9 +1,9 @@
 package fr.dynamx.api.entities;
 
-import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.entities.PackPhysicsEntity;
-import fr.dynamx.common.entities.modules.DoorsModule;
-import fr.dynamx.common.entities.modules.SeatsModule;
+import fr.dynamx.core.common.entities.BaseVehicleEntity;
+import fr.dynamx.core.common.entities.PackPhysicsEntity;
+import fr.dynamx.core.common.entities.modules.DoorsModule;
+import fr.dynamx.core.common.entities.modules.SeatsModule;
 
 import javax.annotation.Nullable;
 

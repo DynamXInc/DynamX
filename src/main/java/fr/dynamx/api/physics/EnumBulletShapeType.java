@@ -1,8 +1,9 @@
 package fr.dynamx.api.physics;
 
-import fr.dynamx.common.entities.BaseVehicleEntity;
-import fr.dynamx.common.physics.entities.AbstractEntityPhysicsHandler;
-import fr.dynamx.common.physics.player.PlayerPhysicsHandler;
+import fr.dynamx.core.common.entities.BaseVehicleEntity;
+import fr.dynamx.core.common.physics.entities.AbstractEntityPhysicsHandler;
+import fr.dynamx.core.common.physics.player.PlayerPhysicsHandler;
+import fr.dynamx.core.common.physics.terrain.element.CompoundBoxTerrainElement;
 
 /**
  * Bullet shape types are used in {@link BulletShapeType} class <br>
@@ -11,7 +12,7 @@ import fr.dynamx.common.physics.player.PlayerPhysicsHandler;
  *     <li>VEHICLE : a vehicle, as {@link BaseVehicleEntity}</li>
  *     <li>TEST : used for testing, has no specific behavior</li>
  *     <li>PLAYER : used for player collision shape, see {@link PlayerPhysicsHandler}</li>
- *     <li>TERRAIN : used for terrain shape, see {@link fr.dynamx.common.physics.terrain.element.CompoundBoxTerrainElement}</li>
+ *     <li>TERRAIN : used for terrain shape, see {@link CompoundBoxTerrainElement}</li>
  *     <li>SLOPE : used for terrain shape, see {@link fr.dynamx.common.physics.terrain.element.SlopeTerrainElement}</li>
  *     <li>BULLET_ENTITY : used for non-vehicle entities, see {@link AbstractEntityPhysicsHandler}</li>
  * </ul>

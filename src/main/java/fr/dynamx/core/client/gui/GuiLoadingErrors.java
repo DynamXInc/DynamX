@@ -1,0 +1,206 @@
+package fr.dynamx.core.client.gui;
+
+import fr.aym.acsguis.api.ACsGuiFrame;
+import fr.aym.acsguis.api.GuiAPIClientHelper;
+import fr.aym.acsguis.component.GuiComponent;
+import fr.aym.acsguis.component.layout.GuiScaler;
+import fr.aym.acsguis.component.panel.GuiFrame;
+import fr.aym.acsguis.component.panel.GuiPanel;
+import fr.aym.acsguis.component.panel.GuiScrollPane;
+import fr.aym.acsguis.component.textarea.GuiLabel;
+import fr.aym.acsguis.component.textarea.GuiTextArea;
+import fr.aym.acslib.api.services.error.*;
+import fr.dynamx.core.utils.DynamXConstants;
+import fr.dynamx.core.utils.errors.DynamXErrorManager;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.fml.relauncher.Side;
+
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+
+//TODO CLEAN
+@ACsGuiFrame
+public class GuiLoadingErrors extends GuiFrame {
+    @ACsGuiFrame.RegisteredStyleSheet
+    public static final ResourceLocation STYLE = new ResourceLocation(DynamXConstants.ID, "css/loading_errors.css");
+
+    private final GuiPanel summary;
+    private GuiComponent displayed;
+
+    public GuiLoadingErrors() {
+        super(new GuiScaler.Identity());
+        setCssId("root");
+
+        summary = new GuiScrollPane();
+        summary.setCssId("content-pane");
+        fillSummary(null);
+        summary.setFocused(true);
+        add(summary);
+        DynamXErrorManager.printErrors(Side.CLIENT, ErrorLevel.ADVICE);
+    }
+
+    private void fillSummary(String filter) {
+        summary.removeAllChildren();
+        summary.add(new GuiLabel(TextFormatting.DARK_AQUA + "Errors while loading DynamX and the content packs").getStyleCustomizer().setPaddingLeft(2).setPaddingTop(2).getOwner());
+        summary.add(new GuiLabel(TextFormatting.GRAY + "Click on any category to view it, press escape to go back").getStyleCustomizer().setPaddingLeft(2).setPaddingTop(2).getOwner());
+
+        Map<ResourceLocation, LocatedErrorList> allErrors = DynamXErrorManager.getErrorManager().getAllErrors();
+        if (filter != null)
+            allErrors = allErrors.entrySet().stream().filter(entry ->
+                    entry.getValue().getErrors().stream().anyMatch(error -> (entry.getKey() + "/" + error.getObject()).equals(filter))
+            ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        if (!allErrors.isEmpty()) {
+            /* todo search field
+            List<String> names = new ArrayList<>();
+            allErrors.forEach((location, errorList) -> {
+                errorList.getErrors().forEach(errorData -> names.add(location + "/" + errorData.getObject()));
+            });
+            GuiSearchField2 field = new GuiSearchField2(this::fillSummary, 14, 10) {
+                @Override
+                public List<String> generateAvailableNames() {
+                    return names.stream().distinct().collect(Collectors.toList());
+                }
+            };
+            field.setCssId("search_field");
+            summary.add(field);*/
+
+            allErrors.entrySet().stream().sorted(Comparator.comparingInt(e -> -e.getValue().getHighestErrorLevel().ordinal())).forEachOrdered(entry -> {
+                LocatedErrorList locatedErrorList = entry.getValue();
+                StringBuilder title = new StringBuilder(locatedErrorList.getHighestErrorLevel().color.toString() + entry.getKey() + " : ");
+                long fatals = locatedErrorList.getErrors().stream().filter(er -> er.getLevel() == ErrorLevel.FATAL).count();
+                if (fatals > 0)
+                    title.append(ErrorLevel.FATAL.color.toString()).append(fatals).append(" fatal error(s) ");
+                fatals = locatedErrorList.getErrors().stream().filter(er -> er.getLevel() == ErrorLevel.HIGH).count();
+                if (fatals > 0)
+                    title.append(ErrorLevel.HIGH.color.toString()).append(fatals).append(" error(s) ");
+                fatals = locatedErrorList.getErrors().stream().filter(er -> er.getLevel() == ErrorLevel.LOW).count();
+                if (fatals > 0)
+                    title.append(ErrorLevel.LOW.color.toString()).append(fatals).append(" warning(s) ");
+                fatals = locatedErrorList.getErrors().stream().filter(er -> er.getLevel() == ErrorLevel.ADVICE).count();
+                if (fatals > 0)
+                    title.append(ErrorLevel.ADVICE.color.toString()).append(fatals).append(" advice(s)");
+                summary.add(new GuiLabel("+ " + title).getStyleCustomizer().setPaddingLeft(2).setPaddingTop(2).getOwner().setCssId("label-closed").addClickListener((x, y, b) ->
+                        showErrors(false, new ArrayList<>(), entry.getKey(), locatedErrorList)
+                ));
+            });
+        } else {
+            summary.add(new GuiLabel("No error found here"));
+        }
+    }
+
+    private void setDeployed(GuiTextArea label, String object, List<ErrorData> errorListPerObject, boolean deploy) {
+        label.setMaxTextLength(50000);
+        StringBuilder title = new StringBuilder(object + " : ");
+        int height = 20;
+        if (deploy) {
+            final StringBuilder text = new StringBuilder("- " + title + "\n");
+            int length = text.length();
+            for (int j = 0; j < length - 3; j++) {
+                text.append('-');
+            }
+            text.append('\n');
+            Map<String, List<ErrorData>> errorsPerType = ErrorManagerService.groupBy(errorListPerObject, ErrorData::getGenericType);
+            errorsPerType.forEach(((s2, errorListPerType) -> {
+                errorListPerType.sort(ErrorManagerService.ERROR_COMPARATOR);
+                ErrorData errorType = errorListPerType.get(0);
+                text.append("\n");
+                text.append(errorType.getLevel().color).append("==> Level: ").append(errorType.getLevel()).append("\n").append(TextFormatting.LIGHT_PURPLE);
+                ErrorFormatter formatter = errorType.getCategory().getErrorFormatter(s2);
+                formatter.formatError(text, false, errorListPerType);
+            }));
+            label.setText(text.toString());
+            label.setCssId("label-deployed");
+            height = mc.fontRenderer.FONT_HEIGHT * GuiAPIClientHelper.trimTextToWidth(text.toString(), (int) getWidth(), -1).size() + 10;
+        } else {
+            long fatals = errorListPerObject.stream().filter(er -> er.getLevel() == ErrorLevel.FATAL).count();
+            if (fatals > 0)
+                title.append(ErrorLevel.FATAL.color.toString()).append(fatals).append(" fatal error(s) ");
+            fatals = errorListPerObject.stream().filter(er -> er.getLevel() == ErrorLevel.HIGH).count();
+            if (fatals > 0)
+                title.append(ErrorLevel.HIGH.color.toString()).append(fatals).append(" error(s) ");
+            fatals = errorListPerObject.stream().filter(er -> er.getLevel() == ErrorLevel.LOW).count();
+            if (fatals > 0)
+                title.append(ErrorLevel.LOW.color.toString()).append(fatals).append(" warning(s) ");
+            fatals = errorListPerObject.stream().filter(er -> er.getLevel() == ErrorLevel.ADVICE).count();
+            if (fatals > 0)
+                title.append(ErrorLevel.ADVICE.color.toString()).append(fatals).append(" advice(s)");
+            label.setText("+ " + TextFormatting.GREEN + title);
+            label.setCssId("label-closed");
+        }
+        label.getStyleCustomizer().setHeight(height);
+    }
+
+    private void showErrors(boolean deployAll, List<Integer> deployObjs, ResourceLocation location, LocatedErrorList locatedErrorList) {
+        if (displayed != null)
+            remove(displayed);
+        else
+            remove(summary);
+        GuiPanel errorsPanel = new GuiScrollPane();
+        errorsPanel.setCssId("content-pane");
+        errorsPanel.add(new GuiLabel(TextFormatting.DARK_AQUA + "Errors while loading " + location).getStyleCustomizer().setPaddingLeft(2).setPaddingTop(2).getOwner());
+        errorsPanel.add(new GuiLabel(TextFormatting.GRAY + "Click on any category to view it, press escape to go back").getStyleCustomizer().setPaddingLeft(2).setPaddingTop(2).getOwner());
+        errorsPanel.add(new GuiLabel(TextFormatting.GRAY + "  -> Show all").setCssId("label-closed").addClickListener((x, y, b) ->
+                showErrors(!deployAll, new ArrayList<>(), location, locatedErrorList)
+        ));
+
+        AtomicInteger i = new AtomicInteger();
+        Collection<ErrorData> errorList = locatedErrorList.getErrors();
+        Map<String, List<ErrorData>> errorsPerObject = ErrorManagerService.groupBy(errorList, ErrorData::getObject);
+        errorsPerObject.forEach((s1, errorListPerObject) -> {
+            int id = i.get();
+            GuiTextArea label = new GuiLabel("");
+            label.setEditable(false);
+            setDeployed(label, s1, errorListPerObject, deployAll != deployObjs.contains(id));
+            errorsPanel.add(label.getStyleCustomizer().setPaddingLeft(2).setPaddingTop(2).getOwner().addClickListener((x, y, b) -> {
+                if (deployObjs.contains(id))
+                    deployObjs.remove((Integer) id);
+                else
+                    deployObjs.add(id);
+                setDeployed(label, s1, errorListPerObject, deployAll != deployObjs.contains(id));
+                errorsPanel.getLayout().clear();
+                errorsPanel.getStyle().refreshStyle();
+            }));
+            i.getAndIncrement();
+        });
+        errorsPanel.add(new GuiLabel(TextFormatting.DARK_AQUA + "  <- Go back").setCssId("label-closed").addClickListener((x, y, b) ->
+                goBack()
+        ));
+        displayed = errorsPanel;
+        errorsPanel.setFocused(true);
+        add(errorsPanel.getStyleCustomizer().setForegroundColor(0x88FF88).setBackgroundColor(0xDD222222).getOwner());
+    }
+
+    @Override
+    public void onKeyTyped(char typedChar, int keyCode) {
+        if (keyCode == 1) {
+            if (displayed != null) {
+                goBack();
+            } else if (mc.world != null) {
+                mc.displayGuiScreen(new NewGuiDnxDebug().getGuiScreen());
+            } else {
+                mc.displayGuiScreen(null);
+            }
+        } else {
+            super.onKeyTyped(typedChar, keyCode);
+        }
+    }
+
+    private void goBack() {
+        remove(displayed);
+        add(summary);
+        summary.setFocused(true);
+        displayed = null;
+    }
+
+    @Override
+    public List<ResourceLocation> getCssStyles() {
+        return Collections.singletonList(STYLE);
+    }
+
+    @Override
+    public boolean usesDefaultStyle() {
+        return false;
+    }
+}

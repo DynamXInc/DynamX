@@ -1,11 +1,8 @@
 package fr.dynamx.api.events.client;
 
 import fr.dynamx.api.events.EventPhase;
-import fr.dynamx.client.renders.model.ModelObjArmor;
-import fr.dynamx.client.renders.model.renderer.DxModelRenderer;
-import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
-import fr.dynamx.client.renders.scene.BaseRenderContext;
-import fr.dynamx.client.renders.scene.node.SceneNode;
+import fr.dynamx.core.client.renders.scene.BaseRenderContext;
+import fr.dynamx.core.client.renders.scene.node.SceneNode;
 import lombok.Getter;
 import net.minecraftforge.fml.common.eventhandler.Cancelable;
 import net.minecraftforge.fml.common.eventhandler.Event;

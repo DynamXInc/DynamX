@@ -1,9 +1,10 @@
 package fr.dynamx.api.dxmodel;
 
 import fr.dynamx.api.contentpack.object.INamedObject;
-import fr.dynamx.client.renders.model.renderer.ObjObjectRenderer;
-import fr.dynamx.client.renders.model.texture.TextureVariantData;
-import fr.dynamx.common.objloader.data.ObjObjectData;
+import fr.dynamx.core.client.renders.model.renderer.ObjObjectRenderer;
+import fr.dynamx.core.client.renders.model.texture.TextureVariantData;
+import fr.dynamx.core.common.objloader.data.ObjObjectData;
+import fr.dynamx.core.client.renders.model.renderer.ObjModelRenderer;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -11,7 +12,7 @@ import java.util.Map;
 /**
  * Matches an {@link ObjObjectData} with its available textures
  *
- * @see fr.dynamx.client.renders.model.renderer.ObjModelRenderer
+ * @see ObjModelRenderer
  */
 public interface IModelTextureVariantsSupplier extends INamedObject {
     default IModelTextureVariants getMainObjectVariants() {

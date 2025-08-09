@@ -42,7 +42,7 @@ import de.javagl.jgltf.dynamx.model.io.IO;
 import de.javagl.jgltf.dynamx.model.io.v2.GltfAssetV2;
 import de.javagl.jgltf.dynamx.model.v2.MaterialModelV2.AlphaMode;
 import de.javagl.jgltf.dynamx.model.v2.gl.Materials;
-import fr.dynamx.common.contentpack.PackInfo;
+import fr.dynamx.core.common.contentpack.PackInfo;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 

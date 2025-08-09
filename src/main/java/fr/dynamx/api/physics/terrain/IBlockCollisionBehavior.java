@@ -1,9 +1,9 @@
 package fr.dynamx.api.physics.terrain;
 
-import fr.dynamx.common.physics.terrain.computing.BlockCollisionBehaviors;
-import fr.dynamx.common.physics.terrain.computing.TerrainBoxBuilder;
-import fr.dynamx.common.physics.terrain.computing.TerrainBoxConstructor;
-import fr.dynamx.common.physics.terrain.computing.TerrainCollisionsCalculator;
+import fr.dynamx.core.common.physics.terrain.computing.BlockCollisionBehaviors;
+import fr.dynamx.core.common.physics.terrain.computing.TerrainBoxBuilder;
+import fr.dynamx.core.common.physics.terrain.computing.TerrainBoxConstructor;
+import fr.dynamx.core.common.physics.terrain.computing.TerrainCollisionsCalculator;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;

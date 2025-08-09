@@ -1,12 +1,12 @@
 package fr.dynamx.api.physics.terrain;
 
-import fr.dynamx.common.physics.terrain.cache.FileTerrainCache;
-import fr.dynamx.common.physics.terrain.chunk.ChunkCollisions;
-import fr.dynamx.common.physics.terrain.chunk.ChunkLoadingTicket;
-import fr.dynamx.common.physics.terrain.chunk.ChunkTerrain;
-import fr.dynamx.common.physics.terrain.element.TerrainElementType;
-import fr.dynamx.utils.VerticalChunkPos;
-import fr.dynamx.utils.debug.Profiler;
+import fr.dynamx.core.common.physics.terrain.cache.FileTerrainCache;
+import fr.dynamx.core.common.physics.terrain.chunk.ChunkCollisions;
+import fr.dynamx.core.common.physics.terrain.chunk.ChunkLoadingTicket;
+import fr.dynamx.core.common.physics.terrain.chunk.ChunkTerrain;
+import fr.dynamx.core.common.physics.terrain.element.TerrainElementType;
+import fr.dynamx.core.utils.VerticalChunkPos;
+import fr.dynamx.core.utils.debug.Profiler;
 
 import javax.annotation.Nullable;
 import java.util.concurrent.CompletableFuture;

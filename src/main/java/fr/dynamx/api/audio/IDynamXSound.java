@@ -1,6 +1,6 @@
 package fr.dynamx.api.audio;
 
-import fr.dynamx.client.sound.DynamXSoundHandler;
+import fr.dynamx.core.client.sound.DynamXSoundHandler;
 
 /**
  * Pattern for DynamXSound, used in {@link DynamXSoundHandler} <br>

@@ -1,7 +1,7 @@
 package fr.dynamx.api.dxmodel;
 
 import fr.dynamx.api.contentpack.object.INamedObject;
-import fr.dynamx.common.contentpack.PackInfo;
+import fr.dynamx.core.common.contentpack.PackInfo;
 import lombok.Getter;
 import net.minecraft.util.ResourceLocation;
 

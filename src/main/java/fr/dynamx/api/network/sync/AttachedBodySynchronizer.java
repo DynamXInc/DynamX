@@ -1,12 +1,13 @@
 package fr.dynamx.api.network.sync;
 
-import fr.dynamx.common.physics.utils.RigidBodyTransform;
-import fr.dynamx.common.physics.utils.SynchronizedRigidBodyTransform;
+import fr.dynamx.core.common.physics.utils.RigidBodyTransform;
+import fr.dynamx.core.common.physics.utils.SynchronizedRigidBodyTransform;
+import fr.dynamx.core.common.network.sync.variables.EntityTransformsVariable;
 
 import java.util.Map;
 
 /**
- * Handles sync of attached bodies, via the {@link fr.dynamx.common.network.sync.variables.EntityTransformsVariable}
+ * Handles sync of attached bodies, via the {@link EntityTransformsVariable}
  */
 public interface AttachedBodySynchronizer {
     /**

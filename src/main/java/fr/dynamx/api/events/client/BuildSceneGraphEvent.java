@@ -4,13 +4,15 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IPhysicsPackInfo;
 import fr.dynamx.api.contentpack.object.part.IDrawablePart;
 import fr.dynamx.api.contentpack.object.render.IModelPackObject;
-import fr.dynamx.client.renders.scene.BaseRenderContext;
-import fr.dynamx.client.renders.scene.IRenderContext;
-import fr.dynamx.client.renders.scene.SceneBuilder;
-import fr.dynamx.client.renders.scene.node.SceneNode;
-import fr.dynamx.common.contentpack.type.objects.ArmorObject;
-import fr.dynamx.common.contentpack.type.objects.BlockObject;
-import fr.dynamx.common.contentpack.type.objects.ItemObject;
+import fr.dynamx.core.client.renders.scene.BaseRenderContext;
+import fr.dynamx.core.client.renders.scene.IRenderContext;
+import fr.dynamx.core.client.renders.scene.SceneBuilder;
+import fr.dynamx.core.client.renders.scene.node.SceneNode;
+import fr.dynamx.core.common.contentpack.type.objects.ArmorObject;
+import fr.dynamx.core.common.contentpack.type.objects.BlockObject;
+import fr.dynamx.core.common.contentpack.type.objects.ItemObject;
+import fr.dynamx.core.common.contentpack.type.objects.PropObject;
+import fr.dynamx.core.common.contentpack.type.vehicle.ModularVehicleInfo;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -82,7 +84,7 @@ public abstract class BuildSceneGraphEvent<C extends IRenderContext, A extends I
     }
 
     /**
-     * Fired when creating the {@link SceneNode} of a pack info ({@link fr.dynamx.common.contentpack.type.vehicle.ModularVehicleInfo} or {@link fr.dynamx.common.contentpack.type.objects.PropObject} for eample) <br>
+     * Fired when creating the {@link SceneNode} of a pack info ({@link ModularVehicleInfo} or {@link PropObject} for eample) <br>
      * This event can be used to override the scene graph of a pack info, or edit its drawable parts before creating the scene graph <br>
      * This event is fired before the {@link CreatePartSceneEvent} event
      */
@@ -102,7 +104,7 @@ public abstract class BuildSceneGraphEvent<C extends IRenderContext, A extends I
     }
 
     /**
-     * Fired when creating the {@link SceneNode} of a block ({@link fr.dynamx.common.contentpack.type.objects.BlockObject} <br>
+     * Fired when creating the {@link SceneNode} of a block ({@link BlockObject} <br>
      * This event can be used to override the scene graph of a block, or edit its drawable parts before creating the scene graph <br>
      * This event is fired before the {@link CreatePartSceneEvent} event
      */
@@ -122,7 +124,7 @@ public abstract class BuildSceneGraphEvent<C extends IRenderContext, A extends I
     }
 
     /**
-     * Fired when creating the {@link SceneNode} of an armor ({@link fr.dynamx.common.contentpack.type.objects.ArmorObject} <br>
+     * Fired when creating the {@link SceneNode} of an armor ({@link ArmorObject} <br>
      * This event can be used to override the scene graph of an armor, or edit its drawable parts before creating the scene graph <br>
      * This event is fired before the {@link CreatePartSceneEvent} event
      */
@@ -142,7 +144,7 @@ public abstract class BuildSceneGraphEvent<C extends IRenderContext, A extends I
     }
 
     /**
-     * Fired when creating the {@link SceneNode} of an item ({@link fr.dynamx.common.contentpack.type.objects.ItemObject} <br>
+     * Fired when creating the {@link SceneNode} of an item ({@link ItemObject} <br>
      * This event can be used to override the scene graph of an item, or edit its drawable parts before creating the scene graph <br>
      * This event is fired before the {@link CreatePartSceneEvent} event
      */

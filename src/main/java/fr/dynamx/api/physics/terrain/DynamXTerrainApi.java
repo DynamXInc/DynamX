@@ -1,6 +1,6 @@
 package fr.dynamx.api.physics.terrain;
 
-import fr.dynamx.common.physics.terrain.computing.TerrainCollisionsCalculator;
+import fr.dynamx.core.common.physics.terrain.computing.TerrainCollisionsCalculator;
 import lombok.Getter;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;

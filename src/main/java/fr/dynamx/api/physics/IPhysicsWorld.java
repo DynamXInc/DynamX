@@ -6,9 +6,9 @@ import com.jme3.bullet.joints.PhysicsJoint;
 import com.jme3.bullet.objects.PhysicsVehicle;
 import fr.dynamx.api.events.PhysicsEvent;
 import fr.dynamx.api.physics.terrain.ITerrainManager;
-import fr.dynamx.common.entities.PhysicsEntity;
-import fr.dynamx.common.physics.terrain.PhysicsWorldTerrain;
-import fr.dynamx.common.physics.utils.PhysicsWorldOperation;
+import fr.dynamx.core.common.entities.PhysicsEntity;
+import fr.dynamx.core.common.physics.terrain.PhysicsWorldTerrain;
+import fr.dynamx.core.common.physics.utils.PhysicsWorldOperation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 

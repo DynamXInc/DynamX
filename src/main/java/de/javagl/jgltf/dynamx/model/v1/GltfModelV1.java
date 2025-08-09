@@ -39,7 +39,7 @@ import de.javagl.jgltf.dynamx.model.gl.impl.DefaultShaderModel;
 import de.javagl.jgltf.dynamx.model.gl.impl.DefaultTechniqueModel;
 import de.javagl.jgltf.dynamx.model.impl.DefaultGltfModel;
 import de.javagl.jgltf.dynamx.model.io.v1.GltfAssetV1;
-import fr.dynamx.common.contentpack.PackInfo;
+import fr.dynamx.core.common.contentpack.PackInfo;
 import net.minecraft.util.ResourceLocation;
 
 import java.util.*;

@@ -33,7 +33,7 @@ import java.util.List;
  */
 @Getter
 @Setter
-@RegisteredSubInfoType(name = "steeringwheel", registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
+@RegisteredSubInfoType(name = "steeringwheel", registries = SubInfoTypeRegistries.WHEELED_VEHICLES, strictName = false)
 public class SteeringWheelInfo extends BasePart<ModularVehicleInfo> implements IDrawablePart<ModularVehicleInfo> {
     @IPackFilePropertyFixer.PackFilePropertyFixer(registries = SubInfoTypeRegistries.WHEELED_VEHICLES)
     public static final IPackFilePropertyFixer PROPERTY_FIXER = (object, key, value) -> {
@@ -47,8 +47,8 @@ public class SteeringWheelInfo extends BasePart<ModularVehicleInfo> implements I
     @PackFileProperty(configNames = {"Rotation", "BaseRotation", "BaseRotationQuat"}, required = false, defaultValue = "From model", description = "SteeringWheelInfo.Rotation")
     protected Quaternion steeringWheelBaseRotation = null;
 
-    public SteeringWheelInfo(ModularVehicleInfo owner) {
-        super(owner, "steeringwheel");
+    public SteeringWheelInfo(ModularVehicleInfo owner, String partName) {
+        super(owner, partName);
     }
 
     @Override
@@ -66,12 +66,12 @@ public class SteeringWheelInfo extends BasePart<ModularVehicleInfo> implements I
 
     @Override
     public String getNodeName() {
-        return getName();
+        return getPartName();
     }
 
     @Override
     public String getName() {
-        return "SteeringWheel";
+        return "Steering wheel named " + getPartName() + " in " + getOwner().getName();
     }
 
     class SteeringWheelNode<A extends ModularVehicleInfo> extends SimpleNode<BaseRenderContext.EntityRenderContext, A> {

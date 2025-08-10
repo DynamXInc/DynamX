@@ -42,7 +42,6 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.culling.ICamera;
-import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -332,7 +331,7 @@ public class ClientEventHandler {
         }
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public void renderWorldLast(RenderWorldLastEvent event) {
         double partialTicks = event.getPartialTicks();
 
@@ -364,7 +363,7 @@ public class ClientEventHandler {
             }
         }
         if (!isRenderingEntitiesWithOptifineShaders) {
-            renderBigEntities((float) partialTicks);
+            renderBigEntities((float) partialTicks, true);
         } else {
             isRenderingEntitiesWithOptifineShaders = false;
         }
@@ -387,8 +386,9 @@ public class ClientEventHandler {
      * It renders all the DynamX entities that weren't rendered by the normal renderer, but are in the camera frustum and SHOULD be rendered
      *
      * @param partialTicks The partial render ticks
+     * @param isRenderWorldLast Applies adapted lighting
      */
-    public static void renderBigEntities(float partialTicks) {
+    public static void renderBigEntities(float partialTicks, boolean isRenderWorldLast) {
         boolean setup = false;
         Entity entity = MC.getRenderViewEntity();
         if (entity == null) {
@@ -406,8 +406,10 @@ public class ClientEventHandler {
             }
             if (!setup) {
                 GlStateManager.pushMatrix();
-                RenderHelper.enableStandardItemLighting();
-                MC.entityRenderer.enableLightmap();
+                if (isRenderWorldLast) {
+                    RenderHelper.enableStandardItemLighting();
+                    MC.entityRenderer.enableLightmap();
+                }
                 icamera = new Frustum();
 
                 d0 = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks;
@@ -429,8 +431,10 @@ public class ClientEventHandler {
             }
         }
         if (setup) {
-            MC.entityRenderer.disableLightmap();
-            RenderHelper.disableStandardItemLighting();
+            if (isRenderWorldLast) {
+                MC.entityRenderer.disableLightmap();
+                RenderHelper.disableStandardItemLighting();
+            }
             GlStateManager.popMatrix();
         }
     }

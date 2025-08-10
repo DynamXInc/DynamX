@@ -53,7 +53,7 @@ public abstract class MixinRenderGlobal {
     private void postRenderEntities(Entity renderViewEntity, ICamera camera, float partialTicks, CallbackInfo ci) {
         int renderPass = MinecraftForgeClient.getRenderPass();
         if (renderPass == 0) {
-            ClientEventHandler.renderBigEntities(partialTicks);
+            ClientEventHandler.renderBigEntities(partialTicks, false);
             ClientEventHandler.isRenderingEntitiesWithOptifineShaders = true;
         }
     }

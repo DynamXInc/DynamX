@@ -43,19 +43,12 @@ public class DynamXCoreMod implements IFMLLoadingPlugin {
     @Override
     public void injectData(Map<String, Object> data) {
         StatsBotCorePlugin.runtimeDeobfuscationEnabled = (Boolean) data.get("runtimeDeobfuscationEnabled");
+
+        LibraryInstaller.configureSsslContext();
+
         if (StatsBotCorePlugin.runtimeDeobfuscationEnabled) { //Production
-            SSLContext sslContext;
-            if (DynamXConstants.DYNAMX_CERT != null || DynamXConstants.DYNAMX_AUX_CERT != null) { // && SSLHelper.shouldInstallCert())
-                sslContext = SSLHelper.createCustomSSLContext(DynamXConstants.DYNAMX_CERT, DynamXConstants.DYNAMX_AUX_CERT);
-            } else {
-                try {
-                    sslContext = SSLContext.getDefault();
-                } catch (NoSuchAlgorithmException e) {
-                    throw new RuntimeException("SSLContext error", e);
-                }
-            }
             LOG.info("Checking ACsGuis installation...");
-            if (!LibraryInstaller.loadACsGuis(LOG, sslContext, new File("mods"), DynamXConstants.DEFAULT_ACSGUIS_VERSION)) {
+            if (!LibraryInstaller.loadACsGuis(LOG, new File("mods"), DynamXConstants.DEFAULT_ACSGUIS_VERSION)) {
                 LOG.fatal("ACsGuis library cannot be found or installed !");
             }
         } else {

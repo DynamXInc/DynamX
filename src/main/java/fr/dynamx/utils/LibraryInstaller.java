@@ -1,5 +1,7 @@
 package fr.dynamx.utils;
 
+import fr.aym.mps.utils.SSLHelper;
+import lombok.Setter;
 import org.apache.logging.log4j.Logger;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -7,15 +9,13 @@ import javax.net.ssl.SSLContext;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.NoSuchAlgorithmException;
 
 public class LibraryInstaller {
+    @Setter
     private static SSLContext dynamXSSLContext;
 
-    /**
-     *
-     */
-    public static boolean loadACsGuis(Logger logger, SSLContext dynamXSSLContext, File directory, String defaultACsGuisVersion) {
-        LibraryInstaller.dynamXSSLContext = dynamXSSLContext;
+    public static boolean loadACsGuis(Logger logger, File directory, String defaultACsGuisVersion) {
         File file = new File(directory, "ACsGuis-" + defaultACsGuisVersion + ".jar");
         String absoluteFilename = file.getAbsolutePath();
         boolean success = false;
@@ -78,5 +78,17 @@ public class LibraryInstaller {
             throw new IllegalStateException("SSLContext not initialized");
         }
         return dynamXSSLContext;
+    }
+
+    public static void configureSsslContext() {
+        if (DynamXConstants.DYNAMX_CERT != null || DynamXConstants.DYNAMX_AUX_CERT != null) { // && SSLHelper.shouldInstallCert())
+            dynamXSSLContext = SSLHelper.createCustomSSLContext(DynamXConstants.DYNAMX_CERT, DynamXConstants.DYNAMX_AUX_CERT);
+        } else {
+            try {
+                dynamXSSLContext = SSLContext.getDefault();
+            } catch (NoSuchAlgorithmException e) {
+                throw new RuntimeException("SSLContext error", e);
+            }
+        }
     }
 }

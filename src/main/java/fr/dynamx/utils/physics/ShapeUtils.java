@@ -26,6 +26,7 @@ import vhacd.VHACDParameters;
 
 import java.io.*;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.zip.*;
@@ -78,8 +79,8 @@ public class ShapeUtils {
             File file = new File(modelPath.replace(format, "_" + lowerCaseObjectName + "_" + DynamXConstants.DC_FILE_VERSION + ".dc"));
 
             float[] pos = lowerCaseObjectName.isEmpty() ? model.getVerticesPos() : model.getVerticesPos(lowerCaseObjectName);
-            int[] indices = lowerCaseObjectName.isEmpty() ? model.getAllMeshIndices() : model.getMeshIndices(lowerCaseObjectName);
-            if (pos.length == 0 || indices.length == 0) {
+            IntBuffer indices = lowerCaseObjectName.isEmpty() ? model.getAllMeshIndices() : model.getMeshIndices(lowerCaseObjectName);
+            if (pos.length == 0 || indices.capacity() == 0) {
                 throw new IllegalArgumentException("Part '" + objectName + "' of '" + path + "' does not exist or is empty. Check the name of the part in the obj file.");
             }
 
@@ -248,11 +249,14 @@ public class ShapeUtils {
     }
 
     public static class ShapeGenerator implements Serializable {
+        //For .dc save, don't touch !
+        private static final long serialVersionUID = -8635979585463792283L;
 
         public List<float[]> points = new ArrayList<>();
 
-        public ShapeGenerator(float[] positions, int[] indices, VHACDParameters params) {
-            List<VHACDHull> hullList = VHACD.compute(positions, indices, params);
+        public ShapeGenerator(float[] positions, IntBuffer indices, VHACDParameters params) {
+            //FIXME THE indices.array() IS VERY BAD BECAUSE IT'S CONVERTED BACK TO A BUFFER IN VHACDHull
+            List<VHACDHull> hullList = VHACD.compute(positions, indices.array(), params);
             hullList.forEach(hull -> points.add(hull.clonePositions()));
         }
 

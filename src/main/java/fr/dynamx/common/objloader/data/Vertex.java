@@ -15,7 +15,4 @@ public class Vertex {
     private final Vector2f texCoords;
     @Getter
     private final Vector3f normal;
-    @Getter
-    private final Vector3f tangent;
-
 }

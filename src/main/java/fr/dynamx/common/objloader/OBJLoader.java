@@ -8,9 +8,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IResource;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
+import org.lwjgl.BufferUtils;
 
 import javax.vecmath.Vector2f;
 import javax.vecmath.Vector3f;
+import java.nio.IntBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -155,6 +157,10 @@ public class OBJLoader {
                 indices = result.getObjIndices();
                 map.put(object, result);
                 object.setCenter(result.computeCenter());
+
+                IntBuffer indicesBuffer = BufferUtils.createIntBuffer(indices.size());
+                IntBuffer normalsIndicesBuffer = BufferUtils.createIntBuffer(indices.size());
+
                 for (IndexedModel.OBJIndex current : indices) {
                     Vector3f pos = positions.get(current.positionIndex);
                     Vector2f texCoord = hasTexCoords && location != null ? texCoords.get(current.texCoordsIndex) : new Vector2f();
@@ -167,9 +173,9 @@ public class OBJLoader {
 
                         result.getVertices().add(pos);
                         result.getTexCoords().add(texCoord);
-                        if (hasNormals)
+                        if (hasNormals) {
                             result.getNormals().add(normal);
-                        result.getTangents().add(new Vector3f());
+                        }
                     }
 
                     int normalModelIndex = normalIndexMap.getOrDefault(current.positionIndex, -1);
@@ -181,13 +187,16 @@ public class OBJLoader {
                         normalModel.getVertices().add(pos);
                         normalModel.getTexCoords().add(texCoord);
                         normalModel.getNormals().add(normal);
-                        normalModel.getTangents().add(new Vector3f());
                     }
 
-                    result.getIndices().add(modelVertexIndex);
-                    normalModel.getIndices().add(normalModelIndex);
+                    indicesBuffer.put(modelVertexIndex);
+                    normalsIndicesBuffer.put(normalModelIndex);
+
                     indexMap.put(modelVertexIndex, normalModelIndex);
                 }
+
+                indicesBuffer.flip();
+                result.setIndices(indicesBuffer);
 
                 if (!hasNormals) {
                     normalModel.computeNormals();

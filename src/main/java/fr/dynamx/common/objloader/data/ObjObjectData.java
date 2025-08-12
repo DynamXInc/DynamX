@@ -2,9 +2,12 @@ package fr.dynamx.common.objloader.data;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.lwjgl.BufferUtils;
 
 import javax.annotation.Nullable;
 import javax.vecmath.Vector3f;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,7 +20,7 @@ public class ObjObjectData{
 
     @Getter
     @Setter
-    private int[] indices;
+    private IntBuffer indices;
     @Getter
     @Setter
     private Vertex[] vertices;
@@ -39,31 +42,31 @@ public class ObjObjectData{
                 '}';
     }
 
-    public float[] getVerticesPos() {
-        float[] pos = new float[vertices.length * 3];
-        for (int i = 0; i < vertices.length; i++) {
-            pos[i * 3] = vertices[i].getPos().x;
-            pos[i * 3 + 1] = vertices[i].getPos().y;
-            pos[i * 3 + 2] = vertices[i].getPos().z;
+    public FloatBuffer getVerticesPos() {
+        FloatBuffer pos = BufferUtils.createFloatBuffer(vertices.length * 3);
+        for (Vertex vertex : vertices) {
+            pos.put(vertex.getPos().x);
+            pos.put(vertex.getPos().y);
+            pos.put(vertex.getPos().z);
         }
         return pos;
     }
 
-    public float[] getVerticesNormals() {
-        float[] pos = new float[vertices.length * 3];
-        for (int i = 0; i < vertices.length; i++) {
-            pos[i * 3] = vertices[i].getNormal().x;
-            pos[i * 3 + 1] = vertices[i].getNormal().y;
-            pos[i * 3 + 2] = vertices[i].getNormal().z;
+    public FloatBuffer getVerticesNormals() {
+        FloatBuffer pos = BufferUtils.createFloatBuffer(vertices.length * 3);
+        for (Vertex vertex : vertices) {
+            pos.put(vertex.getNormal().x);
+            pos.put(vertex.getNormal().y);
+            pos.put(vertex.getNormal().z);
         }
         return pos;
     }
 
-    public float[] getTextureCoords() {
-        float[] pos = new float[vertices.length * 2];
-        for (int i = 0; i < vertices.length; i++) {
-            pos[i * 2] = vertices[i].getTexCoords().x;
-            pos[i * 2 + 1] = 1 - vertices[i].getTexCoords().y;
+    public FloatBuffer getTextureCoords() {
+        FloatBuffer pos = BufferUtils.createFloatBuffer(vertices.length * 3);
+        for (Vertex vertex : vertices) {
+            pos.put(vertex.getTexCoords().x);
+            pos.put(vertex.getTexCoords().y);
         }
         return pos;
     }

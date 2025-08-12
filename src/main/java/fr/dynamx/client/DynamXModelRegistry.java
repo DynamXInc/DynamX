@@ -183,10 +183,10 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
                 /* == Load textures == */
                 List<Callable<?>> loadTexturesTasks = new ArrayList<>();
                 //Obj loader specific
-                OBJLoader.getMtlLoaders().forEach(mtlLoader -> loadTexturesTasks.add(() -> {
+                /*OBJLoader.getMtlLoaders().forEach(mtlLoader -> loadTexturesTasks.add(() -> {
                     mtlLoader.loadTextures();
                     return null;
-                }));
+                }));*/
                 start = System.currentTimeMillis();
                 modelLoader.invokeAll((List) loadTexturesTasks);
                 log.info("Took " + (System.currentTimeMillis() - start) + " ms to load " + loadTexturesTasks.size() + " obj materials");
@@ -222,6 +222,9 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
             synchronized (OBJLoader.getMtlLoaders()) {
                 OBJLoader.getMtlLoaders().forEach(MTLLoader::uploadTextures);
                 OBJLoader.getMtlLoaders().clear();
+
+                System.out.println("Testing a First GC :)");
+                System.gc();
             }
             if (ClientEventHandler.MC.world != null)
                 uploadVAOs();

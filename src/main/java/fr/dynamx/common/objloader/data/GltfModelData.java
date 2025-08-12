@@ -5,9 +5,11 @@ import com.modularmods.mcgltf.dynamx.MCglTF;
 import de.javagl.jgltf.dynamx.model.*;
 import fr.dynamx.api.dxmodel.DxModelPath;
 import lombok.Getter;
+import org.lwjgl.BufferUtils;
 
 import javax.annotation.Nullable;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +60,7 @@ public class GltfModelData extends DxModelData {
     }
 
     @Override
-    public int[] getMeshIndices(String objectName) {
+    public IntBuffer getMeshIndices(String objectName) {
         String objectNameLower = objectName.toLowerCase();
         List<int[]> indicesList = new ArrayList<>();
         int size = 0;
@@ -71,7 +73,7 @@ public class GltfModelData extends DxModelData {
                 for (MeshPrimitiveModel meshPrimitiveModel : meshModel.getMeshPrimitiveModels()) {
                     AccessorModel accessorModel = meshPrimitiveModel.getIndices();
                     if (accessorModel.getComponentType() != 5123) {
-                        return new int[0];
+                        return BufferUtils.createIntBuffer(0);
                     }
                     ShortBuffer shortBuffer = accessorModel.getBufferViewModel().getBufferViewData().asShortBuffer();
                     int[] indices = new int[shortBuffer.limit()];
@@ -84,13 +86,10 @@ public class GltfModelData extends DxModelData {
             }
             break;
         }
-        int[] indices = new int[size];
-        int currentPosition = 0;
-        for (int[] ints : indicesList) {
-            System.arraycopy(ints, 0, indices, currentPosition, ints.length);
-            currentPosition += ints.length;
-        }
-        return indices;
+
+        IntBuffer indicesBuffer = BufferUtils.createIntBuffer(size);
+        indicesList.forEach(indicesBuffer::put);
+        return indicesBuffer;
     }
 
     @Override

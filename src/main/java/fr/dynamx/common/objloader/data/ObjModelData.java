@@ -9,6 +9,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 
 import javax.annotation.Nullable;
+import java.nio.IntBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,7 +57,7 @@ public class ObjModelData extends DxModelData {
     }
 
     @Override
-    public int[] getMeshIndices(String objectName) {
+    public IntBuffer getMeshIndices(String objectName) {
         return getObjObject(objectName).getIndices();
     }
 

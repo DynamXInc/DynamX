@@ -23,6 +23,8 @@ import org.lwjgl.opengl.GL15;
 
 import javax.annotation.Nullable;
 import javax.vecmath.Vector4f;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -235,17 +237,17 @@ public class ObjObjectRenderer {
         DynamXRenderUtils.bindVertexArray(0);
     }
 
-    private int setupIndicesBuffer(int[] indices) {
+    private int setupIndicesBuffer(IntBuffer indices) {
         int vboId = GL15.glGenBuffers();
         GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vboId);
-        GL15.glBufferData(GL15.GL_ELEMENT_ARRAY_BUFFER, DynamXUtils.createIntBuffer(indices), GL15.GL_STATIC_DRAW);
+        GL15.glBufferData(GL15.GL_ELEMENT_ARRAY_BUFFER, indices, GL15.GL_STATIC_DRAW);
         return vboId;
     }
 
-    private int setupArraysPointers(EnumGLPointer glPointer, float[] data) {
+    private int setupArraysPointers(EnumGLPointer glPointer, FloatBuffer data) {
         int vboId = GL15.glGenBuffers();
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboId);
-        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, DynamXUtils.createFloatBuffer(data), GL15.GL_STATIC_DRAW);
+        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, data, GL15.GL_STATIC_DRAW);
         switch (glPointer) {
             case VERTEX:
                 GL11.glVertexPointer(3, GL11.GL_FLOAT, 0, 0);

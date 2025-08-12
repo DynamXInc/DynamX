@@ -20,27 +20,26 @@ public class MaterialTexture {
     private int glTextureId;
 
     public void loadTexture(TextureManager man) {
-        ITextureObject obj = man.getTexture(path);
+        /*ITextureObject obj = man.getTexture(path);
         if (obj == null) {
             //obj = DynamXContext.isOptifineLoaded() ? new OptifineTextureMat(material, path, textureVariantName) : new ThreadedTexture(path);
             obj = new ThreadedTexture(path);
             man.loadTexture(path, obj);
-        }
+        }*/
+        throw new IllegalArgumentException("not now idiot");
     }
 
     public void uploadTexture(TextureManager man) {
         ITextureObject obj = man.getTexture(path);
         if (obj == null) { // happens sometimes o_0
-            loadTexture(man);
-            obj = man.getTexture(path);
+            man.loadTexture(path, new ThreadedTexture(path));
+            obj = man.getTexture(path); // ensure to have the correct texture, or the fallback of Mc
+
         }
-        if (obj != null) {
-            if (obj instanceof ThreadedTexture) {
-                ((ThreadedTexture) obj).uploadTexture(man);
-                glTextureId = obj.getGlTextureId();
-            }
-        } else {
-            DynamXMain.log.warn("Texture could not be uploaded because it is null");
+        if (!(obj instanceof ThreadedTexture)) {
+            return;
         }
+        ((ThreadedTexture) obj).uploadTexture(man);
+        glTextureId = obj.getGlTextureId();
     }
 }

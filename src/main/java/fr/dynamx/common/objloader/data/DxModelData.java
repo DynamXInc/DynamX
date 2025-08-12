@@ -12,14 +12,19 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.util.Tuple;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import org.lwjgl.BufferUtils;
 
 import javax.annotation.Nullable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.Buffer;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public abstract class DxModelData {
 
@@ -88,14 +93,22 @@ public abstract class DxModelData {
         return pos;
     }
 
-    public abstract int[] getMeshIndices(String objectName);
+    public abstract IntBuffer getMeshIndices(String objectName);
 
-    public int[] getAllMeshIndices() {
-        return getMeshNames().stream()
+    public IntBuffer getAllMeshIndices() {
+        List<IntBuffer> indicesBuffers = getMeshNames().stream()
                 .filter(meshName -> !meshName.equalsIgnoreCase("main"))
-                .map(meshName -> getMeshIndices(meshName.toLowerCase()))
-                .flatMapToInt(Arrays::stream)
-                .toArray();
+                .map(meshName -> getMeshIndices(meshName.toLowerCase())).collect(Collectors.toList());
+
+        int size = indicesBuffers.stream().mapToInt(Buffer::capacity).sum();
+        IntBuffer result = BufferUtils.createIntBuffer(size);
+        indicesBuffers.forEach(buffer -> {
+            result.put(buffer);
+            buffer.flip();
+        });
+
+        result.flip();
+        return result;
     }
 
     public abstract Vector3f getMeshMin(String name, @Nullable Vector3f result);

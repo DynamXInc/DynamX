@@ -55,6 +55,7 @@ import net.minecraftforge.fml.common.versioning.DefaultArtifactVersion;
 import net.minecraftforge.fml.common.versioning.InvalidVersionSpecificationException;
 import net.minecraftforge.fml.common.versioning.VersionRange;
 import net.minecraftforge.fml.relauncher.Side;
+import org.lwjgl.Sys;
 
 import java.util.function.Predicate;
 
@@ -111,6 +112,9 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
         SplashProgress.pause();
         try {
             DynamXContext.getDxModelRegistry().uploadVAOs();
+
+            System.out.println("Testing a second GC :)");
+            System.gc();
         } finally {
             SplashProgress.resume();
         }

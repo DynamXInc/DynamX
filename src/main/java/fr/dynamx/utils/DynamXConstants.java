@@ -6,8 +6,8 @@ import net.minecraftforge.fml.common.versioning.DefaultArtifactVersion;
 public class DynamXConstants {
     public static final String NAME = "DynamX";
     public static final String ID = "dynamxmod";
-    public static final String VERSION = "4.2.0";
-    public static final String VERSION_TYPE = "dev4";
+    public static final String VERSION = "4.2.1";
+    public static final String VERSION_TYPE = "dev1";
     public static final String RES_DIR_NAME = "DynamX";
 
     public static final String ACS_GUIS_BASE_URL = "https://maven.dynamx.fr/artifactory/ACsGuisRepo/fr/aym/acsguis/ACsGuis/%1$s/ACsGuis-%1$s.jar";//"https://mps.dynamx.fr/files/4.0.0/ACsGuis/ACsGuis-%s-all.jar";
@@ -35,5 +35,5 @@ public class DynamXConstants {
 
     public static final String STATS_URL = "https://dynamx.fr/statsbot/statsbotrcv.php", STATS_PRODUCT = "DNX_" + VERSION + "_BETA", STATS_TOKEN = "ZG54OnN0YWJkOTg=";
 
-    public static final boolean REMAP = true;
+    public static final boolean REMAP = false;
 }

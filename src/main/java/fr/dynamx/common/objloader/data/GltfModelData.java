@@ -89,6 +89,7 @@ public class GltfModelData extends DxModelData {
 
         IntBuffer indicesBuffer = BufferUtils.createIntBuffer(size);
         indicesList.forEach(indicesBuffer::put);
+        indicesBuffer.flip();
         return indicesBuffer;
     }
 

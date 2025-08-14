@@ -159,7 +159,6 @@ public class OBJLoader {
                 object.setCenter(result.computeCenter());
 
                 IntBuffer indicesBuffer = BufferUtils.createIntBuffer(indices.size());
-                IntBuffer normalsIndicesBuffer = BufferUtils.createIntBuffer(indices.size());
 
                 for (IndexedModel.OBJIndex current : indices) {
                     Vector3f pos = positions.get(current.positionIndex);
@@ -190,7 +189,6 @@ public class OBJLoader {
                     }
 
                     indicesBuffer.put(modelVertexIndex);
-                    normalsIndicesBuffer.put(normalModelIndex);
 
                     indexMap.put(modelVertexIndex, normalModelIndex);
                 }

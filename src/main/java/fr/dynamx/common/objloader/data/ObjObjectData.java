@@ -49,6 +49,7 @@ public class ObjObjectData{
             pos.put(vertex.getPos().y);
             pos.put(vertex.getPos().z);
         }
+        pos.flip();
         return pos;
     }
 
@@ -59,15 +60,17 @@ public class ObjObjectData{
             pos.put(vertex.getNormal().y);
             pos.put(vertex.getNormal().z);
         }
+        pos.flip();
         return pos;
     }
 
     public FloatBuffer getTextureCoords() {
-        FloatBuffer pos = BufferUtils.createFloatBuffer(vertices.length * 3);
+        FloatBuffer pos = BufferUtils.createFloatBuffer(vertices.length * 2);
         for (Vertex vertex : vertices) {
             pos.put(vertex.getTexCoords().x);
-            pos.put(vertex.getTexCoords().y);
+            pos.put(1 - vertex.getTexCoords().y);
         }
+        pos.flip();
         return pos;
     }
 

@@ -16,6 +16,7 @@ import fr.dynamx.utils.client.DynamXRenderUtils;
 import fr.dynamx.utils.maths.DynamXMath;
 import fr.dynamx.utils.optimization.QuaternionPool;
 import lombok.Getter;
+import net.minecraftforge.client.MinecraftForgeClient;
 
 import java.util.HashMap;
 import java.util.List;
@@ -76,6 +77,10 @@ public class GltfModelRenderer extends DxModelRenderer implements IGltfModelRece
      */
     public void renderVanillaOrShader(int nodeModelIndex, boolean forceVanillaRender) {
         DynamXRenderUtils.pushGlAllAttribBits();
+        // TODO PROPER SUPPORT OF TRANSPARENCY ON GLTF MODELS
+        if (MinecraftForgeClient.getRenderPass() != 0) {
+            return;
+        }
         if (forceVanillaRender) {
             scene.renderForVanilla(nodeModelIndex);
         } else if (MCglTF.getInstance().isShaderModActive()) {

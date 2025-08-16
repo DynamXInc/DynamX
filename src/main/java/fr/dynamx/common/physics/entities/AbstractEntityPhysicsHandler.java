@@ -112,6 +112,11 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
         }
         handledEntity.physicsPosition.set(physicsPosition);
         handledEntity.physicsRotation.set(physicsRotation);
+
+        if (!Vector3f.isValidVector(pos)) {
+            throw new IllegalArgumentException("Pos isn't finite: " + pos + ". COM: " + centerOfMass + " rotation: " + physicsRotation + " physicsPos:" + physicsPosition);
+        }
+
         collisionObject.getCollisionShape().boundingBox(pos, physicsRotation, boundingBox);
     }
 

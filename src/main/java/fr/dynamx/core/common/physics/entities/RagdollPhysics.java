@@ -10,7 +10,7 @@ import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.core.common.DynamXContext;
 import fr.dynamx.core.common.entities.RagdollEntity;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import fr.dynamx.core.utils.physics.DynamXPhysicsHelper;
 
 import java.util.HashMap;
@@ -24,7 +24,7 @@ public class RagdollPhysics<T extends RagdollEntity> extends EntityPhysicsHandle
 
     public static Point2PointJoint createBodyPartJoint(RagdollEntity ragdollEntity, EnumRagdollBodyPart bodyPart) {
         Point2PointJoint joint = new Point2PointJoint(ragdollEntity.physicsHandler.getBodyParts().get(EnumRagdollBodyPart.CHEST), ragdollEntity.physicsHandler.getBodyParts().get(bodyPart),
-                Vector3fPool.get(bodyPart.getChestAttachPoint().x, bodyPart.getChestAttachPoint().y, bodyPart.getChestAttachPoint().z), bodyPart.getBodyPartAttachPoint());
+                JmeVector3fPool.get(bodyPart.getChestAttachPoint().x, bodyPart.getChestAttachPoint().y, bodyPart.getChestAttachPoint().z), bodyPart.getBodyPartAttachPoint());
         joint.setDamping(1);
         // marche pas avec la sync. todo : activer en solo ? joint.setBreakingImpulseThreshold(350);
         // joint.setCollisionBetweenLinkedBodies(false);
@@ -48,10 +48,10 @@ public class RagdollPhysics<T extends RagdollEntity> extends EntityPhysicsHandle
     }
 
     private void createBodyPart(EnumRagdollBodyPart enumBodyPart, Vector3f position, float spawnRotation) {
-        Quaternion localQuat = new Quaternion().fromAngleNormalAxis((float) Math.toRadians(-spawnRotation), Vector3fPool.get(0, 1, 0));
+        Quaternion localQuat = new Quaternion().fromAngleNormalAxis((float) Math.toRadians(-spawnRotation), JmeVector3fPool.get(0, 1, 0));
         Vector3f pos = DynamXGeometry.rotateVectorByQuaternion(enumBodyPart.getChestAttachPoint().subtract(enumBodyPart.getBodyPartAttachPoint()), localQuat);
         PhysicsRigidBody bodyPart = DynamXPhysicsHelper.fastCreateRigidBody(handledEntity, enumBodyPart.getMass(), new BoxCollisionShape(enumBodyPart.getBoxSize()),
-                Vector3fPool.get(position).addLocal(pos), spawnRotation);
+                JmeVector3fPool.get(position).addLocal(pos), spawnRotation);
         bodyPart.setCcdMotionThreshold(0.1f);
         bodyPart.setCcdSweptSphereRadius(0.1f);
         // bodyPart.setCollisionGroup(PhysicsCollisionObject.COLLISION_GROUP_02);

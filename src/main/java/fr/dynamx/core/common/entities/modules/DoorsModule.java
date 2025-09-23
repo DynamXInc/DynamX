@@ -36,7 +36,7 @@ import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.maths.DynamXMath;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import fr.dynamx.core.utils.physics.DynamXPhysicsHelper;
 import lombok.Getter;
 import lombok.Setter;
@@ -99,8 +99,8 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
     @Override
     public Constraint createJoint(byte jointId) {
         PartDoor partDoor = getPartDoor(jointId);
-        Vector3f p1 = Vector3fPool.get(partDoor.getCarAttachPoint());
-        Vector3f p2 = Vector3fPool.get(partDoor.getDoorAttachPoint());
+        Vector3f p1 = JmeVector3fPool.get(partDoor.getCarAttachPoint());
+        Vector3f p2 = JmeVector3fPool.get(partDoor.getDoorAttachPoint());
 
         DoorPhysics localVarContainer = new DoorPhysics();
         localVarContainer.setModule(this);

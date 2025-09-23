@@ -1,7 +1,7 @@
 package fr.dynamx.core.common.slopes;
 
 import com.jme3.math.Vector3f;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 
@@ -47,15 +47,15 @@ public class PosRotator {
     public Vector3f mute(int i, int x, float y, int z) {
         switch (direction) {
             case NORTH:
-                return Vector3fPool.get(x, y, z - i);
+                return JmeVector3fPool.get(x, y, z - i);
             case SOUTH:
-                return Vector3fPool.get(x, y, z + i);
+                return JmeVector3fPool.get(x, y, z + i);
             case EAST:
-                return Vector3fPool.get(x + i, y, z);
+                return JmeVector3fPool.get(x + i, y, z);
             case WEST:
-                return Vector3fPool.get(x - i, y, z);
+                return JmeVector3fPool.get(x - i, y, z);
         }
-        return Vector3fPool.get(x, y, z);
+        return JmeVector3fPool.get(x, y, z);
     }
 
     public int getLittleX(int xstart, int xend) {

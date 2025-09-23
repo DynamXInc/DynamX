@@ -9,7 +9,7 @@ import fr.dynamx.core.common.entities.modules.engines.HelicopterEngineModule;
 import fr.dynamx.core.common.entities.vehicles.HelicopterEntity;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.maths.DynamXMath;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 
 public class HelicopterPhysicsHandler<A extends HelicopterEntity<?>> extends BaseVehiclePhysicsHandler<A> implements IPackInfoReloadListener {
     private HelicopterPhysicsInfo physicsInfo;
@@ -41,14 +41,14 @@ public class HelicopterPhysicsHandler<A extends HelicopterEntity<?>> extends Bas
         if (module.isEngineStarted() && module.getPower() > 0) {
             float dx = module.getRollControls().get(0);
             if (dx != 0) {
-                Vector3f force = Vector3fPool.get(0, -physicsInfo.getMouseYawForce() * dx, physicsInfo.getMouseRollForce() * dx);
+                Vector3f force = JmeVector3fPool.get(0, -physicsInfo.getMouseYawForce() * dx, physicsInfo.getMouseRollForce() * dx);
                 force = DynamXGeometry.rotateVectorByQuaternion(force, getRotation());
                 applyTorque(force);
                 module.getRollControls().set(0, 0);
             }
             float dy = module.getRollControls().get(1);
             if (dy != 0) {
-                Vector3f force = Vector3fPool.get(-physicsInfo.getMousePitchForce() * dy, 0, 0);
+                Vector3f force = JmeVector3fPool.get(-physicsInfo.getMousePitchForce() * dy, 0, 0);
                 force = DynamXGeometry.rotateVectorByQuaternion(force, getRotation());
                 applyTorque(force);
                 module.getRollControls().set(1, 0);
@@ -66,14 +66,14 @@ public class HelicopterPhysicsHandler<A extends HelicopterEntity<?>> extends Bas
     }
 
     public void updateMovement() {
-        Vector3f gravity = DynamXContext.getPhysicsWorld(getHandledEntity().world).getDynamicsWorld().getGravity(Vector3fPool.get());
+        Vector3f gravity = DynamXContext.getPhysicsWorld(getHandledEntity().world).getDynamicsWorld().getGravity(JmeVector3fPool.get());
         if (module.isEngineStarted()) {
             setForceActivation(true);
 
             // Gravity
             // Calculation of the inclination of the helicopter
             // We take a horizontal plane and rotate it
-            Vector3f plane = Vector3fPool.get(1, 0, 1);
+            Vector3f plane = JmeVector3fPool.get(1, 0, 1);
             plane = DynamXGeometry.rotateVectorByQuaternion(plane, getRotation());
             plane = plane.normalize();
             // we get the vertical component which is proportional to the inclination of the helicopter
@@ -89,18 +89,18 @@ public class HelicopterPhysicsHandler<A extends HelicopterEntity<?>> extends Bas
             getCollisionObject().setGravity(gravity);
 
             // Acceleration
-            Vector3f force = Vector3fPool.get(0, physicsInfo.getThrustForce(), 0);
+            Vector3f force = JmeVector3fPool.get(0, physicsInfo.getThrustForce(), 0);
             force = DynamXGeometry.rotateVectorByQuaternion(force, getRotation());
             force.addLocal(0, -physicsInfo.getVerticalThrustCompensation(), 0);
             force.multLocal(module.getPower(), (module.getPower() >= 0.01 && module.isAccelerating()) ? module.getPower() : 0, module.getPower());
-            applyImpulse(Vector3fPool.get(), force);
+            applyImpulse(JmeVector3fPool.get(), force);
 
             //Brake
             if (module.isReversing()) {
                 activate();
-                force = Vector3fPool.get(0, -physicsInfo.getBrakeForce(), 0);
+                force = JmeVector3fPool.get(0, -physicsInfo.getBrakeForce(), 0);
                 force = DynamXGeometry.rotateVectorByQuaternion(force, getRotation());
-                applyImpulse(Vector3fPool.get(), force);
+                applyImpulse(JmeVector3fPool.get(), force);
             }
         } else {
             getCollisionObject().setGravity(gravity);
@@ -109,7 +109,7 @@ public class HelicopterPhysicsHandler<A extends HelicopterEntity<?>> extends Bas
 
     protected void roll(float strength) {
         if (strength != 0) {
-            Vector3f force = Vector3fPool.get(0, 0, physicsInfo.getRollForce() * strength);
+            Vector3f force = JmeVector3fPool.get(0, 0, physicsInfo.getRollForce() * strength);
             force = DynamXGeometry.rotateVectorByQuaternion(force, getRotation());
             applyTorque(force);
         }

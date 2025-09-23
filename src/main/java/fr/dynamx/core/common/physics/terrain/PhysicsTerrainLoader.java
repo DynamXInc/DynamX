@@ -8,7 +8,7 @@ import fr.dynamx.core.common.physics.terrain.chunk.DebugChunkCollisions;
 import fr.dynamx.core.utils.VerticalChunkPos;
 import fr.dynamx.core.utils.debug.ChunkGraph;
 import fr.dynamx.core.utils.debug.Profiler;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -62,12 +62,12 @@ public class PhysicsTerrainLoader {
                     return;
                 }
                 chk.getTicket().incrStatusIndex(); //Invalidate other loading processes
-                Vector3fPool.openPool();
-                collision.loadCollisionsAsync(manager, manager.getCache(), chk.getTicket(), Vector3fPool.get(lookingAt.x * 16, lookingAt.y * 16, lookingAt.z * 16)).exceptionally(e -> {
+                JmeVector3fPool.openPool();
+                collision.loadCollisionsAsync(manager, manager.getCache(), chk.getTicket(), JmeVector3fPool.get(lookingAt.x * 16, lookingAt.y * 16, lookingAt.z * 16)).exceptionally(e -> {
                     DynamXMain.log.fatal("Failed to async-load chunk {}", chk.getTicket(), e);
                     return null;
                 });
-                Vector3fPool.closePool();
+                JmeVector3fPool.closePool();
                 profiler.end(Profiler.Profiles.TERRAIN_LOADER_TICK);
                 profiler.update();
             }

@@ -5,7 +5,7 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.core.common.physics.entities.modules.WheelsPhysicsHandler;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 
 import static fr.dynamx.core.utils.maths.DynamXMath.clamp;
 
@@ -50,16 +50,16 @@ public class PacejkaMagicFormula {
     // and the direction in which the vehicle is traveling.
     protected float calculateLateralSlipAngle(WheelPhysics wheelPhysics) {
         Quaternion wheelRot = wheelPhysics.getPhysicsVehicle().getPhysicsRotation(QuaternionPool.get()).mult(
-                QuaternionPool.get().fromAngleNormalAxis(wheelPhysics.getSteeringAngle(), Vector3fPool.get(0, 1, 0)), QuaternionPool.get());
+                QuaternionPool.get().fromAngleNormalAxis(wheelPhysics.getSteeringAngle(), JmeVector3fPool.get(0, 1, 0)), QuaternionPool.get());
 
-        Vector3f wheelDir = DynamXGeometry.getRotationColumn(wheelRot, 2, Vector3fPool.get());
+        Vector3f wheelDir = DynamXGeometry.getRotationColumn(wheelRot, 2, JmeVector3fPool.get());
 
         Vector3f vehicleTravel;
 
         if (wheelPhysics.getPhysicsVehicle().getCurrentVehicleSpeedKmHour() < 5) {
             vehicleTravel = DynamXGeometry.getRotationColumn(wheelPhysics.getPhysicsVehicle().getPhysicsRotation(null), 2);
         } else {
-            vehicleTravel = wheelPhysics.getPhysicsVehicle().getLinearVelocity(Vector3fPool.get());
+            vehicleTravel = wheelPhysics.getPhysicsVehicle().getLinearVelocity(JmeVector3fPool.get());
             DynamXGeometry.normalizeVector(vehicleTravel);
             vehicleTravel.y = 0;
         }
@@ -87,7 +87,7 @@ public class PacejkaMagicFormula {
         // combined rotation of normal roll + wheelspin
         float rot = wheelSpinRot + normalRot;
 
-        float vel = wheelPhysics.getPhysicsVehicle().getLinearVelocity(Vector3fPool.get()).length();
+        float vel = wheelPhysics.getPhysicsVehicle().getLinearVelocity(JmeVector3fPool.get()).length();
 
         float angle = rot / vel;
         angle *= 10;

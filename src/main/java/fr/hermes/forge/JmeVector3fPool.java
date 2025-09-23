@@ -1,6 +1,10 @@
-package fr.dynamx.core.utils.optimization;
+package fr.hermes.forge;
 
-import org.joml.Vector3f;
+import com.jme3.math.Vector3f;
+import fr.dynamx.core.utils.optimization.ClassPool;
+import fr.dynamx.core.utils.optimization.SubClassPool;
+import fr.dynamx.core.utils.optimization.Vector3fPool;
+import net.minecraft.util.math.Vec3d;
 
 import javax.annotation.concurrent.ThreadSafe;
 
@@ -8,12 +12,21 @@ import javax.annotation.concurrent.ThreadSafe;
  * Stores different Vector3fPool for each thread, referenced by their id (named "instance" here)
  */
 @ThreadSafe
-public class Vector3fPool extends ClassPool<Vector3f> {
-    private static final ThreadLocal<Vector3fPool> LOCAL_POOL = ThreadLocal.withInitial(Vector3fPool::new);
+public class JmeVector3fPool extends ClassPool<Vector3f> {
+    private static final ThreadLocal<JmeVector3fPool> LOCAL_POOL = ThreadLocal.withInitial(JmeVector3fPool::new);
 
-    public static Vector3fPool getPool() {
+    //  private final Map<StackTraceElement, Integer> callers = new HashMap<>();
+
+    public static JmeVector3fPool getPool() {
         return LOCAL_POOL.get();
     }
+
+   /* @Override
+    public Vector3f provideNewInstance() {
+        StackTraceElement[] st = Thread.currentThread().getStackTrace();
+        callers.put(st[3], callers.getOrDefault(st[3], 0)+1);
+        return super.provideNewInstance();
+    }*/
 
     /**
      * @return A <strong>new</strong> vector initialized with from's data
@@ -28,10 +41,14 @@ public class Vector3fPool extends ClassPool<Vector3f> {
 
     public static void openPool(String identifier) {
         getPool().openSubPool(identifier);
+
+        Vector3fPool.openPool(identifier); //TODO SPARADRAP TO REMOVE
     }
 
     public static void closePool() {
         getPool().closeSubPool();
+
+        Vector3fPool.closePool(); //TODO SPARADRAP TO REMOVE
     }
 
     public static Vector3f get() {
@@ -62,7 +79,7 @@ public class Vector3fPool extends ClassPool<Vector3f> {
         return v;
     }
 
-    public Vector3fPool() {
+    public JmeVector3fPool() {
         super(40000, 4000);
     }
 

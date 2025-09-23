@@ -4,7 +4,7 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.audio.EnumSoundState;
 import fr.dynamx.api.audio.IDynamXSound;
 import fr.dynamx.core.common.entities.BaseVehicleEntity;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.Vec3d;
@@ -113,9 +113,9 @@ public abstract class VehicleSound implements IDynamXSound {
         if (vehicleEntity.equals(player.getRidingEntity())) {
             return getCurrentPitch();
         } else {
-            Vector3f temp = Vector3fPool.get(playerPos);
-            Vector3f temp2 = Vector3fPool.get(sourcePos);
-            double soundVelocity = Vector3fPool.get(playerPos).subtractLocal(sourcePos.x, sourcePos.y, sourcePos.z).length() - temp.addLocal((float) player.motionX, (float) player.motionY, (float) player.motionZ)
+            Vector3f temp = JmeVector3fPool.get(playerPos);
+            Vector3f temp2 = JmeVector3fPool.get(sourcePos);
+            double soundVelocity = JmeVector3fPool.get(playerPos).subtractLocal(sourcePos.x, sourcePos.y, sourcePos.z).length() - temp.addLocal((float) player.motionX, (float) player.motionY, (float) player.motionZ)
                     .addLocal(temp2.addLocal((float) vehicleEntity.motionX, (float) vehicleEntity.motionY, (float) vehicleEntity.motionZ).multLocal(-1)).length();
             return (float) (getCurrentPitch() * (1 + soundVelocity / 10F));
         }

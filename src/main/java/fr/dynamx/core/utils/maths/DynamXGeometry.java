@@ -7,6 +7,7 @@ import fr.dynamx.core.common.DynamXMain;
 import fr.dynamx.core.utils.client.ClientDynamXUtils;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import fr.dynamx.core.utils.physics.DynamXPhysicsHelper;
 
 /**
@@ -18,9 +19,9 @@ import fr.dynamx.core.utils.physics.DynamXPhysicsHelper;
  */
 public class DynamXGeometry {
 
-    public final static Vector3f FORWARD_DIRECTION = new Vector3f(0.0f,0.0f,1.0f);
-    public final static Vector3f LEFT_DIRECTION = new Vector3f(1.0f,0.0f,0.0f);
-    public final static Vector3f UP_DIRECTION = new Vector3f(0.0f,1.0f,0.0f);
+    public final static org.joml.Vector3f FORWARD_DIRECTION = new org.joml.Vector3f(0.0f,0.0f,1.0f);
+    public final static org.joml.Vector3f LEFT_DIRECTION = new org.joml.Vector3f(1.0f,0.0f,0.0f);
+    public final static org.joml.Vector3f UP_DIRECTION = new org.joml.Vector3f(0.0f,1.0f,0.0f);
 
     /**
      * Returns the angle in radians between this vector and the vector
@@ -29,7 +30,7 @@ public class DynamXGeometry {
      * @param v1 the other vector
      * @return the angle in radians in the range [0,PI]
      */
-    public static float angle(Vector3f t, Vector3f v1) {
+    public static float angle(org.joml.Vector3f t, org.joml.Vector3f v1) {
         double vDot = t.dot(v1) / (t.length() * v1.length());
         if (vDot < -1.0) vDot = -1.0;
         if (vDot > 1.0) vDot = 1.0;
@@ -55,7 +56,7 @@ public class DynamXGeometry {
         y = (float) (pos.x * (a * f) + pos.y * (a * e) + pos.z * (-b));
         z = (float) (pos.x * (d * e + b * c * f) + pos.y * (b * c * e - d * f) + pos.z * (a * c));
 
-        return Vector3fPool.get(x, y, z);
+        return JmeVector3fPool.get(x, y, z);
     }
 
     /**
@@ -193,15 +194,15 @@ public class DynamXGeometry {
      */
     public static Vector3f rotateVectorByQuaternion(Vector3f v, Quaternion q) {
         // Extract the vector part of the quaternion
-        Vector3f u = Vector3fPool.get(q.getX(), q.getY(), q.getZ());
+        Vector3f u = JmeVector3fPool.get(q.getX(), q.getY(), q.getZ());
 
         // Extract the scalar part of the quaternion
         float s = q.getW();
 
         // Do the math
-        Vector3f v1 = Vector3fPool.get(u);
+        Vector3f v1 = JmeVector3fPool.get(u);
         v1.multLocal(2 * u.dot(v));
-        Vector3f v2 = Vector3fPool.get(v);
+        Vector3f v2 = JmeVector3fPool.get(v);
         v2.multLocal(s * s - u.dot(u));
         v1.addLocal(v2);
         v2.set(u.cross(v, v2));
@@ -269,8 +270,8 @@ public class DynamXGeometry {
     }
 
     public static Vector3f getCenter(Vector3f p1, Vector3f p2, Vector3f p3, Vector3f p4) {
-        Vector3f min = Vector3fPool.get(DynamXMath.getMin(p1.x, p2.x, p3.x, p4.x), DynamXMath.getMin(p1.y, p2.y, p3.y, p4.y), DynamXMath.getMin(p1.z, p2.z, p3.z, p4.z));
-        return Vector3fPool.get((DynamXMath.getMax(p1.x, p2.x, p3.x, p4.x) - min.x) / 2, (DynamXMath.getMax(p1.y, p2.y, p3.y, p4.y) - min.y) / 2, (DynamXMath.getMax(p1.z, p2.z, p3.z, p4.z) - min.z) / 2).addLocal(min);
+        Vector3f min = JmeVector3fPool.get(DynamXMath.getMin(p1.x, p2.x, p3.x, p4.x), DynamXMath.getMin(p1.y, p2.y, p3.y, p4.y), DynamXMath.getMin(p1.z, p2.z, p3.z, p4.z));
+        return JmeVector3fPool.get((DynamXMath.getMax(p1.x, p2.x, p3.x, p4.x) - min.x) / 2, (DynamXMath.getMax(p1.y, p2.y, p3.y, p4.y) - min.y) / 2, (DynamXMath.getMax(p1.z, p2.z, p3.z, p4.z) - min.z) / 2).addLocal(min);
     }
 
     /**
@@ -297,7 +298,7 @@ public class DynamXGeometry {
      */
     public static Vector3f getRotationColumn(Quaternion quaternion, int i, Vector3f store) {
         if (store == null) {
-            store = Vector3fPool.get();
+            store = JmeVector3fPool.get();
         }
 
         float norm = quaternion.norm();
@@ -339,9 +340,9 @@ public class DynamXGeometry {
         return store;
     }
 
-    public static float getYawFromRotationVector(Vector3f forwardRotationVector) {
-        Vector3f horizontalRotationVec = Vector3fPool.get(forwardRotationVector.x, 0, forwardRotationVector.z);
-        Vector3f tmpVector = LEFT_DIRECTION.clone();
+    public static float getYawFromRotationVector(org.joml.Vector3f forwardRotationVector) {
+        org.joml.Vector3f horizontalRotationVec = Vector3fPool.get(forwardRotationVector.x, 0, forwardRotationVector.z);
+        org.joml.Vector3f tmpVector = Vector3fPool.get(LEFT_DIRECTION);
         float yaw = (horizontalRotationVec.length() == 0 ? 0 : DynamXGeometry.angle(tmpVector, horizontalRotationVec) + FastMath.HALF_PI);
 
         tmpVector.cross(horizontalRotationVec, tmpVector);
@@ -352,19 +353,8 @@ public class DynamXGeometry {
         return (float) Math.toDegrees(-yaw);
     }
 
-    public static float getPitchFromRotationVector(Vector3f forwardRotationVector) {
+    public static float getPitchFromRotationVector(org.joml.Vector3f forwardRotationVector) {
         return (float) Math.toDegrees(FastMath.HALF_PI - DynamXGeometry.angle(UP_DIRECTION, forwardRotationVector));
-    }
-
-    public static float getRollFromRotationVector(Vector3f leftRotationVector, Vector3f forwardRotationVector) {
-        Vector3f tmpVector = Vector3fPool.get();
-        UP_DIRECTION.cross(forwardRotationVector, tmpVector);
-        float roll = -DynamXGeometry.angle(tmpVector, leftRotationVector);
-
-        if (leftRotationVector.y > 0)
-            roll = -roll;
-
-        return (float) Math.toDegrees(roll);
     }
 
     /**

@@ -5,7 +5,7 @@ import fr.dynamx.api.audio.IDynamXSound;
 import fr.dynamx.forge.DynamXConfig;
 import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.optimization.SubClassPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.audio.SoundManager;
@@ -100,7 +100,7 @@ public class DynamXSoundHandler {
     public void tick() {
         if (ready()) {
             //Update all sounds
-            Vector3fPool.openPool(SubClassPool.DX_SOUND_HANDLER);
+            JmeVector3fPool.openPool(SubClassPool.DX_SOUND_HANDLER);
             for (IDynamXSound sound : playingSounds) {
                 sound.update(this);
             }
@@ -112,7 +112,7 @@ public class DynamXSoundHandler {
                     playingSounds.get(i).onMuted();
                 }
             }
-            Vector3fPool.closePool();
+            JmeVector3fPool.closePool();
             //Remove sounds that were stopped
             if (!stoppingSounds.isEmpty()) {
                 for (IDynamXSound sound : stoppingSounds) {

@@ -19,7 +19,7 @@ import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.optimization.BoundingBoxPool;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.dynamx.core.utils.optimization.SubClassPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -68,7 +68,7 @@ public class VehicleDebugRenderer {
         @Override
         public void render(BaseVehicleEntity<?> entity, RenderPhysicsEntity<BaseVehicleEntity<?>> renderer, double x, double y, double z, float partialTicks) {
             if (!entity.getPackInfo().getFrictionPoints().isEmpty()) {
-                float horizSpeed = Vector3fPool.get((float) entity.motionX, 0, (float) entity.motionZ).length();
+                float horizSpeed = JmeVector3fPool.get((float) entity.motionX, 0, (float) entity.motionZ).length();
                 for (FrictionPoint f : entity.getPackInfo().getFrictionPoints()) {
                     Vector3f pushDown = new Vector3f((float) -entity.motionX, -horizSpeed, (float) -entity.motionZ);
                     pushDown.multLocal(f.getIntensity());
@@ -76,7 +76,7 @@ public class VehicleDebugRenderer {
                     pos = DynamXGeometry.rotateVectorByQuaternion(pos, entity.renderRotation);
 
                     GlStateManager.color(1, 0, 0, 1);
-                    DynamXRenderUtils.drawBoundingBox(Vector3fPool.get(pos).addLocal(-0.04f, -0.04f, -0.04f), Vector3fPool.get(pos).addLocal(0.04f, 0.04f, 0.04f), 0, 1, 0, 1);
+                    DynamXRenderUtils.drawBoundingBox(JmeVector3fPool.get(pos).addLocal(-0.04f, -0.04f, -0.04f), JmeVector3fPool.get(pos).addLocal(0.04f, 0.04f, 0.04f), 0, 1, 0, 1);
                     GlStateManager.glBegin(GL11.GL_LINES);
                     GlStateManager.glVertex3f(pos.x, pos.y, pos.z);
                     pos.addLocal(pushDown);
@@ -174,8 +174,8 @@ public class VehicleDebugRenderer {
             DynamXContext.getPlayerToCollision().forEach((player, playerPhysicsHandler) -> {
                 if (playerPhysicsHandler.getBodyIn() != null) {
                     BoundingBox bb = playerPhysicsHandler.getBodyIn().boundingBox(BoundingBoxPool.get());
-                    Vector3f min = bb.getMin(Vector3fPool.get());
-                    Vector3f max = bb.getMax(Vector3fPool.get());
+                    Vector3f min = bb.getMin(JmeVector3fPool.get());
+                    Vector3f max = bb.getMax(JmeVector3fPool.get());
                     RenderGlobal.drawBoundingBox(min.x, min.y, min.z, max.x, max.y, max.z, 0.2f, 0.5f, 0.7f, 1);
                 }
             });
@@ -210,7 +210,7 @@ public class VehicleDebugRenderer {
                     GlStateManager.translate(-entity.posX, -entity.posY, -entity.posZ);
 
                     Vector3f pos = DynamXGeometry.rotateVectorByQuaternion(container.getPosition(), entity.physicsRotation);
-                    MutableBoundingBox rotatedSize = DynamXContext.getCollisionHandler().rotateBB(Vector3fPool.get(0, 0, 0), container.getBoundingBox(), entity.physicsRotation);
+                    MutableBoundingBox rotatedSize = DynamXContext.getCollisionHandler().rotateBB(JmeVector3fPool.get(0, 0, 0), container.getBoundingBox(), entity.physicsRotation);
                     rotatedSize = rotatedSize.offset(pos);
                     rotatedSize = rotatedSize.offset(entity.physicsPosition);
                     DynamXRenderUtils.drawBoundingBox(rotatedSize.toBB(), 1, 0, 0, 1);

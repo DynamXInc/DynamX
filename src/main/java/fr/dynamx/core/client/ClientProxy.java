@@ -34,7 +34,7 @@ import fr.dynamx.core.utils.DynamXLoadingTasks;
 import fr.dynamx.core.utils.client.DynamXRenderUtils;
 import fr.dynamx.core.utils.errors.DynamXErrorManager;
 import fr.dynamx.core.utils.optimization.SubClassPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.resources.SimpleReloadableResourceManager;
@@ -222,9 +222,9 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
                 loadingState++;
                 ThreadedLoadingService loadingService = ACsLib.getPlatform().provideService(ThreadedLoadingService.class);
                 loadingService.addTask(ThreadedLoadingService.ModLoadingSteps.BLOCK_REGISTRY, "packsload", () -> {
-                    Vector3fPool.openPool(SubClassPool.PACK_MODEL_LOAD); //Open a pool for the loading of entities
+                    JmeVector3fPool.openPool(SubClassPool.PACK_MODEL_LOAD); //Open a pool for the loading of entities
                     DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.MC_INIT, DynamXLoadingTasks.PACK);
-                    Vector3fPool.closePool();
+                    JmeVector3fPool.closePool();
 
                     //Must follow addons init
                     loadingService.addTask(ThreadedLoadingService.ModLoadingSteps.INIT, "proxy preinit", this::preInit);

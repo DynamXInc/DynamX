@@ -20,18 +20,11 @@ import fr.dynamx.core.utils.debug.Profiler;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.dynamx.core.utils.optimization.SubClassPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.api.mc.HmEntity;
+import fr.hermes.forge.JmeVector3fPool;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.entity.Entity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,12 +65,12 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
      */
     private final List<MutableBoundingBox> rawBoxes = new ArrayList<>();
 
-    public PackPhysicsEntity(World worldIn) {
-        super(worldIn);
+    public PackPhysicsEntity(HmEntity mcEntityWrapper) {
+        super(mcEntityWrapper);
     }
 
-    public PackPhysicsEntity(String infoName, World world, Vector3f pos, float spawnRotationAngle, int metadata) {
-        super(world, pos, spawnRotationAngle);
+    public PackPhysicsEntity(String infoName, HmEntity mcEntityWrapper, Vector3f pos, float spawnRotationAngle, int metadata) {
+        super(mcEntityWrapper, pos, spawnRotationAngle);
         setInfoName(infoName);
         setMetadata(metadata);
     }
@@ -131,18 +124,18 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
     }
 
     @Override
-    protected void readEntityFromNBT(NBTTagCompound tagCompound) {
+    public void readFromNbt(NBTTagCompound tagCompound) {
         //Read info name before entity init in super method
         setInfoName(tagCompound.getString("vehicleName"));
         setMetadata(tagCompound.getInteger("Metadata"));
-        super.readEntityFromNBT(tagCompound);
+        super.readFromNbt(tagCompound);
     }
 
     @Override
-    protected void writeEntityToNBT(NBTTagCompound tagCompound) {
+    public void writeToNbt(NBTTagCompound tagCompound) {
         tagCompound.setString("vehicleName", getInfoName());
         tagCompound.setInteger("Metadata", getMetadata());
-        super.writeEntityToNBT(tagCompound);
+        super.writeToNbt(tagCompound);
     }
 
     @Override
@@ -151,17 +144,17 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
             setDead();
             return;
         }
-        Vector3fPool.openPool(SubClassPool.TICK_ENTITY_MC);
+        JmeVector3fPool.openPool(SubClassPool.TICK_ENTITY_MC);
         Profiler.get().start(Profiler.Profiles.TICK_ENTITIES);
         super.onUpdate();
-        if (world.isRemote && getMetadata() != lastMetadata && !isDead) //Metadata has been sync, so update texture
+        if (mcEntityWrapper.getWorld().isClient() && getMetadata() != lastMetadata && !isDead) //Metadata has been sync, so update texture
         {
             lastMetadata = getMetadata();
             entityTextureId = (byte) getMetadata();
             getModules().forEach(m -> m.onTexturesChange(entityTextureId));
         }
         Profiler.get().end(Profiler.Profiles.TICK_ENTITIES);
-        Vector3fPool.closePool();
+        JmeVector3fPool.closePool();
     }
 
     @Override
@@ -176,7 +169,7 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
     public List<MutableBoundingBox> getCollisionBoxes() {
         if (getPackInfo() == null || physicsPosition == null)
             return new ArrayList<>(0);
-        Vector3f pos = Vector3fPool.get(posX, posY, posZ);
+        Vector3f pos = JmeVector3fPool.get(getPosX(), getPosY(), getPosZ());
         if (rawBoxes.size() != getPackInfo().getCollisionsHelper().getShapes().size()) {
             rawBoxes.clear();
             for (IShapeInfo shape : getPackInfo().getCollisionsHelper().getShapes()) {
@@ -205,12 +198,12 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
         Vec3d hitVec = entity.getPositionVector().add(0, entity.getEyeHeight(), 0);
         InteractivePart<?, ?> nearest = null;
         Vector3f nearestPos = null;
-        Vector3f playerPos = Vector3fPool.get((float) entity.posX, (float) entity.posY, (float) entity.posZ);
+        Vector3f playerPos = JmeVector3fPool.get((float) entity.posX, (float) entity.posY, (float) entity.posZ);
         MutableBoundingBox box = new MutableBoundingBox();
         for (float f = 1.0F; f < 4.0F; f += 0.1F) {
             for (InteractivePart<?, ?> part : getPackInfo().getInteractiveParts()) {
                 part.getBox(box);
-                box = DynamXContext.getCollisionHandler().rotateBB(Vector3fPool.get(), box, physicsRotation);
+                box = DynamXContext.getCollisionHandler().rotateBB(JmeVector3fPool.get(), box, physicsRotation);
                 Vector3f partPos = DynamXGeometry.rotateVectorByQuaternion(part.getPosition(), physicsRotation);
                 partPos.addLocal(physicsPosition);
                 box.offset(partPos);

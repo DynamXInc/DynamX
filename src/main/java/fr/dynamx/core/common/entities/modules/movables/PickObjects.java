@@ -13,7 +13,7 @@ import fr.dynamx.core.common.physics.joints.EntityJoint;
 import fr.dynamx.core.common.physics.joints.JointHandlerRegistry;
 import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.DynamXUtils;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import fr.dynamx.core.utils.physics.DynamXPhysicsHelper;
 import lombok.Getter;
 import net.minecraft.entity.player.EntityPlayer;
@@ -84,22 +84,22 @@ public class PickObjects extends MovableModule {
         if (!b || joint == null || mover == null) {
             return;
         }
-        Vector3fPool.openPool();
-        Vector3f playerPosition = Vector3fPool.get(
+        JmeVector3fPool.openPool();
+        Vector3f playerPosition = JmeVector3fPool.get(
                 (float) mover.posX,
                 (float) mover.posY + mover.getEyeHeight(),
                 (float) mover.posZ);
-        Vector3f pickRaw = DynamXUtils.calculateRay(mover, 64, Vector3fPool.get());
+        Vector3f pickRaw = DynamXUtils.calculateRay(mover, 64, JmeVector3fPool.get());
 
-        Vector3f newRayTo = Vector3fPool.get(pickRaw);
-        Vector3f eyePos = Vector3fPool.get(playerPosition);
+        Vector3f newRayTo = JmeVector3fPool.get(pickRaw);
+        Vector3f eyePos = JmeVector3fPool.get(playerPosition);
         Vector3f dir = newRayTo.subtractLocal(eyePos.x, eyePos.y, eyePos.z);
         dir = dir.normalize();
         dir.multLocal(pickDistance.get());
 
         Vector3f newPos = eyePos.addLocal(dir);
         joint.setPivotInB(newPos);
-        Vector3fPool.closePool();
+        JmeVector3fPool.closePool();
     }
 
     @Override

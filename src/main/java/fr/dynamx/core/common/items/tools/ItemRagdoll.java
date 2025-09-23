@@ -6,7 +6,7 @@ import fr.dynamx.core.common.items.DynamXItemRegistry;
 import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.DynamXUtils;
 import fr.dynamx.core.utils.RegistryNameSetter;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -60,7 +60,7 @@ public class ItemRagdoll extends Item {
                     for (int j = -10; j < 10; j += 4) {
                         //for (int k = 0; k < 3; k++) {
                         Vector3f pos = new Vector3f(blockpos.getX() + i, blockpos.getY(), blockpos.getZ() + j);
-                        RagdollEntity entity = getSpawnEntity(worldIn, playerIn, Vector3fPool.get(pos.x, pos.y + 2.3F, pos.z), playerIn.rotationYaw % 360.0F, itemStackIn.getMetadata());
+                        RagdollEntity entity = getSpawnEntity(worldIn, playerIn, JmeVector3fPool.get(pos.x, pos.y + 2.3F, pos.z), playerIn.rotationYaw % 360.0F, itemStackIn.getMetadata());
                         worldIn.spawnEntity(entity);
 
                         // }
@@ -68,7 +68,7 @@ public class ItemRagdoll extends Item {
 
                 }
             } else {
-                RagdollEntity entity = getSpawnEntity(worldIn, playerIn, Vector3fPool.get(blockpos.getX(), blockpos.getY() + 2.19F, blockpos.getZ())
+                RagdollEntity entity = getSpawnEntity(worldIn, playerIn, JmeVector3fPool.get(blockpos.getX(), blockpos.getY() + 2.19F, blockpos.getZ())
                         .add(new Vector3f(0.5f, 0, 0.5f)), playerIn.rotationYaw % 360.0F, itemStackIn.getMetadata());
                 worldIn.spawnEntity(entity);
             }

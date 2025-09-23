@@ -20,7 +20,7 @@ import fr.dynamx.core.utils.debug.DynamXDebugOptions;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.optimization.GlQuaternionPool;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.client.renderer.GlStateManager;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
@@ -32,7 +32,7 @@ import java.awt.*;
 public class PhysicsDebugRenderer {
     public static void debugSoftBody(PhysicsSoftBody physicsSoftBody) {
         GlStateManager.pushMatrix();
-        Vector3f physicsLocation = Vector3fPool.get();
+        Vector3f physicsLocation = JmeVector3fPool.get();
         Quaternion physicsRotation = QuaternionPool.get();
         physicsSoftBody.getPhysicsLocation(physicsLocation);
         physicsSoftBody.getPhysicsRotation(physicsRotation);
@@ -52,13 +52,13 @@ public class PhysicsDebugRenderer {
         System.out.println("n "+physicsSoftBody.countNodes());*/
         int numFaces = physicsSoftBody.countFaces();
         for (int i = 0; i < numFaces; i++) {
-            Vector3f nodePos1 = Vector3fPool.get();
-            Vector3f nodePos2 = Vector3fPool.get();
-            Vector3f nodePos3 = Vector3fPool.get();
+            Vector3f nodePos1 = JmeVector3fPool.get();
+            Vector3f nodePos2 = JmeVector3fPool.get();
+            Vector3f nodePos3 = JmeVector3fPool.get();
 
-            Vector3f nodeNormal1 = Vector3fPool.get();
-            Vector3f nodeNormal2 = Vector3fPool.get();
-            Vector3f nodeNormal3 = Vector3fPool.get();
+            Vector3f nodeNormal1 = JmeVector3fPool.get();
+            Vector3f nodeNormal2 = JmeVector3fPool.get();
+            Vector3f nodeNormal3 = JmeVector3fPool.get();
 
             physicsSoftBody.nodeLocation(i, nodePos1);
             physicsSoftBody.nodeLocation(i + 1, nodePos2);
@@ -67,7 +67,7 @@ public class PhysicsDebugRenderer {
             physicsSoftBody.nodeNormal(i, nodeNormal1);
             physicsSoftBody.nodeNormal(i + 1, nodeNormal2);
             physicsSoftBody.nodeNormal(i + 2, nodeNormal3);
-            Vector3f tpt1 = Vector3fPool.get(), tpt2 = Vector3fPool.get();
+            Vector3f tpt1 = JmeVector3fPool.get(), tpt2 = JmeVector3fPool.get();
             tpt1 = nodePos2.subtract(nodePos1);
             tpt2 = nodePos3.subtract(nodePos1);
 
@@ -90,7 +90,7 @@ public class PhysicsDebugRenderer {
 
     public static void debugRigidBody(PhysicsRigidBody physicsRigidBody, RigidBodyTransform prevTransform, RigidBodyTransform curTransform, float partialTicks) {
         Object userObject = physicsRigidBody.getUserObject();
-        Vector3f physicsLocation = Vector3fPool.get();
+        Vector3f physicsLocation = JmeVector3fPool.get();
         Quaternion physicsRotation = QuaternionPool.get();
         GlStateManager.pushMatrix();
         int greenColor = physicsRigidBody.getActivationState() == 2 ? 1 : 0;
@@ -131,9 +131,9 @@ public class PhysicsDebugRenderer {
             } else if (collisionShape instanceof CompoundCollisionShape) {
                 for (ChildCollisionShape childCollisionShape : ((CompoundCollisionShape) collisionShape).listChildren()) {
                     if (childCollisionShape.getShape() instanceof BoxCollisionShape) {
-                        DynamXRenderUtils.glTranslate(childCollisionShape.copyOffset(Vector3fPool.get()));
+                        DynamXRenderUtils.glTranslate(childCollisionShape.copyOffset(JmeVector3fPool.get()));
                         debugBoxCollisionShape((BoxCollisionShape) childCollisionShape.getShape(), 1, greenColor, blueColor, 1);
-                        DynamXRenderUtils.glTranslate(childCollisionShape.copyOffset(Vector3fPool.get()).multLocal(-1));
+                        DynamXRenderUtils.glTranslate(childCollisionShape.copyOffset(JmeVector3fPool.get()).multLocal(-1));
                     }
                 }
             }
@@ -154,7 +154,7 @@ public class PhysicsDebugRenderer {
     }
 
     public static void debugBoxCollisionShape(BoxCollisionShape boxCollisionShape, float red, float green, float blue, float alpha) {
-        Vector3f halfExtent = Vector3fPool.get();
+        Vector3f halfExtent = JmeVector3fPool.get();
         boxCollisionShape.getHalfExtents(halfExtent);
         DynamXRenderUtils.drawBoundingBox(halfExtent, red, green, blue, alpha);
     }
@@ -162,8 +162,8 @@ public class PhysicsDebugRenderer {
     public static void debugConstraint(PhysicsJoint joint, float partialTicks) {
         if (joint instanceof Constraint) {
             Constraint constraint = (Constraint) joint;
-            Vector3f pivotA = Vector3fPool.get();
-            Vector3f pivotB = Vector3fPool.get();
+            Vector3f pivotA = JmeVector3fPool.get();
+            Vector3f pivotB = JmeVector3fPool.get();
             if (constraint.getBodyA() != null) {
                 constraint.getPivotA(pivotA);
                 drawSingleEndedConstraint(constraint.getBodyA(), pivotA, new Color(1, 0, 0, 1), new Color(1, 0, 0, 0.5f), new Color(1, 0, 0, 1), partialTicks);

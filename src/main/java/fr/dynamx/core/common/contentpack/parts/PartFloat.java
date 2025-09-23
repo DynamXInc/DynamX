@@ -8,7 +8,7 @@ import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.core.utils.debug.DynamXDebugOption;
 import fr.dynamx.core.utils.debug.DynamXDebugOptions;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -55,7 +55,7 @@ public class PartFloat<T extends ISubInfoTypeOwner<T>> extends BasePart<T> {
             for (int j = 0; j < lSizeZ; j++) {
                 float xPos = (float) (box.minX + i * (size + spacing.x) + offset.x);
                 float zPos = (float) (box.minZ + j * (size + spacing.z) + offset.z);
-                childrenPositionList.add(Vector3fPool.getPermanentVector(getPosition()).addLocal(xPos + size / 2, 0, zPos + size / 2));
+                childrenPositionList.add(JmeVector3fPool.getPermanentVector(getPosition()).addLocal(xPos + size / 2, 0, zPos + size / 2));
             }
         }
     }

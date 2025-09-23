@@ -11,7 +11,7 @@ import fr.dynamx.core.common.entities.modules.MovableModule;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
 import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.DynamXUtils;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import fr.dynamx.core.utils.physics.DynamXPhysicsHelper;
 import net.minecraft.entity.player.EntityPlayer;
 
@@ -56,7 +56,7 @@ public class MoveObjects extends MovableModule {
         if (picker.get() == null || pickedEntity.get() == null) {
             return;
         }
-        ((PhysicsRigidBody) entity.getPhysicsHandler().getCollisionObject()).setGravity(Vector3fPool.get(0, -DynamXPhysicsHelper.GRAVITY,0));
+        ((PhysicsRigidBody) entity.getPhysicsHandler().getCollisionObject()).setGravity(JmeVector3fPool.get(0, -DynamXPhysicsHelper.GRAVITY,0));
         PhysicsRigidBody rigidBody = (PhysicsRigidBody) pickedEntity.get().getPhysicsHandler().getCollisionObject();
         Vector3f playerLookPos = DynamXUtils.toVector3f(picker.get().getLookVec());
         rigidBody.setLinearVelocity(playerLookPos.multLocal(force));
@@ -67,7 +67,7 @@ public class MoveObjects extends MovableModule {
         if (picker.get() == null) {
             return;
         }
-        ((PhysicsRigidBody) entity.getPhysicsHandler().getCollisionObject()).setGravity(Vector3fPool.get(0, -DynamXPhysicsHelper.GRAVITY,0));
+        ((PhysicsRigidBody) entity.getPhysicsHandler().getCollisionObject()).setGravity(JmeVector3fPool.get(0, -DynamXPhysicsHelper.GRAVITY,0));
         DynamXContext.getPlayerPickingObjects().remove(picker.get().getEntityId());
         isPicked.set(false);
         entity.getSynchronizer().onPlayerStopControlling(picker.get(), false);
@@ -80,9 +80,9 @@ public class MoveObjects extends MovableModule {
             if (picker.get() != null && pickedEntity != null && isPicked.get()) {
                 PhysicsRigidBody rigidBody = (PhysicsRigidBody) pickedEntity.getPhysicsHandler().getCollisionObject();
                 Vector3f playerLookPos = DynamXUtils.toVector3f(picker.get().getLookVec());
-                rigidBody.setGravity(Vector3fPool.get());
-                rigidBody.setAngularVelocity(Vector3fPool.get());
-                rigidBody.setLinearVelocity(Vector3fPool.get());
+                rigidBody.setGravity(JmeVector3fPool.get());
+                rigidBody.setAngularVelocity(JmeVector3fPool.get());
+                rigidBody.setLinearVelocity(JmeVector3fPool.get());
                 Vector3f playerPos = DynamXUtils.toVector3f(picker.get().getPositionEyes(1.0f));
                 Vector3f finalPos = playerPos.addLocal(playerLookPos);
                 pickedEntity.getPhysicsHandler().setPhysicsPosition(finalPos);

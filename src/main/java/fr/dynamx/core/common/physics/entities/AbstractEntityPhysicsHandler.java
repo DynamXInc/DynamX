@@ -9,7 +9,7 @@ import fr.dynamx.core.common.DynamXContext;
 import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import lombok.Getter;
 
 import javax.annotation.Nullable;
@@ -49,7 +49,7 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
     public AbstractEntityPhysicsHandler(T entity) {
         this.handledEntity = entity;
         //Fixes the position of physics objects when reloading them from a save
-        Vector3f position = Vector3fPool.get(entity.physicsPosition);
+        Vector3f position = JmeVector3fPool.get(entity.physicsPosition);
         Vector3f centerOfMass = getCenterOfMass();
         if (centerOfMass != null) {
             position.addLocal(DynamXGeometry.rotateVectorByQuaternion(centerOfMass, entity.physicsRotation).multLocal(-1));
@@ -101,9 +101,9 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
     public void postUpdate() {
         isBodyActive = collisionObject.isActive();
 
-        Vector3f physicsPosition = collisionObject.getPhysicsLocation(Vector3fPool.get());
+        Vector3f physicsPosition = collisionObject.getPhysicsLocation(JmeVector3fPool.get());
         Quaternion physicsRotation = collisionObject.getPhysicsRotation(QuaternionPool.get());
-        Vector3f pos = Vector3fPool.get(physicsPosition);
+        Vector3f pos = JmeVector3fPool.get(physicsPosition);
         Vector3f centerOfMass = getCenterOfMass();
         if (centerOfMass != null) {
             Vector3f rotatedCenterOfMass = DynamXGeometry.rotateVectorByQuaternion(centerOfMass, physicsRotation);

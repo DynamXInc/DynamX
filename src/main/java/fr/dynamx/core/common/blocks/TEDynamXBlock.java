@@ -31,7 +31,7 @@ import fr.dynamx.core.utils.debug.ChunkGraph;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.entity.Entity;
@@ -253,7 +253,7 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
     public AxisAlignedBB computeBoundingBox() {
         if (boundingBoxCache == null) {
             QuaternionPool.openPool();
-            Vector3fPool.openPool();
+            JmeVector3fPool.openPool();
             List<IShapeInfo> boxes = getUnrotatedCollisionBoxes(); //Get PartShape boxes
             if (boxes.isEmpty()) {//If there is no boxes, create a default one
                 boundingBoxCache = new AxisAlignedBB(0, 0, 0, 1, 1, 1);
@@ -271,11 +271,11 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
                 Quaternion physicsRotation = getCollidableRotation();
                 container.scale(getRelativeScale().x != 0 ? getRelativeScale().x : 1, getRelativeScale().y != 0 ? getRelativeScale().y : 1, getRelativeScale().z != 0 ? getRelativeScale().z : 1);
                 container.grow(0.1, 0.0, 0.1); //Grow it to avoid little glitches on the corners of the car
-                container = DynamXContext.getCollisionHandler().rotateBB(Vector3fPool.get(0.5f, 0, 0.5f), container, physicsRotation);
+                container = DynamXContext.getCollisionHandler().rotateBB(JmeVector3fPool.get(0.5f, 0, 0.5f), container, physicsRotation);
                 container.offset(getRelativeTranslation().x, getRelativeTranslation().y, getRelativeTranslation().z);
                 boundingBoxCache = container.toBB();
             }
-            Vector3fPool.closePool();
+            JmeVector3fPool.closePool();
             QuaternionPool.closePool();
         }
         return boundingBoxCache;
@@ -357,7 +357,7 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
 
     @Override
     public Vector3f getCollisionOffset() {
-        return Vector3fPool.get(0.5f, 0, 0.5f).addLocal(relativeTranslation);
+        return JmeVector3fPool.get(0.5f, 0, 0.5f).addLocal(relativeTranslation);
     }
 
     @Override
@@ -468,12 +468,12 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
         Vec3d hitVec = entity.getPositionVector().add(0, entity.getEyeHeight(), 0);
         InteractivePart<?, ?> nearest = null;
         Vector3f nearestPos = null;
-        Vector3f playerPos = Vector3fPool.get((float) entity.posX, (float) entity.posY, (float) entity.posZ);
+        Vector3f playerPos = JmeVector3fPool.get((float) entity.posX, (float) entity.posY, (float) entity.posZ);
         MutableBoundingBox box = new MutableBoundingBox();
         for (float f = 1.0F; f < 4.0F; f += 0.1F) {
             for (InteractivePart<?, ?> part : getPackInfo().getInteractiveParts()) {
                 part.getBox(box);
-                box = DynamXContext.getCollisionHandler().rotateBB(Vector3fPool.get(), box, getCollidableRotation());
+                box = DynamXContext.getCollisionHandler().rotateBB(JmeVector3fPool.get(), box, getCollidableRotation());
                 Vector3f partPos = DynamXGeometry.rotateVectorByQuaternion(part.getPosition(), getCollidableRotation());
                 partPos.addLocal(getPos().getX() + getPackInfo().getTranslation().x + getCollisionOffset().x,
                         getPos().getY() + getPackInfo().getTranslation().y + getCollisionOffset().y,

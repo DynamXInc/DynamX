@@ -9,12 +9,10 @@ import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariableRegistry;
 import fr.dynamx.core.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.core.common.physics.entities.PackEntityPhysicsHandler;
+import fr.hermes.api.mc.HmEntity;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
-import net.minecraftforge.fml.relauncher.Side;
+import org.joml.Quaternionf;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -41,12 +39,12 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
     protected ModularEntityInitCallback initCallback;
     protected ModularEntityPhysicsInitCallback physicsInitCallback;
 
-    public ModularPhysicsEntity(World worldIn) {
-        super(worldIn);
+    public ModularPhysicsEntity(HmEntity mcEntityWrapper) {
+        super(mcEntityWrapper);
     }
 
-    public ModularPhysicsEntity(World world, Vector3f pos, float spawnRotationAngle) {
-        super(world, pos, spawnRotationAngle);
+    public ModularPhysicsEntity(HmEntity mcEntityWrapper, Vector3f pos, float spawnRotationAngle) {
+        super(mcEntityWrapper, pos, spawnRotationAngle);
     }
 
     /**
@@ -118,7 +116,7 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
     @Override
     public boolean initEntityProperties() {
         createModules(new ModuleListBuilder(moduleList));
-        fireCreateModulesEvent(world.isRemote ? Side.CLIENT : Side.SERVER);
+        // TODO EVENTS fireCreateModulesEvent(world.isRemote ? Side.CLIENT : Side.SERVER);
         moduleList.sort(Comparator.comparingInt(m -> -m.getInitPriority()));
         moduleList.forEach(IPhysicsModule::initEntityProperties);
         if (initCallback != null) {
@@ -163,7 +161,7 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
      * Fires the create modules event, with the right generic type <br>
      * If you override this function, you should make it final
      */
-    protected abstract void fireCreateModulesEvent(Side side);
+    // TODO EVENTS protected abstract void fireCreateModulesEvent(Side side);
 
     @Override
     public void registerSynchronizedVariables() {
@@ -175,8 +173,8 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
     }
 
     @Override
-    protected void readEntityFromNBT(NBTTagCompound tagCompound) {
-        super.readEntityFromNBT(tagCompound);
+    public void readFromNbt(NBTTagCompound tagCompound) {
+        super.readFromNbt(tagCompound);
         //Load the modules after because they are initialized in the super method
         int size = moduleList.size();
         for (int i = 0; i < size; i++) {
@@ -185,8 +183,8 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
     }
 
     @Override
-    protected void writeEntityToNBT(NBTTagCompound tagCompound) {
-        super.writeEntityToNBT(tagCompound);
+    public void writeToNbt(NBTTagCompound tagCompound) {
+        super.writeToNbt(tagCompound);
         moduleList.forEach(m -> m.writeToNBT(tagCompound));
     }
 
@@ -230,8 +228,8 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
     }
 
     @Override
-    public void updateMinecraftPos() {
-        super.updateMinecraftPos();
+    public void updateMinecraftPos(org.joml.Vector3f physicsPosition, Quaternionf physicsRotation) {
+        super.updateMinecraftPos(physicsPosition, physicsRotation);
         int size = updateEntityPosListeners.size();
         for (int i = 0; i < size; i++) {
             updateEntityPosListeners.get(i).updateEntityPos();
@@ -299,8 +297,8 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
     }
 
     @Override
-    public void setDead() {
-        super.setDead();
+    public void onSetDead() {
+        super.onSetDead();
         moduleList.forEach(IPhysicsModule::onSetDead);
     }
 

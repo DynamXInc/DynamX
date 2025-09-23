@@ -12,7 +12,6 @@ import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
 import fr.dynamx.core.client.renders.RenderPhysicsEntity;
 import fr.dynamx.core.client.sound.VehicleSound;
 import fr.dynamx.core.common.DynamXMain;
-import fr.dynamx.core.common.contentpack.ContentPackLoader;
 import fr.dynamx.core.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.core.common.contentpack.parts.PartWheel;
 import fr.dynamx.core.common.contentpack.type.vehicle.PartWheelInfo;
@@ -25,7 +24,7 @@ import fr.dynamx.core.common.physics.entities.modules.WheelsPhysicsHandler;
 import fr.dynamx.core.common.physics.entities.parts.wheel.WheelPhysics;
 import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.maths.DynamXMath;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import jme3utilities.Validate;
 import lombok.Getter;
 import net.minecraft.block.state.IBlockState;
@@ -229,7 +228,7 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
                 if (w == null) {
                     continue;
                 }
-                Vector3f pos = Vector3fPool.get();
+                Vector3f pos = JmeVector3fPool.get();
                 w.getPhysicsWheel().getCollisionLocation(pos);
                 BlockPos bp = new BlockPos(pos.x, Math.ceil(pos.y) - 1, pos.z);
                 IBlockState blockState = entity.world.getBlockState(bp);
@@ -299,7 +298,7 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
             visualProperties[indexRotationAngle] = angles[1];
 
             visualProperties[VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.SUSPENSION_LENGTH)] = info.getSuspensionLength();
-            Vector3f pos = Vector3fPool.get();
+            Vector3f pos = JmeVector3fPool.get();
             info.getCollisionLocation(pos);
             visualProperties[VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.COLLISION_X)] = pos.x;
             visualProperties[VehicleEntityProperties.getPropertyIndex(i, VehicleEntityProperties.EnumVisualProperties.COLLISION_Y)] = pos.y;

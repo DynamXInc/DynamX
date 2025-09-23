@@ -5,9 +5,9 @@ import fr.dynamx.api.physics.IRotatedCollisionHandler;
 import fr.dynamx.core.common.DynamXContext;
 import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.EnumFacing;
+import fr.hermes.forge.JmeVector3fPool;
+import fr.hermes.api.mc.HmOrientation;
+import fr.hermes.api.mc.HmPlayerEntity;
 
 /**
  * Responsible to update a walking player <br>
@@ -18,18 +18,18 @@ import net.minecraft.util.EnumFacing;
 public class WalkingOnPlayerController {
     public static WalkingOnPlayerController controller;
 
-    public EntityPlayer player;
+    public HmPlayerEntity player;
     public PhysicsEntity<?> entity;
-    public EnumFacing face;
+    public HmOrientation face;
     public Vector3f offset;
 
-    public WalkingOnPlayerController(EntityPlayer player, PhysicsEntity<?> entity, EnumFacing face, Vector3f offset) {
+    public WalkingOnPlayerController(HmPlayerEntity player, PhysicsEntity<?> entity, HmOrientation face, Vector3f offset) {
         this.player = player;
         this.entity = entity;
         this.face = face;
         this.offset = offset;
         if (DynamXContext.getPlayerToCollision().containsKey(player)) {
-            DynamXContext.getPlayerToCollision().get(player).removeFromWorld(false, player.world);
+            DynamXContext.getPlayerToCollision().get(player).removeFromWorld(false, player.getWorld());
         }
     }
 
@@ -37,8 +37,8 @@ public class WalkingOnPlayerController {
      * Teleport the player to the right pos and disables arms animation
      */
     public void applyOffset() {
-        Vector3f newPos = Vector3fPool.get((float) entity.posX, (float) entity.posY, (float) entity.posZ);
-        newPos.addLocal(DynamXGeometry.rotateVectorByQuaternion(offset, entity.physicsRotation));//PhysicsHelper.getRotatedPoint(offset, -entity.rotationPitch, entity.rotationYaw, entity.rotationRoll));
+        Vector3f newPos = JmeVector3fPool.get((float) entity.getPosX(), (float) entity.getPosY(), (float) entity.getPosZ());
+        newPos.addLocal(DynamXGeometry.rotateVectorByQuaternion(offset, entity.physicsRotation));
         player.prevPosX = player.posX;
         player.prevPosY = player.posY;
         player.prevPosZ = player.posZ;

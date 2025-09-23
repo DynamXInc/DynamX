@@ -4,7 +4,7 @@ import fr.dynamx.api.events.PhysicsEvent;
 import fr.dynamx.core.common.DynamXMain;
 import fr.dynamx.core.utils.debug.Profiler;
 import fr.dynamx.core.utils.optimization.SubClassPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 
@@ -27,7 +27,7 @@ public class BuiltinPhysicsWorld extends BasePhysicsWorld {
 
     @Override
     public void stepSimulation(float deltaTime) {
-        Vector3fPool.openPool(SubClassPool.PHYSICS_WORLD_STEP);
+        JmeVector3fPool.openPool(SubClassPool.PHYSICS_WORLD_STEP);
         {
             //Disable physics simulation
             //Note that minecraft does the same, but with a delay of 300, so it avoids physics while entities are paused
@@ -45,7 +45,7 @@ public class BuiltinPhysicsWorld extends BasePhysicsWorld {
                 flushOperations(Profiler.get());
             }
         }
-        Vector3fPool.closePool();
+        JmeVector3fPool.closePool();
 
         Profiler.get().start(Profiler.Profiles.TICK_TERRAIN);
         manager.tickTerrain();

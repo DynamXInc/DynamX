@@ -14,7 +14,7 @@ import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.maths.DynamXMath;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.util.math.MathHelper;
 import org.apache.commons.lang3.math.NumberUtils;
 
@@ -75,7 +75,7 @@ public class DynamXPhysicsHelper {
         if(iPhysicsWorld == null) {
             return null;
         }
-        Vector3fPool.openPool();
+        JmeVector3fPool.openPool();
 
         List<PhysicsRayTestResult> results = new LinkedList<>();
         iPhysicsWorld.getDynamicsWorld().rayTest(from, dir, results);
@@ -86,25 +86,25 @@ public class DynamXPhysicsHelper {
             if (!ignoredBody.test(((BulletShapeType<?>) result.getCollisionObject().getUserObject()).getType()))
                 continue;
 
-            Vector3f hitPosition = Vector3fPool.get();
+            Vector3f hitPosition = JmeVector3fPool.get();
             DynamXMath.interpolateLinear(result.getHitFraction(), from, dir, hitPosition);
 
             float distance = result.getHitFraction() * dir.length();
 
-            Vector3f hitNormalInWorld = Vector3fPool.get();
+            Vector3f hitNormalInWorld = JmeVector3fPool.get();
             result.getHitNormalLocal(hitNormalInWorld);
 
             PhysicsRigidBody hitBody = (PhysicsRigidBody) result.getCollisionObject();
 
-            Vector3fPool.closePool();
+            JmeVector3fPool.closePool();
             return new PhysicsRaycastResult(from, dir, hitPosition, distance, hitNormalInWorld, hitBody);
         }
-        Vector3fPool.closePool();
+        JmeVector3fPool.closePool();
         return null;
     }
 
     public static Vector3f getBodyLocalPoint(PhysicsCollisionObject rigidBody, Vector3f pointInWorld) {
-        Vector3f bodyLocation = Vector3fPool.get();
+        Vector3f bodyLocation = JmeVector3fPool.get();
         rigidBody.getPhysicsLocation(bodyLocation);
 
         Vector3f pickPosition = pointInWorld.subtract(bodyLocation);

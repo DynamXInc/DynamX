@@ -18,7 +18,7 @@ import fr.dynamx.core.common.network.sync.MessageSeatsSync;
 import fr.dynamx.core.common.network.sync.PhysicsEntitySynchronizer;
 import fr.dynamx.core.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -110,10 +110,10 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
         if (seat == null) {
             return;
         }
-        Vector3fPool.openPool();
+        JmeVector3fPool.openPool();
         Vector3f posVec = DynamXGeometry.rotateVectorByQuaternion(seat.getPosition(), entity.renderRotation);
         passenger.setPosition(entity.posX + posVec.x, entity.posY + posVec.y, entity.posZ + posVec.z);
-        Vector3fPool.closePool();
+        JmeVector3fPool.closePool();
 
         // make player's yaw follow the entity yaw
         float deltaRotation = entity.rotationYaw - entity.prevRotationYaw;

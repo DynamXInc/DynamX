@@ -6,7 +6,7 @@ import fr.dynamx.core.common.physics.utils.StairsBox;
 import fr.dynamx.core.utils.debug.TerrainDebugData;
 import fr.dynamx.core.utils.debug.TerrainDebugRenderer;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.util.EnumFacing;
 
 import javax.annotation.Nullable;
@@ -25,11 +25,11 @@ public class IndexedMeshBuilder {
     /**
      * Temporary vector helping to build the faces
      */
-    private final Vector3f min = Vector3fPool.get();
+    private final Vector3f min = JmeVector3fPool.get();
     /**
      * Temporary vector helping to build the faces
      */
-    private final Vector3f max = Vector3fPool.get();
+    private final Vector3f max = JmeVector3fPool.get();
 
     /**
      * Creates a new IndexedMeshBuilder capable to convert lists of boxes into IndexedMeshes, applying the given offset to all boxes
@@ -147,7 +147,7 @@ public class IndexedMeshBuilder {
                 }
                 else*/
                 //TerrainDebugData tdebugData = new TerrainDebugData(TerrainDebugRenderer.STARIS, new float[]{min.x-margin, min.y-margin, min.z-margin, max.x+margin, max.y+margin, max.z+margin});
-                TerrainDebugData tdebugData = new TerrainDebugData(TerrainDebugRenderer.STAIRS, computeDebug(Vector3fPool.get(-x, -y, -z), Arrays.asList(triangles), indices));
+                TerrainDebugData tdebugData = new TerrainDebugData(TerrainDebugRenderer.STAIRS, computeDebug(JmeVector3fPool.get(-x, -y, -z), Arrays.asList(triangles), indices));
                 debugData.put(tdebugData.getUuid(), tdebugData);
             }
         }

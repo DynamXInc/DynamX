@@ -21,7 +21,7 @@ import fr.dynamx.core.utils.debug.renderer.PhysicsDebugRenderer;
 import fr.dynamx.core.utils.maths.DynamXMath;
 import fr.dynamx.core.utils.optimization.GlQuaternionPool;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -165,29 +165,29 @@ public class ClientDebugSystem {
             if (DynamXDebugOptions.PHYSICS_DEBUG.isActive()) {
 
                 for (PhysicsRigidBody body : DynamXContext.getPhysicsWorld(MC.world).getDynamicsWorld().getRigidBodyList()) {
-                    Vector3fPool.openPool();
+                    JmeVector3fPool.openPool();
                     QuaternionPool.openPool();
                     GlQuaternionPool.openPool();
                     PhysicsDebugRenderer.debugRigidBody(body, getPrevRigidBodyTransform(body.nativeId()), getCurrentRigidBodyTransform(body.nativeId()), event.getPartialTicks());
                     GlQuaternionPool.closePool();
-                    Vector3fPool.closePool();
+                    JmeVector3fPool.closePool();
                     QuaternionPool.closePool();
                 }
-                Vector3fPool.openPool();
+                JmeVector3fPool.openPool();
                 QuaternionPool.openPool();
                 GlQuaternionPool.openPool();
                 DynamXContext.getPhysicsWorld(MC.world).getDynamicsWorld().getSoftBodyList().forEach(PhysicsDebugRenderer::debugSoftBody);
-                Vector3fPool.closePool();
+                JmeVector3fPool.closePool();
                 QuaternionPool.closePool();
 
                 GlStateManager.disableDepth();
-                Vector3fPool.openPool();
+                JmeVector3fPool.openPool();
                 QuaternionPool.openPool();
                 for (PhysicsJoint physicsJoint : DynamXContext.getPhysicsWorld(MC.world).getDynamicsWorld().getJointList()) {
                     PhysicsDebugRenderer.debugConstraint(physicsJoint, event.getPartialTicks());
                 }
                 GlQuaternionPool.closePool();
-                Vector3fPool.closePool();
+                JmeVector3fPool.closePool();
                 QuaternionPool.closePool();
                 GlStateManager.enableDepth();
             }
@@ -200,22 +200,22 @@ public class ClientDebugSystem {
                 CameraSystem.drawDebug();
             }
 
-            Vector3fPool.openPool();
+            JmeVector3fPool.openPool();
             if (MC.objectMouseOver != null) {
                 if (!rootPlayer.isSneaking()) {
                     disableShapeDebug(lastPart);
-                    Vector3fPool.closePool();
+                    JmeVector3fPool.closePool();
                     return;
                 }
                 if (!(MC.objectMouseOver.entityHit instanceof PackPhysicsEntity)) {
                     disableShapeDebug(lastPart);
-                    Vector3fPool.closePool();
+                    JmeVector3fPool.closePool();
                     return;
                 }
                 PackPhysicsEntity<?, ?> entityHit = (PackPhysicsEntity<?, ?>) MC.objectMouseOver.entityHit;
                 if (!(entityHit.getPackInfo() instanceof IPartContainer)) {
                     disableShapeDebug(lastPart);
-                    Vector3fPool.closePool();
+                    JmeVector3fPool.closePool();
                     return;
                 }
                 Predicate<BasePart<?>> wantedShape = null;
@@ -234,7 +234,7 @@ public class ClientDebugSystem {
                 BasePart<?> basePart = DynamXUtils.rayTestPart(rootPlayer, entityHit, (IPartContainer<?>) entityHit.getPackInfo(), wantedShape);
                 if (basePart == null) {
                     disableShapeDebug(lastPart);
-                    Vector3fPool.closePool();
+                    JmeVector3fPool.closePool();
                     return;
                 }
                 GlStateManager.pushMatrix();
@@ -272,7 +272,7 @@ public class ClientDebugSystem {
                 QuaternionPool.closePool();
                 GlStateManager.popMatrix();
             }
-            Vector3fPool.closePool();
+            JmeVector3fPool.closePool();
         }
     }
 
@@ -460,7 +460,7 @@ public class ClientDebugSystem {
         RigidBodyTransform prevTransform = ClientDebugSystem.getPrevRigidBodyTransform(rigidBody.nativeId());
         RigidBodyTransform curTransform = ClientDebugSystem.getCurrentRigidBodyTransform(rigidBody.nativeId());
         if (prevTransform == null || curTransform == null) {
-            return Vector3fPool.get();
+            return JmeVector3fPool.get();
         }
         return DynamXMath.interpolateLinear(partialTicks, prevTransform.getPosition(), curTransform.getPosition());
     }

@@ -39,7 +39,7 @@ import fr.dynamx.core.utils.debug.DynamXDebugOption;
 import fr.dynamx.core.utils.debug.DynamXDebugOptions;
 import fr.dynamx.core.utils.errors.DynamXErrorManager;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import fr.dynamx.core.utils.physics.DynamXPhysicsHelper;
 import lombok.Getter;
 import lombok.Setter;
@@ -172,11 +172,11 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     }
 
     public void mount(BaseVehicleEntity<?> vehicleEntity, PartEntitySeat seat, EntityPlayer context) {
-        Vector3fPool.openPool();
+        JmeVector3fPool.openPool();
         if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.PlayerInteract(context, vehicleEntity, seat))) {
             seat.interact(vehicleEntity, context);
         }
-        Vector3fPool.closePool();
+        JmeVector3fPool.closePool();
     }
 
     @Nullable
@@ -375,7 +375,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
             ModularPhysicsEntity<?> entity = context.getEntity();
             DoorsModule module = entity != null ? entity.getModuleByType(DoorsModule.class) : null;
             if (!isEnabled() || module == null || module.getCurrentState(getId()) == DoorsModule.DoorState.CLOSED) {
-                Vector3f pos = Vector3fPool.get().addLocal(translation);
+                Vector3f pos = JmeVector3fPool.get().addLocal(translation);
                 pos.subtract(getDoorAttachPoint(), pos);
                 transform.translate(pos.x, pos.y, pos.z);
             } else if (module.getTransforms().containsKey(getId())) {
@@ -383,7 +383,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
                 SynchronizedRigidBodyTransform sync = module.getTransforms().get(getId());
                 RigidBodyTransform rbSyncTrans = sync.getTransform();
                 RigidBodyTransform prev = sync.getPrevTransform();
-                Vector3f pos = Vector3fPool.get(prev.getPosition()).addLocal(rbSyncTrans.getPosition().subtract(prev.getPosition(), Vector3fPool.get()).multLocal(partialTicks));
+                Vector3f pos = JmeVector3fPool.get(prev.getPosition()).addLocal(rbSyncTrans.getPosition().subtract(prev.getPosition(), JmeVector3fPool.get()).multLocal(partialTicks));
 
                 transform.rotate(ClientDynamXUtils.computeInterpolatedJomlQuaternion(entity.prevRenderRotation, entity.renderRotation, partialTicks, true));
                 transform.translate((float) (pos.x - (entity.prevPosX + (entity.posX - entity.prevPosX) * partialTicks)),

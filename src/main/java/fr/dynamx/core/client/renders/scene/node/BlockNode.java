@@ -16,7 +16,7 @@ import fr.dynamx.core.utils.debug.DynamXDebugOptions;
 import fr.dynamx.core.utils.optimization.GlQuaternionPool;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.client.renderer.GlStateManager;
@@ -50,7 +50,7 @@ public class BlockNode<A extends BlockObject<?>> extends AbstractItemNode<BaseRe
     public void render(BaseRenderContext.BlockRenderContext context, A packInfo, Matrix4f parentTransform) {
         if (context.getTileEntity() != null && context.getTileEntity().getBlockType() instanceof DynamXBlock) { //the instanceof fixes a crash
             transform.identity();
-            Vector3fPool.openPool();
+            JmeVector3fPool.openPool();
             QuaternionPool.openPool();
             GlQuaternionPool.openPool();
             TEDynamXBlock te = context.getTileEntity();
@@ -75,7 +75,7 @@ public class BlockNode<A extends BlockObject<?>> extends AbstractItemNode<BaseRe
 
             GlQuaternionPool.closePool();
             QuaternionPool.closePool();
-            Vector3fPool.closePool();
+            JmeVector3fPool.closePool();
             DynamXRenderUtils.popGlAllAttribBits();
         }
     }
@@ -110,7 +110,7 @@ public class BlockNode<A extends BlockObject<?>> extends AbstractItemNode<BaseRe
         if (te == null)
             return;
         transform.identity();
-        Vector3fPool.openPool();
+        JmeVector3fPool.openPool();
         QuaternionPool.openPool();
         GlQuaternionPool.openPool();
         GlStateManager.pushMatrix();
@@ -153,7 +153,7 @@ public class BlockNode<A extends BlockObject<?>> extends AbstractItemNode<BaseRe
         GlStateManager.popMatrix();
         GlQuaternionPool.closePool();
         QuaternionPool.closePool();
-        Vector3fPool.closePool();
+        JmeVector3fPool.closePool();
     }
 
     @Override

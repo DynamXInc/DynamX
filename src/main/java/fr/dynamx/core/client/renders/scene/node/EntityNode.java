@@ -11,7 +11,7 @@ import fr.dynamx.core.utils.debug.DynamXDebugOptions;
 import fr.dynamx.core.utils.optimization.GlQuaternionPool;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.SubClassPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.client.renderer.GlStateManager;
@@ -57,7 +57,7 @@ public class EntityNode<A extends IPhysicsPackInfo> extends AbstractItemNode<Bas
      * Implementation of the render method, to allow the use of a modified transform matrix
      */
     protected void renderWithTransform(BaseRenderContext.EntityRenderContext context, A packInfo, Matrix4f transform) {
-        Vector3fPool.openPool(SubClassPool.ENTITY_RENDER_NODE);
+        JmeVector3fPool.openPool(SubClassPool.ENTITY_RENDER_NODE);
         QuaternionPool.openPool(SubClassPool.ENTITY_RENDER_NODE);
         GlQuaternionPool.openPool(SubClassPool.ENTITY_RENDER_NODE);
 
@@ -97,7 +97,7 @@ public class EntityNode<A extends IPhysicsPackInfo> extends AbstractItemNode<Bas
 
         GlQuaternionPool.closePool();
         QuaternionPool.closePool();
-        Vector3fPool.closePool();
+        JmeVector3fPool.closePool();
         DynamXRenderUtils.popGlAllAttribBits();
     }
 

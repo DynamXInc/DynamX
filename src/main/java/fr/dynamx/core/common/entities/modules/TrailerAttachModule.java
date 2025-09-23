@@ -16,7 +16,7 @@ import fr.dynamx.core.common.physics.joints.EntityJoint;
 import fr.dynamx.core.common.physics.joints.JointHandler;
 import fr.dynamx.core.common.physics.joints.JointHandlerRegistry;
 import fr.dynamx.core.utils.DynamXConstants;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import lombok.Getter;
 import net.minecraft.util.ResourceLocation;
 
@@ -49,8 +49,8 @@ public class TrailerAttachModule implements IPhysicsModule<BaseVehiclePhysicsHan
 
     @Override
     public Constraint createJoint(TrailerEntity<?> trailer, byte jointId) {
-        Vector3f p1 = Vector3fPool.get(info.getAttachPoint());
-        Vector3f p2 = Vector3fPool.get(trailer.getModuleByType(TrailerAttachModule.class).getAttachPoint());
+        Vector3f p1 = JmeVector3fPool.get(info.getAttachPoint());
+        Vector3f p2 = JmeVector3fPool.get(trailer.getModuleByType(TrailerAttachModule.class).getAttachPoint());
         p1.addLocal(entity.getPackInfo().getCenterOfMass());
         p2.addLocal(trailer.getPackInfo().getCenterOfMass());
         Point2PointJoint joint = new Point2PointJoint(entity.physicsHandler.getCollisionObject(), trailer.physicsHandler.getCollisionObject(), p1, p2);

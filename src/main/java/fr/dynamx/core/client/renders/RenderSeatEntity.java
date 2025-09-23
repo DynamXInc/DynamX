@@ -10,7 +10,7 @@ import fr.dynamx.core.utils.debug.DynamXDebugOptions;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.entity.Render;
@@ -39,12 +39,12 @@ public class RenderSeatEntity extends Render<SeatEntity> {
                 RenderGlobal.drawBoundingBox(-0.5, -0.5, -0.5, 0.5, 0.5, 0.5,
                         1, 0, 0, 1);
             } else {
-                Vector3fPool.openPool();
+                JmeVector3fPool.openPool();
                 QuaternionPool.openPool();
                 MutableBoundingBox box = new MutableBoundingBox();
                 for (PartBlockSeat seat : (List<PartBlockSeat>) block.getPackInfo().getPartsByType(PartBlockSeat.class)) {
                     seat.getBox(box);
-                    box = DynamXContext.getCollisionHandler().rotateBB(Vector3fPool.get(), box, block.getCollidableRotation());
+                    box = DynamXContext.getCollisionHandler().rotateBB(JmeVector3fPool.get(), box, block.getCollidableRotation());
                     Vector3f partPos = DynamXGeometry.rotateVectorByQuaternion(seat.getPosition(), block.getCollidableRotation());
                     partPos.addLocal(block.getRelativeTranslation());
                     box.offset(partPos);
@@ -52,7 +52,7 @@ public class RenderSeatEntity extends Render<SeatEntity> {
                             0, 1, 0, 1);
                 }
                 QuaternionPool.closePool();
-                Vector3fPool.closePool();
+                JmeVector3fPool.closePool();
             }
             GlStateManager.enableLighting();
             GlStateManager.enableTexture2D();

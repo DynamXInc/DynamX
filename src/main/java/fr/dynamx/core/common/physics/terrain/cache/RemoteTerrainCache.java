@@ -17,7 +17,7 @@ import fr.dynamx.core.utils.debug.ChunkGraph;
 import fr.dynamx.core.utils.debug.Profiler;
 import fr.dynamx.core.utils.optimization.HashMapPool;
 import fr.dynamx.core.utils.optimization.PooledHashMap;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
@@ -159,7 +159,7 @@ public class RemoteTerrainCache implements ITerrainCache {
         if (rawData != null && dataType != 2) {
             List<ITerrainElement> elements = new ArrayList<>();
             List<ITerrainElement.IPersistentTerrainElement> persistents = new ArrayList<>();
-            Vector3fPool.openPool();
+            JmeVector3fPool.openPool();
             //long start = System.currentTimeMillis();
             long start2;
             ObjectInputStream in = null;
@@ -209,7 +209,7 @@ public class RemoteTerrainCache implements ITerrainCache {
                 if (start > DynamXConfig.networkChunkComputeWarnTime) {
                     DynamXMain.log.warn("Took " + start + " ms to load terrain from network at " + pos + " ! Loaded " + elements + " elements and " + persistents + " persistent elements");
                 }*/
-                Vector3fPool.closePool();
+                JmeVector3fPool.closePool();
                 data = new ChunkTerrain(elements, persistents);
             }
         }
@@ -234,9 +234,9 @@ public class RemoteTerrainCache implements ITerrainCache {
         if (dataType == 2) { //Persistent elements
             if (rawData != null) { //Not empty : load received elements and complete the query
                 rawSlopeDataCache.putData(pos, rawData);
-                Vector3fPool.openPool();
+                JmeVector3fPool.openPool();
                 future.complete(new ChunkTerrain((List<ITerrainElement.IPersistentTerrainElement>) (List<?>) rawSlopeDataCache.loadChunk(pos, this)));
-                Vector3fPool.closePool();
+                JmeVector3fPool.closePool();
             } else { //Empty : complete the query
                 future.complete(new ChunkTerrain());
             }
@@ -248,9 +248,9 @@ public class RemoteTerrainCache implements ITerrainCache {
                 erroredChunks.add(pos);
             }
             //Complete the query
-            Vector3fPool.openPool();
+            JmeVector3fPool.openPool();
             future.complete(parsedData);
-            Vector3fPool.closePool();
+            JmeVector3fPool.closePool();
         }
     }
 

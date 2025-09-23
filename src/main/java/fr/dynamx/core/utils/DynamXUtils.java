@@ -31,7 +31,8 @@ import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.maths.DynamXMath;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.dynamx.forge.DynamXConfig;
+import fr.hermes.forge.JmeVector3fPool;
 import fr.dynamx.core.utils.physics.DynamXPhysicsHelper;
 import fr.dynamx.core.utils.physics.PhysicsRaycastResult;
 import io.netty.buffer.ByteBuf;
@@ -143,19 +144,19 @@ public class DynamXUtils {
     }
 
     public static Vector3f toVector3f(Vec3d pos) {
-        return Vector3fPool.get((float) pos.x, (float) pos.y, (float) pos.z);
+        return JmeVector3fPool.get((float) pos.x, (float) pos.y, (float) pos.z);
     }
 
     public static Vector3f toVector3f(javax.vecmath.Vector3f pos) {
-        return Vector3fPool.get(pos.x, pos.y, pos.z);
+        return JmeVector3fPool.get(pos.x, pos.y, pos.z);
     }
 
     public static Vector3f toVector3f(BlockPos pos) {
-        return Vector3fPool.get((float) pos.getX(), (float) pos.getY(), (float) pos.getZ());
+        return JmeVector3fPool.get((float) pos.getX(), (float) pos.getY(), (float) pos.getZ());
     }
 
     public static Vector3f toVector3f(org.joml.Vector3f pos) {
-        return Vector3fPool.get(pos.x, pos.y, pos.z);
+        return JmeVector3fPool.get(pos.x, pos.y, pos.z);
     }
 
     public static org.joml.Vector3f toVector3f(Vector3f pos) {
@@ -176,14 +177,14 @@ public class DynamXUtils {
     }
 
     public static Vector3f getPositionEyes(Entity entity) {
-        return Vector3fPool.get((float) entity.posX, (float) entity.posY + entity.getEyeHeight(), (float) entity.posZ);
+        return JmeVector3fPool.get((float) entity.posX, (float) entity.posY + entity.getEyeHeight(), (float) entity.posZ);
     }
 
     public static Vector3f calculateRay(Entity base, float distance, Vector3f offset) {
         Vec3d vec3 = base.getPositionVector();
         Vec3d vec31 = base.getLook(1);
         Vec3d vec32 = vec3.add(vec31.x * distance, vec31.y * distance, vec31.z * distance);
-        Vector3f lookAt = Vector3fPool.get((float) vec32.x, (float) vec32.y, (float) vec32.z);
+        Vector3f lookAt = JmeVector3fPool.get((float) vec32.x, (float) vec32.y, (float) vec32.z);
         lookAt.subtractLocal(offset.x, offset.y, offset.z);
         return lookAt;
     }
@@ -219,7 +220,7 @@ public class DynamXUtils {
     }
 
     public static Vector3f getCameraTranslation(Minecraft mc, float delta) {
-        return Vector3fPool.get((float) mc.player.prevPosX + (float) (mc.player.posX - mc.player.prevPosX) * delta, (float) mc.player.prevPosY + (float) (mc.player.posY - (float) mc.player.prevPosY) * delta, (float) mc.player.prevPosZ + (float) (mc.player.posZ - (float) mc.player.prevPosZ) * delta);
+        return JmeVector3fPool.get((float) mc.player.prevPosX + (float) (mc.player.posX - mc.player.prevPosX) * delta, (float) mc.player.prevPosY + (float) (mc.player.posY - (float) mc.player.prevPosY) * delta, (float) mc.player.prevPosZ + (float) (mc.player.posZ - (float) mc.player.prevPosZ) * delta);
     }
 
     public static RayTraceResult rayTraceEntitySpawn(World worldIn, EntityPlayer playerIn, EnumHand hand) {
@@ -308,21 +309,21 @@ public class DynamXUtils {
     }
 
     public static BasePart<?> rayTestPart(EntityPlayer player, PackPhysicsEntity<?, ?> entityPart, IPartContainer<?> packInfo, Predicate<BasePart<?>> wantedPart) {
-        Vector3fPool.openPool();
+        JmeVector3fPool.openPool();
         Vec3d lookVec = player.getLook(1.0F);
         Vec3d hitVec = player.getPositionVector().add(0, player.getEyeHeight(), 0);
         BasePart<?> nearest = null;
         Vector3f nearestPos = null;
-        Vector3f playerPos = Vector3fPool.get((float) player.posX, (float) player.posY, (float) player.posZ);
+        Vector3f playerPos = JmeVector3fPool.get((float) player.posX, (float) player.posY, (float) player.posZ);
         for (float f = 1.0F; f < 4.0F; f += 0.1F) {
             for (BasePart<?> part : packInfo.getAllParts()) {
                 if (wantedPart != null && !wantedPart.test(part)) {
                     continue;
                 }
                 Vector3f partPos = DynamXGeometry.rotateVectorByQuaternion(part.getPosition(), entityPart.physicsRotation);
-                Vector3fPool.openPool();
-                partPos.addLocal(toVector3f(entityPart.getPositionVector()));
-                Vector3fPool.closePool();
+                JmeVector3fPool.openPool();
+                partPos.addLocal(entityPart.physicsPosition);
+                JmeVector3fPool.closePool();
                 if ((nearestPos == null || DynamXGeometry.distanceBetween(partPos, playerPos) < DynamXGeometry.distanceBetween(nearestPos, playerPos))
                         && vecInsideBox(hitVec, part, partPos)) {
                     nearest = part;
@@ -331,7 +332,7 @@ public class DynamXUtils {
             }
             hitVec = hitVec.add(lookVec.x * 0.1F, lookVec.y * 0.1F, lookVec.z * 0.1F);
         }
-        Vector3fPool.closePool();
+        JmeVector3fPool.closePool();
         return nearest;
     }
 
@@ -382,7 +383,7 @@ public class DynamXUtils {
     }
 
     public static void attachTrailer(EntityPlayer player, BaseVehicleEntity<?> carEntity, BaseVehicleEntity<?> trailer) {
-        Vector3fPool.openPool();
+        JmeVector3fPool.openPool();
         Vector3f p1r = DynamXGeometry.rotateVectorByQuaternion(carEntity.getModuleByType(TrailerAttachModule.class).getAttachPoint(), carEntity.physicsRotation);
         Vector3f p2r = DynamXGeometry.rotateVectorByQuaternion(trailer.getModuleByType(TrailerAttachModule.class).getAttachPoint(), trailer.physicsRotation);
         if (p1r.addLocal(carEntity.physicsPosition).subtract(p2r.addLocal(trailer.physicsPosition)).lengthSquared() < 60) {
@@ -417,7 +418,7 @@ public class DynamXUtils {
         } else {
             player.sendMessage(new TextComponentTranslation("trailer.attach.toofar"));
         }
-        Vector3fPool.closePool();
+        JmeVector3fPool.closePool();
     }
 
 

@@ -12,7 +12,7 @@ import fr.dynamx.core.common.network.packets.MessageSyncPlayerPicking;
 import fr.dynamx.forge.DynamXConfig;
 import fr.dynamx.core.utils.DynamXUtils;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import fr.dynamx.core.utils.physics.PhysicsRaycastResult;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -29,7 +29,7 @@ public class PickingObjectHelper {
                 && !DynamXConfig.allowPlayersToMoveObjects || moduleAction.getMovableAction() == MovableModule.EnumAction.ATTACH_OBJECTS) {
             return;
         }
-        Vector3fPool.openPool();
+        JmeVector3fPool.openPool();
         QuaternionPool.openPool();
         if (!DynamXContext.getPlayerPickingObjects().containsKey(player.getEntityId())) {
             switch (moduleAction.getMovableAction()) {
@@ -62,7 +62,7 @@ public class PickingObjectHelper {
         //Copy map to avoid concurrency errors
         //TODO use map pool
         DynamXContext.getNetwork().sendToClientFromOtherThread(new MessageSyncPlayerPicking(new HashMap<>(DynamXContext.getPlayerPickingObjects())), EnumPacketTarget.ALL, null);
-        Vector3fPool.closePool();
+        JmeVector3fPool.closePool();
         QuaternionPool.closePool();
     }
 

@@ -12,7 +12,7 @@ import fr.dynamx.core.utils.client.DynamXRenderUtils;
 import fr.dynamx.core.utils.optimization.GlQuaternionPool;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.SubClassPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
@@ -53,7 +53,7 @@ public abstract class AbstractItemNode<C extends IRenderContext, A extends IMode
             GlStateManager.popMatrix();
         } else {
             transform.identity();
-            Vector3fPool.openPool(SubClassPool.ITEM_RENDER_NODE);
+            JmeVector3fPool.openPool(SubClassPool.ITEM_RENDER_NODE);
             QuaternionPool.openPool(SubClassPool.ITEM_RENDER_NODE);
             GlQuaternionPool.openPool(SubClassPool.ITEM_RENDER_NODE);
             if (!MinecraftForge.EVENT_BUS.post(new DynamXRenderItemEvent(context, this, DynamXRenderItemEvent.EventStage.TRANSFORM))) {
@@ -71,7 +71,7 @@ public abstract class AbstractItemNode<C extends IRenderContext, A extends IMode
             }
             GlQuaternionPool.closePool();
             QuaternionPool.closePool();
-            Vector3fPool.closePool();
+            JmeVector3fPool.closePool();
             DynamXRenderUtils.popGlAllAttribBits();
         }
     }

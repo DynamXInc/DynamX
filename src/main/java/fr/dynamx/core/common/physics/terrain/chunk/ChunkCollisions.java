@@ -19,7 +19,7 @@ import fr.dynamx.core.utils.debug.ChunkGraph;
 import fr.dynamx.core.utils.debug.Profiler;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.SubClassPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 
@@ -170,7 +170,7 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
      * @param profiler The current profiler, can be null
      */
     public void addToBulletWorld(IPhysicsWorld physicsWorld, @Nullable Profiler profiler) {
-        Vector3fPool.openPool();
+        JmeVector3fPool.openPool();
         if (!getChunkState().areComputedElementsAdded() && !getChunkState().arePersistentElementsAdded())
             addToBulletWorld(physicsWorld, TerrainElementType.ALL, profiler);
         else if (!getChunkState().areComputedElementsAdded())
@@ -179,7 +179,7 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
             addToBulletWorld(physicsWorld, TerrainElementType.PERSISTENT_ELEMENTS, profiler);
         else if (false) //FIXME should not be called
             throw new IllegalStateException("Chunk is already added " + this + " " + getChunkState());
-        Vector3fPool.closePool();
+        JmeVector3fPool.closePool();
     }
 
     /**
@@ -199,7 +199,7 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
             int x = myPos.x * 16 + 8;
             int y = myPos.y * 16;
             int z = myPos.z * 16 + 8;
-            Vector3f pos = Vector3fPool.get(x, y, z);
+            Vector3f pos = JmeVector3fPool.get(x, y, z);
             /*final Vector3f min = Vector3fPool.get(pos);
             final Vector3f max = Vector3fPool.get(pos);
             Matrix3f mat = new Matrix3f();*/
@@ -328,7 +328,7 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
      */
     public CompletableFuture<Void> loadCollisionsAsync(ITerrainManager manager, ITerrainCache cache, ChunkLoadingTicket ticket, Vector3f pos) {
         TerrainElementType needType = initCollisionsLoading(ticket, false);
-        final Vector3f fpos = Vector3fPool.getPermanentVector(pos);
+        final Vector3f fpos = JmeVector3fPool.getPermanentVector(pos);
         final ChunkLoadingTicket.Snap c = ticket.snapshot();
         return cache.asyncLoad(ticket, needType).thenAccept((terrainElements) -> { //Nb : the FileTerrainCache is not async, only the RemoteTerrainCache is
             Profiler localProfiler = Profiler.get(); //it's async,so in another thread
@@ -364,7 +364,7 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
     private boolean localLoadCollisions(@Nullable ChunkTerrain cachedElements, ITerrainCache cache, TerrainElementType type, ChunkLoadingTicket ticket, Vector3f pos, Profiler profiler) {
         profiler.start(Profiler.Profiles.CHUNK_SHAPE_COMPUTE);
 
-        Vector3fPool.openPool(SubClassPool.CHUNK_COLLISIONS_LOAD);
+        JmeVector3fPool.openPool(SubClassPool.CHUNK_COLLISIONS_LOAD);
         QuaternionPool.openPool(SubClassPool.CHUNK_COLLISIONS_LOAD);
 
         boolean debug = DynamXConfig.enableDebugTerrainManager && DynamXConfig.chunkDebugPoses.contains(getPos());
@@ -435,7 +435,7 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
 
             shouldSave = localLoadCollisions(cachedElements, cache, TerrainElementType.RELOAD_ALL, ticket, pos, profiler);
             QuaternionPool.closePool();
-            Vector3fPool.closePool();
+            JmeVector3fPool.closePool();
             return shouldSave;
         }
         this.elements.getPersistentElements().forEach(element -> {
@@ -451,7 +451,7 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
         });
 
         QuaternionPool.closePool();
-        Vector3fPool.closePool();
+        JmeVector3fPool.closePool();
         setChunkState(EnumChunkCollisionsState.COMPUTED);
         profiler.end(Profiler.Profiles.CHUNK_SHAPE_COMPUTE);
         return shouldSave;
@@ -475,7 +475,7 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
             removeFromBulletWorld(manager.getPhysicsWorld(), TerrainElementType.PERSISTENT_ELEMENTS);
         elements.getPersistentElements().addAll(elementList);
         for (ITerrainElement element : elementList) {
-            element.build(mcWorld, Vector3fPool.get(myPos.x * 16, myPos.y * 16, myPos.z * 16));
+            element.build(mcWorld, JmeVector3fPool.get(myPos.x * 16, myPos.y * 16, myPos.z * 16));
         }
         if (added)
             addToBulletWorld(manager.getPhysicsWorld(), TerrainElementType.PERSISTENT_ELEMENTS, null);

@@ -19,7 +19,7 @@ import fr.dynamx.core.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.core.common.physics.entities.modules.EnginePhysicsHandler;
 import fr.dynamx.core.common.physics.entities.parts.engine.AutomaticGearboxHandler;
 import fr.dynamx.core.utils.DynamXConstants;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
@@ -265,7 +265,7 @@ public abstract class BasicEngineModule implements IPhysicsModule<BaseVehiclePhy
             if (currentEngineSound.getState() == EnumSoundState.STOPPING) { //already playing
                 currentEngineSound.onStarted();
             } else {
-                SOUND_HANDLER.playStreamingSound(Vector3fPool.get(currentEngineSound.getPosX(), currentEngineSound.getPosY(), currentEngineSound.getPosZ()), currentEngineSound);
+                SOUND_HANDLER.playStreamingSound(JmeVector3fPool.get(currentEngineSound.getPosX(), currentEngineSound.getPosY(), currentEngineSound.getPosZ()), currentEngineSound);
             }
         }
     }

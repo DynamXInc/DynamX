@@ -3,6 +3,7 @@ package fr.dynamx.core.common.command;
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.core.common.DynamXContext;
 import fr.dynamx.core.utils.optimization.*;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
@@ -40,14 +41,14 @@ public class CmdPoolStates implements ISubCommand {
             switch (target) {
                 case "Vector3f":
                     sender.sendMessage(new TextComponentString(TextFormatting.GOLD + "Vector3f pool inspection:"));
-                    result = Vector3fPool.getPool().getExpandedDebugInfo();
+                    result = JmeVector3fPool.getPool().getExpandedDebugInfo();
                     sender.sendMessage(new TextComponentString(result));
 
                     if (physicsWorld == null) {
                         return;
                     }
                     physicsWorld.schedule(() -> {
-                        String result2 = Vector3fPool.getPool().getExpandedDebugInfo();
+                        String result2 = JmeVector3fPool.getPool().getExpandedDebugInfo();
 
                         sender.sendMessage(new TextComponentString(TextFormatting.GREEN + "Physics thread:"));
                         sender.sendMessage(new TextComponentString(result2));
@@ -76,7 +77,7 @@ public class CmdPoolStates implements ISubCommand {
                 "HashMap: " + HashMapPool.getINSTANCE().getDebugInfo() + "\n" +
                 "Quaternion: " + QuaternionPool.getPool().getDebugInfo() + "\n" +
                 "UDPByteArray: " + UDPByteArrayPool.getINSTANCE().getDebugInfo() + "\n" +
-                "Vector3f: " + Vector3fPool.getPool().getDebugInfo() + "\n";
+                "Vector3f: " + JmeVector3fPool.getPool().getDebugInfo() + "\n";
 
         if (client) {
             result += getClientResult();
@@ -93,7 +94,7 @@ public class CmdPoolStates implements ISubCommand {
             String result2 = "BoundingBox: " + BoundingBoxPool.getPool().getDebugInfo() + "\n" +
                     "HashMap: " + HashMapPool.getINSTANCE().getDebugInfo() + "\n" +
                     "Quaternion: " + QuaternionPool.getPool().getDebugInfo() + "\n" +
-                    "Vector3f: " + Vector3fPool.getPool().getDebugInfo() + "\n";
+                    "Vector3f: " + JmeVector3fPool.getPool().getDebugInfo() + "\n";
 
             sender.sendMessage(new TextComponentString(TextFormatting.GREEN + "Physics thread pools:"));
             sender.sendMessage(new TextComponentString(result2));

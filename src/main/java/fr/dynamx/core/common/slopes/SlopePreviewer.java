@@ -12,7 +12,7 @@ import fr.dynamx.core.utils.debug.DynamXDebugOption;
 import fr.dynamx.core.utils.debug.DynamXDebugOptions;
 import fr.dynamx.core.utils.debug.TerrainDebugData;
 import fr.dynamx.core.utils.debug.TerrainDebugRenderer;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
@@ -62,7 +62,7 @@ public class SlopePreviewer {
     public static void worldRender(RenderWorldLastEvent event) {
         //Drawing preview of slopes with the slope item
         if (Minecraft.getMinecraft().player.getHeldItemMainhand().getItem() instanceof ItemSlopes) {
-            Vector3fPool.openPool();
+            JmeVector3fPool.openPool();
             GlStateManager.pushMatrix();
             EntityPlayer rootPlayer = Minecraft.getMinecraft().player;
             float partialTicks = event.getPartialTicks();
@@ -106,7 +106,7 @@ public class SlopePreviewer {
 
             GlStateManager.enableTexture2D();
             GlStateManager.popMatrix();
-            Vector3fPool.closePool();
+            JmeVector3fPool.closePool();
         }
     }
 
@@ -162,19 +162,19 @@ public class SlopePreviewer {
 
             SlopeBuildingConfig config = new SlopeBuildingConfig(s.getTagCompound().getCompoundTag("ptconfig"));
             if (!p1.equals(cacheP1) || !p2.equals(cacheP2) || cacheVersion != config.getConfigVersion()) {
-                cacheP1 = Vector3fPool.getPermanentVector(p1);
-                cacheP2 = Vector3fPool.getPermanentVector(p2);
+                cacheP1 = JmeVector3fPool.getPermanentVector(p1);
+                cacheP2 = JmeVector3fPool.getPermanentVector(p2);
                 cacheVersion = config.getConfigVersion();
                 if (config.getFacing().getAxis() != EnumFacing.Axis.Y) {
                     Minecraft.getMinecraft().ingameGUI.setOverlayMessage(TextFormatting.GOLD + "Generating preview...", false);
                     POOL.submit(() -> {
-                        Vector3fPool.openPool();
+                        JmeVector3fPool.openPool();
                         slopeCache = SlopeGenerator.generateSlopesInBox(rootPlayer.world, config, new BlockPos(p1.x, p1.y, p1.z), new BlockPos(p2.x, p2.y, p2.z));
                         if (slopeCache.isEmpty())
                             Minecraft.getMinecraft().ingameGUI.setOverlayMessage(TextFormatting.RED + "No slope found", false);
                         else
                             Minecraft.getMinecraft().ingameGUI.setOverlayMessage(TextFormatting.GREEN + "Preview generated", false);
-                        Vector3fPool.closePool();
+                        JmeVector3fPool.closePool();
                     });
                 } else {
                     slopeCache = null;
@@ -205,13 +205,13 @@ public class SlopePreviewer {
                     cacheVersion = -1;
                     Minecraft.getMinecraft().ingameGUI.setOverlayMessage(TextFormatting.GOLD + "Generating preview...", false);
                     POOL.submit(() -> {
-                        Vector3fPool.openPool();
+                        JmeVector3fPool.openPool();
                         slopeCache = SlopeGenerator.generateSlopesFromControlPoints(cachePoints);
                         if (slopeCache.isEmpty())
                             Minecraft.getMinecraft().ingameGUI.setOverlayMessage(TextFormatting.RED + "No slope found", false);
                         else
                             Minecraft.getMinecraft().ingameGUI.setOverlayMessage(TextFormatting.GREEN + "Preview generated", false);
-                        Vector3fPool.closePool();
+                        JmeVector3fPool.closePool();
                     });
                 }
                 drawSlopesFromCache();
@@ -231,7 +231,7 @@ public class SlopePreviewer {
     private static void drawSlopesFromCache() {
         if (slopeCache != null) {
             for (Map.Entry<VerticalChunkPos, List<ITerrainElement.IPersistentTerrainElement>> e : slopeCache.entrySet()) {
-                Vector3f pos = Vector3fPool.get(e.getKey().x * 16 + 8, e.getKey().y * 16, e.getKey().z * 16 + 8);
+                Vector3f pos = JmeVector3fPool.get(e.getKey().x * 16 + 8, e.getKey().y * 16, e.getKey().z * 16 + 8);
                 for (ITerrainElement el : e.getValue()) {
                     drawSlopeDebug(((CustomSlopeTerrainElement) el).getDebugDataPreview(pos), 0, 0.7f, 0.7f, 0.5f);
                 }

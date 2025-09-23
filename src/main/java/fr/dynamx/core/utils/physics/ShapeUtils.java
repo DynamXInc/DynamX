@@ -14,7 +14,7 @@ import fr.dynamx.core.common.contentpack.PackInfo;
 import fr.dynamx.core.common.objloader.data.DxModelData;
 import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.DynamXUtils;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.util.ResourceLocation;
 import vhacd.VHACD;
 import vhacd.VHACDHull;
@@ -221,25 +221,25 @@ public class ShapeUtils {
     }
 
     public static List<Vector3f> getDebugVectorList(CompoundCollisionShape compoundShape, FloatBuffer[] debugBuffer) {
-        Vector3fPool.openPool();
+        JmeVector3fPool.openPool();
         List<Vector3f> vectors = new ArrayList<>();
         if (compoundShape != null) {
             int j = 0;
             for (ChildCollisionShape sh : compoundShape.listChildren()) {
                 FloatBuffer fb = debugBuffer[j];
                 if (fb != null) {
-                    vectors.addAll(DynamXUtils.floatBufferToVec3f(fb, sh.copyOffset(Vector3fPool.get())));
+                    vectors.addAll(DynamXUtils.floatBufferToVec3f(fb, sh.copyOffset(JmeVector3fPool.get())));
                 }
                 j++;
             }
         } else {
             for (FloatBuffer fb : debugBuffer) {
                 if (fb != null) {
-                    vectors.addAll(DynamXUtils.floatBufferToVec3f(fb, Vector3fPool.get()));
+                    vectors.addAll(DynamXUtils.floatBufferToVec3f(fb, JmeVector3fPool.get()));
                 }
             }
         }
-        Vector3fPool.closePool();
+        JmeVector3fPool.closePool();
         return vectors;
     }
 

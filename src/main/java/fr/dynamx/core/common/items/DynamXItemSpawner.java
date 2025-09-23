@@ -5,7 +5,7 @@ import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.core.common.contentpack.type.objects.AbstractItemObject;
 import fr.dynamx.core.common.entities.PackPhysicsEntity;
 import fr.dynamx.core.utils.DynamXUtils;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
@@ -68,7 +68,7 @@ public abstract class DynamXItemSpawner<T extends AbstractItemObject<T, ?>> exte
 
     public boolean spawnEntity(ItemStack itemStackIn, World worldIn, EntityPlayer playerIn, Vec3d blockPos) {
         if (!worldIn.isRemote) {
-            PackPhysicsEntity<?, ?> entity = getSpawnEntity(worldIn, playerIn, Vector3fPool.get((float) blockPos.x, (float) blockPos.y + 1F, (float) blockPos.z), playerIn.rotationYaw % 360.0F, itemStackIn.getMetadata());
+            PackPhysicsEntity<?, ?> entity = getSpawnEntity(worldIn, playerIn, JmeVector3fPool.get((float) blockPos.x, (float) blockPos.y + 1F, (float) blockPos.z), playerIn.rotationYaw % 360.0F, itemStackIn.getMetadata());
             if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Spawn(worldIn, entity, playerIn, this, blockPos)))
                 worldIn.spawnEntity(entity);
         }

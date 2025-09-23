@@ -29,7 +29,7 @@ import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.client.ContentPackUtils;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.SubClassPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -202,9 +202,9 @@ public class CommonEventHandler {
                 ItemSlopes i = (ItemSlopes) event.getItemStack().getItem();
                 if (!event.getEntity().isSneaking()) {
                     Vec3d post = event.getHitVec();
-                    Vector3fPool.openPool();
+                    JmeVector3fPool.openPool();
                     i.clickedWith(event.getWorld(), event.getEntityPlayer(), event.getHand(), ItemSlopes.fixPos(event.getWorld(), post));
-                    Vector3fPool.closePool();
+                    JmeVector3fPool.closePool();
                 }
             }
         }
@@ -242,7 +242,7 @@ public class CommonEventHandler {
         if (!(e.player.getRidingEntity() instanceof PhysicsEntity<?>) && DynamXContext.getPhysicsWorld(e.player.world) != null && !e.player.isDead) {
             if (!DynamXContext.getPlayerToCollision().containsKey(e.player) && DynamXPhysicsWorldBlacklistApi.isBlacklisted(e.player))
                 return;
-            Vector3fPool.openPool(SubClassPool.PLAYER_COLL);
+            JmeVector3fPool.openPool(SubClassPool.PLAYER_COLL);
             QuaternionPool.openPool(SubClassPool.PLAYER_COLL);
             if (!DynamXContext.getPlayerToCollision().containsKey(e.player)) {
                 PlayerPhysicsHandler playerPhysicsHandler = new PlayerPhysicsHandler(e.player);
@@ -250,7 +250,7 @@ public class CommonEventHandler {
                 playerPhysicsHandler.addToWorld();
             }
             DynamXContext.getPlayerToCollision().get(e.player).update(e.player.world);
-            Vector3fPool.closePool();
+            JmeVector3fPool.closePool();
             QuaternionPool.closePool();
         }
     }

@@ -14,7 +14,7 @@ import fr.dynamx.core.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.optimization.GlQuaternionPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -74,11 +74,11 @@ public class DynamXRenderUtils {
      */
     @Deprecated
     public static void renderCar(ModularVehicleInfo car, byte textureId) {
-        Vector3fPool.openPool();
+        JmeVector3fPool.openPool();
         GlQuaternionPool.openPool();
         getRenderBaseVehicle().renderEntity(car, textureId);
         GlQuaternionPool.closePool();
-        Vector3fPool.closePool();
+        JmeVector3fPool.closePool();
     }
 
     /**
@@ -108,7 +108,7 @@ public class DynamXRenderUtils {
     }
 
     public static void drawConvexHull(List<Vector3f> vectorBuffer, boolean wireframe) {
-        Vector3fPool.openPool();
+        JmeVector3fPool.openPool();
         GlStateManager.glPolygonMode(GL11.GL_FRONT_AND_BACK, wireframe ? GL11.GL_LINE : GL11.GL_FILL);
         GlStateManager.glBegin(GL11.GL_TRIANGLES);
         int index = 0;
@@ -122,7 +122,7 @@ public class DynamXRenderUtils {
                 Vector3f v1 = vectorBuffer.get(i1);
                 Vector3f v2 = vectorBuffer.get(i2);
                 Vector3f v3 = vectorBuffer.get(i3);
-                Vector3f normal = Vector3fPool.get(v3.subtract(v1)).multLocal(v2.subtract(v1));
+                Vector3f normal = JmeVector3fPool.get(v3.subtract(v1)).multLocal(v2.subtract(v1));
                 normal = normal.normalize();
                 GlStateManager.glNormal3f(normal.x, normal.y, normal.z);
                 GlStateManager.glVertex3f(v1.x, v1.y, v1.z);
@@ -133,7 +133,7 @@ public class DynamXRenderUtils {
         }
         GlStateManager.glEnd();
         GlStateManager.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
-        Vector3fPool.closePool();
+        JmeVector3fPool.closePool();
     }
 
     public static void drawNameplate(FontRenderer fontRendererIn, String str, float x, float y, float z, PhysicsEntity<?> entity, int verticalShift, float viewerYaw, float viewerPitch, boolean isThirdPersonFrontal) {

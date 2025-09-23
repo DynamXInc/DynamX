@@ -10,7 +10,7 @@ import fr.dynamx.core.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.core.server.network.ServerPhysicsEntitySynchronizer;
 import fr.dynamx.core.utils.DynamXLoadingTasks;
 import fr.dynamx.core.utils.optimization.SubClassPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -36,9 +36,9 @@ public class ServerProxy extends CommonProxy {
     public void schedulePacksInit() {
         ThreadedLoadingService loadingService = ACsLib.getPlatform().provideService(ThreadedLoadingService.class);
         loadingService.addTask(ThreadedLoadingService.ModLoadingSteps.BLOCK_REGISTRY, "packsload", () -> {
-            Vector3fPool.openPool(SubClassPool.PACK_MODEL_LOAD); //Open a pool for the loading of entities
+            JmeVector3fPool.openPool(SubClassPool.PACK_MODEL_LOAD); //Open a pool for the loading of entities
             DynamXLoadingTasks.reload(DynamXLoadingTasks.TaskContext.MC_INIT, DynamXLoadingTasks.PACK);
-            Vector3fPool.closePool();
+            JmeVector3fPool.closePool();
 
             //Must follow addons init
             loadingService.addTask(ThreadedLoadingService.ModLoadingSteps.INIT, "proxy preinit", this::preInit);

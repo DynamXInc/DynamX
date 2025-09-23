@@ -5,7 +5,7 @@ import fr.dynamx.core.common.blocks.TEDynamXBlock;
 import fr.dynamx.core.common.contentpack.parts.PartBlockSeat;
 import fr.dynamx.core.utils.EnumSeatPlayerPosition;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
@@ -40,11 +40,11 @@ public class SeatEntity extends Entity implements IEntityAdditionalSpawnData {
         if (block == null || mySeat == null) {
             return;
         }
-        Vector3fPool.openPool();
+        JmeVector3fPool.openPool();
         Vector3f posVec = DynamXGeometry.rotateVectorByQuaternion(mySeat.getPosition(), block.getCollidableRotation());
         posVec.addLocal(block.getRelativeTranslation());
         passenger.setPosition(posX + posVec.x, posY + posVec.y, posZ + posVec.z);
-        Vector3fPool.closePool();
+        JmeVector3fPool.closePool();
     }
 
     /**

@@ -7,7 +7,7 @@ import fr.dynamx.core.utils.VerticalChunkPos;
 import fr.dynamx.core.utils.debug.Profiler;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.SubClassPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
@@ -61,7 +61,7 @@ public class TerrainCollisionsCalculator {
         int y = myPos.y * 16;
         int z = myPos.z * 16;
 
-        Vector3fPool.openPool(SubClassPool.CHUNK_COLLISIONS_COMPUTE);
+        JmeVector3fPool.openPool(SubClassPool.CHUNK_COLLISIONS_COMPUTE);
         QuaternionPool.openPool(SubClassPool.CHUNK_COLLISIONS_COMPUTE);
 
         //Root terrain
@@ -70,7 +70,7 @@ public class TerrainCollisionsCalculator {
         TerrainCollisionsCalculator.loadBlockCollisions(mcWorld, boxBuilder);
 
         QuaternionPool.closePool();
-        Vector3fPool.closePool();
+        JmeVector3fPool.closePool();
 
         //And return all TerrainElements
         List<ITerrainElement> result = boxBuilder.getTerrainElements();

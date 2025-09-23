@@ -16,7 +16,7 @@ import fr.dynamx.core.utils.VerticalChunkPos;
 import fr.dynamx.core.utils.debug.Profiler;
 import fr.dynamx.core.utils.optimization.BoundingBoxPool;
 import fr.dynamx.core.utils.optimization.SubClassPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -202,8 +202,8 @@ public class CmdSlopes implements ISubCommand {
                             for (ITerrainElement.IPersistentTerrainElement element : chunkData.getElements().getPersistentElements()) {
                                 BoundingBox box = BoundingBoxPool.get();
                                 element.getBody().boundingBox(box);
-                                Vector3f min = Vector3fPool.get();
-                                Vector3f max = Vector3fPool.get();
+                                Vector3f min = JmeVector3fPool.get();
+                                Vector3f max = JmeVector3fPool.get();
                                 box.getMin(min);
                                 box.getMax(max);
                                 if (min.x >= minX - 1 && max.x <= maxX + 1 && min.y >= minY - 1 && max.y <= maxY + 1 && max.z <= maxZ + 1 && min.z >= minZ - 1) {

@@ -6,7 +6,7 @@ import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import fr.dynamx.core.utils.physics.DynamXPhysicsHelper;
 import lombok.Getter;
 import lombok.Setter;
@@ -61,7 +61,7 @@ public class FloatPhysicsHandler {
         float area = size * size;
         dy = Math.min(dy, scale.y);
 
-        Vector3f buoyForce = Vector3fPool.get(0, dy * area * DynamXPhysicsHelper.WATER_DENSITY * DynamXPhysicsHelper.GRAVITY * buoyCoefficient, 0);
+        Vector3f buoyForce = JmeVector3fPool.get(0, dy * area * DynamXPhysicsHelper.WATER_DENSITY * DynamXPhysicsHelper.GRAVITY * buoyCoefficient, 0);
 
         debugBuoyForce.set(buoyForce.mult(0.001f));
         physicsHandler.applyForce(buoyForce.multLocal(0.05f), rotatedFloatPos);

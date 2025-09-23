@@ -7,7 +7,7 @@ import fr.dynamx.core.common.physics.terrain.PhysicsEntityTerrainLoader;
 import fr.dynamx.core.common.physics.terrain.chunk.ChunkLoadingTicket;
 import fr.dynamx.core.utils.VerticalChunkPos;
 import fr.dynamx.core.utils.debug.Profiler;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.fml.relauncher.Side;
@@ -26,9 +26,9 @@ public class SlopesPreviewTerrainLoader extends PhysicsEntityTerrainLoader {
     @Override
     public void update(ITerrainManager terrain, Profiler profiler) {
         if (terrain.getWorld().isRemote || DynamXMain.getProxy().getClientWorld() != null) {
-            Vector3fPool.openPool();
+            JmeVector3fPool.openPool();
             refresh(terrain, profiler);
-            Vector3fPool.closePool();
+            JmeVector3fPool.closePool();
         }
     }
 
@@ -53,7 +53,7 @@ public class SlopesPreviewTerrainLoader extends PhysicsEntityTerrainLoader {
                         int deltaX = pos.x * 16 + 8 - (int) player.posX;
                         int deltaY = pos.y * 16 + 8 - (int) player.posY;
                         int deltaZ = pos.z * 16 + 8 - (int) player.posZ;
-                        if (needsToBeLoaded(Vector3fPool.get(), deltaX, deltaY, deltaZ)) {
+                        if (needsToBeLoaded(JmeVector3fPool.get(), deltaX, deltaY, deltaZ)) {
                             //only slopes
                             ChunkLoadingTicket.TicketPriority priority = ChunkLoadingTicket.TicketPriority.LOW;
                             loadMatrice[i][j] = (byte) priority.ordinal();

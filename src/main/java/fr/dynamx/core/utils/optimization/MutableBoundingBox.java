@@ -1,6 +1,7 @@
 package fr.dynamx.core.utils.optimization;
 
 import com.jme3.math.Vector3f;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.*;
 
@@ -469,10 +470,10 @@ public class MutableBoundingBox implements Serializable {
     }
 
     public Vector3f getPosition() {
-        return Vector3fPool.get((float) (minX + maxX) / 2, (float) (minY + maxY) / 2, (float) (minZ + maxZ) / 2);
+        return JmeVector3fPool.get((float) (minX + maxX) / 2, (float) (minY + maxY) / 2, (float) (minZ + maxZ) / 2);
     }
 
     public Vector3f getSize() {
-        return Vector3fPool.get((float) (maxX - minX) / 2, (float) (maxY - minY) / 2, (float) (maxZ - minZ) / 2);
+        return JmeVector3fPool.get((float) (maxX - minX) / 2, (float) (maxY - minY) / 2, (float) (maxZ - minZ) / 2);
     }
 }

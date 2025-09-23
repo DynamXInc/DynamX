@@ -4,7 +4,7 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.util.math.MathHelper;
 
 import javax.vecmath.Quat4f;
@@ -52,7 +52,7 @@ public class DynamXMath {
      */
     public static Vector3f interpolateLinear(float scale, Vector3f startValue, Vector3f endValue, Vector3f store) {
         if (store == null) {
-            store = Vector3fPool.get();
+            store = JmeVector3fPool.get();
         }
         store.x = interpolateLinear(scale, startValue.x, endValue.x);
         store.y = interpolateLinear(scale, startValue.y, endValue.y);

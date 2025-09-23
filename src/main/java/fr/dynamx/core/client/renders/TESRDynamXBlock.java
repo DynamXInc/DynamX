@@ -14,7 +14,7 @@ import fr.dynamx.core.common.contentpack.type.objects.BlockObject;
 import fr.dynamx.core.utils.DynamXUtils;
 import fr.dynamx.core.utils.client.DynamXRenderUtils;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
@@ -33,7 +33,7 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
         if (modelRenderer == null) {
             return;
         }
-        Vector3fPool.openPool();
+        JmeVector3fPool.openPool();
         QuaternionPool.openPool();
         BaseRenderContext.BlockRenderContext context = this.context.setModelParams(te, modelRenderer, (byte) te.getBlockMetadata());
         context.setRenderParams(x, y, z, partialTicks, false);
@@ -60,7 +60,7 @@ public class TESRDynamXBlock<T extends TEDynamXBlock> extends TileEntitySpecialR
             GlStateManager.enableDepth();
         }
         QuaternionPool.closePool();
-        Vector3fPool.closePool();
+        JmeVector3fPool.closePool();
     }
 
     public boolean shouldRenderDebug() {

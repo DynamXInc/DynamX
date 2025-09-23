@@ -33,7 +33,7 @@ import fr.dynamx.core.utils.errors.DynamXErrorManager;
 import fr.dynamx.core.utils.optimization.GlQuaternionPool;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.SubClassPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
@@ -175,7 +175,7 @@ public class ClientEventHandler {
     @SubscribeEvent
     public void drawHudCursor(RenderGameOverlayEvent.Pre event) {
         if (event.getType() == RenderGameOverlayEvent.ElementType.CROSSHAIRS) {
-            Vector3fPool.openPool(SubClassPool.CURSOR_HIT);
+            JmeVector3fPool.openPool(SubClassPool.CURSOR_HIT);
             QuaternionPool.openPool(SubClassPool.CURSOR_HIT);
             GlStateManager.enableBlend();
             GameSettings gamesettings = MC.gameSettings;
@@ -212,7 +212,7 @@ public class ClientEventHandler {
                 }
             }
             QuaternionPool.closePool();
-            Vector3fPool.closePool();
+            JmeVector3fPool.closePool();
         } else if (event.getType() == RenderGameOverlayEvent.ElementType.ALL && !Minecraft.getMinecraft().isSingleplayer() && DynamXConfig.useUdp && (!DynamXContext.getNetwork().isConnected() || !DynamXContext.getNetwork().getQuickNetwork().isAuthenticated())) {
             String text = "DynamX: connecting to the server " + (DynamXContext.getNetwork().isConnected() ? "2/2" : "1/2");
             switch ((int) (Minecraft.getSystemTime() / 600L % 3L)) {
@@ -346,10 +346,10 @@ public class ClientEventHandler {
             GlStateManager.disableDepth();
             GlStateManager.translate(-x, -y, -z);
 
-            Vector3fPool.openPool();
+            JmeVector3fPool.openPool();
             QuaternionPool.openPool();
             RenderMovableLine.renderLine(event.getPartialTicks());
-            Vector3fPool.closePool();
+            JmeVector3fPool.closePool();
             QuaternionPool.closePool();
 
             GlStateManager.enableTexture2D();

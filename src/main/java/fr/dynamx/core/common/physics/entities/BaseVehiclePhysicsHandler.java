@@ -11,7 +11,7 @@ import fr.dynamx.core.common.entities.BaseVehicleEntity;
 import fr.dynamx.core.common.physics.entities.modules.EnginePhysicsHandler;
 import fr.dynamx.core.common.physics.entities.modules.WheelsPhysicsHandler;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 
 /**
  * Physics handler of {@link BaseVehicleEntity} <br>
@@ -73,9 +73,9 @@ public abstract class BaseVehiclePhysicsHandler<T extends BaseVehicleEntity<?>> 
     public float getSpeed(SpeedUnit speedUnit) {
         switch (speedUnit) {
             case KMH:
-                return getCollisionObject().getLinearVelocity(Vector3fPool.get()).length() * 3.6f;
+                return getCollisionObject().getLinearVelocity(JmeVector3fPool.get()).length() * 3.6f;
             case MPH:
-                return getCollisionObject().getLinearVelocity(Vector3fPool.get()).length() * 3.6f * KMH_TO_MPH;
+                return getCollisionObject().getLinearVelocity(JmeVector3fPool.get()).length() * 3.6f * KMH_TO_MPH;
         }
         return 0;
     }

@@ -15,7 +15,7 @@ import fr.dynamx.core.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.core.common.entities.BaseVehicleEntity;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import jme3utilities.math.MyQuaternion;
 import lombok.Getter;
 
@@ -63,7 +63,7 @@ public abstract class BaseWheeledVehiclePhysicsHandler<T extends BaseVehicleEnti
     public void update() {
         super.update();
         if (!handledEntity.getPackInfo().getFrictionPoints().isEmpty() && isBodyActive()) {
-            float horizSpeed = Vector3fPool.get(getLinearVelocity().x, 0, getLinearVelocity().z).length();
+            float horizSpeed = JmeVector3fPool.get(getLinearVelocity().x, 0, getLinearVelocity().z).length();
             for (FrictionPoint f : handledEntity.getPackInfo().getFrictionPoints()) {
                 Vector3f pushDown = new Vector3f(-getLinearVelocity().x, -horizSpeed, -getLinearVelocity().z);
                 pushDown.multLocal(f.getIntensity());

@@ -10,7 +10,7 @@ import fr.dynamx.core.common.entities.modules.MovableModule;
 import fr.dynamx.core.utils.DynamXUtils;
 import fr.dynamx.core.utils.client.DynamXRenderUtils;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
@@ -53,13 +53,13 @@ public class RenderMovableLine {
             Quaternion physicsRotation = ClientDebugSystem.getInterpolatedRotation(hitBody, partialTicks);
             DynamXRenderUtils.glTranslate(physicsLocation);
 
-            Vector3f firstPersonOffset = Vector3fPool.get(0, 0, 0.35f);
+            Vector3f firstPersonOffset = JmeVector3fPool.get(0, 0, 0.35f);
 
             float interYaw = player.prevRotationYaw + (player.rotationYaw - player.prevRotationYaw) * partialTicks;
             float interPitch = player.prevRotationPitch + (player.rotationPitch - player.prevRotationPitch) * partialTicks;
             Vector3f firstPersonOffsetRot = DynamXGeometry.getRotatedPoint(firstPersonOffset, interPitch, interYaw, 0);
 
-            Vector3f target = Vector3fPool.get(DynamXUtils.getCameraTranslation(Minecraft.getMinecraft(), partialTicks)).add(firstPersonOffsetRot);
+            Vector3f target = JmeVector3fPool.get(DynamXUtils.getCameraTranslation(Minecraft.getMinecraft(), partialTicks)).add(firstPersonOffsetRot);
             target.subtractLocal(physicsLocation.x, physicsLocation.y - player.getEyeHeight(), physicsLocation.z);
 
             Vector3f pivot = DynamXGeometry.rotateVectorByQuaternion(movableModule.pickObjects.getLocalPickPosition(), physicsRotation);

@@ -11,16 +11,18 @@ import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.core.common.DynamXContext;
 import fr.dynamx.core.common.entities.RagdollEntity;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import fr.dynamx.core.utils.physics.DynamXPhysicsHelper;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.world.World;
+import fr.hermes.api.mc.HmPlayerEntity;
+import fr.hermes.api.mc.HmWorld;
+import lombok.Getter;
 
 /**
  * Handles player's rigid body
  */
 public class PlayerPhysicsHandler {
-    private final EntityPlayer playerIn;
+    private final HmPlayerEntity playerIn;
+    @Getter
     private PhysicsRigidBody bodyIn;
 
     private PlayerBodyState state = PlayerBodyState.DISABLED;
@@ -28,10 +30,10 @@ public class PlayerPhysicsHandler {
 
     public RagdollEntity ragdollEntity;
 
-    public PlayerPhysicsHandler(EntityPlayer playerIn) {
+    public PlayerPhysicsHandler(HmPlayerEntity playerIn) {
         this.playerIn = playerIn;
-        Quaternion localQuat = new Quaternion(0.0F, 1.0F, 0.0F, playerIn.rotationYaw);
-        Transform localTransform = new Transform(new Vector3f((float) playerIn.posX, (float) playerIn.posY + 0.8f, (float) playerIn.posZ), localQuat);
+        Quaternion localQuat = new Quaternion(0.0F, 1.0F, 0.0F, playerIn.getRotationYaw());
+        Transform localTransform = new Transform(new Vector3f((float) playerIn.getPosX(), (float) playerIn.getPosY() + 0.8f, (float) playerIn.getPosZ()), localQuat);
         BoxCollisionShape shape = new BoxCollisionShape(0.35f, 0.8f, 0.35f);
         bodyIn = DynamXPhysicsHelper.createRigidBody(60f, localTransform, shape,
                 new BulletShapeType<>(EnumBulletShapeType.PLAYER, this));
@@ -39,7 +41,7 @@ public class PlayerPhysicsHandler {
         bodyIn.setEnableSleep(false);
     }
 
-    public void update(World world) {
+    public void update(HmWorld world) {
         if (playerIn.isDead)
             removeFromWorld(true, world);
         if (removedCountdown > 0)
@@ -64,7 +66,7 @@ public class PlayerPhysicsHandler {
                 else if (bodyIn.isInWorld()) {
                     physicsWorld.schedule(() -> {
                         if(bodyIn != null)
-                            bodyIn.setGravity(Vector3fPool.get());
+                            bodyIn.setGravity(JmeVector3fPool.get());
                     });
                     state = PlayerBodyState.ACTIVATED;
                 }
@@ -73,11 +75,11 @@ public class PlayerPhysicsHandler {
                 if (playerIn.isSpectator())
                     removeFromWorld(false, world);
                 else if (bodyIn != null) {
-                    Vector3f position = Vector3fPool.get();
-                    position.set((float) playerIn.posX, (float) playerIn.posY + 0.8f, (float) playerIn.posZ);
+                    Vector3f position = JmeVector3fPool.get();
+                    position.set((float) playerIn.getPosX(), (float) playerIn.getPosY() + 0.8f, (float) playerIn.getPosZ());
                     if (Vector3f.isValidVector(position) && playerIn.fallDistance < 10) { //fixes a crash with elytra
                         bodyIn.setPhysicsLocation(position);
-                        bodyIn.setPhysicsRotation(QuaternionPool.get().fromAngleNormalAxis((float) Math.toRadians(-playerIn.rotationYaw), Vector3f.UNIT_Y));
+                        bodyIn.setPhysicsRotation(QuaternionPool.get().fromAngleNormalAxis((float) Math.toRadians(-playerIn.getRotationYaw()), Vector3f.UNIT_Y));
                         bodyIn.setContactResponse(true);
                     } else
                         bodyIn.setContactResponse(false);
@@ -115,7 +117,7 @@ public class PlayerPhysicsHandler {
             state = PlayerBodyState.ACTIONABLE;
     }
 
-    public void removeFromWorld(boolean delete, World world) {
+    public void removeFromWorld(boolean delete, HmWorld world) {
         removedCountdown = 30;
         if (bodyIn != null && state == PlayerBodyState.ACTIVATED)
             DynamXContext.getPhysicsWorld(world).removeCollisionObject(bodyIn);
@@ -125,10 +127,6 @@ public class PlayerPhysicsHandler {
             state = PlayerBodyState.DELETED;
         } else
             state = PlayerBodyState.DISABLED;
-    }
-
-    public PhysicsRigidBody getBodyIn() {
-        return bodyIn;
     }
 
     public enum PlayerBodyState {

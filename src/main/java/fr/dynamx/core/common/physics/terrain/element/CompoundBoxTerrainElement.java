@@ -12,7 +12,7 @@ import fr.dynamx.core.utils.debug.DynamXDebugOptions;
 import fr.dynamx.core.utils.debug.TerrainDebugData;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
@@ -65,7 +65,7 @@ public class CompoundBoxTerrainElement implements ITerrainElement {
             }
             System.out.println("Shape " + shape);
             if (body != null) {
-                System.out.println("Body transform " + body.getPhysicsLocation(Vector3fPool.get()) + " " + body.getPhysicsRotation(QuaternionPool.get()));
+                System.out.println("Body transform " + body.getPhysicsLocation(JmeVector3fPool.get()) + " " + body.getPhysicsRotation(QuaternionPool.get()));
             } else {
                 System.out.println("Body not initialized");
             }

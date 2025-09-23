@@ -13,7 +13,7 @@ import fr.dynamx.core.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.core.common.physics.entities.BaseWheeledVehiclePhysicsHandler;
 import fr.dynamx.core.common.physics.entities.parts.wheel.PacejkaMagicFormula;
 import fr.dynamx.core.common.physics.entities.parts.wheel.WheelPhysics;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -60,7 +60,7 @@ public class WheelsPhysicsHandler {
     }
 
     public void addWheel(PartWheel partWheel, PartWheelInfo wheelInfo) {
-        Vector3f wheelPosition = Vector3fPool.get(partWheel.getPosition()).addLocal(handler.getPackInfo().getCenterOfMass()).addLocal(0, -wheelInfo.getSuspensionRestLength(), 0);
+        Vector3f wheelPosition = JmeVector3fPool.get(partWheel.getPosition()).addLocal(handler.getPackInfo().getCenterOfMass()).addLocal(0, -wheelInfo.getSuspensionRestLength(), 0);
         VehicleWheel vehicleWheel = handler.getPhysicsVehicle().addWheel(wheelPosition, direction, axle, wheelInfo.getSuspensionRestLength(), wheelInfo.getWheelRadius(), partWheel.isWheelIsSteerable());
         byte index = (byte) (handler.getPhysicsVehicle().getNumWheels() - 1);
         WheelPhysics wheelPhysics = new WheelPhysics(handler.getPhysicsVehicle(), vehicleWheel, index, partWheel);

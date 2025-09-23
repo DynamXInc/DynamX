@@ -5,7 +5,7 @@ import fr.dynamx.api.physics.terrain.ITerrainElement;
 import fr.dynamx.core.common.physics.terrain.element.CustomSlopeTerrainElement;
 import fr.dynamx.core.utils.VerticalChunkPos;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -28,7 +28,7 @@ public class SlopeGenerator {
             p = Vector3fPool.get(cp.x*16+8, cp.y*16, cp.z*16+8).multLocal(-1);*/
 
             //System.out.println("P is "+p+" "+cp);
-            Vector3f p = Vector3fPool.get();
+            Vector3f p = JmeVector3fPool.get();
 
             Vector3f[] realPositions = new Vector3f[4];
             int i = j;
@@ -180,7 +180,7 @@ public class SlopeGenerator {
     private static void bakeSlope(Map<VerticalChunkPos, List<ITerrainElement.IPersistentTerrainElement>> list, Vector3f[] poses) {
         Vector3f p = DynamXGeometry.getCenter(poses[0], poses[1], poses[2], poses[3]);
         VerticalChunkPos cp = new VerticalChunkPos((int) (p.x) >> 4, (int) (p.y) >> 4, (int) (p.z) >> 4);
-        p = Vector3fPool.get(cp.x * 16 + 8, cp.y * 16, cp.z * 16 + 8).multLocal(-1);
+        p = JmeVector3fPool.get(cp.x * 16 + 8, cp.y * 16, cp.z * 16 + 8).multLocal(-1);
         for (int k = 0, posesLength = poses.length; k < posesLength; k++) {
             poses[k] = poses[k].add(p);
         }
@@ -201,7 +201,7 @@ public class SlopeGenerator {
 
         BlockPos.MutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain();
         int len = Math.abs(rotator.getTheDir(fixedEnd) - rotator.getTheDir(fixedStart));
-        Vector3f curStart = Vector3fPool.get(fixedStart.getX(), y, fixedStart.getZ());
+        Vector3f curStart = JmeVector3fPool.get(fixedStart.getX(), y, fixedStart.getZ());
         Vector3f curEnd = null, lastPlacedAtPos = null;
 
         ArrayList<Vector3f[]> list = new ArrayList<>();
@@ -282,7 +282,7 @@ public class SlopeGenerator {
                     //curLen = Math.abs(rotator.getTheDir(curEnd)-rotator.getTheDir(curStart));
                     //curHeight -= Math.abs(curEnd.y-curStart.y);
                     curStart = curEnd;//new BlockPos(pos);
-                    lastPlacedAtPos = Vector3fPool.get(pos.getX(), (float) (pos.getY() + box.maxY), pos.getZ());//search for a new rotator.mute(i, fixedStart.getX(), y, fixedStart.getZ()); //!= pos
+                    lastPlacedAtPos = JmeVector3fPool.get(pos.getX(), (float) (pos.getY() + box.maxY), pos.getZ());//search for a new rotator.mute(i, fixedStart.getX(), y, fixedStart.getZ()); //!= pos
                     /*if(round)
                         curEnd = lastPlacedAtPos;
                     else*/
@@ -318,7 +318,7 @@ public class SlopeGenerator {
         if (placing && hasStartPoint) {
             if (curEnd == null) {
                 if (lastPlacedAtPos == null)
-                    curEnd = Vector3fPool.get(fixedEnd.getX(), fixedEnd.getY(), fixedEnd.getZ());
+                    curEnd = JmeVector3fPool.get(fixedEnd.getX(), fixedEnd.getY(), fixedEnd.getZ());
                 else
                     curEnd = lastPlacedAtPos;
             }

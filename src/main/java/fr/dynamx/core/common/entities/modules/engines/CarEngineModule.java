@@ -17,7 +17,7 @@ import fr.dynamx.core.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.core.common.physics.entities.modules.EnginePhysicsHandler;
 import fr.dynamx.core.common.physics.entities.parts.engine.AutomaticGearboxHandler;
 import fr.dynamx.core.utils.DynamXConstants;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.relauncher.Side;
@@ -149,6 +149,6 @@ public class CarEngineModule extends BasicEngineModule implements IPackInfoReloa
             SOUND_HANDLER.stopSound(reversingSound);
         }
         reversingSound = new ReversingSound(sound, entity, this, forInterior);
-        SOUND_HANDLER.playStreamingSound(Vector3fPool.get(reversingSound.getPosX(), reversingSound.getPosY(), reversingSound.getPosZ()), reversingSound);
+        SOUND_HANDLER.playStreamingSound(JmeVector3fPool.get(reversingSound.getPosX(), reversingSound.getPosY(), reversingSound.getPosZ()), reversingSound);
     }
 }

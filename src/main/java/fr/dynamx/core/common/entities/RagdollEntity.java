@@ -28,7 +28,7 @@ import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;
@@ -145,18 +145,18 @@ public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> imple
     @Override
     public boolean initEntityProperties() {
         super.initEntityProperties();
-        Vector3fPool.openPool();
+        JmeVector3fPool.openPool();
         QuaternionPool.openPool();
         for (EnumRagdollBodyPart part : EnumRagdollBodyPart.values()) {
             RigidBodyTransform transform = new RigidBodyTransform();
-            Quaternion localQuat = QuaternionPool.get().fromAngleNormalAxis((float) Math.toRadians(-rotationYaw), Vector3fPool.get(0, 1, 0));
+            Quaternion localQuat = QuaternionPool.get().fromAngleNormalAxis((float) Math.toRadians(-rotationYaw), JmeVector3fPool.get(0, 1, 0));
             Vector3f pos = DynamXGeometry.rotateVectorByQuaternion(part.getChestAttachPoint(), localQuat);
             transform.setPosition(physicsPosition.add(pos));
             transform.setRotation(localQuat);
 
             transforms.put((byte) part.ordinal(), new SynchronizedRigidBodyTransform(transform));
         }
-        Vector3fPool.closePool();
+        JmeVector3fPool.closePool();
         QuaternionPool.closePool();
         return true;
     }

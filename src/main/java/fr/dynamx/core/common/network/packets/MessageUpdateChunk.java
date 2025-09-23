@@ -9,7 +9,7 @@ import fr.dynamx.core.common.physics.terrain.chunk.ChunkLoadingTicket;
 import fr.dynamx.forge.DynamXConfig;
 import fr.dynamx.core.utils.VerticalChunkPos;
 import fr.dynamx.core.utils.debug.ChunkGraph;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
@@ -70,7 +70,7 @@ public class MessageUpdateChunk implements IDnxPacket, IMessageHandler<MessageUp
         IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(context.world);
         if (physicsWorld != null && DynamXMain.getProxy().shouldUseBulletSimulation(context.world)) {
             physicsWorld.schedule(() -> {
-                Vector3fPool.openPool();
+                JmeVector3fPool.openPool();
                 for (VerticalChunkPos pos : chunksToUpdate) {
                     if (DynamXConfig.enableDebugTerrainManager) {
                         ChunkLoadingTicket ticket = physicsWorld.getTerrainManager().getTicket(pos);
@@ -79,7 +79,7 @@ public class MessageUpdateChunk implements IDnxPacket, IMessageHandler<MessageUp
                     }
                     physicsWorld.getTerrainManager().onChunkChanged(pos);
                 }
-                Vector3fPool.closePool();
+                JmeVector3fPool.closePool();
             });
         } else if (DynamXConfig.enableDebugTerrainManager) {
             DynamXMain.log.info("RCV FAILZ {} {}", physicsWorld, DynamXMain.getProxy().shouldUseBulletSimulation(context.world));

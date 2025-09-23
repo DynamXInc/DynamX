@@ -11,7 +11,7 @@ import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.entity.player.EntityPlayer;
 
 import java.util.ArrayList;
@@ -56,7 +56,7 @@ public class PropsContainerModule implements IPhysicsModule<BaseVehiclePhysicsHa
         modifiedEntitiesCache.clear();
         for (PartPropsContainer container : containers) {
             Vector3f pos = DynamXGeometry.rotateVectorByQuaternion(container.getPosition(), entity.physicsRotation);
-            MutableBoundingBox rotatedSize = DynamXContext.getCollisionHandler().rotateBB(Vector3fPool.get(0, 0, 0), container.getBoundingBox(), entity.physicsRotation);
+            MutableBoundingBox rotatedSize = DynamXContext.getCollisionHandler().rotateBB(JmeVector3fPool.get(0, 0, 0), container.getBoundingBox(), entity.physicsRotation);
             rotatedSize = rotatedSize.offset(pos);
             rotatedSize = rotatedSize.offset(entity.physicsPosition);
             List<PhysicsEntity> entityList = entity.world.getEntitiesWithinAABB(PhysicsEntity.class, rotatedSize.toBB(), ent -> ent != entity);

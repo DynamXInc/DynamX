@@ -1,6 +1,7 @@
 package fr.dynamx.core.utils.optimization;
 
 import com.jme3.bounding.BoundingBox;
+import fr.hermes.forge.JmeVector3fPool;
 
 import javax.annotation.concurrent.ThreadSafe;
 
@@ -10,7 +11,7 @@ public class BoundingBoxPool extends ClassPool<BoundingBox> {
 
     public static BoundingBox get() {
         BoundingBox v = getPool().provideNewInstance();
-        v.setMinMax(Vector3fPool.get(), Vector3fPool.get());
+        v.setMinMax(JmeVector3fPool.get(), JmeVector3fPool.get());
         return v;
     }
 

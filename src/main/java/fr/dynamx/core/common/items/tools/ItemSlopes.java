@@ -5,7 +5,7 @@ import fr.dynamx.core.common.items.DynamXItemRegistry;
 import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.RegistryNameSetter;
 import fr.dynamx.core.utils.maths.DynamXMath;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -52,7 +52,7 @@ public class ItemSlopes extends Item {
     }
 
     public static Vector3f fixPos(World worldIn, Vec3d post) {
-        Vector3f pos = Vector3fPool.get(DynamXMath.preciseRound(post.x), DynamXMath.preciseRound(post.y), DynamXMath.preciseRound(post.z));
+        Vector3f pos = JmeVector3fPool.get(DynamXMath.preciseRound(post.x), DynamXMath.preciseRound(post.y), DynamXMath.preciseRound(post.z));
         BlockPos bpos = new BlockPos(post.x, post.y, post.z);
         IBlockState state = worldIn.getBlockState(bpos);
         AxisAlignedBB box = state.getCollisionBoundingBox(worldIn, bpos);
@@ -132,6 +132,6 @@ public class ItemSlopes extends Item {
     }
 
     public static Vector3f getPosFromTag(NBTTagCompound tag) {
-        return Vector3fPool.get(tag.getFloat("X"), tag.getFloat("Y"), tag.getFloat("Z"));
+        return JmeVector3fPool.get(tag.getFloat("X"), tag.getFloat("Y"), tag.getFloat("Z"));
     }
 }

@@ -6,7 +6,7 @@ import fr.dynamx.core.common.DynamXContext;
 import fr.dynamx.core.common.command.ISubCommand;
 import fr.dynamx.core.common.entities.RagdollEntity;
 import fr.dynamx.core.utils.DynamXUtils;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -45,7 +45,7 @@ public class CmdSpawnRagdoll implements ISubCommand {
             player = (EntityPlayerMP) sender;
         else
             throw new WrongUsageException("You're not a player !");
-        Vector3fPool.openPool();
+        JmeVector3fPool.openPool();
         int life = -1;
         if (args.length >= 3)
             life = CommandBase.parseInt(args[2]);
@@ -65,7 +65,7 @@ public class CmdSpawnRagdoll implements ISubCommand {
             DynamXContext.getPlayerToCollision().get(player).ragdollEntity = ragdollEntity;
             DynamXContext.getPlayerToCollision().get(player).removeFromWorld(false, player.world);
         }
-        Vector3fPool.closePool();
+        JmeVector3fPool.closePool();
         if (player != sender) {
             sender.sendMessage(new TextComponentString("Ragdoll spawned!"));
         }

@@ -14,6 +14,8 @@ import fr.dynamx.core.common.objloader.data.GltfModelData;
 import fr.dynamx.core.common.objloader.data.ObjModelData;
 import fr.dynamx.core.common.physics.player.PlayerPhysicsHandler;
 import fr.dynamx.core.common.physics.world.PhysicsSimulationModes;
+import fr.hermes.api.mc.HmPlayerEntity;
+import fr.hermes.api.mc.HmWorld;
 import lombok.Getter;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
@@ -54,14 +56,14 @@ public class DynamXContext {
      * @return The rigid bodies of all players
      */
     @Getter
-    private static final Map<EntityPlayer, PlayerPhysicsHandler> playerToCollision = new HashMap<>();
+    private static final Map<HmPlayerEntity, PlayerPhysicsHandler> playerToCollision = new HashMap<>();
     /**
      * -- GETTER --
      *
      * @return The players walking on the top of entities
      */
     @Getter
-    private static final ConcurrentHashMap<EntityPlayer, PhysicsEntity<?>> walkingPlayers = new ConcurrentHashMap<>(0, 0.75f, 2);
+    private static final ConcurrentHashMap<HmPlayerEntity, PhysicsEntity<?>> walkingPlayers = new ConcurrentHashMap<>(0, 0.75f, 2);
     /**
      * -- GETTER --
      *
@@ -92,14 +94,14 @@ public class DynamXContext {
      * @return True is a {@link IPhysicsWorld} exists for this {@link World} (depends on the side of the world) <br>
      * Always true except for client single player worlds
      */
-    public static boolean usesPhysicsWorld(World world) {
+    public static boolean usesPhysicsWorld(HmWorld world) {
         return DynamXMain.getProxy().shouldUseBulletSimulation(world);
     }
 
     /**
      * @return The local physics world
      */
-    public static IPhysicsWorld getPhysicsWorld(World world) {
+    public static IPhysicsWorld getPhysicsWorld(HmWorld world) {
         return getPhysicsWorldPerDimensionMap().get(world.provider.getDimension());
     }
 

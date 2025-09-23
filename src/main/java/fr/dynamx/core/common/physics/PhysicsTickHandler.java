@@ -11,7 +11,7 @@ import fr.dynamx.core.utils.debug.DynamXDebugOptions;
 import fr.dynamx.core.utils.debug.Profiler;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.SubClassPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -47,7 +47,7 @@ public class PhysicsTickHandler {
 
         if (event.phase == TickEvent.Phase.START) {
             QuaternionPool.openPool(SubClassPool.TICK_CLIENT);
-            Vector3fPool.openPool(SubClassPool.TICK_CLIENT);
+            JmeVector3fPool.openPool(SubClassPool.TICK_CLIENT);
             DynamXLoadingTasks.tick();
         } else {
             Profiler.get().end(Profiler.Profiles.TICK);
@@ -65,7 +65,7 @@ public class PhysicsTickHandler {
             if (!Minecraft.getMinecraft().isSingleplayer()) {//If not in solo
                 TaskScheduler.tick();
             }
-            Vector3fPool.closePool();
+            JmeVector3fPool.closePool();
             QuaternionPool.closePool();
         }
     }
@@ -79,7 +79,7 @@ public class PhysicsTickHandler {
     public void tickServer(TickEvent.ServerTickEvent event) {
         if (event.phase == TickEvent.Phase.START) {
             QuaternionPool.openPool(SubClassPool.TICK_SERVER);
-            Vector3fPool.openPool(SubClassPool.TICK_SERVER);
+            JmeVector3fPool.openPool(SubClassPool.TICK_SERVER);
             try {
                 Profiler.get().start(Profiler.Profiles.TICK);
             } catch (Exception e) {
@@ -101,7 +101,7 @@ public class PhysicsTickHandler {
             sendClientsDebug();
             Profiler.get().update();
             TaskScheduler.tick();
-            Vector3fPool.closePool();
+            JmeVector3fPool.closePool();
             QuaternionPool.closePool();
         }
     }
@@ -118,7 +118,7 @@ public class PhysicsTickHandler {
         }
         // START phase
         QuaternionPool.openPool(SubClassPool.TICK_PHYSICS_WORLD);
-        Vector3fPool.openPool(SubClassPool.TICK_PHYSICS_WORLD);
+        JmeVector3fPool.openPool(SubClassPool.TICK_PHYSICS_WORLD);
 
         physicsWorld.tickStart();
 
@@ -139,7 +139,7 @@ public class PhysicsTickHandler {
             });
         }
 
-        Vector3fPool.closePool();
+        JmeVector3fPool.closePool();
         QuaternionPool.closePool();
     }
 

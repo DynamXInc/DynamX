@@ -19,7 +19,7 @@ import fr.dynamx.core.common.physics.entities.parts.engine.Engine;
 import fr.dynamx.core.common.physics.entities.parts.engine.GearBox;
 import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraftforge.fml.relauncher.Side;
@@ -248,14 +248,14 @@ public class BoatPropellerModule extends BasicEngineModule implements IPackInfoR
             Vector3f look = DynamXGeometry.FORWARD_DIRECTION;
             look = DynamXGeometry.rotateVectorByQuaternion(look, entity.physicsRotation);
             look.multLocal(-getBrakeForce() * strength);
-            entity.physicsHandler.getCollisionObject().applyForce(look, Vector3fPool.get());
+            entity.physicsHandler.getCollisionObject().applyForce(look, JmeVector3fPool.get());
         }
 
         public void steer(float strength) {
-            Vector3f look = Vector3fPool.get(boatPhysicsHandler.getSpeedOnZAxisInBoatSpace() < 0 ? 1 : -1, 0, 0);
+            Vector3f look = JmeVector3fPool.get(boatPhysicsHandler.getSpeedOnZAxisInBoatSpace() < 0 ? 1 : -1, 0, 0);
             look = DynamXGeometry.rotateVectorByQuaternion(look, entity.physicsRotation);
             look.multLocal(getSteerForce() * strength);
-            Vector3f linearFactor = entity.physicsHandler.getCollisionObject().getLinearFactor(Vector3fPool.get());
+            Vector3f linearFactor = entity.physicsHandler.getCollisionObject().getLinearFactor(JmeVector3fPool.get());
             Vector3f rotatedPos = DynamXGeometry.rotateVectorByQuaternion(info.getPosition(), entity.physicsRotation);
             entity.physicsHandler.getCollisionObject().applyTorque(rotatedPos.cross(look.multLocal(linearFactor)));
         }

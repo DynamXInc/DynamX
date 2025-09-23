@@ -12,7 +12,7 @@ import fr.dynamx.core.utils.debug.DynamXDebugOptions;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.maths.DynamXMath;
 import fr.dynamx.core.utils.optimization.SubClassPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
@@ -72,7 +72,7 @@ public class CameraSystem {
      * Only works when camera is inside vehicles.
      */
     public static void rotateVehicleCamera(EntityViewRenderEvent.CameraSetup event) {
-        Vector3fPool.openPool(SubClassPool.CAMERA_UPDATE);
+        JmeVector3fPool.openPool(SubClassPool.CAMERA_UPDATE);
         PhysicsEntity<?> vehicle = (PhysicsEntity<?>) event.getEntity().getRidingEntity();
         Entity renderEntity = event.getEntity();
 
@@ -92,7 +92,7 @@ public class CameraSystem {
         if (vehicle instanceof IModuleContainer.ISeatsContainer && ((IModuleContainer.ISeatsContainer) vehicle).hasSeats()) {
             BasePartSeat seat = ((IModuleContainer.ISeatsContainer) vehicle).getSeats().getRidingSeat(renderEntity);
             if(seat == null) {
-                Vector3fPool.closePool();
+                JmeVector3fPool.closePool();
                 return;
             }
             if(ClientEventHandler.MC.gameSettings.thirdPersonView > 0 && seat.getCameraPositionY() != 0) {
@@ -121,7 +121,7 @@ public class CameraSystem {
         event.setPitch(0);
         event.setRoll(0);
         event.setYaw(0);
-        Vector3fPool.closePool();
+        JmeVector3fPool.closePool();
     }
 
     private static final Vector3f pt0 = new Vector3f();
@@ -132,12 +132,12 @@ public class CameraSystem {
     private static final Map<Vector3f, Vector3f> cameraRadius = new HashMap<>();
 
     public static void drawDebug() {
-        Vector3fPool.openPool();
+        JmeVector3fPool.openPool();
         GlStateManager.pushMatrix();
         GlStateManager.disableTexture2D();
         GlStateManager.disableDepth();
 
-        Vector3f eye = Vector3fPool.get(0, Minecraft.getMinecraft().player.getEyeHeight(), 0);
+        Vector3f eye = JmeVector3fPool.get(0, Minecraft.getMinecraft().player.getEyeHeight(), 0);
         eye = DynamXGeometry.rotateVectorByQuaternion(eye, jmeQuatCache.inverse());
         GlStateManager.translate(-Minecraft.getMinecraft().getRenderViewEntity().posX + eye.x, -Minecraft.getMinecraft().getRenderViewEntity().posY + eye.y, -Minecraft.getMinecraft().getRenderViewEntity().posZ + eye.z);
 
@@ -173,7 +173,7 @@ public class CameraSystem {
         GlStateManager.enableDepth();
         GlStateManager.popMatrix();
 
-        Vector3fPool.closePool();
+        JmeVector3fPool.closePool();
     }
 
     /**
@@ -194,7 +194,7 @@ public class CameraSystem {
         double d2 = (entity.prevPosZ + (entity.posZ - entity.prevPosZ) * partialTicks);
         if (debug)
             pt0.set((float) d0, (float) d1, (float) d2);
-        Vector3f eye = Vector3fPool.get(0, f + (ClientEventHandler.MC.gameSettings.thirdPersonView > 0 ? cameraPositionY : 0), 0);
+        Vector3f eye = JmeVector3fPool.get(0, f + (ClientEventHandler.MC.gameSettings.thirdPersonView > 0 ? cameraPositionY : 0), 0);
         eye = DynamXGeometry.rotateVectorByQuaternion(eye, vRotation.inverse());
         d0 += eye.x;
         d1 += eye.y;
@@ -221,17 +221,17 @@ public class CameraSystem {
             f5 = f5 * 0.1F;
 
             //Apply camera rotation offset of the vehicle
-            Vector3f start = DynamXGeometry.getRotatedPoint(Vector3fPool.get(f3, f4, f5), 0, 180, 0);//PhysicsHelper.getRotatedPoint(Vector3fPool.get(f3, f4, f5), vPitch, MathHelper.wrapDegrees(vYaw+180), vRoll);
+            Vector3f start = DynamXGeometry.getRotatedPoint(JmeVector3fPool.get(f3, f4, f5), 0, 180, 0);//PhysicsHelper.getRotatedPoint(Vector3fPool.get(f3, f4, f5), vPitch, MathHelper.wrapDegrees(vYaw+180), vRoll);
             start = DynamXGeometry.rotateVectorByQuaternion(start, vRotation.inverse());
 
-            Vector3f end = DynamXGeometry.getRotatedPoint(Vector3fPool.get(-d4 + f3, -d6 + f4, -d5 + f5), 0, 180, 0);//PhysicsHelper.getRotatedPoint(Vector3fPool.get(- d4 + f3 + f5, - d6 + f4, - d5 + f5), vPitch, MathHelper.wrapDegrees(vYaw+180), vRoll);
+            Vector3f end = DynamXGeometry.getRotatedPoint(JmeVector3fPool.get(-d4 + f3, -d6 + f4, -d5 + f5), 0, 180, 0);//PhysicsHelper.getRotatedPoint(Vector3fPool.get(- d4 + f3 + f5, - d6 + f4, - d5 + f5), vPitch, MathHelper.wrapDegrees(vYaw+180), vRoll);
             end = DynamXGeometry.rotateVectorByQuaternion(end, vRotation.inverse());
             if (debug) {
                 pt1.set(start);
                 pt1.addLocal(pt0);
                 pt2.set(end);
                 pt2.addLocal(pt0);
-                cameraRadius.put(Vector3fPool.getPermanentVector(pt1), Vector3fPool.getPermanentVector(pt2));
+                cameraRadius.put(JmeVector3fPool.getPermanentVector(pt1), JmeVector3fPool.getPermanentVector(pt2));
             }
 
             RayTraceResult raytraceresult = ClientEventHandler.MC.world.rayTraceBlocks(new Vec3d(d0 + start.x, d1 + start.y, d2 + start.z), new Vec3d(d0 + end.x, d1 + end.y, d2 + end.z), false, true, false);

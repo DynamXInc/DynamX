@@ -9,7 +9,7 @@ import fr.dynamx.core.common.contentpack.parts.PartEntitySeat;
 import fr.dynamx.core.common.entities.PackPhysicsEntity;
 import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.common.items.tools.ItemWrench;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.common.MinecraftForge;
@@ -68,11 +68,11 @@ public class MessageEntityInteract implements IDnxPacket, IMessageHandler<Messag
         }
         PackPhysicsEntity<?, ?> targetEntity = (PackPhysicsEntity<?, ?>) physicsEntity;
         //If we clicked a part, try to interact with it.
-        Vector3fPool.openPool();
+        JmeVector3fPool.openPool();
         InteractivePart hitPart = targetEntity.getHitPart(context);
         if (hitPart != null && hitPart.canInteract(targetEntity, context)) {
             if ((hitPart instanceof PartEntitySeat && ((PartEntitySeat) hitPart).hasDoor()) && context.isSneaking()) {
-                Vector3fPool.closePool();
+                JmeVector3fPool.closePool();
                 return;
             }
             if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.PlayerInteract(context, targetEntity, hitPart))) {
@@ -81,6 +81,6 @@ public class MessageEntityInteract implements IDnxPacket, IMessageHandler<Messag
         } else {
             MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.PlayerInteract(context, targetEntity, null));
         }
-        Vector3fPool.closePool();
+        JmeVector3fPool.closePool();
     }
 }

@@ -18,7 +18,7 @@ import fr.dynamx.forge.DynamXConfig;
 import fr.dynamx.core.utils.VerticalChunkPos;
 import fr.dynamx.core.utils.debug.ChunkGraph;
 import fr.dynamx.core.utils.debug.Profiler;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -218,7 +218,7 @@ public class PhysicsWorldTerrain implements ITerrainManager {
      */
     private void addChunkToPhysicsWorld(ChunkLoadingTicket ticket, boolean checkNotLoaded, boolean checkStatus) {
         Profiler.get().start(ADD_USED);
-        Vector3fPool.openPool();
+        JmeVector3fPool.openPool();
 
         if ((!checkStatus || ticket.getStatus() == ChunkState.LOADED) && ticket.getPriority() != ChunkLoadingTicket.TicketPriority.NONE) {
             ChunkCollisions collisions = ticket.getCollisions();
@@ -270,7 +270,7 @@ public class PhysicsWorldTerrain implements ITerrainManager {
             }
         }
 
-        Vector3fPool.closePool();
+        JmeVector3fPool.closePool();
         Profiler.get().end(ADD_USED);
     }
 
@@ -360,7 +360,7 @@ public class PhysicsWorldTerrain implements ITerrainManager {
         }
 
         ticket.incrStatusIndex(); //When we start to load the chunk, we can consider it's the more up-to-date version, and we are in the physics thread, so very good
-        coll.loadCollisionsSync(this, getCache(), ticket, Vector3fPool.get(pos.x * 16, pos.y * 16, pos.z * 16), profiler);
+        coll.loadCollisionsSync(this, getCache(), ticket, JmeVector3fPool.get(pos.x * 16, pos.y * 16, pos.z * 16), profiler);
         ticket.fireLoadedCallback(); //Call this after adding the chunk : the callback may ask for a new load of this ticket
         profiler.end(Profiler.Profiles.EMERGENCY_CHUNK_LOAD);
 

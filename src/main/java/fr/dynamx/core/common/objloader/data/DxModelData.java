@@ -6,7 +6,7 @@ import fr.dynamx.api.dxmodel.DxModelPath;
 import fr.dynamx.api.dxmodel.EnumDxModelFormats;
 import fr.dynamx.core.common.contentpack.ContentPackLoader;
 import fr.dynamx.core.common.contentpack.PackInfo;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Tuple;
@@ -109,32 +109,32 @@ public abstract class DxModelData {
     public abstract List<String> getMeshNames();
 
     public Vector3f getCenter(@Nullable Vector3f result) {
-        Vector3f min = getMinOfModel(Vector3fPool.get());
-        Vector3f max = getMaxOfModel(Vector3fPool.get());
+        Vector3f min = getMinOfModel(JmeVector3fPool.get());
+        Vector3f max = getMaxOfModel(JmeVector3fPool.get());
         if (result == null)
             return new Vector3f((max.x + min.x) / 2f, (max.y + min.y) / 2f, (max.z + min.z) / 2f);
         return result.set((max.x + min.x) / 2f, (max.y + min.y) / 2f, (max.z + min.z) / 2f);
     }
 
     public Vector3f getDimension(@Nullable Vector3f result) {
-        Vector3f min = getMinOfModel(Vector3fPool.get());
-        Vector3f max = getMaxOfModel(Vector3fPool.get());
+        Vector3f min = getMinOfModel(JmeVector3fPool.get());
+        Vector3f max = getMaxOfModel(JmeVector3fPool.get());
         if (result == null)
             return new Vector3f((max.x - min.x) / 2, (max.y - min.y) / 2, (max.z - min.z) / 2);
         return result.set((max.x - min.x) / 2, (max.y - min.y) / 2, (max.z - min.z) / 2);
     }
 
     public Vector3f getMeshCenter(String name, @Nullable Vector3f result) {
-        Vector3f min = getMeshMin(name, Vector3fPool.get());
-        Vector3f max = getMeshMax(name, Vector3fPool.get());
+        Vector3f min = getMeshMin(name, JmeVector3fPool.get());
+        Vector3f max = getMeshMax(name, JmeVector3fPool.get());
         if (result == null)
             return new Vector3f((max.x + min.x) / 2f, (max.y + min.y) / 2f, (max.z + min.z) / 2f);
         return result.set((max.x + min.x) / 2f, (max.y + min.y) / 2f, (max.z + min.z) / 2f);
     }
 
     public Vector3f getMeshDimension(String name, @Nullable Vector3f result) {
-        Vector3f min = getMeshMin(name, Vector3fPool.get());
-        Vector3f max = getMeshMax(name, Vector3fPool.get());
+        Vector3f min = getMeshMin(name, JmeVector3fPool.get());
+        Vector3f max = getMeshMax(name, JmeVector3fPool.get());
         if (result == null)
             return new Vector3f((max.x - min.x) / 2, (max.y - min.y) / 2, (max.z - min.z) / 2);
         return result.set((max.x - min.x) / 2, (max.y - min.y) / 2, (max.z - min.z) / 2);

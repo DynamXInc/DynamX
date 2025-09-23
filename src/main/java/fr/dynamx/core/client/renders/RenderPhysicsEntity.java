@@ -14,7 +14,7 @@ import fr.dynamx.core.utils.debug.renderer.DebugRenderer;
 import fr.dynamx.core.utils.optimization.GlQuaternionPool;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.SubClassPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
@@ -65,7 +65,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
 
         int renderPass = MinecraftForgeClient.getRenderPass();
         QuaternionPool.openPool(SubClassPool.ENTITY_RENDER);
-        Vector3fPool.openPool(SubClassPool.ENTITY_RENDER);
+        JmeVector3fPool.openPool(SubClassPool.ENTITY_RENDER);
         GlQuaternionPool.openPool(SubClassPool.ENTITY_RENDER);
 
         //Render vehicle
@@ -81,7 +81,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
         }
         MinecraftForge.EVENT_BUS.post(new DynamXEntityRenderEvent(entity, context, DynamXEntityRenderEvent.Type.POST, renderPass));
 
-        Vector3fPool.closePool();
+        JmeVector3fPool.closePool();
         QuaternionPool.closePool();
         GlQuaternionPool.closePool();
     }
@@ -151,7 +151,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
             List<DebugRenderer<T>> validRotatedRenders = debugRenderers.stream().filter(r -> r.shouldRender(entity) && r.hasEntityRotation(entity)).collect(Collectors.toList());
             List<DebugRenderer<T>> validPureRenders = debugRenderers.stream().filter(r -> r.shouldRender(entity) && !r.hasEntityRotation(entity)).collect(Collectors.toList());
             QuaternionPool.openPool();
-            Vector3fPool.openPool();
+            JmeVector3fPool.openPool();
 
             GlStateManager.pushMatrix();
             {
@@ -184,7 +184,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
             }
             GlStateManager.popMatrix();
 
-            Vector3fPool.closePool();
+            JmeVector3fPool.closePool();
             QuaternionPool.closePool();
         }
     }

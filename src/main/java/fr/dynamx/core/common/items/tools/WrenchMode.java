@@ -25,7 +25,7 @@ import fr.dynamx.core.common.physics.joints.JointHandlerRegistry;
 import fr.dynamx.forge.DynamXConfig;
 import fr.dynamx.core.utils.DynamXUtils;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import fr.dynamx.core.utils.physics.PhysicsRaycastResult;
 import lombok.Getter;
 import net.minecraft.entity.Entity;
@@ -65,7 +65,7 @@ public class WrenchMode {
                 Item item = itemOffhand.getItem();
                 if (item instanceof ItemProps) {
                     PropsEntity<?> spawnEntity = ((ItemProps<?>) item).getSpawnEntity(playerIn.world, playerIn,
-                            Vector3fPool.get(playerIn.posX, playerIn.posY + 1.25, playerIn.posZ), playerIn.rotationYaw % 360.0F, item.getMetadata(itemOffhand));
+                            JmeVector3fPool.get(playerIn.posX, playerIn.posY + 1.25, playerIn.posZ), playerIn.rotationYaw % 360.0F, item.getMetadata(itemOffhand));
                     playerIn.world.spawnEntity(spawnEntity);
                     spawnEntity.setPhysicsInitCallback((modularEntity, physicsHandler) -> {
                         physicsHandler.setLinearVelocity(DynamXUtils.toVector3f(playerIn.getLookVec()).multLocal(20));
@@ -195,7 +195,7 @@ public class WrenchMode {
 
         private void act(EntityPlayer player, boolean shouldWeldObjects) {
             QuaternionPool.openPool();
-            Vector3fPool.openPool();
+            JmeVector3fPool.openPool();
             Predicate<EnumBulletShapeType> predicateShape = p -> !p.isPlayer();
 
             PhysicsRaycastResult result = DynamXUtils.castRayFromEntity(player, 30, predicateShape);
@@ -232,7 +232,7 @@ public class WrenchMode {
                     }
                 }
             }
-            Vector3fPool.closePool();
+            JmeVector3fPool.closePool();
             QuaternionPool.closePool();
         }
     }

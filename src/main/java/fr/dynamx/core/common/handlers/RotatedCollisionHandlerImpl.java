@@ -17,6 +17,7 @@ import fr.dynamx.forge.DynamXConfig;
 import fr.dynamx.core.utils.debug.renderer.VehicleDebugRenderer;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.maths.DynamXMath;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.player.EntityPlayer;
@@ -38,16 +39,16 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
     @Override
     public Vector3f rotate(Vector3f pos, Quaternion rotation) {
         if (rotation == null) {
-            return Vector3fPool.get(pos);
+            return JmeVector3fPool.get(pos);
         }
         return DynamXGeometry.rotateVectorByQuaternion(pos, rotation);
     }
 
     @Override
     public AxisAlignedBB rotateBB(Vector3f offset, Vector3f pos, AxisAlignedBB from, Quaternion rotation) {
-        Vector3f tp = rotate(Vector3fPool.get(pos.x - offset.x, pos.y - offset.y, pos.z - offset.z), rotation); //get rotated offset viewed from the bullet entity with a yaw of 0
+        Vector3f tp = rotate(JmeVector3fPool.get(pos.x - offset.x, pos.y - offset.y, pos.z - offset.z), rotation); //get rotated offset viewed from the bullet entity with a yaw of 0
         MutableBoundingBox bb = rotateBB(pos, new MutableBoundingBox(from), rotation);
-        bb.offset(Vector3fPool.get(offset.x + tp.x - pos.x, offset.y + tp.y - pos.y, offset.z + tp.z - pos.z)); //The player box is symmetric, re-put the player box next to the bullet entity, and remove box offset (pos) added by previous rotateBB call
+        bb.offset(JmeVector3fPool.get(offset.x + tp.x - pos.x, offset.y + tp.y - pos.y, offset.z + tp.z - pos.z)); //The player box is symmetric, re-put the player box next to the bullet entity, and remove box offset (pos) added by previous rotateBB call
         return bb.toBB();
     }
 
@@ -55,12 +56,12 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
     public MutableBoundingBox rotateBB(Vector3f pos, MutableBoundingBox from, Quaternion rotation) {
         from.offset(pos.multLocal(-1)); //put at 0
         pos.multLocal(-1); //Restore pos value
-        Vector3f v1 = rotate(Vector3fPool.get((float) from.minX, 0, 0), rotation);
-        Vector3f v2 = rotate(Vector3fPool.get(0, (float) from.minY, 0), rotation);
-        Vector3f v3 = rotate(Vector3fPool.get(0, 0, (float) from.minZ), rotation);
-        Vector3f v4 = rotate(Vector3fPool.get((float) from.maxX, 0, 0), rotation);
-        Vector3f v5 = rotate(Vector3fPool.get(0, (float) from.maxY, 0), rotation);
-        Vector3f v6 = rotate(Vector3fPool.get(0, 0, (float) from.maxZ), rotation);
+        Vector3f v1 = rotate(JmeVector3fPool.get((float) from.minX, 0, 0), rotation);
+        Vector3f v2 = rotate(JmeVector3fPool.get(0, (float) from.minY, 0), rotation);
+        Vector3f v3 = rotate(JmeVector3fPool.get(0, 0, (float) from.minZ), rotation);
+        Vector3f v4 = rotate(JmeVector3fPool.get((float) from.maxX, 0, 0), rotation);
+        Vector3f v5 = rotate(JmeVector3fPool.get(0, (float) from.maxY, 0), rotation);
+        Vector3f v6 = rotate(JmeVector3fPool.get(0, 0, (float) from.maxZ), rotation);
         MutableBoundingBox n = new MutableBoundingBox(DynamXMath.getMin(v1.x, v2.x, v3.x, v4.x, v5.x, v6.x), DynamXMath.getMin(v1.y, v2.y, v3.y, v4.y, v5.y, v6.y), DynamXMath.getMin(v1.z, v2.z, v3.z, v4.z, v5.z, v6.z),
                 DynamXMath.getMax(v1.x, v2.x, v3.x, v4.x, v5.x, v6.x), DynamXMath.getMax(v1.y, v2.y, v3.y, v4.y, v5.y, v6.y), DynamXMath.getMax(v1.z, v2.z, v3.z, v4.z, v5.z, v6.z));
         n.offset(pos);
@@ -141,13 +142,13 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
         float oldx = mx, oldy = my, oldz = mz;
         eps = 0.1;
 
-        Vector3f data = Vector3fPool.get(mx, my, mz);
+        Vector3f data = JmeVector3fPool.get(mx, my, mz);
         if (entity.world.isRemote && ClientDebugSystem.enableDebugDrawing)
-            VehicleDebugRenderer.PlayerCollisionsDebug.motion = Vector3fPool.getPermanentVector(data);
+            VehicleDebugRenderer.PlayerCollisionsDebug.motion = JmeVector3fPool.getPermanentVector(data);
         Quaternion withRotation = with.getCollidableRotation();
         Quaternion inversedWithRotation = withRotation.inverse();
         if (inversedWithRotation == null) //error when loading world
-            return Vector3fPool.get(oldx, oldy, oldz);
+            return JmeVector3fPool.get(oldx, oldy, oldz);
         data = rotate(data, inversedWithRotation);
         mx = data.x;
         my = data.y;
@@ -156,7 +157,7 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
 
         List<EnumFacing> collisionFaces = new ArrayList<>();
         List<MutableBoundingBox> list1 = with.getCollisionBoxes();
-        AxisAlignedBB tempBB = rotateBB(withPosition, Vector3fPool.get((float) entity.posX, (float) entity.posY, (float) entity.posZ), entity.getEntityBoundingBox(), inversedWithRotation);
+        AxisAlignedBB tempBB = rotateBB(withPosition, JmeVector3fPool.get((float) entity.posX, (float) entity.posY, (float) entity.posZ), entity.getEntityBoundingBox(), inversedWithRotation);
         Vector3f offset = with.getCollisionOffset();
         offset = DynamXGeometry.rotateVectorByQuaternion(offset, inversedWithRotation);
         tempBB = tempBB.offset(-offset.x, -offset.y, -offset.z);
@@ -164,7 +165,7 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
 //            tempBB = tempBB.offset(-0.5f, 0, -0.5f);
         if (entity.world.isRemote && ClientDebugSystem.enableDebugDrawing) {
             VehicleDebugRenderer.PlayerCollisionsDebug.lastTemp = tempBB.grow(0);
-            VehicleDebugRenderer.PlayerCollisionsDebug.rotatedmotion = Vector3fPool.getPermanentVector(data);
+            VehicleDebugRenderer.PlayerCollisionsDebug.rotatedmotion = JmeVector3fPool.getPermanentVector(data);
         }
         //if (my != 0.0D)
         {
@@ -214,9 +215,9 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
             //if(mz != 0)
             //tempBB = tempBB.offset(0, 0, mz);
         }
-        data = Vector3fPool.get(mx, my, mz);
+        data = JmeVector3fPool.get(mx, my, mz);
         if (entity.world.isRemote && ClientDebugSystem.enableDebugDrawing)
-            VehicleDebugRenderer.PlayerCollisionsDebug.realmotionrot = Vector3fPool.getPermanentVector(data);
+            VehicleDebugRenderer.PlayerCollisionsDebug.realmotionrot = JmeVector3fPool.getPermanentVector(data);
 
         if (mx != ox || my != oy || mz != oz) {
             // if(entity.world.isRemote)
@@ -247,8 +248,8 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
                 for (EnumFacing f : collisionFaces) {
                     if (!collisionFaces.contains(f.getOpposite())) //If not stuck between 2 aabb
                     {
-                        Vector3f vh = rotate(Vector3fPool.get((float) collidingWith.motionX, (float) collidingWith.motionY, (float) collidingWith.motionZ), inversedWithRotation);
-                        float projVehicMotion = Vector3fPool.get(vh.x, vh.y, vh.z).dot(Vector3fPool.get(f.getDirectionVec().getX(), f.getDirectionVec().getY(), f.getDirectionVec().getZ()));
+                        Vector3f vh = rotate(JmeVector3fPool.get((float) collidingWith.motionX, (float) collidingWith.motionY, (float) collidingWith.motionZ), inversedWithRotation);
+                        float projVehicMotion = JmeVector3fPool.get(vh.x, vh.y, vh.z).dot(JmeVector3fPool.get(f.getDirectionVec().getX(), f.getDirectionVec().getY(), f.getDirectionVec().getZ()));
                         //if (projVehicMotion != 0)
                         //  System.out.println("Collide on face " + f + " " + projVehicMotion);
                         if (projVehicMotion != 0) //We push the player
@@ -268,9 +269,9 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
                                     break;
                                 case UP:
                                     if (collidingWith.canPlayerStandOnTop()) {
-                                        offset = Vector3fPool.get((float) (entity.posX - collidingWith.posX + data.x), (float) (entity.posY - collidingWith.posY + data.y), (float) (entity.posZ - collidingWith.posZ + data.z));
+                                        offset = JmeVector3fPool.get((float) (entity.posX - collidingWith.posX + data.x), (float) (entity.posY - collidingWith.posY + data.y), (float) (entity.posZ - collidingWith.posZ + data.z));
                                         offset = rotate(offset, inversedWithRotation);
-                                        offset = Vector3fPool.getPermanentVector(offset); //We don't want an instance from the pool
+                                        offset = JmeVector3fPool.getPermanentVector(offset); //We don't want an instance from the pool
                                         //System.out.println("Collision point for " + collisionFaces.get(0) + " at " + offsetv);
                                         WalkingOnPlayerController.controller = new WalkingOnPlayerController((EntityPlayer) entity, collidingWith, f, offset);
                                         collidingWith.walkingOnPlayers.put((EntityPlayer) entity, WalkingOnPlayerController.controller);
@@ -287,10 +288,10 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
         } else {
             // if(entity.world.isRemote)
             // System.out.println("PAS COLL With is "+withRotation+" "+entity.ticksExisted+" "+with+" "+withPosition+" "+data+" "+tempBB);
-            data = Vector3fPool.get(oldx, oldy, oldz);
+            data = JmeVector3fPool.get(oldx, oldy, oldz);
         }
         if (entity.world.isRemote && ClientDebugSystem.enableDebugDrawing)
-            VehicleDebugRenderer.PlayerCollisionsDebug.realmotion = Vector3fPool.getPermanentVector(data);
+            VehicleDebugRenderer.PlayerCollisionsDebug.realmotion = JmeVector3fPool.getPermanentVector(data);
         return data;
     }
 
@@ -326,7 +327,7 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
                     if (!inBox.intersects(entry.getValue())) {
                         continue;
                     }
-                    Vector3f pos = Vector3fPool.get(entry.getKey().getX(), entry.getKey().getY(), entry.getKey().getZ());
+                    Vector3f pos = JmeVector3fPool.get(entry.getKey().getX(), entry.getKey().getY(), entry.getKey().getZ());
                     if (entities.containsKey(pos)) {
                         continue;
                     }
@@ -335,7 +336,7 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
                         iterator.remove();
                         continue;
                     }
-                    entities.put(Vector3fPool.get(entry.getKey().getX(), entry.getKey().getY(), entry.getKey().getZ()), (IDynamXObject) tileEntity);
+                    entities.put(JmeVector3fPool.get(entry.getKey().getX(), entry.getKey().getY(), entry.getKey().getZ()), (IDynamXObject) tileEntity);
                 }
             }
         }
@@ -410,12 +411,12 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
         motionChanged = false;
 
         if (shouldHandleCollision(entity)) {
-            Vector3fPool.openPool(SubClassPool.ROTATED_COLLS_HANDLER_0);
+            JmeVector3fPool.openPool(SubClassPool.ROTATED_COLLS_HANDLER_0);
 
             PooledHashMap<Vector3f, IDynamXObject> collidableEntities = getCollidableTileEntities(entity.world, new MutableBoundingBox(entity.getEntityBoundingBox()).grow(1));
             for (Map.Entry<Vector3f, IDynamXObject> e : collidableEntities.entrySet()) {
                 //System.out.println("Input "+mx+" "+my+" "+mz+" "+nx+" "+ny+" "+nz+" "+entity.onGround+" "+entity.collidedVertically+" "+e.physicsPosition);
-                Vector3fPool.openPool(SubClassPool.ROTATED_COLLS_HANDLER_1);
+                JmeVector3fPool.openPool(SubClassPool.ROTATED_COLLS_HANDLER_1);
                 QuaternionPool.openPool(SubClassPool.ROTATED_COLLS_HANDLER_1);
                 float castx = (float) nx, casty = (float) ny, castz = (float) nz;
                 Vector3f n = collideWith(entity, e.getValue(), e.getKey(), castx, casty, castz);
@@ -432,17 +433,17 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
                     nz = n.z;
                 }
                 QuaternionPool.closePool();
-                Vector3fPool.closePool();
+                JmeVector3fPool.closePool();
             }
             collidableEntities.release();
             List<PhysicsEntity> entities = entity.world.getEntitiesWithinAABB(PhysicsEntity.class, entity.getEntityBoundingBox().grow(icollidableCheckRadius));
             for (PhysicsEntity e : entities) {
                 if (!DynamXContext.getPlayerPickingObjects().containsValue(e.getEntityId())) {
                     //System.out.println("Input "+mx+" "+my+" "+mz+" "+nx+" "+ny+" "+nz+" "+entity.onGround+" "+entity.collidedVertically+" "+e.physicsPosition);
-                    Vector3fPool.openPool(SubClassPool.ROTATED_COLLS_HANDLER_2);
+                    JmeVector3fPool.openPool(SubClassPool.ROTATED_COLLS_HANDLER_2);
                     QuaternionPool.openPool(SubClassPool.ROTATED_COLLS_HANDLER_2);
                     float castx = (float) nx, casty = (float) ny, castz = (float) nz;
-                    Vector3f withPos = Vector3fPool.get((float) e.posX, (float) e.posY, (float) e.posZ);
+                    Vector3f withPos = JmeVector3fPool.get((float) e.posX, (float) e.posY, (float) e.posZ);
                     Vector3f n = collideWith(entity, e, withPos, castx, casty, castz);
                     if (castx != n.x) {
                         nx = n.x;
@@ -457,11 +458,11 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
                         nz = n.z;
                     }
                     QuaternionPool.closePool();
-                    Vector3fPool.closePool();
+                    JmeVector3fPool.closePool();
                 }
             }
 
-            Vector3fPool.closePool();
+            JmeVector3fPool.closePool();
         }
         //if(entity.world.isRemote && entity instanceof EntityPlayer)
         //System.out.println("Got motiin "+nx+" "+ny+" "+nz);

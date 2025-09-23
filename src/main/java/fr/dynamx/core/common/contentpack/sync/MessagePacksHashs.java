@@ -10,7 +10,7 @@ import fr.dynamx.core.common.contentpack.loader.InfoLoader;
 import fr.dynamx.core.common.handlers.TaskScheduler;
 import fr.dynamx.forge.DynamXConfig;
 import fr.dynamx.core.utils.DynamXUtils;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.TextComponentString;
@@ -115,7 +115,7 @@ public class MessagePacksHashs implements IDnxPacket {
 
             Minecraft.getMinecraft().ingameGUI.setOverlayMessage("Synchronizing DynamX packs...", false);
             Minecraft.getMinecraft().addScheduledTask(() -> {
-                Vector3fPool.openPool();
+                JmeVector3fPool.openPool();
 
                 try {
                     for (Map.Entry<String, Map<String, byte[]>> entry : message.objects.entrySet()) {
@@ -139,7 +139,7 @@ public class MessagePacksHashs implements IDnxPacket {
                 DynamXUtils.hotswapWorldPackInfos(DynamXMain.getProxy().getClientWorld());
                 Minecraft.getMinecraft().ingameGUI.setOverlayMessage("", false);
 
-                Vector3fPool.closePool();
+                JmeVector3fPool.closePool();
             });
             return null;
         }

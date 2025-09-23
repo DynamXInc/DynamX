@@ -7,7 +7,7 @@ import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.common.network.sync.MPPhysicsEntitySynchronizer;
 import fr.dynamx.core.utils.debug.Profiler;
 import fr.dynamx.core.utils.optimization.PooledHashMap;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.relauncher.Side;
@@ -46,9 +46,9 @@ public class ServerPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends
         readReceivedPackets();
 
         profiler.start(Profiler.Profiles.PHY1);
-        Vector3fPool.openPool();
+        JmeVector3fPool.openPool();
         entity.prePhysicsUpdateWrapper(profiler, true);
-        Vector3fPool.closePool();
+        JmeVector3fPool.closePool();
         profiler.end(Profiler.Profiles.PHY1);
 
         if (entity.ticksExisted % entity.getSyncTickRate() == 0) //Don't send a packet each tick

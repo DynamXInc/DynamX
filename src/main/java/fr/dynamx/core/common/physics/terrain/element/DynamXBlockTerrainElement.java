@@ -15,7 +15,7 @@ import fr.dynamx.core.utils.debug.TerrainDebugRenderer;
 import fr.dynamx.core.utils.optimization.BoundingBoxPool;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.SubClassPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -71,7 +71,7 @@ public class DynamXBlockTerrainElement implements ITerrainElement {
             return null;
         }
         PhysicsRigidBody p = new PhysicsRigidBody(((TEDynamXBlock) te).getPhysicsCollision(), 0);
-        p.setPhysicsLocation(pos.add(Vector3fPool.get(x + 0.5f, y + 1.5f, z + 0.5f)).addLocal(((TEDynamXBlock) te).getRelativeTranslation()));
+        p.setPhysicsLocation(pos.add(JmeVector3fPool.get(x + 0.5f, y + 1.5f, z + 0.5f)).addLocal(((TEDynamXBlock) te).getRelativeTranslation()));
         p.setPhysicsRotation(((TEDynamXBlock) te).getCollidableRotation());
         p.setUserObject(new BulletShapeType<>(EnumBulletShapeType.TERRAIN, this));
         body = p;
@@ -86,19 +86,19 @@ public class DynamXBlockTerrainElement implements ITerrainElement {
 
     @Override
     public void addDebugToWorld(World mcWorld, Vector3f pos) {
-        Vector3fPool.openPool();
+        JmeVector3fPool.openPool();
         QuaternionPool.openPool();
         BoundingBoxPool.getPool().openSubPool(SubClassPool.BOUNDING_BOX_DEFAULT);
 
-        BoundingBox b = body.getCollisionShape().boundingBox(body.getPhysicsLocation(Vector3fPool.get()), body.getPhysicsRotation(QuaternionPool.get()), BoundingBoxPool.get());
-        Vector3f min = b.getMin(Vector3fPool.get());
-        Vector3f max = b.getMax(Vector3fPool.get());
+        BoundingBox b = body.getCollisionShape().boundingBox(body.getPhysicsLocation(JmeVector3fPool.get()), body.getPhysicsRotation(QuaternionPool.get()), BoundingBoxPool.get());
+        Vector3f min = b.getMin(JmeVector3fPool.get());
+        Vector3f max = b.getMax(JmeVector3fPool.get());
         debugData = new TerrainDebugData(TerrainDebugRenderer.DYNAMXBLOCKS, new float[]{min.x, min.y, min.z, max.x, max.y, max.z});
         (mcWorld.isRemote ? DynamXDebugOptions.CLIENT_BLOCK_BOXES : DynamXDebugOptions.BLOCK_BOXES).getDataIn().put(debugData.getUuid(), debugData);
 
         BoundingBoxPool.getPool().closeSubPool();
         QuaternionPool.closePool();
-        Vector3fPool.closePool();
+        JmeVector3fPool.closePool();
     }
 
     @Override

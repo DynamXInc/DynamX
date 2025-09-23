@@ -41,19 +41,6 @@ public class ContentPackLoader {
      */
     private static boolean initialized;
     public static boolean isHotReloading;
-    /**
-     * Loaded BlockInfo
-     */
-    private static final Map<HmBlock, float[]> BLOCKS_GRIP = new HashMap<>();
-    private static final float[] DEFAULT_GRIP = new float[]{1, 0.9f};
-
-    /**
-     * Blocks where slopes can be placed
-     */
-    public static final List<HmBlock> slopes = new ArrayList<>();
-
-    public static boolean PLACE_SLOPES = false;
-    public static int SLOPES_LENGTH = 20;
 
     /**
      * Protected resources of protected packs
@@ -148,7 +135,6 @@ public class ContentPackLoader {
      * <strong>DON'T CALL THIS, USE {@link DynamXLoadingTasks} !</strong>
      *
      * @param resDir            The packs folder
-     * @param loadBlocksConfigs If should load blocks.dynx and slopes.dynx
      */
     public static void reload(HermesMod mod, boolean isClient, File resDir) {
         isHotReloading = initialized;
@@ -169,11 +155,9 @@ public class ContentPackLoader {
             String suffix = ".dynx";
             for (File contentPack : resDir.listFiles()) {
                 if (contentPack.getName().equals("slopes.dynx")) {
-                    if (loadBlocksConfigs)
-                        registerSlopes(new BufferedReader(new InputStreamReader(new FileInputStream(contentPack))));
+                    log.fatal("slopes.dynx isn't support in this version of DynamX!");
                 } else if (contentPack.getName().equals("blocks.dynx")) {
-                    if (loadBlocksConfigs)
-                        registerBlockGrip(new BufferedReader(new InputStreamReader(new FileInputStream(contentPack))));
+                    log.fatal("blocks.dynx isn't support in this version of DynamX!");
                 } else if (contentPack.isDirectory()) {
                     // Loading pack, useful for debugging errors
                     String loadingPack = contentPack.getName();
@@ -306,64 +290,6 @@ public class ContentPackLoader {
                 e = new RuntimeException("encapsulated error", e);
             DynamXErrorManager.addError(loadingPack, DynamXErrorManager.PACKS_ERRORS, "pack_file_load_error", ErrorLevel.FATAL, file.getName().replace(suffix, ""), null, (Exception) e, 100);
         }
-    }
-
-    private static void registerSlopes(BufferedReader reader) {
-        String[] array = reader.lines().toArray(String[]::new);
-        for (int i = 0; i < array.length; i++) {
-            //Configuring length of slopes
-            Pattern p = Pattern.compile("length\\s*:\\s*(\\d+)");
-            Matcher m = p.matcher(array[i]);
-            if (m.find()) {
-                SLOPES_LENGTH = Integer.parseInt(m.group(1));
-                continue;
-            }
-
-            //Configuring auto-placing of slopes
-            p = Pattern.compile("auto place\\s*:\\s*(\\w+)");
-            m = p.matcher(array[i]);
-            if (m.find()) {
-                PLACE_SLOPES = Boolean.parseBoolean(m.group(1));
-                continue;
-            }
-
-            //TODO
-            HmBlock block = Block.getBlockFromName(array[i]);
-            if (block != null) {
-                slopes.add(block);
-            } else {
-                log.error("Block " + array[i] + " doesn't exist");
-            }
-        }
-    }
-
-    private static void registerBlockGrip(BufferedReader reader) {
-        reader.lines().forEach(s -> {
-            if (!s.trim().startsWith("//") && s.contains(":")) {
-                String[] blockString = s.split(": ");
-                HmBlock block = Block.getBlockFromName(blockString[0]);
-                if (block != null) {
-                    String[] values = blockString[1].split(" ");
-                    if (values.length > 1) {
-                        BLOCKS_GRIP.put(block, new float[]{
-                                Float.parseFloat(values[0]), Float.parseFloat(values[1])});
-                    } else {
-                        BLOCKS_GRIP.put(block, new float[]{
-                                Float.parseFloat(values[0]), Float.parseFloat(values[0])});
-                    }
-                } else {
-                    log.error("Bad block grip config: block " + blockString[0] + " doesn't exist");
-                }
-            }
-        });
-    }
-
-    public static float[] getBlockFriction(HmBlock of) {
-        return BLOCKS_GRIP.getOrDefault(of, DEFAULT_GRIP);
-    }
-
-    public static Map<HmBlock, float[]> getBlocksGrip() {
-        return BLOCKS_GRIP;
     }
 
     /**

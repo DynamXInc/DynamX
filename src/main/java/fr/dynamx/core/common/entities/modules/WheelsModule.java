@@ -48,6 +48,8 @@ import java.util.Map;
  */
 @SynchronizedEntityVariable.SynchronizedPhysicsModule(modid = DynamXConstants.ID)
 public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHandler<?>>, IPhysicsModule.IPhysicsUpdateListener, IPackInfoReloadListener {
+    private static final float[] DEFAULT_GRIP = new float[]{1, 0.9f};
+
     @SynchronizedEntityVariable(name = "wheel_infos")
     protected final EntityMapVariable<Map<Byte, String>, Byte, String> synchronizedWheelInfos = new EntityMapVariable<>((variable, value) -> {
         value.forEach((wheelIndex, wheelInfoName) -> {
@@ -231,7 +233,7 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
                 w.getPhysicsWheel().getCollisionLocation(pos);
                 BlockPos bp = new BlockPos(pos.x, Math.ceil(pos.y) - 1, pos.z);
                 IBlockState blockState = entity.world.getBlockState(bp);
-                float[] frictionValues = ContentPackLoader.getBlockFriction(blockState.getBlock());
+                float[] frictionValues = DEFAULT_GRIP; // TODO dynamic grip depending on the block was removed. to add back properly. See commit 🏷️ Remove block-grip and block-related slope config support
                 boolean isBlockWet = entity.world.getBiome(bp).canRain() && entity.world.isRaining() && entity.world.canBlockSeeSky(bp);
                 float frictionValue = isBlockWet ? frictionValues[1] : frictionValues[0];
                 w.setGrip((w.isFlattened() ? 0.16f : 1) * frictionValue);

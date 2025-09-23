@@ -7,9 +7,7 @@ import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.api.physics.terrain.ITerrainElement;
 import fr.dynamx.core.common.DynamXContext;
 import fr.dynamx.core.common.command.ISubCommand;
-import fr.dynamx.core.common.contentpack.ContentPackLoader;
 import fr.dynamx.core.common.items.tools.ItemSlopes;
-import fr.dynamx.core.common.network.packets.MessageSwitchAutoSlopesMode;
 import fr.dynamx.core.common.network.packets.MessageUpdateChunk;
 import fr.dynamx.core.common.physics.terrain.chunk.ChunkCollisions;
 import fr.dynamx.core.common.slopes.SlopeBuildingConfig;
@@ -70,9 +68,6 @@ public class CmdSlopes implements ISubCommand {
                 r.add("create");
                 r.add("delete");
                 r.add("automatic");
-                //r.add("switch");
-                //r.add("clear");
-                r.add("enableAutoSlopes");
             } else if (args[1].equalsIgnoreCase("automatic")) {
                 if (args.length == 3) {
                     r.add("generate");
@@ -384,12 +379,7 @@ public class CmdSlopes implements ISubCommand {
             sender.sendMessage(new TextComponentTranslation("Points supprimés de l'item !"));
         }*/
         else if (args[1].equalsIgnoreCase("enableAutoSlopes")) {
-            ContentPackLoader.PLACE_SLOPES = !ContentPackLoader.PLACE_SLOPES;
-            //NBTTagCompound tag = new NBTTagCompound();
-            //tag.setBoolean("enable", ContentPackLoader.PLACE_SLOPES);
-            DynamXContext.getNetwork().getVanillaNetwork().getChannel().sendToAll(new MessageSwitchAutoSlopesMode(ContentPackLoader.PLACE_SLOPES ? 1 : 0));
-            sender.sendMessage(new TextComponentString("[EXPERIMENTAL] Placement des pentes automatiques " + (ContentPackLoader.PLACE_SLOPES ? "activé" : "désactivé")));
-            sender.sendMessage(new TextComponentString("Cette valeur n'est pas sauvegardée par défaut, ajoutez \"auto slopes:" + ContentPackLoader.PLACE_SLOPES + "\" dans le fichier slopes.dynx !"));
+            throw new WrongUsageException("This command isn't support in this version. Ask Aym' for support");
         } else {
             throw new WrongUsageException("/dynamx " + getUsage());
         }

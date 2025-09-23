@@ -69,7 +69,6 @@ public class DynamXPacketRegistry {
         registerMessage(channel, MessageForcePlayerPos.class, MessageForcePlayerPos.class, Side.CLIENT);
         registerMessage(channel, MessageJoints.class, MessageJoints.class, Side.CLIENT);
         registerMessage(channel, MessageSyncPlayerPicking.class, MessageSyncPlayerPicking.class, Side.CLIENT);
-        registerMessage(channel, MessageSwitchAutoSlopesMode.Handler.class, MessageSwitchAutoSlopesMode.class, Side.CLIENT);
         registerMessage(channel, MessageCollisionDebugDraw.class, MessageCollisionDebugDraw.class, Side.CLIENT);
         registerMessage(channel, MessageCollisionDebugDraw.class, MessageCollisionDebugDraw.class, Side.CLIENT);
         registerMessage(channel, MessageHandleExplosion.class, MessageHandleExplosion.class, Side.CLIENT);

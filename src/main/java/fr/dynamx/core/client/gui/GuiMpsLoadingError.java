@@ -33,7 +33,7 @@ public class GuiMpsLoadingError extends GuiCustomModLoadingErrorScreen {
     @Override
     protected void actionPerformed(GuiButton button) {
         if (button.id == 48) {
-            DynamXMain.memoizedLoadingError = null;
+            DynamXMain.getInstance().setMemoizedLoadingError(null);
             this.mc.displayGuiScreen(parent);
         } else {
             super.actionPerformed(button);
@@ -41,9 +41,9 @@ public class GuiMpsLoadingError extends GuiCustomModLoadingErrorScreen {
     }
 
     @Override
-    protected void keyTyped(char typedChar, int keyCode) throws IOException {
+    protected void keyTyped(char typedChar, int keyCode) {
         if (keyCode == 1) {
-            DynamXMain.memoizedLoadingError = null;
+            DynamXMain.getInstance().setMemoizedLoadingError(null);
             this.mc.displayGuiScreen(parent);
         }
     }

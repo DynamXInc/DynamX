@@ -7,5 +7,9 @@ public interface HermesUtils
 {
     void addPathToClasspath(URL path);
 
+    //TODO SHOULD BE MOVED TO SOME CLIENT UTILS METHOD
     boolean addFileResources(File file);
+
+    //TODO SHOULD BE MOVED TO SOME CLIENT UTILS METHOD
+    void reloadLanguageResources();
 }

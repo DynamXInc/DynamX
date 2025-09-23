@@ -136,7 +136,7 @@ public class MessagePacksHashs implements IDnxPacket {
                 }
 
                 DynamXContext.getDxModelRegistry().getItemRenderer().refreshItemInfos();
-                DynamXUtils.hotswapWorldPackInfos(DynamXMain.proxy.getClientWorld());
+                DynamXUtils.hotswapWorldPackInfos(DynamXMain.getProxy().getClientWorld());
                 Minecraft.getMinecraft().ingameGUI.setOverlayMessage("", false);
 
                 Vector3fPool.closePool();

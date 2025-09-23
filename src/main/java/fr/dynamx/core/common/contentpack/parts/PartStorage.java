@@ -16,6 +16,7 @@ import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.client.ContentPackUtils;
 import fr.dynamx.core.utils.debug.DynamXDebugOption;
 import fr.dynamx.core.utils.debug.DynamXDebugOptions;
+import fr.dynamx.forge.DynamXForgeMod;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.entity.Entity;
@@ -67,9 +68,9 @@ public class PartStorage<T extends ISubInfoTypeOwner<T>> extends InteractivePart
     public boolean interact(IDynamXObject entity, EntityPlayer player) {
         if (entity instanceof TEDynamXBlock) {
             BlockPos pos = ((TEDynamXBlock) entity).getPos();
-            player.openGui(DynamXMain.instance, getId() + 2, player.world, pos.getX(), pos.getY(), pos.getZ());
+            player.openGui(DynamXForgeMod.modInstance, getId() + 2, player.world, pos.getX(), pos.getY(), pos.getZ());
         } else if (entity instanceof PackPhysicsEntity) {
-            player.openGui(DynamXMain.instance, 1, player.world, ((Entity) entity).getEntityId(), getId(), 0);
+            player.openGui(DynamXForgeMod.modInstance, 1, player.world, ((Entity) entity).getEntityId(), getId(), 0);
         } else {
             throw new IllegalArgumentException("DynamX doesn't know how a storage should be opened on a " + entity);
         }
@@ -92,7 +93,7 @@ public class PartStorage<T extends ISubInfoTypeOwner<T>> extends InteractivePart
 
         if(FMLCommonHandler.instance().getSide().isClient()) {
             String ownerName = owner instanceof ObjectInfo ? ((ObjectInfo<?>) owner).getDefaultName() : owner.getName();
-            ContentPackUtils.addMissingLangTranslation(DynamXMain.resourcesDirectory, getPackName(),
+            ContentPackUtils.addMissingLangTranslation(DynamXMain.getInstance().getResourcesDirectory(), getPackName(),
                     "part.storage" + owner.getFullName(), ownerName + "'s trunk");
         }
     }

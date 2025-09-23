@@ -169,13 +169,13 @@ public class CommonEventHandler {
         World world = event.getWorld();
         world.addEventListener(new DynamXWorldListener());
         if (event.getWorld().isRemote || FMLCommonHandler.instance().getMinecraftServerInstance().isDedicatedServer()) {
-            DynamXMain.proxy.initPhysicsWorld(event.getWorld());
+            DynamXMain.getProxy().initPhysicsWorld(event.getWorld());
         }
     }
 
     @SubscribeEvent
     public void onChunkUnload(ChunkEvent.Unload e) {
-        if (DynamXMain.proxy.shouldUseBulletSimulation(e.getWorld())) {
+        if (DynamXMain.getProxy().shouldUseBulletSimulation(e.getWorld())) {
             DynamXContext.getPhysicsWorld(e.getWorld()).schedule(() -> DynamXContext.getPhysicsWorld(e.getWorld()).getTerrainManager().onChunkUnload(e));
         }
     }
@@ -290,7 +290,7 @@ public class CommonEventHandler {
                     } else {
                         ContentPackUtils.registerDynamXBlockStateMapper(block);
                         if (((DynamXBlock<?>) block).createJson()) {
-                            ContentPackUtils.createBlockJson((IResourcesOwner) block, block.getInfo(), DynamXMain.resourcesDirectory);
+                            ContentPackUtils.createBlockJson((IResourcesOwner) block, block.getInfo(), DynamXMain.getInstance().getResourcesDirectory());
                         }
                     }
                 }

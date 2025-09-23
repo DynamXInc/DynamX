@@ -167,7 +167,7 @@ public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> imple
         if (world.isRemote) {
             return;
         }
-        DynamXMain.proxy.scheduleTask(world, () -> {
+        DynamXMain.getProxy().scheduleTask(world, () -> {
             for (EnumRagdollBodyPart enumBodyPart : EnumRagdollBodyPart.values()) {
                 if (!enumBodyPart.equals(EnumRagdollBodyPart.CHEST)) {
                     JointHandlerRegistry.createJointWithSelf(RagdollJointsHandler.JOINT_HANDLER_NAME, this, (byte) enumBodyPart.ordinal());

@@ -140,9 +140,9 @@ public class ClientEventHandler {
 
     @SubscribeEvent
     public void guiOpenEvent(GuiOpenEvent event) {
-        if (event.getGui() instanceof GuiMainMenu && DynamXMain.memoizedLoadingError != null) {
+        if (event.getGui() instanceof GuiMainMenu && DynamXMain.getInstance().getMemoizedLoadingError() != null) {
             DynamXMain.log.warn("Some errors occurred while loading DynamX content. Showing user a custom error screen.");
-            CustomModLoadingErrorDisplayException custom = DynamXMain.memoizedLoadingError.toCustomModLoadingErrorDisplayException("You can ignore this error but you may miss some 3D models.");
+            CustomModLoadingErrorDisplayException custom = DynamXMain.getInstance().getMemoizedLoadingError().toCustomModLoadingErrorDisplayException("You can ignore this error but you may miss some 3D models.");
             event.setGui(new GuiMpsLoadingError(custom, (GuiMainMenu) event.getGui()));
         }
     }

@@ -51,9 +51,9 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
      */
     public Entity getOtherSideEntity() {
         if (mySide.isServer()) {
-            return Minecraft.getMinecraft().player == null ? null : DynamXMain.proxy.getClientWorld().getEntityByID(entity.getEntityId());
+            return Minecraft.getMinecraft().player == null ? null : DynamXMain.getProxy().getClientWorld().getEntityByID(entity.getEntityId());
         }
-        return DynamXMain.proxy.getServerWorld().getEntityByID(entity.getEntityId());
+        return DynamXMain.getProxy().getServerWorld().getEntityByID(entity.getEntityId());
     }
 
     /**

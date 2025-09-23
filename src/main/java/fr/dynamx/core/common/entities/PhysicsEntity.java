@@ -142,7 +142,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
         preventEntitySpawning = true;
 
         // Network Init
-        synchronizer = DynamXMain.proxy.getNetHandlerForEntity(this);
+        synchronizer = DynamXMain.getProxy().getNetHandlerForEntity(this);
         usesPhysicsWorld = DynamXContext.usesPhysicsWorld(world);
 
         ignoreFrustumCheck = true;

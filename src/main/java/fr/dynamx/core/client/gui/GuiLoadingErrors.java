@@ -38,7 +38,7 @@ public class GuiLoadingErrors extends GuiFrame {
         fillSummary(null);
         summary.setFocused(true);
         add(summary);
-        DynamXErrorManager.printErrors(Side.CLIENT, ErrorLevel.ADVICE);
+        DynamXErrorManager.printErrors(true, ErrorLevel.ADVICE);
     }
 
     private void fillSummary(String filter) {

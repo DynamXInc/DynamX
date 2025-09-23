@@ -68,7 +68,7 @@ public class MessageUpdateChunk implements IDnxPacket, IMessageHandler<MessageUp
         if (context == null)
             return; // World is unloaded
         IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(context.world);
-        if (physicsWorld != null && DynamXMain.proxy.shouldUseBulletSimulation(context.world)) {
+        if (physicsWorld != null && DynamXMain.getProxy().shouldUseBulletSimulation(context.world)) {
             physicsWorld.schedule(() -> {
                 Vector3fPool.openPool();
                 for (VerticalChunkPos pos : chunksToUpdate) {
@@ -81,7 +81,8 @@ public class MessageUpdateChunk implements IDnxPacket, IMessageHandler<MessageUp
                 }
                 Vector3fPool.closePool();
             });
-        } else if (DynamXConfig.enableDebugTerrainManager)
-            DynamXMain.log.info("RCV FAILZ " + physicsWorld + " " + DynamXMain.proxy.shouldUseBulletSimulation(context.world));
+        } else if (DynamXConfig.enableDebugTerrainManager) {
+            DynamXMain.log.info("RCV FAILZ {} {}", physicsWorld, DynamXMain.getProxy().shouldUseBulletSimulation(context.world));
+        }
     }
 }

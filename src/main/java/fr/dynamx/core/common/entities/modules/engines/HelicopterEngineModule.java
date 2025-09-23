@@ -65,7 +65,7 @@ public class HelicopterEngineModule extends BasicEngineModule implements IEntity
     @Override
     public void onEngineSwitchedOn() {
         super.onEngineSwitchedOn();
-        if (DynamXMain.proxy.ownsSimulation(entity)) {
+        if (DynamXMain.getProxy().ownsSimulation(entity)) {
             startupTimer = engineStartupTime;
             power.set(1f / engineStartupTime);
         }
@@ -102,7 +102,7 @@ public class HelicopterEngineModule extends BasicEngineModule implements IEntity
 
     @Override
     public void updateEntity() {
-        if (DynamXMain.proxy.ownsSimulation(entity)) {
+        if (DynamXMain.getProxy().ownsSimulation(entity)) {
             if (startupTimer > 0) {
                 startupTimer--;
                 power.set(1f - (float) startupTimer / engineStartupTime);

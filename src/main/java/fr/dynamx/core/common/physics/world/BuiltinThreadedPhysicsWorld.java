@@ -75,7 +75,7 @@ public class BuiltinThreadedPhysicsWorld extends BasePhysicsWorld implements Run
                     DynamXMain.log.warn("Server too slow, physics will skip " + (ticksLate.get() - 1) + " simulation ticks !");
                     ticksLate.set(1);
                 } else {
-                    if (profiler.isActive() && DynamXMain.proxy.getTickTime() % 20 == 0) {
+                    if (profiler.isActive() && DynamXMain.getProxy().getTickTime() % 20 == 0) {
                         profiler.printData("Physics thread");
                         profiler.reset();
                     }

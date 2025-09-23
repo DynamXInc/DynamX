@@ -135,7 +135,7 @@ public abstract class InfoList<T extends ISubInfoTypeOwner<?>> {
                             };
                             DynamXItemRegistry.creativeTabs.add(tab);
                             if (client) {
-                                ContentPackUtils.addMissingLangTranslation(DynamXMain.resourcesDirectory, info.getPackName(), tab.getTranslationKey(), tab.getTabLabel());
+                                ContentPackUtils.addMissingLangTranslation(DynamXMain.getInstance().getResourcesDirectory(), info.getPackName(), tab.getTranslationKey(), tab.getTabLabel());
                             }
                         }
                     }
@@ -152,7 +152,7 @@ public abstract class InfoList<T extends ISubInfoTypeOwner<?>> {
                                 for (int metadata = 0; metadata < ((IResourcesOwner) ob).getMaxMeta(); metadata++) {
                                     String translationKey = info.getTranslationKey((IDynamXItem) ob, metadata) + ".name";
                                     String translationValue = info.getTranslatedName((IDynamXItem) ob, metadata);
-                                    ContentPackUtils.addMissingLangTranslation(DynamXMain.resourcesDirectory, info.getPackName(), translationKey, translationValue);
+                                    ContentPackUtils.addMissingLangTranslation(DynamXMain.getInstance().getResourcesDirectory(), info.getPackName(), translationKey, translationValue);
                                 }
                             }
                         }

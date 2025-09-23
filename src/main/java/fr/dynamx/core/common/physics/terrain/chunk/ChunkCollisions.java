@@ -510,7 +510,7 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
      * Called when the chunk is updated, to wake neighbor {@link PhysicsEntity} from sleeping
      */
     private void updateNearEntities() {
-        DynamXMain.proxy.scheduleTask(mcWorld, () -> {
+        DynamXMain.getProxy().scheduleTask(mcWorld, () -> {
             try {
                 for (int x = -1; x <= 1; x++) {
                     for (int z = -1; z <= 1; z++) {

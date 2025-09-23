@@ -87,7 +87,7 @@ public class PhysicsWorldOperation<A> {
                             }
                         }
                     };
-                    DynamXMain.proxy.scheduleTask(et.world, task);
+                    DynamXMain.getProxy().scheduleTask(et.world, task);
                     break;
                 case ADD_CONSTRAINT:
                     if (object != null && !joints.contains(object)) {

@@ -22,6 +22,7 @@ import fr.dynamx.core.utils.physics.NativeEngineInstaller;
 import fr.hermes.api.mod.HermesMod;
 import fr.hermes.api.forge.HermesProgressManager;
 import lombok.Getter;
+import lombok.Setter;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
@@ -32,30 +33,52 @@ import java.io.File;
 import static fr.dynamx.core.utils.DynamXConstants.*;
 
 public class DynamXMain {
+    private static DynamXMain INSTANCE;
+
+    @Getter
+    private final HermesMod mod;
+
+    @Getter
+    private final boolean isClient;
+
+    // TODO MOVE IN HERMES API
+    public static final Logger log = LogManager.getLogger("DynamX");
+
+    // TODO SHOULD IDEALLY DISAPPEAR IN HERMES, BUT KEEPING IT FOR NOW
     @Getter
     private static CommonProxy proxy;
 
-    public static File resourcesDirectory;
+    @Getter
+    private File resourcesDirectory;
 
-    public static ModProtectionContainer mpsContainer;
+    @Getter
+    private ModProtectionContainer mpsContainer;
 
     /**
      * An error that occurred during construction, to be thrown at pre-init <br>
      * This is used to prevent the game from starting if a critical error occurred during construction <br>
      * The error cannot be thrown during construction because some required Minecraft classes are not loaded yet
      */
-    public static UserErrorMessageException memoizedConstructionError;
+    @Getter
+    @Setter
+    private UserErrorMessageException memoizedConstructionError;
+
     /**
      * An error that occurred during loading, to be thrown at the end of loading <br>
      * This error will be shown to the user at the end of the loading process <br>
      * This error can be skipped by the user
      */
-    public static UserErrorMessageException memoizedLoadingError;
+    @Getter
+    @Setter
+    private UserErrorMessageException memoizedLoadingError;
 
-    // TODO MOVE IN HERMES API
-    public static final Logger log = LogManager.getLogger("DynamX");
+    public DynamXMain(HermesMod mod, boolean isClient) {
+        this.mod = mod;
+        this.isClient = isClient;
+        INSTANCE = this;
+    }
 
-    public static void constructDynamX(HermesMod mod, boolean isClient) {
+    public void constructDynamX() {
         HermesProgressManager.HermesProgressBar bar = mod.getProgressManager().push("Constructing DynamX", 5);
         bar.step("Init");
         ThreadedLoadingService loadingService = ACsLib.getPlatform().provideService(ThreadedLoadingService.class);
@@ -124,7 +147,7 @@ public class DynamXMain {
         bar.pop();
     }
 
-    public static void modPreInit(HermesMod mod, boolean isClient) {
+    public void modPreInit() {
         if (memoizedConstructionError != null) {
             log.warn("Construction error detected, throwing it now");
             if (isClient)
@@ -152,25 +175,25 @@ public class DynamXMain {
         //TODO CapabilityManager.INSTANCE.register(DynamXChunkData.class, new DynamXChunkDataStorage(), DynamXChunkData::new);
     }
 
-    public static void modInit(HermesMod mod) {
+    public void modInit() {
         proxy.init();
     }
 
-    public static void modPostInit(HermesMod mod) {
+    public void modPostInit() {
         SynchronizedEntityVariableRegistry.sortRegistry(mod2 -> true);
     }
 
-    public static void serverStarted(HermesMod mod) {
+    public void serverStarted() {
         DynamXContext.getNetwork().startNetwork();
     }
 
-    public static void serverStopped(HermesMod mod) {
+    public void serverStopped() {
         if (DynamXContext.getNetwork() != null) {
             DynamXContext.getNetwork().stopNetwork();
         }
     }
 
-    public static void mcLoadComplete(HermesMod mod, boolean isClient) {
+    public void mcLoadComplete() {
         //TODO proxy.completeInit();
         DynamXErrorManager.printErrors(isClient, !isClient ? ErrorLevel.ADVICE : ErrorLevel.HIGH);
         if (!isClient) {
@@ -187,8 +210,12 @@ public class DynamXMain {
      * Separated client method as {@link net.minecraftforge.fml.client.CustomModLoadingErrorDisplayException} is client-side only
      */
     @SideOnly(Side.CLIENT)
-    private static void throwConstructionErrorClient() {
+    private void throwConstructionErrorClient() {
         throw memoizedConstructionError.toCustomModLoadingErrorDisplayException(null);
+    }
+
+    public static DynamXMain getInstance() {
+        return INSTANCE;
     }
 }
 

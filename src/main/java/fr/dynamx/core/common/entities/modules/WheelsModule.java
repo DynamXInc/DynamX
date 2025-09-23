@@ -92,7 +92,7 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
             if (entity.getSynchronizer().getSimulationHolder().ownsControls(FMLCommonHandler.instance().getEffectiveSide())) {
                 return;
             }
-            if (!DynamXMain.proxy.shouldUseBulletSimulation(entity.world)) {
+            if (!DynamXMain.getProxy().shouldUseBulletSimulation(entity.world)) {
                 return;
             }
             for (int i = 0; i < value.length; i++) {

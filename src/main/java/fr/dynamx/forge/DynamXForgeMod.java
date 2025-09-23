@@ -30,7 +30,9 @@ import static fr.dynamx.core.utils.DynamXConstants.*;
 @Mod(modid = ID, name = NAME, version = VERSION, updateJSON = "https://dynamx.fr/mps/updates.json", dependencies = "required-after:acslib@" + ACSLIBS_REQUIRED_VERSION)
 public class DynamXForgeMod implements HermesMod {
     @Mod.Instance(value = ID)
-    public static DynamXMain instance;
+    public static DynamXForgeMod modInstance;
+
+    private static DynamXMain dynamXInstance;
 
     private final HermesProgressManager progressManager = new ForgeProgressManager();
     private final AddonLoader addonLoader = new AddonLoader();
@@ -38,16 +40,18 @@ public class DynamXForgeMod implements HermesMod {
 
     @Mod.EventHandler
     public void construction(FMLConstructionEvent event) {
+        dynamXInstance = new DynamXMain(this, event.getSide().isClient());
+
         DynamXMain.log.info(NAME + " version " + VERSION + "-" + VERSION_TYPE + " (pack loader version {}) is running, by Yanis and Aym'", PACK_LOADER_VERSION.getVersionString());
         addonLoader.setForgeData(event);
-        DynamXMain.constructDynamX(this, event.getSide().isClient());
+        dynamXInstance.constructDynamX();
     }
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         /* Loading configuration file */
         DynamXConfig.load(event.getSuggestedConfigurationFile());
-        DynamXMain.modPreInit(this);
+        dynamXInstance.modPreInit();
 
         new ItemShockWave();
         new ItemSlopes();
@@ -56,13 +60,13 @@ public class DynamXForgeMod implements HermesMod {
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
-        DynamXMain.modInit(this);
+        dynamXInstance.modInit();
     }
 
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent event) {
         DynamXReflection.initReflection();
-        DynamXMain.modPostInit(this);
+        dynamXInstance.modPostInit();
     }
 
     @Mod.EventHandler
@@ -74,7 +78,7 @@ public class DynamXForgeMod implements HermesMod {
         } else if (result.status == ForgeVersion.Status.FAILED) {
             DynamXMain.log.warn("Forge failed to check majs for DynamX !");
         }
-        DynamXMain.mcLoadComplete(this, event.getSide().isClient());
+        dynamXInstance.mcLoadComplete();
     }
 
     @Mod.EventHandler
@@ -84,21 +88,21 @@ public class DynamXForgeMod implements HermesMod {
 
     @Mod.EventHandler
     public void onServerStarted(FMLServerStartedEvent event) {
-        DynamXMain.serverStarted(this);
+        dynamXInstance.serverStarted();
     }
 
     @Mod.EventHandler
     public void stopServer(FMLServerStoppedEvent event) {
-        DynamXMain.serverStopped(this);
+        dynamXInstance.serverStopped();
     }
 
     @NetworkCheckHandler
     public boolean checkRemote(Map mods, Side side) {
-        DynamXMain.log.info("Connecting to " + mods + " on " + side);
+        DynamXMain.log.info("Connecting to {} on {}", mods, side);
         if (side.isClient()) {
             for (AddonInfo info : addonLoader.getAddons().values()) {
                 if (info.isRequiredOnClient() && !mods.containsKey(info.getModId())) {
-                    DynamXMain.log.fatal("Rejecting connection: Addon not loaded on client : " + info);
+                    DynamXMain.log.fatal("Rejecting connection: Addon not loaded on client : {}", info);
                     return false;
                 }
             }

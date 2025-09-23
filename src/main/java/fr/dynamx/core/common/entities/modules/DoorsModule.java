@@ -164,7 +164,7 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
 
     public void spawnDoor(PartDoor door) {
         if (door.isEnabled()) {
-            DynamXMain.proxy.scheduleTask(vehicleEntity.world, () -> JointHandlerRegistry.createJointWithSelf(JOINT_NAME, vehicleEntity, door.getId()));
+            DynamXMain.getProxy().scheduleTask(vehicleEntity.world, () -> JointHandlerRegistry.createJointWithSelf(JOINT_NAME, vehicleEntity, door.getId()));
         }
     }
 
@@ -261,7 +261,7 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
 
     @Override
     public void onRemovedFromWorld() {
-        if (DynamXMain.proxy.shouldUseBulletSimulation(vehicleEntity.world)) {
+        if (DynamXMain.getProxy().shouldUseBulletSimulation(vehicleEntity.world)) {
             for (DoorPhysics body : attachedDoors.values())
                 DynamXContext.getPhysicsWorld(vehicleEntity.world).removeCollisionObject(body.doorBody);
             attachedDoors.clear();
@@ -279,7 +279,7 @@ public class DoorsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
 
     @Override
     public void onSetDead() {
-        if (DynamXMain.proxy.shouldUseBulletSimulation(vehicleEntity.world)) {
+        if (DynamXMain.getProxy().shouldUseBulletSimulation(vehicleEntity.world)) {
             for (DoorPhysics body : attachedDoors.values())
                 DynamXContext.getPhysicsWorld(vehicleEntity.world).removeCollisionObject(body.doorBody);
             attachedDoors.clear();

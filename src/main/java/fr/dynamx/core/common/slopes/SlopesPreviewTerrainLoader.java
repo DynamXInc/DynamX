@@ -25,7 +25,7 @@ public class SlopesPreviewTerrainLoader extends PhysicsEntityTerrainLoader {
 
     @Override
     public void update(ITerrainManager terrain, Profiler profiler) {
-        if (terrain.getWorld().isRemote || DynamXMain.proxy.getClientWorld() != null) {
+        if (terrain.getWorld().isRemote || DynamXMain.getProxy().getClientWorld() != null) {
             Vector3fPool.openPool();
             refresh(terrain, profiler);
             Vector3fPool.closePool();

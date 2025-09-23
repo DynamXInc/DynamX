@@ -54,7 +54,7 @@ public class PhysicsTickHandler {
             if (Minecraft.getMinecraft().world != null) {
                 boolean profiling = DynamXDebugOptions.PROFILING.isActive();
                 if (profiling) {
-                    if (DynamXMain.proxy.getTickTime() % 20 == 0) {
+                    if (DynamXMain.getProxy().getTickTime() % 20 == 0) {
                         Profiler.get().printData("Client");
                     }
                 }
@@ -72,7 +72,7 @@ public class PhysicsTickHandler {
 
     @SideOnly(Side.CLIENT)
     private boolean canTickClient(Minecraft mc) {
-        return mc.world != null && !mc.isGamePaused() && DynamXMain.proxy.shouldUseBulletSimulation(mc.world) && DynamXContext.getPhysicsWorld(mc.world) != null;
+        return mc.world != null && !mc.isGamePaused() && DynamXMain.getProxy().shouldUseBulletSimulation(mc.world) && DynamXContext.getPhysicsWorld(mc.world) != null;
     }
 
     @SubscribeEvent
@@ -107,7 +107,7 @@ public class PhysicsTickHandler {
     }
 
     private boolean canTickServer(World world) {
-        return world != null && DynamXMain.proxy.shouldUseBulletSimulation(world) && DynamXContext.getPhysicsWorld(world) != null;
+        return world != null && DynamXMain.getProxy().shouldUseBulletSimulation(world) && DynamXContext.getPhysicsWorld(world) != null;
     }
 
     private void tickWorldPhysics(TickEvent.Phase phase, World world) {
@@ -145,12 +145,12 @@ public class PhysicsTickHandler {
 
     private void sendClientsDebug() {
         boolean profiling;
-        if (DynamXMain.proxy.getServerWorld().getMinecraftServer().isDedicatedServer()) { //If integrated server, the vars are already shared
+        if (DynamXMain.getProxy().getServerWorld().getMinecraftServer().isDedicatedServer()) { //If integrated server, the vars are already shared
             profiling = false;
             boolean networkDebug = false, wheelData = false;
             for (Map.Entry<EntityPlayer, Integer> e : requestedDebugInfo.entrySet()) {
                 //Don't spam of debug packets
-                if (DynamXMain.proxy.getServerWorld().getMinecraftServer().getTickCounter() % 10 == 0 && (DynamXDebugOptions.BLOCK_BOXES.matchesNetMask(e.getValue()) || DynamXDebugOptions.SLOPE_BOXES.matchesNetMask(e.getValue()))) {
+                if (DynamXMain.getProxy().getServerWorld().getMinecraftServer().getTickCounter() % 10 == 0 && (DynamXDebugOptions.BLOCK_BOXES.matchesNetMask(e.getValue()) || DynamXDebugOptions.SLOPE_BOXES.matchesNetMask(e.getValue()))) {
                     DynamXContext.getNetwork().sendToClient(new MessageCollisionDebugDraw(DynamXDebugOptions.BLOCK_BOXES.getDataIn(), DynamXDebugOptions.SLOPE_BOXES.getDataIn()), EnumPacketTarget.PLAYER, (EntityPlayerMP) e.getKey());
                 }
                 if (DynamXDebugOptions.PROFILING.matchesNetMask(e.getValue())) {
@@ -161,7 +161,7 @@ public class PhysicsTickHandler {
                     wheelData = true;
                 }
             }
-            if (DynamXMain.proxy.getServerWorld().getMinecraftServer().getTickCounter() % 5 == 0) //requestedDebugInfo is sent all 5 ticks
+            if (DynamXMain.getProxy().getServerWorld().getMinecraftServer().getTickCounter() % 5 == 0) //requestedDebugInfo is sent all 5 ticks
                 requestedDebugInfo.clear();
             if (networkDebug != DynamXDebugOptions.FULL_NETWORK_DEBUG.isActive()) {
                 //System.out.println("Setting FULL_NETWORK_DEBUG active : " + networkDebug);
@@ -181,7 +181,7 @@ public class PhysicsTickHandler {
             profiling = DynamXDebugOptions.PROFILING.isActive();
         }
         if (profiling) {
-            if (DynamXMain.proxy.getTickTime() % 20 == 0) {
+            if (DynamXMain.getProxy().getTickTime() % 20 == 0) {
                 Profiler.get().printData("Server");
             }
         }

@@ -73,7 +73,7 @@ public class ClientPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends
                 if (!getReceivedPackets().isEmpty()) {
                     readReceivedPackets();
                     ticksBeforeNextSync = entity.getSyncTickRate();
-                    usePhysicsThisTick = DynamXMain.proxy.ownsSimulation(entity);
+                    usePhysicsThisTick = DynamXMain.getProxy().ownsSimulation(entity);
                 } else //We have no packets so use prediction
                 {
                     usePhysicsThisTick = true;
@@ -81,7 +81,7 @@ public class ClientPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends
                 }
             } else if (ticksBeforeNextSync > 0) {//We have a new pos, so interpolate
                 //todo getInputSyncVars().forEach((i, v) -> v.interpolate(entity, this, profiler, null, ticksBeforeNextSync));
-                usePhysicsThisTick = DynamXMain.proxy.ownsSimulation(entity);
+                usePhysicsThisTick = DynamXMain.getProxy().ownsSimulation(entity);
             }
         }
         entity.prePhysicsUpdateWrapper(profiler, usePhysicsThisTick);

@@ -235,7 +235,7 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
                     log.warn("Entity with id " + e.getValue() + " not found for seat in " + entity);
                     log.warn("Details " + msg.getSeatToEntity() + " " + entity.getPassengers());
                     log.warn("Players there " + entity.world.playerEntities);
-                    log.warn("THE player id " + DynamXMain.proxy.getClientWorld());
+                    log.warn("THE player id " + DynamXMain.getProxy().getClientWorld());
                 }
             } else {
                 log.warn("Seat with id " + e.getKey() + " not found in " + entity);

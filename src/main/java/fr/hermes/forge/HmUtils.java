@@ -5,6 +5,7 @@ import fr.dynamx.core.common.DynamXMain;
 import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.errors.DynamXErrorManager;
 import fr.hermes.api.mod.HermesUtils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.common.FMLModContainer;
@@ -22,6 +23,7 @@ public class HmUtils implements HermesUtils {
         ((LaunchClassLoader) Thread.currentThread().getContextClassLoader()).addURL(path);
     }
 
+    //TODO SHOULD BE MOVED TO SOME CLIENT UTILS METHOD
     @Override
     public boolean addFileResources(File file) {
         try {
@@ -41,5 +43,12 @@ public class HmUtils implements HermesUtils {
             DynamXErrorManager.addError(file.getName(), DynamXErrorManager.INIT_ERRORS, "res_pack_load_fail", ErrorLevel.FATAL, "assets", "Failed to register as resource pack", (Exception) e, 700);
             return false;
         }
+    }
+
+    //TODO SHOULD BE MOVED TO SOME CLIENT UTILS METHOD
+    @Override
+    public void reloadLanguageResources() {
+        Minecraft mc = Minecraft.getMinecraft();
+        mc.addScheduledTask(() -> mc.getLanguageManager().onResourceManagerReload(mc.getResourceManager()));
     }
 }

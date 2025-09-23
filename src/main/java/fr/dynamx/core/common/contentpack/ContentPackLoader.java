@@ -10,9 +10,9 @@ import fr.dynamx.core.common.contentpack.loader.InfoLoader;
 import fr.dynamx.core.common.contentpack.sync.PackSyncHandler;
 import fr.dynamx.core.utils.DynamXLoadingTasks;
 import fr.dynamx.core.utils.errors.DynamXErrorManager;
+import fr.hermes.api.forge.HermesProgressManager;
 import fr.hermes.api.mc.HmBlock;
 import fr.hermes.api.mod.HermesMod;
-import fr.hermes.api.forge.HermesProgressManager;
 import lombok.Getter;
 
 import javax.annotation.Nonnull;
@@ -93,10 +93,11 @@ public class ContentPackLoader {
             if (file.isDirectory() || file.getName().endsWith(".zip") || file.getName().endsWith(PACK_FILE_EXTENSION)) {
                 DynamXMain.log.debug("Loading resource pack: " + file.getName());
                 //Add assets
-                if (isClient && loadPackResources(mod, file))
+                if (!isClient) {
                     packCount++;
-                else if (!isClient)
+                } else if (loadPackResources(mod, file)) {
                     packCount++;
+                }
                 //Add custom ModProtectionSystem repositories
                 protectedResources.put(file.getName(), modProtectionContainer.getParent().loadCustomRepository(modProtectionContainer, file));
             }
@@ -129,7 +130,7 @@ public class ContentPackLoader {
 
     @Nonnull
     public static ModProtectionContainer getProtectedResources(String packName) {
-        return protectedResources.getOrDefault(packName, DynamXMain.mpsContainer);
+        return protectedResources.getOrDefault(packName, DynamXMain.getInstance().getMpsContainer());
     }
 
     /**
@@ -149,7 +150,7 @@ public class ContentPackLoader {
      * @param resDir            The packs folder
      * @param loadBlocksConfigs If should load blocks.dynx and slopes.dynx
      */
-    public static void reload(HermesMod mod, boolean isClient, File resDir, boolean loadBlocksConfigs) {
+    public static void reload(HermesMod mod, boolean isClient, File resDir) {
         isHotReloading = initialized;
         if (!isHotReloading)
             initialized = true;
@@ -249,7 +250,7 @@ public class ContentPackLoader {
         }
         if (isClient) {
             //Reload languages added by packs
-            scheduleLanguageRefresh();
+            mod.getUtils().reloadLanguageResources();
         }
         PackSyncHandler.computeAll();
         DynamXLoadingTasks.endTask(DynamXLoadingTasks.PACK);
@@ -305,11 +306,6 @@ public class ContentPackLoader {
                 e = new RuntimeException("encapsulated error", e);
             DynamXErrorManager.addError(loadingPack, DynamXErrorManager.PACKS_ERRORS, "pack_file_load_error", ErrorLevel.FATAL, file.getName().replace(suffix, ""), null, (Exception) e, 100);
         }
-    }
-
-    @SideOnly(Side.CLIENT)
-    private static void scheduleLanguageRefresh() {
-        Minecraft.getMinecraft().addScheduledTask(() -> Minecraft.getMinecraft().getLanguageManager().onResourceManagerReload(Minecraft.getMinecraft().getResourceManager()));
     }
 
     private static void registerSlopes(BufferedReader reader) {

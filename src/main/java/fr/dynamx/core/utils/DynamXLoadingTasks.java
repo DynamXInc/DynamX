@@ -29,15 +29,15 @@ public class DynamXLoadingTasks {
     public static Consumer<TaskContext> PACK = new Consumer<TaskContext>() {
         @Override
         public void accept(TaskContext taskContext) {
-            ContentPackLoader.reload(DynamXMain.resourcesDirectory, taskContext != TaskContext.CLIENT || taskContext.isSinglePlayer());
+            ContentPackLoader.reload(DynamXMain.getInstance().getMod(), taskContext != TaskContext.CLIENT || taskContext.isSinglePlayer(), DynamXMain.getInstance().getResourcesDirectory());
             if (taskContext.isClient()) { //Dedicated server
                 DynamXContext.getDxModelRegistry().getItemRenderer().refreshItemInfos();
                 if (taskContext == TaskContext.CLIENT && !taskContext.isSinglePlayer()) {
                     PackSyncHandler.requestPackSync();
                 } else if (taskContext != TaskContext.MC_INIT) {
-                    DynamXUtils.hotswapWorldPackInfos(DynamXMain.proxy.getClientWorld());
+                    DynamXUtils.hotswapWorldPackInfos(DynamXMain.getProxy().getClientWorld());
                     if (taskContext.isSinglePlayer()) {
-                        DynamXUtils.hotswapWorldPackInfos(DynamXMain.proxy.getServerWorld());
+                        DynamXUtils.hotswapWorldPackInfos(DynamXMain.getProxy().getServerWorld());
                     }
                 }
             } else if (taskContext == TaskContext.SERVER_RUNNING) {

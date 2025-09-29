@@ -14,6 +14,7 @@ import fr.dynamx.core.utils.debug.renderer.DebugRenderer;
 import fr.dynamx.core.utils.optimization.GlQuaternionPool;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.SubClassPool;
+import fr.hermes.api.mc.HmEntity;
 import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.Render;
@@ -209,7 +210,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
      * Will draw a white box over the all entity if model wasn't loaded (not found for example) <br>
      * <strong>For GLTF models, this method pushed the GL11.GL_ALL_ATTRIB_BITS that must be popped with {@link DynamXRenderUtils#popGlAllAttribBits()}</strong>
      */
-    public void renderModel(DxModelRenderer model, @Nullable Entity entity, byte textureDataId, boolean forceVanillaRender) {
+    public void renderModel(DxModelRenderer model, @Nullable HmEntity entity, byte textureDataId, boolean forceVanillaRender) {
         if (!model.isEmpty())
             model.renderModel(textureDataId, forceVanillaRender);
         else if (entity != null) //Error while loading the model
@@ -221,7 +222,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
      * Will draw a white box over the all entity if model wasn't loaded (not found for example) <br>
      * <strong>For GLTF models, this method pushed the GL11.GL_ALL_ATTRIB_BITS that must be popped with {@link DynamXRenderUtils#popGlAllAttribBits()}</strong>
      */
-    public void renderMainModel(DxModelRenderer model, @Nullable Entity entity, byte textureDataId, boolean forceVanillaRender) {
+    public void renderMainModel(DxModelRenderer model, @Nullable HmEntity entity, byte textureDataId, boolean forceVanillaRender) {
         boolean drawn = model.renderDefaultParts(textureDataId, forceVanillaRender);
         if (!drawn && entity != null) {
             renderOffsetAABB(entity.getEntityBoundingBox(), -entity.lastTickPosX, -entity.lastTickPosY, -entity.lastTickPosZ);
@@ -233,7 +234,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
      * Will draw a white box over the all entity if model wasn't loaded (not found for example) <br>
      * <strong>For GLTF models, this method pushed the GL11.GL_ALL_ATTRIB_BITS that must be popped with {@link DynamXRenderUtils#popGlAllAttribBits()}</strong>
      */
-    public void renderModelGroup(DxModelRenderer model, String group, @Nullable Entity entity, byte textureDataId, boolean forceVanillaRender) {
+    public void renderModelGroup(DxModelRenderer model, String group, @Nullable HmEntity entity, byte textureDataId, boolean forceVanillaRender) {
         boolean drawn = model.renderGroup(group, textureDataId, forceVanillaRender);
         if (!drawn && entity != null) {
             renderOffsetAABB(entity.getEntityBoundingBox(), -entity.lastTickPosX, -entity.lastTickPosY, -entity.lastTickPosZ);

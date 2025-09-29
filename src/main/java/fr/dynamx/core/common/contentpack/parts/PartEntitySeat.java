@@ -31,6 +31,8 @@ import fr.dynamx.core.utils.client.DynamXRenderUtils;
 import fr.dynamx.core.utils.debug.DynamXDebugOptions;
 import fr.dynamx.core.utils.errors.DynamXErrorManager;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
+import fr.hermes.api.mc.HmEntity;
+import fr.hermes.api.mc.HmPlayerEntity;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.Minecraft;
@@ -38,9 +40,6 @@ import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.entity.RenderPlayer;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.client.MinecraftForgeClient;
 import org.joml.Matrix4f;
 
@@ -85,14 +84,14 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
     }
 
     @Override
-    public boolean interact(BaseVehicleEntity<?> vehicleEntity, EntityPlayer player) {
+    public boolean interact(BaseVehicleEntity<?> vehicleEntity, HmPlayerEntity player) {
         if (!(vehicleEntity instanceof IModuleContainer.ISeatsContainer))
             throw new IllegalStateException("The entity " + vehicleEntity + " has PartSeats, but does not implement IHaveSeats !");
         SeatsModule seats = ((IModuleContainer.ISeatsContainer) vehicleEntity).getSeats();
-        Entity seatRider = seats.getSeatToPassengerMap().get(this);
+        HmEntity seatRider = seats.getSeatToPassengerMap().get(this);
         if (seatRider != null) {
             if (seatRider != player) {
-                player.sendMessage(new TextComponentString("The seat is already taken"));
+                player.sendMessage("The seat is already taken");
                 return false;
             }
         }
@@ -104,7 +103,7 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
         }
         PartDoor door = getLinkedPartDoor();
         if (door == null) {
-            DynamXMain.log.error("Cannot mount : part door not found : " + linkedDoor);
+            DynamXMain.log.error("Cannot mount : part door not found : {}", linkedDoor);
             return false;
         }
         IModuleContainer.IDoorContainer doorContainer = (IModuleContainer.IDoorContainer) vehicleEntity;
@@ -204,7 +203,7 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
 
             SeatsModule seats = ((IModuleContainer.ISeatsContainer) context.getEntity()).getSeats();
             assert seats != null;
-            Entity seatRider = seats.getSeatToPassengerMap().get(PartEntitySeat.this);
+            HmEntity seatRider = seats.getSeatToPassengerMap().get(PartEntitySeat.this);
             if (seatRider == null ||
                     (seatRider == Minecraft.getMinecraft().player && Minecraft.getMinecraft().gameSettings.thirdPersonView == 0)) {
                 return;
@@ -234,10 +233,10 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
                 String skinType = ((AbstractClientPlayer) seatRider).getSkinType();
                 RenderPlayer renderPlayer = context.getRender().getRenderManager().getSkinMap().get(skinType);
                 if (renderPlayer != null) {
-                    renderPlayer.doRender((AbstractClientPlayer) seatRider, 0, 0, 0, seatRider.rotationYaw, partialTicks);
+                    renderPlayer.doRender((AbstractClientPlayer) seatRider, 0, 0, 0, seatRider.getRotationYaw(), partialTicks);
                 }
             } else {
-                context.getRender().getRenderManager().renderEntity(seatRider, 0, 0, 0, seatRider.rotationYaw, partialTicks, false);
+                context.getRender().getRenderManager().renderEntity(seatRider, 0, 0, 0, seatRider.getRotationYaw(), partialTicks, false);
             }
 
             GlStateManager.popMatrix();

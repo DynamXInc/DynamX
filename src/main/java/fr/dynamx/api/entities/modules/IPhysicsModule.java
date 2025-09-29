@@ -7,10 +7,9 @@ import fr.dynamx.core.common.entities.modules.SeatsModule;
 import fr.dynamx.core.common.entities.modules.WheelsModule;
 import fr.dynamx.core.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.core.common.entities.modules.engines.BasicEngineModule;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import fr.hermes.api.mc.HmEntity;
+import fr.hermes.api.mc.HmPlayerEntity;
+import io.netty.buffer.ByteBuf;
 
 import javax.annotation.Nullable;
 
@@ -27,13 +26,13 @@ public interface IPhysicsModule<P extends AbstractEntityPhysicsHandler<?, ?>> ex
     /**
      * Called when a passenger is added to the entity
      */
-    default void addPassenger(Entity passenger) {
+    default void addPassenger(HmEntity passenger) {
     }
 
     /**
      * Called when a passenger is removed from the entity
      */
-    default void removePassenger(Entity passenger) {
+    default void removePassenger(HmEntity passenger) {
     }
 
     /**
@@ -74,7 +73,6 @@ public interface IPhysicsModule<P extends AbstractEntityPhysicsHandler<?, ?>> ex
      * @return the controller to use until the driver dismounts, or null
      */
     @Nullable
-    @SideOnly(Side.CLIENT)
     default IVehicleController createNewController() {
         return null;
     }
@@ -85,13 +83,12 @@ public interface IPhysicsModule<P extends AbstractEntityPhysicsHandler<?, ?>> ex
      * @param simulationHolder The new {@link SimulationHolder}
      * @param changeContext    The context of this update
      */
-    default void onSetSimulationHolder(SimulationHolder simulationHolder, EntityPlayer simulationPlayerHolder, SimulationHolder.UpdateContext changeContext) {
+    default void onSetSimulationHolder(SimulationHolder simulationHolder, HmPlayerEntity simulationPlayerHolder, SimulationHolder.UpdateContext changeContext) {
     }
 
     /**
      * Called to update textures of this module (egg for wheels) according to the new entity's metadata
      */
-    @SideOnly(Side.CLIENT)
     default void onTexturesChange(byte newMetadata) {}
 
     /**
@@ -101,7 +98,7 @@ public interface IPhysicsModule<P extends AbstractEntityPhysicsHandler<?, ?>> ex
         /**
          * @return True to listen this update on this side (default is true on all sides)
          */
-        default boolean listenEntityUpdates(Side side) {
+        default boolean listenEntityUpdates(boolean isClient) {
             return true;
         }
 
@@ -120,8 +117,8 @@ public interface IPhysicsModule<P extends AbstractEntityPhysicsHandler<?, ?>> ex
         /**
          * @return True to listen this update on this side (default is true on client side)
          */
-        default boolean listenEntityPosUpdates(Side side) {
-            return side.isClient();
+        default boolean listenEntityPosUpdates(boolean isClient) {
+            return isClient;
         }
 
         /**
@@ -152,5 +149,11 @@ public interface IPhysicsModule<P extends AbstractEntityPhysicsHandler<?, ?>> ex
          */
         default void postUpdatePhysics(boolean simulatingPhysics) {
         }
+    }
+
+    interface IModuleWithSpawnData {
+        void writeSpawnData(ByteBuf byteBuf);
+
+        void readSpawnData(ByteBuf byteBuf);
     }
 }

@@ -13,13 +13,14 @@ import fr.dynamx.core.common.physics.joints.EntityJoint;
 import fr.dynamx.core.common.physics.joints.JointHandler;
 import fr.dynamx.core.common.physics.joints.JointHandlerRegistry;
 import fr.dynamx.core.utils.DynamXConstants;
+import fr.hermes.api.mc.HmResourceLocation;
+import fr.hermes.api.mod.McObjectBinder;
 import lombok.Getter;
-import net.minecraft.util.ResourceLocation;
 
 import java.util.Arrays;
 
 public class MovableModule implements IPhysicsModule<AbstractEntityPhysicsHandler<?, ?>>, AttachModule.AttachToSelfModule, IPhysicsModule.IEntityUpdateListener, IPhysicsModule.IPhysicsUpdateListener {
-    public static final ResourceLocation JOINT_NAME = new ResourceLocation(DynamXConstants.ID, "movable_module");
+    public static final HmResourceLocation JOINT_NAME = McObjectBinder.instance.newResourceLocation(DynamXConstants.ID, "movable_module");
 
     static {
         JointHandlerRegistry.register(new JointHandler(JOINT_NAME, PhysicsEntity.class, PhysicsEntity.class, MovableModule.class));

@@ -3,7 +3,6 @@ package fr.dynamx.api.network.sync;
 import fr.dynamx.core.utils.debug.SyncHelper;
 import io.netty.buffer.ByteBuf;
 import lombok.Getter;
-import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -68,8 +67,8 @@ public class EntityVariable<T> {
         setChanged(true); //server will send changes to clients
     }
 
-    public SyncTarget getSyncTarget(SimulationHolder simulationHolder, Side side) {
-        return changed ? synchronizationRule.getSyncTarget(simulationHolder, side) : SyncTarget.NONE;
+    public SyncTarget getSyncTarget(SimulationHolder simulationHolder, boolean fromClientSide) {
+        return changed ? synchronizationRule.getSyncTarget(simulationHolder, fromClientSide) : SyncTarget.NONE;
     }
 
     public void writeValue(ByteBuf buffer, boolean lightData) {

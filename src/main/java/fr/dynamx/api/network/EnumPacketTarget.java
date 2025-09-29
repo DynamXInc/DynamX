@@ -1,8 +1,11 @@
 package fr.dynamx.api.network;
 
+import fr.hermes.api.mc.HmEntity;
+import fr.hermes.api.mc.HmServerPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
+import org.joml.Vector4f;
 
 /**
  * Fake enum, enumerating all possible targets for {@link IDnxPacket}
@@ -17,15 +20,15 @@ public class EnumPacketTarget<O> {
     /**
      * Specific player target, can be only used from server side
      */
-    public static final EnumPacketTarget<EntityPlayerMP> PLAYER = new EnumPacketTarget<>();
+    public static final EnumPacketTarget<HmServerPlayerEntity> PLAYER = new EnumPacketTarget<>();
     /**
      * All around point target, can be only used from server side
      */
-    public static final EnumPacketTarget<NetworkRegistry.TargetPoint> ALL_AROUND = new EnumPacketTarget<>();
+    public static final EnumPacketTarget<Vector4f> ALL_AROUND = new EnumPacketTarget<>();
     /**
      * All players tracking a specific entity, can be only used from server side
      */
-    public static final EnumPacketTarget<Entity> ALL_TRACKING_ENTITY = new EnumPacketTarget<>();
+    public static final EnumPacketTarget<HmEntity> ALL_TRACKING_ENTITY = new EnumPacketTarget<>();
     /**
      * All players target, can be only used from server side
      */

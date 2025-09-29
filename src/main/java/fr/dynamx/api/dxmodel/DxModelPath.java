@@ -2,8 +2,8 @@ package fr.dynamx.api.dxmodel;
 
 import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.core.common.contentpack.PackInfo;
+import fr.hermes.api.mc.HmResourceLocation;
 import lombok.Getter;
-import net.minecraft.util.ResourceLocation;
 
 import java.util.Collections;
 import java.util.List;
@@ -15,16 +15,16 @@ import java.util.Objects;
  */
 public class DxModelPath implements INamedObject {
     private final List<PackInfo> packLocations;
-    private final ResourceLocation modelPath;
+    private final HmResourceLocation modelPath;
 
     @Getter
     private final EnumDxModelFormats format;
 
-    public DxModelPath(PackInfo packLocation, ResourceLocation modelPath) {
+    public DxModelPath(PackInfo packLocation, HmResourceLocation modelPath) {
         this(Collections.singletonList(packLocation), modelPath);
     }
 
-    public DxModelPath(List<PackInfo> packInfos, ResourceLocation modelPath) {
+    public DxModelPath(List<PackInfo> packInfos, HmResourceLocation modelPath) {
         this.packLocations = packInfos;
         this.modelPath = modelPath;
 
@@ -41,7 +41,7 @@ public class DxModelPath implements INamedObject {
     /**
      * @return The path of the model inside the pack (typically dynamxmod:models/mymodels/myfirstmodel.obj)
      */
-    public ResourceLocation getModelPath() {
+    public HmResourceLocation getModelPath() {
         return modelPath;
     }
 

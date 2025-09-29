@@ -87,9 +87,9 @@ public class EntityNode<A extends IPhysicsPackInfo> extends AbstractItemNode<Bas
         }
         //Render the unlinked children, if any
         if (entity != null && !unlinkedChildren.isEmpty()) {
-            transform.translate((float) (context.getRenderPosition().x - (entity.prevPosX + (entity.posX - entity.prevPosX) * context.getPartialTicks())),
-                    (float) (context.getRenderPosition().y - (entity.prevPosY + (entity.posY - entity.prevPosY) * context.getPartialTicks())),
-                    (float) (context.getRenderPosition().z - (entity.prevPosZ + (entity.posZ - entity.prevPosZ) * context.getPartialTicks())));
+            transform.translate((float) (context.getRenderPosition().x - (entity.getPrevPosX() + (entity.getPosX() - entity.getPrevPosX()) * context.getPartialTicks())),
+                    (float) (context.getRenderPosition().y - (entity.getPrevPosY() + (entity.getPosY() - entity.getPrevPosY()) * context.getPartialTicks())),
+                    (float) (context.getRenderPosition().z - (entity.getPrevPosZ() + (entity.getPosZ() - entity.getPrevPosZ()) * context.getPartialTicks())));
             unlinkedChildren.forEach(c -> c.render(context, packInfo, transform));
         }
 

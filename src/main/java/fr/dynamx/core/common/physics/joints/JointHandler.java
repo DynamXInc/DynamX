@@ -5,7 +5,8 @@ import fr.dynamx.api.entities.modules.AttachModule;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.core.common.DynamXMain;
 import fr.dynamx.core.common.entities.PhysicsEntity;
-import net.minecraft.util.ResourceLocation;
+import fr.hermes.api.mc.HmResourceLocation;
+import lombok.Getter;
 
 /**
  * Handles joint creation, re-creation (on entity load, server->client sync...) and destruction <br>
@@ -17,7 +18,13 @@ import net.minecraft.util.ResourceLocation;
  * @param <D> The class of the {@link AttachModule}, contained in each entity and returned by the getModulesByType function of each entity
  */
 public class JointHandler<A extends PhysicsEntity<?>, B extends PhysicsEntity<?>, D extends AttachModule<B> & IPhysicsModule<?>> {
-    private final ResourceLocation type;
+    /**
+     * -- GETTER --
+     *
+     * @return The registry name of this JointHandler, unique
+     */
+    @Getter
+    private final HmResourceLocation type;
     private final Class<A> entity1;
     private final Class<B> entity2;
     private final Class<D> attachModule;
@@ -28,18 +35,11 @@ public class JointHandler<A extends PhysicsEntity<?>, B extends PhysicsEntity<?>
      * @param entity2      The class of the second entity, not driveable (for example the trailer or the door)
      * @param attachModule The class of the {@link AttachModule}, contained in each entity and returned by the getModulesByType function of each entity
      */
-    public JointHandler(ResourceLocation type, Class<A> entity1, Class<B> entity2, Class<D> attachModule) {
+    public JointHandler(HmResourceLocation type, Class<A> entity1, Class<B> entity2, Class<D> attachModule) {
         this.type = type;
         this.entity1 = entity1;
         this.entity2 = entity2;
         this.attachModule = attachModule;
-    }
-
-    /**
-     * @return The registry name of this JointHandler, unique
-     */
-    public ResourceLocation getType() {
-        return type;
     }
 
     /**
@@ -66,7 +66,7 @@ public class JointHandler<A extends PhysicsEntity<?>, B extends PhysicsEntity<?>
             main.getJointsHandler().addJoint(this, joint, jointId, attached);
             return true;
         } else {
-            DynamXMain.log.warn("[Joint System] Failed to (re-)attach " + entity1 + " with " + entity2);
+            DynamXMain.log.warn("[Joint System] Failed to (re-)attach {} with {}", entity1, entity2);
         }
         return false;
     }

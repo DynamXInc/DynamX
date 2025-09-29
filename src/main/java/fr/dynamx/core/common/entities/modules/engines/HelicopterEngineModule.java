@@ -57,7 +57,7 @@ public class HelicopterEngineModule extends BasicEngineModule implements IEntity
     @Override
     public void removePassenger(Entity passenger) {
         super.removePassenger(passenger);
-        if (entity.getControllingPassenger() == null && passenger instanceof EntityPlayer && !((EntityPlayer) passenger).capabilities.isCreativeMode) {
+        if (entity.getHmControllingPassenger() == null && passenger instanceof EntityPlayer && !((EntityPlayer) passenger).capabilities.isCreativeMode) {
             power.set(0f);
         }
     }

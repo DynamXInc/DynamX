@@ -11,6 +11,8 @@ import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.common.network.packets.MessageForcePlayerPos;
 import fr.dynamx.core.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.core.utils.debug.SyncHelper;
+import fr.hermes.api.mc.HmPlayerEntity;
+import fr.hermes.api.mc.HmServerPlayerEntity;
 import lombok.Getter;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -26,14 +28,14 @@ public class EntityPosVariable extends ListeningEntityVariable<EntityPosVariable
         super(((entityPositionDataSynchronizedEntityVariable, entityPositionData) -> {
 //TODO INTPERPOLATION ETC :c
             if (entity.getSynchronizer().getSimulationHolder().isSinglePlayer()) {
-                if (!entity.world.isRemote) //Solo mode
+                if (!entity.getHmWorld().isClient()) //Solo mode
                 {
-                    entity.motionX = entityPositionData.position.x - entity.physicsPosition.x;
-                    entity.motionY = entityPositionData.position.y - entity.physicsPosition.y;
-                    entity.motionZ = entityPositionData.position.z - entity.physicsPosition.z;
-                    double x = entity.physicsPosition.x + entity.motionX;
-                    double y = entity.physicsPosition.y + entity.motionY;
-                    double z = entity.physicsPosition.z + entity.motionZ;
+                    entity.setMotionX(entityPositionData.position.x - entity.physicsPosition.x);
+                    entity.setMotionY(entityPositionData.position.y - entity.physicsPosition.y);
+                    entity.setMotionZ(entityPositionData.position.z - entity.physicsPosition.z);
+                    double x = entity.physicsPosition.x + entity.getMotionX();
+                    double y = entity.physicsPosition.y + entity.getMotionY();
+                    double z = entity.physicsPosition.z + entity.getMotionZ();
                     entity.physicsPosition.set((float) x, (float) y, (float) z);
                     entity.physicsRotation.set(entityPositionData.rotation);
                 } else {
@@ -46,18 +48,19 @@ public class EntityPosVariable extends ListeningEntityVariable<EntityPosVariable
                     Vector3f pos = entityPositionData.position;
                     float delta = entity.physicsPosition.subtract(pos).length();
                     if (delta > CRITIC1) {
-                        EntityPlayer controllingPlayer = entity.getSynchronizer().getSimulationPlayerHolder();
-                        boolean isControllingPlayerRidingThisEntity = controllingPlayer == entity.getControllingPassenger();
+                        HmPlayerEntity controllingPlayer = entity.getSynchronizer().getSimulationPlayerHolder();
+                        boolean isControllingPlayerRidingThisEntity = controllingPlayer == entity.getHmControllingPassenger();
                         if (delta > CRITIC1warn)
-                            DynamXMain.log.warn("Physics entity " + entity + " is moving too quickly (ridden by " + entity.getControllingPassenger() + ", simulated by " + controllingPlayer + ") !");
+                            DynamXMain.log.warn("Physics entity {} is moving too quickly (ridden by {}, simulated by {}) !", entity, entity.getHmControllingPassenger(), controllingPlayer);
                         if (delta > CRITIC2 && controllingPlayer instanceof EntityPlayerMP && isControllingPlayerRidingThisEntity) {
                             ((EntityPlayerMP) controllingPlayer).connection.disconnect(new TextComponentString("Invalid physics entity move packet"));
-                        } else if (controllingPlayer instanceof EntityPlayerMP || entity.world.isRemote) {
-                            if (delta > CRITIC3 && !entity.world.isRemote && isControllingPlayerRidingThisEntity) {
+                        } else if (controllingPlayer instanceof EntityPlayerMP || entity.getHmWorld().isClient()) {
+                            if (delta > CRITIC3 && !entity.getHmWorld().isClient() && isControllingPlayerRidingThisEntity) {
                                 //Resync
                                 DynamXMain.log.error(entity + " doing resync !!!");
                                 ignoreFor = 20;
-                                DynamXContext.getNetwork().sendToClient(new MessageForcePlayerPos(entity, entity.physicsPosition, entity.physicsRotation, entity.physicsHandler.getLinearVelocity(), entity.physicsHandler.getAngularVelocity()), EnumPacketTarget.PLAYER, (EntityPlayerMP) controllingPlayer);
+                                DynamXContext.getNetwork().sendToClient(new MessageForcePlayerPos(entity, entity.physicsPosition, entity.physicsRotation, entity.physicsHandler.getLinearVelocity(), entity.physicsHandler.getAngularVelocity()),
+                                        EnumPacketTarget.PLAYER, (HmServerPlayerEntity) controllingPlayer);
                             } else
                                 entity.physicsHandler.updatePhysicsState(pos, entityPositionData.rotation, entityPositionData.linearVel, entityPositionData.rotationalVel);
                         } else
@@ -80,7 +83,7 @@ public class EntityPosVariable extends ListeningEntityVariable<EntityPosVariable
             @Override
             public EntityPosVariable.EntityPositionData call() {
                 AbstractEntityPhysicsHandler<?, ?> physicsHandler = entity.physicsHandler;
-                boolean changed = entity.ticksExisted % (physicsHandler.isBodyActive() ? 13 : 20) == 0; //Keep low-rate sync while not moving
+                boolean changed = entity.getTicksExisted() % (physicsHandler.isBodyActive() ? 13 : 20) == 0; //Keep low-rate sync while not moving
                 //Detect changes
                 Vector3f pos = entity.physicsPosition;
                 if (positionData == null || positionData.bodyActive != physicsHandler.isBodyActive()) {
@@ -132,6 +135,7 @@ public class EntityPosVariable extends ListeningEntityVariable<EntityPosVariable
     //TODO USE
     public void onTeleported(PhysicsEntity<?> entity, Vector3f newPos) {
         //DOIT IGNORER LES PROCHAINES UPDATES VENANT DU CLIENT ignoreFor = 22;
-        DynamXContext.getNetwork().sendToClient(new MessageForcePlayerPos(entity, newPos, entity.physicsRotation, entity.physicsHandler.getLinearVelocity(), entity.physicsHandler.getAngularVelocity()), EnumPacketTarget.PLAYER, (EntityPlayerMP) entity.getControllingPassenger());
+        DynamXContext.getNetwork().sendToClient(new MessageForcePlayerPos(entity, newPos, entity.physicsRotation, entity.physicsHandler.getLinearVelocity(), entity.physicsHandler.getAngularVelocity()),
+                EnumPacketTarget.PLAYER, (HmServerPlayerEntity) entity.getHmControllingPassenger());
     }
 }

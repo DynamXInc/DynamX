@@ -4,15 +4,11 @@ import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.core.common.entities.BaseVehicleEntity;
 import fr.dynamx.core.common.entities.modules.engines.HelicopterEngineModule;
 import fr.dynamx.core.common.physics.entities.BaseVehiclePhysicsHandler;
+import fr.hermes.api.mc.HmWorld;
 import io.netty.buffer.ByteBuf;
 import lombok.Getter;
-import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
-import net.minecraftforge.fml.relauncher.Side;
 
-public class HelicopterRotorModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, IPhysicsModule.IEntityUpdateListener, IEntityAdditionalSpawnData {
+public class HelicopterRotorModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, IPhysicsModule.IEntityUpdateListener, IPhysicsModule.IModuleWithSpawnData {
     protected final BaseVehicleEntity<? extends BaseVehiclePhysicsHandler<?>> entity;
     private HelicopterEngineModule engine;
 
@@ -29,8 +25,8 @@ public class HelicopterRotorModule implements IPhysicsModule<BaseVehiclePhysicsH
     }
 
     @Override
-    public boolean listenEntityUpdates(Side side) {
-        return side.isClient();
+    public boolean listenEntityUpdates(boolean isClient) {
+        return isClient;
     }
 
     @Override
@@ -40,8 +36,8 @@ public class HelicopterRotorModule implements IPhysicsModule<BaseVehiclePhysicsH
             curPower = curPower + (targetPower - curPower) / 60; //3-seconds interpolation
             curAngle += curPower;
         }
-        if (entity.world.isRemote) {
-            int height = entity.getPosition().getY() - entity.world.getHeight(entity.getPosition().getX(), entity.getPosition().getZ());
+        if (entity.getHmWorld().isClient()) {
+            int height = (int) (entity.getPosY() - entity.getHmWorld().getHeight((int) entity.getPosX(), (int) entity.getPosZ()));
             if (height < 10) {
                 renderParticles(entity, height);
             }
@@ -49,23 +45,23 @@ public class HelicopterRotorModule implements IPhysicsModule<BaseVehiclePhysicsH
     }
 
     private void renderParticles(BaseVehicleEntity<?> entity, int height) {
-        World world = entity.world;
+        HmWorld world = entity.getHmWorld();
         for (int i = 0; i < 360; i += 2) {
             int power = (int) (engine.getPower() * 10);
 
-            if (world.rand.nextInt(100) < power) {
+            if (world.getRandom().nextInt(100) < power) {
                 float minRadius = 5.5f - height * 0.5f;
-                float radius = world.rand.nextFloat() * 4;
+                float radius = world.getRandom().nextFloat() * 4;
 
                 double x = Math.cos(Math.toRadians(i)) * (minRadius + radius);
                 double z = Math.sin(Math.toRadians(i)) * (minRadius + radius);
 
-                double y = world.getHeight((int) (entity.getPosition().getX() + x), (int) (entity.getPosition().getZ() + z));
+                double y = world.getHeight((int) (entity.getPosX() + x), (int) (entity.getPosZ() + z));
                 double zSpeed = Math.sin(Math.toRadians(i)) * 0.9;
                 double xSpeed = Math.cos(Math.toRadians(i)) * 0.9;
 
-                if (world.isAirBlock(new BlockPos((int) (entity.getPosition().getX() + x), (int) (y), (int) (entity.getPosition().getZ() + z)))) {
-                    world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, entity.posX + x, y, entity.posZ + z, xSpeed, 0, zSpeed);
+                if (world.isAirBlock((int) (entity.getPosX() + x), (int) (y), (int) (entity.getPosZ() + z))) {
+                    //TODO PARTICLE world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, entity.getPosX() + x, y, entity.getPosZ() + z, xSpeed, 0, zSpeed);
                 }
             }
         }

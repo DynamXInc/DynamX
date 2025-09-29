@@ -37,9 +37,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import org.joml.Quaternionf;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Base class for all entities using bullet to simulate their physics
@@ -140,7 +138,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
 
         // Network Init
         synchronizer = DynamXMain.getProxy().getNetHandlerForEntity(this);
-        usesPhysicsWorld = DynamXContext.usesPhysicsWorld(mcEntityWrapper.getWorld());
+        usesPhysicsWorld = DynamXContext.usesPhysicsWorld(mcEntityWrapper.getHmWorld());
     }
 
     public PhysicsEntity(HmEntity mcEntityWrapper, Vector3f pos, float spawnRotationAngle) {
@@ -193,8 +191,18 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     }
 
     @Override
+    public float getPrevRotationYaw() {
+        return mcEntityWrapper.getPrevRotationYaw();
+    }
+
+    @Override
     public float getRotationPitch() {
         return mcEntityWrapper.getRotationPitch();
+    }
+
+    @Override
+    public float getPrevRotationPitch() {
+        return mcEntityWrapper.getPrevRotationPitch();
     }
 
     @Override
@@ -220,6 +228,37 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     @Override
     public void onSetDead() {
 
+    }
+
+    @Override
+    public UUID getUniqueID() {
+        return mcEntityWrapper.getUniqueID();
+    }
+
+    @Override
+    public boolean isDead() {
+        return mcEntityWrapper.isDead();
+    }
+
+    @Override
+    public int getTicksExisted() {
+        return mcEntityWrapper.getTicksExisted();
+    }
+
+    @Override
+    public float getDistanceSq(HmEntity entity) {
+        return mcEntityWrapper.getDistanceSq(entity);
+    }
+
+    @Override
+    public Collection<HmEntity> getHmPassengers() {
+        return mcEntityWrapper.getHmPassengers();
+    }
+
+    @Override
+    public boolean isInRangeToRenderDist(double range) {
+        double d = getHmBoundingBox().getAverageEdgeLength() * 4.0D * 64.0D;
+        return range < d * d;
     }
 
     // ====== DynamX entity logic ======
@@ -304,7 +343,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
                 physicsHandler.setPhysicsState(EntityPhysicsState.ENABLE);
             }
             if (isRegistered == EnumEntityPhysicsRegistryState.NOT_REGISTERED) {
-                DynamXContext.getPhysicsWorld(mcEntityWrapper.getWorld()).addBulletEntity(this);
+                DynamXContext.getPhysicsWorld(mcEntityWrapper.getHmWorld()).addBulletEntity(this);
             }
         }
 
@@ -479,7 +518,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     }
 
     @Override
-    public MutableBoundingBox getBoundingBox() {
+    public MutableBoundingBox getHmBoundingBox() {
         if (entityBoxCache != null) {
             return entityBoxCache;
         }
@@ -522,7 +561,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
 
     @Override
     public void onRemovedFromWorld() {
-        IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(mcEntityWrapper.getWorld());
+        IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(mcEntityWrapper.getHmWorld());
         if (usesPhysicsWorld && physicsWorld != null) //onRemovedFromWorld may be called before physicsWorld is loaded (in case of failing to load from nbt)
         {
             physicsWorld.removeBulletEntity(this);

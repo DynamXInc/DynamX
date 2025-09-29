@@ -8,19 +8,24 @@ import fr.dynamx.api.contentpack.object.part.IShapeInfo;
 import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
-import fr.dynamx.core.client.renders.RenderPhysicsEntity;
+import fr.dynamx.api.network.sync.EntityVariable;
+import fr.dynamx.api.network.sync.SynchronizationRules;
+import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
 import fr.dynamx.core.common.DynamXContext;
 import fr.dynamx.core.common.DynamXMain;
 import fr.dynamx.core.common.contentpack.parts.BasePartSeat;
 import fr.dynamx.core.common.entities.modules.MovableModule;
 import fr.dynamx.core.common.physics.entities.PackEntityPhysicsHandler;
 import fr.dynamx.core.common.physics.joints.EntityJointsHandler;
+import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.client.ClientDynamXUtils;
 import fr.dynamx.core.utils.debug.Profiler;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.dynamx.core.utils.optimization.SubClassPool;
+import fr.dynamx.core.utils.optimization.Vector3fPool;
 import fr.hermes.api.mc.HmEntity;
+import fr.hermes.api.mc.HmItemStack;
 import fr.hermes.forge.JmeVector3fPool;
 import lombok.Getter;
 import lombok.Setter;
@@ -36,9 +41,14 @@ import java.util.List;
  * @see IPhysicsModule
  * @see PackEntityPhysicsHandler For the physics implementation
  */
+@SynchronizedEntityVariable.SynchronizedPhysicsModule(modid = DynamXConstants.ID)
 public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>, A extends IPhysicsPackInfo & IPartContainer<?>> extends ModularPhysicsEntity<T> implements IPackInfoReloadListener {
-    private static final DataParameter<String> INFO_NAME = EntityDataManager.createKey(PackPhysicsEntity.class, DataSerializers.STRING);
-    private static final DataParameter<Integer> METADATA = EntityDataManager.createKey(PackPhysicsEntity.class, DataSerializers.VARINT);
+    @SynchronizedEntityVariable(name = "info_name")
+    private final EntityVariable<String> infoName = new EntityVariable<>(SynchronizationRules.SERVER_TO_CLIENTS, "");
+
+    @SynchronizedEntityVariable(name = "metadata")
+    private final EntityVariable<Integer> metadata = new EntityVariable<>(SynchronizationRules.SERVER_TO_CLIENTS, 0);
+
     private int lastMetadata = -1;
 
     /**
@@ -73,13 +83,6 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
         super(mcEntityWrapper, pos, spawnRotationAngle);
         setInfoName(infoName);
         setMetadata(metadata);
-    }
-
-    @Override
-    protected void entityInit() {
-        super.entityInit();
-        this.getDataManager().register(INFO_NAME, "");
-        this.getDataManager().register(METADATA, -1);
     }
 
     public abstract A createInfo(String infoName);
@@ -147,7 +150,7 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
         JmeVector3fPool.openPool(SubClassPool.TICK_ENTITY_MC);
         Profiler.get().start(Profiler.Profiles.TICK_ENTITIES);
         super.onUpdate();
-        if (mcEntityWrapper.getWorld().isClient() && getMetadata() != lastMetadata && !isDead) //Metadata has been sync, so update texture
+        if (mcEntityWrapper.getHmWorld().isClient() && getMetadata() != lastMetadata && !isDead()) //Metadata has been sync, so update texture
         {
             lastMetadata = getMetadata();
             entityTextureId = (byte) getMetadata();
@@ -158,7 +161,7 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
     }
 
     @Override
-    public ItemStack getPickedResult(RayTraceResult target) {
+    public HmItemStack getHmPickedResult() {
         return packInfo.getPickedResult(getMetadata());
     }
 
@@ -190,15 +193,15 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
     /**
      * Ray-traces to get hit part when interacting with the entity
      */
-    public InteractivePart<?, ?> getHitPart(Entity entity) {
+    public InteractivePart<?, ?> getHitPart(HmEntity entity) {
         if (getPackInfo() == null) {
             return null;
         }
-        Vec3d lookVec = entity.getLook(1.0F);
-        Vec3d hitVec = entity.getPositionVector().add(0, entity.getEyeHeight(), 0);
+        org.joml.Vector3f lookVec = entity.getHmLook();
+        org.joml.Vector3f hitVec = entity.getHmPosition().add(0, entity.getEyeHeight(), 0, Vector3fPool.get());
         InteractivePart<?, ?> nearest = null;
         Vector3f nearestPos = null;
-        Vector3f playerPos = JmeVector3fPool.get((float) entity.posX, (float) entity.posY, (float) entity.posZ);
+        Vector3f playerPos = JmeVector3fPool.get((float) entity.getPosX(), (float) entity.getPosY(), (float) entity.getPosZ());
         MutableBoundingBox box = new MutableBoundingBox();
         for (float f = 1.0F; f < 4.0F; f += 0.1F) {
             for (InteractivePart<?, ?> part : getPackInfo().getInteractiveParts()) {
@@ -207,7 +210,8 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
                 Vector3f partPos = DynamXGeometry.rotateVectorByQuaternion(part.getPosition(), physicsRotation);
                 partPos.addLocal(physicsPosition);
                 box.offset(partPos);
-                if ((nearestPos == null || DynamXGeometry.distanceBetween(partPos, playerPos) < DynamXGeometry.distanceBetween(nearestPos, playerPos)) && box.contains(hitVec)) {
+                if ((nearestPos == null || DynamXGeometry.distanceBetween(partPos, playerPos) < DynamXGeometry.distanceBetween(nearestPos, playerPos))
+                        && box.contains(hitVec)) {
                     nearest = part;
                     nearestPos = partPos;
                 }
@@ -218,18 +222,8 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
     }
 
     @Override
-    protected boolean canFitPassenger(Entity passenger) {
-        return this.getPassengers().size() < getPackInfo().getPartsByType(BasePartSeat.class).size();
-    }
-
-    @Override
-    public boolean shouldRiderSit() {
-        return RenderPhysicsEntity.shouldRenderPlayerSitting;
-    }
-
-    @Override
-    public boolean canPassengerSteer() {
-        return false;
+    public boolean canFitPassenger(HmEntity passenger) {
+        return getHmPassengers().size() < getPackInfo().getPartsByType(BasePartSeat.class).size();
     }
 
     @Override
@@ -246,16 +240,16 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
     }
 
     public int getMetadata() {
-        return this.getDataManager().get(METADATA);
+        return metadata.get();
     }
 
     public void setMetadata(int metadata) {
-        this.getDataManager().set(METADATA, metadata);
+        this.metadata.set(metadata);
     }
 
     @Override
     public int getBrightnessForRender() {
-        return ClientDynamXUtils.getLightNear(world, getPosition(), 1, 3);
+        return ClientDynamXUtils.getLightNear(getHmWorld(), getHmPosition(), 1, 3);
     }
 
     @Override
@@ -264,10 +258,10 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
     }
 
     public String getInfoName() {
-        return this.getDataManager().get(INFO_NAME);
+        return infoName.get();
     }
 
     private void setInfoName(String name) {
-        this.getDataManager().set(INFO_NAME, name);
+        this.infoName.set(name);
     }
 }

@@ -8,14 +8,12 @@ import fr.dynamx.core.client.renders.scene.node.SceneNode;
 import fr.dynamx.core.common.contentpack.type.ViewTransformsInfo;
 import fr.dynamx.core.utils.client.ClientDynamXUtils;
 import fr.dynamx.core.utils.maths.DynamXMath;
+import fr.hermes.api.mc.HmCameraTransforms;
+import fr.hermes.api.mc.HmItemStack;
+import fr.hermes.api.mc.HmResourceLocation;
+import io.netty.util.internal.StringUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.StringUtils;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.joml.Matrix4f;
 
 import javax.annotation.Nullable;
@@ -27,8 +25,8 @@ public interface IModelPackObject extends IModelTextureVariantsSupplier {
     /**
      * @return The model location of this object
      */
-    @SideOnly(Side.CLIENT)
-    ResourceLocation getModel();
+    //@SideOnly(Side.CLIENT)
+    HmResourceLocation getModel();
 
     /**
      * @return True if this object has a model
@@ -48,15 +46,15 @@ public interface IModelPackObject extends IModelTextureVariantsSupplier {
      * @param viewType The item view type
      * @return The transforms info for the given view type
      */
-    @SideOnly(Side.CLIENT)
-    default ViewTransformsInfo getViewTransformsInfo(ItemCameraTransforms.TransformType viewType) {
+    //@SideOnly(Side.CLIENT)
+    default ViewTransformsInfo getViewTransformsInfo(HmCameraTransforms viewType) {
         return null;
     }
 
     /**
      * @return The default scale applied to the item when getViewTransformsInfo returns null
      */
-    @SideOnly(Side.CLIENT)
+    //@SideOnly(Side.CLIENT)
     default float getItemScale() {
         return 1;
     }
@@ -64,7 +62,7 @@ public interface IModelPackObject extends IModelTextureVariantsSupplier {
     /**
      * @return The 3D render location of this item
      */
-    @SideOnly(Side.CLIENT)
+    //@SideOnly(Side.CLIENT)
     default Enum3DRenderLocation get3DItemRenderLocation() {
         return Enum3DRenderLocation.ALL;
     }
@@ -73,7 +71,7 @@ public interface IModelPackObject extends IModelTextureVariantsSupplier {
      * @return A text shown on the item in guis
      */
     @Nullable
-    @SideOnly(Side.CLIENT)
+    //@SideOnly(Side.CLIENT)
     default String getItemIcon() {
         return null;
     }
@@ -87,8 +85,8 @@ public interface IModelPackObject extends IModelTextureVariantsSupplier {
      * @param model The model of the item
      * @param transform The matrix to apply the transforms to
      */
-    @SideOnly(Side.CLIENT)
-    default void applyItemTransforms(ItemCameraTransforms.TransformType renderType, ItemStack stack, ItemDxModel model, Matrix4f transform) {
+    //@SideOnly(Side.CLIENT)
+    default void applyItemTransforms(HmCameraTransforms renderType, HmItemStack stack, ItemDxModel model, Matrix4f transform) {
         switch (renderType) {
             case NONE:
                 break;
@@ -109,7 +107,8 @@ public interface IModelPackObject extends IModelTextureVariantsSupplier {
             case GUI:
                 transform.translate(0.5f, 0.32f, 0);
                 String tip = model.getOwner().getItemIcon();
-                if (!StringUtils.isNullOrEmpty(tip)) {
+                if (!StringUtil.isNullOrEmpty(tip)) {
+                    //TODO MIGRATE TO HERMES
                     GlStateManager.disableLighting();
                     Matrix4f textTransform = new Matrix4f(transform);
                     textTransform.translate(0, 0, 20);

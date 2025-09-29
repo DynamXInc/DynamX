@@ -1,13 +1,14 @@
 package fr.dynamx.api.contentpack.object;
 
 import fr.dynamx.core.common.contentpack.type.ObjectInfo;
+import fr.hermes.api.mc.HmItem;
 
 /**
  * An IDynamXItem is something having an {@link ObjectInfo}. It is, for example, an item or a block
  *
  * @param <T> The type of the owner {@link ObjectInfo}
  */
-public interface IDynamXItem<T extends ObjectInfo<?>> {
+public interface IDynamXItem<T extends ObjectInfo<?>> extends HmItem {
     /**
      * @return The {@link ObjectInfo} contained
      */

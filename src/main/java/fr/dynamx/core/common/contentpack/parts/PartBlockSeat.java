@@ -11,6 +11,8 @@ import fr.dynamx.core.common.entities.PackPhysicsEntity;
 import fr.dynamx.core.common.entities.PropsEntity;
 import fr.dynamx.core.common.entities.SeatEntity;
 import fr.dynamx.core.common.entities.modules.SeatsModule;
+import fr.hermes.api.mc.HmEntity;
+import fr.hermes.api.mc.HmPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.TextComponentString;
@@ -25,7 +27,7 @@ public class PartBlockSeat<T extends ISubInfoTypeOwner<T>> extends BasePartSeat<
     }
 
     @Override
-    public boolean interact(IDynamXObject entity, EntityPlayer with) {
+    public boolean interact(IDynamXObject entity, HmPlayerEntity with) {
         if (entity instanceof TEDynamXBlock) {
             byte idx = getId();
             if (idx >= ((TEDynamXBlock) entity).getSeatEntities().size()) {
@@ -37,9 +39,9 @@ public class PartBlockSeat<T extends ISubInfoTypeOwner<T>> extends BasePartSeat<
         if (entity instanceof PropsEntity) {
             PropsEntity<?> vehicleEntity = (PropsEntity<?>) entity;
             SeatsModule seats = ((IModuleContainer.ISeatsContainer) vehicleEntity).getSeats();
-            Entity seatRider = seats.getSeatToPassengerMap().get(this);
+            HmEntity seatRider = seats.getSeatToPassengerMap().get(this);
             if (seatRider != null && seatRider != with) {
-                with.sendMessage(new TextComponentString("The seat is already taken"));
+                with.sendMessage("The seat is already taken");
                 return false;
             }
             return mountEntity(vehicleEntity, seats, with);

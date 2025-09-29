@@ -6,8 +6,8 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.core.common.DynamXMain;
 import fr.dynamx.core.common.entities.PhysicsEntity;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
+import fr.dynamx.core.utils.optimization.MutableBoundingBox;
+import org.joml.Vector3i;
 
 /**
  * Physics handler of {@link PhysicsEntity} using rigid bodies <br>
@@ -103,9 +103,9 @@ public abstract class EntityPhysicsHandler<T extends PhysicsEntity<?>> extends A
         PhysicsEntity<?> entity = getHandledEntity();
         // search water downwards, two blocks from the entity
         for (int offset = 2; offset > -2; offset--) {
-            BlockPos blockPos = new BlockPos(entity.physicsPosition.x, entity.physicsPosition.y + offset, entity.physicsPosition.z);
-            if (entity.getEntityWorld().getBlockState(blockPos).getMaterial().isLiquid()) {
-                AxisAlignedBB boundingBox = entity.getEntityWorld().getBlockState(blockPos).getBoundingBox(entity.getEntityWorld(), blockPos);
+            Vector3i blockPos = new Vector3i((int) entity.physicsPosition.x, (int) (entity.physicsPosition.y + offset), (int) entity.physicsPosition.z);
+            if (entity.getHmWorld().getBlockState(blockPos).isLiquid()) {
+                MutableBoundingBox boundingBox = entity.getHmWorld().getBlockState(blockPos).getBoundingBox(entity.getHmWorld(), blockPos);
                 return (float) boundingBox.offset(blockPos).maxY - 0.125F + 0.5f;
             }
         }

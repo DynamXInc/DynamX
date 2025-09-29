@@ -1,7 +1,7 @@
 package fr.dynamx.core.common.physics.joints;
 
 import fr.dynamx.core.common.entities.PhysicsEntity;
-import net.minecraft.util.ResourceLocation;
+import fr.hermes.api.mc.HmResourceLocation;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -11,7 +11,7 @@ import java.util.Map;
  * Registry of {@link JointHandler}, required to sync joints and load them from world saves
  */
 public class JointHandlerRegistry {
-    private static final Map<ResourceLocation, JointHandler<?, ?, ?>> HANDLERS = new HashMap<>();
+    private static final Map<HmResourceLocation, JointHandler<?, ?, ?>> HANDLERS = new HashMap<>();
 
     /**
      * Registers a joint handler
@@ -28,7 +28,7 @@ public class JointHandlerRegistry {
      * @return The joint handler matching with the given name
      * @throws IllegalArgumentException If no handler was found
      */
-    public static JointHandler<?, ?, ?> getHandler(ResourceLocation name) {
+    public static JointHandler<?, ?, ?> getHandler(HmResourceLocation name) {
         if (!HANDLERS.containsKey(name))
             throw new IllegalArgumentException("JointHandler " + name + " does not exists");
         return HANDLERS.get(name);
@@ -38,7 +38,7 @@ public class JointHandlerRegistry {
      * @return The joint handler matching with the given name, or null if no handler was found
      */
     @Nullable
-    public static JointHandler<?, ?, ?> getHandlerUnsafe(ResourceLocation name) {
+    public static JointHandler<?, ?, ?> getHandlerUnsafe(HmResourceLocation name) {
         return HANDLERS.containsKey(name) ? HANDLERS.get(name) : null;
     }
 
@@ -49,7 +49,7 @@ public class JointHandlerRegistry {
      * @param entity  The affected entity
      * @param jointID The local id of the joint, useful if you have multiple joints on this JointHandler <br> Should be unique for each joint
      */
-    public static void createJointWithSelf(ResourceLocation name, PhysicsEntity<?> entity, byte jointID) {
+    public static void createJointWithSelf(HmResourceLocation name, PhysicsEntity<?> entity, byte jointID) {
         getHandler(name).createJoint(entity, entity, jointID);
     }
 
@@ -61,7 +61,7 @@ public class JointHandlerRegistry {
      * @param entity2 The other entity
      * @param jointID The local id of the joint, useful if you have multiple joints on this JointHandler <br> Should be unique for each joint
      */
-    public static void createJointWithOther(ResourceLocation name, PhysicsEntity<?> entity1, PhysicsEntity<?> entity2, byte jointID) {
+    public static void createJointWithOther(HmResourceLocation name, PhysicsEntity<?> entity1, PhysicsEntity<?> entity2, byte jointID) {
         getHandler(name).createJoint(entity1, entity2, jointID);
     }
 }

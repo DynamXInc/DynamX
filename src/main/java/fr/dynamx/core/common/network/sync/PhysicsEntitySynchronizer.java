@@ -16,10 +16,9 @@ import fr.dynamx.core.server.network.ServerPhysicsSyncManager;
 import fr.dynamx.core.utils.debug.Profiler;
 import fr.dynamx.core.utils.optimization.HashMapPool;
 import fr.dynamx.core.utils.optimization.PooledHashMap;
+import fr.hermes.api.mc.HmPlayerEntity;
+import fr.hermes.api.mc.HmServerPlayerEntity;
 import lombok.Getter;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -42,7 +41,7 @@ public abstract class PhysicsEntitySynchronizer<T extends PhysicsEntity<?>> {
      */
     private SimulationHolder simulationHolder = getDefaultSimulationHolder();
     @Getter
-    private EntityPlayer simulationPlayerHolder;
+    private HmPlayerEntity simulationPlayerHolder;
 
     /**
      * The entity that we sync
@@ -99,12 +98,12 @@ public abstract class PhysicsEntitySynchronizer<T extends PhysicsEntity<?>> {
     /**
      * Called when a driver mounts on this entity, useful to change the {@link SimulationHolder}
      */
-    public abstract void onPlayerStartControlling(EntityPlayer player, boolean addControllers);
+    public abstract void onPlayerStartControlling(HmPlayerEntity player, boolean addControllers);
 
     /**
      * Called when a driver dismounts from this entity, useful to change the {@link SimulationHolder}
      */
-    public abstract void onPlayerStopControlling(EntityPlayer player, boolean removeControllers);
+    public abstract void onPlayerStopControlling(HmPlayerEntity player, boolean removeControllers);
 
     /**
      * Called when the state of a walking player changes
@@ -143,7 +142,7 @@ public abstract class PhysicsEntitySynchronizer<T extends PhysicsEntity<?>> {
      *
      * @param simulationHolder The new simulation holder
      */
-    public void setSimulationHolder(SimulationHolder simulationHolder, EntityPlayer simulationPlayerHolder) {
+    public void setSimulationHolder(SimulationHolder simulationHolder, HmPlayerEntity simulationPlayerHolder) {
         setSimulationHolder(simulationHolder, simulationPlayerHolder, SimulationHolder.UpdateContext.NORMAL);
     }
 
@@ -153,7 +152,7 @@ public abstract class PhysicsEntitySynchronizer<T extends PhysicsEntity<?>> {
      * @param simulationHolder The new simulation holder
      * @param changeContext    The simulation holder update context, changes the affected entities (linked entities, entities in props containers...)
      */
-    public void setSimulationHolder(SimulationHolder simulationHolder, EntityPlayer simulationPlayerHolder, SimulationHolder.UpdateContext changeContext) {
+    public void setSimulationHolder(SimulationHolder simulationHolder, HmPlayerEntity simulationPlayerHolder, SimulationHolder.UpdateContext changeContext) {
         //System.out.println("SET HOLD " + this.simulationHolder+" "+simulationHolder+" "+entity+" "+changeContext+" "+simulationPlayerHolder);
         this.simulationHolder = simulationHolder;
         this.simulationPlayerHolder = simulationPlayerHolder;
@@ -165,19 +164,20 @@ public abstract class PhysicsEntitySynchronizer<T extends PhysicsEntity<?>> {
         }
     }
 
-    public void resyncEntity(EntityPlayerMP target) {
+    public void resyncEntity(HmServerPlayerEntity target) {
         //Force tcp for first sync and resyncs
         DynamXContext.getNetwork().getVanillaNetwork().sendPacket(new MessagePhysicsEntitySync(entity, ServerPhysicsSyncManager.getTime(target), synchronizedVariables, false), EnumPacketTarget.PLAYER, target);
         if (entity instanceof IModuleContainer.ISeatsContainer && ((IModuleContainer.ISeatsContainer) entity).hasSeats())
             DynamXContext.getNetwork().sendToClient(new MessageSeatsSync((IModuleContainer.ISeatsContainer) entity), EnumPacketTarget.PLAYER, target);
-        if (entity.getJointsHandler() != null)
+        if (entity.getJointsHandler() != null) {
             entity.getJointsHandler().sync(target);
+        }
     }
 
-    public PooledHashMap<Integer, EntityVariable<?>> getVarsToSync(Side fromSide, SyncTarget target) {
+    public PooledHashMap<Integer, EntityVariable<?>> getVarsToSync(boolean fromClientSide, SyncTarget target) {
         PooledHashMap<Integer, EntityVariable<?>> ret = HashMapPool.get();
         getSynchronizedVariables().forEach((i, s) -> {
-            SyncTarget varTarget = s.getSyncTarget(simulationHolder, fromSide);
+            SyncTarget varTarget = s.getSyncTarget(simulationHolder, fromClientSide);
             if (target.isIncluded(varTarget)) {
                 ret.put(i, s);
             }

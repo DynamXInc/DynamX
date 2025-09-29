@@ -32,6 +32,9 @@ import fr.dynamx.core.utils.maths.DynamXMath;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.forge.DynamXConfig;
+import fr.hermes.api.mc.HmEntity;
+import fr.hermes.api.mc.HmPlayerEntity;
+import fr.hermes.api.mc.HmResourceLocation;
 import fr.hermes.forge.JmeVector3fPool;
 import fr.dynamx.core.utils.physics.DynamXPhysicsHelper;
 import fr.dynamx.core.utils.physics.PhysicsRaycastResult;
@@ -121,7 +124,7 @@ public class DynamXUtils {
     /**
      * @return A new {@link DxModelPath} for this model
      */
-    public static DxModelPath getModelPath(String packName, ResourceLocation model) {
+    public static DxModelPath getModelPath(String packName, HmResourceLocation model) {
         List<PackInfo> packLocations = DynamXObjectLoaders.PACKS.findPackLocations(packName);
         if (packLocations.isEmpty()) {
             DynamXMain.log.error("Pack info {} not found. This should not happen.", packName);
@@ -176,22 +179,22 @@ public class DynamXUtils {
         return new Quaternionf(quat.getX(), quat.getY(), quat.getZ(), quat.getW());
     }
 
-    public static Vector3f getPositionEyes(Entity entity) {
+    public static Vector3f getPositionEyes(HmEntity entity) {
         return JmeVector3fPool.get((float) entity.posX, (float) entity.posY + entity.getEyeHeight(), (float) entity.posZ);
     }
 
-    public static Vector3f calculateRay(Entity base, float distance, Vector3f offset) {
+    public static Vector3f calculateRay(HmEntity base, float distance, Vector3f offset) {
         Vec3d vec3 = base.getPositionVector();
-        Vec3d vec31 = base.getLook(1);
+        org.joml.Vector3f vec31 = base.getHmLook();
         Vec3d vec32 = vec3.add(vec31.x * distance, vec31.y * distance, vec31.z * distance);
         Vector3f lookAt = JmeVector3fPool.get((float) vec32.x, (float) vec32.y, (float) vec32.z);
         lookAt.subtractLocal(offset.x, offset.y, offset.z);
         return lookAt;
     }
 
-    public static PhysicsRaycastResult castRayFromEntity(Entity entity, float distanceMax, Predicate<EnumBulletShapeType> ignoredPredicate) {
+    public static PhysicsRaycastResult castRayFromEntity(HmPlayerEntity entity, float distanceMax, Predicate<EnumBulletShapeType> ignoredPredicate) {
         Vector3f eyePos = DynamXUtils.getPositionEyes(entity); //from
-        Vector3f eyeLook = DynamXUtils.toVector3f(entity.getLook(1)); //to
+        org.joml.Vector3f eyeLook = entity.getHmLook(); //to
         Vector3f lookAt = new Vector3f(eyePos.x, eyePos.y, eyePos.z);
         eyeLook.multLocal(distanceMax);
         lookAt.addLocal(eyeLook);

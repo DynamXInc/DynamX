@@ -4,6 +4,7 @@ import com.jme3.math.Vector3f;
 import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.*;
+import org.joml.Vector3i;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
@@ -475,5 +476,35 @@ public class MutableBoundingBox implements Serializable {
 
     public Vector3f getSize() {
         return JmeVector3fPool.get((float) (maxX - minX) / 2, (float) (maxY - minY) / 2, (float) (maxZ - minZ) / 2);
+    }
+
+    public double getAverageEdgeLength()
+    {
+        double d0 = this.maxX - this.minX;
+        double d1 = this.maxY - this.minY;
+        double d2 = this.maxZ - this.minZ;
+        return (d0 + d1 + d2) / 3.0D;
+    }
+
+    public boolean contains(org.joml.Vector3f vec) {
+        if (vec.x > this.minX && vec.x < this.maxX) {
+            if (vec.y > this.minY && vec.y < this.maxY) {
+                return vec.z > this.minZ && vec.z < this.maxZ;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    public MutableBoundingBox offset(Vector3i position) {
+        minX += position.x;
+        maxX += position.x;
+        minY += position.y;
+        maxY += position.y;
+        minZ += position.z;
+        maxZ += position.z;
+        return this;
     }
 }

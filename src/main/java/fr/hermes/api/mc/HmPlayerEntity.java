@@ -1,6 +1,7 @@
 package fr.hermes.api.mc;
 
 import com.mojang.authlib.GameProfile;
+import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 
 /**
@@ -12,4 +13,12 @@ public interface HmPlayerEntity extends HmEntity {
     GameProfile getGameProfile();
 
     void sendMessage(String message);
+
+    boolean isLocalPlayer();
+
+    HmItemStack getHeldItemMainhand();
+
+    boolean isCreativeMode();
+
+    boolean isSneaking();
 }

@@ -4,17 +4,16 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.core.common.entities.IDynamXObject;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
+import fr.hermes.api.mc.HmPlayerEntity;
+import fr.hermes.api.mc.HmResourceLocation;
 import lombok.Setter;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.AxisAlignedBB;
 
 public abstract class InteractivePart<A extends IDynamXObject, T extends ISubInfoTypeOwner<T>> extends BasePart<T> {
     /**
      * The box used for interaction and raytracing
      */
     @Setter
-    private AxisAlignedBB box;
+    private MutableBoundingBox box;
 
     public InteractivePart(T owner, String partName) {
         super(owner, partName);
@@ -40,13 +39,13 @@ public abstract class InteractivePart<A extends IDynamXObject, T extends ISubInf
     @Override
     public void appendTo(T owner) {
         super.appendTo(owner);
-        box = new AxisAlignedBB(-getScale().x, 0, -getScale().z, getScale().x, getScale().y, getScale().z);
+        box = new MutableBoundingBox(-getScale().x, 0, -getScale().z, getScale().x, getScale().y, getScale().z);
     }
 
     /**
      * @return The texture to display on the cursor when the player is looking at this part
      */
-    public ResourceLocation getHudCursorTexture() {
+    public HmResourceLocation getHudCursorTexture() {
         return null;
     }
 
@@ -55,7 +54,7 @@ public abstract class InteractivePart<A extends IDynamXObject, T extends ISubInf
      *
      * @return True if interacted with success
      */
-    public abstract boolean interact(A with, EntityPlayer player);
+    public abstract boolean interact(A with, HmPlayerEntity player);
 
     /**
      * Checks if the player can interact with this part
@@ -64,7 +63,7 @@ public abstract class InteractivePart<A extends IDynamXObject, T extends ISubInf
      * @param player The interacting player
      * @return True if the player can interact with this part
      */
-    public boolean canInteract(A with, EntityPlayer player) {
+    public boolean canInteract(A with, HmPlayerEntity player) {
         return true;
     }
 }

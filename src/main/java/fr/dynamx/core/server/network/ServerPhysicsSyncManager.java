@@ -4,8 +4,8 @@ import fr.dynamx.api.network.sync.EntityVariable;
 import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.utils.debug.Profiler;
 import fr.dynamx.core.utils.optimization.PooledHashMap;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
+import fr.hermes.api.mc.HmPlayerEntity;
+import fr.hermes.api.mc.HmServerPlayerEntity;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +17,7 @@ public class ServerPhysicsSyncManager {
     /**
      * Holds one {@link PlayerSyncBuffer} per connected player
      */
-    private static final Map<EntityPlayer, PlayerSyncBuffer> sendBuffers = new HashMap<>();
+    private static final Map<HmPlayerEntity, PlayerSyncBuffer> sendBuffers = new HashMap<>();
 
     /**
      * Updates player buffers, sending all sync packets
@@ -35,7 +35,7 @@ public class ServerPhysicsSyncManager {
     /**
      * Sets a player simulation time, used for driving sync, see {@link EntityPhysicsState}
      */
-    public static void putTime(EntityPlayer player, int time) {
+    public static void putTime(HmPlayerEntity player, int time) {
         if (sendBuffers.containsKey(player))
             sendBuffers.get(player).setSyncTime(time);
     }
@@ -43,7 +43,7 @@ public class ServerPhysicsSyncManager {
     /**
      * Gets a player simulation time, used for driving sync, see {@link EntityPhysicsState}
      */
-    public static int getTime(EntityPlayer player) {
+    public static int getTime(HmPlayerEntity player) {
         if (sendBuffers.containsKey(player))
             return sendBuffers.get(player).getSyncTime();
         return 0;
@@ -52,7 +52,7 @@ public class ServerPhysicsSyncManager {
     /**
      * Called on player disconnection to destroy its buffer
      */
-    public static void onDisconnect(EntityPlayer player) {
+    public static void onDisconnect(HmPlayerEntity player) {
         if (sendBuffers.containsKey(player))
             sendBuffers.remove(player).clear();
     }
@@ -64,9 +64,9 @@ public class ServerPhysicsSyncManager {
      * @param entity     The entity to sync
      * @param varsToSync The data to send
      */
-    public static <T extends PhysicsEntity<?>> void addEntitySync(EntityPlayer target, T entity, PooledHashMap<Integer, EntityVariable<?>> varsToSync) {
+    public static <T extends PhysicsEntity<?>> void addEntitySync(HmPlayerEntity target, T entity, PooledHashMap<Integer, EntityVariable<?>> varsToSync) {
         if (!sendBuffers.containsKey(target))
-            sendBuffers.put(target, new PlayerSyncBuffer((EntityPlayerMP) target));
+            sendBuffers.put(target, new PlayerSyncBuffer((HmServerPlayerEntity) target));
         sendBuffers.get(target).addEntitySync(entity, varsToSync);
     }
 }

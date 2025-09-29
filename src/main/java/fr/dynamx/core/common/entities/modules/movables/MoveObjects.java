@@ -11,15 +11,15 @@ import fr.dynamx.core.common.entities.modules.MovableModule;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
 import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.DynamXUtils;
+import fr.hermes.api.mc.HmPlayerEntity;
 import fr.hermes.forge.JmeVector3fPool;
 import fr.dynamx.core.utils.physics.DynamXPhysicsHelper;
-import net.minecraft.entity.player.EntityPlayer;
 
 @SynchronizedEntityVariable.SynchronizedPhysicsModule(modid = DynamXConstants.ID)
 public class MoveObjects extends MovableModule {
 
     @SynchronizedEntityVariable(name = "picker")
-    private final EntityVariable<EntityPlayer> picker = new EntityVariable<>((variable, value) -> {
+    private final EntityVariable<HmPlayerEntity> picker = new EntityVariable<>((variable, value) -> {
         if(value != null && DynamXContext.getPlayerPickingObjects().containsKey(value.getEntityId()))
             entity.getSynchronizer().onPlayerStartControlling(value, false);
     }, SynchronizationRules.SERVER_TO_CLIENTS);
@@ -35,7 +35,7 @@ public class MoveObjects extends MovableModule {
         super(entity);
     }
 
-    public void pickObject(EntityPlayer picker, PhysicsEntity<?> pickedEntity) {
+    public void pickObject(HmPlayerEntity picker, PhysicsEntity<?> pickedEntity) {
         if (pickedEntity.getPhysicsHandler() == null) {
             return;
         }
@@ -58,7 +58,7 @@ public class MoveObjects extends MovableModule {
         }
         ((PhysicsRigidBody) entity.getPhysicsHandler().getCollisionObject()).setGravity(JmeVector3fPool.get(0, -DynamXPhysicsHelper.GRAVITY,0));
         PhysicsRigidBody rigidBody = (PhysicsRigidBody) pickedEntity.get().getPhysicsHandler().getCollisionObject();
-        Vector3f playerLookPos = DynamXUtils.toVector3f(picker.get().getLookVec());
+        Vector3f playerLookPos = DynamXUtils.toVector3f(picker.get().getHmLook());
         rigidBody.setLinearVelocity(playerLookPos.multLocal(force));
         unPickObject();
     }
@@ -79,7 +79,7 @@ public class MoveObjects extends MovableModule {
             PhysicsEntity<?> pickedEntity = this.pickedEntity.get();
             if (picker.get() != null && pickedEntity != null && isPicked.get()) {
                 PhysicsRigidBody rigidBody = (PhysicsRigidBody) pickedEntity.getPhysicsHandler().getCollisionObject();
-                Vector3f playerLookPos = DynamXUtils.toVector3f(picker.get().getLookVec());
+                Vector3f playerLookPos = DynamXUtils.toVector3f(picker.get().getHmLook());
                 rigidBody.setGravity(JmeVector3fPool.get());
                 rigidBody.setAngularVelocity(JmeVector3fPool.get());
                 rigidBody.setLinearVelocity(JmeVector3fPool.get());

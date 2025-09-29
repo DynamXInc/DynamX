@@ -11,11 +11,12 @@ import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.EnumSeatPlayerPosition;
 import fr.dynamx.core.utils.debug.DynamXDebugOption;
 import fr.dynamx.core.utils.debug.DynamXDebugOptions;
+import fr.hermes.api.mc.HmEntity;
+import fr.hermes.api.mc.HmResourceLocation;
+import fr.hermes.api.mod.McObjectBinder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.Nullable;
 
@@ -71,12 +72,12 @@ public abstract class BasePartSeat<A extends IDynamXObject, T extends ISubInfoTy
         return DynamXDebugOptions.SEATS_AND_STORAGE;
     }
 
-    public boolean mountEntity(A riddenEntity, SeatsModule seatsModule, Entity rider) {
+    public boolean mountEntity(A riddenEntity, SeatsModule seatsModule, HmEntity rider) {
         if (seatsModule.getSeatToPassengerMap().containsValue(rider)) {
             return false; //Player on another seat
         }
         seatsModule.getSeatToPassengerMap().put(this, rider);
-        if (!rider.startRiding((Entity) riddenEntity, false)) //something went wrong : dismount
+        if (!rider.startRiding((HmEntity) riddenEntity, false)) //something went wrong : dismount
         {
             seatsModule.getSeatToPassengerMap().remove(this);
             return false;
@@ -85,8 +86,8 @@ public abstract class BasePartSeat<A extends IDynamXObject, T extends ISubInfoTy
     }
 
     @Override
-    public ResourceLocation getHudCursorTexture() {
-        return new ResourceLocation(DynamXConstants.ID, "textures/seat.png");
+    public HmResourceLocation getHudCursorTexture() {
+        return McObjectBinder.instance.newResourceLocation(DynamXConstants.ID, "textures/seat.png");
     }
 
     @Override

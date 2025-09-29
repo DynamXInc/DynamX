@@ -12,13 +12,13 @@ import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.common.network.packets.MessageJoints;
 import fr.dynamx.core.common.network.sync.SPPhysicsEntitySynchronizer;
 import fr.dynamx.core.common.physics.entities.AbstractEntityPhysicsHandler;
+import fr.hermes.api.mc.HmEntity;
+import fr.hermes.api.mc.HmPlayerEntity;
+import fr.hermes.api.mc.HmResourceLocation;
+import fr.hermes.api.mc.HmServerPlayerEntity;
 import lombok.Getter;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.Constants;
 
 import java.util.ArrayList;
@@ -62,12 +62,12 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
     private void addJointInternal(PhysicsEntity<?> target, EntityJoint<?> joint) {
         if (joints.contains(joint)) //prevent duplicates
             throw new IllegalStateException("There is already a joint " + joint + " between " + entity + " and " + target + " !");
-        DynamXMain.getProxy().scheduleTask(entity.world, () -> joints.add(joint));
+        DynamXMain.getProxy().scheduleTask(entity.getHmWorld(), () -> joints.add(joint));
         setDirty(true);
         if (!restoringJoints && queuedRestorations != null) {
             EntityJoint.CachedJoint rm = null;
             for (EntityJoint.CachedJoint k : queuedRestorations) {
-                if (k.getId().equals(target.getPersistentID())) {
+                if (k.getId().equals(target.getUniqueID())) {
                     rm = k;
                     break;
                 }
@@ -109,7 +109,7 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
         if (j.getJoint() == null) {
             return;
         }
-        DynamXContext.getPhysicsWorld(entity.world).addJoint(j.getJoint());
+        DynamXContext.getPhysicsWorld(entity.getHmWorld()).addJoint(j.getJoint());
         entity.physicsHandler.activate();
         if (otherEntity != entity) {
             otherEntity.physicsHandler.activate();
@@ -124,7 +124,7 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
             queuedRestorations = new ArrayList<>();
         }
         queuedRestorations.add(toAdd);
-        restoreCooldown = entity.ticksExisted < 20 ? 1 : 5;
+        restoreCooldown = entity.getTicksExisted() < 20 ? 1 : 5;
     }
 
     /**
@@ -134,7 +134,7 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
      * @param jointType The type of the joint (name of the {@link JointHandler})
      * @param jointId   The local id of the joint, the same as when the joint was created
      */
-    public void removeJointWithMe(ResourceLocation jointType, byte jointId) {
+    public void removeJointWithMe(HmResourceLocation jointType, byte jointId) {
         removeJointWith(entity, jointType, jointId);
     }
 
@@ -146,8 +146,8 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
      * @param jointType   The type of the joint (name of the {@link JointHandler})
      * @param jointId     The local id of the joint, the same as when the joint was created
      */
-    public void removeJointWith(PhysicsEntity<?> otherEntity, ResourceLocation jointType, byte jointId) {
-        DynamXMain.getProxy().scheduleTask(entity.world, () -> {
+    public void removeJointWith(PhysicsEntity<?> otherEntity, HmResourceLocation jointType, byte jointId) {
+        DynamXMain.getProxy().scheduleTask(entity.getHmWorld(), () -> {
             EntityJoint<?> temp = null;
             EntityJoint<?> toRemove = new EntityJoint<>(null, entity, otherEntity, jointId, jointType, null);
             for (EntityJoint<?> j : joints) {
@@ -160,13 +160,13 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
                 onRemoveJointInternal(temp, otherEntity);
                 joints.remove(temp);
             } else {
-                DynamXMain.log.warn("[JointsHandler] Cannot remove joint between " + entity + " and " + otherEntity + " : joint not found !");
+                DynamXMain.log.warn("[JointsHandler] Cannot remove joint between {} and {} : joint not found !", entity, otherEntity);
             }
         });
     }
 
-    public void removeJointsOfType(ResourceLocation jointType, byte jointId) {
-        DynamXMain.getProxy().scheduleTask(entity.world, () -> {
+    public void removeJointsOfType(HmResourceLocation jointType, byte jointId) {
+        DynamXMain.getProxy().scheduleTask(entity.getHmWorld(), () -> {
             EntityJoint<?> temp = null;
             for (EntityJoint<?> j : joints) {
                 if (j.getJointId() == jointId && (j.getEntity1() == entity || j.getEntity2() == entity) && jointType.equals(j.getType())) {
@@ -187,7 +187,7 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
      * Internal function remove a joint on entity death or from a packet
      */
     public void onRemoveJoint(EntityJoint<?> joint) {
-        DynamXMain.getProxy().scheduleTask(entity.world, () -> {
+        DynamXMain.getProxy().scheduleTask(entity.getHmWorld(), () -> {
             onRemoveJointInternal(joint, joint.getOtherEntity(entity));
         });
     }
@@ -215,7 +215,7 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
         if (joint.getJoint() == null) {
             return;
         }
-        DynamXContext.getPhysicsWorld(entity.world).removeJoint(joint.getJoint());
+        DynamXContext.getPhysicsWorld(entity.getHmWorld()).removeJoint(joint.getJoint());
         entity.physicsHandler.activate();
         if (otherEntity != entity) {
             otherEntity.physicsHandler.activate();
@@ -226,7 +226,9 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
     public void writeToNBT(NBTTagCompound tag) {
         NBTTagList jointst = new NBTTagList();
         if (!joints.isEmpty()) {
-            joints.forEach(j -> jointst.appendTag(NBTSerializer.serialize(new EntityJoint.CachedJoint(j.getOtherEntity(entity).getPersistentID(), j.getJointId(), j.getType(), JointHandlerRegistry.getHandler(j.getType()).isJointOwner(j, entity)))));
+            joints.forEach(j -> jointst.appendTag(NBTSerializer.serialize(
+                    new EntityJoint.CachedJoint(j.getOtherEntity(entity).getUniqueID(), j.getJointId(), j.getType(),
+                            JointHandlerRegistry.getHandler(j.getType()).isJointOwner(j, entity)))));
         }
         tag.setTag("joints", jointst);
     }
@@ -257,23 +259,23 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
                 i:
                 for (EntityJoint.CachedJoint j : queuedRestorations) {
                     boolean found = false;
-                    for (Entity e : entity.world.loadedEntityList) {
-                        if (!e.getPersistentID().equals(j.getId())) {
+                    for (HmEntity e : entity.getHmWorld().getEntityList()) {
+                        if (!e.getUniqueID().equals(j.getId())) {
                             continue;
                         }
                         found = true;
                         if (!(e instanceof PhysicsEntity<?>)) {
-                            DynamXMain.log.warn("[Joints NBT Load] Failed to re attach " + entity + " to entity with uuid " + j.getId() + " : wrong entity type : " + e);
+                            DynamXMain.log.warn("[Joints NBT Load] Failed to re attach {} to entity with uuid {} : wrong entity type : {}", entity, j.getId(), e);
                             continue;
                         }
                         JointHandler<?, ?, ?> jointHandler = JointHandlerRegistry.getHandlerUnsafe(j.getType());
                         if (jointHandler == null) {
-                            DynamXMain.log.warn("[Joints NBT Load] Failed to re attach " + entity + " to " + e + " : joint handler " + j.getType() + " not found !");
+                            DynamXMain.log.warn("[Joints NBT Load] Failed to re attach {} to {} : joint handler {} not found !", entity, e, j.getType());
                             continue;
                         }
                         for (EntityJoint<?> joint : joints) {
                             if (joint.getJointId() == j.getJid() && j.getType().equals(joint.getType()) && (joint.getEntity1() == e || joint.getEntity2() == e)) {
-                                DynamXMain.log.warn("TRYING TO ADD DUPLICATED JOINT " + j + " " + entity + " " + joints + " " + e + ". Sync cancelled");
+                                DynamXMain.log.warn("TRYING TO ADD DUPLICATED JOINT {} {} {} {}. Sync cancelled", j, entity, joints, e);
                                 continue i;
                             }
                         }
@@ -281,7 +283,7 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
                         break;
                     }
                     if (!found) {
-                        DynamXMain.log.warn("[Joints NBT Load] Failed to re attach " + entity + " to entity with uuid " + j.getId() + " : not found");
+                        DynamXMain.log.warn("[Joints NBT Load] Failed to re attach {} to entity with uuid {} : not found", entity, j.getId());
                     }
                 }
                 restoringJoints = false;
@@ -305,7 +307,7 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
         if (!isDirty()) {
             return;
         }
-        if (!entity.world.isRemote && entity.getSynchronizer().doesOtherSideUsesPhysics()) {
+        if (!entity.getHmWorld().isClient() && entity.getSynchronizer().doesOtherSideUsesPhysics()) {
             DynamXContext.getNetwork().sendToClient(new MessageJoints(entity, computeCachedJoints()), EnumPacketTarget.ALL_TRACKING_ENTITY, entity);
         }
         setDirty(false);
@@ -317,16 +319,16 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
     public List<EntityJoint.CachedJoint> computeCachedJoints() {
         List<EntityJoint.CachedJoint> sendList = new ArrayList<>();
         for (EntityJoint<?> g : joints) {
-            sendList.add(new EntityJoint.CachedJoint(g.getOtherEntity(entity).getPersistentID(), g.getJointId(), g.getType(), g.getHandler().isJointOwner(g, entity)));
+            sendList.add(new EntityJoint.CachedJoint(g.getOtherEntity(entity).getUniqueID(), g.getJointId(), g.getType(), g.getHandler().isJointOwner(g, entity)));
         }
         return sendList;
     }
 
     protected void syncRemovedJoint(EntityJoint<?> joint) {
-        if (!entity.world.isRemote || !entity.getSynchronizer().getSimulationHolder().isSinglePlayer()) {
+        if (!entity.getHmWorld().isClient() || !entity.getSynchronizer().getSimulationHolder().isSinglePlayer()) {
             return;
         }
-        Entity e = ((SPPhysicsEntitySynchronizer<?>) entity.getSynchronizer()).getOtherSideEntity();
+        HmEntity e = ((SPPhysicsEntitySynchronizer<?>) entity.getSynchronizer()).getOtherSideEntity();
         if (e instanceof PhysicsEntity) {
             Optional<EntityJoint<?>> other = ((PhysicsEntity<?>) e).getJointsHandler().getJoints().stream().filter(j2 -> j2.getType().equals(joint.getType()) && j2.getJointId() == joint.getJointId()).findFirst();
             if (other.isPresent()) {
@@ -345,7 +347,7 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
     /**
      * Updates the {@link SimulationHolder} of all linked entity, if we own the joint
      */
-    public void setSimulationHolderOnJointedEntities(SimulationHolder holder, EntityPlayer simulationPlayerHolder) {
+    public void setSimulationHolderOnJointedEntities(SimulationHolder holder, HmPlayerEntity simulationPlayerHolder) {
         for (EntityJoint<?> j : joints) {
             if (j.getHandler().isJointOwner(j, entity) && j.getEntity1() != j.getEntity2()) {
                 //NB : le ATTACHED_ENTITIES empêche les boucles infinies, et donc de faire des remorques attachées à d'autres remorques
@@ -358,7 +360,7 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
      * Sends all the joints to the target client <br>
      * Used for player connection
      */
-    public void sync(EntityPlayerMP target) {
+    public void sync(HmServerPlayerEntity target) {
         if (!getJoints().isEmpty()) {
             DynamXContext.getNetwork().sendToClient(new MessageJoints(entity, computeCachedJoints()), EnumPacketTarget.PLAYER, target);
         }

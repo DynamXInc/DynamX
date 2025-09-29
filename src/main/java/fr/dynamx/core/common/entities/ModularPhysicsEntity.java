@@ -94,9 +94,9 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
         updateEntityListeners.clear();
         updatePhysicsListeners.clear();
         moduleList.forEach(m -> {
-            if (m instanceof IPhysicsModule.IEntityUpdateListener && ((IPhysicsModule.IEntityUpdateListener) m).listenEntityUpdates(world.isRemote ? Side.CLIENT : Side.SERVER))
+            if (m instanceof IPhysicsModule.IEntityUpdateListener && ((IPhysicsModule.IEntityUpdateListener) m).listenEntityUpdates(getHmWorld().isClient()))
                 updateEntityListeners.add((IPhysicsModule.IEntityUpdateListener) m);
-            if (m instanceof IPhysicsModule.IEntityPosUpdateListener && ((IPhysicsModule.IEntityPosUpdateListener) m).listenEntityPosUpdates(world.isRemote ? Side.CLIENT : Side.SERVER))
+            if (m instanceof IPhysicsModule.IEntityPosUpdateListener && ((IPhysicsModule.IEntityPosUpdateListener) m).listenEntityPosUpdates(getHmWorld().isClient()))
                 updateEntityPosListeners.add((IPhysicsModule.IEntityPosUpdateListener) m);
             if (m instanceof IPhysicsModule.IPhysicsUpdateListener)
                 updatePhysicsListeners.add((IPhysicsModule.IPhysicsUpdateListener) m);
@@ -162,7 +162,6 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
      * If you override this function, you should make it final
      */
     // TODO EVENTS protected abstract void fireCreateModulesEvent(Side side);
-
     @Override
     public void registerSynchronizedVariables() {
         super.registerSynchronizedVariables();
@@ -193,8 +192,8 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
         super.writeSpawnData(buffer);
         buffer.writeInt(moduleList.size());
         moduleList.forEach(m -> {
-            if (m instanceof IEntityAdditionalSpawnData) {
-                ((IEntityAdditionalSpawnData) m).writeSpawnData(buffer);
+            if (m instanceof IPhysicsModule.IModuleWithSpawnData) {
+                ((IPhysicsModule.IModuleWithSpawnData) m).writeSpawnData(buffer);
             }
         });
     }
@@ -203,7 +202,7 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
     public void readSpawnData(ByteBuf additionalData) {
         super.readSpawnData(additionalData);
         int size = additionalData.readInt();
-        if(size == 0) {
+        if (size == 0) {
             return;
         }
         int i = 0;
@@ -211,8 +210,8 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
             if (i >= size) {
                 return;
             }
-            if (m instanceof IEntityAdditionalSpawnData) {
-                ((IEntityAdditionalSpawnData) m).readSpawnData(additionalData);
+            if (m instanceof IPhysicsModule.IModuleWithSpawnData) {
+                ((IPhysicsModule.IModuleWithSpawnData) m).readSpawnData(additionalData);
                 i++;
             }
         }
@@ -254,46 +253,45 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
         }
     }
 
+    // ====== HmEntity overrides =======
+
     @Override
-    protected void addPassenger(Entity passenger) {
-        super.addPassenger(passenger);
+    public void onAddPassenger(HmEntity passenger) {
         int size = moduleList.size();
         moduleList.forEach(iPhysicsModule -> iPhysicsModule.addPassenger(passenger));
     }
 
     @Override
-    protected void removePassenger(Entity passenger) {
-        super.removePassenger(passenger);
+    public void onRemovePassenger(HmEntity passenger) {
         int size = moduleList.size();
         moduleList.forEach(iPhysicsModule -> iPhysicsModule.removePassenger(passenger));
     }
 
     @Override
-    public void applyOrientationToEntity(Entity passenger) {
+    public boolean updatePassenger(HmEntity passenger) {
         if (this instanceof IModuleContainer.ISeatsContainer && ((IModuleContainer.ISeatsContainer) this).getSeats() != null) {
-            ((IModuleContainer.ISeatsContainer) this).getSeats().applyOrientationToEntity(passenger);
-        } else {
-            super.applyOrientationToEntity(passenger);
+            ((IModuleContainer.ISeatsContainer) this).getSeats().updatePassenger(passenger);
+            return true;
         }
+        return false;
     }
 
     @Override
-    public void updatePassenger(Entity passenger) {
-        if (this instanceof IModuleContainer.ISeatsContainer) {
-            ((IModuleContainer.ISeatsContainer) this).getSeats().updatePassenger(passenger);
-        } else {
-            super.updatePassenger(passenger);
+    public boolean updatePassengerRotation(HmEntity passenger) {
+        if (this instanceof IModuleContainer.ISeatsContainer && ((IModuleContainer.ISeatsContainer) this).getSeats() != null) {
+            ((IModuleContainer.ISeatsContainer) this).getSeats().applyOrientationToEntity(passenger);
+            return true;
         }
+        return false;
     }
 
     @Nullable
     @Override
-    public Entity getControllingPassenger() {
+    public HmEntity getHmControllingPassenger() {
         if (this instanceof IModuleContainer.ISeatsContainer && ((IModuleContainer.ISeatsContainer) this).getSeats() != null) { //May be called before init of modules
             return ((IModuleContainer.ISeatsContainer) this).getSeats().getControllingPassenger();
-        } else {
-            return super.getControllingPassenger();
         }
+        return null;
     }
 
     @Override

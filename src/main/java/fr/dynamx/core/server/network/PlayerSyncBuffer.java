@@ -8,7 +8,7 @@ import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.common.network.sync.MessageMultiPhysicsEntitySync;
 import fr.dynamx.core.common.network.sync.MessagePhysicsEntitySync;
 import fr.dynamx.core.utils.optimization.PooledHashMap;
-import net.minecraft.entity.player.EntityPlayerMP;
+import fr.hermes.api.mc.HmServerPlayerEntity;
 
 import java.util.*;
 
@@ -47,7 +47,7 @@ public class PlayerSyncBuffer {
     /**
      * Managed player
      */
-    private final EntityPlayerMP playerIn;
+    private final HmServerPlayerEntity playerIn;
     /**
      * Packets added this tick
      */
@@ -61,7 +61,7 @@ public class PlayerSyncBuffer {
      */
     private int syncTime;
 
-    public PlayerSyncBuffer(EntityPlayerMP playerIn) {
+    public PlayerSyncBuffer(HmServerPlayerEntity playerIn) {
         this.playerIn = playerIn;
     }
 
@@ -198,7 +198,7 @@ public class PlayerSyncBuffer {
          * Adds a {@link MessagePhysicsEntitySync} to the send queue, if this entity is not dead
          */
         private void send(Queue<MessagePhysicsEntitySync<?>> sendQueue) {
-            if (!entity.isDead) {
+            if (!entity.isDead()) {
                 sendQueue.add(new MessagePhysicsEntitySync(entity, syncTime, varsToSync, varsToSync.size() > NEW_SENDS_LIMIT));
             }
         }

@@ -23,11 +23,10 @@ import fr.dynamx.core.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.core.common.entities.PackPhysicsEntity;
 import fr.dynamx.core.common.items.ItemProps;
 import fr.dynamx.core.utils.DynamXUtils;
+import fr.hermes.api.mc.HmItemStack;
+import fr.hermes.api.mod.McObjectBinder;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -157,7 +156,7 @@ public class PropObject<T extends PropObject<T>> extends AbstractProp<T> impleme
     @Override
     public IDynamXItem<T> createItem(InfoList<T> loader) {
         CreatePackItemEvent.PropsItem<T, ?> event = new CreatePackItemEvent.PropsItem(loader, this);
-        MinecraftForge.EVENT_BUS.post(event);
+        // TODO EVENTS MinecraftForge.EVENT_BUS.post(event);
         if (event.isOverridden()) {
             return event.getObjectItem();
         } else {
@@ -171,8 +170,8 @@ public class PropObject<T extends PropObject<T>> extends AbstractProp<T> impleme
     }
 
     @Override
-    public ItemStack getPickedResult(int metadata) {
-        return new ItemStack((Item) getItems()[0], 1, metadata);
+    public HmItemStack getPickedResult(int metadata) {
+        return McObjectBinder.instance.newItemStack(getItems()[0], 1, metadata);
     }
 
     @Override
@@ -213,7 +212,7 @@ public class PropObject<T extends PropObject<T>> extends AbstractProp<T> impleme
         if (sceneGraph == null) {
             if (isModelValid()) {
                 BuildSceneGraphEvent.BuildEntityScene event = new BuildSceneGraphEvent.BuildEntityScene(this, (List) getDrawableParts(), getScaleModifier());
-                MinecraftForge.EVENT_BUS.post(event);
+                //TODO EVENTS MinecraftForge.EVENT_BUS.post(event);
                 sceneGraph = event.getSceneGraphResult();
             } else
                 sceneGraph = new EntityNode<>(Collections.EMPTY_LIST, Collections.EMPTY_LIST);

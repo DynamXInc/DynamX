@@ -41,18 +41,18 @@ public class PhysicsEntityTerrainLoader implements IPhysicsTerrainLoader {
 
     @Override
     public void update(ITerrainManager terrain, Profiler profiler) {
-        if (lastChunkX != entityIn.chunkCoordX || lastChunkY != entityIn.chunkCoordY || lastChunkZ != entityIn.chunkCoordZ) {
+        if (lastChunkX != entityIn.getChunkX() || lastChunkY != entityIn.getChunkY() || lastChunkZ != entityIn.getChunkZ()) {
             profiler.start(Profiler.Profiles.DELTA_COMPUTE);
             VerticalChunkPos.Mutable pos = new VerticalChunkPos.Mutable();
             VerticalChunkPos.Mutable prevPos = new VerticalChunkPos.Mutable();
-            int curChunkX = entityIn.chunkCoordX;
-            int curChunkY = entityIn.chunkCoordY;
-            int curChunkZ = entityIn.chunkCoordZ;
+            int curChunkX = entityIn.getChunkX();
+            int curChunkY = entityIn.getChunkY();
+            int curChunkZ = entityIn.getChunkZ();
             for (int i = 0; i < radiusY; i++) { //TODO DEPENDS ON SPEED ?
                 for (int j = 0; j < squareRadiusH; j++) {
                     int dx = (j % radiusH) - radiusHHalf;
                     int dz = (j / radiusH) - radiusHHalf;
-                    pos.setPos(entityIn.chunkCoordX + dx, entityIn.chunkCoordY + i - radiusYHalf, entityIn.chunkCoordZ + dz);
+                    pos.setPos(entityIn.getChunkX() + dx, entityIn.getChunkY() + i - radiusYHalf, entityIn.getChunkZ() + dz);
                     prevPos.setPos(lastChunkX + dx, lastChunkY + i - radiusYHalf, lastChunkZ + dz);
                     //boolean border = isBorderChunkUnsub(entityIn.chunkCoordX - lastChunkX, entityIn.chunkCoordY - lastChunkY, entityIn.chunkCoordZ - lastChunkZ, dx, i - radiusYHalf, dz);
                     if (loadMatrice[i][j] != -1) {
@@ -67,9 +67,9 @@ public class PhysicsEntityTerrainLoader implements IPhysicsTerrainLoader {
                             toLoad.remove(prevPosImmutable);
                         loadMatrice[i][j] = -1;
                     }
-                    int deltaX = pos.x * 16 + 8 - (int) entityIn.posX;
-                    int deltaY = pos.y * 16 + 8 - (int) entityIn.posY;
-                    int deltaZ = pos.z * 16 + 8 - (int) entityIn.posZ;
+                    int deltaX = pos.x * 16 + 8 - (int) entityIn.getPosX();
+                    int deltaY = pos.y * 16 + 8 - (int) entityIn.getPosY();
+                    int deltaZ = pos.z * 16 + 8 - (int) entityIn.getPosZ();
                     if (needsToBeLoaded(entityIn.physicsHandler.getLinearVelocity(), deltaX, deltaY, deltaZ)) {
                         ChunkLoadingTicket.TicketPriority priority = getPriority(entityIn.physicsHandler.getLinearVelocity(), dx, i - radiusYHalf, dz, deltaX, deltaY, deltaZ);
                         loadMatrice[i][j] = (byte) priority.ordinal();
@@ -126,29 +126,6 @@ public class PhysicsEntityTerrainLoader implements IPhysicsTerrainLoader {
                 }
             }
         }
-    }
-
-    public void printReport(PhysicsWorldTerrain terrainManager) {
-        System.out.println("ToLoad " + toLoad);
-        System.out.println("ToUnload " + toUnLoad);
-        System.out.println(lastChunkX + " " + entityIn.chunkCoordX + " " + lastChunkY + " " + entityIn.chunkCoordY + " " + lastChunkZ + entityIn.chunkCoordZ);
-        StringBuilder strs = new StringBuilder();
-        VerticalChunkPos.Mutable pos = new VerticalChunkPos.Mutable();
-        for (int i = 0; i < radiusY; i++) {
-            for (int j = 0; j < radiusH * radiusH; j++) {
-                int dx = (j % radiusH) - radiusHHalf;
-                int dz = (j / radiusH) - radiusHHalf;
-                pos.setPos(lastChunkX + dx, lastChunkY + i - radiusYHalf, lastChunkZ + dz);
-                strs.append("[").append(i).append("] [").append(j).append("] = ").append(dx).append(", ").append(dz).append(" -> ").append(loadMatrice[i][j]);
-                if (loadMatrice[i][j] != -1) {
-                    ChunkLoadingTicket ticket = terrainManager.getTicket(pos.toImmutable());
-                    strs.append(" CHK IS ").append(ticket);
-                    loadMatrice[i][j] = -1;
-                }
-                strs.append("\n");
-            }
-        }
-        System.out.println(strs.toString());
     }
 
     protected boolean isSameDir(int d1, float d2) {

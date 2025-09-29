@@ -5,7 +5,9 @@ import fr.aym.acslib.utils.DeserializedData;
 import fr.aym.acslib.utils.nbtserializer.ISerializable;
 import fr.aym.acslib.utils.nbtserializer.NBTSerializer;
 import fr.dynamx.core.common.entities.PhysicsEntity;
-import net.minecraft.util.ResourceLocation;
+import fr.hermes.api.mc.HmResourceLocation;
+import fr.hermes.api.mod.McObjectBinder;
+import lombok.Getter;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -18,13 +20,17 @@ import java.util.UUID;
  * @see EntityJointsHandler
  */
 public class EntityJoint<T extends Constraint> {
+    @Getter
     private final JointHandler<?, ?, ?> handler;
+    @Getter
     private final PhysicsEntity<?> entity1, entity2;
-    private final ResourceLocation type;
+    @Getter
+    private final HmResourceLocation type;
+    @Getter
     private final byte jointId;
     private final T joint;
 
-    public EntityJoint(JointHandler<?, ?, ?> handler, PhysicsEntity<?> entity1, PhysicsEntity<?> entity2, byte jointId, ResourceLocation type, T joint) {
+    public EntityJoint(JointHandler<?, ?, ?> handler, PhysicsEntity<?> entity1, PhysicsEntity<?> entity2, byte jointId, HmResourceLocation type, T joint) {
         this.handler = handler;
         this.entity1 = entity1;
         this.entity2 = entity2;
@@ -33,20 +39,8 @@ public class EntityJoint<T extends Constraint> {
         this.joint = joint;
     }
 
-    public JointHandler<?, ?, ?> getHandler() {
-        return handler;
-    }
-
     public PhysicsEntity<?> getOtherEntity(PhysicsEntity<?> from) {
         return entity1 != from ? entity1 : entity2;
-    }
-
-    public PhysicsEntity<?> getEntity1() {
-        return entity1;
-    }
-
-    public PhysicsEntity<?> getEntity2() {
-        return entity2;
     }
 
     /**
@@ -57,14 +51,6 @@ public class EntityJoint<T extends Constraint> {
     @Nullable
     public T getJoint() {
         return joint;
-    }
-
-    public ResourceLocation getType() {
-        return type;
-    }
-
-    public byte getJointId() {
-        return jointId;
     }
 
     @Override
@@ -94,36 +80,21 @@ public class EntityJoint<T extends Constraint> {
     /**
      * A serialized {@link EntityJoint}, ready to be saved
      */
+    @Getter
     public static class CachedJoint implements ISerializable {
         private UUID id;
         private byte jid;
-        private ResourceLocation type;
+        private HmResourceLocation type;
         private boolean jointOwner;
 
         public CachedJoint() {
         }
 
-        public CachedJoint(UUID id, byte jid, ResourceLocation type, boolean jointOwner) {
+        public CachedJoint(UUID id, byte jid, HmResourceLocation type, boolean jointOwner) {
             this.id = id;
             this.jid = jid;
             this.type = type;
             this.jointOwner = jointOwner;
-        }
-
-        public UUID getId() {
-            return id;
-        }
-
-        public byte getJid() {
-            return jid;
-        }
-
-        public ResourceLocation getType() {
-            return type;
-        }
-
-        public boolean isJointOwner() {
-            return jointOwner;
         }
 
         @Override
@@ -149,7 +120,7 @@ public class EntityJoint<T extends Constraint> {
         @Override
         public void populateWithSavedObjects(DeserializedData objects) {
             id = objects.next();
-            type = new ResourceLocation(objects.next());
+            type = McObjectBinder.instance.newResourceLocation(objects.next());
             jid = objects.next();
             jointOwner = NBTSerializer.convert(objects.next());
         }

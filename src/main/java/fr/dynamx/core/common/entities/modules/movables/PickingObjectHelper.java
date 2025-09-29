@@ -12,20 +12,19 @@ import fr.dynamx.core.common.network.packets.MessageSyncPlayerPicking;
 import fr.dynamx.forge.DynamXConfig;
 import fr.dynamx.core.utils.DynamXUtils;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
+import fr.hermes.api.mc.HmEntity;
+import fr.hermes.api.mc.HmPlayerEntity;
+import fr.hermes.api.mc.HmWorld;
 import fr.hermes.forge.JmeVector3fPool;
 import fr.dynamx.core.utils.physics.PhysicsRaycastResult;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
 
 import java.util.HashMap;
 import java.util.function.Predicate;
 
 public class PickingObjectHelper {
-    public static void handlePickingControl(MovableModule.Action moduleAction, EntityPlayer player) {
-        World world = player.world;
-        if (!player.capabilities.isCreativeMode && !(player.getHeldItemMainhand().getItem() instanceof ItemWrench)
+    public static void handlePickingControl(MovableModule.Action moduleAction, HmPlayerEntity player) {
+        HmWorld world = player.getHmWorld();
+        if (!player.isCreativeMode() && !(player.getHeldItemMainhand().getItem() instanceof ItemWrench)
                 && !DynamXConfig.allowPlayersToMoveObjects || moduleAction.getMovableAction() == MovableModule.EnumAction.ATTACH_OBJECTS) {
             return;
         }
@@ -41,7 +40,7 @@ public class PickingObjectHelper {
                     break;
             }
         } else {
-            Entity entity = world.getEntityByID(DynamXContext.getPlayerPickingObjects().get(player.getEntityId()));
+            HmEntity entity = world.getEntityByID(DynamXContext.getPlayerPickingObjects().get(player.getEntityId()));
             if (entity instanceof PhysicsEntity) {
                 PhysicsEntity<?> physicsEntity = (PhysicsEntity<?>) entity;
                 MovableModule movableModule = physicsEntity.getModuleByType(MovableModule.class);
@@ -66,13 +65,13 @@ public class PickingObjectHelper {
         QuaternionPool.closePool();
     }
 
-    public static void handlePlayerDisconnection(EntityPlayer player) {
-        World world = player.world;
-        if (!player.capabilities.isCreativeMode && !(player.getHeldItemMainhand().getItem() instanceof ItemWrench)
+    public static void handlePlayerDisconnection(HmPlayerEntity player) {
+        HmWorld world = player.getHmWorld();
+        if (!player.isCreativeMode() && !(player.getHeldItemMainhand().getItem() instanceof ItemWrench)
                 && !DynamXConfig.allowPlayersToMoveObjects) {
             return;
         }
-        Entity entity = world.getEntityByID(DynamXContext.getPlayerPickingObjects().get(player.getEntityId()));
+        HmEntity entity = world.getEntityByID(DynamXContext.getPlayerPickingObjects().get(player.getEntityId()));
         if (entity instanceof PhysicsEntity) {
             PhysicsEntity<?> physicsEntity = (PhysicsEntity<?>) entity;
             MovableModule movableModule = physicsEntity.getModuleByType(MovableModule.class);
@@ -94,7 +93,7 @@ public class PickingObjectHelper {
         DynamXContext.getNetwork().sendToClientFromOtherThread(new MessageSyncPlayerPicking(new HashMap<>(DynamXContext.getPlayerPickingObjects())), EnumPacketTarget.ALL, null);
     }
 
-    private static void startPicking(MovableModule.Action moduleAction, EntityPlayer player) {
+    private static void startPicking(MovableModule.Action moduleAction, HmPlayerEntity player) {
         int distanceMax = (int) moduleAction.getInfo()[0];
 
         Predicate<EnumBulletShapeType> predicateShape = p -> !p.isTerrain() && !p.isPlayer();
@@ -124,8 +123,8 @@ public class PickingObjectHelper {
         }
     }
 
-    private static void startTaking(MovableModule.Action moduleAction, World world, EntityPlayer player) {
-        Entity targetEntity = world.getEntityByID((int) moduleAction.getInfo()[0]);
+    private static void startTaking(MovableModule.Action moduleAction, HmWorld world, HmPlayerEntity player) {
+        HmEntity targetEntity = world.getEntityByID((int) moduleAction.getInfo()[0]);
         if (targetEntity instanceof PhysicsEntity) {
             MovableModule movableModule = ((PhysicsEntity<?>) targetEntity).getModuleByType(MovableModule.class);
             if (movableModule != null) {

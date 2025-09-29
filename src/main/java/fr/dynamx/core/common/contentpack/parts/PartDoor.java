@@ -15,7 +15,6 @@ import fr.dynamx.api.contentpack.registry.*;
 import fr.dynamx.api.dxmodel.DxModelPath;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
-import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.core.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.core.client.renders.scene.BaseRenderContext;
 import fr.dynamx.core.client.renders.scene.IRenderContext;
@@ -39,16 +38,16 @@ import fr.dynamx.core.utils.debug.DynamXDebugOption;
 import fr.dynamx.core.utils.debug.DynamXDebugOptions;
 import fr.dynamx.core.utils.errors.DynamXErrorManager;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
-import fr.hermes.forge.JmeVector3fPool;
 import fr.dynamx.core.utils.physics.DynamXPhysicsHelper;
+import fr.hermes.api.mc.HmItemStack;
+import fr.hermes.api.mc.HmPlayerEntity;
+import fr.hermes.api.mc.HmResourceLocation;
+import fr.hermes.api.mod.McObjectBinder;
+import fr.hermes.forge.JmeVector3fPool;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.MinecraftForge;
 import org.joml.Matrix4f;
 
 import javax.annotation.Nullable;
@@ -134,12 +133,12 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     }
 
     @Override
-    public boolean interact(BaseVehicleEntity<?> entity, EntityPlayer player) {
+    public boolean interact(BaseVehicleEntity<?> entity, HmPlayerEntity player) {
         DoorsModule doors = ((IModuleContainer.IDoorContainer) entity).getDoors();
         if (doors == null)
             return false;
         if (isEnabled() && !doors.isDoorAttached(getId())) {
-            if (!entity.world.isRemote) {
+            if (!entity.getHmWorld().isClient()) {
                 doors.spawnDoor(this);
             }
         } else if (!isPlayerMounting()) {
@@ -171,11 +170,11 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
         return true;
     }
 
-    public void mount(BaseVehicleEntity<?> vehicleEntity, PartEntitySeat seat, EntityPlayer context) {
+    public void mount(BaseVehicleEntity<?> vehicleEntity, PartEntitySeat seat, HmPlayerEntity context) {
         JmeVector3fPool.openPool();
-        if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.PlayerInteract(context, vehicleEntity, seat))) {
-            seat.interact(vehicleEntity, context);
-        }
+        //TODO EVENTS if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.PlayerInteract(context, vehicleEntity, seat))) {
+        seat.interact(vehicleEntity, context);
+        //}
         JmeVector3fPool.closePool();
     }
 
@@ -187,7 +186,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
                 .orElse(null);
     }
 
-    protected void readPosition(ResourceLocation model) {
+    protected void readPosition(HmResourceLocation model) {
         if (getPosition() != null && getCarAttachPoint() != null && getScale().lengthSquared() != 0)
             return; // Fix: don't load the model data if we don't need to
         DxModelData modelData = DynamXContext.getDxModelDataFromCache(DynamXUtils.getModelPath(getPackName(), model));
@@ -258,8 +257,8 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     }
 
     @Override
-    public ItemStack getPickedResult(int metadata) {
-        return ItemStack.EMPTY;
+    public HmItemStack getPickedResult(int metadata) {
+        return McObjectBinder.instance.emptyItemStack();
     }
 
     @Override
@@ -278,8 +277,8 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     }
 
     @Override
-    public ResourceLocation getHudCursorTexture() {
-        return new ResourceLocation(DynamXConstants.ID, "textures/door.png");
+    public HmResourceLocation getHudCursorTexture() {
+        return McObjectBinder.instance.newResourceLocation(DynamXConstants.ID, "textures/door.png");
     }
 
     /**
@@ -344,7 +343,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
     }
 
     @Override
-    public ResourceLocation getModel() {
+    public HmResourceLocation getModel() {
         return getOwner().getModel();
     }
 
@@ -386,9 +385,9 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
                 Vector3f pos = JmeVector3fPool.get(prev.getPosition()).addLocal(rbSyncTrans.getPosition().subtract(prev.getPosition(), JmeVector3fPool.get()).multLocal(partialTicks));
 
                 transform.rotate(ClientDynamXUtils.computeInterpolatedJomlQuaternion(entity.prevRenderRotation, entity.renderRotation, partialTicks, true));
-                transform.translate((float) (pos.x - (entity.prevPosX + (entity.posX - entity.prevPosX) * partialTicks)),
-                        (float) (pos.y - (entity.prevPosY + (entity.posY - entity.prevPosY) * partialTicks)),
-                        (float) (pos.z - (entity.prevPosZ + (entity.posZ - entity.prevPosZ) * partialTicks)));
+                transform.translate((float) (pos.x - (entity.getPrevPosX() + (entity.getPosX() - entity.getPrevPosX()) * partialTicks)),
+                        (float) (pos.y - (entity.getPrevPosY() + (entity.getPosY() - entity.getPrevPosY()) * partialTicks)),
+                        (float) (pos.z - (entity.getPrevPosZ() + (entity.getPosZ() - entity.getPrevPosZ()) * partialTicks)));
                 transform.rotate(ClientDynamXUtils.computeInterpolatedJomlQuaternion(prev.getRotation(), rbSyncTrans.getRotation(), partialTicks));
             }
             transform.scale(scale.x, scale.y, scale.z);

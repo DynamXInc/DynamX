@@ -6,7 +6,7 @@ import fr.dynamx.api.contentpack.object.render.IModelPackObject;
 import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.core.common.contentpack.type.ObjectInfo;
 import fr.dynamx.core.common.entities.PackPhysicsEntity;
-import net.minecraft.item.ItemStack;
+import fr.hermes.api.mc.HmItemStack;
 
 import java.util.Collections;
 import java.util.List;
@@ -26,7 +26,7 @@ public interface IPhysicsPackInfo extends ICollisionsContainer, IModelPackObject
         return Collections.emptyList();
     }
 
-    ItemStack getPickedResult(int metadata);
+    HmItemStack getPickedResult(int metadata);
 
     float getLinearDamping();
 

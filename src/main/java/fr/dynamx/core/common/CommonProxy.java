@@ -8,6 +8,7 @@ import fr.dynamx.core.common.network.sync.SPPhysicsEntitySynchronizer;
 import fr.dynamx.core.common.physics.PhysicsTickHandler;
 import fr.dynamx.core.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.core.common.physics.world.BuiltinPhysicsWorld;
+import fr.hermes.api.mc.HmWorld;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
@@ -33,14 +34,14 @@ public abstract class CommonProxy {
     /**
      * @return The client world, if loader
      */
-    public World getClientWorld() {
+    public HmWorld getClientWorld() {
         return null;
     }
 
     /**
      * @return The server world, if loader
      */
-    public World getServerWorld() {
+    public HmWorld getServerWorld() {
         return FMLServerHandler.instance().getServer().getEntityWorld();
     }
 
@@ -74,12 +75,12 @@ public abstract class CommonProxy {
     /**
      * Schedules the given task in the client or server threads, according to the given world's side
      */
-    public abstract void scheduleTask(World mcWorld, Runnable task);
+    public abstract void scheduleTask(HmWorld mcWorld, Runnable task);
 
     /**
      * Creates the physics world
      */
-    public void initPhysicsWorld(World world) {
+    public void initPhysicsWorld(HmWorld world) {
         if (DynamXContext.getPhysicsWorldPerDimensionMap().containsKey(world.provider.getDimension())) {
             DynamXMain.log.warn("Physics world of " + world + " is already loaded ! Keeping the previously loaded world.");
             return;

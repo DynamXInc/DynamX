@@ -1,7 +1,5 @@
 package fr.dynamx.api.network.sync;
 
-import net.minecraftforge.fml.relauncher.Side;
-
 /**
  * All possible holder of the simulation of an entity, they will be responsible to sync the entity data to the other clients (and to the server if required)
  */
@@ -38,8 +36,8 @@ public enum SimulationHolder {
      *
      * @return True if this physics simulation holder is me
      */
-    public boolean ownsPhysics(Side side) {
-        return side.isClient() ? this.hasClientPhysics : this == SERVER;
+    public boolean ownsPhysics(boolean isClient) {
+        return isClient ? this.hasClientPhysics : this == SERVER;
     }
 
     /**
@@ -47,9 +45,8 @@ public enum SimulationHolder {
      *
      * @return True if this controls simulation holder is me
      */
-    public boolean ownsControls(Side side)
-    {
-        return side.isClient() ? (this == DRIVER || this == DRIVER_SP) : (this == DRIVER || this == SERVER || this == SERVER_SP);
+    public boolean ownsControls(boolean isClient) {
+        return isClient ? (this == DRIVER || this == DRIVER_SP) : (this == DRIVER || this == SERVER || this == SERVER_SP);
     }
 
     /**
@@ -57,11 +54,11 @@ public enum SimulationHolder {
      * The main simulation is the simulation having an authority on the others, e.g. the server in multiplayer <br>
      * In solo mode, this is the client side
      *
-     * @param currentSide The current side
+     * @param isClient The current side
      * @return True if the current side is the physics authority <br>
      */
-    public boolean isPhysicsAuthority(Side currentSide) {
-        return (!this.isSinglePlayer() && currentSide.isServer()) || ownsPhysics(currentSide);
+    public boolean isPhysicsAuthority(boolean isClient) {
+        return (!this.isSinglePlayer() && !isClient) || ownsPhysics(isClient);
     }
 
     public boolean hasClientPhysics() {

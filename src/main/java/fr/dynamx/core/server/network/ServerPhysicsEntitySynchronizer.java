@@ -80,8 +80,8 @@ public class ServerPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends
     @Override
     public void setSimulationTimeClient(int simulationTimeClient) {
         //Update stored driver's simulation time
-        if (entity.getControllingPassenger() instanceof EntityPlayer) {
-            ServerPhysicsSyncManager.putTime((EntityPlayer) entity.getControllingPassenger(), simulationTimeClient - 1);
+        if (entity.getHmControllingPassenger() instanceof EntityPlayer) {
+            ServerPhysicsSyncManager.putTime((EntityPlayer) entity.getHmControllingPassenger(), simulationTimeClient - 1);
         }
     }
 }

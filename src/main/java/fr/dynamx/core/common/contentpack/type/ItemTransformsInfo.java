@@ -7,7 +7,7 @@ import fr.dynamx.api.contentpack.object.subinfo.SubInfoType;
 import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.core.common.contentpack.type.objects.AbstractItemObject;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
+import fr.hermes.api.mc.HmCameraTransforms;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -16,12 +16,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Stores item transforms for different views ({@link net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType}s)
+ * Stores item transforms for different views ({@link HmCameraTransforms})
  */
 @RegisteredSubInfoType(name = "ItemTransforms", registries = {SubInfoTypeRegistries.WHEELED_VEHICLES, SubInfoTypeRegistries.ITEMS,
         SubInfoTypeRegistries.ARMORS, SubInfoTypeRegistries.BLOCKS, SubInfoTypeRegistries.HELICOPTER}, isClientOnly = true)
 public class ItemTransformsInfo extends SubInfoType<AbstractItemObject<?, ?>> implements ISubInfoTypeOwner<ItemTransformsInfo> {
-    private final Map<ItemCameraTransforms.TransformType, ViewTransformsInfo> viewTransforms = new HashMap<>();
+    private final Map<HmCameraTransforms, ViewTransformsInfo> viewTransforms = new HashMap<>();
 
     public ItemTransformsInfo(ISubInfoTypeOwner<AbstractItemObject<?, ?>> owner) {
         super(owner);
@@ -55,12 +55,12 @@ public class ItemTransformsInfo extends SubInfoType<AbstractItemObject<?, ?>> im
         return Collections.emptyList();
     }
 
-    public void addViewTransforms(ItemCameraTransforms.TransformType viewType, ViewTransformsInfo viewTransformsInfo) {
+    public void addViewTransforms(HmCameraTransforms viewType, ViewTransformsInfo viewTransformsInfo) {
         viewTransforms.put(viewType, viewTransformsInfo);
     }
 
     @Nullable
-    public ViewTransformsInfo getViewTransforms(ItemCameraTransforms.TransformType viewType) {
+    public ViewTransformsInfo getViewTransforms(HmCameraTransforms viewType) {
         return viewTransforms.get(viewType);
     }
 }

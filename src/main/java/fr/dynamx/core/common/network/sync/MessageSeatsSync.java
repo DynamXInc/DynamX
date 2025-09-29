@@ -5,8 +5,8 @@ import fr.dynamx.core.common.DynamXContext;
 import fr.dynamx.core.common.contentpack.parts.BasePartSeat;
 import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.common.network.packets.PhysicsEntityMessage;
+import fr.hermes.api.mc.HmEntity;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -25,7 +25,7 @@ public class MessageSeatsSync extends PhysicsEntityMessage<MessageSeatsSync> {
 
     public MessageSeatsSync(IModuleContainer.ISeatsContainer vehicleEntity) {
         super(vehicleEntity.cast());
-        for (Map.Entry<BasePartSeat, Entity> e : vehicleEntity.getSeats().getSeatToPassengerMap().entrySet()) {
+        for (Map.Entry<BasePartSeat<?, ?>, HmEntity> e : vehicleEntity.getSeats().getSeatToPassengerMap().entrySet()) {
             seatToEntity.put(e.getKey().getId(), e.getValue().getEntityId());
         }
     }
@@ -34,8 +34,9 @@ public class MessageSeatsSync extends PhysicsEntityMessage<MessageSeatsSync> {
     public void fromBytes(ByteBuf buf) {
         super.fromBytes(buf);
         int size = buf.readInt();
-        for (int i = 0; i < size; i++)
+        for (int i = 0; i < size; i++) {
             seatToEntity.put(buf.readByte(), buf.readInt());
+        }
     }
 
     @Override
@@ -47,7 +48,7 @@ public class MessageSeatsSync extends PhysicsEntityMessage<MessageSeatsSync> {
             }
             return;
         }
-        DynamXContext.getPhysicsWorld(entity.world).schedule(() -> ((IModuleContainer.ISeatsContainer) entity).getSeats().updateSeats((MessageSeatsSync) message, entity.getSynchronizer()));
+        DynamXContext.getPhysicsWorld(entity.getHmWorld()).schedule(() -> ((IModuleContainer.ISeatsContainer) entity).getSeats().updateSeats((MessageSeatsSync) message, entity.getSynchronizer()));
     }
 
     @Override

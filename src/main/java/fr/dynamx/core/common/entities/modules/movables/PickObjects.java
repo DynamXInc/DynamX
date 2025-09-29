@@ -13,17 +13,17 @@ import fr.dynamx.core.common.physics.joints.EntityJoint;
 import fr.dynamx.core.common.physics.joints.JointHandlerRegistry;
 import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.DynamXUtils;
+import fr.hermes.api.mc.HmPlayerEntity;
 import fr.hermes.forge.JmeVector3fPool;
 import fr.dynamx.core.utils.physics.DynamXPhysicsHelper;
 import lombok.Getter;
-import net.minecraft.entity.player.EntityPlayer;
 
 @SynchronizedEntityVariable.SynchronizedPhysicsModule(modid = DynamXConstants.ID)
 public class PickObjects extends MovableModule {
 
     private Point2PointJoint joint;
     @SynchronizedEntityVariable(name = "mover")
-    private final EntityVariable<EntityPlayer> mover = new EntityVariable<>((variable, value) -> {
+    private final EntityVariable<HmPlayerEntity> mover = new EntityVariable<>((variable, value) -> {
         if(value != null && DynamXContext.getPlayerPickingObjects().containsKey(value.getEntityId()))
             entity.getSynchronizer().onPlayerStartControlling(value, false);
     }, SynchronizationRules.SERVER_TO_CLIENTS);
@@ -49,7 +49,7 @@ public class PickObjects extends MovableModule {
         return joint;
     }
 
-    public void pickObject(EntityPlayer playerPicking, PhysicsEntity<?> rayCastHitEntity, PhysicsRigidBody rayCastHitBody, Vector3f rayCastHitPos, float pickDistance) {
+    public void pickObject(HmPlayerEntity playerPicking, PhysicsEntity<?> rayCastHitEntity, PhysicsRigidBody rayCastHitBody, Vector3f rayCastHitPos, float pickDistance) {
         if (mover.get() == null) {
             Vector3f localPickPos = DynamXPhysicsHelper.getBodyLocalPoint(rayCastHitBody, rayCastHitPos);
 
@@ -65,7 +65,7 @@ public class PickObjects extends MovableModule {
 
             DynamXContext.getPlayerPickingObjects().put(playerPicking.getEntityId(), rayCastHitEntity.getEntityId());
 
-            DynamXContext.getPhysicsWorld(playerPicking.world).schedule(() -> JointHandlerRegistry.createJointWithSelf(JOINT_NAME, rayCastHitEntity, (byte) 0));
+            DynamXContext.getPhysicsWorld(playerPicking.getHmWorld()).schedule(() -> JointHandlerRegistry.createJointWithSelf(JOINT_NAME, rayCastHitEntity, (byte) 0));
 
             entity.getSynchronizer().onPlayerStartControlling(mover.get(), false);
         }
@@ -80,15 +80,15 @@ public class PickObjects extends MovableModule {
 
     @Override
     public void preUpdatePhysics(boolean b) {
-        EntityPlayer mover = this.mover.get();
+        HmPlayerEntity mover = this.mover.get();
         if (!b || joint == null || mover == null) {
             return;
         }
         JmeVector3fPool.openPool();
         Vector3f playerPosition = JmeVector3fPool.get(
-                (float) mover.posX,
-                (float) mover.posY + mover.getEyeHeight(),
-                (float) mover.posZ);
+                (float) mover.getPosX(),
+                (float) mover.getPosY() + mover.getEyeHeight(),
+                (float) mover.getPosZ());
         Vector3f pickRaw = DynamXUtils.calculateRay(mover, 64, JmeVector3fPool.get());
 
         Vector3f newRayTo = JmeVector3fPool.get(pickRaw);

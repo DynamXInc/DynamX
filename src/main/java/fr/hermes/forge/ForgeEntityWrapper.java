@@ -1,25 +1,35 @@
 package fr.hermes.forge;
 
+import fr.dynamx.core.client.renders.RenderPhysicsEntity;
 import fr.dynamx.core.common.items.DynamXItemRegistry;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.dynamx.core.utils.optimization.SubClassPool;
 import fr.dynamx.core.utils.optimization.Vector3fPool;
 import fr.hermes.api.mc.HmEntity;
+import fr.hermes.api.mc.HmItemStack;
+import fr.hermes.api.mc.HmServerWorld;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import org.joml.Vector3i;
 
-public abstract class ForgeEntityWrapper<E extends HmEntity> extends Entity implements IEntityAdditionalSpawnData, HmEntity {
+import javax.annotation.Nullable;
+import java.util.Collection;
+
+public class ForgeEntityWrapper<E extends HmEntity> extends Entity implements IEntityAdditionalSpawnData, HmEntity {
     private final E modEntity;
 
     // TODO SUB-CLASSES FOR ALL FINAL ENTITIES
@@ -48,8 +58,7 @@ public abstract class ForgeEntityWrapper<E extends HmEntity> extends Entity impl
 
     @Override
     public boolean isInRangeToRenderDist(double range) {
-        double d = getEntityBoundingBox().getAverageEdgeLength() * 4.0D * 64.0D;
-        return range < d * d;
+        return modEntity.isInRangeToRenderDist(range);
     }
 
     @Override
@@ -130,13 +139,23 @@ public abstract class ForgeEntityWrapper<E extends HmEntity> extends Entity impl
     }
 
     @Override
-    protected void readEntityFromNBT(NBTTagCompound compound) {
-        modEntity.readFromNbt(compound);
+    protected void readEntityFromNBT(NBTTagCompound tag) {
+        readFromNbt(tag);
     }
 
     @Override
-    protected void writeEntityToNBT(NBTTagCompound compound) {
-        modEntity.writeToNbt(compound);
+    protected void writeEntityToNBT(NBTTagCompound tag) {
+        writeToNbt(tag);
+    }
+
+    @Override
+    public void readFromNbt(NBTTagCompound tag) {
+        modEntity.readFromNbt(tag);
+    }
+
+    @Override
+    public void writeToNbt(NBTTagCompound tag) {
+        modEntity.writeToNbt(tag);
     }
 
     @Override
@@ -150,13 +169,59 @@ public abstract class ForgeEntityWrapper<E extends HmEntity> extends Entity impl
     }
 
     @Override
-    public MutableBoundingBox getBoundingBox() {
-        return modEntity.getBoundingBox();
+    protected void addPassenger(Entity passenger) {
+        super.addPassenger(passenger);
+        onAddPassenger(passenger);
+    }
+
+    @Override
+    public void onAddPassenger(HmEntity passenger) {
+        modEntity.onAddPassenger(passenger);
+    }
+
+    @Override
+    protected void removePassenger(Entity passenger) {
+        super.removePassenger(passenger);
+        onRemovePassenger(passenger);
+    }
+
+    @Override
+    public void onRemovePassenger(HmEntity passenger) {
+        modEntity.onRemovePassenger(passenger);
+    }
+
+    @Override
+    public void updatePassenger(Entity passenger) {
+        if(!updatePassenger(passenger)) {
+            super.updatePassenger(passenger);
+        }
+    }
+
+    @Override
+    public boolean updatePassenger(HmEntity passenger) {
+        return modEntity.updatePassenger(passenger);
+    }
+
+    @Override
+    public void applyOrientationToEntity(Entity entityToUpdate) {
+        if(!updatePassengerRotation(entityToUpdate)) {
+            super.applyOrientationToEntity(entityToUpdate);
+        }
+    }
+
+    @Override
+    public boolean updatePassengerRotation(HmEntity passenger) {
+        return modEntity.updatePassengerRotation(passenger);
+    }
+
+    @Override
+    public MutableBoundingBox getHmBoundingBox() {
+        return modEntity.getHmBoundingBox();
     }
 
     @Override
     public AxisAlignedBB getEntityBoundingBox() {
-        return getBoundingBox().toBB(); //TODO CACHE THE RESULT!!!
+        return getHmBoundingBox().toBB(); //TODO CACHE THE RESULT!!!
     }
 
     @Override
@@ -170,7 +235,28 @@ public abstract class ForgeEntityWrapper<E extends HmEntity> extends Entity impl
         return modEntity.getName();
     }
 
+    @Override
+    public boolean isDead() {
+        return isDead;
+    }
+
+    @Override
+    public int getTicksExisted() {
+        return ticksExisted;
+    }
+
+    @Override
+    public float getDistanceSq(HmEntity entity) {
+        return super.getDistanceSq(entity);
+    }
+
     // ====== From HmEntity ======
+
+    @Override
+    public HmServerWorld getHmWorld() {
+        //FIXME TODO
+        return null;
+    }
 
     @Override
     public void setNoClip(boolean value) {
@@ -218,8 +304,18 @@ public abstract class ForgeEntityWrapper<E extends HmEntity> extends Entity impl
     }
 
     @Override
+    public float getPrevRotationYaw() {
+        return prevRotationYaw;
+    }
+
+    @Override
     public float getRotationPitch() {
         return rotationPitch;
+    }
+
+    @Override
+    public float getPrevRotationPitch() {
+        return prevRotationPitch;
     }
 
     @Override
@@ -246,5 +342,72 @@ public abstract class ForgeEntityWrapper<E extends HmEntity> extends Entity impl
     @Override
     public void onSetDead() {
         modEntity.onSetDead();
+    }
+
+    @Override
+    public Collection<HmEntity> getHmPassengers() {
+        return super.getPassengers();
+    }
+
+    @Nullable
+    @Override
+    public Entity getControllingPassenger() {
+        HmEntity entity = getHmControllingPassenger();
+        return entity != null ? entity : super.getControllingPassenger();
+    }
+
+    @Nullable
+    @Override
+    public HmEntity getHmControllingPassenger() {
+        return modEntity.getHmControllingPassenger();
+    }
+
+    @Override
+    public ItemStack getPickedResult(RayTraceResult target) {
+        return getHmPickedResult();
+    }
+
+    @Override
+    public HmItemStack getHmPickedResult() {
+        return modEntity.getHmPickedResult();
+    }
+
+    @Override
+    protected boolean canFitPassenger(Entity passenger) {
+        return canFitPassenger(passenger); //FIXME TODO
+    }
+
+    @Override
+    public boolean canFitPassenger(HmEntity passenger) {
+        return modEntity.canFitPassenger(passenger);
+    }
+
+    @Override
+    public int getBrightnessForRender() {
+        return modEntity.getBrightnessForRender();
+    }
+
+    @Override
+    public Vector3f getHmLook() {
+        Vec3d look = getLook(1);
+        return Vector3fPool.get(look.x, look.y, look.z);
+    }
+
+    @Override
+    public Vector3i getHmPosition() {
+        // same logic as getPosition() from Mc
+        return new Vector3i((int) posX, (int) (posY + 0.5f), (int) posZ);
+    }
+
+    // === no from Hm ===
+
+    @Override
+    public boolean shouldRiderSit() {
+        return RenderPhysicsEntity.shouldRenderPlayerSitting;
+    }
+
+    @Override
+    public boolean canPassengerSteer() {
+        return false;
     }
 }

@@ -1,0 +1,6 @@
+---
+alwaysApply: true
+---
+The current goal is to make an abstraction layer for my Minecraft "DynamX" mod, so it's indenpendant of Forge/Mc/Fabric... and on the version of the game. It'll called Hermes (Hm).
+Current forge version is 1.12, and the final goal is to remove ALL net.minecraft.* and forge/fml imports from fr.dynamx.* classes. Everything should go via Hm... interfaces (like HmWorld) that are an abstract version of mc, then implemented for forge 1.12.2 in fr.hermes.forge package.
+When needed, objects will be created like new ForgeSomething(mcObject) where ForgeSomething implements HmSomething and mcObject is a Something for net.minecraft. I however want to avoid doing this when possible, so we're not creating hundreds of new objets (optimisation is a matter). So keeping mapped/cached reference, for exemple for the World instances or player entities is also a goal.

@@ -12,6 +12,7 @@ import fr.dynamx.core.utils.debug.DynamXDebugOptions;
 import fr.dynamx.core.utils.debug.TerrainDebugData;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
+import fr.hermes.api.mc.HmWorld;
 import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.world.World;
 
@@ -137,7 +138,7 @@ public class CompoundBoxTerrainElement implements ITerrainElement {
     }
 
     @Override
-    public PhysicsRigidBody build(World world, Vector3f pos) {
+    public PhysicsRigidBody build(HmWorld world, Vector3f pos) {
         if (shape == null) { //Not generated
             if (meshes.isEmpty()) //No boxes (empty element)
                 return null;
@@ -158,15 +159,15 @@ public class CompoundBoxTerrainElement implements ITerrainElement {
     }
 
     @Override
-    public void addDebugToWorld(World mcWorld, Vector3f pos) {
+    public void addDebugToWorld(HmWorld mcWorld, Vector3f pos) {
         if (!debugData.isEmpty())
-            (mcWorld.isRemote ? DynamXDebugOptions.CLIENT_BLOCK_BOXES : DynamXDebugOptions.BLOCK_BOXES).getDataIn().putAll(debugData);
+            (mcWorld.isClient() ? DynamXDebugOptions.CLIENT_BLOCK_BOXES : DynamXDebugOptions.BLOCK_BOXES).getDataIn().putAll(debugData);
     }
 
     @Override
-    public void removeDebugFromWorld(World mcWorld) {
+    public void removeDebugFromWorld(HmWorld mcWorld) {
         for (Integer pos : debugData.keySet()) {
-            (mcWorld.isRemote ? DynamXDebugOptions.CLIENT_BLOCK_BOXES : DynamXDebugOptions.BLOCK_BOXES).getDataIn().remove(pos);
+            (mcWorld.isClient() ? DynamXDebugOptions.CLIENT_BLOCK_BOXES : DynamXDebugOptions.BLOCK_BOXES).getDataIn().remove(pos);
         }
     }
 

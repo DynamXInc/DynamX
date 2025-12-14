@@ -15,10 +15,11 @@ import fr.dynamx.core.utils.debug.TerrainDebugRenderer;
 import fr.dynamx.core.utils.optimization.BoundingBoxPool;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.SubClassPool;
+import fr.hermes.api.mc.HmTileEntity;
+import fr.hermes.api.mc.HmWorld;
 import fr.hermes.forge.JmeVector3fPool;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import org.joml.Vector3i;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -30,18 +31,18 @@ import java.io.ObjectOutputStream;
  */
 public class DynamXBlockTerrainElement implements ITerrainElement {
     private int x, y, z;
-    private BlockPos pos;
+    private Vector3i pos;
     private PhysicsRigidBody body;
     private TerrainDebugData debugData;
 
     public DynamXBlockTerrainElement() {
     }
 
-    public DynamXBlockTerrainElement(int x, int y, int z, BlockPos pos) {
+    public DynamXBlockTerrainElement(int x, int y, int z, Vector3i pos) {
         this.x = x;
         this.y = y;
         this.z = z;
-        this.pos = new BlockPos(pos);
+        this.pos = new Vector3i(pos);
     }
 
     @Override
@@ -49,9 +50,9 @@ public class DynamXBlockTerrainElement implements ITerrainElement {
         out.writeInt(x);
         out.writeInt(y);
         out.writeInt(z);
-        out.writeInt(pos.getX());
-        out.writeInt(pos.getY());
-        out.writeInt(pos.getZ());
+        out.writeInt(pos.x);
+        out.writeInt(pos.y);
+        out.writeInt(pos.z);
     }
 
     @Override
@@ -59,13 +60,13 @@ public class DynamXBlockTerrainElement implements ITerrainElement {
         x = in.readInt();
         y = in.readInt();
         z = in.readInt();
-        this.pos = new BlockPos(in.readInt(), in.readInt(), in.readInt());
+        this.pos = new Vector3i(in.readInt(), in.readInt(), in.readInt());
         return true;
     }
 
     @Override
-    public PhysicsRigidBody build(World world, Vector3f pos) {
-        TileEntity te = world.getTileEntity(this.pos);
+    public PhysicsRigidBody build(HmWorld world, Vector3f pos) {
+        HmTileEntity te = world.getTileEntity(this.pos);
         if (!(te instanceof TEDynamXBlock)) { //Not generated, should not happen because this should be removed from chunk
             DynamXMain.log.warn("[CHUNK DEBUG] Outdated DynamX block collisions found at: {}: TE not found. Maybe your packs have changed. The chunk will be reloaded", this.pos);
             return null;
@@ -85,7 +86,7 @@ public class DynamXBlockTerrainElement implements ITerrainElement {
     }
 
     @Override
-    public void addDebugToWorld(World mcWorld, Vector3f pos) {
+    public void addDebugToWorld(HmWorld mcWorld, Vector3f pos) {
         JmeVector3fPool.openPool();
         QuaternionPool.openPool();
         BoundingBoxPool.getPool().openSubPool(SubClassPool.BOUNDING_BOX_DEFAULT);
@@ -94,7 +95,7 @@ public class DynamXBlockTerrainElement implements ITerrainElement {
         Vector3f min = b.getMin(JmeVector3fPool.get());
         Vector3f max = b.getMax(JmeVector3fPool.get());
         debugData = new TerrainDebugData(TerrainDebugRenderer.DYNAMXBLOCKS, new float[]{min.x, min.y, min.z, max.x, max.y, max.z});
-        (mcWorld.isRemote ? DynamXDebugOptions.CLIENT_BLOCK_BOXES : DynamXDebugOptions.BLOCK_BOXES).getDataIn().put(debugData.getUuid(), debugData);
+        (mcWorld.isClient() ? DynamXDebugOptions.CLIENT_BLOCK_BOXES : DynamXDebugOptions.BLOCK_BOXES).getDataIn().put(debugData.getUuid(), debugData);
 
         BoundingBoxPool.getPool().closeSubPool();
         QuaternionPool.closePool();
@@ -102,9 +103,9 @@ public class DynamXBlockTerrainElement implements ITerrainElement {
     }
 
     @Override
-    public void removeDebugFromWorld(World mcWorld) {
+    public void removeDebugFromWorld(HmWorld mcWorld) {
         if (debugData != null) {
-            (mcWorld.isRemote ? DynamXDebugOptions.CLIENT_BLOCK_BOXES : DynamXDebugOptions.BLOCK_BOXES).getDataIn().remove(debugData.getUuid());
+            (mcWorld.isClient() ? DynamXDebugOptions.CLIENT_BLOCK_BOXES : DynamXDebugOptions.BLOCK_BOXES).getDataIn().remove(debugData.getUuid());
         }
     }
 

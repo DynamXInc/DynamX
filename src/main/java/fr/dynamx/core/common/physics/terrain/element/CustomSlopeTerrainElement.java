@@ -10,8 +10,8 @@ import fr.dynamx.core.utils.VerticalChunkPos;
 import fr.dynamx.core.utils.debug.DynamXDebugOptions;
 import fr.dynamx.core.utils.debug.TerrainDebugData;
 import fr.dynamx.core.utils.debug.TerrainDebugRenderer;
+import fr.hermes.api.mc.HmWorld;
 import fr.hermes.forge.JmeVector3fPool;
-import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -40,7 +40,7 @@ public class CustomSlopeTerrainElement implements ITerrainElement.IPersistentTer
     }
 
     @Override
-    public PhysicsRigidBody build(World world, Vector3f pos) {
+    public PhysicsRigidBody build(HmWorld world, Vector3f pos) {
         SimplexCollisionShape shape = new SimplexCollisionShape(points);
         PhysicsRigidBody pr = new PhysicsRigidBody(shape, 0);
         Vector3f posFixed = JmeVector3fPool.get(pos).addLocal(8, -0.04f, 8);
@@ -111,7 +111,7 @@ public class CustomSlopeTerrainElement implements ITerrainElement.IPersistentTer
     private static final int[] indices = new int[]{0, 1, 2, 2, 3, 0};
 
     @Override
-    public void addDebugToWorld(World mcWorld, Vector3f pos) {
+    public void addDebugToWorld(HmWorld mcWorld, Vector3f pos) {
         float[] debugData = new float[indices.length * 3 + 3];
         for (int i = 0; i < indices.length; i++) {
             Vector3f pos1 = points[indices[i]];
@@ -123,13 +123,13 @@ public class CustomSlopeTerrainElement implements ITerrainElement.IPersistentTer
         debugData[debugData.length - 2] = pos.y + 8;
         debugData[debugData.length - 1] = pos.z;
         this.debugData = new TerrainDebugData(TerrainDebugRenderer.CUSTOM_SLOPE, debugData);
-        (mcWorld.isRemote ? DynamXDebugOptions.CLIENT_SLOPE_BOXES : DynamXDebugOptions.SLOPE_BOXES).getDataIn().put(this.debugData.getUuid(), this.debugData);
+        (mcWorld.isClient() ? DynamXDebugOptions.CLIENT_SLOPE_BOXES : DynamXDebugOptions.SLOPE_BOXES).getDataIn().put(this.debugData.getUuid(), this.debugData);
     }
 
     @Override
-    public void removeDebugFromWorld(World mcWorld) {
+    public void removeDebugFromWorld(HmWorld mcWorld) {
         if (this.debugData != null)
-            (mcWorld.isRemote ? DynamXDebugOptions.CLIENT_SLOPE_BOXES : DynamXDebugOptions.SLOPE_BOXES).getDataIn().remove(this.debugData.getUuid());
+            (mcWorld.isClient() ? DynamXDebugOptions.CLIENT_SLOPE_BOXES : DynamXDebugOptions.SLOPE_BOXES).getDataIn().remove(this.debugData.getUuid());
     }
 
     @Override

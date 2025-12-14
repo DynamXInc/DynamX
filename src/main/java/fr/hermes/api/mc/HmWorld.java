@@ -22,4 +22,22 @@ public interface HmWorld {
     boolean isAirBlock(int x, int y, int z);
 
     HmBlockState getBlockState(Vector3i blockPos);
+
+    HmBiome getBiome(Vector3f pos);
+
+    boolean isRaining();
+
+    boolean canBlockSeeSky(Vector3f pos);
+
+    void spawnParticle(HmParticleType skidParticle, float x, float y, float z, float speedX, float speedY, float speedZ);
+
+    boolean isChunkGeneratedAt(int x, int z);
+
+    boolean chunkExists(int x, int z);
+
+    HmWorldSaveHandler getSaveHandler();
+
+    HmChunk getChunk(int chunkX, int chunkZ);
+
+    HmTileEntity getTileEntity(Vector3i pos);
 }

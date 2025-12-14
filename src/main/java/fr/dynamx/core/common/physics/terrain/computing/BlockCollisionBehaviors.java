@@ -6,6 +6,8 @@ import fr.dynamx.core.common.blocks.TEDynamXBlock;
 import fr.dynamx.core.common.physics.terrain.element.DynamXBlockTerrainElement;
 import fr.dynamx.forge.DynamXConfig;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
+import fr.hermes.api.mc.HmTileEntity;
+import fr.hermes.api.mc.HmWorld;
 import net.minecraft.block.*;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -15,6 +17,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import org.joml.Vector3i;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -197,10 +200,11 @@ public class BlockCollisionBehaviors {
         }
 
         @Override
-        public void addBlockCollision(TerrainBoxConstructor terrainBoxConstructor, TerrainBoxBuilder boxBuilder, TerrainCollisionsCalculator.TerrainCursor cursor, World world, BlockPos at, IBlockState ofBlock, EnumFacing.Axis axis) {
-            TileEntity te = world.getTileEntity(at);
-            if (te instanceof TEDynamXBlock)
+        public void addBlockCollision(TerrainBoxConstructor terrainBoxConstructor, TerrainBoxBuilder boxBuilder, TerrainCollisionsCalculator.TerrainCursor cursor, HmWorld world, Vector3i at, IBlockState ofBlock, EnumFacing.Axis axis) {
+            HmTileEntity te = world.getTileEntity(at);
+            if (te instanceof TEDynamXBlock) {
                 terrainBoxConstructor.addCustomShapedElement(new DynamXBlockTerrainElement(cursor.dx, cursor.dy, cursor.dz, at));
+            }
         }
 
         @Override

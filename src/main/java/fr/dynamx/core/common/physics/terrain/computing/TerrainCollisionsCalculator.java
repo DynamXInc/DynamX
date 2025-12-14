@@ -7,14 +7,11 @@ import fr.dynamx.core.utils.VerticalChunkPos;
 import fr.dynamx.core.utils.debug.Profiler;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.SubClassPool;
+import fr.hermes.api.mc.HmAxis;
+import fr.hermes.api.mc.HmBlockState;
+import fr.hermes.api.mc.HmWorld;
 import fr.hermes.forge.JmeVector3fPool;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.World;
+import org.joml.Vector3i;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -35,7 +32,7 @@ public class TerrainCollisionsCalculator {
     private static final ThreadLocal<IBlockCollisionBehavior[]> baseBehaviors = ThreadLocal.withInitial(() -> new IBlockCollisionBehavior[]{new BlockCollisionBehaviors.Leaves(), new BlockCollisionBehaviors.FullCube(), new BlockCollisionBehaviors.Slab(), new BlockCollisionBehaviors.DynamXBlockBehavior(),
             new BlockCollisionBehaviors.Stairs(), new BlockCollisionBehaviors.Panes(), new BlockCollisionBehaviors.PathBlock(), new BlockCollisionBehaviors.Fences(), new BlockCollisionBehaviors.Walls()});
     private static final List<IBlockCollisionBehavior> customBehaviors = new ArrayList<>();
-    public static final ThreadLocal<Map<IBlockState, IBlockCollisionBehavior>> behaviorLookup = ThreadLocal.withInitial(HashMap::new);
+    public static final ThreadLocal<Map<HmBlockState, IBlockCollisionBehavior>> behaviorLookup = ThreadLocal.withInitial(HashMap::new);
 
     //TODO OPTI COMMENT LINKED LINES
     public static final boolean printDebug = false;
@@ -55,7 +52,7 @@ public class TerrainCollisionsCalculator {
      * @see ITerrainElement
      * @see IBlockCollisionBehavior
      */
-    public static List<ITerrainElement> computeCollisionFaces(VerticalChunkPos myPos, World mcWorld, Profiler profiler, boolean debug) {
+    public static List<ITerrainElement> computeCollisionFaces(VerticalChunkPos myPos, HmWorld mcWorld, Profiler profiler, boolean debug) {
         profiler.start(Profiler.Profiles.CHUNK_BLOCK_COLLS_COMPUTE);
         int x = myPos.x * 16;
         int y = myPos.y * 16;
@@ -65,7 +62,7 @@ public class TerrainCollisionsCalculator {
         QuaternionPool.openPool(SubClassPool.CHUNK_COLLISIONS_COMPUTE);
 
         //Root terrain
-        TerrainBoxConstructor boxBuilder = new TerrainBoxConstructor(new AxisAlignedBB(x, y, z, x + 16, y + 16, z + 16), x, y, z, debug);
+        TerrainBoxConstructor boxBuilder = new TerrainBoxConstructor(x, y, z, x + 16, y + 16, z + 16, debug);
         //Compute all boxes
         TerrainCollisionsCalculator.loadBlockCollisions(mcWorld, boxBuilder);
 
@@ -87,7 +84,7 @@ public class TerrainCollisionsCalculator {
      * @param forState The block state
      * @return The behavior of this block state
      */
-    public static IBlockCollisionBehavior findBehavior(Map<IBlockState, IBlockCollisionBehavior> lookup, IBlockAccess world, BlockPos pos, IBlockState forState) {
+    public static IBlockCollisionBehavior findBehavior(Map<HmBlockState, IBlockCollisionBehavior> lookup, HmWorld world, Vector3i pos, HmBlockState forState) {
         IBlockCollisionBehavior behavior = lookup.get(forState);
         if (behavior == null) {
             behavior = NONE_BEHAVIOR;
@@ -129,10 +126,10 @@ public class TerrainCollisionsCalculator {
      * @param oz          Offset z
      * @param result      The stack result, filled with the result of the method, and returned
      */
-    private static void canContinueAdding(Map<IBlockState, IBlockCollisionBehavior> lookup, World world, BlockPos pos, EnumFacing.Axis axis, IBlockState cur, IBlockState onto, @Nullable IBlockState lastStacked, TerrainCursor cursor, int ox, int oy, int oz, StackResult result) {
+    private static void canContinueAdding(Map<HmBlockState, IBlockCollisionBehavior> lookup, HmWorld world, Vector3i pos, HmAxis axis, HmBlockState cur, HmBlockState onto, @Nullable HmBlockState lastStacked, TerrainCursor cursor, int ox, int oy, int oz, StackResult result) {
         if (printDebug)
             System.out.println("Test " + cur + " " + ox + " " + oy + " " + oz + " " + cursor + " st " + cursor.getAt(ox, oy, oz));
-        if (cur.getBlock() == Blocks.AIR || cursor.getAt(ox, oy, oz) == 1) {
+        if (world.isAirBlock(pos.x, pos.y, pos.z) || cursor.getAt(ox, oy, oz) == 1) {
             result.set(StackIssue.REFUSED, null);
         } else {
             IBlockCollisionBehavior behavior = findBehavior(lookup, world, pos, cur);
@@ -163,12 +160,13 @@ public class TerrainCollisionsCalculator {
      * @param z              Offset z
      * @return The behavior of this block only if this behavior is stackable in the given context, or none
      */
-    private static boolean addRow(StackResult behavior, Map<IBlockState, IBlockCollisionBehavior> lookup, World world, TerrainBoxConstructor terrainBuilder, TerrainBoxBuilder currentBox, int x, int y, int z, TerrainCursor cursor, BlockPos.PooledMutableBlockPos mutable, IBlockState with) {
-        IBlockState cur = null, lastCur = null;
+    private static boolean addRow(StackResult behavior, Map<HmBlockState, IBlockCollisionBehavior> lookup, HmWorld world, TerrainBoxConstructor terrainBuilder, TerrainBoxBuilder currentBox, int x, int y, int z, TerrainCursor cursor, Vector3i mutable, HmBlockState with) {
+        HmBlockState cur = null, lastCur = null;
         int cz = currentBox.getZSize();
         for (int i = 0; i <= currentBox.getXSize(); i++) { //Along the x axis
-            cur = world.getBlockState(mutable.setPos(x + i, y, z));
-            canContinueAdding(lookup, world, mutable, EnumFacing.Axis.Z, cur, with, lastCur, cursor, i, 0, cz + 1, behavior);
+            mutable.set(x + i, y, z);
+            cur = world.getBlockState(mutable);
+            canContinueAdding(lookup, world, mutable, HmAxis.Z, cur, with, lastCur, cursor, i, 0, cz + 1, behavior);
             if (printDebug)
                 System.out.println("Row : get behavior " + behavior.issue + " " + behavior.behavior + " " + cur + " " + mutable);
             if (behavior.issue == StackIssue.NOT_STACKABLE) { //not stackable
@@ -183,7 +181,7 @@ public class TerrainCollisionsCalculator {
         }
         if (cur != null) {//If row can be added, add it !
             int oldz = currentBox.getZSize();
-            behavior.behavior.addBlockCollision(terrainBuilder, currentBox, cursor, world, mutable, cur, EnumFacing.Axis.Z);
+            behavior.behavior.addBlockCollision(terrainBuilder, currentBox, cursor, world, mutable, cur, HmAxis.Z);
             if (currentBox.getZSize() == oldz) { //Avoid infinite loops...
                 DynamXMain.log.error("Detected z stuck element at " + cursor + " " + mutable + " " + cur + " " + behavior + " " + currentBox + " " + terrainBuilder + ". Incrementing z size anyway...");
                 currentBox.expandZ(1);
@@ -209,13 +207,14 @@ public class TerrainCollisionsCalculator {
      * @param z              Offset z
      * @return The behavior of this block only if this behavior is stackable in the given context, or none
      */
-    private static boolean addPlane(StackResult behavior, Map<IBlockState, IBlockCollisionBehavior> lookup, World world, TerrainBoxConstructor terrainBuilder, TerrainBoxBuilder currentBox, int x, int y, int z, TerrainCursor cursor, BlockPos.PooledMutableBlockPos mutable, IBlockState with) {
-        IBlockState cur = null, lastCur = null;
+    private static boolean addPlane(StackResult behavior, Map<HmBlockState, IBlockCollisionBehavior> lookup, HmWorld world, TerrainBoxConstructor terrainBuilder, TerrainBoxBuilder currentBox, int x, int y, int z, TerrainCursor cursor, Vector3i mutable, HmBlockState with) {
+        HmBlockState cur = null, lastCur = null;
         int cy = currentBox.getYSize();
         for (int i = 0; i <= currentBox.getXSize(); i++) { //Along the x axis
             for (int j = 0; j <= currentBox.getZSize(); j++) { //Along the z axis
-                cur = world.getBlockState(mutable.setPos(x + i, y, z + j));
-                canContinueAdding(lookup, world, mutable, EnumFacing.Axis.Y, cur, with, lastCur, cursor, i, cy + 1, j, behavior);
+                mutable.set(x + i, y, z + j);
+                cur = world.getBlockState(mutable);
+                canContinueAdding(lookup, world, mutable, HmAxis.Y, cur, with, lastCur, cursor, i, cy + 1, j, behavior);
                 if (printDebug)
                     System.out.println("Plane : get behavior " + behavior.issue + " " + behavior.behavior + " " + cur + " " + mutable);
                 if (behavior.issue == StackIssue.NOT_STACKABLE) { //not stackable
@@ -232,7 +231,7 @@ public class TerrainCollisionsCalculator {
         }
         if (cur != null) { //If plane can be added, add it !
             int oldy = currentBox.getYSize();
-            behavior.behavior.addBlockCollision(terrainBuilder, currentBox, cursor, world, mutable, cur, EnumFacing.Axis.Y);
+            behavior.behavior.addBlockCollision(terrainBuilder, currentBox, cursor, world, mutable, cur, HmAxis.Y);
             if (currentBox.getYSize() == oldy) { //Avoid infinite loops...
                 DynamXMain.log.error("Detected y stuck element at " + cursor + " " + mutable + " " + cur + " " + behavior + " " + currentBox + " " + terrainBuilder + ". Incrementing y size anyway...");
                 currentBox.expandY(1);
@@ -249,19 +248,18 @@ public class TerrainCollisionsCalculator {
      * @param world          The minecraft world
      * @param terrainBuilder The terrain construction context
      */
-    public static void loadBlockCollisions(World world, TerrainBoxConstructor terrainBuilder) {
-        AxisAlignedBB aabb = terrainBuilder.getSearchZone();
-        int minX = (int) aabb.minX;
-        int maxX = (int) aabb.maxX;
-        int minY = (int) aabb.minY;
-        int maxY = (int) aabb.maxY;
-        int minZ = (int) aabb.minZ;
-        int maxZ = (int) aabb.maxZ;
+    public static void loadBlockCollisions(HmWorld world, TerrainBoxConstructor terrainBuilder) {
+        int minX = terrainBuilder.getSearchMinX();
+        int maxX = terrainBuilder.getSearchMaxX();
+        int minY = terrainBuilder.getSearchMinY();
+        int maxY = terrainBuilder.getSearchMaxY();
+        int minZ = terrainBuilder.getSearchMinZ();
+        int maxZ = terrainBuilder.getSearchMaxZ();
 
         //Local pos to speed-up things
-        BlockPos.PooledMutableBlockPos mutable = BlockPos.PooledMutableBlockPos.retain();
+        Vector3i mutable = new Vector3i();
         //Local map to speed-up things
-        Map<IBlockState, IBlockCollisionBehavior> lookup = behaviorLookup.get();
+        Map<HmBlockState, IBlockCollisionBehavior> lookup = behaviorLookup.get();
 
         //longueur de la zone à construire (c'est des chunks donc 16 forcément, mais au cas où le code est adaptable pour n'importe quelle région)
         byte lx = (byte) (maxX - minX - 1);
@@ -274,7 +272,7 @@ public class TerrainCollisionsCalculator {
         //If the last checked block is stackable
         boolean[] stackable = new boolean[1];
         //The block currently beeing checked
-        IBlockState cur;
+        HmBlockState cur;
 
         long[] times = new long[6];
 
@@ -286,17 +284,18 @@ public class TerrainCollisionsCalculator {
             // premièrement, on cherche un bloc de base sur lequel s'appuyer pour construire
             // un AABB
             long t1 = System.currentTimeMillis();
-            IBlockState boxStart = world.getBlockState(mutable.setPos(minX + cursor.dx, minY + cursor.dy, minZ + cursor.dz));
+            mutable.set(minX + cursor.dx, minY + cursor.dy, minZ + cursor.dz);
+            HmBlockState boxStart = world.getBlockState(mutable);
 
             //System.out.println("Begin at "+dx+" "+dy+" "+dz);
             stackable[0] = true;
             IBlockCollisionBehavior behavior = findBehavior(lookup, world, mutable, boxStart);
-            while (cursor.getHere() == 1 || !boxStart.getMaterial().blocksMovement() || !(stackable[0] = behavior.isStackableBlock(world, mutable, boxStart))) { // on ne repasse par sur des blocs ayant déjà
+            while (cursor.getHere() == 1 || !boxStart.blocksMovement() || !(stackable[0] = behavior.isStackableBlock(world, mutable, boxStart))) { // on ne repasse par sur des blocs ayant déjà
                 // été traités ni sur ceux ayant des collisions spéciales (ou aucune collisions) /!\ ordre des conditions important
 
-                if (printDebug && boxStart.getBlock() != Blocks.AIR)
+                if (printDebug && !world.isAirBlock(mutable.x, mutable.y, mutable.z))
                     System.out.println("Fail0 at " + cursor + " " + cursor.getHere());
-                if (!stackable[0] && boxStart.getBlock() != Blocks.AIR) {//Si le block a une collision spéciale, on l'ajoute
+                if (!stackable[0] && !world.isAirBlock(mutable.x, mutable.y, mutable.z)) { //Si le block a une collision spéciale, on l'ajoute
                     if (printDebug)
                         System.out.println("ADDINGGGGG " + boxStart);
                     behavior.addBlockCollision(terrainBuilder, null, cursor, world, mutable, boxStart, null);
@@ -306,7 +305,8 @@ public class TerrainCollisionsCalculator {
                         System.out.println("End has been reached");
                     break y;// on a parcouru toute le chunk et on n'a rien trouvé, on arrête et passe au chunk suivant
                 }
-                boxStart = world.getBlockState(mutable.setPos(minX + cursor.dx, minY + cursor.dy, minZ + cursor.dz));
+                mutable.set(minX + cursor.dx, minY + cursor.dy, minZ + cursor.dz);
+                boxStart = world.getBlockState(mutable);
                 behavior = findBehavior(lookup, world, mutable, boxStart);
             }
             long t2 = System.currentTimeMillis();
@@ -326,7 +326,8 @@ public class TerrainCollisionsCalculator {
             //If we can stack in x+ direction
             if (cursor.dx + currentBox.getXSize() < lx) {
                 // on cherche maintenant à étendre notre AABB le plus possible
-                cur = world.getBlockState(mutable.setPos(minX + cursor.dx + (currentBox.getXSize() + 1), minY + cursor.dy, minZ + cursor.dz));
+                mutable.set(minX + cursor.dx + (currentBox.getXSize() + 1), minY + cursor.dy, minZ + cursor.dz);
+                cur = world.getBlockState(mutable);
                 if (printDebug) {
                     System.out.println("==============");
                     System.out.println("Got start point " + cursor + " " + behavior + " " + boxStart + " " + cur + " " + mutable);
@@ -335,20 +336,21 @@ public class TerrainCollisionsCalculator {
                 // on essaie d'aller le plus loin possible en x en ne trouvant aucun bloc d'air,
                 // on enregistre notre distance dans k
                 do {
-                    canContinueAdding(lookup, world, mutable, EnumFacing.Axis.X, cur, boxStart, null, cursor, currentBox.getXSize() + 1, 0, 0, stackResult);
+                    canContinueAdding(lookup, world, mutable, HmAxis.X, cur, boxStart, null, cursor, currentBox.getXSize() + 1, 0, 0, stackResult);
                     if (printDebug)
                         System.out.println("Line : get behavior " + behavior + " " + cur + " " + mutable);
                     if (stackResult.behavior != null) {//If block can be added, add it !
                         if (stackResult.issue == StackIssue.STACKABLE) {
                             cursor.setFilledAt(currentBox.getXSize() + 1, 0, 0); //Mark as checked and add it to the box builder
-                            behavior.addBlockCollision(terrainBuilder, currentBox, cursor, world, mutable, cur, EnumFacing.Axis.X);
+                            behavior.addBlockCollision(terrainBuilder, currentBox, cursor, world, mutable, cur, HmAxis.X);
                         }/* else { //not stackable with boxStart
                             //check it later, be cause it may be stackable with another block
                             //behavior.addCustomBox(terrainBuilder, null, world, mutable, cur, null);
                         }*/
                     }
                     behavior = stackResult.behavior;
-                    cur = world.getBlockState(mutable.setPos(minX + cursor.dx + (currentBox.getXSize() + 1), minY + cursor.dy, minZ + cursor.dz));
+                    mutable.set(minX + cursor.dx + (currentBox.getXSize() + 1), minY + cursor.dy, minZ + cursor.dz);
+                    cur = world.getBlockState(mutable);
                     //System.out.println("StackX at "+dx+" "+dy+" "+dz+" "+k);
                 } //If behavior is null or NONE_BEHAVIOR, then we finished stacking in x+ direction
                 while (cursor.dx + currentBox.getXSize() < lx && stackResult.issue == StackIssue.STACKABLE);
@@ -396,7 +398,7 @@ public class TerrainCollisionsCalculator {
         } while (cursor.incrZY());
 
         //System.out.println("Quand j'ai fini les vanilles sont "+outListVanilla);
-        mutable.release();
+        // no pooled mutable to release in Hermes path
 
         //long tt = (System.currentTimeMillis()-t0);
         //if(tt >= 6)

@@ -48,7 +48,7 @@ public abstract class CommonProxy {
     /**
      * @return True if the bullet physics engine should be used for the world. Always true except for client single player worlds
      */
-    public boolean shouldUseBulletSimulation(World world) {
+    public boolean shouldUseBulletSimulation(HmWorld world) {
         return DynamXContext.getPhysicsWorldPerDimensionMap().containsKey(world.provider.getDimension());
     }
 
@@ -89,4 +89,6 @@ public abstract class CommonProxy {
     }
 
     public abstract void schedulePacksInit();
+
+    public abstract boolean isDedicatedServer();
 }

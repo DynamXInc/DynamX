@@ -10,13 +10,12 @@ import fr.dynamx.core.common.network.packets.MessageUpdateChunk;
 import fr.dynamx.core.common.physics.terrain.chunk.ChunkCollisions;
 import fr.dynamx.core.common.physics.terrain.chunk.ChunkLoadingTicket;
 import fr.dynamx.core.common.physics.terrain.chunk.ChunkTerrain;
-import fr.dynamx.forge.DynamXConfig;
 import fr.dynamx.core.utils.VerticalChunkPos;
 import fr.dynamx.core.utils.debug.ChunkGraph;
 import fr.dynamx.core.utils.debug.Profiler;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.common.FMLCommonHandler;
+import fr.dynamx.forge.DynamXConfig;
+import fr.hermes.api.mc.HmWorld;
+import org.joml.Vector2i;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,13 +35,13 @@ public class FileTerrainCache implements ITerrainCache {
     private final File storageDir;
     private TerrainFile slopesFile;
 
-    private final Map<ChunkPos, TerrainFile> terrainFiles = new HashMap<>();
+    private final Map<Vector2i, TerrainFile> terrainFiles = new HashMap<>();
 
     //The Set avoids duplicates
     protected Set<VerticalChunkPos> dirtyChunks = ConcurrentHashMap.newKeySet();
 
-    public FileTerrainCache(World world) {
-        World serverWorld = world.isRemote ? DynamXMain.getProxy().getServerWorld() : world;
+    public FileTerrainCache(HmWorld world) {
+        HmWorld serverWorld = world.isClient() ? DynamXMain.getProxy().getServerWorld() : world;
         assert serverWorld != null : "Terrain cannot be locally saved";
         assert serverWorld.getSaveHandler().getWorldDirectory() != null : "World save dir not found";
         storageDir = new File(serverWorld.getSaveHandler().getWorldDirectory(), "DnxChunks");
@@ -123,7 +122,7 @@ public class FileTerrainCache implements ITerrainCache {
     private void invalidate(VerticalChunkPos pos, boolean syncChanges) {
         if (syncChanges)
             dirtyChunks.add(pos);
-        ChunkPos cpos = new ChunkPos(pos.x >> 5, pos.z >> 5); //16x16 chunks
+        Vector2i cpos = new Vector2i(pos.x >> 5, pos.z >> 5); //16x16 chunks
         POOL.submit(() -> {
             TerrainFile FILE = getFileAt(cpos);
             FILE.removeChunk(pos);
@@ -141,7 +140,7 @@ public class FileTerrainCache implements ITerrainCache {
 
             //System.out.println("Send dirty "+ Arrays.toString(array));
             //TODO CLEAN CONDITION AND CODE
-            if (FMLCommonHandler.instance().getMinecraftServerInstance() != null && FMLCommonHandler.instance().getMinecraftServerInstance().isDedicatedServer()) {
+            if (DynamXMain.getProxy().isDedicatedServer()) {
                 DynamXContext.getNetwork().sendToClient(new MessageUpdateChunk(array), EnumPacketTarget.ALL);
             }
         }
@@ -159,7 +158,7 @@ public class FileTerrainCache implements ITerrainCache {
             ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.LOAD_FROM_SAVE, ChunkGraph.ActionLocation.UNKNOWN, null, "Status: " + ticket.getStatusIndex());
 
         profiler.start(Profiler.Profiles.CHUNK_COLLS_LOAD_FROM_FILE);
-        ChunkPos cpos = new ChunkPos(pos.x >> 5, pos.z >> 5); //16x16 chunks
+        Vector2i cpos = new Vector2i(pos.x >> 5, pos.z >> 5); //16x16 chunks
 
         List<ITerrainElement> elements = getFileAt(cpos).loadChunk(pos, this);
         List<?> persistentElements = getSlopesFile().loadChunk(pos, this);
@@ -191,11 +190,11 @@ public class FileTerrainCache implements ITerrainCache {
             return false;
     }
 
-    private TerrainFile getFileAt(ChunkPos pos) {
+    private TerrainFile getFileAt(Vector2i pos) {
         if (terrainFiles.containsKey(pos))
             return terrainFiles.get(pos);
         else {
-            File f = new File(storageDir, "region_" + pos.x + "_" + pos.z + ".dnx");
+            File f = new File(storageDir, "region_" + pos.x + "_" + pos.y + ".dnx");
             TerrainFile FILE;
             try {
                 FILE = new TerrainFile(f);
@@ -216,7 +215,7 @@ public class FileTerrainCache implements ITerrainCache {
     }
 
     private volatile boolean needsTerrainSave;
-    private final Queue<ChunkPos> terrainFileSaveQueue = new ArrayDeque<>();
+    private final Queue<Vector2i> terrainFileSaveQueue = new ArrayDeque<>();
     private boolean isSlopesToSave;
     private int timeCounter;
 
@@ -230,7 +229,7 @@ public class FileTerrainCache implements ITerrainCache {
         if (DynamXConfig.enableDebugTerrainManager)
             ChunkGraph.addToGrah(pos, ChunkGraph.ChunkActions.SAVE_TO_FILE, ChunkGraph.ActionLocation.SAVER, null, "elements: " + elements);
         try {
-            ChunkPos cpos = new ChunkPos(pos.x >> 5, pos.z >> 5); //16x16 chunks
+            Vector2i cpos = new Vector2i(pos.x >> 5, pos.z >> 5); //16x16 chunks
             //System.out.println("Saving "+pos+" "+cpos);
             TerrainFile FILE = getFileAt(cpos);
             try {
@@ -258,7 +257,7 @@ public class FileTerrainCache implements ITerrainCache {
     protected void writeModifiedFiles() {
         DynamXMain.log.debug("Saving {} DynamX terrain files", terrainFileSaveQueue.size());
         while (!terrainFileSaveQueue.isEmpty()) {
-            ChunkPos cpos = terrainFileSaveQueue.remove();
+            Vector2i cpos = terrainFileSaveQueue.remove();
             TerrainFile FILE = getFileAt(cpos);
             try {
                 FILE.save();

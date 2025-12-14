@@ -4,7 +4,7 @@ import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.physics.terrain.ITerrainElement;
 import fr.dynamx.core.utils.VerticalChunkPos;
-import net.minecraft.world.World;
+import fr.hermes.api.mc.HmWorld;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -18,7 +18,7 @@ import java.io.ObjectOutputStream;
 public class EmptyTerrainElement implements ITerrainElement {
     @Nullable
     @Override
-    public PhysicsRigidBody build(World world, Vector3f pos) {
+    public PhysicsRigidBody build(HmWorld world, Vector3f pos) {
         return null;
     }
 
@@ -38,11 +38,11 @@ public class EmptyTerrainElement implements ITerrainElement {
     }
 
     @Override
-    public void addDebugToWorld(World mcWorld, Vector3f pos) {
+    public void addDebugToWorld(HmWorld mcWorld, Vector3f pos) {
     }
 
     @Override
-    public void removeDebugFromWorld(World mcWorld) {
+    public void removeDebugFromWorld(HmWorld mcWorld) {
     }
 
     @Override

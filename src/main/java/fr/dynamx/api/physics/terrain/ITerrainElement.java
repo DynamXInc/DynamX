@@ -7,7 +7,7 @@ import fr.dynamx.core.common.physics.terrain.element.CompoundBoxTerrainElement;
 import fr.dynamx.core.common.physics.terrain.element.TerrainElementsFactory;
 import fr.dynamx.core.common.physics.terrain.element.CustomSlopeTerrainElement;
 import fr.dynamx.core.utils.VerticalChunkPos;
-import net.minecraft.world.World;
+import fr.hermes.api.mc.HmWorld;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -31,7 +31,7 @@ public interface ITerrainElement {
      * @return A new rigid body for this terrain element. Null for invalid elements. Returning null will force chunk collisions reloading.
      */
     @Nullable
-    PhysicsRigidBody build(World world, Vector3f pos);
+    PhysicsRigidBody build(HmWorld world, Vector3f pos);
 
     /**
      * Called after build has been called, should return the same body <br>
@@ -62,12 +62,12 @@ public interface ITerrainElement {
      *
      * @param pos The pos where the body is added
      */
-    void addDebugToWorld(World mcWorld, Vector3f pos);
+    void addDebugToWorld(HmWorld mcWorld, Vector3f pos);
 
     /**
      * Called when this element is removed from bullet, useful to disable visual debug
      */
-    void removeDebugFromWorld(World mcWorld);
+    void removeDebugFromWorld(HmWorld mcWorld);
 
     /**
      * Clears data contained in this element, freeing some memory <br>

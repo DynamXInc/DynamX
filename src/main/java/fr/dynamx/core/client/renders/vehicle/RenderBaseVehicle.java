@@ -37,7 +37,7 @@ public class RenderBaseVehicle<T extends BaseVehicleEntity<?>> extends RenderPhy
         if (!MinecraftForge.EVENT_BUS.post(new DynamXEntityRenderEvent(carEntity, context, DynamXEntityRenderEvent.Type.PARTICLES, 0))) {
             if (carEntity.hasModuleOfType(WheelsModule.class)) {
                 //TODO GENERALIZE, USE SUPER
-                carEntity.getModuleByType(WheelsModule.class).spawnPropulsionParticles(this, context.getPartialTicks());
+                carEntity.getModuleByType(WheelsModule.class).spawnPropulsionParticles();
             }
         }
     }

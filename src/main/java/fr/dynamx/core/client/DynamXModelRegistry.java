@@ -29,10 +29,9 @@ import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.DynamXLoadingTasks;
 import fr.dynamx.core.utils.DynamXUtils;
 import fr.dynamx.core.utils.errors.DynamXErrorManager;
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.client.SplashProgress;
-import net.minecraftforge.fml.common.ProgressManager;
+import fr.hermes.api.forge.HermesProgressManager;
+import fr.hermes.api.mc.HmResourceLocation;
+import fr.hermes.api.mod.McObjectBinder;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -54,8 +53,8 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
 
     private static final DxItemModelLoader OBJ_ITEM_MODEL_LOADER = new DxItemModelLoader();
     private static final Map<DxModelPath, IModelTextureVariantsSupplier> MODELS_REGISTRY = new HashMap<>();
-    private static final Map<ResourceLocation, DxModelRenderer> MODELS = new ConcurrentHashMap<>();
-    private static final List<ResourceLocation> FAULTY_MODELS = new ArrayList<>();
+    private static final Map<HmResourceLocation, DxModelRenderer> MODELS = new ConcurrentHashMap<>();
+    private static final List<HmResourceLocation> FAULTY_MODELS = new ArrayList<>();
 
     /**
      * A missing model rendered when the right model isn't found
@@ -106,7 +105,7 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
      * @return The model corresponding to the given name (the name used in registerModel)
      * @throws IllegalArgumentException If the model wasn't registered (should be done before DynamX pre initialization)
      */
-    public DxModelRenderer getModel(ResourceLocation name) {
+    public DxModelRenderer getModel(HmResourceLocation name) {
         if (!MODELS.containsKey(name)) {
             if (!FAULTY_MODELS.contains(name)) {
                 log.error("Dx model " + name + " isn't registered !");
@@ -119,7 +118,7 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
 
     @Deprecated
     public DxModelRenderer getModel(String name) {
-        return getModel(new ResourceLocation(DynamXConstants.ID, String.format("models/%s", name)));
+        return getModel(McObjectBinder.instance.newResourceLocation(DynamXConstants.ID, String.format("models/%s", name)));
     }
 
     /**
@@ -198,7 +197,8 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
                 throw new RuntimeException(e);
             }
         }, () -> {
-            ProgressManager.ProgressBar bar = ProgressManager.push("Post loading models", 2);
+            HermesProgressManager progressManager = DynamXMain.getInstance().getMod().getProgressManager();
+            HermesProgressManager.HermesProgressBar bar = progressManager.push("Post loading models", 2);
             bar.step("Loading GLTF models");
             log.info("Loading GLTF models...");
             long start = System.currentTimeMillis();
@@ -225,7 +225,7 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
             }
             if (ClientEventHandler.MC.world != null)
                 uploadVAOs();
-            ProgressManager.pop(bar);
+            bar.pop();
             DynamXLoadingTasks.endTask(DynamXLoadingTasks.MODEL);
         });
     }

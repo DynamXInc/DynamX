@@ -12,16 +12,16 @@ import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.common.physics.terrain.computing.TerrainCollisionsCalculator;
 import fr.dynamx.core.common.physics.terrain.element.EmptyTerrainElement;
 import fr.dynamx.core.common.physics.terrain.element.TerrainElementType;
-import fr.dynamx.forge.DynamXConfig;
 import fr.dynamx.core.utils.DynamXReflection;
 import fr.dynamx.core.utils.VerticalChunkPos;
 import fr.dynamx.core.utils.debug.ChunkGraph;
 import fr.dynamx.core.utils.debug.Profiler;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.SubClassPool;
+import fr.dynamx.forge.DynamXConfig;
+import fr.hermes.api.mc.HmChunk;
+import fr.hermes.api.mc.HmWorld;
 import fr.hermes.forge.JmeVector3fPool;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
@@ -37,7 +37,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContainer {
     private final VerticalChunkPos myPos;
-    private final World mcWorld;
+    private final HmWorld mcWorld;
 
     /**
      * State of this chunk, avoids inconsistencies due to threaded loading
@@ -55,7 +55,7 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
      */
     private int[] maxSize = ITerrainElement.DEFAULT_SIZE;
 
-    public ChunkCollisions(World mcWorld, VerticalChunkPos pos) {
+    public ChunkCollisions(HmWorld mcWorld, VerticalChunkPos pos) {
         this.myPos = pos;
         this.mcWorld = mcWorld;
         if (DynamXConfig.enableDebugTerrainManager) {
@@ -515,12 +515,13 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
                 for (int x = -1; x <= 1; x++) {
                     for (int z = -1; z <= 1; z++) {
                         if (((boolean) DynamXReflection.worldIsChunkLoaded.invoke(mcWorld, myPos.x + x, myPos.z + z, false))) {
-                            Chunk chk = mcWorld.getChunk(myPos.x + x, myPos.z + z);
+                            HmChunk chk = mcWorld.getChunk(myPos.x + x, myPos.z + z);
                             for (int y = -1; y <= 1; y++) {
                                 if (myPos.y + y >= 0 && myPos.y + y < 16) {
                                     chk.getEntityLists()[myPos.y + y].forEach(e -> {
-                                        if (e instanceof PhysicsEntity)
+                                        if (e instanceof PhysicsEntity) {
                                             ((PhysicsEntity<?>) e).forcePhysicsActivation();
+                                        }
                                     });
                                 }
                             }

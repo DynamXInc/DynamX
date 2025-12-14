@@ -18,12 +18,8 @@ import fr.dynamx.forge.DynamXConfig;
 import fr.dynamx.core.utils.VerticalChunkPos;
 import fr.dynamx.core.utils.debug.ChunkGraph;
 import fr.dynamx.core.utils.debug.Profiler;
+import fr.hermes.api.mc.HmWorld;
 import fr.hermes.forge.JmeVector3fPool;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.gen.ChunkProviderServer;
-import net.minecraftforge.event.world.ChunkEvent;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -45,7 +41,7 @@ public class PhysicsWorldTerrain implements ITerrainManager {
     /**
      * The Minecraft world associated to this terrain
      */
-    private final World world;
+    private final HmWorld world;
     /**
      * The async terrain loaded
      */
@@ -72,7 +68,7 @@ public class PhysicsWorldTerrain implements ITerrainManager {
 
     private final WorldTerrainState terrainState = new WorldTerrainState();
 
-    public PhysicsWorldTerrain(IPhysicsWorld physicsWorld, World world, boolean isRemoteWorld) {
+    public PhysicsWorldTerrain(IPhysicsWorld physicsWorld, HmWorld world, boolean isRemoteWorld) {
         this.physicsWorld = physicsWorld;
         this.world = world;
         this.terrainCache = isRemoteWorld ? new RemoteTerrainCache(world) : new FileTerrainCache(world);
@@ -91,8 +87,8 @@ public class PhysicsWorldTerrain implements ITerrainManager {
     /**
      * @return True if this chunk is loaded in the given world
      */
-    private boolean isChunkLoaded(World world, int x, int z) {
-        return world.isRemote ? world.isChunkGeneratedAt(x, z) : ((ChunkProviderServer) world.getChunkProvider()).chunkExists(x, z);
+    private boolean isChunkLoaded(HmWorld world, int x, int z) {
+        return world.isClient() ? world.isChunkGeneratedAt(x, z) : world.chunkExists(x, z);
     }
 
     @Override

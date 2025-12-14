@@ -32,6 +32,7 @@ import fr.dynamx.core.common.objloader.data.DxModelData;
 import fr.dynamx.core.utils.DynamXUtils;
 import fr.dynamx.core.utils.debug.DynamXDebugOptions;
 import fr.dynamx.core.utils.errors.DynamXErrorManager;
+import fr.hermes.api.mc.HmResourceLocation;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.renderer.GlStateManager;
@@ -118,7 +119,7 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
      *
      * @param model The 3D model owning this part
      */
-    public void readPositionFromModel(ResourceLocation model) {
+    public void readPositionFromModel(HmResourceLocation model) {
         if (getPosition() != null) {
             return;
         }

@@ -4,12 +4,12 @@ import fr.dynamx.core.common.physics.terrain.computing.BlockCollisionBehaviors;
 import fr.dynamx.core.common.physics.terrain.computing.TerrainBoxBuilder;
 import fr.dynamx.core.common.physics.terrain.computing.TerrainBoxConstructor;
 import fr.dynamx.core.common.physics.terrain.computing.TerrainCollisionsCalculator;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.World;
+import fr.hermes.api.mc.HmAxis;
+import fr.hermes.api.mc.HmBlockState;
+import fr.hermes.api.mc.HmServerWorld;
+import fr.hermes.api.mc.HmWorld;
+import fr.dynamx.core.utils.optimization.MutableBoundingBox;
+import org.joml.Vector3i;
 
 import javax.annotation.Nullable;
 
@@ -33,8 +33,8 @@ public interface IBlockCollisionBehavior {
      * @param oz                    The current local translation on z axis
      * @return The {@link TerrainBoxBuilder} to stack similar blocks on boxStart
      */
-    default TerrainBoxBuilder initBoxBuilder(TerrainBoxConstructor terrainBoxConstructor, World world, BlockPos mutable, IBlockState boxStart, double ox, double oy, double oz) {
-        AxisAlignedBB box = boxStart.getBoundingBox(world, mutable);
+    default TerrainBoxBuilder initBoxBuilder(TerrainBoxConstructor terrainBoxConstructor, HmWorld world, org.joml.Vector3i mutable, HmBlockState boxStart, double ox, double oy, double oz) {
+        MutableBoundingBox box = boxStart.getBoundingBox(world instanceof HmServerWorld ? (HmServerWorld) world : null, mutable);
         return new TerrainBoxBuilder.MutableTerrainBoxBuilder(ox + box.minX, oy + box.minY, oz + box.minZ, box.maxX - box.minX, box.maxY - box.minY, box.maxZ - box.minZ);
     }
 
@@ -43,7 +43,9 @@ public interface IBlockCollisionBehavior {
      * It should be as restrictive as possible, to let different blocks handled by other collision behaviors <br> <br>
      * <strong>NOTE : For one block state, the result should ALWAYS be the same</strong>
      */
-    boolean applies(IBlockAccess world, BlockPos pos, IBlockState toBlock);
+    boolean applies(HmWorld world, org.joml.Vector3i pos, HmBlockState toBlock);
+
+    
 
     /**
      * Checks if this block can be the base of a stack box
@@ -53,9 +55,11 @@ public interface IBlockCollisionBehavior {
      * @param blockState The block being tested
      * @return True to being a stack box of this block, false to add this block separately to the world
      */
-    default boolean isStackableBlock(IBlockAccess world, BlockPos pos, IBlockState blockState) {
+    default boolean isStackableBlock(HmWorld world, org.joml.Vector3i pos, HmBlockState blockState) {
         return true;
     }
+
+    
 
     /**
      * Checks if the collisions of the onBlock can be merged with the collisions of the stackingBlock, on the given axis. <br>
@@ -70,7 +74,9 @@ public interface IBlockCollisionBehavior {
      * @param lastStacked   The block previously stacked, on the previous axis, to avoid adding a block and a slab on the same plane. Null if not pertinent.
      * @return True if onBlock can be stacked on stackingBlock
      */
-    boolean stacks(IBlockAccess world, BlockPos pos, EnumFacing.Axis axis, IBlockState onBlock, IBlockState stackingBlock, @Nullable IBlockState lastStacked);
+    boolean stacks(HmWorld world, org.joml.Vector3i pos, HmAxis axis, HmBlockState onBlock, HmBlockState stackingBlock, @Nullable HmBlockState lastStacked);
+
+    
 
     /**
      * Stacks the block of the current 'boxBuilder', of if 'ofBlock', adds its collisions boxes to the 'terrainBoxConstructor' <br>
@@ -84,7 +90,9 @@ public interface IBlockCollisionBehavior {
      * @param ofBlock               The block being added to the boxBuilder or terrainBoxConstructor
      * @param axis                  The direction of stacking (always positive) <br>
      */
-    void addBlockCollision(TerrainBoxConstructor terrainBoxConstructor, @Nullable TerrainBoxBuilder boxBuilder, TerrainCollisionsCalculator.TerrainCursor cursor, World world, BlockPos at, IBlockState ofBlock, @Nullable EnumFacing.Axis axis);
+    void addBlockCollision(TerrainBoxConstructor terrainBoxConstructor, @Nullable TerrainBoxBuilder boxBuilder, TerrainCollisionsCalculator.TerrainCursor cursor, HmWorld world, org.joml.Vector3i at, HmBlockState ofBlock, @Nullable HmAxis axis);
+
+    
 
     /**
      * Fired when the construction of 'boxBuilder', and no more blocks will be added <br>

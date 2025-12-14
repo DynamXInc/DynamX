@@ -12,6 +12,7 @@ import fr.dynamx.api.contentpack.object.subinfo.ISubInfoType;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.api.contentpack.registry.DefinitionType;
 import fr.dynamx.api.contentpack.registry.PackFileProperty;
+import fr.dynamx.core.common.DynamXMain;
 import fr.dynamx.core.common.contentpack.type.ItemTransformsInfo;
 import fr.dynamx.core.common.contentpack.type.ObjectInfo;
 import fr.dynamx.core.common.contentpack.type.ViewTransformsInfo;
@@ -20,12 +21,11 @@ import fr.dynamx.core.client.renders.model.renderer.DxModelRenderer;
 import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.DynamXReflection;
 import fr.dynamx.core.utils.errors.DynamXErrorManager;
+import fr.hermes.api.mc.HmCameraTransforms;
+import fr.hermes.api.mc.HmResourceLocation;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 
 import java.util.*;
 
@@ -39,7 +39,7 @@ public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A e
     @Getter
     @Setter
     @PackFileProperty(configNames = "Model", type = DefinitionType.DynamXDefinitionTypes.DYNX_RESOURCE_LOCATION, description = "common.model", defaultValue = "obj/name_of_vehicle/name_of_model.obj")
-    protected ResourceLocation model;
+    protected HmResourceLocation model;
 
     @Getter
     @PackFileProperty(configNames = "ItemScale", required = false, description = "common.itemscale", defaultValue = "0.9")
@@ -88,6 +88,7 @@ public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A e
         super(packName, fileName);
     }
 
+    //TODO MIGRATE
     public CreativeTabs getCreativeTab(CreativeTabs defaultCreativeTab) {
         if (creativeTabName != null)
             return !creativeTabName.equalsIgnoreCase("None") ?
@@ -128,7 +129,7 @@ public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A e
 
     @Override
     public boolean postLoad(boolean hot) {
-        if(FMLCommonHandler.instance().getSide().isClient() && (itemScale != getBaseItemScale() || itemTranslate != null || itemRotate != null)) {
+        if(DynamXMain.getInstance().isClient() && (itemScale != getBaseItemScale() || itemTranslate != null || itemRotate != null)) {
             if(itemTransformsInfo != null && !hot) { //TODO WOULD BE BETTER WITH PRE-LOAD/CLEANING SYSTEM WITH PACK SYNC SYSTEM
                 DynamXErrorManager.addPackError(getPackName(), "mixed_item_transforms_info", ErrorLevel.HIGH, getName(), "You can't mix old item transforms and ItemTransforms block !");
             } else {
@@ -138,7 +139,7 @@ public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A e
         subProperties.forEach(subInfoType -> subInfoType.postLoad((A) this, hot));
         parts.forEach(part -> part.postLoad((A) this, hot));
         // Build the scene graph
-        if (FMLCommonHandler.instance().getSide().isClient()) {
+        if (DynamXMain.getInstance().isClient()) {
             getSceneGraph();
         }
         return super.postLoad(hot);
@@ -168,7 +169,7 @@ public abstract class AbstractItemObject<T extends AbstractItemObject<?, ?>, A e
     }
 
     @Override
-    public ViewTransformsInfo getViewTransformsInfo(ItemCameraTransforms.TransformType viewType) {
+    public ViewTransformsInfo getViewTransformsInfo(HmCameraTransforms viewType) {
         return itemTransformsInfo != null ? itemTransformsInfo.getViewTransforms(viewType) : null;
     }
 

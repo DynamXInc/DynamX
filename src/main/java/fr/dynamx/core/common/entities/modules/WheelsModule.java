@@ -5,11 +5,9 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
-import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.api.network.sync.EntityVariable;
 import fr.dynamx.api.network.sync.SynchronizationRules;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
-import fr.dynamx.core.client.renders.RenderPhysicsEntity;
 import fr.dynamx.core.client.sound.VehicleSound;
 import fr.dynamx.core.common.DynamXMain;
 import fr.dynamx.core.common.contentpack.DynamXObjectLoaders;
@@ -24,16 +22,11 @@ import fr.dynamx.core.common.physics.entities.modules.WheelsPhysicsHandler;
 import fr.dynamx.core.common.physics.entities.parts.wheel.WheelPhysics;
 import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.maths.DynamXMath;
+import fr.dynamx.core.utils.optimization.Vector3fPool;
 import fr.hermes.forge.JmeVector3fPool;
 import jme3utilities.Validate;
 import lombok.Getter;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -90,10 +83,10 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
     public WheelsModule(BaseVehicleEntity<? extends BaseWheeledVehiclePhysicsHandler<?>> entity) {
         this.entity = entity;
         wheelsStates = new EntityVariable<>((variable, value) -> {
-            if (entity.getSynchronizer().getSimulationHolder().ownsControls(FMLCommonHandler.instance().getEffectiveSide())) {
+            if (entity.getSynchronizer().getSimulationHolder().ownsControls(entity.getHmWorld().isClient())) {
                 return;
             }
-            if (!DynamXMain.getProxy().shouldUseBulletSimulation(entity.world)) {
+            if (!DynamXMain.getProxy().shouldUseBulletSimulation(entity.getHmWorld())) {
                 return;
             }
             for (int i = 0; i < value.length; i++) {
@@ -133,25 +126,25 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
             return;
         }
 
-        VehicleEntityEvent.ChangeWheel event = new VehicleEntityEvent.ChangeWheel(FMLCommonHandler.instance().getEffectiveSide(), entity, this, wheelInfos.get(partIndex), info, partIndex);
+        /* TODO EVENT VehicleEntityEvent.ChangeWheel event = new VehicleEntityEvent.ChangeWheel(FMLCommonHandler.instance().getEffectiveSide(), entity, this, wheelInfos.get(partIndex), info, partIndex);
         if (MinecraftForge.EVENT_BUS.post(event)) {
             return;
-        }
+        }*/
 
-        synchronizedWheelInfos.put(partIndex, event.getNewWheel().getFullName());
-        wheelInfos.put(partIndex, event.getNewWheel());
+        synchronizedWheelInfos.put(partIndex,info.getFullName());
+        wheelInfos.put(partIndex, info);
 
         if (wheelsPhysics != null) {
-            wheelsPhysics.getWheelByPartIndex(partIndex).setWheelInfo(event.getNewWheel());
+            wheelsPhysics.getWheelByPartIndex(partIndex).setWheelInfo(info);
         }
 
-        if (entity.world.isRemote) {
+        if (entity.getHmWorld().isClient()) {
             onTexturesChange(entity.getEntityTextureId());
         }
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
+    //@SideOnly(Side.CLIENT)
     public void onTexturesChange(byte newMetadata) {
         if (newMetadata == -1 || entity.getPackInfo() == null) {
             return;
@@ -162,7 +155,7 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
         }
     }
 
-    @SideOnly(Side.CLIENT)
+    //@SideOnly(Side.CLIENT)
     public byte getWheelsTextureId(int wheelPartId) {
         return wheelsTextureId[wheelPartId];
     }
@@ -222,7 +215,7 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
         if (!simulatePhysics) {
             return;
         }
-        if (entity.ticksExisted > 10) {
+        if (entity.getTicksExisted() > 10) {
             for (int i = 0; i < wheelsPhysics.vehicleWheelData.size(); i++) {
                 WheelPhysics w = wheelsPhysics.vehicleWheelData.get(i);
                 if (w == null) {
@@ -230,10 +223,10 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
                 }
                 Vector3f pos = JmeVector3fPool.get();
                 w.getPhysicsWheel().getCollisionLocation(pos);
-                BlockPos bp = new BlockPos(pos.x, Math.ceil(pos.y) - 1, pos.z);
-                IBlockState blockState = entity.world.getBlockState(bp);
+                org.joml.Vector3f bp = Vector3fPool.get(pos.x, Math.ceil(pos.y) - 1, pos.z);
+                //IBlockState blockState = entity.world.getBlockState(bp);
                 float[] frictionValues = DEFAULT_GRIP; // TODO dynamic grip depending on the block was removed. to add back properly. See commit 🏷️ Remove block-grip and block-related slope config support
-                boolean isBlockWet = entity.world.getBiome(bp).canRain() && entity.world.isRaining() && entity.world.canBlockSeeSky(bp);
+                boolean isBlockWet = entity.getHmWorld().getBiome(bp).canRain() && entity.getHmWorld().isRaining() && entity.getHmWorld().canBlockSeeSky(bp);
                 float frictionValue = isBlockWet ? frictionValues[1] : frictionValues[0];
                 w.setGrip((w.isFlattened() ? 0.16f : 1) * frictionValue);
 
@@ -320,8 +313,8 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
         return skidInfos.get();
     }
 
-    @SideOnly(Side.CLIENT)
-    public void spawnPropulsionParticles(RenderPhysicsEntity<?> render, float partialTicks) {
+    //@SideOnly(Side.CLIENT)
+    public void spawnPropulsionParticles() {
         //Dust particles when the vehicle friction is very low
         entity.getPackInfo().getPartsByType(PartWheel.class).forEach(partWheel -> {
             PartWheelInfo info = getWheelInfo(partWheel.getId());
@@ -331,7 +324,7 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
             if (!(skidInfos.get()[partWheel.getId()] < 0.1f)) {
                 return;
             }
-            entity.world.spawnParticle(info.getSkidParticle(),
+            entity.getHmWorld().spawnParticle(info.getSkidParticle(),
                     visualProperties[VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.COLLISION_X)],
                     visualProperties[VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.COLLISION_Y)],
                     visualProperties[VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.COLLISION_Z)],

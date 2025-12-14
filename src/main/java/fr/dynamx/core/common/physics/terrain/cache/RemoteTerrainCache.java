@@ -17,8 +17,8 @@ import fr.dynamx.core.utils.debug.ChunkGraph;
 import fr.dynamx.core.utils.debug.Profiler;
 import fr.dynamx.core.utils.optimization.HashMapPool;
 import fr.dynamx.core.utils.optimization.PooledHashMap;
+import fr.hermes.api.mc.HmWorld;
 import fr.hermes.forge.JmeVector3fPool;
-import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
 import java.io.ByteArrayInputStream;
@@ -35,7 +35,7 @@ import java.util.zip.GZIPInputStream;
 public class RemoteTerrainCache implements ITerrainCache {
     private static boolean HAD_THE_ERROR;
 
-    private final World world;
+    private final HmWorld world;
 
     private final VirtualTerrainFile rawSlopeDataCache = new VirtualTerrainFile();
     private final Map<VerticalChunkPos, ChunkTerrain> dataCache = new HashMap<>();
@@ -48,7 +48,7 @@ public class RemoteTerrainCache implements ITerrainCache {
 
     private final List<VerticalChunkPos> erroredChunks = new ArrayList<>();
 
-    public RemoteTerrainCache(World world) {
+    public RemoteTerrainCache(HmWorld world) {
         this.world = world;
     }
 

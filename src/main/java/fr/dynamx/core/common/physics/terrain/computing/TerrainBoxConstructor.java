@@ -5,10 +5,9 @@ import fr.dynamx.core.common.physics.terrain.chunk.ChunkCollisions;
 import fr.dynamx.core.common.physics.terrain.element.CompoundBoxTerrainElement;
 import fr.dynamx.core.common.physics.terrain.element.EmptyTerrainElement;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import fr.hermes.api.mc.HmBlockState;
+import fr.hermes.api.mc.HmWorld;
+import org.joml.Vector3i;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -25,16 +24,16 @@ public class TerrainBoxConstructor {
      */
     private static final int MAX_BOXES_PER_MESH = 60;
 
-    private final AxisAlignedBB searchZone;
+    private final MutableBoundingBox searchZone;
     private final List<ITerrainElement> otherTerrainElements = new ArrayList<>();
     //Optimized, grouped collisions of many blocks (full cubes, slabs and snow)
     private final List<MutableBoundingBox> outListMutable = new ArrayList<>();
     //Collisions of special blocks like flower pots with no optimization
-    private final List<AxisAlignedBB> outListVanilla = new ArrayList<>();
+    private final List<MutableBoundingBox> outListVanilla = new ArrayList<>();
     private final int x, y, z;
     private final boolean debug;
 
-    public TerrainBoxConstructor(AxisAlignedBB searchZone, int x, int y, int z, boolean debug) {
+    public TerrainBoxConstructor(MutableBoundingBox searchZone, int x, int y, int z, boolean debug) {
         this.searchZone = searchZone;
         this.x = x;
         this.y = y;
@@ -42,9 +41,28 @@ public class TerrainBoxConstructor {
         this.debug = debug;
     }
 
-    public AxisAlignedBB getSearchZone() {
+    /**
+     * Constructor with explicit bounds of the search zone.
+     */
+    public TerrainBoxConstructor(int minX, int minY, int minZ, int maxX, int maxY, int maxZ, boolean debug) {
+        this(new MutableBoundingBox(minX, minY, minZ, maxX, maxY, maxZ), minX, minY, minZ, debug);
+    }
+
+    public MutableBoundingBox getSearchZone() {
         return searchZone;
     }
+
+    public int getSearchMinX() { return (int) searchZone.minX; }
+
+    public int getSearchMaxX() { return (int) searchZone.maxX; }
+
+    public int getSearchMinY() { return (int) searchZone.minY; }
+
+    public int getSearchMaxY() { return (int) searchZone.maxY; }
+
+    public int getSearchMinZ() { return (int) searchZone.minZ; }
+
+    public int getSearchMaxZ() { return (int) searchZone.maxZ; }
 
     public void addMutable(MutableBoundingBox boundingBox) {
         if (boundingBox == null)
@@ -52,23 +70,23 @@ public class TerrainBoxConstructor {
         outListMutable.add(boundingBox);
     }
 
-    public void addBlockCollisions(World world, BlockPos at, IBlockState ofBlock) {
+    public void addBlockCollisions(HmWorld world, Vector3i at, HmBlockState ofBlock) {
         if (isDebug()) {
-            List<AxisAlignedBB> boxes = new ArrayList<>();
-            ofBlock.addCollisionBoxToList(world, at, getSearchZone(), boxes, null, false);
+            List<MutableBoundingBox> boxes = new ArrayList<>();
+            ofBlock.addCollisionBoxes(world, at, getSearchZone(), boxes);
             injectBlockCollisions(at, ofBlock, boxes);
         } else {
-            ofBlock.addCollisionBoxToList(world, at, getSearchZone(), getOutListVanilla(), null, false);
+            ofBlock.addCollisionBoxes(world, at, getSearchZone(), getOutListVanilla());
         }
     }
 
-    public void injectBlockCollisions(BlockPos at, IBlockState ofBlock, List<AxisAlignedBB> boxes) {
+    public void injectBlockCollisions(Vector3i at, HmBlockState ofBlock, List<MutableBoundingBox> boxes) {
         if (isDebug())
             System.out.println("Injecting " + boxes.size() + " boxes at " + at + " for " + ofBlock);
         outListVanilla.addAll(boxes);
     }
 
-    public List<AxisAlignedBB> getOutListVanilla() {
+    public List<MutableBoundingBox> getOutListVanilla() {
         return outListVanilla;
     }
 
@@ -109,7 +127,7 @@ public class TerrainBoxConstructor {
             return 0;
         }));
         int count = 0;
-        for (AxisAlignedBB box : outListVanilla) {
+        for (MutableBoundingBox box : outListVanilla) {
             if (box != null) {
                 vanillaBoxes.add(new MutableBoundingBox(box));
                 count++;

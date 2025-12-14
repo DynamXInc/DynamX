@@ -12,9 +12,9 @@ import fr.dynamx.core.common.network.packets.MessageSyncPlayerPicking;
 import fr.dynamx.forge.DynamXConfig;
 import fr.dynamx.core.utils.DynamXUtils;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
-import fr.hermes.api.mc.HmEntity;
-import fr.hermes.api.mc.HmPlayerEntity;
-import fr.hermes.api.mc.HmWorld;
+import fr.hermes.api.mc.entities.HmEntity;
+import fr.hermes.api.mc.entities.HmPlayerEntity;
+import fr.hermes.api.mc.world.HmWorld;
 import fr.hermes.forge.JmeVector3fPool;
 import fr.dynamx.core.utils.physics.PhysicsRaycastResult;
 

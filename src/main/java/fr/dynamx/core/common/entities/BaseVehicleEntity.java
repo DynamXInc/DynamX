@@ -7,7 +7,7 @@ import fr.dynamx.core.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.core.utils.DynamXUtils;
 import fr.dynamx.core.utils.EnumPlayerStandOnTop;
 import fr.dynamx.forge.DynamXConfig;
-import fr.hermes.api.mc.HmEntity;
+import fr.hermes.api.mc.entities.HmEntity;
 import net.minecraft.nbt.NBTTagCompound;
 
 /**
@@ -25,11 +25,6 @@ public abstract class BaseVehicleEntity<T extends BaseVehiclePhysicsHandler<?>> 
 
     public BaseVehicleEntity(String name, HmEntity mcEntityWrapper, Vector3f pos, float spawnRotationAngle, int metadata) {
         super(name, mcEntityWrapper, pos, spawnRotationAngle, metadata);
-    }
-
-    @Override
-    protected void entityInit() {
-        super.entityInit();
     }
 
     /* TODO EVENTS @Override

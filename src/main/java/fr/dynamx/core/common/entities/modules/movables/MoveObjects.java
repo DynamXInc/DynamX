@@ -11,7 +11,7 @@ import fr.dynamx.core.common.entities.modules.MovableModule;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
 import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.DynamXUtils;
-import fr.hermes.api.mc.HmPlayerEntity;
+import fr.hermes.api.mc.entities.HmPlayerEntity;
 import fr.hermes.forge.JmeVector3fPool;
 import fr.dynamx.core.utils.physics.DynamXPhysicsHelper;
 
@@ -83,9 +83,9 @@ public class MoveObjects extends MovableModule {
                 rigidBody.setGravity(JmeVector3fPool.get());
                 rigidBody.setAngularVelocity(JmeVector3fPool.get());
                 rigidBody.setLinearVelocity(JmeVector3fPool.get());
-                Vector3f playerPos = DynamXUtils.toVector3f(picker.get().getPositionEyes(1.0f));
-                Vector3f finalPos = playerPos.addLocal(playerLookPos);
-                pickedEntity.getPhysicsHandler().setPhysicsPosition(finalPos);
+                Vector3f playerPos = picker.get().getEyesPosition();
+                playerPos.addLocal(playerLookPos);
+                pickedEntity.getPhysicsHandler().setPhysicsPosition(playerPos);
             }
         }
     }

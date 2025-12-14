@@ -14,7 +14,7 @@ import fr.dynamx.core.utils.VerticalChunkPos;
 import fr.dynamx.core.utils.debug.ChunkGraph;
 import fr.dynamx.core.utils.debug.Profiler;
 import fr.dynamx.forge.DynamXConfig;
-import fr.hermes.api.mc.HmWorld;
+import fr.hermes.api.mc.world.HmWorld;
 import org.joml.Vector2i;
 
 import java.io.File;

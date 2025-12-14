@@ -1,6 +1,8 @@
-package fr.hermes.api.mc;
+package fr.hermes.api.mc.entities;
 
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
+import fr.hermes.api.mc.items.HmItemStack;
+import fr.hermes.api.mc.world.HmServerWorld;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.NBTTagCompound;
 import org.joml.Quaternionf;
@@ -108,7 +110,7 @@ public interface HmEntity {
 
     Vector3f getHmLook();
 
-    Vector3i getHmPosition();
+    Vector3f getHmPosition();
 
     float getEyeHeight();
 
@@ -135,4 +137,6 @@ public interface HmEntity {
     boolean startRiding(HmEntity riddenEntity);
 
     boolean startRiding(HmEntity riddenEntity, boolean force);
+
+    com.jme3.math.Vector3f getEyesPosition();
 }

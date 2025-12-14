@@ -25,6 +25,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+// TODO CONVERT TO HERMES
+
 /**
  * A DefinitionType provides a method to parse a configurable string value to the corresponding java object
  *

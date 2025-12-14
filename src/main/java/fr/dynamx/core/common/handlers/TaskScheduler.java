@@ -2,6 +2,7 @@ package fr.dynamx.core.common.handlers;
 
 import fr.dynamx.core.common.DynamXMain;
 import fr.dynamx.core.common.entities.PhysicsEntity;
+import fr.hermes.api.mc.entities.HmServerPlayerEntity;
 import net.minecraft.entity.player.EntityPlayerMP;
 
 import java.util.ArrayList;
@@ -61,9 +62,9 @@ public class TaskScheduler {
      */
     public static class ResyncItem extends ScheduledTask {
         public final PhysicsEntity<?> entity;
-        public final EntityPlayerMP target;
+        public final HmServerPlayerEntity target;
 
-        public ResyncItem(PhysicsEntity<?> entity, EntityPlayerMP target) {
+        public ResyncItem(PhysicsEntity<?> entity, HmServerPlayerEntity target) {
             super((byte) 20);
             this.entity = entity;
             this.target = target;
@@ -85,10 +86,10 @@ public class TaskScheduler {
 
         @Override
         public void run() {
-            if (target.connection != null && target.connection.getNetworkManager().isChannelOpen()) {
+            if (target.isPlayerConnected()) {
                 entity.getSynchronizer().resyncEntity(target);
             } else {
-                DynamXMain.log.warn("Skipping resync item of " + entity + " for " + target + " : player not connected");
+                DynamXMain.log.warn("Skipping resync item of {} for {} : player not connected", entity, target);
             }
         }
     }

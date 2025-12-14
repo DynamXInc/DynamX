@@ -11,7 +11,7 @@ import fr.dynamx.core.common.physics.utils.StairsBox;
 import fr.dynamx.core.utils.VerticalChunkPos;
 import fr.dynamx.core.utils.debug.DynamXDebugOptions;
 import fr.dynamx.core.utils.debug.TerrainDebugData;
-import fr.hermes.api.mc.HmWorld;
+import fr.hermes.api.mc.world.HmWorld;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;

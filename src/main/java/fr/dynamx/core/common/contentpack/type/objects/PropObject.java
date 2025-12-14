@@ -23,7 +23,7 @@ import fr.dynamx.core.common.contentpack.type.ParticleEmitterInfo;
 import fr.dynamx.core.common.entities.PackPhysicsEntity;
 import fr.dynamx.core.common.items.ItemProps;
 import fr.dynamx.core.utils.DynamXUtils;
-import fr.hermes.api.mc.HmItemStack;
+import fr.hermes.api.mc.items.HmItemStack;
 import fr.hermes.api.mod.McObjectBinder;
 import lombok.Getter;
 import lombok.Setter;

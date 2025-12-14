@@ -1,7 +1,7 @@
 package fr.dynamx.core.common.physics.joints;
 
 import fr.dynamx.core.common.entities.PhysicsEntity;
-import fr.hermes.api.mc.HmResourceLocation;
+import fr.hermes.api.mc.utils.HmResourceLocation;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;

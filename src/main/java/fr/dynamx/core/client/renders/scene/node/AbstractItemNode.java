@@ -12,6 +12,8 @@ import fr.dynamx.core.utils.client.DynamXRenderUtils;
 import fr.dynamx.core.utils.optimization.GlQuaternionPool;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.SubClassPool;
+import fr.hermes.api.mc.items.HmItemStack;
+import fr.hermes.api.mc.utils.HmCameraTransforms;
 import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
@@ -43,10 +45,10 @@ public abstract class AbstractItemNode<C extends IRenderContext, A extends IMode
      * @param packInfo The pack info of the scene graph
      */
     public void renderAsItemNode(BaseRenderContext.ItemRenderContext context, A packInfo) {
-        ItemStack stack = context.getStack();
+        HmItemStack stack = context.getStack();
         ItemDxModel model = context.getItemModel();
-        ItemCameraTransforms.TransformType renderType = context.getRenderType();
-        if (packInfo.get3DItemRenderLocation() == Enum3DRenderLocation.NONE || (renderType == ItemCameraTransforms.TransformType.GUI && packInfo.get3DItemRenderLocation() == Enum3DRenderLocation.WORLD)) {
+        HmCameraTransforms renderType = context.getRenderType();
+        if (packInfo.get3DItemRenderLocation() == Enum3DRenderLocation.NONE || (renderType == HmCameraTransforms.GUI && packInfo.get3DItemRenderLocation() == Enum3DRenderLocation.WORLD)) {
             GlStateManager.pushMatrix();
             GlStateManager.translate(0.5F, 0.5F, 0.5F);
             Minecraft.getMinecraft().getRenderItem().renderItem(stack, model.getGuiBaked());
@@ -89,7 +91,7 @@ public abstract class AbstractItemNode<C extends IRenderContext, A extends IMode
     public void renderItemModel(BaseRenderContext.ItemRenderContext context, A packInfo, Matrix4f transform) {
         GlStateManager.pushMatrix();
         GlStateManager.multMatrix(ClientDynamXUtils.getMatrixBuffer(transform));
-        context.getModel().renderModel(context.getTextureId(), context.getRenderType() == ItemCameraTransforms.TransformType.GUI);
+        context.getModel().renderModel(context.getTextureId(), context.getRenderType() == HmCameraTransforms.GUI);
         GlStateManager.popMatrix();
     }
 }

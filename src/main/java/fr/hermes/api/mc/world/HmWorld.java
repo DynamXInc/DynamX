@@ -1,8 +1,15 @@
-package fr.hermes.api.mc;
+package fr.hermes.api.mc.world;
 
+import fr.dynamx.core.utils.optimization.MutableBoundingBox;
+import fr.hermes.api.mc.*;
+import fr.hermes.api.mc.blocks.HmBlockState;
+import fr.hermes.api.mc.entities.HmEntity;
+import fr.hermes.api.mc.entities.HmPlayerEntity;
+import fr.hermes.api.mc.utils.HmParticleType;
 import org.joml.Vector3i;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Random;
 
 public interface HmWorld {
@@ -23,11 +30,11 @@ public interface HmWorld {
 
     HmBlockState getBlockState(Vector3i blockPos);
 
-    HmBiome getBiome(Vector3f pos);
+    HmBiome getBiome(Vector3i pos);
 
     boolean isRaining();
 
-    boolean canBlockSeeSky(Vector3f pos);
+    boolean canBlockSeeSky(Vector3i pos);
 
     void spawnParticle(HmParticleType skidParticle, float x, float y, float z, float speedX, float speedY, float speedZ);
 
@@ -40,4 +47,6 @@ public interface HmWorld {
     HmChunk getChunk(int chunkX, int chunkZ);
 
     HmTileEntity getTileEntity(Vector3i pos);
+
+    <T extends HmEntity> List<T> getEntitiesWithinAABB(Class<T> clazz, MutableBoundingBox aabb);
 }

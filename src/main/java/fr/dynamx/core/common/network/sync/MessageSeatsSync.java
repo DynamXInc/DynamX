@@ -5,7 +5,7 @@ import fr.dynamx.core.common.DynamXContext;
 import fr.dynamx.core.common.contentpack.parts.BasePartSeat;
 import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.common.network.packets.PhysicsEntityMessage;
-import fr.hermes.api.mc.HmEntity;
+import fr.hermes.api.mc.entities.HmEntity;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.fml.relauncher.Side;

@@ -19,8 +19,8 @@ import fr.dynamx.core.utils.debug.Profiler;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.SubClassPool;
 import fr.dynamx.forge.DynamXConfig;
-import fr.hermes.api.mc.HmChunk;
-import fr.hermes.api.mc.HmWorld;
+import fr.hermes.api.mc.world.HmChunk;
+import fr.hermes.api.mc.world.HmWorld;
 import fr.hermes.forge.JmeVector3fPool;
 
 import javax.annotation.Nullable;

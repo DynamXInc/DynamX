@@ -12,8 +12,8 @@ import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.common.network.sync.variables.SynchronizedEntityVariableSnapshot;
 import fr.dynamx.core.utils.debug.Profiler;
 import fr.dynamx.core.utils.optimization.PooledHashMap;
-import fr.hermes.api.mc.HmEntity;
-import fr.hermes.api.mc.HmPlayerEntity;
+import fr.hermes.api.mc.entities.HmEntity;
+import fr.hermes.api.mc.entities.HmPlayerEntity;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 

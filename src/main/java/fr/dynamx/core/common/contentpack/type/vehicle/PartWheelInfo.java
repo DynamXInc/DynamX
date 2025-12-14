@@ -11,6 +11,7 @@ import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
 import fr.dynamx.core.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.core.client.renders.scene.node.SceneNode;
 import fr.dynamx.core.common.contentpack.type.MaterialVariantsInfo;
+import fr.hermes.api.mc.utils.HmResourceLocation;
 import lombok.Getter;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ResourceLocation;
@@ -35,7 +36,7 @@ public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IM
     private final String partName;
 
     @PackFileProperty(configNames = "Model", description = "common.model", type = DefinitionType.DynamXDefinitionTypes.DYNX_RESOURCE_LOCATION, defaultValue = "obj/nom_du_vehicule/nom_du_modele.obj", required = false)
-    private ResourceLocation model;
+    private HmResourceLocation model;
     @Getter
     @PackFileProperty(configNames = "Width")
     private float wheelWidth;
@@ -147,7 +148,7 @@ public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IM
 
     @Override
     @Nullable
-    public ResourceLocation getModel() {
+    public HmResourceLocation getModel() {
         return model;
     }
 

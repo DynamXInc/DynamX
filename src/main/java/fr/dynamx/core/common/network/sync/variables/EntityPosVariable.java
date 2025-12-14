@@ -11,10 +11,9 @@ import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.common.network.packets.MessageForcePlayerPos;
 import fr.dynamx.core.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.core.utils.debug.SyncHelper;
-import fr.hermes.api.mc.HmPlayerEntity;
-import fr.hermes.api.mc.HmServerPlayerEntity;
+import fr.hermes.api.mc.entities.HmPlayerEntity;
+import fr.hermes.api.mc.entities.HmServerPlayerEntity;
 import lombok.Getter;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.text.TextComponentString;
 

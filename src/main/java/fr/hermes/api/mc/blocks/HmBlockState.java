@@ -1,12 +1,14 @@
-package fr.hermes.api.mc;
+package fr.hermes.api.mc.blocks;
 
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
-import fr.hermes.api.mc.HmWorld;
-import fr.hermes.api.mc.HmServerWorld;
+import fr.hermes.api.mc.world.HmWorld;
+import fr.hermes.api.mc.world.HmServerWorld;
 import org.joml.Vector3i;
 import java.util.List;
 
 public interface HmBlockState {
+    HmBlock getBlock();
+
     boolean isLiquid();
 
     MutableBoundingBox getBoundingBox(HmServerWorld hmWorld, Vector3i blockPos);

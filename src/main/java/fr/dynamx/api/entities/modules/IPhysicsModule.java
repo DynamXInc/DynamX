@@ -7,8 +7,8 @@ import fr.dynamx.core.common.entities.modules.SeatsModule;
 import fr.dynamx.core.common.entities.modules.WheelsModule;
 import fr.dynamx.core.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.core.common.entities.modules.engines.BasicEngineModule;
-import fr.hermes.api.mc.HmEntity;
-import fr.hermes.api.mc.HmPlayerEntity;
+import fr.hermes.api.mc.entities.HmEntity;
+import fr.hermes.api.mc.entities.HmPlayerEntity;
 import io.netty.buffer.ByteBuf;
 
 import javax.annotation.Nullable;

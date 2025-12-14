@@ -4,8 +4,8 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.subinfo.ISubInfoTypeOwner;
 import fr.dynamx.core.common.entities.IDynamXObject;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
-import fr.hermes.api.mc.HmPlayerEntity;
-import fr.hermes.api.mc.HmResourceLocation;
+import fr.hermes.api.mc.entities.HmPlayerEntity;
+import fr.hermes.api.mc.utils.HmResourceLocation;
 import lombok.Setter;
 
 public abstract class InteractivePart<A extends IDynamXObject, T extends ISubInfoTypeOwner<T>> extends BasePart<T> {

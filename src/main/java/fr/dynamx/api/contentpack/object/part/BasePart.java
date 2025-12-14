@@ -17,9 +17,9 @@ import fr.dynamx.core.common.objloader.data.DxModelData;
 import fr.dynamx.core.utils.DynamXUtils;
 import fr.dynamx.core.utils.debug.DynamXDebugOption;
 import fr.dynamx.core.utils.errors.DynamXErrorManager;
+import fr.hermes.api.mc.utils.HmResourceLocation;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.util.ResourceLocation;
 
 /**
  * The base of a part <br>
@@ -131,7 +131,7 @@ public abstract class BasePart<T extends ISubInfoTypeOwner<T>> extends SubInfoTy
      * @param getRotation If true, the rotation of the object in the model will be returned (only for gltf models)
      * @return The rotation of the object in the model, or null if getRotation is false or if the model is an obj model
      */
-    public Quaternion readPositionFromModel(ResourceLocation model, String objectName, boolean allowPartCenter, boolean getRotation) {
+    public Quaternion readPositionFromModel(HmResourceLocation model, String objectName, boolean allowPartCenter, boolean getRotation) {
         Quaternion rotation = null;
         if (getPosition() == null) {
             DxModelData modelData = DynamXContext.getDxModelDataFromCache(DynamXUtils.getModelPath(getPackName(), model));

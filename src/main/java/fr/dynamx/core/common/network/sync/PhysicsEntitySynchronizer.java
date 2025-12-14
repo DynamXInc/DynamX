@@ -16,8 +16,8 @@ import fr.dynamx.core.server.network.ServerPhysicsSyncManager;
 import fr.dynamx.core.utils.debug.Profiler;
 import fr.dynamx.core.utils.optimization.HashMapPool;
 import fr.dynamx.core.utils.optimization.PooledHashMap;
-import fr.hermes.api.mc.HmPlayerEntity;
-import fr.hermes.api.mc.HmServerPlayerEntity;
+import fr.hermes.api.mc.entities.HmPlayerEntity;
+import fr.hermes.api.mc.entities.HmServerPlayerEntity;
 import lombok.Getter;
 
 import java.util.concurrent.ConcurrentHashMap;

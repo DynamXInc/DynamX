@@ -1,4 +1,4 @@
-package fr.hermes.api.mc;
+package fr.hermes.api.mc.blocks;
 
 public interface HmBlock {
     /**

@@ -5,8 +5,8 @@ import fr.dynamx.core.common.physics.terrain.chunk.ChunkCollisions;
 import fr.dynamx.core.common.physics.terrain.element.CompoundBoxTerrainElement;
 import fr.dynamx.core.common.physics.terrain.element.EmptyTerrainElement;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
-import fr.hermes.api.mc.HmBlockState;
-import fr.hermes.api.mc.HmWorld;
+import fr.hermes.api.mc.blocks.HmBlockState;
+import fr.hermes.api.mc.world.HmWorld;
 import org.joml.Vector3i;
 
 import java.util.ArrayList;

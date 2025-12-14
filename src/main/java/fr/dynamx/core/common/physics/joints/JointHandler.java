@@ -5,7 +5,7 @@ import fr.dynamx.api.entities.modules.AttachModule;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.core.common.DynamXMain;
 import fr.dynamx.core.common.entities.PhysicsEntity;
-import fr.hermes.api.mc.HmResourceLocation;
+import fr.hermes.api.mc.utils.HmResourceLocation;
 import lombok.Getter;
 
 /**

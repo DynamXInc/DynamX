@@ -4,7 +4,7 @@ import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.core.common.entities.BaseVehicleEntity;
 import fr.dynamx.core.common.entities.modules.engines.HelicopterEngineModule;
 import fr.dynamx.core.common.physics.entities.BaseVehiclePhysicsHandler;
-import fr.hermes.api.mc.HmWorld;
+import fr.hermes.api.mc.world.HmWorld;
 import io.netty.buffer.ByteBuf;
 import lombok.Getter;
 

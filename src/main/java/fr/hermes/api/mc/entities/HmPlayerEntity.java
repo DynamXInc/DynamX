@@ -1,7 +1,7 @@
-package fr.hermes.api.mc;
+package fr.hermes.api.mc.entities;
 
 import com.mojang.authlib.GameProfile;
-import net.minecraft.item.ItemStack;
+import fr.hermes.api.mc.items.HmItemStack;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 
 /**

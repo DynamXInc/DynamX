@@ -6,9 +6,9 @@ import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.dynamx.core.utils.optimization.SubClassPool;
 import fr.dynamx.core.utils.optimization.Vector3fPool;
-import fr.hermes.api.mc.HmEntity;
-import fr.hermes.api.mc.HmItemStack;
-import fr.hermes.api.mc.HmServerWorld;
+import fr.hermes.api.mc.entities.HmEntity;
+import fr.hermes.api.mc.items.HmItemStack;
+import fr.hermes.api.mc.world.HmServerWorld;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -394,9 +394,10 @@ public class ForgeEntityWrapper<E extends HmEntity> extends Entity implements IE
     }
 
     @Override
-    public Vector3i getHmPosition() {
+    public Vector3f getHmPosition() {
         // same logic as getPosition() from Mc
-        return new Vector3i((int) posX, (int) (posY + 0.5f), (int) posZ);
+        //TODO POOL ?
+        return new Vector3f((float) posX, (float) (posY + 0.5f), (float) posZ);
     }
 
     // === no from Hm ===

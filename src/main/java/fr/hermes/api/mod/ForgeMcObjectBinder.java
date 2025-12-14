@@ -1,8 +1,8 @@
 package fr.hermes.api.mod;
 
-import fr.hermes.api.mc.HmItem;
-import fr.hermes.api.mc.HmItemStack;
-import fr.hermes.api.mc.HmResourceLocation;
+import fr.hermes.api.mc.items.HmItem;
+import fr.hermes.api.mc.items.HmItemStack;
+import fr.hermes.api.mc.utils.HmResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;

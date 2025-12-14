@@ -7,7 +7,7 @@ import fr.dynamx.core.common.physics.terrain.element.CompoundBoxTerrainElement;
 import fr.dynamx.core.common.physics.terrain.element.TerrainElementsFactory;
 import fr.dynamx.core.common.physics.terrain.element.CustomSlopeTerrainElement;
 import fr.dynamx.core.utils.VerticalChunkPos;
-import fr.hermes.api.mc.HmWorld;
+import fr.hermes.api.mc.world.HmWorld;
 
 import javax.annotation.Nullable;
 import java.io.IOException;

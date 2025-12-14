@@ -7,6 +7,8 @@ import fr.dynamx.core.client.renders.model.renderer.DxModelRenderer;
 import fr.dynamx.core.client.renders.scene.node.*;
 import fr.dynamx.core.common.blocks.TEDynamXBlock;
 import fr.dynamx.core.common.entities.ModularPhysicsEntity;
+import fr.hermes.api.mc.items.HmItemStack;
+import fr.hermes.api.mc.utils.HmCameraTransforms;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
@@ -117,19 +119,19 @@ public abstract class BaseRenderContext implements IRenderContext {
     @RequiredArgsConstructor
     public static class ItemRenderContext extends BaseRenderContext {
         private ItemDxModel itemModel;
-        private ItemCameraTransforms.TransformType renderType;
+        private HmCameraTransforms renderType;
         /**
          * The item that is being rendered, not null
          */
-        private ItemStack stack;
+        private HmItemStack stack;
 
-        public ItemRenderContext setModelParams(@Nonnull ItemDxModel itemModel, @Nonnull ItemStack stack, @Nonnull DxModelRenderer model, byte textureId) {
+        public ItemRenderContext setModelParams(@Nonnull ItemDxModel itemModel, @Nonnull HmItemStack stack, @Nonnull DxModelRenderer model, byte textureId) {
             this.itemModel = itemModel;
             this.stack = stack;
             return (ItemRenderContext) super.setModelParams(model, textureId);
         }
 
-        public ItemRenderContext setRenderParams(@Nonnull ItemCameraTransforms.TransformType renderType, float partialTicks, boolean useVanillaRender) {
+        public ItemRenderContext setRenderParams(@Nonnull HmCameraTransforms renderType, float partialTicks, boolean useVanillaRender) {
             this.renderType = renderType;
             return (ItemRenderContext) super.setRenderParams(partialTicks, useVanillaRender);
         }

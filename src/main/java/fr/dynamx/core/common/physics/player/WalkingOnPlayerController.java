@@ -6,8 +6,8 @@ import fr.dynamx.core.common.DynamXContext;
 import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.hermes.forge.JmeVector3fPool;
-import fr.hermes.api.mc.HmOrientation;
-import fr.hermes.api.mc.HmPlayerEntity;
+import fr.hermes.api.mc.utils.HmOrientation;
+import fr.hermes.api.mc.entities.HmPlayerEntity;
 
 /**
  * Responsible to update a walking player <br>
@@ -39,9 +39,9 @@ public class WalkingOnPlayerController {
     public void applyOffset() {
         Vector3f newPos = JmeVector3fPool.get((float) entity.getPosX(), (float) entity.getPosY(), (float) entity.getPosZ());
         newPos.addLocal(DynamXGeometry.rotateVectorByQuaternion(offset, entity.physicsRotation));
-        player.prevPosX = player.posX;
-        player.prevPosY = player.posY;
-        player.prevPosZ = player.posZ;
+        player.prevPosX = player.getPosX();
+        player.prevPosY = player.getPosY();
+        player.prevPosZ = player.getPosZ();
         player.setPosition(newPos.x, newPos.y, newPos.z);
         player.limbSwingAmount = player.limbSwing = player.prevLimbSwingAmount = 0;
     }

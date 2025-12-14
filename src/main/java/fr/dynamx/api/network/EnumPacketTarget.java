@@ -1,10 +1,7 @@
 package fr.dynamx.api.network;
 
-import fr.hermes.api.mc.HmEntity;
-import fr.hermes.api.mc.HmServerPlayerEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
+import fr.hermes.api.mc.entities.HmEntity;
+import fr.hermes.api.mc.entities.HmServerPlayerEntity;
 import org.joml.Vector4f;
 
 /**

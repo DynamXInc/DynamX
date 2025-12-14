@@ -4,7 +4,7 @@ import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.physics.terrain.ITerrainElement;
 import fr.dynamx.core.utils.VerticalChunkPos;
-import fr.hermes.api.mc.HmWorld;
+import fr.hermes.api.mc.world.HmWorld;
 
 import javax.annotation.Nullable;
 import java.io.IOException;

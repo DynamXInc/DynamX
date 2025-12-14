@@ -4,8 +4,8 @@ import fr.dynamx.api.network.sync.EntityVariable;
 import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.utils.debug.Profiler;
 import fr.dynamx.core.utils.optimization.PooledHashMap;
-import fr.hermes.api.mc.HmPlayerEntity;
-import fr.hermes.api.mc.HmServerPlayerEntity;
+import fr.hermes.api.mc.entities.HmPlayerEntity;
+import fr.hermes.api.mc.entities.HmServerPlayerEntity;
 
 import java.util.HashMap;
 import java.util.Map;

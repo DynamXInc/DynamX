@@ -4,12 +4,11 @@ import fr.dynamx.core.common.physics.terrain.computing.BlockCollisionBehaviors;
 import fr.dynamx.core.common.physics.terrain.computing.TerrainBoxBuilder;
 import fr.dynamx.core.common.physics.terrain.computing.TerrainBoxConstructor;
 import fr.dynamx.core.common.physics.terrain.computing.TerrainCollisionsCalculator;
-import fr.hermes.api.mc.HmAxis;
-import fr.hermes.api.mc.HmBlockState;
-import fr.hermes.api.mc.HmServerWorld;
-import fr.hermes.api.mc.HmWorld;
+import fr.hermes.api.mc.utils.HmAxis;
+import fr.hermes.api.mc.blocks.HmBlockState;
+import fr.hermes.api.mc.world.HmServerWorld;
+import fr.hermes.api.mc.world.HmWorld;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
-import org.joml.Vector3i;
 
 import javax.annotation.Nullable;
 

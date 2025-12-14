@@ -30,7 +30,7 @@ import fr.dynamx.core.utils.DynamXLoadingTasks;
 import fr.dynamx.core.utils.DynamXUtils;
 import fr.dynamx.core.utils.errors.DynamXErrorManager;
 import fr.hermes.api.forge.HermesProgressManager;
-import fr.hermes.api.mc.HmResourceLocation;
+import fr.hermes.api.mc.utils.HmResourceLocation;
 import fr.hermes.api.mod.McObjectBinder;
 
 import java.util.ArrayList;

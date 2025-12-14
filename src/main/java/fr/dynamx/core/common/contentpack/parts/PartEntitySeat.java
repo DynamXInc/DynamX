@@ -31,8 +31,8 @@ import fr.dynamx.core.utils.client.DynamXRenderUtils;
 import fr.dynamx.core.utils.debug.DynamXDebugOptions;
 import fr.dynamx.core.utils.errors.DynamXErrorManager;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
-import fr.hermes.api.mc.HmEntity;
-import fr.hermes.api.mc.HmPlayerEntity;
+import fr.hermes.api.mc.entities.HmEntity;
+import fr.hermes.api.mc.entities.HmPlayerEntity;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.Minecraft;
@@ -195,6 +195,7 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
             super(seat.getRelativeRenderPosition(), seat.getRotation(), scale, linkedChilds);
         }
 
+        // TODO RENDER CONVERSION
         @Override
         public void render(BaseRenderContext.EntityRenderContext context, A packInfo, Matrix4f parentTransform) {
             if (MinecraftForgeClient.getRenderPass() != 0 || !(context.getEntity() instanceof IModuleContainer.ISeatsContainer)) {

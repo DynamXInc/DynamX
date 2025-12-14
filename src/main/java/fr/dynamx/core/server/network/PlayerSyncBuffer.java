@@ -8,7 +8,7 @@ import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.common.network.sync.MessageMultiPhysicsEntitySync;
 import fr.dynamx.core.common.network.sync.MessagePhysicsEntitySync;
 import fr.dynamx.core.utils.optimization.PooledHashMap;
-import fr.hermes.api.mc.HmServerPlayerEntity;
+import fr.hermes.api.mc.entities.HmServerPlayerEntity;
 
 import java.util.*;
 

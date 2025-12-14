@@ -10,6 +10,7 @@ import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.core.utils.errors.DynamXErrorManager;
 import fr.dynamx.core.utils.maths.DynamXMath;
+import fr.hermes.api.mc.utils.HmCameraTransforms;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
@@ -18,7 +19,7 @@ import org.joml.Matrix4f;
 import java.util.Arrays;
 
 /**
- * Item transforms for a specific {@link net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType}
+ * Item transforms for a specific {@link net.minecraft.client.renderer.block.model.HmCameraTransforms}
  *
  * @see ItemTransformsInfo
  */
@@ -84,19 +85,19 @@ public class ViewTransformsInfo extends SubInfoType<ItemTransformsInfo> {
     }
 
     public enum EnumViewType {
-        THIRD_PERSON_LEFT_HAND(ItemCameraTransforms.TransformType.THIRD_PERSON_LEFT_HAND, "ThirdPersonLeftHand", "TPLH"),
-        THIRD_PERSON_RIGHT_HAND(ItemCameraTransforms.TransformType.THIRD_PERSON_RIGHT_HAND, "ThirdPersonRightHand", "TPRH"),
-        FIRST_PERSON_LEFT_HAND(ItemCameraTransforms.TransformType.FIRST_PERSON_LEFT_HAND, "FirstPersonLeftHand", "FPLH"),
-        FIRST_PERSON_RIGHT_HAND(ItemCameraTransforms.TransformType.FIRST_PERSON_RIGHT_HAND, "FirstPersonRightHand", "FPRH"),
-        HEAD(ItemCameraTransforms.TransformType.HEAD, "Head"),
-        GUI(ItemCameraTransforms.TransformType.GUI, "Gui"),
-        GROUND(ItemCameraTransforms.TransformType.GROUND, "Ground"),
-        FIXED(ItemCameraTransforms.TransformType.FIXED, "Fixed");
+        THIRD_PERSON_LEFT_HAND(HmCameraTransforms.THIRD_PERSON_LEFT_HAND, "ThirdPersonLeftHand", "TPLH"),
+        THIRD_PERSON_RIGHT_HAND(HmCameraTransforms.THIRD_PERSON_RIGHT_HAND, "ThirdPersonRightHand", "TPRH"),
+        FIRST_PERSON_LEFT_HAND(HmCameraTransforms.FIRST_PERSON_LEFT_HAND, "FirstPersonLeftHand", "FPLH"),
+        FIRST_PERSON_RIGHT_HAND(HmCameraTransforms.FIRST_PERSON_RIGHT_HAND, "FirstPersonRightHand", "FPRH"),
+        HEAD(HmCameraTransforms.HEAD, "Head"),
+        GUI(HmCameraTransforms.GUI, "Gui"),
+        GROUND(HmCameraTransforms.GROUND, "Ground"),
+        FIXED(HmCameraTransforms.FIXED, "Fixed");
 
-        private final ItemCameraTransforms.TransformType transformType;
+        private final HmCameraTransforms transformType;
         private final String[] names;
 
-        EnumViewType(ItemCameraTransforms.TransformType transformType, String... names) {
+        EnumViewType(HmCameraTransforms transformType, String... names) {
             this.transformType = transformType;
             this.names = names;
         }

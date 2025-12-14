@@ -6,8 +6,8 @@ import fr.dynamx.core.common.physics.terrain.chunk.ChunkCollisions;
 import fr.dynamx.core.common.physics.terrain.chunk.ChunkLoadingTicket;
 import fr.dynamx.core.utils.VerticalChunkPos;
 import fr.dynamx.core.utils.debug.Profiler;
-import fr.hermes.api.forge.HmChunkUnloadEvent;
-import fr.hermes.api.mc.HmWorld;
+import fr.hermes.api.mc.world.HmChunk;
+import fr.hermes.api.mc.world.HmWorld;
 
 import javax.annotation.Nullable;
 
@@ -39,7 +39,7 @@ public interface ITerrainManager {
     /**
      * Called on ChunkEvent.Unload, removes any collision linked to it
      */
-    void onChunkUnload(HmChunkUnloadEvent e);
+    void onChunkUnload(HmChunk chunk);
 
     /**
      * Notifies that a chunk will change, and that all async loaded chunks should be received and put in the world now <br>

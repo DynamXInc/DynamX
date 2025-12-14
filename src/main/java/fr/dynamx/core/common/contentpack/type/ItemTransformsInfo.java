@@ -7,7 +7,7 @@ import fr.dynamx.api.contentpack.object.subinfo.SubInfoType;
 import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.core.common.contentpack.type.objects.AbstractItemObject;
-import fr.hermes.api.mc.HmCameraTransforms;
+import fr.hermes.api.mc.utils.HmCameraTransforms;
 
 import javax.annotation.Nullable;
 import java.util.Collections;

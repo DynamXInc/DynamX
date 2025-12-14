@@ -9,7 +9,7 @@ import fr.dynamx.api.entities.modules.ModuleListBuilder;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariableRegistry;
 import fr.dynamx.core.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.core.common.physics.entities.PackEntityPhysicsHandler;
-import fr.hermes.api.mc.HmEntity;
+import fr.hermes.api.mc.entities.HmEntity;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.NBTTagCompound;
 import org.joml.Quaternionf;

@@ -11,7 +11,6 @@ import fr.dynamx.core.common.contentpack.sync.PackSyncHandler;
 import fr.dynamx.core.utils.DynamXLoadingTasks;
 import fr.dynamx.core.utils.errors.DynamXErrorManager;
 import fr.hermes.api.forge.HermesProgressManager;
-import fr.hermes.api.mc.HmBlock;
 import fr.hermes.api.mod.HermesMod;
 import lombok.Getter;
 
@@ -22,8 +21,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;

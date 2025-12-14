@@ -1,4 +1,4 @@
-package fr.hermes.api.mc;
+package fr.hermes.api.mc.utils;
 
 //TODO MOVE TO CLIENT API
 public enum HmCameraTransforms {

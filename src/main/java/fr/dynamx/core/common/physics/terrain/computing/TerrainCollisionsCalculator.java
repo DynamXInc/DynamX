@@ -7,9 +7,9 @@ import fr.dynamx.core.utils.VerticalChunkPos;
 import fr.dynamx.core.utils.debug.Profiler;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.SubClassPool;
-import fr.hermes.api.mc.HmAxis;
-import fr.hermes.api.mc.HmBlockState;
-import fr.hermes.api.mc.HmWorld;
+import fr.hermes.api.mc.utils.HmAxis;
+import fr.hermes.api.mc.blocks.HmBlockState;
+import fr.hermes.api.mc.world.HmWorld;
 import fr.hermes.forge.JmeVector3fPool;
 import org.joml.Vector3i;
 

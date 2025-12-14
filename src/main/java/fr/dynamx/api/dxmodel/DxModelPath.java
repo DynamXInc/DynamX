@@ -2,7 +2,7 @@ package fr.dynamx.api.dxmodel;
 
 import fr.dynamx.api.contentpack.object.INamedObject;
 import fr.dynamx.core.common.contentpack.PackInfo;
-import fr.hermes.api.mc.HmResourceLocation;
+import fr.hermes.api.mc.utils.HmResourceLocation;
 import lombok.Getter;
 
 import java.util.Collections;

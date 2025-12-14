@@ -1,4 +1,4 @@
-package fr.hermes.api.mc;
+package fr.hermes.api.mc.utils;
 
 import lombok.Getter;
 import org.joml.Vector3f;

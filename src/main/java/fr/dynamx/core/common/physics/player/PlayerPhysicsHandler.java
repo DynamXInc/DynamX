@@ -13,8 +13,8 @@ import fr.dynamx.core.common.entities.RagdollEntity;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.hermes.forge.JmeVector3fPool;
 import fr.dynamx.core.utils.physics.DynamXPhysicsHelper;
-import fr.hermes.api.mc.HmPlayerEntity;
-import fr.hermes.api.mc.HmWorld;
+import fr.hermes.api.mc.entities.HmPlayerEntity;
+import fr.hermes.api.mc.world.HmWorld;
 import lombok.Getter;
 
 /**

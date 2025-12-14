@@ -32,6 +32,8 @@ import fr.dynamx.core.utils.errors.DynamXErrorManager;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.maths.DynamXMath;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
+import fr.hermes.api.mc.entities.HmPlayerEntity;
+import fr.hermes.api.mc.utils.HmResourceLocation;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -91,7 +93,7 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
         isRight = partName.toLowerCase().contains("right");
     }
 
-    protected void readMudguardPositionFromModel(ResourceLocation model) {
+    protected void readMudguardPositionFromModel(HmResourceLocation model) {
         if (getRotationPoint() == null && isAutomaticPosition()) {
             DxModelData modelData = DynamXContext.getDxModelDataFromCache(DynamXUtils.getModelPath(getPackName(), model));
             if (modelData != null) {
@@ -128,7 +130,7 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
     }
 
     @Override
-    public boolean interact(BaseVehicleEntity<?> entity, EntityPlayer with) {
+    public boolean interact(BaseVehicleEntity<?> entity, HmPlayerEntity with) {
         return false;
     }
 
@@ -137,7 +139,7 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
             throw new IllegalArgumentException("Attached wheel info " + getDefaultWheelName() + " was not found !");
         }
         defaultWheelInfo = partWheelInfo;
-        setBox(new AxisAlignedBB(-partWheelInfo.getWheelWidth(), -partWheelInfo.getWheelRadius(), -partWheelInfo.getWheelRadius(),
+        setBox(new MutableBoundingBox(-partWheelInfo.getWheelWidth(), -partWheelInfo.getWheelRadius(), -partWheelInfo.getWheelRadius(),
                 partWheelInfo.getWheelWidth(), partWheelInfo.getWheelRadius(), partWheelInfo.getWheelRadius()));
         if (getRimObjectName() == null && partWheelInfo.getModel() == null) {
             DynamXErrorManager.addPackError(getPackName(), "wheel_no_model", ErrorLevel.HIGH, owner.getFullName(), getName() + " using wheel info: " + partWheelInfo.getFullName());

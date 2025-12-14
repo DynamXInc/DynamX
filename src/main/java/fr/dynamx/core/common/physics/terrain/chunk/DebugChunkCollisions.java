@@ -1,7 +1,7 @@
 package fr.dynamx.core.common.physics.terrain.chunk;
 
 import fr.dynamx.core.utils.VerticalChunkPos;
-import fr.hermes.api.mc.HmWorld;
+import fr.hermes.api.mc.world.HmWorld;
 
 import java.util.UUID;
 

@@ -11,11 +11,8 @@ import fr.dynamx.core.common.entities.PackPhysicsEntity;
 import fr.dynamx.core.common.entities.PropsEntity;
 import fr.dynamx.core.common.entities.SeatEntity;
 import fr.dynamx.core.common.entities.modules.SeatsModule;
-import fr.hermes.api.mc.HmEntity;
-import fr.hermes.api.mc.HmPlayerEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.text.TextComponentString;
+import fr.hermes.api.mc.entities.HmEntity;
+import fr.hermes.api.mc.entities.HmPlayerEntity;
 
 /**
  * A seat that can be used on block and props

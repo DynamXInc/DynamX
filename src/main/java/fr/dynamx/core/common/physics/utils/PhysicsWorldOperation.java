@@ -80,14 +80,14 @@ public class PhysicsWorldOperation<A> {
                     PhysicsEntity<?> et = (PhysicsEntity<?>) object;
                     entities.remove(et);
                     Runnable task = () -> {
-                        List<PhysicsEntity> physicsEntities = et.world.getEntitiesWithinAABB(PhysicsEntity.class, et.getEntityBoundingBox().expand(10, 10, 10));
+                        List<PhysicsEntity> physicsEntities = et.getHmWorld().getEntitiesWithinAABB(PhysicsEntity.class, et.getHmBoundingBox().expand(10, 10, 10));
                         for (PhysicsEntity entity : physicsEntities) {
                             if (entity != et) {
                                 entity.forcePhysicsActivation();
                             }
                         }
                     };
-                    DynamXMain.getProxy().scheduleTask(et.world, task);
+                    DynamXMain.getProxy().scheduleTask(et.getHmWorld(), task);
                     break;
                 case ADD_CONSTRAINT:
                     if (object != null && !joints.contains(object)) {

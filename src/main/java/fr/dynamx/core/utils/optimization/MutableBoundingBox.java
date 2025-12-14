@@ -222,7 +222,7 @@ public class MutableBoundingBox implements Serializable {
      * <br>
      * This bounding box is modified and will always be equal or greater in volume to this bounding box.
      */
-    public void expand(double x, double y, double z) {
+    public MutableBoundingBox expand(double x, double y, double z) {
         if (x < 0.0D) {
             minX += x;
         } else if (x > 0.0D) {
@@ -240,6 +240,8 @@ public class MutableBoundingBox implements Serializable {
         } else if (z > 0.0D) {
             maxZ += z;
         }
+
+        return this;
     }
 
     /**

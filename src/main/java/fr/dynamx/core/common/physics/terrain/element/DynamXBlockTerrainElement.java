@@ -16,9 +16,8 @@ import fr.dynamx.core.utils.optimization.BoundingBoxPool;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.SubClassPool;
 import fr.hermes.api.mc.HmTileEntity;
-import fr.hermes.api.mc.HmWorld;
+import fr.hermes.api.mc.world.HmWorld;
 import fr.hermes.forge.JmeVector3fPool;
-import net.minecraft.util.math.BlockPos;
 import org.joml.Vector3i;
 
 import javax.annotation.Nonnull;

@@ -38,8 +38,8 @@ public class DynamXPacketRegistry {
      * Creates a new {@link IDnxNetworkSystem} for this side and registers all packets <br>
      * The network instance is located in {@link DynamXContext}
      */
-    public static IDnxNetworkSystem init(Side side) {
-        IDnxNetworkSystem network = side.isServer() ? new DynamXServerNetworkSystem(DynamXConfig.useUdp ? EnumNetworkType.DYNAMX_UDP : EnumNetworkType.VANILLA_TCP) : new DynamXClientNetworkSystem(DynamXConfig.useUdp ? EnumNetworkType.DYNAMX_UDP : EnumNetworkType.VANILLA_TCP);
+    public static IDnxNetworkSystem init(boolean isClient) {
+        IDnxNetworkSystem network = isClient ? new DynamXClientNetworkSystem(DynamXConfig.useUdp ? EnumNetworkType.DYNAMX_UDP : EnumNetworkType.VANILLA_TCP) : new DynamXServerNetworkSystem(DynamXConfig.useUdp ? EnumNetworkType.DYNAMX_UDP : EnumNetworkType.VANILLA_TCP);
         SimpleNetworkWrapper channel = network.getVanillaNetwork().getChannel();
 
         //Udp packets

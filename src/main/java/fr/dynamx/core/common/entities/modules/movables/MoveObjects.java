@@ -83,7 +83,7 @@ public class MoveObjects extends MovableModule {
                 rigidBody.setGravity(JmeVector3fPool.get());
                 rigidBody.setAngularVelocity(JmeVector3fPool.get());
                 rigidBody.setLinearVelocity(JmeVector3fPool.get());
-                Vector3f playerPos = picker.get().getEyesPosition();
+                Vector3f playerPos = JmeVector3fPool.get(picker.get().getEyesPosition());
                 playerPos.addLocal(playerLookPos);
                 pickedEntity.getPhysicsHandler().setPhysicsPosition(playerPos);
             }

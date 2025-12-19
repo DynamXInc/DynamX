@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.MixinEnvironment;
 /**
  * A Minecraft {@link net.minecraft.entity.player.PlayerEntity}
  */
-public interface HmPlayerEntity extends HmEntity {
+public interface HmPlayerEntity extends HmLivingEntity {
     MixinEnvironment.Side getSide();
 
     GameProfile getGameProfile();

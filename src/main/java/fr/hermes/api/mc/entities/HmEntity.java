@@ -112,6 +112,8 @@ public interface HmEntity {
 
     Vector3f getHmPosition();
 
+    Vector3i getHmBlockPosition();
+
     float getEyeHeight();
 
     //TODO NEW TO IMPLEMENT
@@ -130,13 +132,21 @@ public interface HmEntity {
 
     double getPrevPosX();
 
+    void setPrevPosX(double prevPosX);
+
     double getPrevPosY();
 
+    void setPrevPosY(double prevPosY);
+
     double getPrevPosZ();
+
+    void setPrevPosZ(double prevPosZ);
 
     boolean startRiding(HmEntity riddenEntity);
 
     boolean startRiding(HmEntity riddenEntity, boolean force);
 
-    com.jme3.math.Vector3f getEyesPosition();
+    Vector3f getEyesPosition();
+
+    boolean isRiding();
 }

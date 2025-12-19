@@ -11,6 +11,7 @@ import fr.dynamx.api.dxmodel.IModelTextureVariantsSupplier;
 import fr.dynamx.core.client.renders.model.renderer.ObjObjectRenderer;
 import fr.dynamx.core.client.renders.scene.node.SceneNode;
 import fr.dynamx.core.common.contentpack.type.MaterialVariantsInfo;
+import fr.hermes.api.mc.utils.HmParticleType;
 import fr.hermes.api.mc.utils.HmResourceLocation;
 import lombok.Getter;
 import net.minecraft.util.EnumParticleTypes;
@@ -75,7 +76,7 @@ public class PartWheelInfo extends SubInfoTypeOwner<PartWheelInfo> implements IM
     private float wheelsDampingCompression;
     @Getter
     @PackFileProperty(configNames = "SkidParticle", required = false)
-    private EnumParticleTypes skidParticle = EnumParticleTypes.SMOKE_NORMAL;
+    private HmParticleType skidParticle;
 
     @Getter
     @PackFileProperty(configNames = "ScaleModifier", type = DefinitionType.DynamXDefinitionTypes.VECTOR3F, required = false)

@@ -19,6 +19,7 @@ import fr.dynamx.core.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.core.common.physics.entities.modules.EnginePhysicsHandler;
 import fr.dynamx.core.common.physics.entities.parts.engine.AutomaticGearboxHandler;
 import fr.dynamx.core.utils.DynamXConstants;
+import fr.hermes.api.mc.entities.HmPlayerEntity;
 import fr.hermes.forge.JmeVector3fPool;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
@@ -135,7 +136,7 @@ public abstract class BasicEngineModule implements IPhysicsModule<BaseVehiclePhy
     }
 
     public void onEngineSwitchedOn() {
-        if (entity.world.isRemote && entity.ticksExisted > 60) {
+        if (entity.getHmWorld().isClient() && entity.getTicksExisted() > 60) {
             playStartingSound();
         }
     }
@@ -174,7 +175,7 @@ public abstract class BasicEngineModule implements IPhysicsModule<BaseVehiclePhy
     }
 
     @Override
-    public void onSetSimulationHolder(SimulationHolder simulationHolder, EntityPlayer simulationPlayerHolder, SimulationHolder.UpdateContext changeContext) {
+    public void onSetSimulationHolder(SimulationHolder simulationHolder, HmPlayerEntity simulationPlayerHolder, SimulationHolder.UpdateContext changeContext) {
         if (simulationPlayerHolder == null) {
             resetControls();
         }
@@ -194,8 +195,8 @@ public abstract class BasicEngineModule implements IPhysicsModule<BaseVehiclePhy
     public abstract BaseEngineInfo getEngineInfo();
 
     @Override
-    public boolean listenEntityUpdates(Side side) {
-        return side.isClient();
+    public boolean listenEntityUpdates(boolean isClient) {
+        return isClient;
     }
 
     @Override

@@ -23,10 +23,9 @@ import fr.dynamx.core.utils.PhysicsEntityException;
 import fr.dynamx.core.utils.debug.Profiler;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.SubClassPool;
+import fr.hermes.api.mc.world.HmWorld;
 import fr.hermes.forge.JmeVector3fPool;
-import net.minecraft.world.World;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.relauncher.Side;
+import org.spongepowered.asm.mixin.MixinEnvironment;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -40,7 +39,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class BasePhysicsWorld implements IPhysicsWorld {
     protected PhysicsSoftSpace dynamicsWorld;
     protected final PhysicsWorldTerrain manager;
-    protected final World mcWorld;
+    protected final HmWorld mcWorld;
 
     protected final Set<PhysicsJoint> joints = new HashSet<>();
     protected final HashSet<PhysicsEntity<?>> entities = new HashSet<>();
@@ -50,9 +49,9 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
 
     private final AtomicBoolean scheduledTasksLock = new AtomicBoolean();
 
-    public BasePhysicsWorld(World world, boolean isRemoteWorld) {
+    public BasePhysicsWorld(HmWorld world, boolean isRemoteWorld) {
         this.mcWorld = world;
-        this.manager = new PhysicsWorldTerrain(this, mcWorld, isRemoteWorld);
+        this.manager = new PhysicsWorldTerrain(this, world, isRemoteWorld);
     }
 
     /**
@@ -163,7 +162,6 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
             QuaternionPool.openPool(SubClassPool.TICK_ENTITY_PHY_PRE);
             JmeVector3fPool.openPool(SubClassPool.TICK_ENTITY_PHY_PRE);
             try {
-                //e.getNetwork().onPrePhysicsTick(profiler);
                 e.getSynchronizer().onPrePhysicsTick(profiler);
             } catch (Exception ex) {
                 throw new PhysicsEntityException(e, "prePhysicsTick", ex);
@@ -174,16 +172,15 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
         profiler.end(Profiler.Profiles.PHYSICS_TICK_ENTITIES_PRE);
 
         //Update sync system
-        if (mcWorld.isRemote) {
+        if (mcWorld.isClient()) {
             ClientPhysicsSyncManager.tick();
-        } else if (mcWorld.getMinecraftServer().isDedicatedServer()) {
+        } else {
             ServerPhysicsSyncManager.tick(profiler);
         }
 
         //Tick the physics engine
-        //long pre = System.currentTimeMillis();
         profiler.start(Profiler.Profiles.BULLET_STEP_SIM);
-        DynamXContext.getPhysicsSimulationMode(Side.SERVER).updatePhysicsWorld(dynamicsWorld);
+        DynamXContext.getPhysicsSimulationMode(MixinEnvironment.Side.SERVER).updatePhysicsWorld(dynamicsWorld);
 
         //Post-tick each entity after the physics engine tick
         //Retrieves the simulated data
@@ -192,7 +189,6 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
             try {
                 syncThreadsLock.acquire();
             } catch (InterruptedException ignored) {
-                //System.out.println("Inter 1 !");
                 syncThreadsLock = null; //fix: don't release if interrupted
             }
         }
@@ -212,9 +208,7 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
         }
         profiler.end(Profiler.Profiles.PHYSICS_TICK_ENTITIES_POST);
 
-        // if (false && CmdNetworkConfig.sync_buff)
-        //   System.out.println("Took " + (System.currentTimeMillis() - pre) + " ms");
-        MinecraftForge.EVENT_BUS.post(new PhysicsEvent.StepSimulation(this, DynamXContext.getPhysicsSimulationMode(Side.SERVER).getTimeStep()));
+        // TODO EVENT MinecraftForge.EVENT_BUS.post(new PhysicsEvent.StepSimulation(this, DynamXContext.getPhysicsSimulationMode(MixinEnvironment.Side.SERVER).getTimeStep()));
         profiler.end(Profiler.Profiles.BULLET_STEP_SIM);
     }
 
@@ -237,7 +231,7 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
     }
 
     @Override
-    public World getWorld() {
+    public HmWorld getWorld() {
         return mcWorld;
     }
 
@@ -270,8 +264,8 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
         entities.clear();
         joints.clear();
         getTerrainManager().onWorldUnload();
-        DynamXContext.getPhysicsWorldPerDimensionMap().remove(mcWorld.provider.getDimension());
-        if(mcWorld.isRemote) {
+        DynamXContext.getPhysicsWorldPerDimensionMap().remove(mcWorld.getDimension());
+        if(mcWorld.isClient()) {
             ClientDebugSystem.trackedRigidBodies.clear();
         }
     }

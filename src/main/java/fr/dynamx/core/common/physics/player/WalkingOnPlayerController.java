@@ -39,11 +39,13 @@ public class WalkingOnPlayerController {
     public void applyOffset() {
         Vector3f newPos = JmeVector3fPool.get((float) entity.getPosX(), (float) entity.getPosY(), (float) entity.getPosZ());
         newPos.addLocal(DynamXGeometry.rotateVectorByQuaternion(offset, entity.physicsRotation));
-        player.prevPosX = player.getPosX();
-        player.prevPosY = player.getPosY();
-        player.prevPosZ = player.getPosZ();
+        player.setPrevPosX(player.getPosX());
+        player.setPrevPosY(player.getPosY());
+        player.setPrevPosZ(player.getPosZ());
         player.setPosition(newPos.x, newPos.y, newPos.z);
-        player.limbSwingAmount = player.limbSwing = player.prevLimbSwingAmount = 0;
+        player.setLimbSwingAmount(0);
+        player.setLimbSwing(0);
+        player.setPrevLimbSwingAmount(0);
     }
 
     /**

@@ -27,6 +27,7 @@ import fr.hermes.forge.JmeVector3fPool;
 import jme3utilities.Validate;
 import lombok.Getter;
 import net.minecraft.nbt.NBTTagCompound;
+import org.joml.Vector3i;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -223,7 +224,8 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
                 }
                 Vector3f pos = JmeVector3fPool.get();
                 w.getPhysicsWheel().getCollisionLocation(pos);
-                org.joml.Vector3f bp = Vector3fPool.get(pos.x, Math.ceil(pos.y) - 1, pos.z);
+                // TODO USE POOL
+                org.joml.Vector3i bp = new Vector3i((int) pos.x, (int) (Math.ceil(pos.y) - 1), (int) pos.z);
                 //IBlockState blockState = entity.world.getBlockState(bp);
                 float[] frictionValues = DEFAULT_GRIP; // TODO dynamic grip depending on the block was removed. to add back properly. See commit 🏷️ Remove block-grip and block-related slope config support
                 boolean isBlockWet = entity.getHmWorld().getBiome(bp).canRain() && entity.getHmWorld().isRaining() && entity.getHmWorld().canBlockSeeSky(bp);

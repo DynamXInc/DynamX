@@ -48,14 +48,14 @@ public abstract class CommonProxy {
      * @return True if the bullet physics engine should be used for the world. Always true except for client single player worlds
      */
     public boolean shouldUseBulletSimulation(HmWorld world) {
-        return DynamXContext.getPhysicsWorldPerDimensionMap().containsKey(world.provider.getDimension());
+        return DynamXContext.getPhysicsWorldPerDimensionMap().containsKey(world.getDimension());
     }
 
     /**
      * @return The {@link AbstractEntityPhysicsHandler} for the given entity, according to the side and game type (solo or multi)
      */
     public <T extends AbstractEntityPhysicsHandler<?, ?>> PhysicsEntitySynchronizer<? extends PhysicsEntity<T>> getNetHandlerForEntity(PhysicsEntity<T> tPhysicsEntity) {
-        return new SPPhysicsEntitySynchronizer<>(tPhysicsEntity, Side.SERVER); //Does not work at all on dedicated servers or in lan games
+        return new SPPhysicsEntitySynchronizer<>(tPhysicsEntity, false); //Does not work at all on dedicated servers or in lan games
     }
 
     /**
@@ -80,11 +80,11 @@ public abstract class CommonProxy {
      * Creates the physics world
      */
     public void initPhysicsWorld(HmWorld world) {
-        if (DynamXContext.getPhysicsWorldPerDimensionMap().containsKey(world.provider.getDimension())) {
+        if (DynamXContext.getPhysicsWorldPerDimensionMap().containsKey(world.getDimension())) {
             DynamXMain.log.warn("Physics world of " + world + " is already loaded ! Keeping the previously loaded world.");
             return;
         }
-        DynamXContext.getPhysicsWorldPerDimensionMap().put(world.provider.getDimension(), new BuiltinPhysicsWorld(world, false));
+        DynamXContext.getPhysicsWorldPerDimensionMap().put(world.getDimension(), new BuiltinPhysicsWorld(world, false));
     }
 
     public abstract void schedulePacksInit();

@@ -156,7 +156,7 @@ public class DynamXMain {
                 throw memoizedConstructionError;
         }
 
-        DynamXContext.initNetwork();
+        DynamXContext.initNetwork(isClient);
         /* Registering entities*/
         //TODO ENTITY REGISTRY
         /*EntityRegistry.registerModEntity(new ResourceLocation(DynamXConstants.ID, "entity_car"), CarEntity.class, "entity_car", 102, this, 200, 4, false);

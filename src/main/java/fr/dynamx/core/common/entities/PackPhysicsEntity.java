@@ -198,7 +198,7 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
             return null;
         }
         org.joml.Vector3f lookVec = entity.getHmLook();
-        org.joml.Vector3f hitVec = entity.getHmPosition().add(0, entity.getEyeHeight(), 0, Vector3fPool.get());
+        org.joml.Vector3f hitVec = entity.getEyesPosition();
         InteractivePart<?, ?> nearest = null;
         Vector3f nearestPos = null;
         Vector3f playerPos = JmeVector3fPool.get((float) entity.getPosX(), (float) entity.getPosY(), (float) entity.getPosZ());
@@ -249,7 +249,7 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
 
     @Override
     public int getBrightnessForRender() {
-        return ClientDynamXUtils.getLightNear(getHmWorld(), getHmPosition(), 1, 3);
+        return ClientDynamXUtils.getLightNear(getHmWorld(), getHmBlockPosition(), 1, 3);
     }
 
     @Override

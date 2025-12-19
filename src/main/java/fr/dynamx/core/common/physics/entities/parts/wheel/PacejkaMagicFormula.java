@@ -5,6 +5,7 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.core.common.physics.entities.modules.WheelsPhysicsHandler;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
+import fr.dynamx.core.utils.optimization.Vector3fPool;
 import fr.hermes.forge.JmeVector3fPool;
 
 import static fr.dynamx.core.utils.maths.DynamXMath.clamp;
@@ -52,15 +53,14 @@ public class PacejkaMagicFormula {
         Quaternion wheelRot = wheelPhysics.getPhysicsVehicle().getPhysicsRotation(QuaternionPool.get()).mult(
                 QuaternionPool.get().fromAngleNormalAxis(wheelPhysics.getSteeringAngle(), JmeVector3fPool.get(0, 1, 0)), QuaternionPool.get());
 
-        Vector3f wheelDir = DynamXGeometry.getRotationColumn(wheelRot, 2, JmeVector3fPool.get());
-
-        Vector3f vehicleTravel;
+        org.joml.Vector3f wheelDir = DynamXGeometry.getRotationColumn(wheelRot, 2, Vector3fPool.get());
+        org.joml.Vector3f vehicleTravel;
 
         if (wheelPhysics.getPhysicsVehicle().getCurrentVehicleSpeedKmHour() < 5) {
             vehicleTravel = DynamXGeometry.getRotationColumn(wheelPhysics.getPhysicsVehicle().getPhysicsRotation(null), 2);
         } else {
-            vehicleTravel = wheelPhysics.getPhysicsVehicle().getLinearVelocity(JmeVector3fPool.get());
-            DynamXGeometry.normalizeVector(vehicleTravel);
+            vehicleTravel = Vector3fPool.get(wheelPhysics.getPhysicsVehicle().getLinearVelocity(JmeVector3fPool.get()));
+            vehicleTravel.normalize();
             vehicleTravel.y = 0;
         }
 

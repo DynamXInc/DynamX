@@ -7,12 +7,14 @@ import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.maths.DynamXMath;
 import fr.dynamx.core.utils.optimization.GlQuaternionPool;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
+import fr.hermes.api.mc.world.HmWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
+import org.joml.Vector3i;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.util.vector.Quaternion;
 
@@ -70,7 +72,7 @@ public class ClientDynamXUtils {
     }
 
     @SideOnly(Side.CLIENT)
-    public static int getLightNear(World world, BlockPos pos, int horizontalRadius, int maxHeight) {
+    public static int getLightNear(HmWorld world, Vector3i pos, int horizontalRadius, int maxHeight) {
         if (!world.getBlockState(pos).isOpaqueCube()) {
             return world.getCombinedLight(pos, 0);
         }

@@ -59,20 +59,20 @@ public class PhysicsWorldOperation<A> {
                 case ADD_VEHICLE:
                 case ADD_OBJECT:
                     dynamicsWorld.addCollisionObject((PhysicsCollisionObject) object);
-                    if (physicsWorld.getWorld().isRemote && object instanceof PhysicsRigidBody && ((PhysicsRigidBody) object).getUserObject() instanceof BulletShapeType && !((BulletShapeType<?>) ((PhysicsRigidBody) object).getUserObject()).getType().isTerrain()) {
+                    if (physicsWorld.getWorld().isClient() && object instanceof PhysicsRigidBody && ((PhysicsRigidBody) object).getUserObject() instanceof BulletShapeType && !((BulletShapeType<?>) ((PhysicsRigidBody) object).getUserObject()).getType().isTerrain()) {
                         ClientDebugSystem.trackedRigidBodies.put(((PhysicsCollisionObject) object).nativeId(), (PhysicsRigidBody) object);
                     }
                     break;
                 case REMOVE_VEHICLE:
                 case REMOVE_OBJECT:
                     dynamicsWorld.removeCollisionObject((PhysicsCollisionObject) object);
-                    if (physicsWorld.getWorld().isRemote && object instanceof PhysicsRigidBody && ((PhysicsRigidBody) object).getUserObject() instanceof BulletShapeType && !((BulletShapeType<?>) ((PhysicsRigidBody) object).getUserObject()).getType().isTerrain()) {
+                    if (physicsWorld.getWorld().isClient() && object instanceof PhysicsRigidBody && ((PhysicsRigidBody) object).getUserObject() instanceof BulletShapeType && !((BulletShapeType<?>) ((PhysicsRigidBody) object).getUserObject()).getType().isTerrain()) {
                         ClientDebugSystem.trackedRigidBodies.remove(((PhysicsCollisionObject) object).nativeId());
                     }
                     break;
                 case ADD_ENTITY:
                     if (!entities.add((PhysicsEntity<?>) object)) {
-                        DynamXMain.log.fatal("Entity " + object + " is already registered, please report this !");
+                        DynamXMain.log.fatal("Entity {} is already registered, please report this !", object);
                     }
                     ((PhysicsEntity<?>) object).isRegistered = PhysicsEntity.EnumEntityPhysicsRegistryState.REGISTERED;
                     break;
@@ -94,7 +94,7 @@ public class PhysicsWorldOperation<A> {
                         joints.add((PhysicsJoint) object);
                         dynamicsWorld.addJoint((PhysicsJoint) object);
                     } else
-                        DynamXMain.log.fatal("PhysicsJoint " + object + " is already registered, please report this !");
+                        DynamXMain.log.fatal("PhysicsJoint {} is already registered, please report this !", object);
                     break;
                 case REMOVE_CONSTRAINT:
                     if (joints.contains(object)) {
@@ -111,7 +111,7 @@ public class PhysicsWorldOperation<A> {
                 if (operation != null)
                     operation.execute(physicsWorld, dynamicsWorld, joints, entities);
             } catch (Exception e) {
-                DynamXMain.log.fatal("Exception while executing callback of " + this + ". Callback: " + callback, e);
+                DynamXMain.log.fatal("Exception while executing callback of {}. Callback: {}", this, callback, e);
             }
         }
     }

@@ -9,6 +9,7 @@ import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.Vector3fPool;
 import fr.hermes.forge.JmeVector3fPool;
 import fr.dynamx.core.utils.physics.DynamXPhysicsHelper;
+import org.joml.Quaternionf;
 
 /**
  * General geometrical operations with Vector3f and Quaternions
@@ -282,7 +283,7 @@ public class DynamXGeometry {
      * @param i the column to retrieve. Must be between 0 and 2.
      * @return the column specified by the index.
      */
-    public static Vector3f getRotationColumn(Quaternion quaternion, int i) {
+    public static org.joml.Vector3f getRotationColumn(Quaternion quaternion, int i) {
         return getRotationColumn(quaternion, i, null);
     }
 
@@ -296,9 +297,9 @@ public class DynamXGeometry {
      *              is created.
      * @return the column specified by the index.
      */
-    public static Vector3f getRotationColumn(Quaternion quaternion, int i, Vector3f store) {
+    public static org.joml.Vector3f getRotationColumn(Quaternion quaternion, int i, org.joml.Vector3f store) {
         if (store == null) {
-            store = JmeVector3fPool.get();
+            store = Vector3fPool.get();
         }
 
         float norm = quaternion.norm();

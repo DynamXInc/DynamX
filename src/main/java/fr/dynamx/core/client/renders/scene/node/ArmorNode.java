@@ -4,6 +4,7 @@ import fr.dynamx.core.client.renders.scene.BaseRenderContext;
 import fr.dynamx.core.common.contentpack.type.objects.ArmorObject;
 import fr.dynamx.core.common.items.DynamXItemArmor;
 import fr.dynamx.core.utils.client.DynamXRenderUtils;
+import fr.hermes.api.mc.utils.HmCameraTransforms;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
@@ -54,7 +55,7 @@ public class ArmorNode<A extends ArmorObject<?>> extends AbstractItemNode<BaseRe
         packInfo.getObjArmor().setActivePart(slot, context.getTextureId());
         //restore default rotations (contained in ModelBiped)
         packInfo.getObjArmor().setModelAttributes(packInfo.getObjArmor());
-        if (context.getRenderType() != ItemCameraTransforms.TransformType.GUI)
+        if (context.getRenderType() != HmCameraTransforms.GUI)
             transform.rotate((float) (Math.PI / 2), 1, 0, 0);
         switch (slot) {
             case FEET:

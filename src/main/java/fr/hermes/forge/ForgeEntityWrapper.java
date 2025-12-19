@@ -395,9 +395,77 @@ public class ForgeEntityWrapper<E extends HmEntity> extends Entity implements IE
 
     @Override
     public Vector3f getHmPosition() {
+        //TODO POOL ?
+        return new Vector3f((float) posX, (float) (posY), (float) posZ);
+    }
+
+    @Override
+    public Vector3i getHmBlockPosition() {
         // same logic as getPosition() from Mc
         //TODO POOL ?
-        return new Vector3f((float) posX, (float) (posY + 0.5f), (float) posZ);
+        return new Vector3i((int) posX, (int) (posY + 0.5f), (int) posZ);
+    }
+
+    @Override
+    public int getChunkX() {
+        return chunkCoordX;
+    }
+
+    @Override
+    public int getChunkY() {
+        return chunkCoordY;
+    }
+
+    @Override
+    public int getChunkZ() {
+        return chunkCoordZ;
+    }
+
+    @Override
+    public void setMotionX(float motionX) {
+        this.motionX = motionX;
+    }
+
+    @Override
+    public void setMotionY(float motionY) {
+        this.motionY = motionY;
+    }
+
+    @Override
+    public void setMotionZ(float motionZ) {
+        this.motionZ = motionZ;
+    }
+
+    @Override
+    public double getPrevPosX() {
+        return prevPosX;
+    }
+
+    @Override
+    public double getPrevPosY() {
+        return prevPosY;
+    }
+
+    @Override
+    public double getPrevPosZ() {
+        return prevPosZ;
+    }
+
+    @Override
+    public boolean startRiding(HmEntity riddenEntity) {
+        //FIXME IMPLEMENT
+        return false;
+    }
+
+    @Override
+    public boolean startRiding(HmEntity riddenEntity, boolean force) {
+        //FIXME IMPLEMENT
+        return false;
+    }
+
+    @Override
+    public Vector3f getEyesPosition() {
+        return getHmPosition().add(0, getEyeHeight(), 0);
     }
 
     // === no from Hm ===

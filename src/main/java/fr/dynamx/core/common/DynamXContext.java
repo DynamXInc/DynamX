@@ -15,13 +15,10 @@ import fr.dynamx.core.common.objloader.data.ObjModelData;
 import fr.dynamx.core.common.physics.player.PlayerPhysicsHandler;
 import fr.dynamx.core.common.physics.world.PhysicsSimulationModes;
 import fr.hermes.api.mc.entities.HmPlayerEntity;
+import fr.hermes.api.mc.utils.HmResourceLocation;
 import fr.hermes.api.mc.world.HmWorld;
 import lombok.Getter;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import org.spongepowered.asm.mixin.MixinEnvironment;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -46,7 +43,8 @@ public class DynamXContext {
      */
     @Getter
     private static IDnxNetworkSystem network;
-    @SideOnly(Side.CLIENT)
+    //@SideOnly(Side.CLIENT)
+    // TODO MOVE TO A CLIENT CONTEXT
     private static DynamXModelRegistry dxModelRegistry;
 
     /**
@@ -73,15 +71,15 @@ public class DynamXContext {
 
     private static final IPhysicsSimulationMode[] physicsSimulationModes = new IPhysicsSimulationMode[]{new PhysicsSimulationModes.FullPhysics(), new PhysicsSimulationModes.FullPhysics()};
 
-    private static final Map<ResourceLocation, DxModelData> DX_MODEL_DATA_CACHE = new HashMap<>();
+    private static final Map<HmResourceLocation, DxModelData> DX_MODEL_DATA_CACHE = new HashMap<>();
 
     private static final Map<Integer, IPhysicsWorld> PHYSICS_WORLD_PER_DIMENSION = new HashMap<>();
 
-    public static void initNetwork() {
-        network = DynamXPacketRegistry.init(FMLCommonHandler.instance().getSide());
+    public static void initNetwork(boolean isClient) {
+        network = DynamXPacketRegistry.init(isClient);
     }
 
-    @SideOnly(Side.CLIENT)
+    //@SideOnly(Side.CLIENT)
     public static void initObjModelRegistry() {
         dxModelRegistry = new DynamXModelRegistry();
     }
@@ -90,7 +88,7 @@ public class DynamXContext {
      * Use this to avoid manipulating physics on invalid sides
      *
      * @param world The World to test
-     * @return True is a {@link IPhysicsWorld} exists for this {@link World} (depends on the side of the world) <br>
+     * @return True is a {@link IPhysicsWorld} exists for this {@link HmWorld} (depends on the side of the world) <br>
      * Always true except for client single player worlds
      */
     public static boolean usesPhysicsWorld(HmWorld world) {
@@ -101,13 +99,13 @@ public class DynamXContext {
      * @return The local physics world
      */
     public static IPhysicsWorld getPhysicsWorld(HmWorld world) {
-        return getPhysicsWorldPerDimensionMap().get(world.provider.getDimension());
+        return getPhysicsWorldPerDimensionMap().get(world.getDimension());
     }
 
     /**
      * @return The obj model loader
      */
-    @SideOnly(Side.CLIENT)
+    //@SideOnly(Side.CLIENT)
     public static DynamXModelRegistry getDxModelRegistry() {
         return dxModelRegistry;
     }
@@ -125,7 +123,7 @@ public class DynamXContext {
      *             Side.CLIENT is <strong>only</strong> used on dedicated server for the client physics worlds
      * @return The {@link IPhysicsSimulationMode} on the given side
      */
-    public static IPhysicsSimulationMode getPhysicsSimulationMode(Side side) {
+    public static IPhysicsSimulationMode getPhysicsSimulationMode(MixinEnvironment.Side side) {
         return physicsSimulationModes[side.ordinal()];
     }
 
@@ -134,7 +132,7 @@ public class DynamXContext {
      *                              Side.CLIENT is <strong>only</strong> used on dedicated server for the client physics worlds
      * @param physicsSimulationMode The {@link IPhysicsSimulationMode} to set on the given side
      */
-    public static void setPhysicsSimulationMode(Side side, IPhysicsSimulationMode physicsSimulationMode) {
+    public static void setPhysicsSimulationMode(MixinEnvironment.Side side, IPhysicsSimulationMode physicsSimulationMode) {
         DynamXContext.physicsSimulationModes[side.ordinal()] = physicsSimulationMode;
     }
 
@@ -156,7 +154,7 @@ public class DynamXContext {
         }
     }
 
-    public static Map<ResourceLocation, DxModelData> getDxModelDataCache() {
+    public static Map<HmResourceLocation, DxModelData> getDxModelDataCache() {
         return DX_MODEL_DATA_CACHE;
     }
 }

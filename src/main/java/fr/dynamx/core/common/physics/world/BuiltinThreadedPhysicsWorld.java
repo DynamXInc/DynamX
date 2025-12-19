@@ -1,16 +1,10 @@
 package fr.dynamx.core.common.physics.world;
 
-import fr.dynamx.api.events.PhysicsEvent;
 import fr.dynamx.core.common.DynamXMain;
 import fr.dynamx.core.utils.debug.Profiler;
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.World;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import fr.hermes.api.mc.world.HmClientWorld;
+import fr.hermes.api.mc.world.HmServerWorld;
+import fr.hermes.api.mc.world.HmWorld;
 
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -31,7 +25,7 @@ public class BuiltinThreadedPhysicsWorld extends BasePhysicsWorld implements Run
     private boolean alive;
     private static int crashCount;
 
-    public BuiltinThreadedPhysicsWorld(World world, boolean isRemoteWorld) {
+    public BuiltinThreadedPhysicsWorld(HmWorld world, boolean isRemoteWorld) {
         super(world, isRemoteWorld);
         myThread = new Thread(this);
         myThread.setName("DynamXWorld#" + myId);
@@ -43,22 +37,19 @@ public class BuiltinThreadedPhysicsWorld extends BasePhysicsWorld implements Run
             DynamXMain.log.fatal("DynamX physics thread has crashed, telling to restart !");
             DynamXMain.log.error("Exception : " + e.toString(), e);
 
-            if (world.getMinecraftServer() != null)
-                world.getMinecraftServer().getPlayerList().sendMessage(new TextComponentString("[DynamX] Physics thread has crashed, please restart the server !"));
-            else if (world.isRemote)
-                sendRestartMsg();
+            if (world instanceof HmClientWorld) {
+                ((HmClientWorld)world).getClientPlayer().sendMessage("§4 [DynamX] Physics thread has crashed, please disconnect and reconnect to the server !");
+            } else if (world instanceof HmServerWorld) {
+                HmServerWorld serverWorld = (HmServerWorld) world;
+                if (serverWorld.getServer() != null) {
+                    serverWorld.getServer().sendGlobalChatMessage("§4 [DynamX] Physics thread has crashed, please restart the server !");
+                }
+            }
         });
         alive = true;
-        DynamXMain.log.info("Loading the threaded physics world for the dimension " + world.provider.getDimension());
-        MinecraftForge.EVENT_BUS.post(new PhysicsEvent.PhysicsWorldLoad(this));
+        DynamXMain.log.info("Loading the threaded physics world for the dimension " + world.getDimension());
+        // TODO EVENT MinecraftForge.EVENT_BUS.post(new PhysicsEvent.PhysicsWorldLoad(this));
         myThread.start();
-    }
-
-    @SideOnly(Side.CLIENT)
-    private static void sendRestartMsg() {
-        ITextComponent msg = new TextComponentString("[DynamX] Physics thread has crashed, please disconnect and reconnect to the server !");
-        msg.getStyle().setColor(TextFormatting.DARK_RED);
-        Minecraft.getMinecraft().player.sendMessage(msg);
     }
 
     @Override
@@ -101,7 +92,7 @@ public class BuiltinThreadedPhysicsWorld extends BasePhysicsWorld implements Run
                 }
             }
         }
-        DynamXMain.log.info("Unloading the threaded physics world of the dimension " + mcWorld.provider.getDimension());
+        DynamXMain.log.info("Unloading the threaded physics world of the dimension {}", mcWorld.getDimension());
         super.clearAll();
     }
 

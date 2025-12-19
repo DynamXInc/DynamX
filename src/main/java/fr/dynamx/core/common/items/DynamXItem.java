@@ -9,6 +9,7 @@ import fr.dynamx.core.common.contentpack.type.objects.AbstractItemObject;
 import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.DynamXUtils;
 import fr.dynamx.core.utils.RegistryNameSetter;
+import fr.hermes.api.mc.utils.HmResourceLocation;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -44,7 +45,7 @@ public class DynamXItem<T extends AbstractItemObject<?, ?>> extends Item impleme
      * @param itemName The name of the item
      * @param model    The obj model of the block "namespace:resourceName.obj"
      */
-    public DynamXItem(String modid, String itemName, ResourceLocation model) {
+    public DynamXItem(String modid, String itemName, HmResourceLocation model) {
         if (modid.contains("builtin_mod_")) { //Backward-compatibility
             itemInfo = (T) DynamXObjectLoaders.ITEMS.addBuiltinObject(this, modid, itemName);
             modid = modid.replace("builtin_mod_", "");

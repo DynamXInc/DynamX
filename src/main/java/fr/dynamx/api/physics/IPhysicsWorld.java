@@ -4,13 +4,11 @@ import com.jme3.bullet.PhysicsSoftSpace;
 import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.bullet.joints.PhysicsJoint;
 import com.jme3.bullet.objects.PhysicsVehicle;
-import fr.dynamx.api.events.PhysicsEvent;
 import fr.dynamx.api.physics.terrain.ITerrainManager;
 import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.common.physics.terrain.PhysicsWorldTerrain;
 import fr.dynamx.core.common.physics.utils.PhysicsWorldOperation;
-import net.minecraft.world.World;
-import net.minecraftforge.common.MinecraftForge;
+import fr.hermes.api.mc.world.HmWorld;
 
 /**
  * Where all physics happen
@@ -55,7 +53,7 @@ public interface IPhysicsWorld {
     default void addBulletEntity(PhysicsEntity<?> e) {
         e.isRegistered = PhysicsEntity.EnumEntityPhysicsRegistryState.REGISTERING;
         addOperation(new PhysicsWorldOperation<>(PhysicsWorldOperation.PhysicsWorldOperationType.ADD_ENTITY, e));
-        MinecraftForge.EVENT_BUS.post(new PhysicsEvent.PhysicsEntityAdded(e, this));
+        //TODO EVENT MinecraftForge.EVENT_BUS.post(new PhysicsEvent.PhysicsEntityAdded(e, this));
     }
 
     /**
@@ -66,7 +64,7 @@ public interface IPhysicsWorld {
     default void removeBulletEntity(PhysicsEntity<?> e) {
         addOperation(new PhysicsWorldOperation<>(PhysicsWorldOperation.PhysicsWorldOperationType.REMOVE_ENTITY, e));
         e.isRegistered = PhysicsEntity.EnumEntityPhysicsRegistryState.NOT_REGISTERED;
-        MinecraftForge.EVENT_BUS.post(new PhysicsEvent.PhysicsEntityRemoved(e, this));
+        //TODO EVENT MinecraftForge.EVENT_BUS.post(new PhysicsEvent.PhysicsEntityRemoved(e, this));
     }
 
     /**
@@ -145,7 +143,7 @@ public interface IPhysicsWorld {
     /**
      * @return The minecraft world simulated by this physics world
      */
-    World getWorld();
+    HmWorld getWorld();
 
     /**
      * Called on minecraft tick start

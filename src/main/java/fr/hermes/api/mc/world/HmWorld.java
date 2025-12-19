@@ -49,4 +49,6 @@ public interface HmWorld {
     HmTileEntity getTileEntity(Vector3i pos);
 
     <T extends HmEntity> List<T> getEntitiesWithinAABB(Class<T> clazz, MutableBoundingBox aabb);
+
+    int getDimension();
 }

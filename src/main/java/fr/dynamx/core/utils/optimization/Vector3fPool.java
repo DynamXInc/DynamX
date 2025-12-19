@@ -44,6 +44,12 @@ public class Vector3fPool extends ClassPool<Vector3f> {
         return v;
     }
 
+    public static Vector3f get(com.jme3.math.Vector3f from) {
+        Vector3f v = getPool().provideNewInstance();
+        v.set(from.x, from.y, from.z);
+        return v;
+    }
+
     public static Vector3f get(float x, float y, float z) {
         Vector3f v = getPool().provideNewInstance();
         v.set(x, y, z);

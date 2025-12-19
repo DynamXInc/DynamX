@@ -4,9 +4,8 @@ import fr.dynamx.api.events.PhysicsEvent;
 import fr.dynamx.core.common.DynamXMain;
 import fr.dynamx.core.utils.debug.Profiler;
 import fr.dynamx.core.utils.optimization.SubClassPool;
+import fr.hermes.api.mc.world.HmWorld;
 import fr.hermes.forge.JmeVector3fPool;
-import net.minecraft.world.World;
-import net.minecraftforge.common.MinecraftForge;
 
 /**
  * Where all the physics happen <br>
@@ -16,13 +15,13 @@ public class BuiltinPhysicsWorld extends BasePhysicsWorld {
     protected final Thread physicsThread;
     private short serverAfkTime = 0;
 
-    public BuiltinPhysicsWorld(World world, boolean isRemoteWorld) {
+    public BuiltinPhysicsWorld(HmWorld world, boolean isRemoteWorld) {
         super(world, isRemoteWorld);
         initPhysicsWorld();
         this.physicsThread = Thread.currentThread();
 
-        DynamXMain.log.info("Loading the physics world for the dimension {}", world.provider.getDimension());
-        MinecraftForge.EVENT_BUS.post(new PhysicsEvent.PhysicsWorldLoad(this));
+        DynamXMain.log.info("Loading the physics world for the dimension {}", world.getDimension());
+        //TODO EVENT MinecraftForge.EVENT_BUS.post(new PhysicsEvent.PhysicsWorldLoad(this));
     }
 
     @Override
@@ -31,7 +30,7 @@ public class BuiltinPhysicsWorld extends BasePhysicsWorld {
         {
             //Disable physics simulation
             //Note that minecraft does the same, but with a delay of 300, so it avoids physics while entities are paused
-            if (mcWorld.playerEntities.isEmpty()) {
+            if (mcWorld.getPlayerEntities().isEmpty()) {
                 if (serverAfkTime < 200) {
                     serverAfkTime++;
                 }
@@ -54,7 +53,7 @@ public class BuiltinPhysicsWorld extends BasePhysicsWorld {
 
     @Override
     public void clearAll() {
-        DynamXMain.log.info("Unloading the physics world of the dimension " + mcWorld.provider.getDimension());
+        DynamXMain.log.info("Unloading the physics world of the dimension {}", mcWorld.getDimension());
         super.clearAll();
     }
 

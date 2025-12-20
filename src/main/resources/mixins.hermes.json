@@ -1,0 +1,12 @@
+{
+  "compatibilityLevel": "JAVA_8",
+  "package": "fr.hermes.forge.abstracted",
+  "refmap": "refmap.hermes.json",
+  "mixins": [
+    "MixinWorld"
+  ],
+  "minVersion": "0.6",
+  "server": [],
+  "client": [
+  ]
+}

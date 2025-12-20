@@ -23,6 +23,7 @@ public class DynamXCoreMod implements IFMLLoadingPlugin {
     public DynamXCoreMod() {
         MixinBootstrap.init();
         Mixins.addConfiguration("mixins.dynamxmod.json");
+        Mixins.addConfiguration("mixins.hermes.json");
     }
 
     @Override

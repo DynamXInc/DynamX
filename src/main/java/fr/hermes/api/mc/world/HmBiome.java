@@ -1,9 +1,9 @@
 package fr.hermes.api.mc.world;
 
 public interface HmBiome {
-    String getName();
+    String hm$getName();
 
-    boolean canRain();
+    boolean hm$canRain();
 }
 
 

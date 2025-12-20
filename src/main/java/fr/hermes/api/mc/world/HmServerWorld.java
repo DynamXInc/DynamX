@@ -7,5 +7,5 @@ public interface HmServerWorld extends HmWorld {
         return false;
     }
 
-    HmServer getServer();
+    HmServer hm$getServer();
 }

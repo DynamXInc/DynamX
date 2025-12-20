@@ -227,7 +227,7 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
                 org.joml.Vector3i bp = new Vector3i((int) pos.x, (int) (Math.ceil(pos.y) - 1), (int) pos.z);
                 //IBlockState blockState = entity.world.getBlockState(bp);
                 float[] frictionValues = DEFAULT_GRIP; // TODO dynamic grip depending on the block was removed. to add back properly. See commit 🏷️ Remove block-grip and block-related slope config support
-                boolean isBlockWet = entity.getHmWorld().hm$getBiome(bp).canRain() && entity.getHmWorld().hm$isRaining() && entity.getHmWorld().hm$canBlockSeeSky(bp);
+                boolean isBlockWet = entity.getHmWorld().hm$getBiome(bp).hm$canRain() && entity.getHmWorld().hm$isRaining() && entity.getHmWorld().hm$canBlockSeeSky(bp);
                 float frictionValue = isBlockWet ? frictionValues[1] : frictionValues[0];
                 w.setGrip((w.isFlattened() ? 0.16f : 1) * frictionValue);
 

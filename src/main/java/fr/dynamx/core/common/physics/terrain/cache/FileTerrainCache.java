@@ -43,8 +43,8 @@ public class FileTerrainCache implements ITerrainCache {
     public FileTerrainCache(HmWorld world) {
         HmWorld serverWorld = world.hm$isClient() ? DynamXMain.getProxy().getServerWorld() : world;
         assert serverWorld != null : "Terrain cannot be locally saved";
-        assert serverWorld.hm$getSaveHandler().getWorldDirectory() != null : "World save dir not found";
-        storageDir = new File(serverWorld.hm$getSaveHandler().getWorldDirectory(), "DnxChunks");
+        assert serverWorld.hm$getSaveHandler().hm$getWorldDirectory() != null : "World save dir not found";
+        storageDir = new File(serverWorld.hm$getSaveHandler().hm$getWorldDirectory(), "DnxChunks");
         storageDir.mkdirs();
 
         File f = new File(storageDir, "dnxregion_main.dnx");

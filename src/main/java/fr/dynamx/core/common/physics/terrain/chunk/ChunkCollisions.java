@@ -518,7 +518,7 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
                             HmChunk chk = mcWorld.hm$getChunk(myPos.x + x, myPos.z + z);
                             for (int y = -1; y <= 1; y++) {
                                 if (myPos.y + y >= 0 && myPos.y + y < 16) {
-                                    chk.getEntityLists()[myPos.y + y].forEach(e -> {
+                                    chk.hm$getEntityLists()[myPos.y + y].forEach(e -> {
                                         if (e instanceof PhysicsEntity) {
                                             ((PhysicsEntity<?>) e).forcePhysicsActivation();
                                         }

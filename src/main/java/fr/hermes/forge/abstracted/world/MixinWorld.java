@@ -1,9 +1,9 @@
-package fr.hermes.forge.abstracted;
+package fr.hermes.forge.abstracted.world;
 
 import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
-import fr.hermes.api.mc.HmTileEntity;
+import fr.hermes.api.mc.blocks.HmTileEntity;
 import fr.hermes.api.mc.blocks.HmBlockState;
 import fr.hermes.api.mc.entities.HmEntity;
 import fr.hermes.api.mc.entities.HmPlayerEntity;
@@ -23,6 +23,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.storage.ISaveHandler;
 import org.joml.Vector3i;
 import org.spongepowered.asm.mixin.Final;
@@ -104,6 +105,9 @@ public abstract class MixinWorld implements HmWorld {
 
     @Shadow
     public abstract boolean isAirBlock(BlockPos pos);
+
+    @Shadow
+    protected IChunkProvider chunkProvider;
 
     @Override
     public boolean hm$isClient() {

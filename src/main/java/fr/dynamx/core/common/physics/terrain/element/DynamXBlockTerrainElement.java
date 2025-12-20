@@ -15,7 +15,7 @@ import fr.dynamx.core.utils.debug.TerrainDebugRenderer;
 import fr.dynamx.core.utils.optimization.BoundingBoxPool;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.SubClassPool;
-import fr.hermes.api.mc.HmTileEntity;
+import fr.hermes.api.mc.blocks.HmTileEntity;
 import fr.hermes.api.mc.world.HmWorld;
 import fr.hermes.forge.JmeVector3fPool;
 import org.joml.Vector3i;

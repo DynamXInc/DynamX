@@ -386,7 +386,7 @@ public class PhysicsWorldTerrain implements ITerrainManager {
             public void run() {
                 physicsWorld.schedule(() -> {
                     for (int y = 0; y < 16; y++) {
-                        VerticalChunkPos pos = new VerticalChunkPos(chunk.getX(), y, chunk.getZ());
+                        VerticalChunkPos pos = new VerticalChunkPos(chunk.hm$getX(), y, chunk.hm$getZ());
                         if (chunkTickets.containsKey(pos))
                             terrainState.onChunkUnload(PhysicsWorldTerrain.this, pos);
                     }

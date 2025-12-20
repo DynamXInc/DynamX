@@ -7,5 +7,5 @@ public interface HmClientWorld extends HmWorld {
         return true;
     }
 
-    HmPlayerEntity getClientPlayer();
+    HmPlayerEntity hm$getClientPlayer();
 }

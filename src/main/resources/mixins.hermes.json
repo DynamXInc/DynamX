@@ -3,10 +3,15 @@
   "package": "fr.hermes.forge.abstracted",
   "refmap": "refmap.hermes.json",
   "mixins": [
-    "MixinWorld"
+    "MixinMinecraftServer",
+    "world.MixinChunk",
+    "world.MixinSaveHandler",
+    "world.MixinWorld",
+    "world.MixinWorldServer"
   ],
   "minVersion": "0.6",
   "server": [],
   "client": [
+    "world.MixinWorldClient"
   ]
 }

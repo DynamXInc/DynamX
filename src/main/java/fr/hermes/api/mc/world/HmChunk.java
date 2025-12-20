@@ -2,10 +2,12 @@ package fr.hermes.api.mc.world;
 
 import fr.hermes.api.mc.entities.HmEntity;
 
+import java.util.Set;
+
 public interface HmChunk {
-    Iterable<HmEntity>[] getEntityLists();
+    Set<HmEntity>[] hm$getEntityLists();
 
-    int getX();
+    int hm$getX();
 
-    int getZ();
+    int hm$getZ();
 }

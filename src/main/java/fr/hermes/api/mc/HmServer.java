@@ -1,9 +1,9 @@
 package fr.hermes.api.mc;
 
 public interface HmServer {
-    boolean isDedicatedServer();
+    boolean hm$isDedicatedServer();
 
-    String getHostname(); // mc.getServerHostname()
+    String hm$getHostname(); // mc.getServerHostname()
 
-    void sendGlobalChatMessage(String message);
+    void hm$sendGlobalChatMessage(String message);
 }

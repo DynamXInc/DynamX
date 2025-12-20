@@ -6,7 +6,7 @@ import fr.dynamx.core.common.blocks.TEDynamXBlock;
 import fr.dynamx.core.common.physics.terrain.element.DynamXBlockTerrainElement;
 import fr.dynamx.forge.DynamXConfig;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
-import fr.hermes.api.mc.HmTileEntity;
+import fr.hermes.api.mc.blocks.HmTileEntity;
 import fr.hermes.api.mc.world.HmWorld;
 import net.minecraft.block.*;
 import net.minecraft.block.state.IBlockState;

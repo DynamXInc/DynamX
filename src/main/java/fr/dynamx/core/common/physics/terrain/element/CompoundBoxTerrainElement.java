@@ -160,13 +160,13 @@ public class CompoundBoxTerrainElement implements ITerrainElement {
     @Override
     public void addDebugToWorld(HmWorld mcWorld, Vector3f pos) {
         if (!debugData.isEmpty())
-            (mcWorld.isClient() ? DynamXDebugOptions.CLIENT_BLOCK_BOXES : DynamXDebugOptions.BLOCK_BOXES).getDataIn().putAll(debugData);
+            (mcWorld.hm$isClient() ? DynamXDebugOptions.CLIENT_BLOCK_BOXES : DynamXDebugOptions.BLOCK_BOXES).getDataIn().putAll(debugData);
     }
 
     @Override
     public void removeDebugFromWorld(HmWorld mcWorld) {
         for (Integer pos : debugData.keySet()) {
-            (mcWorld.isClient() ? DynamXDebugOptions.CLIENT_BLOCK_BOXES : DynamXDebugOptions.BLOCK_BOXES).getDataIn().remove(pos);
+            (mcWorld.hm$isClient() ? DynamXDebugOptions.CLIENT_BLOCK_BOXES : DynamXDebugOptions.BLOCK_BOXES).getDataIn().remove(pos);
         }
     }
 

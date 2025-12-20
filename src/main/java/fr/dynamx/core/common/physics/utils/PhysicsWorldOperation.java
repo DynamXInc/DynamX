@@ -59,14 +59,14 @@ public class PhysicsWorldOperation<A> {
                 case ADD_VEHICLE:
                 case ADD_OBJECT:
                     dynamicsWorld.addCollisionObject((PhysicsCollisionObject) object);
-                    if (physicsWorld.getWorld().isClient() && object instanceof PhysicsRigidBody && ((PhysicsRigidBody) object).getUserObject() instanceof BulletShapeType && !((BulletShapeType<?>) ((PhysicsRigidBody) object).getUserObject()).getType().isTerrain()) {
+                    if (physicsWorld.getWorld().hm$isClient() && object instanceof PhysicsRigidBody && ((PhysicsRigidBody) object).getUserObject() instanceof BulletShapeType && !((BulletShapeType<?>) ((PhysicsRigidBody) object).getUserObject()).getType().isTerrain()) {
                         ClientDebugSystem.trackedRigidBodies.put(((PhysicsCollisionObject) object).nativeId(), (PhysicsRigidBody) object);
                     }
                     break;
                 case REMOVE_VEHICLE:
                 case REMOVE_OBJECT:
                     dynamicsWorld.removeCollisionObject((PhysicsCollisionObject) object);
-                    if (physicsWorld.getWorld().isClient() && object instanceof PhysicsRigidBody && ((PhysicsRigidBody) object).getUserObject() instanceof BulletShapeType && !((BulletShapeType<?>) ((PhysicsRigidBody) object).getUserObject()).getType().isTerrain()) {
+                    if (physicsWorld.getWorld().hm$isClient() && object instanceof PhysicsRigidBody && ((PhysicsRigidBody) object).getUserObject() instanceof BulletShapeType && !((BulletShapeType<?>) ((PhysicsRigidBody) object).getUserObject()).getType().isTerrain()) {
                         ClientDebugSystem.trackedRigidBodies.remove(((PhysicsCollisionObject) object).nativeId());
                     }
                     break;
@@ -80,7 +80,7 @@ public class PhysicsWorldOperation<A> {
                     PhysicsEntity<?> et = (PhysicsEntity<?>) object;
                     entities.remove(et);
                     Runnable task = () -> {
-                        List<PhysicsEntity> physicsEntities = et.getHmWorld().getEntitiesWithinAABB(PhysicsEntity.class, et.getHmBoundingBox().expand(10, 10, 10));
+                        List<PhysicsEntity> physicsEntities = et.getHmWorld().hm$getPhysicsEntitiesWithinAABB(PhysicsEntity.class, et.getHmBoundingBox().expand(10, 10, 10));
                         for (PhysicsEntity entity : physicsEntities) {
                             if (entity != et) {
                                 entity.forcePhysicsActivation();

@@ -91,7 +91,7 @@ public class PhysicsWorldTerrain implements ITerrainManager {
      * @return True if this chunk is loaded in the given world
      */
     private boolean isChunkLoaded(HmWorld world, int x, int z) {
-        return world.isClient() ? world.isChunkGeneratedAt(x, z) : world.chunkExists(x, z);
+        return world.hm$isClient() ? world.hm$isChunkGeneratedAt(x, z) : world.hm$chunkExists(x, z);
     }
 
     @Override
@@ -506,7 +506,7 @@ public class PhysicsWorldTerrain implements ITerrainManager {
     public void onBlockChange(HmWorld world, Vector3i pos) {
         VerticalChunkPos pos1 = new VerticalChunkPos(pos.x >> 4, pos.y >> 4, pos.z >> 4);
         if (isDebug()) {
-            HmBlockState state = world.getBlockState(pos);
+            HmBlockState state = world.hm$getBlockState(pos);
             ChunkLoadingTicket ticket = DynamXContext.getPhysicsWorld(world).getTerrainManager().getTicket(pos1);
             if (ticket != null) {
                 ChunkGraph.addToGrah(pos1, ChunkGraph.ChunkActions.CHK_UPDATE, ChunkGraph.ActionLocation.MAIN, ticket.getCollisions(), "Chunk changed from world change of " + state + " at " + pos + " (" + state.getBlock() + "). Ticket " + ticket);

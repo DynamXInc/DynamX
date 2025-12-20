@@ -13,7 +13,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.registry.GameRegistry;
-import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.server.FMLServerHandler;
 
 import static fr.dynamx.core.utils.DynamXConstants.ID;
@@ -48,7 +47,7 @@ public abstract class CommonProxy {
      * @return True if the bullet physics engine should be used for the world. Always true except for client single player worlds
      */
     public boolean shouldUseBulletSimulation(HmWorld world) {
-        return DynamXContext.getPhysicsWorldPerDimensionMap().containsKey(world.getDimension());
+        return DynamXContext.getPhysicsWorldPerDimensionMap().containsKey(world.hm$getDimension());
     }
 
     /**
@@ -80,11 +79,11 @@ public abstract class CommonProxy {
      * Creates the physics world
      */
     public void initPhysicsWorld(HmWorld world) {
-        if (DynamXContext.getPhysicsWorldPerDimensionMap().containsKey(world.getDimension())) {
+        if (DynamXContext.getPhysicsWorldPerDimensionMap().containsKey(world.hm$getDimension())) {
             DynamXMain.log.warn("Physics world of " + world + " is already loaded ! Keeping the previously loaded world.");
             return;
         }
-        DynamXContext.getPhysicsWorldPerDimensionMap().put(world.getDimension(), new BuiltinPhysicsWorld(world, false));
+        DynamXContext.getPhysicsWorldPerDimensionMap().put(world.hm$getDimension(), new BuiltinPhysicsWorld(world, false));
     }
 
     public abstract void schedulePacksInit();

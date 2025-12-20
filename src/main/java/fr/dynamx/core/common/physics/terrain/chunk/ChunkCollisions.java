@@ -515,7 +515,7 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
                 for (int x = -1; x <= 1; x++) {
                     for (int z = -1; z <= 1; z++) {
                         if (((boolean) DynamXReflection.worldIsChunkLoaded.invoke(mcWorld, myPos.x + x, myPos.z + z, false))) {
-                            HmChunk chk = mcWorld.getChunk(myPos.x + x, myPos.z + z);
+                            HmChunk chk = mcWorld.hm$getChunk(myPos.x + x, myPos.z + z);
                             for (int y = -1; y <= 1; y++) {
                                 if (myPos.y + y >= 0 && myPos.y + y < 16) {
                                     chk.getEntityLists()[myPos.y + y].forEach(e -> {

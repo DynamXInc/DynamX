@@ -123,13 +123,13 @@ public class CustomSlopeTerrainElement implements ITerrainElement.IPersistentTer
         debugData[debugData.length - 2] = pos.y + 8;
         debugData[debugData.length - 1] = pos.z;
         this.debugData = new TerrainDebugData(TerrainDebugRenderer.CUSTOM_SLOPE, debugData);
-        (mcWorld.isClient() ? DynamXDebugOptions.CLIENT_SLOPE_BOXES : DynamXDebugOptions.SLOPE_BOXES).getDataIn().put(this.debugData.getUuid(), this.debugData);
+        (mcWorld.hm$isClient() ? DynamXDebugOptions.CLIENT_SLOPE_BOXES : DynamXDebugOptions.SLOPE_BOXES).getDataIn().put(this.debugData.getUuid(), this.debugData);
     }
 
     @Override
     public void removeDebugFromWorld(HmWorld mcWorld) {
         if (this.debugData != null)
-            (mcWorld.isClient() ? DynamXDebugOptions.CLIENT_SLOPE_BOXES : DynamXDebugOptions.SLOPE_BOXES).getDataIn().remove(this.debugData.getUuid());
+            (mcWorld.hm$isClient() ? DynamXDebugOptions.CLIENT_SLOPE_BOXES : DynamXDebugOptions.SLOPE_BOXES).getDataIn().remove(this.debugData.getUuid());
     }
 
     @Override

@@ -23,7 +23,6 @@ import fr.hermes.api.mc.entities.HmPlayerEntity;
 import fr.hermes.forge.JmeVector3fPool;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
@@ -136,7 +135,7 @@ public abstract class BasicEngineModule implements IPhysicsModule<BaseVehiclePhy
     }
 
     public void onEngineSwitchedOn() {
-        if (entity.getHmWorld().isClient() && entity.getTicksExisted() > 60) {
+        if (entity.getHmWorld().hm$isClient() && entity.getTicksExisted() > 60) {
             playStartingSound();
         }
     }

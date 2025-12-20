@@ -144,7 +144,7 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
 
     @Override
     public void addPassenger(HmEntity passenger) {
-        if (entity.getHmWorld().isClient()) {
+        if (entity.getHmWorld().hm$isClient()) {
             return;
         }
         BasePartSeat hitPart = seatToPassenger.inverse().get(passenger);
@@ -167,7 +167,7 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
     @Override
     public void removePassenger(HmEntity passenger) {
         BasePartSeat seat = getRidingSeat(passenger);
-        if (entity.getHmWorld().isClient() || seat == null) {
+        if (entity.getHmWorld().hm$isClient() || seat == null) {
             return;
         }
         lastRiddenSeat = seat;
@@ -220,7 +220,7 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
         for (Map.Entry<Byte, Integer> e : msg.getSeatToEntity().entrySet()) {
             BasePartSeat<?, ?> seat = entity.getPackInfo().getPartByTypeAndId(BasePartSeat.class, e.getKey());
             if (seat != null) {
-                HmEntity passengerEntity = entity.getHmWorld().getEntityByID(e.getValue());
+                HmEntity passengerEntity = entity.getHmWorld().hm$getEntityByID(e.getValue());
                 if (passengerEntity != null) {
                     if (seatToPassenger.get(seat) != passengerEntity) { //And add them
                         seatToPassenger.put(seat, passengerEntity);
@@ -232,7 +232,7 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
                 } else {
                     log.warn("Entity with id {} not found for seat in {}", e.getValue(), entity);
                     log.warn("Details {} {}", msg.getSeatToEntity(), entity.getHmPassengers());
-                    log.warn("Players there {}", entity.getHmWorld().getPlayerEntities());
+                    log.warn("Players there {}", entity.getHmWorld().hm$getPlayerEntities());
                     log.warn("THE player id {}", DynamXMain.getProxy().getClientWorld());
                 }
             } else {

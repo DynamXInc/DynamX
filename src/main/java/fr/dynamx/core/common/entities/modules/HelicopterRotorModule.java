@@ -36,8 +36,8 @@ public class HelicopterRotorModule implements IPhysicsModule<BaseVehiclePhysicsH
             curPower = curPower + (targetPower - curPower) / 60; //3-seconds interpolation
             curAngle += curPower;
         }
-        if (entity.getHmWorld().isClient()) {
-            int height = (int) (entity.getPosY() - entity.getHmWorld().getHeight((int) entity.getPosX(), (int) entity.getPosZ()));
+        if (entity.getHmWorld().hm$isClient()) {
+            int height = (int) (entity.getPosY() - entity.getHmWorld().hm$getHeight((int) entity.getPosX(), (int) entity.getPosZ()));
             if (height < 10) {
                 renderParticles(entity, height);
             }
@@ -49,18 +49,18 @@ public class HelicopterRotorModule implements IPhysicsModule<BaseVehiclePhysicsH
         for (int i = 0; i < 360; i += 2) {
             int power = (int) (engine.getPower() * 10);
 
-            if (world.getRandom().nextInt(100) < power) {
+            if (world.hm$getRandom().nextInt(100) < power) {
                 float minRadius = 5.5f - height * 0.5f;
-                float radius = world.getRandom().nextFloat() * 4;
+                float radius = world.hm$getRandom().nextFloat() * 4;
 
                 double x = Math.cos(Math.toRadians(i)) * (minRadius + radius);
                 double z = Math.sin(Math.toRadians(i)) * (minRadius + radius);
 
-                double y = world.getHeight((int) (entity.getPosX() + x), (int) (entity.getPosZ() + z));
+                double y = world.hm$getHeight((int) (entity.getPosX() + x), (int) (entity.getPosZ() + z));
                 double zSpeed = Math.sin(Math.toRadians(i)) * 0.9;
                 double xSpeed = Math.cos(Math.toRadians(i)) * 0.9;
 
-                if (world.isAirBlock((int) (entity.getPosX() + x), (int) (y), (int) (entity.getPosZ() + z))) {
+                if (world.hm$isAirBlock((int) (entity.getPosX() + x), (int) (y), (int) (entity.getPosZ() + z))) {
                     //TODO PARTICLE world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, entity.getPosX() + x, y, entity.getPosZ() + z, xSpeed, 0, zSpeed);
                 }
             }

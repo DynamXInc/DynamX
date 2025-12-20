@@ -47,7 +47,7 @@ public class BuiltinThreadedPhysicsWorld extends BasePhysicsWorld implements Run
             }
         });
         alive = true;
-        DynamXMain.log.info("Loading the threaded physics world for the dimension " + world.getDimension());
+        DynamXMain.log.info("Loading the threaded physics world for the dimension " + world.hm$getDimension());
         // TODO EVENT MinecraftForge.EVENT_BUS.post(new PhysicsEvent.PhysicsWorldLoad(this));
         myThread.start();
     }
@@ -92,7 +92,7 @@ public class BuiltinThreadedPhysicsWorld extends BasePhysicsWorld implements Run
                 }
             }
         }
-        DynamXMain.log.info("Unloading the threaded physics world of the dimension {}", mcWorld.getDimension());
+        DynamXMain.log.info("Unloading the threaded physics world of the dimension {}", mcWorld.hm$getDimension());
         super.clearAll();
     }
 

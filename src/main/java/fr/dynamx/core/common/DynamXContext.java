@@ -99,7 +99,7 @@ public class DynamXContext {
      * @return The local physics world
      */
     public static IPhysicsWorld getPhysicsWorld(HmWorld world) {
-        return getPhysicsWorldPerDimensionMap().get(world.getDimension());
+        return getPhysicsWorldPerDimensionMap().get(world.hm$getDimension());
     }
 
     /**

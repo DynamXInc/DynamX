@@ -65,7 +65,7 @@ public class DynamXBlockTerrainElement implements ITerrainElement {
 
     @Override
     public PhysicsRigidBody build(HmWorld world, Vector3f pos) {
-        HmTileEntity te = world.getTileEntity(this.pos);
+        HmTileEntity te = world.hm$getTileEntity(this.pos);
         if (!(te instanceof TEDynamXBlock)) { //Not generated, should not happen because this should be removed from chunk
             DynamXMain.log.warn("[CHUNK DEBUG] Outdated DynamX block collisions found at: {}: TE not found. Maybe your packs have changed. The chunk will be reloaded", this.pos);
             return null;
@@ -94,7 +94,7 @@ public class DynamXBlockTerrainElement implements ITerrainElement {
         Vector3f min = b.getMin(JmeVector3fPool.get());
         Vector3f max = b.getMax(JmeVector3fPool.get());
         debugData = new TerrainDebugData(TerrainDebugRenderer.DYNAMXBLOCKS, new float[]{min.x, min.y, min.z, max.x, max.y, max.z});
-        (mcWorld.isClient() ? DynamXDebugOptions.CLIENT_BLOCK_BOXES : DynamXDebugOptions.BLOCK_BOXES).getDataIn().put(debugData.getUuid(), debugData);
+        (mcWorld.hm$isClient() ? DynamXDebugOptions.CLIENT_BLOCK_BOXES : DynamXDebugOptions.BLOCK_BOXES).getDataIn().put(debugData.getUuid(), debugData);
 
         BoundingBoxPool.getPool().closeSubPool();
         QuaternionPool.closePool();
@@ -104,7 +104,7 @@ public class DynamXBlockTerrainElement implements ITerrainElement {
     @Override
     public void removeDebugFromWorld(HmWorld mcWorld) {
         if (debugData != null) {
-            (mcWorld.isClient() ? DynamXDebugOptions.CLIENT_BLOCK_BOXES : DynamXDebugOptions.BLOCK_BOXES).getDataIn().remove(debugData.getUuid());
+            (mcWorld.hm$isClient() ? DynamXDebugOptions.CLIENT_BLOCK_BOXES : DynamXDebugOptions.BLOCK_BOXES).getDataIn().remove(debugData.getUuid());
         }
     }
 

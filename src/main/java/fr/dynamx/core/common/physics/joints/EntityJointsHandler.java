@@ -259,7 +259,7 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
                 i:
                 for (EntityJoint.CachedJoint j : queuedRestorations) {
                     boolean found = false;
-                    for (HmEntity e : entity.getHmWorld().getEntityList()) {
+                    for (HmEntity e : entity.getHmWorld().hm$getEntityList()) {
                         if (!e.getUniqueID().equals(j.getId())) {
                             continue;
                         }
@@ -307,7 +307,7 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
         if (!isDirty()) {
             return;
         }
-        if (!entity.getHmWorld().isClient() && entity.getSynchronizer().doesOtherSideUsesPhysics()) {
+        if (!entity.getHmWorld().hm$isClient() && entity.getSynchronizer().doesOtherSideUsesPhysics()) {
             DynamXContext.getNetwork().sendToClient(new MessageJoints(entity, computeCachedJoints()), EnumPacketTarget.ALL_TRACKING_ENTITY, entity);
         }
         setDirty(false);
@@ -325,7 +325,7 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
     }
 
     protected void syncRemovedJoint(EntityJoint<?> joint) {
-        if (!entity.getHmWorld().isClient() || !entity.getSynchronizer().getSimulationHolder().isSinglePlayer()) {
+        if (!entity.getHmWorld().hm$isClient() || !entity.getSynchronizer().getSimulationHolder().isSinglePlayer()) {
             return;
         }
         HmEntity e = ((SPPhysicsEntitySynchronizer<?>) entity.getSynchronizer()).getOtherSideEntity();

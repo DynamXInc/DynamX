@@ -6,7 +6,6 @@ import com.jme3.bullet.collision.PhysicsCollisionEvent;
 import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.bullet.joints.PhysicsJoint;
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.events.PhysicsEvent;
 import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.api.physics.entities.EntityPhysicsState;
@@ -172,7 +171,7 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
         profiler.end(Profiler.Profiles.PHYSICS_TICK_ENTITIES_PRE);
 
         //Update sync system
-        if (mcWorld.isClient()) {
+        if (mcWorld.hm$isClient()) {
             ClientPhysicsSyncManager.tick();
         } else {
             ServerPhysicsSyncManager.tick(profiler);
@@ -264,8 +263,8 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
         entities.clear();
         joints.clear();
         getTerrainManager().onWorldUnload();
-        DynamXContext.getPhysicsWorldPerDimensionMap().remove(mcWorld.getDimension());
-        if(mcWorld.isClient()) {
+        DynamXContext.getPhysicsWorldPerDimensionMap().remove(mcWorld.hm$getDimension());
+        if(mcWorld.hm$isClient()) {
             ClientDebugSystem.trackedRigidBodies.clear();
         }
     }

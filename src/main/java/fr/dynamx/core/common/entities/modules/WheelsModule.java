@@ -22,7 +22,6 @@ import fr.dynamx.core.common.physics.entities.modules.WheelsPhysicsHandler;
 import fr.dynamx.core.common.physics.entities.parts.wheel.WheelPhysics;
 import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.maths.DynamXMath;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
 import fr.hermes.forge.JmeVector3fPool;
 import jme3utilities.Validate;
 import lombok.Getter;
@@ -84,7 +83,7 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
     public WheelsModule(BaseVehicleEntity<? extends BaseWheeledVehiclePhysicsHandler<?>> entity) {
         this.entity = entity;
         wheelsStates = new EntityVariable<>((variable, value) -> {
-            if (entity.getSynchronizer().getSimulationHolder().ownsControls(entity.getHmWorld().isClient())) {
+            if (entity.getSynchronizer().getSimulationHolder().ownsControls(entity.getHmWorld().hm$isClient())) {
                 return;
             }
             if (!DynamXMain.getProxy().shouldUseBulletSimulation(entity.getHmWorld())) {
@@ -139,7 +138,7 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
             wheelsPhysics.getWheelByPartIndex(partIndex).setWheelInfo(info);
         }
 
-        if (entity.getHmWorld().isClient()) {
+        if (entity.getHmWorld().hm$isClient()) {
             onTexturesChange(entity.getEntityTextureId());
         }
     }
@@ -228,7 +227,7 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
                 org.joml.Vector3i bp = new Vector3i((int) pos.x, (int) (Math.ceil(pos.y) - 1), (int) pos.z);
                 //IBlockState blockState = entity.world.getBlockState(bp);
                 float[] frictionValues = DEFAULT_GRIP; // TODO dynamic grip depending on the block was removed. to add back properly. See commit 🏷️ Remove block-grip and block-related slope config support
-                boolean isBlockWet = entity.getHmWorld().getBiome(bp).canRain() && entity.getHmWorld().isRaining() && entity.getHmWorld().canBlockSeeSky(bp);
+                boolean isBlockWet = entity.getHmWorld().hm$getBiome(bp).canRain() && entity.getHmWorld().hm$isRaining() && entity.getHmWorld().hm$canBlockSeeSky(bp);
                 float frictionValue = isBlockWet ? frictionValues[1] : frictionValues[0];
                 w.setGrip((w.isFlattened() ? 0.16f : 1) * frictionValue);
 
@@ -326,7 +325,7 @@ public class WheelsModule implements IPhysicsModule<BaseWheeledVehiclePhysicsHan
             if (!(skidInfos.get()[partWheel.getId()] < 0.1f)) {
                 return;
             }
-            entity.getHmWorld().spawnParticle(info.getSkidParticle(),
+            entity.getHmWorld().hm$spawnParticle(info.getSkidParticle(),
                     visualProperties[VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.COLLISION_X)],
                     visualProperties[VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.COLLISION_Y)],
                     visualProperties[VehicleEntityProperties.getPropertyIndex(partWheel.getId(), VehicleEntityProperties.EnumVisualProperties.COLLISION_Z)],

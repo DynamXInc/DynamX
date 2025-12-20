@@ -40,7 +40,7 @@ public class PickingObjectHelper {
                     break;
             }
         } else {
-            HmEntity entity = world.getEntityByID(DynamXContext.getPlayerPickingObjects().get(player.getEntityId()));
+            HmEntity entity = world.hm$getEntityByID(DynamXContext.getPlayerPickingObjects().get(player.getEntityId()));
             if (entity instanceof PhysicsEntity) {
                 PhysicsEntity<?> physicsEntity = (PhysicsEntity<?>) entity;
                 MovableModule movableModule = physicsEntity.getModuleByType(MovableModule.class);
@@ -71,7 +71,7 @@ public class PickingObjectHelper {
                 && !DynamXConfig.allowPlayersToMoveObjects) {
             return;
         }
-        HmEntity entity = world.getEntityByID(DynamXContext.getPlayerPickingObjects().get(player.getEntityId()));
+        HmEntity entity = world.hm$getEntityByID(DynamXContext.getPlayerPickingObjects().get(player.getEntityId()));
         if (entity instanceof PhysicsEntity) {
             PhysicsEntity<?> physicsEntity = (PhysicsEntity<?>) entity;
             MovableModule movableModule = physicsEntity.getModuleByType(MovableModule.class);
@@ -124,7 +124,7 @@ public class PickingObjectHelper {
     }
 
     private static void startTaking(MovableModule.Action moduleAction, HmWorld world, HmPlayerEntity player) {
-        HmEntity targetEntity = world.getEntityByID((int) moduleAction.getInfo()[0]);
+        HmEntity targetEntity = world.hm$getEntityByID((int) moduleAction.getInfo()[0]);
         if (targetEntity instanceof PhysicsEntity) {
             MovableModule movableModule = ((PhysicsEntity<?>) targetEntity).getModuleByType(MovableModule.class);
             if (movableModule != null) {

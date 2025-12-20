@@ -1,6 +1,5 @@
 package fr.dynamx.core.common.physics.world;
 
-import fr.dynamx.api.events.PhysicsEvent;
 import fr.dynamx.core.common.DynamXMain;
 import fr.dynamx.core.utils.debug.Profiler;
 import fr.dynamx.core.utils.optimization.SubClassPool;
@@ -20,7 +19,7 @@ public class BuiltinPhysicsWorld extends BasePhysicsWorld {
         initPhysicsWorld();
         this.physicsThread = Thread.currentThread();
 
-        DynamXMain.log.info("Loading the physics world for the dimension {}", world.getDimension());
+        DynamXMain.log.info("Loading the physics world for the dimension {}", world.hm$getDimension());
         //TODO EVENT MinecraftForge.EVENT_BUS.post(new PhysicsEvent.PhysicsWorldLoad(this));
     }
 
@@ -30,7 +29,7 @@ public class BuiltinPhysicsWorld extends BasePhysicsWorld {
         {
             //Disable physics simulation
             //Note that minecraft does the same, but with a delay of 300, so it avoids physics while entities are paused
-            if (mcWorld.getPlayerEntities().isEmpty()) {
+            if (mcWorld.hm$getPlayerEntities().isEmpty()) {
                 if (serverAfkTime < 200) {
                     serverAfkTime++;
                 }
@@ -53,7 +52,7 @@ public class BuiltinPhysicsWorld extends BasePhysicsWorld {
 
     @Override
     public void clearAll() {
-        DynamXMain.log.info("Unloading the physics world of the dimension {}", mcWorld.getDimension());
+        DynamXMain.log.info("Unloading the physics world of the dimension {}", mcWorld.hm$getDimension());
         super.clearAll();
     }
 

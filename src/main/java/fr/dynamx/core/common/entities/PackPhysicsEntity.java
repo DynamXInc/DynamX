@@ -23,7 +23,6 @@ import fr.dynamx.core.utils.debug.Profiler;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.dynamx.core.utils.optimization.SubClassPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
 import fr.hermes.api.mc.entities.HmEntity;
 import fr.hermes.api.mc.items.HmItemStack;
 import fr.hermes.forge.JmeVector3fPool;
@@ -150,7 +149,7 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
         JmeVector3fPool.openPool(SubClassPool.TICK_ENTITY_MC);
         Profiler.get().start(Profiler.Profiles.TICK_ENTITIES);
         super.onUpdate();
-        if (mcEntityWrapper.getHmWorld().isClient() && getMetadata() != lastMetadata && !isDead()) //Metadata has been sync, so update texture
+        if (mcEntityWrapper.getHmWorld().hm$isClient() && getMetadata() != lastMetadata && !isDead()) //Metadata has been sync, so update texture
         {
             lastMetadata = getMetadata();
             entityTextureId = (byte) getMetadata();

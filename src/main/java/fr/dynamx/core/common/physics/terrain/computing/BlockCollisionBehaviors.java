@@ -200,7 +200,7 @@ public class BlockCollisionBehaviors {
 
         @Override
         public void addBlockCollision(TerrainBoxConstructor terrainBoxConstructor, TerrainBoxBuilder boxBuilder, TerrainCollisionsCalculator.TerrainCursor cursor, HmWorld world, Vector3i at, IBlockState ofBlock, EnumFacing.Axis axis) {
-            HmTileEntity te = world.getTileEntity(at);
+            HmTileEntity te = world.hm$getTileEntity(at);
             if (te instanceof TEDynamXBlock) {
                 terrainBoxConstructor.addCustomShapedElement(new DynamXBlockTerrainElement(cursor.dx, cursor.dy, cursor.dz, at));
             }

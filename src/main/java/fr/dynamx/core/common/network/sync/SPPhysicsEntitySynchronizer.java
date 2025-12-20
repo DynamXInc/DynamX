@@ -48,9 +48,9 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
      */
     public HmEntity getOtherSideEntity() {
         if (!isClient) {
-            return DynamXMain.getProxy().getClientWorld() == null ? null : DynamXMain.getProxy().getClientWorld().getEntityByID(entity.getEntityId());
+            return DynamXMain.getProxy().getClientWorld() == null ? null : DynamXMain.getProxy().getClientWorld().hm$getEntityByID(entity.getEntityId());
         }
-        return DynamXMain.getProxy().getServerWorld().getEntityByID(entity.getEntityId());
+        return DynamXMain.getProxy().getServerWorld().hm$getEntityByID(entity.getEntityId());
     }
 
     /**
@@ -84,7 +84,7 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
             entity.physicsHandler.setForceActivation(true);
         }
         setSimulationHolder(SimulationHolder.DRIVER_SP, player);
-        if (!player.getHmWorld().isClient() || !player.isLocalPlayer() || !(entity instanceof BaseVehicleEntity)) {
+        if (!player.getHmWorld().hm$isClient() || !player.isLocalPlayer() || !(entity instanceof BaseVehicleEntity)) {
             return;
         }
         for (IPhysicsModule<?> module : ((BaseVehicleEntity<?>) entity).getModules()) {
@@ -101,14 +101,14 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
             entity.physicsHandler.setForceActivation(false);
         }
         setSimulationHolder(getDefaultSimulationHolder(), null);
-        if (player.getHmWorld().isClient() && player.isLocalPlayer()) {
+        if (player.getHmWorld().hm$isClient() && player.isLocalPlayer()) {
             controllers.clear();
         }
     }
 
     @Override
     public void onPrePhysicsTick(Profiler profiler) {
-        if (entity.getHmWorld().isClient() && entity.initialized == PhysicsEntity.EnumEntityInitState.ALL &&
+        if (entity.getHmWorld().hm$isClient() && entity.initialized == PhysicsEntity.EnumEntityInitState.ALL &&
                 entity.getHmControllingPassenger() instanceof HmPlayerEntity && ((HmPlayerEntity) entity.getHmControllingPassenger()).isLocalPlayer()) {
             controllers.forEach(IVehicleController::update);
         }
@@ -136,7 +136,7 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
 
     @Override
     public boolean doesOtherSideUsesPhysics() {
-        return !entity.getHmWorld().isClient();
+        return !entity.getHmWorld().hm$isClient();
     }
 
     @Override

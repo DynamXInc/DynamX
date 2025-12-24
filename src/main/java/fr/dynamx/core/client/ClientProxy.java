@@ -34,27 +34,10 @@ import fr.dynamx.core.utils.DynamXLoadingTasks;
 import fr.dynamx.core.utils.client.DynamXRenderUtils;
 import fr.dynamx.core.utils.errors.DynamXErrorManager;
 import fr.dynamx.core.utils.optimization.SubClassPool;
+import fr.hermes.api.mc.world.HmClientWorld;
+import fr.hermes.api.mc.world.HmServerWorld;
+import fr.hermes.api.mc.world.HmWorld;
 import fr.hermes.forge.JmeVector3fPool;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.IResourceManager;
-import net.minecraft.client.resources.SimpleReloadableResourceManager;
-import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.world.World;
-import net.minecraftforge.client.ClientCommandHandler;
-import net.minecraftforge.client.model.ModelLoaderRegistry;
-import net.minecraftforge.client.resource.IResourceType;
-import net.minecraftforge.client.resource.ISelectiveResourceReloadListener;
-import net.minecraftforge.client.resource.VanillaResourceType;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.client.FMLClientHandler;
-import net.minecraftforge.fml.client.SplashProgress;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.client.registry.RenderingRegistry;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.versioning.DefaultArtifactVersion;
-import net.minecraftforge.fml.common.versioning.InvalidVersionSpecificationException;
-import net.minecraftforge.fml.common.versioning.VersionRange;
-import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.function.Predicate;
 
@@ -67,11 +50,16 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
     }
 
     @Override
-    public void scheduleTask(World mcWorld, Runnable task) {
-        if (mcWorld.isRemote) {
-            Minecraft.getMinecraft().addScheduledTask(task);
+    public boolean isDedicatedServer() {
+        return false;
+    }
+
+    @Override
+    public void scheduleTask(HmWorld mcWorld, Runnable task) {
+        if (mcWorld.hm$isClient()) {
+            ((HmClientWorld) mcWorld).hm$getMinecraftClient().addScheduledTask(task);
         } else {
-            mcWorld.getMinecraftServer().addScheduledTask(task);
+            ((HmServerWorld) mcWorld).hm$getServer().hm$addScheduledTask(task);
         }
     }
 
@@ -117,23 +105,23 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
     }
 
     @Override
-    public World getClientWorld() {
-        return FMLClientHandler.instance().getClient().world;
+    public HmWorld getClientWorld() {
+        return (HmWorld) FMLClientHandler.instance().getClient().world;
     }
 
     @Override
-    public World getServerWorld() {
-        return FMLCommonHandler.instance().getMinecraftServerInstance().getEntityWorld();
+    public HmWorld getServerWorld() {
+        return (HmWorld) FMLCommonHandler.instance().getMinecraftServerInstance().getEntityWorld();
     }
 
     @Override
-    public boolean shouldUseBulletSimulation(World world) {
-        return super.shouldUseBulletSimulation(world) && world.isRemote;
+    public boolean shouldUseBulletSimulation(HmWorld world) {
+        return super.shouldUseBulletSimulation(world) && world.hm$isClient();
     }
 
     @Override
     public <T extends AbstractEntityPhysicsHandler<?, ?>> PhysicsEntitySynchronizer<? extends PhysicsEntity<T>> getNetHandlerForEntity(PhysicsEntity<T> tPhysicsEntity) {
-        if (tPhysicsEntity.world.isRemote) {
+        if (tPhysicsEntity.getHmWorld().hm$isClient()) {
             if (FMLCommonHandler.instance().getMinecraftServerInstance() != null)
                 return new SPPhysicsEntitySynchronizer<>(tPhysicsEntity, Side.CLIENT);
             else
@@ -150,11 +138,11 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
     @Override
     public boolean ownsSimulation(PhysicsEntity<?> entity) {
         //TODO NEW SYNC CLEAN THIS
-        if (entity.getSynchronizer().getSimulationHolder().ownsPhysics(entity.world.isRemote ? Side.CLIENT : Side.SERVER)) {
+        if (entity.getSynchronizer().getSimulationHolder().ownsPhysics(entity.getHmWorld().hm$isClient())) {
             return true;
         }
-        if (entity.world.isRemote && ClientEventHandler.MC.player.getRidingEntity() instanceof PhysicsEntity
-                && ((PhysicsEntity<?>) ClientEventHandler.MC.player.getRidingEntity()).getSynchronizer().getSimulationHolder().ownsPhysics(Side.CLIENT)) {
+        if (entity.getHmWorld().hm$isClient() && ClientEventHandler.MC.player.getRidingEntity() instanceof PhysicsEntity
+                && ((PhysicsEntity<?>) ClientEventHandler.MC.player.getRidingEntity()).getSynchronizer().getSimulationHolder().ownsPhysics(true)) {
             return true;
         }
         return ClientEventHandler.MC.player != null && DynamXContext.getPlayerPickingObjects().containsKey(ClientEventHandler.MC.player.getEntityId()) &&
@@ -177,8 +165,8 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
     }
 
     @Override
-    public void initPhysicsWorld(World world) {
-        if (DynamXContext.getPhysicsWorldPerDimensionMap().containsKey(world.provider.getDimension())) {
+    public void initPhysicsWorld(HmWorld world) {
+        if (DynamXContext.getPhysicsWorldPerDimensionMap().containsKey(world.hm$getDimension())) {
             // connecting to another server (e.g. with bungeecoord) : unload the previous world
             DynamXMain.log.info("Duplicate world load detected. Are using BungeeCoord ? Unloading old world.");
             IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(world);
@@ -187,7 +175,7 @@ public class ClientProxy extends CommonProxy implements ISelectiveResourceReload
                 physicsWorld.clearAll();
                 DynamXContext.getPlayerToCollision().clear();
             } else {
-                throw new IllegalStateException("Physics world loaded but not found. Dim: " + world.provider.getDimension() + " World: " + world);
+                throw new IllegalStateException("Physics world loaded but not found. Dim: " + world.hm$getDimension() + " World: " + world);
             }
         }
         DynamXContext.getPhysicsWorldPerDimensionMap().put(world.provider.getDimension(), new BuiltinThreadedPhysicsWorld(world, !ClientEventHandler.MC.isSingleplayer()));

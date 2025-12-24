@@ -36,14 +36,10 @@ import fr.dynamx.core.common.entities.PackPhysicsEntity;
 import fr.dynamx.core.utils.DynamXUtils;
 import fr.dynamx.core.utils.EnumPlayerStandOnTop;
 import fr.dynamx.core.utils.errors.DynamXErrorManager;
+import fr.hermes.api.mc.items.HmItemStack;
+import fr.hermes.api.mc.utils.HmCameraTransforms;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.joml.Matrix4f;
 
 import java.util.*;
@@ -237,7 +233,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     @SuppressWarnings({"unchecked"})
     public IDynamXItem<ModularVehicleInfo> createItem(InfoList<ModularVehicleInfo> loader) {
         CreatePackItemEvent.VehicleItem<ModularVehicleInfo, ?> event = new CreatePackItemEvent.VehicleItem(loader, this);
-        MinecraftForge.EVENT_BUS.post(event);
+        //TODO EVENT MinecraftForge.EVENT_BUS.post(event);
         if (event.isOverridden()) {
             return event.getObjectItem();
         } else {
@@ -253,10 +249,10 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
-    public void applyItemTransforms(ItemCameraTransforms.TransformType renderType, ItemStack stack, ItemDxModel model, Matrix4f transform) {
+    //@SideOnly(Side.CLIENT)
+    public void applyItemTransforms(HmCameraTransforms renderType, HmItemStack stack, ItemDxModel model, Matrix4f transform) {
         super.applyItemTransforms(renderType, stack, model, transform);
-        if (renderType == ItemCameraTransforms.TransformType.GUI)
+        if (renderType == HmCameraTransforms.GUI)
             transform.rotate((float) Math.PI, 0, 1, 0);
     }
 
@@ -266,7 +262,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
     }
 
     @Override
-    public ItemStack getPickedResult(int metadata) {
+    public HmItemStack getPickedResult(int metadata) {
         return new ItemStack((Item) getItems()[0], 1, metadata);
     }
 
@@ -275,7 +271,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
         if (sceneGraph == null) {
             if (isModelValid()) {
                 BuildSceneGraphEvent.BuildEntityScene event = new BuildSceneGraphEvent.BuildEntityScene(this, (List) getDrawableParts(), getScaleModifier());
-                MinecraftForge.EVENT_BUS.post(event);
+                //TODO MinecraftForge.EVENT_BUS.post(event);
                 sceneGraph = event.getSceneGraphResult();
             } else
                 sceneGraph = new EntityNode<>(Collections.EMPTY_LIST, Collections.EMPTY_LIST);

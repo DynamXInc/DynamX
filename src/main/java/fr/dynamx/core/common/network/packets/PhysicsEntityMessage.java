@@ -81,7 +81,7 @@ public abstract class PhysicsEntityMessage<T extends PhysicsEntityMessage> imple
                 processMessageServer(message, (PhysicsEntity<?>) ent, player);
             }
         } else if (message instanceof MessageSeatsSync || DynamXConfig.enableDebugTerrainManager) {
-            log.warn("PhysicsEntity with id " + message.entityId + " not found for message with type " + message + " sent from " + player);
+            log.warn("PhysicsEntity with id {} not found for message with type {} sent from {}", message.entityId, message, player);
         }
     }
 

@@ -7,19 +7,27 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 
+/**
+ * Ensures safe conversion creation of Hermes Mc objects thanks to Mixin magic
+ */
 public class ForgeMcObjectBinder implements McObjectBinder {
     @Override
     public HmItemStack newItemStack(HmItem item, int amount, int medata) {
-        return new ItemStack((Item) item, amount, medata);
+        return (HmItemStack) (Object) new ItemStack((Item) item, amount, medata);
     }
 
     @Override
     public HmResourceLocation newResourceLocation(String location) {
-        return new ResourceLocation(location);
+        return (HmResourceLocation) new ResourceLocation(location);
     }
 
     @Override
     public HmResourceLocation newResourceLocation(String namespace, String path) {
-        return new ResourceLocation(namespace, path);
+        return (HmResourceLocation) new ResourceLocation(namespace, path);
+    }
+
+    @Override
+    public HmItemStack emptyItemStack() {
+        return (HmItemStack) (Object) ItemStack.EMPTY;
     }
 }

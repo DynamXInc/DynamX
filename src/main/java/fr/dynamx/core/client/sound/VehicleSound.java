@@ -50,7 +50,7 @@ public abstract class VehicleSound implements IDynamXSound {
 
     @Override
     public void update(DynamXSoundHandler handler) {
-        if (isSoundActive() && !vehicleEntity.isDead) {
+        if (isSoundActive() && !vehicleEntity.isDead()) {
             this.playerPos.set((float) player.posX, (float) player.posY, (float) player.posZ);
             this.sourcePos.set(vehicleEntity.physicsPosition);
 
@@ -58,15 +58,15 @@ public abstract class VehicleSound implements IDynamXSound {
             handler.setPitch(this, getPitch());
             //Set the position to 5 blocks from the player in the direction of the sound.
             //Don't worry about motion as that's used in the sound itself for the pitch.
-            Vec3d soundNormalizedPosition = vehicleEntity.getPositionVector();//sourcePos.subtract(playerPos).normalize().scale(5).add(player.getPositionVector());
-            handler.setPosition(this, (float) soundNormalizedPosition.x, (float) soundNormalizedPosition.y, (float) soundNormalizedPosition.z);
+            org.joml.Vector3f soundNormalizedPosition = vehicleEntity.getHmPosition();//sourcePos.subtract(playerPos).normalize().scale(5).add(player.getPositionVector());
+            handler.setPosition(this, soundNormalizedPosition.x, soundNormalizedPosition.y, soundNormalizedPosition.z);
             if (Minecraft.getMinecraft().isGamePaused()) {
                 handler.pause(this);
             } else {
                 handler.resume(this);
             }
         } else {
-            if (vehicleEntity.isDead) {
+            if (vehicleEntity.isDead()) {
                 handler.stopSound(this);
             } else if (getState() != EnumSoundState.STOPPED) {
                 setState(EnumSoundState.STOPPING);
@@ -100,7 +100,7 @@ public abstract class VehicleSound implements IDynamXSound {
     public float getVolume() {
         //If the player is riding the source, volume will either be 1.0 or 0.5.
         if (vehicleEntity.equals(player.getRidingEntity())) {
-            return 1.0F * volumeFactor;
+            return volumeFactor;
         }
 
         //Sound is not internal and player is not riding the source.  Volume is player distance.
@@ -116,7 +116,7 @@ public abstract class VehicleSound implements IDynamXSound {
             Vector3f temp = JmeVector3fPool.get(playerPos);
             Vector3f temp2 = JmeVector3fPool.get(sourcePos);
             double soundVelocity = JmeVector3fPool.get(playerPos).subtractLocal(sourcePos.x, sourcePos.y, sourcePos.z).length() - temp.addLocal((float) player.motionX, (float) player.motionY, (float) player.motionZ)
-                    .addLocal(temp2.addLocal((float) vehicleEntity.motionX, (float) vehicleEntity.motionY, (float) vehicleEntity.motionZ).multLocal(-1)).length();
+                    .addLocal(temp2.addLocal((float) vehicleEntity.getMotionX(), (float) vehicleEntity.getMotionY(), (float) vehicleEntity.getMotionZ()).multLocal(-1)).length();
             return (float) (getCurrentPitch() * (1 + soundVelocity / 10F));
         }
     }

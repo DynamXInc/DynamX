@@ -4,6 +4,7 @@ import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.hermes.api.mc.items.HmItemStack;
 import fr.hermes.api.mc.world.HmServerWorld;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.nbt.NBTTagCompound;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -149,4 +150,6 @@ public interface HmEntity {
     Vector3f getEyesPosition();
 
     boolean isRiding();
+
+    boolean isRidingOrBeingRiddenBy(HmEntity other);
 }

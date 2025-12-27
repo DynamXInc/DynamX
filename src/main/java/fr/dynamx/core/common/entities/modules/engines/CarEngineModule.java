@@ -17,11 +17,10 @@ import fr.dynamx.core.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.core.common.physics.entities.modules.EnginePhysicsHandler;
 import fr.dynamx.core.common.physics.entities.parts.engine.AutomaticGearboxHandler;
 import fr.dynamx.core.utils.DynamXConstants;
+import fr.hermes.api.mc.HmMinecraftClient;
+import fr.hermes.api.mod.HermesPlatform;
 import fr.hermes.forge.JmeVector3fPool;
 import lombok.Getter;
-import net.minecraft.client.Minecraft;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 
@@ -63,7 +62,7 @@ public class CarEngineModule extends BasicEngineModule implements IPackInfoReloa
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
+    //@SideOnly(Side.CLIENT)
     public IVehicleController createNewController() {
         return new CarController(entity, this);
     }
@@ -128,21 +127,26 @@ public class CarEngineModule extends BasicEngineModule implements IPackInfoReloa
         }
     }
 
-    @SideOnly(Side.CLIENT)
+    //@SideOnly(Side.CLIENT)
     protected void playHandbrakeSound(boolean on) {
         String sound = on ? ((CarInfo) entity.getPackInfo()).getHandbrakeSoundOn() : ((CarInfo) entity.getPackInfo()).getHandbrakeSoundOff(); // It is assumed that entity is a CarEntity, and that it has a CarInfo
-        if (sound != null)
+        if (sound != null) {
             SOUND_HANDLER.playSingleSound(entity.physicsPosition, sound, 1, 1);
+        }
     }
 
-    @SideOnly(Side.CLIENT)
+    //@SideOnly(Side.CLIENT)
     protected void playReversingSound() {
-        if (getEngineInfo() == null)
+        if (getEngineInfo() == null) {
             return;
+        }
         String sound = ((CarInfo) entity.getPackInfo()).getReversingSound(); // It is assumed that entity is a CarEntity, and that it has a CarInfo
-        if (sound == null)
+        if (sound == null) {
             return;
-        boolean forInterior = Minecraft.getMinecraft().gameSettings.thirdPersonView == 0 && entity.isRidingOrBeingRiddenBy(Minecraft.getMinecraft().player);
+        }
+
+        HmMinecraftClient client = HermesPlatform.getInstance().getClient();
+        boolean forInterior = client.hm$getGameSettings().hm$isFirstPersonView() && entity.isRidingOrBeingRiddenBy(client.hm$getPlayer());
         if (reversingSound != null && reversingSound.getState() == EnumSoundState.PLAYING) {
             if (forInterior == reversingSound.isInterior())
                 return;

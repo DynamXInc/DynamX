@@ -80,8 +80,8 @@ public class PhysicsWorldOperation<A> {
                     PhysicsEntity<?> et = (PhysicsEntity<?>) object;
                     entities.remove(et);
                     Runnable task = () -> {
-                        List<PhysicsEntity> physicsEntities = et.hm$getWorld().hm$getPhysicsEntitiesWithinAABB(PhysicsEntity.class, et.getHmBoundingBox().expand(10, 10, 10));
-                        for (PhysicsEntity entity : physicsEntities) {
+                        List<PhysicsEntity<?>> physicsEntities = et.hm$getWorld().hm$getPhysicsEntitiesWithinAABB(et.getHmBoundingBox().expand(10, 10, 10));
+                        for (PhysicsEntity<?> entity : physicsEntities) {
                             if (entity != et) {
                                 entity.forcePhysicsActivation();
                             }

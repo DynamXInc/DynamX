@@ -206,7 +206,7 @@ public class ClientEventHandler {
                     int l = event.getResolution().getScaledWidth();
                     int i1 = event.getResolution().getScaledHeight();
 
-                    MC.getTextureManager().bindTexture(loc);
+                    MC.hm$textureManagerIsLoaded().bindTexture(loc);
 
                     GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.ONE_MINUS_DST_COLOR, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
                     GlStateManager.enableAlpha();

@@ -36,8 +36,10 @@ import fr.dynamx.core.common.entities.PackPhysicsEntity;
 import fr.dynamx.core.utils.DynamXUtils;
 import fr.dynamx.core.utils.EnumPlayerStandOnTop;
 import fr.dynamx.core.utils.errors.DynamXErrorManager;
+import fr.hermes.api.mc.items.HmItem;
 import fr.hermes.api.mc.items.HmItemStack;
 import fr.hermes.api.mc.utils.HmCameraTransforms;
+import fr.hermes.api.mod.McObjectBinder;
 import lombok.Getter;
 import lombok.Setter;
 import org.joml.Matrix4f;
@@ -263,7 +265,7 @@ public class ModularVehicleInfo extends AbstractItemObject<ModularVehicleInfo, M
 
     @Override
     public HmItemStack getPickedResult(int metadata) {
-        return new ItemStack((Item) getItems()[0], 1, metadata);
+        return McObjectBinder.instance.newItemStack((HmItem) getItems()[0], 1, metadata);
     }
 
     @Override

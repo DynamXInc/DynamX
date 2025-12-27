@@ -32,9 +32,9 @@ public class VehicleHud extends GuiFrame {
         CameraSystem.setupCamera(entity);
         setCssClass("root");
         List<IVehicleController> controllers = new ArrayList<>(((ClientEntityNetHandler) entity.cast().getSynchronizer()).getControllers());
-        if (MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.CreateHud(this, styleSheets, entity.getSeats().isLocalPlayerDriving(), this.riddenEntity, controllers))) {
+        /* TODO EVENT if (MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.CreateHud(this, styleSheets, entity.getSeats().isLocalPlayerDriving(), this.riddenEntity, controllers))) {
             return;
-        }
+        }*/
         controllers.forEach(c -> {
             List<ResourceLocation> hudStyle = c.getHudCssStyles();
             if (hudStyle != null)
@@ -56,7 +56,7 @@ public class VehicleHud extends GuiFrame {
                 int k = 0;
                 int l;
                 if (ClientPhysicsSyncManager.pingMs > 80) {
-                    if (riddenEntity.ticksExisted % (20 * 3) >= (20 * 2)) {
+                    if (riddenEntity.getTicksExisted() % (20 * 3) >= (20 * 2)) {
                         l = -1;
                     } else if (ClientPhysicsSyncManager.pingMs < 100) {
                         l = 1;
@@ -93,7 +93,7 @@ public class VehicleHud extends GuiFrame {
         if (!super.tick()) {
             return false;
         }
-        if (netWarning != null && ClientPhysicsSyncManager.pingMs > 100 && riddenEntity.ticksExisted % (20 * 3) < (20 * 2))
+        if (netWarning != null && ClientPhysicsSyncManager.pingMs > 100 && riddenEntity.getTicksExisted() % (20 * 3) < (20 * 2))
             netWarning.setText(ClientPhysicsSyncManager.getPingMessage());
         else if (netWarning != null && !netWarning.getText().isEmpty())
             netWarning.setText("");

@@ -31,10 +31,12 @@ import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.maths.DynamXMath;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
+import fr.dynamx.core.utils.optimization.Vector3fPool;
 import fr.dynamx.forge.DynamXConfig;
 import fr.hermes.api.mc.entities.HmEntity;
 import fr.hermes.api.mc.entities.HmPlayerEntity;
 import fr.hermes.api.mc.utils.HmResourceLocation;
+import fr.hermes.api.mc.world.HmWorld;
 import fr.hermes.forge.JmeVector3fPool;
 import fr.dynamx.core.utils.physics.DynamXPhysicsHelper;
 import fr.dynamx.core.utils.physics.PhysicsRaycastResult;
@@ -178,27 +180,23 @@ public class DynamXUtils {
         return new Quaternionf(quat.getX(), quat.getY(), quat.getZ(), quat.getW());
     }
 
-    public static Vector3f getPositionEyes(HmEntity entity) {
-        return JmeVector3fPool.get((float) entity.posX, (float) entity.posY + entity.getEyeHeight(), (float) entity.posZ);
-    }
-
     public static Vector3f calculateRay(HmEntity base, float distance, Vector3f offset) {
-        Vec3d vec3 = base.getPositionVector();
+        org.joml.Vector3f vec3 = base.getHmPosition();
         org.joml.Vector3f vec31 = base.getHmLook();
-        Vec3d vec32 = vec3.add(vec31.x * distance, vec31.y * distance, vec31.z * distance);
+        org.joml.Vector3f vec32 = vec3.add(vec31.x * distance, vec31.y * distance, vec31.z * distance);
         Vector3f lookAt = JmeVector3fPool.get((float) vec32.x, (float) vec32.y, (float) vec32.z);
         lookAt.subtractLocal(offset.x, offset.y, offset.z);
         return lookAt;
     }
 
     public static PhysicsRaycastResult castRayFromEntity(HmPlayerEntity entity, float distanceMax, Predicate<EnumBulletShapeType> ignoredPredicate) {
-        Vector3f eyePos = DynamXUtils.getPositionEyes(entity); //from
+        org.joml.Vector3f eyePos = entity.getEyesPosition();
         org.joml.Vector3f eyeLook = entity.getHmLook(); //to
-        Vector3f lookAt = new Vector3f(eyePos.x, eyePos.y, eyePos.z);
-        eyeLook.multLocal(distanceMax);
-        lookAt.addLocal(eyeLook);
+        org.joml.Vector3f lookAt = Vector3fPool.get(eyePos.x, eyePos.y, eyePos.z);
+        eyeLook.mul(distanceMax);
+        lookAt.add(eyeLook);
 
-        return DynamXPhysicsHelper.castRay(DynamXContext.getPhysicsWorld(entity.world), eyePos, lookAt, ignoredPredicate);
+        return DynamXPhysicsHelper.castRay(DynamXContext.getPhysicsWorld(entity.hm$getWorld()), eyePos, lookAt, ignoredPredicate);
     }
 
     public static NBTTagList newDoubleNBTList(double... numbers) {
@@ -424,9 +422,9 @@ public class DynamXUtils {
     }
 
 
-    public static void hotswapWorldPackInfos(World w) {
+    public static void hotswapWorldPackInfos(HmWorld w) {
         DynamXMain.log.info("Hot-swapping pack infos in models and spawn entities/tile entities in world " + w);
-        for (Entity e : w.loadedEntityList) {
+        for (HmEntity e : w.hm$getEntityList()) {
             if (e instanceof IPackInfoReloadListener)
                 ((IPackInfoReloadListener) e).onPackInfosReloaded();
         }
@@ -434,8 +432,9 @@ public class DynamXUtils {
             if (te instanceof IPackInfoReloadListener)
                 ((IPackInfoReloadListener) te).onPackInfosReloaded();
         }
-        if (w.isRemote)
+        if (w.hm$isClient()) {
             DynamXContext.getDxModelRegistry().onPackInfosReloaded();
+        }
     }
 
     /**

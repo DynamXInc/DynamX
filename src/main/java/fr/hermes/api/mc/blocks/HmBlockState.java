@@ -11,7 +11,7 @@ public interface HmBlockState {
 
     boolean isLiquid();
 
-    MutableBoundingBox getBoundingBox(HmServerWorld hmWorld, Vector3i blockPos);
+    MutableBoundingBox getBoundingBox(HmWorld hmWorld, Vector3i blockPos);
 
     /**
      * True if this block state blocks movement (is considered solid for stacking checks)
@@ -19,4 +19,6 @@ public interface HmBlockState {
     boolean blocksMovement();
 
     void addCollisionBoxes(HmWorld world, Vector3i blockPos, MutableBoundingBox checkZone, List<MutableBoundingBox> out);
+
+    boolean isFullCube();
 }

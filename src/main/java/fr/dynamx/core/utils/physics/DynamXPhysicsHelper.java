@@ -71,11 +71,13 @@ public class DynamXPhysicsHelper {
         return createRigidBody(mass, bodyTransform, collisionShape, new BulletShapeType<>(EnumBulletShapeType.BULLET_ENTITY, physicsEntity));
     }
 
-    public static PhysicsRaycastResult castRay(IPhysicsWorld iPhysicsWorld, Vector3f from, Vector3f dir, Predicate<EnumBulletShapeType> ignoredBody) {
+    public static PhysicsRaycastResult castRay(IPhysicsWorld iPhysicsWorld, org.joml.Vector3f fromV, org.joml.Vector3f dirV, Predicate<EnumBulletShapeType> ignoredBody) {
         if(iPhysicsWorld == null) {
             return null;
         }
         JmeVector3fPool.openPool();
+        Vector3f from = JmeVector3fPool.get(fromV);
+        Vector3f dir = JmeVector3fPool.get(dirV);
 
         List<PhysicsRayTestResult> results = new LinkedList<>();
         iPhysicsWorld.getDynamicsWorld().rayTest(from, dir, results);

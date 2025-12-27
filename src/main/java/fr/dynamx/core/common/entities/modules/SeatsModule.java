@@ -21,6 +21,7 @@ import fr.hermes.api.mc.entities.HmPlayerEntity;
 import fr.hermes.forge.JmeVector3fPool;
 import lombok.Getter;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nullable;
@@ -126,20 +127,20 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
         BasePartSeat<?, ?> seat = getRidingSeat(passenger);
         if (seat != null && seat.shouldLimitFieldOfView()) {
             // Limit yaw
-            float f = MathHelper.wrapDegrees(passenger.rotationYaw - entity.rotationYaw);
+            float f = MathHelper.wrapDegrees(passenger.getRotationYaw() - entity.getRotationYaw());
             float f1 = MathHelper.clamp(f, seat.getMinYaw(), seat.getMaxYaw());
-            passenger.prevRotationYaw += f1 - f;
-            passenger.rotationYaw += f1 - f;
+            passenger.setPrevRotationYaw(passenger.getPrevRotationYaw() + (f1 - f));
+            passenger.setRotationYaw(passenger.getRotationYaw() + (f1 - f));
 
             // Limit pitch
-            float f2 = MathHelper.wrapDegrees(passenger.rotationPitch);
+            float f2 = MathHelper.wrapDegrees(passenger.getRotationPitch());
             float f3 = MathHelper.clamp(f2, seat.getMinPitch(), seat.getMaxPitch());
-            passenger.rotationPitch = f3;
-            f2 = MathHelper.wrapDegrees(passenger.prevRotationPitch);
+            passenger.setRotationPitch(f3);
+            f2 = MathHelper.wrapDegrees(passenger.getPrevRotationPitch());
             f3 = MathHelper.clamp(f2, seat.getMinPitch(), seat.getMaxPitch());
-            passenger.prevRotationPitch = f3;
+            passenger.setPrevRotationPitch(f3);
         }
-        passenger.setRotationYawHead(passenger.rotationYaw - entity.rotationYaw);
+        passenger.setRotationYawHead(passenger.getRotationYaw() - entity.getRotationYaw());
     }
 
     @Override
@@ -147,7 +148,7 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
         if (entity.hm$getWorld().hm$isClient()) {
             return;
         }
-        BasePartSeat hitPart = seatToPassenger.inverse().get(passenger);
+        BasePartSeat<?, ?> hitPart = seatToPassenger.inverse().get(passenger);
         if (hitPart != null) {
             if (hitPart.isDriver() && passenger instanceof HmPlayerEntity) {
                 if (DynamXContext.usesPhysicsWorld(entity.hm$getWorld())) { //Fix: in single player, server has no physics world
@@ -159,14 +160,14 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
             //TODO EVENTS MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.EntityMount(Side.SERVER, passenger, entity, this, hitPart));
             DynamXContext.getNetwork().sendToClient(new MessageSeatsSync((IModuleContainer.ISeatsContainer) entity), EnumPacketTarget.ALL_TRACKING_ENTITY, entity);
         } else {
-            log.error("Cannot add passenger : " + passenger + " : seat not found !");
+            log.error("Cannot add passenger : {} : seat not found !", passenger);
         }
         //Client side is managed by updateSeats
     }
 
     @Override
     public void removePassenger(HmEntity passenger) {
-        BasePartSeat seat = getRidingSeat(passenger);
+        BasePartSeat<?, ?> seat = getRidingSeat(passenger);
         if (entity.hm$getWorld().hm$isClient() || seat == null) {
             return;
         }

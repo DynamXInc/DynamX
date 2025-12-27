@@ -11,25 +11,19 @@ import fr.dynamx.core.utils.debug.DynamXDebugOptions;
 import fr.dynamx.core.utils.debug.Profiler;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.SubClassPool;
+import fr.hermes.api.mc.HmMinecraftClient;
+import fr.hermes.api.mc.entities.HmPlayerEntity;
+import fr.hermes.api.mc.entities.HmServerPlayerEntity;
+import fr.hermes.api.mc.world.HmWorld;
+import fr.hermes.api.mod.HermesPlatform;
 import fr.hermes.forge.JmeVector3fPool;
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.eventhandler.EventPriority;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class PhysicsTickHandler {
     private static long lastTickTimeMs;
-    public static final Map<EntityPlayer, Integer> requestedDebugInfo = new HashMap<>();
+    public static final Map<HmPlayerEntity, Integer> requestedDebugInfo = new HashMap<>();
 
     @SideOnly(Side.CLIENT)
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -41,8 +35,8 @@ public class PhysicsTickHandler {
                 e.printStackTrace();
             }
         }
-        if (canTickClient(Minecraft.getMinecraft())) {
-            tickWorldPhysics(event.phase, Minecraft.getMinecraft().world);
+        if (canTickClient(HermesPlatform.getInstance().getClient())) {
+            tickWorldPhysics(event.phase, HermesPlatform.getInstance().getClient().hm$getWorld());
         }
 
         if (event.phase == TickEvent.Phase.START) {
@@ -51,7 +45,7 @@ public class PhysicsTickHandler {
             DynamXLoadingTasks.tick();
         } else {
             Profiler.get().end(Profiler.Profiles.TICK);
-            if (Minecraft.getMinecraft().world != null) {
+            if (HermesPlatform.getInstance().getClient().hm$getWorld() != null) {
                 boolean profiling = DynamXDebugOptions.PROFILING.isActive();
                 if (profiling) {
                     if (DynamXMain.getProxy().getTickTime() % 20 == 0) {
@@ -62,7 +56,7 @@ public class PhysicsTickHandler {
                 Profiler.get().update();
             }
 
-            if (!Minecraft.getMinecraft().isSingleplayer()) {//If not in solo
+            if (!HermesPlatform.getInstance().getClient().hm$isSingleplayer()) {//If not in solo
                 TaskScheduler.tick();
             }
             JmeVector3fPool.closePool();
@@ -70,9 +64,9 @@ public class PhysicsTickHandler {
         }
     }
 
-    @SideOnly(Side.CLIENT)
-    private boolean canTickClient(Minecraft mc) {
-        return mc.world != null && !mc.isGamePaused() && DynamXMain.getProxy().shouldUseBulletSimulation(mc.world) && DynamXContext.getPhysicsWorld(mc.world) != null;
+    //@SideOnly(Side.CLIENT)
+    private boolean canTickClient(HmMinecraftClient mc) {
+        return !mc.hm$isGamePaused() && canTickWorld(mc.hm$getWorld());
     }
 
     @SubscribeEvent
@@ -87,13 +81,13 @@ public class PhysicsTickHandler {
             }
         }
         for (WorldServer world : FMLCommonHandler.instance().getMinecraftServerInstance().worlds) {
-            if (canTickServer(world)) {
+            if (canTickWorld(world)) {
                 tickWorldPhysics(event.phase, world);
             }
         }
 
         if (event.phase == TickEvent.Phase.START) {
-            if (FMLCommonHandler.instance().getSide().isServer()) {
+            if (HermesPlatform.getInstance().getServer().hm$isDedicatedServer()) {
                 DynamXLoadingTasks.tick();
             }
         } else {
@@ -106,11 +100,11 @@ public class PhysicsTickHandler {
         }
     }
 
-    private boolean canTickServer(World world) {
+    private boolean canTickWorld(HmWorld world) {
         return world != null && DynamXMain.getProxy().shouldUseBulletSimulation(world) && DynamXContext.getPhysicsWorld(world) != null;
     }
 
-    private void tickWorldPhysics(TickEvent.Phase phase, World world) {
+    private void tickWorldPhysics(TickEvent.Phase phase, HmWorld world) {
         IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(world);
         if (phase == TickEvent.Phase.END) {
             physicsWorld.tickEnd();
@@ -145,13 +139,14 @@ public class PhysicsTickHandler {
 
     private void sendClientsDebug() {
         boolean profiling;
-        if (DynamXMain.getProxy().getServerWorld().getMinecraftServer().isDedicatedServer()) { //If integrated server, the vars are already shared
+        if (DynamXMain.getProxy().isDedicatedServer()) { //If integrated server, the vars are already shared
             profiling = false;
             boolean networkDebug = false, wheelData = false;
-            for (Map.Entry<EntityPlayer, Integer> e : requestedDebugInfo.entrySet()) {
+            for (Map.Entry<HmPlayerEntity, Integer> e : requestedDebugInfo.entrySet()) {
                 //Don't spam of debug packets
-                if (DynamXMain.getProxy().getServerWorld().getMinecraftServer().getTickCounter() % 10 == 0 && (DynamXDebugOptions.BLOCK_BOXES.matchesNetMask(e.getValue()) || DynamXDebugOptions.SLOPE_BOXES.matchesNetMask(e.getValue()))) {
-                    DynamXContext.getNetwork().sendToClient(new MessageCollisionDebugDraw(DynamXDebugOptions.BLOCK_BOXES.getDataIn(), DynamXDebugOptions.SLOPE_BOXES.getDataIn()), EnumPacketTarget.PLAYER, (EntityPlayerMP) e.getKey());
+                if (DynamXMain.getProxy().getTickTime() % 10 == 0 && (DynamXDebugOptions.BLOCK_BOXES.matchesNetMask(e.getValue()) || DynamXDebugOptions.SLOPE_BOXES.matchesNetMask(e.getValue()))) {
+                    DynamXContext.getNetwork().sendToClient(new MessageCollisionDebugDraw(DynamXDebugOptions.BLOCK_BOXES.getDataIn(), DynamXDebugOptions.SLOPE_BOXES.getDataIn()),
+                            EnumPacketTarget.PLAYER, (HmServerPlayerEntity) e.getKey());
                 }
                 if (DynamXDebugOptions.PROFILING.matchesNetMask(e.getValue())) {
                     profiling = true;
@@ -161,21 +156,24 @@ public class PhysicsTickHandler {
                     wheelData = true;
                 }
             }
-            if (DynamXMain.getProxy().getServerWorld().getMinecraftServer().getTickCounter() % 5 == 0) //requestedDebugInfo is sent all 5 ticks
+            if (DynamXMain.getProxy().getTickTime() % 5 == 0) {//requestedDebugInfo is sent all 5 ticks
                 requestedDebugInfo.clear();
+            }
             if (networkDebug != DynamXDebugOptions.FULL_NETWORK_DEBUG.isActive()) {
                 //System.out.println("Setting FULL_NETWORK_DEBUG active : " + networkDebug);
-                if (networkDebug)
+                if (networkDebug) {
                     DynamXDebugOptions.FULL_NETWORK_DEBUG.enable();
-                else
+                } else {
                     DynamXDebugOptions.FULL_NETWORK_DEBUG.disable();
+                }
             }
             if (wheelData != DynamXDebugOptions.WHEEL_ADVANCED_DATA.isActive()) {
                 //System.out.println("Setting WHEEL_ADVANCED_DATA active : " + wheelData);
-                if (wheelData)
+                if (wheelData) {
                     DynamXDebugOptions.WHEEL_ADVANCED_DATA.enable();
-                else
+                } else {
                     DynamXDebugOptions.WHEEL_ADVANCED_DATA.disable();
+                }
             }
         } else {
             profiling = DynamXDebugOptions.PROFILING.isActive();

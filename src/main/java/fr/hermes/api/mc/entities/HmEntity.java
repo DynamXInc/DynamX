@@ -152,4 +152,6 @@ public interface HmEntity {
     boolean isRiding();
 
     boolean isRidingOrBeingRiddenBy(HmEntity other);
+
+    HmEntity getRidingEntity();
 }

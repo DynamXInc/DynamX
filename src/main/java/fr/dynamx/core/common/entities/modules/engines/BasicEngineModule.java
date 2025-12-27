@@ -20,6 +20,7 @@ import fr.dynamx.core.common.physics.entities.modules.EnginePhysicsHandler;
 import fr.dynamx.core.common.physics.entities.parts.engine.AutomaticGearboxHandler;
 import fr.dynamx.core.utils.DynamXConstants;
 import fr.hermes.api.mc.entities.HmPlayerEntity;
+import fr.hermes.api.mod.HermesPlatform;
 import fr.hermes.forge.JmeVector3fPool;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
@@ -184,7 +185,7 @@ public abstract class BasicEngineModule implements IPhysicsModule<BaseVehiclePhy
 
     @SideOnly(Side.CLIENT)
     protected void playStartingSound() {
-        boolean forInterior = Minecraft.getMinecraft().gameSettings.thirdPersonView == 0 && entity.isRidingOrBeingRiddenBy(Minecraft.getMinecraft().player);
+        boolean forInterior = HermesPlatform.getInstance().getClient().hm$getGameSettings().hm$isFirstPersonView() && entity.isRidingOrBeingRiddenBy(HermesPlatform.getInstance().getClient().hm$getPlayer());
         String sound = getStartingSound(forInterior);
         if (sound != null)
             SOUND_HANDLER.playSingleSound(entity.physicsPosition, sound, 1, 1);

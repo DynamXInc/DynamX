@@ -1,6 +1,8 @@
 package fr.hermes.api.mc;
 
-public interface HmServer {
+import fr.hermes.api.mc.world.HmServerWorld;
+
+public interface HmMinecraftServer {
     boolean hm$isDedicatedServer();
 
     String hm$getHostname(); // mc.getServerHostname()
@@ -8,4 +10,8 @@ public interface HmServer {
     void hm$sendGlobalChatMessage(String message);
 
     void hm$addScheduledTask(Runnable task);
+
+    HmServerWorld hm$getWorld();
+
+    int hm$getTickCounter();
 }

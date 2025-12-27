@@ -1,15 +1,19 @@
 package fr.hermes.forge.abstracted;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import fr.dynamx.core.utils.DynamXConstants;
-import fr.hermes.api.mc.HmServer;
+import fr.hermes.api.mc.HmMinecraftServer;
+import fr.hermes.api.mc.world.HmServerWorld;
+import fr.hermes.api.mc.world.HmWorld;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(value = MinecraftServer.class, remap = DynamXConstants.REMAP)
-public abstract class MixinMinecraftServer implements HmServer {
+public abstract class MixinMinecraftServer implements HmMinecraftServer {
     @Shadow
     public abstract boolean isDedicatedServer();
 
@@ -18,6 +22,15 @@ public abstract class MixinMinecraftServer implements HmServer {
 
     @Shadow
     public abstract PlayerList getPlayerList();
+
+    @Shadow
+    public abstract World getEntityWorld();
+
+    @Shadow
+    public abstract int getTickCounter();
+
+    @Shadow
+    public abstract ListenableFuture<Object> addScheduledTask(Runnable runnableToSchedule);
 
     @Override
     public boolean hm$isDedicatedServer() {
@@ -32,5 +45,20 @@ public abstract class MixinMinecraftServer implements HmServer {
     @Override
     public void hm$sendGlobalChatMessage(String message) {
         getPlayerList().sendMessage(new TextComponentString(message));
+    }
+
+    @Override
+    public void hm$addScheduledTask(Runnable task) {
+        addScheduledTask(task);
+    }
+
+    @Override
+    public HmServerWorld hm$getWorld() {
+        return (HmServerWorld) getEntityWorld();
+    }
+
+    @Override
+    public int hm$getTickCounter() {
+        return getTickCounter();
     }
 }

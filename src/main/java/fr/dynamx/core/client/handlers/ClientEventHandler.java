@@ -33,6 +33,8 @@ import fr.dynamx.core.utils.errors.DynamXErrorManager;
 import fr.dynamx.core.utils.optimization.GlQuaternionPool;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.SubClassPool;
+import fr.hermes.api.mc.HmMinecraftClient;
+import fr.hermes.api.mod.HermesPlatform;
 import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -70,7 +72,7 @@ import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 import java.util.UUID;
 
 public class ClientEventHandler {
-    public static final Minecraft MC = Minecraft.getMinecraft();
+    public static final HmMinecraftClient MC = HermesPlatform.getInstance().getClient();
     public static UUID renderingEntity;
     /**
      * There are two choices: <br/>

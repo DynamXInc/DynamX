@@ -18,6 +18,7 @@ import fr.hermes.api.mc.entities.HmPlayerEntity;
 import fr.hermes.api.mc.utils.HmResourceLocation;
 import fr.hermes.api.mc.world.HmWorld;
 import lombok.Getter;
+import net.minecraftforge.client.model.ModelLoaderRegistry;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 
 import java.util.HashMap;
@@ -25,6 +26,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 //TODO MERGE PROXIES INTO DXCONTEXT
+
 /**
  * Common DynamX variables
  */
@@ -82,6 +84,7 @@ public class DynamXContext {
     //@SideOnly(Side.CLIENT)
     public static void initObjModelRegistry() {
         dxModelRegistry = new DynamXModelRegistry();
+        ModelLoaderRegistry.registerLoader(dxModelRegistry.getItemRenderer());
     }
 
     /**

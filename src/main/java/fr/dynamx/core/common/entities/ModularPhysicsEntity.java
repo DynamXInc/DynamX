@@ -94,9 +94,9 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
         updateEntityListeners.clear();
         updatePhysicsListeners.clear();
         moduleList.forEach(m -> {
-            if (m instanceof IPhysicsModule.IEntityUpdateListener && ((IPhysicsModule.IEntityUpdateListener) m).listenEntityUpdates(getHmWorld().hm$isClient()))
+            if (m instanceof IPhysicsModule.IEntityUpdateListener && ((IPhysicsModule.IEntityUpdateListener) m).listenEntityUpdates(hm$getWorld().hm$isClient()))
                 updateEntityListeners.add((IPhysicsModule.IEntityUpdateListener) m);
-            if (m instanceof IPhysicsModule.IEntityPosUpdateListener && ((IPhysicsModule.IEntityPosUpdateListener) m).listenEntityPosUpdates(getHmWorld().hm$isClient()))
+            if (m instanceof IPhysicsModule.IEntityPosUpdateListener && ((IPhysicsModule.IEntityPosUpdateListener) m).listenEntityPosUpdates(hm$getWorld().hm$isClient()))
                 updateEntityPosListeners.add((IPhysicsModule.IEntityPosUpdateListener) m);
             if (m instanceof IPhysicsModule.IPhysicsUpdateListener)
                 updatePhysicsListeners.add((IPhysicsModule.IPhysicsUpdateListener) m);

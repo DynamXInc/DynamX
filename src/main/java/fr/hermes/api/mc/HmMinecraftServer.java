@@ -14,4 +14,6 @@ public interface HmMinecraftServer {
     HmServerWorld hm$getWorld();
 
     int hm$getTickCounter();
+
+    HmServerWorld[] hm$getWorlds();
 }

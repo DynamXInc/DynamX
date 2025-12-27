@@ -84,7 +84,7 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
             entity.physicsHandler.setForceActivation(true);
         }
         setSimulationHolder(SimulationHolder.DRIVER_SP, player);
-        if (!player.getHmWorld().hm$isClient() || !player.isLocalPlayer() || !(entity instanceof BaseVehicleEntity)) {
+        if (!player.hm$getWorld().hm$isClient() || !player.isLocalPlayer() || !(entity instanceof BaseVehicleEntity)) {
             return;
         }
         for (IPhysicsModule<?> module : ((BaseVehicleEntity<?>) entity).getModules()) {
@@ -101,14 +101,14 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
             entity.physicsHandler.setForceActivation(false);
         }
         setSimulationHolder(getDefaultSimulationHolder(), null);
-        if (player.getHmWorld().hm$isClient() && player.isLocalPlayer()) {
+        if (player.hm$getWorld().hm$isClient() && player.isLocalPlayer()) {
             controllers.clear();
         }
     }
 
     @Override
     public void onPrePhysicsTick(Profiler profiler) {
-        if (entity.getHmWorld().hm$isClient() && entity.initialized == PhysicsEntity.EnumEntityInitState.ALL &&
+        if (entity.hm$getWorld().hm$isClient() && entity.initialized == PhysicsEntity.EnumEntityInitState.ALL &&
                 entity.getHmControllingPassenger() instanceof HmPlayerEntity && ((HmPlayerEntity) entity.getHmControllingPassenger()).isLocalPlayer()) {
             controllers.forEach(IVehicleController::update);
         }
@@ -136,7 +136,7 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
 
     @Override
     public boolean doesOtherSideUsesPhysics() {
-        return !entity.getHmWorld().hm$isClient();
+        return !entity.hm$getWorld().hm$isClient();
     }
 
     @Override

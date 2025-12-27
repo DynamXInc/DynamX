@@ -12,6 +12,7 @@ import org.joml.Vector3i;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Consumer;
 
 public interface HmWorld {
     boolean hm$isClient();
@@ -52,4 +53,6 @@ public interface HmWorld {
     List<PhysicsEntity<?>> hm$getPhysicsEntitiesWithinAABB(MutableBoundingBox aabb);
 
     int hm$getDimension();
+
+    void hm$addEntityRemovedListener(Consumer<HmEntity> callback);
 }

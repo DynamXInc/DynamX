@@ -1,9 +1,8 @@
 package fr.dynamx.core.common;
 
-import fr.dynamx.core.common.network.sync.PhysicsEntitySynchronizer;
-import fr.dynamx.core.common.blocks.TEDynamXBlock;
 import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.common.handlers.CommonEventHandler;
+import fr.dynamx.core.common.network.sync.PhysicsEntitySynchronizer;
 import fr.dynamx.core.common.network.sync.SPPhysicsEntitySynchronizer;
 import fr.dynamx.core.common.physics.PhysicsTickHandler;
 import fr.dynamx.core.common.physics.entities.AbstractEntityPhysicsHandler;
@@ -14,16 +13,14 @@ import fr.hermes.api.mc.world.HmWorld;
 import fr.hermes.api.mod.HermesPlatform;
 import fr.hermes.api.mod.HermesUtils;
 
-import static fr.dynamx.core.utils.DynamXConstants.ID;
-
 public abstract class CommonProxy {
     public void preInit() {
-        GameRegistry.registerTileEntity(TEDynamXBlock.class, new ResourceLocation(ID + ":dynamxblock"));
+        DynamXMain.getInstance().getMod().getUtils().registerMcObjects();
     }
 
     public void init() {
-        MinecraftForge.EVENT_BUS.register(new PhysicsTickHandler());
-        MinecraftForge.EVENT_BUS.register(new CommonEventHandler());
+        PhysicsTickHandler.register();
+        CommonEventHandler.register();
     }
 
     public void completeInit(){}

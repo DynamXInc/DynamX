@@ -36,8 +36,8 @@ public class HelicopterRotorModule implements IPhysicsModule<BaseVehiclePhysicsH
             curPower = curPower + (targetPower - curPower) / 60; //3-seconds interpolation
             curAngle += curPower;
         }
-        if (entity.getHmWorld().hm$isClient()) {
-            int height = (int) (entity.getPosY() - entity.getHmWorld().hm$getHeight((int) entity.getPosX(), (int) entity.getPosZ()));
+        if (entity.hm$getWorld().hm$isClient()) {
+            int height = (int) (entity.getPosY() - entity.hm$getWorld().hm$getHeight((int) entity.getPosX(), (int) entity.getPosZ()));
             if (height < 10) {
                 renderParticles(entity, height);
             }
@@ -45,7 +45,7 @@ public class HelicopterRotorModule implements IPhysicsModule<BaseVehiclePhysicsH
     }
 
     private void renderParticles(BaseVehicleEntity<?> entity, int height) {
-        HmWorld world = entity.getHmWorld();
+        HmWorld world = entity.hm$getWorld();
         for (int i = 0; i < 360; i += 2) {
             int power = (int) (engine.getPower() * 10);
 

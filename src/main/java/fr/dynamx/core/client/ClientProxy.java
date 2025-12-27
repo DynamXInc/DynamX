@@ -43,10 +43,8 @@ public class ClientProxy extends CommonProxy {
 
     @Override
     public void preInit() {
-        super.preInit();
-
         DynamXContext.getDxModelRegistry().onPackInfosReloaded();
-        ((HermesUtilsClient) DynamXMain.getInstance().getMod().getUtils()).registerMinecraftRenderingHandlers();
+        super.preInit();
     }
 
     @Override
@@ -72,7 +70,7 @@ public class ClientProxy extends CommonProxy {
 
     @Override
     public <T extends AbstractEntityPhysicsHandler<?, ?>> PhysicsEntitySynchronizer<? extends PhysicsEntity<T>> getNetHandlerForEntity(PhysicsEntity<T> tPhysicsEntity) {
-        if (tPhysicsEntity.getHmWorld().hm$isClient()) {
+        if (tPhysicsEntity.hm$getWorld().hm$isClient()) {
             if (HermesPlatform.getInstance().getServer() != null)
                 return new SPPhysicsEntitySynchronizer<>(tPhysicsEntity, true);
             else
@@ -89,11 +87,11 @@ public class ClientProxy extends CommonProxy {
     @Override
     public boolean ownsSimulation(PhysicsEntity<?> entity) {
         //TODO NEW SYNC CLEAN THIS
-        if (entity.getSynchronizer().getSimulationHolder().ownsPhysics(entity.getHmWorld().hm$isClient())) {
+        if (entity.getSynchronizer().getSimulationHolder().ownsPhysics(entity.hm$getWorld().hm$isClient())) {
             return true;
         }
         HmClientPlayerEntity player = ClientEventHandler.MC.hm$getPlayer();
-        if (entity.getHmWorld().hm$isClient() && player.getRidingEntity() instanceof PhysicsEntity
+        if (entity.hm$getWorld().hm$isClient() && player.getRidingEntity() instanceof PhysicsEntity
                 && ((PhysicsEntity<?>) player.getRidingEntity()).getSynchronizer().getSimulationHolder().ownsPhysics(true)) {
             return true;
         }

@@ -149,7 +149,7 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
         JmeVector3fPool.openPool(SubClassPool.TICK_ENTITY_MC);
         Profiler.get().start(Profiler.Profiles.TICK_ENTITIES);
         super.onUpdate();
-        if (mcEntityWrapper.getHmWorld().hm$isClient() && getMetadata() != lastMetadata && !isDead()) //Metadata has been sync, so update texture
+        if (mcEntityWrapper.hm$getWorld().hm$isClient() && getMetadata() != lastMetadata && !isDead()) //Metadata has been sync, so update texture
         {
             lastMetadata = getMetadata();
             entityTextureId = (byte) getMetadata();
@@ -248,7 +248,7 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
 
     @Override
     public int getBrightnessForRender() {
-        return ClientDynamXUtils.getLightNear(getHmWorld(), getHmBlockPosition(), 1, 3);
+        return ClientDynamXUtils.getLightNear(hm$getWorld(), getHmBlockPosition(), 1, 3);
     }
 
     @Override

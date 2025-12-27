@@ -136,7 +136,7 @@ public abstract class BasicEngineModule implements IPhysicsModule<BaseVehiclePhy
     }
 
     public void onEngineSwitchedOn() {
-        if (entity.getHmWorld().hm$isClient() && entity.getTicksExisted() > 60) {
+        if (entity.hm$getWorld().hm$isClient() && entity.getTicksExisted() > 60) {
             playStartingSound();
         }
     }

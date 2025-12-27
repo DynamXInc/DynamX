@@ -111,7 +111,7 @@ public class CarEngineModule extends BasicEngineModule implements IPackInfoReloa
 
     @Override
     public void setControls(int controls) {
-        if (entity.getHmWorld().hm$isClient() && entity.getTicksExisted() > 60 && entity.getPackInfo() instanceof CarInfo) {
+        if (entity.hm$getWorld().hm$isClient() && entity.getTicksExisted() > 60 && entity.getPackInfo() instanceof CarInfo) {
             if (!this.isHandBraking() && (controls & 32) == 32)
                 playHandbrakeSound(true);
             else if (this.isHandBraking() && (controls & 32) != 32)

@@ -9,6 +9,4 @@ public interface HermesUtilsClient {
 
     // TODO this is not really a hermes thing
     void initializeDynamXPacks();
-
-    void registerMinecraftRenderingHandlers();
 }

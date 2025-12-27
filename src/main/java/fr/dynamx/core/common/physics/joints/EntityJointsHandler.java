@@ -62,7 +62,7 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
     private void addJointInternal(PhysicsEntity<?> target, EntityJoint<?> joint) {
         if (joints.contains(joint)) //prevent duplicates
             throw new IllegalStateException("There is already a joint " + joint + " between " + entity + " and " + target + " !");
-        DynamXMain.getProxy().scheduleTask(entity.getHmWorld(), () -> joints.add(joint));
+        DynamXMain.getProxy().scheduleTask(entity.hm$getWorld(), () -> joints.add(joint));
         setDirty(true);
         if (!restoringJoints && queuedRestorations != null) {
             EntityJoint.CachedJoint rm = null;
@@ -109,7 +109,7 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
         if (j.getJoint() == null) {
             return;
         }
-        DynamXContext.getPhysicsWorld(entity.getHmWorld()).addJoint(j.getJoint());
+        DynamXContext.getPhysicsWorld(entity.hm$getWorld()).addJoint(j.getJoint());
         entity.physicsHandler.activate();
         if (otherEntity != entity) {
             otherEntity.physicsHandler.activate();
@@ -147,7 +147,7 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
      * @param jointId     The local id of the joint, the same as when the joint was created
      */
     public void removeJointWith(PhysicsEntity<?> otherEntity, HmResourceLocation jointType, byte jointId) {
-        DynamXMain.getProxy().scheduleTask(entity.getHmWorld(), () -> {
+        DynamXMain.getProxy().scheduleTask(entity.hm$getWorld(), () -> {
             EntityJoint<?> temp = null;
             EntityJoint<?> toRemove = new EntityJoint<>(null, entity, otherEntity, jointId, jointType, null);
             for (EntityJoint<?> j : joints) {
@@ -166,7 +166,7 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
     }
 
     public void removeJointsOfType(HmResourceLocation jointType, byte jointId) {
-        DynamXMain.getProxy().scheduleTask(entity.getHmWorld(), () -> {
+        DynamXMain.getProxy().scheduleTask(entity.hm$getWorld(), () -> {
             EntityJoint<?> temp = null;
             for (EntityJoint<?> j : joints) {
                 if (j.getJointId() == jointId && (j.getEntity1() == entity || j.getEntity2() == entity) && jointType.equals(j.getType())) {
@@ -187,7 +187,7 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
      * Internal function remove a joint on entity death or from a packet
      */
     public void onRemoveJoint(EntityJoint<?> joint) {
-        DynamXMain.getProxy().scheduleTask(entity.getHmWorld(), () -> {
+        DynamXMain.getProxy().scheduleTask(entity.hm$getWorld(), () -> {
             onRemoveJointInternal(joint, joint.getOtherEntity(entity));
         });
     }
@@ -215,7 +215,7 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
         if (joint.getJoint() == null) {
             return;
         }
-        DynamXContext.getPhysicsWorld(entity.getHmWorld()).removeJoint(joint.getJoint());
+        DynamXContext.getPhysicsWorld(entity.hm$getWorld()).removeJoint(joint.getJoint());
         entity.physicsHandler.activate();
         if (otherEntity != entity) {
             otherEntity.physicsHandler.activate();
@@ -259,7 +259,7 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
                 i:
                 for (EntityJoint.CachedJoint j : queuedRestorations) {
                     boolean found = false;
-                    for (HmEntity e : entity.getHmWorld().hm$getEntityList()) {
+                    for (HmEntity e : entity.hm$getWorld().hm$getEntityList()) {
                         if (!e.getUniqueID().equals(j.getId())) {
                             continue;
                         }
@@ -307,7 +307,7 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
         if (!isDirty()) {
             return;
         }
-        if (!entity.getHmWorld().hm$isClient() && entity.getSynchronizer().doesOtherSideUsesPhysics()) {
+        if (!entity.hm$getWorld().hm$isClient() && entity.getSynchronizer().doesOtherSideUsesPhysics()) {
             DynamXContext.getNetwork().sendToClient(new MessageJoints(entity, computeCachedJoints()), EnumPacketTarget.ALL_TRACKING_ENTITY, entity);
         }
         setDirty(false);
@@ -325,7 +325,7 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
     }
 
     protected void syncRemovedJoint(EntityJoint<?> joint) {
-        if (!entity.getHmWorld().hm$isClient() || !entity.getSynchronizer().getSimulationHolder().isSinglePlayer()) {
+        if (!entity.hm$getWorld().hm$isClient() || !entity.getSynchronizer().getSimulationHolder().isSinglePlayer()) {
             return;
         }
         HmEntity e = ((SPPhysicsEntitySynchronizer<?>) entity.getSynchronizer()).getOtherSideEntity();

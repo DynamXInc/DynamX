@@ -48,7 +48,7 @@ public class MessageSeatsSync extends PhysicsEntityMessage<MessageSeatsSync> {
             }
             return;
         }
-        DynamXContext.getPhysicsWorld(entity.getHmWorld()).schedule(() -> ((IModuleContainer.ISeatsContainer) entity).getSeats().updateSeats((MessageSeatsSync) message, entity.getSynchronizer()));
+        DynamXContext.getPhysicsWorld(entity.hm$getWorld()).schedule(() -> ((IModuleContainer.ISeatsContainer) entity).getSeats().updateSeats((MessageSeatsSync) message, entity.getSynchronizer()));
     }
 
     @Override

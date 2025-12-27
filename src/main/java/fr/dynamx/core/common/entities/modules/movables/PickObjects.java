@@ -65,7 +65,7 @@ public class PickObjects extends MovableModule {
 
             DynamXContext.getPlayerPickingObjects().put(playerPicking.getEntityId(), rayCastHitEntity.getEntityId());
 
-            DynamXContext.getPhysicsWorld(playerPicking.getHmWorld()).schedule(() -> JointHandlerRegistry.createJointWithSelf(JOINT_NAME, rayCastHitEntity, (byte) 0));
+            DynamXContext.getPhysicsWorld(playerPicking.hm$getWorld()).schedule(() -> JointHandlerRegistry.createJointWithSelf(JOINT_NAME, rayCastHitEntity, (byte) 0));
 
             entity.getSynchronizer().onPlayerStartControlling(mover.get(), false);
         }

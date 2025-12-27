@@ -52,9 +52,9 @@ public abstract class BaseWheeledVehiclePhysicsHandler<T extends BaseVehicleEnti
 
     @Override
     public void addToWorld() {
-        IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(getHandledEntity().getHmWorld());
+        IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(getHandledEntity().hm$getWorld());
         if (physicsWorld == null) {
-            throw new NullPointerException("Physics world is null, wtf " + handledEntity.getHmWorld() + " " + getCollisionObject());
+            throw new NullPointerException("Physics world is null, wtf " + handledEntity.hm$getWorld() + " " + getCollisionObject());
         }
         physicsWorld.addVehicle((PhysicsVehicle) getCollisionObject());
     }
@@ -86,7 +86,7 @@ public abstract class BaseWheeledVehiclePhysicsHandler<T extends BaseVehicleEnti
     @Override
     public void removeFromWorld() {
         if (physicsVehicle != null) {
-            DynamXContext.getPhysicsWorld(getHandledEntity().getHmWorld()).removeVehicle(physicsVehicle);
+            DynamXContext.getPhysicsWorld(getHandledEntity().hm$getWorld()).removeVehicle(physicsVehicle);
         }
     }
 }

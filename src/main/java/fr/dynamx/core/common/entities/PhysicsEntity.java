@@ -138,7 +138,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
 
         // Network Init
         synchronizer = DynamXMain.getProxy().getNetHandlerForEntity(this);
-        usesPhysicsWorld = DynamXContext.usesPhysicsWorld(mcEntityWrapper.getHmWorld());
+        usesPhysicsWorld = DynamXContext.usesPhysicsWorld(mcEntityWrapper.hm$getWorld());
     }
 
     public PhysicsEntity(HmEntity mcEntityWrapper, Vector3f pos, float spawnRotationAngle) {
@@ -343,7 +343,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
                 physicsHandler.setPhysicsState(EntityPhysicsState.ENABLE);
             }
             if (isRegistered == EnumEntityPhysicsRegistryState.NOT_REGISTERED) {
-                DynamXContext.getPhysicsWorld(mcEntityWrapper.getHmWorld()).addBulletEntity(this);
+                DynamXContext.getPhysicsWorld(mcEntityWrapper.hm$getWorld()).addBulletEntity(this);
             }
         }
 
@@ -561,7 +561,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
 
     @Override
     public void onRemovedFromWorld() {
-        IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(mcEntityWrapper.getHmWorld());
+        IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(mcEntityWrapper.hm$getWorld());
         if (usesPhysicsWorld && physicsWorld != null) //onRemovedFromWorld may be called before physicsWorld is loaded (in case of failing to load from nbt)
         {
             physicsWorld.removeBulletEntity(this);

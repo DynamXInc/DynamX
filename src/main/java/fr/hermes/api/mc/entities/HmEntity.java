@@ -2,9 +2,8 @@ package fr.hermes.api.mc.entities;
 
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.hermes.api.mc.items.HmItemStack;
-import fr.hermes.api.mc.world.HmServerWorld;
+import fr.hermes.api.mc.world.HmWorld;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.nbt.NBTTagCompound;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -16,7 +15,7 @@ import java.util.UUID;
 public interface HmEntity {
     int getEntityId();
 
-    HmServerWorld getHmWorld();
+    HmWorld hm$getWorld();
 
     void readFromNbt(NBTTagCompound tag);
 

@@ -125,7 +125,9 @@ public class HmUtilsClient extends HmUtils implements HermesUtilsClient, ISelect
     }
 
     @Override
-    public void registerMinecraftRenderingHandlers() {
+    public void registerMcObjects() {
+        super.registerMcObjects();
+
         // TODO not an ideal solution but works for now
         RenderingRegistry.registerEntityRenderingHandler(CarEntity.class, RenderBaseVehicle.RenderCar::new);
         RenderingRegistry.registerEntityRenderingHandler(BoatEntity.class, RenderBaseVehicle.RenderBoat::new);

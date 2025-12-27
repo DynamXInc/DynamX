@@ -1,9 +1,9 @@
 package fr.hermes.api.mod;
 
-import java.io.File;
 import java.net.URL;
 
-public interface HermesUtils
-{
+public interface HermesUtils {
     void addPathToClasspath(URL path);
+
+    void registerMcObjects();
 }

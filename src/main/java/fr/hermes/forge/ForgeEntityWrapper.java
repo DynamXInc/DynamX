@@ -253,7 +253,7 @@ public class ForgeEntityWrapper<E extends HmEntity> extends Entity implements IE
     // ====== From HmEntity ======
 
     @Override
-    public HmServerWorld getHmWorld() {
+    public HmServerWorld hm$getWorld() {
         //FIXME TODO
         return null;
     }

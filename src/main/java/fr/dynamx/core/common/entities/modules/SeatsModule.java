@@ -144,14 +144,14 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
 
     @Override
     public void addPassenger(HmEntity passenger) {
-        if (entity.getHmWorld().hm$isClient()) {
+        if (entity.hm$getWorld().hm$isClient()) {
             return;
         }
         BasePartSeat hitPart = seatToPassenger.inverse().get(passenger);
         if (hitPart != null) {
             if (hitPart.isDriver() && passenger instanceof HmPlayerEntity) {
-                if (DynamXContext.usesPhysicsWorld(entity.getHmWorld())) { //Fix: in single player, server has no physics world
-                    DynamXContext.getPhysicsWorld(entity.getHmWorld()).schedule(() -> entity.getSynchronizer().onPlayerStartControlling((HmPlayerEntity) passenger, true));
+                if (DynamXContext.usesPhysicsWorld(entity.hm$getWorld())) { //Fix: in single player, server has no physics world
+                    DynamXContext.getPhysicsWorld(entity.hm$getWorld()).schedule(() -> entity.getSynchronizer().onPlayerStartControlling((HmPlayerEntity) passenger, true));
                 } else {
                     entity.getSynchronizer().onPlayerStartControlling((HmPlayerEntity) passenger, true);
                 }
@@ -167,14 +167,14 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
     @Override
     public void removePassenger(HmEntity passenger) {
         BasePartSeat seat = getRidingSeat(passenger);
-        if (entity.getHmWorld().hm$isClient() || seat == null) {
+        if (entity.hm$getWorld().hm$isClient() || seat == null) {
             return;
         }
         lastRiddenSeat = seat;
         seatToPassenger.remove(seat);
         if (seat.isDriver() && passenger instanceof HmPlayerEntity) {
-            if (DynamXContext.usesPhysicsWorld(entity.getHmWorld())) { //Fix: in single player, server has no physics world
-                DynamXContext.getPhysicsWorld(entity.getHmWorld()).schedule(() -> entity.getSynchronizer().onPlayerStopControlling((HmPlayerEntity) passenger, true));
+            if (DynamXContext.usesPhysicsWorld(entity.hm$getWorld())) { //Fix: in single player, server has no physics world
+                DynamXContext.getPhysicsWorld(entity.hm$getWorld()).schedule(() -> entity.getSynchronizer().onPlayerStopControlling((HmPlayerEntity) passenger, true));
             } else {
                 entity.getSynchronizer().onPlayerStopControlling((HmPlayerEntity) passenger, true);
             }
@@ -220,7 +220,7 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
         for (Map.Entry<Byte, Integer> e : msg.getSeatToEntity().entrySet()) {
             BasePartSeat<?, ?> seat = entity.getPackInfo().getPartByTypeAndId(BasePartSeat.class, e.getKey());
             if (seat != null) {
-                HmEntity passengerEntity = entity.getHmWorld().hm$getEntityByID(e.getValue());
+                HmEntity passengerEntity = entity.hm$getWorld().hm$getEntityByID(e.getValue());
                 if (passengerEntity != null) {
                     if (seatToPassenger.get(seat) != passengerEntity) { //And add them
                         seatToPassenger.put(seat, passengerEntity);
@@ -232,7 +232,7 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
                 } else {
                     log.warn("Entity with id {} not found for seat in {}", e.getValue(), entity);
                     log.warn("Details {} {}", msg.getSeatToEntity(), entity.getHmPassengers());
-                    log.warn("Players there {}", entity.getHmWorld().hm$getPlayerEntities());
+                    log.warn("Players there {}", entity.hm$getWorld().hm$getPlayerEntities());
                     log.warn("THE player id {}", DynamXMain.getProxy().getClientWorld());
                 }
             } else {

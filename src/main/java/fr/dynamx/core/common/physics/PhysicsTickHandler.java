@@ -11,9 +11,13 @@ import fr.dynamx.core.utils.debug.DynamXDebugOptions;
 import fr.dynamx.core.utils.debug.Profiler;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.SubClassPool;
+import fr.hermes.api.events.HmEventPhase;
 import fr.hermes.api.mc.HmMinecraftClient;
 import fr.hermes.api.mc.entities.HmPlayerEntity;
 import fr.hermes.api.mc.entities.HmServerPlayerEntity;
+import fr.hermes.api.mc.events.HmMcClientEvents;
+import fr.hermes.api.mc.events.HmMcServerEvents;
+import fr.hermes.api.mc.world.HmServerWorld;
 import fr.hermes.api.mc.world.HmWorld;
 import fr.hermes.api.mod.HermesPlatform;
 import fr.hermes.forge.JmeVector3fPool;
@@ -25,10 +29,15 @@ public class PhysicsTickHandler {
     private static long lastTickTimeMs;
     public static final Map<HmPlayerEntity, Integer> requestedDebugInfo = new HashMap<>();
 
-    @SideOnly(Side.CLIENT)
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public void tickClient(TickEvent.ClientTickEvent event) {
-        if (event.phase == TickEvent.Phase.START) {
+    public static void register()
+    {
+        HmMcClientEvents.TICK.register(PhysicsTickHandler::tickClient);
+        HmMcServerEvents.TICK.register(PhysicsTickHandler::tickServer);
+    }
+
+    // note: why was it LOWEST priority @SubscribeEvent(priority = EventPriority.LOWEST)
+    private static void tickClient(HmEventPhase phase) {
+        if (phase == HmEventPhase.PRE) {
             try {
                 Profiler.get().start(Profiler.Profiles.TICK);
             } catch (Exception e) {
@@ -36,10 +45,10 @@ public class PhysicsTickHandler {
             }
         }
         if (canTickClient(HermesPlatform.getInstance().getClient())) {
-            tickWorldPhysics(event.phase, HermesPlatform.getInstance().getClient().hm$getWorld());
+            tickWorldPhysics(phase, HermesPlatform.getInstance().getClient().hm$getWorld());
         }
 
-        if (event.phase == TickEvent.Phase.START) {
+        if (phase == HmEventPhase.PRE) {
             QuaternionPool.openPool(SubClassPool.TICK_CLIENT);
             JmeVector3fPool.openPool(SubClassPool.TICK_CLIENT);
             DynamXLoadingTasks.tick();
@@ -65,13 +74,12 @@ public class PhysicsTickHandler {
     }
 
     //@SideOnly(Side.CLIENT)
-    private boolean canTickClient(HmMinecraftClient mc) {
+    private static boolean canTickClient(HmMinecraftClient mc) {
         return !mc.hm$isGamePaused() && canTickWorld(mc.hm$getWorld());
     }
 
-    @SubscribeEvent
-    public void tickServer(TickEvent.ServerTickEvent event) {
-        if (event.phase == TickEvent.Phase.START) {
+    private static void tickServer(HmEventPhase phase) {
+        if (phase == HmEventPhase.PRE) {
             QuaternionPool.openPool(SubClassPool.TICK_SERVER);
             JmeVector3fPool.openPool(SubClassPool.TICK_SERVER);
             try {
@@ -80,13 +88,13 @@ public class PhysicsTickHandler {
                 DynamXMain.log.throwing(e);
             }
         }
-        for (WorldServer world : FMLCommonHandler.instance().getMinecraftServerInstance().worlds) {
+        for (HmServerWorld world : HermesPlatform.getInstance().getServer().hm$getWorlds()) {
             if (canTickWorld(world)) {
-                tickWorldPhysics(event.phase, world);
+                tickWorldPhysics(phase, world);
             }
         }
 
-        if (event.phase == TickEvent.Phase.START) {
+        if (phase == HmEventPhase.PRE) {
             if (HermesPlatform.getInstance().getServer().hm$isDedicatedServer()) {
                 DynamXLoadingTasks.tick();
             }
@@ -100,13 +108,13 @@ public class PhysicsTickHandler {
         }
     }
 
-    private boolean canTickWorld(HmWorld world) {
+    private static boolean canTickWorld(HmWorld world) {
         return world != null && DynamXMain.getProxy().shouldUseBulletSimulation(world) && DynamXContext.getPhysicsWorld(world) != null;
     }
 
-    private void tickWorldPhysics(TickEvent.Phase phase, HmWorld world) {
+    private static void tickWorldPhysics(HmEventPhase phase, HmWorld world) {
         IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(world);
-        if (phase == TickEvent.Phase.END) {
+        if (phase == HmEventPhase.POST) {
             physicsWorld.tickEnd();
             return;
         }
@@ -137,7 +145,7 @@ public class PhysicsTickHandler {
         QuaternionPool.closePool();
     }
 
-    private void sendClientsDebug() {
+    private static void sendClientsDebug() {
         boolean profiling;
         if (DynamXMain.getProxy().isDedicatedServer()) { //If integrated server, the vars are already shared
             profiling = false;
@@ -186,7 +194,7 @@ public class PhysicsTickHandler {
         Profiler.setIsProfilingOn(profiling);
     }
 
-    private float getDeltaTimeMilliseconds() {
+    private static float getDeltaTimeMilliseconds() {
         long cur = System.currentTimeMillis();
         long dt = cur - lastTickTimeMs;
         lastTickTimeMs = cur;

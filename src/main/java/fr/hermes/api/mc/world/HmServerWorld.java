@@ -1,11 +1,11 @@
 package fr.hermes.api.mc.world;
 
-import fr.hermes.api.mc.HmServer;
+import fr.hermes.api.mc.HmMinecraftServer;
 
 public interface HmServerWorld extends HmWorld {
     default boolean hm$isClient() {
         return false;
     }
 
-    HmServer hm$getServer();
+    HmMinecraftServer hm$getServer();
 }

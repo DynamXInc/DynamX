@@ -9,11 +9,8 @@ import fr.dynamx.core.common.DynamXMain;
 import fr.dynamx.core.common.contentpack.ContentPackLoader;
 import fr.dynamx.core.common.contentpack.sync.PackSyncHandler;
 import fr.dynamx.core.common.network.packets.MessageSyncConfig;
-import net.minecraft.client.Minecraft;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import fr.hermes.api.mc.world.HmWorld;
+import fr.hermes.api.mod.HermesPlatform;
 
 import java.util.ArrayDeque;
 import java.util.HashMap;
@@ -42,7 +39,7 @@ public class DynamXLoadingTasks {
                 }
             } else if (taskContext == TaskContext.SERVER_RUNNING) {
                 DynamXContext.getNetwork().sendToClient(new MessageSyncConfig(true, -1), EnumPacketTarget.ALL);
-                for (World w : FMLCommonHandler.instance().getMinecraftServerInstance().worlds) {
+                for (HmWorld w : HermesPlatform.getInstance().getServer().hm$getWorlds()) {
                     DynamXUtils.hotswapWorldPackInfos(w);
                 }
             }
@@ -140,12 +137,12 @@ public class DynamXLoadingTasks {
         MC_INIT, SERVER_RUNNING, CLIENT;
 
         public boolean isClient() {
-            return this == CLIENT || FMLCommonHandler.instance().getSide().isClient();
+            return this == CLIENT || HermesPlatform.getInstance().getClient() != null;
         }
 
-        @SideOnly(Side.CLIENT)
+        //@SideOnly(Side.CLIENT)
         public boolean isSinglePlayer() {
-            return Minecraft.getMinecraft().isSingleplayer();
+            return HermesPlatform.getInstance().getClient().hm$isSingleplayer();
         }
     }
 }

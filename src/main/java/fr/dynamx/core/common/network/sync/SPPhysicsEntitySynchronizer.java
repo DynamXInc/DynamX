@@ -140,7 +140,7 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
 
     @Override
     public boolean doesOtherSideUsesPhysics() {
-        return !entity.getHmWorld().hm$isClient();
+        return !entity.hm$getWorld().hm$isClient();
     }
 
     @Override

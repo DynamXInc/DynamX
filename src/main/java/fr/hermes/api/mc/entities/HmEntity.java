@@ -94,4 +94,21 @@ public interface HmEntity {
     Vector3f hm$getEyesPosition();
 
     boolean hm$isRiding();
+
+    // TODO hm$ renaming and Mixin implem
+    boolean isRidingOrBeingRiddenBy(HmEntity other);
+
+    HmEntity getRidingEntity();
+
+    float getRotationYawHead();
+
+    void setRotationYawHead(float yawHead);
+
+    void setRenderYawOffset(float offset);
+
+    void setPrevRotationYaw(float prevRotationYaw);
+
+    void setRotationPitch(float rotationPitch);
+
+    void setPrevRotationPitch(float prevRotationPitch);
 }

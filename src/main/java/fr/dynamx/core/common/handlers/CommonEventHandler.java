@@ -29,6 +29,11 @@ import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.client.ContentPackUtils;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.SubClassPool;
+import fr.hermes.api.events.HmEventPhase;
+import fr.hermes.api.mc.entities.HmPlayerEntity;
+import fr.hermes.api.mc.events.HmMcServerEvents;
+import fr.hermes.api.mc.events.HmPlayerEvents;
+import fr.hermes.api.mc.events.HmWorldEvents;
 import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -48,7 +53,6 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.world.ExplosionEvent;
-import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -60,11 +64,68 @@ import java.util.Map;
 
 import static fr.dynamx.core.common.handlers.TaskScheduler.schedule;
 
+// TODO COMPLETE CONVERSION TO HERMES EVENTS
 public class CommonEventHandler {
-
     public static final ResourceLocation CAPABILITY_LOCATION = new ResourceLocation(DynamXConstants.ID, "chunkaabb");
 
     public static final Map<ChunkPos, Map<BlockPos, AxisAlignedBB>> PENDING_CHUNKS_COLLISIONS = new HashMap<>();
+
+    public static void register() {
+        HmPlayerEvents.JOIN.register(player -> {
+            if (player.hm$getServer().hm$isDedicatedServer()) {
+                DynamXContext.getNetwork().sendToClient(new MessageSyncConfig(false, player.getEntityId()), EnumPacketTarget.PLAYER, player);
+            }
+        });
+
+        HmPlayerEvents.LEAVE.register(player -> {
+            if (player.hm$getServer().hm$isDedicatedServer()) {
+                ServerPhysicsSyncManager.onDisconnect(player);
+                DynamXContext.getWalkingPlayers().remove(player);
+            }
+            if (DynamXContext.getPlayerPickingObjects().containsKey(player.getEntityId())) {
+                PickingObjectHelper.handlePlayerDisconnection(player);
+            }
+        });
+
+        HmWorldEvents.LOAD.register(world -> {
+            if (world.hm$isClient() || FMLCommonHandler.instance().getMinecraftServerInstance().isDedicatedServer()) {
+                DynamXMain.getProxy().initPhysicsWorld(world);
+            }
+
+            world.hm$addEntityRemovedListener(entityIn -> {
+                if (entityIn instanceof HmPlayerEntity) {
+                    HmPlayerEntity player = (HmPlayerEntity) entityIn;
+                    if (DynamXContext.getPlayerToCollision().containsKey(player)) {
+                        DynamXContext.getPlayerToCollision().get(player).removeFromWorld(true, player.hm$getWorld());
+                    }
+                }
+            });
+        });
+
+        HmWorldEvents.UNLOAD.register(world -> {
+            try {
+                IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(world);
+                if (physicsWorld != null) {
+                    physicsWorld.clearAll();
+                    DynamXContext.getPlayerToCollision().clear();
+                }
+            } catch (Exception ex) {
+                DynamXMain.log.fatal("Error while unloading the physics world", ex);
+            }
+        });
+
+        HmMcServerEvents.TICK.register(phase -> {
+            if (phase == HmEventPhase.POST) {
+                /* Set floatingTickCount & vehicleFloatingTickCount to 0 to prevent being kicked because of the "Flying is not enable on this server"*/
+                DynamXContext.getWalkingPlayers().forEach((player, physicsEntity) -> {
+                    if (player instanceof EntityPlayerMP) {
+                        ((EntityPlayerMP) player).connection.floatingTickCount = 0;
+                        ((EntityPlayerMP) player).connection.vehicleFloatingTickCount = 0;
+                    }
+                });
+            }
+        });
+    }
 
     @SubscribeEvent
     public void attachCapability(AttachCapabilitiesEvent<Chunk> event) {
@@ -76,24 +137,6 @@ public class CommonEventHandler {
         if (PENDING_CHUNKS_COLLISIONS.containsKey(e.getChunk().getPos())) {
             e.getChunk().getCapability(DynamXChunkDataProvider.DYNAMX_CHUNK_DATA_CAPABILITY, null).getBlocksAABB().putAll(PENDING_CHUNKS_COLLISIONS.get(e.getChunk().getPos()));
         }
-    }
-
-    @SubscribeEvent
-    public void onLoggedIn(net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent event) {
-        if (FMLCommonHandler.instance().getSide().isServer()) {
-            DynamXContext.getNetwork().sendToClient(new MessageSyncConfig(false, event.player.getEntityId()), EnumPacketTarget.PLAYER, (EntityPlayerMP) event.player);
-        }
-    }
-
-    @SubscribeEvent
-    public void onDisconnect(net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedOutEvent event) {
-        EntityPlayer player = event.player;
-        if (FMLCommonHandler.instance().getSide().isServer()) {
-            ServerPhysicsSyncManager.onDisconnect(player);
-            DynamXContext.getWalkingPlayers().remove(player);
-        }
-        if (DynamXContext.getPlayerPickingObjects().containsKey(player.getEntityId()))
-            PickingObjectHelper.handlePlayerDisconnection(player);
     }
 
     @SubscribeEvent
@@ -165,31 +208,9 @@ public class CommonEventHandler {
     }
 
     @SubscribeEvent
-    public void onWorldLoad(WorldEvent.Load event) {
-        World world = event.getWorld();
-        world.addEventListener(new DynamXWorldListener());
-        if (event.getWorld().isRemote || FMLCommonHandler.instance().getMinecraftServerInstance().isDedicatedServer()) {
-            DynamXMain.getProxy().initPhysicsWorld(event.getWorld());
-        }
-    }
-
-    @SubscribeEvent
     public void onChunkUnload(ChunkEvent.Unload e) {
         if (DynamXMain.getProxy().shouldUseBulletSimulation(e.getWorld())) {
             DynamXContext.getPhysicsWorld(e.getWorld()).schedule(() -> DynamXContext.getPhysicsWorld(e.getWorld()).getTerrainManager().onChunkUnload(e));
-        }
-    }
-
-    @SubscribeEvent
-    public void onWorldUnload(WorldEvent.Unload e) {
-        try {
-            IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(e.getWorld());
-            if (physicsWorld != null && physicsWorld.getWorld().equals(e.getWorld())) {
-                physicsWorld.clearAll();
-                DynamXContext.getPlayerToCollision().clear();
-            }
-        } catch (Exception ex) {
-            DynamXMain.log.fatal("Error while unloading the physics world", ex);
         }
     }
 
@@ -218,20 +239,6 @@ public class CommonEventHandler {
                     ((ItemSlopes) event.getItemStack().getItem()).clearMemory(event.getWorld(), event.getEntityPlayer(), event.getItemStack());
                 }
             }
-        }
-    }
-
-    /* Player collisions and walking players */
-    @SubscribeEvent
-    public void onTick(TickEvent.ServerTickEvent event) {
-        if (event.phase == TickEvent.Phase.END) {
-            /* Set floatingTickCount & vehicleFloatingTickCount to 0 to prevent being kicked because of the "Flying is not enable on this server"*/
-            DynamXContext.getWalkingPlayers().forEach((player, physicsEntity) -> {
-                if (player instanceof EntityPlayerMP) {
-                    ((EntityPlayerMP) player).connection.floatingTickCount = 0;
-                    ((EntityPlayerMP) player).connection.vehicleFloatingTickCount = 0;
-                }
-            });
         }
     }
 

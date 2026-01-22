@@ -143,7 +143,7 @@ public class DynamXMain {
             proxy = new ClientProxy();
         else
             proxy = new ServerProxy();
-        proxy.schedulePacksInit();
+        proxy.schedulePacksInit(mod.getUtils());
         bar.pop();
     }
 

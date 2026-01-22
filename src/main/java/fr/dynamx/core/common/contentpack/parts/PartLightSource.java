@@ -312,7 +312,7 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
             int activeStep = 0;
             if (isOn && onLightObject.getBlinkSequence() != null) {
                 int[] seq = onLightObject.getBlinkSequence();
-                int mod = ClientEventHandler.MC.getRenderViewEntity().ticksExisted % seq[seq.length - 1];
+                int mod = ClientEventHandler.MC.hm$getRenderViewEntity().getTicksExisted() % seq[seq.length - 1];
                 isOn = false; //Default state
                 for (int i = seq.length - 1; i >= 0; i--) {
                     if (mod > seq[i]) {
@@ -346,7 +346,7 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
             }
             //Render the light
             if (lights != null && lights.isLightOn(onLightObject.getLightId()) && onLightObject.getRotateDuration() > 0) {
-                float step = ((float) (ClientEventHandler.MC.getRenderViewEntity().ticksExisted % onLightObject.getRotateDuration())) / onLightObject.getRotateDuration();
+                float step = ((float) (ClientEventHandler.MC.hm$getRenderViewEntity().getTicksExisted() % onLightObject.getRotateDuration())) / onLightObject.getRotateDuration();
                 step = step * (FastMath.PI * 2);
                 transform.rotate(step, 0, 1, 0);
             }
@@ -361,7 +361,7 @@ public class PartLightSource extends SubInfoType<ILightOwner<?>> implements ISub
                 OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float) j, (float) k);
                 GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             } else if (context instanceof BaseRenderContext.BlockRenderContext && isOn) {
-                int i = ClientEventHandler.MC.world.getCombinedLight(((BaseRenderContext.BlockRenderContext) context).getTileEntity().getPos(), 0);
+                int i = ClientEventHandler.MC.hm$getWorld().hm$getLightAt(((BaseRenderContext.BlockRenderContext) context).getTileEntity().getPos());
                 int j = i % 65536;
                 int k = i / 65536;
                 OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float) j, (float) k);

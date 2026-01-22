@@ -10,6 +10,10 @@ import fr.dynamx.core.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.core.server.network.ServerPhysicsEntitySynchronizer;
 import fr.dynamx.core.utils.DynamXLoadingTasks;
 import fr.dynamx.core.utils.optimization.SubClassPool;
+import fr.hermes.api.mc.world.HmServerWorld;
+import fr.hermes.api.mc.world.HmWorld;
+import fr.hermes.api.mod.HermesPlatform;
+import fr.hermes.api.mod.HermesUtils;
 import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
@@ -28,12 +32,12 @@ public class ServerProxy extends CommonProxy {
     }
 
     @Override
-    public void scheduleTask(World mcWorld, Runnable task) {
-        mcWorld.getMinecraftServer().addScheduledTask(task);
+    public void scheduleTask(HmWorld mcWorld, Runnable task) {
+        ((HmServerWorld) mcWorld).hm$getServer().hm$addScheduledTask(task);
     }
 
     @Override
-    public void schedulePacksInit() {
+    public void schedulePacksInit(HermesUtils utils) {
         ThreadedLoadingService loadingService = ACsLib.getPlatform().provideService(ThreadedLoadingService.class);
         loadingService.addTask(ThreadedLoadingService.ModLoadingSteps.BLOCK_REGISTRY, "packsload", () -> {
             JmeVector3fPool.openPool(SubClassPool.PACK_MODEL_LOAD); //Open a pool for the loading of entities
@@ -43,5 +47,10 @@ public class ServerProxy extends CommonProxy {
             //Must follow addons init
             loadingService.addTask(ThreadedLoadingService.ModLoadingSteps.INIT, "proxy preinit", this::preInit);
         });
+    }
+
+    @Override
+    public boolean isDedicatedServer() {
+        return HermesPlatform.getInstance().getServer().hm$isDedicatedServer();
     }
 }

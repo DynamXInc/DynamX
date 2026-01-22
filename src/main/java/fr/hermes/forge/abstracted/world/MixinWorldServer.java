@@ -1,7 +1,7 @@
 package fr.hermes.forge.abstracted.world;
 
 import fr.dynamx.core.utils.DynamXConstants;
-import fr.hermes.api.mc.HmServer;
+import fr.hermes.api.mc.HmMinecraftServer;
 import fr.hermes.api.mc.world.HmServerWorld;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.WorldServer;
@@ -21,8 +21,8 @@ public abstract class MixinWorldServer extends MixinWorld implements HmServerWor
     public abstract ChunkProviderServer getChunkProvider();
 
     @Override
-    public HmServer hm$getServer() {
-        return (HmServer) server;
+    public HmMinecraftServer hm$getServer() {
+        return (HmMinecraftServer) server;
     }
 
     @Override

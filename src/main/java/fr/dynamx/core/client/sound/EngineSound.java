@@ -22,7 +22,7 @@ public class EngineSound extends VehicleSound {
 
     @Override
     public boolean tryStop() {
-        if (getVolumeFactor() <= 0 || vehicleEntity.isDead) {
+        if (getVolumeFactor() <= 0 || vehicleEntity.isDead()) {
             setState(EnumSoundState.STOPPED);
             setVolumeFactor(0);
             return true;

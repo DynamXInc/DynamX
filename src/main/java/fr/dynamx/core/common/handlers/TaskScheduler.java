@@ -3,7 +3,6 @@ package fr.dynamx.core.common.handlers;
 import fr.dynamx.core.common.DynamXMain;
 import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.hermes.api.mc.entities.HmServerPlayerEntity;
-import net.minecraft.entity.player.EntityPlayerMP;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,7 +85,7 @@ public class TaskScheduler {
 
         @Override
         public void run() {
-            if (target.isPlayerConnected()) {
+            if (target.hm$isPlayerConnected()) {
                 entity.getSynchronizer().resyncEntity(target);
             } else {
                 DynamXMain.log.warn("Skipping resync item of {} for {} : player not connected", entity, target);

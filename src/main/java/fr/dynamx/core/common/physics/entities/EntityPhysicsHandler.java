@@ -104,8 +104,8 @@ public abstract class EntityPhysicsHandler<T extends PhysicsEntity<?>> extends A
         // search water downwards, two blocks from the entity
         for (int offset = 2; offset > -2; offset--) {
             Vector3i blockPos = new Vector3i((int) entity.physicsPosition.x, (int) (entity.physicsPosition.y + offset), (int) entity.physicsPosition.z);
-            if (entity.getHmWorld().hm$getBlockState(blockPos).isLiquid()) {
-                MutableBoundingBox boundingBox = entity.getHmWorld().hm$getBlockState(blockPos).getBoundingBox(entity.getHmWorld(), blockPos);
+            if (entity.hm$getWorld().hm$getBlockState(blockPos).isLiquid()) {
+                MutableBoundingBox boundingBox = entity.hm$getWorld().hm$getBlockState(blockPos).getBoundingBox(entity.hm$getWorld(), blockPos);
                 return (float) boundingBox.offset(blockPos).maxY - 0.125F + 0.5f;
             }
         }

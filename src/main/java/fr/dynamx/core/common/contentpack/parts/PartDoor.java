@@ -138,7 +138,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
         if (doors == null)
             return false;
         if (isEnabled() && !doors.isDoorAttached(getId())) {
-            if (!entity.getHmWorld().hm$isClient()) {
+            if (!entity.hm$getWorld().hm$isClient()) {
                 doors.spawnDoor(this);
             }
         } else if (!isPlayerMounting()) {

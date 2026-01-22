@@ -10,6 +10,7 @@ import fr.dynamx.forge.DynamXConfig;
 import fr.dynamx.core.utils.maths.DynamXMath;
 import lombok.RequiredArgsConstructor;
 import net.minecraftforge.fml.relauncher.Side;
+import org.spongepowered.asm.mixin.MixinEnvironment;
 
 @RequiredArgsConstructor
 public abstract class AutomaticGearboxHandler {
@@ -111,7 +112,7 @@ public abstract class AutomaticGearboxHandler {
                 }
             }
             wheelRotationSpeed /= j;
-            wheelRotationSpeed *= (float) (3.6 * 20 * 0.05f / DynamXContext.getPhysicsSimulationMode(Side.SERVER).getTimeStep());
+            wheelRotationSpeed *= (float) (3.6 * 20 * 0.05f / DynamXContext.getPhysicsSimulationMode(MixinEnvironment.Side.SERVER).getTimeStep());
             return wheelRotationSpeed;
         }
     }

@@ -32,6 +32,7 @@ import fr.dynamx.core.utils.errors.DynamXErrorManager;
 import fr.hermes.api.forge.HermesProgressManager;
 import fr.hermes.api.mc.utils.HmResourceLocation;
 import fr.hermes.api.mod.McObjectBinder;
+import net.minecraftforge.fml.client.SplashProgress;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -170,7 +171,7 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
 
                 /* == Wait for Mc's texture manager == */
                 long time = System.currentTimeMillis();
-                while (Minecraft.getMinecraft().getTextureManager() == null) { //Don't listen to idea, it can be null
+                while (!ClientEventHandler.MC.hm$textureManagerIsLoaded()) {
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
@@ -223,8 +224,9 @@ public class DynamXModelRegistry implements IPackInfoReloadListener {
                 OBJLoader.getMtlLoaders().forEach(MTLLoader::uploadTextures);
                 OBJLoader.getMtlLoaders().clear();
             }
-            if (ClientEventHandler.MC.world != null)
+            if (ClientEventHandler.MC.hm$getWorld() != null) {
                 uploadVAOs();
+            }
             bar.pop();
             DynamXLoadingTasks.endTask(DynamXLoadingTasks.MODEL);
         });

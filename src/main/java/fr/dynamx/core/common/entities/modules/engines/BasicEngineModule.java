@@ -5,8 +5,6 @@ import fr.dynamx.api.contentpack.object.IPackInfoReloadListener;
 import fr.dynamx.api.entities.VehicleEntityProperties;
 import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.api.entities.modules.IVehicleController;
-import fr.dynamx.api.events.EventPhase;
-import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.api.network.sync.EntityVariable;
 import fr.dynamx.api.network.sync.SimulationHolder;
 import fr.dynamx.api.network.sync.SynchronizationRules;
@@ -19,14 +17,12 @@ import fr.dynamx.core.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.core.common.physics.entities.modules.EnginePhysicsHandler;
 import fr.dynamx.core.common.physics.entities.parts.engine.AutomaticGearboxHandler;
 import fr.dynamx.core.utils.DynamXConstants;
+import fr.hermes.api.mc.HmMinecraftClient;
 import fr.hermes.api.mc.entities.HmPlayerEntity;
+import fr.hermes.api.mod.HermesPlatform;
 import fr.hermes.forge.JmeVector3fPool;
 import lombok.Getter;
-import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -135,7 +131,7 @@ public abstract class BasicEngineModule implements IPhysicsModule<BaseVehiclePhy
     }
 
     public void onEngineSwitchedOn() {
-        if (entity.getHmWorld().hm$isClient() && entity.getTicksExisted() > 60) {
+        if (entity.hm$getWorld().hm$isClient() && entity.getTicksExisted() > 60) {
             playStartingSound();
         }
     }
@@ -182,15 +178,16 @@ public abstract class BasicEngineModule implements IPhysicsModule<BaseVehiclePhy
 
     //Sounds
 
-    @SideOnly(Side.CLIENT)
+    //@SideOnly(Side.CLIENT)
     protected void playStartingSound() {
-        boolean forInterior = Minecraft.getMinecraft().gameSettings.thirdPersonView == 0 && entity.isRidingOrBeingRiddenBy(Minecraft.getMinecraft().player);
+        boolean forInterior = HermesPlatform.getInstance().getClient().hm$getGameSettings().hm$isFirstPersonView() && entity.isRidingOrBeingRiddenBy(HermesPlatform.getInstance().getClient().hm$getPlayer());
         String sound = getStartingSound(forInterior);
-        if (sound != null)
+        if (sound != null) {
             SOUND_HANDLER.playSingleSound(entity.physicsPosition, sound, 1, 1);
+        }
     }
 
-    @SideOnly(Side.CLIENT)
+    //@SideOnly(Side.CLIENT)
     public abstract BaseEngineInfo getEngineInfo();
 
     @Override
@@ -199,14 +196,14 @@ public abstract class BasicEngineModule implements IPhysicsModule<BaseVehiclePhy
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
+    //@SideOnly(Side.CLIENT)
     public void updateEntity() {
-        if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.UpdateSounds(entity, this, EventPhase.PRE))) {
-            if (entity.getPackInfo() != null) {
-                updateSounds();
-            }
-            MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.UpdateSounds(entity, this, EventPhase.POST));
+        //if (!MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.UpdateSounds(entity, this, EventPhase.PRE))) {
+        if (entity.getPackInfo() != null) {
+            updateSounds();
         }
+        // TODO EVENTS MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.UpdateSounds(entity, this, EventPhase.POST));
+        //}
     }
 
     @Override
@@ -214,14 +211,14 @@ public abstract class BasicEngineModule implements IPhysicsModule<BaseVehiclePhy
         engineSounds.clear();
     }
 
-    @SideOnly(Side.CLIENT)
+    //@SideOnly(Side.CLIENT)
     public String getStartingSound(boolean forInterior) {
         if (getEngineInfo() == null)
             return null;
         return forInterior ? getEngineInfo().startingSoundInterior : getEngineInfo().startingSoundExterior;
     }
 
-    @SideOnly(Side.CLIENT)
+    //@SideOnly(Side.CLIENT)
     public void updateSounds() {
         BaseEngineInfo engineInfo = getEngineInfo();
         if (engineInfo == null || engineInfo.getEngineSounds() == null) {
@@ -241,7 +238,8 @@ public abstract class BasicEngineModule implements IPhysicsModule<BaseVehiclePhy
         }
         // engine is started: check what sound should be playing
 
-        boolean forInterior = Minecraft.getMinecraft().gameSettings.thirdPersonView == 0 && entity.isRidingOrBeingRiddenBy(Minecraft.getMinecraft().player);
+        HmMinecraftClient client = HermesPlatform.getInstance().getClient();
+        boolean forInterior = client.hm$getGameSettings().hm$isFirstPersonView() && entity.isRidingOrBeingRiddenBy(client.hm$getPlayer());
         float rpm = getEngineProperty(VehicleEntityProperties.EnumEngineProperties.REVS) * engineInfo.getMaxRevs();
         lastEngineSound = currentEngineSound;
         if (currentEngineSound == null || !currentEngineSound.shouldPlay(rpm, forInterior)) {

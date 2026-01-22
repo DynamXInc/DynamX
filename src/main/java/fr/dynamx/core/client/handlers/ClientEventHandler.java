@@ -35,6 +35,8 @@ import fr.dynamx.core.utils.optimization.SubClassPool;
 import fr.dynamx.forge.DynamXConfig;
 import fr.hermes.api.HmEntityLogicMatcher;
 import fr.hermes.api.mc.entities.HmEntity;
+import fr.hermes.api.mc.HmMinecraftClient;
+import fr.hermes.api.mod.HermesPlatform;
 import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -73,7 +75,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class ClientEventHandler {
-    public static final Minecraft MC = Minecraft.getMinecraft();
+    public static final HmMinecraftClient MC = HermesPlatform.getInstance().getClient();
     public static UUID renderingEntity;
     /**
      * There are two choices: <br/>
@@ -208,7 +210,7 @@ public class ClientEventHandler {
                     int l = event.getResolution().getScaledWidth();
                     int i1 = event.getResolution().getScaledHeight();
 
-                    MC.getTextureManager().bindTexture(loc);
+                    MC.hm$textureManagerIsLoaded().bindTexture(loc);
 
                     GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.ONE_MINUS_DST_COLOR, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
                     GlStateManager.enableAlpha();

@@ -72,7 +72,7 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
      */
     public void addToWorld() {
         if (collisionObject != null) {
-            DynamXContext.getPhysicsWorld(handledEntity.getHmWorld()).addCollisionObject(collisionObject);
+            DynamXContext.getPhysicsWorld(handledEntity.hm$getWorld()).addCollisionObject(collisionObject);
         }
     }
 
@@ -81,7 +81,7 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
      */
     public void removeFromWorld() {
         if (collisionObject != null) {
-            DynamXContext.getPhysicsWorld(handledEntity.getHmWorld()).removeCollisionObject(collisionObject);
+            DynamXContext.getPhysicsWorld(handledEntity.hm$getWorld()).removeCollisionObject(collisionObject);
         }
     }
 

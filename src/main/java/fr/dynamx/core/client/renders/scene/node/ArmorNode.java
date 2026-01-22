@@ -7,7 +7,6 @@ import fr.dynamx.core.utils.client.DynamXRenderUtils;
 import fr.hermes.api.mc.utils.HmCameraTransforms;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import org.joml.Matrix4f;
 
@@ -51,7 +50,7 @@ public class ArmorNode<A extends ArmorObject<?>> extends AbstractItemNode<BaseRe
 
     @Override
     public void renderItemModel(BaseRenderContext.ItemRenderContext context, A packInfo, Matrix4f transform) {
-        EntityEquipmentSlot slot = ((DynamXItemArmor<?>) context.getStack().getItem()).armorType;
+        EntityEquipmentSlot slot = ((DynamXItemArmor<?>) context.getStack().hm$getItem()).armorType;
         packInfo.getObjArmor().setActivePart(slot, context.getTextureId());
         //restore default rotations (contained in ModelBiped)
         packInfo.getObjArmor().setModelAttributes(packInfo.getObjArmor());

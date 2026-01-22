@@ -36,7 +36,7 @@ public class DynamXForgeMod implements HermesMod {
 
     private final HermesProgressManager progressManager = new ForgeProgressManager();
     private final AddonLoader addonLoader = new AddonLoader();
-    private final HermesUtils utils = new HmForgeUtils();
+    private final HermesUtils utils = new HmForgeUtils(); // TODO INIT THE RIGHT ONE
 
     @Mod.EventHandler
     public void construction(FMLConstructionEvent event) {

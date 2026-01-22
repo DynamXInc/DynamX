@@ -5,6 +5,7 @@ import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.core.common.contentpack.type.objects.AbstractItemObject;
 import fr.dynamx.core.common.entities.PackPhysicsEntity;
 import fr.dynamx.core.utils.DynamXUtils;
+import fr.hermes.api.mc.utils.HmResourceLocation;
 import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -28,7 +29,7 @@ public abstract class DynamXItemSpawner<T extends AbstractItemObject<T, ?>> exte
         super(itemInfo);
     }
 
-    public DynamXItemSpawner(String modid, String itemName, ResourceLocation model) {
+    public DynamXItemSpawner(String modid, String itemName, HmResourceLocation model) {
         super(modid, itemName, model);
     }
 

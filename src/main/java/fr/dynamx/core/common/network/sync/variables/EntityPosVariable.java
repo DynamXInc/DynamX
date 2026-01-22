@@ -27,7 +27,7 @@ public class EntityPosVariable extends ListeningEntityVariable<EntityPosVariable
         super(((entityPositionDataSynchronizedEntityVariable, entityPositionData) -> {
 //TODO INTPERPOLATION ETC :c
             if (entity.getSynchronizer().getSimulationHolder().isSinglePlayer()) {
-                if (!entity.getHmWorld().hm$isClient()) //Solo mode
+                if (!entity.hm$getWorld().hm$isClient()) //Solo mode
                 {
                     entity.setMotionX(entityPositionData.position.x - entity.physicsPosition.x);
                     entity.setMotionY(entityPositionData.position.y - entity.physicsPosition.y);
@@ -53,8 +53,8 @@ public class EntityPosVariable extends ListeningEntityVariable<EntityPosVariable
                             DynamXMain.log.warn("Physics entity {} is moving too quickly (ridden by {}, simulated by {}) !", entity, entity.getHmControllingPassenger(), controllingPlayer);
                         if (delta > CRITIC2 && controllingPlayer instanceof EntityPlayerMP && isControllingPlayerRidingThisEntity) {
                             ((EntityPlayerMP) controllingPlayer).connection.disconnect(new TextComponentString("Invalid physics entity move packet"));
-                        } else if (controllingPlayer instanceof EntityPlayerMP || entity.getHmWorld().hm$isClient()) {
-                            if (delta > CRITIC3 && !entity.getHmWorld().hm$isClient() && isControllingPlayerRidingThisEntity) {
+                        } else if (controllingPlayer instanceof EntityPlayerMP || entity.hm$getWorld().hm$isClient()) {
+                            if (delta > CRITIC3 && !entity.hm$getWorld().hm$isClient() && isControllingPlayerRidingThisEntity) {
                                 //Resync
                                 DynamXMain.log.error(entity + " doing resync !!!");
                                 ignoreFor = 20;

@@ -21,6 +21,7 @@ import fr.hermes.api.mc.entities.HmPlayerEntity;
 import fr.hermes.forge.JmeVector3fPool;
 import lombok.Getter;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nullable;
@@ -126,32 +127,32 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
         BasePartSeat<?, ?> seat = getRidingSeat(passenger);
         if (seat != null && seat.shouldLimitFieldOfView()) {
             // Limit yaw
-            float f = MathHelper.wrapDegrees(passenger.rotationYaw - entity.rotationYaw);
+            float f = MathHelper.wrapDegrees(passenger.getRotationYaw() - entity.getRotationYaw());
             float f1 = MathHelper.clamp(f, seat.getMinYaw(), seat.getMaxYaw());
-            passenger.prevRotationYaw += f1 - f;
-            passenger.rotationYaw += f1 - f;
+            passenger.setPrevRotationYaw(passenger.getPrevRotationYaw() + (f1 - f));
+            passenger.setRotationYaw(passenger.getRotationYaw() + (f1 - f));
 
             // Limit pitch
-            float f2 = MathHelper.wrapDegrees(passenger.rotationPitch);
+            float f2 = MathHelper.wrapDegrees(passenger.getRotationPitch());
             float f3 = MathHelper.clamp(f2, seat.getMinPitch(), seat.getMaxPitch());
-            passenger.rotationPitch = f3;
-            f2 = MathHelper.wrapDegrees(passenger.prevRotationPitch);
+            passenger.setRotationPitch(f3);
+            f2 = MathHelper.wrapDegrees(passenger.getPrevRotationPitch());
             f3 = MathHelper.clamp(f2, seat.getMinPitch(), seat.getMaxPitch());
-            passenger.prevRotationPitch = f3;
+            passenger.setPrevRotationPitch(f3);
         }
-        passenger.setRotationYawHead(passenger.rotationYaw - entity.rotationYaw);
+        passenger.setRotationYawHead(passenger.getRotationYaw() - entity.getRotationYaw());
     }
 
     @Override
     public void addPassenger(HmEntity passenger) {
-        if (entity.getHmWorld().hm$isClient()) {
+        if (entity.hm$getWorld().hm$isClient()) {
             return;
         }
-        BasePartSeat hitPart = seatToPassenger.inverse().get(passenger);
+        BasePartSeat<?, ?> hitPart = seatToPassenger.inverse().get(passenger);
         if (hitPart != null) {
             if (hitPart.isDriver() && passenger instanceof HmPlayerEntity) {
-                if (DynamXContext.usesPhysicsWorld(entity.getHmWorld())) { //Fix: in single player, server has no physics world
-                    DynamXContext.getPhysicsWorld(entity.getHmWorld()).schedule(() -> entity.getSynchronizer().onPlayerStartControlling((HmPlayerEntity) passenger, true));
+                if (DynamXContext.usesPhysicsWorld(entity.hm$getWorld())) { //Fix: in single player, server has no physics world
+                    DynamXContext.getPhysicsWorld(entity.hm$getWorld()).schedule(() -> entity.getSynchronizer().onPlayerStartControlling((HmPlayerEntity) passenger, true));
                 } else {
                     entity.getSynchronizer().onPlayerStartControlling((HmPlayerEntity) passenger, true);
                 }
@@ -159,22 +160,22 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
             //TODO EVENTS MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.EntityMount(Side.SERVER, passenger, entity, this, hitPart));
             DynamXContext.getNetwork().sendToClient(new MessageSeatsSync((IModuleContainer.ISeatsContainer) entity), EnumPacketTarget.ALL_TRACKING_ENTITY, entity);
         } else {
-            log.error("Cannot add passenger : " + passenger + " : seat not found !");
+            log.error("Cannot add passenger : {} : seat not found !", passenger);
         }
         //Client side is managed by updateSeats
     }
 
     @Override
     public void removePassenger(HmEntity passenger) {
-        BasePartSeat seat = getRidingSeat(passenger);
-        if (entity.getHmWorld().hm$isClient() || seat == null) {
+        BasePartSeat<?, ?> seat = getRidingSeat(passenger);
+        if (entity.hm$getWorld().hm$isClient() || seat == null) {
             return;
         }
         lastRiddenSeat = seat;
         seatToPassenger.remove(seat);
         if (seat.isDriver() && passenger instanceof HmPlayerEntity) {
-            if (DynamXContext.usesPhysicsWorld(entity.getHmWorld())) { //Fix: in single player, server has no physics world
-                DynamXContext.getPhysicsWorld(entity.getHmWorld()).schedule(() -> entity.getSynchronizer().onPlayerStopControlling((HmPlayerEntity) passenger, true));
+            if (DynamXContext.usesPhysicsWorld(entity.hm$getWorld())) { //Fix: in single player, server has no physics world
+                DynamXContext.getPhysicsWorld(entity.hm$getWorld()).schedule(() -> entity.getSynchronizer().onPlayerStopControlling((HmPlayerEntity) passenger, true));
             } else {
                 entity.getSynchronizer().onPlayerStopControlling((HmPlayerEntity) passenger, true);
             }
@@ -220,7 +221,7 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
         for (Map.Entry<Byte, Integer> e : msg.getSeatToEntity().entrySet()) {
             BasePartSeat<?, ?> seat = entity.getPackInfo().getPartByTypeAndId(BasePartSeat.class, e.getKey());
             if (seat != null) {
-                HmEntity passengerEntity = entity.getHmWorld().hm$getEntityByID(e.getValue());
+                HmEntity passengerEntity = entity.hm$getWorld().hm$getEntityByID(e.getValue());
                 if (passengerEntity != null) {
                     if (seatToPassenger.get(seat) != passengerEntity) { //And add them
                         seatToPassenger.put(seat, passengerEntity);
@@ -232,7 +233,7 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
                 } else {
                     log.warn("Entity with id {} not found for seat in {}", e.getValue(), entity);
                     log.warn("Details {} {}", msg.getSeatToEntity(), entity.getHmPassengers());
-                    log.warn("Players there {}", entity.getHmWorld().hm$getPlayerEntities());
+                    log.warn("Players there {}", entity.hm$getWorld().hm$getPlayerEntities());
                     log.warn("THE player id {}", DynamXMain.getProxy().getClientWorld());
                 }
             } else {

@@ -12,10 +12,14 @@ import fr.dynamx.core.utils.DynamXLoadingTasks;
 import fr.dynamx.core.utils.errors.DynamXErrorManager;
 import fr.hermes.api.forge.HermesProgressManager;
 import fr.hermes.api.mod.HermesMod;
+import fr.hermes.api.mod.HermesUtilsClient;
 import lombok.Getter;
 
 import javax.annotation.Nonnull;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -77,9 +81,7 @@ public class ContentPackLoader {
             if (file.isDirectory() || file.getName().endsWith(".zip") || file.getName().endsWith(PACK_FILE_EXTENSION)) {
                 DynamXMain.log.debug("Loading resource pack: " + file.getName());
                 //Add assets
-                if (!isClient) {
-                    packCount++;
-                } else if (loadPackResources(mod, file)) {
+                if (!isClient || loadPackResources(mod, file)) {
                     packCount++;
                 }
                 //Add custom ModProtectionSystem repositories
@@ -109,7 +111,7 @@ public class ContentPackLoader {
     }
 
     private static boolean loadPackResources(HermesMod mod, File file) {
-        return mod.getUtils().addFileResources(file);
+        return ((HermesUtilsClient) mod.getUtils()).addFileResources(file);
     }
 
     @Nonnull
@@ -231,7 +233,7 @@ public class ContentPackLoader {
         }
         if (isClient) {
             //Reload languages added by packs
-            mod.getUtils().reloadLanguageResources();
+            ((HermesUtilsClient) mod.getUtils()).reloadLanguageResources();
         }
         PackSyncHandler.computeAll();
         DynamXLoadingTasks.endTask(DynamXLoadingTasks.PACK);

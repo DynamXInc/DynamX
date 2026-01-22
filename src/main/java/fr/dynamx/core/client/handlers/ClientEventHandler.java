@@ -16,23 +16,25 @@ import fr.dynamx.core.common.DynamXMain;
 import fr.dynamx.core.common.blocks.DynamXBlock;
 import fr.dynamx.core.common.blocks.TEDynamXBlock;
 import fr.dynamx.core.common.contentpack.type.objects.BlockObject;
+import fr.dynamx.core.common.core.mixin.MixinRenderGlobal;
 import fr.dynamx.core.common.entities.IDynamXObject;
 import fr.dynamx.core.common.entities.PackPhysicsEntity;
 import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.common.entities.PropsEntity;
 import fr.dynamx.core.common.items.DynamXItemSpawner;
-import fr.dynamx.core.common.core.mixin.MixinRenderGlobal;
 import fr.dynamx.core.common.items.tools.ItemSlopes;
 import fr.dynamx.core.common.network.packets.MessageEntityInteract;
 import fr.dynamx.core.common.physics.player.WalkingOnPlayerController;
 import fr.dynamx.core.common.slopes.GuiSlopesConfig;
-import fr.dynamx.forge.DynamXConfig;
 import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.debug.DynamXDebugOptions;
 import fr.dynamx.core.utils.errors.DynamXErrorManager;
 import fr.dynamx.core.utils.optimization.GlQuaternionPool;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.SubClassPool;
+import fr.dynamx.forge.DynamXConfig;
+import fr.hermes.api.HmEntityLogicMatcher;
+import fr.hermes.api.mc.entities.HmEntity;
 import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -67,6 +69,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 
+import java.util.List;
 import java.util.UUID;
 
 public class ClientEventHandler {
@@ -105,7 +108,8 @@ public class ClientEventHandler {
         if (!player.world.isRemote) {
             return;
         }
-        if (!(event.getTarget() instanceof PhysicsEntity) || !event.getHand().equals(EnumHand.MAIN_HAND) || event.getEntityPlayer().getHeldItem(event.getHand()).getItem() instanceof DynamXItemSpawner) {
+        if (!(HmEntityLogicMatcher.is((HmEntity) event.getTarget(), PhysicsEntity.class) || !event.getHand().equals(EnumHand.MAIN_HAND) || event.getEntityPlayer().getHeldItem(event.getHand()).getItem() instanceof DynamXItemSpawner)
+        {
             return;
         }
         DynamXContext.getNetwork().sendToServer(new MessageEntityInteract(event.getTarget().getEntityId()));
@@ -327,7 +331,7 @@ public class ClientEventHandler {
 
     @SubscribeEvent
     public void onEntityCameraSetup(EntityViewRenderEvent.CameraSetup event) {
-        if (event.getEntity().getRidingEntity() instanceof PhysicsEntity) {
+        if (HmEntityLogicMatcher.is((HmEntity) event.getEntity().getRidingEntity(), PhysicsEntity.class)) {
             CameraSystem.rotateVehicleCamera(event);
         }
     }
@@ -375,11 +379,7 @@ public class ClientEventHandler {
      * It resets the wasRendered field of all DynamX entities to false
      */
     public static void resetBigEntities() {
-        for (Entity e : MC.world.loadedEntityList) {
-            if (e instanceof PhysicsEntity) {
-                ((PhysicsEntity<?>) e).wasRendered = false;
-            }
-        }
+        ((List) MC.world.loadedEntityList).forEach(HmEntityLogicMatcher.consumer(PhysicsEntity.class, e -> e.wasRendered = false));
     }
 
     /**
@@ -398,12 +398,11 @@ public class ClientEventHandler {
         double d0 = 0, d1 = 0, d2 = 0;
 
         for (Entity e : MC.world.loadedEntityList) {
-            if (!(e instanceof PhysicsEntity)) {
+            PhysicsEntity<?> physicsEntity = HmEntityLogicMatcher.cast((HmEntity) e, PhysicsEntity.class);
+            if (physicsEntity == null || physicsEntity.wasRendered) {
                 continue;
             }
-            if (((PhysicsEntity<?>) e).wasRendered) {
-                continue;
-            }
+
             if (!setup) {
                 GlStateManager.pushMatrix();
                 RenderHelper.enableStandardItemLighting();
@@ -437,7 +436,7 @@ public class ClientEventHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void playerRender(RenderPlayerEvent.Pre event) {
-        if (event.getEntityPlayer().getRidingEntity() instanceof PhysicsEntity && event.getEntity().getUniqueID() != renderingEntity && event.getRenderer().getRenderManager().isRenderShadow()) { //If shadows are disabled, were are in GuiInventory, CAN BREAK OTHER MODS
+        if (HmEntityLogicMatcher.is((HmEntity) event.getEntityPlayer().getRidingEntity(), PhysicsEntity.class) && event.getEntity().getUniqueID() != renderingEntity && event.getRenderer().getRenderManager().isRenderShadow()) { //If shadows are disabled, were are in GuiInventory, CAN BREAK OTHER MODS
             //If the player is on a seat, and GlobalRender isn't rendering players riding the entity, just cancel the event, and cancel all modifications by other mods (priority = EventPriority.HIGHEST)
             event.setCanceled(true);
         }
@@ -445,7 +444,7 @@ public class ClientEventHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void entityRender(RenderLivingEvent.Pre event) {
-        if (event.getEntity().getRidingEntity() instanceof PhysicsEntity && event.getEntity().getUniqueID() != renderingEntity && event.getRenderer().getRenderManager().isRenderShadow()) { //If shadows are disabled, were are in GuiInventory, CAN BREAK OTHER MODS
+        if (HmEntityLogicMatcher.is((HmEntity) event.getEntity().getRidingEntity(), PhysicsEntity.class) && event.getEntity().getUniqueID() != renderingEntity && event.getRenderer().getRenderManager().isRenderShadow()) { //If shadows are disabled, were are in GuiInventory, CAN BREAK OTHER MODS
             //If the entity is on a seat, and GlobalRender isn't rendering entity riding the entity, just cancel the event, and cancel all modifications by other mods (priority = EventPriority.HIGHEST)
             event.setCanceled(true);
         }

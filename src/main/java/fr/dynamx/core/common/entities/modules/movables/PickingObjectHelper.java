@@ -9,28 +9,29 @@ import fr.dynamx.core.common.entities.modules.DoorsModule;
 import fr.dynamx.core.common.entities.modules.MovableModule;
 import fr.dynamx.core.common.items.tools.ItemWrench;
 import fr.dynamx.core.common.network.packets.MessageSyncPlayerPicking;
-import fr.dynamx.forge.DynamXConfig;
 import fr.dynamx.core.utils.DynamXUtils;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
+import fr.dynamx.core.utils.physics.PhysicsRaycastResult;
+import fr.dynamx.forge.DynamXConfig;
+import fr.hermes.api.HmEntityLogicMatcher;
 import fr.hermes.api.mc.entities.HmEntity;
 import fr.hermes.api.mc.entities.HmPlayerEntity;
 import fr.hermes.api.mc.world.HmWorld;
 import fr.hermes.forge.JmeVector3fPool;
-import fr.dynamx.core.utils.physics.PhysicsRaycastResult;
 
 import java.util.HashMap;
 import java.util.function.Predicate;
 
 public class PickingObjectHelper {
     public static void handlePickingControl(MovableModule.Action moduleAction, HmPlayerEntity player) {
-        HmWorld world = player.getHmWorld();
+        HmWorld world = player.hm$getWorld();
         if (!player.isCreativeMode() && !(player.getHeldItemMainhand().getItem() instanceof ItemWrench)
                 && !DynamXConfig.allowPlayersToMoveObjects || moduleAction.getMovableAction() == MovableModule.EnumAction.ATTACH_OBJECTS) {
             return;
         }
         JmeVector3fPool.openPool();
         QuaternionPool.openPool();
-        if (!DynamXContext.getPlayerPickingObjects().containsKey(player.getEntityId())) {
+        if (!DynamXContext.getPlayerPickingObjects().containsKey(player.hm$getEntityId())) {
             switch (moduleAction.getMovableAction()) {
                 case PICK:
                     startPicking(moduleAction, player);
@@ -40,9 +41,9 @@ public class PickingObjectHelper {
                     break;
             }
         } else {
-            HmEntity entity = world.hm$getEntityByID(DynamXContext.getPlayerPickingObjects().get(player.getEntityId()));
-            if (entity instanceof PhysicsEntity) {
-                PhysicsEntity<?> physicsEntity = (PhysicsEntity<?>) entity;
+            HmEntity entity = world.hm$getEntityByID(DynamXContext.getPlayerPickingObjects().get(player.hm$getEntityId()));
+            PhysicsEntity<?> physicsEntity = HmEntityLogicMatcher.cast(entity, PhysicsEntity.class);
+            if (physicsEntity != null) {
                 MovableModule movableModule = physicsEntity.getModuleByType(MovableModule.class);
                 if (movableModule != null) {
                     switch (movableModule.usingAction) {
@@ -55,7 +56,7 @@ public class PickingObjectHelper {
                     }
                 }
             } else { //If the entity does not exist, stop holding it
-                DynamXContext.getPlayerPickingObjects().remove(player.getEntityId());
+                DynamXContext.getPlayerPickingObjects().remove(player.hm$getEntityId());
             }
         }
         //Copy map to avoid concurrency errors
@@ -66,14 +67,14 @@ public class PickingObjectHelper {
     }
 
     public static void handlePlayerDisconnection(HmPlayerEntity player) {
-        HmWorld world = player.getHmWorld();
+        HmWorld world = player.hm$getWorld();
         if (!player.isCreativeMode() && !(player.getHeldItemMainhand().getItem() instanceof ItemWrench)
                 && !DynamXConfig.allowPlayersToMoveObjects) {
             return;
         }
-        HmEntity entity = world.hm$getEntityByID(DynamXContext.getPlayerPickingObjects().get(player.getEntityId()));
-        if (entity instanceof PhysicsEntity) {
-            PhysicsEntity<?> physicsEntity = (PhysicsEntity<?>) entity;
+        HmEntity entity = world.hm$getEntityByID(DynamXContext.getPlayerPickingObjects().get(player.hm$getEntityId()));
+        PhysicsEntity<?> physicsEntity = HmEntityLogicMatcher.cast(entity, PhysicsEntity.class);
+        if (physicsEntity != null) {
             MovableModule movableModule = physicsEntity.getModuleByType(MovableModule.class);
             if (movableModule != null) {
                 switch (movableModule.usingAction) {
@@ -86,7 +87,7 @@ public class PickingObjectHelper {
                 }
             }
         } else { //If the entity does not exist, stop holding it
-            DynamXContext.getPlayerPickingObjects().remove(player.getEntityId());
+            DynamXContext.getPlayerPickingObjects().remove(player.hm$getEntityId());
         }
         //Copy map to avoid concurrency errors
         //TODO use map pool
@@ -125,11 +126,12 @@ public class PickingObjectHelper {
 
     private static void startTaking(MovableModule.Action moduleAction, HmWorld world, HmPlayerEntity player) {
         HmEntity targetEntity = world.hm$getEntityByID((int) moduleAction.getInfo()[0]);
-        if (targetEntity instanceof PhysicsEntity) {
-            MovableModule movableModule = ((PhysicsEntity<?>) targetEntity).getModuleByType(MovableModule.class);
+        PhysicsEntity<?> physicsEntity = HmEntityLogicMatcher.cast(targetEntity, PhysicsEntity.class);
+            if (physicsEntity != null) {
+            MovableModule movableModule = physicsEntity.getModuleByType(MovableModule.class);
             if (movableModule != null) {
                 movableModule.usingAction = MovableModule.EnumAction.TAKE;
-                movableModule.moveObjects.pickObject(player, (PhysicsEntity<?>) targetEntity);
+                movableModule.moveObjects.pickObject(player, physicsEntity);
             }
         }
     }

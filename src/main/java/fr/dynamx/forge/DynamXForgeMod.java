@@ -15,7 +15,7 @@ import fr.hermes.api.forge.HermesProgressManager;
 import fr.hermes.api.mod.HermesUtils;
 import fr.dynamx.api.IAddonLoader;
 import fr.hermes.forge.ForgeProgressManager;
-import fr.hermes.forge.HmUtils;
+import fr.hermes.forge.HmForgeUtils;
 import net.minecraftforge.common.ForgeVersion;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
@@ -36,7 +36,7 @@ public class DynamXForgeMod implements HermesMod {
 
     private final HermesProgressManager progressManager = new ForgeProgressManager();
     private final AddonLoader addonLoader = new AddonLoader();
-    private final HermesUtils utils = new HmUtils();
+    private final HermesUtils utils = new HmForgeUtils();
 
     @Mod.EventHandler
     public void construction(FMLConstructionEvent event) {

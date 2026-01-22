@@ -27,6 +27,9 @@ import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.api.mc.entities.HmEntityLogic;
+import fr.hermes.api.mc.items.HmItemStack;
+import fr.hermes.api.mc.world.HmWorld;
 import fr.hermes.forge.JmeVector3fPool;
 import fr.hermes.api.mc.entities.HmEntity;
 import fr.hermes.api.mc.utils.HmOrientation;
@@ -45,8 +48,8 @@ import java.util.*;
  * @param <T> The physics handler type
  */
 @SynchronizedEntityVariable.SynchronizedPhysicsModule(modid = DynamXConstants.ID)
-public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>> implements IDynamXObject, HmEntity {
-    protected final HmEntity mcEntityWrapper;
+public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>> implements IDynamXObject, HmEntityLogic {
+    protected final HmEntity mcEntity;
 
     /**
      * Entity network
@@ -130,138 +133,30 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     @Getter
     private final PhysicsEntityTerrainLoader terrainCache = new PhysicsEntityTerrainLoader(this);
 
-    public PhysicsEntity(HmEntity mcEntityWrapper) {
-        this.mcEntityWrapper = mcEntityWrapper;
-        setNoClip(true);
-        setPreventEntitySpawning(true);
-        setIgnoreFrustumCheck(true);
+    public PhysicsEntity(HmEntity mcEntity) {
+        this.mcEntity = mcEntity;
+        mcEntity.hm$setNoClip(true);
+        mcEntity.hm$setPreventEntitySpawning(true);
+        mcEntity.hm$setIgnoreFrustumCheck(true);
 
         // Network Init
         synchronizer = DynamXMain.getProxy().getNetHandlerForEntity(this);
-        usesPhysicsWorld = DynamXContext.usesPhysicsWorld(mcEntityWrapper.getHmWorld());
+        usesPhysicsWorld = DynamXContext.usesPhysicsWorld(mcEntity.hm$getWorld());
     }
 
-    public PhysicsEntity(HmEntity mcEntityWrapper, Vector3f pos, float spawnRotationAngle) {
-        this(mcEntityWrapper);
-        setPosition(pos.x, pos.y, pos.z);
-        setRotationYaw(spawnRotationAngle);
+    public PhysicsEntity(HmEntity mcEntity, Vector3f pos, float spawnRotationAngle) {
+        this(mcEntity);
+        mcEntity.hm$setPosition(pos.x, pos.y, pos.z);
+        mcEntity.hm$setRotationYaw(spawnRotationAngle);
     }
 
-    // ====== Hermes wrappers ======
-    // TODO HAVE A BASE CLASS FOR THIS
-
-    @Override
-    public void setNoClip(boolean value) {
-        mcEntityWrapper.setNoClip(value);
-    }
-
-    @Override
-    public void setPreventEntitySpawning(boolean value) {
-        mcEntityWrapper.setPreventEntitySpawning(value);
-    }
-
-    @Override
-    public void setIgnoreFrustumCheck(boolean value) {
-        mcEntityWrapper.setIgnoreFrustumCheck(value);
-    }
-
-    @Override
-    public void setPosition(float x, float y, float z) {
-        mcEntityWrapper.setPosition(x, y, z);
-    }
-
-    @Override
-    public double getPosX() {
-        return mcEntityWrapper.getPosX();
-    }
-
-    @Override
-    public double getPosY() {
-        return mcEntityWrapper.getPosY();
-    }
-
-    @Override
-    public double getPosZ() {
-        return mcEntityWrapper.getPosZ();
-    }
-
-    @Override
-    public float getRotationYaw() {
-        return mcEntityWrapper.getRotationYaw();
-    }
-
-    @Override
-    public float getPrevRotationYaw() {
-        return mcEntityWrapper.getPrevRotationYaw();
-    }
-
-    @Override
-    public float getRotationPitch() {
-        return mcEntityWrapper.getRotationPitch();
-    }
-
-    @Override
-    public float getPrevRotationPitch() {
-        return mcEntityWrapper.getPrevRotationPitch();
-    }
-
-    @Override
-    public double getMotionX() {
-        return mcEntityWrapper.getMotionX();
-    }
-
-    @Override
-    public double getMotionY() {
-        return mcEntityWrapper.getMotionY();
-    }
-
-    @Override
-    public double getMotionZ() {
-        return mcEntityWrapper.getMotionZ();
-    }
-
-    @Override
-    public void setDead() {
-        mcEntityWrapper.setDead();
-    }
-
-    @Override
-    public void onSetDead() {
-
-    }
-
-    @Override
-    public UUID getUniqueID() {
-        return mcEntityWrapper.getUniqueID();
-    }
-
-    @Override
-    public boolean isDead() {
-        return mcEntityWrapper.isDead();
-    }
-
-    @Override
-    public int getTicksExisted() {
-        return mcEntityWrapper.getTicksExisted();
-    }
-
-    @Override
-    public float getDistanceSq(HmEntity entity) {
-        return mcEntityWrapper.getDistanceSq(entity);
-    }
-
-    @Override
-    public Collection<HmEntity> getHmPassengers() {
-        return mcEntityWrapper.getHmPassengers();
-    }
+    // TODO reorganise methods
 
     @Override
     public boolean isInRangeToRenderDist(double range) {
-        double d = getHmBoundingBox().getAverageEdgeLength() * 4.0D * 64.0D;
+        double d = getBoundingBox().getAverageEdgeLength() * 4.0D * 64.0D;
         return range < d * d;
     }
-
-    // ====== DynamX entity logic ======
 
     public void registerSynchronizedVariables() {
         SynchronizedEntityVariableRegistry.addVarsOf(this.getSynchronizer(), this);
@@ -273,12 +168,12 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     protected void checkEntityInit() {
         switch (initialized) {
             case NOT_INITIALIZED:
-                physicsPosition.set((float) getPosX(), (float) getPosY(), (float) getPosZ());
+                physicsPosition.set((float) mcEntity.hm$getPosX(), (float) mcEntity.hm$getPosY(), (float) mcEntity.hm$getPosZ());
                 if (physicsRotation.equals(Quaternion.IDENTITY)) {
-                    physicsRotation.set(DynamXGeometry.rotationYawToQuaternion(getRotationYaw()));
+                    physicsRotation.set(DynamXGeometry.rotationYawToQuaternion(mcEntity.hm$getRotationYaw()));
                 }
                 if (!initEntityProperties()) {
-                    setDead();
+                    mcEntity.hm$setDead();
                     return;
                 }
             case ONLY_ENTITY_PROPERTIES:
@@ -300,10 +195,10 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     public void readSpawnData(ByteBuf additionalData) {
         // Fix: since initEntityProperties was added here, checkEntityInit wasn't called anymore on client, and so physicsRotation wasn't correct
         if (physicsRotation.equals(Quaternion.IDENTITY)) {
-            physicsRotation.set(DynamXGeometry.rotationYawToQuaternion(getRotationYaw()));
+            physicsRotation.set(DynamXGeometry.rotationYawToQuaternion(mcEntity.hm$getRotationYaw()));
         }
         if (!initEntityProperties()) {
-            setDead();
+            mcEntity.hm$setDead();
             return;
         }
         initialized = EnumEntityInitState.ONLY_ENTITY_PROPERTIES;
@@ -318,14 +213,59 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     public void readFromNbt(NBTTagCompound compound) {
         //Force init here, we have all the info needed
         QuaternionPool.openPool();
-        physicsPosition.set((float) getPosX(), (float) getPosY(), (float) getPosZ());
+        physicsPosition.set((float) mcEntity.hm$getPosX(), (float) mcEntity.hm$getPosY(), (float) mcEntity.hm$getPosZ());
         physicsRotation.set(DynamXUtils.readQuaternionNBT(compound));
         QuaternionPool.closePool();
         if (!initEntityProperties()) {
-            setDead();
+            mcEntity.hm$setDead();
             return;
         }
         initialized = EnumEntityInitState.ONLY_ENTITY_PROPERTIES;
+    }
+
+    @Override
+    public void onSetDead() {
+
+    }
+
+    @Override
+    public void onAddPassenger(HmEntity passenger) {
+
+    }
+
+    @Override
+    public void onRemovePassenger(HmEntity passenger) {
+
+    }
+
+    @Override
+    public boolean updatePassenger(HmEntity passenger) {
+        return false;
+    }
+
+    @Override
+    public boolean updatePassengerRotation(HmEntity passenger) {
+        return false;
+    }
+
+    @Override
+    public HmEntity getControllingPassenger() {
+        return null;
+    }
+
+    @Override
+    public HmItemStack getPickedResult() {
+        return null;
+    }
+
+    @Override
+    public boolean canFitPassenger(HmEntity passenger) {
+        return false;
+    }
+
+    @Override
+    public int getBrightnessForRender() {
+        return -1;
     }
 
     /**
@@ -343,7 +283,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
                 physicsHandler.setPhysicsState(EntityPhysicsState.ENABLE);
             }
             if (isRegistered == EnumEntityPhysicsRegistryState.NOT_REGISTERED) {
-                DynamXContext.getPhysicsWorld(mcEntityWrapper.getHmWorld()).addBulletEntity(this);
+                DynamXContext.getPhysicsWorld(mcEntity.hm$getWorld()).addBulletEntity(this);
             }
         }
 
@@ -373,12 +313,9 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     /**
      * Called in minecraft thread to update vanilla position and rotation fields, also used for render and updating "prev" fields
      */
-    @Override
-    public void updateMinecraftPos(org.joml.Vector3f physicsPosition, Quaternionf physicsRotation) {
+    protected void updateMinecraftPos(org.joml.Vector3f physicsPosition, Quaternionf physicsRotation) {
         prevRenderRotation.set(renderRotation);
         renderRotation.set(physicsRotation.x, physicsRotation.y, physicsRotation.z, physicsRotation.w);
-
-        mcEntityWrapper.updateMinecraftPos(physicsPosition, physicsRotation);
 
         onMove();
     }
@@ -386,11 +323,11 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     /**
      * Fired on entity move to move walking players
      */
-    public void onMove() {
+    protected void onMove() {
         //if (x != 0 || y != 0 || z != 0)
         entityBoxCache = null; //The entity box has changed, mark it as dirty
         //TODO WIP
-        Vector3f motion = JmeVector3fPool.get((float) getMotionX(), (float) getMotionY(), (float) getMotionZ());
+        Vector3f motion = JmeVector3fPool.get((float) mcEntity.hm$getMotionX(), (float) mcEntity.hm$getMotionY(), (float) mcEntity.hm$getMotionZ());
         for (Map.Entry<HmPlayerEntity, WalkingOnPlayerController> e : walkingOnPlayers.entrySet()) {
             HmPlayerEntity entity = e.getKey();
             HmOrientation f = e.getValue().face;
@@ -518,12 +455,12 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     }
 
     @Override
-    public MutableBoundingBox getHmBoundingBox() {
+    public MutableBoundingBox getBoundingBox() {
         if (entityBoxCache != null) {
             return entityBoxCache;
         }
         if (physicsPosition.length() == 0) {
-            physicsPosition.set((float) getPosX(), (float) getPosY(), (float) getPosZ());
+            physicsPosition.set((float) mcEntity.hm$getPosX(), (float) mcEntity.hm$getPosY(), (float) mcEntity.hm$getPosZ());
         }
         JmeVector3fPool.openPool();
         if (physicsHandler != null) {
@@ -536,8 +473,8 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
         } else {
             List<MutableBoundingBox> boxes = getCollisionBoxes(); //Get PartShape boxes
             if (boxes.isEmpty()) { //If there is no boxes, create a default one
-                Vector3f min = JmeVector3fPool.get(getPosX(), getPosY(), getPosZ()).subtractLocal(2, 1, 2);
-                Vector3f max = JmeVector3fPool.get(getPosX(), getPosY(), getPosZ()).addLocal(2, 2, 2);
+                Vector3f min = JmeVector3fPool.get(mcEntity.hm$getPosX(), mcEntity.hm$getPosY(), mcEntity.hm$getPosZ()).subtractLocal(2, 1, 2);
+                Vector3f max = JmeVector3fPool.get(mcEntity.hm$getPosX(), mcEntity.hm$getPosY(), mcEntity.hm$getPosZ()).addLocal(2, 2, 2);
                 entityBoxCache = new MutableBoundingBox(min.x, min.y, min.z, max.x, max.y, max.z);
             } else {
                 MutableBoundingBox container;
@@ -561,7 +498,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
 
     @Override
     public void onRemovedFromWorld() {
-        IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(mcEntityWrapper.getHmWorld());
+        IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(mcEntity.hm$getWorld());
         if (usesPhysicsWorld && physicsWorld != null) //onRemovedFromWorld may be called before physicsWorld is loaded (in case of failing to load from nbt)
         {
             physicsWorld.removeBulletEntity(this);
@@ -574,7 +511,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
 
     @Override
     public String getName() {
-        return "DynamXEntity." + getEntityId();
+        return "DynamXEntity." + mcEntity.hm$getEntityId();
     }
 
     /**
@@ -619,6 +556,22 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     @Override
     public Vector3f getCollisionOffset() {
         return JmeVector3fPool.get();
+    }
+
+    public HmWorld getWorld() {
+        return mcEntity.hm$getWorld();
+    }
+
+    public UUID getUniqueId() {
+        return mcEntity.hm$getUniqueID();
+    }
+
+    public int getEntityId() {
+        return mcEntity.hm$getEntityId();
+    }
+
+    public int getTicksExisted() {
+        return mcEntity.hm$getTicksExisted();
     }
 
     /* FIXME DOES IT BREAKS SOMETHING TO REMOVE THIS?? @Override

@@ -19,6 +19,7 @@ import fr.dynamx.core.utils.debug.Profiler;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.SubClassPool;
 import fr.dynamx.forge.DynamXConfig;
+import fr.hermes.api.HmEntityLogicMatcher;
 import fr.hermes.api.mc.world.HmChunk;
 import fr.hermes.api.mc.world.HmWorld;
 import fr.hermes.forge.JmeVector3fPool;
@@ -518,11 +519,7 @@ public class ChunkCollisions implements VerticalChunkPos.VerticalChunkPosContain
                             HmChunk chk = mcWorld.hm$getChunk(myPos.x + x, myPos.z + z);
                             for (int y = -1; y <= 1; y++) {
                                 if (myPos.y + y >= 0 && myPos.y + y < 16) {
-                                    chk.hm$getEntityLists()[myPos.y + y].forEach(e -> {
-                                        if (e instanceof PhysicsEntity) {
-                                            ((PhysicsEntity<?>) e).forcePhysicsActivation();
-                                        }
-                                    });
+                                    chk.hm$getEntityLists()[myPos.y + y].forEach(HmEntityLogicMatcher.consumer(PhysicsEntity.class, PhysicsEntity::forcePhysicsActivation));
                                 }
                             }
                         }

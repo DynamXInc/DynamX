@@ -100,7 +100,7 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
         A packInfo = createInfo(getInfoName());
         if (packInfo == null) {
             DynamXMain.log.warn("Failed to find info of {} after packs reload. Should be {}. Killing the entity.", this, getInfoName());
-            setDead();
+            mcEntity.hm$setDead();
             return;
         }
         setPackInfo(packInfo);
@@ -143,13 +143,13 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
     @Override
     public void onUpdate() {
         if (getInfoName().isEmpty()) {
-            setDead();
+            mcEntity.hm$setDead();
             return;
         }
         JmeVector3fPool.openPool(SubClassPool.TICK_ENTITY_MC);
         Profiler.get().start(Profiler.Profiles.TICK_ENTITIES);
         super.onUpdate();
-        if (mcEntityWrapper.getHmWorld().hm$isClient() && getMetadata() != lastMetadata && !isDead()) //Metadata has been sync, so update texture
+        if (mcEntity.hm$getWorld().hm$isClient() && getMetadata() != lastMetadata && !mcEntity.hm$isDead()) //Metadata has been sync, so update texture
         {
             lastMetadata = getMetadata();
             entityTextureId = (byte) getMetadata();
@@ -160,7 +160,7 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
     }
 
     @Override
-    public HmItemStack getHmPickedResult() {
+    public HmItemStack getPickedResult() {
         return packInfo.getPickedResult(getMetadata());
     }
 
@@ -171,7 +171,7 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
     public List<MutableBoundingBox> getCollisionBoxes() {
         if (getPackInfo() == null || physicsPosition == null)
             return new ArrayList<>(0);
-        Vector3f pos = JmeVector3fPool.get(getPosX(), getPosY(), getPosZ());
+        Vector3f pos = JmeVector3fPool.get(mcEntity.hm$getPosX(), mcEntity.hm$getPosY(), mcEntity.hm$getPosZ());
         if (rawBoxes.size() != getPackInfo().getCollisionsHelper().getShapes().size()) {
             rawBoxes.clear();
             for (IShapeInfo shape : getPackInfo().getCollisionsHelper().getShapes()) {
@@ -196,11 +196,11 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
         if (getPackInfo() == null) {
             return null;
         }
-        org.joml.Vector3f lookVec = entity.getHmLook();
-        org.joml.Vector3f hitVec = entity.getEyesPosition();
+        org.joml.Vector3f lookVec = entity.hm$getLook();
+        org.joml.Vector3f hitVec = entity.hm$getEyesPosition();
         InteractivePart<?, ?> nearest = null;
         Vector3f nearestPos = null;
-        Vector3f playerPos = JmeVector3fPool.get((float) entity.getPosX(), (float) entity.getPosY(), (float) entity.getPosZ());
+        Vector3f playerPos = JmeVector3fPool.get((float) entity.hm$getPosX(), (float) entity.hm$getPosY(), (float) entity.hm$getPosZ());
         MutableBoundingBox box = new MutableBoundingBox();
         for (float f = 1.0F; f < 4.0F; f += 0.1F) {
             for (InteractivePart<?, ?> part : getPackInfo().getInteractiveParts()) {
@@ -222,7 +222,7 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
 
     @Override
     public boolean canFitPassenger(HmEntity passenger) {
-        return getHmPassengers().size() < getPackInfo().getPartsByType(BasePartSeat.class).size();
+        return mcEntity.hm$getPassengers().size() < getPackInfo().getPartsByType(BasePartSeat.class).size();
     }
 
     @Override
@@ -248,12 +248,12 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
 
     @Override
     public int getBrightnessForRender() {
-        return ClientDynamXUtils.getLightNear(getHmWorld(), getHmBlockPosition(), 1, 3);
+        return ClientDynamXUtils.getLightNear(mcEntity.hm$getWorld(), mcEntity.hm$getBlockPosition(), 1, 3);
     }
 
     @Override
     public String getName() {
-        return "DynamXEntity:" + getInfoName() + ":" + getEntityId();
+        return "DynamXEntity:" + getInfoName() + ":" + mcEntity.hm$getEntityId();
     }
 
     public String getInfoName() {

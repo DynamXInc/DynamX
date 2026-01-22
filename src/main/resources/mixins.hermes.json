@@ -4,6 +4,7 @@
   "refmap": "refmap.hermes.json",
   "mixins": [
     "MixinMinecraftServer",
+    "entities.MixinEntity",
     "world.MixinChunk",
     "world.MixinSaveHandler",
     "world.MixinWorld",

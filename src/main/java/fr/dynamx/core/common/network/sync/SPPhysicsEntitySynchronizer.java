@@ -12,6 +12,7 @@ import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.common.network.sync.variables.SynchronizedEntityVariableSnapshot;
 import fr.dynamx.core.utils.debug.Profiler;
 import fr.dynamx.core.utils.optimization.PooledHashMap;
+import fr.hermes.api.HmEntityLogicMatcher;
 import fr.hermes.api.mc.entities.HmEntity;
 import fr.hermes.api.mc.entities.HmPlayerEntity;
 import io.netty.buffer.ByteBuf;
@@ -46,11 +47,14 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
     /**
      * @return The entity matching this entity, but on the other side (if called on client side, it will return the server side entity, and vice versa)
      */
-    public HmEntity getOtherSideEntity() {
+    public PhysicsEntity<?> getOtherSideEntity() {
+        HmEntity other;
         if (!isClient) {
-            return DynamXMain.getProxy().getClientWorld() == null ? null : DynamXMain.getProxy().getClientWorld().hm$getEntityByID(entity.getEntityId());
+            other = DynamXMain.getProxy().getClientWorld() == null ? null : DynamXMain.getProxy().getClientWorld().hm$getEntityByID(entity.getEntityId());
+        } else {
+            other = DynamXMain.getProxy().getServerWorld().hm$getEntityByID(entity.getEntityId());
         }
-        return DynamXMain.getProxy().getServerWorld().hm$getEntityByID(entity.getEntityId());
+        return HmEntityLogicMatcher.cast(other, PhysicsEntity.class);
     }
 
     /**
@@ -84,7 +88,7 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
             entity.physicsHandler.setForceActivation(true);
         }
         setSimulationHolder(SimulationHolder.DRIVER_SP, player);
-        if (!player.getHmWorld().hm$isClient() || !player.isLocalPlayer() || !(entity instanceof BaseVehicleEntity)) {
+        if (!player.hm$getWorld().hm$isClient() || !player.isLocalPlayer() || !(entity instanceof BaseVehicleEntity)) {
             return;
         }
         for (IPhysicsModule<?> module : ((BaseVehicleEntity<?>) entity).getModules()) {
@@ -101,19 +105,19 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
             entity.physicsHandler.setForceActivation(false);
         }
         setSimulationHolder(getDefaultSimulationHolder(), null);
-        if (player.getHmWorld().hm$isClient() && player.isLocalPlayer()) {
+        if (player.hm$getWorld().hm$isClient() && player.isLocalPlayer()) {
             controllers.clear();
         }
     }
 
     @Override
     public void onPrePhysicsTick(Profiler profiler) {
-        if (entity.getHmWorld().hm$isClient() && entity.initialized == PhysicsEntity.EnumEntityInitState.ALL &&
-                entity.getHmControllingPassenger() instanceof HmPlayerEntity && ((HmPlayerEntity) entity.getHmControllingPassenger()).isLocalPlayer()) {
+        if (entity.getWorld().hm$isClient() && entity.initialized == PhysicsEntity.EnumEntityInitState.ALL &&
+                entity.getControllingPassenger() instanceof HmPlayerEntity && ((HmPlayerEntity) entity.getControllingPassenger()).isLocalPlayer()) {
             controllers.forEach(IVehicleController::update);
         }
-        HmEntity other = getOtherSideEntity();
-        if (other instanceof PhysicsEntity) {
+        PhysicsEntity<?> other = getOtherSideEntity();
+        if (other != null) {
             getReceivedVariables().forEach((key, value) -> ((SynchronizedEntityVariableSnapshot<Object>) value).updateVariable(tryGetVariable(key)));
         }
         entity.prePhysicsUpdateWrapper(profiler, entity.usesPhysicsWorld());
@@ -122,8 +126,8 @@ public class SPPhysicsEntitySynchronizer<T extends PhysicsEntity<?>> extends Phy
     @Override
     public void onPostPhysicsTick(Profiler profiler) {
         entity.postUpdatePhysicsWrapper(profiler, entity.usesPhysicsWorld());
-        HmEntity other = getOtherSideEntity();
-        if (other instanceof PhysicsEntity && ((PhysicsEntity<?>) other).initialized == PhysicsEntity.EnumEntityInitState.ALL) {
+        PhysicsEntity<?> other = getOtherSideEntity();
+        if (other != null && other.initialized == PhysicsEntity.EnumEntityInitState.ALL) {
             if (isClient) {
                 sendMyVars((SPPhysicsEntitySynchronizer<T>) ((T) other).getSynchronizer(), SyncTarget.SERVER);
             } else {

@@ -11,6 +11,7 @@ import fr.dynamx.core.common.entities.modules.SeatsModule;
 import fr.dynamx.core.common.entities.modules.WheelsModule;
 import fr.dynamx.core.common.physics.entities.BaseWheeledVehiclePhysicsHandler;
 import fr.dynamx.core.common.physics.entities.modules.WheelsPhysicsHandler;
+import fr.hermes.api.mc.entities.HmEntity;
 import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
@@ -21,12 +22,12 @@ public class CarEntity<T extends CarEntity.CarPhysicsHandler<?>> extends BaseVeh
     private WheelsModule wheels;
     private DoorsModule doors;
 
-    public CarEntity(World world) {
-        super(world);
+    public CarEntity(HmEntity mcEntityWrapper) {
+        super(mcEntityWrapper);
     }
 
-    public CarEntity(String name, World world, Vector3f pos, float spawnRotationAngle, int metadata) {
-        super(name, world, pos, spawnRotationAngle, metadata);
+    public CarEntity(String name, HmEntity mcEntityWrapper, Vector3f pos, float spawnRotationAngle, int metadata) {
+        super(name, mcEntityWrapper, pos, spawnRotationAngle, metadata);
     }
 
     @Override

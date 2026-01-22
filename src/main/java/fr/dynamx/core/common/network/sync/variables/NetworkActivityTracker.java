@@ -4,6 +4,8 @@ import fr.dynamx.api.network.sync.EntityVariable;
 import fr.dynamx.api.network.sync.SimulationHolder;
 import fr.dynamx.core.client.handlers.ClientEventHandler;
 import fr.dynamx.core.common.entities.PhysicsEntity;
+import fr.hermes.api.HmEntityLogicMatcher;
+import fr.hermes.api.mc.entities.HmEntity;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.entity.Entity;
 
@@ -37,9 +39,10 @@ public class NetworkActivityTracker {
             e = ClientEventHandler.MC.world.getEntityByID(viewEntity);
         else
             e = ClientEventHandler.MC.objectMouseOver.entityHit;
-        if (!(e instanceof PhysicsEntity))
+        PhysicsEntity<?> entity = HmEntityLogicMatcher.cast((HmEntity) e, PhysicsEntity.class);
+        if (entity == null) {
             return;
-        PhysicsEntity<?> entity = (PhysicsEntity<?>) e;
+        }
         int viewIndex = NetworkActivityTracker.viewIndex;
         if (viewIndex == -1)
             viewIndex = lastTime;

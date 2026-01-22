@@ -7,6 +7,8 @@ import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.common.items.DynamXItemRegistry;
 import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.RegistryNameSetter;
+import fr.hermes.api.HmEntityLogicMatcher;
+import fr.hermes.api.mc.entities.HmEntity;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
@@ -73,10 +75,7 @@ public class ItemWrench extends Item {
     public static PhysicsEntity<?> getEntity(ItemStack stack, World world) {
         if (hasEntity(stack)) {
             Entity e = world.getEntityByID(stack.getTagCompound().getInteger("Entity1"));
-            if (e instanceof PhysicsEntity) {
-                return (PhysicsEntity<?>) e;
-            }
-            return null;
+            return HmEntityLogicMatcher.cast((HmEntity) e, PhysicsEntity.class);
         }
         return null;
     }

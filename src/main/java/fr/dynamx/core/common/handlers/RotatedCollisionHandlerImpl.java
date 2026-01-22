@@ -12,11 +12,16 @@ import fr.dynamx.core.common.entities.IDynamXObject;
 import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.common.entities.PropsEntity;
 import fr.dynamx.core.common.physics.player.WalkingOnPlayerController;
-import fr.dynamx.core.utils.optimization.*;
-import fr.dynamx.forge.DynamXConfig;
 import fr.dynamx.core.utils.debug.renderer.VehicleDebugRenderer;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.maths.DynamXMath;
+import fr.dynamx.core.utils.optimization.*;
+import fr.dynamx.forge.DynamXConfig;
+import fr.hermes.api.HmEntityLogicMatcher;
+import fr.hermes.api.mc.entities.HmEntity;
+import fr.hermes.api.mc.entities.HmEntityLogic;
+import fr.hermes.api.mc.entities.HmModEntity;
+import fr.hermes.api.mc.entities.HmPlayerEntity;
 import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MoverType;
@@ -240,46 +245,51 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
             if (Math.abs(data.z - oldz) < eps / 5)
                 data.z = oldz;
 
-            if (with instanceof PhysicsEntity && entity.world.isRemote && entity instanceof EntityPlayer &&
-                    (!(with instanceof PropsEntity) || ((PropsEntity<?>) with).getPackInfo().getCollisionsHelper().getShapes().isEmpty() || ((PropsEntity<?>) with).getPackInfo().getCollisionsHelper().getShapes().get(0).getShapeType() == PartShape.EnumPartType.BOX) &&
-                    !collisionFaces.isEmpty() && WalkingOnPlayerController.controller == null && ((EntityPlayer) entity).isUser() && !DynamXContext.getPlayerPickingObjects().containsKey(entity.getEntityId())) //WIP
-            {
-                PhysicsEntity<?> collidingWith = (PhysicsEntity<?>) with;
-                for (EnumFacing f : collisionFaces) {
-                    if (!collisionFaces.contains(f.getOpposite())) //If not stuck between 2 aabb
-                    {
-                        Vector3f vh = rotate(JmeVector3fPool.get((float) collidingWith.motionX, (float) collidingWith.motionY, (float) collidingWith.motionZ), inversedWithRotation);
-                        float projVehicMotion = JmeVector3fPool.get(vh.x, vh.y, vh.z).dot(JmeVector3fPool.get(f.getDirectionVec().getX(), f.getDirectionVec().getY(), f.getDirectionVec().getZ()));
-                        //if (projVehicMotion != 0)
-                        //  System.out.println("Collide on face " + f + " " + projVehicMotion);
-                        if (projVehicMotion != 0) //We push the player
+            // TODO MOVE TO A FUNCTION AND CLEANUP
+            if (with instanceof HmModEntity) {
+                HmEntityLogic withLogic =  ((HmModEntity) with).getLogic();
+                if (withLogic instanceof PhysicsEntity && entity.world.isRemote && entity instanceof EntityPlayer &&
+                        (!(withLogic instanceof PropsEntity) || ((PropsEntity<?>) withLogic).getPackInfo().getCollisionsHelper().getShapes().isEmpty() || ((PropsEntity<?>) withLogic).getPackInfo().getCollisionsHelper().getShapes().get(0).getShapeType() == PartShape.EnumPartType.BOX) &&
+                        !collisionFaces.isEmpty() && WalkingOnPlayerController.controller == null && ((EntityPlayer) entity).isUser() && !DynamXContext.getPlayerPickingObjects().containsKey(entity.getEntityId())) //WIP
+                {
+                    Entity collidingWithEntity = (Entity) with;
+                    PhysicsEntity<?> collidingWith = (PhysicsEntity<?>) withLogic;
+                    for (EnumFacing f : collisionFaces) {
+                        if (!collisionFaces.contains(f.getOpposite())) //If not stuck between 2 aabb
                         {
-                            switch (f) {
-                                case DOWN:
-                                    data.y += collidingWith.motionY;
-                                    break;
-                                case NORTH:
-                                case SOUTH:
-                                    //System.out.println("Collide on " + f + " " + mx + " " + with.motionX);
-                                    //entity.addVelocity(with.motionX * 1.5f, 0, 0);
-                                case WEST:
-                                case EAST:
-                                    //System.out.println("Collide on " + f + " " + mz + " " + with.motionZ);
-                                    //entity.addVelocity(0, 0, with.motionZ * 1.5f);
-                                    break;
-                                case UP:
-                                    if (collidingWith.canPlayerStandOnTop()) {
-                                        offset = JmeVector3fPool.get((float) (entity.posX - collidingWith.posX + data.x), (float) (entity.posY - collidingWith.posY + data.y), (float) (entity.posZ - collidingWith.posZ + data.z));
-                                        offset = rotate(offset, inversedWithRotation);
-                                        offset = JmeVector3fPool.getPermanentVector(offset); //We don't want an instance from the pool
-                                        //System.out.println("Collision point for " + collisionFaces.get(0) + " at " + offsetv);
-                                        WalkingOnPlayerController.controller = new WalkingOnPlayerController((EntityPlayer) entity, collidingWith, f, offset);
-                                        collidingWith.walkingOnPlayers.put((EntityPlayer) entity, WalkingOnPlayerController.controller);
-                                        DynamXContext.getWalkingPlayers().put((EntityPlayer) entity, collidingWith);
-                                        collidingWith.getSynchronizer().onWalkingPlayerChange(entity.getEntityId(), offset, (byte) f.getIndex());
-                                    } else
-                                        data.y += collidingWith.motionY;
-                                    break;
+                            Vector3f vh = rotate(JmeVector3fPool.get((float) collidingWithEntity.motionX, (float) collidingWithEntity.motionY, (float) collidingWithEntity.motionZ), inversedWithRotation);
+                            float projVehicMotion = JmeVector3fPool.get(vh.x, vh.y, vh.z).dot(JmeVector3fPool.get(f.getDirectionVec().getX(), f.getDirectionVec().getY(), f.getDirectionVec().getZ()));
+                            //if (projVehicMotion != 0)
+                            //  System.out.println("Collide on face " + f + " " + projVehicMotion);
+                            if (projVehicMotion != 0) //We push the player
+                            {
+                                switch (f) {
+                                    case DOWN:
+                                        data.y += collidingWithEntity.motionY;
+                                        break;
+                                    case NORTH:
+                                    case SOUTH:
+                                        //System.out.println("Collide on " + f + " " + mx + " " + with.motionX);
+                                        //entity.addVelocity(with.motionX * 1.5f, 0, 0);
+                                    case WEST:
+                                    case EAST:
+                                        //System.out.println("Collide on " + f + " " + mz + " " + with.motionZ);
+                                        //entity.addVelocity(0, 0, with.motionZ * 1.5f);
+                                        break;
+                                    case UP:
+                                        if (collidingWith.canPlayerStandOnTop()) {
+                                            offset = JmeVector3fPool.get((float) (entity.posX - collidingWithEntity.posX + data.x), (float) (entity.posY - collidingWithEntity.posY + data.y), (float) (entity.posZ - collidingWithEntity.posZ + data.z));
+                                            offset = rotate(offset, inversedWithRotation);
+                                            offset = JmeVector3fPool.getPermanentVector(offset); //We don't want an instance from the pool
+                                            //System.out.println("Collision point for " + collisionFaces.get(0) + " at " + offsetv);
+                                            WalkingOnPlayerController.controller = new WalkingOnPlayerController((HmPlayerEntity) entity, collidingWith, f, offset);
+                                            collidingWith.walkingOnPlayers.put((HmPlayerEntity) entity, WalkingOnPlayerController.controller);
+                                            DynamXContext.getWalkingPlayers().put((HmPlayerEntity) entity, collidingWith);
+                                            collidingWith.getSynchronizer().onWalkingPlayerChange(entity.getEntityId(), offset, (byte) f.getIndex());
+                                        } else
+                                            data.y += collidingWithEntity.motionY;
+                                        break;
+                                }
                             }
                         }
                     }
@@ -351,8 +361,9 @@ public class RotatedCollisionHandlerImpl implements IRotatedCollisionHandler {
     }
 
     private volatile Set<Pattern> compiledIgnorePatterns;
+
     private boolean shouldHandleCollision(Entity entity) {
-        if(entity instanceof PhysicsEntity) {
+        if (HmEntityLogicMatcher.is((HmEntity) entity, PhysicsEntity.class)) {
             return false;
         }
         if (compiledIgnorePatterns == null) {

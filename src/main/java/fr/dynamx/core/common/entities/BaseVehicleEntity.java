@@ -51,7 +51,7 @@ public abstract class BaseVehicleEntity<T extends BaseVehiclePhysicsHandler<?>> 
 
     @Override
     public String getName() {
-        return "DynamXVehicle:" + getInfoName() + ":" + getEntityId();
+        return "DynamXVehicle:" + getInfoName() + ":" + mcEntity.hm$getEntityId();
     }
 
     @Override

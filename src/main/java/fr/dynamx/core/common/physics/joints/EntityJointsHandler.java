@@ -12,10 +12,11 @@ import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.common.network.packets.MessageJoints;
 import fr.dynamx.core.common.network.sync.SPPhysicsEntitySynchronizer;
 import fr.dynamx.core.common.physics.entities.AbstractEntityPhysicsHandler;
+import fr.hermes.api.HmEntityLogicMatcher;
 import fr.hermes.api.mc.entities.HmEntity;
 import fr.hermes.api.mc.entities.HmPlayerEntity;
-import fr.hermes.api.mc.utils.HmResourceLocation;
 import fr.hermes.api.mc.entities.HmServerPlayerEntity;
+import fr.hermes.api.mc.utils.HmResourceLocation;
 import lombok.Getter;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -259,12 +260,12 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
                 i:
                 for (EntityJoint.CachedJoint j : queuedRestorations) {
                     boolean found = false;
-                    for (HmEntity e : entity.getHmWorld().hm$getEntityList()) {
-                        if (!e.getUniqueID().equals(j.getId())) {
+                    for (HmEntity e : entity.getWorld().hm$getEntityList()) {
+                        if (!e.hm$getUniqueID().equals(j.getId())) {
                             continue;
                         }
                         found = true;
-                        if (!(e instanceof PhysicsEntity<?>)) {
+                        if (!HmEntityLogicMatcher.is(e, PhysicsEntity.class)) {
                             DynamXMain.log.warn("[Joints NBT Load] Failed to re attach {} to entity with uuid {} : wrong entity type : {}", entity, j.getId(), e);
                             continue;
                         }
@@ -307,7 +308,7 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
         if (!isDirty()) {
             return;
         }
-        if (!entity.getHmWorld().hm$isClient() && entity.getSynchronizer().doesOtherSideUsesPhysics()) {
+        if (!entity.getWorld().hm$isClient() && entity.getSynchronizer().doesOtherSideUsesPhysics()) {
             DynamXContext.getNetwork().sendToClient(new MessageJoints(entity, computeCachedJoints()), EnumPacketTarget.ALL_TRACKING_ENTITY, entity);
         }
         setDirty(false);
@@ -319,21 +320,22 @@ public class EntityJointsHandler implements IPhysicsModule<AbstractEntityPhysics
     public List<EntityJoint.CachedJoint> computeCachedJoints() {
         List<EntityJoint.CachedJoint> sendList = new ArrayList<>();
         for (EntityJoint<?> g : joints) {
-            sendList.add(new EntityJoint.CachedJoint(g.getOtherEntity(entity).getUniqueID(), g.getJointId(), g.getType(), g.getHandler().isJointOwner(g, entity)));
+            sendList.add(new EntityJoint.CachedJoint(g.getOtherEntity(entity).getUniqueId(), g.getJointId(), g.getType(), g.getHandler().isJointOwner(g, entity)));
         }
         return sendList;
     }
 
     protected void syncRemovedJoint(EntityJoint<?> joint) {
-        if (!entity.getHmWorld().hm$isClient() || !entity.getSynchronizer().getSimulationHolder().isSinglePlayer()) {
+        if (!entity.getWorld().hm$isClient() || !entity.getSynchronizer().getSimulationHolder().isSinglePlayer()) {
             return;
         }
         HmEntity e = ((SPPhysicsEntitySynchronizer<?>) entity.getSynchronizer()).getOtherSideEntity();
-        if (e instanceof PhysicsEntity) {
-            Optional<EntityJoint<?>> other = ((PhysicsEntity<?>) e).getJointsHandler().getJoints().stream().filter(j2 -> j2.getType().equals(joint.getType()) && j2.getJointId() == joint.getJointId()).findFirst();
+        PhysicsEntity physicsEntity = HmEntityLogicMatcher.cast(e, PhysicsEntity.class);
+        if (physicsEntity != null) {
+            Optional<EntityJoint<?>> other = physicsEntity.getJointsHandler().getJoints().stream().filter(j2 -> j2.getType().equals(joint.getType()) && j2.getJointId() == joint.getJointId()).findFirst();
             if (other.isPresent()) {
-                ((PhysicsEntity<?>) e).getJointsHandler().getJoints().remove(other.get());
-                ((PhysicsEntity<?>) e).getJointsHandler().onRemoveJoint(other.get());
+                physicsEntity.getJointsHandler().getJoints().remove(other.get());
+                physicsEntity.getJointsHandler().onRemoveJoint(other.get());
             }
         }
     }

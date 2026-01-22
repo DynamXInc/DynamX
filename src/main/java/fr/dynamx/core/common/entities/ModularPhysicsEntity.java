@@ -94,9 +94,9 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
         updateEntityListeners.clear();
         updatePhysicsListeners.clear();
         moduleList.forEach(m -> {
-            if (m instanceof IPhysicsModule.IEntityUpdateListener && ((IPhysicsModule.IEntityUpdateListener) m).listenEntityUpdates(getHmWorld().hm$isClient()))
+            if (m instanceof IPhysicsModule.IEntityUpdateListener && ((IPhysicsModule.IEntityUpdateListener) m).listenEntityUpdates(mcEntity.hm$getWorld().hm$isClient()))
                 updateEntityListeners.add((IPhysicsModule.IEntityUpdateListener) m);
-            if (m instanceof IPhysicsModule.IEntityPosUpdateListener && ((IPhysicsModule.IEntityPosUpdateListener) m).listenEntityPosUpdates(getHmWorld().hm$isClient()))
+            if (m instanceof IPhysicsModule.IEntityPosUpdateListener && ((IPhysicsModule.IEntityPosUpdateListener) m).listenEntityPosUpdates(mcEntity.hm$getWorld().hm$isClient()))
                 updateEntityPosListeners.add((IPhysicsModule.IEntityPosUpdateListener) m);
             if (m instanceof IPhysicsModule.IPhysicsUpdateListener)
                 updatePhysicsListeners.add((IPhysicsModule.IPhysicsUpdateListener) m);
@@ -287,7 +287,7 @@ public abstract class ModularPhysicsEntity<T extends AbstractEntityPhysicsHandle
 
     @Nullable
     @Override
-    public HmEntity getHmControllingPassenger() {
+    public HmEntity getControllingPassenger() {
         if (this instanceof IModuleContainer.ISeatsContainer && ((IModuleContainer.ISeatsContainer) this).getSeats() != null) { //May be called before init of modules
             return ((IModuleContainer.ISeatsContainer) this).getSeats().getControllingPassenger();
         }

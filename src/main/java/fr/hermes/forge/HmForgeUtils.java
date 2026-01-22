@@ -17,7 +17,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.HashMap;
 
-public class HmUtils implements HermesUtils {
+public class HmForgeUtils implements HermesUtils {
     @Override
     public void addPathToClasspath(URL path) {
         ((LaunchClassLoader) Thread.currentThread().getContextClassLoader()).addURL(path);

@@ -162,7 +162,7 @@ public enum EntityVariableTypes {
             return e instanceof EntityPlayer ? (EntityPlayer) e : null;
         }
     }),
-    PHYSICS_ENTITY(PhysicsEntity.class, new EntityVariableSerializer<PhysicsEntity>() {
+    /*PHYSICS_ENTITY(PhysicsEntity.class, new EntityVariableSerializer<PhysicsEntity>() {
         @Override
         public void writeObject(ByteBuf buffer, PhysicsEntity object) {
             buffer.writeInt(object == null ? -1 : object.getEntityId());
@@ -176,7 +176,7 @@ public enum EntityVariableTypes {
             Entity e = Minecraft.getMinecraft().world.getEntityByID(id);
             return e instanceof PhysicsEntity ? (PhysicsEntity<?>) e : null;
         }
-    }),
+    }),*/
     STRING(String.class, new EntityVariableSerializer<String>() {
         @Override
         public void writeObject(ByteBuf buffer, String object) {

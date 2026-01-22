@@ -29,7 +29,7 @@ public class WalkingOnPlayerController {
         this.face = face;
         this.offset = offset;
         if (DynamXContext.getPlayerToCollision().containsKey(player)) {
-            DynamXContext.getPlayerToCollision().get(player).removeFromWorld(false, player.getHmWorld());
+            DynamXContext.getPlayerToCollision().get(player).removeFromWorld(false, player.hm$getWorld());
         }
     }
 
@@ -37,12 +37,12 @@ public class WalkingOnPlayerController {
      * Teleport the player to the right pos and disables arms animation
      */
     public void applyOffset() {
-        Vector3f newPos = JmeVector3fPool.get((float) entity.getPosX(), (float) entity.getPosY(), (float) entity.getPosZ());
+        Vector3f newPos = JmeVector3fPool.get(entity.physicsPosition);
         newPos.addLocal(DynamXGeometry.rotateVectorByQuaternion(offset, entity.physicsRotation));
-        player.setPrevPosX(player.getPosX());
-        player.setPrevPosY(player.getPosY());
-        player.setPrevPosZ(player.getPosZ());
-        player.setPosition(newPos.x, newPos.y, newPos.z);
+        player.hm$setPrevPosX(player.hm$getPosX());
+        player.hm$setPrevPosY(player.hm$getPosY());
+        player.hm$setPrevPosZ(player.hm$getPosZ());
+        player.hm$setPosition(newPos.x, newPos.y, newPos.z);
         player.setLimbSwingAmount(0);
         player.setLimbSwing(0);
         player.setPrevLimbSwingAmount(0);
@@ -56,8 +56,8 @@ public class WalkingOnPlayerController {
         controller = null;
         entity.walkingOnPlayers.remove(player);
         DynamXContext.getWalkingPlayers().remove(player);
-        entity.getSynchronizer().onWalkingPlayerChange(player.getEntityId(), offset, (byte) -1);
-        if (!player.isRiding() && DynamXContext.getPlayerToCollision().containsKey(player)) {
+        entity.getSynchronizer().onWalkingPlayerChange(player.hm$getEntityId(), offset, (byte) -1);
+        if (!player.hm$isRiding() && DynamXContext.getPlayerToCollision().containsKey(player)) {
             DynamXContext.getPlayerToCollision().get(player).addToWorld();
         }
     }

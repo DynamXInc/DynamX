@@ -1,11 +1,7 @@
 package fr.hermes.api.mc.entities;
 
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
-import fr.hermes.api.mc.items.HmItemStack;
-import fr.hermes.api.mc.world.HmServerWorld;
-import io.netty.buffer.ByteBuf;
-import net.minecraft.nbt.NBTTagCompound;
-import org.joml.Quaternionf;
+import fr.hermes.api.mc.world.HmWorld;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
@@ -13,140 +9,89 @@ import java.util.Collection;
 import java.util.UUID;
 
 public interface HmEntity {
-    int getEntityId();
+    int hm$getEntityId();
 
-    HmServerWorld getHmWorld();
+    HmWorld hm$getWorld();
 
-    void readFromNbt(NBTTagCompound tag);
+    void hm$setNoClip(boolean value);
 
-    void writeToNbt(NBTTagCompound tag);
+    void hm$setPreventEntitySpawning(boolean value);
 
-    void setNoClip(boolean value);
+    void hm$setIgnoreFrustumCheck(boolean value);
 
-    void setPreventEntitySpawning(boolean value);
+    void hm$setPosition(float x, float y, float z);
 
-    void setIgnoreFrustumCheck(boolean value);
+    void hm$setRotationYaw(float yaw);
 
-    void setPosition(float x, float y, float z);
+    double hm$getPosX();
 
-    void setRotationYaw(float yaw);
+    double hm$getPosY();
 
-    double getPosX();
+    double hm$getPosZ();
 
-    double getPosY();
+    float hm$getRotationYaw();
 
-    double getPosZ();
+    float hm$getPrevRotationYaw();
 
-    float getRotationYaw();
+    float hm$getRotationPitch();
 
-    float getPrevRotationYaw();
+    float hm$getPrevRotationPitch();
 
-    float getRotationPitch();
+    double hm$getMotionX();
 
-    float getPrevRotationPitch();
+    double hm$getMotionY();
 
-    double getMotionX();
+    double hm$getMotionZ();
 
-    double getMotionY();
+    void hm$setDead();
 
-    double getMotionZ();
+    MutableBoundingBox hm$getBoundingBox();
 
-    void setDead();
+    String hm$getName();
 
-    void onSetDead();
+    UUID hm$getUniqueID();
 
-    /**
-     * Called in minecraft thread to update vanilla position and rotation fields, also used for render and updating "prev" fields
-     */
-    void updateMinecraftPos(Vector3f physicsPosition, Quaternionf physicsRotation);
+    boolean hm$isDead();
 
-    void onUpdate();
+    float hm$getDistanceSq(HmEntity entity);
 
-    MutableBoundingBox getHmBoundingBox();
+    int hm$getTicksExisted();
 
-    void onRemovedFromWorld();
+    Collection<HmEntity> hm$getPassengers();
 
-    String getName();
+    Vector3f hm$getLook();
 
-    void writeSpawnData(ByteBuf buffer);
+    Vector3f hm$getPosition();
 
-    void readSpawnData(ByteBuf additionalData);
+    Vector3i hm$getBlockPosition();
 
-    default void onAddPassenger(HmEntity passenger) {
-    }
+    float hm$getEyeHeight();
 
-    default void onRemovePassenger(HmEntity passenger) {
-    }
+    int hm$getChunkX();
 
-    default boolean updatePassenger(HmEntity passenger) {
-        return false;
-    }
+    int hm$getChunkY();
 
-    default boolean updatePassengerRotation(HmEntity passenger) {
-        return false;
-    }
+    int hm$getChunkZ();
 
-    UUID getUniqueID();
+    void hm$setMotionX(float motionX);
 
-    boolean isDead();
+    void hm$setMotionY(float motionY);
 
-    float getDistanceSq(HmEntity entity);
+    void hm$setMotionZ(float motionZ);
 
-    int getTicksExisted();
+    double hm$getPrevPosX();
 
-    Collection<HmEntity> getHmPassengers();
+    void hm$setPrevPosX(double prevPosX);
 
-    default HmEntity getHmControllingPassenger() {
-        return null;
-    }
+    double hm$getPrevPosY();
 
-    HmItemStack getHmPickedResult();
+    void hm$setPrevPosY(double prevPosY);
 
-    boolean canFitPassenger(HmEntity passenger);
+    double hm$getPrevPosZ();
 
-    boolean isInRangeToRenderDist(double range);
+    void hm$setPrevPosZ(double prevPosZ);
 
-    int getBrightnessForRender();
+    Vector3f hm$getEyesPosition();
 
-    Vector3f getHmLook();
-
-    Vector3f getHmPosition();
-
-    Vector3i getHmBlockPosition();
-
-    float getEyeHeight();
-
-    //TODO NEW TO IMPLEMENT
-
-    int getChunkX();
-
-    int getChunkY();
-
-    int getChunkZ();
-
-    void setMotionX(float motionX);
-
-    void setMotionY(float motionY);
-
-    void setMotionZ(float motionZ);
-
-    double getPrevPosX();
-
-    void setPrevPosX(double prevPosX);
-
-    double getPrevPosY();
-
-    void setPrevPosY(double prevPosY);
-
-    double getPrevPosZ();
-
-    void setPrevPosZ(double prevPosZ);
-
-    boolean startRiding(HmEntity riddenEntity);
-
-    boolean startRiding(HmEntity riddenEntity, boolean force);
-
-    Vector3f getEyesPosition();
-
-    boolean isRiding();
+    boolean hm$isRiding();
 }

@@ -33,7 +33,7 @@ public interface IBlockCollisionBehavior {
      * @return The {@link TerrainBoxBuilder} to stack similar blocks on boxStart
      */
     default TerrainBoxBuilder initBoxBuilder(TerrainBoxConstructor terrainBoxConstructor, HmWorld world, org.joml.Vector3i mutable, HmBlockState boxStart, double ox, double oy, double oz) {
-        MutableBoundingBox box = boxStart.getBoundingBox(world instanceof HmServerWorld ? (HmServerWorld) world : null, mutable);
+        MutableBoundingBox box = boxStart.hm$getBoundingBox(world instanceof HmServerWorld ? (HmServerWorld) world : null, mutable);
         return new TerrainBoxBuilder.MutableTerrainBoxBuilder(ox + box.minX, oy + box.minY, oz + box.minZ, box.maxX - box.minX, box.maxY - box.minY, box.maxZ - box.minZ);
     }
 

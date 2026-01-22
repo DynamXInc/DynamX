@@ -25,6 +25,7 @@ public class ClientProxy extends CommonProxy {
 
     public ClientProxy() {
         DynamXContext.initObjModelRegistry();
+        ClientEventHandler.register();
     }
 
     @Override
@@ -91,8 +92,8 @@ public class ClientProxy extends CommonProxy {
             return true;
         }
         HmClientPlayerEntity player = ClientEventHandler.MC.hm$getPlayer();
-        if (entity.hm$getWorld().hm$isClient() && player.getRidingEntity() instanceof PhysicsEntity
-                && ((PhysicsEntity<?>) player.getRidingEntity()).getSynchronizer().getSimulationHolder().ownsPhysics(true)) {
+        if (entity.hm$getWorld().hm$isClient() && player.hm$getRidingEntity() instanceof PhysicsEntity
+                && ((PhysicsEntity<?>) player.hm$getRidingEntity()).getSynchronizer().getSimulationHolder().ownsPhysics(true)) {
             return true;
         }
         return player != null && DynamXContext.getPlayerPickingObjects().containsKey(player.getEntityId()) &&

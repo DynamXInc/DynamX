@@ -1,5 +1,6 @@
 package fr.dynamx.api.physics.player;
 
+import fr.hermes.api.mc.entities.HmPlayerEntity;
 import net.minecraft.entity.player.EntityPlayer;
 
 /**
@@ -32,7 +33,7 @@ public class DynamXPhysicsWorldBlacklistApi {
      * @param player - The player that will be added in PhysicsWorld
      * @return - Player is blacklisted from world
      */
-    public static boolean isBlacklisted(EntityPlayer player) {
+    public static boolean isBlacklisted(HmPlayerEntity player) {
         return DynamXPhysicsWorldBlacklistApi.blackListCondition.isBlacklisted(player);
     }
 

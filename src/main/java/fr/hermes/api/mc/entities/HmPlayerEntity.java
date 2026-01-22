@@ -2,23 +2,26 @@ package fr.hermes.api.mc.entities;
 
 import com.mojang.authlib.GameProfile;
 import fr.hermes.api.mc.items.HmItemStack;
+import net.minecraft.util.EnumHand;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 
 /**
  * A Minecraft {@link net.minecraft.entity.player.PlayerEntity}
  */
 public interface HmPlayerEntity extends HmLivingEntity {
-    MixinEnvironment.Side getSide();
+    MixinEnvironment.Side hm$getSide();
 
-    GameProfile getGameProfile();
+    GameProfile hm$getGameProfile();
 
-    void sendMessage(String message);
+    void hm$sendMessage(String message);
 
-    boolean isLocalPlayer();
+    boolean hm$isLocalPlayer();
 
-    HmItemStack getHeldItemMainhand();
+    HmItemStack hm$getHeldItemMainhand();
 
-    boolean isCreativeMode();
+    boolean hm$isCreativeMode();
 
-    boolean isSneaking();
+    boolean hm$isSneaking();
+
+    HmItemStack hm$getHeldItem(EnumHand hand);
 }

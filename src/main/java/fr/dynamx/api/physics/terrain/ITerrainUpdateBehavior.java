@@ -1,8 +1,8 @@
 package fr.dynamx.api.physics.terrain;
 
-import net.minecraft.block.state.IBlockState;
+import fr.hermes.api.mc.blocks.HmBlockState;
+import fr.hermes.api.mc.world.HmWorld;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
 
 /**
  * Defines the physics terrain update when a block is changed in the world <br>
@@ -22,7 +22,7 @@ public interface ITerrainUpdateBehavior {
      * @param newState The new block state
      * @return The result of this update behavior.
      */
-    Result getResult(IBlockAccess world, BlockPos pos, IBlockState oldState, IBlockState newState);
+    Result getResult(HmWorld world, BlockPos pos, HmBlockState oldState, HmBlockState newState);
 
     /**
      * The result of an {@link ITerrainUpdateBehavior}
@@ -36,8 +36,8 @@ public interface ITerrainUpdateBehavior {
      */
     class DefaultUpdateBehavior implements ITerrainUpdateBehavior {
         @Override
-        public Result getResult(IBlockAccess world, BlockPos pos, IBlockState oldState, IBlockState newState) {
-            if (!(oldState.isFullCube() && newState.isFullCube()) && (oldState.getMaterial().blocksMovement() || newState.getMaterial().blocksMovement()))
+        public Result getResult(HmWorld world, BlockPos pos, HmBlockState oldState, HmBlockState newState) {
+            if (!(oldState.hm$isFullCube() && newState.hm$isFullCube()) && (oldState.getMaterial().blocksMovement() || newState.getMaterial().blocksMovement()))
                 return Result.DO_UPDATE;
             return Result.IGNORE;
         }

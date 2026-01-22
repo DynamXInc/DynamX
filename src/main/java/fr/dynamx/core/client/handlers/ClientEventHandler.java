@@ -34,8 +34,16 @@ import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.SubClassPool;
 import fr.dynamx.forge.DynamXConfig;
 import fr.hermes.api.HmEntityLogicMatcher;
+import fr.hermes.api.events.HmEventResult;
+import fr.hermes.api.mc.client.HmScreen;
+import fr.hermes.api.mc.entities.HmClientPlayerEntity;
 import fr.hermes.api.mc.entities.HmEntity;
-import fr.hermes.api.mc.HmMinecraftClient;
+import fr.hermes.api.mc.events.HmMcClientEvents;
+import fr.hermes.api.mc.events.HmPlayerEvents;
+import fr.hermes.api.mc.events.HmWorldEvents;
+import fr.hermes.api.mc.client.HmMinecraftClient;
+import fr.hermes.api.mc.items.HmItemStack;
+import fr.hermes.api.mc.utils.HmRayTraceResult;
 import fr.hermes.api.mod.HermesPlatform;
 import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.client.Minecraft;
@@ -63,8 +71,6 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.client.event.sound.SoundLoadEvent;
 import net.minecraftforge.client.event.sound.SoundSetupEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.client.CustomModLoadingErrorDisplayException;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -85,46 +91,89 @@ public class ClientEventHandler {
     public static boolean isRenderingEntitiesWithOptifineShaders;
 
     /* Placing block */
-    private DxModelRenderer model;
-    private boolean canPlace;
-    private BlockPos blockPos;
-    private int playerOrientation;
-    private BlockObject<?> blockObjectInfo;
-    private int textureNum;
+    private static DxModelRenderer model;
+    private static boolean canPlace;
+    private static BlockPos blockPos;
+    private static int playerOrientation;
+    private static BlockObject<?> blockObjectInfo;
+    private static int textureNum;
 
-    /* World events */
+    public static void register() {
+        HmWorldEvents.UNLOAD.register(world -> {
+            if (world.hm$isClient()) {
+                ClientProxy.SOUND_HANDLER.unload();
+            }
+            DynamXDebugOptions.PROFILING.disable();
+        });
 
-    @SubscribeEvent
-    public void onWorldUnloaded(WorldEvent.Unload event) {
-        if (event.getWorld().isRemote) {
-            ClientProxy.SOUND_HANDLER.unload();
-        }
-        DynamXDebugOptions.PROFILING.disable();
+        HmPlayerEvents.RIGHT_CLICK_ENTITY.register((player, hand, target) -> {
+            if (!player.hm$getWorld().hm$isClient()) {
+                return HmEventResult.pass();
+            }
+            if (!(HmEntityLogicMatcher.is(target, PhysicsEntity.class) || !hand.equals(EnumHand.MAIN_HAND) || player.hm$getHeldItem(hand).hm$getItem() instanceof DynamXItemSpawner)) {
+                return HmEventResult.pass();
+            }
+            DynamXContext.getNetwork().sendToServer(new MessageEntityInteract(target.hm$getEntityId()));
+            return HmEventResult.success();
+        });
+
+        HmPlayerEvents.RIGHT_CLICK_ITEM.register((player, hand, itemStack) -> {
+            if (player.hm$getWorld().hm$isClient() && (MC.hm$getObjectMouseOver() == null || MC.hm$getObjectMouseOver().hm$getType() == HmRayTraceResult.Type.MISS) && player.hm$isSneaking() && itemStack.hm$getItem() instanceof ItemSlopes) {
+                MC.hm$displayGuiScreen((HmScreen) new GuiSlopesConfig(itemStack).getGuiScreen());
+            }
+        });
+
+        HmMcClientEvents.TICK.register((phase) -> {
+            ClientProxy.SOUND_HANDLER.tick();
+
+            if (connectionTime != -1 && !MC.hm$isSingleplayer()) {
+                if ((System.currentTimeMillis() - connectionTime) > 30000) {
+                    connectionTime = -1;
+                    if (!DynamXContext.getNetwork().isConnected()) {
+                        DynamXMain.log.fatal("Failed to establish an TCP/UDP connection : timed out (0x1)");
+                        if (DynamXConfig.doUdpTimeOut) {
+                            MC.hm$disconnectPlayer("DynamX UDP connection timed out (Auth not started)");
+                        }
+                    }
+                }
+            }
+    
+            model = null;
+            HmClientPlayerEntity entityPlayer = MC.hm$getPlayer();
+            if (entityPlayer == null) {
+                return;
+            }
+            if (DynamXContext.getWalkingPlayers().containsKey(entityPlayer)) {
+                PhysicsEntity<?> physicsEntity = DynamXContext.getWalkingPlayers().get(entityPlayer);
+                if (!physicsEntity.canPlayerStandOnTop() && WalkingOnPlayerController.controller != null) {
+                    WalkingOnPlayerController.controller.disable();
+                    entityPlayer.hm$setMotionY(entityPlayer.hm$getMotionY() + 0.2f);
+                }
+            }
+    
+            HmItemStack currentItem = entityPlayer.hm$getHeldItemMainhand();
+            // TODO Convert ItemBlock logic
+            if (currentItem.hm$getItem() instanceof ItemBlock && ((ItemBlock) currentItem.hm$getItem()).getBlock() instanceof DynamXBlock) {
+                ItemBlock itemBlock = (ItemBlock) currentItem.hm$getItem();
+                DynamXBlock<?> block = (DynamXBlock<?>) itemBlock.getBlock();
+                HmRayTraceResult target = MC.hm$getObjectMouseOver();
+                if (target != null && target.hm$getType() == HmRayTraceResult.Type.BLOCK && block.isDxModel()) {
+                    EnumFacing side = target.hm$getSide();
+                    playerOrientation = MathHelper.floor((entityPlayer.hm$getRotationYaw() * 16.0F / 360.0F) + 0.5D) & 0xF;
+                    blockPos = new BlockPos(target.hm$getBlockPos().getX() + side.getXOffset(),
+                            target.hm$getBlockPos().getY() + side.getYOffset(),
+                            target.hm$getBlockPos().getZ() + side.getZOffset());
+    
+                    textureNum = currentItem.hm$getMetadata();
+                    blockObjectInfo = block.blockObjectInfo;
+                    canPlace = itemBlock.canPlaceBlockOnSide(entityPlayer.hm$getWorld(), blockPos, side, entityPlayer, currentItem);
+                    model = DynamXContext.getDxModelRegistry().getModel(block.blockObjectInfo.getModel());
+                }
+            }
+        });
     }
 
-    /* Interaction events */
-
-    @SubscribeEvent
-    public void onInteract(PlayerInteractEvent.EntityInteract event) {
-        EntityPlayer player = event.getEntityPlayer();
-        if (!player.world.isRemote) {
-            return;
-        }
-        if (!(HmEntityLogicMatcher.is((HmEntity) event.getTarget(), PhysicsEntity.class) || !event.getHand().equals(EnumHand.MAIN_HAND) || event.getEntityPlayer().getHeldItem(event.getHand()).getItem() instanceof DynamXItemSpawner)
-        {
-            return;
-        }
-        DynamXContext.getNetwork().sendToServer(new MessageEntityInteract(event.getTarget().getEntityId()));
-        event.setCanceled(true);
-        event.setCancellationResult(EnumActionResult.SUCCESS);
-    }
-
-    @SubscribeEvent
-    public void onRightClickAir(PlayerInteractEvent.RightClickItem e) {
-        if (e.getWorld().isRemote && (MC.objectMouseOver == null || MC.objectMouseOver.typeOfHit == RayTraceResult.Type.MISS) && e.getEntity() instanceof EntityPlayer && !e.getEntity().isSneaking() && e.getItemStack().getItem() instanceof ItemSlopes) {
-            Minecraft.getMinecraft().displayGuiScreen(new GuiSlopesConfig(e.getItemStack()).getGuiScreen());
-        }
-    }
+    // === TODO DynamX events ===
 
     @SubscribeEvent
     public void onMount(VehicleEntityEvent.EntityMount event) {
@@ -142,8 +191,12 @@ public class ClientEventHandler {
         ACsGuiApi.closeHudGui(VehicleHud.class);
     }
 
+    // === end ===
+
     /* Gui events */
 
+    /* TODO error guis migration 
+    
     @SubscribeEvent
     public void guiOpenEvent(GuiOpenEvent event) {
         if (event.getGui() instanceof GuiMainMenu && DynamXMain.getInstance().getMemoizedLoadingError() != null) {
@@ -174,10 +227,11 @@ public class ClientEventHandler {
         /* else if ((event.getGui() instanceof GuiWorldSelection || event.getGui() instanceof GuiMultiplayer) && event.getButton().id == -54392) {
             Minecraft.getMinecraft().displayGuiScreen(new GuiDisconnected(event.getGui(), "Improving DynamX", new TextComponentString("DynamX is collecting data about your computer (GPU, memory, OS) and crash-reports to improve the mod. \n" +
                     "You can disable this in the configuration file of DynamX (under 'config' directory)")));
-        }*/
+        }*/ /*
     }
+    */
 
-
+    /* TODO Hud cursor migration 
     @SubscribeEvent
     public void drawHudCursor(RenderGameOverlayEvent.Pre event) {
         if (event.getType() == RenderGameOverlayEvent.ElementType.CROSSHAIRS) {
@@ -266,57 +320,6 @@ public class ClientEventHandler {
     }
 
     /* Tick/render events */
-
-    @SubscribeEvent
-    public void onClientTick(TickEvent.ClientTickEvent event) {
-        ClientProxy.SOUND_HANDLER.tick();
-
-        if (connectionTime != -1 && !Minecraft.getMinecraft().isSingleplayer()) {
-            if ((System.currentTimeMillis() - connectionTime) > 30000) {
-                connectionTime = -1;
-                if (!DynamXContext.getNetwork().isConnected()) {
-                    DynamXMain.log.fatal("Failed to establish an TCP/UDP connection : timed out (0x1)");
-                    if (Minecraft.getMinecraft().getConnection() != null && DynamXConfig.doUdpTimeOut) {
-                        Minecraft.getMinecraft().getConnection().getNetworkManager().closeChannel(new TextComponentString("DynamX UDP connection timed out (Auth not started)"));
-                    }
-                }
-            }
-        }
-
-        model = null;
-        EntityPlayer entityPlayer = Minecraft.getMinecraft().player;
-        if (entityPlayer == null) {
-            return;
-        }
-        if (DynamXContext.getWalkingPlayers().containsKey(entityPlayer)) {
-            PhysicsEntity<?> physicsEntity = DynamXContext.getWalkingPlayers().get(entityPlayer);
-            if (!physicsEntity.canPlayerStandOnTop()) {
-                if (WalkingOnPlayerController.controller != null) {
-                    WalkingOnPlayerController.controller.disable();
-                    entityPlayer.motionY += 0.2D;
-                }
-            }
-        }
-
-        ItemStack currentItem = entityPlayer.inventory.getCurrentItem();
-        if (currentItem.getItem() instanceof ItemBlock && ((ItemBlock) currentItem.getItem()).getBlock() instanceof DynamXBlock) {
-            ItemBlock itemBlock = (ItemBlock) currentItem.getItem();
-            DynamXBlock<?> block = (DynamXBlock<?>) itemBlock.getBlock();
-            RayTraceResult target = Minecraft.getMinecraft().objectMouseOver;
-            if (target != null && target.typeOfHit == RayTraceResult.Type.BLOCK && block.isDxModel()) {
-                EnumFacing side = target.sideHit;
-                playerOrientation = MathHelper.floor((entityPlayer.rotationYaw * 16.0F / 360.0F) + 0.5D) & 0xF;
-                blockPos = new BlockPos(target.getBlockPos().getX() + side.getXOffset(),
-                        target.getBlockPos().getY() + side.getYOffset(),
-                        target.getBlockPos().getZ() + side.getZOffset());
-
-                textureNum = currentItem.getMetadata();
-                blockObjectInfo = block.blockObjectInfo;
-                this.canPlace = itemBlock.canPlaceBlockOnSide(entityPlayer.world, blockPos, side, entityPlayer, currentItem);
-                this.model = DynamXContext.getDxModelRegistry().getModel(block.blockObjectInfo.getModel());
-            }
-        }
-    }
 
     @SubscribeEvent
     public void onDrawBlockHighlight(DrawBlockHighlightEvent event) {

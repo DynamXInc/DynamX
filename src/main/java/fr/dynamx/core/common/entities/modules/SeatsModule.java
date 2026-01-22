@@ -115,7 +115,7 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
         // make player's yaw follow the entity yaw
         float deltaRotation = entity.getRotationYaw() - entity.getPrevRotationYaw();
         passenger.setRotationYaw(passenger.getRotationYaw() + deltaRotation);
-        passenger.setRotationYawHead(passenger.getRotationYawHead() + deltaRotation);
+        passenger.hm$setRotationYawHead(passenger.hm$getRotationYawHead() + deltaRotation);
         applyOrientationToEntity(passenger);
     }
 
@@ -123,24 +123,24 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
      * Rotates the passenger, limiting his field of view to avoid stiff necks
      */
     public void applyOrientationToEntity(HmEntity passenger) {
-        passenger.setRenderYawOffset(0);
+        passenger.hm$setRenderYawOffset(0);
         BasePartSeat<?, ?> seat = getRidingSeat(passenger);
         if (seat != null && seat.shouldLimitFieldOfView()) {
             // Limit yaw
             float f = MathHelper.wrapDegrees(passenger.getRotationYaw() - entity.getRotationYaw());
             float f1 = MathHelper.clamp(f, seat.getMinYaw(), seat.getMaxYaw());
-            passenger.setPrevRotationYaw(passenger.getPrevRotationYaw() + (f1 - f));
+            passenger.hm$setPrevRotationYaw(passenger.getPrevRotationYaw() + (f1 - f));
             passenger.setRotationYaw(passenger.getRotationYaw() + (f1 - f));
 
             // Limit pitch
             float f2 = MathHelper.wrapDegrees(passenger.getRotationPitch());
             float f3 = MathHelper.clamp(f2, seat.getMinPitch(), seat.getMaxPitch());
-            passenger.setRotationPitch(f3);
+            passenger.hm$setRotationPitch(f3);
             f2 = MathHelper.wrapDegrees(passenger.getPrevRotationPitch());
             f3 = MathHelper.clamp(f2, seat.getMinPitch(), seat.getMaxPitch());
             passenger.setPrevRotationPitch(f3);
         }
-        passenger.setRotationYawHead(passenger.getRotationYaw() - entity.getRotationYaw());
+        passenger.hm$setRotationYawHead(passenger.getRotationYaw() - entity.getRotationYaw());
     }
 
     @Override

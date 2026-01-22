@@ -1,6 +1,6 @@
 package fr.hermes.api.mc.world;
 
-import fr.hermes.api.mc.HmMinecraftClient;
+import fr.hermes.api.mc.client.HmMinecraftClient;
 import fr.hermes.api.mc.entities.HmPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 

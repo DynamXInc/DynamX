@@ -5,8 +5,10 @@ import fr.dynamx.core.common.items.DynamXItemRegistry;
 import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.RegistryNameSetter;
 import fr.dynamx.core.utils.maths.DynamXMath;
+import fr.dynamx.core.utils.optimization.MutableBoundingBox;
+import fr.hermes.api.mc.blocks.HmBlockState;
+import fr.hermes.api.mc.world.HmWorld;
 import fr.hermes.forge.JmeVector3fPool;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -15,7 +17,6 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 
@@ -51,13 +52,12 @@ public class ItemSlopes extends Item {
         }
     }
 
-    public static Vector3f fixPos(World worldIn, Vec3d post) {
+    public static Vector3f fixPos(HmWorld worldIn, org.joml.Vector3f post) {
         Vector3f pos = JmeVector3fPool.get(DynamXMath.preciseRound(post.x), DynamXMath.preciseRound(post.y), DynamXMath.preciseRound(post.z));
         BlockPos bpos = new BlockPos(post.x, post.y, post.z);
-        IBlockState state = worldIn.getBlockState(bpos);
-        AxisAlignedBB box = state.getCollisionBoundingBox(worldIn, bpos);
+        HmBlockState state = worldIn.hm$getBlockState(bpos);
+        MutableBoundingBox box = state.hm$getBoundingBox(worldIn, bpos);
         pos.y = (float) (bpos.getY() + (box == null ? 0 : box.maxY));
-
         return pos;
     }
 

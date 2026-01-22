@@ -44,15 +44,15 @@ public class BlockCollisionBehaviors {
 
         @Override
         public void addBlockCollision(TerrainBoxConstructor terrainBoxConstructor, TerrainBoxBuilder boxBuilder, TerrainCollisionsCalculator.TerrainCursor cursor, HmWorld world, Vector3i at, HmBlockState ofBlock, HmAxis axis) {
-            if (ofBlock.blocksMovement()) //Si le block a une collision spéciale, on l'ajoute
+            if (ofBlock.hm$blocksMovement()) //Si le block a une collision spéciale, on l'ajoute
             {
-                ofBlock.addCollisionBoxes(world, at, terrainBoxConstructor.getSearchZone(), boxes);
+                ofBlock.hm$addCollisionBoxes(world, at, terrainBoxConstructor.getSearchZone(), boxes);
                 if (boxes.size() <= DynamXConfig.maxComplexBlockBoxes) {
                     terrainBoxConstructor.injectBlockCollisions(at, ofBlock, boxes);
                     boxes.clear();
                 } else {
                     boxes.clear();
-                    MutableBoundingBox box = ofBlock.getBoundingBox(world, at);
+                    MutableBoundingBox box = ofBlock.hm$getBoundingBox(world, at);
                     if (box != null) {
                         terrainBoxConstructor.addMutable(box.offset(at));
                     }
@@ -69,7 +69,7 @@ public class BlockCollisionBehaviors {
     static class Leaves implements IBlockCollisionBehavior {
         @Override
         public boolean applies(HmWorld world, Vector3i pos, HmBlockState toBlock) {
-            return toBlock.getBlock() instanceof BlockLeaves;
+            return toBlock.hm$getBlock() instanceof BlockLeaves;
         }
 
         @Override
@@ -90,16 +90,16 @@ public class BlockCollisionBehaviors {
     static class FullCube implements IBlockCollisionBehavior {
         @Override
         public boolean applies(HmWorld world, Vector3i pos, HmBlockState toBlock) {
-            return toBlock.isFullCube() && !(toBlock instanceof BlockLeaves);
+            return toBlock.hm$isFullCube() && !(toBlock instanceof BlockLeaves);
         }
 
         @Override
         public boolean stacks(HmWorld world, Vector3i pos, HmAxis axis, HmBlockState onBlock, HmBlockState stackingBlock, HmBlockState lastStacked) {
-            if (axis == HmAxis.Y && lastStacked != null && !lastStacked.isFullCube()) {
+            if (axis == HmAxis.Y && lastStacked != null && !lastStacked.hm$isFullCube()) {
                 return false;
             }
             IBlockState onBlockMc = (IBlockState) onBlock;
-            return onBlock.isFullCube() || (axis == HmAxis.Y && onBlock.getBlock() instanceof BlockSlab && onBlockMc.getValue(BlockSlab.HALF) == BlockSlab.EnumBlockHalf.TOP);
+            return onBlock.hm$isFullCube() || (axis == HmAxis.Y && onBlock.hm$getBlock() instanceof BlockSlab && onBlockMc.getValue(BlockSlab.HALF) == BlockSlab.EnumBlockHalf.TOP);
         }
 
         @Override
@@ -125,7 +125,7 @@ public class BlockCollisionBehaviors {
     static class Slab implements IBlockCollisionBehavior {
         @Override
         public boolean applies(HmWorld world, Vector3i pos, HmBlockState toBlock) {
-            return toBlock.getBlock() instanceof BlockSlab;
+            return toBlock.hm$getBlock() instanceof BlockSlab;
         }
 
         @Override
@@ -133,12 +133,12 @@ public class BlockCollisionBehaviors {
             IBlockState onBlockMc = (IBlockState) onBlock;
             IBlockState stackingBlockMc = (IBlockState) stackingBlock;
             if (axis == HmAxis.Y) {
-                if (lastStacked != null && lastStacked.isFullCube()) {
+                if (lastStacked != null && lastStacked.hm$isFullCube()) {
                     return false; //cannot continue the plane
                 }
-                return (onBlock.isFullCube() || (onBlock.getBlock() instanceof BlockSlab && onBlockMc.getValue(BlockSlab.HALF) == BlockSlab.EnumBlockHalf.TOP)) && stackingBlockMc.getValue(BlockSlab.HALF) == BlockSlab.EnumBlockHalf.BOTTOM;
+                return (onBlock.hm$isFullCube() || (onBlock.hm$getBlock() instanceof BlockSlab && onBlockMc.getValue(BlockSlab.HALF) == BlockSlab.EnumBlockHalf.TOP)) && stackingBlockMc.getValue(BlockSlab.HALF) == BlockSlab.EnumBlockHalf.BOTTOM;
             }
-            return onBlock.getBlock() instanceof BlockSlab && !((BlockSlab) onBlock.getBlock()).isDouble() && onBlockMc.getValue(BlockSlab.HALF) == stackingBlockMc.getValue(BlockSlab.HALF);
+            return onBlock.hm$getBlock() instanceof BlockSlab && !((BlockSlab) onBlock.hm$getBlock()).isDouble() && onBlockMc.getValue(BlockSlab.HALF) == stackingBlockMc.getValue(BlockSlab.HALF);
         }
 
         @Override
@@ -164,7 +164,7 @@ public class BlockCollisionBehaviors {
     static class DynamXBlockBehavior implements IBlockCollisionBehavior {
         @Override
         public boolean applies(HmWorld world, Vector3i pos, HmBlockState toBlock) {
-            return toBlock.getBlock() instanceof DynamXBlock;
+            return toBlock.hm$getBlock() instanceof DynamXBlock;
         }
 
         @Override
@@ -190,7 +190,7 @@ public class BlockCollisionBehaviors {
         @Override
         public boolean applies(HmWorld world, Vector3i pos, HmBlockState toBlock) {
             IBlockState toBlockMc = (IBlockState) toBlock;
-            return toBlock.getBlock() instanceof BlockStairs && toBlockMc.getValue(BlockStairs.SHAPE) == BlockStairs.EnumShape.STRAIGHT;
+            return toBlock.hm$getBlock() instanceof BlockStairs && toBlockMc.getValue(BlockStairs.SHAPE) == BlockStairs.EnumShape.STRAIGHT;
         }
 
         @Override
@@ -199,7 +199,7 @@ public class BlockCollisionBehaviors {
             IBlockState stackingBlockMc = (IBlockState) stackingBlock;
             if (axis == HmAxis.Y) {
                 return false;
-            } else if (onBlock.getBlock() instanceof BlockStairs && (stackingBlockMc.getValue(BlockStairs.HALF) == onBlockMc.getValue(BlockStairs.HALF))) {
+            } else if (onBlock.hm$getBlock() instanceof BlockStairs && (stackingBlockMc.getValue(BlockStairs.HALF) == onBlockMc.getValue(BlockStairs.HALF))) {
                 EnumFacing facing = stackingBlockMc.getValue(BlockStairs.FACING);
                 if (facing.getAxis().ordinal() != axis.ordinal()) { // TODO Might be miss-convertied oo
                     return facing == onBlockMc.getValue(BlockStairs.FACING);
@@ -229,10 +229,10 @@ public class BlockCollisionBehaviors {
 
         @Override
         public TerrainBoxBuilder initBoxBuilder(TerrainBoxConstructor terrainBoxConstructor, HmWorld world, Vector3i mutable, HmBlockState boxStart, double ox, double oy, double oz) {
-            MutableBoundingBox box = boxStart.getBoundingBox(world, mutable);
+            MutableBoundingBox box = boxStart.hm$getBoundingBox(world, mutable);
             IBlockState boxStartMc = (IBlockState) boxStart;
             BlockPos pos = new BlockPos(mutable.x, mutable.y, mutable.z); // TODO IMPROVE
-            EnumFacing facing = ((BlockStairs) boxStart.getBlock()).getActualState(boxStartMc, (IBlockAccess) world, pos).getValue(BlockStairs.FACING);
+            EnumFacing facing = ((BlockStairs) boxStart.hm$getBlock()).getActualState(boxStartMc, (IBlockAccess) world, pos).getValue(BlockStairs.FACING);
             if (boxStartMc.getValue(BlockStairs.HALF) == BlockStairs.EnumHalf.BOTTOM) {
                 return new TerrainBoxBuilder.StairsTerrainBoxBuilder(ox + box.minX, oy + box.minY, oz + box.minZ, 0.5f, facing, false);
             }
@@ -252,12 +252,12 @@ public class BlockCollisionBehaviors {
 
         @Override
         public boolean applies(HmWorld world, Vector3i pos, HmBlockState toBlock) {
-            return toBlock.getBlock() instanceof BlockPane; // TODO CONVERT
+            return toBlock.hm$getBlock() instanceof BlockPane; // TODO CONVERT
         }
 
         @Override
         public boolean stacks(HmWorld world, Vector3i pos, HmAxis axis, HmBlockState onBlock, HmBlockState stackingBlock, HmBlockState lastStacked) {
-            if (!(onBlock.getBlock() instanceof BlockPane))
+            if (!(onBlock.hm$getBlock() instanceof BlockPane))
                 return false;
             return onBlock.equals(stackingBlock);
         }
@@ -274,7 +274,7 @@ public class BlockCollisionBehaviors {
             }
             IBlockState ofBlockMc = (IBlockState) ofBlock;
             BlockPos pos = new BlockPos(at.x, at.y, at.z); // TODO IMPROVE
-            IBlockState realStacking = ((BlockPane) ofBlock.getBlock()).getActualState(ofBlockMc, (IBlockAccess) world, pos);
+            IBlockState realStacking = ((BlockPane) ofBlock.hm$getBlock()).getActualState(ofBlockMc, (IBlockAccess) world, pos);
             // if (onBlock.getValue(BlockPane.SOUTH) || onBlock.getValue(BlockPane.NORTH))
             // return !onBlock.getValue(BlockPane.EAST) && !onBlock.getValue(BlockPane.WEST);
             switch (axis) {
@@ -296,7 +296,7 @@ public class BlockCollisionBehaviors {
         @Override
         public TerrainBoxBuilder initBoxBuilder(TerrainBoxConstructor terrainBoxConstructor, HmWorld world, Vector3i mutable, HmBlockState boxStart, double ox, double oy, double oz) {
             hasXZLegs = false;
-            MutableBoundingBox box = boxStart.getBoundingBox(world, mutable);
+            MutableBoundingBox box = boxStart.hm$getBoundingBox(world, mutable);
             double maxZ = box.maxZ;
             if (maxZ == 1 && box.maxX == 1) { //if x-stacking, but z+ leg
                 maxZ = 0.5625f;
@@ -332,7 +332,7 @@ public class BlockCollisionBehaviors {
         @Override
         public boolean applies(HmWorld world, Vector3i pos, HmBlockState toBlock) {
             // TODO CONVERT
-            return toBlock.getBlock() == Blocks.GRASS_PATH || toBlock.getBlock() == Blocks.FARMLAND;
+            return toBlock.hm$getBlock() == Blocks.GRASS_PATH || toBlock.hm$getBlock() == Blocks.FARMLAND;
         }
 
         @Override
@@ -367,12 +367,12 @@ public class BlockCollisionBehaviors {
 
         @Override
         public boolean applies(HmWorld world, Vector3i pos, HmBlockState toBlock) {
-            return toBlock.getBlock() instanceof BlockFence; // TODO CONVERT
+            return toBlock.hm$getBlock() instanceof BlockFence; // TODO CONVERT
         }
 
         @Override
         public boolean stacks(HmWorld world, Vector3i pos, HmAxis axis, HmBlockState onBlock, HmBlockState stackingBlock, HmBlockState lastStacked) {
-            if (!(onBlock.getBlock() instanceof BlockFence)) {
+            if (!(onBlock.hm$getBlock() instanceof BlockFence)) {
                 return false;
             }
             IBlockState stackingBlockMc = (IBlockState) stackingBlock;
@@ -382,10 +382,10 @@ public class BlockCollisionBehaviors {
                 case Y:
                     return onBlock.equals(stackingBlock);
                 case X:
-                    realStacking = ((BlockFence) stackingBlock.getBlock()).getActualState(stackingBlockMc, (IBlockAccess) world, posMc);
+                    realStacking = ((BlockFence) stackingBlock.hm$getBlock()).getActualState(stackingBlockMc, (IBlockAccess) world, posMc);
                     return onBlock.equals(stackingBlock) && (realStacking.getValue(BlockFence.EAST) || realStacking.getValue(BlockFence.WEST));
                 case Z:
-                    realStacking = ((BlockFence) stackingBlock.getBlock()).getActualState(stackingBlockMc, (IBlockAccess) world, posMc);
+                    realStacking = ((BlockFence) stackingBlock.hm$getBlock()).getActualState(stackingBlockMc, (IBlockAccess) world, posMc);
                     return onBlock.equals(stackingBlock) && (realStacking.getValue(BlockFence.NORTH) || realStacking.getValue(BlockFence.SOUTH));
             }
             return false;
@@ -403,7 +403,7 @@ public class BlockCollisionBehaviors {
             }
             IBlockState ofBlockMc = (IBlockState) ofBlock;
             BlockPos pos = new BlockPos(at.x, at.y, at.z); // TODO IMPROVE
-            IBlockState realStacking = ((BlockFence) ofBlock.getBlock()).getActualState(ofBlockMc, (IBlockAccess) world, pos);
+            IBlockState realStacking = ((BlockFence) ofBlock.hm$getBlock()).getActualState(ofBlockMc, (IBlockAccess) world, pos);
             // if (onBlock.getValue(BlockPane.SOUTH) || onBlock.getValue(BlockPane.NORTH))
             // return !onBlock.getValue(BlockPane.EAST) && !onBlock.getValue(BlockPane.WEST);
             switch (axis) {
@@ -425,7 +425,7 @@ public class BlockCollisionBehaviors {
         @Override
         public TerrainBoxBuilder initBoxBuilder(TerrainBoxConstructor terrainBoxConstructor, HmWorld world, Vector3i mutable, HmBlockState boxStart, double ox, double oy, double oz) {
             hasXZLegs = false;
-            MutableBoundingBox box = boxStart.getBoundingBox(world, mutable);
+            MutableBoundingBox box = boxStart.hm$getBoundingBox(world, mutable);
             double maxZ = box.maxZ;
             if (maxZ == 1 && box.maxX == 1) { //if x-stacking, but z+ leg
                 maxZ = 0.625D;
@@ -464,12 +464,12 @@ public class BlockCollisionBehaviors {
 
         @Override
         public boolean applies(HmWorld world, Vector3i pos, HmBlockState toBlock) {
-            return toBlock.getBlock() instanceof BlockWall;
+            return toBlock.hm$getBlock() instanceof BlockWall;
         }
 
         @Override
         public boolean stacks(HmWorld world, Vector3i pos, HmAxis axis, HmBlockState onBlock, HmBlockState stackingBlock, HmBlockState lastStacked) {
-            if (!(onBlock.getBlock() instanceof BlockWall)) {
+            if (!(onBlock.hm$getBlock() instanceof BlockWall)) {
                 return false;
             }
             IBlockState stackingBlockMc = (IBlockState) stackingBlock;
@@ -479,10 +479,10 @@ public class BlockCollisionBehaviors {
                 case Y:
                     return onBlock.equals(stackingBlock);
                 case X:
-                    realStacking = ((BlockWall) stackingBlock.getBlock()).getActualState(stackingBlockMc, (IBlockAccess) world, posMc);
+                    realStacking = ((BlockWall) stackingBlock.hm$getBlock()).getActualState(stackingBlockMc, (IBlockAccess) world, posMc);
                     return onBlock.equals(stackingBlock) && (realStacking.getValue(BlockWall.WEST) || realStacking.getValue(BlockWall.EAST));
                 case Z:
-                    realStacking = ((BlockWall) stackingBlock.getBlock()).getActualState(stackingBlockMc, (IBlockAccess) world, posMc);
+                    realStacking = ((BlockWall) stackingBlock.hm$getBlock()).getActualState(stackingBlockMc, (IBlockAccess) world, posMc);
                     return onBlock.equals(stackingBlock) && (realStacking.getValue(BlockWall.NORTH) || realStacking.getValue(BlockWall.SOUTH));
             }
             return false;
@@ -500,7 +500,7 @@ public class BlockCollisionBehaviors {
             }
             IBlockState ofBlockMc = (IBlockState) ofBlock;
             BlockPos pos = new BlockPos(at.x, at.y, at.z); // TODO IMPROVE
-            IBlockState realStacking = ((BlockWall) ofBlock.getBlock()).getActualState(ofBlockMc, (IBlockAccess) world, pos);
+            IBlockState realStacking = ((BlockWall) ofBlock.hm$getBlock()).getActualState(ofBlockMc, (IBlockAccess) world, pos);
             // if (onBlock.getValue(BlockPane.SOUTH) || onBlock.getValue(BlockPane.NORTH))
             // return !onBlock.getValue(BlockPane.EAST) && !onBlock.getValue(BlockPane.WEST);
             switch (axis) {
@@ -522,7 +522,7 @@ public class BlockCollisionBehaviors {
         @Override
         public TerrainBoxBuilder initBoxBuilder(TerrainBoxConstructor terrainBoxConstructor, HmWorld world, Vector3i mutable, HmBlockState boxStart, double ox, double oy, double oz) {
             hasXZLegs = false;
-            MutableBoundingBox box = boxStart.getBoundingBox(world, mutable);
+            MutableBoundingBox box = boxStart.hm$getBoundingBox(world, mutable);
             double maxZ = box.maxZ;
             if (maxZ == 1 && box.maxX == 1) { //if x-stacking, but z+ leg
                 maxZ = 0.75f;

@@ -1,6 +1,8 @@
 package fr.dynamx.api.physics.terrain;
 
 import fr.dynamx.core.common.physics.terrain.computing.TerrainCollisionsCalculator;
+import fr.hermes.api.mc.blocks.HmBlockState;
+import fr.hermes.api.mc.world.HmWorld;
 import lombok.Getter;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
@@ -60,7 +62,7 @@ public class DynamXTerrainApi {
         customUpdateBehaviors.add(behavior);
     }
 
-    public static ITerrainUpdateBehavior.Result getTerrainUpdateBehavior(IBlockAccess world, BlockPos pos, IBlockState oldState, IBlockState newState) {
+    public static ITerrainUpdateBehavior.Result getTerrainUpdateBehavior(HmWorld world, BlockPos pos, HmBlockState oldState, HmBlockState newState) {
         if(!customUpdateBehaviors.isEmpty()) {
             for(ITerrainUpdateBehavior behavior : customUpdateBehaviors) {
                 ITerrainUpdateBehavior.Result result = behavior.getResult(world, pos, oldState, newState);

@@ -17,7 +17,7 @@ import fr.dynamx.core.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.core.common.physics.entities.modules.EnginePhysicsHandler;
 import fr.dynamx.core.common.physics.entities.parts.engine.AutomaticGearboxHandler;
 import fr.dynamx.core.utils.DynamXConstants;
-import fr.hermes.api.mc.HmMinecraftClient;
+import fr.hermes.api.mc.client.HmMinecraftClient;
 import fr.hermes.api.mc.entities.HmPlayerEntity;
 import fr.hermes.api.mod.HermesPlatform;
 import fr.hermes.forge.JmeVector3fPool;

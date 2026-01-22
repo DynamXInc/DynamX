@@ -13,6 +13,7 @@ import fr.aym.acsguis.event.listeners.mouse.IMouseClickListener;
 import fr.dynamx.core.common.DynamXContext;
 import fr.dynamx.core.common.network.packets.MessageSlopesConfigGui;
 import fr.dynamx.core.utils.DynamXConstants;
+import fr.hermes.api.mc.items.HmItemStack;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
@@ -33,10 +34,10 @@ public class GuiSlopesConfig extends GuiFrame {
     private final IMouseClickListener exitButton;
     private boolean cancelled;
 
-    public GuiSlopesConfig(ItemStack stack) {
+    public GuiSlopesConfig(HmItemStack stack) {
         super(new GuiScaler.Identity());
         setCssId("root");
-        SlopeBuildingConfig config = stack.hasTagCompound() ? new SlopeBuildingConfig(stack.getTagCompound().getCompoundTag("ptconfig")) :
+        SlopeBuildingConfig config = stack.hm$hasTagCompound() ? new SlopeBuildingConfig(stack.hm$getTagCompound().getCompoundTag("ptconfig")) :
                 new SlopeBuildingConfig();
 
         add(new GuiLabel(I18n.format("slopes.config.title")).setCssId("main_title"));

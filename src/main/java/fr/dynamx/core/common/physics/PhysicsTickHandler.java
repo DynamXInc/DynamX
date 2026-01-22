@@ -12,7 +12,7 @@ import fr.dynamx.core.utils.debug.Profiler;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.SubClassPool;
 import fr.hermes.api.events.HmEventPhase;
-import fr.hermes.api.mc.HmMinecraftClient;
+import fr.hermes.api.mc.client.HmMinecraftClient;
 import fr.hermes.api.mc.entities.HmPlayerEntity;
 import fr.hermes.api.mc.entities.HmServerPlayerEntity;
 import fr.hermes.api.mc.events.HmMcClientEvents;

@@ -25,7 +25,7 @@ import java.util.function.Predicate;
 public class PickingObjectHelper {
     public static void handlePickingControl(MovableModule.Action moduleAction, HmPlayerEntity player) {
         HmWorld world = player.hm$getWorld();
-        if (!player.isCreativeMode() && !(player.getHeldItemMainhand().hm$getItem() instanceof ItemWrench)
+        if (!player.hm$isCreativeMode() && !(player.hm$getHeldItemMainhand().hm$getItem() instanceof ItemWrench)
                 && !DynamXConfig.allowPlayersToMoveObjects || moduleAction.getMovableAction() == MovableModule.EnumAction.ATTACH_OBJECTS) {
             return;
         }
@@ -68,7 +68,7 @@ public class PickingObjectHelper {
 
     public static void handlePlayerDisconnection(HmPlayerEntity player) {
         HmWorld world = player.hm$getWorld();
-        if (!player.isCreativeMode() && !(player.getHeldItemMainhand().hm$getItem() instanceof ItemWrench)
+        if (!player.hm$isCreativeMode() && !(player.hm$getHeldItemMainhand().hm$getItem() instanceof ItemWrench)
                 && !DynamXConfig.allowPlayersToMoveObjects) {
             return;
         }

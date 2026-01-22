@@ -38,7 +38,7 @@ public class PartBlockSeat<T extends ISubInfoTypeOwner<T>> extends BasePartSeat<
             SeatsModule seats = ((IModuleContainer.ISeatsContainer) vehicleEntity).getSeats();
             HmEntity seatRider = seats.getSeatToPassengerMap().get(this);
             if (seatRider != null && seatRider != with) {
-                with.sendMessage("The seat is already taken");
+                with.hm$sendMessage("The seat is already taken");
                 return false;
             }
             return mountEntity(vehicleEntity, seats, with);

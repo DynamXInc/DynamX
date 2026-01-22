@@ -91,7 +91,7 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
         HmEntity seatRider = seats.getSeatToPassengerMap().get(this);
         if (seatRider != null) {
             if (seatRider != player) {
-                player.sendMessage("The seat is already taken");
+                player.hm$sendMessage("The seat is already taken");
                 return false;
             }
         }

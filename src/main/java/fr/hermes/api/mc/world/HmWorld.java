@@ -7,6 +7,7 @@ import fr.hermes.api.mc.blocks.HmTileEntity;
 import fr.hermes.api.mc.entities.HmEntity;
 import fr.hermes.api.mc.entities.HmPlayerEntity;
 import fr.hermes.api.mc.utils.HmParticleType;
+import net.minecraft.util.math.BlockPos;
 import org.joml.Vector3i;
 
 import java.util.Collection;
@@ -30,13 +31,13 @@ public interface HmWorld {
 
     boolean hm$isAirBlock(int x, int y, int z);
 
-    HmBlockState hm$getBlockState(Vector3i blockPos);
+    HmBlockState hm$getBlockState(BlockPos blockPos);
 
-    HmBiome hm$getBiome(Vector3i pos);
+    HmBiome hm$getBiome(BlockPos pos);
 
     boolean hm$isRaining();
 
-    boolean hm$canBlockSeeSky(Vector3i pos);
+    boolean hm$canBlockSeeSky(BlockPos pos);
 
     void hm$spawnParticle(HmParticleType skidParticle, float x, float y, float z, float speedX, float speedY, float speedZ);
 
@@ -48,7 +49,7 @@ public interface HmWorld {
 
     HmChunk hm$getChunk(int chunkX, int chunkZ);
 
-    HmTileEntity hm$getTileEntity(Vector3i pos);
+    HmTileEntity hm$getTileEntity(BlockPos pos);
 
     List<PhysicsEntity<?>> hm$getPhysicsEntitiesWithinAABB(MutableBoundingBox aabb);
 

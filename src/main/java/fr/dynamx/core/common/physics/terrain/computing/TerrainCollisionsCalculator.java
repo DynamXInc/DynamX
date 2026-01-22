@@ -290,7 +290,7 @@ public class TerrainCollisionsCalculator {
             //System.out.println("Begin at "+dx+" "+dy+" "+dz);
             stackable[0] = true;
             IBlockCollisionBehavior behavior = findBehavior(lookup, world, mutable, boxStart);
-            while (cursor.getHere() == 1 || !boxStart.blocksMovement() || !(stackable[0] = behavior.isStackableBlock(world, mutable, boxStart))) { // on ne repasse par sur des blocs ayant déjà
+            while (cursor.getHere() == 1 || !boxStart.hm$blocksMovement() || !(stackable[0] = behavior.isStackableBlock(world, mutable, boxStart))) { // on ne repasse par sur des blocs ayant déjà
                 // été traités ni sur ceux ayant des collisions spéciales (ou aucune collisions) /!\ ordre des conditions important
 
                 if (printDebug && !world.hm$isAirBlock(mutable.x, mutable.y, mutable.z))

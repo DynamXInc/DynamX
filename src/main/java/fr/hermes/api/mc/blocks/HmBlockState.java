@@ -2,23 +2,23 @@ package fr.hermes.api.mc.blocks;
 
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.hermes.api.mc.world.HmWorld;
-import fr.hermes.api.mc.world.HmServerWorld;
-import org.joml.Vector3i;
+import net.minecraft.util.math.BlockPos;
+
 import java.util.List;
 
 public interface HmBlockState {
-    HmBlock getBlock();
+    HmBlock hm$getBlock();
 
-    boolean isLiquid();
+    boolean hm$isLiquid();
 
-    MutableBoundingBox getBoundingBox(HmWorld hmWorld, Vector3i blockPos);
+    MutableBoundingBox hm$getBoundingBox(HmWorld hmWorld, BlockPos blockPos);
 
     /**
      * True if this block state blocks movement (is considered solid for stacking checks)
      */
-    boolean blocksMovement();
+    boolean hm$blocksMovement();
 
-    void addCollisionBoxes(HmWorld world, Vector3i blockPos, MutableBoundingBox checkZone, List<MutableBoundingBox> out);
+    void hm$addCollisionBoxes(HmWorld world, BlockPos blockPos, MutableBoundingBox checkZone, List<MutableBoundingBox> out);
 
-    boolean isFullCube();
+    boolean hm$isFullCube();
 }

@@ -1,6 +1,5 @@
 package fr.dynamx.core.common.handlers;
 
-import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IDynamXItem;
 import fr.dynamx.api.contentpack.object.render.IResourcesOwner;
 import fr.dynamx.api.entities.IModuleContainer;
@@ -29,34 +28,29 @@ import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.client.ContentPackUtils;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.SubClassPool;
+import fr.hermes.api.HmEntityLogicMatcher;
 import fr.hermes.api.events.HmEventPhase;
+import fr.hermes.api.mc.blocks.HmBlockState;
 import fr.hermes.api.mc.entities.HmPlayerEntity;
 import fr.hermes.api.mc.events.HmMcServerEvents;
 import fr.hermes.api.mc.events.HmPlayerEvents;
 import fr.hermes.api.mc.events.HmWorldEvents;
+import fr.hermes.api.mc.world.HmWorld;
 import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.ChunkEvent;
-import net.minecraftforge.event.world.ExplosionEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.registries.IForgeRegistry;
 
 import java.util.HashMap;
@@ -125,7 +119,96 @@ public class CommonEventHandler {
                 });
             }
         });
+
+        HmPlayerEvents.START_TRACKING.register((player, entity) -> {
+            PhysicsEntity<?> physicsEntity = HmEntityLogicMatcher.cast(entity, PhysicsEntity.class);
+            if (physicsEntity != null)// && event.getTarget().ticksExisted > 20 && event.getEntityPlayer().getServer().isDedicatedServer()) //If the entity was just spawned, the total sync is done by its net handler, only if we are in multiplayer
+            {
+                if (entity.hm$getTicksExisted() > 20) { //If the entity was just spawned, the total sync is done by its net handler, only if we are in multiplayer)
+                    if (player.hm$getServer().hm$isDedicatedServer()) {
+                        schedule(new TaskScheduler.ResyncItem(physicsEntity, player));
+                    } else if (physicsEntity.getJointsHandler() != null) { // Resync joints when the entity was unloaded on the client side, but not server side, in singleplayer
+                        physicsEntity.getJointsHandler().sync(player);
+                    }
+                } else { //If we were riding a vehicle, when we span we need to receive our seat : we do that here
+                    if (physicsEntity instanceof IModuleContainer.ISeatsContainer && ((IModuleContainer.ISeatsContainer) physicsEntity).hasSeats()) {
+                        schedule(new TaskScheduler.ScheduledTask((short) 20) {
+                            @Override
+                            public void run() {
+                                DynamXContext.getNetwork().sendToClient(new MessageSeatsSync((IModuleContainer.ISeatsContainer) physicsEntity), EnumPacketTarget.PLAYER, player);
+                                if (physicsEntity.getJointsHandler() != null) {
+                                    physicsEntity.getJointsHandler().sync(player);
+                                }
+                            }
+                        });
+                    }
+                }
+            } else if (entity instanceof HmPlayerEntity) {
+                if (entity.hm$getRidingEntity() instanceof IModuleContainer.ISeatsContainer && ((IModuleContainer.ISeatsContainer) entity.hm$getRidingEntity()).hasSeats()) {
+                    schedule(new TaskScheduler.ScheduledTask((short) 10) {
+                        @Override
+                        public void run() {
+                            //The player can dismount in between the 20 ticks delay
+                            if (entity.hm$getRidingEntity() instanceof IModuleContainer.ISeatsContainer && ((IModuleContainer.ISeatsContainer) entity.hm$getRidingEntity()).hasSeats()) {
+                                DynamXContext.getNetwork().sendToClient(new MessageSeatsSync((IModuleContainer.ISeatsContainer) entity.hm$getRidingEntity()), EnumPacketTarget.PLAYER, player);
+                            }
+                        }
+                    });
+                }
+            }
+        });
+
+        HmWorldEvents.CHUNK_UNLOAD.register(chunk -> {
+            if (DynamXMain.getProxy().shouldUseBulletSimulation(chunk.hm$getWorld())) {
+                IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(chunk.hm$getWorld());
+                physicsWorld.schedule(() -> physicsWorld.getTerrainManager().onChunkUnload(chunk));
+            }
+        });
+
+        HmWorldEvents.EXPLOSION_DETONATE.register((world, pos, affectedEntities) -> {
+            // Explosion effect
+            DynamXContext.getNetwork().sendToClient(new MessageHandleExplosion(pos, affectedEntities), EnumPacketTarget.ALL);
+        });
+
+        HmPlayerEvents.RIGHT_CLICK_BLOCK.register((player, hand, pos, hitVec) -> {
+            if (player.hm$getHeldItem(hand).hm$getItem() instanceof ItemSlopes) {
+                ItemSlopes i = (ItemSlopes) player.hm$getHeldItem(hand).hm$getItem();
+                if (!player.hm$isSneaking()) {
+                    HmWorld world = player.hm$getWorld();
+                    i.clickedWith(world, player, hand, ItemSlopes.fixPos(world, hitVec));
+                }
+            }
+        });
+
+        HmPlayerEvents.RIGHT_CLICK_ITEM.register((player, hand, itemStack) -> {
+            if (itemStack.hm$getItem() instanceof ItemSlopes) {
+                ItemSlopes i = (ItemSlopes) itemStack.hm$getItem();
+                if (!player.hm$isSneaking()) {
+                    i.clickedWith(player.hm$getWorld(), player, hand, ItemSlopes.fixPos(player.hm$getWorld(), player.hm$getPosition()));
+                }
+            }
+        });
+
+        HmPlayerEvents.TICK.register((player, phase) -> {
+            if (!(player.hm$getRidingEntity() instanceof PhysicsEntity<?>) && DynamXContext.getPhysicsWorld(player.hm$getWorld()) != null && !player.hm$isDead()) {
+                if (!DynamXContext.getPlayerToCollision().containsKey(player) && DynamXPhysicsWorldBlacklistApi.isBlacklisted(player)) {
+                    return;
+                }
+                JmeVector3fPool.openPool(SubClassPool.PLAYER_COLL);
+                QuaternionPool.openPool(SubClassPool.PLAYER_COLL);
+                if (!DynamXContext.getPlayerToCollision().containsKey(player)) {
+                    PlayerPhysicsHandler playerPhysicsHandler = new PlayerPhysicsHandler(player);
+                    DynamXContext.getPlayerToCollision().put(player, playerPhysicsHandler);
+                    playerPhysicsHandler.addToWorld();
+                }
+                DynamXContext.getPlayerToCollision().get(player).update(player.hm$getWorld());
+                JmeVector3fPool.closePool();
+                QuaternionPool.closePool();
+            }
+        });
     }
+
+    // === TODO think about capabilities (this is so Forge specific)
 
     @SubscribeEvent
     public void attachCapability(AttachCapabilitiesEvent<Chunk> event) {
@@ -138,44 +221,7 @@ public class CommonEventHandler {
             e.getChunk().getCapability(DynamXChunkDataProvider.DYNAMX_CHUNK_DATA_CAPABILITY, null).getBlocksAABB().putAll(PENDING_CHUNKS_COLLISIONS.get(e.getChunk().getPos()));
         }
     }
-
-    @SubscribeEvent
-    public void onStartTracking(PlayerEvent.StartTracking event) {
-        if (event.getTarget() instanceof PhysicsEntity)// && event.getTarget().ticksExisted > 20 && event.getEntityPlayer().getServer().isDedicatedServer()) //If the entity was just spawned, the total sync is done by its net handler, only if we are in multiplayer
-        {
-            if (event.getTarget().ticksExisted > 20) //If the entity was just spawned, the total sync is done by its net handler, only if we are in multiplayer)
-            {
-                if (event.getEntityPlayer().getServer().isDedicatedServer())
-                    schedule(new TaskScheduler.ResyncItem((PhysicsEntity<?>) event.getTarget(), (EntityPlayerMP) event.getEntityPlayer()));
-                else if (((PhysicsEntity<?>) event.getTarget()).getJointsHandler() != null) // Resync joints when the entity was unloaded on the client side, but not server side, in singleplayer
-                    ((PhysicsEntity<?>) event.getTarget()).getJointsHandler().sync((EntityPlayerMP) event.getEntityPlayer());
-            } else if (event.getTarget().ticksExisted <= 20) //If we were riding a vehicle, when we span we need to receive our seat : we do that here
-            {
-                if (event.getTarget() instanceof IModuleContainer.ISeatsContainer && ((IModuleContainer.ISeatsContainer) event.getTarget()).hasSeats()) {
-                    schedule(new TaskScheduler.ScheduledTask((short) 20) {
-                        @Override
-                        public void run() {
-                            DynamXContext.getNetwork().sendToClient(new MessageSeatsSync((IModuleContainer.ISeatsContainer) event.getTarget()), EnumPacketTarget.PLAYER, (EntityPlayerMP) event.getEntityPlayer());
-                            if (((PhysicsEntity<?>) event.getTarget()).getJointsHandler() != null)
-                                ((PhysicsEntity<?>) event.getTarget()).getJointsHandler().sync((EntityPlayerMP) event.getEntityPlayer());
-                        }
-                    });
-                }
-            }
-        } else if (event.getTarget() instanceof EntityPlayer) {
-            if (event.getTarget().getRidingEntity() instanceof IModuleContainer.ISeatsContainer && ((IModuleContainer.ISeatsContainer) event.getTarget().getRidingEntity()).hasSeats()) {
-                schedule(new TaskScheduler.ScheduledTask((short) 10) {
-                    @Override
-                    public void run() {
-                        //The player can dismount in between the 20 ticks delay
-                        if (event.getTarget().getRidingEntity() instanceof IModuleContainer.ISeatsContainer && ((IModuleContainer.ISeatsContainer) event.getTarget().getRidingEntity()).hasSeats()) {
-                            DynamXContext.getNetwork().sendToClient(new MessageSeatsSync((IModuleContainer.ISeatsContainer) event.getTarget().getRidingEntity()), EnumPacketTarget.PLAYER, (EntityPlayerMP) event.getEntityPlayer());
-                        }
-                    }
-                });
-            }
-        }
-    }
+    // === end
 
     /* World events */
 
@@ -187,7 +233,7 @@ public class CommonEventHandler {
      * @param world The world
      * @param pos   The modified position. The corresponding chunk will be reloaded if allowed by the terrain update behaviors.
      */
-    public static void onBlockChange(World world, BlockPos pos, IBlockState oldState, IBlockState newState) {
+    public static void onBlockChange(HmWorld world, BlockPos pos, HmBlockState oldState, HmBlockState newState) {
         if (FMLCommonHandler.instance().getMinecraftServerInstance() == null || !DynamXContext.usesPhysicsWorld(world) // If we are on the client, we don't need to update the terrain (the server will notify changes)
                 || DynamXTerrainApi.getTerrainUpdateBehavior(world, pos, oldState, newState) == ITerrainUpdateBehavior.Result.IGNORE) {
             return;
@@ -199,69 +245,7 @@ public class CommonEventHandler {
         physicsWorld.getTerrainManager().onBlockChange(world, pos);
     }
 
-    @SubscribeEvent
-    public void onExplosion(ExplosionEvent.Detonate event) {
-        // Explosion effect
-        Vector3f explosionPosition = new Vector3f((float) event.getExplosion().getPosition().x,
-                (float) event.getExplosion().getPosition().y, (float) event.getExplosion().getPosition().z);
-        DynamXContext.getNetwork().sendToClient(new MessageHandleExplosion(explosionPosition, event.getAffectedEntities()), EnumPacketTarget.ALL);
-    }
-
-    @SubscribeEvent
-    public void onChunkUnload(ChunkEvent.Unload e) {
-        if (DynamXMain.getProxy().shouldUseBulletSimulation(e.getWorld())) {
-            DynamXContext.getPhysicsWorld(e.getWorld()).schedule(() -> DynamXContext.getPhysicsWorld(e.getWorld()).getTerrainManager().onChunkUnload(e));
-        }
-    }
-
-    /* Interaction events */
-
-    @SubscribeEvent
-    public void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
-        if (event.getEntity() instanceof EntityPlayer) {
-            if (event.getItemStack().getItem() instanceof ItemSlopes) {
-                ItemSlopes i = (ItemSlopes) event.getItemStack().getItem();
-                if (!event.getEntity().isSneaking()) {
-                    Vec3d post = event.getHitVec();
-                    JmeVector3fPool.openPool();
-                    i.clickedWith(event.getWorld(), event.getEntityPlayer(), event.getHand(), ItemSlopes.fixPos(event.getWorld(), post));
-                    JmeVector3fPool.closePool();
-                }
-            }
-        }
-    }
-
-    @SubscribeEvent
-    public void onRightClick(PlayerInteractEvent.RightClickItem event) {
-        if (event.getEntity() instanceof EntityPlayer) {
-            if (event.getEntity().isSneaking()) {
-                if (event.getItemStack().getItem() instanceof ItemSlopes) {
-                    ((ItemSlopes) event.getItemStack().getItem()).clearMemory(event.getWorld(), event.getEntityPlayer(), event.getItemStack());
-                }
-            }
-        }
-    }
-
-    //Walking players :
-
-    @SubscribeEvent
-    public void onPlayerUpdate(TickEvent.PlayerTickEvent e) {
-        if (!(e.player.getRidingEntity() instanceof PhysicsEntity<?>) && DynamXContext.getPhysicsWorld(e.player.world) != null && !e.player.isDead) {
-            if (!DynamXContext.getPlayerToCollision().containsKey(e.player) && DynamXPhysicsWorldBlacklistApi.isBlacklisted(e.player))
-                return;
-            JmeVector3fPool.openPool(SubClassPool.PLAYER_COLL);
-            QuaternionPool.openPool(SubClassPool.PLAYER_COLL);
-            if (!DynamXContext.getPlayerToCollision().containsKey(e.player)) {
-                PlayerPhysicsHandler playerPhysicsHandler = new PlayerPhysicsHandler(e.player);
-                DynamXContext.getPlayerToCollision().put(e.player, playerPhysicsHandler);
-                playerPhysicsHandler.addToWorld();
-            }
-            DynamXContext.getPlayerToCollision().get(e.player).update(e.player.world);
-            JmeVector3fPool.closePool();
-            QuaternionPool.closePool();
-        }
-    }
-
+    // === TODO DynamX events for walking players ===
     @SubscribeEvent
     public void onVehicleMount(VehicleEntityEvent.EntityMount e) {
         if (DynamXContext.getPlayerToCollision().containsKey(e.getEntityMounted())) {
@@ -275,8 +259,9 @@ public class CommonEventHandler {
             DynamXContext.getPlayerToCollision().get(e.getEntityDismounted()).addToWorld();
         }
     }
+    // === end ===
 
-    /* Registry */
+    /* TODO Registry */
 
     @Mod.EventBusSubscriber(modid = DynamXConstants.ID)
     public static class RegisterObjects {

@@ -53,7 +53,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.function.Predicate;
 
-public class HmUtilsClient extends HmUtils implements HermesUtilsClient, ISelectiveResourceReloadListener {
+public class HmUtilsClient extends HmForgeUtils implements HermesUtilsClient, ISelectiveResourceReloadListener {
     private byte loadingState;
 
     //TODO SHOULD BE MOVED TO SOME CLIENT UTILS METHOD

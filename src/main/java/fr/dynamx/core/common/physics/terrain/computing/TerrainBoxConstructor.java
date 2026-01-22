@@ -73,10 +73,10 @@ public class TerrainBoxConstructor {
     public void addBlockCollisions(HmWorld world, Vector3i at, HmBlockState ofBlock) {
         if (isDebug()) {
             List<MutableBoundingBox> boxes = new ArrayList<>();
-            ofBlock.addCollisionBoxes(world, at, getSearchZone(), boxes);
+            ofBlock.hm$addCollisionBoxes(world, at, getSearchZone(), boxes);
             injectBlockCollisions(at, ofBlock, boxes);
         } else {
-            ofBlock.addCollisionBoxes(world, at, getSearchZone(), getOutListVanilla());
+            ofBlock.hm$addCollisionBoxes(world, at, getSearchZone(), getOutListVanilla());
         }
     }
 

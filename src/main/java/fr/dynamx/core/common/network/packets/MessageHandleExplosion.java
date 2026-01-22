@@ -1,22 +1,22 @@
 package fr.dynamx.core.common.network.packets;
 
-import com.jme3.math.Vector3f;
 import fr.dynamx.api.network.EnumNetworkType;
 import fr.dynamx.api.network.IDnxPacket;
 import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.utils.DynamXUtils;
 import fr.dynamx.core.utils.physics.DynamXPhysicsHelper;
+import fr.hermes.api.mc.entities.HmEntity;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.List;
 
-
-public class MessageHandleExplosion implements IDnxPacket, net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler<MessageHandleExplosion, IMessage>{
+public class MessageHandleExplosion implements IDnxPacket, net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler<MessageHandleExplosion, IMessage> {
 
     private Vector3f explosionPosition;
     private List<Integer> entityIdList = new ArrayList<>();
@@ -24,10 +24,10 @@ public class MessageHandleExplosion implements IDnxPacket, net.minecraftforge.fm
     public MessageHandleExplosion() {
     }
 
-    public MessageHandleExplosion(Vector3f explosionPosition, List<Entity> entityList) {
+    public MessageHandleExplosion(Vector3f explosionPosition, List<HmEntity> entityList) {
         this.explosionPosition = explosionPosition;
         for (int i = 0; i < entityList.size(); i++) {
-            entityIdList.add(entityList.get(i).getEntityId());
+            entityIdList.add(entityList.get(i).hm$getEntityId());
         }
     }
 
@@ -55,14 +55,14 @@ public class MessageHandleExplosion implements IDnxPacket, net.minecraftforge.fm
         }
     }
 
-        @Override
-        public IMessage onMessage(MessageHandleExplosion message, MessageContext ctx) {
-            message.entityIdList.forEach(integer -> {
-                Entity entityByID = Minecraft.getMinecraft().world.getEntityByID(integer);
-                if(entityByID instanceof PhysicsEntity) {
-                    DynamXPhysicsHelper.createExplosion((PhysicsEntity<?>) entityByID, message.explosionPosition, 10.0D);
-                }
-            });
-            return null;
-        }
+    @Override
+    public IMessage onMessage(MessageHandleExplosion message, MessageContext ctx) {
+        message.entityIdList.forEach(integer -> {
+            Entity entityByID = Minecraft.getMinecraft().world.getEntityByID(integer);
+            if (entityByID instanceof PhysicsEntity) {
+                DynamXPhysicsHelper.createExplosion((PhysicsEntity<?>) entityByID, message.explosionPosition, 10.0D);
+            }
+        });
+        return null;
+    }
 }

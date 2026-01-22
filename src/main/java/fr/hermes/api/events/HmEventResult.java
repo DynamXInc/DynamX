@@ -1,5 +1,7 @@
 package fr.hermes.api.events;
 
+import lombok.Getter;
+
 import javax.annotation.Nullable;
 
 /**
@@ -9,6 +11,12 @@ import javax.annotation.Nullable;
  * @param <T> The type of the result value (use Void if no result is needed)
  */
 public class HmEventResult<T> {
+    /**
+     * -- GETTER --
+     *
+     * @return The result type
+     */
+    @Getter
     private final Type type;
     @Nullable
     private final T result;
@@ -55,13 +63,6 @@ public class HmEventResult<T> {
      */
     public static <T> HmEventResult<T> cancel(T result) {
         return new HmEventResult<>(Type.CANCEL, result);
-    }
-
-    /**
-     * @return The result type
-     */
-    public Type getType() {
-        return type;
     }
 
     /**

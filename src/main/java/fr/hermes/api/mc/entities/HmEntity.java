@@ -73,11 +73,11 @@ public interface HmEntity {
 
     int hm$getChunkZ();
 
-    void hm$setMotionX(float motionX);
+    void hm$setMotionX(double motionX);
 
-    void hm$setMotionY(float motionY);
+    void hm$setMotionY(double motionY);
 
-    void hm$setMotionZ(float motionZ);
+    void hm$setMotionZ(double motionZ);
 
     double hm$getPrevPosX();
 
@@ -95,20 +95,20 @@ public interface HmEntity {
 
     boolean hm$isRiding();
 
-    // TODO hm$ renaming and Mixin implem
-    boolean isRidingOrBeingRiddenBy(HmEntity other);
+    // TODO Mixin implem
+    boolean hm$isRidingOrBeingRiddenBy(HmEntity other);
 
-    HmEntity getRidingEntity();
+    HmEntity hm$getRidingEntity();
 
-    float getRotationYawHead();
+    float hm$getRotationYawHead();
 
-    void setRotationYawHead(float yawHead);
+    void hm$setRotationYawHead(float yawHead);
 
-    void setRenderYawOffset(float offset);
+    void hm$setRenderYawOffset(float offset);
 
-    void setPrevRotationYaw(float prevRotationYaw);
+    void hm$setPrevRotationYaw(float prevRotationYaw);
 
-    void setRotationPitch(float rotationPitch);
+    void hm$setRotationPitch(float rotationPitch);
 
     void setPrevRotationPitch(float prevRotationPitch);
 }

@@ -143,7 +143,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
             }
         } else if (!isPlayerMounting()) {
             PartEntitySeat seat = getLinkedSeat(entity);
-            if (player.isSneaking() || seat == null) {
+            if (player.hm$isSneaking() || seat == null) {
                 doors.switchDoorState(getId());
             } else {
                 if (isEnabled()) {

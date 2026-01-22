@@ -1,6 +1,6 @@
 package fr.hermes.api.mod;
 
-import fr.hermes.api.mc.HmMinecraftClient;
+import fr.hermes.api.mc.client.HmMinecraftClient;
 import fr.hermes.api.mc.HmMinecraftServer;
 import lombok.Getter;
 

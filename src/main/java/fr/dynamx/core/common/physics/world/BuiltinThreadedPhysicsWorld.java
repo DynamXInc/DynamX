@@ -38,7 +38,7 @@ public class BuiltinThreadedPhysicsWorld extends BasePhysicsWorld implements Run
             DynamXMain.log.error("Exception : " + e.toString(), e);
 
             if (world instanceof HmClientWorld) {
-                ((HmClientWorld)world).hm$getClientPlayer().sendMessage("§4 [DynamX] Physics thread has crashed, please disconnect and reconnect to the server !");
+                ((HmClientWorld)world).hm$getClientPlayer().hm$sendMessage("§4 [DynamX] Physics thread has crashed, please disconnect and reconnect to the server !");
             } else if (world instanceof HmServerWorld) {
                 HmServerWorld serverWorld = (HmServerWorld) world;
                 if (serverWorld.hm$getServer() != null) {

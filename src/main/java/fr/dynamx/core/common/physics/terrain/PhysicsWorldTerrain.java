@@ -22,7 +22,7 @@ import fr.hermes.api.mc.blocks.HmBlockState;
 import fr.hermes.api.mc.world.HmChunk;
 import fr.hermes.api.mc.world.HmWorld;
 import fr.hermes.forge.JmeVector3fPool;
-import org.joml.Vector3i;
+import net.minecraft.util.math.BlockPos;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -503,13 +503,13 @@ public class PhysicsWorldTerrain implements ITerrainManager {
      * @param world The world
      * @param pos   The modified position. The corresponding chunk will be reloaded
      */
-    public void onBlockChange(HmWorld world, Vector3i pos) {
-        VerticalChunkPos pos1 = new VerticalChunkPos(pos.x >> 4, pos.y >> 4, pos.z >> 4);
+    public void onBlockChange(HmWorld world, BlockPos pos) {
+        VerticalChunkPos pos1 = new VerticalChunkPos(pos.getX() >> 4, pos.getY() >> 4, pos.getZ() >> 4);
         if (isDebug()) {
             HmBlockState state = world.hm$getBlockState(pos);
             ChunkLoadingTicket ticket = DynamXContext.getPhysicsWorld(world).getTerrainManager().getTicket(pos1);
             if (ticket != null) {
-                ChunkGraph.addToGrah(pos1, ChunkGraph.ChunkActions.CHK_UPDATE, ChunkGraph.ActionLocation.MAIN, ticket.getCollisions(), "Chunk changed from world change of " + state + " at " + pos + " (" + state.getBlock() + "). Ticket " + ticket);
+                ChunkGraph.addToGrah(pos1, ChunkGraph.ChunkActions.CHK_UPDATE, ChunkGraph.ActionLocation.MAIN, ticket.getCollisions(), "Chunk changed from world change of " + state + " at " + pos + " (" + state.hm$getBlock() + "). Ticket " + ticket);
             }
         }
         scheduledChunkReload.put(pos1, (byte) 10);

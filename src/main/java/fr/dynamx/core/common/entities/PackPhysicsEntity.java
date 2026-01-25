@@ -200,7 +200,7 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
         org.joml.Vector3f hitVec = entity.hm$getEyesPosition();
         InteractivePart<?, ?> nearest = null;
         Vector3f nearestPos = null;
-        Vector3f playerPos = JmeVector3fPool.get((float) entity.hm$getPosX(), (float) entity.hm$getPosY(), (float) entity.hm$getPosZ());
+        org.joml.Vector3f playerPos = entity.hm$getPosition();
         MutableBoundingBox box = new MutableBoundingBox();
         for (float f = 1.0F; f < 4.0F; f += 0.1F) {
             for (InteractivePart<?, ?> part : getPackInfo().getInteractiveParts()) {

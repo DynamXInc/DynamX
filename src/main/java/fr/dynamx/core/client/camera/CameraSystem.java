@@ -2,6 +2,10 @@ package fr.dynamx.core.client.camera;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.IModuleContainer;
+import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.api.HmEntityLogicMatcher;
+import fr.hermes.api.events.HmEventResult;
+import fr.hermes.api.mc.entities.HmEntity;
 import fr.dynamx.core.client.handlers.ClientDebugSystem;
 import fr.dynamx.core.client.handlers.ClientEventHandler;
 import fr.dynamx.core.common.contentpack.parts.BasePartSeat;
@@ -71,57 +75,56 @@ public class CameraSystem {
      * Adjusts roll and pitch for camera.
      * Only works when camera is inside vehicles.
      */
-    public static void rotateVehicleCamera(EntityViewRenderEvent.CameraSetup event) {
+    public static HmEventResult<org.joml.Vector3f> rotateVehicleCamera(HmEntity renderEntity, float yaw, float pitch, float roll, float partialTicks) {
         JmeVector3fPool.openPool(SubClassPool.CAMERA_UPDATE);
-        PhysicsEntity<?> vehicle = (PhysicsEntity<?>) event.getEntity().getRidingEntity();
-        Entity renderEntity = event.getEntity();
+        HmEntity vehicleEntity = renderEntity.hm$getRidingEntity();
+        PhysicsEntity<?> vehicle = (PhysicsEntity<?>) HmEntityLogicMatcher.cast(vehicleEntity, PhysicsEntity.class);
 
         //Compute smoothed vehicle rotation, on axes according to camera mode
-        animateCameraRotation(vehicle.prevRenderRotation, vehicle.renderRotation, (float) event.getRenderPartialTicks(), 0.1f);
+        animateCameraRotation(vehicle.prevRenderRotation, vehicle.renderRotation, partialTicks, 0.1f);
 
         // Subtract the vehicle yaw from the player yaw, as it's already applied above
-        float interpVehicleYaw = (float) MathHelper.wrapDegrees(vehicle.prevRotationYaw + (vehicle.rotationYaw - vehicle.prevRotationYaw) * event.getRenderPartialTicks());
+        float interpVehicleYaw = (float) MathHelper.wrapDegrees(vehicleEntity.hm$getPrevRotationYaw() + (vehicleEntity.hm$getRotationYaw() - vehicleEntity.hm$getPrevRotationYaw()) * partialTicks);
         //Apply camera zoom
-        if (ClientEventHandler.MC.gameSettings.thirdPersonView > 0) {
-            performZoomAction(renderEntity, event.getYaw() - interpVehicleYaw, event.getPitch(), event.getRenderPartialTicks(), jmeQuatCache);
+        if (!ClientEventHandler.MC.hm$getGameSettings().hm$isFirstPersonView()) {
+            performZoomAction(renderEntity, yaw - interpVehicleYaw, pitch, partialTicks, jmeQuatCache);
         }
 
         //Rotate the camera
-        GlStateManager.rotate(event.getRoll(), 0.0F, 0.0F, 1.0F);
-        GlStateManager.rotate(event.getPitch(), 1.0F, 0.0F, 0.0F);
+        GlStateManager.rotate(roll, 0.0F, 0.0F, 1.0F);
+        GlStateManager.rotate(pitch, 1.0F, 0.0F, 0.0F);
         if (vehicle instanceof IModuleContainer.ISeatsContainer && ((IModuleContainer.ISeatsContainer) vehicle).hasSeats()) {
-            BasePartSeat seat = ((IModuleContainer.ISeatsContainer) vehicle).getSeats().getRidingSeat(renderEntity);
+            BasePartSeat<?, ?> seat = ((IModuleContainer.ISeatsContainer) vehicle).getSeats().getRidingSeat(renderEntity);
             if(seat == null) {
                 JmeVector3fPool.closePool();
-                return;
+                return HmEventResult.success(Vector3fPool.get(0, 0, 0));
             }
-            if(ClientEventHandler.MC.gameSettings.thirdPersonView > 0 && seat.getCameraPositionY() != 0) {
+            if(!ClientEventHandler.MC.hm$getGameSettings().hm$isFirstPersonView() && seat.getCameraPositionY() != 0) {
                 cameraPositionY = seat.getCameraPositionY();
                 GlStateManager.translate(0, -cameraPositionY, 0);
             }
             if (seat.getRotation() != null) {
-                GlStateManager.rotate(event.getYaw() - interpVehicleYaw + (watchingBehind ? 180 : 0) + seat.getRotationYaw(), 0.0F, 1.0F, 0.0F);
+                GlStateManager.rotate(yaw - interpVehicleYaw + (watchingBehind ? 180 : 0) + seat.getRotationYaw(), 0.0F, 1.0F, 0.0F);
             } else {
-                GlStateManager.rotate(event.getYaw() - interpVehicleYaw + (watchingBehind ? 180 : 0), 0.0F, 1.0F, 0.0F);
+                GlStateManager.rotate(yaw - interpVehicleYaw + (watchingBehind ? 180 : 0), 0.0F, 1.0F, 0.0F);
             }
         } else {
-            GlStateManager.rotate(event.getYaw() - interpVehicleYaw + (watchingBehind ? 180 : 0), 0.0F, 1.0F, 0.0F);
+            GlStateManager.rotate(yaw - interpVehicleYaw + (watchingBehind ? 180 : 0), 0.0F, 1.0F, 0.0F);
         }
 
         //Remove the eye translation
-        GlStateManager.translate(0, -renderEntity.getEyeHeight(), 0);
+        GlStateManager.translate(0, -renderEntity.hm$getEyeHeight(), 0);
 
         //Apply the vehicle's rotation
         GlStateManager.rotate(glQuatCache);
 
         //Restore the eye translation (because it's removed in the vanilla code after this event)
-        GlStateManager.translate(0, renderEntity.getEyeHeight(), 0);
+        GlStateManager.translate(0, renderEntity.hm$getEyeHeight(), 0);
+
+        JmeVector3fPool.closePool();
 
         //Cancel any vanilla rotation
-        event.setPitch(0);
-        event.setRoll(0);
-        event.setYaw(0);
-        JmeVector3fPool.closePool();
+        return HmEventResult.success(Vector3fPool.get(0, 0, 0));
     }
 
     private static final Vector3f pt0 = new Vector3f();
@@ -182,25 +185,25 @@ public class CameraSystem {
      * @param yaw       pitch : the entity's yaw and pitch
      * @param vRotation : the vehicle's rotation
      */
-    private static void performZoomAction(Entity entity, float yaw, float pitch, double partialTicks, com.jme3.math.Quaternion vRotation) {
+    private static void performZoomAction(HmEntity entity, float yaw, float pitch, double partialTicks, com.jme3.math.Quaternion vRotation) {
         boolean debug = ClientDebugSystem.enableDebugDrawing && DynamXDebugOptions.CAMERA_RAYCAST.isActive() && Keyboard.isKeyDown(Keyboard.KEY_B);
         if (debug)
             cameraRadius.clear();
-        float f = entity.getEyeHeight();
+        float f = entity.hm$getEyeHeight();
         float d3 = zoomLevel + f;
         //Camera pos
-        double d0 = (entity.prevPosX + (entity.posX - entity.prevPosX) * partialTicks);
-        double d1 = (entity.prevPosY + (entity.posY - entity.prevPosY) * partialTicks);
-        double d2 = (entity.prevPosZ + (entity.posZ - entity.prevPosZ) * partialTicks);
+        double d0 = (entity.hm$getPrevPosX() + (entity.hm$getPosX() - entity.hm$getPrevPosX()) * partialTicks);
+        double d1 = (entity.hm$getPrevPosY() + (entity.hm$getPosY() - entity.hm$getPrevPosY()) * partialTicks);
+        double d2 = (entity.hm$getPrevPosZ() + (entity.hm$getPosZ() - entity.hm$getPrevPosZ()) * partialTicks);
         if (debug)
             pt0.set((float) d0, (float) d1, (float) d2);
-        Vector3f eye = JmeVector3fPool.get(0, f + (ClientEventHandler.MC.gameSettings.thirdPersonView > 0 ? cameraPositionY : 0), 0);
+        Vector3f eye = JmeVector3fPool.get(0, f + (ClientEventHandler.MC.hm$getGameSettings().hm$isFirstPersonView() ? 0 : cameraPositionY), 0);
         eye = DynamXGeometry.rotateVectorByQuaternion(eye, vRotation.inverse());
         d0 += eye.x;
         d1 += eye.y;
         d2 += eye.z;
 
-        if (ClientEventHandler.MC.gameSettings.thirdPersonView == 2) {
+        if (ClientEventHandler.MC.hm$getGameSettings().hm$isReverseThirdPersonView()) {
             pitch += 180.0F;
         }
         if (watchingBehind)
@@ -234,9 +237,9 @@ public class CameraSystem {
                 cameraRadius.put(JmeVector3fPool.getPermanentVector(pt1), JmeVector3fPool.getPermanentVector(pt2));
             }
 
-            RayTraceResult raytraceresult = ClientEventHandler.MC.world.rayTraceBlocks(new Vec3d(d0 + start.x, d1 + start.y, d2 + start.z), new Vec3d(d0 + end.x, d1 + end.y, d2 + end.z), false, true, false);
+            RayTraceResult raytraceresult = entity.hm$getWorld().rayTraceBlocks(new Vec3d(d0 + start.x, d1 + start.y, d2 + start.z), new Vec3d(d0 + end.x, d1 + end.y, d2 + end.z), false, true, false);
 
-            if (raytraceresult != null && raytraceresult.entityHit != entity.getRidingEntity()) {
+            if (raytraceresult != null && raytraceresult.entityHit != entity.hm$getRidingEntity()) {
                 float d7 = (float) raytraceresult.hitVec.distanceTo(new Vec3d(d0, d1, d2));
                 if (d7 < d3) {
                     d3 = d7;

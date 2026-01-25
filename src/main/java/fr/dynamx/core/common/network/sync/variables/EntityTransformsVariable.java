@@ -17,7 +17,7 @@ public class EntityTransformsVariable extends ListeningEntityVariable<Map<Byte, 
         super(((entityPositionDataSynchronizedEntityVariable, transforms) -> {
 //TODO INTPERPOLATION ETC :c
             if (entity.getSynchronizer().getSimulationHolder().isSinglePlayer()) {
-                if (!entity.world.isRemote) //Solo mode
+                if (!entity.getWorld().hm$isClient()) //Solo mode
                 {
                     Map<Byte, SynchronizedRigidBodyTransform> tar = synchronizer.getTransforms();
                     transforms.forEach((b, t) -> {
@@ -42,7 +42,7 @@ public class EntityTransformsVariable extends ListeningEntityVariable<Map<Byte, 
 
             @Override
             public Map<Byte, RigidBodyTransform> call() {
-                boolean changed = !transforms.isEmpty() && entity.ticksExisted % 20 == 0; //Keep low-rate sync while not moving, if we have joints to sync
+                boolean changed = !transforms.isEmpty() && entity.getTicksExisted() % 20 == 0; //Keep low-rate sync while not moving, if we have joints to sync
                 if (!changed) {
                     for (Map.Entry<Byte, SynchronizedRigidBodyTransform> transform : synchronizer.getTransforms().entrySet()) {
                         if (!transforms.containsKey(transform.getKey())) {

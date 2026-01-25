@@ -24,4 +24,6 @@ public interface HmPlayerEntity extends HmLivingEntity {
     boolean hm$isSneaking();
 
     HmItemStack hm$getHeldItem(EnumHand hand);
+
+    boolean hm$isSpectator();
 }

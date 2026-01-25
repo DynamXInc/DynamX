@@ -9,6 +9,7 @@ import fr.dynamx.core.common.entities.modules.SeatsModule;
 import fr.dynamx.core.common.physics.entities.PackEntityPhysicsHandler;
 import fr.dynamx.core.common.physics.entities.PropPhysicsHandler;
 import fr.dynamx.forge.DynamXConfig;
+import fr.hermes.api.mc.entities.HmEntity;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
@@ -18,12 +19,12 @@ import javax.annotation.Nonnull;
 public class PropsEntity<T extends PackEntityPhysicsHandler<PropObject<?>, ?>> extends PackPhysicsEntity<T, PropObject<?>> implements IModuleContainer.ISeatsContainer {
     private SeatsModule seats;
 
-    public PropsEntity(World worldIn) {
-        super(worldIn);
+    public PropsEntity(HmEntity mcEntityWrapper) {
+        super(mcEntityWrapper);
     }
 
-    public PropsEntity(String infoName, World world, Vector3f pos, float spawnRotationAngle, int metadata) {
-        super(infoName, world, pos, spawnRotationAngle, metadata);
+    public PropsEntity(String infoName, HmEntity mcEntityWrapper, Vector3f pos, float spawnRotationAngle, int metadata) {
+        super(infoName, mcEntityWrapper, pos, spawnRotationAngle, metadata);
     }
 
     @Override
@@ -38,8 +39,8 @@ public class PropsEntity<T extends PackEntityPhysicsHandler<PropObject<?>, ?>> e
             return;
         }
         if (getPackInfo().getDespawnTime() != -1) {
-            if ((ticksExisted % getPackInfo().getDespawnTime()) == 0) {
-                setDead();
+            if ((getTicksExisted() % getPackInfo().getDespawnTime()) == 0) {
+                mcEntity.hm$setDead();
             }
         }
     }
@@ -49,11 +50,11 @@ public class PropsEntity<T extends PackEntityPhysicsHandler<PropObject<?>, ?>> e
         return (T) new PropPhysicsHandler(this);
     }
 
-    @Override
+    /* todo events @Override
     protected final void fireCreateModulesEvent(Side side) {
         //Don't simplify the generic type, for fml
         MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.CreateModules<>(PropsEntity.class, this, moduleList, side));
-    }
+    }*/
 
     @Override
     public int getSyncTickRate() {

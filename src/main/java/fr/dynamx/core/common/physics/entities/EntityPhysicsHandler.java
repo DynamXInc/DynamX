@@ -7,6 +7,7 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.core.common.DynamXMain;
 import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
+import net.minecraft.util.math.BlockPos;
 import org.joml.Vector3i;
 
 /**
@@ -101,12 +102,14 @@ public abstract class EntityPhysicsHandler<T extends PhysicsEntity<?>> extends A
      */
     public float getWaterLevel() {
         PhysicsEntity<?> entity = getHandledEntity();
+
+        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         // search water downwards, two blocks from the entity
         for (int offset = 2; offset > -2; offset--) {
-            Vector3i blockPos = new Vector3i((int) entity.physicsPosition.x, (int) (entity.physicsPosition.y + offset), (int) entity.physicsPosition.z);
-            if (entity.hm$getWorld().hm$getBlockState(blockPos).isLiquid()) {
-                MutableBoundingBox boundingBox = entity.hm$getWorld().hm$getBlockState(blockPos).getBoundingBox(entity.hm$getWorld(), blockPos);
-                return (float) boundingBox.offset(blockPos).maxY - 0.125F + 0.5f;
+            mutableBlockPos.setPos((int) entity.physicsPosition.x, (int) (entity.physicsPosition.y + offset), (int) entity.physicsPosition.z);
+            if (entity.getWorld().hm$getBlockState(mutableBlockPos).hm$isLiquid()) {
+                MutableBoundingBox boundingBox = entity.getWorld().hm$getBlockState(mutableBlockPos).hm$getBoundingBox(entity.getWorld(), mutableBlockPos);
+                return (float) boundingBox.offset(mutableBlockPos.getX(), mutableBlockPos.getY(), mutableBlockPos.getZ()).maxY - 0.125F + 0.5f;
             }
         }
         return Float.MIN_VALUE;

@@ -20,14 +20,16 @@ public class MoveObjects extends MovableModule {
 
     @SynchronizedEntityVariable(name = "picker")
     private final EntityVariable<HmPlayerEntity> picker = new EntityVariable<>((variable, value) -> {
-        if(value != null && DynamXContext.getPlayerPickingObjects().containsKey(value.getEntityId()))
+        if(value != null && DynamXContext.getPlayerPickingObjects().containsKey(value.hm$getEntityId()))
             entity.getSynchronizer().onPlayerStartControlling(value, false);
     }, SynchronizationRules.SERVER_TO_CLIENTS);
+
     @SynchronizedEntityVariable(name = "isPicked")
     private final EntityVariable<Boolean> isPicked = new EntityVariable<>((variable, value) -> {
         if(picker.get() != null)
             entity.getSynchronizer().onPlayerStopControlling(picker.get(), false);
     }, SynchronizationRules.SERVER_TO_CLIENTS, false);
+
     @SynchronizedEntityVariable(name = "pickedEntity")
     private final EntityVariable<PhysicsEntity<?>> pickedEntity = new EntityVariable<>(SynchronizationRules.SERVER_TO_CLIENTS, null);
 
@@ -47,7 +49,7 @@ public class MoveObjects extends MovableModule {
 
             this.isPicked.set(true);
 
-            DynamXContext.getPlayerPickingObjects().put(picker.getEntityId(), pickedEntity.getEntityId());
+            DynamXContext.getPlayerPickingObjects().put(picker.hm$getEntityId(), pickedEntity.getEntityId());
             entity.getSynchronizer().onPlayerStartControlling(picker, false);
         }
     }
@@ -58,7 +60,7 @@ public class MoveObjects extends MovableModule {
         }
         ((PhysicsRigidBody) entity.getPhysicsHandler().getCollisionObject()).setGravity(JmeVector3fPool.get(0, -DynamXPhysicsHelper.GRAVITY,0));
         PhysicsRigidBody rigidBody = (PhysicsRigidBody) pickedEntity.get().getPhysicsHandler().getCollisionObject();
-        Vector3f playerLookPos = DynamXUtils.toVector3f(picker.get().getHmLook());
+        Vector3f playerLookPos = DynamXUtils.toVector3f(picker.get().hm$getLook());
         rigidBody.setLinearVelocity(playerLookPos.multLocal(force));
         unPickObject();
     }
@@ -68,7 +70,7 @@ public class MoveObjects extends MovableModule {
             return;
         }
         ((PhysicsRigidBody) entity.getPhysicsHandler().getCollisionObject()).setGravity(JmeVector3fPool.get(0, -DynamXPhysicsHelper.GRAVITY,0));
-        DynamXContext.getPlayerPickingObjects().remove(picker.get().getEntityId());
+        DynamXContext.getPlayerPickingObjects().remove(picker.get().hm$getEntityId());
         isPicked.set(false);
         entity.getSynchronizer().onPlayerStopControlling(picker.get(), false);
     }
@@ -79,11 +81,11 @@ public class MoveObjects extends MovableModule {
             PhysicsEntity<?> pickedEntity = this.pickedEntity.get();
             if (picker.get() != null && pickedEntity != null && isPicked.get()) {
                 PhysicsRigidBody rigidBody = (PhysicsRigidBody) pickedEntity.getPhysicsHandler().getCollisionObject();
-                Vector3f playerLookPos = DynamXUtils.toVector3f(picker.get().getHmLook());
+                Vector3f playerLookPos = DynamXUtils.toVector3f(picker.get().hm$getLook());
                 rigidBody.setGravity(JmeVector3fPool.get());
                 rigidBody.setAngularVelocity(JmeVector3fPool.get());
                 rigidBody.setLinearVelocity(JmeVector3fPool.get());
-                Vector3f playerPos = JmeVector3fPool.get(picker.get().getEyesPosition());
+                Vector3f playerPos = JmeVector3fPool.get(picker.get().hm$getEyesPosition());
                 playerPos.addLocal(playerLookPos);
                 pickedEntity.getPhysicsHandler().setPhysicsPosition(playerPos);
             }

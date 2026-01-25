@@ -2,7 +2,7 @@ package fr.dynamx.core.client.renders.scene.node;
 
 import fr.dynamx.api.contentpack.object.render.Enum3DRenderLocation;
 import fr.dynamx.api.contentpack.object.render.IModelPackObject;
-import fr.dynamx.api.events.client.DynamXRenderItemEvent;
+import fr.dynamx.core.client.handlers.ClientEventHandler;
 import fr.dynamx.core.client.renders.model.ItemDxModel;
 import fr.dynamx.core.client.renders.scene.BaseRenderContext;
 import fr.dynamx.core.client.renders.scene.IRenderContext;
@@ -15,11 +15,7 @@ import fr.dynamx.core.utils.optimization.SubClassPool;
 import fr.hermes.api.mc.items.HmItemStack;
 import fr.hermes.api.mc.utils.HmCameraTransforms;
 import fr.hermes.forge.JmeVector3fPool;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.common.MinecraftForge;
 import org.joml.Matrix4f;
 
 /**
@@ -51,26 +47,26 @@ public abstract class AbstractItemNode<C extends IRenderContext, A extends IMode
         if (packInfo.get3DItemRenderLocation() == Enum3DRenderLocation.NONE || (renderType == HmCameraTransforms.GUI && packInfo.get3DItemRenderLocation() == Enum3DRenderLocation.WORLD)) {
             GlStateManager.pushMatrix();
             GlStateManager.translate(0.5F, 0.5F, 0.5F);
-            Minecraft.getMinecraft().getRenderItem().renderItem(stack, model.getGuiBaked());
+            ClientEventHandler.MC.getHmRenderApi().renderItem(stack, model.getGuiBaked());
             GlStateManager.popMatrix();
         } else {
             transform.identity();
             JmeVector3fPool.openPool(SubClassPool.ITEM_RENDER_NODE);
             QuaternionPool.openPool(SubClassPool.ITEM_RENDER_NODE);
             GlQuaternionPool.openPool(SubClassPool.ITEM_RENDER_NODE);
-            if (!MinecraftForge.EVENT_BUS.post(new DynamXRenderItemEvent(context, this, DynamXRenderItemEvent.EventStage.TRANSFORM))) {
-                packInfo.applyItemTransforms(renderType, stack, model, transform);
-                ViewTransformsInfo transformsInfo = packInfo.getViewTransformsInfo(renderType);
-                if(transformsInfo != null) {
-                    transform.mul(transformsInfo.getTransformMatrix());
-                } else {
-                    float scale = packInfo.getItemScale();
-                    transform.scale(scale, scale, scale);
-                }
+            // TODO EVENT if (!MinecraftForge.EVENT_BUS.post(new DynamXRenderItemEvent(context, this, DynamXRenderItemEvent.EventStage.TRANSFORM))) {
+            packInfo.applyItemTransforms(renderType, stack, model, transform);
+            ViewTransformsInfo transformsInfo = packInfo.getViewTransformsInfo(renderType);
+            if (transformsInfo != null) {
+                transform.mul(transformsInfo.getTransformMatrix());
+            } else {
+                float scale = packInfo.getItemScale();
+                transform.scale(scale, scale, scale);
             }
-            if (!MinecraftForge.EVENT_BUS.post(new DynamXRenderItemEvent(context, this, DynamXRenderItemEvent.EventStage.RENDER))) {
-                renderItemModel(context, packInfo, transform);
-            }
+            //}
+            // TODO EVENT if (!MinecraftForge.EVENT_BUS.post(new DynamXRenderItemEvent(context, this, DynamXRenderItemEvent.EventStage.RENDER))) {
+            renderItemModel(context, packInfo, transform);
+            //}
             GlQuaternionPool.closePool();
             QuaternionPool.closePool();
             JmeVector3fPool.closePool();

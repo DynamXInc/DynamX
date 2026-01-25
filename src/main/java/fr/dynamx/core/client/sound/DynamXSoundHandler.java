@@ -40,7 +40,7 @@ import static fr.dynamx.core.common.DynamXMain.log;
 @SideOnly(Side.CLIENT)
 public class DynamXSoundHandler {
     //Reflection variables.
-    private static final String[] soundSystemNames = {"sndSystem", "field_148620_e"};
+    private static final String[] soundSystemNames = {"sndSystem", "field_148620_e", "soundSystem"};
     private SoundManager mcSoundManager;
     private SoundSystem mcSoundSystem;
     private int soundSystemStartupDelay = 0;
@@ -51,14 +51,14 @@ public class DynamXSoundHandler {
     /**
      * Called on mc sound system setup
      */
-    public void setup(SoundSetupEvent event) {
-        mcSoundManager = event.getManager();
+    public void setup(SoundManager soundManager) {
+        mcSoundManager = soundManager;
     }
 
     /**
      * Called on mc sound system load
      */
-    public void load(SoundLoadEvent event) {
+    public void load() {
         mcSoundSystem = null;
         secondStartupTry = false;
         soundSystemStartupDelay = 100;

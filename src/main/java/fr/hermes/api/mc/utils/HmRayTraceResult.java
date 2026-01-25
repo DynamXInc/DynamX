@@ -6,7 +6,7 @@ import org.joml.Vector3f;
 import net.minecraft.util.math.BlockPos;
 
 public interface HmRayTraceResult {
-    public enum Type {
+    enum Type {
         BLOCK,
         ENTITY,
         MISS

@@ -5,6 +5,7 @@ import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.contentpack.object.IPartContainer;
 import fr.dynamx.api.contentpack.object.part.BasePart;
+import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.core.client.camera.CameraSystem;
 import fr.dynamx.core.common.DynamXContext;
 import fr.dynamx.core.common.contentpack.parts.BasePartSeat;
@@ -21,6 +22,11 @@ import fr.dynamx.core.utils.debug.renderer.PhysicsDebugRenderer;
 import fr.dynamx.core.utils.maths.DynamXMath;
 import fr.dynamx.core.utils.optimization.GlQuaternionPool;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
+import fr.hermes.api.HmEntityLogicMatcher;
+import fr.hermes.api.mc.client.HmMinecraftClient;
+import fr.hermes.api.mc.entities.HmEntity;
+import fr.hermes.api.mc.entities.HmPlayerEntity;
+import fr.hermes.api.mod.HermesPlatform;
 import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -46,6 +52,8 @@ import java.util.function.Predicate;
 
 @Mod.EventBusSubscriber(modid = DynamXConstants.ID, value = Side.CLIENT)
 public class ClientDebugSystem {
+    public static final HmMinecraftClient MC = HermesPlatform.getInstance().getClient();
+
     private static final List<ProfilingData.Measure> physicsTicks = new ArrayList<>();
     public static boolean enableDebugDrawing;
 
@@ -54,8 +62,6 @@ public class ClientDebugSystem {
 
     private static byte curRigidBodyStatesIndex;
     private static byte prevRigidBodyStatesIndex;
-
-    private static final Minecraft MC = Minecraft.getMinecraft();
 
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
@@ -77,7 +83,7 @@ public class ClientDebugSystem {
                 }
             }
 
-            if (MC.world != null && DynamXContext.getPhysicsWorld(MC.world) != null) {
+            if (MC.hm$getWorld() != null && DynamXContext.getPhysicsWorld(MC.hm$getWorld()) != null) {
                 curRigidBodyStatesIndex++;
                 if (curRigidBodyStatesIndex > 1) {
                     curRigidBodyStatesIndex = 0;
@@ -102,8 +108,8 @@ public class ClientDebugSystem {
             FontRenderer fontRenderer = MC.fontRenderer;
             String s = "Drawing debug";
             fontRenderer.drawString(s, event.getResolution().getScaledWidth() - fontRenderer.getStringWidth(s) - 2, 2, 0xFFBC00);
-            if (DynamXContext.getPhysicsWorld(MC.world) != null) {
-                s = "Entities: " + DynamXContext.getPhysicsWorld(MC.world).getLoadedEntityCount();
+            if (DynamXContext.getPhysicsWorld(MC.hm$getWorld()) != null) {
+                s = "Entities: " + DynamXContext.getPhysicsWorld(MC.hm$getWorld()).getLoadedEntityCount();
             } else
                 s = "Not simulating...";
             fontRenderer.drawString(s, event.getResolution().getScaledWidth() - fontRenderer.getStringWidth(s) - 2, 12, 0xFFBC00);
@@ -151,10 +157,10 @@ public class ClientDebugSystem {
             GlStateManager.enableBlend();
             GlStateManager.disableDepth();
 
-            EntityPlayer rootPlayer = Minecraft.getMinecraft().player;
-            double x = rootPlayer.lastTickPosX + (rootPlayer.posX - rootPlayer.lastTickPosX) * event.getPartialTicks();
-            double y = rootPlayer.lastTickPosY + (rootPlayer.posY - rootPlayer.lastTickPosY) * event.getPartialTicks();
-            double z = rootPlayer.lastTickPosZ + (rootPlayer.posZ - rootPlayer.lastTickPosZ) * event.getPartialTicks();
+            HmPlayerEntity rootPlayer = MC.hm$getPlayer();
+            double x = rootPlayer.hm$getLastTickPosX() + (rootPlayer.hm$getPosX() - rootPlayer.hm$getLastTickPosX()) * event.getPartialTicks();
+            double y = rootPlayer.hm$getLastTickPosY() + (rootPlayer.hm$getPosY() - rootPlayer.hm$getLastTickPosY()) * event.getPartialTicks();
+            double z = rootPlayer.hm$getLastTickPosZ() + (rootPlayer.hm$getPosZ() - rootPlayer.hm$getLastTickPosZ()) * event.getPartialTicks();
             GlStateManager.translate(-x, -y, -z);
 
             drawDebug(DynamXDebugOptions.BLOCK_BOXES);
@@ -162,9 +168,10 @@ public class ClientDebugSystem {
             drawDebug(DynamXDebugOptions.SLOPE_BOXES);
             drawDebug(DynamXDebugOptions.CLIENT_SLOPE_BOXES);
 
+            IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(MC.hm$getWorld());
             if (DynamXDebugOptions.PHYSICS_DEBUG.isActive()) {
 
-                for (PhysicsRigidBody body : DynamXContext.getPhysicsWorld(MC.world).getDynamicsWorld().getRigidBodyList()) {
+                for (PhysicsRigidBody body : physicsWorld.getDynamicsWorld().getRigidBodyList()) {
                     JmeVector3fPool.openPool();
                     QuaternionPool.openPool();
                     GlQuaternionPool.openPool();
@@ -176,14 +183,14 @@ public class ClientDebugSystem {
                 JmeVector3fPool.openPool();
                 QuaternionPool.openPool();
                 GlQuaternionPool.openPool();
-                DynamXContext.getPhysicsWorld(MC.world).getDynamicsWorld().getSoftBodyList().forEach(PhysicsDebugRenderer::debugSoftBody);
+                physicsWorld.getDynamicsWorld().getSoftBodyList().forEach(PhysicsDebugRenderer::debugSoftBody);
                 JmeVector3fPool.closePool();
                 QuaternionPool.closePool();
 
                 GlStateManager.disableDepth();
                 JmeVector3fPool.openPool();
                 QuaternionPool.openPool();
-                for (PhysicsJoint physicsJoint : DynamXContext.getPhysicsWorld(MC.world).getDynamicsWorld().getJointList()) {
+                for (PhysicsJoint physicsJoint : physicsWorld.getDynamicsWorld().getJointList()) {
                     PhysicsDebugRenderer.debugConstraint(physicsJoint, event.getPartialTicks());
                 }
                 GlQuaternionPool.closePool();
@@ -201,19 +208,20 @@ public class ClientDebugSystem {
             }
 
             JmeVector3fPool.openPool();
-            if (MC.objectMouseOver != null) {
-                if (!rootPlayer.isSneaking()) {
+            if (MC.hm$getObjectMouseOver() != null) {
+                if (!rootPlayer.hm$isSneaking()) {
                     disableShapeDebug(lastPart);
                     JmeVector3fPool.closePool();
                     return;
                 }
-                if (!(MC.objectMouseOver.entityHit instanceof PackPhysicsEntity)) {
+                if (!HmEntityLogicMatcher.is(MC.hm$getObjectMouseOver().hm$getEntity(), PackPhysicsEntity.class)) {
                     disableShapeDebug(lastPart);
                     JmeVector3fPool.closePool();
                     return;
                 }
-                PackPhysicsEntity<?, ?> entityHit = (PackPhysicsEntity<?, ?>) MC.objectMouseOver.entityHit;
-                if (!(entityHit.getPackInfo() instanceof IPartContainer)) {
+                HmEntity entityHit =  MC.hm$getObjectMouseOver().hm$getEntity();
+                PackPhysicsEntity<?, ?> packEntityHit = HmEntityLogicMatcher.cast(MC.hm$getObjectMouseOver().hm$getEntity(), PackPhysicsEntity.class);
+                if (!(packEntityHit.getPackInfo() instanceof IPartContainer)) {
                     disableShapeDebug(lastPart);
                     JmeVector3fPool.closePool();
                     return;
@@ -231,7 +239,7 @@ public class ClientDebugSystem {
                         return false;
                     };
                 }
-                BasePart<?> basePart = DynamXUtils.rayTestPart(rootPlayer, entityHit, (IPartContainer<?>) entityHit.getPackInfo(), wantedShape);
+                BasePart<?> basePart = DynamXUtils.rayTestPart(rootPlayer, packEntityHit, packEntityHit.getPackInfo(), wantedShape);
                 if (basePart == null) {
                     disableShapeDebug(lastPart);
                     JmeVector3fPool.closePool();
@@ -241,12 +249,12 @@ public class ClientDebugSystem {
                 GlQuaternionPool.openPool();
                 QuaternionPool.openPool();
                 Quaternion rot = ClientDynamXUtils.computeInterpolatedGlQuaternion(
-                        entityHit.prevRenderRotation,
-                        entityHit.renderRotation,
+                        packEntityHit.prevRenderRotation,
+                        packEntityHit.renderRotation,
                         event.getPartialTicks(), false);
-                double entityX = entityHit.lastTickPosX + (entityHit.posX - entityHit.lastTickPosX) * event.getPartialTicks();
-                double entityY = entityHit.lastTickPosY + (entityHit.posY - entityHit.lastTickPosY) * event.getPartialTicks();
-                double entityZ = entityHit.lastTickPosZ + (entityHit.posZ - entityHit.lastTickPosZ) * event.getPartialTicks();
+                double entityX = entityHit.hm$getLastTickPosX() + (entityHit.hm$getPosX() - entityHit.hm$getLastTickPosX()) * event.getPartialTicks();
+                double entityY = entityHit.hm$getLastTickPosY() + (entityHit.hm$getPosY() - entityHit.hm$getLastTickPosY()) * event.getPartialTicks();
+                double entityZ = entityHit.hm$getLastTickPosZ() + (entityHit.hm$getPosZ() - entityHit.hm$getLastTickPosZ()) * event.getPartialTicks();
                 GlStateManager.translate(-x, -y, -z);
                 GlStateManager.translate(entityX, entityY, entityZ);
                 GlStateManager.rotate(rot);
@@ -258,10 +266,10 @@ public class ClientDebugSystem {
                         basePart.getPosition().y + yOffset + 1,
                         basePart.getPosition().z,
                         ClientDynamXUtils.computeInterpolatedGlQuaternion(
-                                entityHit.prevRenderRotation,
-                                entityHit.renderRotation,
+                                packEntityHit.prevRenderRotation,
+                                packEntityHit.renderRotation,
                                 event.getPartialTicks(), true),
-                        0, rootPlayer.rotationYaw, rootPlayer.rotationPitch, false);
+                        0, rootPlayer.hm$getRotationYaw(), rootPlayer.hm$getRotationPitch(), false);
                 if (lastPart != null && lastPart.getDebugOption() != null)
                     lastPart.getDebugOption().disable();
                 if (basePart.getDebugOption() != null)

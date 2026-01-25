@@ -4,6 +4,7 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.audio.EnumSoundState;
 import fr.dynamx.api.audio.IDynamXSound;
 import fr.dynamx.core.common.entities.BaseVehicleEntity;
+import fr.hermes.api.mc.entities.HmEntity;
 import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
@@ -50,7 +51,7 @@ public abstract class VehicleSound implements IDynamXSound {
 
     @Override
     public void update(DynamXSoundHandler handler) {
-        if (isSoundActive() && !vehicleEntity.isDead()) {
+        if (isSoundActive() && !vehicleEntity.getMcEntity().hm$isDead()) {
             this.playerPos.set((float) player.posX, (float) player.posY, (float) player.posZ);
             this.sourcePos.set(vehicleEntity.physicsPosition);
 
@@ -58,7 +59,7 @@ public abstract class VehicleSound implements IDynamXSound {
             handler.setPitch(this, getPitch());
             //Set the position to 5 blocks from the player in the direction of the sound.
             //Don't worry about motion as that's used in the sound itself for the pitch.
-            org.joml.Vector3f soundNormalizedPosition = vehicleEntity.getHmPosition();//sourcePos.subtract(playerPos).normalize().scale(5).add(player.getPositionVector());
+            Vector3f soundNormalizedPosition = vehicleEntity.physicsPosition;//sourcePos.subtract(playerPos).normalize().scale(5).add(player.getPositionVector());
             handler.setPosition(this, soundNormalizedPosition.x, soundNormalizedPosition.y, soundNormalizedPosition.z);
             if (Minecraft.getMinecraft().isGamePaused()) {
                 handler.pause(this);
@@ -66,7 +67,7 @@ public abstract class VehicleSound implements IDynamXSound {
                 handler.resume(this);
             }
         } else {
-            if (vehicleEntity.isDead()) {
+            if (vehicleEntity.getMcEntity().hm$isDead()) {
                 handler.stopSound(this);
             } else if (getState() != EnumSoundState.STOPPED) {
                 setState(EnumSoundState.STOPPING);
@@ -115,8 +116,9 @@ public abstract class VehicleSound implements IDynamXSound {
         } else {
             Vector3f temp = JmeVector3fPool.get(playerPos);
             Vector3f temp2 = JmeVector3fPool.get(sourcePos);
+            HmEntity entity = vehicleEntity.getMcEntity();
             double soundVelocity = JmeVector3fPool.get(playerPos).subtractLocal(sourcePos.x, sourcePos.y, sourcePos.z).length() - temp.addLocal((float) player.motionX, (float) player.motionY, (float) player.motionZ)
-                    .addLocal(temp2.addLocal((float) vehicleEntity.getMotionX(), (float) vehicleEntity.getMotionY(), (float) vehicleEntity.getMotionZ()).multLocal(-1)).length();
+                    .addLocal(temp2.addLocal((float) entity.hm$getMotionX(), (float) entity.hm$getMotionY(), (float) entity.hm$getMotionZ()).multLocal(-1)).length();
             return (float) (getCurrentPitch() * (1 + soundVelocity / 10F));
         }
     }

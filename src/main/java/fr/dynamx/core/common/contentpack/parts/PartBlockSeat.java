@@ -31,7 +31,7 @@ public class PartBlockSeat<T extends ISubInfoTypeOwner<T>> extends BasePartSeat<
                 idx = 0;
             }
             SeatEntity seatEntity = ((TEDynamXBlock) entity).getSeatEntities().get(idx);
-            return with.startRiding(seatEntity);
+            return with.hm$startRiding(seatEntity);
         }
         if (entity instanceof PropsEntity) {
             PropsEntity<?> vehicleEntity = (PropsEntity<?>) entity;

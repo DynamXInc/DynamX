@@ -54,7 +54,7 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
         if (centerOfMass != null) {
             position.addLocal(DynamXGeometry.rotateVectorByQuaternion(centerOfMass, entity.physicsRotation).multLocal(-1));
         }
-        this.collisionObject = createShape(position, entity.physicsRotation, entity.getRotationYaw());
+        this.collisionObject = createShape(position, entity.physicsRotation, entity.getMcEntity().hm$getRotationYaw());
     }
 
     /**
@@ -72,7 +72,7 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
      */
     public void addToWorld() {
         if (collisionObject != null) {
-            DynamXContext.getPhysicsWorld(handledEntity.hm$getWorld()).addCollisionObject(collisionObject);
+            DynamXContext.getPhysicsWorld(handledEntity.getWorld()).addCollisionObject(collisionObject);
         }
     }
 
@@ -81,7 +81,7 @@ public abstract class AbstractEntityPhysicsHandler<T extends PhysicsEntity<?>, P
      */
     public void removeFromWorld() {
         if (collisionObject != null) {
-            DynamXContext.getPhysicsWorld(handledEntity.hm$getWorld()).removeCollisionObject(collisionObject);
+            DynamXContext.getPhysicsWorld(handledEntity.getWorld()).removeCollisionObject(collisionObject);
         }
     }
 

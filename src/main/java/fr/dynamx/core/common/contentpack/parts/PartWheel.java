@@ -214,7 +214,7 @@ public class PartWheel extends InteractivePart<BaseVehicleEntity<?>, ModularVehi
         if (isSeparateModel) {
             //If the wheel is not flattened, or the model does not supports flattening
             if (wheelsModule == null || wheelsModule.getWheelsStates()[getId()] != WheelsModule.WheelState.ADDED_FLATTENED || !model.renderGroup("rim", wheelsModule.getWheelsTextureId()[getId()], context.isUseVanillaRender())) {
-                context.getRender().renderModel(model, entity, wheelTextureId, context.isUseVanillaRender());
+                context.getRender().renderModel(model, entity.getMcEntity(), wheelTextureId, context.isUseVanillaRender());
             }
         } else {
             if (getRimObjectName() != null) {

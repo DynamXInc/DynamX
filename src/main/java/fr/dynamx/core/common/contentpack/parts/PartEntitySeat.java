@@ -210,7 +210,7 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
                 return;
             }
 
-            ClientEventHandler.renderingEntity = seatRider.getUniqueID();
+            ClientEventHandler.renderingEntity = seatRider.hm$getUniqueID();
             DynamXRenderUtils.popGlAllAttribBits();
 
             float partialTicks = context.getPartialTicks();
@@ -234,10 +234,10 @@ public class PartEntitySeat extends BasePartSeat<BaseVehicleEntity<?>, ModularVe
                 String skinType = ((AbstractClientPlayer) seatRider).getSkinType();
                 RenderPlayer renderPlayer = context.getRender().getRenderManager().getSkinMap().get(skinType);
                 if (renderPlayer != null) {
-                    renderPlayer.doRender((AbstractClientPlayer) seatRider, 0, 0, 0, seatRider.getRotationYaw(), partialTicks);
+                    renderPlayer.doRender((AbstractClientPlayer) seatRider, 0, 0, 0, seatRider.hm$getRotationYaw(), partialTicks);
                 }
             } else {
-                context.getRender().getRenderManager().renderEntity(seatRider, 0, 0, 0, seatRider.getRotationYaw(), partialTicks, false);
+                context.getRender().getRenderManager().renderEntity(seatRider, 0, 0, 0, seatRider.hm$getRotationYaw(), partialTicks, false);
             }
 
             GlStateManager.popMatrix();

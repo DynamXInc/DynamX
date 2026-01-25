@@ -1,57 +1,11 @@
 package fr.dynamx.core.common.entities;
 
-import com.jme3.bullet.joints.Constraint;
-import com.jme3.bullet.objects.PhysicsRigidBody;
-import com.jme3.math.Quaternion;
-import com.jme3.math.Vector3f;
-import fr.dynamx.api.contentpack.object.IPartContainer;
-import fr.dynamx.api.entities.modules.AttachModule;
-import fr.dynamx.api.entities.modules.IPhysicsModule;
-import fr.dynamx.api.entities.modules.ModuleListBuilder;
-import fr.dynamx.api.events.PhysicsEntityEvent;
-import fr.dynamx.api.network.sync.AttachedBodySynchronizer;
 import fr.dynamx.api.network.sync.SynchronizedEntityVariable;
-import fr.dynamx.core.common.DynamXContext;
-import fr.dynamx.core.common.DynamXMain;
-import fr.dynamx.core.common.entities.modules.MovableModule;
-import fr.dynamx.core.common.network.sync.variables.EntityTransformsVariable;
-import fr.dynamx.core.common.physics.entities.EntityPhysicsHandler;
-import fr.dynamx.core.common.physics.entities.EnumRagdollBodyPart;
-import fr.dynamx.core.common.physics.entities.RagdollPhysics;
-import fr.dynamx.core.common.physics.joints.EntityJoint;
-import fr.dynamx.core.common.physics.joints.EntityJointsHandler;
-import fr.dynamx.core.common.physics.joints.JointHandler;
-import fr.dynamx.core.common.physics.joints.JointHandlerRegistry;
-import fr.dynamx.core.common.physics.utils.RigidBodyTransform;
-import fr.dynamx.core.common.physics.utils.SynchronizedRigidBodyTransform;
 import fr.dynamx.core.utils.DynamXConstants;
-import fr.dynamx.core.utils.maths.DynamXGeometry;
-import fr.dynamx.core.utils.optimization.MutableBoundingBox;
-import fr.dynamx.core.utils.optimization.QuaternionPool;
-import fr.hermes.forge.JmeVector3fPool;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.EntityEquipmentSlot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.network.play.server.SPacketEntityEquipment;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.relauncher.Side;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @SynchronizedEntityVariable.SynchronizedPhysicsModule(modid = DynamXConstants.ID)
-public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> implements AttachedBodySynchronizer {
+public class RagdollEntity {/* TODO bring back ragdoll support
+extends ModularPhysicsEntity<RagdollPhysics<?>> implements AttachedBodySynchronizer {
     private static final DataParameter<String> SKIN = EntityDataManager.createKey(RagdollEntity.class, DataSerializers.STRING);
 
     public static final Vector3f HEAD_BOX_SIZE = new Vector3f(0.25f, 0.25f, 0.25f);
@@ -119,7 +73,7 @@ public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> imple
 
     /**
      * @param skin A player name or a string resource location
-     */
+     *//*
     public void setSkin(String skin) {
         dataManager.set(SKIN, skin);
     }
@@ -365,7 +319,7 @@ public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> imple
     /*public Iterable<ItemStack> getHeldEquipment()
     {
         return this.inventoryHands;
-    }*/
+    }*//*
 
     public Iterable<ItemStack> getArmorInventoryList() {
         return this.inventoryArmor;
@@ -418,5 +372,5 @@ public class RagdollEntity extends ModularPhysicsEntity<RagdollPhysics<?>> imple
         public Constraint createJoint(byte jointId) {
             return RagdollPhysics.createBodyPartJoint(entity, EnumRagdollBodyPart.values()[jointId]);
         }
-    }
+    }*/
 }

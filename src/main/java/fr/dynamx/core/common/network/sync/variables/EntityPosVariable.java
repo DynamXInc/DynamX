@@ -11,6 +11,7 @@ import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.common.network.packets.MessageForcePlayerPos;
 import fr.dynamx.core.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.core.utils.debug.SyncHelper;
+import fr.hermes.api.mc.entities.HmEntity;
 import fr.hermes.api.mc.entities.HmPlayerEntity;
 import fr.hermes.api.mc.entities.HmServerPlayerEntity;
 import lombok.Getter;
@@ -27,14 +28,15 @@ public class EntityPosVariable extends ListeningEntityVariable<EntityPosVariable
         super(((entityPositionDataSynchronizedEntityVariable, entityPositionData) -> {
 //TODO INTPERPOLATION ETC :c
             if (entity.getSynchronizer().getSimulationHolder().isSinglePlayer()) {
-                if (!entity.hm$getWorld().hm$isClient()) //Solo mode
+                if (!entity.getWorld().hm$isClient()) //Solo mode
                 {
-                    entity.setMotionX(entityPositionData.position.x - entity.physicsPosition.x);
-                    entity.setMotionY(entityPositionData.position.y - entity.physicsPosition.y);
-                    entity.setMotionZ(entityPositionData.position.z - entity.physicsPosition.z);
-                    double x = entity.physicsPosition.x + entity.getMotionX();
-                    double y = entity.physicsPosition.y + entity.getMotionY();
-                    double z = entity.physicsPosition.z + entity.getMotionZ();
+                    HmEntity mcEntity = entity.getMcEntity();
+                    mcEntity.hm$setMotionX(entityPositionData.position.x - entity.physicsPosition.x);
+                    mcEntity.hm$setMotionY(entityPositionData.position.y - entity.physicsPosition.y);
+                    mcEntity.hm$setMotionZ(entityPositionData.position.z - entity.physicsPosition.z);
+                    double x = entity.physicsPosition.x + mcEntity.hm$getMotionX();
+                    double y = entity.physicsPosition.y + mcEntity.hm$getMotionY();
+                    double z = entity.physicsPosition.z + mcEntity.hm$getMotionZ();
                     entity.physicsPosition.set((float) x, (float) y, (float) z);
                     entity.physicsRotation.set(entityPositionData.rotation);
                 } else {
@@ -48,13 +50,13 @@ public class EntityPosVariable extends ListeningEntityVariable<EntityPosVariable
                     float delta = entity.physicsPosition.subtract(pos).length();
                     if (delta > CRITIC1) {
                         HmPlayerEntity controllingPlayer = entity.getSynchronizer().getSimulationPlayerHolder();
-                        boolean isControllingPlayerRidingThisEntity = controllingPlayer == entity.getHmControllingPassenger();
+                        boolean isControllingPlayerRidingThisEntity = controllingPlayer == entity.getControllingPassenger();
                         if (delta > CRITIC1warn)
-                            DynamXMain.log.warn("Physics entity {} is moving too quickly (ridden by {}, simulated by {}) !", entity, entity.getHmControllingPassenger(), controllingPlayer);
+                            DynamXMain.log.warn("Physics entity {} is moving too quickly (ridden by {}, simulated by {}) !", entity, entity.getControllingPassenger(), controllingPlayer);
                         if (delta > CRITIC2 && controllingPlayer instanceof EntityPlayerMP && isControllingPlayerRidingThisEntity) {
                             ((EntityPlayerMP) controllingPlayer).connection.disconnect(new TextComponentString("Invalid physics entity move packet"));
-                        } else if (controllingPlayer instanceof EntityPlayerMP || entity.hm$getWorld().hm$isClient()) {
-                            if (delta > CRITIC3 && !entity.hm$getWorld().hm$isClient() && isControllingPlayerRidingThisEntity) {
+                        } else if (controllingPlayer instanceof EntityPlayerMP || entity.getWorld().hm$isClient()) {
+                            if (delta > CRITIC3 && !entity.getWorld().hm$isClient() && isControllingPlayerRidingThisEntity) {
                                 //Resync
                                 DynamXMain.log.error(entity + " doing resync !!!");
                                 ignoreFor = 20;
@@ -135,6 +137,6 @@ public class EntityPosVariable extends ListeningEntityVariable<EntityPosVariable
     public void onTeleported(PhysicsEntity<?> entity, Vector3f newPos) {
         //DOIT IGNORER LES PROCHAINES UPDATES VENANT DU CLIENT ignoreFor = 22;
         DynamXContext.getNetwork().sendToClient(new MessageForcePlayerPos(entity, newPos, entity.physicsRotation, entity.physicsHandler.getLinearVelocity(), entity.physicsHandler.getAngularVelocity()),
-                EnumPacketTarget.PLAYER, (HmServerPlayerEntity) entity.getHmControllingPassenger());
+                EnumPacketTarget.PLAYER, (HmServerPlayerEntity) entity.getControllingPassenger());
     }
 }

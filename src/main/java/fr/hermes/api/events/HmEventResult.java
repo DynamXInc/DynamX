@@ -29,15 +29,22 @@ public class HmEventResult<T> {
     /**
      * The event should continue to other listeners.
      */
-    public static <T> HmEventResult<T> pass() {
-        return new HmEventResult<>(Type.PASS, null);
+    public static Type pass() {
+        return Type.PASS;
+    }
+
+    /**
+     * The event should continue to other listeners.
+     */
+    public static <T> HmEventResult<T> pass(T result) {
+        return new HmEventResult<>(Type.PASS, result);
     }
 
     /**
      * The event was handled successfully, stop processing further listeners.
      */
-    public static <T> HmEventResult<T> success() {
-        return new HmEventResult<>(Type.SUCCESS, null);
+    public static Type success() {
+        return Type.SUCCESS;
     }
 
     /**
@@ -50,14 +57,14 @@ public class HmEventResult<T> {
     }
 
     /**
-     * The event should be cancelled, stop processing further listeners.
+     * The event should be canceled, stop processing further listeners.
      */
-    public static <T> HmEventResult<T> cancel() {
-        return new HmEventResult<>(Type.CANCEL, null);
+    public static Type cancel() {
+        return Type.CANCEL;
     }
 
     /**
-     * The event should be cancelled with a result value.
+     * The event should be canceled with a result value.
      *
      * @param result The result value
      */
@@ -84,14 +91,14 @@ public class HmEventResult<T> {
      * @return true if the event should stop propagating to other listeners
      */
     public boolean shouldStopPropagation() {
-        return type != Type.PASS;
+        return type.shouldStopPropagation();
     }
 
     /**
      * @return true if the event was cancelled
      */
     public boolean isCancelled() {
-        return type == Type.CANCEL;
+        return type.isCancelled();
     }
 
     /**
@@ -123,6 +130,14 @@ public class HmEventResult<T> {
         /**
          * The event should be cancelled.
          */
-        CANCEL
+        CANCEL;
+
+        public boolean shouldStopPropagation() {
+            return this != PASS;
+        }
+
+        public boolean isCancelled() {
+            return this == CANCEL;
+        }
     }
 }

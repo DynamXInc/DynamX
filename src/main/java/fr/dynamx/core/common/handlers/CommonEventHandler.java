@@ -65,13 +65,13 @@ public class CommonEventHandler {
     public static final Map<ChunkPos, Map<BlockPos, AxisAlignedBB>> PENDING_CHUNKS_COLLISIONS = new HashMap<>();
 
     public static void register() {
-        HmPlayerEvents.JOIN.register(player -> {
+        HmPlayerEvents.SERVER_JOIN.register(player -> {
             if (player.hm$getServer().hm$isDedicatedServer()) {
                 DynamXContext.getNetwork().sendToClient(new MessageSyncConfig(false, player.getEntityId()), EnumPacketTarget.PLAYER, player);
             }
         });
 
-        HmPlayerEvents.LEAVE.register(player -> {
+        HmPlayerEvents.SERVER_LEAVE.register(player -> {
             if (player.hm$getServer().hm$isDedicatedServer()) {
                 ServerPhysicsSyncManager.onDisconnect(player);
                 DynamXContext.getWalkingPlayers().remove(player);

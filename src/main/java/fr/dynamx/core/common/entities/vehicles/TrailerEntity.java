@@ -12,6 +12,8 @@ import fr.dynamx.core.common.entities.modules.SeatsModule;
 import fr.dynamx.core.common.entities.modules.WheelsModule;
 import fr.dynamx.core.common.physics.entities.BaseWheeledVehiclePhysicsHandler;
 import fr.dynamx.core.common.physics.entities.modules.WheelsPhysicsHandler;
+import fr.hermes.api.mc.entities.HmEntity;
+import fr.hermes.api.mc.world.HmWorld;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -25,12 +27,12 @@ public class TrailerEntity<T extends TrailerEntity.TrailerPhysicsHandler<?>> ext
     private DoorsModule doors;
     private SeatsModule seats;
 
-    public TrailerEntity(World world) {
-        super(world);
+    public TrailerEntity(HmEntity mcEntityWrapper) {
+        super(mcEntityWrapper);
     }
 
-    public TrailerEntity(String name, World world, Vector3f pos, float spawnRotationAngle, int metadata) {
-        super(name, world, pos, spawnRotationAngle, metadata);
+    public TrailerEntity(String name, HmEntity mcEntityWrapper, Vector3f pos, float spawnRotationAngle, int metadata) {
+        super(name, mcEntityWrapper, pos, spawnRotationAngle, metadata);
     }
 
     @Override

@@ -77,7 +77,7 @@ public abstract class BasePartSeat<A extends IDynamXObject, T extends ISubInfoTy
             return false; //Player on another seat
         }
         seatsModule.getSeatToPassengerMap().put(this, rider);
-        if (!rider.startRiding((HmEntity) riddenEntity, false)) //something went wrong : dismount
+        if (!rider.hm$startRiding((HmEntity) riddenEntity)) //something went wrong : dismount
         {
             seatsModule.getSeatToPassengerMap().remove(this);
             return false;

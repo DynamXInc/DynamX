@@ -21,4 +21,6 @@ public interface HmBlockState {
     void hm$addCollisionBoxes(HmWorld world, BlockPos blockPos, MutableBoundingBox checkZone, List<MutableBoundingBox> out);
 
     boolean hm$isFullCube();
+
+    boolean hm$isOpaqueCube();
 }

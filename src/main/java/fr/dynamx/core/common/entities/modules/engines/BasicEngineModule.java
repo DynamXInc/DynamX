@@ -131,7 +131,7 @@ public abstract class BasicEngineModule implements IPhysicsModule<BaseVehiclePhy
     }
 
     public void onEngineSwitchedOn() {
-        if (entity.hm$getWorld().hm$isClient() && entity.getTicksExisted() > 60) {
+        if (entity.getWorld().hm$isClient() && entity.getTicksExisted() > 60) {
             playStartingSound();
         }
     }
@@ -180,7 +180,7 @@ public abstract class BasicEngineModule implements IPhysicsModule<BaseVehiclePhy
 
     //@SideOnly(Side.CLIENT)
     protected void playStartingSound() {
-        boolean forInterior = HermesPlatform.getInstance().getClient().hm$getGameSettings().hm$isFirstPersonView() && entity.isRidingOrBeingRiddenBy(HermesPlatform.getInstance().getClient().hm$getPlayer());
+        boolean forInterior = HermesPlatform.getInstance().getClient().hm$getGameSettings().hm$isFirstPersonView() && entity.hasPassenger(HermesPlatform.getInstance().getClient().hm$getPlayer());
         String sound = getStartingSound(forInterior);
         if (sound != null) {
             SOUND_HANDLER.playSingleSound(entity.physicsPosition, sound, 1, 1);
@@ -239,7 +239,7 @@ public abstract class BasicEngineModule implements IPhysicsModule<BaseVehiclePhy
         // engine is started: check what sound should be playing
 
         HmMinecraftClient client = HermesPlatform.getInstance().getClient();
-        boolean forInterior = client.hm$getGameSettings().hm$isFirstPersonView() && entity.isRidingOrBeingRiddenBy(client.hm$getPlayer());
+        boolean forInterior = client.hm$getGameSettings().hm$isFirstPersonView() && entity.hasPassenger(client.hm$getPlayer());
         float rpm = getEngineProperty(VehicleEntityProperties.EnumEngineProperties.REVS) * engineInfo.getMaxRevs();
         lastEngineSound = currentEngineSound;
         if (currentEngineSound == null || !currentEngineSound.shouldPlay(rpm, forInterior)) {

@@ -181,8 +181,8 @@ public class DynamXUtils {
     }
 
     public static Vector3f calculateRay(HmEntity base, float distance, Vector3f offset) {
-        org.joml.Vector3f vec3 = base.getHmPosition();
-        org.joml.Vector3f vec31 = base.getHmLook();
+        org.joml.Vector3f vec3 = base.hm$getPosition();
+        org.joml.Vector3f vec31 = base.hm$getLook();
         org.joml.Vector3f vec32 = vec3.add(vec31.x * distance, vec31.y * distance, vec31.z * distance);
         Vector3f lookAt = JmeVector3fPool.get((float) vec32.x, (float) vec32.y, (float) vec32.z);
         lookAt.subtractLocal(offset.x, offset.y, offset.z);
@@ -190,8 +190,8 @@ public class DynamXUtils {
     }
 
     public static PhysicsRaycastResult castRayFromEntity(HmPlayerEntity entity, float distanceMax, Predicate<EnumBulletShapeType> ignoredPredicate) {
-        org.joml.Vector3f eyePos = entity.getEyesPosition();
-        org.joml.Vector3f eyeLook = entity.getHmLook(); //to
+        org.joml.Vector3f eyePos = entity.hm$getEyesPosition();
+        org.joml.Vector3f eyeLook = entity.hm$getLook(); //to
         org.joml.Vector3f lookAt = Vector3fPool.get(eyePos.x, eyePos.y, eyePos.z);
         eyeLook.mul(distanceMax);
         lookAt.add(eyeLook);
@@ -308,13 +308,13 @@ public class DynamXUtils {
         return objectMouseOver;
     }
 
-    public static BasePart<?> rayTestPart(EntityPlayer player, PackPhysicsEntity<?, ?> entityPart, IPartContainer<?> packInfo, Predicate<BasePart<?>> wantedPart) {
+    public static BasePart<?> rayTestPart(HmPlayerEntity player, PackPhysicsEntity<?, ?> entityPart, IPartContainer<?> packInfo, Predicate<BasePart<?>> wantedPart) {
         JmeVector3fPool.openPool();
-        Vec3d lookVec = player.getLook(1.0F);
-        Vec3d hitVec = player.getPositionVector().add(0, player.getEyeHeight(), 0);
+        org.joml.Vector3f lookVec = player.hm$getLook();
+        org.joml.Vector3f hitVec = player.hm$getPosition().add(0, player.hm$getEyeHeight(), 0);
         BasePart<?> nearest = null;
         Vector3f nearestPos = null;
-        Vector3f playerPos = JmeVector3fPool.get((float) player.posX, (float) player.posY, (float) player.posZ);
+        org.joml.Vector3f playerPos = player.hm$getPosition();
         for (float f = 1.0F; f < 4.0F; f += 0.1F) {
             for (BasePart<?> part : packInfo.getAllParts()) {
                 if (wantedPart != null && !wantedPart.test(part)) {
@@ -336,7 +336,7 @@ public class DynamXUtils {
         return nearest;
     }
 
-    public static boolean vecInsideBox(Vec3d vec1, BasePart<?> part, Vector3f pos) {
+    public static boolean vecInsideBox(org.joml.Vector3f vec1, BasePart<?> part, Vector3f pos) {
         float minX = -part.getScale().x + pos.x;
         float minY = pos.y;
         float minZ = -part.getScale().z + pos.z;

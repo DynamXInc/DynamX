@@ -8,7 +8,7 @@ import fr.hermes.api.mc.entities.HmEntity;
 import fr.hermes.api.mc.entities.HmPlayerEntity;
 import fr.hermes.api.mc.utils.HmParticleType;
 import net.minecraft.util.math.BlockPos;
-import org.joml.Vector3i;
+import org.joml.Vector3f;
 
 import java.util.Collection;
 import java.util.List;
@@ -56,4 +56,8 @@ public interface HmWorld {
     int hm$getDimension();
 
     void hm$addEntityRemovedListener(Consumer<HmEntity> callback);
+
+    boolean hm$isBlockLoaded(Vector3f vector3f);
+
+    int hm$getLightAt(BlockPos pos);
 }

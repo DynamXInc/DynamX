@@ -20,19 +20,22 @@ import lombok.Getter;
 
 @SynchronizedEntityVariable.SynchronizedPhysicsModule(modid = DynamXConstants.ID)
 public class PickObjects extends MovableModule {
-
     private Point2PointJoint joint;
+
     @SynchronizedEntityVariable(name = "mover")
     private final EntityVariable<HmPlayerEntity> mover = new EntityVariable<>((variable, value) -> {
-        if(value != null && DynamXContext.getPlayerPickingObjects().containsKey(value.getEntityId()))
+        if(value != null && DynamXContext.getPlayerPickingObjects().containsKey(value.hm$getEntityId()))
             entity.getSynchronizer().onPlayerStartControlling(value, false);
     }, SynchronizationRules.SERVER_TO_CLIENTS);
+
     @SynchronizedEntityVariable(name = "pickDistance")
     @Getter
     private final EntityVariable<Float> pickDistance = new EntityVariable<>(SynchronizationRules.SERVER_TO_CLIENTS, 0f);
+
     @Getter
     private PhysicsRigidBody hitBody;
     private float initialMass;
+
     @SynchronizedEntityVariable(name = "localPickPosition")
     private final EntityVariable<Vector3f> localPickPosition = new EntityVariable<>(SynchronizationRules.SERVER_TO_CLIENTS, new Vector3f());
 
@@ -63,7 +66,7 @@ public class PickObjects extends MovableModule {
                 rayCastHitBody.setMass(initialMass);
             }
 
-            DynamXContext.getPlayerPickingObjects().put(playerPicking.getEntityId(), rayCastHitEntity.getEntityId());
+            DynamXContext.getPlayerPickingObjects().put(playerPicking.hm$getEntityId(), rayCastHitEntity.getEntityId());
 
             DynamXContext.getPhysicsWorld(playerPicking.hm$getWorld()).schedule(() -> JointHandlerRegistry.createJointWithSelf(JOINT_NAME, rayCastHitEntity, (byte) 0));
 
@@ -73,7 +76,7 @@ public class PickObjects extends MovableModule {
 
     public void unPickObject() {
         if (mover.get() != null && entity.getJointsHandler() != null) {
-            DynamXContext.getPlayerPickingObjects().remove(mover.get().getEntityId());
+            DynamXContext.getPlayerPickingObjects().remove(mover.get().hm$getEntityId());
             entity.getJointsHandler().removeJointWith(entity, MovableModule.JOINT_NAME, (byte) 0);
         }
     }
@@ -86,9 +89,9 @@ public class PickObjects extends MovableModule {
         }
         JmeVector3fPool.openPool();
         Vector3f playerPosition = JmeVector3fPool.get(
-                (float) mover.getPosX(),
-                (float) mover.getPosY() + mover.getEyeHeight(),
-                (float) mover.getPosZ());
+                (float) mover.hm$getPosX(),
+                (float) mover.hm$getPosY() + mover.hm$getEyeHeight(),
+                (float) mover.hm$getPosZ());
         Vector3f pickRaw = DynamXUtils.calculateRay(mover, 64, JmeVector3fPool.get());
 
         Vector3f newRayTo = JmeVector3fPool.get(pickRaw);
@@ -114,7 +117,7 @@ public class PickObjects extends MovableModule {
         }
         this.joint = null;
         if (mover.get() != null) {
-            DynamXContext.getPlayerPickingObjects().remove(mover.get().getEntityId());
+            DynamXContext.getPlayerPickingObjects().remove(mover.get().hm$getEntityId());
             mover.set(null);
         }
     }

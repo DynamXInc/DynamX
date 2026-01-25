@@ -7,6 +7,7 @@ import fr.dynamx.core.common.contentpack.type.objects.BlockObject;
 import fr.dynamx.core.utils.client.DynamXRenderUtils;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.optimization.GlQuaternionPool;
+import fr.hermes.api.mc.entities.HmPlayerEntity;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.renderer.GlStateManager;
@@ -85,7 +86,8 @@ public abstract class DxModelRenderer {
     public void clearVAOs() {
     }
 
-    public void renderPreview(BlockObject<?> blockObjectInfo, EntityPlayer player, BlockPos blockPos, boolean canPlace, float orientation, float partialTicks, int textureNum) {
+    public void renderPreview(BlockObject<?> blockObjectInfo, HmPlayerEntity hmPlayer, BlockPos blockPos, boolean canPlace, float orientation, float partialTicks, int textureNum) {
+        EntityPlayer player = (EntityPlayer) hmPlayer; // Not doing hermes layer on rendering code for now
         double px = player.lastTickPosX + (player.posX - player.lastTickPosX) * partialTicks;
         double py = player.lastTickPosY + (player.posY - player.lastTickPosY) * partialTicks;
         double pz = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * partialTicks;

@@ -71,17 +71,17 @@ public class ClientDynamXUtils {
     }
 
     @SideOnly(Side.CLIENT)
-    public static int getLightNear(HmWorld world, Vector3i pos, int horizontalRadius, int maxHeight) {
-        if (!world.hm$getBlockState(pos).isOpaqueCube()) {
-            return world.getCombinedLight(pos, 0);
+    public static int getLightNear(HmWorld world, BlockPos pos, int horizontalRadius, int maxHeight) {
+        if (!world.hm$getBlockState(pos).hm$isOpaqueCube()) {
+            return world.hm$getLightAt(pos);
         }
         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos(pos);
         for (int y = 0; y <= maxHeight; y++) {
             for (int x = -horizontalRadius; x <= horizontalRadius; x++) {
                 for (int z = -horizontalRadius; z <= horizontalRadius; z++) {
                     blockpos$mutableblockpos.setPos(x + pos.getX(), y + pos.getY(), z + pos.getZ());
-                    if (!world.hm$getBlockState(blockpos$mutableblockpos).isOpaqueCube()) {
-                        return world.getCombinedLight(blockpos$mutableblockpos, 0);
+                    if (!world.hm$getBlockState(blockpos$mutableblockpos).hm$isOpaqueCube()) {
+                        return world.hm$getLightAt(blockpos$mutableblockpos);
                     }
                 }
             }

@@ -7,4 +7,6 @@ public interface HmLivingEntity extends HmEntity {
     void setLimbSwingAmount(float amount);
     float getPrevLimbSwingAmount();
     void setPrevLimbSwingAmount(float amount);
+
+    float hm$getFallDistance();
 }

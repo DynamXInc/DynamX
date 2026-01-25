@@ -28,12 +28,12 @@ import java.util.Vector;
 public class HmForgeCommonEventHandler {
     @SubscribeEvent
     public void playerJoin(PlayerEvent.PlayerLoggedInEvent event) {
-        HmPlayerEvents.JOIN.invoker().onPlayerJoin((HmServerPlayerEntity) event.player);
+        HmPlayerEvents.SERVER_JOIN.invoker().onPlayerJoin((HmServerPlayerEntity) event.player);
     }
 
     @SubscribeEvent
     public void playerQuit(PlayerEvent.PlayerLoggedOutEvent event) {
-        HmPlayerEvents.LEAVE.invoker().onPlayerLeave((HmServerPlayerEntity) event.player);
+        HmPlayerEvents.SERVER_LEAVE.invoker().onPlayerLeave((HmServerPlayerEntity) event.player);
     }
 
     @SubscribeEvent

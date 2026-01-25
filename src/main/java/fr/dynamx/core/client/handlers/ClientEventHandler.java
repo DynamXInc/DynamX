@@ -1,9 +1,6 @@
 package fr.dynamx.core.client.handlers;
 
 import fr.aym.acsguis.api.ACsGuiApi;
-import fr.aym.acslib.ACsLib;
-import fr.aym.mps.ModProtectionSystem;
-import fr.dynamx.api.contentpack.object.part.InteractivePart;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.core.client.ClientProxy;
@@ -14,30 +11,24 @@ import fr.dynamx.core.client.renders.model.renderer.DxModelRenderer;
 import fr.dynamx.core.common.DynamXContext;
 import fr.dynamx.core.common.DynamXMain;
 import fr.dynamx.core.common.blocks.DynamXBlock;
-import fr.dynamx.core.common.blocks.TEDynamXBlock;
 import fr.dynamx.core.common.contentpack.type.objects.BlockObject;
 import fr.dynamx.core.common.core.mixin.MixinRenderGlobal;
-import fr.dynamx.core.common.entities.IDynamXObject;
-import fr.dynamx.core.common.entities.PackPhysicsEntity;
 import fr.dynamx.core.common.entities.PhysicsEntity;
-import fr.dynamx.core.common.entities.PropsEntity;
 import fr.dynamx.core.common.items.DynamXItemSpawner;
 import fr.dynamx.core.common.items.tools.ItemSlopes;
 import fr.dynamx.core.common.network.packets.MessageEntityInteract;
 import fr.dynamx.core.common.physics.player.WalkingOnPlayerController;
 import fr.dynamx.core.common.slopes.GuiSlopesConfig;
-import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.debug.DynamXDebugOptions;
-import fr.dynamx.core.utils.errors.DynamXErrorManager;
 import fr.dynamx.core.utils.optimization.GlQuaternionPool;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
-import fr.dynamx.core.utils.optimization.SubClassPool;
 import fr.dynamx.forge.DynamXConfig;
 import fr.hermes.api.HmEntityLogicMatcher;
 import fr.hermes.api.events.HmEventResult;
 import fr.hermes.api.mc.client.HmScreen;
 import fr.hermes.api.mc.entities.HmClientPlayerEntity;
 import fr.hermes.api.mc.entities.HmEntity;
+import fr.hermes.api.mc.entities.HmPlayerEntity;
 import fr.hermes.api.mc.events.HmMcClientEvents;
 import fr.hermes.api.mc.events.HmPlayerEvents;
 import fr.hermes.api.mc.events.HmWorldEvents;
@@ -46,38 +37,18 @@ import fr.hermes.api.mc.items.HmItemStack;
 import fr.hermes.api.mc.utils.HmRayTraceResult;
 import fr.hermes.api.mod.HermesPlatform;
 import fr.hermes.forge.JmeVector3fPool;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiMainMenu;
-import net.minecraft.client.gui.GuiScreenOptionsSounds;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.culling.ICamera;
-import net.minecraft.client.settings.GameSettings;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.client.event.*;
-import net.minecraftforge.client.event.sound.SoundLoadEvent;
-import net.minecraftforge.client.event.sound.SoundSetupEvent;
-import net.minecraftforge.fml.client.CustomModLoadingErrorDisplayException;
-import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 
-import java.util.List;
 import java.util.UUID;
 
 public class ClientEventHandler {
@@ -170,6 +141,99 @@ public class ClientEventHandler {
                     model = DynamXContext.getDxModelRegistry().getModel(block.blockObjectInfo.getModel());
                 }
             }
+        });
+
+        HmPlayerEvents.CLIENT_CONNECTED_TO_SERVER.register(() -> {
+            connectionTime = System.currentTimeMillis();
+        });
+
+        HmPlayerEvents.CLIENT_DISCONNECTED_FROM_SERVER.register(() -> {
+            DynamXContext.getNetwork().stopNetwork();
+            connectionTime = -1;
+        });
+
+        HmMcClientEvents.SOUND_SETUP.register((soundManager) -> {
+            ClientProxy.SOUND_HANDLER.setup(soundManager);
+        });
+
+        HmMcClientEvents.SOUND_SYSTEM_LOAD.register(() -> {
+            ClientProxy.SOUND_HANDLER.load();
+        });
+
+        HmMcClientEvents.DRAW_BLOCK_HIGHLIGHT.register((player, target, partialTicks) -> {
+            if (model == null) {
+                return;
+            }
+            GlStateManager.enableAlpha();
+            GlQuaternionPool.openPool();
+            QuaternionPool.openPool();
+            model.renderPreview(blockObjectInfo, player, blockPos, canPlace, playerOrientation, partialTicks, textureNum);
+            QuaternionPool.closePool();
+            GlQuaternionPool.closePool();
+        });
+
+        HmMcClientEvents.CAMERA_SETUP.register((entity, yaw, pitch, roll, partialTicks) -> {
+            if (HmEntityLogicMatcher.is(entity, PhysicsEntity.class)) {
+                return CameraSystem.rotateVehicleCamera(entity, yaw, pitch, roll, partialTicks);
+            }
+            return HmEventResult.pass(null);
+        });
+
+        HmMcClientEvents.RENDER_WORLD_LAST.register((partialTicks) -> {
+            if (RenderMovableLine.hasMovableLines()) {
+                HmPlayerEntity player = MC.hm$getPlayer();
+                float x = (float) (player.hm$getLastTickPosX() + (player.hm$getPosX() - player.hm$getLastTickPosX()) * partialTicks);
+                float y = (float) (player.hm$getLastTickPosY() + (player.hm$getPosY() - player.hm$getLastTickPosY()) * partialTicks);
+                float z = (float) (player.hm$getLastTickPosZ() + (player.hm$getPosZ() - player.hm$getLastTickPosZ()) * partialTicks);
+                GlStateManager.pushMatrix();
+                GlStateManager.disableLighting();
+                GlStateManager.disableTexture2D();
+                GlStateManager.disableDepth();
+                GlStateManager.translate(-x, -y, -z);
+    
+                JmeVector3fPool.openPool();
+                QuaternionPool.openPool();
+                RenderMovableLine.renderLine(partialTicks);
+                JmeVector3fPool.closePool();
+                QuaternionPool.closePool();
+    
+                GlStateManager.enableTexture2D();
+                GlStateManager.enableDepth();
+                GlStateManager.enableLighting();
+                GlStateManager.popMatrix();
+            }
+    
+            if (ClientDebugSystem.enableDebugDrawing) {
+                if (DynamXDebugOptions.CAMERA_RAYCAST.isActive()) {
+                    CameraSystem.drawDebug();
+                }
+            }
+            if (!isRenderingEntitiesWithOptifineShaders) {
+                renderBigEntities(partialTicks);
+            } else {
+                isRenderingEntitiesWithOptifineShaders = false;
+            }
+        });
+
+        HmMcClientEvents.PLAYER_RENDER_PRE.register((player, partialTicks, renderShadow) -> {
+            if (HmEntityLogicMatcher.is( player.hm$getRidingEntity(), PhysicsEntity.class) && player.hm$getUniqueID() != renderingEntity && renderShadow) { //If shadows are disabled, were are in GuiInventory, CAN BREAK OTHER MODS
+                //If the player is on a seat, and GlobalRender isn't rendering players riding the entity, just cancel the event, and cancel all modifications by other mods (priority = EventPriority.HIGHEST)
+                return HmEventResult.cancel();
+            }
+            return HmEventResult.pass();
+        });
+
+        HmMcClientEvents.LIVING_ENTITY_RENDER_PRE.register((entity, partialTicks, renderShadow) -> {
+            if (HmEntityLogicMatcher.is(entity.hm$getRidingEntity(), PhysicsEntity.class) && entity.hm$getUniqueID() != renderingEntity && renderShadow) { //If shadows are disabled, were are in GuiInventory, CAN BREAK OTHER MODS
+                //If the entity is on a seat, and GlobalRender isn't rendering entity riding the entity, just cancel the event, and cancel all modifications by other mods (priority = EventPriority.HIGHEST)
+                return HmEventResult.cancel();
+            }
+    
+            // If the entity has a ragdoll, don't render it
+            if (entity.hm$isInvisible() && DynamXContext.getPlayerToCollision().containsKey(entity) && DynamXContext.getPlayerToCollision().get(entity).ragdollEntity != null) {
+                return HmEventResult.cancel();
+            }
+            return HmEventResult.pass();
         });
     }
 
@@ -296,95 +360,14 @@ public class ClientEventHandler {
 
     private static long connectionTime = -1;
 
-    @SubscribeEvent
-    public void onClientConnected(FMLNetworkEvent.ClientConnectedToServerEvent event) {
-        connectionTime = System.currentTimeMillis();
-    }
-
-    @SubscribeEvent
-    public void onClientDisconnected(FMLNetworkEvent.ClientDisconnectionFromServerEvent event) {
-        DynamXContext.getNetwork().stopNetwork();
-        connectionTime = -1;
-    }
-
-    /* Sound events */
-
-    @SubscribeEvent
-    public void onSoundSystemSetup(SoundSetupEvent event) {
-        ClientProxy.SOUND_HANDLER.setup(event);
-    }
-
-    @SubscribeEvent
-    public void onSoundSystemLoad(SoundLoadEvent event) {
-        ClientProxy.SOUND_HANDLER.load(event);
-    }
-
     /* Tick/render events */
-
-    @SubscribeEvent
-    public void onDrawBlockHighlight(DrawBlockHighlightEvent event) {
-        if (this.model == null) {
-            return;
-        }
-        GlStateManager.enableAlpha();
-        GlQuaternionPool.openPool();
-        QuaternionPool.openPool();
-        model.renderPreview(blockObjectInfo, event.getPlayer(), blockPos, canPlace, playerOrientation, event.getPartialTicks(), textureNum);
-        QuaternionPool.closePool();
-        GlQuaternionPool.closePool();
-    }
-
-    @SubscribeEvent
-    public void onEntityCameraSetup(EntityViewRenderEvent.CameraSetup event) {
-        if (HmEntityLogicMatcher.is((HmEntity) event.getEntity().getRidingEntity(), PhysicsEntity.class)) {
-            CameraSystem.rotateVehicleCamera(event);
-        }
-    }
-
-    @SubscribeEvent
-    public void renderWorldLast(RenderWorldLastEvent event) {
-        double partialTicks = event.getPartialTicks();
-
-        if (RenderMovableLine.hasMovableLines()) {
-            float x = (float) (MC.player.lastTickPosX + (MC.player.posX - MC.player.lastTickPosX) * partialTicks);
-            float y = (float) (MC.player.lastTickPosY + (MC.player.posY - MC.player.lastTickPosY) * partialTicks);
-            float z = (float) (MC.player.lastTickPosZ + (MC.player.posZ - MC.player.lastTickPosZ) * partialTicks);
-            GlStateManager.pushMatrix();
-            GlStateManager.disableLighting();
-            GlStateManager.disableTexture2D();
-            GlStateManager.disableDepth();
-            GlStateManager.translate(-x, -y, -z);
-
-            JmeVector3fPool.openPool();
-            QuaternionPool.openPool();
-            RenderMovableLine.renderLine(event.getPartialTicks());
-            JmeVector3fPool.closePool();
-            QuaternionPool.closePool();
-
-            GlStateManager.enableTexture2D();
-            GlStateManager.enableDepth();
-            GlStateManager.enableLighting();
-            GlStateManager.popMatrix();
-        }
-
-        if (ClientDebugSystem.enableDebugDrawing) {
-            if (DynamXDebugOptions.CAMERA_RAYCAST.isActive()) {
-                CameraSystem.drawDebug();
-            }
-        }
-        if (!isRenderingEntitiesWithOptifineShaders) {
-            renderBigEntities((float) partialTicks);
-        } else {
-            isRenderingEntitiesWithOptifineShaders = false;
-        }
-    }
 
     /**
      * This method is part of the big entities rendering fix <br>
      * It resets the wasRendered field of all DynamX entities to false
      */
     public static void resetBigEntities() {
-        ((List) MC.world.loadedEntityList).forEach(HmEntityLogicMatcher.consumer(PhysicsEntity.class, e -> e.wasRendered = false));
+        MC.hm$getWorld().hm$getEntityList().forEach(HmEntityLogicMatcher.consumer(PhysicsEntity.class, e -> e.wasRendered = false));
     }
 
     /**
@@ -395,15 +378,15 @@ public class ClientEventHandler {
      */
     public static void renderBigEntities(float partialTicks) {
         boolean setup = false;
-        Entity entity = MC.getRenderViewEntity();
-        if (entity == null) {
+        HmEntity renderViewEntity = MC.hm$getRenderViewEntity();
+        if (renderViewEntity == null) {
             return;
         }
         ICamera icamera = null;
         double d0 = 0, d1 = 0, d2 = 0;
 
-        for (Entity e : MC.world.loadedEntityList) {
-            PhysicsEntity<?> physicsEntity = HmEntityLogicMatcher.cast((HmEntity) e, PhysicsEntity.class);
+        for (HmEntity e : MC.hm$getWorld().hm$getEntityList()) {
+            PhysicsEntity<?> physicsEntity = HmEntityLogicMatcher.cast(e, PhysicsEntity.class);
             if (physicsEntity == null || physicsEntity.wasRendered) {
                 continue;
             }
@@ -411,52 +394,31 @@ public class ClientEventHandler {
             if (!setup) {
                 GlStateManager.pushMatrix();
                 RenderHelper.enableStandardItemLighting();
-                MC.entityRenderer.enableLightmap();
+                MC.getHmRenderApi().enableLightmap();
                 icamera = new Frustum();
 
-                d0 = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks;
-                d1 = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks;
-                d2 = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks;
+                d0 = renderViewEntity.hm$getLastTickPosX() + (renderViewEntity.hm$getPosX() - renderViewEntity.hm$getLastTickPosX()) * partialTicks;
+                d1 = renderViewEntity.hm$getLastTickPosY() + (renderViewEntity.hm$getPosY() - renderViewEntity.hm$getLastTickPosY()) * partialTicks;
+                d2 = renderViewEntity.hm$getLastTickPosZ() + (renderViewEntity.hm$getPosZ() - renderViewEntity.hm$getLastTickPosZ()) * partialTicks;
                 icamera.setPosition(d0, d1, d2);
 
-                d0 = entity.prevPosX + (entity.posX - entity.prevPosX) * partialTicks;
-                d1 = entity.prevPosY + (entity.posY - entity.prevPosY) * partialTicks;
-                d2 = entity.prevPosZ + (entity.posZ - entity.prevPosZ) * partialTicks;
+                d0 = renderViewEntity.hm$getPrevPosX() + (renderViewEntity.hm$getPosX() - renderViewEntity.hm$getPrevPosX()) * partialTicks;
+                d1 = renderViewEntity.hm$getPrevPosY() + (renderViewEntity.hm$getPosY() - renderViewEntity.hm$getPrevPosY()) * partialTicks;
+                d2 = renderViewEntity.hm$getPrevPosZ() + (renderViewEntity.hm$getPosZ() - renderViewEntity.hm$getPrevPosZ()) * partialTicks;
                 setup = true;
             }
-            if (!MC.getRenderManager().shouldRender(e, icamera, d0, d1, d2) && !e.isRidingOrBeingRiddenBy(MC.player)) {
+            if (!MC.getHmRenderApi().shouldRender(e, icamera, d0, d1, d2) && !e.hm$isRidingOrBeingRiddenBy(MC.hm$getPlayer())) {
                 continue;
             }
-            boolean flag1 = MC.getRenderViewEntity() instanceof EntityLivingBase && ((EntityLivingBase) MC.getRenderViewEntity()).isPlayerSleeping();
-            if ((e != MC.getRenderViewEntity() || MC.gameSettings.thirdPersonView != 0 || flag1) && (e.posY < 0.0D || e.posY >= 256.0D || MC.world.isBlockLoaded(e.getPosition()))) {
-                MC.getRenderManager().renderEntityStatic(e, partialTicks, false);
+            boolean flag1 = renderViewEntity instanceof EntityLivingBase && ((EntityLivingBase) renderViewEntity).isPlayerSleeping();
+            if ((e != renderViewEntity || !MC.hm$getGameSettings().hm$isFirstPersonView() || flag1) && (e.hm$getPosY() < 0.0D || e.hm$getPosY() >= 256.0D || MC.hm$getWorld().hm$isBlockLoaded(e.hm$getPosition()))) {
+                MC.getHmRenderApi().renderEntity(e, partialTicks);
             }
         }
         if (setup) {
-            MC.entityRenderer.disableLightmap();
+            MC.getHmRenderApi().disableLightmap();
             RenderHelper.disableStandardItemLighting();
             GlStateManager.popMatrix();
-        }
-    }
-
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public void playerRender(RenderPlayerEvent.Pre event) {
-        if (HmEntityLogicMatcher.is((HmEntity) event.getEntityPlayer().getRidingEntity(), PhysicsEntity.class) && event.getEntity().getUniqueID() != renderingEntity && event.getRenderer().getRenderManager().isRenderShadow()) { //If shadows are disabled, were are in GuiInventory, CAN BREAK OTHER MODS
-            //If the player is on a seat, and GlobalRender isn't rendering players riding the entity, just cancel the event, and cancel all modifications by other mods (priority = EventPriority.HIGHEST)
-            event.setCanceled(true);
-        }
-    }
-
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public void entityRender(RenderLivingEvent.Pre event) {
-        if (HmEntityLogicMatcher.is((HmEntity) event.getEntity().getRidingEntity(), PhysicsEntity.class) && event.getEntity().getUniqueID() != renderingEntity && event.getRenderer().getRenderManager().isRenderShadow()) { //If shadows are disabled, were are in GuiInventory, CAN BREAK OTHER MODS
-            //If the entity is on a seat, and GlobalRender isn't rendering entity riding the entity, just cancel the event, and cancel all modifications by other mods (priority = EventPriority.HIGHEST)
-            event.setCanceled(true);
-        }
-
-        // If the entity has a ragdoll, don't render it
-        if (event.getEntity().isInvisible() && DynamXContext.getPlayerToCollision().containsKey(event.getEntity()) && DynamXContext.getPlayerToCollision().get(event.getEntity()).ragdollEntity != null) {
-            event.setCanceled(true);
         }
     }
 }

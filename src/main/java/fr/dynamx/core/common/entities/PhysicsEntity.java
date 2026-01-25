@@ -27,6 +27,7 @@ import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.api.mc.entities.HmClientPlayerEntity;
 import fr.hermes.api.mc.entities.HmEntityLogic;
 import fr.hermes.api.mc.items.HmItemStack;
 import fr.hermes.api.mc.world.HmWorld;
@@ -49,6 +50,7 @@ import java.util.*;
  */
 @SynchronizedEntityVariable.SynchronizedPhysicsModule(modid = DynamXConstants.ID)
 public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>> implements IDynamXObject, HmEntityLogic {
+    @Getter
     protected final HmEntity mcEntity;
 
     /**
@@ -572,6 +574,10 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
 
     public int getTicksExisted() {
         return mcEntity.hm$getTicksExisted();
+    }
+
+    public boolean hasPassenger(HmEntity entity) {
+        return mcEntity.hm$getPassengers().contains(entity);
     }
 
     /* FIXME DOES IT BREAKS SOMETHING TO REMOVE THIS?? @Override

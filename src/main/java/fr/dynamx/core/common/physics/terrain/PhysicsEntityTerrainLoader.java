@@ -8,6 +8,7 @@ import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.common.physics.terrain.chunk.ChunkLoadingTicket;
 import fr.dynamx.core.utils.VerticalChunkPos;
 import fr.dynamx.core.utils.debug.Profiler;
+import fr.hermes.api.mc.entities.HmEntity;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,7 +20,6 @@ public class PhysicsEntityTerrainLoader implements IPhysicsTerrainLoader {
     private static final Map<VerticalChunkPos, ChunkLoadingTicket.TicketPriority> toLoad = new ConcurrentHashMap<>();
     private static final Map<VerticalChunkPos, ChunkLoadingTicket.TicketPriority> toUnLoad = new ConcurrentHashMap<>();
     protected int lastChunkX, lastChunkY = Integer.MAX_VALUE, lastChunkZ; //note that this precises coordinates are an edge case where the chunk won't be loaded on entity spawn :O
-    protected int curChunkX, curChunkY, curChunkZ;
 
     private static final int radiusY = 3;//3
     private static final int radiusYHalf = 1;//1
@@ -41,18 +41,19 @@ public class PhysicsEntityTerrainLoader implements IPhysicsTerrainLoader {
 
     @Override
     public void update(ITerrainManager terrain, Profiler profiler) {
-        if (lastChunkX != entityIn.getChunkX() || lastChunkY != entityIn.getChunkY() || lastChunkZ != entityIn.getChunkZ()) {
+        HmEntity mcEntity = entityIn.getMcEntity();
+        if (lastChunkX != mcEntity.hm$getChunkX() || lastChunkY != mcEntity.hm$getChunkY() || lastChunkZ != mcEntity.hm$getChunkZ()) {
             profiler.start(Profiler.Profiles.DELTA_COMPUTE);
             VerticalChunkPos.Mutable pos = new VerticalChunkPos.Mutable();
             VerticalChunkPos.Mutable prevPos = new VerticalChunkPos.Mutable();
-            int curChunkX = entityIn.getChunkX();
-            int curChunkY = entityIn.getChunkY();
-            int curChunkZ = entityIn.getChunkZ();
+            int curChunkX = mcEntity.hm$getChunkX();
+            int curChunkY = mcEntity.hm$getChunkY();
+            int curChunkZ = mcEntity.hm$getChunkZ();
             for (int i = 0; i < radiusY; i++) { //TODO DEPENDS ON SPEED ?
                 for (int j = 0; j < squareRadiusH; j++) {
                     int dx = (j % radiusH) - radiusHHalf;
                     int dz = (j / radiusH) - radiusHHalf;
-                    pos.setPos(entityIn.getChunkX() + dx, entityIn.getChunkY() + i - radiusYHalf, entityIn.getChunkZ() + dz);
+                    pos.setPos(curChunkX + dx, curChunkY + i - radiusYHalf, curChunkZ + dz);
                     prevPos.setPos(lastChunkX + dx, lastChunkY + i - radiusYHalf, lastChunkZ + dz);
                     //boolean border = isBorderChunkUnsub(entityIn.chunkCoordX - lastChunkX, entityIn.chunkCoordY - lastChunkY, entityIn.chunkCoordZ - lastChunkZ, dx, i - radiusYHalf, dz);
                     if (loadMatrice[i][j] != -1) {
@@ -67,9 +68,9 @@ public class PhysicsEntityTerrainLoader implements IPhysicsTerrainLoader {
                             toLoad.remove(prevPosImmutable);
                         loadMatrice[i][j] = -1;
                     }
-                    int deltaX = pos.x * 16 + 8 - (int) entityIn.getPosX();
-                    int deltaY = pos.y * 16 + 8 - (int) entityIn.getPosY();
-                    int deltaZ = pos.z * 16 + 8 - (int) entityIn.getPosZ();
+                    int deltaX = pos.x * 16 + 8 - (int) mcEntity.hm$getPosX();
+                    int deltaY = pos.y * 16 + 8 - (int) mcEntity.hm$getPosY();
+                    int deltaZ = pos.z * 16 + 8 - (int) mcEntity.hm$getPosZ();
                     if (needsToBeLoaded(entityIn.physicsHandler.getLinearVelocity(), deltaX, deltaY, deltaZ)) {
                         ChunkLoadingTicket.TicketPriority priority = getPriority(entityIn.physicsHandler.getLinearVelocity(), dx, i - radiusYHalf, dz, deltaX, deltaY, deltaZ);
                         loadMatrice[i][j] = (byte) priority.ordinal();

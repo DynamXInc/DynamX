@@ -39,6 +39,7 @@ import fr.dynamx.core.utils.debug.DynamXDebugOptions;
 import fr.dynamx.core.utils.errors.DynamXErrorManager;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.dynamx.core.utils.physics.DynamXPhysicsHelper;
+import fr.hermes.api.mc.entities.HmEntity;
 import fr.hermes.api.mc.items.HmItemStack;
 import fr.hermes.api.mc.entities.HmPlayerEntity;
 import fr.hermes.api.mc.utils.HmResourceLocation;
@@ -138,7 +139,7 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
         if (doors == null)
             return false;
         if (isEnabled() && !doors.isDoorAttached(getId())) {
-            if (!entity.hm$getWorld().hm$isClient()) {
+            if (!entity.getWorld().hm$isClient()) {
                 doors.spawnDoor(this);
             }
         } else if (!isPlayerMounting()) {
@@ -385,16 +386,17 @@ public class PartDoor extends InteractivePart<BaseVehicleEntity<?>, ModularVehic
                 Vector3f pos = JmeVector3fPool.get(prev.getPosition()).addLocal(rbSyncTrans.getPosition().subtract(prev.getPosition(), JmeVector3fPool.get()).multLocal(partialTicks));
 
                 transform.rotate(ClientDynamXUtils.computeInterpolatedJomlQuaternion(entity.prevRenderRotation, entity.renderRotation, partialTicks, true));
-                transform.translate((float) (pos.x - (entity.getPrevPosX() + (entity.getPosX() - entity.getPrevPosX()) * partialTicks)),
-                        (float) (pos.y - (entity.getPrevPosY() + (entity.getPosY() - entity.getPrevPosY()) * partialTicks)),
-                        (float) (pos.z - (entity.getPrevPosZ() + (entity.getPosZ() - entity.getPrevPosZ()) * partialTicks)));
+                HmEntity mcEntity = entity.getMcEntity();
+                transform.translate((float) (pos.x - (mcEntity.hm$getPrevPosX() + (mcEntity.hm$getPosX() - mcEntity.hm$getPrevPosX()) * partialTicks)),
+                        (float) (pos.y - (mcEntity.hm$getPrevPosY() + (mcEntity.hm$getPosY() - mcEntity.hm$getPrevPosY()) * partialTicks)),
+                        (float) (pos.z - (mcEntity.hm$getPrevPosZ() + (mcEntity.hm$getPosZ() - mcEntity.hm$getPrevPosZ()) * partialTicks)));
                 transform.rotate(ClientDynamXUtils.computeInterpolatedJomlQuaternion(prev.getRotation(), rbSyncTrans.getRotation(), partialTicks));
             }
             transform.scale(scale.x, scale.y, scale.z);
 
             GlStateManager.pushMatrix();
             glTransformToPartPos();
-            context.getRender().renderModelGroup(context.getModel(), getObjectName(), entity, context.getTextureId(), false);
+            context.getRender().renderModelGroup(context.getModel(), getObjectName(), entity.getMcEntity(), context.getTextureId(), false);
             GlStateManager.popMatrix();
             renderChildren(context, packInfo, transform);
         }

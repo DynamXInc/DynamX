@@ -132,9 +132,36 @@ public class ListenableHmEvent<T> implements HmEvent<T> {
      * @param <R>             The result type
      * @return The first non-PASS result, or PASS if all listeners passed
      */
-    public <R> HmEventResult<R> process(Function<T, HmEventResult<R>> listenerInvoker) {
+    public <R> HmEventResult<R> processWithResult(Function<T, HmEventResult<R>> listenerInvoker) {
         for (T listener : listeners) {
             HmEventResult<R> result = listenerInvoker.apply(listener);
+            // null is treated as PASS
+            if (result != null && result.shouldStopPropagation()) {
+                return result;
+            }
+        }
+        return HmEventResult.pass(null);
+    }
+
+    /**
+     * Invokes listeners until one returns a non-PASS result.
+     * <p>
+     * Use this inside your invoker factory for cancellable/result callbacks.
+     * <p>
+     * Each listener is called via the listenerInvoker function, which should return:
+     * <ul>
+     *   <li>{@code null} or {@code HmEventResult.pass()} - continue to next listener</li>
+     *   <li>{@code HmEventResult.success()} - stop processing, event handled successfully</li>
+     *   <li>{@code HmEventResult.cancel()} - stop processing, event cancelled</li>
+     * </ul>
+     *
+     * @param listenerInvoker A function that calls the appropriate method on each listener
+     * @param <R>             The result type
+     * @return The first non-PASS result, or PASS if all listeners passed
+     */
+    public HmEventResult.Type process(Function<T, HmEventResult.Type> listenerInvoker) {
+        for (T listener : listeners) {
+            HmEventResult.Type result = listenerInvoker.apply(listener);
             // null is treated as PASS
             if (result != null && result.shouldStopPropagation()) {
                 return result;

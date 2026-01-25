@@ -49,7 +49,7 @@ public abstract class BaseVehiclePhysicsHandler<T extends BaseVehicleEntity<?>> 
     @Override
     public void update() {
         super.update();
-        if (!EnginePhysicsHandler.inTestFullGo && getCollisionObject().getActivationState() == 4 && getHandledEntity().getHmControllingPassenger() == null) {
+        if (!EnginePhysicsHandler.inTestFullGo && getCollisionObject().getActivationState() == 4 && getHandledEntity().getControllingPassenger() == null) {
             getCollisionObject().setEnableSleep(true);
         }
         if (EnginePhysicsHandler.inTestFullGo)

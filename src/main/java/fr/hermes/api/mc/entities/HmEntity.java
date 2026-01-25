@@ -1,9 +1,10 @@
 package fr.hermes.api.mc.entities;
 
+import fr.dynamx.core.common.entities.SeatEntity;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.hermes.api.mc.world.HmWorld;
+import net.minecraft.util.math.BlockPos;
 import org.joml.Vector3f;
-import org.joml.Vector3i;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -63,7 +64,7 @@ public interface HmEntity {
 
     Vector3f hm$getPosition();
 
-    Vector3i hm$getBlockPosition();
+    BlockPos hm$getBlockPosition();
 
     float hm$getEyeHeight();
 
@@ -110,5 +111,15 @@ public interface HmEntity {
 
     void hm$setRotationPitch(float rotationPitch);
 
-    void setPrevRotationPitch(float prevRotationPitch);
+    void hm$setPrevRotationPitch(float prevRotationPitch);
+
+    boolean hm$isInvisible();
+
+    float hm$getLastTickPosX();
+
+    float hm$getLastTickPosY();
+
+    float hm$getLastTickPosZ();
+
+    boolean hm$startRiding(HmEntity entity);
 }

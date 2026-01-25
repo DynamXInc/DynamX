@@ -110,7 +110,7 @@ public class CarEngineModule extends BasicEngineModule implements IPackInfoReloa
 
     @Override
     public void setControls(int controls) {
-        if (entity.hm$getWorld().hm$isClient() && entity.getTicksExisted() > 60 && entity.getPackInfo() instanceof CarInfo) {
+        if (entity.getWorld().hm$isClient() && entity.getTicksExisted() > 60 && entity.getPackInfo() instanceof CarInfo) {
             if (!this.isHandBraking() && (controls & 32) == 32)
                 playHandbrakeSound(true);
             else if (this.isHandBraking() && (controls & 32) != 32)
@@ -146,7 +146,7 @@ public class CarEngineModule extends BasicEngineModule implements IPackInfoReloa
         }
 
         HmMinecraftClient client = HermesPlatform.getInstance().getClient();
-        boolean forInterior = client.hm$getGameSettings().hm$isFirstPersonView() && entity.isRidingOrBeingRiddenBy(client.hm$getPlayer());
+        boolean forInterior = client.hm$getGameSettings().hm$isFirstPersonView() && entity.hasPassenger(client.hm$getPlayer());
         if (reversingSound != null && reversingSound.getState() == EnumSoundState.PLAYING) {
             if (forInterior == reversingSound.isInterior())
                 return;

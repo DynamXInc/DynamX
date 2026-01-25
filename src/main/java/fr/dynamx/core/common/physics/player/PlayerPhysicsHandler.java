@@ -32,8 +32,8 @@ public class PlayerPhysicsHandler {
 
     public PlayerPhysicsHandler(HmPlayerEntity playerIn) {
         this.playerIn = playerIn;
-        Quaternion localQuat = new Quaternion(0.0F, 1.0F, 0.0F, playerIn.getRotationYaw());
-        Transform localTransform = new Transform(new Vector3f((float) playerIn.getPosX(), (float) playerIn.getPosY() + 0.8f, (float) playerIn.getPosZ()), localQuat);
+        Quaternion localQuat = new Quaternion(0.0F, 1.0F, 0.0F, playerIn.hm$getRotationYaw());
+        Transform localTransform = new Transform(new Vector3f((float) playerIn.hm$getPosX(), (float) playerIn.hm$getPosY() + 0.8f, (float) playerIn.hm$getPosZ()), localQuat);
         BoxCollisionShape shape = new BoxCollisionShape(0.35f, 0.8f, 0.35f);
         bodyIn = DynamXPhysicsHelper.createRigidBody(60f, localTransform, shape,
                 new BulletShapeType<>(EnumBulletShapeType.PLAYER, this));
@@ -42,7 +42,7 @@ public class PlayerPhysicsHandler {
     }
 
     public void update(HmWorld world) {
-        if (playerIn.isDead)
+        if (playerIn.hm$isDead())
             removeFromWorld(true, world);
         if (removedCountdown > 0)
             removedCountdown--;
@@ -53,7 +53,7 @@ public class PlayerPhysicsHandler {
                     state = PlayerBodyState.ACTIONABLE;
                 break;
             case ACTIONABLE:
-                if (removedCountdown == 0 && !playerIn.isSpectator()) {
+                if (removedCountdown == 0 && !playerIn.hm$isSpectator()) {
                     if (bodyIn == null)
                         throw new IllegalStateException("Body is null while adding " + removedCountdown + " " + state + " " + playerIn);
                     physicsWorld.addCollisionObject(bodyIn);
@@ -61,7 +61,7 @@ public class PlayerPhysicsHandler {
                 }
                 break;
             case ACTIVATING:
-                if (playerIn.isSpectator())
+                if (playerIn.hm$isSpectator())
                     removeFromWorld(false, world);
                 else if (bodyIn.isInWorld()) {
                     physicsWorld.schedule(() -> {
@@ -72,14 +72,14 @@ public class PlayerPhysicsHandler {
                 }
                 break;
             case ACTIVATED:
-                if (playerIn.isSpectator())
+                if (playerIn.hm$isSpectator())
                     removeFromWorld(false, world);
                 else if (bodyIn != null) {
                     Vector3f position = JmeVector3fPool.get();
-                    position.set((float) playerIn.getPosX(), (float) playerIn.getPosY() + 0.8f, (float) playerIn.getPosZ());
-                    if (Vector3f.isValidVector(position) && playerIn.fallDistance < 10) { //fixes a crash with elytra
+                    position.set((float) playerIn.hm$getPosX(), (float) playerIn.hm$getPosY() + 0.8f, (float) playerIn.hm$getPosZ());
+                    if (Vector3f.isValidVector(position) && playerIn.hm$getFallDistance() < 10) { //fixes a crash with elytra
                         bodyIn.setPhysicsLocation(position);
-                        bodyIn.setPhysicsRotation(QuaternionPool.get().fromAngleNormalAxis((float) Math.toRadians(-playerIn.getRotationYaw()), Vector3f.UNIT_Y));
+                        bodyIn.setPhysicsRotation(QuaternionPool.get().fromAngleNormalAxis((float) Math.toRadians(-playerIn.hm$getRotationYaw()), Vector3f.UNIT_Y));
                         bodyIn.setContactResponse(true);
                     } else
                         bodyIn.setContactResponse(false);

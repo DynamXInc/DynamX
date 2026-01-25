@@ -71,7 +71,7 @@ public class ClientProxy extends CommonProxy {
 
     @Override
     public <T extends AbstractEntityPhysicsHandler<?, ?>> PhysicsEntitySynchronizer<? extends PhysicsEntity<T>> getNetHandlerForEntity(PhysicsEntity<T> tPhysicsEntity) {
-        if (tPhysicsEntity.hm$getWorld().hm$isClient()) {
+        if (tPhysicsEntity.getWorld().hm$isClient()) {
             if (HermesPlatform.getInstance().getServer() != null)
                 return new SPPhysicsEntitySynchronizer<>(tPhysicsEntity, true);
             else
@@ -82,22 +82,22 @@ public class ClientProxy extends CommonProxy {
 
     @Override
     public int getTickTime() {
-        return HermesPlatform.getInstance().getClient().hm$getPlayer().getTicksExisted();
+        return HermesPlatform.getInstance().getClient().hm$getPlayer().hm$getTicksExisted();
     }
 
     @Override
     public boolean ownsSimulation(PhysicsEntity<?> entity) {
         //TODO NEW SYNC CLEAN THIS
-        if (entity.getSynchronizer().getSimulationHolder().ownsPhysics(entity.hm$getWorld().hm$isClient())) {
+        if (entity.getSynchronizer().getSimulationHolder().ownsPhysics(entity.getWorld().hm$isClient())) {
             return true;
         }
         HmClientPlayerEntity player = ClientEventHandler.MC.hm$getPlayer();
-        if (entity.hm$getWorld().hm$isClient() && player.hm$getRidingEntity() instanceof PhysicsEntity
+        if (entity.getWorld().hm$isClient() && player.hm$getRidingEntity() instanceof PhysicsEntity
                 && ((PhysicsEntity<?>) player.hm$getRidingEntity()).getSynchronizer().getSimulationHolder().ownsPhysics(true)) {
             return true;
         }
-        return player != null && DynamXContext.getPlayerPickingObjects().containsKey(player.getEntityId()) &&
-                DynamXContext.getPlayerPickingObjects().get(player.getEntityId()) == entity.getEntityId();
+        return player != null && DynamXContext.getPlayerPickingObjects().containsKey(player.hm$getEntityId()) &&
+                DynamXContext.getPlayerPickingObjects().get(player.hm$getEntityId()) == entity.getEntityId();
         //on client side : true if the player is driving a vehicle (in any entity)
     }
 

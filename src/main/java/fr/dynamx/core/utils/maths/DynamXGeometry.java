@@ -239,7 +239,7 @@ public class DynamXGeometry {
     /**
      * Euclidean distance between this and the specified vector, returned as double
      */
-    public static double distanceBetween(Vector3f vec, Vector3f vec2) {
+    public static double distanceBetween(Vector3f vec, org.joml.Vector3f vec2) {
         double d0 = vec2.x - vec.x;
         double d1 = vec2.y - vec.y;
         double d2 = vec2.z - vec.z;

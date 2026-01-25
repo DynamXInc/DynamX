@@ -11,7 +11,6 @@ import fr.hermes.api.mc.items.HmItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import org.joml.Vector3f;
-import org.joml.Vector3i;
 
 /**
  * Registry of Minecraft common player events
@@ -21,14 +20,14 @@ public final class HmPlayerEvents {
      * Callback for player join events.
      */
     @FunctionalInterface
-    public interface PlayerJoinCallback {
+    public interface PlayerJoinServerCallback {
         void onPlayerJoin(HmServerPlayerEntity player);
     }
 
     /**
      * Called when a player joins the server.
      */
-    public static final HmEvent<PlayerJoinCallback> JOIN = ListenableHmEvent.create(event ->
+    public static final HmEvent<PlayerJoinServerCallback> SERVER_JOIN = ListenableHmEvent.create(event ->
             (player) -> event.forEach(l -> l.onPlayerJoin(player))
     );
 
@@ -36,15 +35,45 @@ public final class HmPlayerEvents {
      * Callback for player leave events.
      */
     @FunctionalInterface
-    public interface PlayerLeaveCallback {
+    public interface PlayerLeaveServerCallback {
         void onPlayerLeave(HmServerPlayerEntity player);
     }
 
     /**
      * Called when a player leaves the server.
      */
-    public static final HmEvent<PlayerLeaveCallback> LEAVE = ListenableHmEvent.create(event ->
+    public static final HmEvent<PlayerLeaveServerCallback> SERVER_LEAVE = ListenableHmEvent.create(event ->
             (player) -> event.forEach(l -> l.onPlayerLeave(player))
+    );
+
+    /**
+     * Callback for client connected to server events.
+     */
+    @FunctionalInterface
+    public interface ClientConnectedToServerCallback {
+        void onClientConnectedToServer();
+    }
+
+    /**
+     * Called when a client connects to the server.
+     */
+    public static final HmEvent<ClientConnectedToServerCallback> CLIENT_CONNECTED_TO_SERVER = ListenableHmEvent.create(event ->
+            () -> event.forEach(ClientConnectedToServerCallback::onClientConnectedToServer)
+    );
+
+    /**
+     * Callback for client disconnected from server events.
+     */
+    @FunctionalInterface
+    public interface ClientDisconnectedFromServerCallback {
+        void onClientDisconnectedFromServer();
+    }
+
+    /**
+     * Called when a client disconnects from the server.
+     */
+    public static final HmEvent<ClientDisconnectedFromServerCallback> CLIENT_DISCONNECTED_FROM_SERVER = ListenableHmEvent.create(event ->
+            () -> event.forEach(ClientDisconnectedFromServerCallback::onClientDisconnectedFromServer)
     );
 
     /**
@@ -112,7 +141,7 @@ public final class HmPlayerEvents {
      */
     @FunctionalInterface
     public interface PlayerRightClickEntityCallback {
-        HmEventResult<Void> onPlayerRightClickEntity(HmPlayerEntity player, EnumHand hand, HmEntity target);
+        HmEventResult.Type onPlayerRightClickEntity(HmPlayerEntity player, EnumHand hand, HmEntity target);
     }
 
     /**

@@ -78,7 +78,7 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
 
     @Override
     public void writeToNBT(NBTTagCompound tag) {
-        seatToPassenger.forEach((s, p) -> tag.setString("Seat" + s.getId(), p.getUniqueID().toString()));
+        seatToPassenger.forEach((s, p) -> tag.setString("Seat" + s.getId(), p.hm$getUniqueID().toString()));
     }
 
     @Override
@@ -104,17 +104,21 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
         if (seat == null) {
             return;
         }
+
         JmeVector3fPool.openPool();
         Vector3f posVec = DynamXGeometry.rotateVectorByQuaternion(seat.getPosition(), entity.renderRotation);
-        passenger.setPosition((
-                float) (entity.getPosX() + posVec.x),
-                (float) (entity.getPosY() + posVec.y),
-                (float) (entity.getPosZ() + posVec.z));
+
+        HmEntity entity = this.entity.getMcEntity();
+        passenger.hm$setPosition((
+                float) (entity.hm$getPosX() + posVec.x),
+                (float) (entity.hm$getPosY() + posVec.y),
+                (float) (entity.hm$getPosZ() + posVec.z));
+
         JmeVector3fPool.closePool();
 
         // make player's yaw follow the entity yaw
-        float deltaRotation = entity.getRotationYaw() - entity.getPrevRotationYaw();
-        passenger.setRotationYaw(passenger.getRotationYaw() + deltaRotation);
+        float deltaRotation = entity.hm$getRotationYaw() - entity.hm$getPrevRotationYaw();
+        passenger.hm$setRotationYaw(passenger.hm$getRotationYaw() + deltaRotation);
         passenger.hm$setRotationYawHead(passenger.hm$getRotationYawHead() + deltaRotation);
         applyOrientationToEntity(passenger);
     }
@@ -127,38 +131,38 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
         BasePartSeat<?, ?> seat = getRidingSeat(passenger);
         if (seat != null && seat.shouldLimitFieldOfView()) {
             // Limit yaw
-            float f = MathHelper.wrapDegrees(passenger.getRotationYaw() - entity.getRotationYaw());
+            float f = MathHelper.wrapDegrees(passenger.hm$getRotationYaw() - entity.getMcEntity().hm$getRotationYaw());
             float f1 = MathHelper.clamp(f, seat.getMinYaw(), seat.getMaxYaw());
-            passenger.hm$setPrevRotationYaw(passenger.getPrevRotationYaw() + (f1 - f));
-            passenger.setRotationYaw(passenger.getRotationYaw() + (f1 - f));
+            passenger.hm$setPrevRotationYaw(passenger.hm$getPrevRotationYaw() + (f1 - f));
+            passenger.hm$setRotationYaw(passenger.hm$getRotationYaw() + (f1 - f));
 
             // Limit pitch
-            float f2 = MathHelper.wrapDegrees(passenger.getRotationPitch());
+            float f2 = MathHelper.wrapDegrees(passenger.hm$getRotationPitch());
             float f3 = MathHelper.clamp(f2, seat.getMinPitch(), seat.getMaxPitch());
             passenger.hm$setRotationPitch(f3);
-            f2 = MathHelper.wrapDegrees(passenger.getPrevRotationPitch());
+            f2 = MathHelper.wrapDegrees(passenger.hm$getPrevRotationPitch());
             f3 = MathHelper.clamp(f2, seat.getMinPitch(), seat.getMaxPitch());
-            passenger.setPrevRotationPitch(f3);
+            passenger.hm$setPrevRotationPitch(f3);
         }
-        passenger.hm$setRotationYawHead(passenger.getRotationYaw() - entity.getRotationYaw());
+        passenger.hm$setRotationYawHead(passenger.hm$getRotationYaw() - entity.getMcEntity().hm$getRotationYaw());
     }
 
     @Override
     public void addPassenger(HmEntity passenger) {
-        if (entity.hm$getWorld().hm$isClient()) {
+        if (entity.getWorld().hm$isClient()) {
             return;
         }
         BasePartSeat<?, ?> hitPart = seatToPassenger.inverse().get(passenger);
         if (hitPart != null) {
             if (hitPart.isDriver() && passenger instanceof HmPlayerEntity) {
-                if (DynamXContext.usesPhysicsWorld(entity.hm$getWorld())) { //Fix: in single player, server has no physics world
-                    DynamXContext.getPhysicsWorld(entity.hm$getWorld()).schedule(() -> entity.getSynchronizer().onPlayerStartControlling((HmPlayerEntity) passenger, true));
+                if (DynamXContext.usesPhysicsWorld(entity.getWorld())) { //Fix: in single player, server has no physics world
+                    DynamXContext.getPhysicsWorld(entity.getWorld()).schedule(() -> entity.getSynchronizer().onPlayerStartControlling((HmPlayerEntity) passenger, true));
                 } else {
                     entity.getSynchronizer().onPlayerStartControlling((HmPlayerEntity) passenger, true);
                 }
             }
             //TODO EVENTS MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.EntityMount(Side.SERVER, passenger, entity, this, hitPart));
-            DynamXContext.getNetwork().sendToClient(new MessageSeatsSync((IModuleContainer.ISeatsContainer) entity), EnumPacketTarget.ALL_TRACKING_ENTITY, entity);
+            DynamXContext.getNetwork().sendToClient(new MessageSeatsSync((IModuleContainer.ISeatsContainer) entity), EnumPacketTarget.ALL_TRACKING_ENTITY, entity.getMcEntity());
         } else {
             log.error("Cannot add passenger : {} : seat not found !", passenger);
         }
@@ -168,19 +172,20 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
     @Override
     public void removePassenger(HmEntity passenger) {
         BasePartSeat<?, ?> seat = getRidingSeat(passenger);
-        if (entity.hm$getWorld().hm$isClient() || seat == null) {
+        if (entity.getWorld().hm$isClient() || seat == null) {
             return;
         }
+
         lastRiddenSeat = seat;
         seatToPassenger.remove(seat);
         if (seat.isDriver() && passenger instanceof HmPlayerEntity) {
-            if (DynamXContext.usesPhysicsWorld(entity.hm$getWorld())) { //Fix: in single player, server has no physics world
-                DynamXContext.getPhysicsWorld(entity.hm$getWorld()).schedule(() -> entity.getSynchronizer().onPlayerStopControlling((HmPlayerEntity) passenger, true));
+            if (DynamXContext.usesPhysicsWorld(entity.getWorld())) { //Fix: in single player, server has no physics world
+                DynamXContext.getPhysicsWorld(entity.getWorld()).schedule(() -> entity.getSynchronizer().onPlayerStopControlling((HmPlayerEntity) passenger, true));
             } else {
                 entity.getSynchronizer().onPlayerStopControlling((HmPlayerEntity) passenger, true);
             }
         }
-        DynamXContext.getNetwork().sendToClient(new MessageSeatsSync((IModuleContainer.ISeatsContainer) entity), EnumPacketTarget.ALL_TRACKING_ENTITY, entity);
+        DynamXContext.getNetwork().sendToClient(new MessageSeatsSync((IModuleContainer.ISeatsContainer) entity), EnumPacketTarget.ALL_TRACKING_ENTITY, entity.getMcEntity());
         //TODO EVENTS MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.EntityDismount(entity.world.isRemote ? Side.CLIENT : Side.SERVER, passenger, entity, this, seat));
         //Client side is managed by updateSeats
     }
@@ -196,7 +201,7 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
         List<BasePartSeat> remove = new ArrayList<>(0);
         //Search for players who dismounted the entity
         for (Map.Entry<BasePartSeat<?, ?>, HmEntity> seatEntry : seatToPassenger.entrySet()) {
-            if (msg.getSeatToEntity().containsValue(seatEntry.getValue().getEntityId())) {
+            if (msg.getSeatToEntity().containsValue(seatEntry.getValue().hm$getEntityId())) {
                 continue;
             }
             remove.add(seatEntry.getKey());
@@ -221,7 +226,7 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
         for (Map.Entry<Byte, Integer> e : msg.getSeatToEntity().entrySet()) {
             BasePartSeat<?, ?> seat = entity.getPackInfo().getPartByTypeAndId(BasePartSeat.class, e.getKey());
             if (seat != null) {
-                HmEntity passengerEntity = entity.hm$getWorld().hm$getEntityByID(e.getValue());
+                HmEntity passengerEntity = entity.getWorld().hm$getEntityByID(e.getValue());
                 if (passengerEntity != null) {
                     if (seatToPassenger.get(seat) != passengerEntity) { //And add them
                         seatToPassenger.put(seat, passengerEntity);
@@ -232,8 +237,8 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
                     }
                 } else {
                     log.warn("Entity with id {} not found for seat in {}", e.getValue(), entity);
-                    log.warn("Details {} {}", msg.getSeatToEntity(), entity.getHmPassengers());
-                    log.warn("Players there {}", entity.hm$getWorld().hm$getPlayerEntities());
+                    log.warn("Details {} {}", msg.getSeatToEntity(), entity.getMcEntity().hm$getPassengers());
+                    log.warn("Players there {}", entity.getWorld().hm$getPlayerEntities());
                     log.warn("THE player id {}", DynamXMain.getProxy().getClientWorld());
                 }
             } else {

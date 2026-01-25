@@ -264,11 +264,9 @@ public abstract class MixinEntity implements HmEntity {
         return Vector3fPool.get(posX, posY, posZ);
     }
 
-    // TODO re-think if it can remain a BlockPos everywhere
     @Override
-    public Vector3i hm$getBlockPosition() {
-        BlockPos pos = getPosition();
-        return new Vector3i(pos.getX(), pos.getY(), pos.getZ());
+    public BlockPos hm$getBlockPosition() {
+        return getPosition();
     }
 
     @Override
@@ -292,17 +290,17 @@ public abstract class MixinEntity implements HmEntity {
     }
 
     @Override
-    public void hm$setMotionX(float motionX) {
+    public void hm$setMotionX(double motionX) {
         this.motionX = motionX;
     }
 
     @Override
-    public void hm$setMotionY(float motionY) {
+    public void hm$setMotionY(double motionY) {
         this.motionY = motionY;
     }
 
     @Override
-    public void hm$setMotionZ(float motionZ) {
+    public void hm$setMotionZ(double motionZ) {
         this.motionZ = motionZ;
     }
 

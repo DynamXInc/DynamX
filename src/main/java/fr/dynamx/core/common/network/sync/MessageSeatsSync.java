@@ -26,7 +26,7 @@ public class MessageSeatsSync extends PhysicsEntityMessage<MessageSeatsSync> {
     public MessageSeatsSync(IModuleContainer.ISeatsContainer vehicleEntity) {
         super(vehicleEntity.cast());
         for (Map.Entry<BasePartSeat<?, ?>, HmEntity> e : vehicleEntity.getSeats().getSeatToPassengerMap().entrySet()) {
-            seatToEntity.put(e.getKey().getId(), e.getValue().getEntityId());
+            seatToEntity.put(e.getKey().getId(), e.getValue().hm$getEntityId());
         }
     }
 
@@ -48,7 +48,7 @@ public class MessageSeatsSync extends PhysicsEntityMessage<MessageSeatsSync> {
             }
             return;
         }
-        DynamXContext.getPhysicsWorld(entity.hm$getWorld()).schedule(() -> ((IModuleContainer.ISeatsContainer) entity).getSeats().updateSeats((MessageSeatsSync) message, entity.getSynchronizer()));
+        DynamXContext.getPhysicsWorld(entity.getWorld()).schedule(() -> ((IModuleContainer.ISeatsContainer) entity).getSeats().updateSeats((MessageSeatsSync) message, entity.getSynchronizer()));
     }
 
     @Override

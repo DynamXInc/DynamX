@@ -17,7 +17,7 @@ import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.maths.DynamXMath;
 import fr.dynamx.core.utils.optimization.*;
 import fr.dynamx.forge.DynamXConfig;
-import fr.hermes.api.HmEntityLogicMatcher;
+import fr.hermes.api.utils.HmEntityLogicMatcher;
 import fr.hermes.api.mc.entities.HmEntity;
 import fr.hermes.api.mc.entities.HmEntityLogic;
 import fr.hermes.api.mc.entities.HmModEntity;

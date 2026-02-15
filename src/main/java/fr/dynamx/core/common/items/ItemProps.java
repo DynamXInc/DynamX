@@ -2,7 +2,8 @@ package fr.dynamx.core.common.items;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.core.common.contentpack.type.objects.PropObject;
-import fr.dynamx.core.common.entities.PropsEntity;
+import fr.dynamx.core.common.entities.PhysicsEntitiesFactory;
+import fr.hermes.api.mc.entities.HmPlayerEntity;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -11,7 +12,6 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 public class ItemProps<T extends PropObject<T>> extends DynamXItemSpawner<T> {
-
     protected final int textureNum;
 
     public ItemProps(T itemInfo) {
@@ -36,21 +36,21 @@ public class ItemProps<T extends PropObject<T>> extends DynamXItemSpawner<T> {
                     for (float j = 0; j < 5; j += 1) {
                         for (float k = 0; k < 5; k += 1) {
                             pos = new Vector3f((float) blockPos.x + i, (float) blockPos.y + 4f + (j), (float) blockPos.z + k);
-                            worldIn.spawnEntity(getSpawnEntity(worldIn, playerIn, pos, playerIn.rotationYaw % 360.0F, itemStackIn.getMetadata()));
+                            worldIn.spawnEntity(getSpawnEntity(playerIn, pos, playerIn.rotationYaw % 360.0F, itemStackIn.getMetadata()));
                         }
                     }
                 }
             } else {
                 pos = new Vector3f((float) blockPos.x + getInfo().getSpawnOffset().x, (float) blockPos.y + getInfo().getSpawnOffset().y, (float) blockPos.z + getInfo().getSpawnOffset().z);
-                worldIn.spawnEntity(getSpawnEntity(worldIn, playerIn, pos, playerIn.rotationYaw % 360.0F, itemStackIn.getMetadata()));
+                worldIn.spawnEntity(getSpawnEntity(playerIn, pos, playerIn.rotationYaw % 360.0F, itemStackIn.getMetadata()));
             }
         }
         return true;
     }
 
     @Override
-    public PropsEntity<?> getSpawnEntity(World worldIn, EntityPlayer playerIn, Vector3f pos, float spawnRotation, int metadata) {
-        return new PropsEntity<>(getInfo().getFullName(), worldIn, pos, spawnRotation, metadata);
+    public PhysicsEntitiesFactory getSpawnEntity(HmPlayerEntity playerIn, Vector3f pos, float spawnRotation, int metadata) {
+        return new PhysicsEntitiesFactory.Props(getInfo().getFullName(), pos, spawnRotation, metadata);
     }
 
     @Override

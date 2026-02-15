@@ -7,6 +7,7 @@ import fr.dynamx.core.common.physics.terrain.element.EmptyTerrainElement;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.hermes.api.mc.blocks.HmBlockState;
 import fr.hermes.api.mc.world.HmWorld;
+import net.minecraft.util.math.BlockPos;
 import org.joml.Vector3i;
 
 import java.util.ArrayList;
@@ -70,7 +71,7 @@ public class TerrainBoxConstructor {
         outListMutable.add(boundingBox);
     }
 
-    public void addBlockCollisions(HmWorld world, Vector3i at, HmBlockState ofBlock) {
+    public void addBlockCollisions(HmWorld world, BlockPos at, HmBlockState ofBlock) {
         if (isDebug()) {
             List<MutableBoundingBox> boxes = new ArrayList<>();
             ofBlock.hm$addCollisionBoxes(world, at, getSearchZone(), boxes);
@@ -80,7 +81,7 @@ public class TerrainBoxConstructor {
         }
     }
 
-    public void injectBlockCollisions(Vector3i at, HmBlockState ofBlock, List<MutableBoundingBox> boxes) {
+    public void injectBlockCollisions(BlockPos at, HmBlockState ofBlock, List<MutableBoundingBox> boxes) {
         if (isDebug())
             System.out.println("Injecting " + boxes.size() + " boxes at " + at + " for " + ofBlock);
         outListVanilla.addAll(boxes);

@@ -37,8 +37,9 @@ public interface ITerrainUpdateBehavior {
     class DefaultUpdateBehavior implements ITerrainUpdateBehavior {
         @Override
         public Result getResult(HmWorld world, BlockPos pos, HmBlockState oldState, HmBlockState newState) {
-            if (!(oldState.hm$isFullCube() && newState.hm$isFullCube()) && (oldState.getMaterial().blocksMovement() || newState.getMaterial().blocksMovement()))
+            if (!(oldState.hm$isFullCube() && newState.hm$isFullCube()) && (oldState.hm$blocksMovement() || newState.hm$blocksMovement())) {
                 return Result.DO_UPDATE;
+            }
             return Result.IGNORE;
         }
     }

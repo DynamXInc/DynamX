@@ -141,7 +141,7 @@ public class HmUtilsClient extends HmForgeUtils implements HermesUtilsClient, IS
         ((SimpleReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(this);
 
         // Code below was in ClientProxy.init() instead of preInit() now
-        MinecraftForge.EVENT_BUS.register(new KeyHandler(FMLClientHandler.instance().getClient()));
+        MinecraftForge.EVENT_BUS.register(new KeyHandler());
         ClientCommandHandler.instance.registerCommand(new DynamXClientCommand());
 
         ClientRegistry.bindTileEntitySpecialRenderer(TEDynamXBlock.class, new TESRDynamXBlock<>());

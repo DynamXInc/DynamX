@@ -23,7 +23,7 @@ import fr.dynamx.core.utils.debug.DynamXDebugOptions;
 import fr.dynamx.core.utils.optimization.GlQuaternionPool;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.forge.DynamXConfig;
-import fr.hermes.api.HmEntityLogicMatcher;
+import fr.hermes.api.utils.HmEntityLogicMatcher;
 import fr.hermes.api.events.HmEventResult;
 import fr.hermes.api.mc.client.HmScreen;
 import fr.hermes.api.mc.entities.HmClientPlayerEntity;

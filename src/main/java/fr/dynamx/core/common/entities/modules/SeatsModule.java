@@ -85,8 +85,7 @@ public class SeatsModule implements IPhysicsModule<AbstractEntityPhysicsHandler<
     public void readFromNBT(NBTTagCompound tag) {
         for (BasePartSeat<?, ?> seat : (List<BasePartSeat>) entity.getPackInfo().getPartsByType(BasePartSeat.class)) {
             if (tag.hasKey("Seat" + seat.getId(), Constants.NBT.TAG_STRING)) {
-                //TODO UTILS FUNCTION
-                HmEntity player = entity.getServer().getPlayerList().getPlayerByUUID(UUID.fromString(tag.getString("Seat" + seat.getId())));
+                HmEntity player = entity.getWorld().hm$getEntityByUuid(UUID.fromString(tag.getString("Seat" + seat.getId())));
                 if (player != null) {
                     seatToPassenger.put(seat, player);
                 }

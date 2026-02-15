@@ -9,18 +9,16 @@ import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.core.common.entities.BaseVehicleEntity;
 import fr.dynamx.core.common.entities.modules.engines.BoatPropellerModule;
 import fr.dynamx.core.utils.DynamXConstants;
+import fr.hermes.api.mc.utils.HmResourceLocation;
+import fr.hermes.api.mod.McObjectBinder;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.Collections;
 import java.util.List;
 
 public class BoatController extends BaseController {
-    public static final ResourceLocation STYLE = new ResourceLocation(DynamXConstants.ID, "css/vehicle_hud.css");
+    public static final HmResourceLocation STYLE = McObjectBinder.instance.newResourceLocation(DynamXConstants.ID, "css/vehicle_hud.css");
 
     @Getter
     @Setter
@@ -39,7 +37,7 @@ public class BoatController extends BaseController {
     @Override
     protected void updateControls() {
         if (engine.getEngineProperties() != null) {
-            MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.ControllerUpdate<>(entity, this));
+            //TODO EVENT MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.ControllerUpdate<>(entity, this));
             int controls = 0;
             if (accelerating)
                 controls = controls | 2;
@@ -60,7 +58,6 @@ public class BoatController extends BaseController {
     //HUD
 
     @Override
-    @SideOnly(Side.CLIENT)
     public GuiComponent createHud() {
         GuiPanel panel = new GuiPanel();
         GuiPanel speed = new GuiPanel();
@@ -73,7 +70,7 @@ public class BoatController extends BaseController {
     }
 
     @Override
-    public List<ResourceLocation> getHudCssStyles() {
+    public List<HmResourceLocation> getHudCssStyles() {
         return Collections.singletonList(STYLE);
     }
 }

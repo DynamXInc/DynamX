@@ -33,33 +33,28 @@ import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.Vector3fPool;
 import fr.dynamx.forge.DynamXConfig;
+import fr.hermes.api.mc.blocks.HmTileEntity;
+import fr.hermes.api.mc.client.HmMinecraftClient;
 import fr.hermes.api.mc.entities.HmEntity;
 import fr.hermes.api.mc.entities.HmPlayerEntity;
+import fr.hermes.api.mc.utils.HmRayTraceResult;
 import fr.hermes.api.mc.utils.HmResourceLocation;
 import fr.hermes.api.mc.world.HmWorld;
 import fr.hermes.forge.JmeVector3fPool;
 import fr.dynamx.core.utils.physics.DynamXPhysicsHelper;
 import fr.dynamx.core.utils.physics.PhysicsRaycastResult;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagDouble;
 import net.minecraft.nbt.NBTTagFloat;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.World;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.joml.Quaternionf;
 import org.lwjgl.BufferUtils;
@@ -219,53 +214,55 @@ public class DynamXUtils {
         return nbttaglist;
     }
 
-    public static Vector3f getCameraTranslation(Minecraft mc, float delta) {
-        return JmeVector3fPool.get((float) mc.player.prevPosX + (float) (mc.player.posX - mc.player.prevPosX) * delta, (float) mc.player.prevPosY + (float) (mc.player.posY - (float) mc.player.prevPosY) * delta, (float) mc.player.prevPosZ + (float) (mc.player.posZ - (float) mc.player.prevPosZ) * delta);
+    public static Vector3f getCameraTranslation(HmEntity player, float delta) {
+        return JmeVector3fPool.get((float) player.hm$getPrevPosX() + (float) (player.hm$getPosX() - player.hm$getPrevPosX()) * delta,
+                (float) player.hm$getPrevPosY() + (float) (player.hm$getPosY() - (float) player.hm$getPrevPosY()) * delta,
+                (float) player.hm$getPrevPosZ() + (float) (player.hm$getPosZ() - (float) player.hm$getPrevPosZ()) * delta);
     }
 
-    public static RayTraceResult rayTraceEntitySpawn(World worldIn, EntityPlayer playerIn, EnumHand hand) {
+    public static HmRayTraceResult rayTraceEntitySpawn(HmWorld worldIn, HmPlayerEntity playerIn, EnumHand hand) {
         return getMouseOver(playerIn, 1);
     }
 
     /**
      * We put that here, because smart people of Forge think a ray trace is a client thing
      */
-    private static RayTraceResult rayTrace(Entity entity, double blockReachDistance, float partialTicks) {
-        Vec3d vec3d = entity.getPositionEyes(partialTicks);
-        Vec3d vec3d1 = entity.getLook(partialTicks);
-        Vec3d vec3d2 = vec3d.add(vec3d1.x * blockReachDistance, vec3d1.y * blockReachDistance, vec3d1.z * blockReachDistance);
-        return entity.world.rayTraceBlocks(vec3d, vec3d2, true, false, true);
+    private static HmRayTraceResult rayTrace(HmEntity entity, float blockReachDistance, float partialTicks) {
+        org.joml.Vector3f vec3d = entity.hm$getEyesPosition(partialTicks);
+        org.joml.Vector3f vec3d1 = entity.hm$getLook(partialTicks);
+        org.joml.Vector3f vec3d2 = vec3d.add(vec3d1.x * blockReachDistance, vec3d1.y * blockReachDistance, vec3d1.z * blockReachDistance);
+        return entity.hm$getWorld().rayTraceBlocks(vec3d, vec3d2, true, false, true);
     }
 
-    public static RayTraceResult getMouseOver(Entity entity, float partialTicks) {
-        RayTraceResult objectMouseOver = null;
+    public static HmRayTraceResult getMouseOver(HmEntity entity, float partialTicks) {
+        HmRayTraceResult objectMouseOver = null;
         if (entity != null) {
-            if (entity.world != null) {
-                Entity pointedEntity = null;
-                double d0 = 5;
+            if (entity.hm$getWorld() != null) {
+                HmEntity pointedEntity = null;
+                float d0 = 5;
                 objectMouseOver = rayTrace(entity, d0, partialTicks);
-                Vec3d vec3d = entity.getPositionEyes(partialTicks);
+                org.joml.Vector3f vec3d = entity.hm$getEyesPosition(partialTicks);
                 int i = 3;
-                double d1 = d0;
+                float d1 = d0;
 
                 if (objectMouseOver != null) {
-                    d1 = objectMouseOver.hitVec.distanceTo(vec3d);
+                    d1 = objectMouseOver.hm$getHitVec().distance(vec3d);
                 }
 
-                Vec3d vec3d1 = entity.getLook(1.0F);
-                Vec3d vec3d2 = vec3d.add(vec3d1.x * d0, vec3d1.y * d0, vec3d1.z * d0);
+                org.joml.Vector3f vec3d1 = entity.hm$getLook(partialTicks);
+                org.joml.Vector3f vec3d2 = vec3d.add(vec3d1.x * d0, vec3d1.y * d0, vec3d1.z * d0);
                 Vec3d vec3d3 = null;
                 float f = 1.0F;
-                List<Entity> list = entity.world.getEntitiesInAABBexcluding(entity, entity.getEntityBoundingBox().expand(vec3d1.x * d0, vec3d1.y * d0, vec3d1.z * d0).grow(1.0D, 1.0D, 1.0D), Predicates.and(EntitySelectors.NOT_SPECTATING, new com.google.common.base.Predicate<Entity>() {
-                    public boolean apply(@Nullable Entity p_apply_1_) {
+                List<HmEntity> list = entity.hm$getWorld().getEntitiesInAABBexcluding(entity, entity.getEntityBoundingBox().expand(vec3d1.x * d0, vec3d1.y * d0, vec3d1.z * d0).grow(1.0D, 1.0D, 1.0D), Predicates.and(EntitySelectors.NOT_SPECTATING, new com.google.common.base.Predicate<Entity>() {
+                    public boolean apply(HmEntity p_apply_1_) {
                         return p_apply_1_ != null && p_apply_1_.canBeCollidedWith();
                     }
                 }));
                 double d2 = d1;
 
-                for (Entity entity1 : list) {
-                    AxisAlignedBB axisalignedbb = entity1.getEntityBoundingBox().grow(entity1.getCollisionBorderSize());
-                    RayTraceResult raytraceresult = axisalignedbb.calculateIntercept(vec3d, vec3d2);
+                for (HmEntity entity1 : list) {
+                    AxisAlignedBB axisalignedbb = entity1.hm$getBoundingBox().grow(entity1.getCollisionBorderSize());
+                    HmRayTraceResult raytraceresult = axisalignedbb.calculateIntercept(vec3d, vec3d2);
 
                     if (axisalignedbb.contains(vec3d)) {
                         if (d2 >= 0.0D) {
@@ -382,7 +379,7 @@ public class DynamXUtils {
         return -1;
     }
 
-    public static void attachTrailer(EntityPlayer player, BaseVehicleEntity<?> carEntity, BaseVehicleEntity<?> trailer) {
+    public static void attachTrailer(HmPlayerEntity player, BaseVehicleEntity<?> carEntity, BaseVehicleEntity<?> trailer) {
         JmeVector3fPool.openPool();
         Vector3f p1r = DynamXGeometry.rotateVectorByQuaternion(carEntity.getModuleByType(TrailerAttachModule.class).getAttachPoint(), carEntity.physicsRotation);
         Vector3f p2r = DynamXGeometry.rotateVectorByQuaternion(trailer.getModuleByType(TrailerAttachModule.class).getAttachPoint(), trailer.physicsRotation);
@@ -401,34 +398,32 @@ public class DynamXUtils {
             }
             if (trailerIsAttached == null) {
                 if (TrailerAttachModule.HANDLER.createJoint(carEntity, trailer, (byte) 0)) {
-                    TextComponentTranslation msg = new TextComponentTranslation("trailer.attached", trailer.getPackInfo().getName(), carEntity.getPackInfo().getName());
-                    msg.getStyle().setColor(TextFormatting.GREEN);
-                    player.sendMessage(msg);
-                    if (player.world.isRemote && trailer instanceof TrailerEntity)
+                    player.hm$sendTranslatedMessage("trailer.attached",TextFormatting.GREEN, trailer.getPackInfo().getName(), carEntity.getPackInfo().getName());
+                    if (player.hm$getWorld().hm$isClient() && trailer instanceof TrailerEntity) {
                         ((TrailerEntity<?>) trailer).playAttachSound();
+                    }
                 } else {
-                    TextComponentTranslation msg = new TextComponentTranslation("trailer.attach.fail", trailer.getPackInfo().getName(), carEntity.getPackInfo().getName());
-                    msg.getStyle().setColor(TextFormatting.RED);
-                    player.sendMessage(msg);
+                    player.hm$sendTranslatedMessage("trailer.attach.fail", TextFormatting.RED, trailer.getPackInfo().getName(), carEntity.getPackInfo().getName());
                 }
             } else {
                 carEntity.getJointsHandler().removeJointWith(trailerIsAttached, TrailerAttachModule.JOINT_NAME, (byte) 0);
-                player.sendMessage(new TextComponentTranslation("trailer.detached"));
+                player.hm$sendTranslatedMessage("trailer.detached");
             }
         } else {
-            player.sendMessage(new TextComponentTranslation("trailer.attach.toofar"));
+            player.hm$sendTranslatedMessage("trailer.attach.toofar");
         }
         JmeVector3fPool.closePool();
     }
 
 
     public static void hotswapWorldPackInfos(HmWorld w) {
-        DynamXMain.log.info("Hot-swapping pack infos in models and spawn entities/tile entities in world " + w);
+        DynamXMain.log.info("Hot-swapping pack infos in models and spawn entities/tile entities in world {}", w);
+        // FIXME THIS IS BROKEN BECAUSE ENTITY LOGIC SYSTEM
         for (HmEntity e : w.hm$getEntityList()) {
             if (e instanceof IPackInfoReloadListener)
                 ((IPackInfoReloadListener) e).onPackInfosReloaded();
         }
-        for (TileEntity te : w.loadedTileEntityList) {
+        for (HmTileEntity te : w.hm$getBlockEntityList()) {
             if (te instanceof IPackInfoReloadListener)
                 ((IPackInfoReloadListener) te).onPackInfosReloaded();
         }

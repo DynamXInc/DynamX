@@ -480,8 +480,7 @@ public class MutableBoundingBox implements Serializable {
         return JmeVector3fPool.get((float) (maxX - minX) / 2, (float) (maxY - minY) / 2, (float) (maxZ - minZ) / 2);
     }
 
-    public double getAverageEdgeLength()
-    {
+    public double getAverageEdgeLength() {
         double d0 = this.maxX - this.minX;
         double d1 = this.maxY - this.minY;
         double d2 = this.maxZ - this.minZ;
@@ -508,5 +507,13 @@ public class MutableBoundingBox implements Serializable {
         minZ += position.z;
         maxZ += position.z;
         return this;
+    }
+
+    public MutableBoundingBox offset(BlockPos pos) {
+        return offset(pos.getX(), pos.getY(), pos.getZ());
+    }
+
+    public AxisAlignedBB offsetToBB(BlockPos pos) {
+        return new AxisAlignedBB(minX + pos.getX(), minY + pos.getY(), minZ + pos.getZ(), maxX + pos.getX(), maxY + pos.getY(), maxZ + pos.getZ());
     }
 }

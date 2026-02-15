@@ -12,15 +12,13 @@ import fr.dynamx.core.common.entities.BaseVehicleEntity;
 import fr.dynamx.core.common.network.sync.variables.EntityFloatArrayVariable;
 import fr.dynamx.core.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.core.utils.DynamXConstants;
+import fr.dynamx.core.utils.maths.DynamXMath;
+import fr.hermes.api.mc.entities.HmEntity;
+import fr.hermes.api.mc.entities.HmPlayerEntity;
 import io.netty.buffer.ByteBuf;
 import lombok.Getter;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SynchronizedEntityVariable.SynchronizedPhysicsModule(modid = DynamXConstants.ID)
 public class HelicopterEngineModule extends BasicEngineModule implements IEntityAdditionalSpawnData {
@@ -47,7 +45,7 @@ public class HelicopterEngineModule extends BasicEngineModule implements IEntity
     }
 
     public void setPower(float power) {
-        this.power.set(MathHelper.clamp(power, 0, 1));
+        this.power.set(DynamXMath.clamp(power, 0, 1));
     }
 
     public float getPower() {
@@ -55,9 +53,9 @@ public class HelicopterEngineModule extends BasicEngineModule implements IEntity
     }
 
     @Override
-    public void removePassenger(Entity passenger) {
+    public void removePassenger(HmEntity passenger) {
         super.removePassenger(passenger);
-        if (entity.getHmControllingPassenger() == null && passenger instanceof EntityPlayer && !((EntityPlayer) passenger).capabilities.isCreativeMode) {
+        if (entity.getControllingPassenger() == null && passenger instanceof HmPlayerEntity && !((HmPlayerEntity) passenger).hm$isCreativeMode()) {
             power.set(0f);
         }
     }
@@ -78,7 +76,6 @@ public class HelicopterEngineModule extends BasicEngineModule implements IEntity
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
     public IVehicleController createNewController() {
         return new HelicopterController(entity, this);
     }
@@ -96,7 +93,7 @@ public class HelicopterEngineModule extends BasicEngineModule implements IEntity
     }
 
     @Override
-    public boolean listenEntityUpdates(Side side) {
+    public boolean listenEntityUpdates(boolean isClient) {
         return true;
     }
 
@@ -111,7 +108,7 @@ public class HelicopterEngineModule extends BasicEngineModule implements IEntity
                 power.set(-(float) startupTimer / 20);
             }
         }
-        if (entity.world.isRemote) { //sounds
+        if (entity.getWorld().hm$isClient()) { //sounds
             super.updateEntity();
         }
     }

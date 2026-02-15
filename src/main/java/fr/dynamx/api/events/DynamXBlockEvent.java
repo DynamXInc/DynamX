@@ -6,6 +6,7 @@ import fr.dynamx.core.client.renders.scene.node.SceneNode;
 import fr.dynamx.core.common.blocks.DynamXBlock;
 import fr.dynamx.core.common.blocks.TEDynamXBlock;
 import fr.dynamx.core.common.contentpack.type.objects.BlockObject;
+import fr.hermes.api.mc.world.HmWorld;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.world.World;
@@ -20,9 +21,9 @@ public class DynamXBlockEvent extends Event {
     private final Side side;
     @Nullable
     private final DynamXBlock<?> block;
-    private final World world;
+    private final HmWorld world;
 
-    public DynamXBlockEvent(Side side, DynamXBlock<?> dynamXBlock, World world) {
+    public DynamXBlockEvent(Side side, DynamXBlock<?> dynamXBlock, HmWorld world) {
         this.block = dynamXBlock;
         this.side = side;
         this.world = world;
@@ -33,7 +34,7 @@ public class DynamXBlockEvent extends Event {
     public static class CreateTileEntity extends DynamXBlockEvent {
         private TEDynamXBlock tileEntity;
 
-        public CreateTileEntity(Side side, DynamXBlock<?> dynamXBlock, World world, TEDynamXBlock tileEntity) {
+        public CreateTileEntity(Side side, DynamXBlock<?> dynamXBlock, HmWorld world, TEDynamXBlock tileEntity) {
             super(side, dynamXBlock, world);
             this.tileEntity = tileEntity;
         }
@@ -50,7 +51,7 @@ public class DynamXBlockEvent extends Event {
         private final EventPhase eventPhase;
 
         public RenderTileEntity(DynamXBlock<?> dynamXBlock, BaseRenderContext.BlockRenderContext renderContext, SceneNode<BaseRenderContext.BlockRenderContext, BlockObject<?>> sceneNode, TESRDynamXBlock<?> renderer, int destroyStage, float alpha, EventPhase eventPhase) {
-            super(Side.CLIENT, dynamXBlock, renderContext.getTileEntity().getWorld());
+            super(Side.CLIENT, dynamXBlock, renderContext.getTileEntity().getMcBlockEntity().hm$getWorld());
             this.renderContext = renderContext;
             this.sceneNode = sceneNode;
             this.renderer = renderer;

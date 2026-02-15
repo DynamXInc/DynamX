@@ -4,6 +4,7 @@ import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.core.common.entities.BaseVehicleEntity;
 import fr.dynamx.core.common.entities.modules.engines.HelicopterEngineModule;
 import fr.dynamx.core.common.physics.entities.BaseVehiclePhysicsHandler;
+import fr.hermes.api.mc.entities.HmEntity;
 import fr.hermes.api.mc.world.HmWorld;
 import io.netty.buffer.ByteBuf;
 import lombok.Getter;
@@ -36,8 +37,8 @@ public class HelicopterRotorModule implements IPhysicsModule<BaseVehiclePhysicsH
             curPower = curPower + (targetPower - curPower) / 60; //3-seconds interpolation
             curAngle += curPower;
         }
-        if (entity.hm$getWorld().hm$isClient()) {
-            int height = (int) (entity.getPosY() - entity.hm$getWorld().hm$getHeight((int) entity.getPosX(), (int) entity.getPosZ()));
+        if (entity.getWorld().hm$isClient()) {
+            int height = (int) (entity.getMcEntity().hm$getPosY() - entity.getWorld().hm$getHeight((int) entity.getMcEntity().hm$getPosX(), (int) entity.getMcEntity().hm$getPosZ()));
             if (height < 10) {
                 renderParticles(entity, height);
             }
@@ -45,8 +46,11 @@ public class HelicopterRotorModule implements IPhysicsModule<BaseVehiclePhysicsH
     }
 
     private void renderParticles(BaseVehicleEntity<?> entity, int height) {
-        HmWorld world = entity.hm$getWorld();
-        for (int i = 0; i < 360; i += 2) {
+        HmWorld world = entity.getWorld();
+        HmEntity mcEntity = entity.getMcEntity();
+
+        // TODO helicopter particle hermes
+        /*for (int i = 0; i < 360; i += 2) {
             int power = (int) (engine.getPower() * 10);
 
             if (world.hm$getRandom().nextInt(100) < power) {
@@ -56,15 +60,15 @@ public class HelicopterRotorModule implements IPhysicsModule<BaseVehiclePhysicsH
                 double x = Math.cos(Math.toRadians(i)) * (minRadius + radius);
                 double z = Math.sin(Math.toRadians(i)) * (minRadius + radius);
 
-                double y = world.hm$getHeight((int) (entity.getPosX() + x), (int) (entity.getPosZ() + z));
+                double y = world.hm$getHeight((int) (mcEntity.hm$getPosX() + x), (int) (mcEntity.hm$getPosZ() + z));
                 double zSpeed = Math.sin(Math.toRadians(i)) * 0.9;
                 double xSpeed = Math.cos(Math.toRadians(i)) * 0.9;
 
-                if (world.hm$isAirBlock((int) (entity.getPosX() + x), (int) (y), (int) (entity.getPosZ() + z))) {
+                if (world.hm$isAirBlock((int) (mcEntity.hm$getPosX() + x), (int) (y), (int) (mcEntity.hm$getPosZ() + z))) {
                     //TODO PARTICLE world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, entity.getPosX() + x, y, entity.getPosZ() + z, xSpeed, 0, zSpeed);
                 }
             }
-        }
+        }*/
     }
 
     @Override

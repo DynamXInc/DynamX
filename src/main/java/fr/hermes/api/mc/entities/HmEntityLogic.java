@@ -2,50 +2,72 @@ package fr.hermes.api.mc.entities;
 
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.hermes.api.mc.items.HmItemStack;
-import fr.hermes.api.mc.world.HmServerWorld;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.NBTTagCompound;
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
-import org.joml.Vector3i;
-
-import java.util.Collection;
-import java.util.UUID;
 
 public interface HmEntityLogic {
+    default void onMcEntityInit() {
+    }
+
     void readFromNbt(NBTTagCompound tag);
 
     void writeToNbt(NBTTagCompound tag);
 
-    void onSetDead();
+    default void onSetDead() {
+    }
 
     void onUpdate();
 
-    MutableBoundingBox getBoundingBox();
+    default MutableBoundingBox getBoundingBox() {
+        return null;
+    }
 
-    void onRemovedFromWorld();
+    default void onRemovedFromWorld() {
+    }
 
-    String getName();
+    default String getName() {
+        return null;
+    }
 
     void writeSpawnData(ByteBuf buffer);
 
     void readSpawnData(ByteBuf additionalData);
 
-    void onAddPassenger(HmEntity passenger);
+    default void onAddPassenger(HmEntity passenger) {
+    }
 
-    void onRemovePassenger(HmEntity passenger);
+    default void onRemovePassenger(HmEntity passenger) {
+    }
 
     boolean updatePassenger(HmEntity passenger);
 
     boolean updatePassengerRotation(HmEntity passenger);
 
-    HmEntity getControllingPassenger();
+    default HmEntity getControllingPassenger() {
+        return null;
+    }
 
-    HmItemStack getPickedResult();
+    default boolean canPassengerSteer() {
+        return true;
+    }
 
-    boolean canFitPassenger(HmEntity passenger);
+    default boolean shouldPassengersSit() {
+        return true;
+    }
 
-    boolean isInRangeToRenderDist(double range);
+    default HmItemStack getPickedResult() {
+        return null;
+    }
 
-    int getBrightnessForRender();
+    default Boolean canFitPassenger(HmEntity passenger) {
+        return null;
+    }
+
+    default Boolean isInRangeToRenderDist(double range) {
+        return null;
+    }
+
+    default int getBrightnessForRender() {
+        return -1;
+    }
 }

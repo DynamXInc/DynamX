@@ -11,6 +11,7 @@ import fr.hermes.api.mc.utils.HmAxis;
 import fr.hermes.api.mc.blocks.HmBlockState;
 import fr.hermes.api.mc.world.HmWorld;
 import fr.hermes.forge.JmeVector3fPool;
+import net.minecraft.util.math.BlockPos;
 import org.joml.Vector3i;
 
 import javax.annotation.Nullable;
@@ -84,7 +85,7 @@ public class TerrainCollisionsCalculator {
      * @param forState The block state
      * @return The behavior of this block state
      */
-    public static IBlockCollisionBehavior findBehavior(Map<HmBlockState, IBlockCollisionBehavior> lookup, HmWorld world, Vector3i pos, HmBlockState forState) {
+    public static IBlockCollisionBehavior findBehavior(Map<HmBlockState, IBlockCollisionBehavior> lookup, HmWorld world, BlockPos pos, HmBlockState forState) {
         IBlockCollisionBehavior behavior = lookup.get(forState);
         if (behavior == null) {
             behavior = NONE_BEHAVIOR;
@@ -126,10 +127,10 @@ public class TerrainCollisionsCalculator {
      * @param oz          Offset z
      * @param result      The stack result, filled with the result of the method, and returned
      */
-    private static void canContinueAdding(Map<HmBlockState, IBlockCollisionBehavior> lookup, HmWorld world, Vector3i pos, HmAxis axis, HmBlockState cur, HmBlockState onto, @Nullable HmBlockState lastStacked, TerrainCursor cursor, int ox, int oy, int oz, StackResult result) {
+    private static void canContinueAdding(Map<HmBlockState, IBlockCollisionBehavior> lookup, HmWorld world, BlockPos pos, HmAxis axis, HmBlockState cur, HmBlockState onto, @Nullable HmBlockState lastStacked, TerrainCursor cursor, int ox, int oy, int oz, StackResult result) {
         if (printDebug)
             System.out.println("Test " + cur + " " + ox + " " + oy + " " + oz + " " + cursor + " st " + cursor.getAt(ox, oy, oz));
-        if (world.hm$isAirBlock(pos.x, pos.y, pos.z) || cursor.getAt(ox, oy, oz) == 1) {
+        if (world.hm$isAirBlock(pos) || cursor.getAt(ox, oy, oz) == 1) {
             result.set(StackIssue.REFUSED, null);
         } else {
             IBlockCollisionBehavior behavior = findBehavior(lookup, world, pos, cur);
@@ -160,11 +161,11 @@ public class TerrainCollisionsCalculator {
      * @param z              Offset z
      * @return The behavior of this block only if this behavior is stackable in the given context, or none
      */
-    private static boolean addRow(StackResult behavior, Map<HmBlockState, IBlockCollisionBehavior> lookup, HmWorld world, TerrainBoxConstructor terrainBuilder, TerrainBoxBuilder currentBox, int x, int y, int z, TerrainCursor cursor, Vector3i mutable, HmBlockState with) {
+    private static boolean addRow(StackResult behavior, Map<HmBlockState, IBlockCollisionBehavior> lookup, HmWorld world, TerrainBoxConstructor terrainBuilder, TerrainBoxBuilder currentBox, int x, int y, int z, TerrainCursor cursor, BlockPos.MutableBlockPos mutable, HmBlockState with) {
         HmBlockState cur = null, lastCur = null;
         int cz = currentBox.getZSize();
         for (int i = 0; i <= currentBox.getXSize(); i++) { //Along the x axis
-            mutable.set(x + i, y, z);
+            mutable.setPos(x + i, y, z);
             cur = world.hm$getBlockState(mutable);
             canContinueAdding(lookup, world, mutable, HmAxis.Z, cur, with, lastCur, cursor, i, 0, cz + 1, behavior);
             if (printDebug)
@@ -207,12 +208,12 @@ public class TerrainCollisionsCalculator {
      * @param z              Offset z
      * @return The behavior of this block only if this behavior is stackable in the given context, or none
      */
-    private static boolean addPlane(StackResult behavior, Map<HmBlockState, IBlockCollisionBehavior> lookup, HmWorld world, TerrainBoxConstructor terrainBuilder, TerrainBoxBuilder currentBox, int x, int y, int z, TerrainCursor cursor, Vector3i mutable, HmBlockState with) {
+    private static boolean addPlane(StackResult behavior, Map<HmBlockState, IBlockCollisionBehavior> lookup, HmWorld world, TerrainBoxConstructor terrainBuilder, TerrainBoxBuilder currentBox, int x, int y, int z, TerrainCursor cursor, BlockPos.MutableBlockPos mutable, HmBlockState with) {
         HmBlockState cur = null, lastCur = null;
         int cy = currentBox.getYSize();
         for (int i = 0; i <= currentBox.getXSize(); i++) { //Along the x axis
             for (int j = 0; j <= currentBox.getZSize(); j++) { //Along the z axis
-                mutable.set(x + i, y, z + j);
+                mutable.setPos(x + i, y, z + j);
                 cur = world.hm$getBlockState(mutable);
                 canContinueAdding(lookup, world, mutable, HmAxis.Y, cur, with, lastCur, cursor, i, cy + 1, j, behavior);
                 if (printDebug)
@@ -233,7 +234,7 @@ public class TerrainCollisionsCalculator {
             int oldy = currentBox.getYSize();
             behavior.behavior.addBlockCollision(terrainBuilder, currentBox, cursor, world, mutable, cur, HmAxis.Y);
             if (currentBox.getYSize() == oldy) { //Avoid infinite loops...
-                DynamXMain.log.error("Detected y stuck element at " + cursor + " " + mutable + " " + cur + " " + behavior + " " + currentBox + " " + terrainBuilder + ". Incrementing y size anyway...");
+                DynamXMain.log.error("Detected y stuck element at {} {} {} {} {} {}. Incrementing y size anyway...", cursor, mutable, cur, behavior, currentBox, terrainBuilder);
                 currentBox.expandY(1);
             }
             return true;
@@ -257,7 +258,7 @@ public class TerrainCollisionsCalculator {
         int maxZ = terrainBuilder.getSearchMaxZ();
 
         //Local pos to speed-up things
-        Vector3i mutable = new Vector3i();
+        BlockPos.PooledMutableBlockPos mutable = BlockPos.PooledMutableBlockPos.retain();
         //Local map to speed-up things
         Map<HmBlockState, IBlockCollisionBehavior> lookup = behaviorLookup.get();
 
@@ -284,7 +285,7 @@ public class TerrainCollisionsCalculator {
             // premièrement, on cherche un bloc de base sur lequel s'appuyer pour construire
             // un AABB
             long t1 = System.currentTimeMillis();
-            mutable.set(minX + cursor.dx, minY + cursor.dy, minZ + cursor.dz);
+            mutable.setPos(minX + cursor.dx, minY + cursor.dy, minZ + cursor.dz);
             HmBlockState boxStart = world.hm$getBlockState(mutable);
 
             //System.out.println("Begin at "+dx+" "+dy+" "+dz);
@@ -293,9 +294,9 @@ public class TerrainCollisionsCalculator {
             while (cursor.getHere() == 1 || !boxStart.hm$blocksMovement() || !(stackable[0] = behavior.isStackableBlock(world, mutable, boxStart))) { // on ne repasse par sur des blocs ayant déjà
                 // été traités ni sur ceux ayant des collisions spéciales (ou aucune collisions) /!\ ordre des conditions important
 
-                if (printDebug && !world.hm$isAirBlock(mutable.x, mutable.y, mutable.z))
+                if (printDebug && !world.hm$isAirBlock(mutable))
                     System.out.println("Fail0 at " + cursor + " " + cursor.getHere());
-                if (!stackable[0] && !world.hm$isAirBlock(mutable.x, mutable.y, mutable.z)) { //Si le block a une collision spéciale, on l'ajoute
+                if (!stackable[0] && !world.hm$isAirBlock(mutable)) { //Si le block a une collision spéciale, on l'ajoute
                     if (printDebug)
                         System.out.println("ADDINGGGGG " + boxStart);
                     behavior.addBlockCollision(terrainBuilder, null, cursor, world, mutable, boxStart, null);
@@ -305,7 +306,7 @@ public class TerrainCollisionsCalculator {
                         System.out.println("End has been reached");
                     break y;// on a parcouru toute le chunk et on n'a rien trouvé, on arrête et passe au chunk suivant
                 }
-                mutable.set(minX + cursor.dx, minY + cursor.dy, minZ + cursor.dz);
+                mutable.setPos(minX + cursor.dx, minY + cursor.dy, minZ + cursor.dz);
                 boxStart = world.hm$getBlockState(mutable);
                 behavior = findBehavior(lookup, world, mutable, boxStart);
             }
@@ -326,7 +327,7 @@ public class TerrainCollisionsCalculator {
             //If we can stack in x+ direction
             if (cursor.dx + currentBox.getXSize() < lx) {
                 // on cherche maintenant à étendre notre AABB le plus possible
-                mutable.set(minX + cursor.dx + (currentBox.getXSize() + 1), minY + cursor.dy, minZ + cursor.dz);
+                mutable.setPos(minX + cursor.dx + (currentBox.getXSize() + 1), minY + cursor.dy, minZ + cursor.dz);
                 cur = world.hm$getBlockState(mutable);
                 if (printDebug) {
                     System.out.println("==============");
@@ -349,7 +350,7 @@ public class TerrainCollisionsCalculator {
                         }*/
                     }
                     behavior = stackResult.behavior;
-                    mutable.set(minX + cursor.dx + (currentBox.getXSize() + 1), minY + cursor.dy, minZ + cursor.dz);
+                    mutable.setPos(minX + cursor.dx + (currentBox.getXSize() + 1), minY + cursor.dy, minZ + cursor.dz);
                     cur = world.hm$getBlockState(mutable);
                     //System.out.println("StackX at "+dx+" "+dy+" "+dz+" "+k);
                 } //If behavior is null or NONE_BEHAVIOR, then we finished stacking in x+ direction
@@ -382,7 +383,7 @@ public class TerrainCollisionsCalculator {
             //Build the box (add it to the terrain builder)
             currentBox.build(terrainBuilder, cursor, minX, minY, minZ, maxX, maxY, maxZ);
             if (cursor.dx == oldx && cursor.dy == oldy && cursor.dz == oldz) { //Avoid infinite loops...
-                DynamXMain.log.error("Detected stuck element at " + cursor + " " + mutable + " " + boxStart + " " + behavior + " " + currentBox + " " + terrainBuilder + ". Incrementing cursor anyway...");
+                DynamXMain.log.error("Detected stuck element at {} {} {} {} {} {}. Incrementing cursor anyway...", cursor, mutable, boxStart, behavior, currentBox, terrainBuilder);
                 cursor.incrXZY();
             }
 
@@ -396,6 +397,8 @@ public class TerrainCollisionsCalculator {
             if (printDebug)
                 System.out.println(cursor + " were deltas");
         } while (cursor.incrZY());
+
+        mutable.release();
 
         //System.out.println("Quand j'ai fini les vanilles sont "+outListVanilla);
         // no pooled mutable to release in Hermes path

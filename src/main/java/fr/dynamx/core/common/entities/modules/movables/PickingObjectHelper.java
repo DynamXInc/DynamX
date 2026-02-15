@@ -13,7 +13,7 @@ import fr.dynamx.core.utils.DynamXUtils;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.physics.PhysicsRaycastResult;
 import fr.dynamx.forge.DynamXConfig;
-import fr.hermes.api.HmEntityLogicMatcher;
+import fr.hermes.api.utils.HmEntityLogicMatcher;
 import fr.hermes.api.mc.entities.HmEntity;
 import fr.hermes.api.mc.entities.HmPlayerEntity;
 import fr.hermes.api.mc.world.HmWorld;

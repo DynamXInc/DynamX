@@ -15,7 +15,6 @@ import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.maths.DynamXMath;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.hermes.forge.JmeVector3fPool;
-import net.minecraft.util.math.MathHelper;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import java.util.LinkedList;
@@ -117,13 +116,13 @@ public class DynamXPhysicsHelper {
         return bodyRotation.inverse().multLocal(pickPosition);
     }
 
-    public static void createExplosion(PhysicsEntity<?> physicsEntity, Vector3f explosionPosition, double explosionStrength) {
+    public static void createExplosion(PhysicsEntity<?> physicsEntity, org.joml.Vector3f explosionPosition, double explosionStrength) {
         if (physicsEntity.getPhysicsHandler() != null) {
             PhysicsRigidBody body = (PhysicsRigidBody) physicsEntity.getPhysicsHandler().getCollisionObject();
             Vector3f centerOfMass = physicsEntity.physicsPosition;
-            double distance = DynamXGeometry.distanceBetween(explosionPosition, centerOfMass);
-            Vector3f direction = centerOfMass.subtract(explosionPosition).normalize().add(new Vector3f(0.0f, 2.0f, 0.0f)).normalize();
-            double forgeStrength = (1.0D - MathHelper.clamp(distance / explosionStrength * 2.0D, 0.0D, 1.0D)) * 15.0D;
+            double distance = DynamXGeometry.distanceBetween(centerOfMass, explosionPosition);
+            Vector3f direction = centerOfMass.subtract(explosionPosition.x, explosionPosition.y, explosionPosition.z).normalize().add(new Vector3f(0.0f, 2.0f, 0.0f)).normalize();
+            double forgeStrength = (1.0D - DynamXMath.clamp((float) (distance / explosionStrength * 2.0f), 0f, 1f)) * 15.0D;
             body.activate();
             body.setLinearVelocity(body.getLinearVelocity(null).add(new Vector3f(
                     (float) (direction.x * forgeStrength),

@@ -9,6 +9,7 @@ import fr.hermes.api.mc.blocks.HmBlockState;
 import fr.hermes.api.mc.world.HmServerWorld;
 import fr.hermes.api.mc.world.HmWorld;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
+import net.minecraft.util.math.BlockPos;
 
 import javax.annotation.Nullable;
 
@@ -32,7 +33,7 @@ public interface IBlockCollisionBehavior {
      * @param oz                    The current local translation on z axis
      * @return The {@link TerrainBoxBuilder} to stack similar blocks on boxStart
      */
-    default TerrainBoxBuilder initBoxBuilder(TerrainBoxConstructor terrainBoxConstructor, HmWorld world, org.joml.Vector3i mutable, HmBlockState boxStart, double ox, double oy, double oz) {
+    default TerrainBoxBuilder initBoxBuilder(TerrainBoxConstructor terrainBoxConstructor, HmWorld world, BlockPos mutable, HmBlockState boxStart, double ox, double oy, double oz) {
         MutableBoundingBox box = boxStart.hm$getBoundingBox(world instanceof HmServerWorld ? (HmServerWorld) world : null, mutable);
         return new TerrainBoxBuilder.MutableTerrainBoxBuilder(ox + box.minX, oy + box.minY, oz + box.minZ, box.maxX - box.minX, box.maxY - box.minY, box.maxZ - box.minZ);
     }
@@ -42,7 +43,7 @@ public interface IBlockCollisionBehavior {
      * It should be as restrictive as possible, to let different blocks handled by other collision behaviors <br> <br>
      * <strong>NOTE : For one block state, the result should ALWAYS be the same</strong>
      */
-    boolean applies(HmWorld world, org.joml.Vector3i pos, HmBlockState toBlock);
+    boolean applies(HmWorld world, BlockPos pos, HmBlockState toBlock);
 
     
 
@@ -54,7 +55,7 @@ public interface IBlockCollisionBehavior {
      * @param blockState The block being tested
      * @return True to being a stack box of this block, false to add this block separately to the world
      */
-    default boolean isStackableBlock(HmWorld world, org.joml.Vector3i pos, HmBlockState blockState) {
+    default boolean isStackableBlock(HmWorld world, BlockPos pos, HmBlockState blockState) {
         return true;
     }
 
@@ -73,7 +74,7 @@ public interface IBlockCollisionBehavior {
      * @param lastStacked   The block previously stacked, on the previous axis, to avoid adding a block and a slab on the same plane. Null if not pertinent.
      * @return True if onBlock can be stacked on stackingBlock
      */
-    boolean stacks(HmWorld world, org.joml.Vector3i pos, HmAxis axis, HmBlockState onBlock, HmBlockState stackingBlock, @Nullable HmBlockState lastStacked);
+    boolean stacks(HmWorld world, BlockPos pos, HmAxis axis, HmBlockState onBlock, HmBlockState stackingBlock, @Nullable HmBlockState lastStacked);
 
     
 
@@ -89,7 +90,7 @@ public interface IBlockCollisionBehavior {
      * @param ofBlock               The block being added to the boxBuilder or terrainBoxConstructor
      * @param axis                  The direction of stacking (always positive) <br>
      */
-    void addBlockCollision(TerrainBoxConstructor terrainBoxConstructor, @Nullable TerrainBoxBuilder boxBuilder, TerrainCollisionsCalculator.TerrainCursor cursor, HmWorld world, org.joml.Vector3i at, HmBlockState ofBlock, @Nullable HmAxis axis);
+    void addBlockCollision(TerrainBoxConstructor terrainBoxConstructor, @Nullable TerrainBoxBuilder boxBuilder, TerrainCollisionsCalculator.TerrainCursor cursor, HmWorld world, BlockPos at, HmBlockState ofBlock, @Nullable HmAxis axis);
 
     
 

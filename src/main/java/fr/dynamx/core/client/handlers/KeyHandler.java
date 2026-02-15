@@ -16,9 +16,11 @@ import fr.dynamx.core.common.network.packets.MessageDebugRequest;
 import fr.dynamx.core.common.network.packets.MessagePickObject;
 import fr.dynamx.core.common.physics.player.WalkingOnPlayerController;
 import fr.dynamx.core.utils.DynamXConstants;
+import fr.hermes.api.mc.entities.HmEntity;
+import fr.hermes.api.mc.entities.HmModEntity;
+import fr.hermes.api.utils.HmEntityLogicMatcher;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.entity.Entity;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
@@ -55,14 +57,10 @@ public class KeyHandler {
 
     public static final KeyBinding KEY_ATTACH_TRAILER = new KeyBinding("key.attachTrailer", Keyboard.KEY_H, "key.categories." + DynamXConstants.ID);
 
-
-    private final Minecraft mc;
     private int holdingDown;
     private boolean justPressed;
 
-    public KeyHandler(Minecraft minecraft) {
-        this.mc = minecraft;
-
+    public KeyHandler() {
         ClientRegistry.registerKeyBinding(KEY_HANDBRAKE);
         ClientRegistry.registerKeyBinding(KEY_ENGINE_ON);
         ClientRegistry.registerKeyBinding(KEY_SPEED_LIMITIER);
@@ -88,8 +86,11 @@ public class KeyHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void tick(TickEvent.ClientTickEvent event) {
-        if ((mc.player != null) && (event.phase == TickEvent.Phase.START)) {
-            if (WalkingOnPlayerController.controller != null && (MC.player.isRiding() || MC.gameSettings.keyBindForward.isKeyDown() || MC.gameSettings.keyBindBack.isKeyDown() || MC.gameSettings.keyBindLeft.isKeyDown() || MC.gameSettings.keyBindRight.isKeyDown() || MC.gameSettings.keyBindJump.isKeyDown())) {
+        if ((MC.hm$getPlayer() != null) && (event.phase == TickEvent.Phase.START)) {
+            if (WalkingOnPlayerController.controller != null && (MC.hm$getPlayer().hm$isRiding()
+                    || MC.hm$getGameSettings().hm$isForwardKeyDown() || MC.hm$getGameSettings().hm$isBackKeyDown()
+                    || MC.hm$getGameSettings().hm$isLeftKeyDown() || MC.hm$getGameSettings().hm$isRightKeyDown()
+                    || MC.hm$getGameSettings().hm$isJumpKeyDown())) {
                 WalkingOnPlayerController.controller.disable();
             }
             controlCamera();
@@ -98,19 +99,19 @@ public class KeyHandler {
                 Minecraft.getMinecraft().player.sendChatMessage("/dynamx debug_gui");
             }
 
-            if (KEY_PICK_OBJECT.isKeyDown() && MC.player.getRidingEntity() == null && MC.player.getHeldItemMainhand().isEmpty()) {
-                if (!DynamXContext.getPlayerPickingObjects().containsKey(MC.player.getEntityId())) {
-                    if (MC.isSingleplayer()) {
-                        PickingObjectHelper.handlePickingControl(new MovableModule.Action(MovableModule.EnumAction.PICK, 3), MC.player);
+            if (KEY_PICK_OBJECT.isKeyDown() && MC.hm$getPlayer().hm$getRidingEntity() == null && MC.hm$getPlayer().hm$getHeldItemMainhand().hm$isEmpty()) {
+                if (!DynamXContext.getPlayerPickingObjects().containsKey(MC.hm$getPlayer().hm$getEntityId())) {
+                    if (MC.hm$isSingleplayer()) {
+                        PickingObjectHelper.handlePickingControl(new MovableModule.Action(MovableModule.EnumAction.PICK, 3), MC.hm$getPlayer());
                     } else {
                         DynamXContext.getNetwork().sendToServer(new MessagePickObject(new MovableModule.Action(MovableModule.EnumAction.PICK, 3)));
                     }
                 }
             } else {
                 //FIXME THIS MAY FIRED WHILE TAKING OBJECT
-                if (DynamXContext.getPlayerPickingObjects().containsKey(MC.player.getEntityId())) {
-                    if (MC.isSingleplayer()) {
-                        PickingObjectHelper.handlePickingControl(new MovableModule.Action(MovableModule.EnumAction.UNPICK), MC.player);
+                if (DynamXContext.getPlayerPickingObjects().containsKey(MC.hm$getPlayer().hm$getEntityId())) {
+                    if (MC.hm$isSingleplayer()) {
+                        PickingObjectHelper.handlePickingControl(new MovableModule.Action(MovableModule.EnumAction.UNPICK), MC.hm$getPlayer());
                     } else {
                         DynamXContext.getNetwork().sendToServer(new MessagePickObject(new MovableModule.Action(MovableModule.EnumAction.UNPICK)));
                     }
@@ -118,9 +119,10 @@ public class KeyHandler {
             }
 
             if (KEY_LOCK_DOOR.isPressed()) {
-                Entity entity = mc.player.getRidingEntity();
+                HmEntity entity = MC.hm$getPlayer().hm$getRidingEntity();
+                BaseVehicleEntity<?> vehicleEntity = HmEntityLogicMatcher.cast(entity, BaseVehicleEntity.class);
                 if (entity instanceof BaseVehicleEntity && entity instanceof IModuleContainer.IDoorContainer && ((IModuleContainer.IDoorContainer) entity).getDoors() != null) {
-                    BasePartSeat<?, ?> seat = ((IModuleContainer.ISeatsContainer) entity).getSeats().getRidingSeat(MC.player);
+                    BasePartSeat<?, ?> seat = ((IModuleContainer.ISeatsContainer) entity).getSeats().getRidingSeat(MC.hm$getPlayer());
                     if (seat == null)
                         return;
                     PartDoor door = seat.getLinkedPartDoor();
@@ -131,17 +133,17 @@ public class KeyHandler {
                 }
             }
 
-            if (MC.objectMouseOver != null) {
-                Entity entityHit = MC.objectMouseOver.entityHit;
+            if (MC.hm$getObjectMouseOver() != null) {
+                HmEntity entityHit = MC.hm$getObjectMouseOver().hm$getEntity();
                 if (KEY_TAKE_OBJECT.isKeyDown()) {
                     if (holdingDown == 0) {
-                        if (MC.player.getRidingEntity() == null && MC.player.getHeldItemMainhand().isEmpty() && !DynamXContext.getPlayerPickingObjects().containsKey(MC.player.getEntityId())) {
+                        if (MC.hm$getPlayer().hm$getRidingEntity() == null && MC.hm$getPlayer().hm$getHeldItemMainhand().hm$isEmpty() && !DynamXContext.getPlayerPickingObjects().containsKey(MC.hm$getPlayer().hm$getEntityId())) {
                             if (entityHit != null) {
                                 justPressed = true;
-                                if (MC.isSingleplayer()) {
-                                    PickingObjectHelper.handlePickingControl(new MovableModule.Action(MovableModule.EnumAction.TAKE, entityHit.getEntityId()), MC.player);
+                                if (MC.hm$isSingleplayer()) {
+                                    PickingObjectHelper.handlePickingControl(new MovableModule.Action(MovableModule.EnumAction.TAKE, entityHit.hm$getEntityId()), MC.hm$getPlayer());
                                 } else {
-                                    DynamXContext.getNetwork().sendToServer(new MessagePickObject(new MovableModule.Action(MovableModule.EnumAction.TAKE, entityHit.getEntityId())));
+                                    DynamXContext.getNetwork().sendToServer(new MessagePickObject(new MovableModule.Action(MovableModule.EnumAction.TAKE, entityHit.hm$getEntityId())));
                                 }
                             }
                         }
@@ -149,9 +151,9 @@ public class KeyHandler {
                     holdingDown++;
                 } else {
                     if (holdingDown > 10) {
-                        if (DynamXContext.getPlayerPickingObjects().containsKey(MC.player.getEntityId())) {
-                            if (MC.isSingleplayer()) {
-                                PickingObjectHelper.handlePickingControl(new MovableModule.Action(MovableModule.EnumAction.THROW, holdingDown), MC.player);
+                        if (DynamXContext.getPlayerPickingObjects().containsKey(MC.hm$getPlayer().hm$getEntityId())) {
+                            if (MC.hm$isSingleplayer()) {
+                                PickingObjectHelper.handlePickingControl(new MovableModule.Action(MovableModule.EnumAction.THROW, holdingDown), MC.hm$getPlayer());
                             } else {
                                 DynamXContext.getNetwork().sendToServer(new MessagePickObject(new MovableModule.Action(MovableModule.EnumAction.THROW, holdingDown)));
                             }
@@ -159,9 +161,9 @@ public class KeyHandler {
                         holdingDown = 0;
                     } else if (holdingDown > 0) {
                         if (!justPressed) {
-                            if (DynamXContext.getPlayerPickingObjects().containsKey(MC.player.getEntityId())) {
-                                if (MC.isSingleplayer()) {
-                                    PickingObjectHelper.handlePickingControl(new MovableModule.Action(MovableModule.EnumAction.UNTAKE), MC.player);
+                            if (DynamXContext.getPlayerPickingObjects().containsKey(MC.hm$getPlayer().hm$getEntityId())) {
+                                if (MC.hm$isSingleplayer()) {
+                                    PickingObjectHelper.handlePickingControl(new MovableModule.Action(MovableModule.EnumAction.UNTAKE), MC.hm$getPlayer());
                                 } else {
                                     DynamXContext.getNetwork().sendToServer(new MessagePickObject(new MovableModule.Action(MovableModule.EnumAction.UNTAKE)));
                                 }
@@ -177,9 +179,10 @@ public class KeyHandler {
     }
 
     private void controlCamera() {
-        Entity entity = mc.player.getRidingEntity();
-        if (!(entity instanceof IModuleContainer.ISeatsContainer))
+        HmEntity entity = MC.hm$getPlayer().hm$getRidingEntity();
+        if (!(entity instanceof HmModEntity) || !(((HmModEntity) entity).getLogic() instanceof IModuleContainer.ISeatsContainer)) {
             return;
+        }
         if (KEY_ZOOM_IN.isPressed()) {
             CameraSystem.changeCameraZoom(false);
         }
@@ -187,26 +190,25 @@ public class KeyHandler {
             CameraSystem.changeCameraZoom(true);
         }
         if (KEY_CAMERA_MODE.isPressed()) {
-            mc.ingameGUI.setOverlayMessage("Vehicle camera mode : " + CameraSystem.cycleCameraMode((IModuleContainer.ISeatsContainer) entity), true);
+            MC.getHmRenderApi().setOverlayMessage("Vehicle camera mode : " + CameraSystem.cycleCameraMode((IModuleContainer.ISeatsContainer) entity), true);
         }
         CameraSystem.setWatchingBehind(KEY_WATCH_BEHIND.isKeyDown());
     }
 
     @SubscribeEvent
     public void onMouseEvent(MouseEvent event) {
-        if (MC.player != null) {
-            if (MC.player.getHeldItemMainhand().getItem() instanceof ItemWrench) {
-                if (MC.player.isSneaking()) {
-                    if (Mouse.getEventDWheel() != 0) {
-                        DynamXContext.getNetwork().sendToServer(new MessageDebugRequest(-15816));
-                        event.setCanceled(true);
-                    }
-                }
-            } else if (MC.player.isSneaking() && MC.player.getHeldItemMainhand().getItem() instanceof ItemSlopes) {
-                if (Mouse.getEventDWheel() != 0) {
-                    DynamXContext.getNetwork().sendToServer(new MessageDebugRequest(-15815));
-                    event.setCanceled(true);
-                }
+        if (MC.hm$getPlayer() == null || !MC.hm$getPlayer().hm$isSneaking()) {
+            return;
+        }
+        if (MC.hm$getPlayer().hm$getHeldItemMainhand().hm$getItem() instanceof ItemWrench) {
+            if (Mouse.getEventDWheel() != 0) {
+                DynamXContext.getNetwork().sendToServer(new MessageDebugRequest(-15816));
+                event.setCanceled(true);
+            }
+        } else if (MC.hm$getPlayer().hm$getHeldItemMainhand().hm$getItem() instanceof ItemSlopes) {
+            if (Mouse.getEventDWheel() != 0) {
+                DynamXContext.getNetwork().sendToServer(new MessageDebugRequest(-15815));
+                event.setCanceled(true);
             }
         }
     }

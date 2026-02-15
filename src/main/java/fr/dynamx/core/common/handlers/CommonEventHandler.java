@@ -28,7 +28,7 @@ import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.client.ContentPackUtils;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.SubClassPool;
-import fr.hermes.api.HmEntityLogicMatcher;
+import fr.hermes.api.utils.HmEntityLogicMatcher;
 import fr.hermes.api.events.HmEventPhase;
 import fr.hermes.api.mc.blocks.HmBlockState;
 import fr.hermes.api.mc.entities.HmPlayerEntity;

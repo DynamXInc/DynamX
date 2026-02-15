@@ -2,7 +2,6 @@ package fr.dynamx.core.common.entities;
 
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.IModuleContainer;
-import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.core.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.core.common.contentpack.type.objects.PropObject;
 import fr.dynamx.core.common.entities.modules.SeatsModule;
@@ -10,9 +9,6 @@ import fr.dynamx.core.common.physics.entities.PackEntityPhysicsHandler;
 import fr.dynamx.core.common.physics.entities.PropPhysicsHandler;
 import fr.dynamx.forge.DynamXConfig;
 import fr.hermes.api.mc.entities.HmEntity;
-import net.minecraft.world.World;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.relauncher.Side;
 
 import javax.annotation.Nonnull;
 
@@ -76,5 +72,10 @@ public class PropsEntity<T extends PackEntityPhysicsHandler<PropObject<?>, ?>> e
     @Override
     public PackPhysicsEntity<?, ?> cast() {
         return this;
+    }
+
+    @Override
+    public PhysicsEntitiesFactory createEntityFactory() {
+        return new PhysicsEntitiesFactory.Props(getInfoName(), physicsPosition, mcEntity.hm$getRotationYaw(), getMetadata());
     }
 }

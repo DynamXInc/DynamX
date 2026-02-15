@@ -4,7 +4,7 @@ import fr.dynamx.api.network.sync.EntityVariable;
 import fr.dynamx.api.network.sync.SimulationHolder;
 import fr.dynamx.core.client.handlers.ClientEventHandler;
 import fr.dynamx.core.common.entities.PhysicsEntity;
-import fr.hermes.api.HmEntityLogicMatcher;
+import fr.hermes.api.utils.HmEntityLogicMatcher;
 import fr.hermes.api.mc.entities.HmEntity;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.entity.Entity;

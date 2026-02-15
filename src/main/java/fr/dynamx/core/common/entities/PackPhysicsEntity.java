@@ -221,12 +221,12 @@ public abstract class PackPhysicsEntity<T extends PackEntityPhysicsHandler<A, ?>
     }
 
     @Override
-    public boolean canFitPassenger(HmEntity passenger) {
+    public Boolean canFitPassenger(HmEntity passenger) {
         return mcEntity.hm$getPassengers().size() < getPackInfo().getPartsByType(BasePartSeat.class).size();
     }
 
     @Override
-    public boolean isInRangeToRenderDist(double range) {
+    public Boolean isInRangeToRenderDist(double range) {
         if (getPackInfo() != null && getPackInfo().getRenderDistanceSquared() != -1) {
             return range < getPackInfo().getRenderDistanceSquared();
         }

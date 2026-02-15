@@ -139,7 +139,7 @@ public class GuiBlockCustomization extends GuiFrame {
             Vector3f relativeTrans = new Vector3f(translationX.getValue(), translationY.getValue(), translationZ.getValue());
             Vector3f relativeScale = new Vector3f(scaleX.getValue(), scaleY.getValue(), scaleZ.getValue());
             Vector3f relativeRotation = new Vector3f(rotationX.getValue(), rotationY.getValue(), rotationZ.getValue());
-            DynamXContext.getNetwork().sendToServer(new MessageSyncBlockCustomization(teBlock.getPos(), relativeTrans, relativeScale, relativeRotation));
+            DynamXContext.getNetwork().sendToServer(new MessageSyncBlockCustomization(teBlock.getMcBlockEntity().hm$getPos(), relativeTrans, relativeScale, relativeRotation));
             teBlock.setRelativeTranslation(relativeTrans);
             teBlock.setRelativeScale(relativeScale);
             teBlock.setRelativeRotation(relativeRotation);
@@ -182,7 +182,7 @@ public class GuiBlockCustomization extends GuiFrame {
         GlStateManager.translate(-0.5, -1, 0.5);
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 
-        blockRenderer.renderBlockBrightness(teBlock.getWorld().getBlockState(teBlock.getPos().down()), 1.0F);
+        blockRenderer.renderBlockBrightness(teBlock.getMcBlockEntity().hm$getWorld().hm$getBlockState(teBlock.getMcBlockEntity().hm$getPos().down()), 1.0F);
         renderModel();
 
         GlStateManager.popMatrix();

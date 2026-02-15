@@ -3,7 +3,8 @@ package fr.dynamx.core.client.camera;
 import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.core.utils.optimization.Vector3fPool;
-import fr.hermes.api.HmEntityLogicMatcher;
+import fr.hermes.api.mc.utils.HmRayTraceResult;
+import fr.hermes.api.utils.HmEntityLogicMatcher;
 import fr.hermes.api.events.HmEventResult;
 import fr.hermes.api.mc.entities.HmEntity;
 import fr.dynamx.core.client.handlers.ClientDebugSystem;
@@ -20,11 +21,9 @@ import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
-import net.minecraft.entity.Entity;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
-import net.minecraftforge.client.event.EntityViewRenderEvent;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Quaternion;
@@ -39,7 +38,7 @@ public class CameraSystem {
     /**
      * Maps default entity's camera modes to the ones set by the user
      */
-    private static Map<CameraMode, CameraMode> preferredCameraMode = new HashMap<>();
+    private static final Map<CameraMode, CameraMode> preferredCameraMode = new HashMap<>();
     /**
      * Current camera mode
      */
@@ -84,7 +83,7 @@ public class CameraSystem {
         animateCameraRotation(vehicle.prevRenderRotation, vehicle.renderRotation, partialTicks, 0.1f);
 
         // Subtract the vehicle yaw from the player yaw, as it's already applied above
-        float interpVehicleYaw = (float) MathHelper.wrapDegrees(vehicleEntity.hm$getPrevRotationYaw() + (vehicleEntity.hm$getRotationYaw() - vehicleEntity.hm$getPrevRotationYaw()) * partialTicks);
+        float interpVehicleYaw = MathHelper.wrapDegrees(vehicleEntity.hm$getPrevRotationYaw() + (vehicleEntity.hm$getRotationYaw() - vehicleEntity.hm$getPrevRotationYaw()) * partialTicks);
         //Apply camera zoom
         if (!ClientEventHandler.MC.hm$getGameSettings().hm$isFirstPersonView()) {
             performZoomAction(renderEntity, yaw - interpVehicleYaw, pitch, partialTicks, jmeQuatCache);
@@ -192,11 +191,11 @@ public class CameraSystem {
         float f = entity.hm$getEyeHeight();
         float d3 = zoomLevel + f;
         //Camera pos
-        double d0 = (entity.hm$getPrevPosX() + (entity.hm$getPosX() - entity.hm$getPrevPosX()) * partialTicks);
-        double d1 = (entity.hm$getPrevPosY() + (entity.hm$getPosY() - entity.hm$getPrevPosY()) * partialTicks);
-        double d2 = (entity.hm$getPrevPosZ() + (entity.hm$getPosZ() - entity.hm$getPrevPosZ()) * partialTicks);
+        float d0 = (float) (entity.hm$getPrevPosX() + (entity.hm$getPosX() - entity.hm$getPrevPosX()) * partialTicks);
+        float d1 = (float) (entity.hm$getPrevPosY() + (entity.hm$getPosY() - entity.hm$getPrevPosY()) * partialTicks);
+        float d2 = (float) (entity.hm$getPrevPosZ() + (entity.hm$getPosZ() - entity.hm$getPrevPosZ()) * partialTicks);
         if (debug)
-            pt0.set((float) d0, (float) d1, (float) d2);
+            pt0.set(d0, d1, d2);
         Vector3f eye = JmeVector3fPool.get(0, f + (ClientEventHandler.MC.hm$getGameSettings().hm$isFirstPersonView() ? 0 : cameraPositionY), 0);
         eye = DynamXGeometry.rotateVectorByQuaternion(eye, vRotation.inverse());
         d0 += eye.x;
@@ -237,14 +236,14 @@ public class CameraSystem {
                 cameraRadius.put(JmeVector3fPool.getPermanentVector(pt1), JmeVector3fPool.getPermanentVector(pt2));
             }
 
-            RayTraceResult raytraceresult = entity.hm$getWorld().rayTraceBlocks(new Vec3d(d0 + start.x, d1 + start.y, d2 + start.z), new Vec3d(d0 + end.x, d1 + end.y, d2 + end.z), false, true, false);
+            HmRayTraceResult raytraceresult = entity.hm$getWorld().hm$rayTraceBlocks(start.addLocal(d0, d1, d2), end.addLocal(d0, d1, d2));
 
-            if (raytraceresult != null && raytraceresult.entityHit != entity.hm$getRidingEntity()) {
-                float d7 = (float) raytraceresult.hitVec.distanceTo(new Vec3d(d0, d1, d2));
+            if (raytraceresult != null && raytraceresult.hm$getEntity() != entity.hm$getRidingEntity()) {
+                float d7 = raytraceresult.hm$getHitVec().distance(d0, d1, d2);
                 if (d7 < d3) {
                     d3 = d7;
                     if (debug)
-                        pt3.set((float) raytraceresult.hitVec.x, (float) raytraceresult.hitVec.y, (float) raytraceresult.hitVec.z);
+                        pt3.set(raytraceresult.hm$getHitVec().x, raytraceresult.hm$getHitVec().y, raytraceresult.hm$getHitVec().z);
                 }
             }
         }

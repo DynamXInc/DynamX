@@ -9,5 +9,11 @@ public interface HmItemStack {
 
     NBTTagCompound hm$getTagCompound();
 
+    void hm$setTagCompound(NBTTagCompound tag);
+
+    NBTTagCompound hm$getOrCreateTagCompound();
+
     int hm$getMetadata();
+
+    boolean hm$isEmpty();
 }

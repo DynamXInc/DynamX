@@ -140,18 +140,18 @@ public abstract class MixinWorld implements HmWorld {
     }
 
     @Override
-    public boolean hm$isAirBlock(int x, int y, int z) {
-        return isAirBlock(temporaryPos.setPos(x, y, z));
+    public boolean hm$isAirBlock(BlockPos pos) {
+        return isAirBlock(pos);
     }
 
     @Override
-    public HmBlockState hm$getBlockState(Vector3i pos) {
-        return (HmBlockState) getBlockState(getTempPos(pos));
+    public HmBlockState hm$getBlockState(BlockPos pos) {
+        return (HmBlockState) getBlockState(pos);
     }
 
     @Override
-    public HmBiome hm$getBiome(Vector3i pos) {
-        return (HmBiome) getBiome(getTempPos(pos));
+    public HmBiome hm$getBiome(BlockPos pos) {
+        return (HmBiome) getBiome(pos);
     }
 
     @Override
@@ -160,8 +160,8 @@ public abstract class MixinWorld implements HmWorld {
     }
 
     @Override
-    public boolean hm$canBlockSeeSky(Vector3i pos) {
-        return canBlockSeeSky(getTempPos(pos));
+    public boolean hm$canBlockSeeSky(BlockPos pos) {
+        return canBlockSeeSky(pos);
     }
 
     @Override
@@ -189,8 +189,8 @@ public abstract class MixinWorld implements HmWorld {
     }
 
     @Override
-    public HmTileEntity hm$getTileEntity(Vector3i pos) {
-        return (HmTileEntity) getTileEntity(getTempPos(pos));
+    public HmTileEntity hm$getTileEntity(BlockPos pos) {
+        return (HmTileEntity) getTileEntity(pos);
     }
 
     @Override

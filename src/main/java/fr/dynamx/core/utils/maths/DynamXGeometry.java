@@ -21,6 +21,7 @@ import org.joml.Quaternionf;
 public class DynamXGeometry {
 
     public final static org.joml.Vector3f FORWARD_DIRECTION = new org.joml.Vector3f(0.0f,0.0f,1.0f);
+    public final static Vector3f FORWARD_DIRECTION_JME = new Vector3f(0.0f,0.0f,1.0f);
     public final static org.joml.Vector3f LEFT_DIRECTION = new org.joml.Vector3f(1.0f,0.0f,0.0f);
     public final static org.joml.Vector3f UP_DIRECTION = new org.joml.Vector3f(0.0f,1.0f,0.0f);
 

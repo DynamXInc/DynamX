@@ -5,6 +5,12 @@ import fr.dynamx.core.common.blocks.TEDynamXBlock;
 import fr.dynamx.core.common.contentpack.parts.PartBlockSeat;
 import fr.dynamx.core.utils.EnumSeatPlayerPosition;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
+import fr.hermes.api.mc.blocks.HmTileEntity;
+import fr.hermes.api.mc.entities.HmEntity;
+import fr.hermes.api.mc.entities.HmEntityFactory;
+import fr.hermes.api.mc.entities.HmEntityLogic;
+import fr.hermes.api.mc.world.HmWorld;
+import fr.hermes.api.utils.HmBlockEntityLogicMatcher;
 import fr.hermes.forge.JmeVector3fPool;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
@@ -14,61 +20,67 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 
-public class SeatEntity extends Entity implements IEntityAdditionalSpawnData {
+public class SeatEntity implements HmEntityLogic {
+    private final HmEntity mcEntity;
     protected TEDynamXBlock block;
     protected PartBlockSeat<?> mySeat;
     protected byte seatID;
 
-    public SeatEntity(World worldIn, byte seatID) {
-        super(worldIn);
-        this.seatID = seatID;
-        this.noClip = true;
-        this.setNoGravity(true);
+    public SeatEntity(HmEntity mcEntity, TEDynamXBlock block, PartBlockSeat<?> seat) {
+        this(mcEntity);
+        this.block = block;
+        this.mySeat = seat;
+        this.seatID = seat.getId();
     }
 
-    public SeatEntity(World worldIn) {
-        super(worldIn);
+    public SeatEntity(HmEntity mcEntity) {
+        super();
+        this.mcEntity = mcEntity;
+        mcEntity.hm$setNoClip(true);
+        mcEntity.hm$setNoGravity(true);
     }
 
     @Override
-    protected void entityInit() {
-        setSize(0.6f, 0.6f);
+    public void onMcEntityInit() {
+        mcEntity.hm$setSize(0.6f, 0.6f);
     }
 
     @Override
-    public void updatePassenger(Entity passenger) {
+    public boolean updatePassenger(HmEntity passenger) {
         if (block == null || mySeat == null) {
-            return;
+            return false;
         }
         JmeVector3fPool.openPool();
         Vector3f posVec = DynamXGeometry.rotateVectorByQuaternion(mySeat.getPosition(), block.getCollidableRotation());
         posVec.addLocal(block.getRelativeTranslation());
-        passenger.setPosition(posX + posVec.x, posY + posVec.y, posZ + posVec.z);
+        passenger.hm$setPosition((float) (mcEntity.hm$getPosX() + posVec.x), (float) (mcEntity.hm$getPosY() + posVec.y), (float) (mcEntity.hm$getPosZ() + posVec.z));
         JmeVector3fPool.closePool();
+        return true;
     }
 
     /**
      * Rotates the passenger, limiting his field of view to avoid stiff necks
      */
     @Override
-    public void applyOrientationToEntity(Entity passenger) {
+    public boolean updatePassengerRotation(HmEntity passenger) {
         if (mySeat == null || !mySeat.shouldLimitFieldOfView()) {
-            return;
+            return true;
         }
         float blockYaw = block.getPackInfo() == null ? 0 : (block.getPackInfo().getRotation().y - block.getRelativeRotation().y + block.getRotation() * 22.5f);
-        passenger.setRenderYawOffset(blockYaw);
-        float f = MathHelper.wrapDegrees(passenger.rotationYaw - blockYaw);
+        passenger.hm$setRenderYawOffset(blockYaw);
+        float f = MathHelper.wrapDegrees(passenger.hm$getRotationYaw() - blockYaw);
         float f1 = MathHelper.clamp(f, mySeat.getMinYaw(), mySeat.getMaxYaw());
-        passenger.prevRotationYaw += f1 - f;
-        passenger.rotationYaw += f1 - f;
-        passenger.setRotationYawHead(passenger.rotationYaw);
+        passenger.hm$setPrevRotationYaw(passenger.hm$getPrevRotationYaw() + f1 - f);
+        passenger.hm$setRotationYaw(passenger.hm$getRotationYaw() + f1 - f);
+        passenger.hm$setRotationYawHead(passenger.hm$getRotationYaw());
 
-        float f2 = MathHelper.wrapDegrees(passenger.rotationPitch);
+        float f2 = MathHelper.wrapDegrees(passenger.hm$getRotationPitch());
         float f3 = MathHelper.clamp(f2, mySeat.getMinPitch(), mySeat.getMaxPitch());
-        passenger.rotationPitch = f3;
-        f2 = MathHelper.wrapDegrees(passenger.prevRotationPitch);
+        passenger.hm$setRotationPitch(f3);
+        f2 = MathHelper.wrapDegrees(passenger.hm$getPrevRotationPitch());
         f3 = MathHelper.clamp(f2, mySeat.getMinPitch(), mySeat.getMaxPitch());
-        passenger.prevRotationPitch = f3;
+        passenger.hm$setPrevRotationPitch(f3);
+        return true;
     }
 
     @Override
@@ -77,33 +89,37 @@ public class SeatEntity extends Entity implements IEntityAdditionalSpawnData {
     }
 
     @Override
-    public boolean shouldRiderSit() {
+    public boolean shouldPassengersSit() {
         return mySeat == null || mySeat.getPlayerPosition() == EnumSeatPlayerPosition.SITTING;
     }
 
     @Override
     public void onUpdate() {
-        super.onUpdate();
-        if (ticksExisted % 20 != 0) {
+        if (mcEntity.hm$getTicksExisted() % 20 != 0) {
             return;
         }
-        TileEntity te = world.getTileEntity(getPosition());
-        if (te instanceof TEDynamXBlock) {
-            block = (TEDynamXBlock) te;
-            mySeat = (PartBlockSeat<?>) block.getPackInfo().getPartsByType(PartBlockSeat.class).stream().filter(s -> ((PartBlockSeat<?>) s).getId() == seatID).findFirst().orElse(null);
-            if (mySeat != null)
-                return;
+        if(block != null && !block.isInvalid()) {
+            return;
         }
-        setDead();
+        HmTileEntity te = mcEntity.hm$getWorld().hm$getTileEntity(mcEntity.hm$getBlockPosition());
+        if (HmBlockEntityLogicMatcher.is(te, TEDynamXBlock.class)) {
+            block = HmBlockEntityLogicMatcher.cast(te, TEDynamXBlock.class);
+            mySeat = (PartBlockSeat<?>) block.getPackInfo().getPartsByType(PartBlockSeat.class).stream()
+                    .filter(s -> ((PartBlockSeat<?>) s).getId() == seatID).findFirst().orElse(null);
+            if (mySeat != null) {
+                return;
+            }
+        }
+        mcEntity.hm$setDead();
     }
 
     @Override
-    protected void readEntityFromNBT(NBTTagCompound nbtTagCompound) {
+    public void readFromNbt(NBTTagCompound nbtTagCompound) {
         seatID = nbtTagCompound.getByte("SeatID");
     }
 
     @Override
-    protected void writeEntityToNBT(NBTTagCompound nbtTagCompound) {
+    public void writeToNbt(NBTTagCompound nbtTagCompound) {
         nbtTagCompound.setByte("SeatID", seatID);
     }
 
@@ -115,5 +131,20 @@ public class SeatEntity extends Entity implements IEntityAdditionalSpawnData {
     @Override
     public void readSpawnData(ByteBuf additionalData) {
         seatID = additionalData.readByte();
+    }
+
+    public static class Factory implements HmEntityFactory {
+        private final TEDynamXBlock block;
+        private final PartBlockSeat<?> seat;
+
+        public Factory(TEDynamXBlock block, PartBlockSeat<?> seat) {
+            this.block = block;
+            this.seat = seat;
+        }
+
+        @Override
+        public HmEntityLogic createEntityLogic(HmWorld world, HmEntity entity) {
+            return new SeatEntity(entity, block, seat);
+        }
     }
 }

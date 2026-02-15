@@ -6,10 +6,11 @@ import fr.dynamx.core.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.core.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.core.common.entities.BaseVehicleEntity;
 import fr.dynamx.core.common.entities.PackPhysicsEntity;
+import fr.dynamx.core.common.entities.PhysicsEntitiesFactory;
 import fr.dynamx.core.common.entities.modules.SeatsModule;
 import fr.dynamx.core.common.entities.modules.engines.BoatPropellerModule;
 import fr.dynamx.core.common.physics.entities.BoatPhysicsHandler;
-import net.minecraft.world.World;
+import fr.hermes.api.mc.entities.HmEntity;
 
 import javax.annotation.Nonnull;
 
@@ -17,12 +18,12 @@ public class BoatEntity<T extends BoatPhysicsHandler<?>> extends BaseVehicleEnti
     private SeatsModule seats;
     private BoatPropellerModule propeller;
 
-    public BoatEntity(World world) {
-        super(world);
+    public BoatEntity(HmEntity mcEntityWrapper) {
+        super(mcEntityWrapper);
     }
 
-    public BoatEntity(String name, World world, Vector3f pos, float spawnRotationAngle, int metadata) {
-        super(name, world, pos, spawnRotationAngle, metadata);
+    public BoatEntity(String name, HmEntity mcEntityWrapper, Vector3f pos, float spawnRotationAngle, int metadata) {
+        super(name, mcEntityWrapper, pos, spawnRotationAngle, metadata);
     }
 
     @Override
@@ -65,4 +66,8 @@ public class BoatEntity<T extends BoatPhysicsHandler<?>> extends BaseVehicleEnti
             physicsHandler.onPackInfosReloaded();
     }
 
+    @Override
+    public PhysicsEntitiesFactory createEntityFactory() {
+        return new PhysicsEntitiesFactory.Boat(getInfoName(), physicsPosition, mcEntity.hm$getRotationYaw(), getMetadata());
+    }
 }

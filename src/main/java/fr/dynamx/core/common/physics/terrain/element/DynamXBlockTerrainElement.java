@@ -18,7 +18,7 @@ import fr.dynamx.core.utils.optimization.SubClassPool;
 import fr.hermes.api.mc.blocks.HmTileEntity;
 import fr.hermes.api.mc.world.HmWorld;
 import fr.hermes.forge.JmeVector3fPool;
-import org.joml.Vector3i;
+import net.minecraft.util.math.BlockPos;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -30,18 +30,18 @@ import java.io.ObjectOutputStream;
  */
 public class DynamXBlockTerrainElement implements ITerrainElement {
     private int x, y, z;
-    private Vector3i pos;
+    private BlockPos pos;
     private PhysicsRigidBody body;
     private TerrainDebugData debugData;
 
     public DynamXBlockTerrainElement() {
     }
 
-    public DynamXBlockTerrainElement(int x, int y, int z, Vector3i pos) {
+    public DynamXBlockTerrainElement(int x, int y, int z, BlockPos pos) {
         this.x = x;
         this.y = y;
         this.z = z;
-        this.pos = new Vector3i(pos);
+        this.pos = new BlockPos(pos);
     }
 
     @Override
@@ -49,9 +49,9 @@ public class DynamXBlockTerrainElement implements ITerrainElement {
         out.writeInt(x);
         out.writeInt(y);
         out.writeInt(z);
-        out.writeInt(pos.x);
-        out.writeInt(pos.y);
-        out.writeInt(pos.z);
+        out.writeInt(pos.getX());
+        out.writeInt(pos.getY());
+        out.writeInt(pos.getZ());
     }
 
     @Override
@@ -59,7 +59,7 @@ public class DynamXBlockTerrainElement implements ITerrainElement {
         x = in.readInt();
         y = in.readInt();
         z = in.readInt();
-        this.pos = new Vector3i(in.readInt(), in.readInt(), in.readInt());
+        this.pos = new BlockPos(in.readInt(), in.readInt(), in.readInt());
         return true;
     }
 

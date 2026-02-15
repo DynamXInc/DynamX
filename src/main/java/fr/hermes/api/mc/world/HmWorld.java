@@ -5,14 +5,19 @@ import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.hermes.api.mc.blocks.HmBlockState;
 import fr.hermes.api.mc.blocks.HmTileEntity;
 import fr.hermes.api.mc.entities.HmEntity;
+import fr.hermes.api.mc.entities.HmEntityFactory;
+import fr.hermes.api.mc.entities.HmModEntity;
 import fr.hermes.api.mc.entities.HmPlayerEntity;
 import fr.hermes.api.mc.utils.HmParticleType;
+import fr.hermes.api.mc.utils.HmRayTraceResult;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import org.joml.Vector3f;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 public interface HmWorld {
@@ -29,7 +34,7 @@ public interface HmWorld {
 
     Random hm$getRandom();
 
-    boolean hm$isAirBlock(int x, int y, int z);
+    boolean hm$isAirBlock(BlockPos pos);
 
     HmBlockState hm$getBlockState(BlockPos blockPos);
 
@@ -51,6 +56,8 @@ public interface HmWorld {
 
     HmTileEntity hm$getTileEntity(BlockPos pos);
 
+    Collection<HmTileEntity> hm$getBlockEntityList();
+
     List<PhysicsEntity<?>> hm$getPhysicsEntitiesWithinAABB(MutableBoundingBox aabb);
 
     int hm$getDimension();
@@ -60,4 +67,13 @@ public interface HmWorld {
     boolean hm$isBlockLoaded(Vector3f vector3f);
 
     int hm$getLightAt(BlockPos pos);
+
+    void hm$setBlockToAir(BlockPos blockPos);
+
+    HmEntity spawnHmEntity(HmEntityFactory entity, Vector3f pos);
+
+    // args for the World method: false, true, false
+    HmRayTraceResult hm$rayTraceBlocks(com.jme3.math.Vector3f start, com.jme3.math.Vector3f end);
+
+    HmEntity hm$getEntityByUuid(UUID uuid);
 }

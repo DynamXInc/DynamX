@@ -25,22 +25,26 @@ import fr.dynamx.core.common.entities.SeatEntity;
 import fr.dynamx.core.common.handlers.CommonEventHandler;
 import fr.dynamx.core.common.physics.terrain.chunk.ChunkCollisions;
 import fr.dynamx.core.common.physics.terrain.chunk.ChunkLoadingTicket;
-import fr.dynamx.forge.DynamXConfig;
 import fr.dynamx.core.utils.VerticalChunkPos;
 import fr.dynamx.core.utils.debug.ChunkGraph;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
+import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.dynamx.forge.DynamXConfig;
+import fr.hermes.api.mc.blocks.HmTileEntity;
+import fr.hermes.api.mc.entities.HmBlockEntityLogic;
+import fr.hermes.api.mc.entities.HmEntity;
+import fr.hermes.api.mc.entities.HmModEntity;
+import fr.hermes.api.mc.world.HmChunk;
+import fr.hermes.api.mc.world.HmWorld;
 import fr.hermes.forge.JmeVector3fPool;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SPacketUpdateTileEntity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.chunk.Chunk;
@@ -49,7 +53,10 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.*;
 
-public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInfoReloadListener, ITickable {
+public class TEDynamXBlock implements IDynamXObject, IPackInfoReloadListener, HmBlockEntityLogic {
+    @Getter
+    protected final HmTileEntity mcBlockEntity;
+
     @Getter
     private BlockObject<?> packInfo;
     @Getter
@@ -66,7 +73,7 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
 
     private boolean hasSeats;
     @Getter
-    private List<SeatEntity> seatEntities;
+    private List<HmEntity> seatEntities;
 
     /**
      * The cache of the block collisions, with position offset but no rotation
@@ -75,7 +82,7 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
     /**
      * The hitbox for (mouse) interaction with the block
      */
-    protected AxisAlignedBB boundingBoxCache;
+    protected MutableBoundingBox boundingBoxCache;
 
     private EnumBlockEntityInitState initialized = EnumBlockEntityInitState.NOT_INITIALIZED;
     protected final List<IBlockEntityModule> moduleList = new ArrayList<>();
@@ -84,25 +91,26 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
     @Getter
     private final DxAnimator animator;
 
-    public TEDynamXBlock() {
-        animator = new DxAnimator();
+    public TEDynamXBlock(HmTileEntity mcBlockEntity) {
+        this.mcBlockEntity = mcBlockEntity;
+        this.animator = new DxAnimator();
     }
 
-    public TEDynamXBlock(BlockObject<?> packInfo) {
-        this();
+    public TEDynamXBlock(HmTileEntity mcBlockEntity, BlockObject<?> packInfo) {
+        this(mcBlockEntity);
         setPackInfo(packInfo);
         this.hasSeats = !packInfo.getPartsByType(PartBlockSeat.class).isEmpty();
     }
 
     public void setPackInfo(BlockObject<?> packInfo) {
         this.packInfo = packInfo;
-        if (world != null)
-            world.markBlockRangeForRenderUpdate(pos, pos);
-        if (packInfo == null)
+        mcBlockEntity.hm$markBlockForRenderUpdate();
+        if (packInfo == null) {
             return;
+        }
         this.hasSeats = !packInfo.getPartsByType(PartBlockSeat.class).isEmpty();
         if (!hasSeats && seatEntities != null) {
-            seatEntities.forEach(Entity::setDead);
+            seatEntities.forEach(HmEntity::hm$setDead);
             seatEntities = null;
         }
     }
@@ -113,8 +121,10 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
     protected void getListenerModules() {
         updateEntityListeners.clear();
         moduleList.forEach(m -> {
-            if (m instanceof IBlockEntityModule.IBlockEntityUpdateListener && ((IBlockEntityModule.IBlockEntityUpdateListener) m).listenBlockEntityUpdates(world.isRemote ? Side.CLIENT : Side.SERVER))
+            if (m instanceof IBlockEntityModule.IBlockEntityUpdateListener && ((IBlockEntityModule.IBlockEntityUpdateListener) m)
+                    .listenBlockEntityUpdates(mcBlockEntity.hm$getWorld().hm$isClient())) {
                 updateEntityListeners.add((IBlockEntityModule.IBlockEntityUpdateListener) m);
+            }
         });
         initialized = EnumBlockEntityInitState.ALL;
     }
@@ -128,13 +138,14 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
     }
 
     public void initBlockEntityModules() {
-        if (packInfo == null)
+        if (packInfo == null) {
             return;
+        }
         createModules(new ModuleListBuilder(moduleList));
         //TODO fireCreateModulesEvent(world.isRemote ? Side.CLIENT : Side.SERVER);
         moduleList.sort(Comparator.comparingInt(m -> -m.getInitPriority()));
         moduleList.forEach(IBlockEntityModule::initBlockEntityProperties);
-        if (world != null) {
+        if (mcBlockEntity.hm$getWorld() != null) { // TE is loaded
             getListenerModules();
         } else {
             initialized = EnumBlockEntityInitState.MODULES_CREATED;
@@ -146,8 +157,7 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
     }
 
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-        super.writeToNBT(compound);
+    public void writeToNbt(NBTTagCompound compound) {
         if (packInfo != null)
             compound.setString("BlockInfo", packInfo.getFullName());
         compound.setInteger("Rotation", rotation);
@@ -162,23 +172,28 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
         compound.setFloat("RotationZ", relativeRotation.z);
         // Write modules data
         moduleList.forEach(m -> m.writeToNBT(compound));
-        return compound;
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound compound) {
-        super.readFromNBT(compound);
+    public void readFromNbt(NBTTagCompound compound) {
         if (!compound.hasKey("BlockInfo")) {
-            DynamXMain.log.error("TEDynamXBlock at " + pos + " has no BlockInfo tag. Ignoring it.");
+            DynamXMain.log.error("TEDynamXBlock at {} has no BlockInfo tag. Ignoring it.", mcBlockEntity.hm$getPos());
             return;
         }
         String info = compound.getString("BlockInfo");
+
         BlockObject<?> packInfo = DynamXObjectLoaders.BLOCKS.findInfo(info);
         if (packInfo == null) {
-            DynamXMain.log.error("Block object info is null for te " + this + " at " + pos + " : " + info + " not found. Ignoring it.");
+            DynamXMain.log.error("Block object info is null for te {} at {} : {} not found.", this, mcBlockEntity.hm$getPos(), info);
+            HmWorld world = mcBlockEntity.hm$getWorld();
+            if (world != null && !world.hm$isClient()) {
+                DynamXMain.log.warn("Removing the block");
+                world.hm$setBlockToAir(mcBlockEntity.hm$getPos());
+            }
             return;
         }
         setPackInfo(DynamXObjectLoaders.BLOCKS.findInfo(compound.getString("BlockInfo")));
+
         this.hasSeats = packInfo != null && !packInfo.getPartsByType(PartBlockSeat.class).isEmpty();
         rotation = compound.getInteger("Rotation");
         relativeTranslation = new Vector3f(
@@ -198,43 +213,13 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
         initBlockEntityModules();
         moduleList.forEach(iBlockEntityModule -> iBlockEntityModule.readFromNBT(compound));
 
-        if (packInfo == null && world != null && !world.isRemote) {
-            DynamXMain.log.warn("Block object info is null for te " + this + " at " + pos + ". Removing it.");
-            world.setBlockToAir(pos);
-        } else {
-            markCollisionsDirty(false);
-        }
+        markCollisionsDirty(false);
     }
 
     @Override
     @SideOnly(Side.CLIENT)
-    public AxisAlignedBB getRenderBoundingBox() {
-        return INFINITE_EXTENT_AABB;
-    }
-
-    @Override
-    @SideOnly(Side.CLIENT)
-    public double getMaxRenderDistanceSquared() {
-        return packInfo == null || packInfo.getRenderDistanceSquared() == -1 ? super.getMaxRenderDistanceSquared() : packInfo.getRenderDistanceSquared();
-    }
-
-    @Override
-    public NBTTagCompound getUpdateTag() {
-        return this.writeToNBT(new NBTTagCompound());
-    }
-
-    @Override
-    public SPacketUpdateTileEntity getUpdatePacket() {
-        NBTTagCompound nbttagcompound = new NBTTagCompound();
-        this.writeToNBT(nbttagcompound);
-        return new SPacketUpdateTileEntity(pos, 0, nbttagcompound);
-    }
-
-    @Override
-    public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
-        super.onDataPacket(net, pkt);
-        this.readFromNBT(pkt.getNbtCompound());
-        this.world.markBlockRangeForRenderUpdate(pos, pos);
+    public float getMaxRenderDistanceSquared() {
+        return packInfo == null || packInfo.getRenderDistanceSquared() == -1 ? -1 : packInfo.getRenderDistanceSquared();
     }
 
     public void setRotation(int rotation) {
@@ -250,13 +235,13 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
     /**
      * @return The block collision box when you try to hover it with the mouse and interact with it
      */
-    public AxisAlignedBB computeBoundingBox() {
+    public MutableBoundingBox computeBoundingBox() {
         if (boundingBoxCache == null) {
             QuaternionPool.openPool();
             JmeVector3fPool.openPool();
             List<IShapeInfo> boxes = getUnrotatedCollisionBoxes(); //Get PartShape boxes
             if (boxes.isEmpty()) {//If there is no boxes, create a default one
-                boundingBoxCache = new AxisAlignedBB(0, 0, 0, 1, 1, 1);
+                boundingBoxCache = new MutableBoundingBox(0, 0, 0, 1, 1, 1);
             } else {
                 MutableBoundingBox container;
                 if (boxes.size() == 1) //If there is one, no more calculus to do !
@@ -273,7 +258,7 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
                 container.grow(0.1, 0.0, 0.1); //Grow it to avoid little glitches on the corners of the car
                 container = DynamXContext.getCollisionHandler().rotateBB(JmeVector3fPool.get(0.5f, 0, 0.5f), container, physicsRotation);
                 container.offset(getRelativeTranslation().x, getRelativeTranslation().y, getRelativeTranslation().z);
-                boundingBoxCache = container.toBB();
+                boundingBoxCache = container;
             }
             JmeVector3fPool.closePool();
             QuaternionPool.closePool();
@@ -283,14 +268,16 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
 
     @Override
     public List<MutableBoundingBox> getCollisionBoxes() {
-        if (packInfo != null && unrotatedCollisionsCache.size() != getUnrotatedCollisionBoxes().size()) {
-            synchronized (unrotatedCollisionsCache) {
-                for (IShapeInfo shape : getUnrotatedCollisionBoxes()) {
-                    MutableBoundingBox b = new MutableBoundingBox(shape.getBoundingBox());
-                    b.scale(relativeScale.x != 0 ? relativeScale.x : 1, relativeScale.y != 0 ? relativeScale.y : 1, relativeScale.z != 0 ? relativeScale.z : 1);
-                    b.offset(pos.getX() - 0.5, pos.getY(), pos.getZ() - 0.5);
-                    unrotatedCollisionsCache.add(b);
-                }
+        if (packInfo == null || unrotatedCollisionsCache.size() == getUnrotatedCollisionBoxes().size()) {
+            return unrotatedCollisionsCache;
+        }
+        BlockPos pos = mcBlockEntity.hm$getPos();
+        synchronized (unrotatedCollisionsCache) {
+            for (IShapeInfo shape : getUnrotatedCollisionBoxes()) {
+                MutableBoundingBox b = new MutableBoundingBox(shape.getBoundingBox());
+                b.scale(relativeScale.x != 0 ? relativeScale.x : 1, relativeScale.y != 0 ? relativeScale.y : 1, relativeScale.z != 0 ? relativeScale.z : 1);
+                b.offset(pos.getX() - 0.5, pos.getY(), pos.getZ() - 0.5);
+                unrotatedCollisionsCache.add(b);
             }
         }
         return unrotatedCollisionsCache;
@@ -314,7 +301,7 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
      */
     public CompoundCollisionShape getPhysicsCollision() {
         if (packInfo == null) {
-            throw new IllegalStateException("BlockObjectInfo is null for te " + this + " at " + pos);
+            throw new IllegalStateException("BlockObjectInfo is null for te " + this + " at " + mcBlockEntity.hm$getPos());
         }
         if (!packInfo.getCollisionsHelper().hasPhysicsCollisions()) {
             return ObjectCollisionsHelper.getEmptyCollisionShape();
@@ -329,23 +316,28 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
      * @param updatePhysicsTerrain True to recompute the {@link ChunkCollisions} of the chunk, for collisions of the {@link fr.dynamx.api.physics.IPhysicsWorld}
      */
     public void markCollisionsDirty(boolean updatePhysicsTerrain) {
-        if (world != null) {
-            removeChunkCollisions();
+        HmWorld world = mcBlockEntity.hm$getWorld();
+        if (world == null) {
+            boundingBoxCache = null;
+            unrotatedCollisionsCache.clear();
+            return;
         }
+
+        removeChunkCollisions();
         boundingBoxCache = null;
         unrotatedCollisionsCache.clear();
-        if (updatePhysicsTerrain && world != null && DynamXContext.usesPhysicsWorld(world)) {
-            VerticalChunkPos pos1 = new VerticalChunkPos(getPos().getX() >> 4, getPos().getY() >> 4, getPos().getZ() >> 4);
+        if (updatePhysicsTerrain && DynamXContext.usesPhysicsWorld(world)) {
+            VerticalChunkPos pos1 = new VerticalChunkPos(mcBlockEntity.hm$getPos().getX() >> 4, mcBlockEntity.hm$getPos().getY() >> 4, mcBlockEntity.hm$getPos().getZ() >> 4);
             if (DynamXConfig.enableDebugTerrainManager) {
                 ChunkLoadingTicket ticket = DynamXContext.getPhysicsWorld(world).getTerrainManager().getTicket(pos1);
-                if (ticket != null)
-                    ChunkGraph.addToGrah(pos1, ChunkGraph.ChunkActions.CHK_UPDATE, ChunkGraph.ActionLocation.MAIN, ticket.getCollisions(), "Chunk changed from DynamX TE markDirty opf " + getPackInfo() + " at " + getPos() + ". Ticket " + ticket);
+                if (ticket != null) {
+                    ChunkGraph.addToGrah(pos1, ChunkGraph.ChunkActions.CHK_UPDATE, ChunkGraph.ActionLocation.MAIN, ticket.getCollisions(),
+                            "Chunk changed from DynamX TE markDirty opf " + getPackInfo() + " at " + mcBlockEntity.hm$getPos() + ". Ticket " + ticket);
+                }
             }
             DynamXContext.getPhysicsWorld(world).getTerrainManager().onChunkChanged(pos1);
         }
-        if (world != null) {
-            addChunkCollisions();
-        }
+        addChunkCollisions();
     }
 
     @Override
@@ -370,22 +362,25 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
      * Used for large blocks that can be in multiple chunks
      */
     protected void addChunkCollisions() {
-        List<Chunk> chunks = new ArrayList<>();
-        AxisAlignedBB bb = computeBoundingBox().offset(pos);
+        HmWorld world = mcBlockEntity.hm$getWorld();
+        BlockPos pos = mcBlockEntity.hm$getPos();
+
+        Set<HmChunk> chunks = new HashSet<>();
+        AxisAlignedBB bb = computeBoundingBox().offsetToBB(pos);
         for (int x = (int) bb.minX; x <= bb.minX + Math.max(1, bb.maxX - bb.minX); x += (int) Math.max(1, Math.min(bb.maxX - bb.minX, 16))) {
             for (int z = (int) bb.minZ; z <= bb.minZ + Math.max(1, bb.maxZ - bb.minZ); z += (int) Math.max(1, Math.min(bb.maxZ - bb.minZ, 16))) {
-                if (!world.isChunkGeneratedAt(x >> 4, z >> 4)) {
-                    ChunkPos pos = new ChunkPos(x >> 4, z >> 4);
-                    if (!CommonEventHandler.PENDING_CHUNKS_COLLISIONS.containsKey(pos))
-                        CommonEventHandler.PENDING_CHUNKS_COLLISIONS.put(pos, new HashMap<>());
-                    CommonEventHandler.PENDING_CHUNKS_COLLISIONS.get(pos).put(this.pos, this.computeBoundingBox().offset(this.pos));
+                if (!world.hm$isChunkGeneratedAt(x >> 4, z >> 4)) {
+                    ChunkPos chunkPos = new ChunkPos(x >> 4, z >> 4);
+                    if (!CommonEventHandler.PENDING_CHUNKS_COLLISIONS.containsKey(chunkPos))
+                        CommonEventHandler.PENDING_CHUNKS_COLLISIONS.put(chunkPos, new HashMap<>());
+                    CommonEventHandler.PENDING_CHUNKS_COLLISIONS.get(chunkPos).put(pos, computeBoundingBox().offsetToBB(pos));
                     continue;
                 }
-                Chunk chunk = world.getChunk(x >> 4, z >> 4);
+                HmChunk chunk = world.hm$getChunk(x >> 4, z >> 4);
                 if (!chunks.contains(chunk)) {
                     chunks.add(chunk);
-                    DynamXChunkData data = chunk.getCapability(DynamXChunkDataProvider.DYNAMX_CHUNK_DATA_CAPABILITY, null);
-                    Objects.requireNonNull(data).getBlocksAABB().put(this.pos, computeBoundingBox().offset(this.pos));
+                    DynamXChunkData data = chunk.getCapability(DynamXChunkDataProvider.DYNAMX_CHUNK_DATA_CAPABILITY);
+                    Objects.requireNonNull(data).getBlocksAABB().put(pos, computeBoundingBox().offsetToBB(pos));
                 }
             }
         }
@@ -396,21 +391,24 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
      * Used for large blocks that can be in multiple chunks
      */
     protected void removeChunkCollisions() {
-        List<Chunk> chunks = new ArrayList<>();
-        AxisAlignedBB bb = computeBoundingBox().offset(pos);
+        HmWorld world = mcBlockEntity.hm$getWorld();
+        BlockPos pos = mcBlockEntity.hm$getPos();
+
+        Set<HmChunk> chunks = new HashSet<>();
+        AxisAlignedBB bb = computeBoundingBox().offsetToBB(pos);
         for (int x = (int) bb.minX; x <= bb.minX + Math.max(1, bb.maxX - bb.minX); x += (int) Math.max(1, Math.min(bb.maxX - bb.minX, 16))) {
             for (int z = (int) bb.minZ; z <= bb.minZ + Math.max(1, bb.maxZ - bb.minZ); z += (int) Math.max(1, Math.min(bb.maxZ - bb.minZ, 16))) {
-                ChunkPos pos = new ChunkPos(x >> 4, z >> 4);
-                if (CommonEventHandler.PENDING_CHUNKS_COLLISIONS.containsKey(pos))
-                    CommonEventHandler.PENDING_CHUNKS_COLLISIONS.get(pos).remove(this.pos);
-                if (!world.isChunkGeneratedAt(x >> 4, z >> 4)) {
+                ChunkPos chunkPos = new ChunkPos(x >> 4, z >> 4);
+                if (CommonEventHandler.PENDING_CHUNKS_COLLISIONS.containsKey(chunkPos))
+                    CommonEventHandler.PENDING_CHUNKS_COLLISIONS.get(chunkPos).remove(pos);
+                if (!world.hm$isChunkGeneratedAt(x >> 4, z >> 4)) {
                     return;
                 }
-                Chunk chunk = world.getChunk(x >> 4, z >> 4);
+                HmChunk chunk = world.hm$getChunk(x >> 4, z >> 4);
                 if (!chunks.contains(chunk)) {
                     chunks.add(chunk);
-                    DynamXChunkData data = chunk.getCapability(DynamXChunkDataProvider.DYNAMX_CHUNK_DATA_CAPABILITY, null);
-                    data.getBlocksAABB().remove(this.pos);
+                    DynamXChunkData data = chunk.getCapability(DynamXChunkDataProvider.DYNAMX_CHUNK_DATA_CAPABILITY);
+                    data.getBlocksAABB().remove(pos);
                 }
             }
         }
@@ -427,18 +425,21 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
 
     @Override
     public void update() {
-        if (hasSeats && (seatEntities == null || seatEntities.stream().anyMatch(e -> e.isDead)) && !world.isRemote) {
+        HmWorld world = mcBlockEntity.hm$getWorld();
+        BlockPos pos = mcBlockEntity.hm$getPos();
+
+        if (hasSeats && (seatEntities == null || seatEntities.stream().anyMatch(HmEntity::hm$isDead)) && !world.hm$isClient()) {
             if (seatEntities != null) {
-                seatEntities.forEach(Entity::setDead);
+                seatEntities.forEach(HmEntity::hm$setDead);
                 seatEntities.clear();
             } else
                 seatEntities = new ArrayList<>();
             List<PartBlockSeat> seats = packInfo.getPartsByType(PartBlockSeat.class);
             for (PartBlockSeat seat : seats) {
-                SeatEntity entity = new SeatEntity(world, seat.getId());
-                entity.setPosition(pos.getX() + 0.5f, pos.getY(), pos.getZ() + 0.5f);
-                world.spawnEntity(entity);
-                seatEntities.add(entity);
+                // TODO
+                SeatEntity.Factory entity = new SeatEntity.Factory(this, seat);
+                HmEntity mcEntity = world.spawnHmEntity(entity, Vector3fPool.get(pos.getX() + 0.5f, pos.getY(), pos.getZ() + 0.5f));
+                seatEntities.add(mcEntity);
             }
         }
         if (initialized != EnumBlockEntityInitState.ALL) {
@@ -451,9 +452,9 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
         if (!updateEntityListeners.isEmpty()) {
             updateEntityListeners.forEach(IBlockEntityModule.IBlockEntityUpdateListener::updateBlockEntity);
         }
-        if (packInfo == null && !world.isRemote) {
-            DynamXMain.log.error(String.format("Block info is null for te %s at %s. Removing it.", this, pos));
-            world.setBlockToAir(pos);
+        if (packInfo == null && !world.hm$isClient()) {
+            DynamXMain.log.error("Block info is null for te {} at {}. Removing it.", this, pos);
+            world.hm$setBlockToAir(pos);
         }
     }
 
@@ -468,16 +469,16 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
         Vec3d hitVec = entity.getPositionVector().add(0, entity.getEyeHeight(), 0);
         InteractivePart<?, ?> nearest = null;
         Vector3f nearestPos = null;
-        Vector3f playerPos = JmeVector3fPool.get((float) entity.posX, (float) entity.posY, (float) entity.posZ);
+        org.joml.Vector3f playerPos = Vector3fPool.get((float) entity.posX, (float) entity.posY, (float) entity.posZ);
         MutableBoundingBox box = new MutableBoundingBox();
         for (float f = 1.0F; f < 4.0F; f += 0.1F) {
             for (InteractivePart<?, ?> part : getPackInfo().getInteractiveParts()) {
                 part.getBox(box);
                 box = DynamXContext.getCollisionHandler().rotateBB(JmeVector3fPool.get(), box, getCollidableRotation());
                 Vector3f partPos = DynamXGeometry.rotateVectorByQuaternion(part.getPosition(), getCollidableRotation());
-                partPos.addLocal(getPos().getX() + getPackInfo().getTranslation().x + getCollisionOffset().x,
-                        getPos().getY() + getPackInfo().getTranslation().y + getCollisionOffset().y,
-                        getPos().getZ() + getPackInfo().getTranslation().z + getCollisionOffset().z);
+                partPos.addLocal(mcBlockEntity.hm$getPos().getX() + getPackInfo().getTranslation().x + getCollisionOffset().x,
+                        mcBlockEntity.hm$getPos().getY() + getPackInfo().getTranslation().y + getCollisionOffset().y,
+                        mcBlockEntity.hm$getPos().getZ() + getPackInfo().getTranslation().z + getCollisionOffset().z);
                 box.offset(partPos);
                 if ((nearestPos == null || DynamXGeometry.distanceBetween(partPos, playerPos) < DynamXGeometry.distanceBetween(nearestPos, playerPos)) && box.contains(hitVec)) {
                     nearest = part;
@@ -491,6 +492,10 @@ public class TEDynamXBlock extends TileEntity implements IDynamXObject, IPackInf
 
     public List<IBlockEntityModule> getModules() {
         return moduleList;
+    }
+
+    public boolean isInvalid() {
+        return mcBlockEntity.hm$isInvalid();
     }
 
     public enum EnumBlockEntityInitState {

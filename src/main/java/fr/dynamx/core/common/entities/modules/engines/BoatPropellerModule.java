@@ -164,7 +164,7 @@ public class BoatPropellerModule extends BasicEngineModule implements IPackInfoR
         }
 
         public void update() {
-            if (entity.isInWater()) {
+            if (entity.getMcEntity().hm$isInWater()) {
                 updateTurn0();
                 updateMovement();
             } else {
@@ -236,7 +236,7 @@ public class BoatPropellerModule extends BasicEngineModule implements IPackInfoR
                 float power = getEngine().getPowerOutputAtRevs() / 1000;
                 strength = power * strength;
             }
-            Vector3f look = DynamXGeometry.FORWARD_DIRECTION;
+            Vector3f look = DynamXGeometry.FORWARD_DIRECTION_JME;
             look = DynamXGeometry.rotateVectorByQuaternion(look, entity.physicsRotation);
             look.multLocal(getAccelerationForce() * strength);
             Vector3f rotatedPos = DynamXGeometry.rotateVectorByQuaternion(info.getPosition(), entity.physicsRotation);
@@ -245,7 +245,7 @@ public class BoatPropellerModule extends BasicEngineModule implements IPackInfoR
 
         public void brake(float strength) {
             this.physicsAccelerationForce = strength;
-            Vector3f look = DynamXGeometry.FORWARD_DIRECTION;
+            Vector3f look = DynamXGeometry.FORWARD_DIRECTION_JME;
             look = DynamXGeometry.rotateVectorByQuaternion(look, entity.physicsRotation);
             look.multLocal(-getBrakeForce() * strength);
             entity.physicsHandler.getCollisionObject().applyForce(look, JmeVector3fPool.get());

@@ -254,8 +254,8 @@ public abstract class MixinEntity implements HmEntity {
     }
 
     @Override
-    public Vector3f hm$getLook() {
-        Vec3d look = getLook(0F);
+    public Vector3f hm$getLook(float partialTicks) {
+        Vec3d look = getLook(partialTicks);
         return Vector3fPool.get(look.x, look.y, look.z);
     }
 
@@ -335,8 +335,8 @@ public abstract class MixinEntity implements HmEntity {
     }
 
     @Override
-    public Vector3f hm$getEyesPosition() {
-        Vec3d eyes = getPositionEyes(0);
+    public Vector3f hm$getEyesPosition(float partialTicks) {
+        Vec3d eyes = getPositionEyes(partialTicks);
         return Vector3fPool.get(eyes.x, eyes.y, eyes.z);
     }
 

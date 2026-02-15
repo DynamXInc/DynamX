@@ -5,6 +5,8 @@ import fr.dynamx.api.entities.modules.IVehicleController;
 import fr.dynamx.core.client.handlers.KeyHandler;
 import fr.dynamx.core.common.entities.BaseVehicleEntity;
 import fr.dynamx.core.common.entities.modules.engines.BasicEngineModule;
+import fr.hermes.api.mc.client.HmMinecraftClient;
+import fr.hermes.api.mod.HermesPlatform;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.Minecraft;
@@ -13,7 +15,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public abstract class BaseController implements IVehicleController {
     @SideOnly(Side.CLIENT)
-    protected static final Minecraft MC = Minecraft.getMinecraft();
+    protected static final HmMinecraftClient MC = HermesPlatform.getInstance().getClient();
 
     protected final BaseVehicleEntity<?> entity;
 
@@ -49,11 +51,11 @@ public abstract class BaseController implements IVehicleController {
     @Override
     @SideOnly(Side.CLIENT)
     public void update() {
-        if (((IModuleContainer.ISeatsContainer) entity).getSeats().isLocalPlayerDriving()) {
-            accelerating = MC.gameSettings.keyBindForward.isKeyDown();
-            reversing = MC.gameSettings.keyBindBack.isKeyDown();
-            turningLeft = MC.gameSettings.keyBindLeft.isKeyDown();
-            turningRight = MC.gameSettings.keyBindRight.isKeyDown();
+        if (((IModuleContainer.ISeatsContainer) entity).getSeats().isEntityDriving(MC.hm$getPlayer())) {
+            accelerating = MC.hm$getGameSettings().hm$isForwardKeyDown();
+            reversing = MC.hm$getGameSettings().hm$isBackKeyDown();
+            turningLeft = MC.hm$getGameSettings().hm$isLeftKeyDown();
+            turningRight = MC.hm$getGameSettings().hm$isRightKeyDown();
             if (KeyHandler.KEY_HANDBRAKE.isPressed())
                 handbraking = !handbraking;
             if (onCooldown > 0)

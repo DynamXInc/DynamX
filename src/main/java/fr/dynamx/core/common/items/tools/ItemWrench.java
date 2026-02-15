@@ -7,7 +7,10 @@ import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.common.items.DynamXItemRegistry;
 import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.RegistryNameSetter;
-import fr.hermes.api.HmEntityLogicMatcher;
+import fr.hermes.api.mc.entities.HmPlayerEntity;
+import fr.hermes.api.mc.items.HmItemStack;
+import fr.hermes.api.mc.world.HmWorld;
+import fr.hermes.api.utils.HmEntityLogicMatcher;
 import fr.hermes.api.mc.entities.HmEntity;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
@@ -51,31 +54,30 @@ public class ItemWrench extends Item {
         }
         if (!worldIn.isRemote) {
             WrenchMode.getCurrentMode(playerIn.getHeldItem(handIn)).onWrenchRightClick(playerIn, handIn);
-        } else
+        } else {
             WrenchMode.getCurrentMode(playerIn.getHeldItem(handIn)).onWrenchRightClickClient(playerIn, handIn);
+        }
         return super.onItemRightClick(worldIn, playerIn, handIn);
     }
 
-    public static void writeEntity(ItemStack stack, PhysicsEntity<?> entity) {
-        if (!stack.hasTagCompound())
-            stack.setTagCompound(new NBTTagCompound());
-        stack.getTagCompound().setInteger("Entity1", entity.getEntityId());
+    public static void writeEntity(HmItemStack stack, PhysicsEntity<?> entity) {
+        stack.hm$getOrCreateTagCompound().setInteger("Entity1", entity.getEntityId());
     }
 
-    public static boolean hasEntity(ItemStack stack) {
-        return stack.hasTagCompound() && stack.getTagCompound().hasKey("Entity1", Constants.NBT.TAG_INT);
+    public static boolean hasEntity(HmItemStack stack) {
+        return stack.hm$hasTagCompound() && stack.hm$getTagCompound().hasKey("Entity1", Constants.NBT.TAG_INT);
     }
 
-    public static void removeEntity(ItemStack stack) {
-        if (stack.hasTagCompound()) {
-            stack.getTagCompound().removeTag("Entity1");
+    public static void removeEntity(HmItemStack stack) {
+        if (stack.hm$hasTagCompound()) {
+            stack.hm$getTagCompound().removeTag("Entity1");
         }
     }
 
-    public static PhysicsEntity<?> getEntity(ItemStack stack, World world) {
+    public static PhysicsEntity<?> getEntity(HmItemStack stack, HmWorld world) {
         if (hasEntity(stack)) {
-            Entity e = world.getEntityByID(stack.getTagCompound().getInteger("Entity1"));
-            return HmEntityLogicMatcher.cast((HmEntity) e, PhysicsEntity.class);
+            HmEntity e = world.hm$getEntityByID(stack.hm$getTagCompound().getInteger("Entity1"));
+            return HmEntityLogicMatcher.cast(e, PhysicsEntity.class);
         }
         return null;
     }
@@ -93,7 +95,7 @@ public class ItemWrench extends Item {
         }
     }
 
-    public void interact(EntityPlayer context, PhysicsEntity<?> physicsEntity) {
-        WrenchMode.getCurrentMode(context.getHeldItemMainhand()).onInteractWithEntity(context, physicsEntity, context.isSneaking());
+    public void interact(HmPlayerEntity context, PhysicsEntity<?> physicsEntity) {
+        WrenchMode.getCurrentMode(context.hm$getHeldItemMainhand()).onInteractWithEntity(context, physicsEntity, context.isSneaking());
     }
 }

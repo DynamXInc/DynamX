@@ -3,6 +3,7 @@ package fr.hermes.api.mc.entities;
 import fr.dynamx.core.common.entities.SeatEntity;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.hermes.api.mc.world.HmWorld;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import org.joml.Vector3f;
 
@@ -15,6 +16,8 @@ public interface HmEntity {
     HmWorld hm$getWorld();
 
     void hm$setNoClip(boolean value);
+
+    void hm$setNoGravity(boolean value);
 
     void hm$setPreventEntitySpawning(boolean value);
 
@@ -60,7 +63,9 @@ public interface HmEntity {
 
     Collection<HmEntity> hm$getPassengers();
 
-    Vector3f hm$getLook();
+    default Vector3f hm$getLook() { return hm$getLook(0); }
+
+    Vector3f hm$getLook(float partialTicks);
 
     Vector3f hm$getPosition();
 
@@ -92,7 +97,9 @@ public interface HmEntity {
 
     void hm$setPrevPosZ(double prevPosZ);
 
-    Vector3f hm$getEyesPosition();
+    default Vector3f hm$getEyesPosition() { return hm$getEyesPosition(0); }
+
+    Vector3f hm$getEyesPosition(float partialTicks);
 
     boolean hm$isRiding();
 
@@ -122,4 +129,14 @@ public interface HmEntity {
     float hm$getLastTickPosZ();
 
     boolean hm$startRiding(HmEntity entity);
+
+    void hm$setSize(float width, float height);
+
+    boolean hm$isInWater();
+
+    void hm$removePassengers();
+
+    void hm$writeToNbt(NBTTagCompound tag);
+
+    void hm$readFromNbt(NBTTagCompound tag);
 }

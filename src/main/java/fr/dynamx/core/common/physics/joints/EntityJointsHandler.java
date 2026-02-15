@@ -12,7 +12,7 @@ import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.common.network.packets.MessageJoints;
 import fr.dynamx.core.common.network.sync.SPPhysicsEntitySynchronizer;
 import fr.dynamx.core.common.physics.entities.AbstractEntityPhysicsHandler;
-import fr.hermes.api.HmEntityLogicMatcher;
+import fr.hermes.api.utils.HmEntityLogicMatcher;
 import fr.hermes.api.mc.entities.HmEntity;
 import fr.hermes.api.mc.entities.HmPlayerEntity;
 import fr.hermes.api.mc.entities.HmServerPlayerEntity;

@@ -2,6 +2,7 @@ package fr.dynamx.core.common.items.tools;
 
 import com.jme3.bullet.joints.JointEnd;
 import com.jme3.bullet.objects.PhysicsRigidBody;
+import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.EnumBulletShapeType;
@@ -10,6 +11,7 @@ import fr.dynamx.core.common.DynamXContext;
 import fr.dynamx.core.common.DynamXMain;
 import fr.dynamx.core.common.contentpack.parts.BasePartSeat;
 import fr.dynamx.core.common.entities.BaseVehicleEntity;
+import fr.dynamx.core.common.entities.PhysicsEntitiesFactory;
 import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.common.entities.PropsEntity;
 import fr.dynamx.core.common.entities.modules.MovableModule;
@@ -22,20 +24,21 @@ import fr.dynamx.core.common.handlers.TaskScheduler;
 import fr.dynamx.core.common.items.ItemProps;
 import fr.dynamx.core.common.network.packets.MessageDebugRequest;
 import fr.dynamx.core.common.physics.joints.JointHandlerRegistry;
+import fr.dynamx.core.utils.optimization.Vector3fPool;
 import fr.dynamx.forge.DynamXConfig;
 import fr.dynamx.core.utils.DynamXUtils;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
+import fr.hermes.api.mc.entities.HmEntity;
+import fr.hermes.api.mc.entities.HmEntityFactory;
+import fr.hermes.api.mc.entities.HmPlayerEntity;
+import fr.hermes.api.mc.items.HmItem;
+import fr.hermes.api.mc.items.HmItemStack;
+import fr.hermes.api.utils.HmEntityLogicMatcher;
 import fr.hermes.forge.JmeVector3fPool;
 import fr.dynamx.core.utils.physics.PhysicsRaycastResult;
 import lombok.Getter;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
@@ -59,17 +62,18 @@ public class WrenchMode {
     public static final WrenchMode ENTITY_SEAT_MODE = new EntitySeatWrenchMode();
     public static final WrenchMode LAUNCH_ENTITIES = new WrenchMode("launch_entities", TextFormatting.GOLD) {
         @Override
-        public void onWrenchRightClick(EntityPlayer playerIn, EnumHand handIn) {
-            if (!playerIn.world.isRemote) {
-                ItemStack itemOffhand = playerIn.getHeldItemOffhand();
-                Item item = itemOffhand.getItem();
+        public void onWrenchRightClick(HmPlayerEntity playerIn, EnumHand handIn) {
+            if (!playerIn.hm$getWorld().hm$isClient()) {
+                HmItemStack itemOffhand = playerIn.hm$getHeldItem(EnumHand.OFF_HAND);
+                HmItem item = itemOffhand.hm$getItem();
                 if (item instanceof ItemProps) {
-                    PropsEntity<?> spawnEntity = ((ItemProps<?>) item).getSpawnEntity(playerIn.world, playerIn,
-                            JmeVector3fPool.get(playerIn.posX, playerIn.posY + 1.25, playerIn.posZ), playerIn.rotationYaw % 360.0F, item.getMetadata(itemOffhand));
-                    playerIn.world.spawnEntity(spawnEntity);
+                    Vector3f pos = JmeVector3fPool.get(playerIn.hm$getPosX(), playerIn.hm$getPosY() + 1.25, playerIn.hm$getPosZ());
+                    PhysicsEntitiesFactory spawnEntity = ((ItemProps<?>) item).getSpawnEntity(playerIn,
+                            pos, playerIn.hm$getRotationYaw() % 360.0F, itemOffhand.hm$getMetadata());
                     spawnEntity.setPhysicsInitCallback((modularEntity, physicsHandler) -> {
-                        physicsHandler.setLinearVelocity(DynamXUtils.toVector3f(playerIn.getLookVec()).multLocal(20));
+                        physicsHandler.setLinearVelocity(DynamXUtils.toVector3f(playerIn.hm$getLook()).multLocal(20));
                     });
+                    playerIn.hm$getWorld().spawnHmEntity(spawnEntity, Vector3fPool.get(pos));
                 }
             }
 
@@ -94,30 +98,30 @@ public class WrenchMode {
         return "wrench.mode.set." + label;
     }
 
-    public void onWrenchLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
+    public void onWrenchLeftClickEntity(HmItemStack stack, HmPlayerEntity player, HmEntity entity) {
     }
 
-    public void onWrenchRightClick(EntityPlayer playerIn, EnumHand handIn) {
+    public void onWrenchRightClick(HmPlayerEntity playerIn, EnumHand handIn) {
     }
 
-    public void onWrenchRightClickClient(EntityPlayer playerIn, EnumHand handIn) {
+    public void onWrenchRightClickClient(HmPlayerEntity playerIn, EnumHand handIn) {
     }
 
-    public void onInteractWithEntity(EntityPlayer player, PhysicsEntity<?> targetEntity, boolean isSneaking) {
+    public void onInteractWithEntity(HmPlayerEntity player, PhysicsEntity<?> targetEntity, boolean isSneaking) {
     }
 
     public static List<WrenchMode> getWrenchModes() {
         return WRENCH_MODES;
     }
 
-    public static void switchMode(EntityPlayer player, ItemStack s) {
-        if (!s.hasTagCompound()) s.setTagCompound(new NBTTagCompound());
-        int l = s.getTagCompound().getInteger("mode") + 1;
+    public static void switchMode(HmPlayerEntity player, HmItemStack s) {
+        NBTTagCompound tag = s.hm$getOrCreateTagCompound();
+        int l = tag.getInteger("mode") + 1;
         if (l >= WRENCH_MODES.size()) {
             l = 0;
         }
-        s.getTagCompound().setInteger("mode", l);
-        if (!player.capabilities.isCreativeMode) {
+        tag.setInteger("mode", l);
+        if (!player.hm$isCreativeMode()) {
             boolean allowed = false;
             for (int i = 0; i < DynamXConfig.allowedWrenchModes.length; i++) {
                 if (DynamXConfig.allowedWrenchModes[i] == l) {
@@ -130,16 +134,16 @@ public class WrenchMode {
                 return;
             }
         }
-        player.sendMessage(new TextComponentTranslation(WRENCH_MODES.get(l).getMessage()));
+        player.hm$sendTranslatedMessage(WRENCH_MODES.get(l).getMessage());
     }
 
-    public static void setMode(EntityPlayer player, ItemStack s, int mode) {
-        if (!s.hasTagCompound()) s.setTagCompound(new NBTTagCompound());
+    public static void setMode(HmPlayerEntity player, HmItemStack s, int mode) {
+        NBTTagCompound tag = s.hm$getOrCreateTagCompound();
         if (mode >= WRENCH_MODES.size()) {
             mode = 0;
         }
-        s.getTagCompound().setInteger("mode", mode);
-        if (!player.capabilities.isCreativeMode) {
+        tag.setInteger("mode", mode);
+        if (!player.hm$isCreativeMode()) {
             boolean allowed = false;
             for (int i = 0; i < DynamXConfig.allowedWrenchModes.length; i++) {
                 if (DynamXConfig.allowedWrenchModes[i] == mode) {
@@ -152,7 +156,7 @@ public class WrenchMode {
                 return;
             }
         }
-        player.sendMessage(new TextComponentTranslation(WRENCH_MODES.get(mode).getMessage()));
+        player.hm$sendTranslatedMessage(WRENCH_MODES.get(mode).getMessage());
     }
 
     public static void sendWrenchMode(WrenchMode mode) {
@@ -166,15 +170,15 @@ public class WrenchMode {
         DynamXContext.getNetwork().sendToServer(new MessageDebugRequest(-15817 - index));
     }
 
-    public static WrenchMode getCurrentMode(ItemStack s) {
-        if (s.hasTagCompound()) {
-            int l = s.getTagCompound().getInteger("mode");
+    public static WrenchMode getCurrentMode(HmItemStack s) {
+        if (s.hm$hasTagCompound()) {
+            int l = s.hm$getTagCompound().getInteger("mode");
             return l < WRENCH_MODES.size() ? WRENCH_MODES.get(l) : NONE;
         }
         return NONE;
     }
 
-    public static boolean isCurrentMode(ItemStack stack, WrenchMode mode) {
+    public static boolean isCurrentMode(HmItemStack stack, WrenchMode mode) {
         return getCurrentMode(stack) == mode;
     }
 
@@ -184,16 +188,16 @@ public class WrenchMode {
         }
 
         @Override
-        public void onWrenchLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
+        public void onWrenchLeftClickEntity(HmItemStack stack, HmPlayerEntity player, HmEntity entity) {
             act(player, false);
         }
 
         @Override
-        public void onInteractWithEntity(EntityPlayer player, PhysicsEntity<?> targetEntity, boolean isSneaking) {
+        public void onInteractWithEntity(HmPlayerEntity player, PhysicsEntity<?> targetEntity, boolean isSneaking) {
             act(player, true);
         }
 
-        private void act(EntityPlayer player, boolean shouldWeldObjects) {
+        private void act(HmPlayerEntity player, boolean shouldWeldObjects) {
             QuaternionPool.openPool();
             JmeVector3fPool.openPool();
             Predicate<EnumBulletShapeType> predicateShape = p -> !p.isPlayer();
@@ -203,17 +207,17 @@ public class WrenchMode {
             if (result != null) {
                 BulletShapeType<?> shapeType = (BulletShapeType<?>) result.hitBody.getUserObject();
 
-                ItemStack itemStack = player.getHeldItemMainhand();
+                HmItemStack itemStack = player.hm$getHeldItemMainhand();
                 if (!ItemWrench.hasEntity(itemStack)) {
                     if (!shapeType.getType().isTerrain()) {
                         MovableModule movableModule = ((PhysicsEntity<?>) shapeType.getObjectIn()).getModuleByType(MovableModule.class);
                         movableModule.attachObjects.initObject(result.hitBody, result.hitPos, JointEnd.A);
                         ItemWrench.writeEntity(itemStack, (PhysicsEntity<?>) shapeType.getObjectIn());
                     } else {
-                        player.sendMessage(new TextComponentString("§cYou must first click on an entity"));
+                        player.hm$sendMessage("§cYou must first click on an entity");
                     }
                 } else {
-                    PhysicsEntity<?> containedEntity = ItemWrench.getEntity(itemStack, player.world);
+                    PhysicsEntity<?> containedEntity = ItemWrench.getEntity(itemStack, player.hm$getWorld());
                     if (containedEntity != null) {
                         AttachObjects attachObjects = containedEntity.getModuleByType(MovableModule.class).attachObjects;
                         if (!shapeType.getType().isTerrain()) {
@@ -222,7 +226,7 @@ public class WrenchMode {
                             // Single ended joint
                             attachObjects.initObject((PhysicsRigidBody) containedEntity.physicsHandler.getCollisionObject(), result.hitPos, JointEnd.A);
                         }
-                        IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(containedEntity.world);
+                        IPhysicsWorld physicsWorld = DynamXContext.getPhysicsWorld(containedEntity.getWorld());
                         if (shapeType.getType().isBulletEntity()) {
                             physicsWorld.schedule(() -> JointHandlerRegistry.createJointWithOther(MovableModule.JOINT_NAME, containedEntity, (PhysicsEntity<?>) shapeType.getObjectIn(), (byte) (shouldWeldObjects ? 2 : 1)));
                         } else {
@@ -243,10 +247,10 @@ public class WrenchMode {
         }
 
         @Override
-        public void onInteractWithEntity(EntityPlayer player, PhysicsEntity<?> physicsEntity, boolean isSneaking) {
+        public void onInteractWithEntity(HmPlayerEntity player, PhysicsEntity<?> physicsEntity, boolean isSneaking) {
             if (isSneaking && physicsEntity instanceof BaseVehicleEntity) {
                 BaseVehicleEntity<?> vehicleEntity = (BaseVehicleEntity<?>) physicsEntity;
-                PhysicsEntity<?> physicsEntityTemp = ItemWrench.getEntity(player.getHeldItemMainhand(), player.world);
+                PhysicsEntity<?> physicsEntityTemp = ItemWrench.getEntity(player.hm$getHeldItemMainhand(), player.hm$getWorld());
                 if (physicsEntityTemp instanceof BaseVehicleEntity) {
                     BaseVehicleEntity<?> temp = (BaseVehicleEntity<?>) physicsEntityTemp;
                     BaseVehicleEntity<?> car = vehicleEntity instanceof CarEntity ? vehicleEntity : temp instanceof CarEntity ? temp : null;
@@ -255,15 +259,13 @@ public class WrenchMode {
                             && car.getModuleByType(TrailerAttachModule.class).getConnectedEntity() == -1 && trailer.getModuleByType(TrailerAttachModule.class).getConnectedEntity() == -1) {
                         DynamXUtils.attachTrailer(player, car, trailer);
                     } else {
-                        TextComponentTranslation msg = new TextComponentTranslation("trailer.attach.fail", temp.getPackInfo().getName(), vehicleEntity.getPackInfo().getName());
-                        msg.getStyle().setColor(TextFormatting.RED);
-                        player.sendMessage(msg);
+                        player.hm$sendTranslatedMessage("trailer.attach.fail", TextFormatting.RED, temp.getPackInfo().getName(), vehicleEntity.getPackInfo().getName());
                     }
-                    ItemWrench.removeEntity(player.getHeldItemMainhand());
+                    ItemWrench.removeEntity(player.hm$getHeldItemMainhand());
                 } else {
                     if (vehicleEntity.getModuleByType(TrailerAttachModule.class) != null && vehicleEntity.getModuleByType(TrailerAttachModule.class).getConnectedEntity() == -1) {
-                        ItemWrench.writeEntity(player.getHeldItemMainhand(), vehicleEntity);
-                        player.sendMessage(new TextComponentTranslation("trailer.wrench.first"));
+                        ItemWrench.writeEntity(player.hm$getHeldItemMainhand(), vehicleEntity);
+                        player.hm$sendTranslatedMessage("trailer.wrench.first");
                     }
                 }
             }
@@ -276,29 +278,26 @@ public class WrenchMode {
         }
 
         @Override
-        public void onInteractWithEntity(EntityPlayer context, PhysicsEntity<?> physicsEntity, boolean isSneaking) {
+        public void onInteractWithEntity(HmPlayerEntity context, PhysicsEntity<?> physicsEntity, boolean isSneaking) {
             if (isSneaking) {
                 NBTTagCompound tag = new NBTTagCompound();
-                context.sendMessage(new TextComponentString("Respawning !"));
-                physicsEntity.removePassengers();
-                physicsEntity.writeToNBT(tag);
-                tag.setTag("Pos", DynamXUtils.newDoubleNBTList(physicsEntity.posX, physicsEntity.posY + 3, physicsEntity.posZ));
-                tag.setTag("Rotation", DynamXUtils.newFloatNBTList(physicsEntity.rotationYaw, 0));
-                try {
-                    PhysicsEntity<?> e = ObfuscationReflectionHelper.findConstructor(physicsEntity.getClass(), World.class).newInstance(context.world);
-                    e.readFromNBT(tag);
-                    physicsEntity.setDead(); //if no error in reflexion
-                    TaskScheduler.schedule(new TaskScheduler.ScheduledTask((short) 2) {
-                        @Override
-                        public void run() {
-                            context.world.spawnEntity(e);
-                        }
-                    });
-                } catch (InstantiationException | IllegalAccessException |
-                         InvocationTargetException instantiationException) {
-                    context.sendMessage(new TextComponentString(TextFormatting.RED + " An error occurred"));
-                    DynamXMain.log.fatal("Cannot respawn entity " + physicsEntity, instantiationException);
-                }
+                context.hm$sendMessage("Respawning !");
+                physicsEntity.getMcEntity().hm$removePassengers();
+                physicsEntity.getMcEntity().hm$writeToNbt(tag);
+                tag.setTag("Pos", DynamXUtils.newDoubleNBTList(physicsEntity.physicsPosition.x, physicsEntity.physicsPosition.y + 3, physicsEntity.physicsPosition.z));
+                tag.setTag("Rotation", DynamXUtils.newFloatNBTList(physicsEntity.getMcEntity().hm$getRotationYaw(), 0));
+                // TODO NO NO NO need to use the factory
+                PhysicsEntitiesFactory entityFactory = physicsEntity.createEntityFactory();
+                entityFactory.setEntityInitCallback(((modularEntity, modules) -> {
+                    modularEntity.getMcEntity().hm$readFromNbt(tag);
+                }));
+                physicsEntity.getMcEntity().hm$setDead(); //if no error in reflexion
+                TaskScheduler.schedule(new TaskScheduler.ScheduledTask((short) 2) {
+                    @Override
+                    public void run() {
+                        context.hm$getWorld().spawnHmEntity(entityFactory, Vector3fPool.get(entityFactory.getPos()));
+                    }
+                });
             }
         }
     }
@@ -309,7 +308,7 @@ public class WrenchMode {
         }
 
         @Override
-        public void onInteractWithEntity(EntityPlayer player, PhysicsEntity<?> targetEntity, boolean isSneaking) {
+        public void onInteractWithEntity(HmPlayerEntity player, PhysicsEntity<?> targetEntity, boolean isSneaking) {
             if (targetEntity instanceof BaseVehicleEntity) {
                 BaseVehicleEntity<?> vehicleEntity = (BaseVehicleEntity<?>) targetEntity;
                 //TODO TAKE HIDDEN VARIANTS IN ACCOUNT
@@ -327,38 +326,38 @@ public class WrenchMode {
             super("entity_seat", TextFormatting.LIGHT_PURPLE);
         }
 
-        HashMap<EntityPlayer, Entity> playerEntityHashMap = new HashMap<>();
+        HashMap<HmPlayerEntity, HmEntity> playerEntityHashMap = new HashMap<>();
 
         @Override
-        public void onWrenchLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
-            if (!(entity instanceof BaseVehicleEntity)) {
+        public void onWrenchLeftClickEntity(HmItemStack stack, HmPlayerEntity player, HmEntity entity) {
+            if (!HmEntityLogicMatcher.is(entity, BaseVehicleEntity.class)) {
                 playerEntityHashMap.put(player, entity);
-                player.sendMessage(new TextComponentString("Entity selected: " + entity.getName()));
+                player.hm$sendMessage("Entity selected: " + entity.hm$getName());
             } else {
-                player.sendMessage(new TextComponentString("You can not mount a vehicle to a vehicle"));
+                player.hm$sendMessage("You can not mount a vehicle to a vehicle");
             }
         }
 
         @Override
-        public void onInteractWithEntity(EntityPlayer context, PhysicsEntity<?> physicsEntity, boolean isSneaking) {
+        public void onInteractWithEntity(HmPlayerEntity context, PhysicsEntity<?> physicsEntity, boolean isSneaking) {
             if (physicsEntity instanceof BaseVehicleEntity) {
                 BaseVehicleEntity<?> baseVehicleEntity = (BaseVehicleEntity<?>) physicsEntity;
                 SeatsModule seatsModule = baseVehicleEntity.getModuleByType(SeatsModule.class);
-                Entity entity = playerEntityHashMap.remove(context);
+                HmEntity entity = playerEntityHashMap.remove(context);
                 if (entity != null) {
                     for (Object object : baseVehicleEntity.getPackInfo().getPartsByType(BasePartSeat.class)) {
                         BasePartSeat partSeat = (BasePartSeat) object;
                         if (!partSeat.isDriver()) {
                             SeatsModule seats = ((IModuleContainer.ISeatsContainer) baseVehicleEntity).getSeats();
-                            Entity seatRider = seats.getSeatToPassengerMap().get(partSeat);
+                            HmEntity seatRider = seats.getSeatToPassengerMap().get(partSeat);
                             if (seatRider == null) {
                                 partSeat.mountEntity(baseVehicleEntity, seatsModule, entity);
-                                context.sendMessage(new TextComponentString("Entity added to vehicle"));
+                                context.hm$sendMessage("Entity added to vehicle");
                                 return;
                             }
                         }
                     }
-                    context.sendMessage(new TextComponentString("No seat for entity was found"));
+                    context.hm$sendMessage("No seat for entity was found");
                 }
             }
         }

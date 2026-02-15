@@ -1,8 +1,6 @@
-package fr.hermes.api;
+package fr.hermes.api.utils;
 
-import fr.hermes.api.mc.entities.HmEntity;
-import fr.hermes.api.mc.entities.HmEntityLogic;
-import fr.hermes.api.mc.entities.HmModEntity;
+import fr.hermes.api.mc.entities.*;
 
 import java.util.function.Consumer;
 

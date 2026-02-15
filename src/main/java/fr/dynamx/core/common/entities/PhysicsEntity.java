@@ -27,7 +27,6 @@ import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.Vector3fPool;
-import fr.hermes.api.mc.entities.HmClientPlayerEntity;
 import fr.hermes.api.mc.entities.HmEntityLogic;
 import fr.hermes.api.mc.items.HmItemStack;
 import fr.hermes.api.mc.world.HmWorld;
@@ -155,7 +154,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     // TODO reorganise methods
 
     @Override
-    public boolean isInRangeToRenderDist(double range) {
+    public Boolean isInRangeToRenderDist(double range) {
         double d = getBoundingBox().getAverageEdgeLength() * 4.0D * 64.0D;
         return range < d * d;
     }
@@ -261,7 +260,7 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     }
 
     @Override
-    public boolean canFitPassenger(HmEntity passenger) {
+    public Boolean canFitPassenger(HmEntity passenger) {
         return false;
     }
 
@@ -595,4 +594,6 @@ public abstract class PhysicsEntity<T extends AbstractEntityPhysicsHandler<?, ?>
     public enum EnumEntityPhysicsRegistryState {
         NOT_REGISTERED, REGISTERING, REGISTERED
     }
+
+    public abstract PhysicsEntitiesFactory createEntityFactory();
 }

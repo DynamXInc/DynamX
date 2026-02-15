@@ -1,5 +1,6 @@
 package fr.hermes.forge;
 
+import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.hermes.api.mc.entities.HmEntity;
 import fr.hermes.api.mc.entities.HmEntityFactory;
 import fr.hermes.api.mc.entities.HmEntityLogic;
@@ -15,9 +16,12 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 // TODO REGISTER, HOW TO HANDLE RENDERING, ETC
 public class HmForgeBaseEntity extends Entity implements HmModEntity, IEntityAdditionalSpawnData {
+    private static final Log log = LogFactory.getLog(HmForgeBaseEntity.class);
     @Getter
     private HmEntityLogic logic;
 
@@ -32,7 +36,7 @@ public class HmForgeBaseEntity extends Entity implements HmModEntity, IEntityAdd
 
     @Override
     protected void entityInit() {
-
+        logic.onMcEntityInit();
     }
 
     @Override
@@ -70,10 +74,14 @@ public class HmForgeBaseEntity extends Entity implements HmModEntity, IEntityAdd
         logic.onUpdate();
     }
 
-    // TODO needs optimization
     @Override
     public AxisAlignedBB getEntityBoundingBox() {
-        return logic.getBoundingBox().toBB();
+        MutableBoundingBox bb = logic.getBoundingBox();
+        if(bb != null) {
+            // TODO needs optimization
+            return bb.toBB();
+        }
+        return super.getEntityBoundingBox();
     }
 
     @Override
@@ -109,8 +117,22 @@ public class HmForgeBaseEntity extends Entity implements HmModEntity, IEntityAdd
     }
 
     @Override
+    public boolean canPassengerSteer() {
+        return logic.canPassengerSteer() && super.canPassengerSteer();
+    }
+
+    @Override
+    public boolean shouldRiderSit() {
+        return logic.shouldPassengersSit();
+    }
+
+    @Override
     protected boolean canFitPassenger(Entity passenger) {
-        return logic.canFitPassenger((HmEntity) passenger);
+        Boolean canFit = logic.canFitPassenger((HmEntity) passenger);
+        if(canFit != null) {
+            return canFit;
+        }
+        return super.canFitPassenger(passenger);
     }
 
     @Override
@@ -121,12 +143,25 @@ public class HmForgeBaseEntity extends Entity implements HmModEntity, IEntityAdd
 
     @Override
     public boolean isInRangeToRenderDist(double distance) {
-        return logic.isInRangeToRenderDist(distance);
+        Boolean inRange = logic.isInRangeToRenderDist(distance);
+        if(inRange != null) {
+            return inRange;
+        }
+        return super.isInRangeToRenderDist(distance);
     }
 
     @Override
     public int getBrightnessForRender() {
         int brightness = super.getBrightnessForRender();
         return brightness != -1 ? brightness : super.getBrightnessForRender();
+    }
+
+    @Override
+    public String getName() {
+        String name = logic.getName();
+        if(name != null) {
+            return name;
+        }
+        return super.getName();
     }
 }

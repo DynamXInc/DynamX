@@ -1,11 +1,14 @@
 package fr.dynamx.core.common.items;
 
 import com.jme3.math.Vector3f;
-import fr.dynamx.api.events.PhysicsEntityEvent;
 import fr.dynamx.core.common.contentpack.type.objects.AbstractItemObject;
-import fr.dynamx.core.common.entities.PackPhysicsEntity;
 import fr.dynamx.core.utils.DynamXUtils;
+import fr.dynamx.core.utils.optimization.Vector3fPool;
+import fr.hermes.api.mc.entities.HmEntityFactory;
+import fr.hermes.api.mc.entities.HmPlayerEntity;
+import fr.hermes.api.mc.items.HmItemStack;
 import fr.hermes.api.mc.utils.HmResourceLocation;
+import fr.hermes.api.mc.world.HmWorld;
 import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -14,12 +17,10 @@ import net.minecraft.stats.StatList;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -67,14 +68,16 @@ public abstract class DynamXItemSpawner<T extends AbstractItemObject<T, ?>> exte
         return new ActionResult<>(EnumActionResult.FAIL, itemstack);
     }
 
-    public boolean spawnEntity(ItemStack itemStackIn, World worldIn, EntityPlayer playerIn, Vec3d blockPos) {
-        if (!worldIn.isRemote) {
-            PackPhysicsEntity<?, ?> entity = getSpawnEntity(worldIn, playerIn, JmeVector3fPool.get((float) blockPos.x, (float) blockPos.y + 1F, (float) blockPos.z), playerIn.rotationYaw % 360.0F, itemStackIn.getMetadata());
-            if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Spawn(worldIn, entity, playerIn, this, blockPos)))
-                worldIn.spawnEntity(entity);
+    public boolean spawnEntity(HmItemStack itemStackIn, HmWorld worldIn, HmPlayerEntity playerIn, Vec3d blockPos) {
+        if (!worldIn.hm$isClient()) {
+            Vector3f pos = JmeVector3fPool.get((float) blockPos.x, (float) blockPos.y + 1F, (float) blockPos.z);
+            HmEntityFactory entity = getSpawnEntity(playerIn, pos,
+                    playerIn.hm$getRotationYaw() % 360.0F, itemStackIn.hm$getMetadata());
+            // TODO EVENT if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Spawn(worldIn, entity, playerIn, this, blockPos)))
+            worldIn.spawnHmEntity(entity, Vector3fPool.get(pos));
         }
         return true;
     }
 
-    public abstract PackPhysicsEntity<?, ?> getSpawnEntity(World worldIn, @Nullable EntityPlayer playerIn, Vector3f pos, float spawnRotation, int metadata);
+    public abstract HmEntityFactory getSpawnEntity(@Nullable HmPlayerEntity playerIn, Vector3f pos, float spawnRotation, int metadata);
 }

@@ -146,7 +146,7 @@ public class CmdSpawnObjects implements ISubCommand {
                 throw new CommandException("Item for " + id + " not found. Check the loading errors.");
             }
             float rotationYaw = 0;
-            PackPhysicsEntity<?, ?> entity = item.getSpawnEntity(w, null, new Vector3f(x, y, z), rotationYaw, 0);
+            PackPhysicsEntity<?, ?> entity = item.getSpawnEntity(null, new Vector3f(x, y, z), rotationYaw, 0);
             if (!MinecraftForge.EVENT_BUS.post(new PhysicsEntityEvent.Spawn(w, entity, null, item, new Vec3d(x, y, z)))) {
                 w.spawnEntity(entity);
             }

@@ -145,7 +145,7 @@ public class VehicleEntityEvent extends Event {
         private final NBTTagCompound nbtTagCompound;
 
         public LoadFromNBT(NBTTagCompound nbtTagCompound, BaseVehicleEntity<?> vehicleEntity) {
-            super(vehicleEntity.hm$getWorld().hm$isClient() ? Side.CLIENT : Side.SERVER, vehicleEntity);
+            super(vehicleEntity.getWorld().hm$isClient() ? Side.CLIENT : Side.SERVER, vehicleEntity);
             this.nbtTagCompound = nbtTagCompound;
         }
     }
@@ -158,7 +158,7 @@ public class VehicleEntityEvent extends Event {
         private final NBTTagCompound nbtTagCompound;
 
         public SaveToNBT(NBTTagCompound nbtTagCompound, BaseVehicleEntity<?> vehicleEntity) {
-            super(vehicleEntity.hm$getWorld().hm$isClient() ? Side.CLIENT : Side.SERVER, vehicleEntity);
+            super(vehicleEntity.getWorld().hm$isClient() ? Side.CLIENT : Side.SERVER, vehicleEntity);
             this.nbtTagCompound = nbtTagCompound;
         }
     }

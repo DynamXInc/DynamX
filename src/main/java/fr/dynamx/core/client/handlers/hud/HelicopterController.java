@@ -3,35 +3,31 @@ package fr.dynamx.core.client.handlers.hud;
 import fr.aym.acsguis.component.GuiComponent;
 import fr.aym.acsguis.component.panel.GuiPanel;
 import fr.aym.acsguis.component.textarea.UpdatableGuiLabel;
-import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.VehicleEntityProperties;
-import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.core.client.handlers.KeyHandler;
 import fr.dynamx.core.common.entities.BaseVehicleEntity;
 import fr.dynamx.core.common.entities.modules.engines.HelicopterEngineModule;
 import fr.dynamx.core.common.entities.vehicles.HelicopterEntity;
 import fr.dynamx.core.utils.DynamXConstants;
-import net.minecraft.util.ResourceLocation;
+import fr.hermes.api.mc.utils.HmResourceLocation;
+import fr.hermes.api.mod.McObjectBinder;
+import fr.hermes.api.utils.HmEntityLogicMatcher;
 import net.minecraftforge.client.event.MouseEvent;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.Collections;
 import java.util.List;
 
+// TODO this annotation is miam
 @Mod.EventBusSubscriber(modid = DynamXConstants.ID, value = Side.CLIENT)
 public class HelicopterController extends BaseController {
-    public static final ResourceLocation STYLE = new ResourceLocation(DynamXConstants.ID, "css/vehicle_hud.css");
+    public static final HmResourceLocation STYLE = McObjectBinder.instance.newResourceLocation(DynamXConstants.ID, "css/vehicle_hud.css");
 
     protected final HelicopterEngineModule engine;
 
-    /**
-     * @param entity is assumed to implement {@link IModuleContainer.ISeatsContainer}
-     */
-    @SideOnly(Side.CLIENT)
+
     public HelicopterController(BaseVehicleEntity<?> entity, HelicopterEngineModule engine) {
         super(entity, engine);
         this.engine = engine;
@@ -42,19 +38,19 @@ public class HelicopterController extends BaseController {
         while (KeyHandler.KEY_LOCK_ROTATION.isPressed()) ;
     }
 
+    // TODO CONVERT
     @SubscribeEvent
-    @SideOnly(Side.CLIENT)
     public static void tickMouse(MouseEvent event) {
-        if (HelicopterEntity.isMouseLocked() && MC.player.getRidingEntity() instanceof HelicopterEntity && ((HelicopterEntity<?>) MC.player.getRidingEntity()).getSeats().isLocalPlayerDriving()) {
-            HelicopterEngineModule engineModule = ((HelicopterEntity<?>) MC.player.getRidingEntity()).getModuleByType(HelicopterEngineModule.class);
-            int invert = MC.gameSettings.invertMouse ? -1 : 1;
+        HelicopterEntity<?> helicopter = HmEntityLogicMatcher.cast(MC.hm$getPlayer().hm$getRidingEntity(), HelicopterEntity.class);
+        if (HelicopterEntity.isMouseLocked() && helicopter != null && helicopter.getSeats().isEntityDriving(MC.hm$getPlayer())) {
+            HelicopterEngineModule engineModule = helicopter.getModuleByType(HelicopterEngineModule.class);
+            int invert = MC.hm$getGameSettings().hm$isInvertMouse() ? -1 : 1;
             engineModule.getRollControls().set(0, invert * event.getDx());
             engineModule.getRollControls().set(1, invert * event.getDy());
         }
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
     protected void updateControls() {
         HelicopterEngineModule engine = entity.getModuleByType(HelicopterEngineModule.class);
         if (engine.getEngineProperties() != null && engine != null) {
@@ -86,7 +82,7 @@ public class HelicopterController extends BaseController {
             }
             handbraking = !rolling && KeyHandler.KEY_HANDBRAKE.isKeyDown();
 
-            MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.ControllerUpdate<>(entity, this));
+            // TODO EVENT MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.ControllerUpdate<>(entity, this));
             int controls = 0;
             if (accelerating)
                 controls = controls | 2;
@@ -107,7 +103,6 @@ public class HelicopterController extends BaseController {
     //HUD
 
     @Override
-    @SideOnly(Side.CLIENT)
     public GuiComponent createHud() {
         GuiPanel panel = new GuiPanel();
         GuiPanel speed = new GuiPanel();
@@ -122,8 +117,7 @@ public class HelicopterController extends BaseController {
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
-    public List<ResourceLocation> getHudCssStyles() {
+    public List<HmResourceLocation> getHudCssStyles() {
         return Collections.singletonList(STYLE);
     }
 }

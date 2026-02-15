@@ -4,6 +4,7 @@ import com.jme3.bullet.objects.PhysicsRigidBody;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.core.client.handlers.ClientDebugSystem;
+import fr.dynamx.core.client.handlers.ClientEventHandler;
 import fr.dynamx.core.common.DynamXContext;
 import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.common.entities.modules.MovableModule;
@@ -59,7 +60,7 @@ public class RenderMovableLine {
             float interPitch = player.prevRotationPitch + (player.rotationPitch - player.prevRotationPitch) * partialTicks;
             Vector3f firstPersonOffsetRot = DynamXGeometry.getRotatedPoint(firstPersonOffset, interPitch, interYaw, 0);
 
-            Vector3f target = JmeVector3fPool.get(DynamXUtils.getCameraTranslation(Minecraft.getMinecraft(), partialTicks)).add(firstPersonOffsetRot);
+            Vector3f target = JmeVector3fPool.get(DynamXUtils.getCameraTranslation(ClientEventHandler.MC.hm$getPlayer(), partialTicks)).add(firstPersonOffsetRot);
             target.subtractLocal(physicsLocation.x, physicsLocation.y - player.getEyeHeight(), physicsLocation.z);
 
             Vector3f pivot = DynamXGeometry.rotateVectorByQuaternion(movableModule.pickObjects.getLocalPickPosition(), physicsRotation);

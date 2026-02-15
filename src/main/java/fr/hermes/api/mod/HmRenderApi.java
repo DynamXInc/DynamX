@@ -15,4 +15,6 @@ public interface HmRenderApi {
     void renderEntity(HmEntity e, float partialTicks);
 
     void renderItem(HmItemStack stack, IBakedModel guiBaked);
+
+    void setOverlayMessage(String text, boolean animateColor);
 }

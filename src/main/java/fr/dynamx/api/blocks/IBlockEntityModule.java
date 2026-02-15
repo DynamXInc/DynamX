@@ -2,12 +2,12 @@ package fr.dynamx.api.blocks;
 
 import fr.dynamx.api.entities.modules.IBaseModule;
 import fr.dynamx.core.common.blocks.TEDynamXBlock;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.NonNullList;
+import fr.hermes.api.mc.blocks.HmBlockState;
+import fr.hermes.api.mc.items.HmItemStack;
+import fr.hermes.api.mc.world.HmWorld;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
-import net.minecraftforge.fml.relauncher.Side;
+
+import java.util.List;
 
 /**
  * Base implementation of a {@link TEDynamXBlock} module
@@ -28,7 +28,7 @@ public interface IBlockEntityModule extends IBaseModule {
     /**
      * Fills the drops list with the block drops when the block is broken
      */
-    default void getBlockDrops(NonNullList<ItemStack> drops, IBlockAccess world, BlockPos pos, IBlockState state, int fortune) {
+    default void getBlockDrops(List<HmItemStack> drops, HmWorld world, BlockPos pos, HmBlockState state, int fortune) {
     }
 
     /**
@@ -38,7 +38,7 @@ public interface IBlockEntityModule extends IBaseModule {
         /**
          * @return True to listen this update on this side (default is true on all sides)
          */
-        default boolean listenBlockEntityUpdates(Side side) {
+        default boolean listenBlockEntityUpdates(boolean isClient) {
             return true;
         }
 

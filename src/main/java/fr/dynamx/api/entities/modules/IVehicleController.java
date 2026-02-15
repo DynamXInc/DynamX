@@ -2,9 +2,7 @@ package fr.dynamx.api.entities.modules;
 
 import fr.aym.acsguis.component.GuiComponent;
 import fr.dynamx.core.common.entities.modules.engines.CarEngineModule;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import fr.hermes.api.mc.utils.HmResourceLocation;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -27,7 +25,6 @@ public interface IVehicleController {
      * Nullable : display nothing for this controller
      */
     @Nullable
-    @SideOnly(Side.CLIENT)
     GuiComponent createHud();
 
     /**
@@ -35,6 +32,5 @@ public interface IVehicleController {
      * Nullable : display nothing for this controller
      */
     @Nullable
-    @SideOnly(Side.CLIENT)
-    List<ResourceLocation> getHudCssStyles();
+    List<HmResourceLocation> getHudCssStyles();
 }

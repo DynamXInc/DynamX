@@ -17,13 +17,11 @@ import fr.dynamx.core.common.entities.BaseVehicleEntity;
 import fr.dynamx.core.common.entities.modules.engines.CarEngineModule;
 import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.client.ClientDynamXUtils;
+import fr.hermes.api.mc.utils.HmResourceLocation;
+import fr.hermes.api.mod.McObjectBinder;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.Collections;
 import java.util.List;
@@ -31,7 +29,7 @@ import java.util.List;
 @ACsGuiFrame
 public class CarController extends BaseController {
     @ACsGuiFrame.RegisteredStyleSheet
-    public static final ResourceLocation STYLE = new ResourceLocation(DynamXConstants.ID, "css/vehicle_hud.css");
+    public static final HmResourceLocation STYLE = McObjectBinder.instance.newResourceLocation(DynamXConstants.ID, "css/vehicle_hud.css");
 
     //TODO CREATE EVENT TO INIT THIS ?
     @Getter
@@ -66,7 +64,7 @@ public class CarController extends BaseController {
             }
             if (KeyHandler.KEY_ATTACH_TRAILER.isPressed())
                 ClientDynamXUtils.attachTrailer();
-            MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.ControllerUpdate<>(entity, this));
+            // TODO EVENT MinecraftForge.EVENT_BUS.post(new VehicleEntityEvent.ControllerUpdate<>(entity, this));
             int controls = 0;
             if (accelerating)
                 controls = controls | 2;
@@ -88,7 +86,6 @@ public class CarController extends BaseController {
     //HUD
 
     @Override
-    @SideOnly(Side.CLIENT)
     public GuiComponent createHud() {
         GuiPanel panel = new GuiPanel();
         float maxRpm = entity.getPackInfo().getSubPropertyByType(CarEngineInfo.class).getMaxRevs() + 3000; // todo CONFIGURABLE
@@ -100,10 +97,10 @@ public class CarController extends BaseController {
         float[] engineProperties = engine.getEngineProperties();
         speed.add(new UpdatableGuiLabel("%s", (UpdatableGuiLabel.LabelValueFunction) val ->
                 val.set(engine.isEngineStarted() ? Math.abs((int) engineProperties[VehicleEntityProperties.EnumEngineProperties.SPEED.ordinal()]) : "--", ""))
-            .setCssId("engine_speed"));
+                .setCssId("engine_speed"));
         speed.add(new UpdatableGuiLabel("%s", (UpdatableGuiLabel.LabelValueFunction) val ->
                 val.set(getGearString((int) engineProperties[VehicleEntityProperties.EnumEngineProperties.ACTIVE_GEAR.ordinal()])))
-            .setCssId("engine_gear"));
+                .setCssId("engine_gear"));
         addRpmCounter(speed, scale, maxRpm);
 
         if (hudIcons != null) {
@@ -150,7 +147,7 @@ public class CarController extends BaseController {
     }
 
     @Override
-    public List<ResourceLocation> getHudCssStyles() {
+    public List<HmResourceLocation> getHudCssStyles() {
         return Collections.singletonList(STYLE);
     }
 

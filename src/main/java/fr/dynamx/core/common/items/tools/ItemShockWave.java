@@ -5,6 +5,7 @@ import fr.dynamx.core.common.items.DynamXItemRegistry;
 import fr.dynamx.core.server.command.CmdShockWave;
 import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.RegistryNameSetter;
+import fr.dynamx.core.utils.optimization.Vector3fPool;
 import fr.hermes.forge.JmeVector3fPool;
 import fr.dynamx.core.utils.physics.DynamXPhysicsHelper;
 import net.minecraft.entity.player.EntityPlayer;
@@ -29,7 +30,7 @@ public class ItemShockWave extends Item {
     @Override
     public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
         List<PhysicsEntity> entities = worldIn.getEntitiesWithinAABB(PhysicsEntity.class, playerIn.getEntityBoundingBox().grow(20));
-        entities.forEach(physicsEntity -> DynamXPhysicsHelper.createExplosion(physicsEntity, JmeVector3fPool.get((float) playerIn.posX, (float) playerIn.posY, (float) playerIn.posZ), CmdShockWave.explosionForce));
+        entities.forEach(physicsEntity -> DynamXPhysicsHelper.createExplosion(physicsEntity, Vector3fPool.get((float) playerIn.posX, (float) playerIn.posY, (float) playerIn.posZ), CmdShockWave.explosionForce));
         return new ActionResult<ItemStack>(EnumActionResult.PASS, playerIn.getHeldItem(handIn));
     }
 }

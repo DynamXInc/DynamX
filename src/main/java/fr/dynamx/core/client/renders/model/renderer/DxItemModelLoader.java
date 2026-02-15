@@ -9,6 +9,7 @@ import fr.dynamx.core.client.renders.scene.node.AbstractItemNode;
 import fr.dynamx.core.client.renders.scene.node.SceneNode;
 import fr.dynamx.core.common.DynamXContext;
 import fr.hermes.api.mc.items.HmItemStack;
+import fr.hermes.api.mc.utils.HmCameraTransforms;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
@@ -68,7 +69,8 @@ public class DxItemModelLoader extends TileEntityItemStackRenderer implements IC
             if (!(sceneGraph instanceof AbstractItemNode)) {
                 throw new IllegalStateException("The scene graph of the item " + stack.getItem() + " is not an IItemNode");
             }
-            renderContext.setModelParams(model, (HmItemStack) (Object) stack, modelRenderer, (byte) stack.getMetadata()).setRenderParams(renderType, partialTicks, true);
+            renderContext.setModelParams(model, (HmItemStack) (Object) stack, modelRenderer, (byte) stack.getMetadata())
+                    .setRenderParams((HmCameraTransforms) (Object) renderType, partialTicks, true);
             if (!MinecraftForge.EVENT_BUS.post(new DynamXRenderItemEvent(renderContext, (AbstractItemNode<?, ?>) sceneGraph, DynamXRenderItemEvent.EventStage.PRE))) {
                 ((AbstractItemNode<?, IModelPackObject>) sceneGraph).renderAsItemNode(renderContext, model.getOwner());
                 MinecraftForge.EVENT_BUS.post(new DynamXRenderItemEvent(renderContext, (AbstractItemNode<?, ?>) sceneGraph, DynamXRenderItemEvent.EventStage.POST));

@@ -5,12 +5,11 @@ import fr.aym.acsguis.component.panel.GuiPanel;
 import fr.aym.acsguis.component.textarea.UpdatableGuiLabel;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.api.entities.VehicleEntityProperties;
-import fr.dynamx.api.events.VehicleEntityEvent;
 import fr.dynamx.core.common.entities.BaseVehicleEntity;
 import fr.dynamx.core.common.entities.modules.engines.BoatPropellerModule;
 import fr.dynamx.core.utils.DynamXConstants;
 import fr.hermes.api.mc.utils.HmResourceLocation;
-import fr.hermes.api.mod.McObjectBinder;
+import fr.hermes.api.mc.McObjectBinder;
 import lombok.Getter;
 import lombok.Setter;
 

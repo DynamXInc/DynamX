@@ -10,7 +10,7 @@ import fr.dynamx.core.common.entities.modules.engines.HelicopterEngineModule;
 import fr.dynamx.core.common.entities.vehicles.HelicopterEntity;
 import fr.dynamx.core.utils.DynamXConstants;
 import fr.hermes.api.mc.utils.HmResourceLocation;
-import fr.hermes.api.mod.McObjectBinder;
+import fr.hermes.api.mc.McObjectBinder;
 import fr.hermes.api.utils.HmEntityLogicMatcher;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.fml.common.Mod;

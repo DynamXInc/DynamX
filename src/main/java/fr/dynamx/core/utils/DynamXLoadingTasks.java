@@ -10,7 +10,7 @@ import fr.dynamx.core.common.contentpack.ContentPackLoader;
 import fr.dynamx.core.common.contentpack.sync.PackSyncHandler;
 import fr.dynamx.core.common.network.packets.MessageSyncConfig;
 import fr.hermes.api.mc.world.HmWorld;
-import fr.hermes.api.mod.HermesPlatform;
+import fr.hermes.api.platform.HermesPlatform;
 
 import java.util.ArrayDeque;
 import java.util.HashMap;

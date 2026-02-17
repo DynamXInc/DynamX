@@ -12,7 +12,7 @@ import fr.dynamx.core.utils.DynamXLoadingTasks;
 import fr.dynamx.core.utils.errors.DynamXErrorManager;
 import fr.hermes.api.forge.HermesProgressManager;
 import fr.hermes.api.mod.HermesMod;
-import fr.hermes.api.mod.HermesUtilsClient;
+import fr.hermes.client.api.HermesUtilsClient;
 import lombok.Getter;
 
 import javax.annotation.Nonnull;
@@ -111,7 +111,17 @@ public class ContentPackLoader {
     }
 
     private static boolean loadPackResources(HermesMod mod, File file) {
-        return ((HermesUtilsClient) mod.getUtils()).addFileResources(file);
+        try {
+            ((HermesUtilsClient) mod.getUtils()).addFileResources(file);
+            return true;
+        } catch (Throwable e) {
+            DynamXMain.log.error("Failed to load textures and models of DynamX pack : {}", file.getName());
+            DynamXMain.log.throwing(e);
+            if (!(e instanceof Exception)) //todo clean
+                e = new RuntimeException("encapsulated error", e);
+            DynamXErrorManager.addError(file.getName(), DynamXErrorManager.INIT_ERRORS, "res_pack_load_fail", ErrorLevel.FATAL, "assets", "Failed to register as resource pack", (Exception) e, 700);
+            return false;
+        }
     }
 
     @Nonnull

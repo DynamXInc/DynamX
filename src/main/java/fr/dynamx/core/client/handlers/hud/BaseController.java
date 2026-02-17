@@ -6,10 +6,9 @@ import fr.dynamx.core.client.handlers.KeyHandler;
 import fr.dynamx.core.common.entities.BaseVehicleEntity;
 import fr.dynamx.core.common.entities.modules.engines.BasicEngineModule;
 import fr.hermes.api.mc.client.HmMinecraftClient;
-import fr.hermes.api.mod.HermesPlatform;
+import fr.hermes.api.platform.HermesPlatform;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 

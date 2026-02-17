@@ -13,7 +13,7 @@ import fr.dynamx.core.utils.debug.DynamXDebugOption;
 import fr.dynamx.core.utils.debug.DynamXDebugOptions;
 import fr.hermes.api.mc.entities.HmEntity;
 import fr.hermes.api.mc.utils.HmResourceLocation;
-import fr.hermes.api.mod.McObjectBinder;
+import fr.hermes.api.mc.McObjectBinder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;

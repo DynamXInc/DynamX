@@ -41,7 +41,6 @@ public class DynamXMain {
     @Getter
     private final boolean isClient;
 
-    // TODO MOVE IN HERMES API
     public static final Logger log = LogManager.getLogger("DynamX");
 
     // TODO SHOULD IDEALLY DISAPPEAR IN HERMES, BUT KEEPING IT FOR NOW

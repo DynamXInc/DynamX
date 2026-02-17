@@ -1,4 +1,4 @@
-package fr.hermes.api.mod;
+package fr.hermes.client.api;
 
 import fr.hermes.api.mc.entities.HmEntity;
 import fr.hermes.api.mc.items.HmItemStack;

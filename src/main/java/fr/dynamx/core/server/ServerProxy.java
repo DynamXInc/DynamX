@@ -12,7 +12,7 @@ import fr.dynamx.core.utils.DynamXLoadingTasks;
 import fr.dynamx.core.utils.optimization.SubClassPool;
 import fr.hermes.api.mc.world.HmServerWorld;
 import fr.hermes.api.mc.world.HmWorld;
-import fr.hermes.api.mod.HermesPlatform;
+import fr.hermes.api.platform.HermesPlatform;
 import fr.hermes.api.mod.HermesUtils;
 import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import net.minecraftforge.fml.relauncher.Side;

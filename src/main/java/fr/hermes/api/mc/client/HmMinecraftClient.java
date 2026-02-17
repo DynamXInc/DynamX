@@ -1,12 +1,11 @@
 package fr.hermes.api.mc.client;
 
-import fr.dynamx.core.utils.debug.renderer.BoatDebugRenderer;
 import fr.hermes.api.mc.entities.HmClientPlayerEntity;
 import fr.hermes.api.mc.entities.HmEntity;
 import fr.hermes.api.mc.utils.HmGameSettings;
 import fr.hermes.api.mc.utils.HmRayTraceResult;
 import fr.hermes.api.mc.world.HmClientWorld;
-import fr.hermes.api.mod.HmRenderApi;
+import fr.hermes.client.api.HmRenderApi;
 
 public interface HmMinecraftClient {
     HmGameSettings hm$getGameSettings();

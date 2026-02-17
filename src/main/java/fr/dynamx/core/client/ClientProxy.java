@@ -16,9 +16,9 @@ import fr.hermes.api.mc.entities.HmClientPlayerEntity;
 import fr.hermes.api.mc.world.HmClientWorld;
 import fr.hermes.api.mc.world.HmServerWorld;
 import fr.hermes.api.mc.world.HmWorld;
-import fr.hermes.api.mod.HermesPlatform;
+import fr.hermes.api.platform.HermesPlatform;
 import fr.hermes.api.mod.HermesUtils;
-import fr.hermes.api.mod.HermesUtilsClient;
+import fr.hermes.client.api.HermesUtilsClient;
 
 public class ClientProxy extends CommonProxy {
     public static DynamXSoundHandler SOUND_HANDLER = new DynamXSoundHandler();

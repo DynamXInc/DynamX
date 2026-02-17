@@ -19,7 +19,7 @@ import fr.dynamx.core.common.physics.entities.parts.engine.AutomaticGearboxHandl
 import fr.dynamx.core.utils.DynamXConstants;
 import fr.hermes.api.mc.client.HmMinecraftClient;
 import fr.hermes.api.mc.entities.HmPlayerEntity;
-import fr.hermes.api.mod.HermesPlatform;
+import fr.hermes.api.platform.HermesPlatform;
 import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import lombok.Getter;
 import net.minecraft.nbt.NBTTagCompound;

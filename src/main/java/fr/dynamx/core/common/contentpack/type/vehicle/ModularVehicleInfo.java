@@ -39,7 +39,7 @@ import fr.dynamx.core.utils.errors.DynamXErrorManager;
 import fr.hermes.api.mc.items.HmItem;
 import fr.hermes.api.mc.items.HmItemStack;
 import fr.hermes.api.mc.utils.HmCameraTransforms;
-import fr.hermes.api.mod.McObjectBinder;
+import fr.hermes.api.mc.McObjectBinder;
 import lombok.Getter;
 import lombok.Setter;
 import org.joml.Matrix4f;

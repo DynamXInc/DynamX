@@ -17,7 +17,7 @@ import fr.dynamx.core.common.physics.joints.JointHandler;
 import fr.dynamx.core.common.physics.joints.JointHandlerRegistry;
 import fr.dynamx.core.utils.DynamXConstants;
 import fr.hermes.api.mc.utils.HmResourceLocation;
-import fr.hermes.api.mod.McObjectBinder;
+import fr.hermes.api.mc.McObjectBinder;
 import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import lombok.Getter;
 

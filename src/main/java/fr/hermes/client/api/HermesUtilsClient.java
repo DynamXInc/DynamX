@@ -1,9 +1,9 @@
-package fr.hermes.api.mod;
+package fr.hermes.client.api;
 
 import java.io.File;
 
 public interface HermesUtilsClient {
-    boolean addFileResources(File file);
+    void addFileResources(File file);
 
     void reloadLanguageResources();
 

@@ -19,6 +19,7 @@
   "minVersion": "0.6",
   "server": [],
   "client": [
+    "MixinMinecraftClient",
     "world.MixinWorldClient"
   ]
 }

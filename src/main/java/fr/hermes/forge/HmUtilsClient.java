@@ -3,10 +3,8 @@ package fr.hermes.forge;
 import fr.aym.acsguis.api.ACsGuiApiService;
 import fr.aym.acslib.ACsLib;
 import fr.aym.acslib.api.services.ThreadedLoadingService;
-import fr.aym.acslib.api.services.error.ErrorLevel;
 import fr.aym.mps.utils.UserErrorMessageException;
 import fr.dynamx.core.client.command.DynamXClientCommand;
-import fr.dynamx.core.client.handlers.ClientEventHandler;
 import fr.dynamx.core.client.handlers.KeyHandler;
 import fr.dynamx.core.client.renders.RenderProp;
 import fr.dynamx.core.client.renders.RenderRagdoll;
@@ -26,7 +24,7 @@ import fr.dynamx.core.utils.client.DynamXRenderUtils;
 import fr.dynamx.core.utils.errors.DynamXErrorManager;
 import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import fr.dynamx.core.utils.optimization.SubClassPool;
-import fr.hermes.api.mod.HermesUtilsClient;
+import fr.hermes.client.api.HermesUtilsClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.resources.SimpleReloadableResourceManager;
@@ -54,29 +52,17 @@ import java.util.function.Predicate;
 public class HmUtilsClient extends HmForgeUtils implements HermesUtilsClient, ISelectiveResourceReloadListener {
     private byte loadingState;
 
-    //TODO SHOULD BE MOVED TO SOME CLIENT UTILS METHOD
     @Override
-    public boolean addFileResources(File file) {
-        try {
-            HashMap<String, Object> map = new HashMap<>();
-            map.put("modid", DynamXConstants.ID);
-            map.put("name", "DynamX assets : " + file.getName());
-            map.put("version", "1.0");
-            FMLModContainer container = new FMLModContainer("fr.dynamx.common.DynamXMain", new ModCandidate(file, file, file.isDirectory() ? ContainerType.DIR : ContainerType.JAR), map);
-            container.bindMetadata(MetadataCollection.from(null, ""));
-            FMLClientHandler.instance().addModAsResource(container);
-            return true;
-        } catch (Throwable e) {
-            DynamXMain.log.error("Failed to load textures and models of DynamX pack : {}", file.getName());
-            DynamXMain.log.throwing(e);
-            if (!(e instanceof Exception)) //todo clean
-                e = new RuntimeException("encapsulated error", e);
-            DynamXErrorManager.addError(file.getName(), DynamXErrorManager.INIT_ERRORS, "res_pack_load_fail", ErrorLevel.FATAL, "assets", "Failed to register as resource pack", (Exception) e, 700);
-            return false;
-        }
+    public void addFileResources(File file) {
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("modid", DynamXConstants.ID);
+        map.put("name", "DynamX assets : " + file.getName());
+        map.put("version", "1.0");
+        FMLModContainer container = new FMLModContainer("fr.hermes.forge", new ModCandidate(file, file, file.isDirectory() ? ContainerType.DIR : ContainerType.JAR), map);
+        container.bindMetadata(MetadataCollection.from(null, ""));
+        FMLClientHandler.instance().addModAsResource(container);
     }
 
-    //TODO SHOULD BE MOVED TO SOME CLIENT UTILS METHOD
     @Override
     public void reloadLanguageResources() {
         Minecraft mc = Minecraft.getMinecraft();
@@ -85,6 +71,8 @@ public class HmUtilsClient extends HmForgeUtils implements HermesUtilsClient, IS
 
     @Override
     public void initializeDynamXPacks() {
+        // TODO need to hermes-ize this
+
         try {
             VersionRange versionRange = VersionRange.createFromVersionSpec(DynamXConstants.ACSGUIS_REQUIRED_VERSION);
             ACsGuiApiService service = ACsLib.getPlatform().provideService(ACsGuiApiService.class);
@@ -99,10 +87,6 @@ public class HmUtilsClient extends HmForgeUtils implements HermesUtilsClient, IS
         } catch (InvalidVersionSpecificationException e) {
             throw new RuntimeException("Bad ACSGUIS_REQUIRED_VERSION", e);
         }
-
-        //This event handler needs to be registered before mc's sound system init
-        //TODO HUM HUM
-        MinecraftForge.EVENT_BUS.register(new ClientEventHandler());
 
         ((SimpleReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener((ISelectiveResourceReloadListener) (resourceManager, resourcePredicate) -> {
             if (loadingState == 0) {
@@ -125,6 +109,8 @@ public class HmUtilsClient extends HmForgeUtils implements HermesUtilsClient, IS
     @Override
     public void registerMcObjects() {
         super.registerMcObjects();
+
+        // lol
 
         // TODO not an ideal solution but works for now
         RenderingRegistry.registerEntityRenderingHandler(CarEntity.class, RenderBaseVehicle.RenderCar::new);

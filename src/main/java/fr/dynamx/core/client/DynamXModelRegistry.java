@@ -31,7 +31,7 @@ import fr.dynamx.core.utils.DynamXUtils;
 import fr.dynamx.core.utils.errors.DynamXErrorManager;
 import fr.hermes.api.forge.HermesProgressManager;
 import fr.hermes.api.mc.utils.HmResourceLocation;
-import fr.hermes.api.mod.McObjectBinder;
+import fr.hermes.api.mc.McObjectBinder;
 import net.minecraftforge.fml.client.SplashProgress;
 
 import java.util.ArrayList;

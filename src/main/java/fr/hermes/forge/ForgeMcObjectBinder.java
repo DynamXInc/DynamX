@@ -1,8 +1,9 @@
-package fr.hermes.api.mod;
+package fr.hermes.forge;
 
 import fr.hermes.api.mc.items.HmItem;
 import fr.hermes.api.mc.items.HmItemStack;
 import fr.hermes.api.mc.utils.HmResourceLocation;
+import fr.hermes.api.mc.McObjectBinder;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;

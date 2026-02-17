@@ -6,7 +6,7 @@ import fr.aym.acslib.utils.nbtserializer.ISerializable;
 import fr.aym.acslib.utils.nbtserializer.NBTSerializer;
 import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.hermes.api.mc.utils.HmResourceLocation;
-import fr.hermes.api.mod.McObjectBinder;
+import fr.hermes.api.mc.McObjectBinder;
 import lombok.Getter;
 
 import javax.annotation.Nullable;

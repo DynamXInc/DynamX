@@ -19,7 +19,7 @@ import fr.hermes.api.mc.events.HmMcClientEvents;
 import fr.hermes.api.mc.events.HmMcServerEvents;
 import fr.hermes.api.mc.world.HmServerWorld;
 import fr.hermes.api.mc.world.HmWorld;
-import fr.hermes.api.mod.HermesPlatform;
+import fr.hermes.api.platform.HermesPlatform;
 import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 
 import java.util.HashMap;

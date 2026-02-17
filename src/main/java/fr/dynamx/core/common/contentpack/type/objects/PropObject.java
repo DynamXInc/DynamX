@@ -24,7 +24,7 @@ import fr.dynamx.core.common.entities.PackPhysicsEntity;
 import fr.dynamx.core.common.items.ItemProps;
 import fr.dynamx.core.utils.DynamXUtils;
 import fr.hermes.api.mc.items.HmItemStack;
-import fr.hermes.api.mod.McObjectBinder;
+import fr.hermes.api.mc.McObjectBinder;
 import lombok.Getter;
 import lombok.Setter;
 

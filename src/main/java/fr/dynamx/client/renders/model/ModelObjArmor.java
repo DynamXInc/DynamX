@@ -222,6 +222,23 @@ public class ModelObjArmor extends ModelBiped {
         armor.render(tempTransform, forceVanillaRender);
     }
 
+    public void resetArmorRenderers() {
+        if (head != null) resetRenderer(head);
+        if (body != null) resetRenderer(body);
+        if (arms != null) { for (ArmorRenderer arm : arms) resetRenderer(arm); }
+        if (legs != null) { for (ArmorRenderer leg : legs) resetRenderer(leg); }
+        if (foot != null) { for (ArmorRenderer f : foot) resetRenderer(f); }
+    }
+
+    private static void resetRenderer(ArmorRenderer armor) {
+        armor.rotationPointX = armor.offsetX;
+        armor.rotationPointY = armor.offsetY;
+        armor.rotationPointZ = armor.offsetZ;
+        armor.rotateAngleX = 0;
+        armor.rotateAngleY = 0;
+        armor.rotateAngleZ = 0;
+    }
+
     private static void copyModelAnglesForArmor(ModelRenderer bodyPart, ModelRenderer armor) {
         armor.rotationPointX = bodyPart.rotationPointX / 16f;
         armor.rotationPointY = bodyPart.rotationPointY / 16f;

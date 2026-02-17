@@ -52,8 +52,7 @@ public class ArmorNode<A extends ArmorObject<?>> extends AbstractItemNode<BaseRe
     public void renderItemModel(BaseRenderContext.ItemRenderContext context, A packInfo, Matrix4f transform) {
         EntityEquipmentSlot slot = ((DynamXItemArmor<?>) context.getStack().getItem()).armorType;
         packInfo.getObjArmor().setActivePart(slot, context.getTextureId());
-        //restore default rotations (contained in ModelBiped)
-        packInfo.getObjArmor().setModelAttributes(packInfo.getObjArmor());
+        packInfo.getObjArmor().resetArmorRenderers();
         if (context.getRenderType() != ItemCameraTransforms.TransformType.GUI)
             transform.rotate((float) (Math.PI / 2), 1, 0, 0);
         switch (slot) {

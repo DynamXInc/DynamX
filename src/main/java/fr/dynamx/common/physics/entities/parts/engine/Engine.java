@@ -86,7 +86,12 @@ public class Engine {
      * @return the power at this rev-range, from 0 to getPower().
      */
     public float evaluateSpline(LinearSpline powerGraph, float range) {
-        int index = powerGraph.getControlPoints().size() - 1;
+        int size = powerGraph.getControlPoints().size();
+        if (size < 2) {
+            return size == 1 ? powerGraph.getControlPoints().get(0).y : 0;
+        }
+
+        int index = size - 1;
         Vector3f point = powerGraph.getControlPoints().get(index);
 
         while (point.x >= range && index > 0) {
@@ -94,10 +99,16 @@ public class Engine {
             point = powerGraph.getControlPoints().get(index);
         }
 
+        // Clamp index so that index + 1 stays within bounds
+        if (index >= size - 1) {
+            index = size - 2;
+        }
+
         float start = point.x;
         float end = powerGraph.getControlPoints().get(index + 1).x;
 
         float interp = map(range, start, end, 0, 1);
+        interp = DynamXMath.clamp(interp, 0, 1);
 
         return powerGraph.interpolate(interp, index, null).y;
     }

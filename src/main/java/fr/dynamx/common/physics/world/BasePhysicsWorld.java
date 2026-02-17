@@ -166,7 +166,7 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
                 //e.getNetwork().onPrePhysicsTick(profiler);
                 e.getSynchronizer().onPrePhysicsTick(profiler);
             } catch (Exception ex) {
-                throw new PhysicsEntityException(e, "prePhysicsTick", ex);
+                DynamXMain.log.error("Exception during prePhysicsTick for entity " + e + ", skipping this tick", ex);
             }
             QuaternionPool.closePool();
             Vector3fPool.closePool();
@@ -202,7 +202,7 @@ public abstract class BasePhysicsWorld implements IPhysicsWorld {
             try {
                 e.getSynchronizer().onPostPhysicsTick(profiler);
             } catch (Exception ex) {
-                throw new PhysicsEntityException(e, "postPhysicsTick", ex);
+                DynamXMain.log.error("Exception during postPhysicsTick for entity " + e + ", skipping this tick", ex);
             }
             QuaternionPool.closePool();
             Vector3fPool.closePool();

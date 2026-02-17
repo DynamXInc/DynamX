@@ -7,6 +7,7 @@ import fr.dynamx.core.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.core.common.contentpack.type.vehicle.TrailerAttachInfo;
 import fr.dynamx.core.common.entities.BaseVehicleEntity;
 import fr.dynamx.core.common.entities.PackPhysicsEntity;
+import fr.dynamx.core.common.entities.PhysicsEntitiesFactory;
 import fr.dynamx.core.common.entities.modules.DoorsModule;
 import fr.dynamx.core.common.entities.modules.SeatsModule;
 import fr.dynamx.core.common.entities.modules.WheelsModule;
@@ -79,6 +80,11 @@ public class TrailerEntity<T extends TrailerEntity.TrailerPhysicsHandler<?>> ext
         TrailerAttachInfo info = getPackInfo().getSubPropertyByType(TrailerAttachInfo.class);
         if(info.getAttachSound() != null)
             SOUND_HANDLER.playSingleSound(physicsPosition, info.getAttachSound(), 1, 1);
+    }
+
+    @Override
+    public PhysicsEntitiesFactory createEntityFactory() {
+        return new PhysicsEntitiesFactory.Trailer(getInfoName(), physicsPosition, mcEntity.hm$getRotationYaw(), getMetadata());
     }
 
     public static class TrailerPhysicsHandler<A extends TrailerEntity<?>> extends BaseWheeledVehiclePhysicsHandler<A> {

@@ -4,7 +4,7 @@ import com.jme3.math.Vector3f;
 import fr.dynamx.api.entities.IModuleContainer;
 import fr.dynamx.core.common.contentpack.parts.BasePartSeat;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;

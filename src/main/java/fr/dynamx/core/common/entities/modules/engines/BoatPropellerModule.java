@@ -19,7 +19,7 @@ import fr.dynamx.core.common.physics.entities.parts.engine.Engine;
 import fr.dynamx.core.common.physics.entities.parts.engine.GearBox;
 import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraftforge.fml.relauncher.Side;

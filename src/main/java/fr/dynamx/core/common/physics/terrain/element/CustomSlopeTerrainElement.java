@@ -11,7 +11,7 @@ import fr.dynamx.core.utils.debug.DynamXDebugOptions;
 import fr.dynamx.core.utils.debug.TerrainDebugData;
 import fr.dynamx.core.utils.debug.TerrainDebugRenderer;
 import fr.hermes.api.mc.world.HmWorld;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;

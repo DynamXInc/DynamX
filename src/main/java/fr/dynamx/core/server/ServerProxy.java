@@ -14,8 +14,7 @@ import fr.hermes.api.mc.world.HmServerWorld;
 import fr.hermes.api.mc.world.HmWorld;
 import fr.hermes.api.mod.HermesPlatform;
 import fr.hermes.api.mod.HermesUtils;
-import fr.hermes.forge.JmeVector3fPool;
-import net.minecraft.world.World;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 

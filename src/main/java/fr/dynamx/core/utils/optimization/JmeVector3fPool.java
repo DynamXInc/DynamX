@@ -1,9 +1,6 @@
-package fr.hermes.forge;
+package fr.dynamx.core.utils.optimization;
 
 import com.jme3.math.Vector3f;
-import fr.dynamx.core.utils.optimization.ClassPool;
-import fr.dynamx.core.utils.optimization.SubClassPool;
-import fr.dynamx.core.utils.optimization.Vector3fPool;
 import net.minecraft.util.math.Vec3d;
 
 import javax.annotation.concurrent.ThreadSafe;

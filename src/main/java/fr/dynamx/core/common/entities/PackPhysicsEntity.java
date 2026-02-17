@@ -25,7 +25,7 @@ import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.dynamx.core.utils.optimization.SubClassPool;
 import fr.hermes.api.mc.entities.HmEntity;
 import fr.hermes.api.mc.items.HmItemStack;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.nbt.NBTTagCompound;

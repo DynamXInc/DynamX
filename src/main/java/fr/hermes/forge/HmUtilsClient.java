@@ -24,13 +24,12 @@ import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.DynamXLoadingTasks;
 import fr.dynamx.core.utils.client.DynamXRenderUtils;
 import fr.dynamx.core.utils.errors.DynamXErrorManager;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import fr.dynamx.core.utils.optimization.SubClassPool;
-import fr.hermes.api.mod.HermesUtils;
 import fr.hermes.api.mod.HermesUtilsClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.resources.SimpleReloadableResourceManager;
-import net.minecraft.launchwrapper.LaunchClassLoader;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.client.resource.IResourceType;
@@ -49,7 +48,6 @@ import net.minecraftforge.fml.common.versioning.InvalidVersionSpecificationExcep
 import net.minecraftforge.fml.common.versioning.VersionRange;
 
 import java.io.File;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.function.Predicate;
 

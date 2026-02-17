@@ -5,10 +5,9 @@ import fr.dynamx.api.audio.EnumSoundState;
 import fr.dynamx.api.audio.IDynamXSound;
 import fr.dynamx.core.common.entities.BaseVehicleEntity;
 import fr.hermes.api.mc.entities.HmEntity;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.math.Vec3d;
 
 public abstract class VehicleSound implements IDynamXSound {
     protected final BaseVehicleEntity<?> vehicleEntity;

@@ -6,7 +6,7 @@ import fr.dynamx.api.dxmodel.DxModelPath;
 import fr.dynamx.api.dxmodel.EnumDxModelFormats;
 import fr.dynamx.core.common.contentpack.ContentPackLoader;
 import fr.dynamx.core.common.contentpack.PackInfo;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Tuple;

@@ -8,7 +8,7 @@ import fr.dynamx.core.common.physics.terrain.chunk.DebugChunkCollisions;
 import fr.dynamx.core.utils.VerticalChunkPos;
 import fr.dynamx.core.utils.debug.ChunkGraph;
 import fr.dynamx.core.utils.debug.Profiler;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;

@@ -5,20 +5,16 @@ import fr.dynamx.core.common.blocks.TEDynamXBlock;
 import fr.dynamx.core.common.contentpack.parts.PartBlockSeat;
 import fr.dynamx.core.utils.EnumSeatPlayerPosition;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
-import fr.hermes.api.mc.blocks.HmTileEntity;
+import fr.hermes.api.mc.blocks.HmBlockEntity;
 import fr.hermes.api.mc.entities.HmEntity;
 import fr.hermes.api.mc.entities.HmEntityFactory;
 import fr.hermes.api.mc.entities.HmEntityLogic;
 import fr.hermes.api.mc.world.HmWorld;
 import fr.hermes.api.utils.HmBlockEntityLogicMatcher;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 
 public class SeatEntity implements HmEntityLogic {
     private final HmEntity mcEntity;
@@ -101,7 +97,7 @@ public class SeatEntity implements HmEntityLogic {
         if(block != null && !block.isInvalid()) {
             return;
         }
-        HmTileEntity te = mcEntity.hm$getWorld().hm$getTileEntity(mcEntity.hm$getBlockPosition());
+        HmBlockEntity te = mcEntity.hm$getWorld().hm$getTileEntity(mcEntity.hm$getBlockPosition());
         if (HmBlockEntityLogicMatcher.is(te, TEDynamXBlock.class)) {
             block = HmBlockEntityLogicMatcher.cast(te, TEDynamXBlock.class);
             mySeat = (PartBlockSeat<?>) block.getPackInfo().getPartsByType(PartBlockSeat.class).stream()
@@ -133,7 +129,7 @@ public class SeatEntity implements HmEntityLogic {
         seatID = additionalData.readByte();
     }
 
-    public static class Factory implements HmEntityFactory {
+    public static class Factory implements HmEntityFactory<SeatEntity> {
         private final TEDynamXBlock block;
         private final PartBlockSeat<?> seat;
 
@@ -143,7 +139,7 @@ public class SeatEntity implements HmEntityLogic {
         }
 
         @Override
-        public HmEntityLogic createEntityLogic(HmWorld world, HmEntity entity) {
+        public SeatEntity createEntityLogic(HmWorld world, HmEntity entity) {
             return new SeatEntity(entity, block, seat);
         }
     }

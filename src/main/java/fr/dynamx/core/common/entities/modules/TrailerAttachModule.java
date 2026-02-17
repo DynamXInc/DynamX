@@ -18,9 +18,8 @@ import fr.dynamx.core.common.physics.joints.JointHandlerRegistry;
 import fr.dynamx.core.utils.DynamXConstants;
 import fr.hermes.api.mc.utils.HmResourceLocation;
 import fr.hermes.api.mod.McObjectBinder;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import lombok.Getter;
-import net.minecraft.util.ResourceLocation;
 
 public class TrailerAttachModule implements IPhysicsModule<BaseVehiclePhysicsHandler<?>>, AttachModule.AttachToOtherModule<TrailerEntity<?>>, IPackInfoReloadListener {
     public static final HmResourceLocation JOINT_NAME = McObjectBinder.instance.newResourceLocation(DynamXConstants.ID, "trailer_module");

@@ -99,7 +99,7 @@ public class KeyHandler {
                 Minecraft.getMinecraft().player.sendChatMessage("/dynamx debug_gui");
             }
 
-            if (KEY_PICK_OBJECT.isKeyDown() && MC.hm$getPlayer().hm$getRidingEntity() == null && MC.hm$getPlayer().hm$getHeldItemMainhand().hm$isEmpty()) {
+            if (KEY_PICK_OBJECT.isKeyDown() && MC.hm$getPlayer().hm$getRidingEntity() == null && MC.hm$getPlayer().hm$getHeldItemMainHand().hm$isEmpty()) {
                 if (!DynamXContext.getPlayerPickingObjects().containsKey(MC.hm$getPlayer().hm$getEntityId())) {
                     if (MC.hm$isSingleplayer()) {
                         PickingObjectHelper.handlePickingControl(new MovableModule.Action(MovableModule.EnumAction.PICK, 3), MC.hm$getPlayer());
@@ -137,7 +137,7 @@ public class KeyHandler {
                 HmEntity entityHit = MC.hm$getObjectMouseOver().hm$getEntity();
                 if (KEY_TAKE_OBJECT.isKeyDown()) {
                     if (holdingDown == 0) {
-                        if (MC.hm$getPlayer().hm$getRidingEntity() == null && MC.hm$getPlayer().hm$getHeldItemMainhand().hm$isEmpty() && !DynamXContext.getPlayerPickingObjects().containsKey(MC.hm$getPlayer().hm$getEntityId())) {
+                        if (MC.hm$getPlayer().hm$getRidingEntity() == null && MC.hm$getPlayer().hm$getHeldItemMainHand().hm$isEmpty() && !DynamXContext.getPlayerPickingObjects().containsKey(MC.hm$getPlayer().hm$getEntityId())) {
                             if (entityHit != null) {
                                 justPressed = true;
                                 if (MC.hm$isSingleplayer()) {
@@ -200,12 +200,12 @@ public class KeyHandler {
         if (MC.hm$getPlayer() == null || !MC.hm$getPlayer().hm$isSneaking()) {
             return;
         }
-        if (MC.hm$getPlayer().hm$getHeldItemMainhand().hm$getItem() instanceof ItemWrench) {
+        if (MC.hm$getPlayer().hm$getHeldItemMainHand().hm$getItem() instanceof ItemWrench) {
             if (Mouse.getEventDWheel() != 0) {
                 DynamXContext.getNetwork().sendToServer(new MessageDebugRequest(-15816));
                 event.setCanceled(true);
             }
-        } else if (MC.hm$getPlayer().hm$getHeldItemMainhand().hm$getItem() instanceof ItemSlopes) {
+        } else if (MC.hm$getPlayer().hm$getHeldItemMainHand().hm$getItem() instanceof ItemSlopes) {
             if (Mouse.getEventDWheel() != 0) {
                 DynamXContext.getNetwork().sendToServer(new MessageDebugRequest(-15815));
                 event.setCanceled(true);

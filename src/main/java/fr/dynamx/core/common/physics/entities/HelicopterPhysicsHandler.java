@@ -9,7 +9,7 @@ import fr.dynamx.core.common.entities.modules.engines.HelicopterEngineModule;
 import fr.dynamx.core.common.entities.vehicles.HelicopterEntity;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.maths.DynamXMath;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 
 public class HelicopterPhysicsHandler<A extends HelicopterEntity<?>> extends BaseVehiclePhysicsHandler<A> implements IPackInfoReloadListener {
     private HelicopterPhysicsInfo physicsInfo;

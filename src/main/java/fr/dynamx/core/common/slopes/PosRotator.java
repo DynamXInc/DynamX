@@ -1,7 +1,7 @@
 package fr.dynamx.core.common.slopes;
 
 import com.jme3.math.Vector3f;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 

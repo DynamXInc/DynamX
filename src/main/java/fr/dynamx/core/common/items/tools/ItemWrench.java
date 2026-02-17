@@ -18,7 +18,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
@@ -96,6 +95,6 @@ public class ItemWrench extends Item {
     }
 
     public void interact(HmPlayerEntity context, PhysicsEntity<?> physicsEntity) {
-        WrenchMode.getCurrentMode(context.hm$getHeldItemMainhand()).onInteractWithEntity(context, physicsEntity, context.isSneaking());
+        WrenchMode.getCurrentMode(context.hm$getHeldItemMainHand()).onInteractWithEntity(context, physicsEntity, context.isSneaking());
     }
 }

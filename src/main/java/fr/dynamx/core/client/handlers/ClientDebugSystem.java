@@ -27,7 +27,7 @@ import fr.hermes.api.mc.client.HmMinecraftClient;
 import fr.hermes.api.mc.entities.HmEntity;
 import fr.hermes.api.mc.entities.HmPlayerEntity;
 import fr.hermes.api.mod.HermesPlatform;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.BufferBuilder;

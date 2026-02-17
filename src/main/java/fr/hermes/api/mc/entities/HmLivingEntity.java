@@ -1,12 +1,17 @@
 package fr.hermes.api.mc.entities;
 
-public interface HmLivingEntity extends HmEntity {
-    float getLimbSwing();
-    void setLimbSwing(float limbSwing);
-    float getLimbSwingAmount(); // TODO UNDERSTAND THIS AND FIND A BETTER NAME
-    void setLimbSwingAmount(float amount);
-    float getPrevLimbSwingAmount();
-    void setPrevLimbSwingAmount(float amount);
+import fr.hermes.api.mc.items.HmItemStack;
+import net.minecraft.util.EnumHand;
 
-    float hm$getFallDistance();
+public interface HmLivingEntity extends HmEntity {
+    float hm$getLimbSwing();
+    void hm$setLimbSwing(float limbSwing);
+    float hm$getLimbSwingAmount(); // TODO UNDERSTAND THIS AND FIND A BETTER NAME
+    void hm$setLimbSwingAmount(float amount);
+    float hm$getPrevLimbSwingAmount();
+    void hm$setPrevLimbSwingAmount(float amount);
+
+    HmItemStack hm$getHeldItemMainHand();
+
+    HmItemStack hm$getHeldItem(EnumHand hand);
 }

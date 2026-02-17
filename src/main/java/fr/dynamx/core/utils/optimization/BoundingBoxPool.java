@@ -1,7 +1,6 @@
 package fr.dynamx.core.utils.optimization;
 
 import com.jme3.bounding.BoundingBox;
-import fr.hermes.forge.JmeVector3fPool;
 
 import javax.annotation.concurrent.ThreadSafe;
 

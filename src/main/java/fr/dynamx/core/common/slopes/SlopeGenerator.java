@@ -5,7 +5,7 @@ import fr.dynamx.api.physics.terrain.ITerrainElement;
 import fr.dynamx.core.common.physics.terrain.element.CustomSlopeTerrainElement;
 import fr.dynamx.core.utils.VerticalChunkPos;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;

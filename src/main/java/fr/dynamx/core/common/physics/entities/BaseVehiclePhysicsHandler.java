@@ -11,7 +11,7 @@ import fr.dynamx.core.common.entities.BaseVehicleEntity;
 import fr.dynamx.core.common.physics.entities.modules.EnginePhysicsHandler;
 import fr.dynamx.core.common.physics.entities.modules.WheelsPhysicsHandler;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 
 /**
  * Physics handler of {@link BaseVehicleEntity} <br>

@@ -8,12 +8,10 @@ import fr.dynamx.api.physics.BulletShapeType;
 import fr.dynamx.api.physics.EnumBulletShapeType;
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.core.common.DynamXContext;
-import fr.dynamx.core.common.DynamXMain;
 import fr.dynamx.core.common.contentpack.parts.BasePartSeat;
 import fr.dynamx.core.common.entities.BaseVehicleEntity;
 import fr.dynamx.core.common.entities.PhysicsEntitiesFactory;
 import fr.dynamx.core.common.entities.PhysicsEntity;
-import fr.dynamx.core.common.entities.PropsEntity;
 import fr.dynamx.core.common.entities.modules.MovableModule;
 import fr.dynamx.core.common.entities.modules.SeatsModule;
 import fr.dynamx.core.common.entities.modules.TrailerAttachModule;
@@ -29,21 +27,17 @@ import fr.dynamx.forge.DynamXConfig;
 import fr.dynamx.core.utils.DynamXUtils;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.hermes.api.mc.entities.HmEntity;
-import fr.hermes.api.mc.entities.HmEntityFactory;
 import fr.hermes.api.mc.entities.HmPlayerEntity;
 import fr.hermes.api.mc.items.HmItem;
 import fr.hermes.api.mc.items.HmItemStack;
 import fr.hermes.api.utils.HmEntityLogicMatcher;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import fr.dynamx.core.utils.physics.PhysicsRaycastResult;
 import lombok.Getter;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -207,7 +201,7 @@ public class WrenchMode {
             if (result != null) {
                 BulletShapeType<?> shapeType = (BulletShapeType<?>) result.hitBody.getUserObject();
 
-                HmItemStack itemStack = player.hm$getHeldItemMainhand();
+                HmItemStack itemStack = player.hm$getHeldItemMainHand();
                 if (!ItemWrench.hasEntity(itemStack)) {
                     if (!shapeType.getType().isTerrain()) {
                         MovableModule movableModule = ((PhysicsEntity<?>) shapeType.getObjectIn()).getModuleByType(MovableModule.class);
@@ -250,7 +244,7 @@ public class WrenchMode {
         public void onInteractWithEntity(HmPlayerEntity player, PhysicsEntity<?> physicsEntity, boolean isSneaking) {
             if (isSneaking && physicsEntity instanceof BaseVehicleEntity) {
                 BaseVehicleEntity<?> vehicleEntity = (BaseVehicleEntity<?>) physicsEntity;
-                PhysicsEntity<?> physicsEntityTemp = ItemWrench.getEntity(player.hm$getHeldItemMainhand(), player.hm$getWorld());
+                PhysicsEntity<?> physicsEntityTemp = ItemWrench.getEntity(player.hm$getHeldItemMainHand(), player.hm$getWorld());
                 if (physicsEntityTemp instanceof BaseVehicleEntity) {
                     BaseVehicleEntity<?> temp = (BaseVehicleEntity<?>) physicsEntityTemp;
                     BaseVehicleEntity<?> car = vehicleEntity instanceof CarEntity ? vehicleEntity : temp instanceof CarEntity ? temp : null;
@@ -261,10 +255,10 @@ public class WrenchMode {
                     } else {
                         player.hm$sendTranslatedMessage("trailer.attach.fail", TextFormatting.RED, temp.getPackInfo().getName(), vehicleEntity.getPackInfo().getName());
                     }
-                    ItemWrench.removeEntity(player.hm$getHeldItemMainhand());
+                    ItemWrench.removeEntity(player.hm$getHeldItemMainHand());
                 } else {
                     if (vehicleEntity.getModuleByType(TrailerAttachModule.class) != null && vehicleEntity.getModuleByType(TrailerAttachModule.class).getConnectedEntity() == -1) {
-                        ItemWrench.writeEntity(player.hm$getHeldItemMainhand(), vehicleEntity);
+                        ItemWrench.writeEntity(player.hm$getHeldItemMainHand(), vehicleEntity);
                         player.hm$sendTranslatedMessage("trailer.wrench.first");
                     }
                 }

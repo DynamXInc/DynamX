@@ -5,7 +5,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.core.common.entities.vehicles.BoatEntity;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 
 public class BoatPhysicsHandler<T extends BoatEntity<?>> extends BaseVehiclePhysicsHandler<T> {
     public BoatPhysicsHandler(T entity) {

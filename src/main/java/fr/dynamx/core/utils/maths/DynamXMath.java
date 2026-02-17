@@ -4,7 +4,7 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import net.minecraft.util.math.MathHelper;
 
 import javax.vecmath.Quat4f;

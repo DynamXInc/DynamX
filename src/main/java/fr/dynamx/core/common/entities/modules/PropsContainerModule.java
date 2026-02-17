@@ -11,7 +11,7 @@ import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import net.minecraft.entity.player.EntityPlayer;
 
 import java.util.ArrayList;

@@ -14,7 +14,7 @@ import fr.dynamx.core.common.physics.joints.JointHandlerRegistry;
 import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.DynamXUtils;
 import fr.hermes.api.mc.entities.HmPlayerEntity;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import fr.dynamx.core.utils.physics.DynamXPhysicsHelper;
 import lombok.Getter;
 

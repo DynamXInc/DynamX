@@ -1,4 +1,4 @@
-package fr.hermes.api.mc.entities;
+package fr.hermes.api.mc.blocks;
 
 import net.minecraft.nbt.NBTTagCompound;
 

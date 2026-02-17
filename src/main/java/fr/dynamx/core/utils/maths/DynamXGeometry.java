@@ -7,9 +7,8 @@ import fr.dynamx.core.common.DynamXMain;
 import fr.dynamx.core.utils.client.ClientDynamXUtils;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.Vector3fPool;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import fr.dynamx.core.utils.physics.DynamXPhysicsHelper;
-import org.joml.Quaternionf;
 
 /**
  * General geometrical operations with Vector3f and Quaternions

@@ -4,7 +4,13 @@
   "refmap": "refmap.hermes.json",
   "mixins": [
     "MixinMinecraftServer",
+    "blocks.MixinTileEntity",
     "entities.MixinEntity",
+    "entities.MixinEntityPlayer",
+    "entities.MixinLivingEntity",
+    "utils.MixinBlockPos",
+    "utils.MixinMutableBlockPos",
+    "utils.MixinVec3i",
     "world.MixinChunk",
     "world.MixinSaveHandler",
     "world.MixinWorld",

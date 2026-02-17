@@ -8,10 +8,12 @@ import fr.dynamx.core.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.core.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.core.common.entities.BaseVehicleEntity;
 import fr.dynamx.core.common.entities.PackPhysicsEntity;
+import fr.dynamx.core.common.entities.PhysicsEntitiesFactory;
 import fr.dynamx.core.common.entities.modules.DoorsModule;
 import fr.dynamx.core.common.entities.modules.SeatsModule;
 import fr.dynamx.core.common.entities.modules.WheelsModule;
 import fr.dynamx.core.common.physics.entities.HelicopterPhysicsHandler;
+import fr.hermes.api.mc.entities.HmEntity;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.entity.Entity;
@@ -30,12 +32,12 @@ public class HelicopterEntity<T extends HelicopterPhysicsHandler<?>> extends Bas
     @Getter
     private WheelsModule wheels;
 
-    public HelicopterEntity(World world) {
-        super(world);
+    public HelicopterEntity(HmEntity mcEntityWrapper) {
+        super(mcEntityWrapper);
     }
 
-    public HelicopterEntity(String name, World world, Vector3f pos, float spawnRotationAngle, int metadata) {
-        super(name, world, pos, spawnRotationAngle, metadata);
+    public HelicopterEntity(String name, HmEntity mcEntityWrapper, Vector3f pos, float spawnRotationAngle, int metadata) {
+        super(name, mcEntityWrapper, pos, spawnRotationAngle, metadata);
     }
 
     @Override
@@ -75,14 +77,14 @@ public class HelicopterEntity<T extends HelicopterPhysicsHandler<?>> extends Bas
         if (seats == null) //We may need seats before modules are created, because of seats sync
             seats = new SeatsModule(this, CameraMode.FIXED) {
                 @Override
-                public void applyOrientationToEntity(Entity passenger) {
+                public void applyOrientationToEntity(HmEntity passenger) {
                     if (seats != null && seats.getControllingPassenger() == passenger && isMouseLocked()) {
-                        passenger.rotationYaw = HelicopterEntity.this.rotationYaw;
-                        passenger.prevRotationYaw = HelicopterEntity.this.prevRotationYaw;
-                        passenger.rotationPitch = 0;
-                        passenger.prevRotationPitch = 0;
-                        passenger.setRenderYawOffset(0);
-                        passenger.setRotationYawHead(passenger.rotationYaw - HelicopterEntity.this.rotationYaw);
+                        passenger.hm$setRotationYaw(HelicopterEntity.this.mcEntity.hm$getRotationYaw());
+                        passenger.hm$setPrevRotationYaw(HelicopterEntity.this.mcEntity.hm$getPrevRotationYaw());
+                        passenger.hm$setRotationPitch(0);
+                        passenger.hm$setPrevRotationPitch(0);
+                        passenger.hm$setRenderYawOffset(0);
+                        passenger.hm$setRotationYawHead(passenger.hm$getRotationYaw() - HelicopterEntity.this.mcEntity.hm$getRotationYawHead());
                     } else {
                         super.applyOrientationToEntity(passenger);
                     }
@@ -94,5 +96,10 @@ public class HelicopterEntity<T extends HelicopterPhysicsHandler<?>> extends Bas
     @Override
     public PackPhysicsEntity<?, ?> cast() {
         return this;
+    }
+
+    @Override
+    public PhysicsEntitiesFactory createEntityFactory() {
+        return new PhysicsEntitiesFactory.Helicopter(getInfoName(), physicsPosition, mcEntity.hm$getRotationYaw(), getMetadata());
     }
 }

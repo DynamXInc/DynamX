@@ -38,12 +38,10 @@ import fr.dynamx.core.utils.maths.DynamXMath;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.hermes.api.mc.utils.HmResourceLocation;
 import fr.hermes.api.mod.ForgeMcObjectBinder;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import fr.dynamx.core.utils.physics.DynamXPhysicsHelper;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.HashMap;
 import java.util.Map;

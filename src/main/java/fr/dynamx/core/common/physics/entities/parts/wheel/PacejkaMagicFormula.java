@@ -1,12 +1,11 @@
 package fr.dynamx.core.common.physics.entities.parts.wheel;
 
 import com.jme3.math.Quaternion;
-import com.jme3.math.Vector3f;
 import fr.dynamx.core.common.physics.entities.modules.WheelsPhysicsHandler;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.Vector3fPool;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 
 import static fr.dynamx.core.utils.maths.DynamXMath.clamp;
 

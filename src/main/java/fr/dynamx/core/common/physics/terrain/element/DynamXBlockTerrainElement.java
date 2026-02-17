@@ -15,9 +15,9 @@ import fr.dynamx.core.utils.debug.TerrainDebugRenderer;
 import fr.dynamx.core.utils.optimization.BoundingBoxPool;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.SubClassPool;
-import fr.hermes.api.mc.blocks.HmTileEntity;
+import fr.hermes.api.mc.blocks.HmBlockEntity;
 import fr.hermes.api.mc.world.HmWorld;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import net.minecraft.util.math.BlockPos;
 
 import javax.annotation.Nonnull;
@@ -65,7 +65,7 @@ public class DynamXBlockTerrainElement implements ITerrainElement {
 
     @Override
     public PhysicsRigidBody build(HmWorld world, Vector3f pos) {
-        HmTileEntity te = world.hm$getTileEntity(this.pos);
+        HmBlockEntity te = world.hm$getTileEntity(this.pos);
         if (!(te instanceof TEDynamXBlock)) { //Not generated, should not happen because this should be removed from chunk
             DynamXMain.log.warn("[CHUNK DEBUG] Outdated DynamX block collisions found at: {}: TE not found. Maybe your packs have changed. The chunk will be reloaded", this.pos);
             return null;

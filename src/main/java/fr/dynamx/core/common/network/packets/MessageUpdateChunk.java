@@ -9,7 +9,7 @@ import fr.dynamx.core.common.physics.terrain.chunk.ChunkLoadingTicket;
 import fr.dynamx.forge.DynamXConfig;
 import fr.dynamx.core.utils.VerticalChunkPos;
 import fr.dynamx.core.utils.debug.ChunkGraph;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;

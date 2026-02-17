@@ -30,7 +30,7 @@ public class PartBlockSeat<T extends ISubInfoTypeOwner<T>> extends BasePartSeat<
             if (idx >= ((TEDynamXBlock) entity).getSeatEntities().size()) {
                 idx = 0;
             }
-            SeatEntity seatEntity = ((TEDynamXBlock) entity).getSeatEntities().get(idx);
+            HmEntity seatEntity = ((TEDynamXBlock) entity).getSeatEntities().get(idx);
             return with.hm$startRiding(seatEntity);
         }
         if (entity instanceof PropsEntity) {

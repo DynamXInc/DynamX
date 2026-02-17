@@ -14,7 +14,7 @@ import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.maths.DynamXMath;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import java.util.LinkedList;

@@ -10,9 +10,8 @@ import fr.dynamx.core.utils.optimization.SubClassPool;
 import fr.hermes.api.mc.utils.HmAxis;
 import fr.hermes.api.mc.blocks.HmBlockState;
 import fr.hermes.api.mc.world.HmWorld;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import net.minecraft.util.math.BlockPos;
-import org.joml.Vector3i;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;

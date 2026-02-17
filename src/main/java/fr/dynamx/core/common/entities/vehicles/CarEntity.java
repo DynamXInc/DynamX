@@ -6,6 +6,7 @@ import fr.dynamx.core.common.contentpack.DynamXObjectLoaders;
 import fr.dynamx.core.common.contentpack.type.vehicle.ModularVehicleInfo;
 import fr.dynamx.core.common.entities.BaseVehicleEntity;
 import fr.dynamx.core.common.entities.PackPhysicsEntity;
+import fr.dynamx.core.common.entities.PhysicsEntitiesFactory;
 import fr.dynamx.core.common.entities.modules.DoorsModule;
 import fr.dynamx.core.common.entities.modules.SeatsModule;
 import fr.dynamx.core.common.entities.modules.WheelsModule;
@@ -67,6 +68,11 @@ public class CarEntity<T extends CarEntity.CarPhysicsHandler<?>> extends BaseVeh
     @Override
     public PackPhysicsEntity<?, ?> cast() {
         return this;
+    }
+
+    @Override
+    public PhysicsEntitiesFactory createEntityFactory() {
+        return new PhysicsEntitiesFactory.Car(getInfoName(), physicsPosition, mcEntity.hm$getRotationYaw(), getMetadata());
     }
 
     public static class CarPhysicsHandler<A extends CarEntity<?>> extends BaseWheeledVehiclePhysicsHandler<A> {

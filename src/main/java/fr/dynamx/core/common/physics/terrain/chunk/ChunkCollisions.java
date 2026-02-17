@@ -22,7 +22,7 @@ import fr.dynamx.forge.DynamXConfig;
 import fr.hermes.api.utils.HmEntityLogicMatcher;
 import fr.hermes.api.mc.world.HmChunk;
 import fr.hermes.api.mc.world.HmWorld;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;

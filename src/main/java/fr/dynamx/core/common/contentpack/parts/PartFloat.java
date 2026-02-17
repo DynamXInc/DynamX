@@ -8,7 +8,7 @@ import fr.dynamx.api.contentpack.registry.RegisteredSubInfoType;
 import fr.dynamx.api.contentpack.registry.SubInfoTypeRegistries;
 import fr.dynamx.core.utils.debug.DynamXDebugOption;
 import fr.dynamx.core.utils.debug.DynamXDebugOptions;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.util.math.AxisAlignedBB;

@@ -3,14 +3,12 @@ package fr.hermes.api.mc.world;
 import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.hermes.api.mc.blocks.HmBlockState;
-import fr.hermes.api.mc.blocks.HmTileEntity;
+import fr.hermes.api.mc.blocks.HmBlockEntity;
 import fr.hermes.api.mc.entities.HmEntity;
 import fr.hermes.api.mc.entities.HmEntityFactory;
-import fr.hermes.api.mc.entities.HmModEntity;
 import fr.hermes.api.mc.entities.HmPlayerEntity;
 import fr.hermes.api.mc.utils.HmParticleType;
 import fr.hermes.api.mc.utils.HmRayTraceResult;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import org.joml.Vector3f;
 
@@ -54,9 +52,9 @@ public interface HmWorld {
 
     HmChunk hm$getChunk(int chunkX, int chunkZ);
 
-    HmTileEntity hm$getTileEntity(BlockPos pos);
+    HmBlockEntity hm$getTileEntity(BlockPos pos);
 
-    Collection<HmTileEntity> hm$getBlockEntityList();
+    Collection<HmBlockEntity> hm$getBlockEntityList();
 
     List<PhysicsEntity<?>> hm$getPhysicsEntitiesWithinAABB(MutableBoundingBox aabb);
 

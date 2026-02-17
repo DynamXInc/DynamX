@@ -14,7 +14,7 @@ import fr.dynamx.core.common.contentpack.PackInfo;
 import fr.dynamx.core.common.objloader.data.DxModelData;
 import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.DynamXUtils;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import net.minecraft.util.ResourceLocation;
 import vhacd.VHACD;
 import vhacd.VHACDHull;

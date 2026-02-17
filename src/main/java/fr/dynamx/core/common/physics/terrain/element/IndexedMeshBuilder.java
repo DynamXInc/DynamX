@@ -6,7 +6,7 @@ import fr.dynamx.core.common.physics.utils.StairsBox;
 import fr.dynamx.core.utils.debug.TerrainDebugData;
 import fr.dynamx.core.utils.debug.TerrainDebugRenderer;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import net.minecraft.util.EnumFacing;
 
 import javax.annotation.Nullable;

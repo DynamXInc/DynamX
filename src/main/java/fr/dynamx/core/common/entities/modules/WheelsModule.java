@@ -22,12 +22,11 @@ import fr.dynamx.core.common.physics.entities.modules.WheelsPhysicsHandler;
 import fr.dynamx.core.common.physics.entities.parts.wheel.WheelPhysics;
 import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.maths.DynamXMath;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import jme3utilities.Validate;
 import lombok.Getter;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
-import org.joml.Vector3i;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;

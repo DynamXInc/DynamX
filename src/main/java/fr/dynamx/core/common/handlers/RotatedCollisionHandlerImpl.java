@@ -22,7 +22,7 @@ import fr.hermes.api.mc.entities.HmEntity;
 import fr.hermes.api.mc.entities.HmEntityLogic;
 import fr.hermes.api.mc.entities.HmModEntity;
 import fr.hermes.api.mc.entities.HmPlayerEntity;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.player.EntityPlayer;

@@ -36,7 +36,7 @@ import fr.hermes.api.mc.client.HmMinecraftClient;
 import fr.hermes.api.mc.items.HmItemStack;
 import fr.hermes.api.mc.utils.HmRayTraceResult;
 import fr.hermes.api.mod.HermesPlatform;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.culling.Frustum;
@@ -122,7 +122,7 @@ public class ClientEventHandler {
                 }
             }
     
-            HmItemStack currentItem = entityPlayer.hm$getHeldItemMainhand();
+            HmItemStack currentItem = entityPlayer.hm$getHeldItemMainHand();
             // TODO Convert ItemBlock logic
             if (currentItem.hm$getItem() instanceof ItemBlock && ((ItemBlock) currentItem.hm$getItem()).getBlock() instanceof DynamXBlock) {
                 ItemBlock itemBlock = (ItemBlock) currentItem.hm$getItem();

@@ -1,7 +1,6 @@
 package fr.dynamx.core.utils.optimization;
 
 import com.jme3.math.Vector3f;
-import fr.hermes.forge.JmeVector3fPool;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.*;
 import org.joml.Vector3i;

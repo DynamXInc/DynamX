@@ -18,6 +18,7 @@ import fr.dynamx.core.common.physics.joints.EntityJoint;
 import fr.dynamx.core.common.physics.joints.EntityJointsHandler;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.dynamx.core.utils.physics.DynamXPhysicsHelper;
+import fr.hermes.api.mc.entities.HmEntity;
 import lombok.Getter;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
@@ -39,12 +40,12 @@ public class DoorEntity<T extends PackEntityPhysicsHandler<PartDoor, ?>> extends
     @Getter
     private DoorsModule doorAttachModule;
 
-    public DoorEntity(World world) {
-        super(world);
+    public DoorEntity(HmEntity mcEntityWrapper) {
+        super(mcEntityWrapper);
     }
 
-    public DoorEntity(BaseVehicleEntity<?> vehicleEntity, Vector3f pos, float spawnAngle, byte doorID) {
-        super(vehicleEntity.getInfoName(), vehicleEntity.world, pos, spawnAngle, 0);
+    public DoorEntity(BaseVehicleEntity<?> vehicleEntity, HmEntity mcEntityWrapper, Vector3f pos, float spawnAngle, byte doorID) {
+        super(vehicleEntity.getInfoName(), mcEntityWrapper, pos, spawnAngle, 0);
         setDoorID(doorID);
         setVehicleEntity(vehicleEntity);
     }

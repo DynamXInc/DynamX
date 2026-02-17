@@ -127,6 +127,9 @@ public abstract class MixinEntity implements HmEntity {
     @Shadow
     public abstract BlockPos getPosition();
 
+    @Shadow
+    public float fallDistance;
+
     @Override
     public int hm$getEntityId() {
         return entityId;
@@ -218,9 +221,8 @@ public abstract class MixinEntity implements HmEntity {
     }
 
     @Override
-    public MutableBoundingBox hm$getBoundingBox() {
-        // TODO not really optimized
-        return new MutableBoundingBox(getEntityBoundingBox());
+    public AxisAlignedBB hm$getBoundingBox() {
+        return getEntityBoundingBox();
     }
 
     @Override
@@ -343,5 +345,10 @@ public abstract class MixinEntity implements HmEntity {
     @Override
     public boolean hm$isRiding() {
         return isRiding();
+    }
+
+    @Override
+    public float hm$getFallDistance() {
+        return fallDistance;
     }
 }

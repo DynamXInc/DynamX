@@ -36,7 +36,7 @@ import fr.hermes.api.mc.events.HmMcServerEvents;
 import fr.hermes.api.mc.events.HmPlayerEvents;
 import fr.hermes.api.mc.events.HmWorldEvents;
 import fr.hermes.api.mc.world.HmWorld;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
@@ -67,7 +67,7 @@ public class CommonEventHandler {
     public static void register() {
         HmPlayerEvents.SERVER_JOIN.register(player -> {
             if (player.hm$getServer().hm$isDedicatedServer()) {
-                DynamXContext.getNetwork().sendToClient(new MessageSyncConfig(false, player.getEntityId()), EnumPacketTarget.PLAYER, player);
+                DynamXContext.getNetwork().sendToClient(new MessageSyncConfig(false, player.hm$getEntityId()), EnumPacketTarget.PLAYER, player);
             }
         });
 
@@ -76,7 +76,7 @@ public class CommonEventHandler {
                 ServerPhysicsSyncManager.onDisconnect(player);
                 DynamXContext.getWalkingPlayers().remove(player);
             }
-            if (DynamXContext.getPlayerPickingObjects().containsKey(player.getEntityId())) {
+            if (DynamXContext.getPlayerPickingObjects().containsKey(player.hm$getEntityId())) {
                 PickingObjectHelper.handlePlayerDisconnection(player);
             }
         });

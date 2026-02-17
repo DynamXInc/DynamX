@@ -10,7 +10,7 @@ import fr.dynamx.api.entities.modules.IPhysicsModule;
 import fr.dynamx.core.common.DynamXContext;
 import fr.dynamx.core.common.entities.RagdollEntity;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import fr.dynamx.core.utils.physics.DynamXPhysicsHelper;
 
 import java.util.HashMap;

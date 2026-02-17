@@ -32,13 +32,12 @@ import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.Vector3fPool;
 import fr.dynamx.forge.DynamXConfig;
-import fr.hermes.api.mc.blocks.HmTileEntity;
-import fr.hermes.api.mc.entities.HmBlockEntityLogic;
+import fr.hermes.api.mc.blocks.HmBlockEntity;
+import fr.hermes.api.mc.blocks.HmBlockEntityLogic;
 import fr.hermes.api.mc.entities.HmEntity;
-import fr.hermes.api.mc.entities.HmModEntity;
 import fr.hermes.api.mc.world.HmChunk;
 import fr.hermes.api.mc.world.HmWorld;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.entity.Entity;
@@ -47,7 +46,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -55,7 +53,7 @@ import java.util.*;
 
 public class TEDynamXBlock implements IDynamXObject, IPackInfoReloadListener, HmBlockEntityLogic {
     @Getter
-    protected final HmTileEntity mcBlockEntity;
+    protected final HmBlockEntity mcBlockEntity;
 
     @Getter
     private BlockObject<?> packInfo;
@@ -91,12 +89,12 @@ public class TEDynamXBlock implements IDynamXObject, IPackInfoReloadListener, Hm
     @Getter
     private final DxAnimator animator;
 
-    public TEDynamXBlock(HmTileEntity mcBlockEntity) {
+    public TEDynamXBlock(HmBlockEntity mcBlockEntity) {
         this.mcBlockEntity = mcBlockEntity;
         this.animator = new DxAnimator();
     }
 
-    public TEDynamXBlock(HmTileEntity mcBlockEntity, BlockObject<?> packInfo) {
+    public TEDynamXBlock(HmBlockEntity mcBlockEntity, BlockObject<?> packInfo) {
         this(mcBlockEntity);
         setPackInfo(packInfo);
         this.hasSeats = !packInfo.getPartsByType(PartBlockSeat.class).isEmpty();

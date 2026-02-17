@@ -30,7 +30,7 @@ import fr.dynamx.core.utils.optimization.Vector3fPool;
 import fr.hermes.api.mc.entities.HmEntityLogic;
 import fr.hermes.api.mc.items.HmItemStack;
 import fr.hermes.api.mc.world.HmWorld;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import fr.hermes.api.mc.entities.HmEntity;
 import fr.hermes.api.mc.utils.HmOrientation;
 import fr.hermes.api.mc.entities.HmPlayerEntity;

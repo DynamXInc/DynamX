@@ -11,11 +11,13 @@ import fr.dynamx.core.utils.debug.DynamXDebugOptions;
 import fr.dynamx.core.utils.optimization.GlQuaternionPool;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.SubClassPool;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.hermes.api.mc.entities.HmEntity;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderGlobal;
+import net.minecraft.entity.Entity;
 import org.joml.Matrix4f;
 import org.lwjgl.util.vector.Quaternion;
 
@@ -74,7 +76,7 @@ public class EntityNode<A extends IPhysicsPackInfo> extends AbstractItemNode<Bas
         //Render the model
         GlStateManager.pushMatrix();
         GlStateManager.multMatrix(ClientDynamXUtils.getMatrixBuffer(transform));
-        context.getRender().renderMainModel(context.getModel(), entity, context.getTextureId(), context.isUseVanillaRender()); //TODO SIMPLIFY SCALE THINGS
+        context.getRender().renderMainModel(context.getModel(), (Entity) entity.getMcEntity(), context.getTextureId(), context.isUseVanillaRender()); //TODO SIMPLIFY SCALE THINGS
         GlStateManager.popMatrix();
         transform.scale(1 / packInfo.getScaleModifier().x, 1 / packInfo.getScaleModifier().y, 1 / packInfo.getScaleModifier().z);
 
@@ -86,10 +88,11 @@ public class EntityNode<A extends IPhysicsPackInfo> extends AbstractItemNode<Bas
             unlinkedChildren.forEach(c -> c.render(context, packInfo, transform));
         }
         //Render the unlinked children, if any
-        if (entity != null && !unlinkedChildren.isEmpty()) {
-            transform.translate((float) (context.getRenderPosition().x - (entity.getPrevPosX() + (entity.getPosX() - entity.getPrevPosX()) * context.getPartialTicks())),
-                    (float) (context.getRenderPosition().y - (entity.getPrevPosY() + (entity.getPosY() - entity.getPrevPosY()) * context.getPartialTicks())),
-                    (float) (context.getRenderPosition().z - (entity.getPrevPosZ() + (entity.getPosZ() - entity.getPrevPosZ()) * context.getPartialTicks())));
+        else if (!unlinkedChildren.isEmpty()) {
+            HmEntity mcEntity = entity.getMcEntity();
+            transform.translate((float) (context.getRenderPosition().x - (mcEntity.hm$getPrevPosX() + (mcEntity.hm$getPosX() - mcEntity.hm$getPrevPosX()) * context.getPartialTicks())),
+                    (float) (context.getRenderPosition().y - (mcEntity.hm$getPrevPosY() + (mcEntity.hm$getPosY() - mcEntity.hm$getPrevPosY()) * context.getPartialTicks())),
+                    (float) (context.getRenderPosition().z - (mcEntity.hm$getPrevPosZ() + (mcEntity.hm$getPosZ() - mcEntity.hm$getPrevPosZ()) * context.getPartialTicks())));
             unlinkedChildren.forEach(c -> c.render(context, packInfo, transform));
         }
 

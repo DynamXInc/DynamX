@@ -6,7 +6,6 @@ import fr.dynamx.core.server.command.CmdShockWave;
 import fr.dynamx.core.utils.DynamXConstants;
 import fr.dynamx.core.utils.RegistryNameSetter;
 import fr.dynamx.core.utils.optimization.Vector3fPool;
-import fr.hermes.forge.JmeVector3fPool;
 import fr.dynamx.core.utils.physics.DynamXPhysicsHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;

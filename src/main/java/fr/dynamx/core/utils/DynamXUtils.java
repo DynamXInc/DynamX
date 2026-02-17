@@ -33,14 +33,13 @@ import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.Vector3fPool;
 import fr.dynamx.forge.DynamXConfig;
-import fr.hermes.api.mc.blocks.HmTileEntity;
-import fr.hermes.api.mc.client.HmMinecraftClient;
+import fr.hermes.api.mc.blocks.HmBlockEntity;
 import fr.hermes.api.mc.entities.HmEntity;
 import fr.hermes.api.mc.entities.HmPlayerEntity;
 import fr.hermes.api.mc.utils.HmRayTraceResult;
 import fr.hermes.api.mc.utils.HmResourceLocation;
 import fr.hermes.api.mc.world.HmWorld;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import fr.dynamx.core.utils.physics.DynamXPhysicsHelper;
 import fr.dynamx.core.utils.physics.PhysicsRaycastResult;
 import io.netty.buffer.ByteBuf;
@@ -423,7 +422,7 @@ public class DynamXUtils {
             if (e instanceof IPackInfoReloadListener)
                 ((IPackInfoReloadListener) e).onPackInfosReloaded();
         }
-        for (HmTileEntity te : w.hm$getBlockEntityList()) {
+        for (HmBlockEntity te : w.hm$getBlockEntityList()) {
             if (te instanceof IPackInfoReloadListener)
                 ((IPackInfoReloadListener) te).onPackInfosReloaded();
         }

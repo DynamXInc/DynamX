@@ -4,6 +4,7 @@ import fr.dynamx.core.common.entities.SeatEntity;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.hermes.api.mc.world.HmWorld;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import org.joml.Vector3f;
 
@@ -49,7 +50,7 @@ public interface HmEntity {
 
     void hm$setDead();
 
-    MutableBoundingBox hm$getBoundingBox();
+    AxisAlignedBB hm$getBoundingBox();
 
     String hm$getName();
 
@@ -139,4 +140,8 @@ public interface HmEntity {
     void hm$writeToNbt(NBTTagCompound tag);
 
     void hm$readFromNbt(NBTTagCompound tag);
+
+    boolean hm$isSneaking();
+
+    float hm$getFallDistance();
 }

@@ -13,7 +13,7 @@ import fr.dynamx.core.common.physics.entities.BaseVehiclePhysicsHandler;
 import fr.dynamx.core.common.physics.entities.BaseWheeledVehiclePhysicsHandler;
 import fr.dynamx.core.common.physics.entities.parts.wheel.PacejkaMagicFormula;
 import fr.dynamx.core.common.physics.entities.parts.wheel.WheelPhysics;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

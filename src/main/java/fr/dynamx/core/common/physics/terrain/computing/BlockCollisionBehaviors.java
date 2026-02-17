@@ -7,7 +7,7 @@ import fr.dynamx.core.common.physics.terrain.element.DynamXBlockTerrainElement;
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.dynamx.forge.DynamXConfig;
 import fr.hermes.api.mc.blocks.HmBlockState;
-import fr.hermes.api.mc.blocks.HmTileEntity;
+import fr.hermes.api.mc.blocks.HmBlockEntity;
 import fr.hermes.api.mc.utils.HmAxis;
 import fr.hermes.api.mc.world.HmWorld;
 import net.minecraft.block.*;
@@ -173,7 +173,7 @@ public class BlockCollisionBehaviors {
 
         @Override
         public void addBlockCollision(TerrainBoxConstructor terrainBoxConstructor, TerrainBoxBuilder boxBuilder, TerrainCollisionsCalculator.TerrainCursor cursor, HmWorld world, BlockPos at, HmBlockState ofBlock, HmAxis axis) {
-            HmTileEntity te = world.hm$getTileEntity(at);
+            HmBlockEntity te = world.hm$getTileEntity(at);
             if (te instanceof TEDynamXBlock) {
                 terrainBoxConstructor.addCustomShapedElement(new DynamXBlockTerrainElement(cursor.dx, cursor.dy, cursor.dz, at));
             }

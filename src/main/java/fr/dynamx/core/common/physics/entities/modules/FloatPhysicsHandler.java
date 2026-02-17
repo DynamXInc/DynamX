@@ -6,7 +6,7 @@ import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.common.physics.entities.AbstractEntityPhysicsHandler;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import fr.dynamx.core.utils.physics.DynamXPhysicsHelper;
 import lombok.Getter;
 import lombok.Setter;

@@ -21,7 +21,7 @@ import fr.dynamx.core.utils.debug.Profiler;
 import fr.hermes.api.mc.blocks.HmBlockState;
 import fr.hermes.api.mc.world.HmChunk;
 import fr.hermes.api.mc.world.HmWorld;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import net.minecraft.util.math.BlockPos;
 
 import javax.annotation.Nullable;

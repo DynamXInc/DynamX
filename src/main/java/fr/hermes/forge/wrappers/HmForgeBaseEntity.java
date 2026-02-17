@@ -1,4 +1,4 @@
-package fr.hermes.forge;
+package fr.hermes.forge.wrappers;
 
 import fr.dynamx.core.utils.optimization.MutableBoundingBox;
 import fr.hermes.api.mc.entities.HmEntity;
@@ -16,20 +16,17 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 // TODO REGISTER, HOW TO HANDLE RENDERING, ETC
-public class HmForgeBaseEntity extends Entity implements HmModEntity, IEntityAdditionalSpawnData {
-    private static final Log log = LogFactory.getLog(HmForgeBaseEntity.class);
+public class HmForgeBaseEntity<TLogic extends HmEntityLogic> extends Entity implements HmModEntity<TLogic>, IEntityAdditionalSpawnData {
     @Getter
-    private HmEntityLogic logic;
+    private TLogic logic;
 
     public HmForgeBaseEntity(World worldIn) {
         super(worldIn);
     }
 
-    public HmForgeBaseEntity(World worldIn, HmEntityFactory entityFactory) {
+    public HmForgeBaseEntity(World worldIn, HmEntityFactory<TLogic> entityFactory) {
         super(worldIn);
         logic = entityFactory.createEntityLogic((HmWorld) world, (HmEntity) this);
     }

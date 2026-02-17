@@ -6,7 +6,7 @@ import fr.dynamx.core.common.DynamXContext;
 import fr.dynamx.core.common.command.ISubCommand;
 import fr.dynamx.core.common.entities.RagdollEntity;
 import fr.dynamx.core.utils.DynamXUtils;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;

@@ -10,7 +10,7 @@ import fr.dynamx.core.common.contentpack.loader.InfoLoader;
 import fr.dynamx.core.common.handlers.TaskScheduler;
 import fr.dynamx.forge.DynamXConfig;
 import fr.dynamx.core.utils.DynamXUtils;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.TextComponentString;

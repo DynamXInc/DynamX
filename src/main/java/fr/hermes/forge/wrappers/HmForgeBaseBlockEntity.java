@@ -1,9 +1,9 @@
-package fr.hermes.forge;
+package fr.hermes.forge.wrappers;
 
-import fr.hermes.api.mc.blocks.HmTileEntity;
-import fr.hermes.api.mc.entities.HmBlockEntityFactory;
-import fr.hermes.api.mc.entities.HmBlockEntityLogic;
-import fr.hermes.api.mc.entities.HmModBlockEntity;
+import fr.hermes.api.mc.blocks.HmBlockEntity;
+import fr.hermes.api.mc.blocks.HmBlockEntityFactory;
+import fr.hermes.api.mc.blocks.HmBlockEntityLogic;
+import fr.hermes.api.mc.blocks.HmModBlockEntity;
 import lombok.Getter;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
@@ -25,7 +25,7 @@ public class HmForgeBaseBlockEntity extends TileEntity implements HmModBlockEnti
 
     public HmForgeBaseBlockEntity(HmBlockEntityFactory blockEntityFactory) {
         super();
-        logic = blockEntityFactory.createEntityLogic((HmTileEntity) this);
+        logic = blockEntityFactory.createEntityLogic((HmBlockEntity) this);
     }
 
     @Override

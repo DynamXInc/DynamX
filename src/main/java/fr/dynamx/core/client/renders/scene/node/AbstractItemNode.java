@@ -14,7 +14,7 @@ import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.SubClassPool;
 import fr.hermes.api.mc.items.HmItemStack;
 import fr.hermes.api.mc.utils.HmCameraTransforms;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import net.minecraft.client.renderer.GlStateManager;
 import org.joml.Matrix4f;
 

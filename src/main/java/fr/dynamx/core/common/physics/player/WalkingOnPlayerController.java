@@ -5,7 +5,7 @@ import fr.dynamx.api.physics.IRotatedCollisionHandler;
 import fr.dynamx.core.common.DynamXContext;
 import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.utils.maths.DynamXGeometry;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import fr.hermes.api.mc.utils.HmOrientation;
 import fr.hermes.api.mc.entities.HmPlayerEntity;
 
@@ -43,9 +43,9 @@ public class WalkingOnPlayerController {
         player.hm$setPrevPosY(player.hm$getPosY());
         player.hm$setPrevPosZ(player.hm$getPosZ());
         player.hm$setPosition(newPos.x, newPos.y, newPos.z);
-        player.setLimbSwingAmount(0);
-        player.setLimbSwing(0);
-        player.setPrevLimbSwingAmount(0);
+        player.hm$setLimbSwingAmount(0);
+        player.hm$setLimbSwing(0);
+        player.hm$setPrevLimbSwingAmount(0);
     }
 
     /**

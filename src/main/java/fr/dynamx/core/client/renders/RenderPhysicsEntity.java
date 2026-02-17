@@ -14,12 +14,15 @@ import fr.dynamx.core.utils.debug.renderer.DebugRenderer;
 import fr.dynamx.core.utils.optimization.GlQuaternionPool;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
 import fr.dynamx.core.utils.optimization.SubClassPool;
-import fr.hermes.api.mc.entities.HmEntity;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.hermes.forge.wrappers.HmForgeBaseEntity;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
+import lombok.Getter;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.MinecraftForge;
 import org.joml.Vector3f;
@@ -30,7 +33,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Render<T> {
+@Getter
+public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Render<HmForgeBaseEntity<T>> {
+    /**
+     * -- GETTER --
+     *
+     * @return All debug renders for this entity renderer
+     */
     private final List<DebugRenderer<T>> debugRenderers = new ArrayList<>();
     public static boolean shouldRenderPlayerSitting;
 
@@ -50,7 +59,8 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
     }
 
     @Override
-    public void doRender(T entity, double x, double y, double z, float entityYaw, float partialTicks) {
+    public void doRender(HmForgeBaseEntity<T> mcEntity, double x, double y, double z, float entityYaw, float partialTicks) {
+        T entity = mcEntity.getLogic();
         entity.wasRendered = true;
         if (!canRender(entity)) {
             return;
@@ -58,7 +68,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
 
         BaseRenderContext.EntityRenderContext context = getRenderContext(entity);
         if (context == null) {
-            renderOffsetAABB(entity.getEntityBoundingBox(), x - entity.lastTickPosX, y - entity.lastTickPosY, z - entity.lastTickPosZ);
+            renderOffsetAABB(mcEntity.getEntityBoundingBox(), x - mcEntity.lastTickPosX, y - mcEntity.lastTickPosY, z - mcEntity.lastTickPosZ);
             return;
         }
         context.setRenderParams(x, y, z, partialTicks, false);
@@ -92,18 +102,11 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
             if (packPhysicsEntity.getPackInfo() instanceof ParticleEmitterInfo.IParticleEmitterContainer) {
                 DynamXRenderUtils.spawnParticles(
                         (ParticleEmitterInfo.IParticleEmitterContainer) packPhysicsEntity.getPackInfo(),
-                        physicsEntity.world,
+                        (World) physicsEntity.getWorld(),
                         physicsEntity.physicsPosition,
                         physicsEntity.physicsRotation);
             }
         }
-    }
-
-    /**
-     * @return All debug renders for this entity renderer
-     */
-    public List<DebugRenderer<T>> getDebugRenderers() {
-        return debugRenderers;
     }
 
     /**
@@ -193,7 +196,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
      * You can return null : textures are managed by obj renderer
      */
     @Override
-    protected ResourceLocation getEntityTexture(T entity) {
+    protected ResourceLocation getEntityTexture(HmForgeBaseEntity<T> entity) {
         return null;
     }
 
@@ -209,7 +212,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
      * Will draw a white box over the all entity if model wasn't loaded (not found for example) <br>
      * <strong>For GLTF models, this method pushed the GL11.GL_ALL_ATTRIB_BITS that must be popped with {@link DynamXRenderUtils#popGlAllAttribBits()}</strong>
      */
-    public void renderModel(DxModelRenderer model, @Nullable HmEntity entity, byte textureDataId, boolean forceVanillaRender) {
+    public void renderModel(DxModelRenderer model, @Nullable Entity entity, byte textureDataId, boolean forceVanillaRender) {
         if (!model.isEmpty())
             model.renderModel(textureDataId, forceVanillaRender);
         else if (entity != null) //Error while loading the model
@@ -221,7 +224,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
      * Will draw a white box over the all entity if model wasn't loaded (not found for example) <br>
      * <strong>For GLTF models, this method pushed the GL11.GL_ALL_ATTRIB_BITS that must be popped with {@link DynamXRenderUtils#popGlAllAttribBits()}</strong>
      */
-    public void renderMainModel(DxModelRenderer model, @Nullable HmEntity entity, byte textureDataId, boolean forceVanillaRender) {
+    public void renderMainModel(DxModelRenderer model, @Nullable Entity entity, byte textureDataId, boolean forceVanillaRender) {
         boolean drawn = model.renderDefaultParts(textureDataId, forceVanillaRender);
         if (!drawn && entity != null) {
             renderOffsetAABB(entity.getEntityBoundingBox(), -entity.lastTickPosX, -entity.lastTickPosY, -entity.lastTickPosZ);
@@ -233,7 +236,7 @@ public abstract class RenderPhysicsEntity<T extends PhysicsEntity<?>> extends Re
      * Will draw a white box over the all entity if model wasn't loaded (not found for example) <br>
      * <strong>For GLTF models, this method pushed the GL11.GL_ALL_ATTRIB_BITS that must be popped with {@link DynamXRenderUtils#popGlAllAttribBits()}</strong>
      */
-    public void renderModelGroup(DxModelRenderer model, String group, @Nullable HmEntity entity, byte textureDataId, boolean forceVanillaRender) {
+    public void renderModelGroup(DxModelRenderer model, String group, @Nullable Entity entity, byte textureDataId, boolean forceVanillaRender) {
         boolean drawn = model.renderGroup(group, textureDataId, forceVanillaRender);
         if (!drawn && entity != null) {
             renderOffsetAABB(entity.getEntityBoundingBox(), -entity.lastTickPosX, -entity.lastTickPosY, -entity.lastTickPosZ);

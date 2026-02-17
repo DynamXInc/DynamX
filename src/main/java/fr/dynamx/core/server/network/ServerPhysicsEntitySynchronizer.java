@@ -7,7 +7,7 @@ import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.common.network.sync.MPPhysicsEntitySynchronizer;
 import fr.dynamx.core.utils.debug.Profiler;
 import fr.dynamx.core.utils.optimization.PooledHashMap;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.relauncher.Side;

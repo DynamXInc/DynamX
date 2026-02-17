@@ -3,7 +3,7 @@ package fr.dynamx.core.common.command;
 import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.core.common.DynamXContext;
 import fr.dynamx.core.utils.optimization.*;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;

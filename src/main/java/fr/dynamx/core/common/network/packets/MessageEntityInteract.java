@@ -9,7 +9,7 @@ import fr.dynamx.core.common.contentpack.parts.PartEntitySeat;
 import fr.dynamx.core.common.entities.PackPhysicsEntity;
 import fr.dynamx.core.common.entities.PhysicsEntity;
 import fr.dynamx.core.common.items.tools.ItemWrench;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.common.MinecraftForge;

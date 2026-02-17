@@ -9,7 +9,7 @@ import fr.hermes.api.mc.entities.HmPlayerEntity;
 import fr.hermes.api.mc.items.HmItemStack;
 import fr.hermes.api.mc.utils.HmResourceLocation;
 import fr.hermes.api.mc.world.HmWorld;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;

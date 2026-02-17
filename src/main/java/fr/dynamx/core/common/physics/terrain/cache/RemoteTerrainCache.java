@@ -18,7 +18,7 @@ import fr.dynamx.core.utils.debug.Profiler;
 import fr.dynamx.core.utils.optimization.HashMapPool;
 import fr.dynamx.core.utils.optimization.PooledHashMap;
 import fr.hermes.api.mc.world.HmWorld;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 
 import javax.annotation.Nullable;
 import java.io.ByteArrayInputStream;

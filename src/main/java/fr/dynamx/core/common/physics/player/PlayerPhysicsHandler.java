@@ -11,7 +11,7 @@ import fr.dynamx.api.physics.IPhysicsWorld;
 import fr.dynamx.core.common.DynamXContext;
 import fr.dynamx.core.common.entities.RagdollEntity;
 import fr.dynamx.core.utils.optimization.QuaternionPool;
-import fr.hermes.forge.JmeVector3fPool;
+import fr.dynamx.core.utils.optimization.JmeVector3fPool;
 import fr.dynamx.core.utils.physics.DynamXPhysicsHelper;
 import fr.hermes.api.mc.entities.HmPlayerEntity;
 import fr.hermes.api.mc.world.HmWorld;

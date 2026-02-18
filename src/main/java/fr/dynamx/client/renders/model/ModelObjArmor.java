@@ -173,42 +173,42 @@ public class ModelObjArmor extends ModelBiped {
 
     public void renderHead(float scale) {
         if (head != null) {
-            setModelAttributes(this); //Reset rotations
+            resetArmorRenderers();
             head.render(scale);
         }
     }
 
     public void renderChest(float scale) {
         if (body != null) {
-            setModelAttributes(this); //Reset rotations
+            resetArmorRenderers();
             body.render(scale);
         }
     }
 
     public void renderLeftArm(float scale) {
         if (arms != null) {
-            setModelAttributes(this); //Reset rotations
+            resetArmorRenderers();
             renderPart(arms[0], scale);
         }
     }
 
     public void renderRightArm(float scale) {
         if (arms != null) {
-            setModelAttributes(this); //Reset rotations
+            resetArmorRenderers();
             renderPart(arms[1], scale);
         }
     }
 
     public void renderLeftLeg(float scale) {
         if (legs != null) {
-            setModelAttributes(this); //Reset rotations
+            resetArmorRenderers();
             renderPart(legs[0], scale);
         }
     }
 
     public void renderRightLeg(float scale) {
         if (legs != null) {
-            setModelAttributes(this); //Reset rotations
+            resetArmorRenderers();
             renderPart(legs[1], scale);
         }
     }

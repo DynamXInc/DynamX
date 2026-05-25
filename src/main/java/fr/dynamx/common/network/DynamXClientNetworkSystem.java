@@ -135,6 +135,12 @@ public class DynamXClientNetworkSystem implements IDnxNetworkSystem {
 
         if (this.clientHandlerThread != null) {
             this.clientHandlerThread.interrupt();
+            try {
+                // Wait for the thread to fully terminate before starting a new connection
+                this.clientHandlerThread.join(5000); // 5 second timeout
+            } catch (InterruptedException e) {
+                DynamXMain.log.warn("Interrupted while waiting for UDP client thread to terminate");
+            }
         }
         this.clientHandlerThread = null;
         this.QUICK_NETWORK = VANILLA_NETWORK;

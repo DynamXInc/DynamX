@@ -117,10 +117,10 @@ public class UdpClientNetworkHandler implements IDnxNetworkHandler {
                         DynamXMain.log.info("Notified handler");
                 }
             } catch (SocketException e) {
-                if (e.getMessage().contains("socket closed"))
-                    DynamXMain.log.warn("UDP socket closed unexpectedly");
+                if (e.getMessage() != null && e.getMessage().toLowerCase().contains("socket closed"))
+                    DynamXMain.log.warn("UDP socket closed unexpectedly [" + this.host + ":" + this.port + "]");
                 else
-                    DynamXMain.log.fatal("UDP connection exception", e);
+                    DynamXMain.log.fatal("UDP connection exception [" + this.host + ":" + this.port + "]", e);
                 running = false;
             } catch (IOException e) {
                 DynamXMain.log.fatal("UDP connection exception", e);
@@ -135,8 +135,9 @@ public class UdpClientNetworkHandler implements IDnxNetworkHandler {
     public void stop() {
         running = false;
 
-        if (this.datagramSocket != null)
+        if (this.datagramSocket != null) {
             this.datagramSocket.close();
+        }
     }
 
     @Override

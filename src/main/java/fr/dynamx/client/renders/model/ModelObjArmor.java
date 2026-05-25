@@ -173,42 +173,42 @@ public class ModelObjArmor extends ModelBiped {
 
     public void renderHead(float scale) {
         if (head != null) {
-            setModelAttributes(this); //Reset rotations
+            resetArmorRenderers();
             head.render(scale);
         }
     }
 
     public void renderChest(float scale) {
         if (body != null) {
-            setModelAttributes(this); //Reset rotations
+            resetArmorRenderers();
             body.render(scale);
         }
     }
 
     public void renderLeftArm(float scale) {
         if (arms != null) {
-            setModelAttributes(this); //Reset rotations
+            resetArmorRenderers();
             renderPart(arms[0], scale);
         }
     }
 
     public void renderRightArm(float scale) {
         if (arms != null) {
-            setModelAttributes(this); //Reset rotations
+            resetArmorRenderers();
             renderPart(arms[1], scale);
         }
     }
 
     public void renderLeftLeg(float scale) {
         if (legs != null) {
-            setModelAttributes(this); //Reset rotations
+            resetArmorRenderers();
             renderPart(legs[0], scale);
         }
     }
 
     public void renderRightLeg(float scale) {
         if (legs != null) {
-            setModelAttributes(this); //Reset rotations
+            resetArmorRenderers();
             renderPart(legs[1], scale);
         }
     }
@@ -220,6 +220,23 @@ public class ModelObjArmor extends ModelBiped {
     protected void renderPart(Matrix4f transform, ArmorRenderer armor, boolean forceVanillaRender) {
         tempTransform.set(transform); // armor.render modifies the transform matrix
         armor.render(tempTransform, forceVanillaRender);
+    }
+
+    public void resetArmorRenderers() {
+        if (head != null) resetRenderer(head);
+        if (body != null) resetRenderer(body);
+        if (arms != null) { for (ArmorRenderer arm : arms) resetRenderer(arm); }
+        if (legs != null) { for (ArmorRenderer leg : legs) resetRenderer(leg); }
+        if (foot != null) { for (ArmorRenderer f : foot) resetRenderer(f); }
+    }
+
+    private static void resetRenderer(ArmorRenderer armor) {
+        armor.rotationPointX = armor.offsetX;
+        armor.rotationPointY = armor.offsetY;
+        armor.rotationPointZ = armor.offsetZ;
+        armor.rotateAngleX = 0;
+        armor.rotateAngleY = 0;
+        armor.rotateAngleZ = 0;
     }
 
     private static void copyModelAnglesForArmor(ModelRenderer bodyPart, ModelRenderer armor) {
